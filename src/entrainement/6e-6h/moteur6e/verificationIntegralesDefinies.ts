@@ -5,6 +5,9 @@ import type { PhaseCalculPrimitives } from "./typesCalculPrimitives";
 import { phasesPourExercice as phasesPourExercicePrimitive } from "./typesCalculPrimitives";
 import type { PhaseIntegralesDefinies } from "./typesIntegralesDefinies";
 import { diagnostiquerEcran as diagnostiquerEcranPrimitive } from "./verificationCalculPrimitives";
+import { multiplierValeurExacte, valeurExacteIntegrale } from "./valeurExacteIntegrale";
+import type { ValeurExacte } from "./valeurExacteIntegrale";
+import { refusArrondi, symbolesDeValeurExacte, toleranceExacte } from "./saisieValeurExacteIntegrale";
 
 /**
  * Couche B (6e) — vérification pour `6gen25`. N'importe JAMAIS rien de `src/generateurs6e/` (règle
@@ -33,10 +36,41 @@ function valeurIntegrale(exercice: ExerciceIntegraleSimple | ExerciceIntegraleMo
   return exercice.primitive.primitiveReference(exercice.b) - exercice.primitive.primitiveReference(exercice.a);
 }
 
-/** Écran "finalIntegrale" (scénarios `simple`/`moyenne`) — valeurs[0] = F(b)−F(a). */
+/** Rationnel à dénominateur ≤ 720 (repli quand la valeur exacte symbolique n'est pas disponible). */
+function rationnelNumerique(v: number): boolean {
+  if (!Number.isFinite(v)) return false;
+  for (let d = 1; d <= 720; d++) {
+    if (Math.abs(v - Math.round(v * d) / d) < 1e-9 * Math.max(1, Math.abs(v))) return true;
+  }
+  return false;
+}
+
+/** Valeur EXACTE de l'intégrale (`valeurExacteIntegrale.ts`), `null` si indisponible. */
+export function valeurExacteIntegraleDefinie(exercice: ExerciceIntegraleSimple | ExerciceIntegraleMoyenne): ValeurExacte | null {
+  return valeurExacteIntegrale(exercice.primitive, exercice.a, exercice.b);
+}
+
+/** Valeur exacte de la valeur moyenne (intégrale × 1/(b − a)). */
+export function valeurExacteMoyenne(exercice: ExerciceIntegraleMoyenne): ValeurExacte | null {
+  const integrale = valeurExacteIntegraleDefinie(exercice);
+  return integrale ? multiplierValeurExacte(integrale, 1 / (exercice.b - exercice.a)) : null;
+}
+
+/** Forme exacte EXIGÉE (décision de l'utilisateur, 24/11/2026) : la valeur n'est ni un entier ni une
+ * fraction (ln, e, π, √… — la calculatrice n'en donne qu'un décimal). Même critère pour le profil
+ * d'évaluation (`'exacte'` ⟺ rationnel), la consigne (« sous forme exacte ») et cet écran (arrondi
+ * refusé sans tentative). L'intégrale et la valeur moyenne sont rationnelles ensemble (bornes
+ * rationnelles). */
+export function formeExacteExigee(exercice: ExerciceIntegraleSimple | ExerciceIntegraleMoyenne): boolean {
+  const exacte = valeurExacteIntegraleDefinie(exercice);
+  return exacte ? !exacte.rationnel : !rationnelNumerique(valeurIntegrale(exercice));
+}
+
+/** Écran "finalIntegrale" (scénarios `simple`/`moyenne`) — valeurs[0] = F(b)−F(a). Forme exacte
+ * exigée : seule une valeur exacte est juste (l'arrondi est arrêté avant, `refusSaisieIntegralesDefinies`). */
 export function diagnostiquerFinalIntegrale(exercice: ExerciceIntegraleSimple | ExerciceIntegraleMoyenne, valeurs: string[]): StatutVerification {
   const v = valeurIntegrale(exercice);
-  return diagnostiquerValeur(valeurs[0], v, toleranceRelative(v));
+  return diagnostiquerValeur(valeurs[0], v, formeExacteExigee(exercice) ? toleranceExacte(v) : toleranceRelative(v));
 }
 export function verifierFinalIntegrale(exercice: ExerciceIntegraleSimple | ExerciceIntegraleMoyenne, valeurs: string[]): boolean {
   return diagnostiquerFinalIntegrale(exercice, valeurs) === "correct";
@@ -46,7 +80,21 @@ export function verifierFinalIntegrale(exercice: ExerciceIntegraleSimple | Exerc
  * de l'intégrale CORRECTE de l'écran précédent (jamais recalculée depuis la saisie élève). */
 export function diagnostiquerValeurMoyenne(exercice: ExerciceIntegraleMoyenne, valeurs: string[]): StatutVerification {
   const moyenne = valeurIntegrale(exercice) / (exercice.b - exercice.a);
-  return diagnostiquerValeur(valeurs[0], moyenne, toleranceRelative(moyenne));
+  return diagnostiquerValeur(valeurs[0], moyenne, formeExacteExigee(exercice) ? toleranceExacte(moyenne) : toleranceRelative(moyenne));
+}
+
+/** Contrôle AVANT soumission (écran) : un arrondi de l'intégrale ou de la valeur moyenne quand la
+ * forme exacte est exigée → message (« garde ln, π… »), aucune tentative consommée ; `null` sinon. */
+export function refusSaisieIntegralesDefinies(exercice: ExerciceIntegralesDefinies, phase: PhaseIntegralesDefinies, valeurs: string[]): string | null {
+  if (exercice.scenario === "parametre" || (phase !== "finalIntegrale" && phase !== "valeurMoyenne")) return null;
+  if (!formeExacteExigee(exercice)) return null;
+  const integrale = valeurIntegrale(exercice);
+  if (phase === "finalIntegrale") {
+    return refusArrondi(valeurs[0] ?? "", integrale, toleranceRelative(integrale), symbolesDeValeurExacte(valeurExacteIntegraleDefinie(exercice)?.latex ?? ""));
+  }
+  if (exercice.scenario !== "moyenne") return null;
+  const moyenne = integrale / (exercice.b - exercice.a);
+  return refusArrondi(valeurs[0] ?? "", moyenne, toleranceRelative(moyenne), symbolesDeValeurExacte(valeurExacteMoyenne(exercice)?.latex ?? ""));
 }
 export function verifierValeurMoyenne(exercice: ExerciceIntegraleMoyenne, valeurs: string[]): boolean {
   return diagnostiquerValeurMoyenne(exercice, valeurs) === "correct";

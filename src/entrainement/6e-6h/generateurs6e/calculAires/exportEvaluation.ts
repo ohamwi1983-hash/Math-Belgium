@@ -11,7 +11,7 @@ import type { CriteresDifficulte } from "../../../export/genererFeuilleExercices
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatCalculAires";
-import { CONSIGNE_PRECISION } from "../../ui6e/nombresExactsIntegrales";
+import { CONSIGNE_EXACTE, CONSIGNE_PRECISION } from "../../ui6e/nombresExactsIntegrales";
 import { phasesPourExercice } from "../../moteur6e/typesCalculAires";
 import type { PhaseCalculAires } from "../../moteur6e/typesCalculAires";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCalculAires } from "./index";
@@ -71,7 +71,8 @@ function construireCorrection(exercice: ExerciceCalculAires): BlocCorrection[] {
 function demande(exercice: ExerciceCalculAires): FragmentConsigne[] {
   if (exercice.famille === "D" && exercice.sousType === "parametre") return [t(" Détermine la valeur de "), f("m"), t(".")];
   if (exercice.famille === "C") return [t(` Calcule cette aire totale. ${CONSIGNE_PRECISION}`)];
-  return [t(` Calcule cette aire. ${CONSIGNE_PRECISION}`)];
+  // Famille A (e, ln, sin 1) : forme exacte exigée (décision du 24/11/2026) ; B, C, D : fractions.
+  return [t(` Calcule cette aire. ${exercice.famille === "A" ? CONSIGNE_EXACTE : CONSIGNE_PRECISION}`)];
 }
 
 function enoncePapier(exercice: ExerciceCalculAires): EnoncePapier {
@@ -127,7 +128,9 @@ function bareme(exercice: ExerciceCalculAires): BaremeExercice {
     reponseFinale: reponse(exercice, derniere(exercice)),
     criteres: phases.map((phase, i) => ({ sousQuestion: LETTRES[i], critere: reponse(exercice, phase), points: w[i] })),
     erreursFrequentes: erreurs,
-    reponsesAcceptees: [[t("Valeur exacte ou arrondie au centième ; toute écriture équivalente de la valeur exacte")]],
+    reponsesAcceptees: [
+      [t(exercice.famille === "A" ? "Valeur exacte seulement, toute écriture équivalente (un arrondi seul ne suffit pas)" : "Valeur exacte ou arrondie au centième ; toute écriture équivalente de la valeur exacte")],
+    ],
   };
 }
 

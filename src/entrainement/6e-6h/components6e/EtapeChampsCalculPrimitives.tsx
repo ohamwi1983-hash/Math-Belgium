@@ -31,6 +31,10 @@ interface Props {
   /** Message d'erreur spécifique (ex. « valeur absolue oubliée »), affiché à la place du message
    * générique quand il s'applique — null sinon. */
   messageSpecifique?: (valeurs: string[]) => string | null;
+  /** Contrôle AVANT soumission (6gen25 : arrondi refusé quand la forme exacte est exigée) : un message
+   * renvoyé est affiché et la saisie n'est PAS soumise — aucune tentative consommée. Absent : rien ne
+   * change (6gen23, 6gen24…). */
+  prevalider?: (valeurs: string[]) => string | null;
 }
 
 /**
@@ -60,8 +64,10 @@ export function EtapeChampsCalculPrimitives({
   diagnostiquer,
   validation,
   messageSpecifique,
+  prevalider,
 }: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
+  const [messageSaisie, setMessageSaisie] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
   const messageSpecifiqueActuel = montrerErreurs && dernierStatut !== "correct" && messageSpecifique ? messageSpecifique(valeurs) : null;
@@ -69,11 +75,15 @@ export function EtapeChampsCalculPrimitives({
 
   function valider() {
     if (!toutRempli) return;
+    const refus = prevalider?.(valeurs) ?? null;
+    setMessageSaisie(refus);
+    if (refus) return;
     onValider(valeurs);
   }
 
   function changer(index: number, valeur: string) {
     setValeurs((prev) => prev.map((v, i) => (i === index ? valeur : v)));
+    setMessageSaisie(null);
   }
 
   return (
@@ -125,7 +135,12 @@ export function EtapeChampsCalculPrimitives({
         <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {messageSaisie && (
+          <p className="alert-error" role="alert">
+            {messageSaisie}
+          </p>
+        )}
+        {!messageSaisie && montrerErreurs && (
           <p className="alert-error" role="alert">
             {messageSpecifiqueActuel ? `${messageSpecifiqueActuel} (tentative ${tentativesUtilisees}/${tentativesMax})` : formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

@@ -14,6 +14,7 @@ import { latex, texte } from "../../../export/fragmentsDocx";
 import { blocDonnees, consigneEcran, formatReponseAttenduePhaseLatex } from "../../ui6e/formatIntegralesDefinies";
 import { decimalLatex, valeurExacteLatex } from "../../ui6e/formatMonome";
 import { phasesPourExercice } from "../../moteur6e/typesIntegralesDefinies";
+import { formeExacteExigee } from "../../moteur6e/verificationIntegralesDefinies";
 import type { PhaseIntegralesDefinies } from "../../moteur6e/typesIntegralesDefinies";
 import type { PhaseCalculPrimitives } from "../../moteur6e/typesCalculPrimitives";
 import { phasesPourExercice as phasesPrimitive } from "../../moteur6e/typesCalculPrimitives";
@@ -50,6 +51,18 @@ const LETTRES = "abcdefghij";
 const f = (valeur: string): FragmentConsigne => latex(valeur);
 const t = (valeur: string): FragmentConsigne => texte(valeur);
 const PRECISION = " Donne le résultat sous forme exacte, ou arrondi au centième.";
+/** Résultat ni entier ni fractionnaire (ln, e, π, √…) : forme exacte EXIGÉE (décision de
+ * l'utilisateur, 24/11/2026 — la Graph Math+ calcule ∫ mais n'en donne qu'un décimal). Ces instances
+ * restent tirées « calculatrice autorisée » ; les entières / fractionnaires sont `calcul: 'exacte'`. */
+const PRECISION_EXACTE = " Donne le résultat sous forme exacte.";
+
+function exacteExigee(e: ExerciceIntegralesDefinies): boolean {
+  return e.scenario !== "parametre" && formeExacteExigee(e);
+}
+
+function precision(e: ExerciceIntegralesDefinies): string {
+  return exacteExigee(e) ? PRECISION_EXACTE : PRECISION;
+}
 
 function estEmpruntee(e: ExerciceIntegralesDefinies, phase: PhaseIntegralesDefinies): phase is PhaseCalculPrimitives {
   return phasesPrimitive(e.primitive).includes(phase as PhaseCalculPrimitives);
@@ -76,8 +89,8 @@ function ligneIntegrale(e: ExerciceIntegralesDefinies): string {
 
 function entetePapier(e: ExerciceIntegralesDefinies): FragmentConsigne[] {
   const def = definitionFPrimitive(e.primitive);
-  if (e.scenario === "simple") return [t("Calcule "), f(ligneIntegrale(e)), t(", où "), f(def), t(`${methode(e)}.`), t(PRECISION)];
-  if (e.scenario === "moyenne") return [t("On considère la fonction f définie par "), f(def), t(`${methode(e)}.`), t(PRECISION)];
+  if (e.scenario === "simple") return [t("Calcule "), f(ligneIntegrale(e)), t(", où "), f(def), t(`${methode(e)}.`), t(precision(e))];
+  if (e.scenario === "moyenne") return [t("On considère la fonction f définie par "), f(def), t(`${methode(e)}.`), t(precision(e))];
   const domaine = domaineM(e);
   return [
     t("On considère la fonction f définie par "),
@@ -167,7 +180,7 @@ function bareme(e: ExerciceIntegralesDefinies): BaremeExercice {
     })),
     erreursFrequentes: erreurs.map((x) => ({ description: [t(x.texte)], cout: x.cout })),
     reponsesAcceptees: [
-      [t("Valeur exacte, ou arrondie au centième")],
+      [t(exacteExigee(e) ? "Valeur exacte seulement (toute écriture équivalente) : un arrondi seul ne suffit pas" : "Valeur exacte, ou arrondie au centième")],
       [t("Toute primitive de f (la constante disparaît dans la différence F(b) − F(a))")],
     ],
   };

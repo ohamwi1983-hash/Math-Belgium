@@ -18,7 +18,7 @@ import {
   differenceCarresLatex,
   formatReponseAttenduePhaseLatex,
 } from "../../ui6e/formatVolumesRevolution";
-import { CONSIGNE_PRECISION } from "../../ui6e/nombresExactsIntegrales";
+import { CONSIGNE_EXACTE } from "../../ui6e/nombresExactsIntegrales";
 import { phasesPourExercice } from "../../moteur6e/typesVolumesRevolution";
 import type { PhaseVolumesRevolution } from "../../moteur6e/typesVolumesRevolution";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceVolumesRevolution } from "./index";
@@ -94,7 +94,7 @@ function enoncePapier(exercice: ExerciceVolumesRevolution): EnoncePapier {
   if (exercice.famille === "D") {
     return {
       section: {
-        enteteFragments: [...entete(exercice), t(` ${CONSIGNE_PRECISION}`)],
+        enteteFragments: [...entete(exercice), t(" Donne les valeurs exactes.")],
         questions: [
           q(t("Calcule le volume du paraboloïde.")),
           q(t("Calcule le volume du cylindre englobant, de rayon "), f("f(L)"), t(" et de hauteur L.")),
@@ -107,7 +107,7 @@ function enoncePapier(exercice: ExerciceVolumesRevolution): EnoncePapier {
   const rappelTrig: FragmentConsigne[] =
     exercice.famille === "A" && exercice.type === "trigonometrique" ? [t(" Rappel : "), f("{\\cos^2(x)=\\dfrac{1+\\cos(2x)}{2}}"), t(".")] : [];
   return {
-    section: { enteteFragments: [...entete(exercice), ...rappelTrig, t(` Calcule ce volume. ${CONSIGNE_PRECISION}`)], questions: [] },
+    section: { enteteFragments: [...entete(exercice), ...rappelTrig, t(` Calcule ce volume. ${CONSIGNE_EXACTE}`)], questions: [] },
     reponseBreve: reponse(exercice, derniere(exercice)),
   };
 }
@@ -152,7 +152,7 @@ function bareme(exercice: ExerciceVolumesRevolution): BaremeExercice {
     reponseFinale: reponse(exercice, derniere(exercice)),
     criteres: phases.map((phase, i) => ({ sousQuestion: LETTRES[i], critere: reponse(exercice, phase), points: w[i] })),
     erreursFrequentes: erreurs,
-    reponsesAcceptees: [[t("Valeur exacte (multiple de π, forme avec e ou sin) ou arrondie au centième ; un développement non réduit mais juste est accepté")]],
+    reponsesAcceptees: [[t("Valeur exacte seulement (multiple de π, forme avec e ou sin) : un arrondi seul ne suffit pas ; un développement non réduit mais juste est accepté")]],
   };
 }
 

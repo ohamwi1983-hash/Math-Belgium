@@ -1,7 +1,7 @@
 import type { ExerciceAireA, ExerciceAireB, ExerciceAireC, ExerciceAireD, ExerciceAireD_Parametre, ExerciceCalculAires, SigneFonction } from "../core6e/calculAires.types";
 import type { TermeA } from "../core6e/calculPrimitives.types";
 import type { PhaseCalculAires } from "../moteur6e/typesCalculAires";
-import { CONSIGNE_PRECISION, decimalLatex, egalExactPuisApprox, fractionDepuisValeur, fractionLatex, racineSimplifiee } from "./nombresExactsIntegrales";
+import { CONSIGNE_EXACTE, CONSIGNE_PRECISION, decimalLatex, egalExactPuisApprox, fractionDepuisValeur, fractionLatex, racineSimplifiee } from "./nombresExactsIntegrales";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen26`. Dispatch sur
@@ -161,7 +161,7 @@ export function blocDonneesA(exercice: ExerciceAireA): string[] {
 }
 export function consigneEcranA(phase: PhaseCalculAires): FragmentConsigne[] {
   if (phase === "aEcran1") return [texte("Détermine le signe de "), latex("f(x)"), texte(" sur l'intervalle "), latex("[a;b]"), texte(".")];
-  return [texte("Calcule l'aire du domaine délimité par la courbe de f et l'axe des abscisses sur "), latex("[a;b]"), texte(`, à partir du signe confirmé à l'étape précédente. ${CONSIGNE_PRECISION}`)];
+  return [texte("Calcule l'aire du domaine délimité par la courbe de f et l'axe des abscisses sur "), latex("[a;b]"), texte(`, à partir du signe confirmé à l'étape précédente. ${CONSIGNE_EXACTE}`)];
 }
 export function etatActuelA(exercice: ExerciceAireA, phase: PhaseCalculAires): string[] | null {
   if (phase !== "aEcran2") return null;

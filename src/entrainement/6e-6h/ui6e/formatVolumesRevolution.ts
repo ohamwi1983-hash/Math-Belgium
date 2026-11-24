@@ -1,7 +1,7 @@
 import type { ExerciceVolumeA, ExerciceVolumeB, ExerciceVolumeC, ExerciceVolumeD, ExerciceVolumesRevolution, TermeDeveloppe } from "../core6e/volumesRevolution.types";
 import type { PhaseVolumesRevolution } from "../moteur6e/typesVolumesRevolution";
 import { carreTermes } from "../generateurs6e/volumesRevolution/polynome";
-import { CONSIGNE_PRECISION, decimalLatex, fractionDepuisValeur, fractionLatex, multiplePiLatex } from "./nombresExactsIntegrales";
+import { CONSIGNE_EXACTE, decimalLatex, fractionDepuisValeur, fractionLatex, multiplePiLatex } from "./nombresExactsIntegrales";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen27`. Dispatch sur
@@ -260,7 +260,7 @@ export function consigneEcranA(phase: PhaseVolumesRevolution): FragmentConsigne[
   if (phase === "aEcran1")
     return [texte("Développe et simplifie "), latex("[f(x)]^2"), texte(" (utilise l'identité "), latex("\\cos^2(x)=\\dfrac{1+\\cos(2x)}{2}"), texte(" si f est trigonométrique).")];
   if (phase === "aEcran2") return [texte("Calcule une primitive de l'expression développée de "), latex("[f(x)]^2"), texte(", confirmée à l'étape précédente.")];
-  return [texte(`Évalue cette primitive entre a et b, puis multiplie par π, pour obtenir le volume V. ${CONSIGNE_PRECISION}`)];
+  return [texte(`Évalue cette primitive entre a et b, puis multiplie par π, pour obtenir le volume V. ${CONSIGNE_EXACTE}`)];
 }
 export function etatActuelA(exercice: ExerciceVolumeA, phase: PhaseVolumesRevolution): string[] | null {
   if (phase === "aEcran2") return [`[f(x)]^2=${sommeVolumeLatex(exercice.developpe)}`];
@@ -308,7 +308,7 @@ export function consigneEcranB(phase: PhaseVolumesRevolution): FragmentConsigne[
   if (phase === "bEcran1") return [texte("Trouve les racines de f : ce sont les bornes de l'intégrale.")];
   if (phase === "bEcran2") return [texte("Développe et simplifie "), latex("[f(x)]^2"), texte(".")];
   if (phase === "bEcran3") return [texte("Calcule une primitive de l'expression développée de "), latex("[f(x)]^2"), texte(", confirmée à l'étape précédente.")];
-  return [texte(`Évalue cette primitive entre les racines, puis multiplie par π, pour obtenir le volume V. ${CONSIGNE_PRECISION}`)];
+  return [texte(`Évalue cette primitive entre les racines, puis multiplie par π, pour obtenir le volume V. ${CONSIGNE_EXACTE}`)];
 }
 export function etatActuelB(exercice: ExerciceVolumeB, phase: PhaseVolumesRevolution): string[] | null {
   const racines = `r_1=${exercice.r1}\\text{, }r_2=${exercice.r2}`;
@@ -374,7 +374,7 @@ export function consigneEcranC(phase: PhaseVolumesRevolution): FragmentConsigne[
   if (phase === "cEcran1") return [texte("Trouve les abscisses des points d'intersection des courbes de f et g : ce sont les bornes de l'intégrale.")];
   if (phase === "cEcran2") return [texte("Détermine laquelle des deux courbes est au-dessus de l'autre sur l'intervalle.")];
   if (phase === "cEcran3") return [texte("Développe et simplifie la différence des carrés, à partir de l'ordre confirmé à l'étape précédente.")];
-  return [texte(`Calcule une primitive, évalue-la entre les bornes et multiplie par π, à partir de la forme développée confirmée. ${CONSIGNE_PRECISION}`)];
+  return [texte(`Calcule une primitive, évalue-la entre les bornes et multiplie par π, à partir de la forme développée confirmée. ${CONSIGNE_EXACTE}`)];
 }
 export function etatActuelC(exercice: ExerciceVolumeC, phase: PhaseVolumesRevolution): string[] | null {
   const bornes = `r_1=${exercice.r1}\\text{, }r_2=${exercice.r2}`;
@@ -441,8 +441,8 @@ export function blocDonneesD(exercice: ExerciceVolumeD): string[] {
   return [`f(x)=${kLatexD(exercice)}\\sqrt{x}`, `\\text{Intervalle : }[0\\text{ ; }${exercice.L}]`];
 }
 export function consigneEcranD(phase: PhaseVolumesRevolution): FragmentConsigne[] {
-  if (phase === "dEcran1") return [texte(`Calcule le volume du paraboloïde (méthode des disques). ${CONSIGNE_PRECISION}`)];
-  if (phase === "dEcran2") return [texte("Calcule le volume du cylindre englobant, de rayon "), latex("f(L)"), texte(" et de hauteur L.")];
+  if (phase === "dEcran1") return [texte(`Calcule le volume du paraboloïde (méthode des disques). ${CONSIGNE_EXACTE}`)];
+  if (phase === "dEcran2") return [texte("Calcule le volume du cylindre englobant, de rayon "), latex("f(L)"), texte(` et de hauteur L. ${CONSIGNE_EXACTE}`)];
   return [texte("Calcule le rapport du volume du paraboloïde au volume du cylindre, à partir des volumes confirmés aux étapes précédentes.")];
 }
 export function etatActuelD(exercice: ExerciceVolumeD, phase: PhaseVolumesRevolution): string[] | null {

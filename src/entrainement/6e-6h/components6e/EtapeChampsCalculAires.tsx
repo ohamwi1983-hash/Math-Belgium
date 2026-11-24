@@ -28,6 +28,9 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Contrôle AVANT soumission (arrondi refusé quand la forme exacte est exigée, 6gen26 A et 6gen27) :
+   * un message renvoyé est affiché et la saisie n'est PAS soumise — aucune tentative consommée. */
+  prevalider?: (valeurs: string[]) => string | null;
 }
 
 /**
@@ -39,19 +42,24 @@ interface Props {
  * imposée par CLAUDE.md (consigne générale → bloc données → état actuel → bloc de travail)
  * conservée à l'identique. `App6gen26.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeChampsCalculAires({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsCalculAires({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation, prevalider }: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
+  const [messageSaisie, setMessageSaisie] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
   const toutRempli = valeurs.every((v) => v.trim() !== "");
 
   function valider() {
     if (!toutRempli) return;
+    const refus = prevalider?.(valeurs) ?? null;
+    setMessageSaisie(refus);
+    if (refus) return;
     onValider(valeurs);
   }
 
   function changer(index: number, valeur: string) {
     setValeurs((prev) => prev.map((v, i) => (i === index ? valeur : v)));
+    setMessageSaisie(null);
   }
 
   return (
@@ -111,7 +119,12 @@ export function EtapeChampsCalculAires({ consigneGenerale, blocDonnees, consigne
         <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {messageSaisie && (
+          <p className="alert-error" role="alert">
+            {messageSaisie}
+          </p>
+        )}
+        {!messageSaisie && montrerErreurs && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

@@ -115,3 +115,8 @@ export function racineLatex(n: number): string {
 
 /** Consigne d'arrondi commune aux champs « valeur » (aire, volume, longueur). */
 export const CONSIGNE_PRECISION = "Donne la valeur exacte, ou une valeur arrondie au centième.";
+
+/** Valeur ni entière ni fractionnaire (ln, e, π, sin 1…) en 6gen26 / 6gen27 : forme exacte EXIGÉE
+ * (décision de l'utilisateur, 24/11/2026 — la Graph Math+ calcule ∫ mais n'en donne qu'un décimal) ;
+ * l'écran refuse l'arrondi sans tentative (`moteur6e/saisieValeurExacteIntegrale.ts`). */
+export const CONSIGNE_EXACTE = "Donne la valeur exacte.";

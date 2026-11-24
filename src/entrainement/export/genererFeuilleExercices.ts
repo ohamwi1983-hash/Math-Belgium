@@ -163,7 +163,12 @@ export interface ProfilInstance {
   /** `null` = instance complète ; sinon identifiant court du cas particulier (« sans-dephasage »,
    * « aucune-solution »…), le même pour toutes les séries d'une même question. */
   casParticulier: string | null;
-  calcul?: "exacte" | "calculatrice";
+  /** `'exacte'` : se fait sans calculatrice (la calculatrice de l'année donnerait la réponse) ;
+   * `'calculatrice'` : la demande ; `'calculatriceDirecte'` : la demande ET elle donne directement la
+   * réponse (gen34 « valeurs », σ non entier : « 1-Var Stats » affiche σ, mais à la main il faudrait
+   * √ au centième) — tirée ni « calculatrice interdite » ni « autorisée » (revue des profils,
+   * 24/11/2026). Absent : sans objet, tirée dans les deux cas. */
+  calcul?: "exacte" | "calculatrice" | "calculatriceDirecte";
   /** Type de question quand il est tiré au hasard dans une variante (ex. gen38 : centrage,
    * dispersion, interprétation) : imposé IDENTIQUE d'une série à l'autre, question par question. */
   forme?: string;

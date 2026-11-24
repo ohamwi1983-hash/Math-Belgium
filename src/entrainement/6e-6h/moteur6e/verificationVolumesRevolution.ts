@@ -3,6 +3,7 @@ import type { StatutVerification } from "../moteur/statutVerification";
 import { diagnostiquerEnsembleValeurs, diagnostiquerEquivalenceFonction, diagnostiquerValeur } from "./equivalenceExponentielle";
 import { diagnostiquerPrimitive } from "./verificationCalculPrimitives";
 import type { PhaseVolumesRevolution } from "./typesVolumesRevolution";
+import { refusArrondi, toleranceExacte } from "./saisieValeurExacteIntegrale";
 
 /**
  * Couche B (6e) — vérification pour `6gen27` ("Volumes de révolution", chapitre 4). N'importe
@@ -74,7 +75,7 @@ export function verifierAEcran2(exercice: ExerciceVolumeA, valeurs: string[]): b
 
 export function diagnostiquerAEcran3(exercice: ExerciceVolumeA, valeurs: string[]): StatutVerification {
   const v = volumeEntreBornes(exercice.a, exercice.b, exercice.primitiveDeveloppeReference);
-  return diagnostiquerValeur(valeurs[0], v, toleranceValeur(v));
+  return diagnostiquerValeur(valeurs[0], v, toleranceExacte(v));
 }
 export function verifierAEcran3(exercice: ExerciceVolumeA, valeurs: string[]): boolean {
   return diagnostiquerAEcran3(exercice, valeurs) === "correct";
@@ -107,7 +108,7 @@ export function verifierBEcran3(exercice: ExerciceVolumeB, valeurs: string[]): b
 
 export function diagnostiquerBEcran4(exercice: ExerciceVolumeB, valeurs: string[]): StatutVerification {
   const v = volumeEntreBornes(exercice.r1, exercice.r2, exercice.primitiveDeveloppeReference);
-  return diagnostiquerValeur(valeurs[0], v, toleranceValeur(v));
+  return diagnostiquerValeur(valeurs[0], v, toleranceExacte(v));
 }
 export function verifierBEcran4(exercice: ExerciceVolumeB, valeurs: string[]): boolean {
   return diagnostiquerBEcran4(exercice, valeurs) === "correct";
@@ -140,7 +141,7 @@ export function verifierCEcran3(exercice: ExerciceVolumeC, valeurs: string[]): b
 
 export function diagnostiquerCEcran4(exercice: ExerciceVolumeC, valeurs: string[]): StatutVerification {
   const v = volumeEntreBornes(exercice.r1, exercice.r2, exercice.primitiveDeveloppeReference);
-  return diagnostiquerValeur(valeurs[0], v, toleranceValeur(v));
+  return diagnostiquerValeur(valeurs[0], v, toleranceExacte(v));
 }
 export function verifierCEcran4(exercice: ExerciceVolumeC, valeurs: string[]): boolean {
   return diagnostiquerCEcran4(exercice, valeurs) === "correct";
@@ -151,14 +152,14 @@ export function verifierCEcran4(exercice: ExerciceVolumeC, valeurs: string[]): b
 // ============================================================================
 
 export function diagnostiquerDEcran1(exercice: ExerciceVolumeD, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], exercice.volumeParaboloide, toleranceValeur(exercice.volumeParaboloide));
+  return diagnostiquerValeur(valeurs[0], exercice.volumeParaboloide, toleranceExacte(exercice.volumeParaboloide));
 }
 export function verifierDEcran1(exercice: ExerciceVolumeD, valeurs: string[]): boolean {
   return diagnostiquerDEcran1(exercice, valeurs) === "correct";
 }
 
 export function diagnostiquerDEcran2(exercice: ExerciceVolumeD, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], exercice.volumeCylindre, toleranceValeur(exercice.volumeCylindre));
+  return diagnostiquerValeur(valeurs[0], exercice.volumeCylindre, toleranceExacte(exercice.volumeCylindre));
 }
 export function verifierDEcran2(exercice: ExerciceVolumeD, valeurs: string[]): boolean {
   return diagnostiquerDEcran2(exercice, valeurs) === "correct";
@@ -213,6 +214,27 @@ export function diagnostiquerEcran(exercice: ExerciceVolumesRevolution, phase: P
     case "dEcran3":
       return diagnostiquerDEcran3(exercice as ExerciceVolumeD, valeurs);
   }
+}
+
+/** Volume attendu d'un écran « valeur » (null pour les autres écrans et pour le rapport 1/2, rationnel). */
+function volumeDeLEcran(exercice: ExerciceVolumesRevolution, phase: PhaseVolumesRevolution): number | null {
+  if (exercice.famille === "A" && phase === "aEcran3") return volumeEntreBornes(exercice.a, exercice.b, exercice.primitiveDeveloppeReference);
+  if (exercice.famille === "B" && phase === "bEcran4") return volumeEntreBornes(exercice.r1, exercice.r2, exercice.primitiveDeveloppeReference);
+  if (exercice.famille === "C" && phase === "cEcran4") return volumeEntreBornes(exercice.r1, exercice.r2, exercice.primitiveDeveloppeReference);
+  if (exercice.famille === "D" && phase === "dEcran1") return exercice.volumeParaboloide;
+  if (exercice.famille === "D" && phase === "dEcran2") return exercice.volumeCylindre;
+  return null;
+}
+
+/** Contrôle AVANT soumission (écran) : tous les volumes contiennent π (forme exacte EXIGÉE, décision de
+ * l'utilisateur du 24/11/2026 — la Graph Math+ calcule π∫ mais n'en donne qu'un décimal) ; un arrondi
+ * est refusé avec un message, sans tentative. Les diagnostics ci-dessus n'acceptent plus que la valeur
+ * exacte (`toleranceExacte`). */
+export function refusSaisieVolumesRevolution(exercice: ExerciceVolumesRevolution, phase: PhaseVolumesRevolution, valeurs: string[]): string | null {
+  const v = volumeDeLEcran(exercice, phase);
+  if (v === null) return null;
+  const symboles = exercice.famille === "A" && exercice.type === "exponentielle" ? ["π", "e"] : exercice.famille === "A" && exercice.type === "trigonometrique" ? ["π", "sin"] : ["π"];
+  return refusArrondi(valeurs[0] ?? "", v, toleranceValeur(v), symboles);
 }
 
 export function verifierEcran(exercice: ExerciceVolumesRevolution, phase: PhaseVolumesRevolution, valeurs: string[]): boolean {
