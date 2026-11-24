@@ -3503,9 +3503,9 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
     'signe-derivees': [
       {
         enonce:
-          "Pourquoi la condition $f'(a) = 0$ est-elle nécessaire mais pas suffisante pour affirmer que f admet un extremum en a ?",
+          "Pour une fonction dérivable, pourquoi la condition $f'(a) = 0$ est-elle nécessaire mais pas suffisante pour affirmer que f admet un extremum en un point a intérieur à son domaine ?",
         corrige:
-          "Elle est nécessaire car un sommet ou un creux a toujours une tangente horizontale — sinon la courbe continuerait encore à monter ou à descendre, donc ne serait pas encore à un extremum. Mais elle n'est pas suffisante : une tangente horizontale peut aussi correspondre à un simple replat où $f'$ s'annule sans changer de signe, la courbe continuant alors dans le même sens. $f'(a) = 0$ seule ne distingue jamais ces deux cas — seul un vrai changement de signe de $f'$ le fait.",
+          "Pour une fonction dérivable en un point intérieur, elle est nécessaire car un sommet ou un creux lisse a une tangente horizontale — sinon la courbe continuerait encore à monter ou à descendre, donc ne serait pas encore à un extremum. Mais elle n'est pas suffisante : une tangente horizontale peut aussi correspondre à un simple replat où $f'$ s'annule sans changer de signe, la courbe continuant alors dans le même sens. $f'(a) = 0$ seule ne distingue jamais ces deux cas — seul un vrai changement de signe de $f'$ le fait.",
       },
       {
         enonce:
@@ -3517,9 +3517,9 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
     'etude-locale': [
       {
         enonce:
-          "Pourquoi un point critique qui n'est PAS un extremum correspond-il toujours à un point d'inflexion à tangente horizontale, jamais à un autre type de point ?",
+          "Pour une fonction polynomiale comme $f(x) = x^3+2$, pourquoi un point critique qui n'est PAS un extremum est-il un point d'inflexion à tangente horizontale ?",
         corrige:
-          "Si $f'$ ne change pas de signe en $a$, $f$ continue de croître (ou de décroître) de part et d'autre — ce n'est donc pas un extremum. Mais la tangente y est horizontale ET le sens de variation ne change pas : la courbe traverse cette tangente au lieu de rebondir sur elle, ce qui est exactement la définition d'une inflexion, ici simplement à pente nulle plutôt qu'oblique.",
+          "Si $f'$ ne change pas de signe en $a$, $f$ continue de croître (ou de décroître) de part et d'autre — ce n'est donc pas un extremum. La tangente y est horizontale et le sens de variation ne change pas : pour un polynôme, la courbe traverse cette tangente au lieu de rebondir sur elle, et $f''$ change de signe en $a$ (pour $x^3+2$ : $f''(x) = 6x$) — c'est une inflexion, à pente nulle. Pour une fonction quelconque, on le vérifie par le signe de $f''$.",
       },
       {
         enonce:

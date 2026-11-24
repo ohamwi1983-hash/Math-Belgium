@@ -20,6 +20,19 @@ export const deriveesApplications: ChapterContent = {
       number: 1,
       title: "Calculer f'(a) par la définition",
       kicker: "taux d'accroissement, limite quand h→0, interprétation géométrique (pente de la tangente)",
+      titreCourt: 'f′(a) par la définition',
+      partie: 'Le nombre dérivé et la tangente',
+      essentiel: [
+        'Le taux d\'accroissement $\\dfrac{f(a+h)-f(a)}{h}$ est la pente de la sécante ; sa limite quand h tend vers 0 est le nombre dérivé $f\'(a) = \\lim\\limits_{h \\to 0} \\dfrac{f(a+h)-f(a)}{h}$, pente de la tangente en a.',
+        'Calcule f(a) et f(a+h), simplifie le taux par h, puis fais tendre h vers 0 sur l\'expression SIMPLIFIÉE — jamais h = 0 avant : le taux brut vaut toujours $\\frac{0}{0}$.',
+        'Pour une fraction, on réduit au même dénominateur ; pour une racine, on multiplie par l\'expression conjuguée.',
+      ],
+      cartes: [
+        { question: 'Que représente $\\dfrac{f(a+h)-f(a)}{h}$ sur le graphique de f ?', reponse: 'La pente de la sécante qui relie les points $(a\\,;f(a))$ et $(a+h\\,;f(a+h))$.' },
+        { question: '$f(x) = x^2-3$ : que vaut le taux d\'accroissement en 2, simplifié ?', reponse: '$4+h$ (pour $h \\neq 0$), donc $f\'(2) = 4$.' },
+        { question: 'Où est l\'erreur ? « En $h = 0$, le taux d\'accroissement vaut $\\frac{0}{0}$, donc $f\'(2)$ n\'existe pas. »', reponse: '$\\frac{0}{0}$ est une forme indéterminée : on simplifie d\'abord par h, puis on passe à la limite.' },
+        { question: '$f(x) = \\sqrt{x}$ : comment simplifier le taux d\'accroissement par h ?', reponse: 'On multiplie par l\'expression conjuguée $\\sqrt{x+h}+\\sqrt{x}$ : il reste $\\dfrac{1}{\\sqrt{x+h}+\\sqrt{x}}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Calculer f\'(a) par la définition : taux d\'accroissement, sécante et tangente', youtubeId: 'H1pEUBMk200' },
         {
@@ -140,10 +153,10 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'astuce',
-          label: 'La définition marche pour toute fonction, même sans racine',
+          label: 'La même méthode, même avec une racine',
           text:
-            'Pour $f(x)=\\sqrt{x}$, le taux d\'accroissement se simplifie avec l\'expression ' +
-            'conjuguée — comme au chapitre précédent (forme $\\infty-\\infty$ ou $\\frac{0}{0}$ selon l\'écriture). La ' +
+            'Pour $f(x)=\\sqrt{x}$, le taux d\'accroissement brut donne lui aussi la forme $\\frac{0}{0}$ ; ' +
+            'il se simplifie avec l\'expression conjuguée — comme au chapitre précédent. La ' +
             'méthode générale ne change jamais. Seule la technique de simplification s\'adapte ' +
             'à la forme de f.',
         },
@@ -177,7 +190,7 @@ export const deriveesApplications: ChapterContent = {
           image: {
             src: '/images/historique/fermat.jpg',
             alt: 'Portrait de Pierre de Fermat',
-            caption: 'Pierre de Fermat (1601–1665), portrait anonyme du 17e siècle.',
+            caption: 'Pierre de Fermat (né en 1601 ou en 1607, mort en 1665), portrait anonyme du 17e siècle.',
           },
         },
         {
@@ -199,6 +212,19 @@ export const deriveesApplications: ChapterContent = {
       number: 2,
       title: 'Tangentes',
       kicker: 'y=f(a)+f\'(a)(x−a) ; tangente horizontale ⟺ f\'(a)=0 ; tangente vs sécante ; double tangence',
+      titreCourt: 'Tangentes',
+      partie: 'Le nombre dérivé et la tangente',
+      essentiel: [
+        'Tangente au point d\'abscisse a : $y = f(a) + f\'(a)(x-a)$ ; elle est horizontale exactement quand $f\'(a) = 0$.',
+        'Localement, la tangente ne touche la courbe qu\'au point de contact ; plus loin, elle peut la recouper, et une même droite peut être tangente en deux points (double tangence).',
+        'Approximation affine : pour h petit, $f(a+h) \\approx f(a) + f\'(a)\\,h$.',
+      ],
+      cartes: [
+        { question: 'Tangente à la courbe de $f(x) = x^2-2x+1$ au point d\'abscisse 3 ?', reponse: '$f(3) = 4$ et $f\'(3) = 4$ : $y = 4x-8$.' },
+        { question: 'Quels sont les deux contrôles d\'une équation de tangente ?', reponse: 'Elle passe par $(a\\,;f(a))$, et le coefficient de x vaut $f\'(a)$.' },
+        { question: 'Où est l\'erreur ? « La droite $y = 3x-2$ recoupe $y = x^3$ en $x = -2$ : elle n\'est donc pas tangente en 1. »', reponse: 'Une tangente ne touche la courbe qu\'en un point LOCALEMENT ; plus loin, elle peut très bien la recouper.' },
+        { question: 'Estime $1{,}02^3$ grâce à la tangente à $y = x^3$ en 1.', reponse: '$f(1) + f\'(1)\\cdot 0{,}02 = 1 + 3 \\cdot 0{,}02 = 1{,}06$ (valeur exacte : $1{,}061\\,208$).' },
+      ],
       blocks: [
         { kind: 'video', title: 'Équation d\'une tangente : y = f(a) + f\'(a)(x − a), tangente horizontale, tangente ≠ sécante', youtubeId: 'fD-HtssXw2w' },
         {
@@ -385,16 +411,16 @@ export const deriveesApplications: ChapterContent = {
           kind: 'historique',
           titre: 'Le professeur qui a préparé le terrain pour Newton',
           text:
-            '**Isaac Barrow**, titulaire de la chaire de mathématiques à Cambridge, a pour ' +
-            "élève, dans les années 1660, un certain Isaac Newton. Dans ses travaux de " +
+            '**Isaac Barrow** est, dès 1663, le premier titulaire de la chaire lucasienne de ' +
+            "mathématiques à Cambridge, où étudie alors le jeune Isaac Newton. Dans ses leçons de " +
             'géométrie, Barrow utilise une méthode qu\'il appelle le « triangle ' +
             'différentiel » : un petit triangle formé par un segment infinitésimal de la ' +
             'courbe, sa projection horizontale et sa projection verticale, dont le rapport des ' +
             "côtés donne directement la pente de la tangente — l'idée même que tu viens " +
-            "d'appliquer dans cette section. En 1669, Barrow cède volontairement sa chaire à " +
-            'son brillant élève, convaincu que Newton ira plus loin que lui. L\'histoire lui ' +
-            'donnera raison : Newton bâtira sur ces fondations géométriques tout le calcul ' +
-            'différentiel.',
+            "d'appliquer dans cette section. En 1669, Barrow quitte sa chaire pour se consacrer à " +
+            'la théologie (il deviendra chapelain du roi, puis directeur du Trinity College en ' +
+            '1673) et recommande Newton, qui avait relu ses leçons d\'optique, pour lui succéder. ' +
+            'Newton bâtira sur ces fondations géométriques tout le calcul différentiel.',
           image: {
             src: '/images/historique/barrow.jpg',
             alt: 'Portrait d\'Isaac Barrow',
@@ -433,6 +459,19 @@ export const deriveesApplications: ChapterContent = {
       title: 'Fonction dérivée',
       kicker:
         'fonction dérivée, domaine de dérivabilité, interprétation du nombre dérivé, dérivées de référence, règles de la somme/produit/quotient/chaîne',
+      titreCourt: 'Règles de dérivation',
+      partie: 'Le nombre dérivé et la tangente',
+      essentiel: [
+        'f est dérivable en a si f′(a) existe et est un nombre réel ; la fonction dérivée f′ associe à chaque x de $\\text{dom}_d f$ le nombre $f\'(x)$.',
+        '$(k \\cdot u)\' = k \\cdot u\'$, $(u+v)\' = u\'+v\'$, $(uv)\' = u\'v+uv\'$, $\\left(\\dfrac{u}{v}\\right)\' = \\dfrac{u\'v-uv\'}{v^2}$ et, si $f(x) = g(u(x))$, $f\'(x) = u\'(x) \\cdot g\'(u(x))$.',
+        'Un taux de variation s\'exprime dans l\'unité de f par unité de la variable ; son signe dit si la grandeur augmente ou diminue.',
+      ],
+      cartes: [
+        { question: 'Dérivées de $\\sqrt{x}$ et de $\\dfrac{1}{x}$ ?', reponse: '$\\dfrac{1}{2\\sqrt{x}}$ (pour $x > 0$) et $-\\dfrac{1}{x^2}$.' },
+        { question: 'Où est l\'erreur ? « $f(x) = (2x+1)(x^2-3)$, donc $f\'(x) = 2 \\cdot 2x = 4x$. »', reponse: 'Le produit des dérivées : $(uv)\' = u\'v+uv\'$, ici $f\'(x) = 6x^2+2x-6$.' },
+        { question: '$f(x) = (2x-1)^3$ : que vaut $f\'(x)$ ?', reponse: '$f\'(x) = 2 \\cdot 3(2x-1)^2 = 6(2x-1)^2$ : sans oublier le facteur $u\'(x) = 2$.' },
+        { question: 'Une température (en °C) dépend du temps (en h) : dans quelle unité s\'exprime $f\'(a)$ ?', reponse: 'En °C/h : unité de f par unité de la variable.' },
+      ],
       blocks: [
         { kind: 'video', title: 'La fonction dérivée : dérivabilité, taux de variation, dérivées de référence', youtubeId: 'ln0Bj-SX6K0' },
         { kind: 'video', title: 'Règles de dérivation : somme, produit, quotient et règle de la chaîne', youtubeId: 'a-iBVzWtiO8' },
@@ -490,18 +529,21 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'featureTable',
-          headers: ['', 'Définition', 'Interprétation graphique', 'Interprétation physique'],
+          headers: ['', 'Taux de variation entre a et a + h', 'Nombre dérivé f′(a)'],
           rows: [
             [
-              'Taux de variation entre a et a+h',
+              'Définition',
               '$\\dfrac{f(a+h)-f(a)}{h}$',
-              'pente de la sécante (AB), A(a;f(a)) et B(a+h;f(a+h))',
-              'vitesse MOYENNE de variation entre les instants a et a+h',
+              '$\\displaystyle\\lim_{h \\to 0} \\dfrac{f(a+h)-f(a)}{h}$',
             ],
             [
-              'Nombre dérivé f\'(a)',
-              '$f\'(a) = \\displaystyle\\lim_{h \\to 0} \\dfrac{f(a+h)-f(a)}{h}$',
-              'pente de la tangente en A(a;f(a)) — limite de la sécante (AB) quand B glisse vers A',
+              'Lecture graphique',
+              'pente de la sécante (AB), A(a;f(a)) et B(a+h;f(a+h))',
+              'pente de la tangente en A — limite de la sécante (AB) quand B glisse vers A',
+            ],
+            [
+              'Lecture physique',
+              'vitesse MOYENNE de variation entre les instants a et a+h',
               'vitesse INSTANTANÉE de variation à l\'instant a (voir section 11)',
             ],
           ],
@@ -742,6 +784,19 @@ export const deriveesApplications: ChapterContent = {
       number: 4,
       title: 'Signe de f\' et de f\'\' : variations et concavité',
       kicker: 'signe de f\' ⟺ sens de variation ; signe de f\'\' ⟺ concavité ; point d\'inflexion',
+      titreCourt: 'Signe de f′ et de f″',
+      partie: 'Signe de f′ et de f″ : étudier une fonction',
+      essentiel: [
+        '$f\' > 0$ : f croissante ; $f\' < 0$ : f décroissante ; $f\'(a) = 0$ ET f′ change de signe en a : extremum local (maximum si f′ passe de + à −).',
+        '$f\'\' > 0$ : f convexe ($\\cup$) ; $f\'\' < 0$ : f concave ($\\cap$) ; un point d\'inflexion est un point où f″ change de signe.',
+        'Point anguleux, rebroussement, tangente verticale : f′(a) n\'existe pas. Dérivable ⟹ continue, mais l\'inverse est faux ($|x|$ en 0).',
+      ],
+      cartes: [
+        { question: 'f′ passe de − à + en a : quelle conclusion ?', reponse: 'f décroît puis croît : minimum local en a.' },
+        { question: 'Où est l\'erreur ? « $f\'\'(x) > 0$ sur cet intervalle, donc f y est croissante. »', reponse: 'f″ donne la FORME (convexe, $\\cup$), pas le sens de variation, qui se lit sur f′.' },
+        { question: '$f(x) = |x|$ : que vaut $f\'(0)$ ?', reponse: 'Il n\'existe pas : point anguleux (pentes −1 et 1), même si f a un minimum en 0.' },
+        { question: 'La tangente en a est verticale : a-t-on $f\'(a) = 0$ ?', reponse: 'Non : le taux d\'accroissement tend vers $\\pm\\infty$, f′(a) n\'existe pas. $f\'(a) = 0$ donne une tangente horizontale.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Signe de f\' et de f\'\' : variations, extremums, concavité, point d\'inflexion', youtubeId: 'oSM5X-KVRrk' },
         {
@@ -983,6 +1038,19 @@ export const deriveesApplications: ChapterContent = {
       number: 5,
       title: 'Étude locale (extremums et points critiques)',
       kicker: 'tableau de signes de f\', extremums locaux, point critique sans extremum, racines irrationnelles, fonction rationnelle, concavité par f\'\'',
+      titreCourt: 'Étude locale',
+      partie: 'Signe de f′ et de f″ : étudier une fonction',
+      essentiel: [
+        'Domaine (colonnes ∄), zéros de f′ en valeurs exactes, tableau de signes de f′, puis variations : maximum local si f′ passe de + à −, minimum local si f′ passe de − à +.',
+        'Un point critique ($f\'(a) = 0$) n\'est un extremum que si f′ change réellement de signe : $f(x) = x^3+2$ n\'a pas d\'extremum en 0.',
+        'Une valeur exclue porte ∄ sur chaque ligne, jamais une flèche qui l\'enjambe ; la concavité se lit sur le tableau de signes de f″.',
+      ],
+      cartes: [
+        { question: 'Extremums locaux de $f(x) = x^3-3x$ ?', reponse: '$f\'(x) = 3(x-1)(x+1)$ : maximum local 2 en $x = -1$, minimum local $-2$ en $x = 1$.' },
+        { question: 'Où est l\'erreur ? « $f\'(0) = 0$, donc $f(x) = x^3+2$ admet un extremum en 0. »', reponse: '$f\'(x) = 3x^2 \\geq 0$ ne change pas de signe : pas d\'extremum en 0.' },
+        { question: 'Zéros de $f\'(x) = 3x^2-6x-3$ ?', reponse: '$\\Delta = 72$ : $x = 1 \\pm \\sqrt{2}$, en valeurs exactes.' },
+        { question: 'Comment conclure sur un zéro a de f′ ?', reponse: 'Une valeur test de chaque côté : même signe des deux côtés → « pas d\'extremum ».' },
+      ],
       blocks: [
         { kind: 'video', title: 'Étude locale : tableau de signes de f\', extremums et points critiques', youtubeId: 'MqocKqLTkqY' },
         {
@@ -1060,7 +1128,8 @@ export const deriveesApplications: ChapterContent = {
             'f\'(a)=0 définit un **point critique** — un candidat à être un extremum. Mais ' +
             'SEULEMENT si f\' change réellement de signe autour de a. Si f\' garde le MÊME ' +
             'signe des deux côtés (par exemple toujours positif), a n\'est PAS un extremum. ' +
-            'C\'est un point d\'inflexion à tangente horizontale.',
+            'Pour les fonctions de ce chapitre (polynômes, fonctions rationnelles), c\'est alors ' +
+            'un point d\'inflexion à tangente horizontale.',
         },
         {
           kind: 'exemple',
@@ -1347,6 +1416,19 @@ export const deriveesApplications: ChapterContent = {
       number: 6,
       title: 'Lecture graphique — dérivées et applications',
       kicker: 'lire directement sur un graphique de f : variations, extremums, concavité — sans calcul',
+      titreCourt: 'Lecture graphique',
+      partie: 'Signe de f′ et de f″ : étudier une fonction',
+      essentiel: [
+        'La courbe monte : f′ > 0 ; elle descend : f′ < 0 ; elle change de direction en un sommet lisse : extremum, f′ y vaut 0 et change de signe.',
+        'Forme de bol : convexe, f″ > 0 ; forme de dôme : concave, f″ < 0 ; le passage de l\'un à l\'autre est un point d\'inflexion.',
+        'Sur le graphique de f′ : un zéro où f′ change de signe donne un extremum de f, un extremum de f′ donne un point d\'inflexion de f.',
+      ],
+      cartes: [
+        { question: 'Où est l\'erreur ? « La courbe ralentit sa montée : c\'est un maximum. »', reponse: 'Un extremum exige un changement de DIRECTION ; une pente qui diminue en restant positive n\'est qu\'un changement de concavité.' },
+        { question: 'Le graphique de f′ coupe l\'axe en $-1$, en passant de + à −. Que fait f en $-1$ ?', reponse: 'f passe de croissante à décroissante : maximum local en $-1$.' },
+        { question: 'Le graphique de f′ atteint son minimum en $x = \\frac{1}{2}$. Qu\'en déduis-tu pour f ?', reponse: 'Un point d\'inflexion en $x = \\frac{1}{2}$ : f′ décroît puis croît, f passe de concave à convexe.' },
+        { question: 'Tangente horizontale en C, courbe croissante des deux côtés : C est-il un extremum ?', reponse: 'Non : $f\'(C) = 0$, mais f′ ne change pas de signe.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Lecture graphique : variations, extremums, concavité et points d\'inflexion sans calcul', youtubeId: '3OzjZmJUmCU' },
         {
@@ -1361,7 +1443,8 @@ export const deriveesApplications: ChapterContent = {
           items: [
             'La courbe MONTE ⟹ f\'>0 sur cet intervalle. La courbe DESCEND ⟹ f\'<0.',
             'Un sommet (pic ou creux), là où la courbe change de direction ⟹ extremum local. ' +
-              'f\' y vaut 0 et change de signe.',
+              'Si la courbe est lisse en ce point, f\' y vaut 0 et change de signe ; en un point ' +
+              'anguleux, f\' n\'existe pas (section 4).',
             'La courbe a la forme d\'un « bol » (au-dessus de ses tangentes) ⟹ convexe, f\'\'>0. ' +
               'La forme d\'un « dôme » (en-dessous de ses tangentes) ⟹ concave, f\'\'<0.',
             'Le point où la courbe passe de « bol » à « dôme » (ou l\'inverse) ⟹ point d\'inflexion.',
@@ -1521,6 +1604,17 @@ export const deriveesApplications: ChapterContent = {
       number: 7,
       title: 'Étudier une fonction',
       kicker: 'domaine → limites/asymptotes → f\' et variations → f\'\' et concavité → coordonnées → graphique',
+      titreCourt: 'Étude complète',
+      partie: 'Signe de f′ et de f″ : étudier une fonction',
+      essentiel: [
+        'Ordre fixe : domaine → limites et asymptotes → f′ et son signe → variations et extremums → f″ et concavité → coordonnées des points remarquables → synthèse et graphique.',
+        'Jamais de point d\'inflexion en une valeur exclue : $f(x) = (x-1)+\\dfrac{4}{x-1}$ est concave puis convexe, sans point d\'inflexion.',
+      ],
+      cartes: [
+        { question: '$f(x) = (x-1)+\\dfrac{4}{x-1}$ : quelles asymptotes ?', reponse: 'Verticale $x = 1$ et oblique $y = x-1$.' },
+        { question: 'Où est l\'erreur ? « f″ change de signe en 1, valeur exclue du domaine : point d\'inflexion en 1. »', reponse: 'f n\'est pas définie en 1 : il n\'y a pas de point d\'inflexion.' },
+        { question: 'Extremums de $f(x) = x^3-3x^2+4$ ?', reponse: '$f\'(x) = 3x(x-2)$ : maximum local $(0\\,;4)$, minimum local $(2\\,;0)$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Étudier une fonction : démarche complète, tableau de variations, asymptotes et synthèse', youtubeId: 'R-cGVkXmkxI' },
         {
@@ -1696,6 +1790,19 @@ export const deriveesApplications: ChapterContent = {
       number: 8,
       title: 'Optimisation géométrique',
       kicker: 'maximiser/minimiser une aire ou un volume sous contrainte, dérivée nulle au point optimal',
+      titreCourt: 'Optimisation géométrique',
+      partie: 'Optimiser et modéliser',
+      essentiel: [
+        'Exprime la grandeur à optimiser en fonction d\'UNE seule variable grâce à la contrainte, sur son domaine réaliste, puis résous « dérivée = 0 ».',
+        'Confirme la nature de l\'optimum par le tableau de signes de la dérivée : + puis − pour un maximum, − puis + pour un minimum — jamais supposé.',
+        'Pour une distance, on minimise $AM^2$ (même point optimal, pas de racine à dériver) ; si le zéro de la dérivée sort du domaine, l\'optimum est à une borne.',
+      ],
+      cartes: [
+        { question: 'Rectangle de périmètre 40 m : quelle aire maximale ?', reponse: '$A(x) = x(20-x)$, maximale en $x = 10$ : un carré de 100 m².' },
+        { question: 'Où est l\'erreur ? « L\'aire vaut $A = xy$ : je la dérive par rapport à x. »', reponse: 'Il faut d\'abord éliminer une variable avec la contrainte ($y = 20-x$), AVANT de dériver.' },
+        { question: 'Boîte du carton de 30 cm : $V\'(x) = (30-2x)(30-6x)$. Quelle racine garder ?', reponse: '$x = 5$ : la racine $x = 15$ sort du domaine $]0\\,;15[$.' },
+        { question: 'Pourquoi minimiser $AM^2$ plutôt que AM ?', reponse: 'Le point optimal est le même, et il n\'y a plus de racine à dériver.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Optimisation géométrique : maximiser une aire sous contrainte avec la dérivée', youtubeId: 'rFeq-NezwlM' },
         {
@@ -1894,6 +2001,19 @@ export const deriveesApplications: ChapterContent = {
       number: 9,
       title: 'Contexte économique',
       kicker: 'coût marginal = dérivée du coût total ; profit maximal ; interprétation économique de f\'',
+      titreCourt: 'Contexte économique',
+      partie: 'Optimiser et modéliser',
+      essentiel: [
+        'Le coût marginal $C\'(q)$ est proche du coût de l\'unité suivante, $C(q+1)-C(q)$, sans lui être égal ; on compare les deux par un écart en % de $C\'(q)$.',
+        'Bénéfice maximal : $B\'(x) = 0$, avec B′ qui passe de + à −, c\'est-à-dire $R\'(x) = C\'(x)$ (recette marginale = coût marginal).',
+        'Le coût moyen $C_M(q) = \\dfrac{C(q)}{q}$ est minimal quand $C\'(q) = C_M(q)$ ; la dichotomie approche la solution en coupant l\'intervalle en deux à chaque étape.',
+      ],
+      cartes: [
+        { question: '$C(q) = q^2+4q+100$ : que valent $C\'(10)$ et $C(11)-C(10)$ ?', reponse: '24 € et 25 € : écart $\\approx 4{,}2\\,\\%$ de $C\'(10)$.' },
+        { question: 'Où est l\'erreur ? « $R\'(x) = 0$ donne la quantité qui maximise le bénéfice. »', reponse: '$R\'(x) = 0$ maximise la recette seule ; le bénéfice demande $R\'(x) = C\'(x)$.' },
+        { question: 'Où le coût marginal est-il minimal ?', reponse: 'Là où $C\'\'(q) = 0$, avec C″ qui passe de − à +.' },
+        { question: 'Dichotomie partie d\'un intervalle de largeur 1 : largeur après 4 étapes ?', reponse: '$\\dfrac{1}{16} = 0{,}0625$ : le milieu est à moins de $0{,}04$ de la racine.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Contexte économique : coût marginal, recette marginale et bénéfice maximal', youtubeId: 'viSlSAGAl10' },
         {
@@ -1956,7 +2076,7 @@ export const deriveesApplications: ChapterContent = {
           ],
           result: {
             tag: 'vérification par égalité des marginales',
-            text: '$R\'(x)=50-2x \\implies R\'(10)=30$ ; $C\'(x)=2x+10 \\implies C\'(10)=30$ ⟹ Rm = Cm = 30 € ✓ ; $B(10) = -200+400-20 = 180$ €',
+            text: '$R\'(x)=50-2x \\implies R\'(10)=30$ ; $C\'(x)=2x+10 \\implies C\'(10)=30$ ⟹ $\\text{Rm} = \\text{Cm} = 30$ € ✓ ; $B(10) = -200+400-20 = 180$ €',
           },
           illustration: {
             kind: 'curvePlot',
@@ -2052,7 +2172,7 @@ export const deriveesApplications: ChapterContent = {
           ],
           result: {
             tag: 'conclusion',
-            text: '$q \\approx 4{,}34$ (à 0,03 près) : le coût moyen est minimal pour environ 434 unités. P passe de − à + : $C_M$ décroît puis croît, c\'est bien un minimum.',
+            text: '$q \\approx 4{,}34$, à moins de $0{,}04$ près (demi-largeur du dernier intervalle : $0{,}031\\,25$) : le coût moyen est minimal pour environ 434 unités. P passe de − à + : $C_M$ décroît puis croît, c\'est bien un minimum.',
           },
         },
         {
@@ -2083,6 +2203,17 @@ export const deriveesApplications: ChapterContent = {
       number: 10,
       title: 'Extrema en contexte borné',
       kicker: 'sur un intervalle FERMÉ [a;b] : comparer les extremums locaux ET les valeurs aux bornes',
+      titreCourt: 'Extremums sur [a ; b]',
+      partie: 'Optimiser et modéliser',
+      essentiel: [
+        'Sur un intervalle fermé $[a\\,;b]$, on liste les extremums locaux à l\'intérieur ET les valeurs $f(a)$ et $f(b)$ : la plus grande est le maximum absolu, la plus petite le minimum absolu.',
+        'L\'extremum absolu peut se trouver à une borne : $f(t) = t^3-6t^2+9t+2$ a un maximum local 6, mais son maximum absolu sur $[0\\,;5]$ vaut 22, en $t = 5$.',
+      ],
+      cartes: [
+        { question: 'Où est l\'erreur ? « $f(1) = 6$ est un maximum local, donc le maximum de f sur $[0\\,;5]$ vaut 6. »', reponse: 'Les bornes sont oubliées : $f(5) = 22$ dépasse 6.' },
+        { question: 'Quels sont les candidats au maximum absolu sur $[a\\,;b]$ ?', reponse: 'Les extremums locaux à l\'intérieur de $]a\\,;b[$, $f(a)$ et $f(b)$.' },
+        { question: 'f est croissante sur $[a\\,;b]$ : où sont ses extremums absolus ?', reponse: 'Minimum en a, maximum en b : tous deux aux bornes.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Extrema sur un intervalle fermé : comparer extremums locaux et valeurs aux bornes', youtubeId: 'qyRa-UM5VS0' },
         {
@@ -2196,6 +2327,19 @@ export const deriveesApplications: ChapterContent = {
       number: 11,
       title: 'Vitesse et position',
       kicker: 's(t) position, v(t)=s\'(t) vitesse, a(t)=v\'(t)=s\'\'(t) accélération',
+      titreCourt: 'Vitesse et position',
+      partie: 'Optimiser et modéliser',
+      essentiel: [
+        '$v(t) = s\'(t)$ et $a(t) = v\'(t) = s\'\'(t)$ ; la position est maximale ou minimale quand v s\'annule en changeant de signe.',
+        '$v < 0$ : le mobile recule ; il ralentit quand $|v|$ diminue, c\'est-à-dire quand v et a sont de signes contraires.',
+        'On rejette un temps négatif ; $1$ m/s $= 3{,}6$ km/h ; à décélération constante, la distance de freinage est proportionnelle au carré de la vitesse.',
+      ],
+      cartes: [
+        { question: '$s(t) = -t^2+8t$ : quand le mobile s\'arrête-t-il, et où ?', reponse: '$v(t) = -2t+8 = 0$ en $t = 4$ s, à la position $s(4) = 16$ m.' },
+        { question: 'Où est l\'erreur ? « $v(t) < 0$, donc le mobile ralentit. »', reponse: '$v < 0$ veut dire qu\'il recule ; il ralentit seulement si v et a sont de signes contraires.' },
+        { question: '14 m/s, en km/h ?', reponse: '$14 \\times 3{,}6 = 50{,}4$ km/h.' },
+        { question: 'La vitesse est multipliée par 1,5 : et la distance de freinage ?', reponse: 'Elle est multipliée par $1{,}5^2 = 2{,}25$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Vitesse et position : s, v = s\', a = v\' et interprétation du mouvement', youtubeId: 'iSGuNQqjnxc' },
         {
@@ -2364,13 +2508,13 @@ export const deriveesApplications: ChapterContent = {
             'que les points glissent sur s(t), v(t) = s\'(t) et a(t) = v\'(t). Le signe de v ' +
             'dit si le mobile avance ou recule ; il accélère quand v et a ont le même ' +
             'signe, il ralentit sinon. En freinage, compare la distance d\'arrêt à 50 et à ' +
-            '70 km/h.',
+            '75 km/h, comme dans l\'exemple : vitesse × 1,5, distance × 2,25.',
         },
         {
           kind: 'historique',
           titre: 'Newton et les « fluxions » : la dérivée est née de la vitesse',
           text:
-            'En 1665-1666, l\'université de Cambridge est fermée par la peste. Réfugié dans la ferme ' +
+            'En 1665–1666, l\'université de Cambridge est fermée par la peste. Réfugié dans la ferme ' +
             'familiale, le jeune **Isaac Newton** met au point sa « méthode des fluxions » : il voit ' +
             'chaque grandeur comme une quantité qui « coule » avec le temps (une fluente), et sa ' +
             'vitesse de variation comme sa « fluxion », notée par un point au-dessus de la lettre. ' +
@@ -2458,6 +2602,24 @@ export const deriveesApplications: ChapterContent = {
           { text: '$C_M(q) = \\dfrac{C(q)}{q}$', condition: 'coût moyen — minimal quand $C\'(q) = C_M(q)$' },
           { text: '$v(t) = s\'(t) \\quad a(t) = v\'(t) = s\'\'(t)$' },
           { text: '$1$ m/s $= 3{,}6$ km/h' },
+        ],
+      },
+      {
+        title: 'Conditions, unités, distances et temps',
+        formulas: [
+          {
+            text: 'unité de $f\'(a)$ = unité de f par unité de la variable',
+            condition: 'taux de variation moyen ou instantané (°C/h, m/s, €/pièce) ; $f\'(a) > 0$ : la grandeur augmente',
+          },
+          {
+            text: '$f(x_0) = y_0 \\quad f\'(x_0) = m \\quad f\'\'(x_1) = 0$',
+            condition: 'pour $f(x) = ax^3+bx^2+cx+d$ : point $(x_0\\,;y_0)$ de la courbe, tangente de pente m en $x_0$ (horizontale si $m = 0$), point d\'inflexion en $x_1$ ; $f(0) = d$ et $f\'(0) = c$',
+          },
+          {
+            text: '$AM^2 = (x-x_A)^2 + (f(x)-y_A)^2$',
+            condition: 'distance de $M(x\\,;f(x))$ au point A : on minimise $AM^2$',
+          },
+          { text: '$t = \\dfrac{d}{v}$', condition: 'temps sur une portion parcourue à vitesse constante' },
         ],
       },
     ],
