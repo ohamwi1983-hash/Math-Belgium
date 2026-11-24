@@ -568,16 +568,45 @@
     box-shadow: 0 6px 14px rgba(24, 36, 48, 0.1);
   }
 
+  /* Bandeau compact = UNE ligne d'aperçu (24/11, défaut signalé sur 5gen32 / 5gen35) : avant, chaque
+   * enfant du bloc de données devenait une colonne de 68 px rognée en bas et estompée à droite —
+   * formules coupées au milieu, lignes (« D = 100 m ») disparues sans indication. Désormais tout le
+   * contenu est aplati en une seule ligne (descendants en ligne, sauf l'intérieur de KaTeX) ; figures,
+   * tableaux et images ne sont pas aperçus. `CadreActions` (`apercuEnonce`) mesure la ligne : si elle
+   * ne tient pas, ou si une figure est masquée, il pose `data-apercu-coupe` et `--apercu-coupe` = bord
+   * gauche du premier morceau qui ne tient pas (formule KaTeX entière, ou mot) ; « … » le recouvre
+   * jusqu'au bord droit. Aucune formule n'est donc coupée au milieu, et rien ne disparaît sans « … ».
+   * Déplier (ou fermer le clavier) montre tout. `text-overflow: ellipsis` ne convient pas : les
+   * éléments positionnés de KaTeX restent peints au-delà des points de suspension. */
   .entrainement .entete-exercice.est-replie,
   .entrainement[data-saisie] .entete-exercice {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    display: block;
     min-height: 52px;
     max-height: 84px;
     padding: 8px 40px 8px 14px;
     overflow: hidden;
     box-sizing: border-box;
+    white-space: nowrap;
+    line-height: 36px;
+    text-align: left;
+  }
+
+  .entrainement .entete-exercice.est-replie[data-apercu-coupe]::after,
+  .entrainement[data-saisie] .entete-exercice[data-apercu-coupe]::after {
+    content: "…";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--apercu-coupe, auto);
+    right: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    padding-left: 2px;
+    background: inherit;
+    color: var(--ink-soft);
+    font: 700 16px/1 var(--lecture);
+    pointer-events: none;
   }
 
   .entrainement .entete-exercice.est-replie {
@@ -590,27 +619,78 @@
     display: none;
   }
 
+  /* Énoncé sans bloc de données (consigne seule, ex. gen9) : l'aperçu montre la consigne au lieu
+   * d'une ligne vide. */
+  .entrainement .entete-exercice.est-replie:not(:has(> :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, :empty))) > .prompt-text,
+  .entrainement[data-saisie] .entete-exercice:not(:has(> :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, :empty))) > .prompt-text {
+    display: inline;
+    margin: 0 0.9em 0 0;
+    padding: 0;
+    border: 0;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+
   .entrainement .entete-exercice.est-replie > .entete-exercice-label,
   .entrainement[data-saisie] .entete-exercice > .entete-exercice-label,
   .entrainement .entete-exercice.est-replie > .entete-exercice-bascule,
   .entrainement[data-saisie] .entete-exercice > .entete-exercice-bascule {
-    flex: none;
+    display: inline-flex;
+    vertical-align: middle;
     width: auto;
-    margin: 0;
+    margin: 0 10px 0 0;
   }
 
   .entrainement .entete-exercice.est-replie > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text),
   .entrainement[data-saisie] .entete-exercice > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text) {
-    flex: 1 1 auto;
+    font-size: 0.82em;
+  }
+
+  /* Aplatissement : tout descendant du bloc de données passe en ligne, sauf KaTeX (structure
+   * interne intacte) et ce qui est déjà masqué (`hidden`, `.sr-only`, `display: none` en ligne).
+   * `!important` sur `display` : certains blocs de données posent `style="display: flex"` en ligne. */
+  .entrainement .entete-exercice.est-replie > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]),
+  .entrainement[data-saisie] .entete-exercice > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]),
+  .entrainement .entete-exercice.est-replie > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text) :not(.katex, .katex *, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]),
+  .entrainement[data-saisie] .entete-exercice > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text) :not(.katex, .katex *, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]) {
+    display: inline !important;
+    position: static;
+    width: auto;
     min-width: 0;
-    max-height: 68px;
+    max-width: none;
+    height: auto;
     margin: 0;
     padding: 0;
-    overflow: hidden;
-    font-size: 0.82em;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    white-space: nowrap;
     text-align: left;
-    -webkit-mask-image: linear-gradient(to right, #000 88%, transparent);
-    mask-image: linear-gradient(to right, #000 88%, transparent);
+    vertical-align: baseline;
+  }
+
+  /* Ce qui était un bloc (ligne de données, formule centrée, ligne d'une `.equation-box`) reste
+   * séparé du suivant. */
+  .entrainement .entete-exercice.est-replie :is(div, p, li, .katex-display, .equation-box > *):not(.katex *, :last-child),
+  .entrainement[data-saisie] .entete-exercice :is(div, p, li, .katex-display, .equation-box > *):not(.katex *, :last-child) {
+    margin-right: 0.9em;
+  }
+
+  /* Une formule est un seul bloc : `apercuEnonce` la garde entière ou la recouvre entière. */
+  .entrainement .entete-exercice.est-replie .katex,
+  .entrainement[data-saisie] .entete-exercice .katex,
+  .entrainement .entete-exercice.est-replie .katex-display > .katex,
+  .entrainement[data-saisie] .entete-exercice .katex-display > .katex {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1.2;
+  }
+
+  /* Figures, tableaux, images (et champs) : pas d'aperçu ; `apercuEnonce` pose alors le « … » final. */
+  .entrainement .entete-exercice.est-replie :is(svg, img, canvas, table, figure, video, iframe, input, select, button:not(.entete-exercice-bascule)):not(.katex *),
+  .entrainement[data-saisie] .entete-exercice :is(svg, img, canvas, table, figure, video, iframe, input, select, button:not(.entete-exercice-bascule)):not(.katex *) {
+    /* `!important` : certaines figures portent un `style="display: block"` en ligne. */
+    display: none !important;
   }
 
   .entrainement .entete-exercice.est-replie .equation-box .katex,
@@ -625,6 +705,7 @@
     top: 50%;
     margin-top: -6px;
     transform: rotate(45deg);
+    z-index: 2;
   }
 }
 

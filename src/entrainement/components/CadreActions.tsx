@@ -15,6 +15,9 @@ import type { RefObject } from "react";
  *   (au-dessus du clavier grâce à `visualViewport`) ; sur ordinateur, ils restent sous l'étape.
  * - Clavier ouvert (champ de saisie actif, écran tactile) : `data-saisie` sur la racine, l'énoncé
  *   (`.entete-exercice`) est épinglé en bandeau compact sous la barre du haut.
+ * - Bandeau compact (clavier ouvert, ou énoncé replié) : une seule ligne d'aperçu ; `apercuEnonce`
+ *   mesure ce qui ne tient pas (formule entière ou mot) et pose `data-apercu-coupe` +
+ *   `--apercu-coupe` : « … » recouvre la suite, jamais une formule coupée au milieu.
  * - Aide (maquette B) : quand l'élève touche « Aide », un tiroir s'ouvre par le bas avec une COPIE
  *   en lecture seule des aides de l'écran (« Aide n / N ») ; l'original reste à sa place dans la page,
  *   « Aide suivante » appelle le même bouton. Contenu et déblocage inchangés.
@@ -63,6 +66,83 @@ function choisirPrincipal(carte: Element): HTMLElement | null {
   if (suivants.length > 0) return suivants[suivants.length - 1];
   const valider = candidats.filter((b) => /^\s*(valider|vérifier)/i.test(b.textContent ?? ""));
   return valider.length > 0 ? valider[valider.length - 1] : null;
+}
+
+const MEDIA_APERCU = "svg, img, canvas, table, figure, video, iframe";
+/** Place réservée aux « … » au bout de la ligne d'aperçu (px). */
+const LARGEUR_POINTS = 20;
+
+/**
+ * Bord gauche (px, depuis le bord de remplissage de l'énoncé) du premier morceau de la ligne
+ * d'aperçu qui ne tient pas — formule KaTeX entière, ou mot — ; `null` si tout tient et que rien
+ * n'est masqué. Les figures, tableaux et images ne sont pas aperçus (CSS) : s'il y en a, la coupe
+ * se fait au moins au bout du texte, pour que « … » signale le contenu absent.
+ */
+function pointDeCoupe(enonce: HTMLElement): number | null {
+  const r = enonce.getBoundingClientRect();
+  const cs = getComputedStyle(enonce);
+  const gauche = r.left + parseFloat(cs.borderLeftWidth);
+  const limite = r.right - parseFloat(cs.borderRightWidth) - parseFloat(cs.paddingRight);
+  const morceaux: { g: number; d: number }[] = [];
+  let media = false;
+  const enfants = [...enonce.children];
+  let donnees = enfants.filter((c) => !c.matches(".entete-exercice-label, .entete-exercice-bascule, .prompt-text, :empty"));
+  // Pas de bloc de données : l'aperçu montre la consigne (même règle que `cadre.css`).
+  if (donnees.length === 0) donnees = enfants.filter((c) => c.matches(".prompt-text"));
+  const parcourir = (noeud: Node) => {
+    if (noeud.nodeType === Node.TEXT_NODE) {
+      const texte = noeud.textContent ?? "";
+      const plage = document.createRange();
+      for (const m of texte.matchAll(/\S+/g)) {
+        const debut = m.index ?? 0;
+        plage.setStart(noeud, debut);
+        plage.setEnd(noeud, debut + m[0].length);
+        const b = plage.getBoundingClientRect();
+        if (b.width > 0 || b.height > 0) morceaux.push({ g: b.left, d: b.right });
+      }
+      return;
+    }
+    if (!(noeud instanceof Element)) return;
+    if (noeud.matches(MEDIA_APERCU)) {
+      if (!noeud.closest("[hidden]")) media = true;
+      return;
+    }
+    if (noeud.classList.contains("katex")) {
+      const b = noeud.getBoundingClientRect();
+      if (b.width > 0) morceaux.push({ g: b.left, d: b.right });
+      return;
+    }
+    if (noeud.getClientRects().length === 0 && !noeud.querySelector(MEDIA_APERCU)) return;
+    noeud.childNodes.forEach(parcourir);
+  };
+  donnees.forEach(parcourir);
+  const droite = morceaux.reduce((m, x) => Math.max(m, x.d), -Infinity);
+  if (!media && droite <= limite + 0.5) return null;
+  const premier = morceaux.find((x) => x.d > limite - LARGEUR_POINTS);
+  const coupe = premier ? premier.g : morceaux.length > 0 ? droite + 4 : limite - LARGEUR_POINTS;
+  return Math.max(0, Math.round(coupe - gauche));
+}
+
+/**
+ * Bandeau compact de l'énoncé (< 1 024 px : replié `.est-replie`, ou épinglé clavier ouvert
+ * `data-saisie`) : une seule ligne d'aperçu, terminée par « … » quand tout ne tient pas — voir
+ * `cadre.css`, « Bandeau compact ». N'écrit que si la valeur change (l'observateur suit `style`).
+ */
+function apercuEnonce(racine: HTMLElement) {
+  const compact = window.innerWidth < LARGEUR_ORDINATEUR;
+  const saisie = racine.dataset.saisie !== undefined;
+  racine.querySelectorAll<HTMLElement>(".entete-exercice").forEach((enonce) => {
+    const actif = compact && (saisie || enonce.classList.contains("est-replie")) && visible(enonce);
+    const coupe = actif ? pointDeCoupe(enonce) : null;
+    if (coupe === null) {
+      if (enonce.hasAttribute("data-apercu-coupe")) enonce.removeAttribute("data-apercu-coupe");
+      if (enonce.style.getPropertyValue("--apercu-coupe")) enonce.style.removeProperty("--apercu-coupe");
+      return;
+    }
+    const valeur = `${coupe}px`;
+    if (enonce.style.getPropertyValue("--apercu-coupe") !== valeur) enonce.style.setProperty("--apercu-coupe", valeur);
+    if (!enonce.hasAttribute("data-apercu-coupe")) enonce.setAttribute("data-apercu-coupe", "");
+  });
 }
 
 interface EtatTiroir {
@@ -173,6 +253,7 @@ export function CadreActions({ racineRef }: { racineRef: RefObject<HTMLDivElemen
         }
       }
       geometrieColonnes();
+      apercuEnonce(racine);
     };
 
     const planifier = () => {
@@ -197,13 +278,19 @@ export function CadreActions({ racineRef }: { racineRef: RefObject<HTMLDivElemen
     const tactile = window.matchMedia("(pointer: coarse)");
     const surFocus = (e: FocusEvent) => {
       const cible = e.target as HTMLElement | null;
-      if (cible?.matches?.(SAISIE) && !cible.closest(EXCLUS) && cible.closest("main") && tactile.matches) racine.dataset.saisie = "";
+      if (cible?.matches?.(SAISIE) && !cible.closest(EXCLUS) && cible.closest("main") && tactile.matches) {
+        racine.dataset.saisie = "";
+        planifier();
+      }
     };
     const surPerteFocus = () => {
       // Laisse le focus arriver à sa nouvelle cible (ex. un second champ) avant de décider.
       setTimeout(() => {
         const actif = document.activeElement as HTMLElement | null;
-        if (!(actif?.matches?.(SAISIE) && racine.contains(actif) && actif.closest("main"))) delete racine.dataset.saisie;
+        if (!(actif?.matches?.(SAISIE) && racine.contains(actif) && actif.closest("main"))) {
+          delete racine.dataset.saisie;
+          planifier();
+        }
       }, 0);
     };
     racine.addEventListener("focusin", surFocus);

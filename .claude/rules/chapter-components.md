@@ -227,7 +227,12 @@ partagé ; contenu, aides, tentatives et vérification inchangés, `SelecteurVar
   par écran clos, ✓ vert / ✓ jaune (aide) / ✗ rouge, « Revoir › » seulement si la correspondance
   entrée ↔ écran clos est sûre (même nombre, même verdict) et que le générateur a une fiche.
 - `EnTeteExercice` (×3) : carte sobre ; repliée en une ligne (touche pour déplier) dès qu'un écran
-  est clos. C : `EtapeSelectionGraphiqueQCM` (6gen8/11/20/21) et `EtapeApparierGraphiqueCyclo`
+  est clos. Bandeau compact (replié, ou `data-saisie`, < 1024 px ; correctif du 24/11, 5gen32 / 5gen35
+  rognés) : contenu aplati en UNE ligne (figures, tableaux, images non aperçus ; consigne montrée si
+  pas de bloc de données) ; `apercuEnonce` (`CadreActions`) mesure formules KaTeX entières et mots, pose
+  `data-apercu-coupe` + `--apercu-coupe`, et « … » recouvre tout ce qui ne tient pas — jamais une
+  formule coupée au milieu, rien de masqué sans « … ». Pas de `text-overflow: ellipsis` : les éléments
+  positionnés de KaTeX restent peints au-delà des points de suspension (Chromium). C : `EtapeSelectionGraphiqueQCM` (6gen8/11/20/21) et `EtapeApparierGraphiqueCyclo`
   (6gen5) en grille 2 × 2 dès 312 px, carte cliquable (même sélection), `LoupeGraphique` plein écran ;
   6gen20 : graphique de f épinglé (`ReferenceEpinglee`). 5gen25 : grille dès qu'il y a la place.
 - Styles : `src/entrainement/cadre.css`, chargé APRÈS `theme.css`, tout sous `.entrainement`.
