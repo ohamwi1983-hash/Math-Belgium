@@ -12,6 +12,8 @@ import { FormClasse, type SaisieClasse } from './GestionClasses'
 import { jourMois, trierRecentes } from './outilsCarnet'
 import { ProgressionClasse } from './ProgressionClasse'
 import { CompteurClasse } from './HeuresEffectives'
+import { ListeARendre } from './DevoirsARendre'
+import { devoirsEntre } from '../../lib/carnetDevoirs'
 
 const SEMAINES_PAR_PAGE = 4
 const SEMAINES_COMPLETES = 2
@@ -136,6 +138,7 @@ export function PageClasse({
       )}
 
       <CompteurClasse classe={classe} maintenant={maintenant} />
+      <ListeARendre seances={devoirsEntre(seances, dateIso(maintenant), ajouterJours(dateIso(maintenant), 28), classe.id)} titre={`À rendre en ${classe.nom}`} avecClasse={false} avecDate idTitre={`${id}-a-rendre`} />
 
       <div className="carnet-classe-corps">
         <section className="carnet-colonne" aria-labelledby={`${id}-fil`}>

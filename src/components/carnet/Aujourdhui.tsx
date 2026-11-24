@@ -11,6 +11,8 @@ import { lignesDuJour } from './journeeCarnet'
 import { avertissementsInterro, classesConcernees, interrosDuCreneau, motifCourt, predicatSuppression, texteAvertissement, texteBandeau, type CreneauSupprime } from '../../lib/agendaEvenements'
 import { BandeauEvenement, IconeType, PuceType, RepereRemise } from './AgendaUi'
 import { ResumeHeuresEffectives, titreChapitre } from './HeuresEffectives'
+import { ListeARendre, PuceARendre } from './DevoirsARendre'
+import { devoirsARendre } from '../../lib/carnetDevoirs'
 import { capitale, chapitreEnCours, dateAbregee, derniereFois, heureCourte, lireDepuisOubliees, memoriserDepuisOubliees, resumeSeance, texteReperes, trierRecentes } from './outilsCarnet'
 
 const OUBLIEES_VISIBLES = 12
@@ -83,6 +85,10 @@ export function Aujourdhui({
   const evenementsDuJour = ctx.agenda.actif ? ctx.agenda.evenements.filter((e) => e.du <= jourValide && jourValide <= e.au) : []
   const propose = jourValide === aujourdhui ? creneauPropose(jour.creneaux, minutesMaintenant) : null
   const seancesDuJour = seances.filter((s) => s.date_seance === jourValide)
+  // Devoirs à rendre ce jour-là (0007) : sur le premier créneau de la classe, sinon listés en tête.
+  const aRendre = devoirsARendre(seances, jourValide)
+  const premierCreneau = (classeId: string) => jour.creneaux.find((c) => c.classe_id === classeId)
+  const aRendreSansCreneau = aRendre.filter((s) => !premierCreneau(s.classe_id))
   const horsHoraire = trierRecentes(seancesDuJour.filter((s) => !jour.creneaux.some((c) => seanceDuCreneau(c, [s]) !== null))).reverse()
   const classeDe = (cid: string) => classes.find((c) => c.id === cid)
   const nomEcole = (eid: string) => (ecoles.length > 1 ? ecoles.find((e) => e.id === eid)?.nom : undefined)
@@ -145,6 +151,12 @@ export function Aujourdhui({
           {interros.map((e) => (
             <LigneInterro key={e.id} e={e} ecoleId={c.ecole_id} aujourdhui={aujourdhui} />
           ))}
+          {premierCreneau(c.classe_id) === c &&
+            aRendre.filter((x) => x.classe_id === c.classe_id).map((x) => (
+              <span key={x.id} className="carnet-a-rendre-ligne">
+                <PuceARendre seance={x} avecClasse={false} compacte />
+              </span>
+            ))}
         </div>
         <div className="carnet-heure-actions">
           {s ? (
@@ -235,6 +247,8 @@ export function Aujourdhui({
             })}
           </div>
         )}
+
+        <ListeARendre seances={aRendreSansCreneau} />
 
         {etat.type === 'inconnu' && (
           <p className="compte-aide carnet-a-confirmer" role="note">

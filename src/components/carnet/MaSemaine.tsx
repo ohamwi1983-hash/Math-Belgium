@@ -1,3 +1,5 @@
+import { PuceARendre } from './DevoirsARendre'
+import { devoirsARendre } from '../../lib/carnetDevoirs'
 import { useId, useMemo, useState } from 'react'
 import { ajouterJours } from '../../lib/calendrierFwb'
 import { dateCourte, dateIso, type Seance } from '../../lib/carnet'
@@ -68,11 +70,13 @@ export function MaSemaine({
   const enTeteDuJour = (date: string) => {
     const evs = evenementsSemaine.filter((e) => e.du <= date && date <= e.au && !(e.type === 'interrogation' && !e.journee_entiere))
     const remises = ctx.agenda.actif ? ctx.agenda.periodes.filter((p) => p.remise === date) : []
-    return { evs, remises }
+    // Devoirs à rendre ce jour-là (0007).
+    const devoirs = devoirsARendre(seances, date)
+    return { evs, remises, devoirs }
   }
   const avecEnTetes = grille.jours.some((j) => {
     const t = enTeteDuJour(j.date)
-    return t.evs.length > 0 || t.remises.length > 0
+    return t.evs.length > 0 || t.remises.length > 0 || t.devoirs.length > 0
   })
   const seancesSemaine = seances.filter((s) => s.date_seance >= lundi && s.date_seance <= vendredi)
 
@@ -124,8 +128,8 @@ export function MaSemaine({
   }
 
   function contenuEnTete(date: string) {
-    const { evs, remises } = enTeteDuJour(date)
-    if (evs.length === 0 && remises.length === 0) return null
+    const { evs, remises, devoirs } = enTeteDuJour(date)
+    if (evs.length === 0 && remises.length === 0 && devoirs.length === 0) return null
     return (
       <div className="agenda-entete-jour">
         {evs.map((e) => (
@@ -142,6 +146,9 @@ export function MaSemaine({
               {ctx.ecoles.length > 1 ? ` · ${ctx.ecoles.find((e) => e.id === p.ecole_id)?.nom ?? ''}` : ''}
             </span>
           </span>
+        ))}
+        {devoirs.map((x) => (
+          <PuceARendre key={x.id} seance={x} compacte avecResume={false} />
         ))}
       </div>
     )

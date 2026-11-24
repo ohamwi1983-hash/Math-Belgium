@@ -116,7 +116,9 @@ function Coffre() {
   const [occupe, setOccupe] = useState(false)
   const [filtreType, setFiltreType] = useState<TypePlan | null>(null)
   const [filtreNiveau, setFiltreNiveau] = useState<string | null>(null)
-  const [recherche, setRecherche] = useState('')
+  // `?q=` (et `?niveau=`) : coffre ouvert depuis le carnet (« Choisir dans mon coffre »), filtré sur le
+  // chapitre et le niveau de la séance.
+  const [recherche, setRecherche] = useState(() => (params.get('q') ?? '').slice(0, 80))
   const [ranger, setRanger] = useState<Rangement>(lireRangement)
   const [renommage, setRenommage] = useState<{ id: string; titre: string; erreur: string | null } | null>(null)
   const [aSupprimer, setASupprimer] = useState<string | null>(null)
@@ -141,6 +143,26 @@ function Coffre() {
   useEffect(() => {
     void recharger()
   }, [recharger])
+
+  // Filtres demandés par l'adresse (carnet) : appliqués une fois les plans lus, puis retirés de l'URL.
+  // Le niveau n'est retenu que si le coffre en contient (sinon aucune pastille ne permettrait de l'ôter).
+  const filtresUrl = useRef(params.get('niveau') !== null || params.get('q') !== null)
+  useEffect(() => {
+    if (!plans || !filtresUrl.current) return
+    filtresUrl.current = false
+    const niveau = params.get('niveau')
+    if (niveau && plans.some((p) => p.contenu.levelSlug === niveau)) setFiltreNiveau(niveau)
+    setParams(
+      (prec) => {
+        const p = new URLSearchParams(prec)
+        p.delete('niveau')
+        p.delete('q')
+        return p
+      },
+      { replace: true },
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- une fois, à la première lecture des plans
+  }, [plans])
 
   const liens = useMemo(() => liensRemediation(plans ?? []), [plans])
   const resumes = useMemo(() => new Map((plans ?? []).map((p) => [p.id, resumerPlan(p.contenu, p.type)])), [plans])
