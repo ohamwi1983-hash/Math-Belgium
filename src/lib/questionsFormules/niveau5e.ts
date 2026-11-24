@@ -416,6 +416,11 @@ export const FORMULES_5E: BanqueFormules = {
         enonce: r`Si $f(x) = g(u(x))$, que vaut $f'(x)$ ?`,
         corrige: r`$f'(x) = u'(x) \cdot g'(u(x))$ (règle de la chaîne).`,
       },
+      {
+        id: r`unité de $f'(a)$`,
+        enonce: r`Une température $T(t)$ est mesurée en °C, le temps $t$ en heures. Dans quelle unité s'exprime le taux de variation instantané $T'(a)$, et que dit son signe ?`,
+        corrige: r`En °C/h : unité de $T$ par unité de $t$. Si $T'(a) > 0$, la température augmente à l'instant $a$ ; si $T'(a) < 0$, elle diminue.`,
+      },
     ],
     'signe-derivees': [
       {
@@ -429,6 +434,23 @@ export const FORMULES_5E: BanqueFormules = {
         id: r`$f'(a) = 0$ et f' change de signe`,
         enonce: r`À quelle condition $f$ a-t-elle un extremum local en $a$ ? Et un point d'inflexion en $a$ ?`,
         corrige: r`Extremum local : $f'(a) = 0$ et $f'$ change de signe en $a$. Point d'inflexion : $f''(a) = 0$ et $f''$ change de signe en $a$.`,
+      },
+      {
+        id: r`conditions sur $ax^3+bx^2+cx+d$`,
+        enonce: r`On cherche $f(x) = ax^3+bx^2+cx+d$. Quelle équation traduit chaque condition : la courbe passe par $(x_0\,;y_0)$ ; la tangente en $x_0$ a la pente $m$ ; la tangente en $x_0$ est horizontale ; la courbe a un point d'inflexion en $x_1$ ?`,
+        corrige: r`$f(x_0) = y_0$ ; $f'(x_0) = m$ ; $f'(x_0) = 0$ ; $f''(x_1) = 0$, avec $f'(x) = 3ax^2+2bx+c$ et $f''(x) = 6ax+2b$.`,
+      },
+    ],
+    'optimisation-geometrique': [
+      {
+        id: r`$AM^2 = (x-x_A)^2 + (f(x)-y_A)^2$`,
+        enonce: r`$M(x\,;f(x))$ est un point de la courbe de $f$ et $A(x_A\,;y_A)$ un point fixe. Comment exprime-t-on la distance $AM$, et quelle fonction minimise-t-on pour trouver le point le plus proche ?`,
+        corrige: r`$AM^2 = (x-x_A)^2 + (f(x)-y_A)^2$ (Pythagore) ; on minimise $D(x) = AM^2$, qui a le même point optimal que $AM$, puis on prend la racine.`,
+      },
+      {
+        id: r`$t = \dfrac{d}{v}$`,
+        enonce: r`Quel temps faut-il pour parcourir une distance $d$ à vitesse constante $v$ ? Et pour un trajet en deux portions, à deux vitesses différentes ?`,
+        corrige: r`$t = \dfrac{d}{v}$ ; sur un trajet en deux portions, on additionne les deux temps : $t = \dfrac{d_1}{v_1} + \dfrac{d_2}{v_2}$.`,
       },
     ],
     'contexte-economique': [
@@ -453,6 +475,11 @@ export const FORMULES_5E: BanqueFormules = {
         id: r`$v(t) = s'(t) \quad a(t) = v'(t) = s''(t)$`,
         enonce: r`La position $s(t)$ décrit un mouvement en ligne droite. Exprime la vitesse $v(t)$ et l'accélération $a(t)$ à l'aide de $s$. Comment convertit-on une vitesse de m/s en km/h ?`,
         corrige: r`$v(t) = s'(t)$ et $a(t) = v'(t) = s''(t)$ ; $1$ m/s $= 3{,}6$ km/h (on multiplie par $3{,}6$).`,
+      },
+      {
+        id: r`$d = \dfrac{v_0^2}{2a}$`,
+        enonce: r`Une voiture roule à la vitesse $v_0$ (en m/s) quand elle freine, avec une décélération constante $a$ (en m/s²). Quelle est sa distance de freinage ? Que devient-elle si la vitesse double ?`,
+        corrige: r`$d = \dfrac{v_0^2}{2a}$ : elle est proportionnelle au carré de la vitesse, donc multipliée par 4 si la vitesse double.`,
       },
     ],
   },

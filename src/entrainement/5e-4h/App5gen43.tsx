@@ -3,22 +3,23 @@ import type { VarianteQuizDerivees5e } from "./core5e/quizDerivees5e.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { demarrerSessionQuizDerivees5e, soumettreReponseQuizDerivees5e } from "./moteur5e/sessionQuizDerivees5e";
 import type { EtatSessionQuizDerivees5e, ResultatExerciceQuizDerivees5e } from "./moteur5e/typesQuizDerivees5e";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs5e/quizDerivees5e/index";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition, etendueNombreQuestions, nombreQuestions } from "./generateurs5e/quizDerivees5e/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import { EtapeQuestionQuizDerivees5e } from "./components5e/EtapeQuestionQuizDerivees5e";
 import { ResultatPanelQuizDerivees5e } from "./components5e/ResultatPanelQuizDerivees5e";
 import { ResumeSessionQuizDerivees5e } from "./components5e/ResumeSessionQuizDerivees5e";
 
-/** `nombreExercices: 20` correspond exactement à la taille de la banque par thème (voir
- * `generateurs5e/quizDerivees5e/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une
- * session parcourt donc les 20 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession5e = {
-  nombreExercices: 20,
-  tentativesMax: 1,
-};
+/** `nombreExercices` = taille RÉELLE de la banque du thème (`.claude/rules/quiz-generators.md`,
+ * piège du nombre fixe) : couplé à `creerGenerateurSansRepetition`, une session parcourt toutes les
+ * affirmations du thème choisi sans jamais en répéter une, même si la banque change de taille. */
+function reglagesPour(theme: VarianteQuizDerivees5e): ReglagesSession5e {
+  return { nombreExercices: nombreQuestions(theme), tentativesMax: 1 };
+}
+
+const ETENDUE_QUESTIONS = etendueNombreQuestions();
 
 function nouvelleSession(theme: VarianteQuizDerivees5e): EtatSessionQuizDerivees5e {
-  return demarrerSessionQuizDerivees5e(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizDerivees5e(reglagesPour(theme), creerGenerateurSansRepetition(theme));
 }
 
 /** 5gen43 — "Dérivées et applications" (quiz vrai/faux), chapitre 5, réplique mécanique du patron
@@ -51,7 +52,7 @@ export function App5gen43() {
     const theme = varianteId as VarianteQuizDerivees5e;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizDerivees5e(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizDerivees5e(reglagesPour(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
@@ -82,7 +83,13 @@ export function App5gen43() {
           {!etat ? (
             <div>
               <h2 className="result-title">Choisis un thème</h2>
-              <p className="result-subtitle">7 thèmes, 20 affirmations vrai/faux chacun — révision complète du chapitre.</p>
+              <p className="result-subtitle">
+                {CATALOGUE_VARIANTES.length} thèmes,{" "}
+                {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max
+                  ? `${ETENDUE_QUESTIONS.max} affirmations`
+                  : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max} affirmations`}{" "}
+                vrai/faux chacun, un par section du cours — révision complète du chapitre.
+              </p>
               <div className="accueil-choix">
                 {CATALOGUE_VARIANTES.map((variante, index) => (
                   <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

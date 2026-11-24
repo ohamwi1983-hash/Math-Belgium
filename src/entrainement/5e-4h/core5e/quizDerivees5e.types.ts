@@ -13,7 +13,10 @@ export type VarianteQuizDerivees5e =
   | "tangentes"
   | "etudeLocaleEtGraphique"
   | "etudeComplete"
-  | "applicationsEnContexte";
+  | "optimisation"
+  | "economie"
+  | "extremaBornes"
+  | "mouvement";
 
 export interface QuestionVraiFaux5e {
   enonce: string;
