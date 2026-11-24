@@ -38,7 +38,7 @@ export function consigneEcran(ecran: EcranLectureGraphiqueDerivees): string {
     case "asymptotes":
       return "Nomme chaque asymptote du graphique (verticale, horizontale ou oblique) et donne son équation. S'il n'y en a aucune, coche « Aucune asymptote ».";
     case "zerosFPrime":
-      return "Donne l'abscisse de chaque point où la tangente à la courbe est horizontale (f′(x) = 0). S'il n'y en a aucun, coche « Aucun point ».";
+      return "Donne l'abscisse de chaque point où la tangente à la courbe est horizontale (f′\u2060(x) = 0). S'il n'y en a aucun, coche « Aucun point ».";
     case "tableauFPrime":
       return "Complète le tableau de signes de f′(x), puis les variations de f.";
     case "extremums":

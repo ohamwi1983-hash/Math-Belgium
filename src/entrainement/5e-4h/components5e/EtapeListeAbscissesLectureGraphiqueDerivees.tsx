@@ -10,7 +10,8 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { LectureGraphiqueDeriveesGraph } from "./LectureGraphiqueDeriveesGraph";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { MessageRetour } from "../../4e/components/RetourSaisie";
+import { cibleListeAbscisses } from "../ui5e/retoursLectureGraphiqueDerivees";
 import "./lectureGraphiqueLimites.css";
 
 interface Props {
@@ -37,6 +38,8 @@ export function EtapeListeAbscissesLectureGraphiqueDerivees({ exercice, ecran, t
   const [valeurs, setValeurs] = useState<string[]>([]);
   const [aucun, setAucun] = useState(false);
   const [illisibles, setIllisibles] = useState<boolean[] | null>(null);
+  /** Dernière réponse transmise au moteur : le message ciblé porte sur elle. */
+  const [soumise, setSoumise] = useState<ReponseListeAbscisses | null>(null);
   const fige = !!validation;
   const complet = aucun ? valeurs.length === 0 : valeurs.length > 0 && valeurs.every((v) => v.trim() !== "");
 
@@ -60,6 +63,7 @@ export function EtapeListeAbscissesLectureGraphiqueDerivees({ exercice, ecran, t
       return;
     }
     setIllisibles(null);
+    setSoumise({ aucun, valeurs });
     onValider({ aucun, valeurs });
   }
 
@@ -126,11 +130,7 @@ export function EtapeListeAbscissesLectureGraphiqueDerivees({ exercice, ecran, t
               Écriture non reconnue : tape un nombre, par exemple 2,5 ou −1.
             </p>
           ) : (
-            tentativesUtilisees > 0 && (
-              <p className="alert-error" role="alert">
-                {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-              </p>
-            )
+            <MessageRetour illisible={false} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={soumise ? cibleListeAbscisses(exercice, ecran, soumise) : null} />
           )}
         </>
       )}

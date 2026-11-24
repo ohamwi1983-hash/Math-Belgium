@@ -11,7 +11,8 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { LectureGraphiqueDeriveesGraph } from "./LectureGraphiqueDeriveesGraph";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { MessageRetour } from "../../4e/components/RetourSaisie";
+import { cibleAsymptotesDerivees } from "../ui5e/retoursLectureGraphiqueDerivees";
 import "./lectureGraphiqueLimites.css";
 
 interface Props {
@@ -39,6 +40,8 @@ export function EtapeAsymptotesLectureGraphiqueDerivees({ exercice, tentativesUt
   const [lignes, setLignes] = useState<LigneAsymptote[]>([]);
   const [aucune, setAucune] = useState(false);
   const [illisibles, setIllisibles] = useState<boolean[] | null>(null);
+  /** Dernière réponse transmise au moteur : le message ciblé porte sur elle. */
+  const [soumise, setSoumise] = useState<ReponseNommerAsymptotes | null>(null);
   const fige = !!validation;
   const complet = aucune ? lignes.length === 0 : lignes.length > 0 && lignes.every((l) => l.texte.trim() !== "");
 
@@ -63,6 +66,7 @@ export function EtapeAsymptotesLectureGraphiqueDerivees({ exercice, tentativesUt
       return;
     }
     setIllisibles(null);
+    setSoumise(reponse);
     onValider(reponse);
   }
 
@@ -132,11 +136,7 @@ export function EtapeAsymptotesLectureGraphiqueDerivees({ exercice, tentativesUt
               Écriture non reconnue : tape un nombre (ex. 7,5) pour une asymptote verticale ou horizontale, une expression en x (ex. 5x + 12) pour une oblique.
             </p>
           ) : (
-            tentativesUtilisees > 0 && (
-              <p className="alert-error" role="alert">
-                {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-              </p>
-            )
+            <MessageRetour illisible={false} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={soumise ? cibleAsymptotesDerivees(exercice, soumise) : null} />
           )}
         </>
       )}
