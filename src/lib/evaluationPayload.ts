@@ -4761,8 +4761,8 @@ export interface EnTeteEvaluation {
   /** Texte affiché « Mathématiques {X}h/sem » — voir `HEURES_SEMAINE_DEFAUT`. */
   heuresSemaine: string
   /** Absent en mode `exercice` — voir `mode` ci-dessous —, sauf feuille d'exercices de l'ÉLÈVE
-   * « sans calculatrice » (`compositionEleve.ts`) : `'interdite'` contraint alors le tirage
-   * (`construirePlan`, variantes `calculatriceIndispensable` retirées), rien n'est imprimé. */
+   * (`compositionEleve.ts`) : contraint alors le tirage comme en évaluation (`construirePlan` ;
+   * « interdite » : variantes `calculatriceIndispensable` retirées), rien n'est imprimé. */
   calculatrice?: 'interdite' | 'autorisee'
   /** Nombre de versions anti-triche à générer (>= 1, lettrées A, B, C...) — chacune indépendamment
    * randomisée (générateurs, vrai/faux, et questions ouvertes quand le vivier le permet). Toujours

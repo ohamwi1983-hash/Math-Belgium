@@ -1259,47 +1259,72 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   `mettreAEchelleParGroupes`). Une seule compétence cochée : composition identique à celle d'avant le
   partage égal à graine égale (vérifié). (Avant le 22/11 : les cinq niveaux et les trois compétences
   cochés = exactement l'ancien « Réel ».)
-  **Calculatrice** (décision de l'utilisateur, 23/11/2026 : « le choix avec / sans calculatrice, comme chez
-  le professeur ») : case **« Avec calculatrice »** (feuille ET blanche), bloc 3 juste avant « Niveaux »
-  (la disponibilité des niveaux en dépend), case carrée ✓ ≥ 44 px (téléphone : demi-largeur, comme les
-  autres), **décochée par défaut**, aide sous la case (« Décochée : seulement des exercices faisables sans
-  calculatrice… » / « Cochée : des exercices avec et sans calculatrice. »), non mémorisée ; la changer refait
-  le tirage (clé des réglages, candidats recalculés : `preparerCandidats(chapitre, type, calculatrice)`, en
-  cache). `ReglagesEleve.calculatrice` : `'interdite'` | `'autorisee'` (absent = `'autorisee'`).
-  **Décochée = calculatrice interdite, exactement comme le professeur** : les variantes qui exigent toujours
-  la calculatrice (`exigeCalculatrice` = générateur `calculatriceIndispensable: true` ou variante de sa liste,
-  groupe à verdict : tous ses membres) ne sont pas candidates (`permisParCalculatrice`) ; les autres ne
-  tirent que des instances `calcul !== 'calculatrice'` — `enteteEleve` pose `calculatrice: 'interdite'`, donc
-  `construireItemsPayload` retire ces variantes et `construirePlan` applique `respecteContrainte` avec les
-  mêmes paliers de repli (blanche : complet + calculatrice → complet → sans contrainte ; feuille : seul cas
-  du mode exercice où `calculatrice` est posée — `cas: 'libre'`, calculatrice seule → sans contrainte ; le
-  panneau du professeur et la remédiation la laissent absente en mode exercice : rien ne change pour eux).
-  Niveaux et durées des candidats estimés sur ces instances (`profilVariante(…, 'interdite')`, repli sur le
-  profil libre si aucune n'est trouvée) ; retouche du plan : même contrainte. Les variantes à calculatrice
-  restent dans la liste des candidats, marquées, pour la **disponibilité en direct** : niveau grisé que
-  seules elles offriraient → « Grisé : aucun exercice sans calculatrice à ce niveau dans ces notions.
-  Transférer : seulement en difficile et très difficile ; moyen : seulement avec calculatrice. »
-  (`DisponibiliteEleve.niveauxAvecCalculatrice`, `categoriesAvecCalculatrice`, infobulle « … : seulement avec
-  calculatrice ») ; compétence dont tous les exercices l'exigent : grisée « seulement avec calculatrice » ;
-  « Choisir exercice par exercice » : ces types restent listés, grisés, « · demande une calculatrice »,
-  compteur bloqué à 0. **Cochée = calculatrice autorisée SANS contrainte** (mélange exact / calculatrice,
-  composition d'avant) — choix : PAS la sémantique du professeur (« autorisée » ne tire chez lui que des cas
-  qui exigent la calculatrice) ; un élève qui a sa calculatrice doit aussi revoir les cas exacts.
+  **Calculatrice** (décisions de l'utilisateur, 23/11/2026 : « le choix avec / sans calculatrice, comme chez
+  le professeur » ; 24/11/2026 : cochée = EXACTEMENT la règle du professeur, « calculer sin(a) sachant que
+  cos(a) = 2/3 et qu'il est au 4e quadrant, ou la valeur de cos(210°) : ces exercices n'ont de sens que s'ils
+  ne se font pas à la calculatrice ») : case **« Avec calculatrice »** (feuille ET blanche), bloc 3 juste
+  avant « Niveaux » (la disponibilité des niveaux en dépend), case carrée ✓ ≥ 44 px (téléphone :
+  demi-largeur, comme les autres), **décochée par défaut**, non mémorisée ; la changer refait le tirage (clé
+  des réglages, candidats recalculés : `preparerCandidats(chapitre, type, calculatrice)`, en cache). Aide
+  sous la case : « Décochée : seulement des exercices faisables sans calculatrice[, comme une interro
+  « calculatrice interdite »]… » / « Cochée : seulement les exercices où la calculatrice sert. Ceux de
+  valeurs exactes (comme cos 210°) sont réservés à « sans calculatrice ». » (espaces insécables dans les
+  guillemets). `ReglagesEleve.calculatrice` : `'interdite'` | `'autorisee'` (absent = aucune contrainte,
+  composition d'avant — outils de non-régression seulement ; l'assistant le pose toujours). `enteteEleve`
+  pose `calculatrice` dans l'en-tête du tirage : `construirePlan` applique `respecteContrainte` avec les
+  paliers de repli du professeur (blanche : complet + calculatrice → complet → sans contrainte ; feuille :
+  seul cas du mode exercice où `calculatrice` est posée — `cas: 'libre'`, calculatrice seule → sans
+  contrainte ; le panneau du professeur et la remédiation la laissent absente en mode exercice : rien ne
+  change pour eux). Niveaux et durées des candidats estimés sur les instances permises
+  (`profilVariante(…, calculatrice)`, repli sur le profil libre si aucune n'est trouvée) ; retouche du plan
+  : même contrainte.
+  **Décochée = calculatrice interdite** : les variantes qui exigent toujours la calculatrice
+  (`exigeCalculatrice` = générateur `calculatriceIndispensable: true` ou variante de sa liste, groupe à
+  verdict : tous ses membres) ne sont pas candidates (`permisParCalculatrice`) ; les autres ne tirent que
+  des instances `calcul !== 'calculatrice'`. **Cochée = calculatrice autorisée, règle du professeur** :
+  jamais une instance profilée `calcul: 'exacte'` (les générateurs sans profil `calcul` restent tirés,
+  comme dans `respecteContrainte`) ; une variante dont aucun tirage permis n'est trouvé
+  (`varianteSansCalculatrice` : 4 000 essais / 150 ms, contrainte de l'élève — exercice complet en blanche —,
+  en cache) est marquée `sansCalculatrice` et n'est pas candidate. Les variantes écartées restent dans la
+  liste, marquées, pour la **disponibilité en direct** (`DisponibiliteEleve.niveauxEcartesCalculatrice`,
+  `categoriesEcarteesCalculatrice`, `totalEcartesCalculatrice`) : niveau grisé que seules elles offriraient →
+  « Grisé : aucun exercice sans calculatrice à ce niveau dans ces notions. Transférer : seulement en difficile
+  et très difficile ; moyen : seulement avec calculatrice. » (cochée : « aucun exercice avec calculatrice…
+  très facile : seulement sans calculatrice ») ; compétence dont tous les exercices sont écartés : grisée
+  « seulement avec calculatrice » / « seulement sans calculatrice » ; « Choisir exercice par exercice » : ces
+  types restent listés, grisés, « · demande une calculatrice » / « · se fait sans calculatrice », compteur
+  bloqué à 0. Chapitre sans AUCUN exercice possible avec calculatrice (`chapitreAvecCalculatrice`, calculé
+  en arrière-plan) : case désactivée (`aria-disabled`), « Aucun exercice de ce chapitre ne demande la
+  calculatrice : tout se fait sans. », calculatrice interdite — mesuré : aucun des 23 chapitres n'est dans ce
+  cas (des générateurs sans profil `calcul` restent tirables partout).
+  **Profils corrigés (24/11)** : gen14, gen15, gen16, gen17, gen18, gen76, gen122 (4e ch. 5) et 6gen86
+  (« Comparer et encadrer des logarithmes sans calculatrice ») sont désormais `calcul: 'exacte'` — leur
+  `calcul` était absent à dessein, ils étaient donc tirés aussi « calculatrice autorisée », chez le
+  professeur comme chez l'élève. Effet côté professeur, calculatrice autorisée : ils ne sortent plus qu'au
+  palier de repli (après la recherche bornée de 200 ms) et la case « cas particulier » y est sans effet.
+  D'autres générateurs « tout exact » n'ont toujours pas de `calcul` (commentaire « Pas de `calcul` » :
+  5e anglesRadians, detectiveTrig, sinusoidePoints, suites… ; 6e complexes, limites logarithmiques,
+  intégrales…) : à trancher générateur par générateur avant de les marquer.
   Document : blanche « Calculatrice interdite » / « Calculatrice autorisée » dans l'encadré à droite de
   « Mon score » (l'aménagée n'en imprimait pas : inchangée) ; la feuille n'imprime rien (aucun emplacement).
   Récapitulatif : « … · Connaître et Transférer · sans calculatrice » (ou « avec calculatrice »).
-  **Vérifié — 24/11** (dossier de travail `calculatrice-eleve` : `tests.mjs`, `ui.mjs`, `sonde*.mjs`) :
-  23 chapitres, 306 candidats sur 4 181 (feuille + blanche) exigent la calculatrice (161 variantes distinctes, 14
-  chapitres) ; case décochée : 1 932 compositions + 483 « à la carte » (compteurs posés aussi sur les types à
-  calculatrice) → 0 variante exigeante ; 368 plans réels, 2 282 instances → 0 variante exigeante, 1 instance
-  `calcul: 'calculatrice'` = palier de repli (6gen24 G1 en blanche : 0,1 % des tirages complets sont exacts,
-  hors du budget de 200 ms — même résultat chez le professeur ; 6gen24 G4 : aucun tirage complet exact,
-  seul le cas particulier « C = b » l'est) ; 4 830 contrôles de disponibilité, 0 incohérence (90 niveaux
-  « seulement avec calculatrice ») ; documents : 23 blanches « interdite », 46 feuilles sans mention. Case
-  cochée : 966 + 483 + 966 compositions (feuille, carte, blanche) et 92 plans (même `Math.random`)
-  identiques au code d'avant, blanche « Calculatrice autorisée ». Playwright (build de production, iPhone 13
-  et 1 280 px, clair, 6e ch. 3) 80 vérifications, documents HTML + PDF, 0 erreur console, `scrollWidth` =
-  largeur.
+  **Vérifié — 24/11** (dossier de travail `calculatrice-eleve` : `tests.mjs`, `tests2.mjs`, `ui.mjs`,
+  `ui-trig.mjs`, `sonde*.mjs`) : 23 chapitres, 4 181 candidats (feuille + blanche) — 306 exigent la
+  calculatrice, 406 sont `sansCalculatrice`. Cochée : 1 932 compositions + 483 « à la carte » (compteurs
+  posés aussi sur les types écartés) → 0 variante `sansCalculatrice` ; 276 plans réels, 1 767 instances →
+  0 `calcul: 'exacte'` (396 « calculatrice », 1 371 sans profil `calcul`), blanche « Calculatrice
+  autorisée » ; 4 830 contrôles de disponibilité, 0 incohérence (72 niveaux « seulement sans
+  calculatrice »). Décochée : 1 932 compositions + 483 « à la carte » identiques au commit précédent à
+  graine égale ; 138 plans à `Math.random` égal : 135 identiques, 3 différents (6e ch. 4, feuille), tous
+  dus à 6gen25 « simple_A_direct » (0,7 % d'instances exactes, recherche bornée à 200 ms : l'issue dépend
+  du temps machine — sonde dédiée : 6 plans × 3 comparaisons, 0 écart), 2 instances « calculatrice » de cette
+  variante = palier de repli ; 1re passe (23/11) : 368 plans, 1 instance « calculatrice » (6gen24 G1,
+  palier). 4e ch. 5 : 24 plans cochés → 0 exercice de gen15, gen16, gen17, gen76 (34 variantes écartées) ;
+  24 plans décochés → 148 (gen16 50, gen15 45, gen17 26, gen76 27). Playwright (build de production,
+  iPhone 13 et 1 280 px, clair) : 6e ch. 3 80 vérifications, 4e ch. 5 26 (notions « remarquables /
+  identité / associés » cochée : Appliquer grisée « seulement sans calculatrice » ; 28 types « se fait sans
+  calculatrice » ; feuille de 30 et blanche cochées sans aucun énoncé « sans calculatrice / valeur
+  exacte »), documents HTML + PDF, 0 erreur console, `scrollWidth` = largeur.
 - **Évaluation blanche : parts au hasard, réglables ; démonstrations annoncées** (décision de
   l'utilisateur, 22/11/2026, choix c : « je ne respecte pas les proportions […] je ne peux faire croire
   aux élèves que mon évaluation sera équilibrée comme dans leur simulation » ; « s'il y a des

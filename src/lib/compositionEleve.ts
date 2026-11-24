@@ -61,9 +61,11 @@ import { DEPASSEMENT_MAX } from '../components/admin/conception/composer'
  * professeur : les variantes qui exigent toujours la calculatrice (`exigeCalculatrice`) ne sont pas
  * candidates, les autres ne tirent que des instances sans calculatrice (`respecteContrainte`, mêmes
  * paliers de repli que le moteur), niveaux et durées estimés sur ces instances-là. Cochée
- * (`'autorisee'`, ou absente) = AUCUNE contrainte de calcul (mélange exact / calculatrice, composition
- * d'avant inchangée) — pas la sémantique du professeur, qui ne tire alors que des cas « calculatrice » :
- * un élève qui a sa calculatrice doit aussi revoir les cas exacts.
+ * (`'autorisee'`) = EXACTEMENT la règle du professeur (décision de l'utilisateur, 24/11/2026 : « la
+ * valeur de cos(210°) […] n'a de sens que si elle ne se fait pas à la calculatrice ») : seulement des
+ * instances qui ne sont pas profilées `calcul: 'exacte'` (générateurs sans `calcul` compris, comme
+ * `respecteContrainte`) ; une variante dont aucun tirage n'en donne (`sansCalculatrice`) n'est pas
+ * candidate. Absente : aucune contrainte (composition d'avant, outils de non-régression).
  *
  * Aucune donnée d'élève : rien n'est enregistré (ni coffre, ni historique anti-doublon — l'historique
  * est seulement LU par `construirePlan`).
@@ -127,11 +129,12 @@ export interface ReglagesEleve {
    * global, réparti à parts égales (`composerFeuille`), ou choisi type par type. `duree` est alors
    * ignorée. Absent : composition d'avant (durée), inchangée. */
   exercices?: ExercicesFeuille
-  /** Case « Avec calculatrice » (décision de l'utilisateur, 23/11/2026) : `'interdite'` (case
+  /** Case « Avec calculatrice » (décisions de l'utilisateur, 23 et 24/11/2026) : `'interdite'` (case
    * décochée, défaut de l'assistant) = variantes `exigeCalculatrice` exclues et instances sans
-   * calculatrice seulement (feuille ET blanche) ; `'autorisee'` ou absent = aucune contrainte de calcul
-   * (composition d'avant). Imprimée sur l'évaluation blanche (encadré « Mon score ») ; la feuille
-   * n'imprime rien. */
+   * calculatrice seulement ; `'autorisee'` (cochée) = règle du professeur : variantes
+   * `sansCalculatrice` exclues, jamais une instance `calcul: 'exacte'` (feuille ET blanche, mêmes
+   * paliers de repli) ; absent = aucune contrainte de calcul (composition d'avant). Imprimée sur
+   * l'évaluation blanche (encadré « Mon score ») ; la feuille n'imprime rien. */
   calculatrice?: CalculatriceEleve
 }
 
@@ -193,6 +196,10 @@ interface CandidatBase {
   /** Toutes ses instances exigent la calculatrice (`calculatriceIndispensable` du générateur, ou de
    * cette variante) : jamais candidate quand la calculatrice est interdite (case décochée). */
   exigeCalculatrice?: boolean
+  /** Liste « calculatrice autorisée » seulement : aucun tirage de la variante ne demande la
+   * calculatrice (toutes ses instances respectant la contrainte de l'élève sont `calcul: 'exacte'`) —
+   * jamais candidate quand la case est cochée (règle du professeur). */
+  sansCalculatrice?: boolean
 }
 export interface CandidatExercice extends CandidatBase {
   sorte: 'exercice'
@@ -276,17 +283,15 @@ const BUDGET_FILTRE_MS = 60
 
 /** Contrainte de tirage de l'élève — celle que `construirePlan` impose au même plan :
  * - évaluation blanche : exercice COMPLET (tous les paramètres présents, aucun cas particulier), plus
- *   « calculatrice interdite » si la case est décochée ;
- * - feuille : rien (toute la variété), sauf calculatrice interdite (`cas: 'libre'` : seule la
- *   calculatrice compte).
- * Calculatrice autorisée (case cochée) ou absente : jamais contrainte (toutes les instances
- * possibles). `null` : aucune contrainte. */
+ *   la calculatrice choisie (interdite : jamais `calcul: 'calculatrice'` ; autorisée : jamais
+ *   `calcul: 'exacte'`) ;
+ * - feuille : seulement la calculatrice choisie (`cas: 'libre'` : toute la variété sinon).
+ * Calculatrice absente : feuille sans contrainte, blanche « complet » seul. `null` : aucune contrainte. */
 function contrainteEleve(adaptateur: Adaptateur, type: TypeEleve, calculatrice?: CalculatriceEleve): ContrainteTirage | null {
   if (!adaptateur.profilInstance) return null
-  const interdite = calculatrice === 'interdite'
   const idsParametres = (adaptateur.parametresAuChoix ?? []).map((p) => p.id)
-  if (type === 'blanche') return { cas: 'complet', idsParametres, parametresExclus: adaptateur.parametresAuChoix ? [] : null, ...(interdite ? { calculatrice: 'interdite' as const } : {}) }
-  return interdite ? { cas: 'libre', idsParametres, parametresExclus: null, calculatrice: 'interdite' } : null
+  if (type === 'blanche') return { cas: 'complet', idsParametres, parametresExclus: adaptateur.parametresAuChoix ? [] : null, ...(calculatrice ? { calculatrice } : {}) }
+  return calculatrice ? { cas: 'libre', idsParametres, parametresExclus: null, calculatrice } : null
 }
 
 function respecte(adaptateur: Adaptateur, contrainte: ContrainteTirage | null, instance: never): boolean {
@@ -305,6 +310,76 @@ export function exigeCalculatrice(generatorId: string, varianteId: string): bool
   return EVALUATION_ADAPTER_REGISTRY[generatorId]?.calculatriceIndispensable === true || varianteExigeCalculatrice(generatorId, varianteId)
 }
 
+/** Recherche bornée d'un tirage qui respecte la contrainte (essais, puis budget de temps). */
+function trouverTirage(adaptateur: Adaptateur, varianteId: string, contrainte: ContrainteTirage | null, essais: number, budgetMs: number): boolean {
+  const fin = Date.now() + budgetMs
+  for (let essai = 0; essai < essais && (essai < 50 || Date.now() < fin); essai++) {
+    let instance: never
+    try {
+      instance = tirerInstance(adaptateur, varianteId, tirerGraine())
+    } catch {
+      return false
+    }
+    if (respecte(adaptateur, contrainte, instance)) return true
+  }
+  return false
+}
+
+const ESSAIS_CLASSEMENT = 4000
+const BUDGET_CLASSEMENT_MS = 150
+const cacheSansCalculatrice = new Map<string, boolean>()
+
+/** Calculatrice AUTORISÉE (case cochée, règle du professeur) : la variante n'a-t-elle aucun tirage qui
+ * la demande — aucune instance respectant la contrainte de l'élève (exercice complet pour la blanche)
+ * qui ne soit pas `calcul: 'exacte'` (4 000 essais / 150 ms au plus, en cache) ? Sans profil
+ * (`profilInstance` absent : aucune notion de calcul) ou variante qui exige la calculatrice : non. */
+export function varianteSansCalculatrice(generatorId: string, varianteId: string, type: TypeEleve): boolean {
+  const adaptateur = EVALUATION_ADAPTER_REGISTRY[generatorId] as Adaptateur | undefined
+  if (!adaptateur?.profilInstance || exigeCalculatrice(generatorId, varianteId)) return false
+  const cle = `${type}|${generatorId}|${varianteId}`
+  const connu = cacheSansCalculatrice.get(cle)
+  if (connu !== undefined) return connu
+  const sans = !trouverTirage(adaptateur, varianteId, contrainteEleve(adaptateur, type, 'autorisee'), ESSAIS_CLASSEMENT, BUDGET_CLASSEMENT_MS)
+  cacheSansCalculatrice.set(cle, sans)
+  return sans
+}
+
+/** Variantes d'exercice d'un chapitre (toutes ses notions), comme les candidats. */
+function variantesDuChapitre(chapter: ChapterContent, type: TypeEleve): { sectionId: string; generatorId: IdGenerateurPilote; varianteId: string; processus: Processus; titre: string; variante?: string }[] {
+  const mode = type === 'blanche' ? 'evaluation' : 'exercice'
+  const taches: { sectionId: string; generatorId: IdGenerateurPilote; varianteId: string; processus: Processus; titre: string; variante?: string }[] = []
+  for (const notion of notionsDuChapitre(chapter)) {
+    for (const g of generateursPourSection(chapter.slug, notion.sectionId)) {
+      if (!(g.generatorId in EVALUATION_ADAPTER_REGISTRY)) continue
+      const catalogue = catalogueVariantesExercice(g.generatorId, mode)
+      for (const v of catalogue)
+        taches.push({ sectionId: notion.sectionId, generatorId: g.generatorId, varianteId: v.id, processus: g.processus ?? 2, titre: titreGenerateur(g.label), ...(catalogue.length > 1 && v.label ? { variante: v.label } : {}) })
+    }
+  }
+  return taches
+}
+
+const cacheCasCalculatrice = new Map<string, Promise<boolean>>()
+
+/** Le chapitre a-t-il au moins un exercice possible « avec calculatrice » (règle du professeur) ? Non :
+ * l'assistant désactive la case (« Aucun exercice de ce chapitre ne demande la calculatrice »). S'arrête
+ * à la première variante qui convient ; une variante à la fois, en rendant la main ; en cache. */
+export function chapitreAvecCalculatrice(chapter: ChapterContent, type: TypeEleve): Promise<boolean> {
+  const cle = `${type}|${chapter.levelSlug}|${chapter.slug}`
+  let promesse = cacheCasCalculatrice.get(cle)
+  if (!promesse) {
+    promesse = (async () => {
+      for (const t of variantesDuChapitre(chapter, type)) {
+        await pause()
+        if (!varianteSansCalculatrice(t.generatorId, t.varianteId, type)) return true
+      }
+      return false
+    })()
+    cacheCasCalculatrice.set(cle, promesse)
+  }
+  return promesse
+}
+
 /** Durée d'une instance : grille commune si l'adaptateur est noté, sinon sa constante. */
 function dureeDe(adaptateur: Adaptateur, instance: never): { niveau: number | null; duree: number } {
   let n: ReturnType<typeof niveauEtDuree>
@@ -320,17 +395,18 @@ function dureeDe(adaptateur: Adaptateur, instance: never): { niveau: number | nu
 const cacheProfils = new Map<string, { niveaux: number[]; duree: number } | null>()
 
 /** Niveaux et durée moyenne d'une variante sur quelques tirages (contrainte de l'élève respectée :
- * exercice complet pour une évaluation blanche, instances sans calculatrice si elle est interdite), en
- * cache. `null` : aucun tirage possible. Calculatrice interdite sans aucun tirage qui la respecte :
- * profil sans contrainte de calcul (palier de repli du moteur). */
+ * exercice complet pour une évaluation blanche, calculatrice interdite ou autorisée), en cache. `null` :
+ * aucun tirage possible. Aucun tirage qui respecte la calculatrice : profil sans contrainte de calcul
+ * (palier de repli du moteur). */
 export function profilVariante(generatorId: string, varianteId: string, type: TypeEleve, calculatrice?: CalculatriceEleve): { niveaux: number[]; duree: number } | null {
   const adaptateur = EVALUATION_ADAPTER_REGISTRY[generatorId] as Adaptateur | undefined
   if (!adaptateur) return null
-  // Sans profil (aucune notion de calcul) ou variante qui exige la calculatrice : profil d'avant.
-  const interdite = calculatrice === 'interdite' && !!adaptateur.profilInstance && !exigeCalculatrice(generatorId, varianteId)
-  const cle = `${type}|${interdite ? 'interdite|' : ''}${generatorId}|${varianteId}`
+  // Sans profil (aucune notion de calcul) ou variante qui exige la calculatrice (toutes ses instances
+  // la demandent : « autorisée » ne change rien, « interdite » l'écarte) : profil d'avant.
+  const calcul = calculatrice && adaptateur.profilInstance && !exigeCalculatrice(generatorId, varianteId) ? calculatrice : undefined
+  const cle = `${type}|${calcul ? `${calcul}|` : ''}${generatorId}|${varianteId}`
   if (cacheProfils.has(cle)) return cacheProfils.get(cle)!
-  const contrainte = contrainteEleve(adaptateur, type, interdite ? 'interdite' : undefined)
+  const contrainte = contrainteEleve(adaptateur, type, calcul)
   const retenues: never[] = []
   const fin = Date.now() + BUDGET_FILTRE_MS
   for (let essai = 0; essai < ESSAIS_FILTRE && retenues.length < TIRAGES_ESTIMATION && (essai < TIRAGES_ESTIMATION * 2 || Date.now() < fin); essai++) {
@@ -342,8 +418,8 @@ export function profilVariante(generatorId: string, varianteId: string, type: Ty
     }
     if (respecte(adaptateur, contrainte, instance)) retenues.push(instance)
   }
-  // Calculatrice interdite, aucun tirage sans calculatrice trouvé : profil sans contrainte de calcul.
-  if (retenues.length === 0 && interdite) {
+  // Aucun tirage qui respecte la calculatrice trouvé : profil sans contrainte de calcul.
+  if (retenues.length === 0 && calcul) {
     const repli = profilVariante(generatorId, varianteId, type)
     cacheProfils.set(cle, repli)
     return repli
@@ -376,8 +452,8 @@ const cacheCandidats = new Map<string, Promise<Candidat[]>>()
  * calculatrice. Calculatrice interdite : niveaux et durées estimés sur les instances sans calculatrice ;
  * les variantes qui l'exigent restent dans la liste (`exigeCalculatrice`, profil sans contrainte de
  * calcul) pour que l'assistant dise ce qu'elles offriraient — la composition les écarte. */
-export function preparerCandidats(chapter: ChapterContent, type: TypeEleve, calculatrice: CalculatriceEleve = 'autorisee', progression?: (fait: number, total: number) => void): Promise<Candidat[]> {
-  const cle = `${type}|${calculatrice}|${chapter.levelSlug}|${chapter.slug}`
+export function preparerCandidats(chapter: ChapterContent, type: TypeEleve, calculatrice?: CalculatriceEleve, progression?: (fait: number, total: number) => void): Promise<Candidat[]> {
+  const cle = `${type}|${calculatrice ?? 'libre'}|${chapter.levelSlug}|${chapter.slug}`
   let promesse = cacheCandidats.get(cle)
   if (!promesse) {
     promesse = calculerCandidats(chapter, type, calculatrice, progression)
@@ -387,17 +463,8 @@ export function preparerCandidats(chapter: ChapterContent, type: TypeEleve, calc
   return promesse
 }
 
-async function calculerCandidats(chapter: ChapterContent, type: TypeEleve, calculatrice: CalculatriceEleve, progression?: (fait: number, total: number) => void): Promise<Candidat[]> {
-  const mode = type === 'blanche' ? 'evaluation' : 'exercice'
-  const taches: { sectionId: string; generatorId: IdGenerateurPilote; varianteId: string; processus: Processus; titre: string; variante?: string }[] = []
-  for (const notion of notionsDuChapitre(chapter)) {
-    for (const g of generateursPourSection(chapter.slug, notion.sectionId)) {
-      if (!(g.generatorId in EVALUATION_ADAPTER_REGISTRY)) continue
-      const catalogue = catalogueVariantesExercice(g.generatorId, mode)
-      for (const v of catalogue)
-        taches.push({ sectionId: notion.sectionId, generatorId: g.generatorId, varianteId: v.id, processus: g.processus ?? 2, titre: titreGenerateur(g.label), ...(catalogue.length > 1 && v.label ? { variante: v.label } : {}) })
-    }
-  }
+async function calculerCandidats(chapter: ChapterContent, type: TypeEleve, calculatrice: CalculatriceEleve | undefined, progression?: (fait: number, total: number) => void): Promise<Candidat[]> {
+  const taches = variantesDuChapitre(chapter, type)
   const candidats: Candidat[] = []
   let fait = 0
   for (const t of taches) {
@@ -407,7 +474,16 @@ async function calculerCandidats(chapter: ChapterContent, type: TypeEleve, calcu
     progression?.(fait, taches.length)
     if (!profil) continue
     const exige = exigeCalculatrice(t.generatorId, t.varianteId)
-    candidats.push({ sorte: 'exercice', cle: `${t.sectionId}|${t.generatorId}|${t.varianteId}`, ...t, duree: profil.duree, niveaux: profil.niveaux, ...(exige ? { exigeCalculatrice: true } : {}) })
+    const sans = calculatrice === 'autorisee' && varianteSansCalculatrice(t.generatorId, t.varianteId, type)
+    candidats.push({
+      sorte: 'exercice',
+      cle: `${t.sectionId}|${t.generatorId}|${t.varianteId}`,
+      ...t,
+      duree: profil.duree,
+      niveaux: profil.niveaux,
+      ...(exige ? { exigeCalculatrice: true } : {}),
+      ...(sans ? { sansCalculatrice: true } : {}),
+    })
   }
   if (chapitreAUneBanqueVraiFauxLocale(chapter.slug)) {
     for (const notion of notionsDuChapitre(chapter)) {
@@ -501,13 +577,15 @@ export function candidatAuxNiveaux(c: Candidat, categories: ReadonlySet<Categori
 }
 
 /** Un candidat permis par le choix de la calculatrice : jamais une variante qui l'exige quand elle est
- * interdite. */
+ * interdite, ni une variante sans aucun cas « calculatrice » quand elle est autorisée. */
 export function permisParCalculatrice(c: Candidat, calculatrice?: CalculatriceEleve): boolean {
-  return !(calculatrice === 'interdite' && c.exigeCalculatrice)
+  if (calculatrice === 'interdite') return !c.exigeCalculatrice
+  if (calculatrice === 'autorisee') return !c.sansCalculatrice
+  return true
 }
 
 /** Candidats des réglages : notions retenues, compétences cochées (jamais une autre), seulement les
- * démonstrations cochées, et aucune variante qui exige une calculatrice interdite. */
+ * démonstrations cochées, et aucune variante écartée par le choix de la calculatrice. */
 function candidatsDesReglages(candidatsChapitre: Candidat[], reglages: Pick<ReglagesEleve, 'sections' | 'competences' | 'demonstrations' | 'calculatrice'>): Candidat[] {
   const sections = new Set(reglages.sections)
   const competences = new Set(reglages.competences)
@@ -923,17 +1001,18 @@ export interface DisponibiliteCompetence {
   /** Au moins une question sans niveau qui compte (formule, compréhension, démonstration cochée) :
    * toujours proposée, quels que soient les niveaux cochés. */
   questionsSansNiveau: boolean
-  /** Calculatrice interdite : variantes de cette compétence écartées parce qu'elles exigent la
-   * calculatrice (0 sinon), et niveaux qu'ELLES SEULES offriraient (« seulement avec calculatrice »). */
-  totalAvecCalculatrice: number
-  categoriesAvecCalculatrice: CategorieNiveau[]
+  /** Variantes de cette compétence écartées par le choix de la calculatrice (interdite : celles qui
+   * l'exigent ; autorisée : celles qui se font toujours sans), et niveaux qu'ELLES SEULES offriraient
+   * (« seulement avec calculatrice » / « seulement sans calculatrice »). */
+  totalEcartesCalculatrice: number
+  categoriesEcarteesCalculatrice: CategorieNiveau[]
 }
 
 export interface DisponibiliteEleve {
   /** Niveau proposé : au moins un exercice des compétences cochées, dans les notions retenues. */
   niveaux: Record<CategorieNiveau, boolean>
-  /** Niveau grisé qu'une variante exigeant la calculatrice rendrait disponible (calculatrice interdite). */
-  niveauxAvecCalculatrice: Record<CategorieNiveau, boolean>
+  /** Niveau grisé que l'autre choix de calculatrice rendrait disponible. */
+  niveauxEcartesCalculatrice: Record<CategorieNiveau, boolean>
   parCompetence: Record<Processus, DisponibiliteCompetence>
 }
 
@@ -945,8 +1024,8 @@ export function disponibilite(candidatsChapitre: Candidat[], reglages: Pick<Regl
   const sections = new Set(reglages.sections)
   const demos = new Set(reglages.demonstrations ?? [])
   // Une démonstration rend la compétence disponible (l'élève peut la cocher), mais ne compte pour la
-  // composition que si elle est cochée. Calculatrice interdite : les variantes qui l'exigent ne
-  // comptent pas (elles disent seulement ce que la calculatrice ajouterait).
+  // composition que si elle est cochée. Variantes écartées par le choix de la calculatrice : elles ne
+  // comptent pas (elles disent seulement ce que l'autre choix ajouterait).
   const toutesNotions = candidatsChapitre.filter((c) => sections.size === 0 || sections.has(c.sectionId))
   const dansNotions = toutesNotions.filter((c) => permisParCalculatrice(c, reglages.calculatrice))
   const categoriesDe = (liste: Candidat[]) => CATEGORIES_NIVEAU.filter((k) => liste.some((c) => partDansCategories(c, new Set([k])) >= 0.5))
@@ -961,8 +1040,8 @@ export function disponibilite(candidatsChapitre: Candidat[], reglages: Pick<Regl
     parCompetence[p] = {
       total: liste.length,
       categories,
-      totalAvecCalculatrice: ecartees.length,
-      categoriesAvecCalculatrice: categoriesDe(ecartees).filter((k) => !categories.includes(k)),
+      totalEcartesCalculatrice: ecartees.length,
+      categoriesEcarteesCalculatrice: categoriesDe(ecartees).filter((k) => !categories.includes(k)),
       auxNiveauxCoches: liste.some((c) => comptee(c) && candidatAuxNiveaux(c, cochees, tous)),
       demonstrationsSeules: liste.length > 0 && liste.every((c) => c.sorte === 'demonstration'),
       sansNiveauSeules: liste.length > 0 && liste.every(estSansNiveau),
@@ -970,12 +1049,12 @@ export function disponibilite(candidatsChapitre: Candidat[], reglages: Pick<Regl
     }
   }
   const niveaux = {} as Record<CategorieNiveau, boolean>
-  const niveauxAvecCalculatrice = {} as Record<CategorieNiveau, boolean>
+  const niveauxEcartesCalculatrice = {} as Record<CategorieNiveau, boolean>
   for (const k of CATEGORIES_NIVEAU) {
     niveaux[k] = reglages.competences.some((p) => parCompetence[p]?.categories.includes(k))
-    niveauxAvecCalculatrice[k] = !niveaux[k] && reglages.competences.some((p) => parCompetence[p]?.categoriesAvecCalculatrice.includes(k))
+    niveauxEcartesCalculatrice[k] = !niveaux[k] && reglages.competences.some((p) => parCompetence[p]?.categoriesEcarteesCalculatrice.includes(k))
   }
-  return { niveaux, niveauxAvecCalculatrice, parCompetence }
+  return { niveaux, niveauxEcartesCalculatrice, parCompetence }
 }
 
 /** Liste lisible de niveaux : « moyen », « très facile et facile », « facile à difficile » (au moins
@@ -1100,10 +1179,9 @@ export function enteteEleve(reglages: ReglagesEleve, chapter: ChapterContent): E
     mode: blanche ? 'evaluation' : 'exercice',
     versionAmenagee: reglages.amenagee,
     afficherDuree: false,
-    // Calculatrice interdite (case décochée) : contraint le tirage de `construirePlan` (feuille : rien
-    // d'imprimé ; blanche : « Calculatrice interdite » dans l'encadré « Mon score »). Autorisée :
-    // aucune contrainte, la blanche l'imprime une fois le plan tiré (`construirePlanEleve`).
-    ...(reglages.calculatrice === 'interdite' ? { calculatrice: 'interdite' as const } : {}),
+    // Calculatrice choisie : contraint le tirage de `construirePlan` comme chez le professeur (feuille :
+    // rien d'imprimé ; blanche : « Calculatrice interdite / autorisée » dans l'encadré « Mon score »).
+    ...(reglages.calculatrice ? { calculatrice: reglages.calculatrice } : {}),
     surtitre: `${niveauLabel} · Chapitre ${chapter.chapterNumber}`,
     titreChapitre: chapter.title,
     urlChapitre: `https://math-belgium.vercel.app/${reglages.levelSlug}/${chapter.slug}`,
@@ -1319,8 +1397,7 @@ export async function construirePlanEleve(reglages: ReglagesEleve, chapter: Chap
   const duree = elements.reduce((t, e) => t + (e.type === 'exercice' ? (mesures.get(e)?.duree ?? DUREE_PAR_DEFAUT) : dureeHorsExercice(e)), 0)
   const dureeConseillee = Math.max(5, Math.round(duree / 5) * 5)
   if (blanche) {
-    // Case « Avec calculatrice » : cochée → « Calculatrice autorisée », tirage NON contraint (exercices
-    // exacts ET à la calculatrice) ; décochée → « Calculatrice interdite », déjà dans l'en-tête du tirage.
+    // Case « Avec calculatrice » : déjà dans l'en-tête du tirage (absente : « autorisée », sans contrainte).
     const partsHasard = reglages.parts?.mode === 'hasard'
     plan.entete = { ...plan.entete, calculatrice: reglages.calculatrice === 'interdite' ? 'interdite' : 'autorisee', blanche: { dureeConseillee, ...(parts ? { repartition: texteRepartitionBlanche(parts, partsHasard) } : {}) } }
   }

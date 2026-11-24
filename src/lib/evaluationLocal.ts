@@ -226,8 +226,8 @@ function codeInstance(generatorId: string, adaptateur: Adaptateur, varianteId: s
  *   sont ignorés ;
  * - `cas` (autres caractéristiques du profil) : `'complet'` (défaut) = aucune ; `'particulier'` = un
  *   cas particulier simple (case « inclure un cas particulier ») ; `'libre'` = n'importe lequel
- *   (feuille d'exercices de l'élève « sans calculatrice » : seule la calculatrice est contrainte, la
- *   feuille garde toute sa variété) ; autre chaîne = CE cas précis (même question d'une série à
+ *   (feuille d'exercices de l'élève avec ou sans calculatrice : seule la calculatrice est contrainte,
+ *   la feuille garde toute sa variété) ; autre chaîne = CE cas précis (même question d'une série à
  *   l'autre) ;
  * - `forme` : même type de question que la série A (`ProfilInstance.forme`) ;
  * - `calculatrice` : interdite → jamais d'instance qui exige la calculatrice ; autorisée →
@@ -414,10 +414,10 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
         // instances complètes, paramètres décochés absents, un cas particulier si la case est cochée ;
         // la série A fixe la structure de chaque question, les autres séries la reproduisent.
         const equilibre = entete.mode !== 'exercice'
-        // Feuille d'exercices de l'ÉLÈVE « sans calculatrice » (assistant `AssistantEleve`, seul à poser
-        // `calculatrice` en mode exercice — le panneau du professeur et la remédiation la laissent
+        // Feuille d'exercices de l'ÉLÈVE avec ou sans calculatrice (assistant `AssistantEleve`, seul à
+        // poser `calculatrice` en mode exercice — le panneau du professeur et la remédiation la laissent
         // absente) : seule la calculatrice est contrainte (`cas: 'libre'`), mêmes paliers de repli.
-        const calculSeul = !equilibre && entete.calculatrice === 'interdite'
+        const calculSeul = !equilibre && !!entete.calculatrice
         const idsParametres = (adaptateur.parametresAuChoix ?? []).map((p) => p.id)
         // Réglages PAR VARIANTE (décision de l'utilisateur) : chaque entrée (variante, éventuellement
         // dupliquée) a ses paramètres décochés et sa case « cas particulier » ; l'ancien réglage de
@@ -431,7 +431,7 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
           equilibre
             ? { cas, idsParametres, parametresExclus, forme, calculatrice: entete.calculatrice }
             : calculSeul
-              ? { cas: 'libre', idsParametres, parametresExclus: null, calculatrice: 'interdite' }
+              ? { cas: 'libre', idsParametres, parametresExclus: null, calculatrice: entete.calculatrice }
               : undefined
         const indexItem = items.indexOf(item)
         const structureA = structureParItem.get(indexItem)
