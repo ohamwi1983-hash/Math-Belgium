@@ -33,11 +33,14 @@
  * d'erreur) — niveau et durée constants dans gen73 et gen81, piège constant en gen19. gen18
  * « sin α = sin β » : jamais de cas particulier, `forme` = fonction et β à ramener ou non.
  *
- * `calcul` : absent pour gen14–gen18 — toutes leurs réponses sont exactes (valeurs remarquables,
- * signes, fractions ; gen17 donne les valeurs approchées dans l'énoncé et interdit la calculatrice) :
- * la calculatrice n'y est jamais un critère de tirage (un `'exacte'` partout ferait perdre le cas
- * particulier coché quand le professeur autorise la calculatrice, palier de repli « sans
- * calculatrice »). 'calculatrice' pour gen19 et gen58 (toujours).
+ * `calcul` : `'exacte'` pour gen14–gen18 — toutes leurs réponses sont exactes (valeurs remarquables,
+ * signes, fractions ; gen17 donne les valeurs approchées dans l'énoncé et interdit la calculatrice).
+ * Décision de l'utilisateur du 24/11/2026 (« calculer sin(a) sachant que cos(a) = 2/3 et qu'il est au
+ * 4e quadrant, ou la valeur de cos(210°) : ces exercices n'ont de sens que s'ils ne se font pas à la
+ * calculatrice ») : ils ne sont tirés qu'en « calculatrice interdite ». Avant, `calcul` était absent
+ * (tirés aussi quand la calculatrice est autorisée). Conséquence côté professeur, calculatrice
+ * autorisée : ces exercices ne sortent plus qu'au palier de repli (« sans calculatrice »), et la case
+ * « cas particulier » y est sans effet. 'calculatrice' pour gen19 et gen58 (toujours).
  */
 import type { ProfilInstance } from "../../export/genererFeuilleExercices";
 import type { ExerciceCercleTrigonometrique } from "../core/cercleTrigonometrique.types";
@@ -55,7 +58,7 @@ export const LIBELLE_CAS_QUADRANT_I = "Inclure un cas particulier (angle du prem
 
 /** gen14 — placement et lecture sur le cercle trigonométrique. */
 export function profilCercleTrigonometrique(e: ExerciceCercleTrigonometrique): ProfilInstance {
-  return { casParticulier: e.quadrant === "I" ? "quadrant-I" : null };
+  return { casParticulier: e.quadrant === "I" ? "quadrant-I" : null, calcul: "exacte" };
 }
 
 /** gen15 — valeurs remarquables. `forme` : angle à ramener dans [0° ; 360°[ ou non (variantes
@@ -65,12 +68,13 @@ export function profilValeursRemarquables(e: ExerciceValeursRemarquables): Profi
   return {
     casParticulier: e.quadrant === "I" ? "quadrant-I" : null,
     forme: `${surAxe ? "axe:" : ""}${e.angleDepart === e.angleReduit ? "direct" : "a-reduire"}`,
+    calcul: "exacte",
   };
 }
 
 /** gen16 — l'un sans l'autre. */
 export function profilUnSansLautre(e: ExerciceUnSansLautre): ProfilInstance {
-  return { casParticulier: cas([e.quadrant === "I" && "quadrant-I", e.typeValeur === "triplet" && "valeur-rationnelle"]) };
+  return { casParticulier: cas([e.quadrant === "I" && "quadrant-I", e.typeValeur === "triplet" && "valeur-rationnelle"]), calcul: "exacte" };
 }
 
 /** Case du panneau (cochée par défaut) : cochée = valeur donnée quelconque, le résultat garde un
@@ -84,7 +88,7 @@ export const LIBELLE_CAS_ANGLES_ASSOCIES = "Inclure un cas particulier (relation
  * `necessiteAide3`). */
 export function profilAnglesAssocies(e: ExerciceAnglesAssocies): ProfilInstance {
   const sansCofonction = e.variante === "sinCos" && e.quadrant !== "I" && e.relation !== "plus90" && e.xReference === e.alpha;
-  return { casParticulier: sansCofonction ? "sans-cofonction" : null };
+  return { casParticulier: sansCofonction ? "sans-cofonction" : null, calcul: "exacte" };
 }
 
 export const LIBELLE_CAS_QUEL_ANGLE = "Inclure un cas particulier (équation sans solution, ou k = 0 ou ±1)";
@@ -96,10 +100,10 @@ export function profilQuelAngle(e: ExerciceQuelAngle): ProfilInstance {
   if (e.angleEgal !== undefined) {
     const b = e.angleEgal;
     const aRamener = b < 0 || (e.fonction === "sin" ? 180 - b < 0 : true);
-    return { casParticulier: null, forme: `${e.fonction}:${aRamener ? "a-ramener" : "direct"}` };
+    return { casParticulier: null, forme: `${e.fonction}:${aRamener ? "a-ramener" : "direct"}`, calcul: "exacte" };
   }
   const surAxe = e.angleReference === 0 || e.angleReference === 90;
-  return { casParticulier: e.angleReference === null ? "aucune-solution" : surAxe ? "valeur-sur-axe" : null };
+  return { casParticulier: e.angleReference === null ? "aucune-solution" : surAxe ? "valeur-sur-axe" : null, calcul: "exacte" };
 }
 
 /** gen19 et gen58 — triangles quelconques et triangles liés : toujours la calculatrice. */

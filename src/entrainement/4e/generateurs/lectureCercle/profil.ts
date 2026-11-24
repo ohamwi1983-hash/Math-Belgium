@@ -11,11 +11,11 @@ import { LIBELLE_CAS_QUADRANT_I } from "../profilsEvaluation4eCh5";
  * - Les angles sur un axe ne sont PAS un cas particulier : « tan θ n'est pas définie » (90°, 270°)
  *   est un verdict de l'écran 3, et le filtrer rendrait la réponse « définie » toujours vraie. Un
  *   tirage d'évaluation par défaut (quadrant I exclu) donne donc ≈ 24 % de « n'est pas définie ».
- * - Pas de `calcul` : tout est exact (même choix que gen14–gen18 et gen76 ; `calcul: 'exacte'`
- *   exclurait gen122 des évaluations avec calculatrice).
+ * - `calcul: 'exacte'` : tout est exact — tiré seulement en « calculatrice interdite » (même choix que
+ *   gen14–gen18 et gen76, décision de l'utilisateur du 24/11/2026).
  */
 export function profilLectureCercle(e: ExerciceLectureCercle): ProfilInstance {
-  return { casParticulier: position(e) === "I" ? "quadrant-I" : null };
+  return { casParticulier: position(e) === "I" ? "quadrant-I" : null, calcul: "exacte" };
 }
 
 export const LIBELLE_CAS_LECTURE_CERCLE = LIBELLE_CAS_QUADRANT_I;

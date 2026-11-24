@@ -18,6 +18,8 @@ import {
   NOMBRE_FEUILLE_MAX,
   NOMBRE_FEUILLE_MIN,
   capaciteType,
+  chapitreAvecCalculatrice,
+  permisParCalculatrice,
   demonstrationsDuChapitre,
   enonceDemonstration,
   typesFeuille,
@@ -61,10 +63,12 @@ import {
  * égales, ou « Choisir exercice par exercice » (compteur par type, 0 à 5 ; « Revenir au nombre
  * global »). Connaître y compte aussi les « Formule », les questions de compréhension et les
  * démonstrations cochées dans « Démonstrations à travailler » (aucune par défaut) — sans niveau.
- * Case « Avec calculatrice » (décision de l'utilisateur, 23/11/2026), feuille ET blanche, décochée par
- * défaut : décochée = calculatrice interdite comme chez le professeur (variantes qui l'exigent écartées
- * et grisées avec leur raison, instances sans calculatrice) ; cochée = aucune contrainte (mélange exact /
- * calculatrice). Changer la case refait le tirage ; rien n'est mémorisé.
+ * Case « Avec calculatrice » (décisions de l'utilisateur, 23 et 24/11/2026), feuille ET blanche, décochée
+ * par défaut — exactement la règle du professeur : décochée = calculatrice interdite (variantes qui
+ * l'exigent écartées et grisées avec leur raison, instances sans calculatrice) ; cochée = calculatrice
+ * autorisée (seulement des cas où elle sert : variantes toujours exactes écartées et grisées, jamais une
+ * instance `calcul: 'exacte'`). Chapitre sans aucun cas « calculatrice » : case désactivée, avec la
+ * raison. Changer la case refait le tirage ; rien n'est mémorisé.
  * Aucune donnée d'élève : rien n'est enregistré.
  */
 
@@ -123,11 +127,16 @@ function niveauxDuType(c: Candidat, niveaux: readonly CategorieNiveau[]): string
   return libellePlageNiveaux(Math.min(...liste), Math.max(...liste))
 }
 
-/** Ce qu'une compétence offre aux niveaux : « seulement de facile à moyen », suivi, calculatrice
- * interdite, des niveaux que seules des variantes à calculatrice offriraient (« ; difficile : seulement
- * avec calculatrice »). */
-function texteOffre(d: DisponibiliteCompetence): string {
-  const calc = d.categoriesAvecCalculatrice.length > 0 ? `${texteCategories(d.categoriesAvecCalculatrice)} : seulement avec calculatrice` : ''
+/** « seulement avec calculatrice » (case décochée : ce que seules des variantes à calculatrice offrent) ou
+ * « seulement sans calculatrice » (case cochée : ce que seules des variantes toujours exactes offrent). */
+function texteAutreChoix(calculatrice: CalculatriceEleve): string {
+  return calculatrice === 'interdite' ? 'seulement avec calculatrice' : 'seulement sans calculatrice'
+}
+
+/** Ce qu'une compétence offre aux niveaux : « seulement de facile à moyen », suivi des niveaux que seul
+ * l'autre choix de calculatrice offrirait (« ; difficile : seulement avec calculatrice »). */
+function texteOffre(d: DisponibiliteCompetence, calculatrice: CalculatriceEleve): string {
+  const calc = d.categoriesEcarteesCalculatrice.length > 0 ? `${texteCategories(d.categoriesEcarteesCalculatrice)} : ${texteAutreChoix(calculatrice)}` : ''
   if (d.categories.length === 0) return calc || texteSeulement(d.categories)
   return `${texteSeulement(d.categories)}${calc ? ` ; ${calc}` : ''}`
 }
@@ -172,7 +181,12 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   const [amenagee, setAmenagee] = useState(false)
   /** Case « Avec calculatrice » (décision de l'utilisateur, 23/11/2026) : décochée par défaut =
    * calculatrice interdite, comme chez le professeur. Changer la case refait le tirage ; non mémorisée. */
-  const [avecCalculatrice, setAvecCalculatrice] = useState(false)
+  const [avecCalculatriceVoulue, setAvecCalculatrice] = useState(false)
+  /** Le chapitre a-t-il au moins un exercice « avec calculatrice » (règle du professeur) ? `false` : case
+   * désactivée (« Aucun exercice de ce chapitre ne demande la calculatrice »), calculatrice interdite. */
+  const [casCalculatrice, setCasCalculatrice] = useState<boolean | null>(null)
+  const calculatriceImpossible = casCalculatrice === false
+  const avecCalculatrice = avecCalculatriceVoulue && !calculatriceImpossible
   const calculatrice: CalculatriceEleve = avecCalculatrice ? 'autorisee' : 'interdite'
   /** Feuille d'exercices : joindre le formulaire du chapitre (annexe juste après l'énoncé, comme la case du
    * professeur) — décoché par défaut (décision de l'utilisateur, 22/11/2026). Posé au moment de générer :
@@ -230,11 +244,11 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
     () => (!blancheChoisie && candidats && chapitre ? typesFeuille(candidats, { sections, competences, niveaux, demonstrations: demosRetenues, calculatrice }, chapitre) : []),
     [blancheChoisie, candidats, chapitre, sections, competences, niveaux, demosRetenues, calculatrice],
   )
-  /** Liste « exercice par exercice » affichée : calculatrice interdite, les types qui l'exigent y restent,
-   * grisés (« demande une calculatrice »), sans compteur réglable. */
+  /** Liste « exercice par exercice » affichée : les types écartés par le choix de la calculatrice y
+   * restent, grisés (« demande une calculatrice » / « se fait sans calculatrice »), sans compteur réglable. */
   const typesAffiches = useMemo(
-    () => (!blancheChoisie && candidats && chapitre && calculatrice === 'interdite' ? typesFeuille(candidats, { sections, competences, niveaux, demonstrations: demosRetenues }, chapitre) : typesDispo),
-    [blancheChoisie, candidats, chapitre, sections, competences, niveaux, demosRetenues, calculatrice, typesDispo],
+    () => (!blancheChoisie && candidats && chapitre ? typesFeuille(candidats, { sections, competences, niveaux, demonstrations: demosRetenues }, chapitre) : []),
+    [blancheChoisie, candidats, chapitre, sections, competences, niveaux, demosRetenues],
   )
   /** Compteurs des seuls types encore proposés (un type qui disparaît avec les choix ne compte plus) ;
    * deux démonstrations d'un même résultat (même énoncé imprimé) : la première réglée seulement. */
@@ -294,6 +308,21 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
       annule = true
     }
   }, [chapitre, type, calculatrice])
+
+  // Chapitre sans aucun cas « calculatrice » : la case est désactivée (calcul en arrière-plan, en cache).
+  useEffect(() => {
+    if (!chapitre) return
+    let annule = false
+    setCasCalculatrice(null)
+    chapitreAvecCalculatrice(chapitre, type)
+      .then((oui) => {
+        if (!annule) setCasCalculatrice(oui)
+      })
+      .catch(() => undefined)
+    return () => {
+      annule = true
+    }
+  }, [chapitre, type])
 
   // Plan préparé à l'avance (récapitulatif exact) ; un nouveau à chaque changement et après chaque
   // génération (`tirage`).
@@ -514,9 +543,9 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
           .filter((p) => dispo.parCompetence[p].total > 0)
           .map((p) => {
             const d = dispo.parCompetence[p]
-            const calc = d.categoriesAvecCalculatrice.length > 0 ? ` (${texteOffre({ ...d, categories: [] })})` : ''
+            const calc = d.categoriesEcarteesCalculatrice.length > 0 ? ` (${texteOffre({ ...d, categories: [] }, calculatrice)})` : ''
             if (d.categories.length === 0) return `${LIBELLE_COMPETENCE[p]} : seulement des questions sans niveau${calc}`
-            return `${LIBELLE_COMPETENCE[p]} : ${texteOffre(d)}${d.questionsSansNiveau ? ', plus des questions sans niveau (toujours proposées)' : ''}`
+            return `${LIBELLE_COMPETENCE[p]} : ${texteOffre(d, calculatrice)}${d.questionsSansNiveau ? ', plus des questions sans niveau (toujours proposées)' : ''}`
           })
       : []
   /** Compétences cochées sans exercice aux niveaux cochés : signalées, leur temps va aux autres. */
@@ -630,8 +659,8 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
           <div className="eleve-coches" role="group" aria-labelledby="eleve-competences">
             {COMPETENCES_ELEVE.map(({ id, libelle }) => {
               const vide = !!dispo && dispo.parCompetence[id].total === 0
-              // Calculatrice interdite : ses seuls exercices exigent une calculatrice.
-              const calcSeule = vide && dispo!.parCompetence[id].totalAvecCalculatrice > 0
+              // Ses seuls exercices sont écartés par le choix de la calculatrice.
+              const calcSeule = vide && dispo!.parCompetence[id].totalEcartesCalculatrice > 0
               const on = competencesCochees.has(id) && !vide
               return (
                 <button
@@ -640,14 +669,14 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
                   className="eleve-coche"
                   aria-pressed={on}
                   aria-disabled={vide || undefined}
-                  title={calcSeule ? `« ${libelle} » : seulement avec calculatrice dans ces notions` : vide ? `Aucun exercice « ${libelle} » dans ces notions` : undefined}
+                  title={calcSeule ? `« ${libelle} » : ${texteAutreChoix(calculatrice)} dans ces notions` : vide ? `Aucun exercice « ${libelle} » dans ces notions` : undefined}
                   onClick={() => basculerCompetence(id)}
                 >
                   <span className="eleve-coche-case" aria-hidden="true">
                     {on ? '✓' : ''}
                   </span>
                   <span>{libelle}</span>
-                  {vide && <span className="eleve-coche-raison">{calcSeule ? 'seulement avec calculatrice' : 'aucun exercice ici'}</span>}
+                  {vide && <span className="eleve-coche-raison">{calcSeule ? texteAutreChoix(calculatrice) : 'aucun exercice ici'}</span>}
                 </button>
               )
             })}
@@ -744,7 +773,15 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
             Calculatrice
           </span>
           <div className="eleve-coches" role="group" aria-labelledby="eleve-calculatrice" aria-describedby="eleve-calculatrice-aide">
-            <button type="button" className="eleve-coche eleve-coche-calculatrice" aria-pressed={avecCalculatrice} onClick={() => setAvecCalculatrice((v) => !v)}>
+            <button
+              type="button"
+              className="eleve-coche eleve-coche-calculatrice"
+              aria-pressed={avecCalculatrice}
+              aria-disabled={calculatriceImpossible || undefined}
+              onClick={() => {
+                if (!calculatriceImpossible) setAvecCalculatrice((v) => !v)
+              }}
+            >
               <span className="eleve-coche-case" aria-hidden="true">
                 {avecCalculatrice ? '✓' : ''}
               </span>
@@ -752,9 +789,11 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
             </button>
           </div>
           <p className="eleve-aide" id="eleve-calculatrice-aide">
-            {avecCalculatrice
-              ? 'Cochée : des exercices avec et sans calculatrice.'
-              : `Décochée : seulement des exercices faisables sans calculatrice${blanche ? ', comme une interro « calculatrice interdite »' : ''}. Coche-la si ${blanche ? 'ton professeur autorise' : 'tu veux t’entraîner avec'} la calculatrice.`}
+            {calculatriceImpossible
+              ? 'Aucun exercice de ce chapitre ne demande la calculatrice : tout se fait sans.'
+              : avecCalculatrice
+                ? `Cochée : seulement les exercices où la calculatrice sert. Ceux de valeurs exactes (comme cos 210°) sont réservés à « sans calculatrice ».`
+                : `Décochée : seulement des exercices faisables sans calculatrice${blanche ? ', comme une interro « calculatrice interdite »' : ''}. Coche-la si ${blanche ? 'ton professeur autorise' : 'tu veux t’entraîner avec'} la calculatrice.`}
           </p>
         </div>
         <div className="eleve-reglage">
@@ -785,8 +824,8 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
                   aria-describedby={grise ? 'eleve-niveau-raisons' : undefined}
                   title={
                     grise
-                      ? dispo!.niveauxAvecCalculatrice[c]
-                        ? `${LIBELLE_CATEGORIE[c]} : seulement avec calculatrice pour ${listeCompetences(competences)} dans ces notions`
+                      ? dispo!.niveauxEcartesCalculatrice[c]
+                        ? `${LIBELLE_CATEGORIE[c]} : ${texteAutreChoix(calculatrice)} pour ${listeCompetences(competences)} dans ces notions`
                         : `Aucun exercice ${LIBELLE_CATEGORIE[c]} pour ${listeCompetences(competences)} dans ces notions`
                       : undefined
                   }
@@ -810,7 +849,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
             <div className="eleve-dispo" id="eleve-niveau-raisons">
               {raisonsNiveaux.length > 0 && (
                 <p>
-                  Grisé : aucun exercice {niveauxGrises.some((c) => dispo!.niveauxAvecCalculatrice[c]) ? 'sans calculatrice ' : ''}à ce niveau dans ces notions. {raisonsNiveaux.join(' · ')}.
+                  Grisé : aucun exercice {niveauxGrises.some((c) => dispo!.niveauxEcartesCalculatrice[c]) ? (calculatrice === 'interdite' ? 'sans calculatrice ' : 'avec calculatrice ') : ''}à ce niveau dans ces notions. {raisonsNiveaux.join(' · ')}.
                 </p>
               )}
               {competencesSansNiveau.map((p) =>
@@ -821,7 +860,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
                   </p>
                 ) : (
                   <p key={p}>
-                    {LIBELLE_COMPETENCE[p]} : aucun exercice aux niveaux cochés ({texteOffre(dispo!.parCompetence[p])}) — {blanche ? 'son temps va' : 'ses exercices vont'} aux autres
+                    {LIBELLE_COMPETENCE[p]} : aucun exercice aux niveaux cochés ({texteOffre(dispo!.parCompetence[p], calculatrice)}) — {blanche ? 'son temps va' : 'ses exercices vont'} aux autres
                     compétences cochées.
                   </p>
                 ),
@@ -870,8 +909,8 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
                           <ul>
                             {types.map((c) => {
                               const niv = niveauxDuType(c, niveaux)
-                              // Calculatrice interdite : type grisé, compteur bloqué à 0.
-                              const demandeCalc = !avecCalculatrice && !!c.exigeCalculatrice
+                              // Écarté par le choix de la calculatrice : type grisé, compteur bloqué à 0.
+                              const demandeCalc = !permisParCalculatrice(c, calculatrice)
                               return (
                                 <li key={c.cle} className={`eleve-type${demandeCalc ? ' eleve-type-grise' : ''}`} aria-disabled={demandeCalc || undefined}>
                                   <span className="eleve-type-nom">
@@ -887,7 +926,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
                                     <span className="eleve-type-meta">
                                       {LIBELLE_COMPETENCE[c.processus]}
                                       {niv ? ` · niv. ${niv}` : ''}
-                                      {demandeCalc && <span className="eleve-type-calc"> · demande une calculatrice</span>}
+                                      {demandeCalc && <span className="eleve-type-calc"> · {calculatrice === 'interdite' ? 'demande une calculatrice' : 'se fait sans calculatrice'}</span>}
                                     </span>
                                   </span>
                                   <Compteur

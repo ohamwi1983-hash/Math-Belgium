@@ -6,10 +6,11 @@ import { estPremierQuadrant, necessiteReduction } from "../../moteur/modeleValeu
  * Profil d'instance de gen76 pour le TIRAGE ÉQUILIBRÉ des évaluations (`.claude/rules/
  * feuilles-evaluations.md`, « Tirage équilibré »).
  *
- * - pas de `calcul` : toutes les instances sont exactes par construction (c'est LE générateur des
- *   évaluations sans calculatrice). Marquer `calcul: 'exacte'` ferait exclure gen76 quand la
- *   calculatrice est AUTORISÉE (le pipeline n'y garde que les instances qui l'exigent) : recherche
- *   plus lente et case « cas particulier » sans effet. Même choix que gen14–gen18
+ * - `calcul: 'exacte'` : toutes les instances sont exactes par construction (c'est LE générateur des
+ *   évaluations sans calculatrice). Décision de l'utilisateur du 24/11/2026 (« la valeur de
+ *   cos(210°) […] n'a de sens que si elle ne se fait pas à la calculatrice ») : gen76 n'est tiré
+ *   qu'en « calculatrice interdite » ; calculatrice autorisée, il ne sort plus qu'au palier de repli
+ *   et la case « cas particulier » y est sans effet. Même choix que gen14–gen18
  *   (`profilsEvaluation4eCh5.ts`).
  * - `forme` fixe ce qui allonge la résolution, identique d'une série à l'autre, question par
  *   question : nombre de termes (n), d'angles à ramener dans [0° ; 360°[ (r), de tangentes (t), de
@@ -39,5 +40,6 @@ export function profilValeurExacte(e: ExerciceValeurExacte): ProfilInstance {
   return {
     casParticulier: e.termes.some(estPremierQuadrant) ? "terme-premier-quadrant" : null,
     forme: formeValeurExacte(e),
+    calcul: "exacte",
   };
 }
