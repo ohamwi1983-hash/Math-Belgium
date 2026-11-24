@@ -663,6 +663,46 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   toujours vraie/fausse), `forme` 5gen11 (mode) et 5gen13 (type de 2ᵉ partie). Niveau et durée
   diffèrent d'une technique à l'autre du groupe (directe 10,6 min, produit 15,2) : sans effet, la
   copie d'évaluation n'imprime ni l'un ni l'autre.
+- **6e ch. 6, lot G — 6gen160–6gen161 (nouveaux, notés, corrigé « comme au tableau »)** : socle d'écrans du
+  5e (`AppEcransTrigo`, sans modification : `bonneOption` → choix jugés ✗ / ✓, `piegeChoixRevele`,
+  `aidesChoixDeuxNiveaux`) ; lecture commune `moteur6e/lectureProbaLotG.ts` (fraction, décimal, « % », préfixe
+  « P(…) = », « − », exact à 1e-9 ; décimal ou % proche mais faux = « approchée », message SANS tentative ;
+  illisible sans tentative). **6gen160** « Indépendants ou incompatibles ? » (§ 3, Appliquer ; le cours le
+  traite déjà : § 1 et rappel + exemple résolu du § 3 — aucun bloc ajouté) : variantes `venn` (SVG pur des
+  effectifs), `tableau` (SVG pur, marges comprises), `valeurs` (P(A), P(B), P(A ∩ B) ou P(A ∪ B), décimaux ou
+  fractions ; `forme` = `valeurs|inter` / `valeurs|union`), `contexte` (dé à n faces, urne numérotée, 52 ou 32
+  cartes ; `core6e/evenements160.ts`) ; écrans P(A) et P(B), P(A ∩ B), P(A) × P(B), verdict à trois issues
+  (choix fermé) — valeurs « inter » : produit puis verdict, « union » : P(A ∩ B) d'abord. Verdict tiré au
+  tiers AVANT les nombres (`effectifsPour`), recalculé depuis les nombres partout ; « ni l'un ni l'autre » à
+  ±3 unités du produit (ou inclusion B ⊂ A une fois sur cinq) ; P(A), P(B) jamais nulles. Messages ciblés :
+  région « A seulement » (Venn, seulement si A ∩ B ≠ ∅ et si la valeur diffère de la bonne réponse du champ),
+  case intérieure prise pour un total, conditionnelle au lieu de P(A ∩ B), indépendance supposée, signe de la
+  formule d'addition, somme au lieu du produit, et « incompatibles ⇒ indépendants » sur le verdict. Énoncé
+  papier = données (+ figure SVG, rasterisée en Word) + « … indépendants, incompatibles, ou ni l'un ni
+  l'autre ? Justifie par un calcul. » ; regroupement : variante `valeurs` seulement (entrée `6gen160` de
+  `REGROUPEMENTS`, ligne « P(A) = …, P(B) = … et P(A ∪ B) = … » ; 60 / 60 reconnus), les autres ont un
+  contexte propre. Lectures : tableau a, b ; Venn b. Critères fixes (méthode 1, piège 1, `sansCharge`) :
+  Venn 4 · 9 min, tableau 3 · 8, valeurs inter 3 · 6 / union 4 · 8, contexte 4 · 10 — constants dans chaque
+  verdict. **6gen161** « Quel jeu choisir ? » (§ 4, Transférer, SANS espérance) : catalogue déterministe de
+  284 jeux (`core6e/quelJeuChoisir.ts` : sommes, doubles, écarts, produit pair, « au moins un 6 » à deux dés ou
+  répété 2–4 fois, 2–4 pièces exactement / au moins k pile, urnes rouges / vertes avec ou sans remise —
+  deux rouges, même couleur, au moins une rouge, couleurs différentes —, roues à n secteurs tournées deux
+  fois) ; variantes `des` (dés et pièces), `urnes`, `melange` (familles différentes) ; verdict A / B / égal tiré
+  au tiers AVANT les jeux ; paires précalculées une fois (≈ 0,1 s) : égales construites exprès, différentes à
+  au plus 0,12 d'écart ; deux jeux de même structure jamais face à face (roue 2/4 et 3/6, urnes avec remise
+  de même proportion, sommes s / 14 − s, pièces k / n − k, rouges ↔ vertes pour les événements symétriques) ;
+  groupe tiré avec un poids √taille (roue + urne écrasait tout). Écrans P(G_A), P(G_B), choix ; corrigé :
+  dénombrement des 36 couples, chemins P/F de l'arbre, produit le long d'un chemin, événement contraire,
+  comparaison au même dénominateur (produits en croix au-delà de 2 000), vérification décimale. Méthode 2,
+  piège 0, `sansCharge` : 4 · 10 min partout. Aucun `calcul` (démarche évaluée, tiré « interdite » ET
+  « autorisée »), aucun cas particulier, aucun groupe à verdict. Mesuré : moteurs 8 000 (6gen160) et 4 500
+  (6gen161) tirages, réponses recalculées indépendamment (effectifs, énumération exhaustive des issues),
+  écritures exactes variées, approchée, illisible, pièges, 0 anomalie, verdicts ≈ 33 % chacun ; collecteur
+  (outils de `6gen156-159/corrige` recopiés) 1 500 tirages, ≈ 6 600 égalités, 0 fausse ; plans réels 30 × 2
+  séries (interdite / autorisée) : structure B = A 30 / 30, verdict B ≠ A 15–21 / 30 (≈ 2/3 attendu), niveau
+  et durée constants par verdict, `?code=` 420 / 420 ; iPhone 13 (bonnes réponses et erreurs) scrollWidth 390,
+  0 erreur console ; documents réels (2 plans, 2 séries + aménagée + corrigé + grille + feuille + Word copie /
+  corrigé / grille) 0 débordement à 680 / 820 / 1 280 px, 0 `.katex-error`.
 - **6e ch. 2 (lots B, C, E, 6gen6–12)** : `6e-6h/components6e/RetourSaisieExpo.tsx` (hook du 4e,
   `MESSAGES_ILLISIBLE_EXPO` par nature de champ, `AidesExpo` en KaTeX en ligne), lecture
   `moteur6e/lectureSaisieExpo.ts`, messages ciblés `ui6e/retoursExponentielles.ts` ; choix fermés à

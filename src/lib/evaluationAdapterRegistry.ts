@@ -503,6 +503,8 @@ import { adaptateurEvaluationProbabilitesEnsembles } from '../entrainement/6e-6h
 import { adaptateurEvaluationTiragesArbres } from '../entrainement/6e-6h/generateurs6e/tiragesArbres/exportEvaluation'
 import { adaptateurEvaluationIndependanceBayes } from '../entrainement/6e-6h/generateurs6e/independanceBayes/exportEvaluation'
 import { adaptateurEvaluationProbabilitesProblemes } from '../entrainement/6e-6h/generateurs6e/probabilitesProblemes/exportEvaluation'
+import { adaptateurEvaluation160 } from '../entrainement/6e-6h/generateurs6e/independantsIncompatibles/exportEvaluation'
+import { adaptateurEvaluation161 } from '../entrainement/6e-6h/generateurs6e/quelJeuChoisir/exportEvaluation'
 import { adaptateurEvaluationFrequenceProbabilite } from '../entrainement/6e-6h/generateurs6e/frequenceProbabilite/exportEvaluation'
 import { adaptateurEvaluationArbreTableauEffectifs } from '../entrainement/6e-6h/generateurs6e/arbreTableauEffectifs/exportEvaluation'
 import { adaptateurEvaluationParadoxesProbabilites } from '../entrainement/6e-6h/generateurs6e/paradoxesProbabilites/exportEvaluation'
@@ -622,6 +624,8 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen76': versionPapier(adaptateurEvaluationParadoxesProbabilites) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen162': versionPapier(adaptateurEvaluationProbaGeo) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen163': versionPapier(adaptateurEvaluationDetectiveProba) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen160': versionPapier(adaptateurEvaluation160) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen161': versionPapier(adaptateurEvaluation161) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen54': adaptateurEvaluationPointsDroitesRemarquablesTriangle as unknown as AdaptateurFeuilleExercices<never>,
   '6gen55': adaptateurEvaluationCercles as unknown as AdaptateurFeuilleExercices<never>,
   '6gen56': adaptateurEvaluationLieuxGeometriquesParametres as unknown as AdaptateurFeuilleExercices<never>,

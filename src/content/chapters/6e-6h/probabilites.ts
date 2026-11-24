@@ -1484,6 +1484,18 @@ export const probabilites: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 74. Arbre, tableau, effectifs »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Indépendants ou incompatibles ?',
+          generatorId: '6gen160',
+          description: [
+            'Diagramme de Venn, tableau à double entrée, valeurs de P(A), P(B), P(A ∩ B) ou P(A ∪ B), ' +
+              'dé, urne ou cartes : calcule ce qu\'il faut, puis décide — indépendants, incompatibles, ' +
+              'ou ni l\'un ni l\'autre.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 160. Indépendants ou incompatibles ? »',
+        },
       ],
     },
 
@@ -1957,6 +1969,17 @@ export const probabilites: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 163. Détective d\'erreurs : probabilités »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Quel jeu choisir ?',
+          generatorId: '6gen161',
+          description: [
+            'Deux jeux de hasard — dés, pièces, urnes avec ou sans remise, roues : calcule la probabilité ' +
+              'exacte de gagner à chacun, puis choisis le meilleur, ou reconnais qu\'ils se valent.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 161. Quel jeu choisir ? »',
         },
       ],
     },
