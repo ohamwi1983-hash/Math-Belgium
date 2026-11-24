@@ -24,6 +24,7 @@
 import type { AtomeDerivable, ExerciceFonctionDerivee, TypeDerivee } from "../core5e/fonctionDerivee.types";
 import { evaluerExpressionGenerale } from "../moteur/expressionGenerale";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { MESSAGES_ILLISIBLE_DERIVEES, expressionLisibleDerivees } from "./saisieDerivees";
 
 // ============================================================================
 // Réplique locale de la Couche A — jamais importée.
@@ -413,4 +414,26 @@ export function diagnostiquerCalculerDerivee(texte: string, exercice: ExerciceFo
   } catch {
     return "parse_error";
   }
+}
+
+/** Valeur d'une saisie en x (sin/cos en radians) — null si illisible ou non définie. */
+export function evaluerRadiansFonctionDerivee(texte: string, x: number): number | null {
+  try {
+    const v = evaluerRadians(texte.replace(/^[^=]*=/, ""), x);
+    return Number.isFinite(v) ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Saisie refusée SANS tentative (lot B, partagé par le moteur et l'écran) : syntaxe non reconnue.
+ * Une expression hors de son domaine en un point n'est pas illisible. Rend le message, ou null. */
+export function refusSaisieFonctionDerivee(ecran: "decomposerUV" | "decomposerComposee" | "calculer", valeurs: string[]): string | null {
+  if (ecran === "decomposerComposee") {
+    const [interieur, exterieur] = valeurs;
+    if (!expressionLisibleDerivees(interieur)) return MESSAGES_ILLISIBLE_DERIVEES.expressionX;
+    if (!expressionLisibleDerivees(exterieur.replace(/(?<![a-zA-Z])u(?![a-zA-Z])/g, "x"))) return "Expression non reconnue : écris g(u) avec la lettre u, par exemple 7u^5 ou 2√u. Cette saisie ne compte pas comme une tentative.";
+    return null;
+  }
+  return valeurs.some((v) => !expressionLisibleDerivees(v)) ? MESSAGES_ILLISIBLE_DERIVEES.expressionX : null;
 }

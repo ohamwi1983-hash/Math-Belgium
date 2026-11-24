@@ -137,12 +137,12 @@ export function refusSaisieDefinitionDerivee(exercice: ExerciceDefinitionDerivee
     const [fA, fAH] = valeurs;
     if (lireNombreDerivees(fA) === null) return MESSAGES_ILLISIBLE_DERIVEES.nombreExact;
     if (estApprocheeDerivees(fA, valeurFonction(exercice, a))) return MESSAGES_ILLISIBLE_DERIVEES.approchee;
-    if (!expressionLisibleDerivees(fAH, "h") || diagnostiquerDeveloppementH(fAH, exercice, a) === "parse_error") return MESSAGES_ILLISIBLE_DERIVEES.expressionH;
+    if (!expressionLisibleDerivees(fAH, "h")) return MESSAGES_ILLISIBLE_DERIVEES.expressionH;
     return controlerFormeDeveloppement(fAH, exercice);
   }
   if (ecran === "quotient") {
     const [q] = valeurs;
-    if (!expressionLisibleDerivees(q, "h") || diagnostiquerQuotientH(q, exercice, a) === "parse_error") return MESSAGES_ILLISIBLE_DERIVEES.expressionH;
+    if (!expressionLisibleDerivees(q, "h")) return MESSAGES_ILLISIBLE_DERIVEES.expressionH;
     return controlerFormeQuotient(q);
   }
   const [v] = valeurs;

@@ -54,22 +54,21 @@ export function diagnostiquerNombreExact(brut: string, attendu: number): StatutV
   return Math.abs(v - attendu) < 1e-9 * Math.max(1, Math.abs(attendu)) ? "correct" : "not_equivalent";
 }
 
-/** Une expression (en x, h, t ou q) est lisible si elle s'évalue en au moins deux points. */
+/** Une expression (en x, h, t ou q) est lisible si sa SYNTAXE est reconnue : une valeur hors du
+ * domaine en un point (√(x − 5) en x = 0,37) n'est pas illisible, c'est une réponse à juger. */
 export function expressionLisibleDerivees(brut: string, variable: "x" | "h" | "t" | "q" = "x"): boolean {
   let s = normaliserSigneMoins(brut).trim();
   s = s.replace(/^[^=]*=/, "").trim();
   if (s === "") return false;
   if (variable !== "x") s = s.replace(new RegExp(`(?<![a-zA-Z])${variable}(?![a-zA-Z])`, "g"), "x");
-  let n = 0;
-  for (const x of [0.37, 1.61, -0.83, 2.29, -1.47, 3.7]) {
+  for (const x of [0.37, 1.61, -0.83]) {
     try {
-      const v = evaluerExpressionGenerale(s, x);
-      if (Number.isFinite(v)) n++;
+      evaluerExpressionGenerale(s, x);
     } catch {
       return false;
     }
   }
-  return n >= 2;
+  return true;
 }
 
 const FIN = " Cette saisie ne compte pas comme une tentative.";

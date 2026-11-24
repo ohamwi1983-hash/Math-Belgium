@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import type { AideTrig } from "../ui5e/aidesTrigonometrie";
+import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 import type { ExerciceFonctionDerivee, TypeDerivee } from "../core5e/fonctionDerivee.types";
 import {
   consigneEcran,
@@ -7,15 +10,10 @@ import {
   labelsChampsDecomposition,
   placeholdersChampsDecomposition,
   questionFinale,
-  texteAideNiveau1,
-  texteAideNiveau2,
 } from "../ui5e/formatFonctionDerivee";
 import { Katex } from "../components/Katex";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -34,6 +32,11 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Lot B : saisie refusée SANS tentative (illisible, approchée…) — même fonction que le moteur. */
+  refus: (valeurs: string[]) => string | null;
+  /** Message ciblé sur l'erreur trahie par la dernière réponse fausse. */
+  cible: (valeurs: string[]) => FragmentConsigne[] | null;
+  aides: AideTrig[];
 }
 
 /** Écran "decomposer" — 2 champs texte libres, labellisés dynamiquement selon `typeRetenu`
@@ -41,25 +44,25 @@ interface Props {
  * 1-tentative-combinée que `EtapeDevelopperDerivee.tsx` (5gen26). Le champ1/champ2 générique est
  * mappé côté `App5gen27.tsx` vers `ReponseDecomposerUV`/`ReponseDecomposerComposee` selon
  * `typeRetenu`. */
-export function EtapeDecomposerFonctionDerivee({ exercice, typeRetenu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeDecomposerFonctionDerivee({ exercice, typeRetenu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, refus, cible, aides, validation}: Props) {
+  const [refusAffiche, setRefusAffiche] = useState<string | null>(null);
+  const [soumises, setSoumises] = useState<string[] | null>(null);
   const [champ1, setChamp1] = useState("");
   const [champ2, setChamp2] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
-  const montrerErreurs = tentativesUtilisees > 0;
   const complet = champ1.trim() !== "" && champ2.trim() !== "";
   const apresEchec = tentativesUtilisees > 0;
   const statuts = apresEchec && diagnostiquer && complet ? diagnostiquer({ champ1, champ2 }) : null;
-  const aide2 = texteAideNiveau2("decomposer", typeRetenu);
   const [label1, label2] = labelsChampsDecomposition(typeRetenu);
   const [placeholder1, placeholder2] = placeholdersChampsDecomposition(typeRetenu);
 
   function valider() {
     if (!complet) return;
     const reponse = { champ1, champ2 };
-    if (diagnostiquer) {
-      const s = diagnostiquer(reponse);
-      setDernierStatut(s.champ1 !== "correct" ? s.champ1 : s.champ2);
-    }
+    const valeursSoumises = [champ1, champ2];
+    const message = refus(valeursSoumises);
+    setRefusAffiche(message);
+    if (message) return;
+    setSoumises(valeursSoumises);
     onValider(reponse);
   }
 
@@ -88,7 +91,10 @@ export function EtapeDecomposerFonctionDerivee({ exercice, typeRetenu, tentative
           type="text"
           className={`text-input${statuts && statuts.champ1 !== "correct" ? " is-erronee" : ""}`}
           value={champ1}
-          onChange={(e) => setChamp1(e.target.value)}
+          onChange={(e) => {
+            setChamp1(e.target.value);
+            setRefusAffiche(null);
+          }}
           placeholder={placeholder1}
         />
       </div>
@@ -101,43 +107,27 @@ export function EtapeDecomposerFonctionDerivee({ exercice, typeRetenu, tentative
           type="text"
           className={`text-input${statuts && statuts.champ2 !== "correct" ? " is-erronee" : ""}`}
           value={champ2}
-          onChange={(e) => setChamp2(e.target.value)}
+          onChange={(e) => {
+            setChamp2(e.target.value);
+            setRefusAffiche(null);
+          }}
           placeholder={placeholder2}
         />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          {(() => {
-            const aide1 = texteAideNiveau1("decomposer", typeRetenu);
-            return (
-              <>
-                <p>{aide1.texte}</p>
-                {aide1.latex && <Katex expression={aide1.latex} block />}
-              </>
-            );
-          })()}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aide2.texte}</p>
-              {aide2.latex && <Katex expression={aide2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aides}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={refusAffiche !== null}
+        texteIllisible={refusAffiche ?? ""}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumises !== null && tentativesUtilisees > 0 ? cible(soumises) : null}
+        validation={validation}
+      />
     </div>
   );
 }

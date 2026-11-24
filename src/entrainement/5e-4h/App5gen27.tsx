@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { aidesFonctionDerivee, cibleFonctionDerivee } from "./ui5e/retoursFonctionDerivee";
+import { refusSaisieFonctionDerivee } from "./moteur5e/verificationFonctionDerivee";
+import { PREFIXE_CHOIX_FERME } from "./ui5e/retoursDerivees";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceFonctionDerivee } from "./generateurs5e/fonctionDerivee/index";
@@ -171,6 +174,7 @@ export function App5gen27() {
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
+        ...(enAttente.revele && etat.phase === "reconnaissance" ? { messageRevele: `${PREFIXE_CHOIX_FERME} La dernière opération effectuée dans f(x) donne la règle à appliquer.` } : {}),
         reponseAttendue: reponseAttendueFonctionDerivee(exercice, etat.phase, etat.typeRetenu),
         corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeFonctionDerivee(exercice), lettreEcranFonctionDerivee(exercice, etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
@@ -246,6 +250,7 @@ function EcranCourant({
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           onValider={(choix) => terminerEtape(soumettreReponseReconnaissance(etat, choix), LIBELLE_TYPE[choix])}
+          aides={aidesFonctionDerivee(exercice, "reconnaissance", null)}
           validation={validation}
         />
       );
@@ -270,6 +275,9 @@ function EcranCourant({
               const d = diagnostiquerChampsUV({ u: r.champ1, v: r.champ2 }, exercice);
               return { champ1: d.u, champ2: d.v };
             }}
+            refus={(v) => refusSaisieFonctionDerivee("decomposerUV", v)}
+            cible={(v) => cibleFonctionDerivee(exercice, "decomposer", typeRetenu, v)}
+            aides={aidesFonctionDerivee(exercice, "decomposer", typeRetenu)}
             validation={validation}
           />
         );
@@ -294,6 +302,9 @@ function EcranCourant({
             champ1: diagnostiquerChampInterieur(r.champ1, exercice, typeRetenu),
             champ2: diagnostiquerChampExterieur(r.champ2, exercice, typeRetenu),
           })}
+          refus={(v) => refusSaisieFonctionDerivee("decomposerComposee", v)}
+          cible={(v) => cibleFonctionDerivee(exercice, "decomposer", typeRetenu, v)}
+          aides={aidesFonctionDerivee(exercice, "decomposer", typeRetenu)}
           validation={validation}
         />
       );
@@ -312,6 +323,9 @@ function EcranCourant({
           onActiverAide={onActiverAide}
           onValider={(texte) => terminerEtape(soumettreReponseCalculer(etat, texte), `f'(x) = ${texte}`)}
           diagnostiquer={(t) => diagnostiquerCalculerDerivee(t, exercice)}
+          refus={(v) => refusSaisieFonctionDerivee("calculer", v)}
+          cible={(v) => cibleFonctionDerivee(exercice, "calculer", etat.typeRetenu, v)}
+          aides={aidesFonctionDerivee(exercice, "calculer", etat.typeRetenu)}
           validation={validation}
         />
       );

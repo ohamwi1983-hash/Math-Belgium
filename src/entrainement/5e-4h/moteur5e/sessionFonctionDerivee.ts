@@ -12,7 +12,7 @@ import type { ReglagesSession5e } from "../core5e/session5e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
 import type { EtatEtapeTentatives, ReglagesEtape } from "../moteur/etapeTentatives";
 import type { EcranFonctionDerivee, EtatSessionFonctionDerivee, ResultatExerciceFonctionDerivee } from "./typesFonctionDerivee";
-import { diagnostiquerCalculerDerivee, verifierDecompositionComposee, verifierDecompositionUV } from "./verificationFonctionDerivee";
+import { diagnostiquerCalculerDerivee, verifierDecompositionComposee, verifierDecompositionUV, refusSaisieFonctionDerivee } from "./verificationFonctionDerivee";
 
 const POINTS_DE_BASE = 100;
 
@@ -125,6 +125,8 @@ export interface ReponseDecomposerUV {
 
 export function soumettreReponseDecomposerUV(etat: EtatSessionFonctionDerivee, reponse: ReponseDecomposerUV): EtatSessionFonctionDerivee {
   if (etat.terminee || etat.phase !== "decomposer") throw new Error('soumettreReponseDecomposerUV : la session n\'est pas à l\'écran "decomposer"');
+  // Lot B : saisie illisible — état inchangé, aucune tentative consommée.
+  if (refusSaisieFonctionDerivee("decomposerUV", [reponse.u, reponse.v])) return etat;
   const exercice = etat.exerciceCourant;
   const etapeCourante = soumettreEtapeTentatives(etat.etapeCourante, reponse, {
     ...reglagesEtape(etat),
@@ -142,6 +144,7 @@ export interface ReponseDecomposerComposee {
 
 export function soumettreReponseDecomposerComposee(etat: EtatSessionFonctionDerivee, reponse: ReponseDecomposerComposee): EtatSessionFonctionDerivee {
   if (etat.terminee || etat.phase !== "decomposer") throw new Error('soumettreReponseDecomposerComposee : la session n\'est pas à l\'écran "decomposer"');
+  if (refusSaisieFonctionDerivee("decomposerComposee", [reponse.interieur, reponse.exterieur])) return etat;
   const exercice = etat.exerciceCourant;
   const typeRetenu = etat.typeRetenu as TypeDerivee;
   const etapeCourante = soumettreEtapeTentatives(etat.etapeCourante, reponse, {
@@ -159,6 +162,7 @@ export function soumettreReponseDecomposerComposee(etat: EtatSessionFonctionDeri
 
 export function soumettreReponseCalculer(etat: EtatSessionFonctionDerivee, texte: string): EtatSessionFonctionDerivee {
   if (etat.terminee || etat.phase !== "calculer") throw new Error('soumettreReponseCalculer : la session n\'est pas à l\'écran "calculer"');
+  if (refusSaisieFonctionDerivee("calculer", [texte])) return etat;
   const exercice = etat.exerciceCourant;
   const etapeCourante = soumettreEtapeTentatives(etat.etapeCourante, texte, {
     ...reglagesEtape(etat),

@@ -24,6 +24,7 @@ import type {
 } from "../../core5e/fonctionDerivee.types";
 import { entierAleatoire, entierNonNul, reduireFraction } from "../limites/fraction";
 import { formatPolynomeLatex } from "../domaineDefinition/polynome";
+import { deriveeProduitReduiteLatex, deriveeQuotientReduiteLatex } from "./deriveeReduite";
 
 // ============================================================================
 // Atome — valeur/dérivée numériques pures (RÉPLIQUÉES telles quelles côté moteur5e).
@@ -293,8 +294,29 @@ function deuxPuissancesDeX(a: AtomeDerivable, b: AtomeDerivable): boolean {
   return puissance(a) && puissance(b);
 }
 
-function genererDeuxAtomesFacteurs(tauxTrig: number, forcerTrig?: boolean): [AtomeDerivable, AtomeDerivable] {
+/** Binôme ax + b (b ≠ 0, a et b premiers entre eux), écrit comme un monôme d'exposant 1 d'intérieure
+ * ax + b — dérivée a (aucune règle de la chaîne à appliquer). */
+function binome(coeff: number): AtomeDerivable {
+  for (;;) {
+    const a = entierAleatoire(1, 3);
+    const b = entierNonNul(5);
+    if (pgcdEntiers(a, b) === 1) return { noyau: { type: "monome", exposant: 1 }, coeff, interieurA: a, interieurB: b };
+  }
+}
+
+/** Facteurs SANS trig (audit 5e ch. 5, G10) : jamais un énoncé simplifiable avant dérivation
+ * (xⁿ·√x, x/√x → règle de base). Produit : (ax + b)·√x ; quotient : xⁿ (n = 1, 2) ou √x sur un
+ * binôme ax + b. */
+function deuxAtomesSansTrig(famille: "produit" | "quotient"): [AtomeDerivable, AtomeDerivable] {
+  const racine: AtomeDerivable = { noyau: { type: "racine" }, coeff: 1, interieurA: 1, interieurB: 0 };
+  if (famille === "produit") return [binome(entierNonNul(4)), racine];
+  const numerateur: AtomeDerivable = Math.random() < 0.4 ? { ...racine, coeff: entierNonNul(4) } : { noyau: { type: "monome", exposant: entierAleatoire(1, 2) }, coeff: entierNonNul(4), interieurA: 1, interieurB: 0 };
+  return [numerateur, binome(1)];
+}
+
+function genererDeuxAtomesFacteurs(tauxTrig: number, forcerTrig?: boolean, famille: "produit" | "quotient" = "produit"): [AtomeDerivable, AtomeDerivable] {
   const avecTrig = forcerTrig ?? Math.random() < tauxTrig;
+  if (!avecTrig) return deuxAtomesSansTrig(famille);
   for (let essai = 0; essai < 200; essai++) {
     let atomes: [AtomeDerivable, AtomeDerivable];
     if (!avecTrig) {
@@ -389,7 +411,7 @@ function reduireCoefficientsQuotient(atome1: AtomeDerivable, atome2: AtomeDeriva
 function genererQuotientOrdinaire(forcerTrig?: boolean): ExerciceFonctionDeriveeQuotient {
   return genererAvecRejet(
     () => {
-      const [atome1, atome2] = reduireCoefficientsQuotient(...genererDeuxAtomesFacteurs(TAUX_TRIG_PRODUIT_QUOTIENT, forcerTrig));
+      const [atome1, atome2] = reduireCoefficientsQuotient(...genererDeuxAtomesFacteurs(TAUX_TRIG_PRODUIT_QUOTIENT, forcerTrig, "quotient"));
       return {
         famille: "quotient" as const,
         ambigu: false as const,
@@ -675,18 +697,28 @@ function formatDeriveeAmbigueLatex(exercice: { trig: "sin" | "cos"; a: number; b
   return `${signe}\\dfrac{${Math.abs(coeff2a)}\\cos(${inner})}{\\sin^{3}(${inner})}`;
 }
 
+/** f'(x) RÉDUITE (G10) : produit et quotient passés par `deriveeReduite.ts` — réponse de référence
+ * de l'écran, de la brève, du barème et du papier. */
 export function formatDeriveeFDeXLatex(exercice: ExerciceFonctionDerivee): string {
   switch (exercice.famille) {
     case "reglebase":
       return joindre(exercice.atomes.map(formatDeriveeAtomeLatex));
     case "produit":
-      return formatDeriveeProduitLatex(exercice.atome1, exercice.atome2);
+      return deriveeProduitReduiteLatex(exercice.atome1, exercice.atome2);
     case "quotient":
       if (exercice.ambigu) return formatDeriveeAmbigueLatex(exercice);
-      return formatDeriveeQuotientOrdinaireLatex(exercice.atome1, exercice.atome2);
+      return deriveeQuotientReduiteLatex(exercice.atome1, exercice.atome2);
     case "composee":
       return formatDeriveeAtomeLatex(exercice.atome);
   }
+}
+
+/** f'(x) telle que donnée par la formule (u'v + uv', (u'v − uv')/v²), avant réduction — ligne
+ * « on remplace u, u′, v et v′ » du corrigé. */
+export function formatDeriveeBruteFDeXLatex(exercice: ExerciceFonctionDerivee): string {
+  if (exercice.famille === "produit") return formatDeriveeProduitLatex(exercice.atome1, exercice.atome2);
+  if (exercice.famille === "quotient" && !exercice.ambigu) return formatDeriveeQuotientOrdinaireLatex(exercice.atome1, exercice.atome2);
+  return formatDeriveeFDeXLatex(exercice);
 }
 
 // ============================================================================
