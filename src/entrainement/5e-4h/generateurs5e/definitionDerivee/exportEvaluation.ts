@@ -75,7 +75,15 @@ function baremeDefinitionDerivee(exercice: ExerciceDefinitionDerivee): BaremeExe
         ]
       : [
           c("a", `Valeur de f(${a})`, 0.5),
-          c("a", exercice.famille === "quadratique" ? `f(${a} + h) développé et réduit` : `f(${a} + h) écrit avec un seul numérateur et un seul dénominateur`, 1),
+          c(
+            "a",
+            exercice.famille === "quadratique" || exercice.famille === "quadratiqueComplete"
+              ? `f(${a} + h) développé et réduit`
+              : exercice.famille === "racine"
+                ? `f(${a} + h) avec la somme sous la racine réduite`
+                : `f(${a} + h) écrit avec un seul numérateur et un seul dénominateur`,
+            1,
+          ),
           c("b", "Taux d'accroissement simplifié (le facteur h a disparu)", 1.5),
           c("c", `Passage à la limite : valeur de f'(${a})`, 1),
         ];
@@ -83,7 +91,7 @@ function baremeDefinitionDerivee(exercice: ExerciceDefinitionDerivee): BaremeExe
     reponseFinale: reponseBreveDefinitionDerivee(exercice),
     criteres,
     erreursFrequentes: [
-      exercice.famille === "quadratique"
+      exercice.famille === "quadratique" || exercice.famille === "quadratiqueComplete"
         ? { description: [texte(`Oubli du terme croisé en développant le carré de ${a} + h`)], cout: `0 pt sur f(${a} + h)` }
         : { description: [texte("Remplacer h par 0 avant d'avoir simplifié le facteur h (forme 0/0)")], cout: "0 pt sur la limite" },
       { description: [texte("Résultat donné par les règles de dérivation, sans passer par la définition")], cout: "0 pt sur les étapes de calcul" },

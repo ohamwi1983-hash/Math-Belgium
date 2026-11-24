@@ -15,6 +15,7 @@ import {
   diagnostiquerLimiteDerivee,
   diagnostiquerQuotientH,
   diagnostiquerValeurFA,
+  refusSaisieDefinitionDerivee,
 } from "./verificationDefinitionDerivee";
 
 const POINTS_DE_BASE = 100;
@@ -87,6 +88,8 @@ export interface ReponseDevelopper {
 }
 
 export function soumettreReponseDevelopper(etat: EtatSessionDefinitionDerivee, reponse: ReponseDevelopper): EtatSessionDefinitionDerivee {
+  // Lot B : saisie illisible, approchée ou de forme à reprendre — état inchangé, aucune tentative.
+  if (refusSaisieDefinitionDerivee(etat.exerciceCourant, "developper", [reponse.fA, reponse.fAH])) return etat;
   const exercice = etat.exerciceCourant;
   const a = exercice.a;
   return soumettreEcran(
@@ -105,6 +108,7 @@ export function soumettreReponseDevelopper(etat: EtatSessionDefinitionDerivee, r
 // ============================================================================
 
 export function soumettreReponseQuotient(etat: EtatSessionDefinitionDerivee, texte: string): EtatSessionDefinitionDerivee {
+  if (refusSaisieDefinitionDerivee(etat.exerciceCourant, "quotient", [texte])) return etat;
   const exercice = etat.exerciceCourant;
   const a = exercice.a;
   return soumettreEcran(etat, "quotient", texte, (t) => diagnostiquerQuotientH(t, exercice, a) === "correct" && controlerFormeQuotient(t) === null);
@@ -115,6 +119,7 @@ export function soumettreReponseQuotient(etat: EtatSessionDefinitionDerivee, tex
 // ============================================================================
 
 export function soumettreReponseLimite(etat: EtatSessionDefinitionDerivee, texte: string): EtatSessionDefinitionDerivee {
+  if (refusSaisieDefinitionDerivee(etat.exerciceCourant, "limite", [texte])) return etat;
   const exercice = etat.exerciceCourant;
   const a = exercice.a;
   return soumettreEcran(etat, "limite", texte, (t) => diagnostiquerLimiteDerivee(t, exercice, a) === "correct");

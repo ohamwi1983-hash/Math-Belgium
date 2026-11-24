@@ -35,7 +35,9 @@ export function profilDefinitionDerivee(e: ExerciceDefinitionDerivee): ProfilIns
     case "rationnelleSimple":
       return { casParticulier: null, calcul: "exacte", forme: `rationnelleSimple-x${e.expo}` };
     case "rationnelleLineaire":
-      return { casParticulier: null, calcul: "exacte", forme: "rationnelleLineaire" };
+    case "quadratiqueComplete":
+    case "racine":
+      return { casParticulier: null, calcul: "exacte", forme: e.famille };
   }
 }
 

@@ -10,7 +10,7 @@
  */
 import type { ExerciceDefinitionDerivee } from "../core5e/definitionDerivee.types";
 import type { FractionExacte } from "../core5e/limites.types";
-import { deriveeExacte, valeurExacte } from "../generateurs5e/definitionDerivee/index";
+import { deriveeExacte, racineEnA, valeurExacte } from "../generateurs5e/definitionDerivee/index";
 import { pgcd } from "../generateurs5e/limites/fraction";
 import { ORDRE_COMPLET } from "../moteur5e/typesDefinitionDerivee";
 import type { EcranDefinitionDerivee } from "../moteur5e/typesDefinitionDerivee";
@@ -96,6 +96,10 @@ export function formatFDeXLatex(exercice: ExerciceDefinitionDerivee): string {
       return exercice.expo === 1 ? `f(x)=\\dfrac{${exercice.k}}{x}` : `f(x)=\\dfrac{${exercice.k}}{x^2}`;
     case "rationnelleLineaire":
       return `f(x)=\\dfrac{${formatPolynomeVarLatex([exercice.p, exercice.m], "x")}}{${formatFacteurXMoinsQ(exercice.q)}}`;
+    case "quadratiqueComplete":
+      return `f(x)=${formatPolynomeVarLatex([exercice.p, exercice.n, exercice.m], "x")}`;
+    case "racine":
+      return `f(x)=${exercice.k === 1 ? "" : exercice.k}\\sqrt{${formatPolynomeVarLatex([exercice.c, 1], "x")}}`;
   }
 }
 
@@ -134,7 +138,8 @@ export function questionSpecifiqueEcran(exercice: ExerciceDefinitionDerivee, ecr
   const a = exercice.a;
   switch (ecran) {
     case "developper":
-      return exercice.famille === "affine" || exercice.famille === "quadratique"
+      if (exercice.famille === "racine") return { texteAvant: `Calcule f(${nombreTexte(a)}), puis écris f(${nombreTexte(a)} + h) en fonction de h, en réduisant la somme sous la racine.` };
+      return exercice.famille === "affine" || exercice.famille === "quadratique" || exercice.famille === "quadratiqueComplete"
         ? { texteAvant: `Calcule f(${nombreTexte(a)}), puis écris f(${nombreTexte(a)} + h) en fonction de h, sous forme développée et réduite.` }
         : { texteAvant: `Calcule f(${nombreTexte(a)}), puis écris f(${nombreTexte(a)} + h) en fonction de h : un seul numérateur et un seul dénominateur, chacun réduit.` };
     case "quotient":
@@ -225,6 +230,13 @@ export function texteAideNiveau1(exercice: ExerciceDefinitionDerivee, ecran: Ecr
           texte: "Remplace x par a + h au numérateur et au dénominateur, puis réduis chacun des deux :",
           latex: "f(a+h)=\\dfrac{m(a+h)+p}{(a+h)-q}",
         };
+      case "quadratiqueComplete":
+        return {
+          texte: "Développe d'abord le carré, puis distribue m et n. Piège : oublier le double produit 2ah, ou le terme en h qui vient de n(a + h) :",
+          latex: "f(a+h)=m(a+h)^2+n(a+h)+p, \\quad (a+h)^2=a^2+2ah+h^2",
+        };
+      case "racine":
+        return { texte: "Remplace x par a + h sous la racine, puis réduis la somme sous la racine :", latex: "f(a+h)=k\\sqrt{(a+h)+c}" };
     }
   }
   if (ecran === "quotient") {
@@ -246,6 +258,13 @@ export function texteAideNiveau1(exercice: ExerciceDefinitionDerivee, ecran: Ecr
           texte: "Mets f(a + h) − f(a) au même dénominateur avant de diviser par h — le numérateur se réduit alors à un multiple de h, qui se simplifie avec le h du quotient. Dénominateur commun :",
           latex: "(a+h-q)(a-q)",
         };
+      case "quadratiqueComplete":
+        return { texte: "Dans f(a + h) − f(a), les termes sans h s'annulent : mets h en évidence au numérateur, puis simplifie par h. Il doit rester :", latex: "2ma+n+mh" };
+      case "racine":
+        return {
+          texte: "Multiplie le numérateur et le dénominateur par l'expression conjuguée du numérateur : le produit fait disparaître les racines au numérateur, et h se simplifie :",
+          latex: "\\left(\\sqrt{A}-\\sqrt{B}\\right)\\left(\\sqrt{A}+\\sqrt{B}\\right)=A-B",
+        };
     }
   }
   if (exercice.famille === "affine") {
@@ -257,66 +276,13 @@ export function texteAideNiveau1(exercice: ExerciceDefinitionDerivee, ecran: Ecr
   };
 }
 
-export function texteAideNiveau2(exercice: ExerciceDefinitionDerivee, ecran: EcranDefinitionDerivee): AideFragmentee {
-  if (ecran === "developper") {
-    switch (exercice.famille) {
-      case "affine":
-        return { texte: "Exemple :", latex: "\\begin{array}{l} f(x)=2x+3 \\\\ \\Rightarrow\\; f(a+h)=2(a+h)+3=2a+2h+3 \\end{array}" };
-      case "quadratique":
-        return {
-          texte: "Exemple :",
-          latex: "\\begin{array}{l} f(x)=x^2+1,\\ a=5 \\\\ \\Rightarrow\\; f(5+h)=(5+h)^2+1 \\\\ =25+10h+h^2+1=h^2+10h+26 \\end{array}",
-        };
-      case "rationnelleSimple":
-        return exercice.expo === 1
-          ? { texte: "Exemple :", latex: "\\begin{array}{l} f(x)=\\dfrac{4}{x},\\ a=2 \\\\ \\Rightarrow\\; f(2+h)=\\dfrac{4}{2+h} \\end{array}" }
-          : { texte: "Exemple :", latex: "\\begin{array}{l} f(x)=\\dfrac{4}{x^2},\\ a=2 \\\\ \\Rightarrow\\; f(2+h)=\\dfrac{4}{(2+h)^2} \\end{array}" };
-      case "rationnelleLineaire":
-        return {
-          texte: "Exemple :",
-          latex: "\\begin{array}{l} f(x)=\\dfrac{x+1}{x-2},\\ a=3 \\\\ \\Rightarrow\\; f(3+h)=\\dfrac{(3+h)+1}{(3+h)-2} \\\\ =\\dfrac{h+4}{h+1} \\end{array}",
-        };
-    }
-  }
-  if (ecran === "quotient") {
-    switch (exercice.famille) {
-      case "affine":
-        return {
-          texte: "Exemple :",
-          latex: "\\begin{array}{l} f(x)=2x+3 \\\\ f(a+h)-f(a)=(2a+2h+3)-(2a+3)=2h \\\\ \\Rightarrow\\; \\dfrac{2h}{h}=2 \\end{array}",
-        };
-      case "quadratique":
-        return {
-          texte: "Exemple :",
-          latex: "\\begin{array}{l} a=5:\\ f(5+h)-f(5)=(h^2+10h+26)-26 \\\\ =h^2+10h=h(h+10) \\\\ \\Rightarrow\\; \\dfrac{h(h+10)}{h}=h+10 \\end{array}",
-        };
-      case "rationnelleSimple":
-        return {
-          texte: "Exemple :",
-          latex:
-            "\\begin{array}{l} f(x)=\\dfrac{4}{x},\\ a=2 \\\\ \\dfrac{\\frac{4}{2+h}-\\frac{4}{2}}{h} = \\dfrac{\\frac{8-4(2+h)}{2(2+h)}}{h} \\\\ = \\dfrac{\\frac{-4h}{2(2+h)}}{h} = \\dfrac{-2}{2+h} \\end{array}",
-        };
-      case "rationnelleLineaire":
-        return {
-          texte: "Exemple :",
-          latex:
-            "\\begin{array}{l} f(x)=\\dfrac{x+1}{x-2},\\ a=3 \\\\ \\dfrac{\\frac{h+4}{h+1}-4}{h}=\\dfrac{\\frac{h+4-4(h+1)}{h+1}}{h} \\\\ =\\dfrac{\\frac{-3h}{h+1}}{h}=\\dfrac{-3}{h+1} \\end{array}",
-        };
-    }
-  }
-  if (exercice.famille === "affine") {
-    return { texte: "Exemple :", latex: "\\begin{array}{l} f(x)=2x+3 \\\\ \\dfrac{f(a+h)-f(a)}{h}=\\dfrac{2h}{h}=2 \\;\\xrightarrow{h\\to0}\\; f'(a)=2 \\end{array}" };
-  }
-  return { texte: "Exemple : si le quotient simplifié vaut 2a + h, on remplace h par 0 :", latex: "\\lim_{h\\to0}(2a+h)=2a" };
-}
-
 // ============================================================================
 // Développement/quotient CONFIRMÉS — formes canoniques (état actuel + récapitulatif + question
 // spécifique écran 3). Toute forme algébriquement équivalente est acceptée par la vérification ;
 // ces fonctions n'affichent qu'UNE forme correcte de référence.
 // ============================================================================
 
-function formatDeveloppementConfirmeLatex(exercice: ExerciceDefinitionDerivee, a: number): string {
+export function formatDeveloppementConfirmeLatex(exercice: ExerciceDefinitionDerivee, a: number): string {
   switch (exercice.famille) {
     case "affine":
       return formatPolynomeHLatex([exercice.m * a + exercice.p, exercice.m]);
@@ -326,6 +292,12 @@ function formatDeveloppementConfirmeLatex(exercice: ExerciceDefinitionDerivee, a
       return exercice.expo === 1 ? `\\dfrac{${exercice.k}}{${formatHPlusConstante(a)}}` : `\\dfrac{${exercice.k}}{(${formatHPlusConstante(a)})^2}`;
     case "rationnelleLineaire":
       return `\\dfrac{${formatPolynomeHLatex([exercice.m * a + exercice.p, exercice.m])}}{${formatHPlusConstante(a - exercice.q)}}`;
+    case "quadratiqueComplete":
+      return formatPolynomeHLatex([exercice.m * a * a + exercice.n * a + exercice.p, 2 * exercice.m * a + exercice.n, exercice.m]);
+    case "racine": {
+      const s = racineEnA(exercice);
+      return `${exercice.k === 1 ? "" : exercice.k}\\sqrt{h+${s * s}}`;
+    }
   }
 }
 
@@ -344,7 +316,7 @@ function signeAuNumerateur(num: number, denomCoeff: number): { num: number; deno
   return denomCoeff < 0 ? { num: -num, denomCoeff: -denomCoeff } : { num, denomCoeff };
 }
 
-function formatQuotientConfirmeLatex(exercice: ExerciceDefinitionDerivee, a: number): string {
+export function formatQuotientConfirmeLatex(exercice: ExerciceDefinitionDerivee, a: number): string {
   switch (exercice.famille) {
     case "affine":
       return `${exercice.m}`;
@@ -366,6 +338,12 @@ function formatQuotientConfirmeLatex(exercice: ExerciceDefinitionDerivee, a: num
       const reduit = reduireCoeffs(numConst, denomCoeffRaw);
       const { num, denomCoeff } = signeAuNumerateur(reduit.num, reduit.denomCoeff);
       return formatFractionAvecFacteurLatex(num, "", formatCoeffDevantFacteur(denomCoeff, `(${formatHPlusConstante(denomCoeffRaw)})`));
+    }
+    case "quadratiqueComplete":
+      return formatPolynomeHLatex([2 * exercice.m * a + exercice.n, exercice.m]);
+    case "racine": {
+      const s = racineEnA(exercice);
+      return `\\dfrac{${exercice.k}}{\\sqrt{h+${s * s}}+${s}}`;
     }
   }
 }

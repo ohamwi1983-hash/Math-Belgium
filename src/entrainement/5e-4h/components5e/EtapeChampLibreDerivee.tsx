@@ -1,13 +1,13 @@
 import { useState } from "react";
 import type { ExerciceDefinitionDerivee } from "../core5e/definitionDerivee.types";
 import type { EcranDefinitionDerivee } from "../moteur5e/typesDefinitionDerivee";
-import { consigneGenerale, formatTermesDonneesLatex, questionSpecifiqueEcran, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatDefinitionDerivee";
+import { consigneGenerale, formatTermesDonneesLatex, questionSpecifiqueEcran } from "../ui5e/formatDefinitionDerivee";
 import { Katex } from "../components/Katex";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import type { AideTrig } from "../ui5e/aidesTrigonometrie";
+import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -23,9 +23,12 @@ interface Props {
   onActiverAide: () => void;
   onValider: (texte: string) => void;
   diagnostiquer?: (texte: string) => StatutVerification;
-  /** Contrôle de forme AVANT validation (quotient simplifié) : renvoie un message, et la saisie
-   * n'est alors PAS soumise — aucune tentative consommée. */
-  controlerForme?: (texte: string) => string | null;
+  /** Lot B : saisie refusée SANS tentative (illisible, approchée, forme à reprendre) — même
+   * fonction que le moteur ; renvoie le message, ou null. */
+  refus: (texte: string) => string | null;
+  /** Message ciblé sur l'erreur trahie par la dernière réponse fausse. */
+  cible: (texte: string) => FragmentConsigne[] | null;
+  aides: AideTrig[];
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -40,33 +43,20 @@ interface Props {
  * Question spécifique rendue en 3 morceaux (`texteAvant`/`latex`/`texteApres`,
  * `questionSpecifiqueEcran`) — le fragment central passe par `<Katex>` (fraction/limite empilée,
  * jamais un texte plat avec crochets). */
-export function EtapeChampLibreDerivee({ exercice, ecran, labelChamp, placeholder, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, controlerForme, validation }: Props) {
+export function EtapeChampLibreDerivee({ exercice, ecran, labelChamp, placeholder, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, refus, cible, aides, validation }: Props) {
   const [texte, setTexte] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
-  /** Message affiché sans consommer de tentative : saisie illisible, ou forme non simplifiée. */
-  const [messageAvantValidation, setMessageAvantValidation] = useState<string | null>(null);
-  const montrerErreurs = tentativesUtilisees > 0;
+  const [refusAffiche, setRefusAffiche] = useState<string | null>(null);
+  const [soumis, setSoumis] = useState<string | null>(null);
   const apresEchec = tentativesUtilisees > 0;
   const texteErronee = apresEchec && !!diagnostiquer && diagnostiquer(texte) !== "correct";
-  const aide2 = texteAideNiveau2(exercice, ecran);
   const question = questionSpecifiqueEcran(exercice, ecran);
 
   function valider() {
     if (texte.trim() === "") return;
-    if (diagnostiquer) {
-      const statut = diagnostiquer(texte);
-      if (statut === "parse_error") {
-        setMessageAvantValidation(formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error"));
-        return;
-      }
-      setDernierStatut(statut);
-    }
-    const message = controlerForme ? controlerForme(texte) : null;
-    if (message) {
-      setMessageAvantValidation(message);
-      return;
-    }
-    setMessageAvantValidation(null);
+    const message = refus(texte);
+    setRefusAffiche(message);
+    if (message) return;
+    setSoumis(texte);
     onValider(texte);
   }
 
@@ -98,49 +88,25 @@ export function EtapeChampLibreDerivee({ exercice, ecran, labelChamp, placeholde
           value={texte}
           onChange={(e) => {
             setTexte(e.target.value);
-            setMessageAvantValidation(null);
+            setRefusAffiche(null);
           }}
           placeholder={placeholder}
         />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          {(() => {
-            const aide1 = texteAideNiveau1(exercice, ecran);
-            return (
-              <>
-                <p>{aide1.texte}</p>
-                {aide1.latex && <Katex expression={aide1.latex} block />}
-              </>
-            );
-          })()}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aide2.texte}</p>
-              {aide2.latex && <Katex expression={aide2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
-          Valider
-        </button>
-        {messageAvantValidation && (
-          <p className="alert-error" role="alert">
-            {messageAvantValidation}
-          </p>
-        )}
-        {montrerErreurs && !messageAvantValidation && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aides}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={texte.trim() === ""}
+        illisible={refusAffiche !== null}
+        texteIllisible={refusAffiche ?? ""}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumis !== null && tentativesUtilisees > 0 ? cible(soumis) : null}
+        validation={validation}
+      />
     </div>
   );
 }
