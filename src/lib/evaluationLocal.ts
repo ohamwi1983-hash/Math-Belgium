@@ -225,14 +225,16 @@ function codeInstance(generatorId: string, adaptateur: Adaptateur, varianteId: s
  *   (cases décochées) — les paramètres non applicables à l'instance (`parametresNonApplicables`)
  *   sont ignorés ;
  * - `cas` (autres caractéristiques du profil) : `'complet'` (défaut) = aucune ; `'particulier'` = un
- *   cas particulier simple (case « inclure un cas particulier ») ; autre chaîne = CE cas précis
- *   (même question d'une série à l'autre) ;
+ *   cas particulier simple (case « inclure un cas particulier ») ; `'libre'` = n'importe lequel
+ *   (feuille d'exercices de l'élève « sans calculatrice » : seule la calculatrice est contrainte, la
+ *   feuille garde toute sa variété) ; autre chaîne = CE cas précis (même question d'une série à
+ *   l'autre) ;
  * - `forme` : même type de question que la série A (`ProfilInstance.forme`) ;
  * - `calculatrice` : interdite → jamais d'instance qui exige la calculatrice ; autorisée →
  *   seulement des instances qui l'exigent (pas d'angles ni de valeurs remarquables).
  * Sans `profilInstance` dans l'adaptateur, aucune contrainte (comportement historique). */
 export interface ContrainteTirage {
-  cas: 'complet' | 'particulier' | string
+  cas: 'complet' | 'particulier' | 'libre' | string
   idsParametres: string[]
   parametresExclus: string[] | null
   forme?: string
@@ -246,6 +248,7 @@ export function autresCaracteristiques(profil: ProfilInstance, idsParametres: st
 }
 
 function casRespecte(autres: string | null, cas: ContrainteTirage['cas']): boolean {
+  if (cas === 'libre') return true
   if (cas === 'complet') return autres === null
   if (cas === 'particulier') return autres !== null && !autres.includes('+')
   return autres === cas
@@ -313,7 +316,7 @@ export function graineInedite(generatorId: string, adaptateur: Adaptateur, varia
           // un tirage coûte quelques microsecondes.
           { essais: 20000, filtre: (p) => respecteContrainte(p, contrainte, true) },
           // Cas particulier introuvable (générateur sans ce cas) : exercice complet, calculatrice respectée.
-          ...(contrainte.cas !== 'complet' ? [{ essais: 20000, filtre: (p: ProfilInstance) => respecteContrainte(p, { ...contrainte, cas: 'complet' }, true) }] : []),
+          ...(contrainte.cas !== 'complet' && contrainte.cas !== 'libre' ? [{ essais: 20000, filtre: (p: ProfilInstance) => respecteContrainte(p, { ...contrainte, cas: 'complet' }, true) }] : []),
           { essais: 20000, filtre: (p) => respecteContrainte(p, contrainte, false) },
           { essais: 8, filtre: null },
         ]
@@ -411,6 +414,10 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
         // instances complètes, paramètres décochés absents, un cas particulier si la case est cochée ;
         // la série A fixe la structure de chaque question, les autres séries la reproduisent.
         const equilibre = entete.mode !== 'exercice'
+        // Feuille d'exercices de l'ÉLÈVE « sans calculatrice » (assistant `AssistantEleve`, seul à poser
+        // `calculatrice` en mode exercice — le panneau du professeur et la remédiation la laissent
+        // absente) : seule la calculatrice est contrainte (`cas: 'libre'`), mêmes paliers de repli.
+        const calculSeul = !equilibre && entete.calculatrice === 'interdite'
         const idsParametres = (adaptateur.parametresAuChoix ?? []).map((p) => p.id)
         // Réglages PAR VARIANTE (décision de l'utilisateur) : chaque entrée (variante, éventuellement
         // dupliquée) a ses paramètres décochés et sa case « cas particulier » ; l'ancien réglage de
@@ -421,7 +428,11 @@ export async function construirePlan(levelSlug: string, entete: EnTeteEvaluation
         const casDe = (e: (typeof entrees)[number], i: number): boolean =>
           e.inclureCasParticulier ?? (!!item.exercice!.inclureCasParticulier && i === entrees.length - 1)
         const contrainteDe = (cas: ContrainteTirage['cas'], parametresExclus: string[] | null, forme?: string): ContrainteTirage | undefined =>
-          equilibre ? { cas, idsParametres, parametresExclus, forme, calculatrice: entete.calculatrice } : undefined
+          equilibre
+            ? { cas, idsParametres, parametresExclus, forme, calculatrice: entete.calculatrice }
+            : calculSeul
+              ? { cas: 'libre', idsParametres, parametresExclus: null, calculatrice: 'interdite' }
+              : undefined
         const indexItem = items.indexOf(item)
         const structureA = structureParItem.get(indexItem)
         // Une question par instance, avec l'indice de son entrée (pour ses réglages).

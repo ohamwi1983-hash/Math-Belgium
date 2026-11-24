@@ -2210,6 +2210,8 @@ fieldset.eleve-demos { border: 0; margin: 0; padding: 0; }
 .eleve-type:first-child { border-top: 0; }
 .eleve-type-nom { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 0.95rem; overflow-wrap: anywhere; }
 .eleve-type-meta { font-size: 0.78rem; color: var(--ink-faint); }
+.eleve-type-grise .eleve-type-nom { color: var(--ink-faint); }
+.eleve-type-calc { font-weight: 600; }
 .eleve-types-pied { display: flex; gap: 8px 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
 .eleve-types-total { font-weight: 700; }
 .eleve-recap { background: var(--ink); color: var(--paper); border-radius: var(--radius); padding: 20px 24px; display: flex; gap: 14px 18px; align-items: center; justify-content: space-between; flex-wrap: wrap; z-index: 5; }
@@ -2240,6 +2242,7 @@ fieldset.eleve-demos { border: 0; margin: 0; padding: 0; }
   .eleve-segments { display: flex; flex-wrap: nowrap; }
   .eleve-segments button { flex: 1 1 0; padding: 11px 4px; min-width: 0; }
   .eleve-coche { flex: 1 1 calc(50% - 4px); }
+  .eleve-coche.eleve-coche-calculatrice { flex: 0 1 calc(50% - 4px); }
   /* Barre fixée en bas (maquette téléphone) : récapitulatif et bouton toujours sous le pouce. */
   .eleve-recap { position: sticky; bottom: 0; margin: 0 calc(-1 * var(--page-gutter, 16px)); border-radius: 0; padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px)); flex-direction: column; align-items: stretch; gap: 10px; box-shadow: 0 -6px 20px rgba(24, 36, 48, 0.18); }
   .eleve-recap-titre { display: none; }
