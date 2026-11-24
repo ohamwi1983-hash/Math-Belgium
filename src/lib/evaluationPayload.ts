@@ -653,10 +653,10 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'derivees-applications', sectionId: 'etude-locale', quizTheme: 'etudeLocaleEtGraphique', label: '', quizChapitre: 5 },
   { chapitreSlug: 'derivees-applications', sectionId: 'lecture-graphique-derivees', quizTheme: 'etudeLocaleEtGraphique', label: '', quizChapitre: 5 },
   { chapitreSlug: 'derivees-applications', sectionId: 'etudier-fonction', quizTheme: 'etudeComplete', label: '', quizChapitre: 5 },
-  { chapitreSlug: 'derivees-applications', sectionId: 'optimisation-geometrique', quizTheme: 'applicationsEnContexte', label: '', quizChapitre: 5 },
-  { chapitreSlug: 'derivees-applications', sectionId: 'contexte-economique', quizTheme: 'applicationsEnContexte', label: '', quizChapitre: 5 },
-  { chapitreSlug: 'derivees-applications', sectionId: 'extrema-bornes', quizTheme: 'applicationsEnContexte', label: '', quizChapitre: 5 },
-  { chapitreSlug: 'derivees-applications', sectionId: 'vitesse-position', quizTheme: 'applicationsEnContexte', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'optimisation-geometrique', quizTheme: 'optimisation', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'contexte-economique', quizTheme: 'economie', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'extrema-bornes', quizTheme: 'extremaBornes', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'vitesse-position', quizTheme: 'mouvement', label: '', quizChapitre: 5 },
 ]
 
 export function generateursPourSection(chapitreSlug: string, sectionId: string): GeneratorConfig[] {

@@ -2889,9 +2889,10 @@ export const deriveesApplications: ChapterContent = {
       title: 'Quiz vrai ou faux — tout le chapitre',
       generatorId: '5gen43',
       description: [
-        '7 thèmes de 20 affirmations chacun : reconnaissance graphique, calcul par définition, ' +
-          'fonction dérivée, tangentes, étude locale et graphique, étude complète, applications ' +
-          'en contexte. Choisis un thème, réponds vrai ou faux — la justification est toujours révélée.',
+        '10 thèmes de 35 affirmations, un par section : définition, tangentes, règles de ' +
+          'dérivation, signe de f′ et f″, étude locale et lecture graphique, étude complète, ' +
+          'optimisation, économie, intervalle fermé, mouvement. Choisis un thème, réponds vrai ou ' +
+          'faux — la justification est toujours révélée.',
       ],
       chantier: '5e-4h',
       whereLabel: '5e (4h) → « 43. Dérivées et applications — quiz vrai/faux »',

@@ -13,14 +13,28 @@ import { randomInt } from "./aleatoire";
 import { BANQUE_QUIZ_DERIVEES_5E } from "./banque";
 
 export const CATALOGUE_VARIANTES: { id: VarianteQuizDerivees5e; label: string }[] = [
-  { id: "reconnaissanceGraphique", label: "Association graphique — signe de f'/f''" },
   { id: "calculParDefinition", label: "Calculer f'(a) par la définition" },
+  { id: "tangentes", label: "Tangentes et approximation affine" },
   { id: "fonctionDerivee", label: "Fonction dérivée — règles de dérivation" },
-  { id: "tangentes", label: "Tangentes" },
+  { id: "reconnaissanceGraphique", label: "Signe de f' et de f'' — variations et concavité" },
   { id: "etudeLocaleEtGraphique", label: "Étude locale et lecture graphique" },
   { id: "etudeComplete", label: "Étudier une fonction" },
-  { id: "applicationsEnContexte", label: "Applications en contexte" },
+  { id: "optimisation", label: "Optimisation géométrique" },
+  { id: "economie", label: "Contexte économique" },
+  { id: "extremaBornes", label: "Extremums sur un intervalle fermé" },
+  { id: "mouvement", label: "Vitesse et position" },
 ];
+
+/** Taille RÉELLE de la banque d'un thème (`.claude/rules/quiz-generators.md`, piège du nombre fixe). */
+export function nombreQuestions(varianteId: VarianteQuizDerivees5e): number {
+  return BANQUE_QUIZ_DERIVEES_5E[varianteId].length;
+}
+
+/** Bornes min/max des tailles de thèmes, pour un texte d'accueil toujours exact. */
+export function etendueNombreQuestions(): { min: number; max: number } {
+  const tailles = CATALOGUE_VARIANTES.map((v) => nombreQuestions(v.id));
+  return { min: Math.min(...tailles), max: Math.max(...tailles) };
+}
 
 function tirerQuestion(varianteId: VarianteQuizDerivees5e): QuestionVraiFaux5e {
   const banque = BANQUE_QUIZ_DERIVEES_5E[varianteId];
@@ -53,9 +67,9 @@ function melanger<T>(items: readonly T[]): T[] {
 
 /**
  * Générateur SANS RÉPÉTITION pour un thème donné — chaque session étudiant porte sur un thème
- * unique et compte autant d'exercices que de questions dans la banque de ce thème (20) : sans
- * cette précaution, le tirage indépendant habituel (`genererExerciceQuizDerivees5e`) pourrait
- * répéter une question avant d'avoir couvert les 19 autres. État interne (file mélangée, ré-mélangée
+ * unique et compte autant d'exercices que de questions dans la banque de ce thème (`nombreQuestions`) :
+ * sans cette précaution, le tirage indépendant habituel (`genererExerciceQuizDerivees5e`) pourrait
+ * répéter une question avant d'avoir couvert toutes les autres. État interne (file mélangée, ré-mélangée
  * à chaque épuisement) enfermé dans la fermeture, jamais partagé entre deux appels de cette fonction
  * — voir `App5gen43.tsx`, qui en crée une par session démarrée.
  */
