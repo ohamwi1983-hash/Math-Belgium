@@ -564,6 +564,8 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
   "6gen3": simple(String.raw`Résous dans ℝ l'équation (?<ligne>${M}), en justifiant chaque étape\.`, "Résous dans ℝ chaque équation, en justifiant chaque étape."),
   "6gen4": simple(String.raw`Dérive la fonction suivante : (?<ligne>${M})\s*Simplifie le résultat\.`, "Dérive chaque fonction et simplifie le résultat."),
   "6gen157": { formes: [{ motif: re(String.raw`Étudie la fonction (?<ligne>${M}) : (?<s>.+)`), consigne: (g) => `Étudie chaque fonction : ${g.s}` }] },
+  // 6gen160 : seule la variante « valeurs » (données sans figure ni contexte) se regroupe.
+  "6gen160": simple(String.raw`\$A\$ et \$B\$ sont deux événements tels que (?<ligne>.+)\.\nLes événements \$A\$ et \$B\$ sont-ils indépendants, incompatibles, ou ni l'un ni l'autre \? Justifie par un calcul\.`, "Dans chaque cas, les événements $A$ et $B$ ont les probabilités indiquées. Sont-ils indépendants, incompatibles, ou ni l'un ni l'autre ? Justifie par un calcul."),
   "6gen6": simple(String.raw`Calcule la limite suivante : (?<ligne>${M})\s*Justifie chaque étape\.`, "Calcule chaque limite. Justifie chaque étape."),
   "6gen7": simple(String.raw`Détermine le domaine puis calcule la dérivée de la fonction suivante : (?<ligne>${M})\.?`, "Détermine le domaine puis calcule la dérivée de chaque fonction."),
   "6gen9": simple(String.raw`Résous l'équation suivante : (?<ligne>${M})\s*Justifie chaque étape\.`, "Résous chaque équation. Justifie chaque étape."),

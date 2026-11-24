@@ -97,6 +97,7 @@ export type IdGenerateurPilote =
   | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84' | '6gen82' | '6gen78' | '6gen80' | '6gen83' | '6gen79' | '6gen81'
   | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42' | '6gen93' | '6gen95' | '6gen94' | '6gen97' | '6gen96' | '6gen98' | '6gen99'
   | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
+  | '6gen160' | '6gen161'
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
@@ -252,8 +253,10 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'probabilites', sectionId: 'tiragesarbres', generatorId: '6gen31', label: '' },
   { chapitreSlug: 'probabilites', sectionId: 'independancebayes', generatorId: '6gen32', label: 'Indépendance et Bayes (6gen32)' },
   { chapitreSlug: 'probabilites', sectionId: 'independancebayes', generatorId: '6gen74', label: 'Arbre, tableau, effectifs (6gen74)' },
+  { chapitreSlug: 'probabilites', sectionId: 'independancebayes', generatorId: '6gen160', label: 'Indépendants ou incompatibles ? (6gen160)', processus: 2 },
   { chapitreSlug: 'probabilites', sectionId: 'probabilitesproblemes', generatorId: '6gen33', label: 'Problèmes de probabilités (6gen33)', processus: 3 },
   { chapitreSlug: 'probabilites', sectionId: 'probabilitesproblemes', generatorId: '6gen76', label: 'Paradoxes (6gen76)', processus: 3 },
+  { chapitreSlug: 'probabilites', sectionId: 'probabilitesproblemes', generatorId: '6gen161', label: 'Quel jeu choisir ? (6gen161)', processus: 3 },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'points-droites-remarquables', generatorId: '6gen54', label: '' },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'cercles', generatorId: '6gen55', label: '' },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'lieux-elimination', generatorId: '6gen56', label: '' },

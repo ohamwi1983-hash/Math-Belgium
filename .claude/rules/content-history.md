@@ -227,6 +227,14 @@ paths:
   156 blocs `exemple`, 153 cadres rendus, **0 cadre vide**, les 3 seuls exemples désormais sans
   cadre étant exactement les 3 blocs concernés de ce chapitre — et le cadre `is-empty` de
   « Fonctions composées » toujours rendu avec son contenu.
+  **Lot G (nouveaux générateurs, 6gen160–6gen161)** : cartes 6gen160 « Indépendants ou incompatibles ? » en § 3
+  (après 6gen74) et 6gen161 « Quel jeu choisir ? » en § 4 (après 6gen76) ; registres (`registry.ts`,
+  `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts`, processus 2 / 3, sections
+  `independancebayes` / `probabilitesproblemes`). Aucun bloc de cours ajouté : « incompatibles ≠ indépendants »
+  est déjà au § 1 (piège, tableau comparatif) et au § 3 (rappel + exemple résolu à trois issues) ; épreuves
+  répétées, « au moins un » et arbres sans remise sont au § 2 et au § 4. Descriptions de carte en Unicode
+  (P(A ∩ B)), jamais de `$…$`. Détail : `.claude/rules/feuilles-evaluations.md`, « Textes : écran vs papier »,
+  paragraphe « 6e ch. 6, lot G ».
 
 - **6e (6h), Chapitre 9 — Lieux géométriques** (`lieux-geometriques`) : migré en intégralité depuis
   un artifact `plateforme-maths` (6e/6h, chapitre 9 dans ce dépôt-là — conservé tel quel ici,
