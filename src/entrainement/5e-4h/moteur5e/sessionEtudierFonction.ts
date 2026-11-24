@@ -30,6 +30,7 @@ import {
   limitesContiennentChoixFerme,
   pointsClesEtudierFonction,
   listeSlotsLimites,
+  refusSaisieEtudierFonction,
   tableauFPrimeAttendu,
   tableauFSecondeAttendu,
   verifierEnsembleReelGuide,
@@ -38,6 +39,11 @@ import {
 } from "./verificationEtudierFonction";
 
 const POINTS_DE_BASE = 100;
+
+/** « f'(x) = » recopié devant la saisie : toléré. */
+export function sansPrefixeDerivee(t: string): string {
+  return t.replace(/^\s*f'{1,2}\s*\(\s*x\s*\)\s*=\s*/i, "");
+}
 
 /** Convention STANDARD de la plateforme (2 niveaux d'aide) pour les écrans 1-7. L'écran 8 a sa
  * propre échelle d'aide (1 niveau, gérée par `PlacementPointsGraphique` — voir la tête de fichier
@@ -124,6 +130,7 @@ export function soumettreReponseDomaine(etat: EtatSessionEtudierFonction, repons
 // ============================================================================
 
 export function soumettreReponseLimites(etat: EtatSessionEtudierFonction, reponses: ValeurReponseSlotLimite[]): EtatSessionEtudierFonction {
+  if (refusSaisieEtudierFonction(etat.exerciceCourant, "limites", reponses) !== null) return etat;
   const slots = listeSlotsLimites(etat.exerciceCourant);
   return soumettreEcran(etat, "limites", reponses, (r) => verifierLimitesEtudierFonction(r, slots), limitesContiennentChoixFerme(etat.exerciceCourant) ? 1 : undefined);
 }
@@ -133,11 +140,13 @@ export function soumettreReponseLimites(etat: EtatSessionEtudierFonction, repons
 // ============================================================================
 
 export function soumettreReponseCalculerFPrime(etat: EtatSessionEtudierFonction, texte: string): EtatSessionEtudierFonction {
-  return soumettreEcran(etat, "calculerFPrime", texte, (t) => diagnostiquerCalculerFPrime(t, etat.exerciceCourant) === "correct");
+  if (refusSaisieEtudierFonction(etat.exerciceCourant, "calculerFPrime", [texte]) !== null) return etat;
+  return soumettreEcran(etat, "calculerFPrime", texte, (t) => diagnostiquerCalculerFPrime(sansPrefixeDerivee(t), etat.exerciceCourant) === "correct");
 }
 
 export function soumettreReponseCalculerFSeconde(etat: EtatSessionEtudierFonction, texte: string): EtatSessionEtudierFonction {
-  return soumettreEcran(etat, "calculerFSeconde", texte, (t) => diagnostiquerCalculerFSeconde(t, etat.exerciceCourant) === "correct");
+  if (refusSaisieEtudierFonction(etat.exerciceCourant, "calculerFSeconde", [texte]) !== null) return etat;
+  return soumettreEcran(etat, "calculerFSeconde", texte, (t) => diagnostiquerCalculerFSeconde(sansPrefixeDerivee(t), etat.exerciceCourant) === "correct");
 }
 
 // ============================================================================
@@ -168,6 +177,7 @@ export function avancerRecap(etat: EtatSessionEtudierFonction): EtatSessionEtudi
 // ============================================================================
 
 export function soumettreReponseCoordonnees(etat: EtatSessionEtudierFonction, reponses: string[]): EtatSessionEtudierFonction {
+  if (refusSaisieEtudierFonction(etat.exerciceCourant, "coordonnees", reponses) !== null) return etat;
   const points = pointsClesEtudierFonction(etat.exerciceCourant);
   return soumettreEcran(etat, "coordonnees", reponses, (r) => r.length === points.length && r.every((t, i) => diagnostiquerOrdonnee(t, points[i].y) === "correct"));
 }

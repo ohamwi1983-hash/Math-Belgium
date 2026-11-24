@@ -8,7 +8,7 @@
 import type { RacineEtudeLocale } from "../core5e/etudeLocale.types";
 import type { ExerciceEtudierFonction, ExerciceRationnelleAO } from "../core5e/etudierFonction.types";
 import type { EnsembleReelGuide } from "../core5e/domaineDefinition.types";
-import { formatFDeXLatex as formatFDeXLatexEtudeLocale, formatFPrimeDeXLatex as formatFPrimeDeXLatexEtudeLocale, formatFSecondeDeXLatex as formatFSecondeDeXLatexEtudeLocale, formatRacineLatex } from "./formatEtudeLocale";
+import { formatFDeXLatex as formatFDeXLatexEtudeLocale, formatFPrimeDeXLatex as formatFPrimeDeXLatexEtudeLocale, formatFSecondeDeXLatex as formatFSecondeDeXLatexEtudeLocale, formatRacineLatex, radicalSimplifieLatex } from "./formatEtudeLocale";
 import type { EcranEtudierFonction } from "../moteur5e/typesEtudierFonction";
 import type { SlotLimiteEtudierFonction } from "../moteur5e/verificationEtudierFonction";
 import { classificationFPrime, decalageVertical, domaineAttendu, exclusionsCE, listeSlotsLimites, pointsClesEtudierFonction, racinesFPrime, racinesFSeconde } from "../moteur5e/verificationEtudierFonction";
@@ -110,7 +110,7 @@ export const LIBELLE_ECRAN_ETUDIER_FONCTION: Record<EcranEtudierFonction, string
 export function consigneEcranEtudierFonction(ecran: EcranEtudierFonction): string {
   switch (ecran) {
     case "domaine":
-      return "Le dénominateur de f ne peut jamais s'annuler — détermine le domaine de définition de f.";
+      return "Détermine le domaine de définition de f : quelles valeurs de x faut-il exclure ?";
     case "limites":
       return "Détermine le comportement de f à chaque borne de son domaine (asymptotes verticales) et en ±∞ (asymptote horizontale, oblique, ou aucune).";
     case "calculerFPrime":
@@ -124,68 +124,9 @@ export function consigneEcranEtudierFonction(ecran: EcranEtudierFonction): strin
     case "recap":
       return "Voici la synthèse de ton étude : vérifie-la avant de calculer les coordonnées des points remarquables.";
     case "coordonnees":
-      return "Calcule l'ordonnée de chaque point remarquable (valeur exacte ou arrondie au centième).";
+      return "Calcule l'ordonnée exacte de chaque point remarquable (entier, fraction ou racine, par exemple 5/3 ou 2 − 4√2).";
     case "graphique":
       return "Place chaque point sur le graphique en tapant à l'endroit correspondant ; la courbe apparaîtra une fois tous les points placés.";
-  }
-}
-
-export function texteAideNiveau1EtudierFonction(ecran: EcranEtudierFonction): string {
-  switch (ecran) {
-    case "domaine":
-      return "Cherche la ou les valeurs de x qui annulent le dénominateur de f.";
-    case "limites":
-      return "Près d'une AV, regarde le signe du dénominateur juste avant/après — le numérateur, lui, garde un signe fixe proche de cette valeur.";
-    case "calculerFPrime":
-      return "Identifie la forme de f (somme, produit, quotient, composée) avant de dériver.";
-    case "tableauFPrime":
-      return "Attention : une racine de f' n'est un extremum que si le signe de f' change de part et d'autre.";
-    case "calculerFSeconde":
-      return "Dérive f'(x) terme à terme, exactement comme à l'écran précédent.";
-    case "tableauFSeconde":
-      return "Attention : ne confonds pas variations (données par f') et concavité (donnée par f''). Une racine de f'' n'est un point d'inflexion que si le signe de f'' change autour d'elle.";
-    case "recap":
-      return "";
-    case "coordonnees":
-      return "L'ordonnée d'un point de la courbe s'obtient en remplaçant x par son abscisse dans l'expression de f.";
-    case "graphique":
-      return "Repère d'abord l'abscisse du point demandé sur l'axe des x, puis vise la hauteur correspondante.";
-  }
-}
-
-/** Aide fragmentée — texte en français d'un côté, formule KaTeX de l'autre (jamais de formule
- * brute dans le texte), rendue via `<p>{aide.texte}</p> {aide.latex && <Katex expression={aide.latex} block />}`. */
-export interface AideFragmentee {
-  texte: string;
-  latex: string | null;
-}
-
-export function texteAideNiveau2EtudierFonction(ecran: EcranEtudierFonction): AideFragmentee {
-  switch (ecran) {
-    case "domaine":
-      return { texte: "Exemple :", latex: "x-3=0 \\iff x=3 \\;\\Rightarrow\\; \\text{dom}\\,f=\\mathbb{R}\\setminus\\{3\\}" };
-    case "limites":
-      return { texte: "Exemple :", latex: "f(x)=\\dfrac{1}{x-2}, \\text{ en } x\\to2^- \\text{ le dénominateur est négatif proche de } 0 \\;\\Rightarrow\\; f(x)\\to-\\infty" };
-    case "calculerFPrime":
-      return { texte: "Exemple :", latex: "f(x)=x^3+2x \\;\\Rightarrow\\; f'(x)=3x^2+2" };
-    case "tableauFPrime":
-      return {
-        texte: "Exemple : f' s'annule en 0 mais reste positive des deux côtés (racine double), donc « ni l'un ni l'autre » :",
-        latex: "f'(x)=6x^2",
-      };
-    case "calculerFSeconde":
-      return { texte: "Exemple :", latex: "f'(x)=3x^2+2 \\;\\Rightarrow\\; f''(x)=6x" };
-    case "tableauFSeconde":
-      return {
-        texte: "Exemple : change bien de signe en x=0 — c'est un vrai point d'inflexion :",
-        latex: "f''(x)=12x",
-      };
-    case "recap":
-      return { texte: "", latex: null };
-    case "coordonnees":
-      return { texte: "Exemple :", latex: "f(x)=x^3-3x \\;\\Rightarrow\\; f(1)=1-3=-2" };
-    case "graphique":
-      return { texte: "Utilise les valeurs déjà trouvées dans les écrans précédents (extremums, points d'inflexion) — l'ordonnée à l'origine se calcule avec f(0).", latex: null };
   }
 }
 
@@ -261,6 +202,79 @@ export function formatOrdonneeLatex(y: number): string {
   return (Object.is(r, -0) ? 0 : r).toString().replace(".", "{,}");
 }
 
+/** Ordonnée EXACTE d'un point remarquable (lot C, question 4) : p/q + k√r. Polynomiale en x = e ± √r
+ * (zéros de f′ = 3a[(x − e)² − r]) : f(e) − 2ar·(±√r) ; rationnelle c/((x − e)² + k) en e ± √(k/3) :
+ * 3c/(4k) ; asymptote oblique en e ± √r (c = a·r) : ae + b ± 2a√r ; abscisse rationnelle : calcul
+ * dans ℚ. Décalage vertical compris. */
+export interface OrdonneeExacte {
+  n: number;
+  d: number;
+  /** Coefficient de √r (0 si rationnelle). */
+  k: number;
+  r: number;
+}
+
+function pgcd(a: number, b: number): number {
+  a = Math.abs(a);
+  b = Math.abs(b);
+  while (b) [a, b] = [b, a % b];
+  return a || 1;
+}
+
+function fraction(n: number, d: number): { n: number; d: number } {
+  const g = pgcd(n, d) * (d < 0 ? -1 : 1);
+  return { n: n / g, d: d / g };
+}
+
+function plus(x: { n: number; d: number }, y: { n: number; d: number }) {
+  return fraction(x.n * y.d + y.n * x.d, x.d * y.d);
+}
+
+export function ordonneeExacte(exercice: ExerciceEtudierFonction, point: PointCleEtudierFonction): OrdonneeExacte {
+  const dec = { n: decalageVertical(exercice), d: 1 };
+  const R = point.racine;
+  const xq = R && R.exact ? fraction(R.valeur.num, R.valeur.den) : R ? null : fraction(Math.round(point.x * 1e6), 1e6);
+  if (exercice.famille === "rationnelleAO") {
+    const { a, b, c, e } = exercice;
+    if (xq) {
+      const v = plus(fraction(a * xq.n + b * xq.d, xq.d), fraction(c * xq.d, xq.n - e * xq.d));
+      return { ...v, k: 0, r: 1 };
+    }
+    const irr = R as { centre: number; radicande: number; signe: 1 | -1 };
+    return { n: a * irr.centre + b, d: 1, k: 2 * a * irr.signe, r: irr.radicande };
+  }
+  const nyau = exercice.noyau;
+  if (nyau.type === "polynomiale") {
+    const { a, b, c, d } = nyau;
+    if (xq) {
+      const { n: p, d: q } = xq;
+      return { ...plus(fraction(a * p ** 3 + b * p * p * q + c * p * q * q + d * q ** 3, q ** 3), dec), k: 0, r: 1 };
+    }
+    const irr = R as { centre: number; radicande: number; signe: 1 | -1 };
+    const e = irr.centre;
+    return { ...plus({ n: a * e ** 3 + b * e * e + c * e + d, d: 1 }, dec), k: -2 * a * irr.radicande * irr.signe, r: irr.radicande };
+  }
+  const { c, e, k } = nyau;
+  if (xq) {
+    const { n: p, d: q } = xq;
+    return { ...plus(fraction(c * q * q, (p - e * q) ** 2 + k * q * q), dec), k: 0, r: 1 };
+  }
+  return { ...plus(fraction(3 * c, 4 * k), dec), k: 0, r: 1 };
+}
+
+export function formatOrdonneeExacteLatex(o: OrdonneeExacte): string {
+  const rat = o.d === 1 ? `${o.n}` : o.n < 0 ? `-\\dfrac{${-o.n}}{${o.d}}` : `\\dfrac{${o.n}}{${o.d}}`;
+  if (o.k === 0) return rat;
+  const rad = radicalSimplifieLatex(o.k, o.r);
+  if (o.n === 0) return `${o.k < 0 ? "-" : ""}${rad}`;
+  return `${rat}${o.k < 0 ? "-" : "+"}${rad}`;
+}
+
+/** Ordonnée exacte (écran « coordonnées », réponse attendue, corrigé) — « f(e ± √r) = A ± B√r ». */
+export function formatOrdonneePointLatex(exercice: ExerciceEtudierFonction, point: PointCleEtudierFonction): string {
+  return formatOrdonneeExacteLatex(ordonneeExacte(exercice, point));
+}
+
 export function formatAbscissePointLatex(point: PointCleEtudierFonction): string {
   return point.racine ? formatRacineLatex(point.racine) : formatOrdonneeLatex(point.x);
 }
@@ -271,7 +285,7 @@ export function formatLabelCoordonneeLatex(point: PointCleEtudierFonction): stri
 }
 
 export function formatCoordonneesLatex(exercice: ExerciceEtudierFonction): string[] {
-  return pointsClesEtudierFonction(exercice).map((p) => `\\text{${p.label} : }\\left(${formatAbscissePointLatex(p)}\\,;\\,${formatOrdonneeLatex(p.y)}\\right)`);
+  return pointsClesEtudierFonction(exercice).map((p) => `\\text{${p.label} : }\\left(${formatAbscissePointLatex(p)}\\,;\\,${formatOrdonneePointLatex(exercice, p)}\\right)`);
 }
 
 /** Termes de « Ce qu'on sait déjà » pour UN écran clos — les vraies valeurs, jamais « confirmé ». */

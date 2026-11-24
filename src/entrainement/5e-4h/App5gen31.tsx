@@ -26,9 +26,8 @@ import {
 import type { EcranEtudierFonction, EtatSessionEtudierFonction } from "./moteur5e/typesEtudierFonction";
 import { ordreEcransEtudierFonction } from "./moteur5e/typesEtudierFonction";
 import {
-  diagnostiquerCalculerFPrime,
-  diagnostiquerCalculerFSeconde,
   listeSlotsLimites,
+  refusSaisieEtudierFonction,
   pointsClesEtudierFonction,
   tableauFPrimeAttendu,
   tableauFSecondeAttendu,
@@ -36,10 +35,14 @@ import {
 import type { ReponseTableauEtudierFonction, ValeurReponseSlotLimite } from "./moteur5e/verificationEtudierFonction";
 import { EtapeDomaineEtudierFonction } from "./components5e/EtapeDomaineEtudierFonction";
 import { EtapeLimitesEtudierFonction } from "./components5e/EtapeLimitesEtudierFonction";
-import { EtapeCalculerDeriveeGenerique } from "./components5e/EtapeCalculerDeriveeGenerique";
+import { EcranSaisieLimites } from "./components5e/EcranSaisieLimites";
+import { EnTeteExercice } from "./components5e/EnTeteExercice";
+import { QuestionFinale } from "./components/QuestionFinale";
+import { RenduFragments } from "../4e/components/RenduFragments";
+import type { FragmentConsigne } from "../export/genererFeuilleExercices";
+import { aidesEtudierFonction, cibleEtudierFonction, cibleLimitesEtudierFonction, cibleTableauEtudierFonction } from "./ui5e/retoursEtudierFonction";
 import { EtapeTableauEtudierFonction } from "./components5e/EtapeTableauEtudierFonction";
 import { EtapeRecapitulatifEtudierFonction } from "./components5e/EtapeRecapitulatifEtudierFonction";
-import { EtapeCoordonneesEtudierFonction } from "./components5e/EtapeCoordonneesEtudierFonction";
 import { TableauEtudeLocaleRecap } from "./components5e/TableauEtudeLocaleRecap";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 import { PlacementPointsGraphique } from "./components5e/PlacementPointsGraphique";
@@ -53,8 +56,13 @@ import {
   formatEnsembleReelGuideLatex,
   formatEnteteColonnesTableauEtudierFonction,
   formatLabelSlotLimite,
-  formatOrdonneeLatex,
+  formatLabelCoordonneeLatex,
+  formatOrdonneePointLatex,
   formatReponseAttenduePhaseLatex,
+  CONSIGNE_GENERALE_ETUDIER_FONCTION,
+  consigneEcranEtudierFonction,
+  formatTermesDonneesLatex,
+  questionFinaleEtudierFonction,
   LIBELLE_ECRAN_ETUDIER_FONCTION,
 } from "./ui5e/formatEtudierFonction";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -157,6 +165,27 @@ function reponseAttenduePhase(exercice: EtatSessionEtudierFonction["exerciceCour
 interface TransitionEnAttente {
   etatSuivant: EtatSessionEtudierFonction;
   revele: boolean;
+  /** Message ciblé sous la réponse révélée d'un écran à choix fermés (une seule tentative). */
+  messageRevele?: FragmentConsigne[] | null;
+}
+
+/** En-tête commun des écrans (consigne générale, f(x), objectif). */
+function EnTeteEtudierFonction({ exercice }: { exercice: EtatSessionEtudierFonction["exerciceCourant"] }) {
+  return (
+    <>
+      <EnTeteExercice
+        consigneGenerale={CONSIGNE_GENERALE_ETUDIER_FONCTION}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
+      <QuestionFinale question={questionFinaleEtudierFonction()} />
+    </>
+  );
 }
 
 export function App5gen31() {
@@ -198,7 +227,7 @@ export function App5gen31() {
   /** Un écran qui se clôt passe par le bloc `ValidationEcran` (réponse attendue, « Écran suivant ») ;
    * une tentative ratée non finale reste sur l'écran. Le dernier écran (« graphique ») a son propre
    * bouton « Continuer » et n'est jamais poussé dans l'historique. */
-  function terminerEtape(nouvelEtat: EtatSessionEtudierFonction, votreReponse?: ReactNode) {
+  function terminerEtape(nouvelEtat: EtatSessionEtudierFonction, votreReponse?: ReactNode, messageRevele?: FragmentConsigne[] | null) {
     const clos = nouvelEtat.phase !== etat.phase || nouvelEtat.resultats.length > etat.resultats.length;
     if (!clos) {
       setEtat(nouvelEtat);
@@ -210,7 +239,7 @@ export function App5gen31() {
       return;
     }
     setAideParPhase((m) => ({ ...m, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } }));
-    setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+    setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee, messageRevele: nouvelEtat.derniereEtapeRevelee ? messageRevele : null });
   }
 
   function passerEcranSuivant() {
@@ -244,6 +273,15 @@ export function App5gen31() {
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
+        ...(enAttente.messageRevele
+          ? {
+              messageRevele: (
+                <span>
+                  Ce n'était pas la bonne réponse (choix fermés : une seule tentative). <RenduFragments fragments={enAttente.messageRevele} />
+                </span>
+              ),
+            }
+          : {}),
         reponseAttendue: reponseAttenduePhase(exercice, etat.phase),
         corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEtudierFonction(exercice), lettreEcranEtudierFonction(exercice, etat.phase))} />,
         labelSuivant: "Écran suivant",
@@ -314,7 +352,7 @@ interface EcranProps {
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
-  terminerEtape: (nouvelEtat: EtatSessionEtudierFonction, votreReponse?: ReactNode) => void;
+  terminerEtape: (nouvelEtat: EtatSessionEtudierFonction, votreReponse?: ReactNode, messageRevele?: FragmentConsigne[] | null) => void;
   setEtat: (etat: EtatSessionEtudierFonction) => void;
   continuerRecap: () => void;
   validation: ValidationEtapeProps | null;
@@ -355,26 +393,29 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           validation={validation}
           onValider={(reponses: ValeurReponseSlotLimite[]) =>
-            terminerEtape(soumettreReponseLimites(etat, reponses), <Katex expression={formatReponseLimitesLatex(exercice, reponses)} />)
+            terminerEtape(soumettreReponseLimites(etat, reponses), <Katex expression={formatReponseLimitesLatex(exercice, reponses)} />, cibleLimitesEtudierFonction(exercice, reponses))
           }
         />
       );
 
     case "calculerFPrime":
       return (
-        <EtapeCalculerDeriveeGenerique
+        <EcranSaisieLimites
           key={cleEcran}
-          exercice={exercice}
-          phase="calculerFPrime"
-          labelChamp="f'(x)="
-          tentativesUtilisees={tentativesUtilisees}
-          tentativesMax={tentativesMax}
+          enTete={<EnTeteEtudierFonction exercice={exercice} />}
+          consigne={[{ type: "texte", valeur: consigneEcranEtudierFonction("calculerFPrime") }]}
+          champs={[{ label: "f'(x)=", placeholder: "ex : 6x^2 − 2", apercu: true }]}
+          aides={aidesEtudierFonction(exercice, "calculerFPrime")}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          texteIllisible={(v) => refusSaisieEtudierFonction(exercice, "calculerFPrime", v) ?? ""}
+          illisible={(v) => refusSaisieEtudierFonction(exercice, "calculerFPrime", v) !== null}
+          cible={(v) => cibleEtudierFonction(exercice, "calculerFPrime", v)}
+          onValider={(v) => terminerEtape(soumettreReponseCalculerFPrime(etat, v[0]), `f′(x) = ${v[0]}`)}
           validation={validation}
-          onValider={(texte) => terminerEtape(soumettreReponseCalculerFPrime(etat, texte), `f'(x) = ${texte}`)}
-          diagnostiquer={(t) => diagnostiquerCalculerFPrime(t, exercice)}
         />
       );
 
@@ -390,25 +431,28 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           validation={validation}
-          onValider={(reponse) => terminerEtape(soumettreReponseTableauFPrime(etat, reponse), formatReponseTableauTexte(reponse))}
+          onValider={(reponse) => terminerEtape(soumettreReponseTableauFPrime(etat, reponse), formatReponseTableauTexte(reponse), cibleTableauEtudierFonction(exercice, "fprime", reponse))}
         />
       );
 
     case "calculerFSeconde":
       return (
-        <EtapeCalculerDeriveeGenerique
+        <EcranSaisieLimites
           key={cleEcran}
-          exercice={exercice}
-          phase="calculerFSeconde"
-          labelChamp="f''(x)="
-          tentativesUtilisees={tentativesUtilisees}
-          tentativesMax={tentativesMax}
+          enTete={<EnTeteEtudierFonction exercice={exercice} />}
+          consigne={[{ type: "texte", valeur: consigneEcranEtudierFonction("calculerFSeconde") }]}
+          champs={[{ label: "f''(x)=", placeholder: "ex : 6x^2 − 2", apercu: true }]}
+          aides={aidesEtudierFonction(exercice, "calculerFSeconde")}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          texteIllisible={(v) => refusSaisieEtudierFonction(exercice, "calculerFSeconde", v) ?? ""}
+          illisible={(v) => refusSaisieEtudierFonction(exercice, "calculerFSeconde", v) !== null}
+          cible={(v) => cibleEtudierFonction(exercice, "calculerFSeconde", v)}
+          onValider={(v) => terminerEtape(soumettreReponseCalculerFSeconde(etat, v[0]), `f″(x) = ${v[0]}`)}
           validation={validation}
-          onValider={(texte) => terminerEtape(soumettreReponseCalculerFSeconde(etat, texte), `f''(x) = ${texte}`)}
-          diagnostiquer={(t) => diagnostiquerCalculerFSeconde(t, exercice)}
         />
       );
 
@@ -424,33 +468,41 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           validation={validation}
-          onValider={(reponse) => terminerEtape(soumettreReponseTableauFSeconde(etat, reponse), formatReponseTableauTexte(reponse))}
+          onValider={(reponse) => terminerEtape(soumettreReponseTableauFSeconde(etat, reponse), formatReponseTableauTexte(reponse), cibleTableauEtudierFonction(exercice, "fseconde", reponse))}
         />
       );
 
     case "recap":
       return <EtapeRecapitulatifEtudierFonction key={cleEcran} exercice={exercice} onContinuer={continuerRecap} />;
 
-    case "coordonnees":
+    case "coordonnees": {
+      const points = pointsClesEtudierFonction(exercice);
       return (
-        <EtapeCoordonneesEtudierFonction
+        <EcranSaisieLimites
           key={cleEcran}
-          exercice={exercice}
-          tentativesUtilisees={tentativesUtilisees}
-          tentativesMax={tentativesMax}
+          enTete={<EnTeteEtudierFonction exercice={exercice} />}
+          consigne={[{ type: "texte", valeur: consigneEcranEtudierFonction("coordonnees") }]}
+          champs={points.map((p) => ({ label: formatLabelCoordonneeLatex(p), placeholder: "ex : 2 − 4√2" }))}
+          aides={aidesEtudierFonction(exercice, "coordonnees")}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          texteIllisible={(v) => refusSaisieEtudierFonction(exercice, "coordonnees", v) ?? ""}
+          illisible={(v) => refusSaisieEtudierFonction(exercice, "coordonnees", v) !== null}
+          cible={(v) => cibleEtudierFonction(exercice, "coordonnees", v)}
+          onValider={(v) => terminerEtape(soumettreReponseCoordonnees(etat, v), v.join(" ; "))}
           validation={validation}
-          onValider={(reponses) => terminerEtape(soumettreReponseCoordonnees(etat, reponses), reponses.join(" ; "))}
         />
       );
+    }
 
     case "graphique": {
       const points = pointsClesEtudierFonction(exercice).map((p) => ({
         id: p.id,
         label: p.label,
-        labelLatex: `\\left(${formatAbscissePointLatex(p)}\\,;\\,${formatOrdonneeLatex(p.y)}\\right)`,
+        labelLatex: `\\left(${formatAbscissePointLatex(p)}\\,;\\,${formatOrdonneePointLatex(exercice, p)}\\right)`,
         x: p.x,
         y: p.y,
       }));

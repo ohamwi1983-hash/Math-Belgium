@@ -87,11 +87,16 @@ export function TableauEtudeLocaleBuilder({ colonnes, enteteColonnes, mode, atte
   const complet = signes.every((v) => v !== null) && ligne2.every((v, i) => colonnes[i].type === "exclusion" || v !== null);
   const montrerErreurs = tentativesUtilisees > 0;
 
+  // Écran clos (choix fermés : une seule tentative) : chaque case est JUGÉE — juste en vert, fausse en
+  // rouge (`is-juste` / `is-faux`, mêmes classes que `4e/ui/choixFige.ts`) ; la réponse attendue est
+  // montrée en dessous par `ValidationEcran`.
   function classeSigne(j: number): string {
+    if (validation) return `btn toggle-signe ${signes[j] === attendu.signes[j] ? "is-juste" : "is-faux"}`;
     const erronee = montrerErreurs && signes[j] !== null && signes[j] !== attendu.signes[j];
     return erronee ? "btn toggle-signe is-erronee" : "btn toggle-signe";
   }
   function classeLigne2(j: number): string {
+    if (validation) return `btn toggle-signe ${ligne2[j] === attendu.ligne2[j] ? "is-juste" : "is-faux"}`;
     const erronee = montrerErreurs && ligne2[j] !== null && ligne2[j] !== attendu.ligne2[j];
     return erronee ? "btn toggle-signe is-erronee" : "btn toggle-signe";
   }
@@ -129,7 +134,7 @@ export function TableauEtudeLocaleBuilder({ colonnes, enteteColonnes, mode, atte
               <td className="grille-signes-borne" />
               {colonnes.map((col, j) => (
                 <td key={j} className={col.type === "zone" ? "grille-signes-zone" : "grille-signes-point"}>
-                  <button type="button" className={classeSigne(j)} onClick={() => cyclerCelluleSigne(j)}>
+                  <button type="button" className={classeSigne(j)} disabled={!!validation} onClick={() => cyclerCelluleSigne(j)}>
                     {libelleSigneTableau(signes[j])}
                   </button>
                 </td>
@@ -142,7 +147,7 @@ export function TableauEtudeLocaleBuilder({ colonnes, enteteColonnes, mode, atte
               {colonnes.map((col, j) => (
                 <td key={j} className={col.type === "zone" ? "grille-signes-zone" : "grille-signes-point"}>
                   {col.type !== "exclusion" && (
-                    <button type="button" className={classeLigne2(j)} onClick={() => cyclerCelluleLigne2(j)} aria-label={libelleLigne2Tableau(ligne2[j])}>
+                    <button type="button" className={classeLigne2(j)} disabled={!!validation} onClick={() => cyclerCelluleLigne2(j)} aria-label={libelleLigne2Tableau(ligne2[j])}>
                       <EtiquetteLigne2Tableau valeur={ligne2[j]} />
                     </button>
                   )}
@@ -159,7 +164,7 @@ export function TableauEtudeLocaleBuilder({ colonnes, enteteColonnes, mode, atte
           <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
             Valider
           </button>
-          {montrerErreurs && (
+          {montrerErreurs && tentativesUtilisees < tentativesMax && (
             <p className="alert-error" role="alert">
               Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
             </p>

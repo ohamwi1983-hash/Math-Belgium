@@ -5,10 +5,11 @@
  * tirages par variante (scratchpad 5c5-R3/mesure.txt).
  *
  * 5gen31 — `forme` = type de fonction (polynomiale, rationnelle sans/avec valeurs interdites,
- * rationnelle à asymptote oblique), même type d'une série à l'autre. Cas particulier (il RACCOURCIT
- * l'étude) : `sans-extremum` — f′ sans changement de signe (racine double de la polynomiale, ou
- * asymptote oblique sans extremum) : aucun extremum à placer. `calcul` : `'calculatrice'` dès qu'un
- * point remarquable a une abscisse irrationnelle (ordonnées arrondies au centième), `'exacte'` sinon.
+ * rationnelle à asymptote oblique) + racines irrationnelles visibles (`-irrationnelle`), même type
+ * d'une série à l'autre. Lot D : « sans extremum » (racine double de la polynomiale, asymptote oblique
+ * sans extremum) est le VERDICT de l'étude — plus un cas particulier, hors de la `forme`, groupes à
+ * verdict `groupe_extremums_poly` / `groupe_extremums_ao` (exportEvaluation). Lot C : ordonnées
+ * EXACTES (e ± √r compris), `calcul` absent (la calculatrice ne fait pas l'étude).
  *
  * 5gen32 — `forme` = famille (gouttière, boîte, affiche ×2, fenêtre ×2, cubique), avec l'application
  * numérique du cylindre comme structure à part (une question de plus). Aucun cas particulier (chaque
@@ -31,17 +32,14 @@ import type { ExerciceContexteEconomique } from "../core5e/contexteEconomique.ty
 // 5gen31 — étudier une fonction.
 // ============================================================================
 
-export const LIBELLE_CAS_ETUDIER_FONCTION = "Inclure un cas particulier (fonction sans extremum)";
-
 export function profilEtudierFonction(e: ExerciceEtudierFonction): ProfilInstance {
   if (e.famille === "rationnelleAO") {
     const irrationnelle = e.racinesFPrime.some((r) => !r.exact);
-    return { casParticulier: e.racinesFPrime.length === 0 ? "sans-extremum" : null, calcul: irrationnelle ? "calculatrice" : undefined, forme: "rationnelleAO" };
+    return { casParticulier: null, forme: irrationnelle ? "rationnelleAO-irrationnelle" : "rationnelleAO" };
   }
   const n = e.noyau;
-  const sansExtremum = n.classificationFPrime.every((c) => c === "ni_lun_ni_lautre");
-  const irrationnelle = [...n.racinesFPrime, ...n.racinesFSeconde].some((r) => !r.exact);
-  return { casParticulier: sansExtremum ? "sans-extremum" : null, calcul: irrationnelle ? "calculatrice" : undefined, forme: n.type };
+  const irrationnelle = n.type === "polynomiale" && n.racinesFPrime.some((r) => !r.exact);
+  return { casParticulier: null, forme: irrationnelle ? `${n.type}-irrationnelle` : n.type };
 }
 
 // ============================================================================

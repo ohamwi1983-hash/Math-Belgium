@@ -2,7 +2,7 @@ import type { RacineEtudeLocale } from "../../core5e/etudeLocale.types";
 import type { ExerciceEtudierFonction } from "../../core5e/etudierFonction.types";
 import { construireSvgFonction, type PointMarqueSvg } from "../../../export/svgGraph";
 import { formatLimiteCibleLatex, formatOrdonneeLatex } from "../../ui5e/formatEtudierFonction";
-import { libelleLigne2Tableau } from "../../ui5e/formatEtudeLocale";
+import { libelleLigne2Tableau, radicalSimplifieLatex } from "../../ui5e/formatEtudeLocale";
 import { calculerViewBoxEtudierFonction } from "../../ui5e/etudierFonctionCourbe";
 import { decalageVertical, exclusionsCE, listeSlotsLimites, pointsClesEtudierFonction, racinesFPrime, racinesFSeconde, typeAsymptotique, valeurF } from "../../moteur5e/verificationEtudierFonction";
 import type { TableauEtudeLocaleAttendu } from "../../moteur5e/verificationEtudeLocale";
@@ -27,7 +27,7 @@ export function asymptotesLatex(exercice: ExerciceEtudierFonction): string[] {
 export function racineTexte(r: RacineEtudeLocale): string {
   const moins = (s: string) => s.replace(/-/g, "−");
   if (r.exact) return moins(r.valeur.den === 1 ? `${r.valeur.num}` : `${r.valeur.num}/${r.valeur.den}`);
-  const racine = `√${r.radicande}`;
+  const racine = radicalSimplifieLatex(1, r.radicande).replace(/\\sqrt\{(\d+)\}/, "√$1");
   if (r.centre === 0) return r.signe < 0 ? `−${racine}` : racine;
   return `${moins(`${r.centre}`)} ${r.signe < 0 ? "−" : "+"} ${racine}`;
 }

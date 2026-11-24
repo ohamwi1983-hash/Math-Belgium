@@ -1,7 +1,9 @@
 import type { ExerciceEtudierFonction } from "../core5e/etudierFonction.types";
 import type { ReponseTableauEtudierFonction } from "../moteur5e/verificationEtudierFonction";
 import { tableauFPrimeAttendu, tableauFSecondeAttendu } from "../moteur5e/verificationEtudierFonction";
-import { CONSIGNE_GENERALE_ETUDIER_FONCTION, consigneEcranEtudierFonction, formatEnteteColonnesTableauEtudierFonction, formatTermesDonneesLatex, questionFinaleEtudierFonction, texteAideNiveau1EtudierFonction, texteAideNiveau2EtudierFonction } from "../ui5e/formatEtudierFonction";
+import { CONSIGNE_GENERALE_ETUDIER_FONCTION, consigneEcranEtudierFonction, formatEnteteColonnesTableauEtudierFonction, formatTermesDonneesLatex, questionFinaleEtudierFonction } from "../ui5e/formatEtudierFonction";
+import { aidesEtudierFonction } from "../ui5e/retoursEtudierFonction";
+import { AidesTrig } from "./RetourSaisieTrig";
 import { Katex } from "../components/Katex";
 import { QuestionFinale } from "../components/QuestionFinale";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -46,21 +48,7 @@ export function EtapeTableauEtudierFonction({ exercice, phase, tentativesUtilise
       />
       <QuestionFinale question={questionFinaleEtudierFonction()} />
       <p className="prompt-text">{consigneEcranEtudierFonction(phase)}</p>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1EtudierFonction(phase)}</p>
-          {niveauAide >= 2 &&
-            (() => {
-              const aide2 = texteAideNiveau2EtudierFonction(phase);
-              return (
-                <>
-                  <p>{aide2.texte}</p>
-                  {aide2.latex && <Katex expression={aide2.latex} block />}
-                </>
-              );
-            })()}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesEtudierFonction(exercice, phase)} />
       <TableauEtudeLocaleBuilder
         colonnes={attendu.colonnes}
         enteteColonnes={enteteColonnes}

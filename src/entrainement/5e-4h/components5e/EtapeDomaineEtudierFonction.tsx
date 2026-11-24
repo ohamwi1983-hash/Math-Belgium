@@ -3,11 +3,13 @@ import type { ExerciceEtudierFonction } from "../core5e/etudierFonction.types";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import { QuestionFinale } from "../components/QuestionFinale";
 import { Katex } from "../components/Katex";
-import { CONSIGNE_GENERALE_ETUDIER_FONCTION, consigneEcranEtudierFonction, formatTermesDonneesLatex, questionFinaleEtudierFonction, texteAideNiveau1EtudierFonction, texteAideNiveau2EtudierFonction } from "../ui5e/formatEtudierFonction";
+import { CONSIGNE_GENERALE_ETUDIER_FONCTION, consigneEcranEtudierFonction, formatTermesDonneesLatex, questionFinaleEtudierFonction } from "../ui5e/formatEtudierFonction";
+import { aidesEtudierFonction } from "../ui5e/retoursEtudierFonction";
 import { domaineAttendu } from "../moteur5e/verificationEtudierFonction";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { AidesTrig } from "./RetourSaisieTrig";
 
 interface Props {
   exercice: ExerciceEtudierFonction;
@@ -22,7 +24,8 @@ interface Props {
 
 /** Écran "domaine" — uniquement présent si le domaine est restreint (voir
  * `moteur5e/typesEtudierFonction.ts`). Réutilise DIRECTEMENT `EnsembleReelGuideBuilder`, exactement
- * comme 5gen29 (`EtapeDomaineEtudeLocale.tsx`). Calculatrice ABSENTE (question structurelle). */
+ * comme 5gen29 (`EtapeDomaineEtudeLocale.tsx`). Lot B : aides à deux niveaux (niveau 2 posé pour la
+ * fonction), consigne qui ne dit plus que le dénominateur « ne s'annule jamais » (G7). */
 export function EtapeDomaineEtudierFonction({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -48,24 +51,10 @@ export function EtapeDomaineEtudierFonction({ exercice, tentativesUtilisees, ten
         apresEchec={montrerErreurs}
         validation={validation}
       />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1EtudierFonction("domaine")}</p>
-          {niveauAide >= 2 &&
-            (() => {
-              const aide2 = texteAideNiveau2EtudierFonction("domaine");
-              return (
-                <>
-                  <p>{aide2.texte}</p>
-                  {aide2.latex && <Katex expression={aide2.latex} block />}
-                </>
-              );
-            })()}
-        </div>
-      )}
+      <AidesTrig niveauAide={niveauAide} aides={aidesEtudierFonction(exercice, "domaine")} />
       {!validation && montrerErreurs && (
         <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          Incorrect : une valeur exclue est une valeur qui annule un dénominateur — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
         </p>
       )}
     </div>

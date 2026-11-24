@@ -61,14 +61,26 @@ export function formatDLatexPublic(e: number, k: number): string {
   return formatDLatex(e, k);
 }
 
-function formatRacineLatex(r: RacineEtudeLocale): string {
+/** |coef|·√r SIMPLIFIÉ (audit 5e ch. 5, G11 : √8 = 2√2), sans signe : « 2\\sqrt{2} », « \\sqrt{3} », « 6 ». */
+export function radicalSimplifieLatex(coef: number, r: number): string {
+  let k = Math.abs(coef);
+  let m = r;
+  for (let p = 2; p * p <= m; p++) while (m % (p * p) === 0) {
+    m /= p * p;
+    k *= p;
+  }
+  if (m === 1) return `${k}`;
+  return `${k === 1 ? "" : k}\\sqrt{${m}}`;
+}
+
+export function formatRacineLatex(r: RacineEtudeLocale): string {
   if (r.exact) {
     const { num, den } = r.valeur;
     if (den === 1) return `${num}`;
     return num < 0 ? `-\\dfrac{${-num}}{${den}}` : `\\dfrac{${num}}{${den}}`;
   }
   const centreTxt = r.centre === 0 ? "" : `${r.centre}`;
-  const sqrtTxt = `\\sqrt{${r.radicande}}`;
+  const sqrtTxt = radicalSimplifieLatex(1, r.radicande);
   if (r.centre === 0) return r.signe < 0 ? `-${sqrtTxt}` : sqrtTxt;
   return r.signe < 0 ? `${centreTxt}-${sqrtTxt}` : `${centreTxt}+${sqrtTxt}`;
 }
@@ -545,4 +557,3 @@ export function formatEnteteColonnesTableau(exercice: ExerciceEtudeLocale, colon
   });
 }
 
-export { formatRacineLatex };
