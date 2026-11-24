@@ -5,6 +5,8 @@ import type { EntreeRecapitulatif } from "./recapitulatif";
 
 const LIBELLE_PHASE: Record<EcranEtudeLocale, string> = {
   domaine: "Domaine",
+  deriverFPrime: "Dérivée f'(x)",
+  deriverFSeconde: "Dérivée seconde f''(x)",
   resoudreFPrime: "Racines de f'(x)=0",
   tableauFPrime: "Tableau de signes de f'",
   extremums: "Valeurs aux extremums",

@@ -24,7 +24,7 @@ import type { ExerciceEtudeLocale } from "../core5e/etudeLocale.types";
 import type { ReglagesSession5e } from "../core5e/session5e.types";
 import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
-export type EcranEtudeLocale = "domaine" | "resoudreFPrime" | "tableauFPrime" | "extremums" | "resoudreFSeconde" | "tableauFSeconde" | "inflexions";
+export type EcranEtudeLocale = "domaine" | "deriverFPrime" | "resoudreFPrime" | "tableauFPrime" | "extremums" | "deriverFSeconde" | "resoudreFSeconde" | "tableauFSeconde" | "inflexions";
 
 /** Nombre de racines de f'(x)=0 réellement classées "max" ou "min" (jamais "ni_lun_ni_lautre") —
  * calculé UNE FOIS depuis `classificationFPrime`, déjà stocké à la génération (jamais re-dérivé en
@@ -45,8 +45,9 @@ export function nombreInflexions(exercice: ExerciceEtudeLocale): number {
 export function structureFixeEtudeLocale(exercice: ExerciceEtudeLocale): EcranEtudeLocale[] {
   const ecrans: EcranEtudeLocale[] = [];
   if (exercice.type !== "polynomiale") ecrans.push("domaine");
+  if (exercice.deriveesACalculer) ecrans.push("deriverFPrime");
   ecrans.push("resoudreFPrime", "tableauFPrime", "extremums");
-  if (exercice.niveau === "avance") ecrans.push("resoudreFSeconde", "tableauFSeconde", "inflexions");
+  if (exercice.niveau === "avance") ecrans.push(...(exercice.deriveesACalculer ? (["deriverFSeconde"] as EcranEtudeLocale[]) : []), "resoudreFSeconde", "tableauFSeconde", "inflexions");
   return ecrans;
 }
 
@@ -55,9 +56,11 @@ export function ordreEcransEtudeLocale(exercice: ExerciceEtudeLocale): EcranEtud
   // Écran domaine pour TOUTE fonction rationnelle (avec OU sans CE) : décider s'il existe des
   // valeurs interdites fait partie du raisonnement (audit 5e ch. 5, décision J).
   if (exercice.type !== "polynomiale") ecrans.push("domaine");
+  if (exercice.deriveesACalculer) ecrans.push("deriverFPrime");
   ecrans.push("resoudreFPrime", "tableauFPrime");
   if (nombreExtremums(exercice) > 0) ecrans.push("extremums");
   if (exercice.niveau === "avance") {
+    if (exercice.deriveesACalculer) ecrans.push("deriverFSeconde");
     ecrans.push("resoudreFSeconde", "tableauFSeconde");
     if (nombreInflexions(exercice) > 0) ecrans.push("inflexions");
   }

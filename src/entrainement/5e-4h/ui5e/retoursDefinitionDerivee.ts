@@ -39,7 +39,7 @@ function niveau2(e: ExerciceDefinitionDerivee, ecran: EcranDefinitionDerivee): A
       case "rationnelleSimple":
         return {
           texte: [t("Ici, f("), l(`${a}`), t(") s'obtient en remplaçant x par "), l(par(a)), t(" (simplifie la fraction si possible) ; pour f("), l(`${a}+h`), t("), x devient :")],
-          formules: [e.expo === 1 ? `f(${a})=\\dfrac{${e.k}}{${par(a)}}\\qquad x\\to ${a}+h` : `f(${a})=\\dfrac{${e.k}}{${par(a)}^2}\\qquad x^2\\to ${ah}^2`],
+          formules: [e.expo === 1 ? `x\\to ${par(a)}\\qquad x\\to ${a}+h` : `x^2\\to ${par(a)}^2\\qquad x^2\\to ${ah}^2`],
         };
       case "rationnelleLineaire":
         return {

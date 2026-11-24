@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import type { AideTrig } from "../ui5e/aidesTrigonometrie";
+import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 import type { ExerciceEtudeLocale } from "../core5e/etudeLocale.types";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { Katex } from "../components/Katex";
 import { QuestionFinale } from "../components/QuestionFinale";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
-import { formatMessageErreur } from "../ui/messageErreur";
-import { CONSIGNE_GENERALE_ETUDE_LOCALE, consigneEcranEtudeLocale, formatTermesDonneesLatex, questionFinaleEtudeLocale, texteAideNiveau1EtudeLocale, texteAideNiveau2EtudeLocale } from "../ui5e/formatEtudeLocale";
+import { consigneGeneraleEtudeLocale, consigneEcranEtudeLocale, formatTermesDonneesLatex, questionFinaleEtudeLocale } from "../ui5e/formatEtudeLocale";
 
 interface Props {
   exercice: ExerciceEtudeLocale;
@@ -35,6 +35,10 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Message ciblé sur l'erreur trahie par la dernière réponse fausse (lot B). */
+  cible?: (valeurs: string[]) => FragmentConsigne[] | null;
+  /** Aides à deux niveaux (niveau 2 posé pour l'instance). */
+  aides: AideTrig[];
 }
 
 /** Écran générique "N champs numériques FIGÉS, vérifiés comme un ENSEMBLE" — réutilisé par
@@ -58,6 +62,8 @@ export function EtapeChampsNumeriquesEtudeLocale({
   onValider,
   diagnostiquer,
   controlerSaisie,
+  cible,
+  aides,
   validation,
 }: Props) {
   const nb = labels.length;
@@ -65,9 +71,8 @@ export function EtapeChampsNumeriquesEtudeLocale({
   useEffect(() => {
     setValeurs(new Array(nb).fill(""));
   }, [nb]);
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const [soumises, setSoumises] = useState<string[] | null>(null);
   const [avertissement, setAvertissement] = useState<string | null>(null);
-  const montrerErreurs = tentativesUtilisees > 0;
   const complet = valeurs.every((v) => v.trim() !== "");
   const apresEchec = tentativesUtilisees > 0;
   const statuts = apresEchec && diagnostiquer && complet ? valeurs.map((v) => diagnostiquer(v)) : null;
@@ -80,7 +85,7 @@ export function EtapeChampsNumeriquesEtudeLocale({
     const message = controlerSaisie ? controlerSaisie(valeurs) : null;
     setAvertissement(message);
     if (message) return;
-    if (diagnostiquer) setDernierStatut(valeurs.map((v) => diagnostiquer(v)).find((s) => s !== "correct") ?? "correct");
+    setSoumises(valeurs);
     onValider(valeurs);
   }
 
@@ -89,7 +94,7 @@ export function EtapeChampsNumeriquesEtudeLocale({
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={CONSIGNE_GENERALE_ETUDE_LOCALE}
+        consigneGenerale={consigneGeneraleEtudeLocale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">
             {formatTermesDonneesLatex(exercice).map((frag, i) => (
@@ -115,48 +120,20 @@ export function EtapeChampsNumeriquesEtudeLocale({
         </div>
       ))}
       <CalculatriceScientifique />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          {(() => {
-            const aide1 = texteAideNiveau1EtudeLocale(phase, exercice);
-            return (
-              <>
-                <p>{aide1.texte}</p>
-                {aide1.latex && <Katex expression={aide1.latex} block />}
-              </>
-            );
-          })()}
-          {niveauAide >= 2 &&
-            (() => {
-              const aide2 = texteAideNiveau2EtudeLocale(phase);
-              return (
-                <>
-                  <p>{aide2.texte}</p>
-                  {aide2.latex && <Katex expression={aide2.latex} block />}
-                </>
-              );
-            })()}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {avertissement && (
-          <p className="alert-error" role="alert">
-            {avertissement}
-          </p>
-        )}
-        {montrerErreurs && !avertissement && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aides}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={avertissement !== null}
+        texteIllisible={avertissement ?? ""}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumises !== null && tentativesUtilisees > 0 && cible ? cible(soumises) : null}
+        validation={validation}
+      />
     </div>
   );
 }

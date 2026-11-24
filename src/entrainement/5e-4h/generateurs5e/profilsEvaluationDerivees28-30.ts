@@ -67,10 +67,16 @@ export function profilTangente(e: ExerciceTangente): ProfilInstance {
   }
 }
 
+/** Option « f′ et f″ données / à calculer » (lot C, question 3) : case cochée (défaut) = dérivées
+ * données ; décochée = à calculer. Marqueur d'absence : `derivees-a-calculer`. */
+export const PARAMETRES_ETUDE_LOCALE = [{ id: "derivees-a-calculer", label: "Dérivées f′ (et f″) données (décoché : à calculer)" }];
+
 export function profilEtudeLocale(e: ExerciceEtudeLocale): ProfilInstance {
-  const nature = e.type === "polynomiale" ? `-${e.natureRacines}` : "";
-  const irrationnelle = e.type === "polynomiale" && e.natureRacines === "irrationnelle";
-  return { casParticulier: null, calcul: irrationnelle ? "calculatrice" : "exacte", forme: `${e.type}${nature}-${e.niveau}` };
+  // Lot D : racines simples ou double (= extremums ou non) est le VERDICT (groupes à verdict) — hors
+  // de la `forme` ; irrationnelle reste visible dans la forme (elle n'est pas dans un groupe). Lot C :
+  // valeurs exactes partout (`calcul: 'exacte'`).
+  const nature = e.type === "polynomiale" ? (e.natureRacines === "irrationnelle" ? "-irrationnelle" : "-rationnelle") : "";
+  return { casParticulier: e.deriveesACalculer ? "derivees-a-calculer" : null, calcul: "exacte", forme: `${e.type}${nature}-${e.niveau}` };
 }
 
 export function profilLectureGraphiqueDerivees(e: ExerciceLectureGraphiqueDerivees): ProfilInstance {

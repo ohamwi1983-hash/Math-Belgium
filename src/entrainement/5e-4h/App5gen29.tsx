@@ -3,7 +3,15 @@ import type { ReactNode } from "react";
 import type { RacineEtudeLocale } from "./core5e/etudeLocale.types";
 import type { EnsembleReelGuide } from "./core5e/domaineDefinition.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEtudeLocale } from "./generateurs5e/etudeLocale/index";
+import type { ExerciceEtudeLocale } from "./core5e/etudeLocale.types";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEtudeLocale, genererExerciceEtudeLocaleLibre } from "./generateurs5e/etudeLocale/index";
+import { aidesEtudeLocale, cibleEtudeLocale } from "./ui5e/retoursEtudeLocale";
+import { EcranSaisieLimites } from "./components5e/EcranSaisieLimites";
+import { EnTeteExercice } from "./components5e/EnTeteExercice";
+import { QuestionFinale } from "./components/QuestionFinale";
+import { consigneEcranEtudeLocale, consigneGeneraleEtudeLocale, formatTermesDonneesLatex, questionFinaleEtudeLocale } from "./ui5e/formatEtudeLocale";
+import { refusDeriveeEtudeLocale, refusValeursEtudeLocale } from "./moteur5e/verificationEtudeLocale";
+import { soumettreReponseDeriver } from "./moteur5e/sessionEtudeLocale";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import {
   activerAideSuivante,
@@ -25,7 +33,6 @@ import {
   ciblesRacinesFSeconde,
   ciblesValeursExtremums,
   ciblesValeursInflexions,
-  contientArrondiRationnel,
   diagnostiquerChampParmiCiblesExactes,
   tableauFPrimeAttendu,
   tableauFSecondeAttendu,
@@ -60,8 +67,15 @@ import { lignesDeLEtape } from "../export/corrigeTableau";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
-function nouvelleSession(): EtatSessionEtudeLocale {
-  return demarrerSessionEtudeLocale(REGLAGES_DEMO, genererExerciceEtudeLocale);
+/** Option « f′ et f″ données / à calculer » de l'écran (lot C, question 3 ; défaut : données). */
+type ModeDerivees = "donnees" | "calculer";
+
+function avecMode(e: ExerciceEtudeLocale, mode: ModeDerivees): ExerciceEtudeLocale {
+  return { ...e, deriveesACalculer: mode === "calculer" };
+}
+
+function nouvelleSession(mode: ModeDerivees = "donnees"): EtatSessionEtudeLocale {
+  return demarrerSessionEtudeLocale(REGLAGES_DEMO, () => avecMode(genererExerciceEtudeLocaleLibre(), mode));
 }
 
 /** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
@@ -101,14 +115,9 @@ function reponseAttendueEtudeLocale(exercice: EtatSessionEtudeLocale["exerciceCo
   );
 }
 
-const MESSAGE_ILLISIBLE = "Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).";
-const MESSAGE_ARRONDI = "Valeur arrondie : donne la valeur exacte (fraction ou décimal exact). Cette tentative n'est pas décomptée.";
-
-/** Contrôle de FORME avant soumission (saisie illisible, arrondi d'une valeur rationnelle) : la
- * tentative n'est pas décomptée (audit 5e ch. 5, décision I). */
+/** Saisie refusée sans tentative (illisible, arrondie) — même fonction que le moteur (lot B). */
 function controlerSaisieNumerique(reponses: string[], cibles: CibleNumerique[]): string | null {
-  if (reponses.some((t) => diagnostiquerChampParmiCiblesExactes(t, cibles) === "parse_error")) return MESSAGE_ILLISIBLE;
-  return contientArrondiRationnel(reponses, cibles) ? MESSAGE_ARRONDI : null;
+  return refusValeursEtudeLocale(reponses, cibles);
 }
 
 interface TransitionEnAttente {
@@ -174,6 +183,7 @@ function texteTableauEtudeLocale(reponse: ReponseTableauEtudeLocale): string {
 
 export function App5gen29() {
   const [etat, setEtat] = useState<EtatSessionEtudeLocale>(sessionInitiale);
+  const [mode, setMode] = useState<ModeDerivees>(() => (etat.exerciceCourant.deriveesACalculer ? "calculer" : "donnees"));
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
    * `EtatSessionEtudeLocale`, jamais dans le moteur (même principe que `AppAnalyseFonction.tsx`, 4e). */
@@ -215,7 +225,7 @@ export function App5gen29() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
-      setEtat(nouvelleSession());
+      setEtat(nouvelleSession(mode));
       setHistorique([]);
       setAideParPhase({});
       setNumeroGeneration((g) => g + 1);
@@ -230,7 +240,17 @@ export function App5gen29() {
     setHistorique([]);
     setAideParPhase({});
     setNumeroGeneration((g) => g + 1);
-    setEtat(demarrerSessionEtudeLocale(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
+    setEtat(demarrerSessionEtudeLocale(REGLAGES_DEMO, () => avecMode(construireAvecVarianteId(id), mode)));
+  }
+
+  function changerMode(m: ModeDerivees) {
+    if (m === mode) return;
+    setMode(m);
+    setEnAttente(null);
+    setHistorique([]);
+    setAideParPhase({});
+    setNumeroGeneration((g) => g + 1);
+    setEtat(nouvelleSession(m));
   }
 
   const exercice = etat.exerciceCourant;
@@ -254,6 +274,14 @@ export function App5gen29() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Étude locale (extremums et points critiques)</h1>
         <p className="app-subtitle">Chapitre 5 — Dérivées et applications</p>
+        <div className="options-grid" role="group" aria-label="Dérivées f′ et f″">
+          <button type="button" className={`btn${mode === "donnees" ? " toggle-active" : ""}`} aria-pressed={mode === "donnees"} onClick={() => changerMode("donnees")}>
+            f′ et f″ données
+          </button>
+          <button type="button" className={`btn${mode === "calculer" ? " toggle-active" : ""}`} aria-pressed={mode === "calculer"} onClick={() => changerMode("calculer")}>
+            f′ et f″ à calculer
+          </button>
+        </div>
         <ProgressionPuces
           segments={calculerSegmentsProgression(etat, aideParPhase, enAttente?.etatSuivant.terminee ?? false)}
           onSegmentClick={(index) => setFicheOuverteIndex(indexHistoriquePourPuce(etat, index))}
@@ -301,6 +329,42 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
 
   switch (phase) {
+    case "deriverFPrime":
+    case "deriverFSeconde":
+      return (
+        <EcranSaisieLimites
+          key={cleEcran}
+          enTete={
+            <>
+              <EnTeteExercice
+                consigneGenerale={consigneGeneraleEtudeLocale(exercice)}
+                blocDonnees={
+                  <div className="equation-box equation-box-donnees">
+                    {formatTermesDonneesLatex(exercice).map((frag, i) => (
+                      <Katex key={i} expression={frag} />
+                    ))}
+                  </div>
+                }
+              />
+              <QuestionFinale question={questionFinaleEtudeLocale(exercice)} />
+            </>
+          }
+          consigne={[{ type: "texte", valeur: consigneEcranEtudeLocale(phase) }]}
+          champs={[{ label: phase === "deriverFPrime" ? "f'(x)=" : "f''(x)=", placeholder: "ex : 6x^2 − 2", apercu: true }]}
+          aides={aidesEtudeLocale(exercice, phase)}
+          niveauAide={etat.niveauAide}
+          niveauAideMax={niveauAideMax}
+          onActiverAide={onActiverAide}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          texteIllisible={(v) => refusDeriveeEtudeLocale(v[0]) ?? ""}
+          illisible={(v) => refusDeriveeEtudeLocale(v[0]) !== null}
+          cible={(v) => cibleEtudeLocale(exercice, phase, v)}
+          onValider={(v) => terminerEtape(soumettreReponseDeriver(etat, v[0]), v[0])}
+          validation={validation}
+        />
+      );
+
     case "domaine":
       return (
         <EtapeDomaineEtudeLocale
@@ -331,6 +395,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onValider={(reponses) => terminerEtape(soumettreReponseResoudreFPrime(etat, reponses), reponses.join(" ; "))}
           diagnostiquer={(t) => diagnostiquerChampParmiCiblesExactes(t, ciblesRacinesFPrime(exercice))}
           controlerSaisie={(reponses) => controlerSaisieNumerique(reponses, ciblesRacinesFPrime(exercice))}
+          aides={aidesEtudeLocale(exercice, "resoudreFPrime")}
+          cible={(v) => cibleEtudeLocale(exercice, "resoudreFPrime", v)}
           validation={validation}
         />
       );
@@ -370,6 +436,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onValider={(reponses) => terminerEtape(soumettreReponseExtremums(etat, reponses), reponses.join(" ; "))}
           diagnostiquer={(t) => diagnostiquerChampParmiCiblesExactes(t, ciblesValeursExtremums(exercice))}
           controlerSaisie={(reponses) => controlerSaisieNumerique(reponses, ciblesValeursExtremums(exercice))}
+          aides={aidesEtudeLocale(exercice, "extremums")}
+          cible={(v) => cibleEtudeLocale(exercice, "extremums", v)}
           validation={validation}
         />
       );
@@ -390,6 +458,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onValider={(reponses) => terminerEtape(soumettreReponseResoudreFSeconde(etat, reponses), reponses.join(" ; "))}
           diagnostiquer={(t) => diagnostiquerChampParmiCiblesExactes(t, ciblesRacinesFSeconde(exercice))}
           controlerSaisie={(reponses) => controlerSaisieNumerique(reponses, ciblesRacinesFSeconde(exercice))}
+          aides={aidesEtudeLocale(exercice, "resoudreFSeconde")}
+          cible={(v) => cibleEtudeLocale(exercice, "resoudreFSeconde", v)}
           validation={validation}
         />
       );
@@ -429,6 +499,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onValider={(reponses) => terminerEtape(soumettreReponseInflexions(etat, reponses), reponses.join(" ; "))}
           diagnostiquer={(t) => diagnostiquerChampParmiCiblesExactes(t, ciblesValeursInflexions(exercice))}
           controlerSaisie={(reponses) => controlerSaisieNumerique(reponses, ciblesValeursInflexions(exercice))}
+          aides={aidesEtudeLocale(exercice, "inflexions")}
+          cible={(v) => cibleEtudeLocale(exercice, "inflexions", v)}
           validation={validation}
         />
       );
