@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceFonctionDerivee } from "./generateurs5e/fonctionDerivee/index";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeFonctionDerivee, lettreEcranFonctionDerivee } from "./generateurs5e/fonctionDerivee/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import {
   activerAideSuivante,
@@ -169,6 +172,7 @@ export function App5gen27() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendueFonctionDerivee(exercice, etat.phase, etat.typeRetenu),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeFonctionDerivee(exercice), lettreEcranFonctionDerivee(exercice, etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

@@ -3,6 +3,8 @@ import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, derivee, genererExerciceAssociation } from "./generateurs5e/association/index";
 import { CATALOGUE_VARIANTES_EXPORT_ASSOCIATION } from "./generateurs5e/association/exportEvaluation";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeAssociation } from "./generateurs5e/association/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import {
   activerAideSuivante,
@@ -127,6 +129,7 @@ export function App5gen25() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendueAssociation(exercice),
+        ...(exercice.famille === "grapheDeriveeAvancee" ? {} : { corrigeDetaille: <CorrigeDetailleEcran etapes={correctionDetailleeAssociation(exercice)} /> }),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

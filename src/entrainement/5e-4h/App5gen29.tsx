@@ -54,6 +54,9 @@ import {
   precisionAnnonceeCibles,
 } from "./ui5e/formatEtudeLocale";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeEtudeLocale, lettreEcranEtudeLocale } from "./generateurs5e/etudeLocale/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
@@ -239,6 +242,7 @@ export function App5gen29() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendueEtudeLocale(exercice, etat.phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEtudeLocale(exercice), lettreEcranEtudeLocale(exercice, etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

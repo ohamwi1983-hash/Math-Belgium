@@ -36,6 +36,9 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { formatEnteteColonnesTableauFPrime, formatEnteteColonnesTableauFSeconde, formatReponseAttenduePhaseLatex, LIBELLE_ECRAN_LECTURE_GRAPHIQUE_DERIVEES } from "./ui5e/formatLectureGraphiqueDerivees";
 import { LIBELLE_TYPE_ASYMPTOTE } from "./ui5e/formatLectureGraphiqueLimites";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeLectureGraphiqueDerivees, lettreEcranLectureGraphiqueDerivees } from "./generateurs5e/lectureGraphiqueDerivees/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
@@ -165,6 +168,7 @@ export function App5gen30() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttenduePhase(exercice, etat.phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLectureGraphiqueDerivees(exercice), lettreEcranLectureGraphiqueDerivees(exercice, etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
