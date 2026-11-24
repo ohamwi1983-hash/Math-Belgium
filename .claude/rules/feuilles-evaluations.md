@@ -286,9 +286,25 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
   6gen39 B, 6gen42 E « aucun »), `exacte` reste (mode « interdite ») : seules les variantes TOUJOURS
   exactes ont été changées, au cas par cas dans la fonction de profil. « Interdite » inchangée par
   construction (`exacte` et absent y sont équivalents) — mesuré : mêmes plans à l'aléa près (accord
-  83,6 % avant / après contre 83,1 % entre deux passes). Restent à trancher (calculatrice de la classe) :
-  mode complexe (6gen34, 6gen35, 6gen40 A), touche ∫ (6gen79, et 6gen25), statistiques, lois de
-  probabilité. 5e ch. 5 (5gen25–35) : revu à part.
+  83,6 % avant / après contre 83,1 % entre deux passes). 5e ch. 5 (5gen25–35) : revu à part.
+  **Calculatrice des élèves, par année** (utilisateur, 24/11/2026) — c'est ELLE qui décide « la calculatrice
+  donne la réponse » : 4e et 5e 4h → **TI-30XB MultiView** (scientifique : fractions, √ et π exacts,
+  stats 1 et 2 variables — Q1/Q3 = médianes des demi-séries, PAS la règle du seuil du cours —, nCr/nPr,
+  table de valeurs ; ni complexes, ni ∫, ni dérivée, ni solveur) ; 6e 6h (et la future 5e 6h) → **Casio
+  Graph Math+** (mode complexe a+bi, `Conjg`/`Abs`/`Arg`, ∫ et d/dx numériques, `SolveN`, application
+  Équations, lois binomiale / normale / Poisson / hypergéométrique et leurs inverses, G-Solve : zéros,
+  extremums, intersections, ∫dx). Sources : manuel en ligne Casio GRAPH MATH+ (menu Catalogue, Calculs,
+  Équations, Graph&Table), guide et fiche TI-30XS/XB MultiView. Appliqué (partie 2 de la revue) :
+  6gen34 tout ; 6gen35 A, C ; 6gen79 signe, comparer (toute la variante : ne garder que l'issue « on ne peut
+  pas conclure » rendrait le verdict prévisible) ; 6gen47 A ; 6gen48 A exactement / aucun / tous ; 6gen51 A,
+  B, C et D « cumulée » ; 6gen52 B exactement / aucun / tous, C « cumulée » (`profilInstance` créé pour
+  6gen47, 48, 51, 52, sans cas particulier ni `forme`) ; gen32 « discrète » ; gen33 « discrète » quand la
+  TI affiche exactement les Q₁ / médiane / Q₃ du cours (`quartilesTi30xb`, 91,8 % des exercices complets).
+  Laissés sans `calcul` (la démarche est évaluée) : 6gen40 (traduire la transformation en formule), 6gen35 B
+  et D, 6gen47 B et C, 6gen48 et 6gen52 « au moins / au plus », 6gen50, 6gen51 et 6gen52 « symétrique /
+  encadrée », 6gen51 E, 6gen53 (λ à ajuster, conditions), gen30, gen32 et gen33 « classes ». Candidats plus
+  larges (intégrales numériques, σ en 4e, impédances…) : listés, en attente de validation (revue, section
+  « 2 bis »).
 - Recherche de graine bornée par le temps (200 ms par palier) : les cas rares (σ entier, combinaison
   précise de paramètres) sont trouvés sans bloquer le panneau. Un cas particulier va sur la DERNIÈRE
   question de la ligne qui peut le recevoir (cas propre à une seule variante).
@@ -1348,7 +1364,8 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   professeur comme chez l'élève. Effet côté professeur, calculatrice autorisée : ils ne sortent plus qu'au
   palier de repli (après la recherche bornée de 200 ms) et la case « cas particulier » y est sans effet.
   Les autres générateurs « tout exact » ont été revus le 24/11 (section « Tirage équilibré », puce
-  « Profils `calcul` revus ») : la plupart restent sans `calcul`, à dessein.
+  « Profils `calcul` revus », calculatrice réelle de chaque année) : la plupart restent sans `calcul`, à
+  dessein.
   Document : blanche « Calculatrice interdite » / « Calculatrice autorisée » dans l'encadré à droite de
   « Mon score » (l'aménagée n'en imprimait pas : inchangée) ; la feuille n'imprime rien (aucun emplacement).
   Récapitulatif : « … · Connaître et Transférer · sans calculatrice » (ou « avec calculatrice »).

@@ -1,5 +1,5 @@
 import type { ExerciceProbabiliteHypergeometrique } from "../../core6e/probabiliteHypergeometrique.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BlocCorrection, ProfilInstance, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatProbabiliteHypergeometrique";
 import { phasesPourExercice } from "../../moteur6e/typesProbabiliteHypergeometrique";
@@ -29,6 +29,20 @@ function construireCorrection(exercice: ExerciceProbabiliteHypergeometrique): Bl
   }));
 }
 
+/** Profil (tirage équilibré) de 6gen47.
+ * Calculatrice des élèves de 6e (6h) : Casio Graph Math+ (lois binomiale, normale, de Poisson et
+ * hypergéométrique intégrées, `BinomialPD`/`BinomialCD`, `NormCD`/`InvNormCD`, `HypergeoPD`…). Règle validée
+ * (revue des profils, 24/11/2026) : `calcul: 'exacte'` SEULEMENT si la calculatrice donne directement la
+ * réponse demandée — la variante n'est alors jamais tirée « calculatrice autorisée ». Aucun cas particulier
+ * ni `forme`.
+ * - A (aucun / tous / exactement k succès) : N, K, n et k sont DONNÉS dans l'énoncé ; « à l'aide de la formule
+ *   hypergéométrique » : `HypergeoPD(k, n, K, N)` donne la probabilité directement → `exacte`.
+ * - B (ordre contre composition) et C (loto + bonus, combinaison des deux catégories) : il reste un
+ *   raisonnement (produit de fractions et nombre d'ordres ; indépendance → produit) → pas de `calcul`. */
+export function profilProbabiliteHypergeometrique(exercice: ExerciceProbabiliteHypergeometrique): ProfilInstance {
+  return exercice.famille === "A" ? { casParticulier: null, calcul: "exacte" } : { casParticulier: null };
+}
+
 export const adaptateurEvaluationProbabiliteHypergeometrique: AdaptateurFeuilleExercices<ExerciceProbabiliteHypergeometrique> = {
   titreDocument: "Probabilité hypergéométrique — Évaluation",
   nomFichierBase: "probabilite-hypergeometrique",
@@ -37,4 +51,5 @@ export const adaptateurEvaluationProbabiliteHypergeometrique: AdaptateurFeuilleE
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce,
   construireCorrection,
+  profilInstance: profilProbabiliteHypergeometrique,
 };

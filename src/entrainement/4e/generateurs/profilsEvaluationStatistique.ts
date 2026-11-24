@@ -55,11 +55,32 @@ export function profilHistogramme(e: ExerciceHistogramme): ProfilInstance {
   return { casParticulier: cas([tousEgaux(e.classes.map((c) => c.effectif)) && "effectifs-egaux"]) };
 }
 
-/** gen32 — moyenne pondérée. Moyenne toujours à au plus deux décimales → `calcul` sans objet.
- * Effectifs tous égaux (la moyenne pondérée devient une moyenne simple) : ~0,8 % → exclu sans case. */
+/** gen32 — moyenne pondérée. Moyenne toujours à au plus deux décimales. Effectifs tous égaux (la
+ * moyenne pondérée devient une moyenne simple) : ~0,8 % → exclu sans case.
+ * `calcul` (revue des profils, 24/11/2026 : `exacte` SEULEMENT si la calculatrice des élèves donne
+ * directement la réponse demandée ; en 4e, la TI-30XB MultiView) : variante « discrète » `exacte` — le
+ * tableau x_i / n_i se tape en deux listes et « 1-Var Stats » (liste des effectifs en FRQ) affiche x̄ ;
+ * « classes » : sans `calcul` (les centres de classe sont à déterminer d'abord). */
 export function profilMoyennePonderee(e: ExerciceMoyennePonderee): ProfilInstance {
   const effectifs = e.variante === "discrete" ? e.lignes.map((l) => l.effectif) : e.classes.map((c) => c.effectif);
-  return { casParticulier: cas([tousEgaux(effectifs) && "effectifs-egaux"]) };
+  const casParticulier = cas([tousEgaux(effectifs) && "effectifs-egaux"]);
+  return e.variante === "discrete" ? { casParticulier, calcul: "exacte" } : { casParticulier };
+}
+
+/** Médiane d'une liste triée (convention de la calculatrice : moyenne des deux valeurs centrales si
+ * l'effectif est pair). */
+function medianeListe(t: number[]): number {
+  const m = t.length;
+  return m % 2 === 1 ? t[(m - 1) / 2] : (t[m / 2 - 1] + t[m / 2]) / 2;
+}
+
+/** Q₁, médiane, Q₃ tels que les affiche « 1-Var Stats » de la TI-30XB MultiView (guide TI : « Q1 :
+ * médiane des éléments entre MinX et Med », Med exclue quand l'effectif est impair ; Q3 de même), pour
+ * un tableau x_i / n_i trié. */
+export function quartilesTi30xb(lignes: { valeur: number; effectif: number }[]): { q1: number; mediane: number; q3: number } {
+  const t = lignes.flatMap((l) => Array.from({ length: l.effectif }, () => l.valeur));
+  const n = t.length;
+  return { q1: medianeListe(t.slice(0, Math.floor(n / 2))), mediane: medianeListe(t), q3: medianeListe(t.slice(Math.ceil(n / 2))) };
 }
 
 export const LIBELLE_CAS_MEDIANE = "Inclure un cas particulier (effectif cumulé exactement égal à n/2, n/4 ou 3n/4, ou deux quartiles égaux)";
@@ -70,16 +91,25 @@ export const LIBELLE_CAS_MEDIANE = "Inclure un cas particulier (effectif cumulé
  *   (Q₁ = Q₂ ou Q₂ = Q₃ : 16,7 %) ;
  * - classes : effectif cumulé égal à un seuil (médiane 15 %, Q₁/Q₃ 15 %) — la valeur se lit
  *   directement sur une borne de classe, sans lecture graphique entre deux points.
- * Plusieurs modes (28 %) : vrai cas pédagogique, gardé. `calcul` sans objet. */
+ * Plusieurs modes (28 %) : vrai cas pédagogique, gardé.
+ * `calcul` (revue des profils, 24/11/2026 ; en 4e, la TI-30XB MultiView) : discrète `exacte` quand
+ * « 1-Var Stats » (liste des effectifs en FRQ) affiche EXACTEMENT les Q₁, médiane et Q₃ du cours
+ * (`quartilesTi30xb`) — min et max s'y lisent aussi, le mode se lit sur le tableau. La calculatrice
+ * suit une autre convention que la règle du seuil du cours (médiane des demi-séries, moyenne des deux
+ * valeurs centrales) : elles diffèrent quand un effectif cumulé tombe sur un seuil (n pair) ou juste
+ * en dessous (n impair) — mesuré : 8,2 % des exercices complets ; ces instances gardent leur sens avec
+ * la calculatrice (elle y donnerait une réponse fausse) → sans `calcul`, tirées « calculatrice
+ * autorisée ». Classes (interpolation linéaire) : sans `calcul`. */
 export function profilMediane(e: ExerciceMediane): ProfilInstance {
   const seuils = [e.seuil, e.seuilQ1, e.seuilQ3];
   if (e.variante === "discrete") {
-    return {
-      casParticulier: cas([
-        e.lignes.some((l) => seuils.includes(l.effectifCumule)) && "seuil-atteint",
-        (e.q1 === e.mediane || e.mediane === e.q3) && "quartiles-confondus",
-      ]),
-    };
+    const casParticulier = cas([
+      e.lignes.some((l) => seuils.includes(l.effectifCumule)) && "seuil-atteint",
+      (e.q1 === e.mediane || e.mediane === e.q3) && "quartiles-confondus",
+    ]);
+    const ti = quartilesTi30xb(e.lignes);
+    const memeReponse = ti.q1 === e.q1 && ti.mediane === e.mediane && ti.q3 === e.q3;
+    return memeReponse ? { casParticulier, calcul: "exacte" } : { casParticulier };
   }
   return { casParticulier: cas([e.classes.some((c) => seuils.includes(c.effectifCumule)) && "seuil-atteint"]) };
 }
