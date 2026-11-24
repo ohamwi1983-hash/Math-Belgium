@@ -17,6 +17,9 @@ interface Props {
   /** Tableau à double entrée (écran 1 de la famille A) : les champs qu'il référence sont rendus
    * dans ses cases, les autres au-dessus, en ligne. */
   tableau?: TableauSaisie | null;
+  /** Figure HTML autonome (famille C : diagramme de Venn à trois ensembles, zones déjà trouvées
+   * écrites, les autres « ? »), sous la consigne. */
+  figureHtml?: string | null;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -39,19 +42,27 @@ interface Props {
  * générale → bloc données → bloc de travail) conservée à l'identique.
  * `App6gen30.tsx` doit le rendre avec `key={`${generation}-${phase}`}` (remet les champs à vide à
  * chaque écran ET à chaque nouvel exercice, même variante forcée). */
-export function EtapeChampsProbabilitesEnsembles({ consigneGenerale, blocDonnees, consigneEcran, champs, tableau, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsProbabilitesEnsembles({ consigneGenerale, blocDonnees, consigneEcran, champs, tableau, figureHtml, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
+  /** Saisie illisible refusée SANS consommer de tentative (règle commune des générateurs). */
+  const [illisible, setIllisible] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
   const toutRempli = valeurs.every((v) => v.trim() !== "");
 
   function valider() {
     if (!toutRempli) return;
+    if (diagnostiquer(valeurs) === "parse_error") {
+      setIllisible(true);
+      return;
+    }
+    setIllisible(false);
     onValider(valeurs);
   }
 
   function changer(index: number, valeur: string) {
     setValeurs((prev) => prev.map((v, i) => (i === index ? valeur : v)));
+    setIllisible(false);
   }
 
   const dansTableau = new Set(tableau ? tableau.cases.flat().flatMap((c) => (c.type === "champ" ? [c.index] : [])) : []);
@@ -90,6 +101,7 @@ export function EtapeChampsProbabilitesEnsembles({ consigneGenerale, blocDonnees
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
+      {figureHtml && <div className="figure-venn-6gen30" style={{ maxWidth: "100%", overflowX: "auto" }} dangerouslySetInnerHTML={{ __html: figureHtml }} />}
       {horsTableau.length > 0 && (
         <div className={`field-row ${horsTableau.length > 3 ? "field-row-wrap" : ""}`}>
           {horsTableau.map((i) => (
@@ -146,7 +158,12 @@ export function EtapeChampsProbabilitesEnsembles({ consigneGenerale, blocDonnees
         <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
           Valider
         </button>
-        {montrerErreurs && (
+        {illisible && (
+          <p className="alert-error" role="alert">
+            Saisie illisible : écris un nombre (entier, fraction, décimal ou pourcentage). Cette saisie ne compte pas comme une tentative.
+          </p>
+        )}
+        {montrerErreurs && !illisible && (
           <p className="alert-error" role="alert">
             {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
           </p>

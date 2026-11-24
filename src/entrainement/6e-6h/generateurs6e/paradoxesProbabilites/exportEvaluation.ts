@@ -3,26 +3,20 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { valeursAttendues } from "../../moteur6e/verificationParadoxesProbabilites";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeParadoxes } from "./corrigeDetaille";
 import {
-  UNIVERS_DEUX_ENFANTS,
   blocDonnees,
   conclusionCorrecte,
   consigneGenerale,
   formatReponseAttenduePhaseLatex,
-  fractionLatex,
-  informationTexte,
-  issueFavorable,
-  issuesCompatibles,
-  millieme,
 } from "../../ui6e/formatParadoxesProbabilites";
-import { figureCorrigeSvg } from "../../ui6e/figureParadoxesProbabilites";
 import { VARIANTES_CALCULATRICE_PARADOXES, profilParadoxesProbabilites } from "../profilsEvaluationParadoxes";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceParadoxesProbabilites } from "./index";
 import type { IdVarianteParadoxesProbabilites } from "./index";
@@ -51,9 +45,6 @@ function liste(formules: string[]): FragmentConsigne[] {
   return formules.flatMap((x, i) => (i === 0 ? [f(x)] : [t(" ; "), f(x)]));
 }
 
-function listeIssues(issues: readonly string[]): string {
-  return `\\{${issues.map((i) => `\\mathrm{${i}}`).join("\\,;\\,")}\\}`;
-}
 
 // ============================================================================
 // Énoncé papier.
@@ -118,113 +109,23 @@ function enoncePapier(e: ExerciceParadoxesProbabilites): EnoncePapier {
 // Corrigé détaillé.
 // ============================================================================
 
-function piege(e: ExerciceParadoxesProbabilites, etape: Etape): FragmentConsigne[] | null {
-  switch (e.famille) {
-    case "mere":
-      if (etape === "modeliser") return [t("Calculer la probabilité de « quatre 6 », "), f("\\left(\\frac{1}{6}\\right)^{4}"), t(", au lieu de celle de « aucun 6 » : le contraire de « au moins un » est « aucun », pas « tous ».")];
-      if (etape === "conclure") {
-        return [
-          t("Raisonner par proportionnalité, "),
-          f("4\\times\\frac{1}{6}"),
-          t(" ou "),
-          f(`${e.kLancersDouble}\\times\\frac{1}{36}`),
-          t(" : on compte plusieurs fois les parties où le 6 sort plusieurs fois. Avec 7 lancers, ce calcul dépasserait même 1."),
-        ];
-      }
-      return null;
-    case "montyHall":
-      if (etape === "conclure") {
-        return [
-          t("Croire que les portes encore fermées sont équiprobables (« ça revient au même ») : l'animateur sait où est la voiture et ne choisit pas au hasard la porte qu'il ouvre ; ta porte garde sa probabilité "),
-          f(fractionLatex(1, e.nPortes, "t")),
-          t("."),
-        ];
-      }
-      if (etape === "modeliser") return [t("Mettre à jour "), f("P(V)"), t(" après l'ouverture d'une porte : l'animateur peut TOUJOURS ouvrir une porte à chèvre, son geste n'apprend rien sur ta porte.")];
-      return null;
-    case "deuxEnfants":
-      if (etape !== "modeliser") return null;
-      return e.information === "auMoinsUn"
-        ? [t("Traiter les trois compositions « deux garçons », « un garçon et une fille », « deux filles » comme équiprobables : « un garçon et une fille » regroupe deux issues, GF et FG.")]
-        : [t("Confondre cette information avec « au moins un des deux » : elle désigne un enfant précis, seul le sexe de l'autre enfant reste inconnu.")];
-  }
-}
 
-function methode(e: ExerciceParadoxesProbabilites, etape: Etape): FragmentConsigne[] {
-  switch (e.famille) {
-    case "mere":
-      if (etape === "modeliser") {
-        return [
-          t("Le contraire de « au moins un 6 en 4 lancers » est « pas de 6 à chacun des 4 lancers » ; les lancers sont indépendants, on multiplie. Avec deux dés, un double six a la probabilité "),
-          f("\\frac{1}{6}\\times\\frac{1}{6}=\\frac{1}{36}"),
-          t(", son contraire "),
-          f("\\frac{35}{36}"),
-          t("."),
-        ];
-      }
-      if (etape === "calculer") return [t("On revient à l'événement lui-même : "), f("P(A)=1-P(\\overline{A})"), t(".")];
-      return [t("Un pari est favorable au joueur quand sa probabilité de gain dépasse "), f("\\frac{1}{2}"), t(".")];
-    case "montyHall": {
-      const n = e.nPortes;
-      if (etape === "modeliser") {
-        return n === 3
-          ? [t("Au moment du choix, les 3 portes sont équiprobables, et l'animateur ne déplace pas la voiture. Si elle n'est pas derrière ta porte, elle n'est pas derrière la porte ouverte : elle est derrière la dernière porte fermée, et changer gagne à coup sûr.")]
-          : [
-              t(`Au moment du choix, les ${n} portes sont équiprobables, et l'animateur ne déplace pas la voiture. Si elle n'est pas derrière ta porte, elle n'est pas derrière la porte ouverte : elle est derrière l'une des ${n - 2} portes que tu peux prendre en changeant, au hasard.`),
-            ];
-      }
-      if (etape === "calculer") return [t("En gardant, on gagne exactement quand "), f("V"), t(" est réalisé. En changeant, on ne peut gagner que sur la branche "), f("\\overline{V}"), t(" : on multiplie les probabilités le long de cette branche.")];
-      return [
-        f(`P(C)=${fractionLatex(n - 1, n * (n - 2))}>${fractionLatex(1, n)}=P(G)`),
-        ...(n === 3 ? [t(" : changer double la probabilité de gagner.")] : [t(" : changer multiplie la probabilité de gagner par "), f(fractionLatex(n - 1, n - 2)), t(".")]),
-      ];
-    }
-    case "deuxEnfants": {
-      const compat = issuesCompatibles(e);
-      if (etape === "modeliser") {
-        return [
-          t("Les quatre issues "),
-          f(`\\Omega=${listeIssues(UNIVERS_DEUX_ENFANTS)}`),
-          t(` (sexe de l'aîné en premier) sont équiprobables. L'information « ${informationTexte(e)} » ne garde que les issues compatibles.`),
-        ];
-      }
-      if (etape === "calculer") return [t("Les issues de "), f("A"), t(" restent équiprobables et "), f("B"), t(" est inclus dans "), f("A"), t(" : "), f("P(B\\mid A)=\\dfrac{\\#B}{\\#A}"), t(".")];
-      return [t(`Seule l'issue ${issueFavorable(e)} réalise B parmi les ${compat.length} issues équiprobables de A.`)];
-    }
-  }
-}
 
-/** Comparaison au seuil 1/2 (Méré, étape « conclure »). */
-function comparaisonMere(e: ExerciceParadoxesProbabilites): FragmentConsigne[] {
-  const [p1, p2] = valeursAttendues(e, "calculer");
-  const signe = (p: number) => (p > 0.5 ? ">" : "<");
-  return [f(`P(A_1)\\approx ${millieme(p1)}${signe(p1)}0{,}5`), t(" et "), f(`P(A_2)\\approx ${millieme(p2)}${signe(p2)}0{,}5`), t(" ; de plus "), f("P(A_1)>P(A_2)"), t(".")];
-}
 
-function lignesEtape(e: ExerciceParadoxesProbabilites, etape: Etape): EtapeCorrection[] {
-  const sq = LETTRES[etape];
-  const lignes: EtapeCorrection[] = [{ label: "Méthode", sousQuestion: sq, fragments: methode(e, etape) }];
-  if (etape === "conclure" && e.famille === "mere") lignes.push({ label: "Calcul", sousQuestion: sq, fragments: comparaisonMere(e) });
-  const figure = etape === "modeliser" ? figureCorrigeSvg(e) : null;
-  lignes.push({ label: "Conclusion", sousQuestion: sq, fragments: [...reponseEtape(e, etape), ...(etape === "conclure" ? [t(".")] : [])], ...(figure ? { figureHtml: figure } : {}) });
-  const p = piege(e, etape);
-  if (p) lignes.push({ label: "Piège", sousQuestion: sq, fragments: p });
-  return lignes;
-}
 
-function correctionDetaillee(e: ExerciceParadoxesProbabilites): EtapeCorrection[] {
-  return ETAPES.flatMap((etape) => lignesEtape(e, etape));
-}
 
-function difficulte(e: ExerciceParadoxesProbabilites): 1 | 2 | 3 {
-  if (e.famille === "mere") return 2;
-  if (e.famille === "montyHall") return 3;
-  return e.information === "auMoinsUn" ? 3 : 2;
-}
 
 // ============================================================================
 // Barème (poids, somme 4).
 // ============================================================================
+
+/** Niveau (`niveauDifficulte.ts`) : modéliser et calculer transforment, conclure est une décision qui
+ * relit les valeurs calculées (lecture) ; méthode 2 pour Monty Hall (modéliser le geste de
+ * l'animateur), 1 sinon ; piège 1 partout (l'intuition de l'énoncé est le piège : proportionnalité de
+ * Méré, portes « équiprobables », compositions « équiprobables ») ; nombres : Méré (calculatrice). */
+function criteresDifficulte(e: ExerciceParadoxesProbabilites): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeParadoxes(e), ["c"]), methode: e.famille === "montyHall" ? 2 : 1, piege: 1, nombres: e.famille === "mere" ? 1 : 0 };
+}
 
 function bareme(e: ExerciceParadoxesProbabilites): BaremeExercice {
   const m = formatReponseAttenduePhaseLatex(e, "modeliser");
@@ -292,12 +193,11 @@ export const adaptateurEvaluationParadoxesProbabilites: AdaptateurFeuilleExercic
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteParadoxesProbabilites),
   construireEnonce,
   construireCorrection,
-  difficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeParadoxes,
+  criteresDifficulte,
   bareme,
   enoncePapier,
-  dureeMinutes: 8,
   profilInstance: profilParadoxesProbabilites,
   calculatriceIndispensable: VARIANTES_CALCULATRICE_PARADOXES,
 };

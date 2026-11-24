@@ -30,5 +30,8 @@ export const LIBELLE_CAS_PROBABILITES_ENSEMBLES = "Inclure un cas particulier (p
 
 export function profilProbabilitesEnsembles(e: ExerciceProbabilitesEnsembles): ProfilInstance {
   if (e.famille === "A") return { casParticulier: e.demandeEcran2 === "AetBbar" || e.demandeEcran2 === "AbaretB" ? "lecture-directe" : null };
+  // Famille C (Venn à trois ensembles) : aucun cas particulier, `calcul` absent (effectifs entiers) ;
+  // `forme` = type de la probabilité conditionnelle (la série B reproduit la question de la série A).
+  if (e.famille === "C") return { casParticulier: null, forme: `C-${e.conditionnelle.type}` };
   return { casParticulier: e.countAetB === 0 ? "intersection-vide" : null };
 }

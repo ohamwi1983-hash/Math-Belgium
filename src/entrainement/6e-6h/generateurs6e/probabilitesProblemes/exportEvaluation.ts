@@ -11,21 +11,21 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeProbabilitesProblemes as correctionDetaillee } from "./corrigeDetaille";
 import { phasesPourExercice } from "../../moteur6e/typesProbabilitesProblemes";
 import type { PhaseProbabilitesProblemes } from "../../moteur6e/typesProbabilitesProblemes";
-import { affirmationFEstVraie, configurationsExactementK, valeurAlternativeF } from "../../moteur6e/verificationProbabilitesProblemes";
+import { affirmationFEstVraie, valeurAlternativeF } from "../../moteur6e/verificationProbabilitesProblemes";
 import {
   PRECISION,
   PRECISION_FIABILITE,
-  aideNiveau1,
-  aideNiveau2,
   blocDonnees,
   consigneEcran,
   consigneGenerale,
@@ -36,7 +36,7 @@ import {
   nombreLatex,
   phrasesMixte,
 } from "../../ui6e/formatProbabilitesProblemes";
-import { arbreBayesSvg, arbreCheminsSvg, cheminsAKSucces, deuxSchemasHtml, schemaMontageSvg } from "../../ui6e/figureProbabilitesProblemes";
+import { deuxSchemasHtml, schemaMontageSvg } from "../../ui6e/figureProbabilitesProblemes";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProbabilitesProblemes } from "./index";
 import type { IdVarianteProbabilitesProblemes } from "./index";
 import { LIBELLE_CAS_PROBABILITES_PROBLEMES, profilProbabilitesProblemes } from "./profilEvaluation";
@@ -227,159 +227,30 @@ function enoncePapier(exercice: ExerciceProbabilitesProblemes): EnoncePapier {
 // Corrigé détaillé : par étape, Méthode, Calcul, Piège éventuel, Conclusion.
 // ============================================================================
 
-interface ContenuEtape {
-  methode: FragmentConsigne[];
-  calcul?: string;
-  piege?: string;
-  figure?: string;
-}
 
-/** Aide de niveau 1 de l'écran, en fragments (texte puis formule éventuelle). */
-function aide1(exercice: ExerciceProbabilitesProblemes, phase: PhaseProbabilitesProblemes): FragmentConsigne[] {
-  const a = aideNiveau1(exercice, phase);
-  return a.latex === null ? [t(a.texte)] : [t(`${a.texte} `), f(a.latex)];
-}
-/** Calcul posé de l'aide de niveau 2 de l'écran (même source que l'écran). */
-function calcul2(exercice: ExerciceProbabilitesProblemes, phase: PhaseProbabilitesProblemes): string | undefined {
-  return aideNiveau2(exercice, phase).latex ?? undefined;
-}
 
-function contenuA(e: ExerciceFamilleA, phase: PhaseProbabilitesProblemes): ContenuEtape {
-  if (phase === "aEcran1") {
-    return {
-      methode: [t("On numérote les personnes. Quand les k premières ont des anniversaires tous différents, la personne numéro k + 1 doit éviter k jours sur 365 : la probabilité de cet événement vaut "), f("\\dfrac{365-k}{365}"), t(".")],
-    };
-  }
-  if (phase === "aEcran2") return { methode: [t("Règle du produit le long du chemin de l'arbre (une personne après l'autre) : on multiplie les facteurs.")], calcul: calcul2(e, phase) };
-  return {
-    methode: aide1(e, phase),
-    calcul: calcul2(e, phase),
-    piege: "Chercher « au moins deux le même jour » directement : il y a beaucoup trop de cas ; on passe par l'événement contraire « tous différents ».",
-  };
-}
 
-function branches(nombre: number): string {
-  return nombre === 1 ? "1 branche" : `${nombre} branches`;
-}
 
-function contenuB(e: ExerciceFamilleB, phase: PhaseProbabilitesProblemes): ContenuEtape {
-  if (phase === "bEcran1") {
-    const chemins = cheminsAKSucces(e.n, e.k);
-    return {
-      methode: [t(`Chaque chemin de l'arbre est une suite de ${e.n} résultats, succès (S) ou échec (É). On énumère, avec méthode, ceux qui comportent exactement ${e.k} succès :`)],
-      calcul: chemins.map((m) => `\\text{${m}}`).join(",\\ "),
-      figure: arbreCheminsSvg(e.n, e.k, nombreLatex(e.p).replace("{,}", ","), nombreLatex(1 - e.p).replace("{,}", ",")),
-    };
-  }
-  if (phase === "bEcran2") {
-    return {
-      methode: [t(`Règle du produit : chacun de ces chemins passe par ${branches(e.k)} de probabilité p et ${branches(e.n - e.k)} de probabilité 1 − p, donc ils ont tous la même probabilité ; on additionne ces probabilités, c'est-à-dire qu'on multiplie par le nombre de chemins.`)],
-      calcul: calcul2(e, phase),
-      piege: "Oublier de multiplier par le nombre de chemins : un seul chemin ne donne pas « exactement k succès ».",
-    };
-  }
-  return {
-    methode: aide1(e, phase),
-    calcul: calcul2(e, phase),
-    piege: e.demandeEcran3 === "auMoinsK" ? `Confondre « au moins ${e.k} » et « exactement ${e.k} », ou oublier le cas « ${e.n} succès ».` : "Ne retirer que « que des succès » et oublier « que des échecs ».",
-  };
-}
 
-function contenuC(e: ExerciceFamilleC, phase: PhaseProbabilitesProblemes): ContenuEtape {
-  const configs = configurationsExactementK(e.k);
-  if (phase === "cEcran1") return { methode: aide1(e, phase) };
-  if (phase === "cEcran2") {
-    const lignes = configs.map((c) => {
-      const facteurs = [0, 1, 2].map((i) => (c.includes(i) ? nombreLatex(e.p[i]) : `(1-${nombreLatex(e.p[i])})`));
-      return `P(\\{${c.map((i) => i + 1).join("\\,;\\,")}\\})=${facteurs.join("\\cdot ")}`;
-    });
-    return { methode: aide1(e, phase), calcul: `\\begin{gathered}${lignes.join("\\\\")}\\end{gathered}`, piege: "Oublier le facteur 1 − pᵢ des éléments non concernés." };
-  }
-  return {
-    methode: aide1(e, phase),
-    calcul: calcul2(e, phase),
-    piege: "Appliquer la règle des épreuves répétées avec une probabilité moyenne : les trois probabilités sont différentes, chaque configuration a sa propre probabilité.",
-  };
-}
 
-function contenuE(e: ExerciceFamilleEMixte, phase: PhaseProbabilitesProblemes): ContenuEtape {
-  if (phase === "eMixteEcran1") return { methode: aide1(e, phase) };
-  if (phase === "eMixteEcran2") {
-    // Les 4 chemins et P(E) posés (l'aide de l'écran n'en montre qu'un).
-    const { p, q1, q2 } = e.base;
-    const [P, Q1, Q2] = [p, q1, q2].map((v) => nombreLatex(v));
-    const calcul =
-      `\\begin{gathered}P(c_1\\cap E)=${P}\\cdot ${Q1}\\qquad P(c_1\\cap\\overline{E})=${P}\\cdot(1-${Q1})\\\\` +
-      `P(c_2\\cap E)=(1-${P})\\cdot ${Q2}\\qquad P(c_2\\cap\\overline{E})=(1-${P})\\cdot(1-${Q2})\\\\` +
-      `P(E)=P(c_1\\cap E)+P(c_2\\cap E)\\end{gathered}`;
-    return { methode: aide1(e, phase), calcul, figure: arbreBayesSvg(e.base), piege: "Oublier l'un des deux chemins qui mènent à E dans le calcul de P(E)." };
-  }
-  return { methode: aide1(e, phase), calcul: calcul2(e, phase), piege: "Confondre P(c₁ | E) avec P(E | c₁), qui est une donnée de l'énoncé." };
-}
 
-function contenuF(e: ExerciceFamilleF, phase: PhaseProbabilitesProblemes): ContenuEtape {
-  if (phase === "fEcran1") return { methode: aide1(e, phase), piege: "Confondre série (produit des fiabilités) et parallèle (1 moins le produit des probabilités de panne)." };
-  if (phase === "fEcran2") return { methode: [t("On effectue le calcul posé.")] };
-  const verifier = e.demandeEcran3 === "verifierAffirmation";
-  return {
-    methode: [t(`On identifie le nouveau montage et on applique la même méthode${verifier ? ", puis on compare le résultat, arrondi à 4 décimales, à la valeur affirmée" : ""}.`)],
-    calcul: calcul2(e, phase),
-  };
-}
 
-function contenuG(e: ExerciceFamilleGMelange, phase: PhaseProbabilitesProblemes): ContenuEtape {
-  if (phase === "gMelangeEcran1") return { methode: [t("La somme des probabilités des 6 faces du dé de l'urne 1 vaut 1 : une face vaut a, chacune des 5 autres vaut p.")] };
-  if (phase === "gMelangeEcran4") return { methode: aide1(e, phase), calcul: calcul2(e, phase), piege: "Additionner les deux probabilités sans les pondérer par la probabilité de choisir chaque urne." };
-  return { methode: aide1(e, phase), calcul: calcul2(e, phase) };
-}
 
-function contenuEtape(exercice: ExerciceProbabilitesProblemes, phase: PhaseProbabilitesProblemes): ContenuEtape {
-  switch (exercice.famille) {
-    case "A":
-      return contenuA(exercice, phase);
-    case "B":
-      return contenuB(exercice, phase);
-    case "C":
-      return contenuC(exercice, phase);
-    case "E":
-      return contenuE(exercice, phase);
-    case "F":
-      return contenuF(exercice, phase);
-    case "G":
-      return contenuG(exercice, phase);
-  }
-}
 
-function correctionDetaillee(exercice: ExerciceProbabilitesProblemes): EtapeCorrection[] {
-  return phasesPourExercice(exercice).flatMap((phase, i) => {
-    const sousQuestion = LETTRES[i];
-    const contenu = contenuEtape(exercice, phase);
-    const etapes: EtapeCorrection[] = [];
-    if (contenu.methode.length > 0) etapes.push({ label: "Méthode", sousQuestion, fragments: contenu.methode, ...(contenu.figure ? { figureHtml: contenu.figure } : {}) });
-    if (contenu.calcul) etapes.push({ label: "Calcul", sousQuestion, fragments: [f(contenu.calcul)] });
-    if (contenu.piege) etapes.push({ label: "Piège", sousQuestion, fragments: [t(contenu.piege)] });
-    etapes.push({ label: "Conclusion", sousQuestion, fragments: reponse(exercice, phase) });
-    return etapes;
-  });
-}
 
 // ============================================================================
 // Difficulté, réponse brève, barème.
 // ============================================================================
 
-function difficulte(exercice: ExerciceProbabilitesProblemes): 1 | 2 | 3 {
-  switch (exercice.famille) {
-    case "A":
-    case "C":
-      return 2;
-    case "B":
-      return exercice.demandeEcran3 === "auMoinsK" && exercice.k >= 2 ? 3 : 2;
-    case "E":
-    case "G":
-      return 3;
-    case "F":
-      return exercice.configuration === "mixte" || exercice.configurationAlternative === "mixte" ? 3 : 2;
-  }
+
+/** Niveau (`niveauDifficulte.ts`) : une étape par écran ; méthode 2 (problème : l'élève construit
+ * lui-même le modèle — arbre des épreuves, configurations, arbre de Bayes, montage, urnes) ; piège
+ * dans les données : E (données présentées dans le désordre, sens des conditionnelles) et F
+ * « vérifier » (valeur affirmée issue d'une confusion série / parallèle, posée que l'affirmation soit
+ * vraie ou fausse) ; nombres : profil `calcul` (calculatrice). */
+function criteresDifficulte(exercice: ExerciceProbabilitesProblemes): CriteresDifficulte {
+  const piege = exercice.famille === "E" || (exercice.famille === "F" && exercice.demandeEcran3 === "verifierAffirmation") ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetaillee(exercice)), methode: 2, piege, nombres: profilProbabilitesProblemes(exercice).calcul === "calculatrice" ? 1 : 0 };
 }
 
 function reponseBreve(exercice: ExerciceProbabilitesProblemes): FragmentConsigne[] {
@@ -409,10 +280,9 @@ function poids(exercice: ExerciceProbabilitesProblemes): number[] {
 function bareme(exercice: ExerciceProbabilitesProblemes): BaremeExercice {
   const phases = phasesPourExercice(exercice);
   const w = poids(exercice);
-  const erreurs = phases.flatMap((phase) => {
-    const piege = contenuEtape(exercice, phase).piege;
-    return piege ? [{ description: [t(piege)], cout: "−1" }] : [];
-  });
+  const erreurs = correctionDetaillee(exercice)
+    .filter((l) => l.type === "piege")
+    .map((l) => ({ description: l.fragments, cout: "−1" }));
   erreurs.push({ description: [t("Arrondir trop tôt une valeur intermédiaire (écart sur le résultat final)")], cout: "−0,5" });
   const acceptees: FragmentConsigne[][] = [
     exercice.famille === "F"
@@ -450,12 +320,11 @@ export const adaptateurEvaluationProbabilitesProblemes: AdaptateurFeuilleExercic
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteProbabilitesProblemes),
   construireEnonce,
   construireCorrection,
-  difficulte,
   reponseBreve,
   correctionDetaillee,
+  criteresDifficulte,
   bareme,
   enoncePapier,
-  dureeMinutes: 12,
   profilInstance: profilProbabilitesProblemes,
   libelleCasParticulier: LIBELLE_CAS_PROBABILITES_PROBLEMES,
   // Anniversaires (produit de facteurs (365 − k)/365), Bayes à données réalistes et fiabilités à

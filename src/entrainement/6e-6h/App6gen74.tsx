@@ -2,6 +2,9 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeArbreTableauEffectifs, lettreEcranArbreTableau } from "./generateurs6e/arbreTableauEffectifs/corrigeDetaille";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceArbreTableauEffectifs } from "./generateurs6e/arbreTableauEffectifs";
 import type { IdVarianteArbreTableauEffectifs } from "./generateurs6e/arbreTableauEffectifs";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionArbreTableauEffectifs, soumettreReponseEcran, tentativesMaxCourant } from "./moteur6e/sessionArbreTableauEffectifs";
@@ -145,6 +148,9 @@ export function App6gen74() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendue(phase),
+        // Corrigé détaillé « comme au tableau » de l'écran (même source que le papier), affiché par
+        // `ValidationEcran` quand les tentatives sont épuisées.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeArbreTableauEffectifs(exercice), lettreEcranArbreTableau(exercice, phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         ...(phase === "independance" ? { messageRevele: "Ce n'était pas la bonne réponse." } : {}),

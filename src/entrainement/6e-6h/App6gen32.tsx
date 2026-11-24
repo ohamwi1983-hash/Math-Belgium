@@ -19,6 +19,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeIndependanceBayes, lettreEcranIndependanceBayes } from "./generateurs6e/independanceBayes/corrigeDetaille";
 
 /**
  * `6gen32` — Indépendance, conditionnement et Bayes (chapitre 8, "Probabilités", 3e générateur du
@@ -148,6 +151,9 @@ export function App6gen32() {
             ))}
           </span>
         ),
+        // Corrigé détaillé « comme au tableau » de l'écran (même source que le papier), affiché par
+        // `ValidationEcran` quand les tentatives sont épuisées.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeIndependanceBayes(exercice), lettreEcranIndependanceBayes(exercice, phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

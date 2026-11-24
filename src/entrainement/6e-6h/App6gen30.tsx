@@ -1,7 +1,9 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProbabilitesEnsembles } from "./generateurs6e/probabilitesEnsembles";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProbabilitesEnsembles, genererExerciceProbabilitesEnsemblesLibre } from "./generateurs6e/probabilitesEnsembles";
+import { vennEcranHtml } from "./ui6e/formatVennTrois";
+import type { PhaseC } from "./ui6e/formatVennTrois";
 import type { IdVarianteProbabilitesEnsembles } from "./generateurs6e/probabilitesEnsembles";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionProbabilitesEnsembles, soumettreReponseEcran, tentativesMaxPhase } from "./moteur6e/sessionProbabilitesEnsembles";
 import { phasesPourExercice } from "./moteur6e/typesProbabilitesEnsembles";
@@ -19,6 +21,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeProbabilitesEnsembles, lettreEcranProbabilitesEnsembles } from "./generateurs6e/probabilitesEnsembles/corrigeDetaille";
 
 /**
  * `6gen30` — Probabilités et ensembles (chapitre 8, "Probabilités", PREMIER générateur de ce
@@ -30,7 +35,8 @@ import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionProbabilitesEnsembles {
-  return demarrerSessionProbabilitesEnsembles(REGLAGES_DEMO, genererExerciceProbabilitesEnsembles);
+  // Tirage libre de l'appli : famille C (Venn à trois ensembles) une fois sur quatre.
+  return demarrerSessionProbabilitesEnsembles(REGLAGES_DEMO, genererExerciceProbabilitesEnsemblesLibre);
 }
 
 /** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
@@ -148,6 +154,9 @@ export function App6gen30() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: <ReponseAttendue exercice={exercice} phase={phase} />,
+        // Corrigé détaillé « comme au tableau » de l'écran (même source que le papier), affiché par
+        // `ValidationEcran` quand les tentatives sont épuisées.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeProbabilitesEnsembles(exercice), lettreEcranProbabilitesEnsembles(exercice, phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -197,6 +206,7 @@ export function App6gen30() {
             {...propsCommun}
             champs={champsEcran(exercice, phase)}
             tableau={tableauEcran(exercice, phase)}
+            figureHtml={exercice.famille === "C" ? vennEcranHtml(exercice, phase as PhaseC) : null}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
             onValider={(valeurs) =>
               terminerEtape(soumettreReponseEcran(etat, valeurs), champsEcran(exercice, phase).map((c, i) => `${c.label} : ${valeurs[i]}`).join(" ; "))

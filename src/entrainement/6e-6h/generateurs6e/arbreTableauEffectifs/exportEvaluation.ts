@@ -3,23 +3,21 @@ import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeArbreTableauEffectifs } from "./corrigeDetaille";
 import { phasesPourExercice } from "../../moteur6e/typesArbreTableauEffectifs";
 import type { PhaseArbreTableauEffectifs } from "../../moteur6e/typesArbreTableauEffectifs";
 import {
   branchesInconnues,
-  brancheComplementaire,
   cellulesInconnues,
   fractionASachantB,
-  fractionB,
   fractionBSachantA,
-  ordreRemplissage,
-  sontIndependantsArbreTableau,
   valeurBranche,
 } from "../../moteur6e/verificationArbreTableauEffectifs";
 import {
@@ -150,176 +148,11 @@ function construireCorrection(e: Ex): BlocCorrection[] {
 // Corrigé détaillé
 // ============================================================================
 
-function correctionArbre(e: Ex): EtapeCorrection[] {
-  const L = lettre(e, "arbre");
-  const { A } = lettresAB(e);
-  const n = e.effectifs;
-  const lignes: EtapeCorrection[] = [];
-  const egal = (b: CleBranche) => `${latexBranche(e, b)}=${dec(valeurBranche(e, b))}`;
-  if (e.mode === "pourcentages") {
-    lignes.push({
-      label: "Méthode",
-      sousQuestion: L,
-      fragments: [
-        texte("Chaque pourcentage devient une probabilité (on divise par 100). Le premier porte sur toute la population : 1er niveau. Les deux autres sont pris « parmi » un groupe : ce sont des probabilités conditionnelles, portées par les branches qui partent du nœud de ce groupe."),
-      ],
-    });
-    lignes.push({ label: "Calcul", sousQuestion: L, fragments: [texte("Traduction des pourcentages : "), latex(["A", "B_A", "B_nA"].map((b) => egal(b as CleBranche)).join(",\\quad "))] });
-    lignes.push({
-      label: "Calcul",
-      sousQuestion: L,
-      fragments: [texte("Branches complémentaires (somme 1 sur chaque nœud) : "), latex((["nA", "nB_A", "nB_nA"] as CleBranche[]).map((b) => `${latexBranche(e, b)}=1-${dec(valeurBranche(e, brancheComplementaire(b)))}=${dec(valeurBranche(e, b))}`).join(",\\quad "))],
-    });
-  } else if (e.mode === "arbrePartiel") {
-    lignes.push({ label: "Méthode", sousQuestion: L, fragments: [texte("Les branches qui partent d'un même nœud ont des probabilités de somme 1 : chaque branche manquante est la complémentaire de la branche donnée issue du même nœud.")] });
-    lignes.push({
-      label: "Calcul",
-      sousQuestion: L,
-      fragments: [latex(branchesInconnues(e).map((b) => `${latexBranche(e, b)}=1-${dec(valeurBranche(e, brancheComplementaire(b)))}=${dec(valeurBranche(e, b))}`).join(",\\quad "))],
-    });
-  } else {
-    lignes.push({ label: "Méthode", sousQuestion: L, fragments: [texte("On divise chaque effectif par celui du nœud de départ : par "), latex("N"), texte(" au 1er niveau, par "), latex(`n(${A})`), texte(" ou "), latex(`n(\\bar{${A}})`), texte(" au 2e niveau.")] });
-    lignes.push({
-      label: "Calcul",
-      sousQuestion: L,
-      fragments: [texte("1er niveau : "), latex(`P(${A})=\\dfrac{${ent(n.A)}}{${ent(n.N)}}=${dec(valeurBranche(e, "A"))},\\quad P(\\bar{${A}})=\\dfrac{${ent(n.nA)}}{${ent(n.N)}}=${dec(valeurBranche(e, "nA"))}`)],
-    });
-    lignes.push({
-      label: "Calcul",
-      sousQuestion: L,
-      fragments: [
-        texte("2e niveau : "),
-        latex(
-          [
-            `${latexBranche(e, "B_A")}=\\dfrac{${ent(n.AB)}}{${ent(n.A)}}=${dec(valeurBranche(e, "B_A"))}`,
-            `${latexBranche(e, "nB_A")}=\\dfrac{${ent(n.AnB)}}{${ent(n.A)}}=${dec(valeurBranche(e, "nB_A"))}`,
-          ].join(",\\quad "),
-        ),
-        texte(" ; "),
-        latex(
-          [
-            `${latexBranche(e, "B_nA")}=\\dfrac{${ent(n.nAB)}}{${ent(n.nA)}}=${dec(valeurBranche(e, "B_nA"))}`,
-            `${latexBranche(e, "nB_nA")}=\\dfrac{${ent(n.nAnB)}}{${ent(n.nA)}}=${dec(valeurBranche(e, "nB_nA"))}`,
-          ].join(",\\quad "),
-        ),
-      ],
-    });
-  }
-  lignes.push({ label: "Conclusion", sousQuestion: L, fragments: [texte("L'arbre pondéré complet :")], figureHtml: arbreSvg(construireArbre(e, []), "Arbre pondéré complet") });
-  return lignes;
-}
 
-function correctionTableau(e: Ex): EtapeCorrection[] {
-  const L = lettre(e, "tableau");
-  const { A, B } = lettresAB(e);
-  const n = e.effectifs;
-  const c = (k: CleCellule) => latexCellule(e, k);
-  const lignes: EtapeCorrection[] = [];
-  if (e.mode === "tableauPartiel") {
-    lignes.push({ label: "Méthode", sousQuestion: L, fragments: [texte("Dans chaque ligne et dans chaque colonne, les deux cases ont pour somme le total : on complète de proche en proche, en commençant par une ligne ou une colonne où il ne manque qu'une case.")] });
-    for (const pas of ordreRemplissage(e.cellulesDonnees) ?? []) {
-      const [total, p1, p2] = pas.relation;
-      let calcul: string;
-      if (pas.cle === total) calcul = `${c(total)}=${c(p1)}+${c(p2)}=${ent(n[p1])}+${ent(n[p2])}=${ent(n[total])}`;
-      else {
-        const autre = pas.cle === p1 ? p2 : p1;
-        calcul = `${c(pas.cle)}=${c(total)}-${c(autre)}=${ent(n[total])}-${ent(n[autre])}=${ent(n[pas.cle])}`;
-      }
-      lignes.push({ label: "Calcul", sousQuestion: L, fragments: [latex(calcul)] });
-    }
-  } else {
-    lignes.push({
-      label: "Méthode",
-      sousQuestion: L,
-      fragments: [texte("L'effectif d'un chemin vaut "), latex("N"), texte(" multiplié par les probabilités lues le long du chemin ; les autres cases s'obtiennent par soustraction, les totaux par addition.")],
-    });
-    lignes.push({ label: "Calcul", sousQuestion: L, fragments: [latex(`${c("A")}=${ent(n.N)}\\times${dec(valeurBranche(e, "A"))}=${ent(n.A)},\\quad ${c("nA")}=${ent(n.N)}-${ent(n.A)}=${ent(n.nA)}`)] });
-    lignes.push({ label: "Calcul", sousQuestion: L, fragments: [latex(`${c("AB")}=${ent(n.A)}\\times${dec(valeurBranche(e, "B_A"))}=${ent(n.AB)},\\quad ${c("AnB")}=${ent(n.A)}-${ent(n.AB)}=${ent(n.AnB)}`)] });
-    lignes.push({ label: "Calcul", sousQuestion: L, fragments: [latex(`${c("nAB")}=${ent(n.nA)}\\times${dec(valeurBranche(e, "B_nA"))}=${ent(n.nAB)},\\quad ${c("nAnB")}=${ent(n.nA)}-${ent(n.nAB)}=${ent(n.nAnB)}`)] });
-    lignes.push({ label: "Calcul", sousQuestion: L, fragments: [latex(`${c("B")}=${ent(n.AB)}+${ent(n.nAB)}=${ent(n.B)},\\quad ${c("nB")}=${ent(n.AnB)}+${ent(n.nAnB)}=${ent(n.nB)}`)] });
-  }
-  lignes.push({ label: "Vérification", sousQuestion: L, fragments: [latex(`n(${B})+n(\\bar{${B}})=${ent(n.B)}+${ent(n.nB)}=${ent(n.N)}=n(${A})+n(\\bar{${A}})`)] });
-  lignes.push({ label: "Conclusion", sousQuestion: L, fragments: [texte("Le tableau des effectifs complet :")], figureHtml: `<div>${tableauHtml(construireTableau(e, []))}</div>` });
-  return lignes;
-}
 
-function correctionConditionnelles(e: Ex): EtapeCorrection[] {
-  const L = lettre(e, "conditionnelles");
-  const { A, B } = lettresAB(e);
-  const bA = fractionBSachantA(e);
-  const aB = fractionASachantB(e);
-  const egales = bA.num * aB.den === aB.num * bA.den;
-  return [
-    {
-      label: "Méthode",
-      sousQuestion: L,
-      fragments: [texte("Une probabilité conditionnelle se calcule dans la sous-population de la condition (l'événement écrit après la barre) : on divise par son effectif.")],
-    },
-    { label: "Calcul", sousQuestion: L, fragments: [latex(`${latexPBsachantA(e)}=\\dfrac{n(${A}\\cap ${B})}{n(${A})}=${egaliteFraction(bA)}`), texte(" : c'est la branche de l'arbre qui va de "), latex(A), texte(" à "), latex(B), texte(".")] },
-    { label: "Calcul", sousQuestion: L, fragments: [latex(`${latexPAsachantB(e)}=\\dfrac{n(${A}\\cap ${B})}{n(${B})}=${egaliteFraction(aB)}`), texte(" : elle ne se lit pas sur l'arbre ; son dénominateur est le total de la colonne de "), latex(B), texte(".")] },
-    {
-      label: "Conclusion",
-      sousQuestion: L,
-      fragments: egales
-        ? [texte("Ici les deux probabilités sont égales, parce que "), latex(`n(${A})=n(${B})`), texte(" : c'est une coïncidence, pas une règle.")]
-        : [texte("Les deux probabilités sont différentes : "), latex(`${latexPBsachantA(e)}\\neq ${latexPAsachantB(e)}`), texte(".")],
-    },
-  ];
-}
 
-function correctionIndependance(e: Ex): EtapeCorrection[] {
-  const L = lettre(e, "independance");
-  const { A, B } = lettresAB(e);
-  const n = e.effectifs;
-  const bA = fractionBSachantA(e);
-  const indep = sontIndependantsArbreTableau(e);
-  return [
-    {
-      label: "Méthode",
-      sousQuestion: L,
-      fragments: [latex(A), texte(" et "), latex(B), texte(" sont indépendants lorsque "), latex(`${latexPBsachantA(e)}=P(${B})`), texte(" : savoir que "), latex(A), texte(" est réalisé ne change pas la probabilité de "), latex(B), texte(".")],
-    },
-    { label: "Calcul", sousQuestion: L, fragments: [latex(`P(${B})=\\dfrac{n(${B})}{N}=${egaliteFraction(fractionB(e))}`), texte(" et "), latex(`${latexPBsachantA(e)}=${dec(bA.num / bA.den)}`)] },
-    {
-      label: "Vérification",
-      sousQuestion: L,
-      fragments: [texte("Avec les effectifs : "), latex(`n(${A}\\cap ${B})\\times N=${ent(n.AB)}\\times${ent(n.N)}=${ent(n.AB * n.N)}`), texte(indep ? " est égal à " : " est différent de "), latex(`n(${A})\\times n(${B})=${ent(n.A)}\\times${ent(n.B)}=${ent(n.A * n.B)}`), texte(".")],
-    },
-    {
-      label: "Conclusion",
-      sousQuestion: L,
-      fragments: [latex(indep ? `${latexPBsachantA(e)}=P(${B})` : `${latexPBsachantA(e)}\\neq P(${B})`), texte(` : ${verdictIndependanceTexte(e)}`)],
-    },
-  ];
-}
 
-function piege(e: Ex): EtapeCorrection {
-  const { A, B } = lettresAB(e);
-  return {
-    label: "Piège",
-    fragments: [
-      texte("Ne pas confondre "),
-      latex(latexPBsachantA(e)),
-      texte(" (on divise par "),
-      latex(`n(${A})`),
-      texte(", elle se lit sur l'arbre) et "),
-      latex(latexPAsachantB(e)),
-      texte(" (on divise par "),
-      latex(`n(${B})`),
-      texte(", total de la colonne, qui ne se lit pas sur l'arbre)."),
-    ],
-  };
-}
 
-function correctionDetaillee(e: Ex): EtapeCorrection[] {
-  const parPhase: Record<PhaseArbreTableauEffectifs, () => EtapeCorrection[]> = {
-    arbre: () => correctionArbre(e),
-    tableau: () => correctionTableau(e),
-    conditionnelles: () => correctionConditionnelles(e),
-    independance: () => correctionIndependance(e),
-  };
-  return [...phasesPourExercice(e).flatMap((p) => parPhase[p]()), piege(e)];
-}
 
 // ============================================================================
 // Réponse brève, difficulté, barème
@@ -337,8 +170,14 @@ function reponseBreve(e: Ex): FragmentConsigne[] {
   ];
 }
 
-function difficulte(e: Ex): 1 | 2 | 3 {
-  return e.mode === "tableauPartiel" ? 3 : 2;
+
+/** Niveau (`niveauDifficulte.ts`) : une étape par écran (quatre) ; méthode 1 (traduire pourcentages,
+ * arbre et tableau l'un dans l'autre, conditionnelle dans la bonne sous-population) ; aucun piège
+ * dans les données ; nombres 0 (effectifs entiers, branches décimales exactes). Étape « indépendance »
+ * sans charge : niveau et durée constants quel que soit le verdict. */
+function criteresDifficulte(e: Ex): CriteresDifficulte {
+  const base = etapesDuCorrige(correctionDetailleeArbreTableauEffectifs(e));
+  return { ...base, lettresSansCharge: [...(base.lettresSansCharge ?? []), lettre(e, "independance")], methode: 1, piege: 0, nombres: 0 };
 }
 
 const crit = (sousQuestion: string, points: number, ...critere: FragmentConsigne[]) => ({ sousQuestion, points, critere });
@@ -386,10 +225,9 @@ export const adaptateurEvaluationArbreTableauEffectifs: AdaptateurFeuilleExercic
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteArbreTableauEffectifs),
   construireEnonce,
   construireCorrection,
-  difficulte,
   reponseBreve,
-  correctionDetaillee,
+  correctionDetaillee: correctionDetailleeArbreTableauEffectifs,
+  criteresDifficulte,
   bareme,
   enoncePapier,
-  dureeMinutes: 12,
 };

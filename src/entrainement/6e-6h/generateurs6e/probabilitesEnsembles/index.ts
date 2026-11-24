@@ -1,6 +1,7 @@
 import type { ExerciceProbabilitesEnsembles } from "../../core6e/probabilitesEnsembles.types";
 import { construireFamilleA, genererFamilleA } from "./familleA";
 import { construireFamilleB, genererFamilleB } from "./familleB";
+import { construireFamilleC, genererFamilleC } from "./familleC";
 
 /**
  * Couche A (6e) — point d'entrée pour `6gen30`. Tirage ÉQUIPROBABLE de la famille (A/B, spec),
@@ -16,6 +17,14 @@ export function genererExerciceProbabilitesEnsembles(): ExerciceProbabilitesEnse
   return tirerParmi(["A", "B"] as const) === "A" ? genererFamilleA() : genererFamilleB();
 }
 
+/** Tirage libre de L'APPLI : la famille C (Venn à trois ensembles) une fois sur quatre, A et B à
+ * parts égales sinon. Le tirage libre de l'adaptateur et des codes `?code=` reste
+ * `genererExerciceProbabilitesEnsembles` (A ou B) : les codes déjà imprimés rouvrent le même
+ * exercice ; la famille C s'imprime par ses variantes (fin de catalogue). */
+export function genererExerciceProbabilitesEnsemblesLibre(): ExerciceProbabilitesEnsembles {
+  return Math.random() < 0.25 ? genererFamilleC() : genererExerciceProbabilitesEnsembles();
+}
+
 /** Identifiants de variante forcée — granularité "ce qui change la structure de la question",
  * jamais un identifiant par tirage numérique individuel (les effectifs/le contexte restent
  * aléatoires même une fois la variante forcée). Famille A : croise `troisiemeDonnee` (3 valeurs) et
@@ -25,7 +34,7 @@ export function genererExerciceProbabilitesEnsembles(): ExerciceProbabilitesEnse
  * enregistrés) mais désignent désormais le sous-type « relation » (incompatibles / indépendants / ni
  * l'un ni l'autre, audit 6e ch. 6, décision C) ; l'ordre du catalogue est inchangé (les codes
  * `?code=` encodent l'INDEX de la variante). */
-export type IdVarianteProbabilitesEnsembles = "A-PAetB-incompatibilite" | "A-PAetB-comparaison" | "A-PAouB-incompatibilite" | "A-PAouB-comparaison" | "A-PniAniB-incompatibilite" | "A-PniAniB-comparaison" | "B-cartes-intersection" | "B-cartes-union" | "B-des-intersection" | "B-des-union";
+export type IdVarianteProbabilitesEnsembles = "A-PAetB-incompatibilite" | "A-PAetB-comparaison" | "A-PAouB-incompatibilite" | "A-PAouB-comparaison" | "A-PniAniB-incompatibilite" | "A-PniAniB-comparaison" | "B-cartes-intersection" | "B-cartes-union" | "B-des-intersection" | "B-des-union" | "C-union" | "C-exactementUn" | "C-auMoinsDeux";
 
 export const CATALOGUE_VARIANTES: { id: IdVarianteProbabilitesEnsembles; label: string }[] = [
   { id: "A-PAetB-incompatibilite", label: "A — donnée P(A∩B), écran 3 incompatibles / indépendants / ni l'un ni l'autre" },
@@ -38,6 +47,10 @@ export const CATALOGUE_VARIANTES: { id: IdVarianteProbabilitesEnsembles; label: 
   { id: "B-cartes-union", label: "B — cartes, écran 2 union" },
   { id: "B-des-intersection", label: "B — dés, écran 2 intersection" },
   { id: "B-des-union", label: "B — dés, écran 2 union" },
+  // Famille C AJOUTÉE EN FIN de catalogue (les codes encodent l'indice de la variante).
+  { id: "C-union", label: "C — Venn à trois ensembles, P(A∪B∪C)" },
+  { id: "C-exactementUn", label: "C — Venn à trois ensembles, « exactement un »" },
+  { id: "C-auMoinsDeux", label: "C — Venn à trois ensembles, « au moins deux »" },
 ];
 
 export function construireAvecVarianteId(id: IdVarianteProbabilitesEnsembles): ExerciceProbabilitesEnsembles {
@@ -62,5 +75,11 @@ export function construireAvecVarianteId(id: IdVarianteProbabilitesEnsembles): E
       return construireFamilleB("des", "intersection");
     case "B-des-union":
       return construireFamilleB("des", "union");
+    case "C-union":
+      return construireFamilleC("union");
+    case "C-exactementUn":
+      return construireFamilleC("exactementUn");
+    case "C-auMoinsDeux":
+      return construireFamilleC("auMoinsDeux");
   }
 }

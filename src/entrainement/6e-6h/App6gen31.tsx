@@ -19,6 +19,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeTiragesArbres, lettreEcranTiragesArbres } from "./generateurs6e/tiragesArbres/corrigeDetaille";
 
 /**
  * `6gen31` — Tirages et arbres (chapitre 6 de 6e, « Les probabilités »). Un seul dispatch piloté par
@@ -148,6 +151,9 @@ export function App6gen31() {
             ))}
           </span>
         ),
+        // Corrigé détaillé « comme au tableau » de l'écran (même source que le papier), affiché par
+        // `ValidationEcran` quand les tentatives sont épuisées.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTiragesArbres(exercice), lettreEcranTiragesArbres(exercice, phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

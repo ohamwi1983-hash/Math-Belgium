@@ -109,6 +109,11 @@ export type SousTypeFamilleB = "cartes" | "des";
 export interface EvenementFamilleB {
   label: string;
   count: number;
+  /** Issues favorables, en texte (« valet de cœur », « (2 ; 5) ») — corrigé détaillé ; absent dans
+   * les instances antérieures (rien d'autre n'en dépend). */
+  issues?: string[];
+  /** Comptage expliqué (cartes : « 3 figures dans chacune des 4 couleurs ») — corrigé détaillé. */
+  explication?: string;
 }
 
 /** Laquelle des deux opérations (intersection/union) est demandée à l'écran 2 — tirée
@@ -127,10 +132,49 @@ export interface ExerciceFamilleB {
   eventB: EvenementFamilleB;
   /** Effectif de A∩B — vérité terrain, dénombré par énumération complète. */
   countAetB: number;
+  /** Issues communes à A et B, en texte (corrigé détaillé) ; absent dans les anciennes instances. */
+  issuesAetB?: string[];
   demandeEcran2: DemandeEcran2FamilleB;
 }
 
-export type ExerciceProbabilitesEnsembles = ExerciceFamilleA | ExerciceFamilleB;
+// ============================================================================
+// Famille C — diagramme de Venn à trois ensembles (décision du professeur, ajoutée EN FIN de
+// catalogue : les codes imprimés des familles A et B ne changent pas).
+// ============================================================================
+
+/** Zone d'un diagramme de Venn à trois ensembles : appartenance à A, B, C (« 110 » : dans A et B,
+ * pas dans C ; « 000 » : à l'extérieur des trois). */
+export type ZoneVennTrois = "111" | "110" | "101" | "011" | "100" | "010" | "001" | "000";
+
+export interface ContexteFamilleC {
+  id: string;
+  /** Phrase d'introduction (« {N} » remplacé par l'effectif total). */
+  introduction: string;
+  /** « un élève », « un membre »… (« On choisit … au hasard »). */
+  individu: string;
+  /** Définitions des événements, en prose (jamais en mode math). */
+  definitions: [string, string, string];
+}
+
+/** Probabilité de l'écran 3 : réunion des trois, « exactement un », « au moins deux ». */
+export type DemandeEcran3FamilleC = "union" | "exactementUn" | "auMoinsDeux";
+
+/** Probabilité conditionnelle de l'écran 4 : P(X | Ȳ) ou P(X | « au moins deux »). Indices 0, 1, 2
+ * = A, B, C. */
+export type ConditionnelleFamilleC = { type: "XsachantNonY"; x: 0 | 1 | 2; y: 0 | 1 | 2 } | { type: "XsachantAuMoinsDeux"; x: 0 | 1 | 2 };
+
+export interface ExerciceFamilleC {
+  famille: "C";
+  contexte: ContexteFamilleC;
+  /** Effectifs ENTIERS des 8 zones (source de vérité de toutes les données et réponses). */
+  zones: Record<ZoneVennTrois, number>;
+  /** Effectif total (somme des 8 zones). */
+  total: number;
+  demandeEcran3: DemandeEcran3FamilleC;
+  conditionnelle: ConditionnelleFamilleC;
+}
+
+export type ExerciceProbabilitesEnsembles = ExerciceFamilleA | ExerciceFamilleB | ExerciceFamilleC;
 
 export type FamilleProbabilitesEnsembles = ExerciceProbabilitesEnsembles["famille"];
 

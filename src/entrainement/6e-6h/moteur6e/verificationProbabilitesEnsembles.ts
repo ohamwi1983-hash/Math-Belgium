@@ -2,6 +2,7 @@ import type { CaseTableauA, EvenementTableauA, ExerciceFamilleA, ExerciceFamille
 import type { StatutVerification } from "../moteur/statutVerification";
 import type { PhaseProbabilitesEnsembles } from "./typesProbabilitesEnsembles";
 import { diagnostiquerProbabilite, sontIndependantsEffectifs } from "./verificationProbabilites";
+import { diagnostiquerEcranC } from "./verificationVennTrois";
 
 /**
  * Couche B (6e) — vérification propre à `6gen30` (tableau à double entrée, cartes/dés). N'importe
@@ -263,6 +264,11 @@ export function diagnostiquerEcran(exercice: ExerciceProbabilitesEnsembles, phas
       return diagnostiquerBEcran3(exercice as ExerciceFamilleB, valeurs);
     case "bEcran4":
       return diagnostiquerBEcran4(exercice as ExerciceFamilleB, valeurs);
+    case "cEcran1":
+    case "cEcran2":
+    case "cEcran3":
+    case "cEcran4":
+      return exercice.famille === "C" ? diagnostiquerEcranC(exercice, phase, valeurs) : "not_equivalent";
   }
 }
 
