@@ -4,8 +4,8 @@ import type {
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
@@ -15,12 +15,12 @@ import {
   consigneGeneraleExtremaBornesRiche,
   formatFDeTLatex,
   formatReponseAttenduePhaseLatex,
-  texteAideNiveau1ExtremaBornes,
 } from "../../ui5e/formatExtremaBornes";
 import type { EcranExtremaBornes } from "../../moteur5e/typesExtremaBornes";
 import { ORDRE_ECRANS_EXTREMA_BORNES } from "../../moteur5e/typesExtremaBornes";
-import { construireSvgTableauVariations } from "../../export5e/svgTableauVariations";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, derivativeCoeffs, evalPoly, genererExerciceExtremaBornes } from "./index";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeExtremaBornes, LETTRES_LECTURE_EXTREMA_BORNES } from "./corrigeDetaille";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, evalPoly, genererExerciceExtremaBornes } from "./index";
 import { VARIANTES_CALCULATRICE_EXTREMA_BORNES, profilExtremaBornes } from "../profilsEvaluationDerivees34-35";
 
 /**
@@ -50,11 +50,6 @@ function fragmentsRiches(source: string): FragmentConsigne[] {
     .split("$")
     .map((morceau, i) => (i % 2 === 1 ? latex(morceau) : texte(morceau.replace(/ \?/g, "\u00a0?"))))
     .filter((f) => f.valeur !== "");
-}
-
-/** Nombre entier en Unicode, « − » typographique (figure SVG). */
-function nombreUnicode(v: number): string {
-  return v < 0 ? `−${Math.abs(v)}` : `${v}`;
 }
 
 interface Candidat {
@@ -124,79 +119,6 @@ function reponseBreveExtremaBornes(exercice: ExerciceExtremaBornes): FragmentCon
   return [latex(max), texte(" ; "), latex(min)];
 }
 
-/** f'(t) écrite en facteurs à partir de ses racines (vérité terrain de l'instance). */
-function fPrimeFactoriseeLatex(exercice: ExerciceExtremaBornes): string {
-  const coeffs = derivativeCoeffs(exercice.coeffs);
-  const dominant = coeffs[coeffs.length - 1];
-  const prefixe = dominant === 1 ? "" : dominant === -1 ? "-" : `${dominant}`;
-  return `f'(t)=${prefixe}${exercice.racinesFPrime.map((r) => `(t-${r})`).join("")}`;
-}
-
-/** Signe de f' sur chacun des intervalles délimités par 0, les racines et T — déduit de la nature
- * des extremums (+ avant un maximum, − avant un minimum, alternance aux racines simples). */
-function signesFPrime(exercice: ExerciceExtremaBornes): ("+" | "−")[] {
-  const premier = exercice.classificationFPrime[0] === "max" ? "+" : "−";
-  return Array.from({ length: exercice.racinesFPrime.length + 1 }, (_, i) => ((i % 2 === 0) === (premier === "+") ? "+" : "−"));
-}
-
-function figureTableau(exercice: ExerciceExtremaBornes): string {
-  const abscissesNum = [0, ...exercice.racinesFPrime, exercice.T];
-  const valeurs = abscissesNum.map((t) => evalPoly(exercice.coeffs, t));
-  return construireSvgTableauVariations(
-    {
-      variable: "t",
-      libelleDerivee: "f′(t)",
-      libelleFonction: "f(t)",
-      abscisses: abscissesNum.map(nombreUnicode),
-      zeros: abscissesNum.map((_, i) => i > 0 && i < abscissesNum.length - 1),
-      signes: signesFPrime(exercice),
-      valeurs: valeurs.map(nombreUnicode),
-    },
-    valeurs,
-  );
-}
-
-function aide(ecran: EcranExtremaBornes, exercice: ExerciceExtremaBornes): FragmentConsigne[] {
-  const a = texteAideNiveau1ExtremaBornes(ecran, exercice);
-  return [...fragmentsRiches(a.texte), ...(a.latex ? [texte(" "), latex(a.latex)] : [])];
-}
-
-function correctionDetailleeExtremaBornes(exercice: ExerciceExtremaBornes): EtapeCorrection[] {
-  const max = candidatExtreme(exercice, "max");
-  const min = candidatExtreme(exercice, "min");
-  const [conclusionMax, conclusionMin] = reponseAttendue(exercice, "comparaison");
-  const borne = [max, min].filter((c) => c.origine === "borne");
-  const piege: FragmentConsigne[] =
-    borne.length > 0
-      ? [
-          texte("S'arrêter aux extremums locaux : ici, "),
-          ...borne.flatMap((c, i) => [
-            ...(i > 0 ? [texte(" et ")] : []),
-            texte(c === max ? "le maximum absolu" : "le minimum absolu"),
-            texte(" est atteint à la borne "),
-            latex(`t=${c.t}`),
-          ]),
-          texte(", pas à un extremum local."),
-        ]
-      : [texte("Oublier les bornes : ici, les deux extremums absolus sont des extremums locaux, mais il fallait comparer aussi "), latex(`f(0)`), texte(" et "), latex(`f(${exercice.T})`), texte(" pour le savoir.")];
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: aide("deriver", exercice) },
-    { label: "Calcul", sousQuestion: "a", fragments: [latex(reponseAttendue(exercice, "deriver")[0]), texte(".")] },
-    { label: "Méthode", sousQuestion: "b", fragments: aide("racines", exercice) },
-    { label: "Calcul", sousQuestion: "b", fragments: [latex(fPrimeFactoriseeLatex(exercice)), texte(", donc "), latex(reponseAttendue(exercice, "racines")[0]), texte(".")] },
-    {
-      label: "Tableau",
-      sousQuestion: "c",
-      fragments: [texte("Signe de f′ sur "), latex(intervalleLatex(exercice)), texte(" et variations de f : "), latex(reponseAttendue(exercice, "tableauFPrime").join(" \\quad ")), texte(".")],
-      figureHtml: figureTableau(exercice),
-    },
-    { label: "Calcul", sousQuestion: "d", fragments: [latex(reponseAttendue(exercice, "valeursExtremums").join(" \\quad ")), texte(".")] },
-    { label: "Calcul", sousQuestion: "e", fragments: [latex(reponseAttendue(exercice, "valeursBornes").join(" \\quad ")), texte(".")] },
-    { label: "Conclusion", sousQuestion: "f", fragments: [texte("On compare toutes ces valeurs : "), latex(conclusionMax), texte(" ; "), latex(conclusionMin), texte(".")] },
-    { label: "Piège", sousQuestion: "f", fragments: piege },
-  ];
-}
-
 function baremeExtremaBornes(exercice: ExerciceExtremaBornes): BaremeExercice {
   const c = (sousQuestion: string, critere: string, points: number): CritereBareme => ({ sousQuestion, critere: [texte(critere)], points });
   return {
@@ -217,8 +139,12 @@ function baremeExtremaBornes(exercice: ExerciceExtremaBornes): BaremeExercice {
   };
 }
 
-function difficulteExtremaBornes(exercice: ExerciceExtremaBornes): 1 | 2 | 3 {
-  return exercice.degre === 4 ? 3 : 2;
+/** Niveau 1–7 : méthode 1 (choisir la méthode du cours : dérivée, extremums locaux ET bornes) ;
+ * piège 1 constant (la comparaison avec les bornes est le cœur de l'exercice — le cas « à la borne »
+ * est le verdict, il ne doit pas changer le niveau) ; l'écran « comparaison » (choisir parmi des valeurs
+ * déjà calculées) est compté comme une lecture. */
+function criteresDifficulteExtremaBornes(exercice: ExerciceExtremaBornes): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeExtremaBornes(exercice), LETTRES_LECTURE_EXTREMA_BORNES), methode: 1, piege: 1 };
 }
 
 /** Ancien corrigé (repli, documents Word) : les étapes du corrigé détaillé, en paragraphes. */
@@ -236,12 +162,11 @@ export const adaptateurEvaluationExtremaBornes: AdaptateurFeuilleExercices<Exerc
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce: construireEnonceExtremaBornes,
   construireCorrection: construireCorrectionExtremaBornes,
-  difficulte: difficulteExtremaBornes,
+  criteresDifficulte: criteresDifficulteExtremaBornes,
   reponseBreve: reponseBreveExtremaBornes,
   correctionDetaillee: correctionDetailleeExtremaBornes,
   bareme: baremeExtremaBornes,
   enoncePapier: enoncePapierExtremaBornes,
-  dureeMinutes: 12,
   profilInstance: profilExtremaBornes,
   calculatriceIndispensable: [...VARIANTES_CALCULATRICE_EXTREMA_BORNES],
 };

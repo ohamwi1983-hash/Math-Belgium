@@ -54,6 +54,9 @@ import {
 } from "./ui5e/formatExtremaBornes";
 import { EnTeteExercice } from "./components5e/EnTeteExercice";
 import { QuestionFinale } from "./components/QuestionFinale";
+import { correctionDetailleeExtremaBornes, lettreEcranExtremaBornes } from "./generateurs5e/extremaBornes/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import type { ReactNode } from "react";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
@@ -226,6 +229,7 @@ export function App5gen34() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeExtremaBornes(exercice), lettreEcranExtremaBornes(etat.phase))} />,
         reponseAttendue: reponseAttendueEcran(exercice, etat.phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

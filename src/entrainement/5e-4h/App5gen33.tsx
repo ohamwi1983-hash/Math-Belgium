@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { correctionDetailleeContexteEconomique, lettreEcranContexteEconomique } from "./generateurs5e/contexteEconomique/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceContexteEconomique } from "./generateurs5e/contexteEconomique/index";
@@ -220,6 +223,7 @@ export function App5gen33() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeContexteEconomique(exercice), lettreEcranContexteEconomique(exercice, etat.phase))} />,
         reponseAttendue: (
           <span className="equation-box-termes">
             {formatReponseAttenduePhaseLatex(exercice, etat.phase).map((frag, i) => (

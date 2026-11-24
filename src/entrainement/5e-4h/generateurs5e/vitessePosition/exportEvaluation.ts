@@ -4,17 +4,19 @@ import type {
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   QuestionExercice,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { consigneEcranRiche, formatReponseAttenduePhaseLatex, phraseEnonce, texteAideNiveau1 } from "../../ui5e/formatVitessePosition";
+import { consigneEcranRiche, formatReponseAttenduePhaseLatex, phraseEnonce } from "../../ui5e/formatVitessePosition";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeVitessePosition, lettresLectureVitessePosition } from "./corrigeDetaille";
 import type { EcranVitessePosition } from "../../moteur5e/typesVitessePosition";
 import { ordreEcransVitessePosition } from "../../moteur5e/typesVitessePosition";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceVitessePosition, valeurVitesseExacte } from "./index";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceVitessePosition } from "./index";
 import { PARAMETRES_VITESSE_POSITION, profilVitessePosition } from "../profilsEvaluationDerivees34-35";
 
 /**
@@ -121,59 +123,6 @@ function reponseBreveVitessePosition(exercice: ExerciceVitessePosition): Fragmen
   return [...debut, texte(" ; d) "), latex(reponse(exercice, "tempsTotal"))];
 }
 
-/** Équation s(t) = d ramenée à la forme t² + Bt + C = 0 (coefficients entiers), puis résolue. Les
- * deux solutions sont celles de l'instance (`tCible`, `racineRejetee`) : le discriminant affiché vaut
- * (tCible − racineRejetee)², le carré de leur écart (équation unitaire). */
-function resolutionLatex(exercice: ExerciceVitessePosition): string {
-  const d = exercice.distanceCible;
-  const B = exercice.a === 2 ? exercice.b : 2 * exercice.b;
-  const C = exercice.a === 2 ? -d : -2 * d;
-  const terme = (k: number) => (k === 0 ? "" : k === 1 ? "+t" : `+${k}t`);
-  const gauche = `${exercice.a === 2 ? "t^2" : "\\dfrac{1}{2}t^2"}${terme(exercice.b)}=${d}`;
-  const solutions = `t=${exercice.tCible} \\text{ ou } t=${exercice.racineRejetee}`;
-  if (B === 0) return exercice.a === 2 ? `${gauche} \\iff ${solutions}` : `${gauche} \\iff t^2=${-C} \\iff ${solutions}`;
-  const forme = `t^2${terme(B)}-${-C}=0`;
-  const delta = B * B - 4 * C;
-  const racine = exercice.tCible - exercice.racineRejetee;
-  return `${gauche} \\iff ${forme} ;\\ \\Delta=${B}^2+4\\cdot${-C}=${delta}=${racine}^2 ;\\ t=\\dfrac{-${B}\\pm${racine}}{2} \\text{, donc } ${solutions}`;
-}
-
-function aide(ecran: EcranVitessePosition): FragmentConsigne[] {
-  const a = texteAideNiveau1(ecran);
-  return [...fragmentsRiches(a.texte), ...(a.latex ? [texte(" "), latex(a.latex)] : [])];
-}
-
-function correctionDetailleeVitessePosition(exercice: ExerciceVitessePosition): EtapeCorrection[] {
-  const l = (ecran: EcranVitessePosition) => lettreDe(exercice, ecran);
-  const lignes: EtapeCorrection[] = [
-    { label: "Méthode", sousQuestion: l("derivee"), fragments: aide("derivee") },
-    { label: "Calcul", sousQuestion: l("derivee"), fragments: [latex(reponse(exercice, "derivee")), texte(" (en m/s).")] },
-    { label: "Calcul", sousQuestion: l("acceleration"), fragments: [latex(reponse(exercice, "acceleration")), texte(".")] },
-    { label: "Méthode", sousQuestion: l("resoudre"), fragments: aide("resoudre") },
-    { label: "Calcul", sousQuestion: l("resoudre"), fragments: [latex(resolutionLatex(exercice)), texte(".")] },
-    { label: "Justification", sousQuestion: l("rejet"), fragments: [latex(`t=${exercice.racineRejetee}<0`), texte(" : le temps est compté à partir du départ, donc cette solution n'a pas de sens ici. On retient "), latex(`t=${exercice.tCible}\\text{ s}`), texte(".")] },
-    { label: "Calcul", sousQuestion: l("vitessePointe"), fragments: [latex(`v(${exercice.tCible})=${formatVitesse(exercice)}=${valeurVitesseExacte(exercice, exercice.tCible)}\\text{ m/s}`), texte(".")] },
-    { label: "Piège", sousQuestion: l("vitessePointe"), fragments: [texte("Évaluer s au lieu de v, ou calculer une vitesse moyenne (distance ÷ durée) : la vitesse atteinte est la vitesse instantanée "), latex(`v(${exercice.tCible})`), texte(".")] },
-  ];
-  if (exercice.variante === "A") {
-    lignes.push({ label: "Calcul", sousQuestion: l("conversion"), fragments: [latex(reponse(exercice, "conversion")), texte(" (1 m/s = 3,6 km/h).")] });
-    return lignes;
-  }
-  lignes.push(
-    { label: "Méthode", sousQuestion: l("segmentConstant"), fragments: aide("segmentConstant") },
-    { label: "Calcul", sousQuestion: l("segmentConstant"), fragments: [latex(`D_2=${exercice.D}-${exercice.distanceCible}=${exercice.D2}\\text{ m}`), texte(" ; "), latex(reponse(exercice, "segmentConstant")), texte(".")] },
-    { label: "Piège", sousQuestion: l("segmentConstant"), fragments: [texte("Utiliser encore "), latex("s(t)"), texte(" sur le second segment : la vitesse y est constante, le modèle du premier segment ne s'applique plus.")] },
-    { label: "Calcul", sousQuestion: l("tempsTotal"), fragments: [latex(`t_{\\text{total}}=${exercice.tCible}+t_2`), texte(", donc "), latex(reponse(exercice, "tempsTotal")), texte(".")] },
-  );
-  return lignes;
-}
-
-/** a·t₀ + b substitué, ex. « 2\cdot6+2 ». */
-function formatVitesse(exercice: ExerciceVitessePosition): string {
-  const produit = exercice.a === 1 ? `${exercice.tCible}` : `${exercice.a}\\cdot${exercice.tCible}`;
-  return exercice.b === 0 ? produit : `${produit}+${exercice.b}`;
-}
-
 function baremeVitessePosition(exercice: ExerciceVitessePosition): BaremeExercice {
   const l = (ecran: EcranVitessePosition) => lettreDe(exercice, ecran);
   const c = (sousQuestion: string, critere: string, points: number): CritereBareme => ({ sousQuestion, critere: [texte(critere)], points });
@@ -210,8 +159,11 @@ function baremeVitessePosition(exercice: ExerciceVitessePosition): BaremeExercic
   };
 }
 
-function difficulteVitessePosition(exercice: ExerciceVitessePosition): 1 | 2 | 3 {
-  return exercice.variante === "B" ? 3 : 2;
+/** Niveau 1–7 : méthode 0 en A (questions guidées, modèle donné), 1 en B (changement de modèle à
+ * décider : vitesse constante sur le second segment) ; piège 1 (une solution négative à rejeter,
+ * toujours dans les données) ; l'écran « rejet » (décision sans calcul) est compté comme une lecture. */
+function criteresDifficulteVitessePosition(exercice: ExerciceVitessePosition): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeVitessePosition(exercice), lettresLectureVitessePosition(exercice)), methode: exercice.variante === "B" ? 1 : 0, piege: 1 };
 }
 
 /** Ancien corrigé (repli, documents Word) : les étapes du corrigé détaillé, en paragraphes. */
@@ -229,12 +181,11 @@ export const adaptateurEvaluationVitessePosition: AdaptateurFeuilleExercices<Exe
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce: construireEnonceVitessePosition,
   construireCorrection: construireCorrectionVitessePosition,
-  difficulte: difficulteVitessePosition,
+  criteresDifficulte: criteresDifficulteVitessePosition,
   reponseBreve: reponseBreveVitessePosition,
   correctionDetaillee: correctionDetailleeVitessePosition,
   bareme: baremeVitessePosition,
   enoncePapier: enoncePapierVitessePosition,
-  dureeMinutes: 12,
   profilInstance: profilVitessePosition,
   parametresAuChoix: PARAMETRES_VITESSE_POSITION,
 };

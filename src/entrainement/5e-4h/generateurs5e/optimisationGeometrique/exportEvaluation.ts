@@ -4,15 +4,17 @@ import type {
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { consigneGeneraleRiche, formatNombreLatex, formatReponseAttendueEcranLatex, formatTermesDonneesLatex, texteAideNiveau1, texteAideNiveau2 } from "../../ui5e/formatOptimisationGeometrique";
+import { consigneGeneraleRiche, formatNombreLatex, formatTermesDonneesLatex } from "../../ui5e/formatOptimisationGeometrique";
 import { ordreEcransOptimisation, type EcranOptimisation } from "../../moteur5e/typesOptimisationGeometrique";
 import { conclusionReelle, pointsTest } from "../../moteur5e/verificationOptimisationGeometrique";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeOptimisation, reponseEcranOptimisation, variableOptimisation } from "./corrigeDetaille";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOptimisation } from "./index";
 import { profilOptimisation } from "../profilsEvaluationDerivees31-33";
 
@@ -48,22 +50,8 @@ function fragmentsRiches(source: string): FragmentConsigne[] {
     .filter((f) => f.valeur !== "");
 }
 
-function variable(exercice: ExerciceOptimisation): string {
-  if (exercice.famille === "trapeze") return "\\alpha";
-  if (exercice.famille === "fenetreA" || exercice.famille === "fenetreB") return "r";
-  return "x";
-}
-
-/** L'écran fait saisir x pour α ou r : le papier reprend la variable de l'énoncé. */
-function avecVariable(exercice: ExerciceOptimisation, latexEcran: string): string {
-  const v = variable(exercice);
-  if (v === "x") return latexEcran;
-  return latexEcran.replace(/(?<![A-Za-z\\])x(?![A-Za-z])/g, v === "\\alpha" ? "\\alpha " : "r").replace(/\\alpha \)/g, "\\alpha)").replace(/\\alpha ([,}])/g, "\\alpha$1");
-}
-
-function reponseEcran(exercice: ExerciceOptimisation, ecran: EcranOptimisation): string {
-  return avecVariable(exercice, formatReponseAttendueEcranLatex(exercice, ecran));
-}
+const variable = variableOptimisation;
+const reponseEcran = reponseEcranOptimisation;
 
 function nombreTexte(v: number): string {
   const arrondi = Math.round(v * 100) / 100;
@@ -271,62 +259,6 @@ function enoncePapierOptimisation(exercice: ExerciceOptimisation): EnoncePapier 
 // Corrigé détaillé.
 // ============================================================================
 
-function aide(exercice: ExerciceOptimisation, ecran: EcranOptimisation, niveau: 1 | 2): FragmentConsigne[] {
-  const a = niveau === 1 ? texteAideNiveau1(exercice, ecran) : texteAideNiveau2(exercice, ecran);
-  if (!a || (a.texte === "" && !a.latex)) return [];
-  const papier = a.texte.replace(/aux écrans précédents/g, "aux étapes précédentes").replace(/des écrans précédents/g, "des étapes précédentes").replace(/à l'écran précédent/g, "à l'étape précédente");
-  const fragments = fragmentsRiches(papier).map((fr) => (fr.type === "latex" ? latex(avecVariable(exercice, fr.valeur)) : fr));
-  return [...fragments, ...(a.latex ? [texte(" "), latex(avecVariable(exercice, a.latex))] : [])];
-}
-
-function lignesEtape(exercice: ExerciceOptimisation, ecran: EcranOptimisation): EtapeCorrection[] {
-  const sq = lettreDe(exercice, ecran);
-  const ligne = (label: string, fragments: FragmentConsigne[]): EtapeCorrection[] => (fragments.length === 0 ? [] : [{ label, sousQuestion: sq, fragments }]);
-  const reponse = () => [latex(reponseEcran(exercice, ecran)), texte(".")];
-  const f = exercice.famille;
-  switch (ecran) {
-    case "lien":
-    case "construire":
-      return [...ligne("Méthode", aide(exercice, ecran, 1)), ...ligne("Calcul", reponse())];
-    case "deriver": {
-      const methodeDerivee =
-        f === "fenetreA"
-          ? fragmentsRiches("$F$ est un polynôme du deuxième degré en $r$ : on dérive terme à terme.")
-          : f === "margesA"
-            ? [...fragmentsRiches("Règle du quotient pour le premier terme, puis dérivée du terme en $x$ :"), texte(" "), latex("\\left(\\dfrac{u}{v}\\right)'=\\dfrac{u'v-uv'}{v^2}")]
-            : aide(exercice, ecran, 1);
-      return [...ligne("Méthode", methodeDerivee), ...ligne("Calcul", reponse())];
-    }
-    case "resoudre": {
-      const lignes = [...ligne("Calcul", aide(exercice, ecran, 2)), ...ligne("Conclusion", reponse())];
-      if (f === "margesA" || f === "margesB" || f === "fenetreB") lignes.push(...ligne("Piège", [texte("L'équation a deux solutions opposées : une longueur est positive, on rejette la solution négative.")]));
-      if (f === "trapeze") lignes.push(...ligne("Piège", [texte("On garde la solution u comprise entre 0 et 1 (u = cos α avec 0° < α < 90°).")]));
-      return lignes;
-    }
-    case "justifier": {
-      const nature = conclusionReelle(exercice) === "max" ? "maximum" : "minimum";
-      return [
-        ...ligne("Méthode", [texte(nature === "maximum" ? "F′ positive avant l'optimum et négative après : F croît puis décroît." : "F′ négative avant l'optimum et positive après : F décroît puis croît.")]),
-        ...ligne("Conclusion", reponse()),
-      ];
-    }
-    case "conclure":
-      return [...ligne("Méthode", aide(exercice, ecran, 1)), ...ligne("Conclusion", reponse())];
-    case "application":
-      return [...ligne("Méthode", [texte("Coût = prix au cm² × aire totale minimale (ce n'est pas une nouvelle optimisation).")]), ...ligne("Calcul", reponse())];
-    case "coeffsImmediats":
-    case "relation":
-    case "resoudreA":
-      return [...ligne("Méthode", aide(exercice, ecran, 1)), ...ligne("Calcul", reponse())];
-    case "expressionFinale":
-      return ligne("Conclusion", reponse());
-  }
-}
-
-function correctionDetailleeOptimisation(exercice: ExerciceOptimisation): EtapeCorrection[] {
-  return ordreEcransOptimisation(exercice).flatMap((e) => lignesEtape(exercice, e));
-}
-
 function reponseBreveSansApplication(exercice: ExerciceOptimisation): FragmentConsigne[] {
   if (exercice.famille === "cubique") return [latex(reponseEcran(exercice, "expressionFinale"))];
   const nature = conclusionReelle(exercice) === "max" ? "maximum" : "minimum";
@@ -372,9 +304,14 @@ function baremeOptimisation(exercice: ExerciceOptimisation): BaremeExercice {
   };
 }
 
-function difficulteOptimisation(exercice: ExerciceOptimisation): 1 | 2 | 3 {
-  if (exercice.famille === "trapeze" || exercice.famille === "fenetreA" || exercice.famille === "fenetreB") return 3;
-  return 2;
+/** Niveau 1–7 : méthode 2 pour les problèmes géométriques (l'élève construit lui-même la fonction à
+ * optimiser à partir de la situation), 1 pour la reconstruction du polynôme cubique ; piège 1 quand une
+ * solution de F′ = 0 est à rejeter (trapèze : u négatif ; marges, fenêtre à aire fixée : longueur
+ * négative), 0 sinon ; nombres = profil (les valeurs de F′ aux points test ne servent que par leur
+ * signe) ; aucun écran de pure lecture. */
+function criteresDifficulteOptimisation(exercice: ExerciceOptimisation): CriteresDifficulte {
+  const piege = exercice.famille === "trapeze" || exercice.famille === "margesA" || exercice.famille === "margesB" || exercice.famille === "fenetreB" ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeOptimisation(exercice), []), methode: exercice.famille === "cubique" ? 1 : 2, piege, nombres: profilOptimisation(exercice).calcul === "calculatrice" ? 1 : 0 };
 }
 
 /** Repli (documents Word) : les lignes du corrigé détaillé, en paragraphes. */
@@ -392,12 +329,11 @@ export const adaptateurEvaluationOptimisationGeometrique: AdaptateurFeuilleExerc
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce: construireEnonceOptimisation,
   construireCorrection: construireCorrectionOptimisation,
-  difficulte: difficulteOptimisation,
+  criteresDifficulte: criteresDifficulteOptimisation,
   reponseBreve: reponseBreveOptimisation,
   correctionDetaillee: correctionDetailleeOptimisation,
   bareme: baremeOptimisation,
   enoncePapier: enoncePapierOptimisation,
-  dureeMinutes: 15,
   profilInstance: profilOptimisation,
   calculatriceIndispensable: ["cylindre-application"],
 };
