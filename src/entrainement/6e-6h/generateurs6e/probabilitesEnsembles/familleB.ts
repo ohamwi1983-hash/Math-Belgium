@@ -41,22 +41,36 @@ interface DescripteurEvenement<T> {
   categorie: string;
   label: string;
   predicat: (item: T) => boolean;
+  /** Comptage expliqué (corrigé détaillé). */
+  explication?: string;
+}
+
+const NOM_RANG: Record<number, string> = { 1: "as", 11: "valet", 12: "dame", 13: "roi" };
+
+/** Nom d'une carte en clair (« valet de cœur », « 7 de pique ») — corrigé détaillé. */
+function nomCarte(c: Carte): string {
+  return `${NOM_RANG[c.rang] ?? String(c.rang)} de ${LABEL_SUITE[c.suite]}`;
+}
+
+/** Couple de deux dés (« (2 ; 5) ») — corrigé détaillé. */
+function nomJet(j: JetDes): string {
+  return `(${j.d1} ; ${j.d2})`;
 }
 
 function catalogueCartes(): DescripteurEvenement<Carte>[] {
   const valeurAleatoire = tirerEntier(2, 10);
   const suiteAleatoire = tirerParmi(SUITES);
   return [
-    { categorie: "couleur", label: "la carte est rouge (cœur ou carreau)", predicat: (c) => c.suite === "coeur" || c.suite === "carreau" },
-    { categorie: "couleur", label: "la carte est noire (trèfle ou pique)", predicat: (c) => c.suite === "trefle" || c.suite === "pique" },
-    { categorie: "rang", label: "la carte est une figure (valet, dame ou roi)", predicat: (c) => c.rang >= 11 },
-    { categorie: "rang", label: "la carte est un as", predicat: (c) => c.rang === 1 },
-    { categorie: "rang", label: `la carte porte la valeur ${valeurAleatoire}`, predicat: (c) => c.rang === valeurAleatoire },
-    { categorie: "suite", label: `la carte est un ${LABEL_SUITE[suiteAleatoire]}`, predicat: (c) => c.suite === suiteAleatoire },
+    { categorie: "couleur", label: "la carte est rouge (cœur ou carreau)", predicat: (c) => c.suite === "coeur" || c.suite === "carreau", explication: "13 cœurs et 13 carreaux" },
+    { categorie: "couleur", label: "la carte est noire (trèfle ou pique)", predicat: (c) => c.suite === "trefle" || c.suite === "pique", explication: "13 trèfles et 13 piques" },
+    { categorie: "rang", label: "la carte est une figure (valet, dame ou roi)", predicat: (c) => c.rang >= 11, explication: "3 figures dans chacune des 4 couleurs" },
+    { categorie: "rang", label: "la carte est un as", predicat: (c) => c.rang === 1, explication: "un as dans chacune des 4 couleurs" },
+    { categorie: "rang", label: `la carte porte la valeur ${valeurAleatoire}`, predicat: (c) => c.rang === valeurAleatoire, explication: `un ${valeurAleatoire} dans chacune des 4 couleurs` },
+    { categorie: "suite", label: `la carte est un ${LABEL_SUITE[suiteAleatoire]}`, predicat: (c) => c.suite === suiteAleatoire, explication: `13 cartes par couleur` },
     // Audit 6e ch. 6 : avec les seuls événements ci-dessus, 4 paires sur 5 étaient indépendantes
     // (réponse quasi prévisible) ; ces deux-ci ne sont indépendantes que de quelques partenaires.
-    { categorie: "paire", label: "la carte porte une valeur paire (2, 4, 6, 8 ou 10)", predicat: (c) => c.rang <= 10 && c.rang % 2 === 0 },
-    { categorie: "figureRouge", label: "la carte est une figure rouge", predicat: (c) => c.rang >= 11 && (c.suite === "coeur" || c.suite === "carreau") },
+    { categorie: "paire", label: "la carte porte une valeur paire (2, 4, 6, 8 ou 10)", predicat: (c) => c.rang <= 10 && c.rang % 2 === 0, explication: "5 valeurs paires dans chacune des 4 couleurs" },
+    { categorie: "figureRouge", label: "la carte est une figure rouge", predicat: (c) => c.rang >= 11 && (c.suite === "coeur" || c.suite === "carreau"), explication: "3 figures dans chacune des 2 couleurs rouges" },
   ];
 }
 
@@ -83,14 +97,19 @@ function catalogueDes(facesParDe: number): DescripteurEvenement<JetDes>[] {
   const valeurPremierDe = tirerEntier(1, facesParDe);
   return [
     { categorie: "somme", label: `la somme des deux dés vaut ${sommeCible}`, predicat: (j) => j.d1 + j.d2 === sommeCible },
-    { categorie: "ecart", label: ecartCible === 0 ? "les deux dés affichent la même valeur" : `l'écart entre les deux dés vaut ${ecartCible}`, predicat: (j) => Math.abs(j.d1 - j.d2) === ecartCible },
-    { categorie: "parite", label: "la somme des deux dés est paire", predicat: (j) => (j.d1 + j.d2) % 2 === 0 },
+    {
+      categorie: "ecart",
+      label: ecartCible === 0 ? "les deux dés affichent la même valeur" : `l'écart entre les deux dés vaut ${ecartCible}`,
+      predicat: (j) => Math.abs(j.d1 - j.d2) === ecartCible,
+      explication: ecartCible === 0 ? `${facesParDe} doubles` : `${facesParDe - ecartCible} couples où le premier dé dépasse le second de ${ecartCible}, autant dans l'autre sens`,
+    },
+    { categorie: "parite", label: "la somme des deux dés est paire", predicat: (j) => (j.d1 + j.d2) % 2 === 0, explication: `pour chacun des ${facesParDe} résultats du premier dé, ${facesParDe / 2} résultats du second de même parité` },
     // Audit 6e ch. 6 : sans événement portant sur UN dé, aucune paire tirée n'était jamais
     // indépendante (réponse « non indépendants » constante sur les dés). Un événement sur le premier
     // dé et un sur le second sont indépendants ; « premier dé = k » l'est aussi de « somme paire »,
     // de « dés égaux » et de « somme = n + 1 », mais pas des autres sommes/écarts.
-    { categorie: "de1", label: `le premier dé affiche ${valeurPremierDe}`, predicat: (j) => j.d1 === valeurPremierDe },
-    { categorie: "de2", label: "le second dé affiche un nombre pair", predicat: (j) => j.d2 % 2 === 0 },
+    { categorie: "de1", label: `le premier dé affiche ${valeurPremierDe}`, predicat: (j) => j.d1 === valeurPremierDe, explication: `${facesParDe} résultats possibles pour le second dé` },
+    { categorie: "de2", label: "le second dé affiche un nombre pair", predicat: (j) => j.d2 % 2 === 0, explication: `${facesParDe / 2} résultats pairs du second dé pour chacun des ${facesParDe} résultats du premier` },
   ];
 }
 
@@ -124,18 +143,18 @@ export function construireFamilleB(sousType: SousTypeFamilleB, demandeEcran2: De
   if (sousType === "cartes") {
     const deck = jeuDe52Cartes();
     const [descA, descB] = choisirDeuxEvenements(catalogueCartes());
-    const eventA: EvenementFamilleB = { label: descA.label, count: deck.filter(descA.predicat).length };
-    const eventB: EvenementFamilleB = { label: descB.label, count: deck.filter(descB.predicat).length };
-    const countAetB = deck.filter((c) => descA.predicat(c) && descB.predicat(c)).length;
-    return { famille: "B", sousType, denominateur: 52, eventA, eventB, countAetB, demandeEcran2 };
+    const eventA: EvenementFamilleB = { label: descA.label, count: deck.filter(descA.predicat).length, issues: deck.filter(descA.predicat).map(nomCarte), explication: descA.explication };
+    const eventB: EvenementFamilleB = { label: descB.label, count: deck.filter(descB.predicat).length, issues: deck.filter(descB.predicat).map(nomCarte), explication: descB.explication };
+    const communes = deck.filter((c) => descA.predicat(c) && descB.predicat(c));
+    return { famille: "B", sousType, denominateur: 52, eventA, eventB, countAetB: communes.length, issuesAetB: communes.map(nomCarte), demandeEcran2 };
   }
   const facesParDe = tirerParmi([4, 6] as const);
   const paires = toutesLesPaires(facesParDe);
   const [descA, descB] = choisirDeuxEvenements(catalogueDes(facesParDe));
-  const eventA: EvenementFamilleB = { label: descA.label, count: paires.filter(descA.predicat).length };
-  const eventB: EvenementFamilleB = { label: descB.label, count: paires.filter(descB.predicat).length };
-  const countAetB = paires.filter((j) => descA.predicat(j) && descB.predicat(j)).length;
-  return { famille: "B", sousType, facesParDe, denominateur: facesParDe * facesParDe, eventA, eventB, countAetB, demandeEcran2 };
+  const eventA: EvenementFamilleB = { label: descA.label, count: paires.filter(descA.predicat).length, issues: paires.filter(descA.predicat).map(nomJet), explication: descA.explication };
+  const eventB: EvenementFamilleB = { label: descB.label, count: paires.filter(descB.predicat).length, issues: paires.filter(descB.predicat).map(nomJet), explication: descB.explication };
+  const communes = paires.filter((j) => descA.predicat(j) && descB.predicat(j));
+  return { famille: "B", sousType, facesParDe, denominateur: facesParDe * facesParDe, eventA, eventB, countAetB: communes.length, issuesAetB: communes.map(nomJet), demandeEcran2 };
 }
 
 const SOUS_TYPES_B: readonly SousTypeFamilleB[] = ["cartes", "des"];

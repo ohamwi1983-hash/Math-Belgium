@@ -163,6 +163,11 @@ paths:
   occurrences dans le premier jet de ce chapitre, détectées seulement au rendu navigateur, pas par
   `tsc`). Y mettre des caractères Unicode (2ⁿ, x², ×, −), jamais du LaTeX.
 
+- **6e (6h), Chapitre 6 — corrigé « comme au tableau » et niveaux (6gen30–33, 6gen74–76)** : corrigés détaillés
+  typés partagés écran / papier (`generateurs6e/*/corrigeDetaille.ts`, brique `ui6e/corrigeProbabilites.ts`),
+  `criteresDifficulte` à la place des étoiles, profils `calcul` relus (aucun changement : rien n'est donné
+  directement par la calculatrice). Détails : `.claude/rules/feuilles-evaluations.md`, section « Corrigé
+  détaillé — comme au tableau ».
 - **6e (6h), Chapitre 6 — Les probabilités** (`probabilites`) : migré une première fois, puis
   **complété/enrichi à son tour** quand l'artifact source a grandi (nouvelles sections, nouveaux
   exemples résolus, et des diagrammes de plus, portant l'artifact à 11 diagrammes). La mise à jour a

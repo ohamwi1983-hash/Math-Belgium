@@ -1,41 +1,26 @@
-import type { ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, ExerciceFamilleD, ExerciceTiragesArbres, FractionExacte } from "../../core6e/tiragesArbres.types";
+import type { ExerciceFamilleD, ExerciceTiragesArbres, FractionExacte } from "../../core6e/tiragesArbres.types";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeTiragesArbres as correctionDetaillee } from "./corrigeDetaille";
 import {
-  aideNiveau2,
   branchesArbreD,
-  cheminsEcran3A,
-  choixBienPlaces,
   consigneEcran,
   consigneGenerale,
-  couleurD,
-  equationsC,
-  facesDe,
-  facesEcran3,
-  factorielle,
   formatReponseAttenduePhaseLatex,
-  fractionsA,
   fx,
-  objetB,
-  probCheminFraction,
-  probFaceFraction,
-  produitLatex,
-  questionEcran3A,
   reduire,
-  singulier,
-  toutesMalPlacees,
 } from "../../ui6e/formatTiragesArbres";
 import { arbreTiragesSvg } from "../../ui6e/figuresTiragesArbres";
-import type { EtiquetteBranche } from "../../ui6e/figuresTiragesArbres";
 import { phasesPourExercice } from "../../moteur6e/typesTiragesArbres";
 import type { PhaseTiragesArbres } from "../../moteur6e/typesTiragesArbres";
 import { LIBELLE_CAS_TIRAGES_ARBRES, profilTiragesArbres } from "../profilsEvaluationTiragesArbres";
@@ -216,242 +201,16 @@ function construireCorrection(e: ExerciceTiragesArbres): BlocCorrection[] {
 }
 
 // ============================================================================
-// Arbres du corrigé.
-// ============================================================================
-
-function arbreCompletUrne(n1: number, n2: number, avecRemise: boolean, profondeur: 2 | 3, initiales: [string, string]): string {
-  return arbreTiragesSvg({
-    profondeur,
-    initiales,
-    etiquette: (chemin): EtiquetteBranche => {
-      // Branche = proportion de la couleur dans l'urne au moment du tirage (non réduite : la
-      // composition de l'urne reste lisible).
-      let r1 = n1;
-      let r2 = n2;
-      for (const c of chemin.slice(0, -1)) {
-        if (!avecRemise) {
-          if (c === 0) r1--;
-          else r2--;
-        }
-      }
-      const c = chemin[chemin.length - 1];
-      return { fraction: [c === 0 ? r1 : r2, r1 + r2] };
-    },
-    feuille: (chemin) => {
-      const p = probCheminFraction(n1, n2, avecRemise, chemin);
-      return [p.num, p.den];
-    },
-    libelle: `Arbre des ${profondeur} tirages ${avecRemise ? "avec" : "sans"} remise`,
-  });
-}
-
-// ============================================================================
-// Corrigé détaillé, par famille.
-// ============================================================================
-
-function etapesA(e: ExerciceFamilleA): EtapeCorrection[] {
-  const { p1, p2, p3 } = fractionsA(e);
-  const i1 = e.labelCouleur1.charAt(0).toUpperCase();
-  const i2 = e.labelCouleur2.charAt(0).toUpperCase();
-  const tous = (c: number) => new Array<number>(e.k).fill(c);
-  const urne = e.avecRemise ? "avec remise, l'urne est la même à chaque tirage" : "sans remise, il reste une boule de moins à chaque tirage, et une de moins de la couleur tirée";
-  const ra = reponse(e, "aEcran1")[0];
-  const rb = reponse(e, "aEcran2")[0];
-  const rc = reponse(e, "aEcran3")[0];
-  const lignes: EtapeCorrection[] = [
-    {
-      label: "Méthode",
-      sousQuestion: "a",
-      fragments: [t(`Arbre des ${e.k} tirages (${urne}). « Toutes ${e.labelCouleur1} » est un seul chemin : sa probabilité est le produit des probabilités de ses branches (règle du produit).`)],
-      figureHtml: arbreCompletUrne(e.n1, e.n2, e.avecRemise, e.k === 3 ? 3 : 2, [i1, i2]),
-    },
-    { label: "Calcul", sousQuestion: "a", fragments: [f(`P(${e.k}\\ \\text{${e.labelCouleur1}})=${produitLatex(e.n1, e.n2, e.avecRemise, tous(0))}=${fx(p1)}`)] },
-    { label: "Calcul", sousQuestion: "a", fragments: [f(`P(${e.k}\\ \\text{${e.labelCouleur2}})=${produitLatex(e.n1, e.n2, e.avecRemise, tous(1))}=${fx(p2)}`)] },
-    { label: "Conclusion", sousQuestion: "a", fragments: [f(avecDecimal(ra)), t(" ; "), f(avecDecimal(reponse(e, "aEcran1")[1]))] },
-    { label: "Piège", sousQuestion: "a", fragments: [t(e.avecRemise ? "Additionner les probabilités des branches au lieu de les multiplier le long du chemin." : "Garder la même urne d'un tirage à l'autre : sans remise, le numérateur et le dénominateur diminuent de 1 à chaque tirage.")] },
-    { label: "Méthode", sousQuestion: "b", fragments: [t(`« Même couleur » = « toutes ${e.labelCouleur1} » ou « toutes ${e.labelCouleur2} » : deux événements incompatibles, dont on additionne les probabilités.`)] },
-    { label: "Calcul", sousQuestion: "b", fragments: [f(`P(\\text{même couleur})=${fx(p1)}+${fx(p2)}=${droite(rb)}`)] },
-    { label: "Conclusion", sousQuestion: "b", fragments: [f(avecDecimal(rb))] },
-    { label: "Piège", sousQuestion: "b", fragments: [t("Multiplier les deux probabilités : on multiplie le long d'un chemin, on additionne des chemins différents.")] },
-  ];
-  if (e.questionEcran3 === "auMoinsUne") {
-    lignes.push(
-      { label: "Méthode", sousQuestion: "c", fragments: [t(`Le contraire de « au moins une boule ${singulier(e.labelCouleur1)} » est « aucune boule ${singulier(e.labelCouleur1)} », c'est-à-dire « toutes ${e.labelCouleur2} » : `), f("P(E)=1-P(\\overline{E})"), t(".")] },
-      { label: "Calcul", sousQuestion: "c", fragments: [f(`1-${fx(p2)}=${fx(p3)}`)] },
-    );
-  } else {
-    const chemins = cheminsEcran3A(e);
-    const noms = chemins.map((c) => c.map((x) => (x === 0 ? i1 : i2)).join("")).join(", ");
-    lignes.push(
-      {
-        label: "Méthode",
-        sousQuestion: "c",
-        fragments: [t(`Les chemins avec exactement ${questionEcran3A(e).replace(/^exactement /, "")} sont ${noms} : ${chemins.length} chemins, qui ont tous la même probabilité (mêmes facteurs, dans un autre ordre).`)],
-      },
-      { label: "Calcul", sousQuestion: "c", fragments: [f(`${chemins.length}\\times ${produitLatex(e.n1, e.n2, e.avecRemise, chemins[0])}=${fx(p3)}`)] },
-    );
-  }
-  lignes.push(
-    { label: "Conclusion", sousQuestion: "c", fragments: [f(avecDecimal(rc))] },
-    {
-      label: "Piège",
-      sousQuestion: "c",
-      fragments: [t(e.questionEcran3 === "auMoinsUne" ? "Calculer 1 − P(toutes de la couleur cherchée) : le contraire de « au moins une » est « aucune »." : "Ne compter qu'un seul chemin : l'ordre des couleurs varie d'un chemin à l'autre.")],
-    },
-  );
-  return lignes;
-}
-
-function etapesB(e: ExerciceFamilleB): EtapeCorrection[] {
-  const { nom, noms } = objetB(e);
-  const n = e.n;
-  const phases = phasesPourExercice(e);
-  const lignes: EtapeCorrection[] = [];
-  const [r1, r2, r3, r4] = phases.map((p) => reponse(e, p)[0]);
-  // a) positions données.
-  if (e.demandeEcran1 === "une") {
-    lignes.push(
-      { label: "Méthode", sousQuestion: "a", fragments: [t(`La ${nom} n°${NBSP}${e.positionsEcran1[0]} peut arriver à chacune des ${n} places avec la même probabilité ; une seule est la bonne.`)] },
-      { label: "Calcul", sousQuestion: "a", fragments: [f(`P=\\dfrac{1}{${n}}`)] },
-    );
-  } else {
-    lignes.push(
-      { label: "Méthode", sousQuestion: "a", fragments: [t(`Arbre à deux niveaux : la ${nom} n°${NBSP}${e.positionsEcran1[0]} a une bonne place sur ${n}, puis la ${nom} n°${NBSP}${e.positionsEcran1[1]} une bonne place sur les ${n - 1} restantes. Règle du produit.`)] },
-      { label: "Calcul", sousQuestion: "a", fragments: [f(`${aideNiveau2(e, "bEcran1").latex}=${droite(r1)}`)] },
-    );
-  }
-  lignes.push(
-    { label: "Conclusion", sousQuestion: "a", fragments: [f(avecDecimal(r1))] },
-    { label: "Piège", sousQuestion: "a", fragments: [t(e.demandeEcran1 === "une" ? `Répondre 1/${n}! : on ne s'intéresse qu'à une seule ${nom}.` : `Multiplier 1/${n} par 1/${n} : une place est déjà prise, il en reste ${n - 1}.`)] },
-  );
-  // b) toutes bien placées.
-  lignes.push(
-    { label: "Méthode", sousQuestion: "b", fragments: [t(`Sur l'arbre des placements, les ${n}! chemins sont équiprobables et un seul place tout correctement.`)] },
-    { label: "Calcul", sousQuestion: "b", fragments: [f(`${aideNiveau2(e, "bEcran2").latex}\\quad\\text{donc}\\quad P=\\dfrac{1}{${factorielle(n)}}`)] },
-    { label: "Conclusion", sousQuestion: "b", fragments: [f(avecDecimal(r2))] },
-    { label: "Piège", sousQuestion: "b", fragments: [t(`Diviser par ${n} ou par ${n * n} : le nombre d'arrangements est ${n}! = ${factorielle(n)}.`)] },
-  );
-  // c) exactement k.
-  const choix = choixBienPlaces(e);
-  const r = n - e.k;
-  const facons = r === 2 ? "1 façon (on les échange)" : "2 façons (chacune décalée d'un cran, dans un sens ou dans l'autre)";
-  lignes.push(
-    { label: "Méthode", sousQuestion: "c", fragments: [t(`On compte les arrangements favorables : ${choix.justification}, puis les ${r} autres ${noms} toutes mal placées, soit ${facons}.`)] },
-    { label: "Calcul", sousQuestion: "c", fragments: [f(`P=\\dfrac{${choix.nombre}\\times ${toutesMalPlacees(r)}}{${n}!}=${droite(r3)}`)] },
-    { label: "Conclusion", sousQuestion: "c", fragments: [f(avecDecimal(r3))] },
-    { label: "Piège", sousQuestion: "c", fragments: [t(`Oublier que les ${r} autres ${noms} doivent toutes être mal placées : sinon on compte aussi des arrangements avec plus de ${e.k} ${e.k > 1 ? noms : nom} bien placée${e.k > 1 ? "s" : ""}.`)] },
-  );
-  // d) aucune / au moins trois.
-  const aide4 = aideNiveau2(e, "bEcran4").latex ?? "";
-  if (e.demandeEcran4 === "auMoinsTrois") {
-    lignes.push({ label: "Méthode", sousQuestion: "d", fragments: [t(`« Au moins trois » = exactement trois, exactement quatre (impossible : la cinquième serait à sa place) ou toutes : des cas incompatibles, dont on additionne les nombres d'arrangements.`)] });
-  } else {
-    lignes.push({ label: "Méthode", sousQuestion: "d", fragments: [t(`Événement contraire : « au moins une ${nom} bien placée » = exactement une, exactement deux… ou toutes (exactement ${n - 1} est impossible).`)] });
-  }
-  lignes.push(
-    { label: "Calcul", sousQuestion: "d", fragments: [f(`P=${aide4}=${droite(r4)}`)] },
-    { label: "Conclusion", sousQuestion: "d", fragments: [f(avecDecimal(r4))] },
-    { label: "Piège", sousQuestion: "d", fragments: [t(e.demandeEcran4 === "auMoinsTrois" ? "Compter « exactement quatre » : si quatre sont bien placées, la cinquième l'est aussi." : "Calculer 1 − P(toutes bien placées) : le contraire de « aucune » est « au moins une ».")] },
-  );
-  return lignes;
-}
-
-function etapesC(e: ExerciceFamilleC): EtapeCorrection[] {
-  const n = facesDe(e);
-  const eqs = equationsC(e);
-  const r2 = reponse(e, "cEcran2");
-  const r3 = reponse(e, "cEcran3")[0];
-  const lignes: EtapeCorrection[] = [];
-  if (e.sousType === "special") {
-    const reste = reduire({ num: e.p0.den - e.p0.num, den: e.p0.den });
-    lignes.push(
-      { label: "Méthode", sousQuestion: "a", fragments: [t(`La somme des probabilités des ${n} faces vaut 1 : la face ${e.faceSpeciale} (probabilité connue) et ${n - 1} faces de probabilité `), f("p"), t(".")] },
-      { label: "Conclusion", sousQuestion: "a", fragments: [f(eqs[0])] },
-      { label: "Piège", sousQuestion: "a", fragments: [t(`Écrire ${n}p au lieu de ${n - 1}p : la face ${e.faceSpeciale} n'a pas la probabilité p.`)] },
-      { label: "Calcul", sousQuestion: "b", fragments: [f(`${n - 1}p=1-${fx(e.p0)}=${fx(reste)}`), t(" donc "), f(`p=${fx(reste)}\\div ${n - 1}`)] },
-      { label: "Conclusion", sousQuestion: "b", fragments: [f(r2[0])] },
-      { label: "Piège", sousQuestion: "b", fragments: [t(`Oublier de diviser par ${n - 1} après avoir soustrait la probabilité connue.`)] },
-    );
-  } else {
-    const fort = (e.plusProbable ?? "pair") === "pair" ? "paire" : "impaire";
-    const faible = fort === "paire" ? "impaire" : "paire";
-    lignes.push(
-      { label: "Méthode", sousQuestion: "a", fragments: [t(`La relation de l'énoncé : une face ${fort} est ${e.r} fois plus probable qu'une face ${faible}. La somme : ${n / 2} faces paires (probabilité `), f("p"), t(`) et ${n / 2} faces impaires (probabilité `), f("q"), t(") ; elle vaut 1.")] },
-      { label: "Conclusion", sousQuestion: "a", fragments: [f(eqs[0]), t(" et "), f(eqs[1])] },
-      { label: "Piège", sousQuestion: "a", fragments: [t(`Inverser la relation (écrire ${fort === "paire" ? `q = ${e.r}p` : `p = ${e.r}q`}) : c'est la face ${fort} qui est la plus probable.`)] },
-      { label: "Calcul", sousQuestion: "b", fragments: [t("On remplace dans la somme : "), f(aideNiveau2(e, "cEcran2").latex ?? "")] },
-      { label: "Conclusion", sousQuestion: "b", fragments: [f(r2[0]), t(" ; "), f(r2[1])] },
-      { label: "Piège", sousQuestion: "b", fragments: [t("S'arrêter à une seule inconnue : l'autre se déduit de la relation.")] },
-    );
-  }
-  const termes = facesEcran3(e).map((face) => fx(probFaceFraction(e, face)));
-  lignes.push(
-    { label: "Méthode", sousQuestion: "c", fragments: [t("Des faces différentes donnent des événements incompatibles : on additionne les probabilités des faces concernées.")] },
-    { label: "Calcul", sousQuestion: "c", fragments: [f(`${termes.join("+")}=${droite(r3)}`)] },
-    { label: "Conclusion", sousQuestion: "c", fragments: [f(avecDecimal(r3))] },
-    { label: "Piège", sousQuestion: "c", fragments: [t("Compter les faces comme équiprobables (nombre de faces favorables divisé par le nombre de faces) : le dé est truqué.")] },
-  );
-  return lignes;
-}
-
-function etapesD(e: ExerciceFamilleD): EtapeCorrection[] {
-  const b = branchesArbreD(e);
-  const p = (chemin: number[]) => produitLatex(e.n1, e.n2, e.avecRemise, chemin);
-  const cible = singulier(couleurD(e, e.couleurCible));
-  const autre = e.couleurCible === 0 ? 1 : 0;
-  const [, r2, r3, r4] = phasesPourExercice(e).map((ph) => reponse(e, ph)[0]);
-  const deuxieme = e.avecRemise ? "comme la boule est remise, l'urne est la même qu'au départ" : "il reste une boule de moins, et une de moins de la couleur déjà tirée";
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: [t(`Premier tirage : nombre de boules de chaque couleur divisé par le nombre total. Deuxième tirage : ${deuxieme}. Les branches issues d'un même nœud ont une somme égale à 1.`)] },
-    {
-      label: "Conclusion",
-      sousQuestion: "a",
-      fragments: [f(b.map((fr, i) => `p_${i + 1}=${fx(fr)}`).join(",\\ "))],
-      figureHtml: arbreCompletUrne(e.n1, e.n2, e.avecRemise, 2, [e.initiale1, e.initiale2]),
-    },
-    { label: "Piège", sousQuestion: "a", fragments: [t(e.avecRemise ? "Modifier l'urne au deuxième tirage alors que la boule a été remise." : "Garder les proportions du premier tirage au deuxième : sans remise, l'urne a changé.")] },
-    { label: "Calcul", sousQuestion: "b", fragments: [t("Règle du produit le long du chemin : "), f(`${p(e.chemin)}=${droite(r2)}`)] },
-    { label: "Conclusion", sousQuestion: "b", fragments: [f(avecDecimal(r2))] },
-    { label: "Piège", sousQuestion: "b", fragments: [t("Additionner les deux branches du chemin au lieu de les multiplier.")] },
-    { label: "Méthode", sousQuestion: "c", fragments: [t(`« Exactement une boule ${cible} » : deux chemins incompatibles (${cible} puis ${singulier(couleurD(e, autre))}, ou l'inverse), dont on additionne les probabilités.`)] },
-    { label: "Calcul", sousQuestion: "c", fragments: [f(`${p([0, 1])}+${p([1, 0])}=${droite(r3)}`)] },
-    { label: "Conclusion", sousQuestion: "c", fragments: [f(avecDecimal(r3))] },
-    { label: "Piège", sousQuestion: "c", fragments: [t("Ne compter qu'un des deux chemins : la boule cherchée peut sortir au premier ou au deuxième tirage.")] },
-    { label: "Méthode", sousQuestion: "d", fragments: [t(`Le contraire de « au moins une boule ${cible} » est « aucune boule ${cible} » : un seul chemin. `), f("P(E)=1-P(\\overline{E})")] },
-    { label: "Calcul", sousQuestion: "d", fragments: [f(`1-${p([autre, autre])}=${droite(r4)}`)] },
-    { label: "Conclusion", sousQuestion: "d", fragments: [f(avecDecimal(r4))] },
-    { label: "Piège", sousQuestion: "d", fragments: [t(`Calculer 1 − P(deux boules ${couleurD(e, e.couleurCible)}) : le contraire de « au moins une » est « aucune ».`)] },
-  ];
-}
-
-function correctionDetaillee(e: ExerciceTiragesArbres): EtapeCorrection[] {
-  switch (e.famille) {
-    case "A":
-      return etapesA(e);
-    case "B":
-      return etapesB(e);
-    case "C":
-      return etapesC(e);
-    case "D":
-      return etapesD(e);
-  }
-}
-
-// ============================================================================
 // Difficulté, barème.
 // ============================================================================
 
-function difficulte(e: ExerciceTiragesArbres): 1 | 2 | 3 {
-  switch (e.famille) {
-    case "A":
-      return e.k === 3 && !e.avecRemise ? 3 : 2;
-    case "B":
-      return e.n === 3 ? 1 : e.n === 4 ? 2 : 3;
-    case "C":
-      return e.sousType === "special" ? 1 : 2;
-    case "D":
-      return 2;
-  }
+/** Niveau (`niveauDifficulte.ts`) : une étape par écran, méthode 1 (règle du produit, somme de
+ * chemins incompatibles, événement contraire, dénombrement d'arrangements, équation de la somme des
+ * probabilités : à choisir parmi les outils du cours). Piège dans les données : famille B seulement
+ * (un cas qui n'en est pas un — « exactement n − 1 bien placées » est impossible). Nombres 0 :
+ * fractions exactes. */
+function criteresDifficulte(e: ExerciceTiragesArbres): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 1, piege: e.famille === "B" ? 1 : 0, nombres: 0 };
 }
 
 function criteres(e: ExerciceTiragesArbres): CritereBareme[] {
@@ -487,7 +246,7 @@ function criteres(e: ExerciceTiragesArbres): CritereBareme[] {
 }
 
 function bareme(e: ExerciceTiragesArbres): BaremeExercice {
-  const pieges = correctionDetaillee(e).filter((l) => l.label === "Piège");
+  const pieges = correctionDetaillee(e).filter((l) => l.type === "piege");
   return {
     reponseFinale: reponseBreve(e),
     criteres: criteres(e),
@@ -504,12 +263,11 @@ export const adaptateurEvaluationTiragesArbres: AdaptateurFeuilleExercices<Exerc
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as IdVarianteTiragesArbres),
   construireEnonce,
   construireCorrection,
-  difficulte,
   reponseBreve,
   correctionDetaillee,
+  criteresDifficulte,
   bareme,
   enoncePapier,
-  dureeMinutes: 12,
   profilInstance: profilTiragesArbres,
   libelleCasParticulier: LIBELLE_CAS_TIRAGES_ARBRES,
 };

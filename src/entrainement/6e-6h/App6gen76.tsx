@@ -34,6 +34,9 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
+import { correctionDetailleeParadoxes, lettreEcranParadoxes } from "./generateurs6e/paradoxesProbabilites/corrigeDetaille";
 
 /**
  * `6gen76` — « Quand l'intuition se trompe » (audit 6e ch. 6, décision M, fiche P3) : générateur
@@ -153,6 +156,9 @@ export function App6gen76() {
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendue(exercice, phase),
+        // Corrigé détaillé « comme au tableau » de l'écran (même source que le papier), affiché par
+        // `ValidationEcran` quand les tentatives sont épuisées.
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeParadoxes(exercice), lettreEcranParadoxes(phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         ...(choix ? { messageRevele: "Ce n'était pas la bonne réponse (une seule tentative sur un choix fermé)." } : {}),

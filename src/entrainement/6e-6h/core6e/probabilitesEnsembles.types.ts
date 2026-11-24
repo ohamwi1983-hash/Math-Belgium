@@ -109,6 +109,11 @@ export type SousTypeFamilleB = "cartes" | "des";
 export interface EvenementFamilleB {
   label: string;
   count: number;
+  /** Issues favorables, en texte (« valet de cœur », « (2 ; 5) ») — corrigé détaillé ; absent dans
+   * les instances antérieures (rien d'autre n'en dépend). */
+  issues?: string[];
+  /** Comptage expliqué (cartes : « 3 figures dans chacune des 4 couleurs ») — corrigé détaillé. */
+  explication?: string;
 }
 
 /** Laquelle des deux opérations (intersection/union) est demandée à l'écran 2 — tirée
@@ -127,6 +132,8 @@ export interface ExerciceFamilleB {
   eventB: EvenementFamilleB;
   /** Effectif de A∩B — vérité terrain, dénombré par énumération complète. */
   countAetB: number;
+  /** Issues communes à A et B, en texte (corrigé détaillé) ; absent dans les anciennes instances. */
+  issuesAetB?: string[];
   demandeEcran2: DemandeEcran2FamilleB;
 }
 
