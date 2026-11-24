@@ -12,8 +12,9 @@
  * `calcul` :
  * - A1 (bidons, V = πx²h) : `'calculatrice'` — π et une racine cubique à chaque instance
  *   (`calculatriceIndispensable: ["A1"]` dans l'adaptateur) ;
- * - A2 (stock et commande) : `'exacte'` — relevés entiers, équation du second degré à racine entière
- *   par construction, minimum lu sur le graphique ;
+ * - A2 (stock et commande) : sans objet — relevés entiers, équation du second degré à racine entière
+ *   par construction, minimum lu sur le graphique, mais modéliser reste le travail : la calculatrice ne
+ *   donne pas la réponse (ancien `'exacte'` retiré, revue des profils du 24/11/2026) ;
  * - B et C : sans objet — données décimales courtes (coûts unitaires au centième, tableau de valeurs
  *   au centième) et opérations élémentaires : faisables avec ou sans calculatrice.
  */
@@ -28,6 +29,6 @@ export function formeProblemesContexte(e: ExerciceProblemeContexte): string {
 
 export function profilProblemesContexte(e: ExerciceProblemeContexte): ProfilInstance {
   const forme = formeProblemesContexte(e);
-  if (e.scenario === "A") return { casParticulier: null, calcul: e.combo === "kInverseXAxCarre" ? "calculatrice" : "exacte", forme };
+  if (e.scenario === "A" && e.combo === "kInverseXAxCarre") return { casParticulier: null, calcul: "calculatrice", forme };
   return { casParticulier: null, forme };
 }

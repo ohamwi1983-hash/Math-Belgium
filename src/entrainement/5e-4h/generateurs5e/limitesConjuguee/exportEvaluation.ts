@@ -66,7 +66,9 @@ function bareme(e: E): BaremeExercice {
 /** `forme` = variante | sous-forme : même structure d'une série à l'autre ; aucun cas particulier,
  * aucun verdict (la forme indéterminée se lit sur l'expression) ; tout est exact. */
 export function profilConjuguee(e: E): ProfilInstance {
-  return { casParticulier: null, calcul: "exacte", forme: `${e.variante}|${e.sous}` };
+  // Pas de `calcul` (revue des profils, 24/11/2026) : la calculatrice ne donne pas la réponse, tiré
+  // que la calculatrice soit interdite ou autorisée.
+  return { casParticulier: null, forme: `${e.variante}|${e.sous}` };
 }
 
 export const adaptateurEvaluationLimitesConjuguee: AdaptateurFeuilleExercices<E> = {

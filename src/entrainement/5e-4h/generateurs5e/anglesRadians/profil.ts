@@ -9,10 +9,12 @@ import { quadrant, type ExerciceAnglesRadians } from "../../moteur5e/modeleAngle
  * - un angle sur un axe n'est PAS un cas particulier : « sur un axe » est un verdict de l'écran 2 et
  *   « tan θ n'existe pas » un verdict de l'écran 4 (décision de l'utilisateur : un verdict n'est
  *   jamais un cas particulier) ;
- * - pas de `calcul` : tout est exact, la calculatrice n'y change rien.
+ * - `calcul: 'exacte'` (revue des profils, 24/11/2026) : la consigne finit par « donne les valeurs
+ *   exactes de cos θ, sin θ et tan θ », que la calculatrice donne directement (comme cos 210°) — jamais
+ *   tiré « calculatrice autorisée ».
  */
 export function profilAnglesRadians(e: ExerciceAnglesRadians): ProfilInstance {
-  return { casParticulier: quadrant(e) === "I" ? "quadrant-I" : null, forme: e.variante };
+  return { casParticulier: quadrant(e) === "I" ? "quadrant-I" : null, calcul: "exacte", forme: e.variante };
 }
 
 export const LIBELLE_CAS_ANGLES_RADIANS = "Inclure un cas particulier (point image dans le premier quadrant : aucun signe à chercher)";

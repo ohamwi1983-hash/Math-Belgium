@@ -76,7 +76,9 @@ function bareme(e: E): BaremeExercice {
 /** `forme` = variante (même allure de graphique d'une série à l'autre) ; « f(a) existe » est le
  * verdict tiré dans chaque série ; aucun cas particulier ; tout est exact. */
 export function profilLireDomaine(e: E): ProfilInstance {
-  return { casParticulier: null, calcul: "exacte", forme: e.variante };
+  // Pas de `calcul` (revue des profils, 24/11/2026) : la calculatrice ne donne pas la réponse, tiré
+  // que la calculatrice soit interdite ou autorisée.
+  return { casParticulier: null, forme: e.variante };
 }
 
 export const adaptateurEvaluationLireDomaine: AdaptateurFeuilleExercices<E> = {

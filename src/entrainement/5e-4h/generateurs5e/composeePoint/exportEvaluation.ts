@@ -69,7 +69,9 @@ function bareme(e: E): BaremeExercice {
 /** `forme` = variante | ordre (f∘g ou g∘f) : même structure d'une série à l'autre ; l'existence est
  * le verdict (jamais dans `forme`, jamais un cas particulier) ; tout est exact. */
 export function profilComposeePoint(e: E): ProfilInstance {
-  return { casParticulier: null, calcul: "exacte", forme: `${e.variante}|${e.ordre}` };
+  // Pas de `calcul` (revue des profils, 24/11/2026) : la calculatrice ne donne pas la réponse, tiré
+  // que la calculatrice soit interdite ou autorisée.
+  return { casParticulier: null, forme: `${e.variante}|${e.ordre}` };
 }
 
 export const adaptateurEvaluationComposeePoint: AdaptateurFeuilleExercices<E> = {

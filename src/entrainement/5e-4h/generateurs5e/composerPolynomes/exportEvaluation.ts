@@ -86,7 +86,9 @@ function bareme(e: E): BaremeExercice {
 /** Aucun cas particulier : le verdict (deux affines) est tiré 50/50 dans la série. `forme` = variante
  * et place de la parabole (structure reproduite d'une série à l'autre) ; tout est exact. */
 export function profilComposerPolynomes(e: E): ProfilInstance {
-  return { casParticulier: null, calcul: "exacte", forme: e.variante === "affines" ? "affines" : `second-${e.quadratique}` };
+  // Pas de `calcul` (revue des profils, 24/11/2026) : la calculatrice ne donne pas la réponse, tiré
+  // que la calculatrice soit interdite ou autorisée.
+  return { casParticulier: null, forme: e.variante === "affines" ? "affines" : `second-${e.quadratique}` };
 }
 
 export const adaptateurEvaluationComposerPolynomes: AdaptateurFeuilleExercices<E> = {

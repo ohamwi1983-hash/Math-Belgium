@@ -71,7 +71,9 @@ function bareme(e: E): BaremeExercice {
 /** Cas particulier : domaine vide (décision de l'utilisateur). `forme` = famille de g (structure
  * reproduite d'une série à l'autre) ; tout est exact. */
 export function profilDomaineParImage(e: E): ProfilInstance {
-  return { casParticulier: e.cas === "vide" ? "domaine-vide" : null, calcul: "exacte", forme: e.g.famille };
+  // Pas de `calcul` (revue des profils, 24/11/2026) : la calculatrice ne donne pas la réponse, tiré
+  // que la calculatrice soit interdite ou autorisée.
+  return { casParticulier: e.cas === "vide" ? "domaine-vide" : null, forme: e.g.famille };
 }
 
 export const adaptateurEvaluationDomaineParImage: AdaptateurFeuilleExercices<E> = {

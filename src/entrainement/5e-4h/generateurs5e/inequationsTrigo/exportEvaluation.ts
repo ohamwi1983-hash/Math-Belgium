@@ -72,7 +72,9 @@ function bareme(e: E): BaremeExercice {
  * `forme` = fonction et sens après isolement inversé ou non (structure reproduite d'une série à
  * l'autre) ; toujours des valeurs exactes. */
 export function profilInequationTrigo(e: E): ProfilInstance {
-  return { casParticulier: e.cas ? "toujours" : null, calcul: "exacte", forme: `${e.fonction}|${e.inversion ? "inverse" : "direct"}` };
+  // Pas de `calcul` (revue des profils, 24/11/2026) : la calculatrice ne donne pas la réponse, tiré
+  // que la calculatrice soit interdite ou autorisée.
+  return { casParticulier: e.cas ? "toujours" : null, forme: `${e.fonction}|${e.inversion ? "inverse" : "direct"}` };
 }
 
 export const adaptateurEvaluationInequationTrigo: AdaptateurFeuilleExercices<E> = {

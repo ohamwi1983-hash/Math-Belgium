@@ -8,11 +8,13 @@
  * - 6gen37 : `forme` = famille, et sous-type pour B (produit, quotient, puissance). Cas particulier
  *   « point sur un axe » : un nombre complexe donné (z, z₁, z₂) est réel ou imaginaire pur — module et
  *   argument se lisent sans calcul. Hors évaluation par défaut, offert par la case. Toutes les
- *   familles se traitent avec des valeurs remarquables : `calcul` = `'exacte'`.
+ *   familles se traitent avec des valeurs remarquables : `calcul` = `'exacte'`, sauf D (revue des
+ *   profils du 24/11/2026 : la calculatrice ne fait pas le raisonnement, pas de `calcul`).
  * - 6gen38 : douze exercices seulement (n ∈ {3 ; 4 ; 5 ; 6} × trois cibles) : `forme` = cible SEULE —
  *   avec `forme` = n et cible, chaque série recevait exactement les mêmes douze exercices mélangés ;
  *   n reste tiré librement pour que deux séries diffèrent. Aucun cas particulier, calcul symbolique (`calcul` sans objet).
- * - 6gen39 : `forme` = famille. Familles A et C : valeurs exactes. Famille B : racine n-ième du module
+ * - 6gen39 : `forme` = famille. Familles A et C : valeurs exactes, sans `calcul` (revue du
+ *   24/11/2026 : la calculatrice ne donne pas les racines). Famille B : racine n-ième du module
  *   et arguments arrondis, calculatrice — sauf w ∈ {1 ; −1 ; i ; −i}. Cas particuliers : w réel
  *   positif (θ = 0, familles A et C : argument lu sans calcul) ; argument remarquable en famille B
  *   (point sur un axe ou une bissectrice : plus d'arctangente ni de correction de quadrant).
@@ -55,6 +57,11 @@ export function profilFormeTrigonometrique(e: ExerciceFormeTrigonometrique): Pro
       axe = false;
       break;
   }
+  // `exacte` (revue des profils, 24/11/2026) : la calculatrice donne la réponse — A module et argument
+  // (touche Pol, ou mode complexe), B ceux de chaque facteur puis une somme / un produit, C z^n (Pol
+  // puis Rec), E cos θ et sin θ (comme 6gen94). D (entiers n tels que z^n soit…) : un raisonnement sur
+  // les arguments que la calculatrice ne fait pas — pas de `calcul`, tirée interdite ou autorisée.
+  if (e.famille === "D") return { casParticulier: axe ? "point-sur-un-axe" : null, forme: formeFormeTrigonometrique(e) };
   return { casParticulier: axe ? "point-sur-un-axe" : null, calcul: "exacte", forme: formeFormeTrigonometrique(e) };
 }
 
@@ -78,5 +85,8 @@ export function profilRacinesNiemes(e: ExerciceRacinesNiemes): ProfilInstance {
     const unitaire = e.a * e.a + e.b * e.b === 1;
     return { casParticulier: remarquable ? "argument-remarquable" : null, calcul: unitaire ? "exacte" : "calculatrice", forme: "B" };
   }
-  return { casParticulier: e.angle.p === 0 ? "w-reel-positif" : null, calcul: "exacte", forme: e.famille };
+  // Familles A et C : valeurs exactes, mais la calculatrice ne donne pas les n racines (formule à
+  // appliquer, seule la conversion finale lui revient) — pas de `calcul`, tirées interdite ou autorisée
+  // (revue des profils, 24/11/2026). Famille B : `exacte` / `calculatrice` mêlés (mode interdite).
+  return { casParticulier: e.angle.p === 0 ? "w-reel-positif" : null, forme: e.famille };
 }

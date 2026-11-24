@@ -52,5 +52,7 @@ function populationExacte(e: Extract<ExerciceLimitesContexte, { famille: "popula
 export function profilLimitesContexte(e: ExerciceLimitesContexte): ProfilInstance {
   if (e.famille === "clubLoisirs") return { casParticulier: null, calcul: "calculatrice" };
   if (e.famille === "population") return { casParticulier: null, calcul: populationExacte(e) ? "exacte" : "calculatrice" };
-  return { casParticulier: null, calcul: "exacte" };
+  // Prix de revient, eau salée : toujours exacts, mais la calculatrice ne donne ni la limite ni
+  // l'interprétation — pas de `calcul`, tirés interdite ou autorisée (revue des profils, 24/11/2026).
+  return { casParticulier: null };
 }

@@ -15,6 +15,10 @@
  *   sur 5 000) et 6gen42 E quand l'argument du rapport n'est pas un angle remarquable (« ni
  *   parallèles ni perpendiculaires », valeur approchée au centième). `calcul` est ABSENT pour 6gen40,
  *   dont toutes les instances sont exactes (un seul régime : aucune contrainte à appliquer).
+ *   Revue des profils (24/11/2026, `exacte` seulement si la calculatrice donne la réponse) : plus de
+ *   `'exacte'` pour 6gen41 A, C, D, E ni pour 6gen42 (sauf E « ni parallèles ni perpendiculaires »,
+ *   où il sert au mode « calculatrice interdite » face aux instances `calculatrice`) — raisonnements
+ *   que la calculatrice ne fait pas, tirés interdite ou autorisée.
  */
 import type { ProfilInstance } from "../../export/genererFeuilleExercices";
 import type { ExerciceTransformationsPlan } from "../core6e/transformationsPlan.types";
@@ -66,7 +70,8 @@ export function formeTrianglesComplexes(e: ExerciceTrianglesComplexes): string {
 }
 
 export function profilTrianglesComplexes(e: ExerciceTrianglesComplexes): ProfilInstance {
-  return { casParticulier: null, calcul: e.famille === "B" ? "calculatrice" : "exacte", forme: formeTrianglesComplexes(e) };
+  if (e.famille === "B") return { casParticulier: null, calcul: "calculatrice", forme: formeTrianglesComplexes(e) };
+  return { casParticulier: null, forme: formeTrianglesComplexes(e) };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -96,6 +101,9 @@ export function formeComplexesAvances(e: ExerciceComplexesAvances): string {
 }
 
 export function profilComplexesAvances(e: ExerciceComplexesAvances): ProfilInstance {
-  const calcul = e.famille === "E" && !argumentRemarquableE(e) ? "calculatrice" : "exacte";
-  return { casParticulier: null, calcul, forme: formeComplexesAvances(e) };
+  const forme = formeComplexesAvances(e);
+  if (e.famille !== "E") return { casParticulier: null, forme };
+  if (!argumentRemarquableE(e)) return { casParticulier: null, calcul: "calculatrice", forme };
+  // Parallèles / perpendiculaires : pas de `calcul` ; « aucun » à argument remarquable reste `exacte`.
+  return e.statut === "aucun" ? { casParticulier: null, calcul: "exacte", forme } : { casParticulier: null, forme };
 }

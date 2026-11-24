@@ -86,7 +86,9 @@ function bareme(e: E): BaremeExercice {
 
 /** `forme` = variante : même structure d'une série à l'autre ; aucun cas particulier ni verdict. */
 export function profilFonctionAsymptotes(e: E): ProfilInstance {
-  return { casParticulier: null, calcul: "exacte", forme: e.variante };
+  // Pas de `calcul` (revue des profils, 24/11/2026) : la calculatrice ne donne pas la réponse, tiré
+  // que la calculatrice soit interdite ou autorisée.
+  return { casParticulier: null, forme: e.variante };
 }
 
 export const adaptateurEvaluationFonctionAsymptotes: AdaptateurFeuilleExercices<E> = {

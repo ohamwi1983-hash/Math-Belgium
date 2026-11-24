@@ -79,7 +79,9 @@ function bareme(e: E): BaremeExercice {
 
 /** `forme` = type d'erreur seul (jamais la ligne fausse : c'est un verdict tiré dans chaque série). */
 export function profilDetectiveLimites(e: E): ProfilInstance {
-  return { casParticulier: null, calcul: "exacte", forme: e.variante };
+  // Pas de `calcul` (revue des profils, 24/11/2026) : la calculatrice ne donne pas la réponse, tiré
+  // que la calculatrice soit interdite ou autorisée.
+  return { casParticulier: null, forme: e.variante };
 }
 
 export const adaptateurEvaluationDetectiveLimites: AdaptateurFeuilleExercices<E> = {

@@ -1,5 +1,5 @@
 import type { ExerciceBinomeNewton } from "../../core6e/binomeNewton.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import type { AdaptateurFeuilleExercices, BlocCorrection, ProfilInstance, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatBinomeNewton";
 import { phasesPourExercice } from "../../moteur6e/typesBinomeNewton";
@@ -28,6 +28,14 @@ function construireCorrection(exercice: ExerciceBinomeNewton): BlocCorrection[] 
   }));
 }
 
+/** Profil (tirage équilibré) : aucun cas particulier ni `forme` ; `calcul: 'exacte'` pour la famille C
+ * seulement (« calcule 0,99³ EXACTEMENT à l'aide du binôme » : la calculatrice donne 0,970299
+ * directement — revue des profils, 24/11/2026 ; jamais tirée « calculatrice autorisée »). A et B
+ * (développement, terme de rang k) : pas de `calcul`. */
+export function profilBinomeNewton(exercice: ExerciceBinomeNewton): ProfilInstance {
+  return exercice.famille === "C" ? { casParticulier: null, calcul: "exacte" } : { casParticulier: null };
+}
+
 export const adaptateurEvaluationBinomeNewton: AdaptateurFeuilleExercices<ExerciceBinomeNewton> = {
   titreDocument: "Binôme de Newton — Évaluation",
   nomFichierBase: "binome-newton",
@@ -36,4 +44,5 @@ export const adaptateurEvaluationBinomeNewton: AdaptateurFeuilleExercices<Exerci
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
   construireEnonce,
   construireCorrection,
+  profilInstance: profilBinomeNewton,
 };

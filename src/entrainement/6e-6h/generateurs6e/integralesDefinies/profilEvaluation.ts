@@ -24,16 +24,27 @@ function cas(liste: (string | false)[]): string | null {
   return presents.length === 0 ? null : presents.join("+");
 }
 
+/** `exacte` ou `calculatrice` ; `undefined` pour A « diviser d'abord (fraction) », toujours rationnelle :
+ * la calculatrice ne donne pas la primitive, elle est tirée interdite ou autorisée (revue des profils,
+ * 24/11/2026 ; ailleurs `exacte` sert au mode « calculatrice interdite » des variantes mêlées). */
+function calculIntegrale(e: ExerciceIntegralesDefinies, rationnel: boolean): ProfilInstance["calcul"] {
+  if (!rationnel) return "calculatrice";
+  const p = e.primitive;
+  return p.famille === "A" && p.sousType === "diviserFraction" ? undefined : "exacte";
+}
+
 export function profilIntegralesDefinies(e: ExerciceIntegralesDefinies): ProfilInstance {
   if (e.scenario === "parametre") return { casParticulier: null };
   const integrale = e.primitive.primitiveReference(e.b) - e.primitive.primitiveReference(e.a);
   const nulle = Math.abs(integrale) < 1e-9 && Math.abs(e.a + e.b) < 1e-9;
   if (e.scenario === "simple") {
-    return { casParticulier: nulle ? "integrale-nulle" : null, calcul: estRationnel(integrale) ? "exacte" : "calculatrice" };
+    const calcul = calculIntegrale(e, estRationnel(integrale));
+    return { casParticulier: nulle ? "integrale-nulle" : null, ...(calcul ? { calcul } : {}) };
   }
   const moyenne = integrale / (e.b - e.a);
+  const calcul = calculIntegrale(e, estRationnel(integrale) && estRationnel(moyenne));
   return {
     casParticulier: cas([Math.abs(e.b - e.a - 1) < 1e-9 && "intervalle-longueur-1", nulle && "integrale-nulle"]),
-    calcul: estRationnel(integrale) && estRationnel(moyenne) ? "exacte" : "calculatrice",
+    ...(calcul ? { calcul } : {}),
   };
 }

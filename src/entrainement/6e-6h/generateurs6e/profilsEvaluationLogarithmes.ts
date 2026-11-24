@@ -136,8 +136,12 @@ export function profilDeterminerParametresLogarithme(e: ExerciceDeterminerParame
 export const LIBELLE_CAS_HYPERBOLIQUES = "Inclure un cas particulier (sh(x) ou ch(x) sans coefficient dans l'argument)";
 
 /** a·sh(kx), a·ch(kx) (famille A) et a·sh(kx) + b·ch(kx) (famille C) : k = 1 supprime le facteur de
- * la dérivée en chaîne (≈ 33 %). Valeurs toujours exactes (radicaux) : `calcul` sans objet. */
+ * la dérivée en chaîne (≈ 33 %). Valeurs toujours exactes (radicaux). `calcul: 'exacte'` pour la
+ * famille B seulement (« on donne sh x₀, trouve ch x₀ » : comme sin a sachant cos a, la calculatrice
+ * — sh⁻¹ puis ch — donne la valeur ; revue des profils, 24/11/2026) ; A (parité, dérivées), C, D :
+ * raisonnement, pas de `calcul`. */
 export function profilHyperboliques(e: ExerciceHyperboliques): ProfilInstance {
+  if (e.famille === "B") return { casParticulier: null, calcul: "exacte" };
   const k = (e as { k?: number }).k;
   const concerne = (e.famille === "A" && (e.type === "shKx" || e.type === "chKx")) || e.famille === "C";
   return { casParticulier: concerne && k === 1 ? "k-egal-1" : null };

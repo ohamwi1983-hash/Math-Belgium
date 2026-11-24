@@ -71,7 +71,9 @@ function bareme(e: E): BaremeExercice {
 /** `forme` = variante ; la place du bon graphique est le verdict (jamais dans `forme`, jamais un cas
  * particulier) ; tout est exact. */
 export function profilTableauLimites(e: E): ProfilInstance {
-  return { casParticulier: null, calcul: "exacte", forme: e.variante };
+  // Pas de `calcul` (revue des profils, 24/11/2026) : la calculatrice ne donne pas la réponse, tiré
+  // que la calculatrice soit interdite ou autorisée.
+  return { casParticulier: null, forme: e.variante };
 }
 
 export const adaptateurEvaluationTableauLimites: AdaptateurFeuilleExercices<E> = {

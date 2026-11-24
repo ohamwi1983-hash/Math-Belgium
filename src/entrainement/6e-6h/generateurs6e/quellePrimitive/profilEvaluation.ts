@@ -8,6 +8,8 @@
  * - Calculatrice : `calcul: 'exacte'` quand C est rationnel (C = b − F(a) sans ln, π ni racine) ;
  *   `'calculatrice'` sinon (C s'écrit exactement, 2 − ln 3 par exemple, mais sa valeur décimale
  *   demande la calculatrice). Mesures sur 5 000 tirages par variante : voir le rapport de la refonte.
+ *   Exceptions (revue des profils, 24/11/2026) : A « diviser d'abord (fraction) » et C2, toujours
+ *   rationnelles, n'ont pas de `calcul` (sinon jamais tirées « calculatrice autorisée »).
  */
 import type { ProfilInstance } from "../../../export/genererFeuilleExercices";
 import type { ExerciceQuellePrimitive } from "../../core6e/quellePrimitive.types";
@@ -28,5 +30,11 @@ export function profilQuellePrimitive(e: ExerciceQuellePrimitive): ProfilInstanc
   const c = e.b - fa;
   const base = e.exerciceBase;
   const structurel = base.famille === "C" && base.sousType === "2";
-  return { casParticulier: Math.abs(fa) < 1e-12 && !structurel ? "C-egal-b" : null, calcul: estRationnel(c) ? "exacte" : "calculatrice" };
+  const casParticulier = Math.abs(fa) < 1e-12 && !structurel ? "C-egal-b" : null;
+  if (!estRationnel(c)) return { casParticulier, calcul: "calculatrice" };
+  // A « diviser d'abord (fraction) » et C2 : C toujours rationnel — pas de `calcul` (la calculatrice ne
+  // donne pas la primitive), tirées interdite ou autorisée (revue des profils, 24/11/2026). Ailleurs,
+  // `exacte` sert au mode « calculatrice interdite » (variantes mêlées exacte / calculatrice).
+  if ((base.famille === "A" && base.sousType === "diviserFraction") || structurel) return { casParticulier };
+  return { casParticulier, calcul: "exacte" };
 }

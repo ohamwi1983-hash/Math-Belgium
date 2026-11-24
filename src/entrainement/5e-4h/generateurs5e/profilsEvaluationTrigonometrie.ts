@@ -119,11 +119,16 @@ export function profilEquationTrig(e: unknown): ProfilInstance {
   const valides = r.filter((x) => !x.aucuneSolution);
   return {
     casParticulier: valides.length === 0 && r.length > 0 ? "aucune-solution" : cas([valides.some((x) => x.casSpecial) && "valeur-remarquable-0-1"]),
-    // Égalité de deux expressions : réponses toujours exactes (fractions de π), sans résolution
-    // élémentaire stockée.
-    calcul: valides.some((x) => x.regime === "decimal") ? "calculatrice" : valides.length > 0 || (e as { famille?: string }).famille === "egalite" ? "exacte" : undefined,
+    // `exacte` seulement pour « directe » et « produit » (valeurs remarquables : mode « calculatrice
+    // interdite », leurs instances décimales sont `calculatrice`). Pythagoricienne et égalité de deux
+    // expressions (toujours exactes) : pas de `calcul` — la calculatrice ne fait pas la résolution,
+    // elles sont tirées interdite ou autorisée (revue des profils, décision du 24/11/2026).
+    calcul: valides.some((x) => x.regime === "decimal") ? "calculatrice" : valides.length > 0 && !SANS_PROFIL_EXACTE.has((e as { famille?: string }).famille ?? "") ? "exacte" : undefined,
   };
 }
+
+/** Familles de 5gen10 toujours exactes mais sans profil `exacte` (la calculatrice n'y donne pas la réponse). */
+const SANS_PROFIL_EXACTE = new Set(["pythagoricienne", "egalite"]);
 
 export const LIBELLE_CAS_MODELISATION = "Inclure un cas particulier (2e partie sans solution, ou inéquation toujours vraie / toujours fausse)";
 
@@ -139,9 +144,11 @@ export function profilModelisationSinusoide(e: ExerciceModelisationSinusoide): P
 }
 
 /** 5gen7 — polygones, arcs et secteurs : toutes les réponses sont exactes en π (valeur exacte
- * acceptée sur papier) ; aucun raccourci possible (audit 5e ch. 2, P8). */
+ * acceptée sur papier) ; aucun raccourci possible (audit 5e ch. 2, P8). Pas de `calcul` : la
+ * calculatrice ne donne ni l'arc ni le secteur (formules du cercle) — tiré interdite ou autorisée
+ * (revue des profils, 24/11/2026). */
 export function profilPolygonesArcsSecteurs(): ProfilInstance {
-  return { casParticulier: null, calcul: "exacte" };
+  return { casParticulier: null };
 }
 
 /** 5gen12 — géométrie du cercle : arccos ou aire arrondie à l'unité, la calculatrice est toujours

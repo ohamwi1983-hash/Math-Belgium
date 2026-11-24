@@ -11,10 +11,12 @@ import type { ExerciceParadoxesProbabilites } from "../core6e/paradoxesProbabili
  * - `forme` = famille : la série A fixe le paradoxe de chaque question, les autres séries le
  *   reproduisent avec d'autres valeurs (k, nombre de portes, information, sexe).
  * - `calcul` : Méré exige la calculatrice ((35/36)²⁴…) ; Monty Hall et deux enfants se font en
- *   fractions exactes.
+ *   fractions exactes, mais modéliser reste le travail : pas de `calcul` (tirés interdite ou
+ *   autorisée, revue des profils du 24/11/2026).
  */
 export function profilParadoxesProbabilites(e: ExerciceParadoxesProbabilites): ProfilInstance {
-  return { casParticulier: null, calcul: e.famille === "mere" ? "calculatrice" : "exacte", forme: e.famille };
+  if (e.famille === "mere") return { casParticulier: null, calcul: "calculatrice", forme: e.famille };
+  return { casParticulier: null, forme: e.famille };
 }
 
 /** Variantes dont TOUTES les instances exigent la calculatrice. */

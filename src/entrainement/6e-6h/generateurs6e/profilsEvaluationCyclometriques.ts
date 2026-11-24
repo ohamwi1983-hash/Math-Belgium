@@ -16,7 +16,8 @@
  *   part — dans le groupe, leur tirage interne ramenait « B ≠ A » à 20 plans sur 30), 6gen2
  *   `groupe_existence_arc_trig` et `groupe_existence_trig_arc` (le nom de la variante dit
  *   « existe » ou « n'existe pas » ; « existe » doublé dans le second pour un verdict 50/50).
- * - Tout est exact (6gen5 E : constantes multiples de π) : aucun `calcul`.
+ * - Tout est exact (6gen5 E : constantes multiples de π) : aucun `calcul`, sauf 6gen2 (`exacte` : la
+ *   calculatrice donne la valeur cyclométrique, revue des profils du 24/11/2026).
  */
 import type { GroupeVerdict, ProfilInstance } from "../../export/genererFeuilleExercices";
 import type { ExerciceInjectiviteFonctions } from "../core6e/injectiviteFonctions.types";
@@ -37,9 +38,11 @@ export const GROUPES_VERDICT_INJECTIVITE: GroupeVerdict[] = [
   { id: "groupe_injectivite", label: "e) ou f) : injective ou non (verdict tiré)", variantes: ["homographique", "quadratique"] },
 ];
 
-/** 6gen2 — la mécanique de calcul (lecture directe, arc∘trig, trig∘arc), jamais l'existence. */
+/** 6gen2 — la mécanique de calcul (lecture directe, arc∘trig, trig∘arc), jamais l'existence.
+ * `calcul: 'exacte'` (revue des profils, 24/11/2026) : la calculatrice affiche directement la valeur
+ * (−1,047… = −π/3) ou une erreur (« n'existe pas ») — jamais tiré « calculatrice autorisée ». */
 export function profilFonctionsCyclometriques(e: ExerciceFonctionsCyclometriques): ProfilInstance {
-  return { casParticulier: null, forme: e.variante };
+  return { casParticulier: null, calcul: "exacte", forme: e.variante };
 }
 
 export const GROUPES_VERDICT_FONCTIONS_CYCLOMETRIQUES: GroupeVerdict[] = [

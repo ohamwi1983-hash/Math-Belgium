@@ -87,7 +87,9 @@ function bareme(e: E): BaremeExercice {
 /** Même type d'erreur, même scénario, même ligne dans toutes les séries d'une même variante ;
  * aucun cas particulier ; tout est exact. */
 export function profilDetectiveExp(e: E): ProfilInstance {
-  return { casParticulier: null, calcul: "exacte", forme: `${e.scenario}|L${numeroLigneFausse(e)}` };
+  // Pas de `calcul` (revue des profils, 24/11/2026) : la calculatrice ne donne pas la réponse, tiré
+  // que la calculatrice soit interdite ou autorisée.
+  return { casParticulier: null, forme: `${e.scenario}|L${numeroLigneFausse(e)}` };
 }
 
 export const adaptateurEvaluationDetectiveExp: AdaptateurFeuilleExercices<E> = {

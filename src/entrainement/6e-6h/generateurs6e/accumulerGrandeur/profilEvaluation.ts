@@ -10,7 +10,8 @@
  *   les reproduisent avec d'autres nombres. Chaque variante a une seule forme (probabilité 1/8 en
  *   tirage libre : ≈ 2 500 correspondances attendues en 20 000 essais, aucune bride nécessaire).
  * - `calcul` : cuve, salle et les deux comparaisons (polynômes, paramètres entiers) se font sans
- *   calculatrice ; le modèle sinusoïdal (cosinus, arccos) et les modèles exponentiels (e^(kt), ln)
+ *   calculatrice mais n'ont pas de `calcul` (la calculatrice n'y donne pas la réponse : tirées
+ *   interdite ou autorisée, revue des profils du 24/11/2026) ; le modèle sinusoïdal (cosinus, arccos) et les modèles exponentiels (e^(kt), ln)
  *   exigent la calculatrice. Le régime est FIXÉ par la variante (mesuré sur 5 000 tirages par
  *   variante : 100 % dans chaque cas).
  */
@@ -21,5 +22,8 @@ import type { ExerciceAccumulerGrandeur, IdVarianteAccumulerGrandeur } from "../
 export const VARIANTES_CALCULATRICE_ACCUMULER: IdVarianteAccumulerGrandeur[] = ["solaire-seuil", "pluie-seuil", "co2-seuil"];
 
 export function profilAccumulerGrandeur(e: ExerciceAccumulerGrandeur): ProfilInstance {
-  return { casParticulier: null, calcul: VARIANTES_CALCULATRICE_ACCUMULER.includes(e.variante) ? "calculatrice" : "exacte", forme: e.variante };
+  // Variantes sans calculatrice : pas de `calcul` (modéliser reste le travail, la calculatrice ne donne
+  // pas la réponse) — tirées interdite ou autorisée (revue des profils, 24/11/2026).
+  if (!VARIANTES_CALCULATRICE_ACCUMULER.includes(e.variante)) return { casParticulier: null, forme: e.variante };
+  return { casParticulier: null, calcul: "calculatrice", forme: e.variante };
 }

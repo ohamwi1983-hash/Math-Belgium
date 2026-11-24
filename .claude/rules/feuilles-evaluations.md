@@ -270,8 +270,25 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
   passes du code d'avant, structure (générateur + variante) identique dans 22 / 23 chapitres dans les
   deux comparaisons. Playwright (build de test, faux client, 1 280 px et iPhone 13, 4e ch. 5, 6e ch. 3,
   6e ch. 4) : 82 vérifications, 0 erreur console. Revue des profils `calcul` (quels exercices marquer
-  `exacte` selon le critère « la calculatrice donne directement la réponse ») : liste soumise à
-  l'utilisateur, rien de changé.
+  `exacte` selon le critère « la calculatrice donne directement la réponse ») : voir la puce suivante.
+- **Profils `calcul` revus (règle validée par l'utilisateur, 24/11/2026)** : `exacte` SEULEMENT si la
+  calculatrice donnerait directement la réponse (valeurs exactes de trigonométrie, arcsin remarquable,
+  comparer des logarithmes « sans calculatrice »…) ; dériver, résoudre, modéliser, démontrer, lire un
+  graphique, détective d'erreurs… : pas de `exacte` (absent, ou `calculatrice` honnête), tiré dans les deux
+  cas. Ajoutés : 5gen51, 6gen2, 6gen94 (tout), 6gen149 « en zéro », 6gen19 famille B, 5gen48
+  « périodique », 6gen45 C (`profilInstance` créé). Retirés : 5gen5 A2, 5gen7, 5gen10 pythagoricienne et
+  égalité, 5gen23 prix de revient et eau salée, 5gen55, 5gen58–67, 6gen24 A « diviser (fraction) » et C2,
+  6gen25 A « diviser (fraction) », 6gen37 D, 6gen39 A et C, 6gen41 A, C–E, 6gen42 (sauf E « aucun »),
+  6gen76 (Monty Hall, deux enfants), 6gen80 (sans calculatrice), 6gen144, 6gen152, 6gen154–159. Gardés :
+  gen14–18, gen76, gen122, 6gen86, 6gen145, 6gen146, 6gen153 et 6gen37 A, B, C, E (touche Pol / Rec ou
+  mode complexe : module, argument, z^n ; E comme 6gen94). Dans un générateur mêlé (`exacte` ET
+  `calculatrice` dans une même variante : 5gen10 directe / produit, 5gen23 population, 6gen24, 6gen25,
+  6gen39 B, 6gen42 E « aucun »), `exacte` reste (mode « interdite ») : seules les variantes TOUJOURS
+  exactes ont été changées, au cas par cas dans la fonction de profil. « Interdite » inchangée par
+  construction (`exacte` et absent y sont équivalents) — mesuré : mêmes plans à l'aléa près (accord
+  83,6 % avant / après contre 83,1 % entre deux passes). Restent à trancher (calculatrice de la classe) :
+  mode complexe (6gen34, 6gen35, 6gen40 A), touche ∫ (6gen79, et 6gen25), statistiques, lois de
+  probabilité. 5e ch. 5 (5gen25–35) : revu à part.
 - Recherche de graine bornée par le temps (200 ms par palier) : les cas rares (σ entier, combinaison
   précise de paramètres) sont trouvés sans bloquer le panneau. Un cas particulier va sur la DERNIÈRE
   question de la ligne qui peut le recevoir (cas propre à une seule variante).
@@ -1330,9 +1347,8 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   `calcul` était absent à dessein, ils étaient donc tirés aussi « calculatrice autorisée », chez le
   professeur comme chez l'élève. Effet côté professeur, calculatrice autorisée : ils ne sortent plus qu'au
   palier de repli (après la recherche bornée de 200 ms) et la case « cas particulier » y est sans effet.
-  D'autres générateurs « tout exact » n'ont toujours pas de `calcul` (commentaire « Pas de `calcul` » :
-  5e anglesRadians, detectiveTrig, sinusoidePoints, suites… ; 6e complexes, limites logarithmiques,
-  intégrales…) : à trancher générateur par générateur avant de les marquer.
+  Les autres générateurs « tout exact » ont été revus le 24/11 (section « Tirage équilibré », puce
+  « Profils `calcul` revus ») : la plupart restent sans `calcul`, à dessein.
   Document : blanche « Calculatrice interdite » / « Calculatrice autorisée » dans l'encadré à droite de
   « Mon score » (l'aménagée n'en imprimait pas : inchangée) ; la feuille n'imprime rien (aucun emplacement).
   Récapitulatif : « … · Connaître et Transférer · sans calculatrice » (ou « avec calculatrice »).

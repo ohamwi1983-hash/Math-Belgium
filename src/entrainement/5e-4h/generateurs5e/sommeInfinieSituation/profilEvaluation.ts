@@ -7,8 +7,10 @@ import type { ExerciceSommeInfinie } from "../../core5e/sommeInfinieSituation.ty
  *
  * - Aucun cas particulier : chaque instance a ses quatre étapes (premier terme, raison, somme infinie
  *   justifiée, réponse au problème) ; aucune ne se raccourcit.
- * - Pas de `calcul` : toutes les instances sont exactes (fractions, décimaux finis) et faisables sans
- *   calculatrice.
+ * - Toutes les instances sont exactes (fractions, décimaux finis) et faisables sans calculatrice.
+ *   `calcul: 'exacte'` pour « périodique » seulement (écrire 0,3777… en fraction : beaucoup de
+ *   calculatrices convertissent directement un décimal en fraction — revue des profils, 24/11/2026) ;
+ *   rebonds, Zénon, figures (modélisation) : pas de `calcul`.
  * - `forme` = famille, précisée par le sous-cas quand il change la résolution : `periodique:pur`
  *   (partie fixe entière) ou `periodique:mixte` (un chiffre ne se répète pas, à ajouter en fraction),
  *   `rebonds`, `zenon`, `figures:triangle` (q = 1/4) ou `figures:hexagones` (une couronne sur deux,
@@ -18,7 +20,7 @@ import type { ExerciceSommeInfinie } from "../../core5e/sommeInfinieSituation.ty
 export function profilSommeInfinie(e: ExerciceSommeInfinie): ProfilInstance {
   switch (e.variante) {
     case "periodique":
-      return { casParticulier: null, forme: `periodique:${e.sousCas}` };
+      return { casParticulier: null, calcul: "exacte", forme: `periodique:${e.sousCas}` };
     case "figures":
       return { casParticulier: null, forme: `figures:${e.sousCas}` };
     default:

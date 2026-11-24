@@ -10,7 +10,10 @@ import { correctionDetailleeTangenteExpo } from "./corrigeDetaille";
 /**
  * Adaptateur papier de `6gen149` « Tangente à une exponentielle et nombre ln a ». Une consigne globale
  * (la fonction et ce qu'on cherche) ; les trois écrans passent dans le corrigé (étapes a–c). Valeurs
- * exactes acceptées partout : faisable calculatrice interdite (aucun `calcul` dans le profil).
+ * exactes acceptées partout : faisable calculatrice interdite. Profil : `calcul: 'exacte'` pour « en
+ * zéro » seulement (« Sans calculatrice, donne le signe… » de ln a : la calculatrice donne ln a
+ * directement — revue des profils, 24/11/2026) ; « en x₀ » et « base e » (équation de la tangente,
+ * puis arrondis) n'ont pas de `calcul`.
  */
 
 type E = ExerciceTangenteExpo;
@@ -67,6 +70,7 @@ function bareme(e: E): BaremeExercice {
 }
 
 export function profilTangenteExpo(e: E): ProfilInstance {
+  if (e.variante === "en-zero") return { casParticulier: null, calcul: "exacte", forme: e.variante };
   return { casParticulier: null, forme: e.variante };
 }
 

@@ -11,8 +11,10 @@ import type { ExerciceDeuxEcritures } from "../../core6e/deuxEcrituresComplexe";
  *   des facteurs n'entrent dans la forme : la démarche est la même.
  * - Aucun cas particulier : toutes les instances demandent les quatre étapes complètes (aucune ne
  *   raccourcit la résolution).
- * - Toutes les valeurs sont exactes (angles remarquables, racines) : pas de `calcul`.
+ * - `calcul: 'exacte'` (revue des profils, 24/11/2026) : le but est la valeur exacte d'un cos / sin
+ *   non remarquable (cos 5π/12…), que la calculatrice donne directement — jamais tiré « calculatrice
+ *   autorisée ».
  */
 export function profilDeuxEcritures(e: ExerciceDeuxEcritures): ProfilInstance {
-  return { casParticulier: null, forme: e.variante };
+  return { casParticulier: null, calcul: "exacte", forme: e.variante };
 }
