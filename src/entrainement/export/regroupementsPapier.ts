@@ -511,6 +511,25 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
       abscisses: { texte: "Donne les abscisses en valeur exacte ; les valeurs de f peuvent être arrondies au centième." },
     },
   },
+  // 5e ch. 5, nouveaux générateurs 5gen68–5gen70 (5gen70 : vraies questions a) b) c) — écarté).
+  "5gen68": {
+    formes: [
+      {
+        motif: re(String.raw`Estime (?<n>${M}) sans calculatrice, à l'aide de l'approximation affine de la fonction (?<fx>${M})(?<rad> \(x en radians\))? près d'un nombre bien choisi\. La calculatrice affiche (?<c>${M}) : calcule l'erreur commise, à deux chiffres significatifs\.`),
+        consigne: "Estime chaque nombre sans calculatrice, à l'aide de l'approximation affine de la fonction indiquée près d'un nombre bien choisi, puis calcule l'erreur commise, à deux chiffres significatifs, à l'aide de la valeur affichée par la calculatrice.",
+        ligne: (g) => `${g.n}, avec ${g.fx}${g.rad ? " (x en radians)" : ""} ; calculatrice : ${g.c}`,
+      },
+    ],
+  },
+  "5gen69": {
+    formes: [
+      {
+        motif: re(String.raw`On cherche une fonction (?<forme>${M}) dont la courbe admet (?<ligne>.+?)\. (?<q>Détermine a, b, c et d, .+)`),
+        consigne: (g) => `Dans chaque cas, on cherche une fonction ${g.forme} dont la courbe vérifie les conditions données. ${g.q}`,
+        ligne: (g) => (g.ligne ?? "").replace(/^./, (c) => c.toUpperCase()).replace(/, et qui passe par (les points|le point) /, " ; $1 "),
+      },
+    ],
+  },
   "5gen46": { formes: [{ motif: re(String.raw`On note (?<ligne>${M}, ${M} et ${M})\. (?<q>Pour quelle.+)`), consigne: dansChaqueCas }] },
   "5gen55": {
     formes: [{ motif: re(String.raw`Résous dans (?<int>${M}) l'inéquation (?<ligne>${M})\. (?<s>Donne .+)`), consigne: (g) => `Résous dans ${g.int} chaque inéquation. ${g.s}` }],

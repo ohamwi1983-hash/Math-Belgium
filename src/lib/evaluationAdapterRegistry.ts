@@ -331,6 +331,9 @@ import { adaptateurEvaluationOptimisationGeometrique } from '../entrainement/5e-
 import { adaptateurEvaluationContexteEconomique } from '../entrainement/5e-4h/generateurs5e/contexteEconomique/exportEvaluation'
 import { adaptateurEvaluationExtremaBornes } from '../entrainement/5e-4h/generateurs5e/extremaBornes/exportEvaluation'
 import { adaptateurEvaluationVitessePosition } from '../entrainement/5e-4h/generateurs5e/vitessePosition/exportEvaluation'
+import { adaptateurEvaluationApproximationAffine } from '../entrainement/5e-4h/generateurs5e/approximationAffine/exportEvaluation'
+import { adaptateurEvaluationFonctionConditions } from '../entrainement/5e-4h/generateurs5e/fonctionConditions/exportEvaluation'
+import { adaptateurEvaluationTauxInstantane } from '../entrainement/5e-4h/generateurs5e/tauxInstantane/exportEvaluation'
 import { adaptateurEvaluationOptimisationDistance } from '../entrainement/5e-4h/generateurs5e/optimisationDistance/exportEvaluation'
 import { adaptateurEvaluationDetectiveDerivees } from '../entrainement/5e-4h/generateurs5e/detectiveDerivees/exportEvaluation'
 
@@ -394,6 +397,9 @@ export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExe
   '5gen33': versionPapier(adaptateurEvaluationContexteEconomique) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen34': versionPapier(adaptateurEvaluationExtremaBornes) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen35': versionPapier(adaptateurEvaluationVitessePosition) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen68': versionPapier(adaptateurEvaluationApproximationAffine) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen69': versionPapier(adaptateurEvaluationFonctionConditions) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen70': versionPapier(adaptateurEvaluationTauxInstantane) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen71': versionPapier(adaptateurEvaluationOptimisationDistance) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen72': versionPapier(adaptateurEvaluationDetectiveDerivees) as unknown as AdaptateurFeuilleExercices<never>,
 }

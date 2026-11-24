@@ -11,6 +11,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { ariaOptionChoixFerme, classeOptionChoixFerme } from "../../4e/ui/choixFige";
 
 /** Espaces insécables avant « ? ! : ; » et après « « » : le signe ne passe jamais seul à la ligne. */
 function espacesInsecables(texte: string): string {
@@ -102,6 +103,8 @@ interface Props {
   /** Valeur lisible mais approchée alors que la forme exacte est demandée (message) : aucune tentative. */
   approchee?: (valeurs: string[]) => string | null;
   validation?: ValidationEtapeProps | null;
+  /** Choix fermé jugé ✗ / ✓ une fois l'écran clos (`DefinitionEcrans.bonneOption`) ; absent : ancien rendu. */
+  bonneOption?: string;
 }
 
 const LIGNE_VIDE: LigneIntervalle = { ouvrant: "[", gauche: "", droite: "", fermant: "]" };
@@ -161,6 +164,7 @@ export function EtapeEcransTrigo({
   messageIllisible,
   approchee,
   validation,
+  bonneOption,
 }: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => valeursInitiales(mode));
   const [statutsSoumis, setStatutsSoumis] = useState<StatutVerification[] | null>(null);
@@ -305,7 +309,12 @@ export function EtapeEcransTrigo({
               key={option.id}
               type="button"
               aria-pressed={valeurs[0] === option.id}
-              className={`btn ${valeurs[0] === option.id ? "toggle-active" : ""} ${montrerErreurs && valeurs[0] === option.id && faux(0) ? "is-erronee" : ""}`}
+              aria-label={bonneOption !== undefined ? ariaOptionChoixFerme(option.id, { choisie: gele ? valeurs[0] : null, bonne: bonneOption }) : undefined}
+              className={
+                bonneOption !== undefined
+                  ? classeOptionChoixFerme(option.id, { selection: valeurs[0], choisie: gele ? valeurs[0] : null, bonne: bonneOption })
+                  : `btn ${valeurs[0] === option.id ? "toggle-active" : ""} ${montrerErreurs && valeurs[0] === option.id && faux(0) ? "is-erronee" : ""}`
+              }
               disabled={gele}
               onClick={() => changer(0, option.id)}
               style={{ whiteSpace: "normal", maxWidth: "100%", textAlign: "left", minHeight: 44 }}

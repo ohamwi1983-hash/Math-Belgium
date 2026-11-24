@@ -112,6 +112,10 @@ export interface DefinitionEcrans<E, P extends string> {
   /** Choix fermé faux : le message ciblé de `piege` s'affiche avec la réponse révélée (5gen58–5gen60 ;
    * absent : rien, comme avant). */
   piegeChoixRevele?: boolean;
+  /** Choix fermé JUGÉ (rendu de `4e/ui/choixFige.ts`) : id de la bonne option ; une fois l'écran
+   * clos, l'option choisie fausse passe en rouge ✗ et la bonne en vert ✓ (5gen69, 5gen70 ; absent :
+   * ancien rendu, autres générateurs inchangés). */
+  bonneOption?(e: E, phase: P): string;
   correction(e: E): EtapeCorrection[];
 }
 

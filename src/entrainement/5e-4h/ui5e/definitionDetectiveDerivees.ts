@@ -1,7 +1,7 @@
 import type { ExerciceDetectiveDerivees } from "../core5e/detectiveDerivees.types";
 import type { DefinitionEcrans } from "./ecransTrigo.types";
 import type { PhaseDetectiveDerivees } from "./formatDetectiveDerivees";
-import { aide1, aide2, champs, consigne, consigneGenerale, explicationChoix, libelle, messageIllisible, optionsErreur, optionsLigne, PHASES, recap, reponse } from "./formatDetectiveDerivees";
+import { aide1, aide2, champs, consigne, consigneGenerale, explicationChoix, libelle, messageIllisible, numeroLigneFausse, optionsErreur, optionsLigne, PHASES, recap, reponse } from "./formatDetectiveDerivees";
 import { copie } from "../moteur5e/modeleDetectiveDerivees";
 import { diagnostiquer, piege } from "../moteur5e/verificationDetectiveDerivees";
 import { correctionDetailleeDetectiveDerivees } from "../generateurs5e/detectiveDerivees/corrigeDetaille";
@@ -25,6 +25,7 @@ export const DEFINITION_DETECTIVE_DERIVEES: DefinitionEcrans<ExerciceDetectiveDe
   diagnostiquer,
   piege,
   piegeChoixRevele: true,
+  bonneOption: (e, p) => (p === "ligne" ? `L${numeroLigneFausse(e)}` : e.variante),
   messageIllisible,
   reponseAttendue: reponse,
   recap,

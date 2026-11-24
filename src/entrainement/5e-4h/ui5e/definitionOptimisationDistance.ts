@@ -1,4 +1,5 @@
 import type { ExerciceOptimisationDistance } from "../core5e/optimisationDistance";
+import { modele } from "../core5e/optimisationDistance";
 import type { DefinitionEcrans } from "./ecransTrigo.types";
 import type { PhaseOptimisationDistance } from "./formatOptimisationDistance";
 import { aide1, aide2, champs, consigne, consigneGenerale, figureEnonce, libelle, messageIllisible, optionsSigne, PHASES, recap, reponse } from "./formatOptimisationDistance";
@@ -21,6 +22,7 @@ export const DEFINITION_OPTIMISATION_DISTANCE: DefinitionEcrans<ExerciceOptimisa
   approchee,
   piege,
   piegeChoixRevele: true,
+  bonneOption: (e) => modele(e).motif,
   messageIllisible,
   reponseAttendue: reponse,
   recap,
