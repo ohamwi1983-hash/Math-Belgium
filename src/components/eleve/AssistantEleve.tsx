@@ -375,7 +375,8 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
       ...(exercices ? { exercices } : {}),
       calculatrice,
     }
-    const cle = JSON.stringify([levelSlug, chapitre.slug, sections, duree, niveaux, competences, type, amenagee, tirage, parts ?? null, demosRetenues, exercices ?? null, calculatrice])
+    // Même clé que `cleReglages` (filtre des exercices annoncés compris) : sinon le plan préparé n'est jamais reconnu.
+    const cle = JSON.stringify([levelSlug, chapitre.slug, sections, duree, niveaux, competences, type, amenagee, tirage, parts ?? null, demosRetenues, exercices ?? null, calculatrice, filtreExos])
     const minuterie = window.setTimeout(() => {
       const composition = composer(candidats, reglages)
       construirePlanEleve(reglages, chapitre, composition)
@@ -407,7 +408,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
     }
     // `parts` est recréé à chaque rendu : sa forme sérialisée (`cleParts`) suffit comme dépendance.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chapitre, candidats, levelSlug, sections, duree, niveaux, competences, type, amenagee, tirage, reglagesValides, JSON.stringify(parts ?? null), demosRetenues, JSON.stringify(exercices ?? null), calculatrice])
+  }, [chapitre, candidats, levelSlug, sections, duree, niveaux, competences, type, amenagee, tirage, reglagesValides, JSON.stringify(parts ?? null), demosRetenues, JSON.stringify(exercices ?? null), calculatrice, filtreExos])
 
   useEffect(() => () => urls.current.forEach((u) => URL.revokeObjectURL(u)), [])
 
