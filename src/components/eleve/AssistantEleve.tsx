@@ -754,7 +754,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
           <p className="eleve-aide" id="eleve-calculatrice-aide">
             {avecCalculatrice
               ? 'Cochée : des exercices avec et sans calculatrice.'
-              : `Décochée : seulement des exercices faisables sans calculatrice${blanche ? ', comme une interro « calculatrice interdite »' : ''}. Coche-la si ${blanche ? 'ton professeur autorise' : 'tu veux t’entraîner avec'} la calculatrice.`}
+              : `Décochée : seulement des exercices faisables sans calculatrice${blanche ? ', comme une interro « calculatrice interdite »' : ''}. Coche-la si ${blanche ? 'ton professeur autorise' : 'tu veux t’entraîner avec'} la calculatrice.`}
           </p>
         </div>
         <div className="eleve-reglage">
