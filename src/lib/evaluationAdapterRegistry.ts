@@ -506,6 +506,8 @@ import { adaptateurEvaluationProbabilitesProblemes } from '../entrainement/6e-6h
 import { adaptateurEvaluationFrequenceProbabilite } from '../entrainement/6e-6h/generateurs6e/frequenceProbabilite/exportEvaluation'
 import { adaptateurEvaluationArbreTableauEffectifs } from '../entrainement/6e-6h/generateurs6e/arbreTableauEffectifs/exportEvaluation'
 import { adaptateurEvaluationParadoxesProbabilites } from '../entrainement/6e-6h/generateurs6e/paradoxesProbabilites/exportEvaluation'
+import { adaptateurEvaluationProbaGeo } from '../entrainement/6e-6h/generateurs6e/probabilitesGeometriques/exportEvaluation'
+import { adaptateurEvaluationDetectiveProba } from '../entrainement/6e-6h/generateurs6e/detectiveProbabilites/exportEvaluation'
 import { adaptateurEvaluationPointsDroitesRemarquablesTriangle } from '../entrainement/6e-6h/generateurs6e/pointsDroitesRemarquablesTriangle/exportEvaluation'
 import { adaptateurEvaluationCercles } from '../entrainement/6e-6h/generateurs6e/cercles/exportEvaluation'
 import { adaptateurEvaluationLieuxGeometriquesParametres } from '../entrainement/6e-6h/generateurs6e/lieuxGeometriquesParametres/exportEvaluation'
@@ -618,6 +620,8 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen74': versionPapier(adaptateurEvaluationArbreTableauEffectifs) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen75': versionPapier(adaptateurEvaluationFrequenceProbabilite) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen76': versionPapier(adaptateurEvaluationParadoxesProbabilites) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen162': versionPapier(adaptateurEvaluationProbaGeo) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen163': versionPapier(adaptateurEvaluationDetectiveProba) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen54': adaptateurEvaluationPointsDroitesRemarquablesTriangle as unknown as AdaptateurFeuilleExercices<never>,
   '6gen55': adaptateurEvaluationCercles as unknown as AdaptateurFeuilleExercices<never>,
   '6gen56': adaptateurEvaluationLieuxGeometriquesParametres as unknown as AdaptateurFeuilleExercices<never>,

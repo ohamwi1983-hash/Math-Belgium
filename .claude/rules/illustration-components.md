@@ -52,6 +52,9 @@ figure/diagram-frame/figcaption pour toute illustration ; bascule sur `Illustrat
   chaque étiquette RADIALEMENT (le long de l'angle du point, à un rayon élargi) plutôt que par
   décalage x/y de quadrant — nécessaire dès qu'un diagramme a beaucoup de points proches en angle
   (< 20° d'écart) avec des étiquettes à 2 lignes, sous peine de chevauchement entre points voisins.
+- `vectorPlane.regions` (optionnel, 6e ch. 6) — zones ombrées sous le reste du dessin : `polygon` (coordonnées
+  du plan) ou `ring` (couronne, `rInner: 0` = disque plein ; rayon moyenné comme `circles`), tons `accent` /
+  `good` / `bad` (classes `svg-band*`). Aucun rendu existant ne change.
 - `vectorPlane.circle`/`circles` — **ne peut jamais rendre une ellipse**, même sur un domaine
   anisotrope (`xMax-xMin ≠ yMax-yMin`) : `VectorPlane.tsx` calcule le rayon pixel en **moyennant**
   le rayon mis à l'échelle en x et celui mis à l'échelle en y, et dessine toujours un `<circle>` SVG

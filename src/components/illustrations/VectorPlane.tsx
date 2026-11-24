@@ -47,7 +47,7 @@ const SAMPLES = 60
  * (`arrow: false`, pour une droite entière plutôt qu'un vecteur borné) — tous les nouveaux champs
  * sont optionnels et n'affectent aucun rendu existant du chapitre calcul vectoriel.
  */
-export function VectorPlane({ xMin, xMax, yMin, yMax, showAxes = true, grid = false, circle, circles, curves, curvesOfY, vectors, points, angleArcs, rightAngleMarkers }: Props) {
+export function VectorPlane({ xMin, xMax, yMin, yMax, showAxes = true, grid = false, circle, circles, regions, curves, curvesOfY, vectors, points, angleArcs, rightAngleMarkers }: Props) {
   const markerId = `vplane-${useId()}`
   const xScale = (x: number) => ((x - xMin) / (xMax - xMin)) * L
   const yScale = (y: number) => H - ((y - yMin) / (yMax - yMin)) * H
@@ -111,6 +111,18 @@ export function VectorPlane({ xMin, xMax, yMin, yMax, showAxes = true, grid = fa
           ))}
         </g>
       )}
+
+      {regions?.map((z, i) => {
+        const cls = z.tone === 'good' ? 'svg-band-good' : z.tone === 'bad' ? 'svg-band-bad' : 'svg-band'
+        if (z.polygon) return <polygon key={`region-${i}`} points={z.polygon.map((p) => `${xScale(p.x).toFixed(1)},${yScale(p.y).toFixed(1)}`).join(' ')} className={cls} />
+        if (!z.ring) return null
+        const rayonPx = (r: number) => ((r / (xMax - xMin)) * L + (r / (yMax - yMin)) * H) / 2
+        const cx = xScale(z.ring.cx)
+        const cy = yScale(z.ring.cy)
+        const disque = (r: number) => `M${(cx + r).toFixed(1)},${cy.toFixed(1)} A${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(cx - r).toFixed(1)},${cy.toFixed(1)} A${r.toFixed(1)},${r.toFixed(1)} 0 1 0 ${(cx + r).toFixed(1)},${cy.toFixed(1)} Z`
+        const d = disque(rayonPx(z.ring.rOuter)) + (z.ring.rInner > 0 ? ` ${disque(rayonPx(z.ring.rInner))}` : '')
+        return <path key={`region-${i}`} d={d} fillRule="evenodd" className={cls} />
+      })}
 
       {circle && (
         <circle

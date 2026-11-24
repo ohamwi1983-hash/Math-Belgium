@@ -190,6 +190,17 @@ paths:
   production : les figures capturées une à une et comparées à la figure correspondante de
   l'artifact, les 18 autres chapitres re-rendus sans régression (aucun `$...$` non résolu, aucun
   `NaN`/`undefined`, aucune erreur KaTeX ni JS).
+  **Lot G2 (6gen162–6gen163, nouveaux générateurs)** : bloc de cours « Probabilités géométriques : des aires au
+  lieu de cas » en § 1 (après l'application météo, avant « Représenter A∪B et A∩B » — c'est le prolongement de
+  « favorables / possibles » du § 1 : l'aire ou la longueur remplace le nombre de cas ; le § 4 traite les
+  épreuves répétées) : `definition`, `illustrationGroup` de deux `vectorPlane` (cible et couronne, carré des
+  rendez-vous et bande — extension additive `vectorPlane.regions` : polygone ou couronne ombrés), exemples
+  « fléchette sur une cible » et « rendez-vous entre 12 h et 13 h » (énoncés par clé dans
+  `ENONCES_DEMONSTRATION`), `piege` « rapport des rayons ». Cartes 6gen162 « Probabilités géométriques » en § 1
+  (après 6gen75) et 6gen163 « Détective d'erreurs : probabilités » en § 4 (après 6gen76) ; registres
+  (`registry.ts`, `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts`, processus 2 / 3).
+  `essentiel` / `cartes` non touchés (autre agent). Détail : `.claude/rules/feuilles-evaluations.md`, « 6e ch. 6,
+  lot G2 — 6gen162–6gen163 ».
   **Correction de référence en avant (section 4)** : la section 4 « Probabilités : problèmes »
   enseignait les épreuves répétées avec `C(n,k)`/`A(n,k)`, notation qui n'est formellement
   introduite QUE dans le chapitre suivant (« Analyse combinatoire ») — un élève lisant les

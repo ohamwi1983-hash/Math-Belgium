@@ -1001,6 +1001,16 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   5gen29 `repartirSurQuatre` : 9 critères → total 4,5 (la boucle ne s'arrêtait jamais). Contrôle des textes rendus
   (énoncé, brève, corrigé, barème, aides, messages ciblés) : outil `textes.ts` du dossier de travail
   `finitions-5e5` (caractères de contrôle, LaTeX brut en texte, KaTeX invalide).
+- **6e ch. 6, lot G2 (6gen162–6gen163, nouveaux)** : socle d'écrans du 5e (`AppEcransTrigo`, sans
+  modification ; `bonneOption` = choix jugés ✗ / ✓ pour la ligne et l'erreur de 6gen163, `approchee` =
+  valeur décimale proche d'une valeur exacte refusée SANS tentative). Lecture commune
+  `moteur6e/verificationProbabilitesGeometriques.ts::lireProbaGeo` (évaluateur du 6e : fractions, π / pi,
+  √, « − – — », virgule ; unité finale cm², cm2, min² ; préfixe « P = », « A = », « r = » ; pourcentage
+  « 43,75 % »). Notation du cours : `P(A|B)`, `\bar{A}`, `\overline{A\cup V}`, aire 𝒜. Messages ciblés :
+  π oublié, périmètre au lieu d'aire, rayon non élevé au carré, rapport des rayons, différence des rayons au
+  carré, disque entier au lieu de la couronne / du quart, une seule extrémité du segment, un seul triangle,
+  contraire oublié, r = P × R (6gen162) ; résultat de la copie repris et confusions propres au scénario
+  (6gen163). Détail : section « 6e ch. 6, lot G2 — 6gen162–6gen163 » plus bas.
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 
@@ -2096,6 +2106,48 @@ variante) : 6gen156 niv. 4 (réfraction, échelle) / 5 (réflexion, angle de vue
 « ≈ » en degrés convertie, `\limits` ignoré, variables indicées `\theta_2`) : 0 égalité fausse. Documents
 réels (`construirePlan` 2 séries + aménagée + feuille, calculatrice interdite / autorisée ; Word du
 corrigé) : 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error`.
+## 6e ch. 6, lot G2 — 6gen162–6gen163 (nouveaux, notés)
+
+Corrigés `generateurs6e/{probabilitesGeometriques,detectiveProbabilites}/corrigeDetaille.ts`, une lettre par
+écran, partagés par l'appli et l'adaptateur ; cartes 6gen162 en § 1 (après 6gen75, précédée du bloc de cours
+« Probabilités géométriques : des aires au lieu de cas » : définition aire / longueur, figure cible +
+rendez-vous, exemples « fléchette sur une cible » et « rendez-vous entre 12 h et 13 h », énoncés par clé dans
+`ENONCES_DEMONSTRATION`) et 6gen163 en § 4 (après 6gen76 : la copie mêle les §§ 1 à 4). **6gen162 —
+Probabilités géométriques** (Appliquer) : six variantes — `cible` (couronne r₁–r₂ dans une cible de rayon R,
+r₁ + r₂ ≠ R pour que le rapport des rayons ne donne jamais la réponse ; disque central = cas particulier
+`disque-central`, 25 %, tiré AVANT les nombres), `cibleInverse` (rayon du disque central pour P = k²/m²,
+« r = ? » sur la figure, r entier), `carreDisque` et `rectangleQuart` (zone dans / hors de la forme, 50/50),
+`segment` (a ≤ AM ≤ b, à plus de d des deux extrémités, plus long morceau ≥ m), `rendezVous` (carré T × T,
+bande |x − y| ≤ t grisée, rencontre ou non). Écrans : aire totale, aire de la zone (rendez-vous : les deux
+triangles ; inverse : aire nécessaire), probabilité (inverse : rayon) — segment : longueur favorable puis
+probabilité. Figure SVG sans identifiant (`ui6e/figureProbabilitesGeometriques.ts`, écran ET papier, zone en
+gris #ced4da, étiquettes à halo blanc) ; le segment n'a ni repère ni zone (trouver la partie favorable EST
+l'écran 1). Réponses exactes (fractions, a + bπ, `ValPi`) ; aucun profil `calcul` (la calculatrice ne modélise
+pas la situation) ; `forme` = variante + sous-type (dans / hors, type de condition, rencontre / pas — données de
+l'énoncé, aucun verdict). **6gen163 — Détective d'erreurs : probabilités** (Transférer, mécanique de 5gen72 /
+6gen152) : six types d'erreur = variantes, `groupe_erreur` — contraire de « au moins un » pris comme « que des
+succès » (tireur p en dixièmes ou dé), réunion sans retirer l'intersection (club, effectifs / N), conditionnelle
+inversée (on divise par P(T), la copie calcule P(B|T)), produit comme si le tirage était avec remise, chemin
+d'arbre non multiplié par P(B), un seul ordre compté (urne : chemin « bleue puis rouge » oublié ; dés : (a ; b)
+sans (b ; a)). Ligne fausse précédée de 0 à 3 lignes justes (préliminaires puis début de la copie), `av` tiré EN
+DERNIER (après l'ordre des descriptions) ; écran 3 = la probabilité juste, exacte ; corrigé a) ligne refaite
+« et non … comme dans la copie », b) règle illustrée (dé, 52 cartes, urne 2 R / 1 B…), c) résolution reprise +
+vérification (somme des chemins = 1, quatre cases du tableau = N, encadrement de P(D)…). Énoncé papier = exercice
++ copie numérotée + consigne globale. Aucun `calcul`, aucun cas particulier. Regroupement a), b), c) : **écartés
+tous les deux** (situation + figure propres à l'instance ; copie d'élève). Niveaux (`niveauEtDuree`, 300 tirages
+par variante) : 6gen162 niv. 3 · 8 min (cible, inverse, rendez-vous, dans), 4 · 8 min (hors : piège dans les
+données), segment 2 · 6 min (entre) / 3 · 6 min (deux côtés) ; 6gen163 niv. 3 · 8 min constant (`sansCharge`).
+Mesures : collecteur (`…/scratchpad/g2-6e6/collecteur.ts`, évaluateur LaTeX recopié) 3 600 tirages : écran,
+papier, barème (= 4), corrigé : 0 NaN / notation clavier / KaTeX invalide / majuscule d'insistance, ≈ 13 000
+relations évaluées, 0 fausse ; moteur : réponse attendue réécrite acceptée, illisible = `parse_error`, approchée
+détectée, pourcentage lu, résultat de la copie → message ciblé et jamais juste ; ligne fausse ≈ 25 % par
+position. Plans réels `construirePlan` (2 séries, interdite + cas coché ×6, autorisée ×4) : même multiset
+(variante, forme, cas), nombres tous différents, `groupe_erreur` B ≠ A 10 / 10 ; `?code=` 24 / 24 ; iPhone 13
+(toutes les variantes ×2 : illisible sans tentative, faux, juste, choix faux ✗ / ✓, nouvel exercice à champs
+vides) 94 contrôles, scrollWidth 390, 0 erreur console ; documents réels (évaluation 2 séries + aménagée +
+corrigé + grille + feuille + aménagée + Word du corrigé, interdite / autorisée) : 0 débordement à 680, 820 et
+1 280 px, 0 `.katex-error`.
+
 ## 4e ch. 1, lot H — gen123–gen125 (nouveaux, notés)
 
 Corrigés `4e/generateurs/{lectureParabole,differencesSecondes,equationParabolePoints}/corrigeDetaille.ts`
