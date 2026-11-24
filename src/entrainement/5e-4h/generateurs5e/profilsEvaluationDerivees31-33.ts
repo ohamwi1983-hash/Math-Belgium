@@ -36,12 +36,12 @@ export const LIBELLE_CAS_ETUDIER_FONCTION = "Inclure un cas particulier (fonctio
 export function profilEtudierFonction(e: ExerciceEtudierFonction): ProfilInstance {
   if (e.famille === "rationnelleAO") {
     const irrationnelle = e.racinesFPrime.some((r) => !r.exact);
-    return { casParticulier: e.racinesFPrime.length === 0 ? "sans-extremum" : null, calcul: irrationnelle ? "calculatrice" : "exacte", forme: "rationnelleAO" };
+    return { casParticulier: e.racinesFPrime.length === 0 ? "sans-extremum" : null, calcul: irrationnelle ? "calculatrice" : undefined, forme: "rationnelleAO" };
   }
   const n = e.noyau;
   const sansExtremum = n.classificationFPrime.every((c) => c === "ni_lun_ni_lautre");
   const irrationnelle = [...n.racinesFPrime, ...n.racinesFSeconde].some((r) => !r.exact);
-  return { casParticulier: sansExtremum ? "sans-extremum" : null, calcul: irrationnelle ? "calculatrice" : "exacte", forme: n.type };
+  return { casParticulier: sansExtremum ? "sans-extremum" : null, calcul: irrationnelle ? "calculatrice" : undefined, forme: n.type };
 }
 
 // ============================================================================
@@ -53,18 +53,18 @@ const entier = (v: number) => Math.abs(v - Math.round(v)) < 1e-9;
 export function profilOptimisation(e: ExerciceOptimisation): ProfilInstance {
   switch (e.famille) {
     case "trapeze":
-      return { casParticulier: null, calcul: e.u && e.u.num === 1 && e.u.den === 2 ? "exacte" : "calculatrice", forme: "trapeze" };
+      return { casParticulier: null, calcul: e.u && e.u.num === 1 && e.u.den === 2 ? undefined : "calculatrice", forme: "trapeze" };
     case "cylindre":
       if (e.avecApplicationNumerique) return { casParticulier: null, calcul: "calculatrice", forme: "cylindre-application" };
-      return { casParticulier: null, calcul: entier(e.xOpt) ? "exacte" : "calculatrice", forme: "cylindre" };
+      return { casParticulier: null, calcul: entier(e.xOpt) ? undefined : "calculatrice", forme: "cylindre" };
     case "margesA":
     case "margesB":
-      return { casParticulier: null, calcul: entier(e.xOpt) ? "exacte" : "calculatrice", forme: e.famille };
+      return { casParticulier: null, calcul: entier(e.xOpt) ? undefined : "calculatrice", forme: e.famille };
     case "fenetreA":
     case "fenetreB":
-      return { casParticulier: null, calcul: entier(e.rOpt) ? "exacte" : "calculatrice", forme: e.famille };
+      return { casParticulier: null, calcul: entier(e.rOpt) ? undefined : "calculatrice", forme: e.famille };
     case "cubique":
-      return { casParticulier: null, calcul: "exacte", forme: "cubique" };
+      return { casParticulier: null, forme: "cubique" };
   }
 }
 
@@ -75,8 +75,8 @@ export function profilOptimisation(e: ExerciceOptimisation): ProfilInstance {
 export function profilContexteEconomique(e: ExerciceContexteEconomique): ProfilInstance {
   if (e.famille === "A") {
     const ecartJuste = entier(Math.round(e.ecartPourcent * 1e6) / 1e4);
-    return { casParticulier: null, calcul: ecartJuste && e.minimum.exact ? "exacte" : "calculatrice", forme: `A-degre${e.coutTotal.degre}` };
+    return { casParticulier: null, calcul: ecartJuste && e.minimum.exact ? undefined : "calculatrice", forme: `A-degre${e.coutTotal.degre}` };
   }
-  if (e.famille === "B") return { casParticulier: null, calcul: "exacte", forme: "B" };
+  if (e.famille === "B") return { casParticulier: null, forme: "B" };
   return { casParticulier: null, calcul: "calculatrice", forme: "dichotomie" };
 }

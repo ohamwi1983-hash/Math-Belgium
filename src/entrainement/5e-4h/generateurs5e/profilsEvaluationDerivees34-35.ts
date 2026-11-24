@@ -34,7 +34,7 @@ function casCroise(e: ExerciceExtremaBornes): string {
 }
 
 export function profilExtremaBornes(e: ExerciceExtremaBornes): ProfilInstance {
-  return { casParticulier: null, forme: casCroise(e), calcul: e.degre === 4 ? "calculatrice" : "exacte" };
+  return { casParticulier: null, forme: casCroise(e), calcul: e.degre === 4 ? "calculatrice" : undefined };
 }
 
 /** Variantes de 5gen34 toujours quartiques (calculatrice indispensable). */
@@ -48,6 +48,6 @@ function auDixieme(v: number): boolean {
 
 export function profilVitessePosition(e: ExerciceVitessePosition): ProfilInstance {
   const v = e.a * e.tCible + e.b;
-  const calcul = e.variante === "A" || auDixieme(e.D2 / v) ? "exacte" : "calculatrice";
+  const calcul = e.variante === "A" || auDixieme(e.D2 / v) ? undefined : "calculatrice";
   return { casParticulier: e.b === 0 ? "sans-vitesse-initiale" : null, forme: e.variante, calcul };
 }

@@ -2,7 +2,8 @@
  * Profils d'instance (tirage équilibré des évaluations, `AdaptateurFeuilleExercices.profilInstance`,
  * méthode : `.claude/rules/feuilles-evaluations.md`) de 5gen25 (association f ↔ f'), 5gen26 (f'(a)
  * par la définition) et 5gen27 (fonction dérivée), chapitre 5 de 5e. Mesures : 5 000 tirages par
- * variante (scratchpad 5c5-R1/mesure.txt). Aucune valeur n'exige la calculatrice : `calcul: 'exacte'`.
+ * variante (scratchpad 5c5-R1/mesure.txt). `calcul` absent : la calculatrice
+ * ne donne pas la réponse (décision de l'utilisateur, 24/11/2026 : `exacte` seulement dans ce cas).
  *
  * 5gen25 — une association est un VERDICT (aucun cas particulier). `forme` = famille et nombre
  * d'éléments (3 à 5 en tirage libre) : même type de question d'une série à l'autre.
@@ -22,7 +23,7 @@ import type { ExerciceDefinitionDerivee } from "../core5e/definitionDerivee.type
 import type { AtomeDerivable, ExerciceFonctionDerivee } from "../core5e/fonctionDerivee.types";
 
 export function profilAssociation(e: ExerciceAssociation): ProfilInstance {
-  return { casParticulier: null, calcul: "exacte", forme: `${e.famille}-${nombreElementsAssociation(e)}` };
+  return { casParticulier: null, forme: `${e.famille}-${nombreElementsAssociation(e)}` };
 }
 
 export const LIBELLE_CAS_DEFINITION_DERIVEE = "Inclure un cas particulier (terme constant nul : f(x) = mx ou f(x) = mx²)";
@@ -31,13 +32,13 @@ export function profilDefinitionDerivee(e: ExerciceDefinitionDerivee): ProfilIns
   switch (e.famille) {
     case "affine":
     case "quadratique":
-      return { casParticulier: e.p === 0 ? "terme-constant-nul" : null, calcul: "exacte", forme: e.famille };
+      return { casParticulier: e.p === 0 ? "terme-constant-nul" : null, forme: e.famille };
     case "rationnelleSimple":
-      return { casParticulier: null, calcul: "exacte", forme: `rationnelleSimple-x${e.expo}` };
+      return { casParticulier: null, forme: `rationnelleSimple-x${e.expo}` };
     case "rationnelleLineaire":
     case "quadratiqueComplete":
     case "racine":
-      return { casParticulier: null, calcul: "exacte", forme: e.famille };
+      return { casParticulier: null, forme: e.famille };
   }
 }
 
@@ -59,5 +60,5 @@ export function contientTrigFonctionDerivee(e: ExerciceFonctionDerivee): boolean
 
 export function profilFonctionDerivee(e: ExerciceFonctionDerivee): ProfilInstance {
   const forme = e.famille === "quotient" && e.ambigu ? "quotient-ambigu" : `${e.famille}-${contientTrigFonctionDerivee(e) ? "trig" : "sans-trig"}`;
-  return { casParticulier: null, calcul: "exacte", forme };
+  return { casParticulier: null, forme };
 }

@@ -10,14 +10,14 @@
  * - `pente-nulle` : f'(a) = 0 (A polynomiale) ou f'(p) = 0 (C) — tangente horizontale y = f(a) ;
  * - `racine-nulle` : x = 0 solution de f'(x) = 0 (B) — l'ordonnée vaut le terme constant.
  * Racine double ou deux racines distinctes (B) est un VERDICT : jamais filtré, mais imposé identique
- * d'une série à l'autre par `forme`. Toutes les valeurs sont exactes (racines carrées comprises) :
- * `calcul: 'exacte'`.
+ * d'une série à l'autre par `forme`. Toutes les valeurs sont exactes (racines carrées comprises),
+ * mais la calculatrice ne donne pas la réponse (dériver, résoudre) : `calcul` absent (décision de
+ * l'utilisateur, 24/11/2026 : `exacte` seulement si la calculatrice donnerait directement la réponse).
  *
  * 5gen29 — aucun cas particulier : la racine double (aucun extremum) et l'absence de point
  * d'inflexion sont des verdicts. `forme` = type × nature des racines × niveau. Racines
- * irrationnelles (1 ± √2…) : les abscisses sont exactes, mais la valeur de f en ces points demande
- * un développement de (a ± √b)³ peu réaliste à la main en 5e — `calcul: 'calculatrice'` (la consigne
- * papier accepte alors des valeurs arrondies au centième) ; tout le reste se fait à la main.
+ * irrationnelles (1 ± √2…) : valeurs EXACTES f(e ± √r) = A ± B√r exigées (lot C) ; `calcul` absent
+ * partout (la calculatrice ne donne pas la réponse d'une étude).
  * Le niveau avancé (f'') n'existe pas dans la variante « rationnelle avec CE » : pas de paramètre au
  * choix (règle : seulement un paramètre présent dans TOUTES les variantes).
  *
@@ -52,18 +52,18 @@ export function profilTangente(e: ExerciceTangente): ProfilInstance {
     case "pointDonne":
       return {
         casParticulier: cas([e.a === 0 && "abscisse-nulle", e.sousFamille === "polynomiale" && deriveeFPointDonne(e, e.a) === 0 && "pente-nulle", derivee]),
-        calcul: "exacte",
+        
         forme: `pointDonne-${e.sousFamille}`,
       };
     case "horizontale":
       // Lot D : 0, 1 ou 2 points est le VERDICT (groupe_horizontale) — jamais dans la `forme`.
-      return { casParticulier: cas([e.racines.includes(0) && "racine-nulle", derivee]), calcul: "exacte", forme: "horizontale" };
+      return { casParticulier: cas([e.racines.includes(0) && "racine-nulle", derivee]), forme: "horizontale" };
     case "doubleTangence":
-      return { casParticulier: cas([e.p === 0 && "abscisse-nulle", deriveeFDoubleTangence(e, e.p) === 0 && "pente-nulle"]), calcul: "exacte", forme: "doubleTangence", parametresNonApplicables: ["derivee-donnee"] };
+      return { casParticulier: cas([e.p === 0 && "abscisse-nulle", deriveeFDoubleTangence(e, e.p) === 0 && "pente-nulle"]), forme: "doubleTangence", parametresNonApplicables: ["derivee-donnee"] };
     case "pente":
-      return { casParticulier: cas([derivee]), calcul: "exacte", forme: `pente-${e.racines.length}` };
+      return { casParticulier: cas([derivee]), forme: `pente-${e.racines.length}` };
     case "pointExterieur":
-      return { casParticulier: cas([derivee]), calcul: "exacte", forme: "pointExterieur" };
+      return { casParticulier: cas([derivee]), forme: "pointExterieur" };
   }
 }
 
@@ -74,9 +74,9 @@ export const PARAMETRES_ETUDE_LOCALE = [{ id: "derivees-a-calculer", label: "Dé
 export function profilEtudeLocale(e: ExerciceEtudeLocale): ProfilInstance {
   // Lot D : racines simples ou double (= extremums ou non) est le VERDICT (groupes à verdict) — hors
   // de la `forme` ; irrationnelle reste visible dans la forme (elle n'est pas dans un groupe). Lot C :
-  // valeurs exactes partout (`calcul: 'exacte'`).
+  // valeurs exactes partout, `calcul` absent (la calculatrice ne fait pas l'étude).
   const nature = e.type === "polynomiale" ? (e.natureRacines === "irrationnelle" ? "-irrationnelle" : "-rationnelle") : "";
-  return { casParticulier: e.deriveesACalculer ? "derivees-a-calculer" : null, calcul: "exacte", forme: `${e.type}${nature}-${e.niveau}` };
+  return { casParticulier: e.deriveesACalculer ? "derivees-a-calculer" : null, forme: `${e.type}${nature}-${e.niveau}` };
 }
 
 export function profilLectureGraphiqueDerivees(e: ExerciceLectureGraphiqueDerivees): ProfilInstance {
