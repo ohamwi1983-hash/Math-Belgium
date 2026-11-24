@@ -389,6 +389,16 @@ export const FORMULES_5E: BanqueFormules = {
         enonce: r`$f$ est une fonction polynomiale et $t$ sa tangente au point d'abscisse $a$. Quelle forme a $f(x) - t(x)$ ?`,
         corrige: r`$f(x) - t(x) = (x-a)^2 \cdot Q(x)$ : racine (au moins) double au point de contact ; une racine double de $Q$ donne un second point de tangence.`,
       },
+      {
+        id: r`$f'(a) = m$`,
+        enonce: r`On cherche les points de la courbe de $f$ où la tangente a une pente $m$ donnée. Quelle équation résout-on ?`,
+        corrige: r`$f'(a) = m$ : ses solutions sont les abscisses $a$ des points de contact ; la tangente y est $y = f(a) + m(x-a)$.`,
+      },
+      {
+        id: r`$y_P = f(a) + f'(a)(x_P - a)$`,
+        enonce: r`Une tangente à la courbe de $f$, au point d'abscisse $a$, passe par un point $P(x_P\,;y_P)$ hors de la courbe. Quelle équation vérifie $a$ ?`,
+        corrige: r`$y_P = f(a) + f'(a)(x_P - a)$ : on remplace $x$ et $y$ par les coordonnées de $P$ dans l'équation de la tangente, puis on résout en $a$.`,
+      },
     ],
     'fonction-derivee': [
       {
