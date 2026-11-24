@@ -87,3 +87,8 @@ chaque chapitre ouvert dans le panneau, défilement balayé par pas de 8 px : co
 couverts à l'arrivée en descendant, jamais visibles en entier) sur les 191 ateliers : avant, 5
 ateliers fautifs à chaque taille (10 et 8 éléments couverts à l'ouverture) ; après, 0 / 0 / 0 à
 375×667 et 390×664.
+
+**Diapo du mode projection (`InteractiveWidget sansEpingle`)** : aucun épinglage ; l'atelier entier est
+mis à l'échelle (`zoom`) pour tenir dans sa zone de la diapo, jamais sous 0,8 (au-delà la zone défile) —
+voir `chapter-components.md`, « Mode projection ». Pour l'export PowerPoint, son Shadow DOM est aplati
+(feuilles adoptées et `<style>` recopiés, `:host` → `[data-hote]`) avant d'être photographié.
