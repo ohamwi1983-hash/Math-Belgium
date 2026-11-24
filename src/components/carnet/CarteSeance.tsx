@@ -1,15 +1,20 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { dateCourte, htmlSmartschool, slugTitre, texteSmartschool, type Classe, type Seance } from '../../lib/carnet'
+import { findChapter } from '../../content/chaptersIndex'
+import { dateCourte, generateursChapitre, slugTitre, structureChapitre, texteBrut, type Classe, type Seance } from '../../lib/carnet'
+import { dateJourLong } from '../../lib/agendaEvenements'
+import { heureEvenementTexte } from '../../lib/carnetDevoirs'
 import { ficheSeanceHtml } from '../../lib/carnetFiche'
-import { couleurClasse, resoudre, useCarnet } from './contexteCarnet'
+import { couleurClasse, evenementDeSeance, resoudre, textesSeance, useCarnet } from './contexteCarnet'
 import { MenuActions } from './MenuActions'
 import { capitale, copierTexte, dateAbregee, ouvrirFiche, telechargerFiche } from './outilsCarnet'
 
 /**
- * Actions d'une séance notée : UNE action principale, « Copier pour Smartschool » (texte + HTML
- * riche, repli texte à copier à la main), et le menu « … » (fiche à imprimer / PDF, télécharger la
- * fiche, modifier, supprimer). `menuSeul` : la copie passe aussi dans le menu (ligne compacte).
+ * Actions d'une séance notée : UNE action principale, « Copier pour Smartschool » (texte en rubriques
+ * + HTML riche, rubriques mémorisées du professeur, repli texte à copier à la main), et le menu « … »
+ * (texte pour l'agenda scolaire — rubriques, objectif, compétences —, fiche à imprimer / PDF,
+ * télécharger la fiche, modifier, supprimer). `menuSeul` : la copie passe aussi dans le menu (ligne
+ * compacte).
  */
 export function ActionsSeance({ seance, menuSeul = false, avecOuvrir = false }: { seance: Seance; menuSeul?: boolean; avecOuvrir?: boolean }) {
   const ctx = useCarnet()
@@ -17,12 +22,13 @@ export function ActionsSeance({ seance, menuSeul = false, avecOuvrir = false }: 
   const classe = ctx.classes.find((c) => c.id === seance.classe_id)
   if (!classe) return null
   const r = resoudre(ctx, seance, classe)
-  const texte = texteSmartschool(r)
+  const textes = textesSeance(ctx, seance, classe)
+  const texte = textes.texte
   // Nom ASCII : un accent dans l'attribut `download` fait perdre le nom du fichier dans Chromium.
   const nomFiche = `seance-${slugTitre(classe.nom)}-${seance.date_seance}.html`
 
   async function copier() {
-    const ok = await copierTexte(texte, htmlSmartschool(r))
+    const ok = await copierTexte(texte, textes.html)
     setCopie(ok ? 'ok' : 'echec')
     if (ok) window.setTimeout(() => setCopie((c) => (c === 'ok' ? null : c)), 4000)
   }
@@ -30,6 +36,7 @@ export function ActionsSeance({ seance, menuSeul = false, avecOuvrir = false }: 
   const actions = [
     ...(menuSeul ? [{ texte: 'Copier pour Smartschool', onChoisir: () => void copier() }] : []),
     ...(avecOuvrir ? [{ texte: 'Ouvrir la séance', onChoisir: () => ctx.voir(seance) }] : []),
+    { texte: 'Texte pour l’agenda scolaire (rubriques)…', onChoisir: () => ctx.ouvrirTexte(seance) },
     { texte: 'Fiche (imprimer, PDF)', onChoisir: () => ouvrirFiche(ficheSeanceHtml({ ...r, professeur: ctx.professeur })) },
     { texte: 'Télécharger la fiche', onChoisir: () => telechargerFiche(ficheSeanceHtml({ ...r, professeur: ctx.professeur }), nomFiche) },
     { texte: 'Modifier', onChoisir: () => ctx.modifier(seance), desactive: ctx.occupe },
@@ -78,6 +85,19 @@ export function CarteSeance({ seance, compacte = false, titreId }: { seance: Sea
   if (!classe) return null
   const r = resoudre(ctx, seance, classe)
   const lienSection = (url: string) => `/${seance.niveau}/${seance.chapitre}#${url.split('#')[1]}`
+  const chapitre = findChapter(seance.niveau, seance.chapitre)
+  const exercicesDevoir = chapitre ? generateursChapitre(chapitre).filter((g) => (seance.devoir_generateurs ?? []).includes(g.id)).map((g) => texteBrut(g.titre)) : (seance.devoir_generateurs ?? [])
+  const evenement = evenementDeSeance(ctx, seance)
+  const sectionsEval = chapitre ? structureChapitre(chapitre).filter((x) => (seance.evaluation_parties ?? []).includes(x.id)).map((x) => `§ ${x.numero}`) : []
+  const texteEvaluation = seance.evaluation_type
+    ? [
+        seance.evaluation_type === 'faite' ? 'interro faite en classe' : seance.evaluation_type === 'bilan' ? 'contrôle-bilan annoncé' : 'interro annoncée',
+        seance.evaluation_type !== 'faite' ? (evenement ? `le ${dateJourLong(evenement.du)}${heureEvenementTexte(evenement) ? ` (${heureEvenementTexte(evenement)})` : ''}` : 'retirée de l’agenda') : '',
+        sectionsEval.length > 0 ? `— ${sectionsEval.join(', ')}` : '',
+      ]
+        .filter(Boolean)
+        .join(' ')
+    : ''
 
   if (compacte) {
     return (
@@ -133,9 +153,15 @@ export function CarteSeance({ seance, compacte = false, titreId }: { seance: Sea
           <strong>Exercices :</strong> {r.generateurs.map((g) => g.titre).join(' · ')}
         </p>
       )}
-      {r.devoir && (
+      {(r.devoir || (seance.devoir_generateurs?.length ?? 0) > 0) && (
         <p className="carnet-seance-detail carnet-texte-libre">
-          <strong>Devoir :</strong> {r.devoir}
+          <strong>Devoir{seance.devoir_pour ? ` pour le ${dateJourLong(seance.devoir_pour)}` : ''} :</strong> {r.devoir}
+          {exercicesDevoir.length > 0 && <span className="carnet-seance-joints"> Exercices en ligne : {exercicesDevoir.join(' · ')}</span>}
+        </p>
+      )}
+      {seance.evaluation_type && (
+        <p className="carnet-seance-detail">
+          <strong>Évaluation :</strong> {texteEvaluation}
         </p>
       )}
       {r.remarque && (

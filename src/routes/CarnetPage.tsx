@@ -6,8 +6,10 @@ import { EnTeteCompte, PageCompte, PageReservee } from '../components/compte/Pag
 import { AgendaPeriode } from '../components/carnet/AgendaPeriode'
 import { Aujourdhui } from '../components/carnet/Aujourdhui'
 import { CarteSeance } from '../components/carnet/CarteSeance'
-import { CarnetContexte, avecGrille, resoudre, type ContexteCarnet } from '../components/carnet/contexteCarnet'
-import { FormulaireSeance } from '../components/carnet/FormulaireSeance'
+import { CarnetContexte, avecGrille, textesSeance, type ContexteCarnet } from '../components/carnet/contexteCarnet'
+import { FormulaireSeance, type AnnonceEvaluation } from '../components/carnet/FormulaireSeance'
+import { ReglagesTexteAgenda, TexteAgenda } from '../components/carnet/TexteAgenda'
+import { prechargerProcessus } from '../components/carnet/processusCarnet'
 import { GestionClasses, type SaisieClasse } from '../components/carnet/GestionClasses'
 import { MaSemaine } from '../components/carnet/MaSemaine'
 import { MessageHoraireInactif, MonHoraire } from '../components/carnet/MonHoraire'
@@ -20,18 +22,24 @@ import '../components/carnet/carnet.css'
 import '../components/carnet/agenda.css'
 import '../components/compte/profil.css'
 import { findChapter } from '../content/chaptersIndex'
-import { dateIso, dateLongue, htmlSmartschool, texteSmartschool, type Classe, type ReglagesCarnet, type SaisieSeance, type Seance } from '../lib/carnet'
+import { dateIso, dateLongue, type Classe, type ReglagesCarnet, type SaisieSeance, type Seance } from '../lib/carnet'
+import { dateJourLong } from '../lib/agendaEvenements'
+import { INTITULE_BILAN, lireCompetences, lireRubriques, type Rubriques } from '../lib/carnetDevoirs'
 import {
   ajouterClasse,
   ajouterSeance,
   chargerHoraire,
+  chargerSeances,
+  enregistrerReglagesTexte,
+  enregistrerTexteSeance,
+  lireReglagesTexte,
+  type ReglagesTexte,
   definirCase,
   enregistrerGrille,
   enregistrerReglages,
   ErreurCarnet,
   lireReglages,
   listerClasses,
-  listerSeances,
   modifierClasse,
   modifierSeance,
   supprimerClasse,
@@ -46,6 +54,7 @@ import { estConnecteActif, useCompte } from '../lib/compteContexte'
 import { messageErreur } from '../lib/compteValidation'
 
 const DUREES = [40, 45, 50, 55, 60, 90, 100, 110]
+const TEXTE_DEFAUT = { rubriques: lireRubriques(null), competences: lireCompetences(null) }
 
 /** `/carnet/*` — carnet de matière vue (phase 2 des comptes), réservé aux professeurs connectés.
  * Bandeau sombre (« ESPACE PROFESSEUR », période et semaine, créneaux à noter, classes) et menu
@@ -82,6 +91,10 @@ interface Donnees {
   horaire: DonneesHoraire
   /** Agenda (0006) ; `actif` faux tant que 0006 n'est pas appliqué. */
   agenda: DonneesAgenda
+  /** 0007 appliqué : colonnes de devoir / évaluation / texte présentes. */
+  devoirs: boolean
+  /** Rubriques du texte et compétences transversales (défauts sans 0007). */
+  texte: ReglagesTexte
 }
 
 type Panneau =
@@ -89,6 +102,7 @@ type Panneau =
   | { type: 'modifier'; seance: Seance }
   | { type: 'voir'; seanceId: string }
   | { type: 'evenement'; evenement: Evenement | null; prerempli: Partial<SaisieEvenement> }
+  | { type: 'texte'; seanceId: string }
 
 function MessageCarnetInactif() {
   return (
@@ -132,8 +146,12 @@ function Carnet() {
       // L'horaire (0003) d'abord : il dit si `seances.numero_heure_fin` existe.
       // L'agenda (0006) est facultatif : sans lui (ou en cas de panne de lecture), le carnet reste utilisable.
       const [classes, r, horaire, agenda] = await Promise.all([listerClasses(client), lireReglages(client), chargerHoraire(client), chargerAgenda(client).catch(() => AGENDA_INACTIF)])
-      const seances = await listerSeances(client, horaire.actif)
-      setDonnees({ classes, seances, reglages: r.reglages, reglagesExiste: r.existe, horaire, agenda })
+      // Devoirs / évaluations / texte (0007) : facultatifs, détectés à la lecture des séances.
+      const [{ seances, devoirs }, texte] = await Promise.all([
+        chargerSeances(client, horaire.actif),
+        lireReglagesTexte(client).catch((): ReglagesTexte => ({ actif: false, ...TEXTE_DEFAUT })),
+      ])
+      setDonnees({ classes, seances, reglages: r.reglages, reglagesExiste: r.existe, horaire, agenda, devoirs, texte: devoirs ? texte : { ...texte, actif: false } })
       setAbsent(false)
       setErreurChargement(null)
     } catch (ex) {
@@ -145,6 +163,14 @@ function Carnet() {
   useEffect(() => {
     void charger()
   }, [charger])
+
+  // Table des processus (texte en rubriques) : chargée à part, une fois le carnet affiché.
+  const pret = donnees !== null
+  useEffect(() => {
+    if (!pret) return
+    const t = window.setTimeout(() => void prechargerProcessus().catch(() => undefined), 400)
+    return () => window.clearTimeout(t)
+  }, [pret])
 
   // « Noter dans le carnet » depuis une page de cours : `?chapitre=niveau/chapitre`.
   const chapitreDemande = params.get('chapitre')
@@ -194,6 +220,9 @@ function Carnet() {
       ctxAgenda,
       nouvelEvenement: (prerempli = {}) => setPanneau({ type: 'evenement', evenement: null, prerempli }),
       ouvrirEvenement: (e) => setPanneau({ type: 'evenement', evenement: e, prerempli: {} }),
+      devoirs: donnees.devoirs,
+      texte: donnees.texte,
+      ouvrirTexte: (s) => setPanneau({ type: 'texte', seanceId: s.id }),
     }
   }, [donnees, ecoles, profil, occupe, client, ctxAgenda])
 
@@ -305,32 +334,90 @@ function Carnet() {
   function apercu(s: SaisieSeance): string {
     const classe = donnees!.classes.find((c) => c.id === s.classe_id)
     if (!classe) return ''
-    return texteSmartschool(resoudre(contexte!, { ...s, id: '', cree_le: '', modifie_le: '' }, classe))
+    return textesSeance(contexte!, { ...s, id: '', cree_le: '', modifie_le: '' }, classe).texte
   }
 
-  async function enregistrerSeance(s: SaisieSeance, copier: boolean) {
+  async function enregistrerSeance(s: SaisieSeance, copier: boolean, annonce: AnnonceEvaluation | null) {
     const p = panneau
-    if (!p || p.type === 'voir' || !client) return
+    if (!p || (p.type !== 'noter' && p.type !== 'modifier') || !client) return
     const actif = horaire.actif
-    // Copie lancée AVANT l'enregistrement (geste de l'utilisateur encore valable pour le
-    // presse-papiers) ; même texte que la copie d'une séance enregistrée.
+    const devoirs = donnees!.devoirs
+    const agenda = donnees!.agenda
     const classe = donnees!.classes.find((c) => c.id === s.classe_id)
-    const r = classe ? resoudre(contexte!, { ...s, id: '', cree_le: '', modifie_le: '' }, classe) : null
-    const copie = copier && r ? copierTexte(texteSmartschool(r), htmlSmartschool(r)) : null
+    // Interro annoncée / contrôle-bilan : l'événement « Interrogation » de l'agenda (0006).
+    const saisieEv: SaisieEvenement | null =
+      devoirs && annonce && classe && agenda.actif
+        ? {
+            ecole_id: classe.ecole_id,
+            type: 'interrogation',
+            intitule: s.evaluation_type === 'bilan' ? INTITULE_BILAN : '',
+            du: annonce.date,
+            au: annonce.date,
+            journee_entiere: annonce.heureDebut === null,
+            heure_debut: annonce.heureDebut,
+            heure_fin: annonce.heureFin,
+            toutes_classes: false,
+            accompagne: false,
+            classe_id: classe.id,
+            chapitre: `${s.niveau}/${s.chapitre}`,
+            classes: [],
+          }
+        : null
+    // Copie lancée AVANT l'enregistrement (geste de l'utilisateur encore valable pour le
+    // presse-papiers) ; même texte que la copie d'une séance enregistrée, interro comprise.
+    const evenementCopie = saisieEv ? { ...saisieEv, id: '', cree_le: '' } : null
+    const textes = classe ? textesSeance(contexte!, { ...s, id: '', cree_le: '', modifie_le: '' }, classe, undefined, saisieEv ? { evenement: evenementCopie } : {}) : null
+    const copie = copier && textes ? copierTexte(textes.texte, textes.html) : null
+    const ancien = p.type === 'modifier' ? (p.seance.evaluation_evenement ?? null) : null
     const ok = await agir(
-      () => (p.type === 'modifier' ? modifierSeance(client, p.seance.id, s, actif) : ajouterSeance(client, s, actif)),
+      async () => {
+        let evId: string | null = s.evaluation_evenement ?? null
+        let cree: string | null = null
+        if (saisieEv) {
+          const existant = evId ? agenda.evenements.find((e) => e.id === evId) : undefined
+          if (existant) await modifierEvenement(client, existant, saisieEv)
+          else evId = cree = await ajouterEvenement(client, saisieEv)
+        }
+        const finale: SaisieSeance = devoirs ? { ...s, evaluation_evenement: saisieEv ? evId : null } : s
+        try {
+          if (p.type === 'modifier') await modifierSeance(client, p.seance.id, finale, actif, devoirs)
+          else await ajouterSeance(client, finale, actif, devoirs)
+        } catch (ex) {
+          // Pas d'interro orpheline : celle qu'on vient de créer est retirée.
+          if (cree) await supprimerEvenement(client, cree).catch(() => undefined)
+          throw ex
+        }
+        // L'interro liée d'avant n'a plus lieu d'être (évaluation retirée ou « faite aujourd'hui »).
+        if (ancien && ancien !== finale.evaluation_evenement && agenda.evenements.some((e) => e.id === ancien)) await supprimerEvenement(client, ancien)
+      },
       p.type === 'modifier' ? 'Séance modifiée.' : 'Séance enregistrée.',
     )
     if (!ok) return
     setPanneau(null)
     choisirClasse(s.classe_id)
-    if (copie && r) {
-      if (await copie) setMessage(`${p.type === 'modifier' ? 'Séance modifiée' : 'Séance enregistrée'} et copiée : colle-la dans Smartschool (journal de classe ou message).`)
+    const base = p.type === 'modifier' ? 'Séance modifiée' : 'Séance enregistrée'
+    const interro = saisieEv ? ` ${s.evaluation_type === 'bilan' ? 'Contrôle-bilan' : 'Interro'} du ${dateJourLong(saisieEv.du)} ajouté${s.evaluation_type === 'bilan' ? '' : 'e'} à l’agenda.` : ''
+    if (copie && textes) {
+      if (await copie) setMessage(`${base} et copiée : colle-la dans Smartschool (journal de classe ou message).${interro}`)
       else {
-        setMessage(`${p.type === 'modifier' ? 'Séance modifiée' : 'Séance enregistrée'}. Copie automatique impossible sur cet appareil : sélectionne le texte ci-dessous et copie-le.`)
-        setTexteACopier(texteSmartschool(r))
+        setMessage(`${base}. Copie automatique impossible sur cet appareil : sélectionne le texte ci-dessous et copie-le.${interro}`)
+        setTexteACopier(textes.texte)
       }
-    }
+    } else if (interro) setMessage(`${base}.${interro}`)
+  }
+
+  /** Rubriques du texte (panneau du texte ou réglages) : mémorisées si 0007 est appliqué. */
+  async function changerRubriques(r: Rubriques) {
+    if (!client || !profil || !donnees) return
+    setDonnees({ ...donnees, texte: { ...donnees.texte, rubriques: r } }) // affiché tout de suite
+    if (!donnees.texte.actif) return
+    await agir(() => enregistrerReglagesTexte(client, { rubriques: r }, donnees.reglagesExiste, profil.id), 'Rubriques du texte enregistrées.')
+  }
+
+  async function changerCompetences(liste: string[]) {
+    if (!client || !profil || !donnees || !donnees.texte.actif) return
+    setDonnees({ ...donnees, texte: { ...donnees.texte, competences: liste } })
+    await agir(() => enregistrerReglagesTexte(client, { competences: liste }, donnees.reglagesExiste, profil.id), 'Liste des compétences transversales enregistrée.')
   }
 
   async function changerReglages(r: ReglagesCarnet) {
@@ -404,6 +491,14 @@ function Carnet() {
         Réglages du carnet
       </h2>
       {reglagesAgenda}
+      <ReglagesTexteAgenda
+        actif={donnees.texte.actif}
+        rubriques={donnees.texte.rubriques}
+        competences={donnees.texte.competences}
+        occupe={occupe}
+        onRubriques={(r) => void changerRubriques(r)}
+        onCompetences={(l) => void changerCompetences(l)}
+      />
       <fieldset className="carnet-fieldset">
         <legend>Horaire des séances</legend>
         <label className="carnet-case">
@@ -475,6 +570,8 @@ function Carnet() {
   const avecClasses = (vue: ReactNode) => (donnees.classes.length === 0 ? sansClasse : vue)
 
   const seanceVue = panneau?.type === 'voir' ? donnees.seances.find((s) => s.id === panneau.seanceId) : undefined
+  const seanceTexte = panneau?.type === 'texte' ? donnees.seances.find((s) => s.id === panneau.seanceId) : undefined
+  const classeTexte = seanceTexte ? donnees.classes.find((c) => c.id === seanceTexte.classe_id) : undefined
 
   return (
     <CarnetContexte.Provider value={contexte}>
@@ -630,7 +727,7 @@ function Carnet() {
               const k = donnees.classes.find((c) => c.id === id)
               return k ? avecGrille(contexte, k) : false
             }}
-            onEnregistrer={(s, copier) => void enregistrerSeance(s, copier)}
+            onEnregistrer={(s, copier, annonce) => void enregistrerSeance(s, copier, annonce)}
             onAnnuler={() => setPanneau(null)}
           />
         </PanneauLateral>
@@ -655,6 +752,19 @@ function Carnet() {
             onEnregistrer={(s) => void enregistrerEvenement(s)}
             onSupprimer={() => void supprimerUnEvenement()}
             onAnnuler={() => setPanneau(null)}
+          />
+        </PanneauLateral>
+      )}
+      {seanceTexte && classeTexte && (
+        <PanneauLateral titreId={titrePanneau} onFermer={() => setPanneau(null)} large>
+          <TexteAgenda
+            key={seanceTexte.id}
+            seance={seanceTexte}
+            classe={classeTexte}
+            titreId={titrePanneau}
+            onFermer={() => setPanneau(null)}
+            onRubriques={(r) => void changerRubriques(r)}
+            onEnregistrerSeance={(v) => void agir(() => enregistrerTexteSeance(client, seanceTexte.id, v), 'Objectif et compétences enregistrés avec la séance.')}
           />
         </PanneauLateral>
       )}

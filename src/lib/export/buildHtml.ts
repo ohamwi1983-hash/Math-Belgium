@@ -14,7 +14,7 @@ import type { ChapterContent } from '../../content/types'
  * le(s) même(s) `<style>` en prod) — il en faut l'intégralité ici, pas seulement les règles
  * `.katex` (contrairement à `katexImage.ts` côté plateforme-maths, qui ne rasterise QUE la formule
  * elle-même) : le fichier exporté doit reproduire la mise en page complète du chapitre. */
-function toutesLesReglesCss(): string {
+export function toutesLesReglesCss(): string {
   const regles: string[] = []
   for (const feuille of Array.from(document.styleSheets)) {
     let ensemble: CSSRuleList
@@ -32,7 +32,7 @@ function toutesLesReglesCss(): string {
 /** Retire le bloc de préférence sombre du CSS copié. L'export est TOUJOURS en thème clair : un
  * fichier HTML téléchargé n'a plus le JS de ce site pour forcer un thème à l'ouverture, donc on
  * retire directement la règle plutôt que de compter sur un attribut/mécanisme runtime. */
-function retirerPreferenceSombre(css: string): string {
+export function retirerPreferenceSombre(css: string): string {
   return css.replace(/@media\s*\(prefers-color-scheme:\s*dark\)\s*\{[\s\S]*?\n\}\n?/g, '')
 }
 
@@ -51,7 +51,7 @@ async function urlVersDataUrl(url: string): Promise<string> {
  * autonome (aucune requête réseau à l'ouverture, y compris hors ligne). Même technique que
  * `plateforme-maths/src/export/katexImage.ts` (`construireCssKatexAutonome`), appliquée ici à
  * l'ensemble du CSS du site plutôt qu'au seul CSS KaTeX. */
-async function inlinerPolices(css: string): Promise<string> {
+export async function inlinerPolices(css: string): Promise<string> {
   const urls = new Set<string>()
   const motif = /url\(\s*(['"]?)([^'")]+)\1\s*\)/g
   let correspondance: RegExpExecArray | null

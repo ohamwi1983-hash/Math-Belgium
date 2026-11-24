@@ -216,7 +216,9 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
  * jamais capturé par l'export HTML (A4) (voir `.no-export` sur le conteneur appelant : un Shadow
  * DOM n'est de toute façon pas repris par un `cloneNode`/`outerHTML` classique).
  */
-export function InteractiveWidget({ tag, figuresTactiles, panneau }: { tag: InteractiveWidgetTag; figuresTactiles?: boolean; panneau?: boolean }) {
+/** `sansEpingle` : pas d'épinglage de la figure (diapo du mode projection : l'atelier entier est mis à
+ * l'échelle pour tenir dans la diapo, rien ne défile). */
+export function InteractiveWidget({ tag, figuresTactiles, panneau, sansEpingle }: { tag: InteractiveWidgetTag; figuresTactiles?: boolean; panneau?: boolean; sansEpingle?: boolean }) {
   const hostRef = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState(false)
 
@@ -236,13 +238,13 @@ export function InteractiveWidget({ tag, figuresTactiles, panneau }: { tag: Inte
     if (!ready || !host) return
     const el = document.createElement(tag)
     host.replaceChildren(el)
-    const retirerEpingle = epinglerFigure(el, !!panneau)
+    const retirerEpingle = sansEpingle ? undefined : epinglerFigure(el, !!panneau)
     const retirerTactile = figuresTactiles ? figuresSansDefilement(el) : undefined
     return () => {
-      retirerEpingle()
+      retirerEpingle?.()
       retirerTactile?.()
     }
-  }, [ready, tag, figuresTactiles, panneau])
+  }, [ready, tag, figuresTactiles, panneau, sansEpingle])
 
   return <div ref={hostRef} className="widget-host" />
 }

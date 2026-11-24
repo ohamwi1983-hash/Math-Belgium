@@ -170,7 +170,7 @@ function compterMots(texte: string | undefined): number {
     .filter(Boolean).length
 }
 
-function textesBloc(b: Block): (string | undefined)[] {
+export function textesBloc(b: Block): (string | undefined)[] {
   switch (b.kind) {
     case 'para':
     case 'subheading':

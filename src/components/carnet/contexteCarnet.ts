@@ -10,6 +10,9 @@ import type { Ecole } from '../../lib/compteValidation'
 import type { GrilleHoraire } from '../../lib/horaire'
 import type { ContexteAgenda, Evenement, SaisieEvenement } from '../../lib/agendaEvenements'
 import type { DonneesAgenda } from '../../lib/agendaDonnees'
+import type { ReglagesTexte } from '../../lib/carnetDonnees'
+import { donneesTexteAgenda, htmlAgenda, texteAgenda, type DonneesTexteAgenda, type Rubriques } from '../../lib/carnetDevoirs'
+import { processusConnus } from './processusCarnet'
 
 export interface ContexteCarnet {
   classes: Classe[]
@@ -31,6 +34,12 @@ export interface ContexteCarnet {
   nouvelEvenement: (prerempli?: Partial<SaisieEvenement>) => void
   /** Ouvre le formulaire sur un événement existant (le toucher dans l'agenda). */
   ouvrirEvenement: (e: Evenement) => void
+  /** 0007 appliqué : devoirs (date de remise, exercices joints), évaluations, texte mémorisé. */
+  devoirs: boolean
+  /** Rubriques du texte pour l'agenda scolaire et liste des compétences transversales (0007). */
+  texte: ReglagesTexte
+  /** Ouvre le panneau « Texte pour l'agenda scolaire » d'une séance (rubriques, objectif, compétences). */
+  ouvrirTexte: (s: Seance) => void
 }
 
 export const CarnetContexte = createContext<ContexteCarnet | null>(null)
@@ -63,4 +72,38 @@ export function avecGrille(ctx: Pick<ContexteCarnet, 'grilles'>, classe: Pick<Cl
  * identique pour les mêmes données). */
 export function resoudre(ctx: Pick<ContexteCarnet, 'grilles' | 'ecoles' | 'format'>, seance: Seance, classe: Classe): SeanceResolue {
   return resoudreSeance(seance, classe, { format: ctx.format, ecole: nomEcole(ctx, classe.ecole_id), lienGenerateur: generatorLink, avecGrille: avecGrille(ctx, classe) })
+}
+
+/** Interro de l'agenda liée à la séance (annonce / contrôle-bilan), si elle existe encore. */
+export function evenementDeSeance(ctx: Pick<ContexteCarnet, 'agenda'>, seance: Seance): Evenement | null {
+  return seance.evaluation_evenement ? (ctx.agenda.evenements.find((e) => e.id === seance.evaluation_evenement) ?? null) : null
+}
+
+/** Données du texte en rubriques d'une séance (processus si la table est chargée). `valeurs` : objectif
+ * et compétences en cours de modification dans le panneau du texte. */
+export function donneesTexte(
+  ctx: Pick<ContexteCarnet, 'grilles' | 'ecoles' | 'format' | 'agenda'>,
+  seance: Seance,
+  classe: Classe,
+  valeurs: { objectif?: string; transversales?: string[]; evenement?: Evenement | null } = {},
+): DonneesTexteAgenda {
+  return donneesTexteAgenda(seance, resoudre(ctx, seance, classe), {
+    lienGenerateur: generatorLink,
+    processusDe: processusConnus(seance.chapitre) ?? undefined,
+    evenement: valeurs.evenement !== undefined ? valeurs.evenement : evenementDeSeance(ctx, seance),
+    objectif: valeurs.objectif,
+    transversales: valeurs.transversales,
+  })
+}
+
+/** Texte brut + HTML « Copier pour Smartschool » d'une séance, avec les rubriques du professeur. */
+export function textesSeance(
+  ctx: Pick<ContexteCarnet, 'grilles' | 'ecoles' | 'format' | 'agenda' | 'texte'>,
+  seance: Seance,
+  classe: Classe,
+  rubriques: Rubriques = ctx.texte.rubriques,
+  valeurs: { objectif?: string; transversales?: string[]; evenement?: Evenement | null } = {},
+): { texte: string; html: string } {
+  const d = donneesTexte(ctx, seance, classe, valeurs)
+  return { texte: texteAgenda(d, rubriques), html: htmlAgenda(d, rubriques) }
 }

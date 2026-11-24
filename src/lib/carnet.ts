@@ -19,6 +19,8 @@ export const SITE_URL = 'https://math-belgium.vercel.app'
 export const NOM_CLASSE_MAX = 40
 export const DEVOIR_MAX = 2000
 export const REMARQUE_MAX = 2000
+/** Phrase « Je suis capable de … » (0007). */
+export const OBJECTIF_MAX = 300
 export const NUMERO_HEURE_MAX = 15
 
 export type FormatHoraire = 'plage' | 'numero'
@@ -57,10 +59,51 @@ export interface Seance {
   remarque: string
   cree_le: string
   modifie_le: string
+  /* Devoirs, évaluations et texte en rubriques (`0007_devoirs_evaluations.sql`) : absents tant que
+   * 0007 n'est pas appliqué (le carnet marche alors comme avant). */
+  /** Date de remise du devoir (`AAAA-MM-JJ`), `null` : pas de date. */
+  devoir_pour?: string | null
+  /** Exercices en ligne joints au devoir (générateurs du chapitre). */
+  devoir_generateurs?: string[]
+  /** Phrase « Je suis capable de … » du texte pour l'agenda scolaire (vide : rubrique omise). */
+  objectif?: string
+  /** Compétences transversales cochées pour cette séance (intitulés de la liste du professeur). */
+  competences?: string[]
+  /** Évaluation notée avec la séance : annoncée, faite aujourd'hui ou contrôle-bilan. */
+  evaluation_type?: TypeEvaluation | null
+  /** Parties de la matière évaluée (ids de sections du chapitre). */
+  evaluation_parties?: string[]
+  /** Événement « Interrogation » de l'agenda (0006) créé par « Annoncer » / « Contrôle-bilan ». */
+  evaluation_evenement?: string | null
 }
 
+/** Évaluation notée avec une séance (0007). « faite » : l'interro a eu lieu pendant la séance (aucun
+ * événement futur) ; « annonce » et « bilan » créent l'événement « Interrogation » de l'agenda. */
+export type TypeEvaluation = 'annonce' | 'faite' | 'bilan'
+
 /** Ce que le formulaire envoie (sans id ni dates techniques). */
-export type SaisieSeance = Pick<Seance, 'classe_id' | 'date_seance' | 'heure_debut' | 'heure_fin' | 'numero_heure' | 'numero_heure_fin' | 'niveau' | 'chapitre' | 'parties' | 'generateurs' | 'devoir' | 'remarque'>
+export type SaisieSeance = Pick<
+  Seance,
+  | 'classe_id'
+  | 'date_seance'
+  | 'heure_debut'
+  | 'heure_fin'
+  | 'numero_heure'
+  | 'numero_heure_fin'
+  | 'niveau'
+  | 'chapitre'
+  | 'parties'
+  | 'generateurs'
+  | 'devoir'
+  | 'remarque'
+  | 'devoir_pour'
+  | 'devoir_generateurs'
+  | 'objectif'
+  | 'competences'
+  | 'evaluation_type'
+  | 'evaluation_parties'
+  | 'evaluation_evenement'
+>
 
 /* ------------------------------------------------------------------------------- textes */
 
@@ -384,6 +427,8 @@ export interface ErreursSeance {
   chapitre?: string
   devoir?: string
   remarque?: string
+  devoirPour?: string
+  objectif?: string
 }
 
 export function erreursSeance(s: SaisieSeance): ErreursSeance {
@@ -403,6 +448,11 @@ export function erreursSeance(s: SaisieSeance): ErreursSeance {
   if (!s.niveau || !s.chapitre) e.chapitre = 'Choisis le chapitre.'
   if (s.devoir.length > DEVOIR_MAX) e.devoir = `Devoir trop long : ${DEVOIR_MAX} caractères maximum.`
   if (s.remarque.length > REMARQUE_MAX) e.remarque = `Remarque trop longue : ${REMARQUE_MAX} caractères maximum.`
+  const pour = s.devoir_pour ? partiesDate(s.devoir_pour) : null
+  if (s.devoir_pour && (!pour || pour.a < 2000 || pour.a > 2100)) e.devoirPour = 'Date de remise illisible.'
+  else if (s.devoir_pour && s.devoir_pour < s.date_seance) e.devoirPour = 'Le devoir est à rendre après la séance : choisis une date qui suit.'
+  else if (s.devoir_pour && d && Date.parse(s.devoir_pour) - Date.parse(s.date_seance.slice(0, 10)) > 366 * 86_400_000) e.devoirPour = 'Date de remise trop lointaine (un an au plus).'
+  if ((s.objectif ?? '').length > OBJECTIF_MAX) e.objectif = `Objectif trop long : ${OBJECTIF_MAX} caractères maximum.`
   return e
 }
 

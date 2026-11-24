@@ -611,24 +611,21 @@ export const deriveesApplications: ChapterContent = {
           ],
         },
         {
-          kind: 'featureTable',
-          headers: ['', 'Taux de variation entre a et a + h', 'Nombre dérivé f′(a)'],
-          rows: [
-            [
-              'Définition',
-              '$\\dfrac{f(a+h)-f(a)}{h}$',
-              '$\\displaystyle\\lim_{h \\to 0} \\dfrac{f(a+h)-f(a)}{h}$',
-            ],
-            [
-              'Lecture graphique',
-              'pente de la sécante (AB), A(a;f(a)) et B(a+h;f(a+h))',
-              'pente de la tangente en A — limite de la sécante (AB) quand B glisse vers A',
-            ],
-            [
-              'Lecture physique',
-              'vitesse MOYENNE de variation entre les instants a et a+h',
-              'vitesse INSTANTANÉE de variation à l\'instant a (voir section 11)',
-            ],
+          kind: 'definition',
+          label: 'Taux de variation (moyen, entre deux points)',
+          items: [
+            '**Définition** : $\\dfrac{f(a+h)-f(a)}{h}$',
+            '**Lecture graphique** : pente de la sécante $(AB)$, avec $A(a\\,;f(a))$ et $B(a+h\\,;f(a+h))$.',
+            '**Lecture physique** : vitesse **moyenne** de variation entre les instants $a$ et $a+h$.',
+          ],
+        },
+        {
+          kind: 'definition',
+          label: 'Nombre dérivé (instantané, en un point)',
+          items: [
+            '**Définition** : $f\'(a) = \\displaystyle\\lim_{h \\to 0} \\dfrac{f(a+h)-f(a)}{h}$',
+            '**Lecture graphique** : pente de la tangente en $A$ — la limite de la sécante $(AB)$ quand $B$ glisse vers $A$.',
+            '**Lecture physique** : vitesse **instantanée** de variation à l\'instant $a$ (voir section 11).',
           ],
         },
         {
@@ -636,10 +633,10 @@ export const deriveesApplications: ChapterContent = {
           label: 'Unité et signe d\'un taux de variation',
           text:
             'Un taux de variation (moyen ou instantané) est un quotient : il s\'exprime dans ' +
-            'l\'unité de f **par** unité de la variable — °C/h pour une température en fonction du ' +
+            'l\'unité de $f$ **par** unité de la variable — °C/h pour une température en fonction du ' +
             'temps en heures, m/s pour une position en mètres, €/pièce pour un bénéfice. Le **signe** ' +
-            'de f\'(a) dit si la grandeur augmente (f\'(a) > 0) ou diminue (f\'(a) < 0) à l\'instant a ; ' +
-            'f\'(a) n\'est ni la valeur f(a) de la grandeur, ni sa variation moyenne sur un intervalle.',
+            'de $f\'(a)$ dit si la grandeur augmente ($f\'(a) > 0$) ou diminue ($f\'(a) < 0$) à l\'instant $a$ ; ' +
+            '$f\'(a)$ n\'est ni la valeur $f(a)$ de la grandeur, ni sa variation moyenne sur un intervalle.',
         },
         {
           kind: 'exemple',

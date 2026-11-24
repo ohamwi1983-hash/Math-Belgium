@@ -20,6 +20,8 @@ import { classesTouchees, concerne, dateCourteJour, evenementsEntre, resumeSuppr
 import { PuceType } from './AgendaUi'
 import { useCarnet } from './contexteCarnet'
 import { titreChapitre } from './HeuresEffectives'
+import { ListeARendre } from './DevoirsARendre'
+import { devoirsEntre } from '../../lib/carnetDevoirs'
 
 const RACCOURCIS: Raccourci[] = ['semaine', 'mois', 'rentree', 'dernierConge']
 const TOUTES = '*'
@@ -231,6 +233,8 @@ export function AgendaPeriode({
       {texteManuel !== null && (
         <textarea className="carnet-texte-copie" readOnly rows={10} value={texteManuel} onFocus={(e) => e.currentTarget.select()} aria-label="Agenda pour Smartschool" />
       )}
+
+      {ctx.devoirs && !erreurDates && <ListeARendre seances={devoirsEntre(seances, du, au, classeId)} titre="Devoirs à rendre de la période" avecClasse={!classeId} avecDate idTitre={`${id}-devoirs`} />}
 
       {ctx.agenda.actif && !erreurDates && (
         <section className="agenda-periode-evenements" aria-labelledby={`${id}-evs`}>

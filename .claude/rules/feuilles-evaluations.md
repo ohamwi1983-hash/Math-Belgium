@@ -244,6 +244,34 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
   toute l'évaluation ») et les rangées gardent « — demande une calculatrice ». Choix : le bouton ne
   bascule PAS le réglage d'office — il vaut pour toute l'évaluation (« autorisée » ne tire plus que
   des cas qui exigent la calculatrice, dans tous les générateurs).
+- **Variante exclue parce qu'elle se fait sans calculatrice** (décision de l'utilisateur, 24/11/2026,
+  symétrique de la puce précédente) : en « calculatrice AUTORISÉE », une variante dont AUCUN tirage n'est
+  autre que `calcul: 'exacte'` (`tirageInstance.ts::varianteToujoursExacte` : au plus 100 tirages / 25 ms,
+  au moins 60, en cache — mesuré sur les 1 368 variantes profilées : une variante qui a des instances non
+  exactes en a au moins 15,7 %, risque d'erreur < 4·10⁻⁸ ; générateur sans `profilInstance` : jamais ;
+  groupe à verdict : seulement si tous ses membres le sont) est EXCLUE : rangée grisée « se fait sans
+  calculatrice » (« sans calculatrice » quand d'autres variantes du générateur restent), raison ET
+  solution « Se fait sans calculatrice (« … ») : passe la calculatrice à « Interdite » (en haut) pour
+  l'utiliser. », même bouton « Aller au réglage » (défilement, focus, surlignage 2,6 s, réglage NON
+  basculé) ; toutes les variantes concernées → une seule note en tête du générateur (« … : toutes ses
+  variantes se font sans calculatrice… ») ; espaces insécables dans les guillemets (aussi dans les textes
+  « demande une calculatrice »). Jamais tirée : `construireItemsPayload` la retire (pas de palier de repli
+  qui la ressortirait), `construirePlan` ne tire pas un membre toujours exact d'un groupe à verdict
+  (`membresTirables`, « autorisée » seulement), « Préparer » (`composer.ts::variantesComposables`) ne la
+  choisit pas. Plan qui l'avait déjà (choisie avant de basculer, plan rechargé) : rangée grisée sans
+  « ×n », hors du compte et des points, elle revient telle quelle si le réglage repasse à « Interdite »
+  (même choix que « demande une calculatrice »). Examen : même règle (mêmes items). Remédiation d'une
+  ancienne évaluation qui la contenait : la question est reprise (palier de repli du moteur), comme pour
+  « demande une calculatrice » — une évaluation créée depuis ne peut plus la contenir. Mesuré (24/11) :
+  23 chapitres, une question par variante, 2 séries, évaluation ET examen : 178 variantes exclues
+  (35 générateurs entiers), 0 dans les items, 5 508 instances tirées en « autorisée » → 0 `exacte` ;
+  « interdite » : mêmes plans qu'avant (même `Math.random`, export de `d3f7394`) à l'aléa près des
+  recherches bornées par le temps — accord élément par élément 79 % avant / après contre 83 % entre deux
+  passes du code d'avant, structure (générateur + variante) identique dans 22 / 23 chapitres dans les
+  deux comparaisons. Playwright (build de test, faux client, 1 280 px et iPhone 13, 4e ch. 5, 6e ch. 3,
+  6e ch. 4) : 82 vérifications, 0 erreur console. Revue des profils `calcul` (quels exercices marquer
+  `exacte` selon le critère « la calculatrice donne directement la réponse ») : liste soumise à
+  l'utilisateur, rien de changé.
 - Recherche de graine bornée par le temps (200 ms par palier) : les cas rares (σ entier, combinaison
   précise de paramètres) sont trouvés sans bloquer le panneau. Un cas particulier va sur la DERNIÈRE
   question de la ligne qui peut le recevoir (cas propre à une seule variante).

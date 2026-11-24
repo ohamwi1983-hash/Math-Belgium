@@ -42,6 +42,10 @@ retirés, voir `.claude/rules/content-history.md`) — via `src/lib/export/` :
 - `downloadBlob.ts` — téléchargement natif du navigateur (`URL.createObjectURL` + `<a download>`).
 - `buildHtmlBlob` est chargé à la demande (`import()` dynamique dans `runExport.ts`), pas au
   chargement de la page.
+- Exception : le mode « Projeter en classe » a son propre « Télécharger en PowerPoint »
+  (`lib/projection/exportPptx.tsx`, `pptxgenjs`), qui réutilise `toutesLesReglesCss` /
+  `retirerPreferenceSombre` / `inlinerPolices` de `buildHtml.ts` (exportées pour lui) — voir
+  `chapter-components.md`, « Mode projection ». L'export du CHAPITRE reste HTML seulement.
 
 ## Impression des chapitres (bouton « Imprimer », Ctrl+P, fichier « Télécharger ce chapitre »)
 
