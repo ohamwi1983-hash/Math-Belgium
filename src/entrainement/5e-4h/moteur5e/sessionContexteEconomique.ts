@@ -13,6 +13,7 @@ import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { ecranApres, ecranInitial, indexIteration } from "./typesContexteEconomique";
 import type { EcranContexteEconomique, EtatSessionContexteEconomique, ResultatExerciceContexteEconomique } from "./typesContexteEconomique";
 import type { ReponseEgaliteMarginales, ReponseIterationDichotomie, ReponseTableauSigneBenefice } from "./verificationContexteEconomique";
+import type { StatutVerification } from "../moteur/statutVerification";
 import {
   diagnostiquerBeneficeDerivee,
   diagnostiquerBeneficeFormule,
@@ -27,6 +28,13 @@ import {
   diagnostiquerRacineApprochee,
   diagnostiquerRecetteMarginale,
   diagnostiquerRecetteTotale,
+  diagnostiquerMinimumQ,
+  diagnostiquerMinimumValeur,
+  diagnostiquerRacineMarginale,
+  diagnostiquerRacineRetenue,
+  diagnostiquerMilieuIteration,
+  diagnostiquerBPrimePointTest,
+  valeursBPrimePointsTest,
   choixIterationErrone,
   verifierEgaliteMarginales,
   verifierIterationDichotomie,
@@ -74,8 +82,10 @@ function cloturerExerciceOuSuivant(etat: EtatSessionContexteEconomique, resultat
 
 /** `choixFermeErrone` : un choix fermé (boutons) faux clôt l'écran tout de suite — un seul essai sur
  * un choix qui se gagnerait par élimination (audit 5e ch. 5, point 11). */
-function soumettreEcran<T>(etat: EtatSessionContexteEconomique, ecranAttendu: EcranContexteEconomique, reponse: T, verifier: (r: T) => boolean, choixFermeErrone = false): EtatSessionContexteEconomique {
+function soumettreEcran<T>(etat: EtatSessionContexteEconomique, ecranAttendu: EcranContexteEconomique, reponse: T, verifier: (r: T) => boolean, choixFermeErrone = false, statuts: StatutVerification[] = []): EtatSessionContexteEconomique {
   if (etat.terminee || etat.phase !== ecranAttendu) throw new Error(`soumettreEcran : la session n'est pas à l'écran "${ecranAttendu}"`);
+  // Lot B : une saisie illisible est refusée sans tentative (état inchangé).
+  if (statuts.includes("parse_error")) return etat;
 
   const reglages = reglagesEtape(etat);
   const etapeCourante = soumettreEtapeTentatives<T>(etat.etapeCourante, reponse, {
@@ -109,15 +119,15 @@ function exerciceA(etat: EtatSessionContexteEconomique) {
 }
 
 export function soumettreReponseCoutMarginalDiscret(etat: EtatSessionContexteEconomique, texte: string): EtatSessionContexteEconomique {
-  return soumettreEcran(etat, "coutMarginalDiscret", texte, (t) => diagnostiquerCoutMarginalDiscret(t, exerciceA(etat)) === "correct");
+  return soumettreEcran(etat, "coutMarginalDiscret", texte, (t) => diagnostiquerCoutMarginalDiscret(t, exerciceA(etat)) === "correct", false, [diagnostiquerCoutMarginalDiscret(texte, exerciceA(etat))]);
 }
 
 export function soumettreReponseDeriveeSymbolique(etat: EtatSessionContexteEconomique, texte: string): EtatSessionContexteEconomique {
-  return soumettreEcran(etat, "deriveeSymbolique", texte, (t) => diagnostiquerDeriveeSymboliqueA(t, exerciceA(etat)) === "correct");
+  return soumettreEcran(etat, "deriveeSymbolique", texte, (t) => diagnostiquerDeriveeSymboliqueA(t, exerciceA(etat)) === "correct", false, [diagnostiquerDeriveeSymboliqueA(texte, exerciceA(etat))]);
 }
 
 export function soumettreReponseDeriveeValeur(etat: EtatSessionContexteEconomique, texte: string): EtatSessionContexteEconomique {
-  return soumettreEcran(etat, "deriveeValeur", texte, (t) => diagnostiquerDeriveeValeur(t, exerciceA(etat)) === "correct");
+  return soumettreEcran(etat, "deriveeValeur", texte, (t) => diagnostiquerDeriveeValeur(t, exerciceA(etat)) === "correct", false, [diagnostiquerDeriveeValeur(texte, exerciceA(etat))]);
 }
 
 export function soumettreReponseComparaisonEcart(etat: EtatSessionContexteEconomique, reponse: { ecartAbsolu: string; ecartPourcent: string }): EtatSessionContexteEconomique {
@@ -126,13 +136,15 @@ export function soumettreReponseComparaisonEcart(etat: EtatSessionContexteEconom
     "comparaisonEcart",
     reponse,
     (r) => diagnostiquerEcartAbsolu(r.ecartAbsolu, exerciceA(etat)) === "correct" && diagnostiquerEcartPourcent(r.ecartPourcent, exerciceA(etat)) === "correct",
+    false,
+    [diagnostiquerEcartAbsolu(reponse.ecartAbsolu, exerciceA(etat)), diagnostiquerEcartPourcent(reponse.ecartPourcent, exerciceA(etat))],
   );
 }
 
 /** Écran "extremum" (identifiant conservé) : coût moyen minimal (degré 2) ou coût marginal minimal
  * (degré 3). */
 export function soumettreReponseMinimum(etat: EtatSessionContexteEconomique, reponse: { q: string; valeur: string }): EtatSessionContexteEconomique {
-  return soumettreEcran(etat, "extremum", reponse, (r) => verifierMinimum(r, exerciceA(etat)));
+  return soumettreEcran(etat, "extremum", reponse, (r) => verifierMinimum(r, exerciceA(etat)), false, [diagnostiquerMinimumQ(reponse.q, exerciceA(etat)), diagnostiquerMinimumValeur(reponse.valeur, exerciceA(etat))]);
 }
 
 // ============================================================================
@@ -146,7 +158,7 @@ function exerciceB(etat: EtatSessionContexteEconomique) {
 }
 
 export function soumettreReponseRecetteTotale(etat: EtatSessionContexteEconomique, texte: string): EtatSessionContexteEconomique {
-  return soumettreEcran(etat, "recetteTotale", texte, (t) => diagnostiquerRecetteTotale(t, exerciceB(etat)) === "correct");
+  return soumettreEcran(etat, "recetteTotale", texte, (t) => diagnostiquerRecetteTotale(t, exerciceB(etat)) === "correct", false, [diagnostiquerRecetteTotale(texte, exerciceB(etat))]);
 }
 
 export function soumettreReponseMarginales(etat: EtatSessionContexteEconomique, reponse: { coutMarginal: string; recetteMarginale: string }): EtatSessionContexteEconomique {
@@ -155,27 +167,30 @@ export function soumettreReponseMarginales(etat: EtatSessionContexteEconomique, 
     "marginales",
     reponse,
     (r) => diagnostiquerCoutMarginalB(r.coutMarginal, exerciceB(etat)) === "correct" && diagnostiquerRecetteMarginale(r.recetteMarginale, exerciceB(etat)) === "correct",
+    false,
+    [diagnostiquerCoutMarginalB(reponse.coutMarginal, exerciceB(etat)), diagnostiquerRecetteMarginale(reponse.recetteMarginale, exerciceB(etat))],
   );
 }
 
 export function soumettreReponseEgaliteMarginales(etat: EtatSessionContexteEconomique, reponse: ReponseEgaliteMarginales): EtatSessionContexteEconomique {
-  return soumettreEcran(etat, "resoudreEgaliteMarginales", reponse, (r) => verifierEgaliteMarginales(r, exerciceB(etat)));
+  return soumettreEcran(etat, "resoudreEgaliteMarginales", reponse, (r) => verifierEgaliteMarginales(r, exerciceB(etat)), false, [...reponse.racines.map((t) => diagnostiquerRacineMarginale(t, exerciceB(etat))), diagnostiquerRacineRetenue(reponse.retenue, exerciceB(etat))]);
 }
 
 export function soumettreReponseBeneficeFormule(etat: EtatSessionContexteEconomique, texte: string): EtatSessionContexteEconomique {
-  return soumettreEcran(etat, "beneficeFormule", texte, (t) => diagnostiquerBeneficeFormule(t, exerciceB(etat)) === "correct");
+  return soumettreEcran(etat, "beneficeFormule", texte, (t) => diagnostiquerBeneficeFormule(t, exerciceB(etat)) === "correct", false, [diagnostiquerBeneficeFormule(texte, exerciceB(etat))]);
 }
 
 export function soumettreReponseBeneficeDerivee(etat: EtatSessionContexteEconomique, texte: string): EtatSessionContexteEconomique {
-  return soumettreEcran(etat, "beneficeDerivee", texte, (t) => diagnostiquerBeneficeDerivee(t, exerciceB(etat)) === "correct");
+  return soumettreEcran(etat, "beneficeDerivee", texte, (t) => diagnostiquerBeneficeDerivee(t, exerciceB(etat)) === "correct", false, [diagnostiquerBeneficeDerivee(texte, exerciceB(etat))]);
 }
 
 export function soumettreReponseTableauSigneBenefice(etat: EtatSessionContexteEconomique, reponse: ReponseTableauSigneBenefice): EtatSessionContexteEconomique {
-  return soumettreEcran(etat, "tableauSigneBenefice", reponse, (r) => verifierTableauSigneBenefice(r, exerciceB(etat)));
+  const v = valeursBPrimePointsTest(exerciceB(etat));
+  return soumettreEcran(etat, "tableauSigneBenefice", reponse, (r) => verifierTableauSigneBenefice(r, exerciceB(etat)), false, [diagnostiquerBPrimePointTest(reponse.avant, v.avant), diagnostiquerBPrimePointTest(reponse.apres, v.apres)]);
 }
 
 export function soumettreReponseBeneficeMaximum(etat: EtatSessionContexteEconomique, texte: string): EtatSessionContexteEconomique {
-  return soumettreEcran(etat, "beneficeMaximum", texte, (t) => diagnostiquerBeneficeMaximum(t, exerciceB(etat)) === "correct");
+  return soumettreEcran(etat, "beneficeMaximum", texte, (t) => diagnostiquerBeneficeMaximum(t, exerciceB(etat)) === "correct", false, [diagnostiquerBeneficeMaximum(texte, exerciceB(etat))]);
 }
 
 // ============================================================================
@@ -189,15 +204,15 @@ function exerciceBonus(etat: EtatSessionContexteEconomique) {
 }
 
 export function soumettreReponsePoserEquationReduite(etat: EtatSessionContexteEconomique, texte: string): EtatSessionContexteEconomique {
-  return soumettreEcran(etat, "poserEquationReduite", texte, (t) => diagnostiquerEquationReduite(t, exerciceBonus(etat)) === "correct");
+  return soumettreEcran(etat, "poserEquationReduite", texte, (t) => diagnostiquerEquationReduite(t, exerciceBonus(etat)) === "correct", false, [diagnostiquerEquationReduite(texte, exerciceBonus(etat))]);
 }
 
 export function soumettreReponseIteration(etat: EtatSessionContexteEconomique, reponse: ReponseIterationDichotomie): EtatSessionContexteEconomique {
   const ecran = etat.phase;
   const index = indexIteration(ecran);
-  return soumettreEcran(etat, ecran, reponse, (r) => verifierIterationDichotomie(r, exerciceBonus(etat), index), choixIterationErrone(reponse, exerciceBonus(etat), index));
+  return soumettreEcran(etat, ecran, reponse, (r) => verifierIterationDichotomie(r, exerciceBonus(etat), index), choixIterationErrone(reponse, exerciceBonus(etat), index), [diagnostiquerMilieuIteration(reponse.milieu, exerciceBonus(etat).iterations[index].milieu)]);
 }
 
 export function soumettreReponseRacineApprochee(etat: EtatSessionContexteEconomique, texte: string): EtatSessionContexteEconomique {
-  return soumettreEcran(etat, "racineApprochee", texte, (t) => diagnostiquerRacineApprochee(t, exerciceBonus(etat)) === "correct");
+  return soumettreEcran(etat, "racineApprochee", texte, (t) => diagnostiquerRacineApprochee(t, exerciceBonus(etat)) === "correct", false, [diagnostiquerRacineApprochee(texte, exerciceBonus(etat))]);
 }

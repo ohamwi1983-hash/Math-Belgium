@@ -72,12 +72,12 @@ function egalOuEnviron(v: number): string {
 
 export function consigneGenerale(exercice: ExerciceContexteEconomique): string {
   if (exercice.famille === "A") {
-    return "Une entreprise fabrique $q$ unités d'un produit ; son coût total de production, en euros, vaut $C_T(q)$. Le coût marginal en $q_0$ (coût de l'unité supplémentaire) peut s'estimer de deux façons : par la différence $C_T(q_0+1)-C_T(q_0)$, ou par la dérivée $C'_T(q_0)$.";
+    return "Une entreprise fabrique $q$ centaines d'unités d'un produit ; son coût total de production, en euros, vaut $C_T(q)$. Le coût marginal en $q_0$ (coût de la centaine supplémentaire) peut s'estimer de deux façons : par la différence $C_T(q_0+1)-C_T(q_0)$, ou par la dérivée $C'_T(q_0)$.";
   }
   if (exercice.famille === "B") {
     return "Une entreprise fabrique et vend $x$ centaines d'objets. Le prix de vente unitaire $p(x)$, en euros, diminue quand la quantité augmente ; le coût total de production vaut $C_T(x)$, en centaines d'euros. La recette totale est $R_T(x)=x\\cdot p(x)$ et le bénéfice $B(x)=R_T(x)-C_T(x)$.";
   }
-  return "Une entreprise fabrique $q$ unités ; son coût total vaut $C_T(q)$ euros. Le coût moyen $C_M(q)=\\dfrac{C_T(q)}{q}$ est minimal quand il est égal au coût marginal $C'_T(q)$. Cette condition mène à une équation qu'on ne sait pas résoudre exactement : on approche sa solution par dichotomie.";
+  return "Une entreprise fabrique $q$ centaines d'unités ; son coût total vaut $C_T(q)$ euros. Le coût moyen $C_M(q)=\\dfrac{C_T(q)}{q}$ est minimal quand il est égal au coût marginal $C'_T(q)$. Cette condition mène à une équation qu'on ne sait pas résoudre exactement : on approche sa solution par dichotomie.";
 }
 
 export function questionFinale(exercice: ExerciceContexteEconomique): string {
@@ -248,14 +248,22 @@ export function texteAideNiveau1(ecran: EcranContexteEconomique, exercice?: Exer
 
 export function texteAideNiveau2(exercice: ExerciceContexteEconomique, ecran: EcranContexteEconomique): AideFragmentee {
   switch (ecran) {
-    case "coutMarginalDiscret":
-      return { texte: "Exemple :", latex: "C_T(q)=q^2+3q+10 \\;\\Rightarrow\\; C_T(3)-C_T(2)=28-20=8" };
-    case "deriveeSymbolique":
-      return { texte: "Exemple :", latex: "C_T(q)=q^2+3q+10 \\;\\Rightarrow\\; C'_T(q)=2q+3" };
-    case "deriveeValeur":
-      return { texte: "Exemple :", latex: "C'_T(q)=2q+3,\\ q_0=2 \\;\\Rightarrow\\; C'_T(2)=7" };
-    case "comparaisonEcart":
-      return { texte: "Exemple :", latex: "8 \\text{ et } 7 \\;\\Rightarrow\\; \\text{écart absolu}=1,\\ \\text{écart en \\%}=\\dfrac{1}{7}\\times100\\approx14{,}29\\ \\%" };
+    case "coutMarginalDiscret": {
+      const ex = exercice as ExerciceContexteEconomiqueA;
+      return { texte: "Calcule ces deux coûts totaux avec les données, puis leur différence :", latex: `C_T(${ex.q0 + 1})-C_T(${ex.q0})` };
+    }
+    case "deriveeSymbolique": {
+      const ex = exercice as ExerciceContexteEconomiqueA;
+      return { texte: "Dérive chaque terme de C_T ; le coût fixe (la constante) disparaît :", latex: `C_T(q)=${formatCoutTotalLatex(ex.coutTotal, "q")}` };
+    }
+    case "deriveeValeur": {
+      const ex = exercice as ExerciceContexteEconomiqueA;
+      return { texte: "Remplace q par q₀ dans la dérivée trouvée à l'écran précédent :", latex: `C'_T(q)=${formatDeriveeCoutTotalLatex(ex.coutTotal, "q")},\\quad q_0=${ex.q0}` };
+    }
+    case "comparaisonEcart": {
+      const ex = exercice as ExerciceContexteEconomiqueA;
+      return { texte: "Avec tes deux estimations (la dérivée sert de référence) :", latex: `\\left|${formatNombreLatex(ex.cmDiscret)}-${formatNombreLatex(ex.cmDerivee)}\\right|\\quad\\text{puis}\\quad\\dfrac{\\text{écart}}{${formatNombreLatex(ex.cmDerivee)}}\\times 100` };
+    }
     case "extremum": {
       const ex = exercice as ExerciceContexteEconomiqueA;
       if (ex.minimum.grandeur === "coutMarginal") {
@@ -264,29 +272,36 @@ export function texteAideNiveau2(exercice: ExerciceContexteEconomique, ecran: Ec
       const c = ex.coutTotal;
       return { texte: "Avec les données :", latex: `C_M(q)=${c.a === 1 ? "" : c.a}q+${c.b}+\\dfrac{${c.degre === 2 ? c.c : 0}}{q}` };
     }
-    case "recetteTotale":
-      return { texte: "Exemple :", latex: "p(x)=50-2x \\;\\Rightarrow\\; R_T(x)=(50-2x)\\,x=50x-2x^2" };
-    case "marginales":
-      return { texte: "Exemple :", latex: "C_T(x)=x^3+2x+5,\\ R_T(x)=50x-2x^2 \\;\\Rightarrow\\; C'_T(x)=3x^2+2,\\ R'_T(x)=50-4x" };
+    case "recetteTotale": {
+      const ex = exercice as ExerciceContexteEconomiqueB;
+      return { texte: "La recette est la quantité multipliée par le prix ; développe :", latex: `R_T(x)=x\\cdot\\left(${formatPolynomeVarLatex([ex.k, ex.m], "x")}\\right)` };
+    }
+    case "marginales": {
+      const ex = exercice as ExerciceContexteEconomiqueB;
+      return { texte: "Dérive chacune terme à terme :", latex: `C_T(x)=${formatCoutTotalLatex({ degre: 3, a: ex.a, b: ex.b, c: ex.c, d: ex.d }, "x")},\\quad R_T(x)=${formatPolynomeVarLatex([0, ex.k, ex.m], "x")}` };
+    }
     case "resoudreEgaliteMarginales": {
       const ex = exercice as ExerciceContexteEconomiqueB;
       return { texte: "Avec les données, l'égalité s'écrit :", latex: `${formatPolynomeVarLatex([ex.c, 2 * ex.b, 3 * ex.a], "x")}=${formatPolynomeVarLatex([ex.k, 2 * ex.m], "x")}` };
     }
-    case "beneficeFormule":
-      return { texte: "Exemple :", latex: "R_T(x)=50x-2x^2,\\ C_T(x)=x^3+2x+5 \\;\\Rightarrow\\; B(x)=-x^3-2x^2+48x-5" };
-    case "beneficeDerivee":
-      return { texte: "Exemple :", latex: "B(x)=-x^3-2x^2+48x-5 \\;\\Rightarrow\\; B'(x)=-3x^2-4x+48" };
+    case "beneficeFormule": {
+      const ex = exercice as ExerciceContexteEconomiqueB;
+      return { texte: "Retire TOUT le coût (parenthèses), puis réduis :", latex: `B(x)=\\left(${formatPolynomeVarLatex([0, ex.k, ex.m], "x")}\\right)-\\left(${formatCoutTotalLatex({ degre: 3, a: ex.a, b: ex.b, c: ex.c, d: ex.d }, "x")}\\right)` };
+    }
+    case "beneficeDerivee": {
+      const ex = exercice as ExerciceContexteEconomiqueB;
+      return { texte: "Dérive terme à terme le bénéfice trouvé à l'écran précédent :", latex: `B(x)=${formatPolynomeVarLatex([-ex.d, ex.k - ex.c, ex.m - ex.b, -ex.a], "x")}` };
+    }
     case "tableauSigneBenefice":
       return { texte: "Si B' est positive avant la quantité retenue et négative après, B croît puis décroît : le bénéfice y est maximal.", latex: null };
     case "confirmationCoherence":
       return { texte: "C'est toujours le cas :", latex: "B'(x)=R'_T(x)-C'_T(x)" };
     case "beneficeMaximum":
       return { texte: "Calcule séparément la recette et le coût pour cette quantité, puis fais la différence.", latex: null };
-    case "poserEquationReduite":
-      return {
-        texte: "Exemple :",
-        latex: "C_T(q)=q^3+2q^2+4q+5 \\;\\Rightarrow\\; P(q)=q(3q^2+4q+4)-(q^3+2q^2+4q+5)=2q^3+2q^2-5",
-      };
+    case "poserEquationReduite": {
+      const ex = exercice as ExerciceContexteEconomiqueBonus;
+      return { texte: "Avec les données, développe puis réduis :", latex: `P(q)=q\\left(${formatDeriveeCoutTotalLatex(ex.coutTotal, "q")}\\right)-\\left(${formatCoutTotalLatex(ex.coutTotal, "q")}\\right)` };
+    }
     case "iteration0":
     case "iteration1":
     case "iteration2":
@@ -337,7 +352,7 @@ function formatReponseAttendueA(exercice: ExerciceContexteEconomiqueA, ecran: Ec
     case "extremum": {
       const { q, valeur, grandeur } = exercice.minimum;
       const nom = grandeur === "coutMoyen" ? `C_M` : `C'_T`;
-      return [`q${egalOuEnviron(q)}${formatCentiemeLatex(q)}`, `${nom}(q)_{\\min}${egalOuEnviron(valeur)}${formatCentiemeLatex(valeur)}`];
+      return [`q${egalOuEnviron(q)}${formatCentiemeLatex(q)}\\ \\text{centaines}`, `${nom}(q)_{\\min}${egalOuEnviron(valeur)}${formatCentiemeLatex(valeur)}`];
     }
     default:
       return [];
@@ -357,13 +372,13 @@ function formatReponseAttendueB(exercice: ExerciceContexteEconomiqueB, ecran: Ec
     case "marginales":
       return [`C'_T(x)=${CmLatex}`, `R'_T(x)=${RmLatex}`];
     case "resoudreEgaliteMarginales":
-      return [`x=${exercice.xOpt} \\text{ (retenue)}`, `x=${exercice.xNeg} \\text{ (rejetée : quantité négative)}`];
+      return [`x=${exercice.xOpt} \\text{ (retenue)}`, `x=${exercice.xNeg}\\ \\text{(rejetée, négative)}`];
     case "beneficeFormule":
       return [`B(x)=${BLatex}`];
     case "beneficeDerivee":
       return [`B'(x)=${BPrimeLatex}`];
     case "tableauSigneBenefice":
-      return [`B'(${exercice.pointTestAvant})=${bPrime(exercice.pointTestAvant)}>0`, `B'(${exercice.pointTestApres})=${bPrime(exercice.pointTestApres)}<0`, `\\text{B croît puis décroît : maximum en } x=${exercice.xOpt}`];
+      return [`B'(${exercice.pointTestAvant})=${bPrime(exercice.pointTestAvant)}>0`, `B'(${exercice.pointTestApres})=${bPrime(exercice.pointTestApres)}<0`, `\\text{maximum en }x=${exercice.xOpt}`];
     case "confirmationCoherence":
       return [`\\text{oui, même } x=${exercice.xOpt}`];
     case "beneficeMaximum":

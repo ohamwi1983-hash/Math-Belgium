@@ -69,7 +69,7 @@ function etapesA(e: ExerciceContexteEconomiqueA, l: (x: EcranContexteEconomique)
   // a) différence
   const la = l("coutMarginalDiscret");
   out.push(
-    utilise(la, [t("Le coût de l'unité supplémentaire se lit comme une différence de deux coûts totaux : "), f("C_T(q_0+1)-C_T(q_0)"), t(" "), t(COURS_ECONOMIQUE), t(".")]),
+    utilise(la, [t("Le coût de la centaine supplémentaire se lit comme une différence de deux coûts totaux : "), f("C_T(q_0+1)-C_T(q_0)"), t(" "), t(COURS_ECONOMIQUE), t(".")]),
     calcul(la, v1.lignes, [], `En q = ${q0 + 1}`),
     calcul(la, v0.lignes, [], `En q = ${q0}`),
     calcul(la, [ligne(`C_T(${q0 + 1})-C_T(${q0})=${v1.valeur}-${v0.valeur}`, "on soustrait"), ligne(`=${v1.valeur - v0.valeur}`)], [], "Différence"),

@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import type { AideTrig } from "../ui5e/aidesTrigonometrie";
+import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 import type { ExerciceContexteEconomique } from "../core5e/contexteEconomique.types";
 import type { EcranContexteEconomique } from "../moteur5e/typesContexteEconomique";
-import { consigneEcranRiche, consigneGenerale, formatTermesDonneesLatex, questionFinale, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatContexteEconomique";
+import { consigneEcranRiche, consigneGenerale, formatTermesDonneesLatex, questionFinale } from "../ui5e/formatContexteEconomique";
 import { Katex } from "../components/Katex";
 import { TexteRiche5e } from "./TexteRiche5e";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -33,6 +33,12 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Message ciblé sur l'erreur trahie par la dernière réponse fausse (lot B). */
+  cible?: (valeurs: string[]) => FragmentConsigne[] | null;
+  /** Aides à deux niveaux (niveau 2 posé pour l'instance). */
+  aides: AideTrig[];
+  /** Message d'illisible par nature de champ (déjà terminé par « … ne compte pas comme une tentative. »). */
+  texteIllisible?: string;
 }
 
 /** Écran générique "N champs NUMÉRIQUES" — réutilisé par tous les écrans à réponse chiffrée de
@@ -51,17 +57,15 @@ export function EtapeChampsNumeriquesCE({
   onActiverAide,
   onValider,
   diagnostiquer,
-  validation,
-}: Props) {
+  validation, cible, aides, texteIllisible }: Props) {
   const nb = labels.length;
   const [valeurs, setValeurs] = useState<string[]>(() => new Array(nb).fill(""));
   useEffect(() => {
     setValeurs(new Array(nb).fill(""));
   }, [nb]);
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   /** Saisie illisible (parse_error) : signalée sans consommer de tentative (audit 5e ch. 5). */
+  const [soumises, setSoumises] = useState<string[] | null>(null);
   const [ecritureIllisible, setEcritureIllisible] = useState(false);
-  const montrerErreurs = tentativesUtilisees > 0;
   const complet = valeurs.every((v) => v.trim() !== "");
   const apresEchec = tentativesUtilisees > 0;
   const statuts = apresEchec && complet ? diagnostiquer(valeurs) : null;
@@ -77,7 +81,7 @@ export function EtapeChampsNumeriquesCE({
       return;
     }
     setEcritureIllisible(false);
-    setDernierStatut(s.find((x) => x !== "correct") ?? "correct");
+    setSoumises(valeurs);
     onValider(valeurs);
   }
 
@@ -116,48 +120,20 @@ export function EtapeChampsNumeriquesCE({
         </div>
       ))}
       <CalculatriceScientifique />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          {(() => {
-            const aide1 = texteAideNiveau1(ecran, exercice);
-            return (
-              <>
-                <p>{aide1.texte}</p>
-                {aide1.latex && <Katex expression={aide1.latex} block />}
-              </>
-            );
-          })()}
-          {niveauAide >= 2 &&
-            (() => {
-              const aide2 = texteAideNiveau2(exercice, ecran);
-              return (
-                <>
-                  <p>{aide2.texte}</p>
-                  {aide2.latex && <Katex expression={aide2.latex} block />}
-                </>
-              );
-            })()}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {ecritureIllisible && (
-          <p className="alert-error" role="alert">
-            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
-          </p>
-        )}
-        {!ecritureIllisible && montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aides}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={ecritureIllisible}
+        texteIllisible={texteIllisible ?? "Écriture non reconnue : vérifie les nombres, les parenthèses et la place de la variable. Cette saisie ne compte pas comme une tentative."}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumises !== null && tentativesUtilisees > 0 && cible ? cible(soumises) : null}
+        validation={validation}
+      />
     </div>
   );
 }
