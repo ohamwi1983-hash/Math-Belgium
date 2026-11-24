@@ -34,6 +34,7 @@ import {
 import { EtapeChampVitessePosition } from "./components5e/EtapeChampVitessePosition";
 import { EtapeResoudreVitessePosition } from "./components5e/EtapeResoudreVitessePosition";
 import { EtapeRejetVitessePosition } from "./components5e/EtapeRejetVitessePosition";
+import { messageRejetVitessePosition } from "./ui5e/retoursVitessePosition";
 import {
   formatReponseAttenduePhaseLatex,
   formatTermesDonneesLatex,
@@ -75,6 +76,7 @@ function sessionInitiale(): EtatSessionVitessePosition {
 interface TransitionEnAttente {
   etatSuivant: EtatSessionVitessePosition;
   revele: boolean;
+  messageRevele?: string | null;
 }
 
 /** Même source que `calculerRecapitulatifVitessePosition` (`etat.revelesPartiels[ecran]`, jamais
@@ -141,7 +143,7 @@ export function App5gen35() {
       if (!exerciceTermine && votreReponse !== undefined) {
         ajouterHistorique(votreReponse, nouvelEtat);
       }
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee, messageRevele: nouvelEtat.derniereEtapeRevelee && etat.phase === "rejet" ? messageRejetVitessePosition() : null });
       return;
     }
     setEtat(nouvelEtat);
@@ -178,6 +180,7 @@ export function App5gen35() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        ...(enAttente.messageRevele ? { messageRevele: enAttente.messageRevele } : {}),
         corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeVitessePosition(exercice), lettreEcranVitessePosition(exercice, etat.phase))} />,
         reponseAttendue: (
           <span className="equation-box-termes">

@@ -35,6 +35,8 @@ interface Props {
    * pas ici" (5gen25, famille A avancée). Absente par défaut, comportement historique inchangé
    * pour toute réutilisation future de ce composant sans cette option. */
   libelleOptionSupplementaire?: string;
+  /** Réponse attendue par élément : une fois l'écran clos, chaque choix est JUGÉ (✓ / ✗ + bonne lettre). */
+  reponsesAttendues?: (number | "aucune")[];
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -68,6 +70,7 @@ export function ComposantAssociation({
   texteAideNiveau1,
   aideNiveau2,
   libelleOptionSupplementaire,
+  reponsesAttendues,
   validation,
 }: Props) {
   const [choix, setChoix] = useState<ChoixLigne[]>(() => Array(nombreItems).fill(null));
@@ -88,7 +91,7 @@ export function ComposantAssociation({
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={`${consigne} ${consigneGenerale.replace(/^Associe chaque élément numéroté au candidat lettré qui lui correspond, en/, "Réponds en")}`}
         blocDonnees={
           <div className="association-candidats-grid">
             {lettres.map((lettre, j) => (
@@ -100,7 +103,6 @@ export function ComposantAssociation({
           </div>
         }
       />
-      <p className="prompt-text">{consigne}</p>
       {Array.from({ length: nombreItems }, (_, i) => (
         <div key={i} className="association-item-ligne">
           <div className="association-item-contenu">
@@ -109,7 +111,7 @@ export function ComposantAssociation({
           </div>
           <span className="select-souligne-wrap">
             <select
-              className={`ce-select${correction && correction[i] === false ? " is-erronee" : ""}`}
+              className={`ce-select${(correction && correction[i] === false) || (validation && reponsesAttendues && choix[i] !== reponsesAttendues[i]) ? " is-erronee" : ""}`}
               aria-label={`Lettre correspondant à l'élément ${i + 1}`}
               value={choix[i] ?? ""}
               disabled={!!validation}
@@ -126,6 +128,11 @@ export function ComposantAssociation({
               {libelleOptionSupplementaire && <option value="aucune">{libelleOptionSupplementaire}</option>}
             </select>
           </span>
+          {validation && reponsesAttendues && (
+            <span className={choix[i] === reponsesAttendues[i] ? "association-juge association-juge--juste" : "association-juge association-juge--faux"} role="status">
+              {choix[i] === reponsesAttendues[i] ? "✓ juste" : `✗ bonne réponse : ${reponsesAttendues[i] === "aucune" ? (libelleOptionSupplementaire ?? "aucune") : lettres[reponsesAttendues[i] as number]}`}
+            </span>
+          )}
         </div>
       ))}
       {niveauAide >= 1 && (

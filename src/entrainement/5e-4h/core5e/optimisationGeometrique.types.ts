@@ -31,7 +31,7 @@
  */
 import type { FractionExacte } from "./limites.types";
 
-export type FamilleOptimisation = "trapeze" | "cylindre" | "margesA" | "margesB" | "fenetreA" | "fenetreB" | "cubique";
+export type FamilleOptimisation = "trapeze" | "cylindre" | "margesA" | "margesB" | "fenetreA" | "fenetreB" | "cubique" | "boite";
 
 /** Valeur exacte de la forme `rationnel + coeffPi·π` — réutilisée pour toute donnée d'énoncé
  * combinant un exact rationnel et un multiple de π (volume du cylindre : rationnel=0 ; périmètre/
@@ -106,5 +106,15 @@ export interface ExerciceCubique {
   y3: number;
 }
 
-export type ExerciceOptimisation = ExerciceTrapeze | ExerciceCylindre | ExerciceMarges | ExerciceFenetre | ExerciceCubique;
+/** Famille E « boîte sans couvercle » (lot C, famille validée ; variante EN FIN de catalogue) : carré
+ * de carton de côté c, un carré de côté x découpé à chaque coin, bords relevés. V(x) = x(c − 2x)² sur
+ * 0 < x < c/2 ; V′(x) = (c − 2x)(c − 6x) ⇒ x = c/6, maximum (c multiple de 6 : optimum entier, toutes
+ * les valeurs exactes) ; x = c/2 est rejetée (hors du domaine : la boîte serait plate). */
+export interface ExerciceBoite {
+  famille: "boite";
+  /** Côté du carré de carton (cm), multiple de 6. */
+  c: number;
+}
+
+export type ExerciceOptimisation = ExerciceTrapeze | ExerciceCylindre | ExerciceMarges | ExerciceFenetre | ExerciceCubique | ExerciceBoite;
 export type GenerateurExerciceOptimisation = () => ExerciceOptimisation;

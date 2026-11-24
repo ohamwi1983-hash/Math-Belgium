@@ -320,13 +320,14 @@ function intervalleHauteurRaccord(pente: number, dx: number, rho: 1 | -1, cote: 
 const Y_MAX_POINTS = 8.5;
 const HAUTEUR_ENTRE_POINTS: [number, number] = [1.5, 4];
 
-/** Valeur dans [lo ; hi] (lo ≤ hi), sur la grille 0,5 si possible. */
+/** Valeur ENTIÈRE dans [lo ; hi] (lot C, G15 : un extremum se lit sur un nœud du quadrillage d'une
+ * unité, plus au demi-carreau) ; null si l'intervalle ne contient aucun entier (l'appelant recommence). */
 function tirerDansIntervalle(lo: number, hi: number): number | null {
   if (hi < lo) return null;
   const grille: number[] = [];
-  for (let v = Math.ceil(lo * 2) / 2; v <= hi + 1e-9; v += 0.5) grille.push(v);
+  for (let v = Math.ceil(lo - 1e-9); v <= hi + 1e-9; v += 1) grille.push(v);
   if (grille.length > 0) return grille[Math.floor(Math.random() * grille.length)];
-  return hasard(lo, hi);
+  return null;
 }
 
 /** Intervalle des valeurs y atteintes en partant de y0 dans la direction d, hauteur ∈ [hMin ; hMax]. */
@@ -383,15 +384,15 @@ export function tenterBranche(asymptotique: ExerciceLectureGraphiqueLimites, ind
   const n = natures.length;
   if (xb - xa < (n === 0 ? 0.8 : ECART_ENTRE_POINTS * (n - 1) + 2 * ECART_RACCORD_POINT)) return null;
 
-  // Abscisses des points clés : grille 0,5, à ≥ 1 des raccords, espacées d'au moins 2.
+  // Abscisses des points clés : ENTIÈRES (G15), à ≥ 1 des raccords, espacées d'au moins 2.
   const xs: number[] = [];
-  const minX = Math.ceil((xa + ECART_RACCORD_POINT) * 2) / 2;
-  const maxX = Math.floor((xb - ECART_RACCORD_POINT) * 2) / 2;
+  const minX = Math.ceil(xa + ECART_RACCORD_POINT);
+  const maxX = Math.floor(xb - ECART_RACCORD_POINT);
   for (let j = 0; j < n; j++) {
     const lo = j === 0 ? minX : xs[j - 1] + ECART_ENTRE_POINTS;
     const hi = maxX - ECART_ENTRE_POINTS * (n - 1 - j);
     if (hi < lo) return null;
-    xs.push(lo + Math.floor(Math.random() * (Math.round((hi - lo) * 2) + 1)) / 2);
+    xs.push(lo + Math.floor(Math.random() * (Math.round(hi - lo) + 1)));
   }
 
   const ys: number[] = [];

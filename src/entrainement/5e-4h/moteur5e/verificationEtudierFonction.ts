@@ -43,6 +43,7 @@ import type { TableauEtudeLocaleAttendu } from "./verificationEtudeLocale";
 import { diagnostiquerQuotient } from "./verificationAsymptoteOblique";
 import { retirerPrefixeEquation } from "./verificationLectureGraphiqueLimites";
 import { verifierSigne } from "./verificationLimites";
+import { MESSAGES_ILLISIBLE_DERIVEES, diagnostiquerNombreExact, estApprocheeDerivees, expressionLisibleDerivees, nombreIllisibleDerivees } from "./saisieDerivees";
 
 export { diagnostiquerNombre, verifierSigne, diagnostiquerQuotient, verifierEnsembleReelGuide };
 
@@ -389,19 +390,33 @@ export function pointsClesEtudierFonction(exercice: ExerciceEtudierFonction): Po
   return points.map((p) => ({ ...p, label: NOMS[p.nature] }));
 }
 
-/** Écran « coordonnées » : ordonnée exacte ou arrondie au centième. */
-export const TOLERANCE_COORDONNEE = 0.0051;
+/** Écran « coordonnées » : ordonnée EXACTE (lot C, question 4 : plus d'arrondi au centième) —
+ * « f(…) = » ou « y = » recopié toléré ; une valeur approchée est refusée SANS tentative
+ * (`refusSaisieEtudierFonction`). */
+function sansPrefixeOrdonnee(texte: string): string {
+  return retirerPrefixeEquation(texte.replace(/^\s*f\s*\([^)]*\)\s*=\s*/i, "")).trim();
+}
 
 export function diagnostiquerOrdonnee(texte: string, cible: number): StatutVerification {
-  const t = retirerPrefixeEquation(texte.replace(/^\s*f\s*\([^)]*\)\s*=\s*/i, "")).trim();
-  if (t === "" || /[a-zA-Z]/.test(t.replace(/sqrt|racine/gi, ""))) return "parse_error";
-  try {
-    const v = evaluerExpressionGenerale(t, 0);
-    if (!Number.isFinite(v)) return "parse_error";
-    return Math.abs(v - cible) <= TOLERANCE_COORDONNEE ? "correct" : "not_equivalent";
-  } catch {
-    return "parse_error";
+  return diagnostiquerNombreExact(sansPrefixeOrdonnee(texte), cible);
+}
+
+/** Saisie refusée SANS tentative (lot B) — message, ou null si la saisie est lisible. Appelé par le
+ * moteur (`sessionEtudierFonction.ts`, état inchangé) ET par l'écran (même message). */
+export function refusSaisieEtudierFonction(exercice: ExerciceEtudierFonction, ecran: "calculerFPrime" | "calculerFSeconde" | "coordonnees" | "limites", valeurs: (string | number | null)[]): string | null {
+  if (ecran === "calculerFPrime" || ecran === "calculerFSeconde") {
+    const v = String(valeurs[0] ?? "").replace(/^\s*f'{1,2}\s*\(\s*x\s*\)\s*=\s*/i, "");
+    return expressionLisibleDerivees(v) ? null : MESSAGES_ILLISIBLE_DERIVEES.expressionX;
   }
+  if (ecran === "coordonnees") {
+    const points = pointsClesEtudierFonction(exercice);
+    if (valeurs.some((v) => nombreIllisibleDerivees(sansPrefixeOrdonnee(String(v ?? ""))))) return MESSAGES_ILLISIBLE_DERIVEES.nombreExact;
+    if (valeurs.some((v, i) => points[i] && estApprocheeDerivees(sansPrefixeOrdonnee(String(v ?? "")), points[i].y))) return MESSAGES_ILLISIBLE_DERIVEES.approchee;
+    return null;
+  }
+  const slots = listeSlotsLimites(exercice);
+  const illisible = slots.some((slot, i) => (slot.kind === "infiniHorizontale" || slot.kind === "infiniOblique") && typeof valeurs[i] === "string" && diagnostiquerSlotTexteLimite(slot, valeurs[i] as string) === "parse_error");
+  return illisible ? "Écriture non reconnue : un nombre (ex. 7,5) pour une asymptote horizontale, une expression en x (ex. 5x + 12) pour une oblique. Cette saisie ne compte pas comme une tentative." : null;
 }
 
 /** Placement par tap : tolérance exprimée en PIXELS (≈ 11 px), quelle que soit la fenêtre. */

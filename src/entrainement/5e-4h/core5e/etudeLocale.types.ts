@@ -50,6 +50,10 @@ interface ExerciceEtudeLocaleCommun {
   classificationFSeconde: ClassificationInflexion[];
   /** Valeurs interdites du domaine (CE) — uniquement non vide pour `rationnelleAvecCE`. */
   exclusionsCE: number[];
+  /** Option « f′ et f″ données / à calculer » (lot C, question 3 ; réglage `derivees-a-calculer`) :
+   * vrai → l'élève calcule f′ (et f″ au niveau avancé), écrans « deriverFPrime » / « deriverFSeconde » ;
+   * absent / faux → données (défaut, comportement d'avant). */
+  deriveesACalculer?: boolean;
 }
 
 /** f(x) = a·x³+b·x²+c·x+d, construit "à l'envers" à partir des racines CHOISIES de f'(x)=0 (même

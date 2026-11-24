@@ -10,18 +10,37 @@ import type { ExerciceTangente } from "../core5e/tangentes.types";
 import type { ReglagesSession5e } from "../core5e/session5e.types";
 import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
-export type EcranTangente = "substituer" | "tangente" | "resoudre" | "coordonnees" | "tangenteEnP" | "trouverQ" | "verifierPente";
+export type EcranTangente =
+  | "deriver"
+  | "substituer"
+  | "tangente"
+  | "resoudre"
+  | "coordonnees"
+  | "tangenteEnP"
+  | "trouverQ"
+  | "verifierPente"
+  | "resoudrePente"
+  | "tangentesPente"
+  | "condition"
+  | "abscissesContact"
+  | "tangentesContact";
 
-/** Séquence COMPLÈTE et FIXE d'écrans pour une variante donnée — A : 2 écrans, B : 2 écrans
- * (nombre de champs variable mais toujours ces 2 mêmes écrans), C : 3 écrans. */
+/** Écrans de l'exercice. « deriver » en tête quand f′ est À CALCULER (option du lot C, défaut) —
+ * jamais pour la double tangence (la dérivée y est déjà un écran). Aucune tangente horizontale
+ * (Δ < 0) : l'écran « coordonnées » disparaît (l'élève a conclu « aucune solution »). */
 export function ordreEcransTangente(exercice: ExerciceTangente): EcranTangente[] {
+  const deriver: EcranTangente[] = exercice.deriveeDonnee ? [] : ["deriver"];
   switch (exercice.variante) {
     case "pointDonne":
-      return ["substituer", "tangente"];
+      return [...deriver, "substituer", "tangente"];
     case "horizontale":
-      return ["resoudre", "coordonnees"];
+      return exercice.racines.length === 0 ? [...deriver, "resoudre"] : [...deriver, "resoudre", "coordonnees"];
     case "doubleTangence":
       return ["tangenteEnP", "trouverQ", "verifierPente"];
+    case "pente":
+      return [...deriver, "resoudrePente", "coordonnees", "tangentesPente"];
+    case "pointExterieur":
+      return [...deriver, "condition", "abscissesContact", "tangentesContact"];
   }
 }
 

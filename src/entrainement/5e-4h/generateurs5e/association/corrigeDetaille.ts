@@ -6,6 +6,9 @@ import { monomesDe } from "../../ui5e/corrigeLimites";
 import { COURS_DERIVEE, COURS_SIGNE, dixiemeL, dixiemeT, f, finaliser, jf, par, sansDoublons, somme, t } from "../../ui5e/corrigeDerivees1";
 import { evaluerPolynome } from "../domaineDefinition/polynome";
 import { derivee, formeCubique } from "./index";
+import { specJustification, OPTIONS_SINGULARITE } from "../../moteur5e/justificationAssociation";
+import { consigneJustificationAssociation } from "../../ui5e/retoursAssociation";
+import { fragmentsRiches5e } from "../../ui5e/retoursDerivees";
 
 /**
  * Corrigé détaillé « comme au tableau » de 5gen25 (association graphique/mots ↔ signe de f′/f″) —
@@ -208,8 +211,60 @@ function texteParPiege(e: ExerciceAssociation): string {
   }
 }
 
+const RESUME_SINGULARITE: Record<string, string> = {
+  saute: "f'_g(a)\\neq f'_d(a)",
+  infini: "|f'(x)|\\to+\\infty",
+  discontinue: "f\\text{ non continue en }a",
+  existe: "f'(a)\\text{ existe}",
+};
+
+/** Lot C : étape « b » — justification de l'association choisie par le générateur (même spécification
+ * que l'écran : `moteur5e/justificationAssociation.ts`). */
+function etapesJustification(e: ExerciceAssociation): EtapeCorrection[] {
+  const spec = specJustification(e);
+  const k = spec.item + 1;
+  const lettre = e.famille === "grapheDeriveeAvancee" && e.singulier[spec.item] ? null : lettreDe(e, spec.item);
+  const lignes: LigneCalcul[] = [];
+  const nb = (v: number) => `${Math.round(v * 100) / 100}`.replace(".", "{,}");
+  for (const c of spec.champs) {
+    if (c.kind === "nombre") lignes.push(ligne(`${c.label}${nb(c.cible)}`, c.groupe === "extremums" ? `sommet du graphique n° ${k} : zéro de f′` : `changement de courbure du graphique n° ${k} : extremum de f′`));
+    else if (c.kind === "expression") {
+      const g = e.famille === "symbolique" ? e.gLatex[lettreCorrecte(e.ordreLettres, spec.item)] : "";
+      lignes.push(ligne(`${c.label}${g}`, "règles de dérivation du cours"));
+    } else {
+      const o = c.options.find((x) => x.id === c.bonne);
+      // Les options « singularité » sont des phrases : la cellule de formule reçoit leur forme courte
+      // (le texte KaTeX, insécable, sortait de la chaîne en A4) et la phrase passe à droite.
+      const court = RESUME_SINGULARITE[o?.id ?? ""];
+      if (court) lignes.push(ligne(court, [...fragmentsRiches5e(c.label), t(` ${o?.label ?? ""}.`)]));
+      else lignes.push(ligne(`\\text{${(o?.label ?? "").replace(/′/g, "'")}}`, fragmentsRiches5e(c.label)));
+    }
+  }
+  const conclusion = lettre ? [t("donc "), f(`${k}\\to ${lettre}`), t(".")] : [t("donc "), f(`f_{${k}}'`), t(" n'existe pas en ce point : aucune lettre.")];
+  return [
+    utilise("b", fragmentsRiches5e(consigneJustificationAssociation(e))),
+    calcul("b", lignes, [], "Justification"),
+    resultat("b", conclusion),
+  ];
+}
+
 export function correctionDetailleeAssociation(e: ExerciceAssociation): EtapeCorrection[] {
-  if (e.famille === "grapheDeriveeAvancee") return [];
+  if (e.famille === "grapheDeriveeAvancee") {
+    const lignes: LigneCalcul[] = e.fonctions.map((fo, i) => {
+      if (e.singulier[i]) {
+        const car = fo.caracteristique;
+        const opt = OPTIONS_SINGULARITE.find((o) => o.id === (car?.type === "angulaire" ? "saute" : car?.type === "cuspide" || car?.type === "tangenteVerticale" ? "infini" : "discontinue"));
+        return ligne(`${i + 1}\\to\\ \\text{f' n'existe pas ici}`, opt ? opt.label : "");
+      }
+      return ligne(`${i + 1}\\to ${lettreDe(e, i)}`, "pente de f lue sur le graphique : signe de f′ zone par zone");
+    });
+    return finaliser([
+      utilise("a", [t("Là où f monte, f′ > 0 ; là où elle descend, f′ < 0. En un coin, une tangente verticale, un rebroussement, un saut ou un trou, f′ n'existe pas "), t(COURS_DERIVEE), t(".")]),
+      calcul("a", lignes, [], "Association"),
+      resultat("a", [f(lignes.map((l) => l.latex).join(",\\ "))]),
+      ...etapesJustification(e),
+    ]);
+  }
   const n = nombreElementsAssociation(e);
   const etapes: EtapeCorrection[] = [utiliseFamille(e)];
   for (let i = 0; i < n; i++) {
@@ -225,6 +280,7 @@ export function correctionDetailleeAssociation(e: ExerciceAssociation): EtapeCor
   const res = resultat("a", [f(correspondance)]);
   etapes.push(e.famille === "symbolique" ? res : { ...res, figureHtml: figureGraphes(e, e.famille) });
   etapes.push(piege("a", [t(texteParPiege(e))]));
+  etapes.push(...etapesJustification(e));
   return finaliser(etapes);
 }
 

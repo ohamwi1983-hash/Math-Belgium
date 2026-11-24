@@ -16,6 +16,7 @@ import type { ExerciceDefinitionDerivee } from "../core5e/definitionDerivee.type
 import { evaluerExpressionGenerale } from "../moteur/expressionGenerale";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { diagnostiquerNombre } from "./verificationAsymptoteOblique";
+import { MESSAGES_ILLISIBLE_DERIVEES, diagnostiquerNombreExact, estApprocheeDerivees, expressionLisibleDerivees, lireNombreDerivees } from "./saisieDerivees";
 
 export { diagnostiquerNombre };
 
@@ -31,6 +32,10 @@ export function valeurFonction(exercice: ExerciceDefinitionDerivee, x: number): 
       return exercice.expo === 1 ? exercice.k / x : exercice.k / (x * x);
     case "rationnelleLineaire":
       return (exercice.m * x + exercice.p) / (x - exercice.q);
+    case "quadratiqueComplete":
+      return exercice.m * x * x + exercice.n * x + exercice.p;
+    case "racine":
+      return exercice.k * Math.sqrt(x + exercice.c);
   }
 }
 
@@ -46,6 +51,10 @@ export function valeurDeriveeExacte(exercice: ExerciceDefinitionDerivee, a: numb
       return exercice.expo === 1 ? -exercice.k / (a * a) : (-2 * exercice.k) / (a * a * a);
     case "rationnelleLineaire":
       return -(exercice.m * exercice.q + exercice.p) / ((a - exercice.q) * (a - exercice.q));
+    case "quadratiqueComplete":
+      return 2 * exercice.m * a + exercice.n;
+    case "racine":
+      return exercice.k / (2 * Math.sqrt(a + exercice.c));
   }
 }
 
@@ -62,6 +71,8 @@ const ECHANTILLONS_H = [0.7, -0.4, 1.3, -0.9, 0.2];
 function surPole(exercice: ExerciceDefinitionDerivee, a: number, h: number): boolean {
   if (exercice.famille === "rationnelleSimple") return Math.abs(a + h) < 1e-6;
   if (exercice.famille === "rationnelleLineaire") return Math.abs(a + h - exercice.q) < 1e-6;
+  // √(a + c + h) : seulement là où la racine existe (a + c ≥ 1, certains h valent −1,3).
+  if (exercice.famille === "racine") return a + exercice.c + h <= 1e-6;
   return false;
 }
 
@@ -109,12 +120,35 @@ export function diagnostiquerQuotientH(texte: string, exercice: ExerciceDefiniti
 
 /** Écran "developper", champ "f(a)" — nombre exact, réutilise `diagnostiquerNombre`. */
 export function diagnostiquerValeurFA(texte: string, exercice: ExerciceDefinitionDerivee, a: number): StatutVerification {
-  return diagnostiquerNombre(texte, valeurFonction(exercice, a));
+  return diagnostiquerNombreExact(texte, valeurFonction(exercice, a));
 }
 
 /** Écran "limite", champ "f'(a)" — nombre exact, réutilise `diagnostiquerNombre`. */
 export function diagnostiquerLimiteDerivee(texte: string, exercice: ExerciceDefinitionDerivee, a: number): StatutVerification {
-  return diagnostiquerNombre(texte, valeurDeriveeExacte(exercice, a));
+  return diagnostiquerNombreExact(texte, valeurDeriveeExacte(exercice, a));
+}
+
+/** Saisie refusée SANS tentative (lot B, partagé par le moteur et l'écran) : nombre ou expression
+ * illisible, valeur décimale approchée d'une valeur exacte, forme non développée / non simplifiée.
+ * Rend le message à afficher, ou null. `valeurs` : [f(a), f(a + h)] (développer), [quotient], [f'(a)]. */
+export function refusSaisieDefinitionDerivee(exercice: ExerciceDefinitionDerivee, ecran: "developper" | "quotient" | "limite", valeurs: string[]): string | null {
+  const a = exercice.a;
+  if (ecran === "developper") {
+    const [fA, fAH] = valeurs;
+    if (lireNombreDerivees(fA) === null) return MESSAGES_ILLISIBLE_DERIVEES.nombreExact;
+    if (estApprocheeDerivees(fA, valeurFonction(exercice, a))) return MESSAGES_ILLISIBLE_DERIVEES.approchee;
+    if (!expressionLisibleDerivees(fAH, "h")) return MESSAGES_ILLISIBLE_DERIVEES.expressionH;
+    return controlerFormeDeveloppement(fAH, exercice);
+  }
+  if (ecran === "quotient") {
+    const [q] = valeurs;
+    if (!expressionLisibleDerivees(q, "h")) return MESSAGES_ILLISIBLE_DERIVEES.expressionH;
+    return controlerFormeQuotient(q);
+  }
+  const [v] = valeurs;
+  if (lireNombreDerivees(v) === null) return MESSAGES_ILLISIBLE_DERIVEES.nombreExact;
+  if (estApprocheeDerivees(v, valeurDeriveeExacte(exercice, a))) return MESSAGES_ILLISIBLE_DERIVEES.approchee;
+  return null;
 }
 
 // ============================================================================
@@ -150,6 +184,7 @@ function groupesParentheses(texte: string): { profondeurMax: number; groupes: { 
 export const MESSAGE_FORME_DEVELOPPEMENT_POLYNOME = "Développe complètement f(a + h) : il ne doit plus rester de parenthèses.";
 export const MESSAGE_FORME_DEVELOPPEMENT_RATIONNELLE =
   "Réduis f(a + h) : écris un seul numérateur et un seul dénominateur, chacun développé et réduit (sans parenthèses à l'intérieur).";
+export const MESSAGE_FORME_DEVELOPPEMENT_RACINE = "Réduis la somme sous la racine : écris f(a + h) sous la forme k√(h + nombre).";
 export const MESSAGE_FORME_QUOTIENT =
   "Simplifie encore le taux d'accroissement : il ne doit plus rester de facteur h à simplifier, l'expression doit pouvoir être calculée pour h = 0.";
 
@@ -160,9 +195,11 @@ export const MESSAGE_FORME_QUOTIENT =
 export function controlerFormeDeveloppement(texte: string, exercice: ExerciceDefinitionDerivee): string | null {
   const analyse = groupesParentheses(texte);
   if (analyse === null) return null;
-  if (exercice.famille === "affine" || exercice.famille === "quadratique") {
+  if (exercice.famille === "affine" || exercice.famille === "quadratique" || exercice.famille === "quadratiqueComplete") {
     return analyse.profondeurMax === 0 ? null : MESSAGE_FORME_DEVELOPPEMENT_POLYNOME;
   }
+  // Racine : « √(h + 9) » garde ses parenthèses ; seule la somme sous la racine doit être réduite.
+  if (exercice.famille === "racine") return /√\s*\([^()]*\+[^()]*\+|sqrt\s*\([^()]*\+[^()]*\+/i.test(texte.replace(/\s+/g, "")) ? MESSAGE_FORME_DEVELOPPEMENT_RACINE : null;
   if (analyse.profondeurMax > 1) return MESSAGE_FORME_DEVELOPPEMENT_RATIONNELLE;
   const groupesValides = analyse.groupes.every((g) => g.apres === "/" || g.avant === "/");
   return groupesValides ? null : MESSAGE_FORME_DEVELOPPEMENT_RATIONNELLE;

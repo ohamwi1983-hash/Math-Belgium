@@ -334,6 +334,13 @@ paths:
   avec `versionPapier`, `evaluationPayload.ts`, processus 1 / 2 / 2 ; libellés pilotes de 5gen25 et 5gen30
   remplis). 5gen75 en version MODESTE (morceaux, |x − a|, √(x − a)) : la version plus poussée (∛, x|x|·g)
   est réservée à la 5e 6h. Détail : `.claude/rules/feuilles-evaluations.md`, « 5e ch. 5, lot H — 5gen73–75 ».
+  **Lots B, C, D des générateurs 5gen25–35 (24/11)** : règles communes (illisible refusé dans le moteur, aides
+  posées, messages ciblés, choix jugés ✗ / ✓) ; 5gen25 justification en deux temps + famille avancée tirée et
+  exportée ; 5gen26 √(x + c) et ax² + bx + c ; 5gen27 réponses réduites ; 5gen28 option f′, « aucune »,
+  pente donnée, point extérieur ; 5gen29 option f′/f″, valeurs exactes ; 5gen31 exact, 2√2 ; 5gen32 boîte sans
+  couvercle, cubique retirée ; 5gen33 centaines ; 5gen34 kW ; 5gen30 nœuds ; banque « Formule » : tangente de
+  pente donnée, tangente par un point extérieur. Cours inchangé. Détail : `.claude/rules/feuilles-evaluations.md`,
+  « 5e ch. 5 (lots B, C, D, 5gen25–35) ».
 
 - **5e (4h), Chapitre 4 — Limites et asymptotes** (`limites-asymptotes`) : enrichi depuis une
   version plus ancienne du même artifact `plateforme-maths` (5e/4h) ; aucune section n'a dû être

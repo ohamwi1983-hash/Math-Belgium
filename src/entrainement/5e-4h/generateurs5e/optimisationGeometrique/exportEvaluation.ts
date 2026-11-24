@@ -133,6 +133,19 @@ function schemaSvg(exercice: ExerciceOptimisation): string {
         txt(cx, yBase + 16, "2r", "middle");
       break;
     }
+    case "boite": {
+      // Carré de carton, coins découpés (carrés de côté x), pliures en pointillés.
+      const x0 = 55, y0 = 8, cote = 150, k = 30;
+      corps =
+        `<path d="M ${x0 + k} ${y0} H ${x0 + cote - k} V ${y0 + k} H ${x0 + cote} V ${y0 + cote - k} H ${x0 + cote - k} V ${y0 + cote} H ${x0 + k} V ${y0 + cote - k} H ${x0} V ${y0 + k} H ${x0 + k} Z" ${TRAIT}/>` +
+        `<rect x="${x0}" y="${y0}" width="${cote}" height="${cote}" ${COTE}/>` +
+        `<rect x="${x0 + k}" y="${y0 + k}" width="${cote - 2 * k}" height="${cote - 2 * k}" ${COTE}/>` +
+        txt(x0 + k / 2, y0 + k / 2 + 5, "x", "middle") +
+        txt(x0 + k + 4, y0 + k / 2 + 5, "x") +
+        txt(x0 + cote / 2, y0 + cote / 2 + 5, "b", "middle") +
+        txt(x0 + cote / 2, y0 + cote + 14, "c", "middle");
+      break;
+    }
     case "cubique":
       return "";
   }
@@ -161,6 +174,7 @@ const GRANDEUR: Record<Exclude<ExerciceOptimisation["famille"], "cubique">, stri
   margesB: "l'aire totale de l'affiche",
   fenetreA: "l'aire de la fenêtre",
   fenetreB: "le périmètre de la fenêtre",
+  boite: "le volume de la boîte",
 };
 
 function consigneEtape(exercice: ExerciceOptimisation, ecran: EcranOptimisation): FragmentConsigne[] {
@@ -170,6 +184,7 @@ function consigneEtape(exercice: ExerciceOptimisation, ecran: EcranOptimisation)
     case "lien":
       if (f === "trapeze") return fragmentsRiches("Exprime la hauteur $h$ et la grande base $B$ du trapèze en fonction de $\\alpha$.");
       if (f === "margesA" || f === "margesB") return fragmentsRiches("Exprime la hauteur imprimée $y$ en fonction de $x$ à l'aide de la contrainte.");
+      if (f === "boite") return fragmentsRiches("Exprime le côté $b$ de la base carrée de la boîte en fonction de $x$.");
       return fragmentsRiches(`Exprime la hauteur $h$ en fonction de $${v}$ à l'aide de la contrainte.`);
     case "construire":
       return fragmentsRiches(`Exprime ${f === "cubique" ? "" : GRANDEUR[f]} en fonction de la seule variable $${v}$ : c'est la fonction $F$ à optimiser.`);
@@ -177,11 +192,11 @@ function consigneEtape(exercice: ExerciceOptimisation, ecran: EcranOptimisation)
       return fragmentsRiches(f === "trapeze" ? "Calcule $F'(\\alpha)$, avec $\\alpha$ en radians." : `Calcule $F'(${v})$.`);
     case "resoudre":
       if (f === "trapeze") return fragmentsRiches("Résous $F'(\\alpha)=0$ : remplace $\\sin^2\\alpha$ par $1-\\cos^2\\alpha$, pose $u=\\cos\\alpha$ et résous l'équation du deuxième degré obtenue ; donne $\\alpha$ en degrés.");
-      if (f === "margesA" || f === "margesB" || f === "fenetreB") return fragmentsRiches(`Résous $F'(${v})=0$ et justifie la valeur de $${v}$ retenue.`);
+      if (f === "margesA" || f === "margesB" || f === "fenetreB" || f === "boite") return fragmentsRiches(`Résous $F'(${v})=0$ et justifie la valeur de $${v}$ retenue.`);
       return fragmentsRiches(`Résous $F'(${v})=0$.`);
     case "justifier": {
       const pts = pointsTest(exercice);
-      const u = f === "trapeze" ? "°" : "";
+      const u = f === "trapeze" ? "^\\circ" : "";
       return fragmentsRiches(`Calcule $F'$ en $${v}=${formatNombreLatex(pts.affichageAvant)}${u}$ et en $${v}=${formatNombreLatex(pts.affichageApres)}${u}$, puis déduis-en la nature de l'extremum.`);
     }
     case "conclure":
@@ -208,7 +223,8 @@ function construireEnonceOptimisation(exercice: ExerciceOptimisation): SectionEx
 }
 
 function consigneGlobale(exercice: ExerciceOptimisation): FragmentConsigne[] {
-  const precision = " Donne les valeurs exactes, ou arrondies au centième.";
+  // Lot C : « exactes » seules quand tout est exact (boîte, cylindre au rayon entier : 96π cm²…).
+  const precision = profilOptimisation(exercice).calcul === "calculatrice" ? " Donne les valeurs exactes, ou arrondies au centième." : " Donne les valeurs exactes.";
   switch (exercice.famille) {
     case "trapeze":
       return fragmentsRiches(
@@ -227,6 +243,8 @@ function consigneGlobale(exercice: ExerciceOptimisation): FragmentConsigne[] {
       return fragmentsRiches(`Détermine le rayon $r$ et la hauteur $h$ qui rendent le périmètre de la fenêtre minimal, justifie la nature de l'extremum et donne ce périmètre minimal.${precision}`);
     case "cubique":
       return fragmentsRiches("Détermine les coefficients $a$, $b$, $c$ et $d$, puis écris $f(x)$.");
+    case "boite":
+      return fragmentsRiches(`Détermine la longueur $x$ des carrés à découper qui rend le volume de la boîte maximal, justifie qu'il s'agit d'un maximum, puis donne le côté de la base de la boîte et son volume maximal.${precision}`);
   }
 }
 
@@ -300,7 +318,7 @@ function baremeOptimisation(exercice: ExerciceOptimisation): BaremeExercice {
     reponseFinale: reponseBreveOptimisation(exercice),
     criteres,
     erreursFrequentes: erreurs,
-    reponsesAcceptees: [[texte("Valeurs exactes (avec π ou une racine) ou arrondies au centième ; F et F′ sous une forme équivalente")]],
+    reponsesAcceptees: [[texte(profilOptimisation(exercice).calcul === "calculatrice" ? "Valeurs exactes (avec π ou une racine) ou arrondies au centième, avec leur unité ; F et F′ sous une forme équivalente" : "Valeurs exactes (avec π si besoin), avec leur unité ; F et F′ sous une forme équivalente (développée ou factorisée)")]],
   };
 }
 
@@ -310,7 +328,7 @@ function baremeOptimisation(exercice: ExerciceOptimisation): BaremeExercice {
  * négative), 0 sinon ; nombres = profil (les valeurs de F′ aux points test ne servent que par leur
  * signe) ; aucun écran de pure lecture. */
 function criteresDifficulteOptimisation(exercice: ExerciceOptimisation): CriteresDifficulte {
-  const piege = exercice.famille === "trapeze" || exercice.famille === "margesA" || exercice.famille === "margesB" || exercice.famille === "fenetreB" ? 1 : 0;
+  const piege = exercice.famille === "trapeze" || exercice.famille === "margesA" || exercice.famille === "margesB" || exercice.famille === "fenetreB" || exercice.famille === "boite" ? 1 : 0;
   return { ...etapesDuCorrige(correctionDetailleeOptimisation(exercice), []), methode: exercice.famille === "cubique" ? 1 : 2, piege, nombres: profilOptimisation(exercice).calcul === "calculatrice" ? 1 : 0 };
 }
 

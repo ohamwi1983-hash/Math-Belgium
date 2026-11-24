@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
-import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceDefinitionDerivee } from "./generateurs5e/definitionDerivee/index";
+import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceDefinitionDerivee, genererExerciceDefinitionDeriveeLibre } from "./generateurs5e/definitionDerivee/index";
+import { aidesDefinitionDerivee, cibleDefinitionDerivee } from "./ui5e/retoursDefinitionDerivee";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { correctionDetailleeDefinitionDerivee, lettreEcranDefinitionDerivee } from "./generateurs5e/definitionDerivee/corrigeDetaille";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
@@ -18,12 +19,11 @@ import {
 import type { EcranDefinitionDerivee, EtatSessionDefinitionDerivee } from "./moteur5e/typesDefinitionDerivee";
 import { ordreEcrans } from "./moteur5e/typesDefinitionDerivee";
 import {
-  controlerFormeDeveloppement,
-  controlerFormeQuotient,
   diagnostiquerDeveloppementH,
   diagnostiquerLimiteDerivee,
   diagnostiquerQuotientH,
   diagnostiquerValeurFA,
+  refusSaisieDefinitionDerivee,
 } from "./moteur5e/verificationDefinitionDerivee";
 import type { ExerciceDefinitionDerivee } from "./core5e/definitionDerivee.types";
 import { EtapeChampLibreDerivee } from "./components5e/EtapeChampLibreDerivee";
@@ -41,7 +41,9 @@ import type { ValidationEtapeProps } from "../components/ValidationEcran";
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionDefinitionDerivee {
-  return demarrerSessionDefinitionDerivee(REGLAGES_DEMO, genererExerciceDefinitionDerivee);
+  // Tirage libre de l'appli : les familles de fin de catalogue (quadratique complète, racine) une
+  // fois sur trois ; les `?code=` gardent le tirage de l'adaptateur.
+  return demarrerSessionDefinitionDerivee(REGLAGES_DEMO, genererExerciceDefinitionDeriveeLibre);
 }
 
 /** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
@@ -235,7 +237,9 @@ function EcranCourant({
           onActiverAide={onActiverAide}
           onValider={(reponse) => terminerEtape(soumettreReponseDevelopper(etat, reponse), `f(${nombreTexte(a)}) = ${reponse.fA} ; f(${nombreTexte(a)} + h) = ${reponse.fAH}`)}
           diagnostiquer={(r) => ({ fA: diagnostiquerValeurFA(r.fA, exercice, a), fAH: diagnostiquerDeveloppementH(r.fAH, exercice, a) })}
-          controlerForme={(r) => controlerFormeDeveloppement(r.fAH, exercice)}
+          refus={(r) => refusSaisieDefinitionDerivee(exercice, "developper", [r.fA, r.fAH])}
+          cible={(r) => cibleDefinitionDerivee(exercice, "developper", [r.fA, r.fAH])}
+          aides={aidesDefinitionDerivee(exercice, "developper")}
           validation={validation}
         />
       );
@@ -255,7 +259,9 @@ function EcranCourant({
           onActiverAide={onActiverAide}
           onValider={(texte) => terminerEtape(soumettreReponseQuotient(etat, texte), texte)}
           diagnostiquer={(t) => diagnostiquerQuotientH(t, exercice, a)}
-          controlerForme={controlerFormeQuotient}
+          refus={(t) => refusSaisieDefinitionDerivee(exercice, "quotient", [t])}
+          cible={(t) => cibleDefinitionDerivee(exercice, "quotient", [t])}
+          aides={aidesDefinitionDerivee(exercice, "quotient")}
           validation={validation}
         />
       );
@@ -275,6 +281,9 @@ function EcranCourant({
           onActiverAide={onActiverAide}
           onValider={(texte) => terminerEtape(soumettreReponseLimite(etat, texte), `f'(${nombreTexte(a)}) = ${texte}`)}
           diagnostiquer={(t) => diagnostiquerLimiteDerivee(t, exercice, a)}
+          refus={(t) => refusSaisieDefinitionDerivee(exercice, "limite", [t])}
+          cible={(t) => cibleDefinitionDerivee(exercice, "limite", [t])}
+          aides={aidesDefinitionDerivee(exercice, "limite")}
           validation={validation}
         />
       );

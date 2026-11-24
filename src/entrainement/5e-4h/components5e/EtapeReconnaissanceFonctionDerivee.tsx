@@ -1,11 +1,13 @@
 import { useState } from "react";
 import type { ExerciceFonctionDerivee, TypeDerivee } from "../core5e/fonctionDerivee.types";
-import { consigneEcran, consigneGenerale, formatTermesDonneesLatex, OPTIONS_RECONNAISSANCE, questionFinale, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatFonctionDerivee";
+import { consigneEcran, consigneGenerale, formatTermesDonneesLatex, LIBELLE_TYPE_FRAGMENTS, OPTIONS_RECONNAISSANCE, questionFinale } from "../ui5e/formatFonctionDerivee";
 import { Katex } from "../components/Katex";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import type { AideTrig } from "../ui5e/aidesTrigonometrie";
+import { RenduFragments } from "../../4e/components/RenduFragments";
+import { ariaOptionChoixFerme, classeOptionChoixFerme } from "../../4e/ui/choixFige";
 
 interface Props {
   exercice: ExerciceFonctionDerivee;
@@ -15,27 +17,19 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (choix: TypeDerivee) => void;
-  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
-   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
-   * "validation/invalidation avant de passer à l'écran suivant"). */
+  aides: AideTrig[];
+  /** Présent une fois l'écran terminé : options figées et jugées (✗ / ✓). */
   validation?: ValidationEtapeProps | null;
 }
 
-/** Écran "reconnaissance" — 4 boutons en grille 2 colonnes (`.options-grid`), choix booléen pur
- * (aucun champ libre, aucun statut à 3 valeurs nécessaire ici — même esprit que
- * `EtapeChoixSigne.tsx`, 5gen20). Correction câblée directement sur `exercice.typesAcceptes`
- * (jamais une seule valeur figée : l'item ambigu accepte 2 réponses). */
-export function EtapeReconnaissanceFonctionDerivee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+/** Écran "reconnaissance" — choix fermé, UNE tentative (lot B) : une fois jugé, l'option choisie
+ * fausse est rouge ✗ et la bonne verte ✓ (`4e/ui/choixFige.ts`) ; libellés « u·v », « u/v » en
+ * KaTeX. L'item ambigu accepte deux réponses (`typesAcceptes`). */
+export function EtapeReconnaissanceFonctionDerivee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, aides, validation }: Props) {
   const [choix, setChoix] = useState<TypeDerivee | null>(null);
-  const montrerErreurs = tentativesUtilisees > 0;
-  const apresEchec = tentativesUtilisees > 0;
-  const erronee = apresEchec && choix !== null && !exercice.typesAcceptes.includes(choix);
-  const aide2 = texteAideNiveau2("reconnaissance", null);
-
-  function valider() {
-    if (choix === null) return;
-    onValider(choix);
-  }
+  const juge = !!validation && choix !== null;
+  const bonne = choix !== null && exercice.typesAcceptes.includes(choix) ? choix : exercice.typesAcceptes[0];
+  const etat = { selection: choix, choisie: juge ? choix : null, bonne };
 
   return (
     <div>
@@ -54,54 +48,33 @@ export function EtapeReconnaissanceFonctionDerivee({ exercice, tentativesUtilise
       </p>
       <p className="prompt-text">{consigneEcran("reconnaissance", null)}</p>
       <div className="options-grid">
-        {OPTIONS_RECONNAISSANCE.map((option) => {
-          const actif = choix === option.type;
-          return (
-            <button
-              key={option.type}
-              type="button"
-              className={`btn${actif ? " toggle-active" : ""}${erronee && actif ? " is-erronee" : ""}`}
-              disabled={!!validation}
-              onClick={() => setChoix(option.type)}
-            >
-              {option.label}
-            </button>
-          );
-        })}
+        {OPTIONS_RECONNAISSANCE.map((option) => (
+          <button
+            key={option.type}
+            type="button"
+            className={classeOptionChoixFerme(option.type, etat)}
+            aria-pressed={choix === option.type}
+            aria-label={ariaOptionChoixFerme(option.type, etat)}
+            disabled={!!validation}
+            onClick={() => setChoix(option.type)}
+          >
+            <RenduFragments fragments={LIBELLE_TYPE_FRAGMENTS[option.type]} />
+          </button>
+        ))}
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          {(() => {
-            const aide1 = texteAideNiveau1("reconnaissance", null);
-            return (
-              <>
-                <p>{aide1.texte}</p>
-                {aide1.latex && <Katex expression={aide1.latex} block />}
-              </>
-            );
-          })()}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aide2.texte}</p>
-              {aide2.latex && <Katex expression={aide2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aides}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={() => choix !== null && onValider(choix)}
+        vide={choix === null}
+        illisible={false}
+        texteIllisible=""
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        validation={validation}
+      />
     </div>
   );
 }

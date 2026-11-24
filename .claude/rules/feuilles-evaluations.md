@@ -952,6 +952,30 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   (53 / 60 : liste des leurres) et libre (57 / 60), gen101 « deux plans » (59 / 60, tirage bridé) ; gen103
   et gen107 « cavalière » : mêmes exercices, textes changés ; documents réels (2 plans, 2 séries +
   aménagée + corrigé + grille + feuille + Word) : 0 débordement à 680 / 820 / 1 280 px, 0 `.katex-error`.
+- **5e ch. 5 (lots B, C, D, 5gen25–35)** : lecture `moteur5e/saisieDerivees.ts` (`lireNombreDerivees`,
+  `nombreExactRefuseDerivees`, `expressionLisibleDerivees` — syntaxe seule —, messages par nature de champ
+  `MESSAGES_ILLISIBLE_DERIVEES`), refus SANS tentative dans chaque moteur (`refusSaisie…` partagé avec l'écran) ;
+  écrans sur `PiedEcranFonctions` / `EcranSaisieLimites` ; aides et cibles `ui5e/retours{DefinitionDerivee,
+  FonctionDerivee,Tangentes,EtudeLocale,EtudierFonction,Optimisation,ContexteEconomique,ExtremaBornes,
+  VitessePosition,Association}.ts` (niveau 2 posé pour l'instance, plus d'« Exemple » avec une autre fonction) ;
+  choix fermés jugés ✗ / ✓ avec message propre (`messageRevele`) ; tableaux de signes (`TableauEtudeLocaleBuilder`)
+  jugés case par case une fois l'écran clos. Lot C : 5gen25 justification en deux temps
+  (`moteur5e/justificationAssociation.ts`, spécification pure écran / papier / corrigé ; barème 3 + 1) et famille
+  avancée tirée 1 fois sur 4 par l'appli, AJOUTÉE EN FIN du catalogue papier ; 5gen26 variantes `quadratiqueComplete`
+  et `racine` en fin de catalogue ; 5gen27 dérivées de référence réduites ; 5gen28 option `derivee-donnee`
+  (défaut : à calculer), issue « aucune » (Δ < 0), familles `pente` et `pointExterieur` en fin de catalogue ;
+  5gen29 option `derivees-a-calculer` (défaut : données), valeurs EXACTES e ± √r ; 5gen31 ordonnées exactes, radicaux
+  simplifiés (2√2), consigne du domaine juste ; 5gen32 famille `boite` (x(c − 2x)², x = c/6, x = c/2 rejetée) en fin
+  de catalogue, `cubique` `retiree`, aire exacte 6πx², unités, α, `^\circ` ; 5gen33 q en centaines, q ≥ 1 ; 5gen34
+  kW, « par jour » ; 5gen30 extremums sur les nœuds, inflexions lues à l'unité ; 5gen75 fenêtre du corrigé.
+  **`calcul`** (décision du 24/11) : `exacte` retiré de 5gen25–35 (la calculatrice ne fait ni la dérivée ni
+  l'étude) ; `calculatrice` gardé là où il est honnête (quartiques de 5gen34, régimes calculatrice de 5gen32 / 33,
+  segment B de 5gen35) ; `calculatriceIndispensable` retiré de 5gen29 et 5gen31. **Lot D** : groupes à verdict
+  5gen28 `groupe_horizontale` (formeCommune), 5gen29 `groupe_racines_base/avance`, 5gen31 `groupe_extremums_poly`
+  / `_ao`, 5gen34 `groupe_position_extremums` ; `forme` sans le verdict ; niveau et durée d'un membre « sans
+  extremum / racine double » pris sur un jumeau (`lignesMinimales` pour la charge) — 5gen34 non égalisé (3 zéros :
+  6 · 18 min contre 5 · 15, la copie d'évaluation n'imprime ni niveau ni durée). Codes imprimés : inchangés sauf
+  5gen27 produit / quotient sans trig, 5gen30 (grille), 5gen33 A degré 3 calculatrice ; options tirées en dernier.
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 

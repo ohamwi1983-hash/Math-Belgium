@@ -60,6 +60,7 @@ import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 import type { ReponseEgaliteMarginales, ReponseIterationDichotomie, ReponseTableauSigneBenefice } from "./moteur5e/verificationContexteEconomique";
 import { EtapeChampsLibresCE } from "./components5e/EtapeChampsLibresCE";
+import { aidesContexteEconomique, cibleContexteEconomique, messageChoixDichotomie } from "./ui5e/retoursContexteEconomique";
 import { EtapeChampsNumeriquesCE } from "./components5e/EtapeChampsNumeriquesCE";
 import { EtapeResoudreEgaliteMarginales } from "./components5e/EtapeResoudreEgaliteMarginales";
 import { EtapeTableauSigneBenefice } from "./components5e/EtapeTableauSigneBenefice";
@@ -85,6 +86,7 @@ function sessionInitiale(): EtatSessionContexteEconomique {
 interface TransitionEnAttente {
   etatSuivant: EtatSessionContexteEconomique;
   revele: boolean;
+  messageRevele?: string | null;
 }
 
 /** Même source que `calculerRecapitulatifContexteEconomique` (`revelesPartiels[ecran]`) —
@@ -186,7 +188,9 @@ export function App5gen33() {
       if (!exerciceTermine && votreReponse !== undefined) {
         ajouterHistorique(votreReponse, etat.phase, nouvelEtat);
       }
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      // Choix fermé faux d'une itération (une seule tentative) : message propre au choix.
+      const choixFaux = nouvelEtat.derniereEtapeRevelee && etat.phase.startsWith("iteration") && etat.etapeCourante.tentativesUtilisees + 1 < etat.reglages.tentativesMax;
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee, messageRevele: choixFaux ? messageChoixDichotomie() : null });
       return;
     }
     setEtat(nouvelEtat);
@@ -223,6 +227,7 @@ export function App5gen33() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        ...(enAttente.messageRevele ? { messageRevele: enAttente.messageRevele } : {}),
         corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeContexteEconomique(exercice), lettreEcranContexteEconomique(exercice, etat.phase))} />,
         reponseAttendue: (
           <span className="equation-box-termes">
@@ -295,6 +300,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         return (
           <EtapeChampsNumeriquesCE
             key={cleEcran}
+            aides={aidesContexteEconomique(exercice, phase)}
+            cible={(v) => cibleContexteEconomique(exercice, phase, v)}
             exercice={exercice}
             ecran={phase}
             labels={labels}
@@ -316,6 +323,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         return (
           <EtapeChampsLibresCE
             key={cleEcran}
+            aides={aidesContexteEconomique(exercice, phase)}
+            cible={(v) => cibleContexteEconomique(exercice, phase, v)}
             exercice={exercice}
             ecran={phase}
             labels={labels}
@@ -336,6 +345,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         return (
           <EtapeChampsNumeriquesCE
             key={cleEcran}
+            aides={aidesContexteEconomique(exercice, phase)}
+            cible={(v) => cibleContexteEconomique(exercice, phase, v)}
             exercice={exercice}
             ecran={phase}
             labels={labels}
@@ -357,6 +368,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         return (
           <EtapeChampsNumeriquesCE
             key={cleEcran}
+            aides={aidesContexteEconomique(exercice, phase)}
+            cible={(v) => cibleContexteEconomique(exercice, phase, v)}
             exercice={exercice}
             ecran={phase}
             labels={labels}
@@ -380,6 +393,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         return (
           <EtapeChampsNumeriquesCE
             key={cleEcran}
+            aides={aidesContexteEconomique(exercice, phase)}
+            cible={(v) => cibleContexteEconomique(exercice, phase, v)}
             exercice={exercice}
             ecran={phase}
             labels={labels}
@@ -408,6 +423,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         return (
           <EtapeChampsLibresCE
             key={cleEcran}
+            aides={aidesContexteEconomique(exercice, phase)}
+            cible={(v) => cibleContexteEconomique(exercice, phase, v)}
             exercice={exercice}
             ecran={phase}
             labels={labels}
@@ -428,6 +445,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         return (
           <EtapeChampsLibresCE
             key={cleEcran}
+            aides={aidesContexteEconomique(exercice, phase)}
+            cible={(v) => cibleContexteEconomique(exercice, phase, v)}
             exercice={exercice}
             ecran={phase}
             labels={labels}
@@ -449,6 +468,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         return (
           <EtapeResoudreEgaliteMarginales
             key={cleEcran}
+            aides={aidesContexteEconomique(exercice, phase)}
+            cible={(r) => cibleContexteEconomique(exercice, phase, [...r.racines, r.retenue])}
             exercice={exercice}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
@@ -466,6 +487,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         return (
           <EtapeChampsLibresCE
             key={cleEcran}
+            aides={aidesContexteEconomique(exercice, phase)}
+            cible={(v) => cibleContexteEconomique(exercice, phase, v)}
             exercice={exercice}
             ecran={phase}
             labels={labels}
@@ -486,6 +509,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         return (
           <EtapeChampsLibresCE
             key={cleEcran}
+            aides={aidesContexteEconomique(exercice, phase)}
+            cible={(v) => cibleContexteEconomique(exercice, phase, v)}
             exercice={exercice}
             ecran={phase}
             labels={labels}
@@ -505,6 +530,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         return (
           <EtapeTableauSigneBenefice
             key={cleEcran}
+            aides={aidesContexteEconomique(exercice, phase)}
             exercice={exercice}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
@@ -520,6 +546,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         return (
           <EtapeChampsNumeriquesCE
             key={cleEcran}
+            aides={aidesContexteEconomique(exercice, phase)}
+            cible={(v) => cibleContexteEconomique(exercice, phase, v)}
             exercice={exercice}
             ecran={phase}
             labels={labels}
@@ -548,6 +576,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
       return (
         <EtapeChampsLibresCE
           key={cleEcran}
+          aides={aidesContexteEconomique(exercice, phase)}
+          cible={(v) => cibleContexteEconomique(exercice, phase, v)}
           exercice={exercice}
           ecran={phase}
           labels={labels}
@@ -572,6 +602,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
       return (
         <EtapeIterationDichotomie
           key={cleEcran}
+          aides={aidesContexteEconomique(exercice, phase)}
           exercice={exercice}
           ecran={phase}
           intervalleCourant={{ gauche: it.gauche, droite: it.droite }}
@@ -591,6 +622,8 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
       return (
         <EtapeChampsNumeriquesCE
           key={cleEcran}
+          aides={aidesContexteEconomique(exercice, phase)}
+          cible={(v) => cibleContexteEconomique(exercice, phase, v)}
           exercice={exercice}
           ecran={phase}
           labels={labels}

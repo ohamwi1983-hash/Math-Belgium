@@ -1,13 +1,15 @@
 import { useState } from "react";
 import type { ExerciceVitessePosition } from "../core5e/vitessePosition.types";
-import { consigneEcranRiche, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatVitessePosition";
+import { consigneEcranRiche } from "../ui5e/formatVitessePosition";
+import { aidesVitessePosition } from "../ui5e/retoursVitessePosition";
+import { saisieIllisibleVitessePosition } from "../moteur5e/sessionVitessePosition";
+import { MESSAGES_ILLISIBLE_DERIVEES } from "../moteur5e/saisieDerivees";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
 import type { ReponseResoudre } from "../moteur5e/verificationVitessePosition";
 import { Katex } from "../components/Katex";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { TexteRiche5e } from "./TexteRiche5e";
 
@@ -33,15 +35,17 @@ interface Props {
 export function EtapeResoudreVitessePosition({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquerRacine, validation }: Props) {
   const [racine1, setRacine1] = useState("");
   const [racine2, setRacine2] = useState("");
-  const montrerErreurs = tentativesUtilisees > 0;
+  const [illisible, setIllisible] = useState(false);
   const complet = racine1.trim() !== "" && racine2.trim() !== "";
   const apresEchec = tentativesUtilisees > 0;
   const statut1 = apresEchec && diagnostiquerRacine && racine1.trim() !== "" ? diagnostiquerRacine(racine1) : null;
   const statut2 = apresEchec && diagnostiquerRacine && racine2.trim() !== "" ? diagnostiquerRacine(racine2) : null;
-  const aides = niveauAide >= 2 ? [texteAideNiveau1("resoudre"), texteAideNiveau2("resoudre")] : niveauAide >= 1 ? [texteAideNiveau1("resoudre")] : [];
-
   function valider() {
     if (!complet) return;
+    if (saisieIllisibleVitessePosition(exercice, "resoudre", [racine1, racine2])) {
+      setIllisible(true);
+      return;
+    }
     onValider({ racines: [racine1, racine2] });
   }
 
@@ -63,39 +67,32 @@ export function EtapeResoudreVitessePosition({ exercice, tentativesUtilisees, te
             type="text"
             className={`text-input${champ.statut && champ.statut !== "correct" ? " is-erronee" : ""}`}
             value={champ.valeur}
-            onChange={(e) => champ.set(e.target.value)}
+            onChange={(e) => {
+              setIllisible(false);
+              champ.set(normaliserSigneMoins(e.target.value));
+            }}
             placeholder={champ.placeholder}
+            disabled={!!validation}
+            autoComplete="off"
           />
         </div>
       ))}
       <CalculatriceScientifique />
 
-      {aides.length > 0 && (
-        <div className="aide-5e">
-          {aides.map((aide, i) => (
-            <div key={i}>
-              <p>
-                <TexteRiche5e texte={aide.texte} />
-              </p>
-              {aide.latex && <Katex expression={aide.latex} block />}
-            </div>
-          ))}
-        </div>
-      )}
-      {!validation && (
-        <>
-          <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-          <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-            Valider
-          </button>
-          {montrerErreurs && (
-            <p className="alert-error" role="alert">
-              {formatMessageErreur(tentativesUtilisees, tentativesMax, null)}
-            </p>
-          )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesVitessePosition(exercice, "resoudre")}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={illisible}
+        texteIllisible={MESSAGES_ILLISIBLE_DERIVEES.nombre}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={null}
+        validation={validation}
+      />
     </div>
   );
 }

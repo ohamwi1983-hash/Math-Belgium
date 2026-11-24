@@ -5,7 +5,7 @@ import type { EcranFonctionDerivee } from "../../moteur5e/typesFonctionDerivee";
 import { formatReponseAttendueCalculerLatex, formatTermesReponseAttendueDecomposerLatex } from "../../ui5e/formatFonctionDerivee";
 import { COURS_DERIVEE, coefFacteur, dernierMembre, droiteTropLongue, f, finaliser, jf, liste, par, sansDoublons, t, type Fragments } from "../../ui5e/corrigeDerivees1";
 import { formatPolynomeLatex } from "../domaineDefinition/polynome";
-import { formatAtomeLatex, formatDeriveeAtomeLatex, formatDeriveeFDeXLatex, formatExterieurEnULatex, formatFDeXLatex, formatInterieurLatex } from "./index";
+import { formatAtomeLatex, formatDeriveeAtomeLatex, formatDeriveeBruteFDeXLatex, formatDeriveeFDeXLatex, formatExterieurEnULatex, formatFDeXLatex, formatInterieurLatex } from "./index";
 
 /**
  * Corrigé détaillé « comme au tableau » de 5gen27 (fonction dérivée) — règle
@@ -206,7 +206,9 @@ function lignesCalcul(e: ExerciceFonctionDerivee): LigneCalcul[] {
         lignes.push(ligne(`u(x)\\cdot v'(x)=${produit(formatAtomeLatex(A), formatDeriveeAtomeLatex(B))}`, "second terme"));
       }
       lignes.push(ligne(`f'(x)=u'(x)\\cdot v(x)+u(x)\\cdot v'(x)`, jf("dérivée d'un produit ", { l: "(uv)'=u'v+uv'" })));
-      lignes.push(ligne(`=${finale}`, "on remplace u, u′, v et v′"));
+      const brute = formatDeriveeBruteFDeXLatex(e);
+      lignes.push(ligne(`=${brute}`, "on remplace u, u′, v et v′"));
+      if (brute !== finale) lignes.push(ligne(`=${finale}`, A.noyau.type === "trig" || B.noyau.type === "trig" ? "on regroupe les nombres et les puissances de x" : "on réduit au même dénominateur et on regroupe"));
       return lignes;
     }
     case "quotient": {
@@ -234,7 +236,8 @@ function lignesCalcul(e: ExerciceFonctionDerivee): LigneCalcul[] {
         ...lignesDeriveeAtome("u'(x)", A),
         ...lignesDeriveeAtome("v'(x)", B),
         ligne(`f'(x)=\\dfrac{u'(x)\\cdot v(x)-u(x)\\cdot v'(x)}{[v(x)]^{2}}`, jf("dérivée d'un quotient ", { l: "\\left(\\frac{u}{v}\\right)'=\\frac{u'v-uv'}{v^2}" })),
-        ligne(`=${finale}`, "on remplace u, u′, v et v′"),
+        ligne(`=${formatDeriveeBruteFDeXLatex(e)}`, "on remplace u, u′, v et v′"),
+        ...(formatDeriveeBruteFDeXLatex(e) === finale ? [] : [ligne(`=${finale}`, "on chasse les fractions du numérateur et on réduit")]),
       ];
     }
     case "composee": {

@@ -272,11 +272,26 @@ function tirerNiveau(): NiveauEtudeLocale {
   return Math.random() < 0.5 ? "base" : "avance";
 }
 
-export function genererExerciceEtudeLocale(): ExerciceEtudeLocale {
+/** Option « à calculer » tirée EN DERNIER (une fois sur quatre ; les nombres d'un code imprimé avant
+ * le lot C restent les mêmes) — le réglage du panneau (`derivees-a-calculer`) choisit ensuite. */
+function avecOptionDerivees(e: ExerciceEtudeLocale): ExerciceEtudeLocale {
+  return { ...e, deriveesACalculer: Math.random() < 0.25 };
+}
+
+function genererExerciceEtudeLocaleBrut(): ExerciceEtudeLocale {
   const type = tirerType();
   if (type === "polynomiale") return genererPolynomiale(tirerNature(), tirerNiveau());
   if (type === "rationnelleSansCE") return construireRationnelle("rationnelleSansCE", tirerNiveau());
   return construireRationnelle("rationnelleAvecCE", "base");
+}
+
+export function genererExerciceEtudeLocale(): ExerciceEtudeLocale {
+  return avecOptionDerivees(genererExerciceEtudeLocaleBrut());
+}
+
+/** Tirage libre de l'appli : l'option est réglée par la bascule de l'écran. */
+export function genererExerciceEtudeLocaleLibre(): ExerciceEtudeLocale {
+  return genererExerciceEtudeLocaleBrut();
 }
 
 export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [
@@ -292,6 +307,10 @@ export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [
 ];
 
 export function construireAvecVarianteId(id: string): ExerciceEtudeLocale {
+  return avecOptionDerivees(construireAvecVarianteIdBrut(id));
+}
+
+function construireAvecVarianteIdBrut(id: string): ExerciceEtudeLocale {
   switch (id) {
     case "polynomiale-simple-base":
       return genererPolynomiale("simple", "base");

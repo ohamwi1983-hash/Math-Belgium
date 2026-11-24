@@ -173,25 +173,29 @@ export function texteAideNiveau1(ecranDemande: EcranDemande): AideFragmentee {
   }
 }
 
-export function texteAideNiveau2(ecranDemande: EcranDemande): AideFragmentee {
+export function texteAideNiveau2(ecranDemande: EcranDemande, exercice: ExerciceVitessePosition): AideFragmentee {
   const ecran = ecranReel(ecranDemande);
+  const { a, b, tCible, distanceCible } = exercice;
+  const vCible = a * tCible + b;
   switch (ecran) {
     case "derivee":
-      return { texte: "Exemple :", latex: "s(t)=\\dfrac{3}{2}t^2+7t \\;\\Rightarrow\\; v(t)=s'(t)=3t+7" };
+      return { texte: "Dérive la position terme à terme :", latex: formatPositionLatex(a, b) };
     case "acceleration":
-      return { texte: "Exemple :", latex: "v(t)=3t+7 \\;\\Rightarrow\\; a(t)=v'(t)=3\\ \\text{m/s}^2" };
+      return { texte: "Dérive la vitesse trouvée à l'écran précédent :", latex: formatVDeTLatex(exercice) };
     case "resoudre":
-      return { texte: "Exemple :", latex: "t^2+3t=40 \\iff t^2+3t-40=0,\\ \\Delta=169 \\;\\Rightarrow\\; t=5 \\text{ ou } t=-8" };
+      return { texte: "L'équation à résoudre, ramenée à zéro (puis discriminant ou racine carrée) :", latex: `${formatPositionLatex(a, b).replace(/^s\(t\)=/, "")}=${distanceCible}` };
     case "rejet":
       return { texte: "L'équation est juste et ses deux solutions la vérifient : seule l'une d'elles a un sens physique ici.", latex: null };
     case "vitessePointe":
-      return { texte: "Exemple :", latex: "v(t)=3t+7,\\ t=5 \\;\\Rightarrow\\; v(5)=3\\cdot5+7=22\\ \\text{m/s}" };
+      return { texte: "Remplace t par la solution retenue dans la vitesse :", latex: `${formatVDeTLatex(exercice)},\\quad t=${tCible}` };
     case "conversion":
-      return { texte: "Exemple :", latex: "13\\ \\text{m/s}\\times3{,}6=46{,}8\\ \\text{km/h}" };
-    case "segmentConstant":
-      return { texte: "Exemple :", latex: "D_2=150-24=126\\ \\text{m},\\ v=9\\ \\text{m/s} \\;\\Rightarrow\\; t_2=\\dfrac{126}{9}=14\\ \\text{s}" };
+      return { texte: "1 m/s = 3,6 km/h : on MULTIPLIE la vitesse en m/s par 3,6, ici :", latex: `v=${formatNombreFr(vCible)}\\ \\text{m/s}` };
+    case "segmentConstant": {
+      const D2 = exercice.variante === "B" ? exercice.D2 : 0;
+      return { texte: "La vitesse reste celle atteinte au bout du premier segment :", latex: `t_2=\\dfrac{${D2}}{v(${tCible})}` };
+    }
     case "tempsTotal":
-      return { texte: "Exemple :", latex: "t_1=4\\ \\text{s},\\ t_2\\approx7{,}3\\ \\text{s} \\;\\Rightarrow\\; t_{\\text{total}}\\approx11{,}3\\ \\text{s}" };
+      return { texte: "Ajoute la durée du premier segment à celle du second :", latex: `t_1=${tCible}\\ \\text{s}` };
   }
 }
 

@@ -1,13 +1,15 @@
 import { useState } from "react";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import { ariaOptionChoixFerme, classeOptionChoixFerme } from "../../4e/ui/choixFige";
+import type { AideTrig } from "../ui5e/aidesTrigonometrie";
+import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 import type { ExerciceContexteEconomiqueBonus, IterationDichotomie } from "../core5e/contexteEconomique.types";
 import type { ReponseIterationDichotomie } from "../moteur5e/verificationContexteEconomique";
-import { consigneEcranRiche, consigneGenerale, formatNombreLatex, formatNombreTexte, formatTermesDonneesLatex, questionFinale, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatContexteEconomique";
+import { consigneEcranRiche, consigneGenerale, formatNombreLatex, formatNombreTexte, formatTermesDonneesLatex, questionFinale } from "../ui5e/formatContexteEconomique";
 import type { EcranContexteEconomique } from "../moteur5e/typesContexteEconomique";
 import { Katex } from "../components/Katex";
 import { TexteRiche5e } from "./TexteRiche5e";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
@@ -30,6 +32,12 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Message ciblé sur l'erreur trahie par la dernière réponse fausse (lot B). */
+  cible?: (valeurs: { milieu: string }) => FragmentConsigne[] | null;
+  /** Aides à deux niveaux (niveau 2 posé pour l'instance). */
+  aides: AideTrig[];
+  /** Message d'illisible par nature de champ (déjà terminé par « … ne compte pas comme une tentative. »). */
+  texteIllisible?: string;
 }
 
 /** Écran d'itération de dichotomie (bonus) — RÉPÉTÉ 4 fois (`iteration0`..`iteration3`), un seul
@@ -49,13 +57,12 @@ export function EtapeIterationDichotomie({
   onActiverAide,
   onValider,
   diagnostiquerMilieu,
-  validation,
-}: Props) {
+  validation, cible, aides, texteIllisible }: Props) {
   const [milieu, setMilieu] = useState("");
   const [signe, setSigne] = useState<1 | -1 | null>(null);
   const [garder, setGarder] = useState<"gauche" | "droite" | null>(null);
+  const [soumises, setSoumises] = useState<{ milieu: string } | null>(null);
   const [ecritureIllisible, setEcritureIllisible] = useState(false);
-  const montrerErreurs = tentativesUtilisees > 0;
   /** Un seul essai sur les deux choix fermés : gelés après la première validation (un choix faux
    * clôt l'écran, voir `sessionContexteEconomique.ts`). */
   const choixGeles = tentativesUtilisees > 0 || Boolean(validation);
@@ -64,6 +71,7 @@ export function EtapeIterationDichotomie({
   const statutMilieu = apresEchec ? diagnostiquerMilieu(milieu) : null;
 
   const { gauche, droite } = intervalleCourant;
+  const iteration = exercice.iterations[["iteration0", "iteration1", "iteration2", "iteration3"].indexOf(ecran)];
 
   function valider() {
     if (!complet) return;
@@ -72,6 +80,7 @@ export function EtapeIterationDichotomie({
       return;
     }
     setEcritureIllisible(false);
+    setSoumises({ milieu });
     onValider({ milieu, signe: signe as 1 | -1, garder: garder as "gauche" | "droite" });
   }
 
@@ -115,7 +124,7 @@ export function EtapeIterationDichotomie({
       </p>
       <div className="options-grid-compact">
         {([1, -1] as const).map((v) => (
-          <button key={v} type="button" className={`btn${signe === v ? " toggle-active" : ""}`} onClick={() => setSigne(v)} disabled={choixGeles}>
+          <button key={v} type="button" className={classeOptionChoixFerme<1 | -1 | null>(v, { selection: signe, choisie: validation ? signe : null, bonne: iteration.signeMilieu })} aria-label={ariaOptionChoixFerme<1 | -1 | null>(v, { choisie: validation ? signe : null, bonne: iteration.signeMilieu })} onClick={() => setSigne(v)} disabled={choixGeles}>
             {v === 1 ? "+" : "−"}
           </button>
         ))}
@@ -123,57 +132,29 @@ export function EtapeIterationDichotomie({
 
       <p className="field-label field-label-minuscule">Sous-intervalle à conserver</p>
       <div className="options-grid-compact">
-        <button type="button" className={`btn${garder === "gauche" ? " toggle-active" : ""}`} onClick={() => setGarder("gauche")} disabled={choixGeles}>
+        <button type="button" className={classeOptionChoixFerme<"gauche" | "droite" | null>("gauche", { selection: garder, choisie: validation ? garder : null, bonne: iteration.garderCote })} onClick={() => setGarder("gauche")} disabled={choixGeles}>
           {`[${formatNombreTexte(gauche)} ; milieu]`}
         </button>
-        <button type="button" className={`btn${garder === "droite" ? " toggle-active" : ""}`} onClick={() => setGarder("droite")} disabled={choixGeles}>
+        <button type="button" className={classeOptionChoixFerme<"gauche" | "droite" | null>("droite", { selection: garder, choisie: validation ? garder : null, bonne: iteration.garderCote })} onClick={() => setGarder("droite")} disabled={choixGeles}>
           {`[milieu ; ${formatNombreTexte(droite)}]`}
         </button>
       </div>
 
       <CalculatriceScientifique />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          {(() => {
-            const aide1 = texteAideNiveau1(ecran, exercice);
-            return (
-              <>
-                <p>{aide1.texte}</p>
-                {aide1.latex && <Katex expression={aide1.latex} block />}
-              </>
-            );
-          })()}
-          {niveauAide >= 2 &&
-            (() => {
-              const aide2 = texteAideNiveau2(exercice, ecran);
-              return (
-                <>
-                  <p>{aide2.texte}</p>
-                  {aide2.latex && <Katex expression={aide2.latex} block />}
-                </>
-              );
-            })()}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-        {ecritureIllisible && (
-          <p className="alert-error" role="alert">
-            Écriture non reconnue : vérifie ta saisie (cette tentative n'est pas décomptée).
-          </p>
-        )}
-        {!ecritureIllisible && montrerErreurs && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, corrige le milieu.
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aides}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={!complet}
+        illisible={ecritureIllisible}
+        texteIllisible={texteIllisible ?? "Écriture non reconnue : vérifie les nombres, les parenthèses et la place de la variable. Cette saisie ne compte pas comme une tentative."}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumises !== null && tentativesUtilisees > 0 && cible ? cible(soumises) : null}
+        validation={validation}
+      />
     </div>
   );
 }

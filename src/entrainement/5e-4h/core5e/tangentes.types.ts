@@ -15,6 +15,8 @@
  * tête `coeffs[coeffs.length-1]` toujours non nul). f(a) et f'(a) toujours des entiers exacts. */
 export interface ExerciceTangentePointDonnePolynomiale {
   variante: "pointDonne";
+  /** Option « f′ donnée » (lot C) — voir `ExerciceTangente`. */
+  deriveeDonnee?: boolean;
   sousFamille: "polynomiale";
   /** Coefficients ASCENDANTS [constante, x, x², ...], longueur 3 (degré 2) ou 4 (degré 3). */
   coeffs: number[];
@@ -26,6 +28,8 @@ export interface ExerciceTangentePointDonnePolynomiale {
  * être IRRATIONNELS (ex. 2√5), explicitement acceptés par la vérification numérique tolérante. */
 export interface ExerciceTangentePointDonneRadicale {
   variante: "pointDonne";
+  /** Option « f′ donnée » (lot C) — voir `ExerciceTangente`. */
+  deriveeDonnee?: boolean;
   sousFamille: "radicale";
   /** Coefficient multiplicatif, jamais nul. */
   coeff: number;
@@ -45,12 +49,14 @@ export type ExerciceTangentePointDonne = ExerciceTangentePointDonnePolynomiale |
 
 export interface ExerciceTangenteHorizontale {
   variante: "horizontale";
+  /** Option « f′ donnée » (lot C) — voir `ExerciceTangente`. */
+  deriveeDonnee?: boolean;
   a: number;
   b: number;
   c: number;
   d: number;
-  /** Racine(s) EXACTE(S) de f'(x)=0, vérité terrain — longueur 1 (racine double) ou 2 (racines
-   * distinctes), JAMAIS recalculées en résolvant f'(x)=0 une seconde fois côté vérification. */
+  /** Racine(s) EXACTE(S) de f'(x)=0, vérité terrain — longueur 0 (Δ < 0 : aucune tangente
+   * horizontale, lot C), 1 (racine double) ou 2 (racines distinctes), JAMAIS recalculées en résolvant f'(x)=0 une seconde fois côté vérification. */
   racines: number[];
 }
 
@@ -65,6 +71,8 @@ export interface ExerciceTangenteHorizontale {
 
 export interface ExerciceTangenteDoubleTangence {
   variante: "doubleTangence";
+  /** Option « f′ donnée » (lot C) — voir `ExerciceTangente`. */
+  deriveeDonnee?: boolean;
   /** Coefficients ASCENDANTS [e0,e1,e2,e3,e4] du quartique développé, e4≠0. */
   coeffs: number[];
   /** Point donné à l'élève — la tangence en ce point est admise, à recalculer. */
@@ -74,6 +82,38 @@ export interface ExerciceTangenteDoubleTangence {
   q: number;
 }
 
-export type ExerciceTangente = ExerciceTangentePointDonne | ExerciceTangenteHorizontale | ExerciceTangenteDoubleTangence;
+/** Variante D (lot C, familles validées — fin de catalogue) — tangente de PENTE DONNÉE m : f
+ * polynomiale (coefficients ascendants, degré 2 ou 3), points où f′(x) = m (1 point pour un degré 2,
+ * 2 points pour un degré 3), puis les tangentes y = mx + p en ces points. */
+export interface ExerciceTangentePente {
+  variante: "pente";
+  /** Option « f′ donnée » (lot C) — voir `ExerciceTangente`. */
+  deriveeDonnee?: boolean;
+  coeffs: number[];
+  m: number;
+  /** Abscisses EXACTES (entières) des points où f′(x) = m, triées — vérité terrain. */
+  racines: number[];
+}
+
+/** Variante E (lot C, familles validées — fin de catalogue) — tangentes passant par un point
+ * EXTÉRIEUR P(xP ; yP) à la parabole f(x) = ax² + bx + c : abscisses de contact xP ± d (deux
+ * tangentes). */
+export interface ExerciceTangentePointExterieur {
+  variante: "pointExterieur";
+  /** Option « f′ donnée » (lot C) — voir `ExerciceTangente`. */
+  deriveeDonnee?: boolean;
+  a: number;
+  b: number;
+  c: number;
+  xP: number;
+  yP: number;
+  /** Abscisses de contact, triées — vérité terrain. */
+  contacts: number[];
+}
+
+/** Option « f′ donnée / à calculer » (question 3 de l'audit, réglage `parametresAuChoix`
+ * `derivee-donnee`) : vrai → f′(x) est donnée (écran et papier) ; absent/faux → l'élève la calcule
+ * (écran « deriver » en tête, étape du papier). Sans objet pour la double tangence. */
+export type ExerciceTangente = ExerciceTangentePointDonne | ExerciceTangenteHorizontale | ExerciceTangenteDoubleTangence | ExerciceTangentePente | ExerciceTangentePointExterieur;
 
 export type GenerateurExerciceTangente = () => ExerciceTangente;

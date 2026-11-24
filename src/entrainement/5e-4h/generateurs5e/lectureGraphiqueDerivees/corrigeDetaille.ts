@@ -4,7 +4,7 @@ import type { ExerciceLectureGraphiqueDerivees } from "../../core5e/lectureGraph
 import { ecransParcourus, type EcranLectureGraphiqueDerivees } from "../../moteur5e/typesLectureGraphiqueDerivees";
 import { listeAsymptotes } from "../../moteur5e/typesLectureGraphiqueLimites";
 import { pointsTangenteHorizontale, tableauFPrimeAttendu, tableauFSecondeAttendu } from "../../moteur5e/verificationLectureGraphiqueDerivees";
-import { formatEnteteColonnesTableauFPrime, formatEnteteColonnesTableauFSeconde, formatReponseAttenduePhaseLatex } from "../../ui5e/formatLectureGraphiqueDerivees";
+import { formatEnteteColonnesTableauFPrime, formatEnteteColonnesTableauFSeconde, formatReponseAttenduePhaseLatex, abscisseInflexionLatex } from "../../ui5e/formatLectureGraphiqueDerivees";
 import {
   COURS_LECTURE,
   COURS_SIGNE,
@@ -162,7 +162,7 @@ export function correctionDetailleeLectureGraphiqueDerivees(e: ExerciceLectureGr
                 const avant = att.signes[i - 1] === "+" ? "∪" : "∩";
                 const apres = att.signes[i + 1] === "+" ? "∪" : "∩";
                 const palier = e.paliers.some((x) => Math.abs(x.position - p.position) < 1e-6);
-                return ligne(`x\\approx ${dixiemeL(p.position)}`, `${palier ? "palier : " : ""}la courbe passe de ${avant} à ${apres}`);
+                return ligne(`x\\approx ${abscisseInflexionLatex(p.position)}`, `${palier ? "palier : " : ""}la courbe passe de ${avant} à ${apres} (ligne de la grille la plus proche)`);
               });
         etapes.push(
           utilise(l, [t(`Un point d'inflexion est un point où la courbe passe de ∪ (tournée vers le haut) à ∩ (tournée vers le bas), ou l'inverse ; entre une bosse et un creux voisins, il y en a toujours un ${COURS_LECTURE}.`)]),
@@ -178,7 +178,7 @@ export function correctionDetailleeLectureGraphiqueDerivees(e: ExerciceLectureGr
         const lignes: LigneCalcul[] = zones.map((z) =>
           ligne(`f''(x)${z.signe === "+" ? ">" : "<"}0\\text{ sur }]${z.gauche}\\,;\\,${z.droite}[`, z.signe === "+" ? "la courbe est tournée vers le haut (∪)" : "la courbe est tournée vers le bas (∩)"),
         );
-        for (const p of e.inflexions) lignes.push(ligne(`f''(${dixiemeL(p.position)})=0`, "f″ change de signe : point d'inflexion"));
+        for (const p of e.inflexions) lignes.push(ligne(`f''(x)=0\\ \\text{en}\\ x\\approx ${abscisseInflexionLatex(p.position)}`, "f″ change de signe : point d'inflexion"));
         etapes.push(
           utilise(l, [t(`f″ > 0 là où la courbe est tournée vers le haut (∪), f″ < 0 là où elle est tournée vers le bas (∩) ; chaque point d'inflexion sépare deux zones de signes contraires ${COURS_SIGNE}.`)]),
           calcul(l, lignes),

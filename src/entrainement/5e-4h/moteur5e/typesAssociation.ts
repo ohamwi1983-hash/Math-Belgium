@@ -20,6 +20,10 @@ export interface EtatSessionAssociation {
   reglages: ReglagesSession5e;
   generateur: () => ExerciceAssociation;
   exerciceCourant: ExerciceAssociation;
+  /** Lot C : l'association (choix fermés, une tentative), puis la justification d'UNE association. */
+  phase: "association" | "justification";
+  /** Score de l'écran d'association (gardé pendant la justification). */
+  scoreAssociation?: number;
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   indexExercice: number;

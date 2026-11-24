@@ -45,8 +45,29 @@ export interface ExerciceDefinitionDeriveeRationnelleLineaire {
   a: number;
 }
 
+/** Famille 5 (lot C, audit 5e ch. 5 — fin de catalogue) — f(x)=m·x²+n·x+p, m≠0, n≠0 (quadratique
+ * complète : le terme en x s'ajoute au double produit). `a` ≠ 0. */
+export interface ExerciceDefinitionDeriveeQuadratiqueComplete {
+  famille: "quadratiqueComplete";
+  m: number;
+  n: number;
+  p: number;
+  a: number;
+}
+
+/** Famille 6 (lot C, fin de catalogue) — f(x)=k·√(x+c), k≥1 : a + c = s² (s entier de 1 à 4), le
+ * taux d'accroissement se simplifie par l'expression conjuguée (cours, § 1 ; lien avec 5gen64). */
+export interface ExerciceDefinitionDeriveeRacine {
+  famille: "racine";
+  k: number;
+  c: number;
+  a: number;
+}
+
 export type ExerciceDefinitionDerivee =
   | ExerciceDefinitionDeriveeAffine
+  | ExerciceDefinitionDeriveeQuadratiqueComplete
+  | ExerciceDefinitionDeriveeRacine
   | ExerciceDefinitionDeriveeQuadratique
   | ExerciceDefinitionDeriveeRationnelleSimple
   | ExerciceDefinitionDeriveeRationnelleLineaire;

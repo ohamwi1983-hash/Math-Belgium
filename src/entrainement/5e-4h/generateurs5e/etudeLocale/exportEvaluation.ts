@@ -17,7 +17,7 @@ import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { correctionDetailleeEtudeLocale } from "./corrigeDetaille";
 import { ordreEcransEtudeLocale, type EcranEtudeLocale } from "../../moteur5e/typesEtudeLocale";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEtudeLocale } from "./index";
-import { profilEtudeLocale } from "../profilsEvaluationDerivees28-30";
+import { PARAMETRES_ETUDE_LOCALE, profilEtudeLocale } from "../profilsEvaluationDerivees28-30";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceEtudeLocale>` pour 5gen29 (Étude locale) — feuille
@@ -32,7 +32,7 @@ import { profilEtudeLocale } from "../profilsEvaluationDerivees28-30";
  * `tableauFPrimeAttendu`/`tableauFSecondeAttendu`, la MÊME source que la vérification de l'écran).
  */
 
-const LETTRES = "abcdefgh";
+const LETTRES = "abcdefghijkl";
 
 // ============================================================================
 // Tableau de signes en LaTeX (réutilisé par 5gen30, `lectureGraphiqueDerivees/exportEvaluation.ts`).
@@ -46,6 +46,8 @@ export { tableauSignesEtudeLatex };
 
 function entete(exercice: ExerciceEtudeLocale): FragmentConsigne[] {
   const avance = exercice.niveau === "avance";
+  // Option « à calculer » (lot C) : seule f est donnée.
+  if (exercice.deriveesACalculer) return [texte("On considère la fonction "), latex(formatTermesDonneesLatex(exercice)[0]), texte(".")];
   return [texte(avance ? "On considère la fonction f ; ses dérivées f' et f'' sont données : " : "On considère la fonction f ; sa dérivée f' est donnée : "), latex(formatTermesDonneesLatex(exercice).join(" \\quad "))];
 }
 
@@ -65,8 +67,10 @@ function consignePapier(exercice: ExerciceEtudeLocale): string {
   const domaine = exercice.type !== "polynomiale" ? "Détermine le domaine de définition de f. " : "";
   const fPrime = "Recherche les zéros de f', étudie le signe de f' et les variations de f, puis détermine les éventuels extremums de f (abscisse, nature et valeur).";
   const fSeconde = exercice.niveau === "avance" ? " Étudie de même le signe de f'' et la concavité de f, puis détermine ses éventuels points d'inflexion (abscisse et valeur)." : "";
-  const precision = irrationnelle(exercice) ? " Donne les abscisses en valeur exacte ; les valeurs de f peuvent être arrondies au centième." : " Donne des valeurs exactes.";
-  return `${domaine}${fPrime}${fSeconde}${precision}`;
+  // Lot C (question 4) : valeurs exactes partout, racines irrationnelles comprises.
+  const precision = " Donne des valeurs exactes.";
+  const derivees = exercice.deriveesACalculer ? (exercice.niveau === "avance" ? "Calcule f'(x) et f''(x). " : "Calcule f'(x). ") : "";
+  return `${domaine}${derivees}${fPrime}${fSeconde}${precision}`;
 }
 
 function enoncePapierEtudeLocale(exercice: ExerciceEtudeLocale): EnoncePapier {
@@ -102,10 +106,12 @@ function reponseBreveEtudeLocale(exercice: ExerciceEtudeLocale): FragmentConsign
   return fragments;
 }
 
-const POIDS_ECRAN: Record<EcranEtudeLocale, number> = { domaine: 0.5, resoudreFPrime: 2, tableauFPrime: 2, extremums: 1.5, resoudreFSeconde: 2, tableauFSeconde: 2, inflexions: 1.5 };
+const POIDS_ECRAN: Record<EcranEtudeLocale, number> = { domaine: 0.5, deriverFPrime: 1, deriverFSeconde: 1, resoudreFPrime: 2, tableauFPrime: 2, extremums: 1.5, resoudreFSeconde: 2, tableauFSeconde: 2, inflexions: 1.5 };
 
 const CRITERE_ECRAN: Record<EcranEtudeLocale, string> = {
   domaine: "Domaine de définition",
+  deriverFPrime: "Dérivée f'(x) correcte",
+  deriverFSeconde: "Dérivée seconde f''(x) correcte",
   resoudreFPrime: "Zéros de f' (toutes les solutions)",
   tableauFPrime: "Tableau de signes de f', variations et nature de chaque zéro",
   extremums: "Valeur de f en chaque extremum",
@@ -142,7 +148,7 @@ function baremeEtudeLocale(exercice: ExerciceEtudeLocale): BaremeExercice {
     reponseFinale: reponseBreveEtudeLocale(exercice),
     criteres,
     erreursFrequentes: erreurs,
-    reponsesAcceptees: irrationnelle(exercice) ? [[texte("Valeurs de f arrondies au centième")]] : [[texte("Fractions non simplifiées ou décimaux exacts équivalents")]],
+    reponsesAcceptees: irrationnelle(exercice) ? [[texte("Valeur exacte sous une autre forme équivalente (par exemple 4√2 − 4)")]] : [[texte("Fractions non simplifiées ou décimaux exacts équivalents")]],
   };
 }
 
@@ -151,7 +157,30 @@ function baremeEtudeLocale(exercice: ExerciceEtudeLocale): BaremeExercice {
  * interdites à porter dans le tableau (rationnelle avec CE). La racine double n'est pas notée en piège :
  * c'est le verdict de l'élève (nature du point). */
 function criteresDifficulteEtudeLocale(exercice: ExerciceEtudeLocale): CriteresDifficulte {
-  return { ...etapesDuCorrige(correctionDetailleeEtudeLocale(exercice), []), methode: 0, piege: exercice.type === "rationnelleAvecCE" ? 1 : 0 };
+  // Groupe à verdict « racines » (lot D) : la racine double (aucun extremum, un écran de moins) prend
+  // le niveau et la durée des racines simples au même niveau — la feuille ne trahit pas le verdict.
+  const reference = exercice.type === "polynomiale" && exercice.natureRacines === "double" ? referenceRacinesSimples(exercice) : exercice;
+  return { ...etapesDuCorrige(correctionDetailleeEtudeLocale(reference), []), methode: 0, piege: exercice.type === "rationnelleAvecCE" ? 1 : 0 };
+}
+
+/** f(x) = 2x³ − 6x + d (zéros de f′ : −1 et 1 ; f″ s'annule en 0), même niveau et même option. */
+function referenceRacinesSimples(e: ExerciceEtudeLocale): ExerciceEtudeLocale {
+  const entier = (n: number) => ({ exact: true as const, valeur: { num: n, den: 1 } });
+  return {
+    type: "polynomiale",
+    natureRacines: "simple",
+    niveau: e.niveau,
+    a: 2,
+    b: 0,
+    c: -6,
+    d: e.type === "polynomiale" ? e.d : 1,
+    racinesFPrime: [entier(-1), entier(1)],
+    classificationFPrime: ["max", "min"],
+    racinesFSeconde: e.niveau === "avance" ? [entier(0)] : [],
+    classificationFSeconde: e.niveau === "avance" ? ["pi"] : [],
+    exclusionsCE: [],
+    deriveesACalculer: e.deriveesACalculer,
+  };
 }
 
 /** Ancien corrigé (repli, documents Word) : les lignes du corrigé détaillé, en paragraphes. */
@@ -175,5 +204,10 @@ export const adaptateurEvaluationEtudeLocale: AdaptateurFeuilleExercices<Exercic
   bareme: baremeEtudeLocale,
   enoncePapier: enoncePapierEtudeLocale,
   profilInstance: profilEtudeLocale,
-  calculatriceIndispensable: ["polynomiale-irrationnelle-base", "polynomiale-irrationnelle-avance"],
+  // Lot C (question 4) : plus de calculatrice indispensable — valeurs exactes en e ± √r.
+  parametresAuChoix: PARAMETRES_ETUDE_LOCALE,
+  groupesVerdict: [
+    { id: "groupe_racines_base", label: "Polynomiale — racines simples ou double, tiré au hasard (base)", variantes: ["polynomiale-simple-base", "polynomiale-double-base"], formeCommune: true },
+    { id: "groupe_racines_avance", label: "Polynomiale — racines simples ou double, tiré au hasard (avancé)", variantes: ["polynomiale-simple-avance", "polynomiale-double-avance"], formeCommune: true },
+  ],
 };

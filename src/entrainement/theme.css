@@ -4453,3 +4453,8 @@
   .entrainement .corrige-ecran-calcul { grid-template-columns: max-content minmax(max-content, 1fr); min-width: 100%; }
   .entrainement .corrige-ecran-calcul .cc-j { grid-column: 1 / -1; padding: 0 0 4px 1.2em; contain: inline-size; }
 }
+
+/* 5gen25 (lot C) : choix d'association jugé une fois l'écran clos. */
+.entrainement .association-juge { display: inline-block; margin-left: 0.5rem; font-weight: 600; }
+.entrainement .association-juge--juste { color: var(--good, #2b8a3e); }
+.entrainement .association-juge--faux { color: var(--bad, #c92a2a); }

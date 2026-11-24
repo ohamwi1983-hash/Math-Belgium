@@ -24,8 +24,7 @@ import {
   ciblesValeursInflexions,
   verifierEnsembleNumeriqueExact,
   verifierEnsembleReelGuide,
-  verifierTableauEtudeLocale,
-} from "./verificationEtudeLocale";
+  verifierTableauEtudeLocale, diagnostiquerDeriveeEtudeLocale, refusDeriveeEtudeLocale, refusValeursEtudeLocale } from "./verificationEtudeLocale";
 
 const POINTS_DE_BASE = 100;
 
@@ -122,13 +121,23 @@ export function soumettreReponseDomaine(etat: EtatSessionEtudeLocale, reponse: E
 // Écrans "resoudreFPrime"/"resoudreFSeconde" — ensemble de racines, ordre indifférent.
 // ============================================================================
 
+/** Lot C — écrans « deriverFPrime » / « deriverFSeconde » (option à calculer). */
+export function soumettreReponseDeriver(etat: EtatSessionEtudeLocale, texte: string): EtatSessionEtudeLocale {
+  if (refusDeriveeEtudeLocale(texte)) return etat;
+  const ordre = etat.phase === "deriverFSeconde" ? 2 : 1;
+  return soumettreEcran(etat, etat.phase, texte, (t) => diagnostiquerDeriveeEtudeLocale(t, etat.exerciceCourant, ordre) === "correct");
+}
+
 export function soumettreReponseResoudreFPrime(etat: EtatSessionEtudeLocale, reponses: string[]): EtatSessionEtudeLocale {
+  // Lot B : saisie illisible ou arrondie — état inchangé, aucune tentative consommée.
+  if (reponses.length > 0 && refusValeursEtudeLocale(reponses, ciblesRacinesFPrime(etat.exerciceCourant))) return etat;
   return soumettreEcran(etat, "resoudreFPrime", reponses, (r) => verifierEnsembleNumeriqueExact(r, ciblesRacinesFPrime(etat.exerciceCourant)));
 }
 
 export function soumettreReponseResoudreFSeconde(etat: EtatSessionEtudeLocale, reponses: string[]): EtatSessionEtudeLocale {
   const exercice = etat.exerciceCourant;
   if (exercice.niveau !== "avance") throw new Error('soumettreReponseResoudreFSeconde : exercice hors niveau "avance"');
+  if (reponses.length > 0 && refusValeursEtudeLocale(reponses, ciblesRacinesFSeconde(exercice))) return etat;
   return soumettreEcran(etat, "resoudreFSeconde", reponses, (r) => verifierEnsembleNumeriqueExact(r, ciblesRacinesFSeconde(exercice)));
 }
 
@@ -152,9 +161,11 @@ export function soumettreReponseTableauFSeconde(etat: EtatSessionEtudeLocale, re
 // ============================================================================
 
 export function soumettreReponseExtremums(etat: EtatSessionEtudeLocale, reponses: string[]): EtatSessionEtudeLocale {
+  if (refusValeursEtudeLocale(reponses, ciblesValeursExtremums(etat.exerciceCourant))) return etat;
   return soumettreEcran(etat, "extremums", reponses, (r) => verifierEnsembleNumeriqueExact(r, ciblesValeursExtremums(etat.exerciceCourant)));
 }
 
 export function soumettreReponseInflexions(etat: EtatSessionEtudeLocale, reponses: string[]): EtatSessionEtudeLocale {
+  if (refusValeursEtudeLocale(reponses, ciblesValeursInflexions(etat.exerciceCourant))) return etat;
   return soumettreEcran(etat, "inflexions", reponses, (r) => verifierEnsembleNumeriqueExact(r, ciblesValeursInflexions(etat.exerciceCourant)));
 }

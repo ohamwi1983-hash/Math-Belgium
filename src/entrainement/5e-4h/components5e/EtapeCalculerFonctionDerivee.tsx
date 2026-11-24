@@ -1,12 +1,12 @@
 import { useState } from "react";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
+import type { AideTrig } from "../ui5e/aidesTrigonometrie";
+import type { FragmentConsigne } from "../../export/genererFeuilleExercices";
 import type { ExerciceFonctionDerivee, TypeDerivee } from "../core5e/fonctionDerivee.types";
-import { consigneEcran, consigneGenerale, formatTermesDonneesLatex, questionFinale, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatFonctionDerivee";
+import { consigneEcran, consigneGenerale, formatTermesDonneesLatex, questionFinale } from "../ui5e/formatFonctionDerivee";
 import { Katex } from "../components/Katex";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -24,23 +24,31 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
+  /** Lot B : saisie refusée SANS tentative (illisible, approchée…) — même fonction que le moteur. */
+  refus: (valeurs: string[]) => string | null;
+  /** Message ciblé sur l'erreur trahie par la dernière réponse fausse. */
+  cible: (valeurs: string[]) => FragmentConsigne[] | null;
+  aides: AideTrig[];
 }
 
 /** Écran "calculer" — champ unique f'(x), mêmes idiomes que `EtapeChampLibreDerivee.tsx`
  * (5gen26) mais réécrit localement : le type `ExerciceDefinitionDerivee`/`PhaseDefinitionDerivee`
  * de ce composant est propre à 5gen26, jamais élargi pour un autre générateur. Jamais de
  * calculatrice : générateur purement symbolique/exact. */
-export function EtapeCalculerFonctionDerivee({ exercice, typeRetenu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeCalculerFonctionDerivee({ exercice, typeRetenu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, refus, cible, aides, validation}: Props) {
+  const [refusAffiche, setRefusAffiche] = useState<string | null>(null);
+  const [soumises, setSoumises] = useState<string[] | null>(null);
   const [texte, setTexte] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
-  const montrerErreurs = tentativesUtilisees > 0;
   const apresEchec = tentativesUtilisees > 0;
   const texteErronee = apresEchec && !!diagnostiquer && diagnostiquer(texte) !== "correct";
-  const aide2 = texteAideNiveau2("calculer", typeRetenu);
 
   function valider() {
     if (texte.trim() === "") return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
+    const valeursSoumises = [texte];
+    const message = refus(valeursSoumises);
+    setRefusAffiche(message);
+    if (message) return;
+    setSoumises(valeursSoumises);
     onValider(texte);
   }
 
@@ -69,43 +77,27 @@ export function EtapeCalculerFonctionDerivee({ exercice, typeRetenu, tentativesU
           type="text"
           className={`text-input${texteErronee ? " is-erronee" : ""}`}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => {
+            setTexte(e.target.value);
+            setRefusAffiche(null);
+          }}
           placeholder="ex : 6x^5 − sin(x)"
         />
       </div>
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          {(() => {
-            const aide1 = texteAideNiveau1("calculer", typeRetenu);
-            return (
-              <>
-                <p>{aide1.texte}</p>
-                {aide1.latex && <Katex expression={aide1.latex} block />}
-              </>
-            );
-          })()}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aide2.texte}</p>
-              {aide2.latex && <Katex expression={aide2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aides}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={texte.trim() === ""}
+        illisible={refusAffiche !== null}
+        texteIllisible={refusAffiche ?? ""}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={soumises !== null && tentativesUtilisees > 0 ? cible(soumises) : null}
+        validation={validation}
+      />
     </div>
   );
 }

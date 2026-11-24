@@ -223,7 +223,8 @@ function ciblesValeursF(exercice: ExerciceEtudeLocale, racines: RacineEtudeLocal
   racines.forEach((r, i) => {
     if (!retenue(i)) return;
     const x = valeurNumeriqueRacineEtudeLocale(r);
-    out.push({ valeur: valeurFEtudeLocale(exercice, x), exacte: exercice.type !== "polynomiale" || r.exact });
+    // Lot C (question 4) : valeur EXACTE exigée partout, même en e ± √r (f(e ± √r) = A ± B√r).
+    out.push({ valeur: valeurFEtudeLocale(exercice, x), exacte: true });
   });
   return out;
 }
@@ -348,4 +349,53 @@ export function verifierTableauEtudeLocale(reponse: ReponseTableauEtudeLocale, a
     reponse.ligne2.length === attendu.ligne2.length &&
     reponse.ligne2.every((v, i) => v === attendu.ligne2[i])
   );
+}
+
+// ============================================================================
+// Lot C — écrans « deriverFPrime » / « deriverFSeconde » (option f′ et f″ à calculer) ; lot B —
+// refus sans tentative partagé moteur / écran.
+// ============================================================================
+
+const POINTS_DERIVEE = [0.37, 1.61, -0.83, 2.29, -1.47, 3.1];
+
+/** Saisie de f′(x) ou f″(x) égale à la dérivée de l'instance (équivalence en 6 points). */
+export function diagnostiquerDeriveeEtudeLocale(texte: string, exercice: ExerciceEtudeLocale, ordre: 1 | 2): StatutVerification {
+  const s = texte.replace(/[\u2212\u2013\u2014]/g, "-").replace(/^[^=]*=/, "");
+  let n = 0;
+  for (const x of POINTS_DERIVEE) {
+    const c = ordre === 1 ? deriveeFEtudeLocale(exercice, x) : deriveeSecondeEtudeLocale(exercice, x);
+    if (!Number.isFinite(c)) continue;
+    let v: number;
+    try {
+      v = evaluerExpressionGenerale(s, x);
+    } catch {
+      return "parse_error";
+    }
+    if (!Number.isFinite(v) || Math.abs(v - c) > 1e-6 * Math.max(1, Math.abs(c))) return "not_equivalent";
+    n++;
+  }
+  return n >= 3 ? "correct" : "not_equivalent";
+}
+
+const FIN_REFUS = " Cette saisie ne compte pas comme une tentative.";
+export const MESSAGE_ILLISIBLE_ETUDE_LOCALE = "Valeur non reconnue : écris chaque valeur exacte, par exemple −2, 5/3 ou 1 + √2." + FIN_REFUS;
+export const MESSAGE_ARRONDI_ETUDE_LOCALE = "Valeur arrondie : donne la valeur exacte (fraction ou racine, par exemple 3 − 4√2)." + FIN_REFUS;
+export const MESSAGE_EXPRESSION_ETUDE_LOCALE = "Expression non reconnue : vérifie les parenthèses, les signes et la place de x." + FIN_REFUS;
+
+/** Liste de valeurs refusée sans tentative (illisible, arrondie) — rend le message, ou null. */
+export function refusValeursEtudeLocale(reponses: string[], cibles: CibleNumerique[]): string | null {
+  if (reponses.some((t) => evaluerSaisie(t) === null)) return MESSAGE_ILLISIBLE_ETUDE_LOCALE;
+  return contientArrondiRationnel(reponses, cibles) ? MESSAGE_ARRONDI_ETUDE_LOCALE : null;
+}
+
+/** Expression de dérivée refusée sans tentative (syntaxe) — rend le message, ou null. */
+export function refusDeriveeEtudeLocale(texte: string): string | null {
+  const s = texte.replace(/[\u2212\u2013\u2014]/g, "-").replace(/^[^=]*=/, "").trim();
+  if (s === "") return MESSAGE_EXPRESSION_ETUDE_LOCALE;
+  try {
+    evaluerExpressionGenerale(s, 0.37);
+    return null;
+  } catch {
+    return MESSAGE_EXPRESSION_ETUDE_LOCALE;
+  }
 }

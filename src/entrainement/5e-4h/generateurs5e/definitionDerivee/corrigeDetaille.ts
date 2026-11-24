@@ -24,7 +24,7 @@ import {
   t,
   type Q,
 } from "../../ui5e/corrigeDerivees1";
-import { deriveeExacte, valeurExacte } from "./index";
+import { deriveeExacte, racineEnA, valeurExacte } from "./index";
 
 /**
  * Corrigé détaillé « comme au tableau » de 5gen26 (calculer f'(a) par la définition) — règle
@@ -92,6 +92,17 @@ function lignesFA(e: ExerciceDefinitionDerivee): LigneCalcul[] {
       return lignesValeurPoly(g, [e.p, e.m], q(a)).lignes;
     case "quadratique":
       return lignesValeurPoly(g, [e.p, 0, e.m], q(a)).lignes;
+    case "quadratiqueComplete":
+      return lignesValeurPoly(g, [e.p, e.n, e.m], q(a)).lignes;
+    case "racine": {
+      const s = racineEnA(e);
+      const k = e.k === 1 ? "" : `${e.k}`;
+      return sansDoublons([
+        ligne(`${g}=${k}\\sqrt{${a}${e.c > 0 ? `+${e.c}` : e.c}}`, `on remplace x par ${nombreTexte(a)}`),
+        ligne(`=${k}\\sqrt{${s * s}}`, "on calcule sous la racine"),
+        ligne(`=${qL(v)}`, e.k === 1 ? undefined : `${e.k}\u00a0×\u00a0${s}`),
+      ]);
+    }
     case "rationnelleSimple": {
       if (e.expo === 1) {
         if (a === 1) return [ligne(`${g}=${qL(v)}`, "on remplace x par 1")];
@@ -139,6 +150,26 @@ function lignesFAH(e: ExerciceDefinitionDerivee): LigneCalcul[] {
       ];
       return sansDoublons(lignes);
     }
+    case "quadratiqueComplete": {
+      const { m, n, p } = e;
+      const carre = somme([`${a * a}`, monome(2 * a, 1, "h"), "h^{2}"]);
+      const pTxt = p === 0 ? "" : p > 0 ? `+${p}` : `${p}`;
+      const nTxt = `${n < 0 ? "-" : "+"}${Math.abs(n) === 1 ? "" : Math.abs(n)}(${ah})`;
+      return sansDoublons([
+        ligne(`${g}=${coefFacteur(m, `(${ah})^{2}`)}${nTxt}${pTxt}`, [t("on remplace x par "), f(ah)]),
+        ligne(`=${coefFacteur(m, `(${carre})`)}${nTxt}${pTxt}`, jf("identité remarquable ", { l: "(a+b)^2=a^2+2ab+b^2" })),
+        ligne(`=${somme([`${m * a * a}`, monome(2 * m * a, 1, "h"), monome(m, 2, "h"), `${n * a}`, monome(n, 1, "h"), `${p}`])}`, "on distribue"),
+        ligne(`=${polyV([m * a * a + n * a + p, 2 * m * a + n, m], "h")}`, "on réduit et on ordonne"),
+      ]);
+    }
+    case "racine": {
+      const s = racineEnA(e);
+      const k = e.k === 1 ? "" : `${e.k}`;
+      return sansDoublons([
+        ligne(`${g}=${k}\\sqrt{(${ah})${e.c > 0 ? `+${e.c}` : e.c}}`, [t("on remplace x par "), f(ah)]),
+        ligne(`=${k}\\sqrt{h+${s * s}}`, "on réduit sous la racine"),
+      ]);
+    }
     case "rationnelleSimple":
       return e.expo === 1
         ? sansDoublons([ligne(`${g}=\\dfrac{${e.k}}{${ah}}`, [t("on remplace x par "), f(ah)]), ligne(`=\\dfrac{${e.k}}{${hPlus(a)}}`, "on écrit h en premier")])
@@ -166,14 +197,15 @@ function moinsFA(v: Q): string {
   return v.n < 0 ? `+${qL(q(-v.n, v.d))}` : `-${qL(v)}`;
 }
 
-function lignesQuotientQuadratique(e: ExerciceDefinitionDerivee & { famille: "quadratique" }): LigneCalcul[] {
+function lignesQuotientQuadratique(e: ExerciceDefinitionDerivee & { famille: "quadratique" | "quadratiqueComplete" }): LigneCalcul[] {
   const a = e.a;
   const m = e.m;
-  const v = m * a * a + e.p;
-  const reste = polyV([0, 2 * m * a, m], "h");
-  const fact = polyV([2 * m * a, m], "h");
+  const n = e.famille === "quadratiqueComplete" ? e.n : 0;
+  const v = m * a * a + n * a + e.p;
+  const reste = polyV([0, 2 * m * a + n, m], "h");
+  const fact = polyV([2 * m * a + n, m], "h");
   return sansDoublons([
-    ligne(`f(${a}+h)-f(${a})=(${polyV([v, 2 * m * a, m], "h")})${moinsFA(q(v))}`, jf("on soustrait ", { l: `f(${a})=${v}` })),
+    ligne(`f(${a}+h)-f(${a})=(${polyV([v, 2 * m * a + n, m], "h")})${moinsFA(q(v))}`, jf("on soustrait ", { l: `f(${a})=${v}` })),
     ligne(`=${reste}`, "les termes constants s'annulent"),
     ligne(`=h(${fact})`, "on met h en évidence"),
     ligne(`\\dfrac{f(${a}+h)-f(${a})}{h}=\\dfrac{h(${fact})}{h}`, "on divise par h"),
@@ -242,6 +274,25 @@ function lignesQuotientRationnel(e: ExerciceDefinitionDerivee, r: FormeRationnel
   return sansDoublons(lignes);
 }
 
+/** Taux d'accroissement de k√(x + c) : expression conjuguée (cours, § 1 ; 5gen64). */
+function lignesQuotientRacine(e: ExerciceDefinitionDerivee & { famille: "racine" }): LigneCalcul[] {
+  const a = e.a;
+  const s = racineEnA(e);
+  const S = s * s;
+  const r = `\\sqrt{h+${S}}`;
+  const k = e.k === 1 ? "" : `${e.k}`;
+  const kfois = e.k === 1 ? "" : `${e.k}\\cdot`;
+  const ks = e.k * s;
+  return sansDoublons([
+    ligne(`\\dfrac{f(${a}+h)-f(${a})}{h}=\\dfrac{${k}${r}-${ks}}{h}`, jf("on soustrait ", { l: `f(${a})=${ks}` })),
+    ...(e.k === 1 ? [] : [ligne(`=${kfois}\\dfrac{${r}-${s}}{h}`, `on met ${e.k} en évidence`)]),
+    ligne(`=${kfois}\\dfrac{\\left(${r}-${s}\\right)\\left(${r}+${s}\\right)}{h\\left(${r}+${s}\\right)}`, [t("on multiplie par l'expression conjuguée "), f(`${r}+${s}`)]),
+    ligne(`=${kfois}\\dfrac{(h+${S})-${S}}{h\\left(${r}+${s}\\right)}`, jf("", { l: "(A-B)(A+B)=A^2-B^2" })),
+    ligne(`=${kfois}\\dfrac{h}{h\\left(${r}+${s}\\right)}`, "on réduit le numérateur"),
+    ligne(`=\\dfrac{${e.k}}{${r}+${s}}`, "on simplifie par h (h ≠ 0)"),
+  ]);
+}
+
 // ============================================================================
 // Étape « limite ».
 // ============================================================================
@@ -281,6 +332,21 @@ function lignesVerification(e: ExerciceDefinitionDerivee): LigneCalcul[] {
   switch (e.famille) {
     case "affine":
       return [ligne(`f'(x)=${e.m}`, "la dérivée de mx + p est m")];
+    case "quadratiqueComplete":
+      return sansDoublons([
+        ligne(`f'(x)=${polyV([e.n, 2 * e.m])}`, jf("règles ", { l: "(x^2)'=2x,\\ (x)'=1" })),
+        ligne(`f'(${a})=${2 * e.m}\\cdot ${par(a)}${e.n < 0 ? e.n : `+${e.n}`}`, `on remplace x par ${nombreTexte(a)}`),
+        ligne(`=${val}`),
+      ]);
+    case "racine": {
+      const s = racineEnA(e);
+      const xc = polyV([e.c, 1]);
+      return sansDoublons([
+        ligne(`f'(x)=\\dfrac{${e.k}}{2\\sqrt{${xc}}}`, jf("règle ", { l: "\\left(\\sqrt{x}\\right)'=\\frac{1}{2\\sqrt{x}}" })),
+        ligne(`f'(${a})=\\dfrac{${e.k}}{2\\sqrt{${s * s}}}`, `on remplace x par ${nombreTexte(a)}`),
+        ligne(`=${val}`),
+      ]);
+    }
     case "quadratique":
       return sansDoublons([
         ligne(`f'(x)=${monome(2 * e.m, 1)}`, jf("règle ", { l: "(x^2)'=2x" })),
@@ -328,7 +394,10 @@ function piegeEtape(e: ExerciceDefinitionDerivee): EtapeCorrection {
     case "affine":
       return piege(lettreEcranDefinitionDerivee(e, "limite"), [t(`Le terme constant disparaît dans f(${a} + h) − f(${a}) : il ne s'ajoute pas au résultat, f'(${a}) vaut le coefficient de x.`)]);
     case "quadratique":
+    case "quadratiqueComplete":
       return piege("a", [t(`En développant le carré de ${a} + h, ne pas oublier le double produit (terme en h) ni le signe du coefficient de x².`)]);
+    case "racine":
+      return piege(lettreEcranDefinitionDerivee(e, "quotient"), [t("Remplacer h par 0 dans le taux non simplifié donne "), f("\\frac{0}{0}"), t(" : il faut d'abord multiplier par l'expression conjuguée pour simplifier h.")]);
     default:
       return piege(lettreEcranDefinitionDerivee(e, "quotient"), [t(`On met f(${a} + h) − f(${a}) au même dénominateur avant de diviser par h : sinon le facteur h ne peut pas se simplifier.`)]);
   }
@@ -355,10 +424,10 @@ export function correctionDetailleeDefinitionDerivee(e: ExerciceDefinitionDerive
       utilise(l, [
         t("Taux d'accroissement : on calcule "),
         f(`f(${a}+h)-f(${a})`),
-        t(forme ? ", mis au même dénominateur, on met h en évidence au numérateur, puis on divise par h " : ", on met h en évidence, puis on divise par h "),
+        t(forme ? ", mis au même dénominateur, on met h en évidence au numérateur, puis on divise par h " : e.famille === "racine" ? ", puis on multiplie le taux par l'expression conjuguée du numérateur pour simplifier h " : ", on met h en évidence, puis on divise par h "),
         t(`${COURS_DEFINITION}.`),
       ]),
-      calcul(l, e.famille === "quadratique" ? lignesQuotientQuadratique(e) : lignesQuotientRationnel(e, forme!)),
+      calcul(l, e.famille === "quadratique" || e.famille === "quadratiqueComplete" ? lignesQuotientQuadratique(e) : e.famille === "racine" ? lignesQuotientRacine(e) : lignesQuotientRationnel(e, forme!)),
       resultat(l, [f(formatReponseAttendueEcranLatex(e, "quotient")[0])]),
     );
   }

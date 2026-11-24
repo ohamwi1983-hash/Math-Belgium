@@ -16,6 +16,8 @@ import {
   diagnostiquerAcceleration,
   diagnostiquerConversionKmh,
   diagnostiquerDeriveeVitesse,
+  diagnostiquerNombreAuDixieme,
+  diagnostiquerRacineChamp,
   diagnostiquerSegmentConstant,
   diagnostiquerTempsTotal,
   diagnostiquerVitessePointe,
@@ -94,18 +96,29 @@ function soumettreEcran<T>(etat: EtatSessionVitessePosition, ecranAttendu: Ecran
 // "resoudre" (2 racines), "rejet" (QCM, une tentative), "vitessePointe" (v(tCible), numérique).
 // ============================================================================
 
+/** Lot B : saisie illisible refusée SANS tentative (état inchangé) — même lecture que l'écran. */
+export function saisieIllisibleVitessePosition(exercice: ExerciceVitessePosition, ecran: EcranVitessePosition, valeurs: string[]): boolean {
+  if (ecran === "derivee") return diagnostiquerDeriveeVitesse(valeurs[0] ?? "", exercice) === "parse_error";
+  if (ecran === "acceleration") return diagnostiquerAcceleration(valeurs[0] ?? "", exercice) === "parse_error";
+  if (ecran === "resoudre") return valeurs.some((v) => diagnostiquerRacineChamp(v, exercice) === "parse_error");
+  return valeurs.some((v) => diagnostiquerNombreAuDixieme(v, 0) === "parse_error");
+}
+
 export function soumettreReponseDerivee(etat: EtatSessionVitessePosition, texte: string): EtatSessionVitessePosition {
   const exercice = etat.exerciceCourant;
+  if (saisieIllisibleVitessePosition(exercice, "derivee", [texte])) return etat;
   return soumettreEcran(etat, "derivee", texte, (t) => diagnostiquerDeriveeVitesse(t, exercice) === "correct");
 }
 
 export function soumettreReponseAcceleration(etat: EtatSessionVitessePosition, texte: string): EtatSessionVitessePosition {
   const exercice = etat.exerciceCourant;
+  if (saisieIllisibleVitessePosition(exercice, "acceleration", [texte])) return etat;
   return soumettreEcran(etat, "acceleration", texte, (t) => diagnostiquerAcceleration(t, exercice) === "correct");
 }
 
 export function soumettreReponseResoudre(etat: EtatSessionVitessePosition, reponse: ReponseResoudre): EtatSessionVitessePosition {
   const exercice = etat.exerciceCourant;
+  if (saisieIllisibleVitessePosition(exercice, "resoudre", [...reponse.racines])) return etat;
   return soumettreEcran(etat, "resoudre", reponse, (r) => verifierEcranResoudre(r, exercice));
 }
 
@@ -116,6 +129,7 @@ export function soumettreReponseRejet(etat: EtatSessionVitessePosition, indexCho
 
 export function soumettreReponseVitessePointe(etat: EtatSessionVitessePosition, texte: string): EtatSessionVitessePosition {
   const exercice = etat.exerciceCourant;
+  if (saisieIllisibleVitessePosition(exercice, "vitessePointe", [texte])) return etat;
   return soumettreEcran(etat, "vitessePointe", texte, (t) => diagnostiquerVitessePointe(t, exercice) === "correct");
 }
 
@@ -125,6 +139,7 @@ export function soumettreReponseVitessePointe(etat: EtatSessionVitessePosition, 
 
 export function soumettreReponseConversion(etat: EtatSessionVitessePosition, texte: string): EtatSessionVitessePosition {
   const exercice = etat.exerciceCourant;
+  if (saisieIllisibleVitessePosition(exercice, "conversion", [texte])) return etat;
   if (exercice.variante !== "A") throw new Error('soumettreReponseConversion : exercice hors variante "A"');
   return soumettreEcran(etat, "conversion", texte, (t) => diagnostiquerConversionKmh(t, exercice) === "correct");
 }
@@ -135,12 +150,14 @@ export function soumettreReponseConversion(etat: EtatSessionVitessePosition, tex
 
 export function soumettreReponseSegmentConstant(etat: EtatSessionVitessePosition, texte: string): EtatSessionVitessePosition {
   const exercice = etat.exerciceCourant;
+  if (saisieIllisibleVitessePosition(exercice, "segmentConstant", [texte])) return etat;
   if (exercice.variante !== "B") throw new Error('soumettreReponseSegmentConstant : exercice hors variante "B"');
   return soumettreEcran(etat, "segmentConstant", texte, (t) => diagnostiquerSegmentConstant(t, exercice) === "correct");
 }
 
 export function soumettreReponseTempsTotal(etat: EtatSessionVitessePosition, texte: string): EtatSessionVitessePosition {
   const exercice = etat.exerciceCourant;
+  if (saisieIllisibleVitessePosition(exercice, "tempsTotal", [texte])) return etat;
   if (exercice.variante !== "B") throw new Error('soumettreReponseTempsTotal : exercice hors variante "B"');
   return soumettreEcran(etat, "tempsTotal", texte, (t) => diagnostiquerTempsTotal(t, exercice) === "correct");
 }

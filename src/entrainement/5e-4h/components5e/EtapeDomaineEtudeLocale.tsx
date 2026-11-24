@@ -3,7 +3,7 @@ import type { ExerciceEtudeLocale } from "../core5e/etudeLocale.types";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import { QuestionFinale } from "../components/QuestionFinale";
 import { Katex } from "../components/Katex";
-import { CONSIGNE_GENERALE_ETUDE_LOCALE, consigneEcranEtudeLocale, formatTermesDonneesLatex, questionFinaleEtudeLocale, texteAideNiveau1EtudeLocale, texteAideNiveau2EtudeLocale } from "../ui5e/formatEtudeLocale";
+import { consigneGeneraleEtudeLocale, consigneEcranEtudeLocale, formatTermesDonneesLatex, questionFinaleEtudeLocale, texteAideNiveau1EtudeLocale, texteAideNiveau2EtudeLocale } from "../ui5e/formatEtudeLocale";
 import { domaineAttendu } from "../moteur5e/verificationEtudeLocale";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -29,7 +29,7 @@ export function EtapeDomaineEtudeLocale({ exercice, tentativesUtilisees, tentati
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={CONSIGNE_GENERALE_ETUDE_LOCALE}
+        consigneGenerale={consigneGeneraleEtudeLocale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">
             {formatTermesDonneesLatex(exercice).map((frag, i) => (
@@ -61,7 +61,7 @@ export function EtapeDomaineEtudeLocale({ exercice, tentativesUtilisees, tentati
           })()}
           {niveauAide >= 2 &&
             (() => {
-              const aide2 = texteAideNiveau2EtudeLocale("domaine");
+              const aide2 = texteAideNiveau2EtudeLocale("domaine", exercice);
               return (
                 <>
                   <p>{aide2.texte}</p>

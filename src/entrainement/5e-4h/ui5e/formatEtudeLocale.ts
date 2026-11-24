@@ -56,14 +56,31 @@ function formatDLatex(e: number, k: number): string {
   return k > 0 ? `${base}+${k}` : `${base}-${-k}`;
 }
 
-function formatRacineLatex(r: RacineEtudeLocale): string {
+/** Dénominateur (x − e)² + k, pour le corrigé. */
+export function formatDLatexPublic(e: number, k: number): string {
+  return formatDLatex(e, k);
+}
+
+/** |coef|·√r SIMPLIFIÉ (audit 5e ch. 5, G11 : √8 = 2√2), sans signe : « 2\\sqrt{2} », « \\sqrt{3} », « 6 ». */
+export function radicalSimplifieLatex(coef: number, r: number): string {
+  let k = Math.abs(coef);
+  let m = r;
+  for (let p = 2; p * p <= m; p++) while (m % (p * p) === 0) {
+    m /= p * p;
+    k *= p;
+  }
+  if (m === 1) return `${k}`;
+  return `${k === 1 ? "" : k}\\sqrt{${m}}`;
+}
+
+export function formatRacineLatex(r: RacineEtudeLocale): string {
   if (r.exact) {
     const { num, den } = r.valeur;
     if (den === 1) return `${num}`;
     return num < 0 ? `-\\dfrac{${-num}}{${den}}` : `\\dfrac{${num}}{${den}}`;
   }
   const centreTxt = r.centre === 0 ? "" : `${r.centre}`;
-  const sqrtTxt = `\\sqrt{${r.radicande}}`;
+  const sqrtTxt = radicalSimplifieLatex(1, r.radicande);
   if (r.centre === 0) return r.signe < 0 ? `-${sqrtTxt}` : sqrtTxt;
   return r.signe < 0 ? `${centreTxt}-${sqrtTxt}` : `${centreTxt}+${sqrtTxt}`;
 }
@@ -94,6 +111,8 @@ export function formatFSecondeDeXLatex(exercice: ExerciceEtudeLocale): string {
 }
 
 export function formatTermesDonneesLatex(exercice: ExerciceEtudeLocale): string[] {
+  // Option « à calculer » (lot C) : seule f(x) est donnée.
+  if (exercice.deriveesACalculer) return [formatFDeXLatex(exercice)];
   const termes = [formatFDeXLatex(exercice), formatFPrimeDeXLatex(exercice)];
   if (exercice.niveau === "avance") termes.push(formatFSecondeDeXLatex(exercice));
   return termes;
@@ -106,6 +125,12 @@ export function formatTermesDonneesLatex(exercice: ExerciceEtudeLocale): string[
 export const CONSIGNE_GENERALE_ETUDE_LOCALE =
   "Les dérivées f'(x) et, si besoin, f''(x) sont données : inutile de dériver. Étudie les points critiques de f à partir de ces expressions.";
 
+/** Consigne générale selon l'option « f′ et f″ données / à calculer » (lot C). */
+export function consigneGeneraleEtudeLocale(exercice: ExerciceEtudeLocale): string {
+  if (!exercice.deriveesACalculer) return CONSIGNE_GENERALE_ETUDE_LOCALE;
+  return exercice.niveau === "avance" ? "Calcule f'(x) puis f''(x), et étudie les points critiques de f à partir de ces expressions." : "Calcule f'(x), puis étudie les points critiques de f à partir de cette expression.";
+}
+
 export function questionFinaleEtudeLocale(exercice: ExerciceEtudeLocale): string {
   return exercice.niveau === "avance" ? "Objectif : localiser tous les extremums et tous les points d'inflexion de f." : "Objectif : localiser tous les extremums de f.";
 }
@@ -116,6 +141,8 @@ export function questionFinaleEtudeLocale(exercice: ExerciceEtudeLocale): string
 
 export const LIBELLE_ECRAN_ETUDE_LOCALE: Record<EcranEtudeLocale, string> = {
   domaine: "Domaine de définition",
+  deriverFPrime: "Dérivée f'(x)",
+  deriverFSeconde: "Dérivée seconde f''(x)",
   resoudreFPrime: "Résoudre f'(x)=0",
   tableauFPrime: "Tableau de signes de f'",
   extremums: "Valeur de f aux extremums",
@@ -128,6 +155,10 @@ export function consigneEcranEtudeLocale(ecran: EcranEtudeLocale): string {
   switch (ecran) {
     case "domaine":
       return "Détermine le domaine de définition de f.";
+    case "deriverFPrime":
+      return "Calcule la dérivée f'(x).";
+    case "deriverFSeconde":
+      return "Calcule la dérivée seconde f''(x), en dérivant f'(x).";
     case "resoudreFPrime":
       return "Calcule les éventuels zéros de f'(x).";
     case "tableauFPrime":
@@ -166,6 +197,11 @@ function formatEquationDomaineLatex(exercice: ExerciceEtudeLocale): string | nul
 
 export function texteAideNiveau1EtudeLocale(ecran: EcranEtudeLocale, exercice?: ExerciceEtudeLocale): AideFragmentee {
   switch (ecran) {
+    case "deriverFPrime":
+    case "deriverFSeconde":
+      return exercice?.type === "polynomiale"
+        ? { texte: "Dérive terme à terme ; une constante a pour dérivée 0 :", latex: "(x^n)'=n\\,x^{n-1}" }
+        : { texte: "f est de la forme c/v : utilise la dérivée d'un quotient (ou de 1/v) :", latex: "\\left(\\frac{u}{v}\\right)'=\\frac{u'v-uv'}{v^2}" };
     case "domaine": {
       const equation = exercice ? formatEquationDomaineLatex(exercice) : null;
       return {
@@ -213,32 +249,36 @@ export interface AideFragmentee {
   latex: string | null;
 }
 
-export function texteAideNiveau2EtudeLocale(ecran: EcranEtudeLocale): AideFragmentee {
+/** Niveau 2 posé pour CETTE fonction (lot B : plus d'« Exemple : 6x² − 6 = 0… »), jamais la réponse. */
+export function texteAideNiveau2EtudeLocale(ecran: EcranEtudeLocale, exercice: ExerciceEtudeLocale): AideFragmentee {
+  const fp = formatFPrimeDeXLatex(exercice).replace(/^f'\(x\)=/, "");
+  const fs = formatFSecondeDeXLatex(exercice).replace(/^f''\(x\)=/, "");
+  const poly = exercice.type === "polynomiale";
   switch (ecran) {
     case "domaine":
-      return {
-        texte: "Deux exemples :",
-        latex:
-          "\\begin{aligned} (x-1)^2-4=0 &\\iff x=-1 \\text{ ou } x=3 &&\\Rightarrow\\ \\operatorname{dom} f=\\mathbb{R}\\setminus\\{-1\\,;3\\}\\\\ (x-1)^2+6=0 &\\iff (x-1)^2=-6 &&\\Rightarrow\\ \\operatorname{dom} f=\\mathbb{R} \\end{aligned}",
-      };
+      return { texte: "Ici, le dénominateur s'annule quand le carré vaut l'opposé de la constante — un carré ne peut pas être négatif :", latex: formatEquationDomaineLatex(exercice) };
+    case "deriverFPrime":
+      return poly
+        ? { texte: "Ici, dérive chacun des termes de f(x) :", latex: formatFDeXLatex(exercice).replace(/^f\(x\)=/, "f'(x)=\\left(").concat("\\right)'") }
+        : { texte: "Ici, le numérateur est constant (u′ = 0) et le dénominateur v se dérive en 2(x − e) :", latex: `v(x)=${formatDLatex(exercice.e, exercice.c ? exercice.k : exercice.k)}` };
+    case "deriverFSeconde":
+      return { texte: "Ici, dérive l'expression de f′(x) trouvée à l'étape précédente :", latex: `f''(x)=\\left(${fp}\\right)'` };
     case "resoudreFPrime":
-      return { texte: "Exemple :", latex: "6x^2-6=0 \\iff x^2=1 \\iff x=-1 \\text{ ou } x=1" };
+      return poly
+        ? { texte: "Ici, divise par le coefficient de x² pour obtenir un trinôme plus simple, puis factorise ou calcule Δ :", latex: `${fp}=0` }
+        : { texte: "Ici, une fraction est nulle quand son numérateur est nul (et son dénominateur non nul) :", latex: `${fp.replace(/^\\dfrac\{([^}]*)\}.*$/, "$1")}=0` };
     case "tableauFPrime":
-      return {
-        texte: "Exemple : avec une racine double en 0, f' reste positive des deux côtés de 0 ; on écrit « ni l'un ni l'autre » même si f'(0) = 0 :",
-        latex: "f'(x)=6x^2",
-      };
+      return { texte: "Ici, f′ est un trinôme ou une fraction : étudie le signe juste avant et juste après chaque zéro trouvé, par exemple en choisissant une valeur test dans chaque zone de :", latex: `f'(x)=${fp}` };
     case "extremums":
-      return { texte: "Exemple, avec f(x) = 2x³ − 6x :", latex: "f(-1)=2\\cdot(-1)^3-6\\cdot(-1)=-2+6=4" };
+      return { texte: "Ici, remplace x par chaque abscisse retenue dans l'expression de f (développe (e ± √r)² et (e ± √r)³ si besoin) :", latex: formatFDeXLatex(exercice) };
     case "resoudreFSeconde":
-      return { texte: "Exemple :", latex: "f''(x)=12x=0 \\iff x=0" };
+      return poly
+        ? { texte: "Ici, c'est une équation du premier degré :", latex: `${fs}=0` }
+        : { texte: "Ici, seul le numérateur peut s'annuler :", latex: `${fs.replace(/^\\dfrac\{([^}]*)\}.*$/, "$1")}=0` };
     case "tableauFSeconde":
-      return {
-        texte: "Exemple : f'' change de signe en 0 (négative avant, positive après), donc ce point est un point d'inflexion (PI) :",
-        latex: "f''(x)=12x",
-      };
+      return { texte: "Ici, étudie le signe de f″ de part et d'autre de chaque zéro :", latex: `f''(x)=${fs}` };
     case "inflexions":
-      return { texte: "Exemple, avec f(x) = 2x³ :", latex: "f(0)=2\\cdot0^3=0" };
+      return { texte: "Ici, remplace x par l'abscisse du point d'inflexion dans f(x) :", latex: formatFDeXLatex(exercice) };
   }
 }
 
@@ -267,7 +307,7 @@ export const PLACEHOLDER_VALEUR_F = "ex : −2/7";
  * exigée (audit 5e ch. 5, décision I) ; valeurs IRRATIONNELLES ⟹ arrondi au centième accepté. */
 export function precisionAnnonceeCibles(cibles: CibleNumerique[]): string | null {
   if (cibles.length === 0) return null;
-  if (cibles.every((c) => c.exacte)) return "Donne la valeur exacte (fraction ou décimal exact).";
+  if (cibles.every((c) => c.exacte)) return "Donne la valeur exacte (fraction, décimal exact ou racine, par exemple 3 − 4√2).";
   return "(arrondi au centième accepté, ou valeur exacte)";
 }
 
@@ -393,7 +433,8 @@ function formatValeurExacteFLatex(exercice: ExerciceEtudeLocale, racine: RacineE
     const coeffRacine = -2 * a * r * racine.signe;
     const partieRacine = `${Math.abs(coeffRacine) === 1 ? "" : Math.abs(coeffRacine)}\\sqrt{${r}}`;
     const exacte = fe === 0 ? `${coeffRacine < 0 ? "-" : ""}${partieRacine}` : `${fe}${coeffRacine < 0 ? "-" : "+"}${partieRacine}`;
-    return `${exacte}\\approx ${formatNombreLatex(valeurFEtudeLocale(exercice, valeurNumeriqueRacineEtudeLocale(racine)))}`;
+    // Lot C (question 4) : valeur exacte seule, comme le cours (§ 5).
+    return exacte;
   }
   const { c, k } = exercice;
   return racine.exact ? formatFractionLatex(c, k) : formatFractionLatex(3 * c, 4 * k);
@@ -421,6 +462,12 @@ export function formatTermesEtatActuelLatex(exercice: ExerciceEtudeLocale, phase
     switch (ordre[i]) {
       case "domaine":
         termes.push(`\\operatorname{dom} f=${formatEnsembleReelGuideLatex(domaineAttendu(exercice))}`);
+        break;
+      case "deriverFPrime":
+        termes.push(formatFPrimeDeXLatex(exercice));
+        break;
+      case "deriverFSeconde":
+        termes.push(formatFSecondeDeXLatex(exercice));
         break;
       case "resoudreFPrime":
         termes.push(...formatLignesRacinesEtatActuel("f'(x)=0", exercice.racinesFPrime));
@@ -453,6 +500,10 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceEtudeLocale, e
   switch (ecran) {
     case "domaine":
       return [`\\operatorname{dom} f=${formatEnsembleReelGuideLatex(domaineAttendu(exercice))}`];
+    case "deriverFPrime":
+      return [formatFPrimeDeXLatex(exercice)];
+    case "deriverFSeconde":
+      return [formatFSecondeDeXLatex(exercice)];
     case "resoudreFPrime":
       return [formatRacinesSimpleLatex(exercice.racinesFPrime)];
     case "tableauFPrime":
@@ -506,4 +557,3 @@ export function formatEnteteColonnesTableau(exercice: ExerciceEtudeLocale, colon
   });
 }
 
-export { formatRacineLatex };

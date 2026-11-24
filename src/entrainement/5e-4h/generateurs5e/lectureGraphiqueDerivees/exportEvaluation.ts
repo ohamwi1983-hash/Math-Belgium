@@ -61,8 +61,8 @@ function nombreTexte(v: number): string {
 const CONSIGNE_PAPIER =
   "Par lecture du graphique : nomme les éventuelles asymptotes de la courbe (verticale, horizontale ou oblique) avec leur équation ; donne l'abscisse de chaque point où la tangente est horizontale ; dresse le tableau de signes de f' et les variations de f, puis donne la valeur de chaque extremum ; donne l'abscisse de chaque point d'inflexion ; dresse le tableau de signes de f'' et la concavité de f. " +
   (TOLERANCE_POSITION_TANGENTE === TOLERANCE_VALEUR_EXTREMUM
-    ? `Une lecture à ${nombreTexte(TOLERANCE_POSITION_TANGENTE)} près est acceptée (à ${nombreTexte(TOLERANCE_POSITION_INFLEXION)} près pour les points d'inflexion).`
-    : `Une lecture à ${nombreTexte(TOLERANCE_POSITION_TANGENTE)} près est acceptée pour les abscisses et à ${nombreTexte(TOLERANCE_VALEUR_EXTREMUM)} près pour les valeurs (à ${nombreTexte(TOLERANCE_POSITION_INFLEXION)} près pour les points d'inflexion).`);
+    ? `Une lecture à ${nombreTexte(TOLERANCE_POSITION_TANGENTE)} près est acceptée (à l'unité près pour les points d'inflexion : ligne verticale de la grille la plus proche).`
+    : `Une lecture à ${nombreTexte(TOLERANCE_POSITION_TANGENTE)} près est acceptée pour les abscisses et à ${nombreTexte(TOLERANCE_VALEUR_EXTREMUM)} près pour les valeurs (à l'unité près pour les points d'inflexion : ligne verticale de la grille la plus proche).`);
 
 /** Consigne d'étape = celle de l'écran, sans les tournures d'interface (« coche… », « Complète… »). */
 function consigneEtape(ecran: EcranLectureGraphiqueDerivees): FragmentConsigne[] {

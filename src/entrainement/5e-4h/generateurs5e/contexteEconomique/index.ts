@@ -82,7 +82,8 @@ function tirerCoutDegre3(exact: boolean): { coutTotal: CoutTotalDegre3; minimum:
     b = -3 * a * entierAleatoire(2, 8);
   } else {
     do {
-      b = -entierAleatoire(4, 24 * a);
+      // G12 : q = −b/(3a) ≥ 1 (au moins une centaine d'unités).
+      b = -entierAleatoire(3 * a + 1, 24 * a);
     } while (b % (3 * a) === 0);
   }
   const c = Math.ceil((b * b) / (3 * a) + 1e-9) + entierAleatoire(2, 40);

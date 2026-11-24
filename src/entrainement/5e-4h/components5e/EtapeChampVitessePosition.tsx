@@ -1,15 +1,17 @@
 import { useState } from "react";
 import type { ExerciceVitessePosition } from "../core5e/vitessePosition.types";
 import type { EcranVitessePosition } from "../moteur5e/typesVitessePosition";
-import { consigneEcranRiche, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatVitessePosition";
+import { consigneEcranRiche } from "../ui5e/formatVitessePosition";
+import { aidesVitessePosition, cibleVitessePosition } from "../ui5e/retoursVitessePosition";
+import { saisieIllisibleVitessePosition } from "../moteur5e/sessionVitessePosition";
+import { MESSAGES_ILLISIBLE_DERIVEES } from "../moteur5e/saisieDerivees";
+import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { PiedEcranFonctions } from "./PiedEcranFonctions";
 import { TexteRiche5e } from "./TexteRiche5e";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
-import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
-import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 /** Libellé du champ (LaTeX) en texte simple pour l'aperçu de saisie : « t_2= » → « t₂= »,
@@ -66,15 +68,20 @@ export function EtapeChampVitessePosition({
   validation,
 }: Props) {
   const [texte, setTexte] = useState("");
-  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
-  const montrerErreurs = tentativesUtilisees > 0;
-  const apresEchec = tentativesUtilisees > 0;
-  const texteErronee = apresEchec && !!diagnostiquer && diagnostiquer(texte) !== "correct";
-  const aides = niveauAide >= 2 ? [texteAideNiveau1(ecran), texteAideNiveau2(ecran)] : niveauAide >= 1 ? [texteAideNiveau1(ecran)] : [];
+  const [soumis, setSoumis] = useState<string | null>(null);
+  const [illisible, setIllisible] = useState(false);
+  const apresEchec = tentativesUtilisees > 0 && soumis !== null;
+  const texteErronee = apresEchec && !validation && !!diagnostiquer && diagnostiquer(texte) !== "correct";
+  // Lot B : saisie illisible refusée sans tentative (le moteur la refuse aussi).
+  const symbolique = ecran === "derivee" || ecran === "acceleration";
 
   function valider() {
     if (texte.trim() === "") return;
-    if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
+    if (saisieIllisibleVitessePosition(exercice, ecran, [texte])) {
+      setIllisible(true);
+      return;
+    }
+    setSoumis(texte);
     onValider(texte);
   }
 
@@ -92,37 +99,30 @@ export function EtapeChampVitessePosition({
           type="text"
           className={`text-input${texteErronee ? " is-erronee" : ""}`}
           value={texte}
-          onChange={(e) => setTexte(e.target.value)}
+          onChange={(e) => {
+            setIllisible(false);
+            setTexte(normaliserSigneMoins(e.target.value));
+          }}
           placeholder={placeholder}
+          disabled={!!validation}
+          autoComplete="off"
         />
       </div>
       {avecCalculatrice && <CalculatriceScientifique />}
-      {aides.length > 0 && (
-        <div className="aide-5e">
-          {aides.map((aide, i) => (
-            <div key={i}>
-              <p>
-                <TexteRiche5e texte={aide.texte} />
-              </p>
-              {aide.latex && <Katex expression={aide.latex} block />}
-            </div>
-          ))}
-        </div>
-      )}
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
-          Valider
-        </button>
-        {montrerErreurs && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
+      <PiedEcranFonctions
+        aides={aidesVitessePosition(exercice, ecran)}
+        niveauAide={niveauAide}
+        niveauAideMax={niveauAideMax}
+        onActiverAide={onActiverAide}
+        onValider={valider}
+        vide={texte.trim() === ""}
+        illisible={illisible}
+        texteIllisible={symbolique ? MESSAGES_ILLISIBLE_DERIVEES.expressionT : MESSAGES_ILLISIBLE_DERIVEES.nombre}
+        tentativesUtilisees={tentativesUtilisees}
+        tentativesMax={tentativesMax}
+        cible={apresEchec && soumis ? cibleVitessePosition(exercice, ecran, [soumis]) : null}
+        validation={validation}
+      />
     </div>
   );
 }

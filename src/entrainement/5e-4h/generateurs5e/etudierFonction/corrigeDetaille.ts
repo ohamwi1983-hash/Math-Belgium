@@ -17,6 +17,7 @@ import {
 } from "../../moteur5e/verificationEtudierFonction";
 import { valeurNumeriqueRacineEtudeLocale } from "../../moteur5e/verificationEtudeLocale";
 import { formatCoordonneesLatex, formatDomaineLatex, formatReponseAttenduePhaseLatex, formatResumeTableauLatex } from "../../ui5e/formatEtudierFonction";
+import { radicalSimplifieLatex } from "../../ui5e/formatEtudeLocale";
 import { cote, infini, lim, zeroSigne } from "../../ui5e/corrigeLimites";
 import {
   COURS_ETUDIER,
@@ -110,7 +111,7 @@ function coef(n: number): string {
 
 function racineLatex(r: RacineEtudeLocale): string {
   if (r.exact) return qL(q(r.valeur.num, r.valeur.den));
-  const rad = `\\sqrt{${r.radicande}}`;
+  const rad = radicalSimplifieLatex(1, r.radicande);
   if (r.centre === 0) return r.signe < 0 ? `-${rad}` : rad;
   return `${r.centre}${r.signe < 0 ? "-" : "+"}${rad}`;
 }
@@ -343,6 +344,7 @@ function etapeTableauFPrime(e: ExerciceEtudierFonction, l: string): EtapeCorrect
       const delta = Math.round(Math.sqrt(qVal(r2)));
       const exact = rs[0].exact;
       lignes.push(ligne(`${xMoins(ee)}=\\pm ${exact ? delta : `\\sqrt{${r2.n}}`}`, "deux valeurs opposées ont ce carré"));
+      if (!exact && radicalSimplifieLatex(1, r2.n) !== `\\sqrt{${r2.n}}`) lignes.push(ligne(`=\\pm ${radicalSimplifieLatex(1, r2.n)}`, [t("on simplifie la racine : "), f(`\\sqrt{${r2.n}}=${radicalSimplifieLatex(1, r2.n)}`)]));
       lignes.push(ligne(`x_1=${racineLatex(rs[0])}`, ee === 0 ? undefined : `on ajoute ${nbT(ee)}`));
       lignes.push(ligne(`x_2=${racineLatex(rs[1])}`));
     }
@@ -611,7 +613,8 @@ function etapeCoordonnees(e: ExerciceEtudierFonction, l: string): EtapeCorrectio
             ligne(`=${s * a < 0 ? "-" : ""}${Math.abs(a) === 1 ? "" : Math.abs(a)}\\sqrt{${r}}`, [t("car "), f(`${c}=${a}\\cdot ${r}`), t(" et "), f(`\\frac{${r}}{\\sqrt{${r}}}=\\sqrt{${r}}`)]),
             ligne(`f(${racineLatex(p.racine)})=${coef(a)}(${racineLatex(p.racine)})${signe(b)}${s * a < 0 ? "-" : "+"}${Math.abs(a) === 1 ? "" : Math.abs(a)}\\sqrt{${r}}`, "on remplace dans f(x)"),
             ligne(`=${a * ee + b}${2 * a * s < 0 ? "-" : "+"}${Math.abs(2 * a) === 1 ? "" : Math.abs(2 * a)}\\sqrt{${r}}`, "on regroupe"),
-            ligne(`\\approx ${approche(val, 2)}`),
+            ...(radicalSimplifieLatex(2 * a, r) !== `${Math.abs(2 * a) === 1 ? "" : Math.abs(2 * a)}\\sqrt{${r}}` ? [ligne(`=${a * ee + b}${2 * a * s < 0 ? "-" : "+"}${radicalSimplifieLatex(2 * a, r)}`, [t("on simplifie : "), f(`\\sqrt{${r}}=${radicalSimplifieLatex(1, r)}`)])] : []),
+            ligne(`\\approx ${approche(val, 2)}`, "valeur approchée, seulement pour placer le point"),
           ],
         });
       } else {

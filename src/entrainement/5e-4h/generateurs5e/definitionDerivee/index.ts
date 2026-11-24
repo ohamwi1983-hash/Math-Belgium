@@ -14,6 +14,8 @@ import type {
   ExerciceDefinitionDerivee,
   ExerciceDefinitionDeriveeAffine,
   ExerciceDefinitionDeriveeQuadratique,
+  ExerciceDefinitionDeriveeQuadratiqueComplete,
+  ExerciceDefinitionDeriveeRacine,
   ExerciceDefinitionDeriveeRationnelleLineaire,
   ExerciceDefinitionDeriveeRationnelleSimple,
 } from "../../core5e/definitionDerivee.types";
@@ -84,6 +86,41 @@ export function genererRationnelleLineaire(): ExerciceDefinitionDeriveeRationnel
 }
 
 // ============================================================================
+// Famille 5 (lot C, fin de catalogue) — quadratique complète : f(x)=mx²+nx+p.
+// ============================================================================
+
+export function genererQuadratiqueComplete(): ExerciceDefinitionDeriveeQuadratiqueComplete {
+  const m = entierNonNul(3);
+  const n = entierNonNul(5);
+  const p = entierAleatoire(-5, 5);
+  // f'(a) = 2ma + n ≠ 0 : un nombre dérivé nul ne se distinguerait pas d'un oubli.
+  const a = tirerUn(plage(-4, 4).filter((v) => v !== 0 && 2 * m * v + n !== 0));
+  return { famille: "quadratiqueComplete", m, n, p, a };
+}
+
+// ============================================================================
+// Famille 6 (lot C, fin de catalogue) — racine : f(x)=k√(x+c), a + c carré parfait.
+// ============================================================================
+
+export function genererRacine(): ExerciceDefinitionDeriveeRacine {
+  const k = tirerUn([1, 1, 2, 3]);
+  for (let essai = 0; essai < 200; essai++) {
+    const s = entierAleatoire(1, 4);
+    const c = entierAleatoire(-5, 5);
+    const a = s * s - c;
+    // a ≠ 0, c ≠ 0 (√x : déjà démontrée au cours) et a modeste.
+    if (a === 0 || c === 0 || Math.abs(a) > 12) continue;
+    return { famille: "racine", k, c, a };
+  }
+  return { famille: "racine", k, c: 3, a: 6 };
+}
+
+/** √(a + c), entier par construction. */
+export function racineEnA(e: ExerciceDefinitionDeriveeRacine): number {
+  return Math.round(Math.sqrt(e.a + e.c));
+}
+
+// ============================================================================
 // Évaluation numérique pure de f (nécessaire à la génération ET, RÉPLIQUÉE, à la vérification).
 // ============================================================================
 
@@ -97,6 +134,10 @@ export function valeurFonction(exercice: ExerciceDefinitionDerivee, x: number): 
       return exercice.expo === 1 ? exercice.k / x : exercice.k / (x * x);
     case "rationnelleLineaire":
       return (exercice.m * x + exercice.p) / (x - exercice.q);
+    case "quadratiqueComplete":
+      return exercice.m * x * x + exercice.n * x + exercice.p;
+    case "racine":
+      return exercice.k * Math.sqrt(x + exercice.c);
   }
 }
 
@@ -111,6 +152,10 @@ export function valeurExacte(exercice: ExerciceDefinitionDerivee, a: number): Fr
       return exercice.expo === 1 ? reduireFraction(exercice.k, a) : reduireFraction(exercice.k, a * a);
     case "rationnelleLineaire":
       return reduireFraction(exercice.m * a + exercice.p, a - exercice.q);
+    case "quadratiqueComplete":
+      return reduireFraction(exercice.m * a * a + exercice.n * a + exercice.p, 1);
+    case "racine":
+      return reduireFraction(exercice.k * racineEnA(exercice), 1);
   }
 }
 
@@ -134,6 +179,10 @@ export function deriveeExacte(exercice: ExerciceDefinitionDerivee, a: number): F
       const denominateur = (a - exercice.q) * (a - exercice.q);
       return reduireFraction(numerateur, denominateur);
     }
+    case "quadratiqueComplete":
+      return reduireFraction(2 * exercice.m * a + exercice.n, 1);
+    case "racine":
+      return reduireFraction(exercice.k, 2 * racineEnA(exercice));
   }
 }
 
@@ -154,7 +203,19 @@ export function genererExerciceDefinitionDerivee(familleForcee?: ExerciceDefinit
       return genererRationnelleSimple();
     case "rationnelleLineaire":
       return genererRationnelleLineaire();
+    case "quadratiqueComplete":
+      return genererQuadratiqueComplete();
+    case "racine":
+      return genererRacine();
   }
+}
+
+/** Tirage libre de l'APPLI (lot C) : les deux familles de fin de catalogue (quadratique complète,
+ * racine) une fois sur trois ; l'adaptateur et les `?code=` gardent `genererExerciceDefinitionDerivee`
+ * (codes imprimés inchangés). */
+export function genererExerciceDefinitionDeriveeLibre(): ExerciceDefinitionDerivee {
+  if (Math.random() < 1 / 3) return Math.random() < 0.5 ? genererQuadratiqueComplete() : genererRacine();
+  return genererExerciceDefinitionDerivee();
 }
 
 export const CATALOGUE_FAMILLES: { id: string; label: string }[] = [
@@ -162,10 +223,12 @@ export const CATALOGUE_FAMILLES: { id: string; label: string }[] = [
   { id: "quadratique", label: "2. Quadratique — f(x) = mx² + p" },
   { id: "rationnelleSimple", label: "3. Rationnelle simple — f(x) = k/x ou k/x²" },
   { id: "rationnelleLineaire", label: "4. Rationnelle linéaire — f(x) = (mx + p)/(x − q)" },
+  { id: "quadratiqueComplete", label: "5. Quadratique complète — f(x) = mx² + nx + p" },
+  { id: "racine", label: "6. Racine — f(x) = k√(x + c)" },
 ];
 
 export function construireAvecFamilleId(id: string): ExerciceDefinitionDerivee {
-  if (id === "affine" || id === "quadratique" || id === "rationnelleSimple" || id === "rationnelleLineaire") {
+  if (id === "affine" || id === "quadratique" || id === "rationnelleSimple" || id === "rationnelleLineaire" || id === "quadratiqueComplete" || id === "racine") {
     return genererExerciceDefinitionDerivee(id);
   }
   throw new Error(`construireAvecFamilleId : id inconnu "${id}"`);

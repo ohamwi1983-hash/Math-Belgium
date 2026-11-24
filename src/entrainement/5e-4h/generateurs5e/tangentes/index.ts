@@ -18,6 +18,8 @@ import type {
   ExerciceTangentePointDonne,
   ExerciceTangentePointDonnePolynomiale,
   ExerciceTangentePointDonneRadicale,
+  ExerciceTangentePente,
+  ExerciceTangentePointExterieur,
 } from "../../core5e/tangentes.types";
 import { entierAleatoire, entierNonNul } from "../limites/fraction";
 
@@ -117,6 +119,19 @@ export function genererHorizontaleRacinesDistinctes(): ExerciceTangenteHorizonta
   }
 }
 
+/** Lot C — aucune tangente horizontale : f′(x) = 3a(x² + Bx + C) avec B² − 4C < 0 (a = ±2 : b et c
+ * entiers, comme pour les autres tirages « horizontale »). */
+export function genererHorizontaleAucune(): ExerciceTangenteHorizontale {
+  for (;;) {
+    const a = A_COEF_HORIZONTALE[entierAleatoire(0, A_COEF_HORIZONTALE.length - 1)];
+    const B = entierAleatoire(-3, 3);
+    const C = entierAleatoire(1, 6);
+    if (B * B - 4 * C >= 0) continue;
+    const exercice: ExerciceTangenteHorizontale = { variante: "horizontale", a, b: (3 * a * B) / 2, c: 3 * a * C, d: entierAleatoire(-5, 5), racines: [] };
+    if (Number.isInteger(exercice.b)) return exercice;
+  }
+}
+
 export function genererHorizontale(): ExerciceTangenteHorizontale {
   return Math.random() < 0.5 ? genererHorizontaleRacineDouble() : genererHorizontaleRacinesDistinctes();
 }
@@ -159,6 +174,58 @@ export function genererDoubleTangence(): ExerciceTangenteDoubleTangence {
     quartique[1] += m;
     if (quartique.every((v) => Math.abs(v) <= BORNE_COEFFS_QUARTIQUE)) return { variante: "doubleTangence", coeffs: quartique, p, q };
   }
+}
+
+// ============================================================================
+// Variante D (lot C, fin de catalogue) — tangente de pente donnée m.
+// ============================================================================
+
+/** Degré 3 (deux points) : f′(x) − m = 3a(x − r1)(x − r2), a = ±2 ; degré 2 (un point) :
+ * f′(x) = 2αx + β = m en x0 entier. Pente m ≠ 0 et m ≠ f′(0) trivial évité. */
+export function genererPente(): ExerciceTangentePente {
+  for (;;) {
+    const m = entierNonNul(6);
+    if (Math.random() < 0.6) {
+      const r1 = entierAleatoire(-3, 2);
+      const r2 = entierAleatoire(r1 + 1, 3);
+      const h = construireHorizontaleAvecRacines([r1, r2]);
+      const coeffs = [h.d, h.c + m, h.b, h.a];
+      const ex: ExerciceTangentePente = { variante: "pente", coeffs, m, racines: [r1, r2] };
+      if ([r1, r2].every((r) => Math.abs(valeurPolynome(coeffs, r)) <= BORNE_VALEURS) && coeffs.every((c) => Math.abs(c) <= 40)) return ex;
+    } else {
+      const alpha = entierNonNul(3);
+      const x0 = entierNonNul(3);
+      const beta = m - 2 * alpha * x0;
+      const gamma = entierAleatoire(-5, 5);
+      const coeffs = [gamma, beta, alpha];
+      if (beta === 0 || Math.abs(beta) > 12) continue;
+      return { variante: "pente", coeffs, m, racines: [x0] };
+    }
+  }
+}
+
+// ============================================================================
+// Variante E (lot C, fin de catalogue) — tangentes issues d'un point extérieur.
+// ============================================================================
+
+/** Parabole f(x) = ax² + bx + c ; P(xP ; f(xP) − a·d²) : les tangentes issues de P touchent la
+ * parabole en xP ± d (condition −a(t − xP)² + a·d² = 0 sur l'abscisse t du contact). */
+export function genererPointExterieur(): ExerciceTangentePointExterieur {
+  for (;;) {
+    const a = [1, -1, 1, -1, 2, -2][entierAleatoire(0, 5)];
+    const b = entierAleatoire(-4, 4);
+    const c = entierAleatoire(-5, 5);
+    const xP = entierAleatoire(-2, 2);
+    const d = entierAleatoire(1, 3);
+    const yP = a * xP * xP + b * xP + c - a * d * d;
+    const contacts = [xP - d, xP + d];
+    const pentesOk = contacts.every((t) => Math.abs(2 * a * t + b) <= 16);
+    if (pentesOk && Math.abs(yP) <= 20) return { variante: "pointExterieur", a, b, c, xP, yP, contacts };
+  }
+}
+
+function valeurPolynome(coeffs: number[], x: number): number {
+  return coeffs.reduce((s, coeff, i) => s + coeff * Math.pow(x, i), 0);
 }
 
 // ============================================================================
@@ -207,19 +274,28 @@ export function deriveeFDoubleTangence(exercice: ExerciceTangenteDoubleTangence,
 // Dispatch pondéré + panneau dev.
 // ============================================================================
 
-const POIDS: Record<ExerciceTangente["variante"], number> = { pointDonne: 45, horizontale: 45, doubleTangence: 10 };
+/** Tirage libre de l'ADAPTATEUR et des `?code=` (inchangé : familles A, B, C). Les familles D et E et
+ * l'issue « aucune tangente horizontale » sont tirées par l'appli (`genererExerciceTangenteLibre`). */
+const POIDS: Record<"pointDonne" | "horizontale" | "doubleTangence", number> = { pointDonne: 45, horizontale: 45, doubleTangence: 10 };
 const TOTAL_POIDS = Object.values(POIDS).reduce((a, b) => a + b, 0);
 
-function tirerVariantePonderee(): ExerciceTangente["variante"] {
+function tirerVariantePonderee(): keyof typeof POIDS {
   let tirage = Math.random() * TOTAL_POIDS;
-  for (const [variante, poids] of Object.entries(POIDS) as [ExerciceTangente["variante"], number][]) {
+  for (const [variante, poids] of Object.entries(POIDS) as [keyof typeof POIDS, number][]) {
     if (tirage < poids) return variante;
     tirage -= poids;
   }
   return "pointDonne";
 }
 
-export function genererExerciceTangente(): ExerciceTangente {
+/** Option « f′ donnée » tirée EN DERNIER (les nombres d'un code imprimé avant le lot C sont
+ * inchangés) : une fois sur quatre — le réglage du panneau (`derivee-donnee`) choisit ensuite. */
+function avecOptionDerivee(e: ExerciceTangente): ExerciceTangente {
+  if (e.variante === "doubleTangence") return e;
+  return { ...e, deriveeDonnee: Math.random() < 0.25 };
+}
+
+function genererExerciceTangenteBrut(): ExerciceTangente {
   switch (tirerVariantePonderee()) {
     case "pointDonne":
       return genererPointDonne();
@@ -230,16 +306,43 @@ export function genererExerciceTangente(): ExerciceTangente {
   }
 }
 
+export function genererExerciceTangente(): ExerciceTangente {
+  return avecOptionDerivee(genererExerciceTangenteBrut());
+}
+
+/** Tirage libre de l'APPLI : les familles de fin de catalogue (pente donnée, point extérieur,
+ * aucune tangente horizontale) une fois sur trois ; l'option f′ est réglée par l'appli. */
+export function genererExerciceTangenteLibre(): ExerciceTangente {
+  const r = Math.random();
+  if (r < 1 / 9) return genererPente();
+  if (r < 2 / 9) return genererPointExterieur();
+  if (r < 3 / 9) return genererHorizontaleAucune();
+  return genererExerciceTangenteBrut();
+}
+
 export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [
   { id: "pointDonne-polynomiale", label: "A. Point donné — polynomiale" },
   { id: "pointDonne-radicale", label: "A. Point donné — radicale" },
   { id: "horizontale-double", label: "B. Horizontale — racine double" },
   { id: "horizontale-distinct", label: "B. Horizontale — 2 racines distinctes" },
   { id: "doubleTangence", label: "C. Double tangence (bonus)" },
+  { id: "horizontale-aucune", label: "B. Horizontale — aucune (Δ < 0)" },
+  { id: "pente", label: "D. Tangente de pente donnée" },
+  { id: "pointExterieur", label: "E. Tangentes issues d'un point extérieur" },
 ];
 
 export function construireAvecVarianteId(id: string): ExerciceTangente {
+  return avecOptionDerivee(construireAvecVarianteIdBrut(id));
+}
+
+function construireAvecVarianteIdBrut(id: string): ExerciceTangente {
   switch (id) {
+    case "horizontale-aucune":
+      return genererHorizontaleAucune();
+    case "pente":
+      return genererPente();
+    case "pointExterieur":
+      return genererPointExterieur();
     case "pointDonne-polynomiale":
       return genererPointDonnePolynomiale();
     case "pointDonne-radicale":
@@ -253,4 +356,36 @@ export function construireAvecVarianteId(id: string): ExerciceTangente {
     default:
       throw new Error(`construireAvecVarianteId : id inconnu "${id}"`);
   }
+}
+
+// ============================================================================
+// Valeurs génériques (toutes variantes) — lot C.
+// ============================================================================
+
+/** Coefficients ascendants de f quand f est polynomiale (null : racine). */
+export function coeffsTangente(e: ExerciceTangente): number[] | null {
+  switch (e.variante) {
+    case "pointDonne":
+      return e.sousFamille === "polynomiale" ? e.coeffs : null;
+    case "horizontale":
+      return [e.d, e.c, e.b, e.a];
+    case "doubleTangence":
+    case "pente":
+      return e.coeffs;
+    case "pointExterieur":
+      return [e.c, e.b, e.a];
+  }
+}
+
+export function valeurFTangente(e: ExerciceTangente, x: number): number {
+  if (e.variante === "pointDonne") return valeurFPointDonne(e, x);
+  return valeurPolynome(coeffsTangente(e) as number[], x);
+}
+
+export function deriveeFTangente(e: ExerciceTangente, x: number): number {
+  if (e.variante === "pointDonne") return deriveeFPointDonne(e, x);
+  const c = coeffsTangente(e) as number[];
+  let s = 0;
+  for (let i = 1; i < c.length; i++) s += i * c[i] * Math.pow(x, i - 1);
+  return s;
 }

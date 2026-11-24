@@ -3,7 +3,8 @@ import { calcul, ligne, piege, resultat, utilise } from "../../../export/corrige
 import type { ExerciceEtudeLocale, ExerciceEtudeLocalePolynomiale, ExerciceEtudeLocaleRationnelle, RacineEtudeLocale } from "../../core5e/etudeLocale.types";
 import { ordreEcransEtudeLocale, type EcranEtudeLocale } from "../../moteur5e/typesEtudeLocale";
 import { tableauFPrimeAttendu, tableauFSecondeAttendu } from "../../moteur5e/verificationEtudeLocale";
-import { formatEnteteColonnesTableau, formatFPrimeDeXLatex, formatRacineLatex, formatReponseAttenduePhaseLatex } from "../../ui5e/formatEtudeLocale";
+import { formatDLatexPublic, formatEnteteColonnesTableau, formatFDeXLatex, formatFPrimeDeXLatex, formatFSecondeDeXLatex, formatRacineLatex, formatReponseAttenduePhaseLatex } from "../../ui5e/formatEtudeLocale";
+import { lignesDeriveePoly } from "../../ui5e/corrigeDerivees1";
 import {
   COURS_ETUDE,
   COURS_SIGNE,
@@ -41,7 +42,7 @@ import {
  * l'adaptateur ET par `App5gen29.tsx`.
  */
 
-const LETTRES = "abcdefgh";
+const LETTRES = "abcdefghijkl";
 
 export function lettreEcranEtudeLocale(e: ExerciceEtudeLocale, ecran: EcranEtudeLocale): string {
   return LETTRES[ordreEcransEtudeLocale(e).indexOf(ecran)] ?? "a";
@@ -224,8 +225,7 @@ function lignesValeurIrrationnelle(p: ExerciceEtudeLocalePolynomiale, nom: strin
   const partsR = somme(termes.map((tm) => `${tm.k * tm.B}`));
   lignes.push(ligne(`f(${nom})=(${parts})+(${partsR})\\sqrt{${r}}`, d === 0 ? "on additionne les termes, on regroupe" : `on additionne les termes et ${nbT(d)}, on regroupe`));
   lignes.push(ligne(`=${ab(constante, racine, r)}`));
-  const v = a * (e + s * Math.sqrt(r)) ** 3 + b * (e + s * Math.sqrt(r)) ** 2 + c * (e + s * Math.sqrt(r)) + d;
-  lignes.push(ligne(`\\approx ${(Math.round(v * 100) / 100).toFixed(2).replace(".", "{,}").replace(/\{,\}00$/, "")}`, "calculatrice, au centième"));
+  // Lot C (question 4) : valeur exacte seule (cours, § 5) — plus d'arrondi au centième.
   return sansDoublons(lignes);
 }
 
@@ -270,6 +270,8 @@ function resultatsNature(e: ExerciceEtudeLocale, mode: "fprime" | "fseconde"): F
   return liste(lignes);
 }
 
+const COURS_DERIVEE_ETUDE = "(cours, § 3)";
+
 export function correctionDetailleeEtudeLocale(e: ExerciceEtudeLocale): EtapeCorrection[] {
   const etapes: EtapeCorrection[] = [];
   const L = (x: EcranEtudeLocale) => lettreEcranEtudeLocale(e, x);
@@ -283,6 +285,42 @@ export function correctionDetailleeEtudeLocale(e: ExerciceEtudeLocale): EtapeCor
           calcul(l, lignesDomaine(r)),
           resultat(l, [f(formatReponseAttenduePhaseLatex(e, "domaine")[0])]),
         );
+        break;
+      }
+      case "deriverFPrime":
+      case "deriverFSeconde": {
+        // Lot C — option « f′ et f″ à calculer ».
+        const seconde = ecran === "deriverFSeconde";
+        const nom = seconde ? "f''(x)" : "f'(x)";
+        const finale = (seconde ? formatFSecondeDeXLatex(e) : formatFPrimeDeXLatex(e)).replace(/^[^=]*=/, "");
+        let lignes: LigneCalcul[];
+        if (e.type === "polynomiale") {
+          const coeffs = seconde ? [e.c, 2 * e.b, 3 * e.a] : [e.d, e.c, e.b, e.a];
+          lignes = lignesDeriveePoly(nom, coeffs).lignes;
+        } else {
+          const D = formatDLatexPublic(e.e, e.k);
+          const xe = e.e === 0 ? "x" : `(x${e.e > 0 ? `-${e.e}` : `+${-e.e}`})`;
+          lignes = seconde
+            ? (() => {
+                const u = formatFPrimeDeXLatex(e).replace(/^[^=]*=\\dfrac\{([^}]*)\}.*$/, "$1");
+                return [
+                  ligne(`D(x)=${D}`, jf("on nomme le dénominateur, de dérivée ", { l: `D'(x)=2${xe}` })),
+                  ligne(`${nom}=\\dfrac{${-2 * e.c}\\,D^2-(${u})\\cdot 2D\\cdot D'}{D^4}`, jf("dérivée d'un quotient, avec ", { l: "(D^2)'=2D\\,D'" })),
+                  ligne(`=\\dfrac{${-2 * e.c}\\,D-(${u})\\cdot 2\\cdot 2${xe}}{D^3}`, "on simplifie par D"),
+                  ligne(`=${finale}`, "on remplace D, on développe et on réduit le numérateur"),
+                ];
+              })()
+            : [
+                ligne(`${nom}=\\dfrac{0\\cdot\\left[${D}\\right]-${e.c < 0 ? `(${e.c})` : e.c}\\cdot 2${xe}}{\\left[${D}\\right]^2}`, jf("dérivée d'un quotient ", { l: "\\left(\\frac{u}{v}\\right)'=\\frac{u'v-uv'}{v^2}" }, ", u constant")),
+                ligne(`=${finale}`, "on développe le numérateur"),
+              ];
+        }
+        etapes.push(
+          utilise(l, [t(seconde ? "On dérive f′(x) " : "On dérive f(x) "), t(e.type === "polynomiale" ? "terme à terme : " : "avec la règle du quotient "), t(`${COURS_DERIVEE_ETUDE}.`)]),
+          calcul(l, lignes),
+          resultat(l, [f(seconde ? formatFSecondeDeXLatex(e) : formatFPrimeDeXLatex(e))]),
+        );
+        void formatFDeXLatex;
         break;
       }
       case "resoudreFPrime":

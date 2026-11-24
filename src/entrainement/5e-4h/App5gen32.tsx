@@ -4,7 +4,8 @@ import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOptimisation } from "./generateurs5e/optimisationGeometrique/index";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOptimisation, genererExerciceOptimisationLibre } from "./generateurs5e/optimisationGeometrique/index";
+import { messageChoixOptimisation } from "./ui5e/retoursOptimisation";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import {
@@ -28,7 +29,7 @@ import { Katex } from "./components/Katex";
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionOptimisation {
-  return demarrerSessionOptimisation(REGLAGES_DEMO, genererExerciceOptimisation);
+  return demarrerSessionOptimisation(REGLAGES_DEMO, genererExerciceOptimisationLibre);
 }
 
 /** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
@@ -45,6 +46,8 @@ function sessionInitiale(): EtatSessionOptimisation {
 interface TransitionEnAttente {
   etatSuivant: EtatSessionOptimisation;
   revele: boolean;
+  /** Choix fermé faux (une seule tentative) : message propre au choix, à la place de « Tentatives épuisées ». */
+  messageRevele?: string | null;
 }
 
 /** Même source que `calculerRecapitulatifOptimisation` (`revelesPartiels[ecran]`) —
@@ -125,7 +128,7 @@ export function App5gen32() {
    * `etat`, pas encore transitionné), puis l'exercice entier redémarre à zéro dès "Nouvel exercice"
    * (`nouvelleSession()`), comme pour la dernière étape ("tableauSignes"/"graphique") des autres
    * générateurs déjà migrés. */
-  function terminerEtape(nouvelEtat: EtatSessionOptimisation, votreReponse?: ReactNode) {
+  function terminerEtape(nouvelEtat: EtatSessionOptimisation, votreReponse?: ReactNode, reponses?: Record<string, string>) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
@@ -133,7 +136,7 @@ export function App5gen32() {
       if (!exerciceTermine && votreReponse !== undefined) {
         ajouterHistorique(votreReponse, etat.phase, nouvelEtat);
       }
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee, messageRevele: nouvelEtat.derniereEtapeRevelee && reponses ? messageChoixOptimisation(etat.exerciceCourant, etat.phase, reponses) : null });
       return;
     }
     setEtat(nouvelEtat);
@@ -171,6 +174,7 @@ export function App5gen32() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        ...(enAttente.messageRevele ? { messageRevele: enAttente.messageRevele } : {}),
         corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeOptimisation(exercice), lettreEcranOptimisation(exercice, etat.phase))} />,
         reponseAttendue: <Katex expression={formatReponseAttendueEcranLatex(exercice, etat.phase)} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
@@ -203,7 +207,7 @@ export function App5gen32() {
             niveauAideMax={niveauAideMax}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponses) =>
-              terminerEtape(soumettreReponseEcran(etat, reponses), formatReponsesEcran(exercice, etat.phase, reponses))
+              terminerEtape(soumettreReponseEcran(etat, reponses), formatReponsesEcran(exercice, etat.phase, reponses), reponses)
             }
             validation={validation}
           />

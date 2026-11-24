@@ -10,7 +10,6 @@ import type { CibleAsymptote, SlotAsymptote } from "../moteur5e/typesLectureGrap
 import { listeAsymptotes } from "../moteur5e/typesLectureGraphiqueLimites";
 import {
   pointsTangenteHorizontale,
-  TOLERANCE_POSITION_INFLEXION,
   TOLERANCE_POSITION_TANGENTE,
   TOLERANCE_VALEUR_EXTREMUM,
 } from "../moteur5e/verificationLectureGraphiqueDerivees";
@@ -108,8 +107,16 @@ export function precisionAnnonceeExtremum(): string {
   return `Une lecture à ${formatNombreTexte(TOLERANCE_VALEUR_EXTREMUM)} près est acceptée.`;
 }
 export function precisionAnnoncee(ecran: "zerosFPrime" | "inflexions"): string {
-  const t = ecran === "zerosFPrime" ? TOLERANCE_POSITION_TANGENTE : TOLERANCE_POSITION_INFLEXION;
-  return `Une lecture à ${formatNombreTexte(t)} près est acceptée.`;
+  // G15 : un point d'inflexion ne tombe pas sur un nœud ; on le lit à l'unité près (ligne verticale
+  // de la grille la plus proche), ce que couvre la tolérance de 0,5.
+  if (ecran === "inflexions") return "Donne l'abscisse à l'unité près (ligne verticale de la grille la plus proche).";
+  return `Une lecture à ${formatNombreTexte(TOLERANCE_POSITION_TANGENTE)} près est acceptée.`;
+}
+
+/** Abscisse d'un point d'inflexion arrondie à l'unité (G15). */
+export function abscisseInflexionLatex(x: number): string {
+  const r = Math.round(x);
+  return `${Object.is(r, -0) ? 0 : r}`;
 }
 
 /** En-têtes des colonnes des tableaux : position de chaque point (déjà validée à l'écran précédent)
@@ -124,7 +131,7 @@ export function formatEnteteColonnesTableauFPrime(exercice: ExerciceLectureGraph
 }
 export function formatEnteteColonnesTableauFSeconde(exercice: ExerciceLectureGraphiqueDerivees, colonnes: { type: "zone" | "racine" | "exclusion"; index: number }[]): string[] {
   return colonnes.map((col) => {
-    if (col.type === "racine") return formatNombreLatex(exercice.inflexions[col.index].position);
+    if (col.type === "racine") return `\\approx ${abscisseInflexionLatex(exercice.inflexions[col.index].position)}`;
     if (col.type === "exclusion") return formatNombreLatex(exercice.asymptotique.vas[col.index].position);
     return "";
   });
@@ -154,10 +161,10 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceLectureGraphiq
     case "extremums":
       return exercice.extrema.map((e) => `f(${formatNombreLatex(e.position)})\\approx ${formatNombreLatex(e.valeur)}\\ \\text{(${e.classification === "max" ? "maximum" : "minimum"})}`);
     case "inflexions":
-      return exercice.inflexions.length === 0 ? ["\\text{aucun point d'inflexion}"] : [`x\\approx ${exercice.inflexions.map((p) => formatNombreLatex(p.position)).join("\\ ;\\ ")}`];
+      return exercice.inflexions.length === 0 ? ["\\text{aucun point d'inflexion}"] : [`x\\approx ${exercice.inflexions.map((p) => abscisseInflexionLatex(p.position)).join("\\ ;\\ ")}`];
     case "tableauFSeconde":
       if (exercice.inflexions.length === 0) return ["\\text{f'' ne s'annule pas : la concavité ne change pas sur chaque intervalle}"];
-      return exercice.inflexions.map((p) => `x\\approx ${formatNombreLatex(p.position)}\\ :\\ \\text{point d'inflexion}`);
+      return exercice.inflexions.map((p) => `x\\approx ${abscisseInflexionLatex(p.position)}\\ :\\ \\text{point d'inflexion}`);
   }
 }
 

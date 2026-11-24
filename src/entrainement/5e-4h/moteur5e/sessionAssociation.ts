@@ -9,6 +9,7 @@ import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import type { EtatSessionAssociation, ResultatExerciceAssociation } from "./typesAssociation";
 import type { ChoixLigneAssociation } from "./verificationAssociation";
 import { verifierAssociationComplete } from "./verificationAssociation";
+import { choixJustificationErrone, diagnostiquerJustification, saisieJustificationIllisible, specJustification } from "./justificationAssociation";
 
 const POINTS_DE_BASE = 100;
 
@@ -19,8 +20,8 @@ export function niveauAideMaxAssociation(): number {
   return NIVEAU_AIDE_MAX_ASSOCIATION;
 }
 
-function etatInitial(exercice: ExerciceAssociation): Pick<EtatSessionAssociation, "exerciceCourant" | "etapeCourante" | "niveauAide"> {
-  return { exerciceCourant: exercice, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0 };
+function etatInitial(exercice: ExerciceAssociation): Pick<EtatSessionAssociation, "exerciceCourant" | "etapeCourante" | "niveauAide" | "phase" | "scoreAssociation"> {
+  return { exerciceCourant: exercice, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: "association", scoreAssociation: undefined };
 }
 
 export function demarrerSessionAssociation(reglages: ReglagesSession5e, generateur: () => ExerciceAssociation): EtatSessionAssociation {
@@ -47,18 +48,36 @@ function cloturerExerciceOuSuivant(etat: EtatSessionAssociation, resultat: Resul
 }
 
 export function soumettreReponseAssociation(etat: EtatSessionAssociation, choixParItem: ChoixLigneAssociation[]): EtatSessionAssociation {
-  if (etat.terminee) throw new Error("soumettreReponseAssociation : la session est déjà terminée");
+  if (etat.terminee || etat.phase !== "association") throw new Error("soumettreReponseAssociation : la session n'est pas à l'écran d'association");
   const { ordreLettres } = etat.exerciceCourant;
   const singulier = etat.exerciceCourant.famille === "grapheDeriveeAvancee" ? etat.exerciceCourant.singulier : undefined;
 
+  // Choix fermés : une seule tentative (ils se gagneraient par élimination).
   const etapeCourante = soumettreEtapeTentatives<ChoixLigneAssociation[]>(etat.etapeCourante, choixParItem, {
     ...reglagesEtape(etat),
+    tentativesMax: 1,
     verifier: (r) => verifierAssociationComplete(ordreLettres, r, singulier),
     revelerReponse: () => {},
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
+  // Lot C : on passe à la justification d'une association (même exercice).
+  return { ...etat, phase: "justification", scoreAssociation: etapeCourante.score as number, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, derniereEtapeRevelee: etapeCourante.revelee };
+}
 
+/** Écran « justification » : champs (3 tentatives) et choix fermés (un choix faux clôt l'écran) ;
+ * une saisie illisible est refusée sans tentative. Clôt l'exercice. */
+export function soumettreReponseJustification(etat: EtatSessionAssociation, reponses: Record<string, string>): EtatSessionAssociation {
+  if (etat.terminee || etat.phase !== "justification") throw new Error("soumettreReponseJustification : la session n'est pas à l'écran de justification");
+  const spec = specJustification(etat.exerciceCourant);
+  if (saisieJustificationIllisible(spec, reponses)) return etat;
+  const etapeCourante = soumettreEtapeTentatives<Record<string, string>>(etat.etapeCourante, reponses, {
+    ...reglagesEtape(etat),
+    tentativesMax: choixJustificationErrone(spec, reponses) ? 1 : etat.reglages.tentativesMax,
+    verifier: (r) => Object.values(diagnostiquerJustification(spec, r)).every((st) => st === "correct"),
+    revelerReponse: () => {},
+  });
+  if (!etapeCourante.terminee) return { ...etat, etapeCourante };
   const revele = etapeCourante.revelee;
-  const score = etapeCourante.score as number;
+  const score = Math.round(((etat.scoreAssociation ?? 0) + (etapeCourante.score as number)) / 2);
   return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, score, niveauAide: etat.niveauAide, revele }, revele);
 }

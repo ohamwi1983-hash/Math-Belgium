@@ -11,7 +11,7 @@ import type { ExerciceOptimisation } from "../core5e/optimisationGeometrique.typ
 import type { ReglagesSession5e } from "../core5e/session5e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
-import { choixFermeErrone, verifierEcran } from "./verificationOptimisationGeometrique";
+import { choixFermeErrone, refusSaisieOptimisation, verifierEcran } from "./verificationOptimisationGeometrique";
 import { ecranApres, ecranInitial } from "./typesOptimisationGeometrique";
 import type { EcranOptimisation, EtatSessionOptimisation, ResultatExerciceOptimisation } from "./typesOptimisationGeometrique";
 
@@ -71,6 +71,8 @@ export function soumettreReponseEcran(etat: EtatSessionOptimisation, reponses: R
   if (etat.terminee) throw new Error("soumettreReponseEcran : la session est déjà terminée");
   const phaseCourante: EcranOptimisation = etat.phase;
   const exercice = etat.exerciceCourant;
+  // Lot B : une saisie illisible est refusée sans tentative (état inchangé).
+  if (refusSaisieOptimisation(exercice, phaseCourante, reponses) !== null) return etat;
 
   // Un choix fermé faux clôt l'écran tout de suite (un seul essai sur un choix qui se gagnerait par
   // élimination) ; les champs à saisie libre gardent leurs tentatives.
