@@ -2300,6 +2300,86 @@ mauvais choix fermé révélé) : scrollWidth 390, 0 erreur console, 0 `.katex-e
 (2 plans : évaluation 2 séries + aménagée + corrigé + grille + feuille + Word du corrigé, interdite /
 autorisée) : 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error` ; QR `?code=` 24 / 24.
 
+## 5e ch. 5, lot H — 5gen73–75 (nouveaux, notés)
+
+Socle d'écrans du 5e (`AppEcransTrigo` + `DefinitionEcrans`) réutilisé SANS modification (options `figure`,
+`bonneOption` — choix fermé jugé ✗ / ✓ —, `piegeChoixRevele`, `aidesChoixDeuxNiveaux`, `aReprendre`, `apercuLatex`,
+`raccourcis`, `nombrePuces`). Figure commune NOUVELLE `ui5e/figureLotHDerivees.ts` (`repereSvg`, `grilleReperesSvg` :
+quadrillage dont un carreau vaut `sx` en x et `sy` en y — échelles différentes permises —, graduations aux lignes,
+axes fléchés, courbes et segments rognés par un `<svg>` imbriqué, AUCUN `id`). Lectures : `lireNombre` /
+`lireFonctionVar` (`moteur5e/lectureApplicationsDerivees.ts`, variable x ou h), `lireLimite` (lot G du 5e ch. 4 :
+±∞ lisibles), `lireEnsemble` (5e ch. 1, `moteur5e/ensemblesReels.ts` : « ℝ \ {1} », « ∅ », « aucun »). Corrigés
+`generateurs5e/{lectureTangente,graphiqueDerivee,derivabilite}/corrigeDetaille.ts`, une lettre par écran, partagés
+par l'adaptateur et l'appli. Cartes : 5gen73 en § 2 « Tangentes » (après 5gen68), 5gen74 en § 6 « Lecture
+graphique » (après 5gen30), 5gen75 en § 4 « Signe de f′ et de f″ » (après 5gen25, précédée de l'exemple libre
+« Dérivée à gauche et à droite : point anguleux, tangente verticale » — |x − 2| en 2 : −1 et 1 ; √x en 0 :
+1/√h → +∞ —, énoncé de démonstration par clé dans `ENONCES_DEMONSTRATION`) ; libellés pilotes de 5gen25 et 5gen30
+remplis.
+
+**5gen73 — Lire f(a) et f′(a) sur un graphique** (Connaître, processus 1) : tout est construit en CARREAUX (A nœud
+(ia ; ja), pente de t en carreaux ±1/2, ±1, ±3/2, ±2, second nœud A + (dq ; dp) dans la fenêtre, courbe
+g(u) = c3(u − ia)³ + c2(u − ia)² + (dp/dq)(u − ia) + ja avec c2 ≠ 0 ; f(x) = sy·g(x/sx)) : f(a) et f′(a) tombent
+sur le quadrillage. Variantes `direct` (même échelle), `echelle` (1 carreau = 1 en x et 2 en y, ou 2 et 1 : la
+pente comptée en carreaux est fausse), `inverse` (t donnée par son équation, quatre graphiques numérotés 1–4 :
+bon, pente de signe opposé, même droite tangente AILLEURS, tangente parallèle — mauvais f(a) —, f(a) et f′(a)
+échangés quand f′(a) est entier ; trois intrus distincts par exercice). Écrans direct / echelle : f(a) → f′(a)
+(Δy / Δx entre deux nœuds de t) → équation de t (comparée en cinq points) → comparaison des nombres dérivés en
+P, Q, R (choix fermé jugé, une tentative : « f′ est négatif en X et le plus grand en Y » ; P, Q, R sur des nœuds
+visibles, EXACTEMENT un f′ < 0 (pente ≤ −0,4 carreau), plus grand f′ dépassant le deuxième de 0,6, option
+« plus basse / plus haute ordonnée » toujours proposée et toujours fausse) ; inverse : f(a) → f′(a) →
+graphique (choix fermé jugé). Messages ciblés : abscisse lue, carreaux sans l'échelle, f(a) donné pour f′(a),
+Δx / Δy à l'envers, signe, « y = f′(a)x + f(a) », bonne pente mais pas par A (ou l'inverse), hauteurs comparées
+au lieu des pentes, intrus nommé. Énoncé papier : consigne + figure + vraies questions a) f(a) [a] b) f′(a) et t
+[b, c] c) comparaison [d] (inverse : a) f(a), f′(a) [a, b] b) graphique [c]) — pas de regroupement (figure propre
+à l'instance ET vraies questions). Niveaux (`sansCharge`, constants par variante) : direct 1 · 8 min, échelle
+2 · 8 min (piège dans les données), inverse 2 · 7 min (méthode 1) ; `forme` = variante, aucun `calcul`, aucun cas
+particulier.
+
+**5gen74 — Du graphique de f′ aux variations de f** (Appliquer) : seul le graphique de f′ est donné (fenêtre
+[−5 ; 5]², carreau 1, zéros et extremums ENTIERS dans [−4 ; 4], valeur extrême entière ≤ 4) ; variantes
+`deuxZeros` k((x − h)² − d²), `zeroDouble` k(x − h)², `sansZero` k((x − h)² + e) — groupe à verdict
+`groupe_zeros_parabole` (même allure de parabole : deux zéros, un palier ou aucun zéro) — et `cubique`
+k(x − a)²(x − b), b = a + 3t (palier + extremum, deux points d'inflexion a et a + 2t). Écrans : signe de f′
+(deux ensembles, crochets OUVERTS exigés aux zéros — sinon `aReprendre` sans tentative), extremums de f
+(maximum, minimum : listes, « aucun » lisible), concavité (deux ensembles, crochets libres aux bornes finies),
+points d'inflexion (liste). Messages ciblés : zéro double gardé dans « f′ > 0 », ensembles échangés, palier pris
+pour un extremum, sommet de f′ pris pour un extremum de f, max / min échangés, concavité lue sur le signe de f′,
+convexe / concave échangés, zéros de f′ donnés pour les inflexions. Corrigé : zéros lus puis signe par
+intervalle, tableau de signes (`array`), figure des zéros ; changement de signe en chaque zéro, variations ; sens
+de variation de f′ (f″), figure des sommets ; inflexions = extremums de f′. Énoncé papier : consigne (graphique
+de f′, PAS de f) + figure + deux vraies questions a) [a, b] b) [c, d] — pas de regroupement. Niveau 3 · 9 min pour
+TOUTES les variantes (signe = lecture, trois raisonnements, méthode 0, piège 1 constant : le graphique est celui
+de f′) ; `forme` « parabole » / « cubique » (jamais le nombre de zéros).
+
+**5gen75 — Dérivable ou non en a ? (VERSION MODESTE, décision de l'utilisateur du 24/11/2026)** (Appliquer) :
+morceaux polynomiaux de degré ≤ 2 raccordés en a (`morceauxDerivable` — même valeur et même pente —,
+`morceauxAnguleux`, `morceauxDiscontinu` — saut de 1 à 4), `absolue` c|x − a| + q(x), q de degré ≤ 2,
+|f(a)| ≤ 6, demi-pentes ≤ 5 (point anguleux), `racine` c√(x − a) + b sur [a ; +∞[ (tangente verticale).
+**PAS** de x|x|·g ni de racine cubique : une version plus poussée (∛, x|x|·g, rebroussement) est réservée à la
+5e 6h, plus tard. Tirage libre : verdict d'abord, un quart chacun (anguleux : morceaux ou valeur absolue) ; groupe
+à verdict `groupe_derivabilite` (les cinq variantes). Écrans : continuité (f(a), limites latérales — la racine n'a
+que la droite), taux à gauche (expression en h comparée en cinq points h < 0, puis limite), taux à droite (idem,
+h > 0 ; saut → terme k/h → ±∞), verdict (choix fermé jugé : dérivable / point anguleux / tangente verticale / pas
+continue), tangente si dérivable ; cinq puces fixes (`nombrePuces`). Messages ciblés : f(a) avec le second
+morceau, limite à droite = f(a) quand f saute, |h| = h pour h < 0, limite finie pour un taux infini (et
+l'inverse), signe de l'infini, saut oublié dans le taux, « dérivable parce que continue », limite infinie prise
+pour un nombre dérivé, tangente sans « − a ». Corrigé : f(a + h) développé en h, f(a + h) − f(a), division par h,
+limite ; verdict justifié par les deux nombres dérivés, figure (demi-tangentes en pointillés, point creux d'un
+saut). Énoncé papier : f + UNE consigne (la même pour tous les verdicts) ; pas de regroupement (a et le domaine
+dans la consigne). Niveau 4 · 10 min CONSTANT (quatre étapes, méthode 1, piège 1, `sansCharge`) ; `forme`
+constante, aucun `calcul`.
+
+Mesures : moteurs 2 000 tirages par variante (f(a), f′(a) par dérivée numérique, B sur t, signe de f′ / f″ par
+balayage, zéros et inflexions recalculés, limites et taux à h = ±10⁻⁷, verdict recalculé ; réponse juste
+acceptée, illisible = `parse_error`, réponse fausse refusée, options distinctes et une seule juste ; textes sans
+NaN / Infinity / undefined / −0 / notation clavier) : 0 anomalie ; verdicts libres de 5gen75 ≈ 25 % chacun ;
+`?code=` 180 / 180 reproductibles. Plans réels `construirePlan` (3 séries, 10 essais, calculatrice interdite
+puis autorisée) : même multiset (forme, cas, calcul) dans chaque série, nombres tous différents, variantes des
+groupes différentes d'une série à l'autre ; documents (évaluation 2 séries + aménagée + corrigé + grille,
+feuille + aménagée, Word du corrigé) : 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error`. iPhone 13
+(chaque variante : illisible → message sans tentative, réponse fausse ciblée, bonne réponse, choix fermé faux
+révélé ✗ / ✓) : scrollWidth 390, 0 erreur console.
+
 ## 4e ch. 7, lot G — gen92–gen95 (nouveaux, notés)
 
 Coquille `components/AppTransfertSecondDegre.tsx` réutilisée ; seule extension (ajout pur, sans effet sur
