@@ -18,6 +18,19 @@ export const probabilites: ChapterContent = {
       number: 1,
       title: 'Probabilités et ensembles',
       kicker: '0 ≤ P(A) ≤ 1 — équiprobabilité : favorables / possibles',
+      titreCourt: 'Probabilités et ensembles',
+      partie: 'Ensembles, arbres et tirages',
+      essentiel: [
+        '$P(A)$ mesure la chance que $A$ se réalise : $0 \\leq P(A) \\leq 1$ et $P(\\bar{A})=1-P(A)$. En situation d\'**équiprobabilité** : $P(A) = \\dfrac{\\text{nombre de cas favorables}}{\\text{nombre de cas possibles}}$ — toujours à vérifier avant de compter.',
+        '$P(A \\cup B) = P(A) + P(B) - P(A \\cap B)$ : tu **retires** l\'intersection — sinon elle est comptée deux fois.',
+        'La probabilité de $A$ **sachant** $B$ : $P(A|B) = \\dfrac{P(A \\cap B)}{P(B)}$, et $P(A|B) \\neq P(B|A)$ en général. $A$ et $B$ sont indépendants si $P(A \\cap B) = P(A) \\times P(B)$.',
+      ],
+      cartes: [
+        { question: 'Au lancer de 2 dés, les 11 sommes de 2 à 12 sont-elles équiprobables ?', reponse: 'Non : 2 ne s\'obtient que par (1;1), $\\frac{1}{36}$ ; 9 s\'obtient de 4 façons, $\\frac{4}{36}$.' },
+        { question: 'Sur 40 personnes, $n(A)=18$, $n(B)=15$, $n(A \\cap B)=6$ : que vaut $P(A \\cup B)$ ?', reponse: '$\\frac{18}{40} + \\frac{15}{40} - \\frac{6}{40} = \\frac{27}{40}$.' },
+        { question: 'Même groupe : que valent $P(A|B)$ et $P(B|A)$ ?', reponse: '$P(A|B) = \\frac{6}{15} = 0{,}4$ et $P(B|A) = \\frac{6}{18} = \\frac{1}{3}$ : même numérateur, pas le même dénominateur.' },
+        { question: 'Deux événements incompatibles, de probabilités non nulles, peuvent-ils être indépendants ?', reponse: 'Jamais : $P(A \\cap B) = 0$ alors que $P(A) \\times P(B) > 0$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Probabilités et ensembles (1/3) — expérience aléatoire, événement, fréquence', youtubeId: 'N1kfU7qjA4o' },
         { kind: 'video', title: 'Probabilités et ensembles (2/3) — Venn, union, tableau à double entrée', youtubeId: 'pZ-1sVqPrVM' },
@@ -523,6 +536,19 @@ export const probabilites: ChapterContent = {
       number: 2,
       title: 'Tirages, arbres et dénombrement',
       kicker: 'chemin → produit ; événement (plusieurs chemins) → somme',
+      titreCourt: 'Arbres et tirages',
+      partie: 'Ensembles, arbres et tirages',
+      essentiel: [
+        'La probabilité d\'un **chemin**, c\'est le produit des probabilités des branches traversées ; la probabilité d\'un **événement**, c\'est la somme des probabilités des chemins qui y mènent.',
+        'Avec remise, les tirages successifs sont **indépendants** ; sans remise, la composition change après chaque tirage : le résultat du 1er tirage modifie les probabilités du 2e.',
+        'Le nombre de façons de ranger $n$ objets distincts vaut $n! = n \\times (n-1) \\times \\ldots \\times 1$ ; un dérangement est une permutation où **aucun** objet ne reste à sa place initiale, et $D(n) \\neq n!$.',
+      ],
+      cartes: [
+        { question: 'Urne à 5 rouges et 3 bleues, 2 tirages **sans** remise : que vaut $P(RR)$ ?', reponse: '$\\frac{5}{8} \\times \\frac{4}{7} = \\frac{20}{56} = \\frac{5}{14}$.' },
+        { question: 'Même urne, **avec** remise : que vaut $P(RR)$ ?', reponse: '$\\left(\\frac{5}{8}\\right)^2 = \\frac{25}{64}$ (indépendance).' },
+        { question: 'Avec deux dés, que vaut $P(\\text{somme}=5)$ ?', reponse: '4 couples sur 36 : (1;4), (2;3), (3;2), (4;1), donc $\\frac{4}{36} = \\frac{1}{9}$.' },
+        { question: '4 lettres dans 4 enveloppes au hasard : probabilité qu\'aucune ne soit bien placée ?', reponse: '$\\dfrac{D(4)}{4!} = \\dfrac{9}{24} = \\dfrac{3}{8}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Tirages, arbres et dénombrement — arbres pondérés, permutations, dérangements', youtubeId: 'XHiFlN4Onjc' },
         {
@@ -906,6 +932,19 @@ export const probabilites: ChapterContent = {
       number: 3,
       title: 'Probabilités totales et théorème de Bayes',
       kicker: 'P(A|B) = P(B|A)×P(A) / P(B)',
+      titreCourt: 'Probabilités totales et Bayes',
+      partie: 'Bayes, épreuves répétées, problèmes',
+      essentiel: [
+        'Si $B_1,\\ldots,B_n$ forment une partition, la loi des probabilités totales donne, pour tout événement $A$ : $P(A) = \\displaystyle\\sum_{i=1}^{n} P(A|B_i) \\times P(B_i)$.',
+        'Théorème de Bayes : $P(A|B) = \\dfrac{P(B|A) \\times P(A)}{P(B)}$. Bayes permet de **retourner** un conditionnement : tu connais $P(B|A)$, tu en déduis $P(A|B)$.',
+        'Un test « fiable à 90 % », où $P(T^+|\\text{malade}) = 0{,}9$, ne signifie **pas** qu\'un résultat positif donne 90 % de chances d\'être malade : tout dépend aussi de la proportion de malades et du taux de faux positifs.',
+      ],
+      cartes: [
+        { question: 'Quelles sont les deux conditions pour que $B_1,\\ldots,B_n$ forment une partition de l\'univers ?', reponse: 'Deux à deux **incompatibles**, et leur union recouvre l\'univers **entier**.' },
+        { question: '$P(\\text{malade}) = 0{,}1$, $P(T^+|\\text{malade}) = 0{,}9$, $P(T^+|\\text{non malade}) = 0{,}2$ : que vaut $P(T^+)$ ?', reponse: '$0{,}9 \\times 0{,}1 + 0{,}2 \\times 0{,}9 = 0{,}27$.' },
+        { question: 'Même test : que vaut $P(\\text{malade}|T^+)$ ?', reponse: '$\\dfrac{0{,}9 \\times 0{,}1}{0{,}27} = \\dfrac{1}{3}$, très différent de $P(T^+|\\text{malade}) = 0{,}9$.' },
+        { question: 'Sensibilité et spécificité d\'un test : quelles probabilités ?', reponse: 'Sensibilité : $P(T^+|\\text{malade})$ ; spécificité : $P(T^-|\\text{non malade})$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Indépendance, conditionnement et Bayes — probabilités totales et théorème de Bayes', youtubeId: 'msDT2q5uV7M' },
         {
@@ -1341,6 +1380,19 @@ export const probabilites: ChapterContent = {
       number: 4,
       title: 'Probabilités : problèmes',
       kicker: 'compter les chemins à k succès dans l’arbre, × pᵏ(1−p)ⁿ⁻ᵏ',
+      titreCourt: 'Épreuves répétées et problèmes',
+      partie: 'Bayes, épreuves répétées, problèmes',
+      essentiel: [
+        'Pour trouver $P(X=k)$, il suffit de **compter** combien de chemins de l\'arbre contiennent $k$ succès, puis de multiplier ce nombre par la probabilité commune à chacun d\'eux : $P(X=k) = N_k \\times p^k(1-p)^{n-k}$.',
+        '« Au moins un succès » se calcule par le complément de « aucun succès », **jamais** en additionnant des probabilités individuelles : $P(\\text{au moins 1}) = 1 - P(X=0) = 1-(1-p)^n$.',
+        'Série : $P(\\text{série fonctionne}) = p_1 \\times p_2$. Parallèle : $P(\\text{parallèle fonctionne}) = 1-(1-p_1)(1-p_2)$.',
+      ],
+      cartes: [
+        { question: '5 tirs indépendants, $p = 0{,}3$ : que vaut $P(X=2)$ ?', reponse: '10 positions des 2 succès, {1;2}, {1;3}, …, {4;5} : $10 \\times 0{,}3^2 \\times 0{,}7^3 = 0{,}3087$.' },
+        { question: 'Même tireur : probabilité d\'au moins un succès ?', reponse: '$1 - 0{,}7^5 = 1 - 0{,}16807 = 0{,}83193$.' },
+        { question: 'Pourquoi « $5 \\times 0{,}3 = 1{,}5$ » ne peut-il pas être la probabilité d\'au moins un succès ?', reponse: 'Une probabilité ne dépasse jamais 1 : seul le complément est fiable.' },
+        { question: 'Composants indépendants fonctionnant avec les probabilités 0,9 et 0,8, montés en parallèle : $P$(fonctionne) ?', reponse: '$1 - 0{,}1 \\times 0{,}2 = 1 - 0{,}02 = 0{,}98$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Probabilités : problèmes — épreuves répétées et synthèse du chapitre', youtubeId: '8nv_851l7IY' },
         {

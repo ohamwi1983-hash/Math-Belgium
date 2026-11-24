@@ -227,6 +227,12 @@ paths:
   156 blocs `exemple`, 153 cadres rendus, **0 cadre vide**, les 3 seuls exemples désormais sans
   cadre étant exactement les 3 blocs concernés de ce chapitre — et le cadre `is-empty` de
   « Fonctions composées » toujours rendu avec son contenu.
+  **Parcours (24/11, lot P)** : 2 parties (« Ensembles, arbres et tirages » § 1–2, « Bayes, épreuves
+  répétées, problèmes » § 3–4), 4 `titreCourt`, 12 phrases d'`essentiel` reprises du cours (notation du
+  cours : `P(A|B)`, `\bar{A}`, `\text{malade}` dans les formules), 16 cartes « Teste-toi » sur les
+  exemples des sections (40 personnes, urne 5 R / 3 B, test médical 0,1 / 0,9 / 0,2, tireur p = 0,3,
+  montage parallèle). Seuls les champs d'en-tête des sections ont changé, pas les `blocks`. Vérifié :
+  carte, 4 étapes et Réviser à 390 / 1 280 px, clair / sombre — 0 `$` visible, 0 `.katex-error`.
 
 - **6e (6h), Chapitre 9 — Lieux géométriques** (`lieux-geometriques`) : migré en intégralité depuis
   un artifact `plateforme-maths` (6e/6h, chapitre 9 dans ce dépôt-là — conservé tel quel ici,
