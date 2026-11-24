@@ -464,3 +464,15 @@ h3.carnet-date { font-size: 0.78rem; }
 .carnet-competence-ajout .carnet-bouton { min-height: 44px; }
 .carnet-tous-gens { align-self: flex-start; min-height: 40px; }
 .carnet-puce-competence { gap: 5px; }
+
+/* ---------- Évaluation : exercices retenus sous chaque section de « Matière » (0008) ---------- */
+.carnet-eval-section { display: flex; flex-direction: column; }
+.carnet-eval-section > .carnet-case { min-height: 44px; }
+.carnet-eval-gens { display: flex; flex-direction: column; padding-left: 30px; border-left: 2px solid var(--line-soft); margin: 0 0 6px 10px; }
+.carnet-eval-gens .carnet-case { min-height: 44px; padding: 6px 2px; font-size: 0.9rem; align-items: center; }
+.carnet-eval-gens .conc-pc { flex: none; }
+.carnet-eval-gens-resume, .carnet-eval-gens-note { margin: 4px 0 0; }
+.carnet-eval-gens-note code { overflow-wrap: anywhere; }
+@media (max-width: 759px) {
+  .carnet-eval-gens { padding-left: 14px; margin-left: 6px; }
+}

@@ -13,7 +13,7 @@ import { dureeEstimeeVariante, estimationEnCache, type OptionsEstimation } from 
 import { RepereNiveauDuree } from './RepereNiveauDuree'
 import { ChampPoints } from './ChampPoints'
 import { ApercuDocument } from './conception/ApercuDocument'
-import { cleSectionComposer, composer, processusComposables, processusDeLignes, type ContexteComposition, type FaconComposer } from './conception/composer'
+import { cleGenerateurComposer, cleSectionComposer, composer, processusComposables, processusDeLignes, type ContexteComposition, type FaconComposer } from './conception/composer'
 import { ordreImpression, type EntreeImpression, type LigneActive } from './conception/ordreImpression'
 import { pointsDemonstration, pointsDemonstrationMoyens, pointsDepuisDuree } from '../../lib/pointsAutomatiques'
 import {
@@ -1122,6 +1122,10 @@ export function EvaluationGeneratorPanel({
   const matiereDemandee = verrouille ? null : params.get('matiere')
   const matiereTraitee = useRef<string | null>(null)
   const [bandeauCarnet, setBandeauCarnet] = useState<string | null>(null)
+  /** Générateurs choisis dans le carnet (annonce d'une évaluation, `…|gen,gen` dans `?matiere=`) : clés
+   * `cleGenerateurComposer`. « Préparer l'évaluation » (et « Composer selon la durée » du bandeau) ne
+   * pioche que dans eux ; `null` : tout le catalogue (lien sans générateurs, ou limite levée). */
+  const [generateursCarnet, setGenerateursCarnet] = useState<Set<string> | null>(null)
   // Classe du carnet (`?cid=`) : avertissement « date limite du bulletin » d'après la date de l'en-tête.
   const [classeCarnetId, setClasseCarnetId] = useState<string | null>(null)
   useEffect(() => {
@@ -1144,8 +1148,25 @@ export function EvaluationGeneratorPanel({
     }
     const lignesCarnet: LigneSelection[] = []
     const processusChoisis: Processus[] = []
-    for (const l of lignesInitiales(chapitresCarnet)) {
-      const vue = l.type === 'exercice' && m.chapitres.find((x) => x.slug === l.chapitreSlug)?.sections.includes(l.sectionId)
+    // Générateurs choisis dans le carnet : seulement ceux des sections listées (un id inconnu est ignoré).
+    const lignesVierges = lignesInitiales(chapitresCarnet)
+    const choisis = new Set(
+      lignesVierges
+        .filter((l) => l.type === 'exercice' && m.chapitres.some((x) => x.slug === l.chapitreSlug && x.sections.includes(l.sectionId) && (x.generateurs ?? []).includes(l.cle ?? '')))
+        .map((l) => cleGenerateurComposer(l.chapitreSlug, l.cle ?? '')),
+    )
+    // Un chapitre sans générateur choisi garde tous ceux de ses sections (lien d'avant).
+    const chapitresLimites = new Set(m.chapitres.filter((x) => lignesVierges.some((l) => l.chapitreSlug === x.slug && choisis.has(cleGenerateurComposer(x.slug, l.cle ?? '')))).map((x) => x.slug))
+    if (chapitresLimites.size > 0) {
+      for (const l of lignesVierges)
+        if (l.type === 'exercice' && !chapitresLimites.has(l.chapitreSlug) && m.chapitres.some((x) => x.slug === l.chapitreSlug && x.sections.includes(l.sectionId))) choisis.add(cleGenerateurComposer(l.chapitreSlug, l.cle ?? ''))
+    }
+    setGenerateursCarnet(chapitresLimites.size > 0 ? choisis : null)
+    for (const l of lignesVierges) {
+      const vue =
+        l.type === 'exercice' &&
+        m.chapitres.find((x) => x.slug === l.chapitreSlug)?.sections.includes(l.sectionId) &&
+        (chapitresLimites.size === 0 || choisis.has(cleGenerateurComposer(l.chapitreSlug, l.cle ?? '')))
       const variante = vue ? catalogueVariantesExercice(l.cle as IdGenerateurPilote, 'evaluation', []).find((v) => !varianteExclue(l.cle ?? '', v.id)) : undefined
       if (variante) processusChoisis.push(l.processus)
       lignesCarnet.push(variante ? { ...l, parVariante: { [variante.id]: 1 }, nombre: 1 } : l)
@@ -1162,9 +1183,13 @@ export function EvaluationGeneratorPanel({
     const sections = m.chapitres.reduce((t, c) => t + c.sections.length, 0)
     setBandeauCarnet(
       `Matière vue${classe ? ` en ${classe}` : ''}${depuis ? ` depuis le ${depuis}` : ''} : ${sections} section${sections > 1 ? 's' : ''}, ` +
-        (generateurs > 0
-          ? `${generateurs} générateur${generateurs > 1 ? 's' : ''} pré-sélectionné${generateurs > 1 ? 's' : ''} (un exercice chacun). Ajuste les nombres et ajoute d'autres questions si besoin.`
-          : 'aucun générateur dans ces sections : choisis les questions à la main.'),
+        (chapitresLimites.size > 0
+          ? generateurs > 0
+            ? `${generateurs} générateur${generateurs > 1 ? 's' : ''} choisi${generateurs > 1 ? 's' : ''} dans le carnet (un exercice chacun ; les autres générateurs de ces sections ne sont pas pris). Ajuste les nombres, ou compose selon la durée avec ces seuls générateurs.`
+            : `aucun des ${choisis.size} générateur${choisis.size > 1 ? 's' : ''} choisis dans le carnet n'est disponible avec ces réglages : choisis les questions à la main.`
+          : generateurs > 0
+            ? `${generateurs} générateur${generateurs > 1 ? 's' : ''} pré-sélectionné${generateurs > 1 ? 's' : ''} (un exercice chacun). Ajuste les nombres et ajoute d'autres questions si besoin.`
+            : 'aucun générateur dans ces sections : choisis les questions à la main.'),
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps -- une seule fois par matière demandée (garde `matiereTraitee`).
   }, [matiereDemandee])
@@ -1490,8 +1515,10 @@ export function EvaluationGeneratorPanel({
 
   /* Façons de composer : elles REMPLISSENT la sélection (rien n'est tiré ici). */
   const dureeCibleComposer = estExamen ? (lectureDuree.etat === 'ok' ? lectureDuree.valeur : Math.min(150, 50 * Math.max(1, chapitres.length))) : 50
-  function contexteComposer(): ContexteComposition {
+  function contexteComposer(facon?: FaconComposer): ContexteComposition {
     return {
+      // Générateurs choisis dans le carnet : « Préparer l'évaluation » ne pioche que dans eux.
+      ...(facon === 'evaluation' && generateursCarnet ? { generateursPermis: generateursCarnet } : {}),
       lignes: lignesInitiales(chapitres),
       mode: estExercice ? 'exercice' : 'evaluation',
       calculatriceInterdite: calculatrice === 'interdite',
@@ -1510,11 +1537,13 @@ export function EvaluationGeneratorPanel({
   }
   function appliquerFacon(facon: FaconComposer) {
     const avant = lignes
-    const res = composer(facon, contexteComposer())
+    const res = composer(facon, contexteComposer(facon))
+    const limite = facon === 'evaluation' && generateursCarnet !== null
     if (res.questions === 0) {
       setComposition({
-        texte:
-          facon === 'evaluation' && !estExamen
+        texte: limite
+          ? `Rien à proposer avec les ${generateursCarnet.size} générateur${generateursCarnet.size > 1 ? 's' : ''} choisis dans le carnet pour ${estExamen ? 'ta répartition d’examen' : texteCompetences(reglageCompetences.cochees)} (compétences, calculatrice) : coche d’autres compétences, ou « Tout le catalogue » dans le bandeau.`
+          : facon === 'evaluation' && !estExamen
             ? `Rien à proposer pour ${texteCompetences(reglageCompetences.cochees)} avec ces réglages (chapitres, calculatrice).`
             : 'Rien à proposer avec ces réglages (notions cochées, calculatrice).',
         avant,
@@ -1530,7 +1559,11 @@ export function EvaluationGeneratorPanel({
     setComposition({
       texte: `${nombre} question${nombre > 1 ? 's' : ''} proposée${nombre > 1 ? 's' : ''} sur ${res.notions} notion${res.notions > 1 ? 's' : ''} : la sélection est à droite, modifiable comme tu veux.${
         res.cedees.length > 0
-          ? ` ${texteCompetences(res.cedees)} : aucun exercice dans ces chapitres — ${res.cedees.length > 1 ? 'leur' : 'son'} temps va à ${texteCompetences(reglageCompetences.cochees.filter((p) => !res.cedees.includes(p)))}.`
+          ? ` ${texteCompetences(res.cedees)} : aucun exercice ${limite ? 'parmi les générateurs choisis dans le carnet' : 'dans ces chapitres'} — ${res.cedees.length > 1 ? 'leur' : 'son'} temps va à ${texteCompetences(reglageCompetences.cochees.filter((p) => !res.cedees.includes(p)))}.`
+          : ''
+      }${limite ? ` Seulement les ${generateursCarnet.size} générateur${generateursCarnet.size > 1 ? 's' : ''} choisis dans le carnet.` : ''}${
+        limite && res.duree && res.duree.remplie < 0.85 * res.duree.cible
+          ? ` Ces générateurs ne remplissent que ≈\u00a0${Math.round(res.duree.remplie)}\u00a0min sur les ${res.duree.cible}\u00a0min visées : ajoute des questions à la main, ou « Tout le catalogue » dans le bandeau.`
           : ''
       }`,
       avant,
@@ -2098,9 +2131,29 @@ export function EvaluationGeneratorPanel({
   return (
     <div className={`admin-eval conc${panneauMobile ? ' conc-panier-ouvert' : ''}`}>
       {bandeauCarnet && (
-        <p className="admin-eval-carnet" role="status">
-          {bandeauCarnet}
-        </p>
+        <div className="admin-eval-carnet">
+          <p role="status">{bandeauCarnet}</p>
+          {generateursCarnet && !estExercice && (
+            <div className="admin-eval-carnet-actions">
+              <button
+                type="button"
+                className="conc-bouton"
+                onClick={() => {
+                  setFaconsOuvertes(true)
+                  setFaconActive('evaluation')
+                  if (!estExamen) setReglageRepartitionOuvert(true)
+                  appliquerFacon('evaluation')
+                }}
+              >
+                Composer selon la durée
+              </button>
+              <button type="button" className="compte-bouton-lien" onClick={() => setGenerateursCarnet(null)}>
+                Tout le catalogue
+              </button>
+              <span className="admin-eval-carnet-aide">« Préparer l’évaluation » (compétences, ≈{'\u00a0'}{dureeCibleComposer}{'\u00a0'}min) ne pioche que dans les {generateursCarnet.size} générateur{generateursCarnet.size > 1 ? 's' : ''} choisis.</span>
+            </div>
+          )}
+        </div>
       )}
       {classeCarnetId && connecte && compte.client && !estExercice && <AvertissementEvaluation client={compte.client} classeId={classeCarnetId} date={date} />}
 
@@ -2361,7 +2414,8 @@ export function EvaluationGeneratorPanel({
                         onChange={setReglageCompetences}
                         feuille={estExercice}
                         dureeCible={dureeCibleComposer}
-                        presentes={processusComposables(contexteComposer())}
+                        presentes={processusComposables(contexteComposer('evaluation'))}
+                        ou={generateursCarnet ? 'parmi les générateurs choisis dans le carnet' : undefined}
                         onPreparer={() => {
                           setFaconActive('evaluation')
                           appliquerFacon('evaluation')

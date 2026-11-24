@@ -93,6 +93,8 @@ interface Donnees {
   agenda: DonneesAgenda
   /** 0007 appliqué : colonnes de devoir / évaluation / texte présentes. */
   devoirs: boolean
+  /** 0008 appliqué : colonne `seances.evaluation_generateurs` présente. */
+  generateursEval: boolean
   /** Rubriques du texte et compétences transversales (défauts sans 0007). */
   texte: ReglagesTexte
 }
@@ -147,11 +149,11 @@ function Carnet() {
       // L'agenda (0006) est facultatif : sans lui (ou en cas de panne de lecture), le carnet reste utilisable.
       const [classes, r, horaire, agenda] = await Promise.all([listerClasses(client), lireReglages(client), chargerHoraire(client), chargerAgenda(client).catch(() => AGENDA_INACTIF)])
       // Devoirs / évaluations / texte (0007) : facultatifs, détectés à la lecture des séances.
-      const [{ seances, devoirs }, texte] = await Promise.all([
+      const [{ seances, devoirs, generateursEval }, texte] = await Promise.all([
         chargerSeances(client, horaire.actif),
         lireReglagesTexte(client).catch((): ReglagesTexte => ({ actif: false, ...TEXTE_DEFAUT })),
       ])
-      setDonnees({ classes, seances, reglages: r.reglages, reglagesExiste: r.existe, horaire, agenda, devoirs, texte: devoirs ? texte : { ...texte, actif: false } })
+      setDonnees({ classes, seances, reglages: r.reglages, reglagesExiste: r.existe, horaire, agenda, devoirs, generateursEval, texte: devoirs ? texte : { ...texte, actif: false } })
       setAbsent(false)
       setErreurChargement(null)
     } catch (ex) {
@@ -221,6 +223,7 @@ function Carnet() {
       nouvelEvenement: (prerempli = {}) => setPanneau({ type: 'evenement', evenement: null, prerempli }),
       ouvrirEvenement: (e) => setPanneau({ type: 'evenement', evenement: e, prerempli: {} }),
       devoirs: donnees.devoirs,
+      generateursEval: donnees.generateursEval,
       texte: donnees.texte,
       ouvrirTexte: (s) => setPanneau({ type: 'texte', seanceId: s.id }),
     }
@@ -342,6 +345,7 @@ function Carnet() {
     if (!p || (p.type !== 'noter' && p.type !== 'modifier') || !client) return
     const actif = horaire.actif
     const devoirs = donnees!.devoirs
+    const generateursEval = donnees!.generateursEval
     const agenda = donnees!.agenda
     const classe = donnees!.classes.find((c) => c.id === s.classe_id)
     // Interro annoncée / contrôle-bilan : l'événement « Interrogation » de l'agenda (0006).
@@ -380,8 +384,8 @@ function Carnet() {
         }
         const finale: SaisieSeance = devoirs ? { ...s, evaluation_evenement: saisieEv ? evId : null } : s
         try {
-          if (p.type === 'modifier') await modifierSeance(client, p.seance.id, finale, actif, devoirs)
-          else await ajouterSeance(client, finale, actif, devoirs)
+          if (p.type === 'modifier') await modifierSeance(client, p.seance.id, finale, actif, devoirs, generateursEval)
+          else await ajouterSeance(client, finale, actif, devoirs, generateursEval)
         } catch (ex) {
           // Pas d'interro orpheline : celle qu'on vient de créer est retirée.
           if (cree) await supprimerEvenement(client, cree).catch(() => undefined)

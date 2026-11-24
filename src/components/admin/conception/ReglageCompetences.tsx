@@ -68,6 +68,7 @@ export function ReglageCompetences({
   onPreparer,
   onFermer,
   eleve,
+  ou,
 }: {
   reglage: ReglageCompetencesDocument
   onChange: (r: ReglageCompetencesDocument) => void
@@ -83,6 +84,9 @@ export function ReglageCompetences({
   /** Assistant élève (évaluation blanche, « Je règle les parts ») : les compétences sont cochées plus
    * haut dans l'assistant (pas de case ici), textes propres. Absent : rendu du professeur inchangé. */
   eleve?: { titre: string; aide: string; etat: string; fermer: string }
+  /** Où il n'y a « aucun exercice » (ex. « parmi les générateurs choisis dans le carnet ») ; absent :
+   * « dans ces chapitres (avec ces réglages) », texte d'avant. */
+  ou?: string
 }) {
   const titre = useRef<HTMLParagraphElement>(null)
   const [rappel, setRappel] = useState(false)
@@ -178,7 +182,7 @@ export function ReglageCompetences({
       </p>
       {absentes.length > 0 && (
         <p className="conc-rep-alerte conc-comp-cede">
-          {texteCompetences(absentes)} : aucun exercice {eleve ? 'avec ces notions et ces niveaux' : `dans ces chapitres${feuille ? '' : ' (avec ces réglages)'}`}
+          {texteCompetences(absentes)} : aucun exercice {eleve ? 'avec ces notions et ces niveaux' : (ou ?? `dans ces chapitres${feuille ? '' : ' (avec ces réglages)'}`)}
           {receveuses.length > 0 ? ` — ${absentes.length > 1 ? 'leur' : 'son'} temps va à ${texteCompetences(receveuses)}.` : ' : rien à proposer avec ces compétences.'}
         </p>
       )}

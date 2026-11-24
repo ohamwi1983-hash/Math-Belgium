@@ -50,6 +50,10 @@ export interface ContexteComposition {
 
   /** « Sur quelques notions » : clés `chapitre::section` cochées. */
   sections?: Set<string>
+  /** Générateurs permis (clés `cleGenerateurComposer`), choisis dans le carnet pour une évaluation
+   * annoncée : seules ces lignes d'exercice sont candidates (ni vrai/faux, ni formule, ni autre
+   * générateur). Absent : tout le catalogue, comme avant. */
+  generateursPermis?: Set<string>
   aleatoire?: () => number
 }
 
@@ -61,6 +65,8 @@ export interface ResultatComposition {
   /** « Préparer l'évaluation » en cession « cochees » : compétences voulues (part > 0) sans aucune
    * question possible, dont le temps est allé aux autres cochées (à dire au professeur). */
   cedees: Processus[]
+  /** « Préparer l'évaluation » : durée estimée de ce qui a été choisi (minutes), et durée visée. */
+  duree?: { remplie: number; cible: number }
 }
 
 /** Unité qu'une recette peut ajouter à la sélection. */
@@ -75,6 +81,8 @@ interface Unite {
 }
 
 export const cleSectionComposer = (chapitreSlug: string, sectionId: string) => `${chapitreSlug}::${sectionId}`
+/** Clé d'un générateur pour `generateursPermis` (l'id seul ne suffit pas : la table est par chapitre). */
+export const cleGenerateurComposer = (chapitreSlug: string, generatorId: string) => `${chapitreSlug}::${generatorId}`
 
 function melanger<T>(t: T[], alea: () => number): T[] {
   const r = [...t]
@@ -100,6 +108,7 @@ export function variantesComposables(ligne: LigneSelection, mode: 'exercice' | '
 function unites(ctx: ContexteComposition): Unite[] {
   const res: Unite[] = []
   ctx.lignes.forEach((l, index) => {
+    if (ctx.generateursPermis && !(l.type === 'exercice' && ctx.generateursPermis.has(cleGenerateurComposer(l.chapitreSlug, l.cle ?? '')))) return
     const base = { index, processus: l.processus, cleSection: cleSectionComposer(l.chapitreSlug, l.sectionId), chapitreSlug: l.chapitreSlug, type: l.type }
     if (l.type === 'exercice') {
       for (const v of variantesComposables(l, ctx.mode, ctx.calculatriceInterdite)) res.push({ ...base, variante: v })
@@ -223,7 +232,7 @@ function notions(ctx: ContexteComposition, alea: () => number): Selection {
  * (`ctx.repartition`, sinon `REPARTITION_PROCESSUS` ; les points automatiques suivent la durée, donc
  * les points aussi). Un processus à 0 % (non coché) n'est JAMAIS choisi. La part d'un processus sans
  * aucune question possible est cédée (`cederParts` pour l'examen, `cederPartsCochees` sinon). */
-function evaluation(ctx: ContexteComposition, alea: () => number): { sel: Selection; cedees: Processus[] } {
+function evaluation(ctx: ContexteComposition, alea: () => number): { sel: Selection; cedees: Processus[]; duree: number } {
   const sel = new Selection(ctx)
   const tout = unites(ctx)
   const candidats = (p: Processus) => tout.filter((u) => u.processus === p)
@@ -238,6 +247,7 @@ function evaluation(ctx: ContexteComposition, alea: () => number): { sel: Select
     if (u.type === 'formule') return 2.5
     return 5
   }
+  let dureeTotale = 0
   for (const p of [1, 2, 3] as const) {
     const budget = ctx.dureeCible * parts[p]
     const liste = candidats(p)
@@ -274,10 +284,11 @@ function evaluation(ctx: ContexteComposition, alea: () => number): { sel: Select
     // courte, pour que le processus voulu soit présent.
     if (duree === 0) {
       const plusCourte = [...liste].sort((a, b) => dureeUnite(a) - dureeUnite(b))[0]
-      if (plusCourte) sel.ajouter(plusCourte, plusCourte.type === 'vraiFaux' ? 2 : 1)
+      if (plusCourte && sel.ajouter(plusCourte, plusCourte.type === 'vraiFaux' ? 2 : 1)) duree += dureeUnite(plusCourte) * (plusCourte.type === 'vraiFaux' ? 2 : 1)
     }
+    dureeTotale += duree
   }
-  return { sel, cedees }
+  return { sel, cedees, duree: dureeTotale }
 }
 
 /** Dépassement maximal (minutes) du budget d'un processus par un ajout de « Préparer l'évaluation /
@@ -328,8 +339,8 @@ export function processusComposables(ctx: ContexteComposition): Processus[] {
 export function composer(facon: FaconComposer, ctx: ContexteComposition): ResultatComposition {
   const alea = ctx.aleatoire ?? Math.random
   if (facon === 'evaluation') {
-    const { sel, cedees } = evaluation(ctx, alea)
-    return { lignes: sel.lignes, questions: sel.questions, notions: sel.sections.size, cedees }
+    const { sel, cedees, duree } = evaluation(ctx, alea)
+    return { lignes: sel.lignes, questions: sel.questions, notions: sel.sections.size, cedees, duree: { remplie: duree, cible: ctx.dureeCible } }
   }
   const sel = facon === 'equilibree' ? equilibree(ctx, alea) : notions(ctx, alea)
   return { lignes: sel.lignes, questions: sel.questions, notions: sel.sections.size, cedees: [] }

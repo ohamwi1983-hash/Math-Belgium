@@ -20,6 +20,10 @@
  * Devoirs, évaluations et texte en rubriques (`0007_devoirs_evaluations.sql`, colonnes de `seances`
  * et de `carnet_reglages`) : FACULTATIFS. `chargerSeances` relit sans ces colonnes si 0007 n'est pas
  * appliqué (`devoirs: false`), et le site ne les écrit alors jamais.
+ *
+ * Générateurs retenus pour une évaluation (`0008_evaluation_generateurs.sql`, colonne
+ * `seances.evaluation_generateurs`) : FACULTATIFS aussi. `chargerSeances` relit sans la colonne si 0008
+ * n'est pas appliqué (`generateursEval: false`), et le site ne l'écrit alors jamais.
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { messageErreur } from './compteValidation'
@@ -40,6 +44,7 @@ export class ErreurCarnet extends Error {
     let message: string
     if (absente) message = 'Carnet pas encore activé.'
     else if (code === '23514' && /seances_devoir_pour_valide/i.test(String(b.message ?? ''))) message = 'Date de remise du devoir refusée : elle doit suivre la séance (un an au plus).'
+    else if (code === '23514' && /seances_evaluation_generateurs/i.test(String(b.message ?? ''))) message = 'Exercices de l’évaluation refusés par le serveur (liste trop longue ou évaluation retirée) : vérifie le bloc Évaluation.'
     else if (code === '23514' && /seances_(devoir_generateurs|objectif|competences|evaluation)/i.test(String(b.message ?? ''))) message = 'Devoir ou évaluation refusé par le serveur (valeur hors limites) : vérifie le formulaire.'
     else if (code === '23514' && /carnet_reglages_(rubriques|competences)/i.test(String(b.message ?? ''))) message = 'Réglage du texte refusé par le serveur : recharge la page.'
     else if (code === '23503' && /seances_evaluation_evenement/i.test(String(b.message ?? ''))) message = 'Interrogation introuvable dans l’agenda (supprimée ?) : recharge la page.'
@@ -71,7 +76,15 @@ const COLONNES_SEANCE = 'id, classe_id, date_seance, heure_debut, heure_fin, num
 const COLONNES_SEANCE_HORAIRE: string = `${COLONNES_SEANCE}, numero_heure_fin`
 /** Avec 0007 : devoir (date, exercices joints), objectif, compétences, évaluation. */
 const COLONNES_0007 = 'devoir_pour, devoir_generateurs, objectif, competences, evaluation_type, evaluation_parties, evaluation_evenement'
+/** Avec 0008 : générateurs retenus pour l'évaluation. */
+const COLONNES_0008 = 'evaluation_generateurs'
 const NOMS_0007 = /devoir_pour|devoir_generateurs|objectif|competences|evaluation_type|evaluation_parties|evaluation_evenement|rubriques|competences_transversales/i
+
+/** Colonne de 0008 inconnue : 0008 pas appliqué (même détection que 0007). */
+export function colonne0008Absente(erreur: unknown): boolean {
+  const e = (erreur ?? {}) as { code?: string; message?: string }
+  return /evaluation_generateurs/i.test(String(e.message ?? '')) && (e.code === '42703' || e.code === 'PGRST204' || /does not exist|schema cache|could not find/i.test(String(e.message ?? '')))
+}
 
 /** Colonne de 0007 inconnue : 0007 pas appliqué (Postgres 42703 en lecture, PGRST204 en écriture). */
 export function colonne0007Absente(erreur: unknown): boolean {
@@ -118,27 +131,35 @@ function nettoyer(s: Seance): Seance {
     evaluation_type: s.evaluation_type ?? null,
     evaluation_parties: textes(s.evaluation_parties),
     evaluation_evenement: s.evaluation_evenement ?? null,
+    ...('evaluation_generateurs' in s ? { evaluation_generateurs: textes(s.evaluation_generateurs) } : {}),
   }
 }
 
-function colonnesSeance(horaire: boolean, devoirs: boolean): string {
-  return `${horaire ? COLONNES_SEANCE_HORAIRE : COLONNES_SEANCE}${devoirs ? `, ${COLONNES_0007}` : ''}`
+function colonnesSeance(horaire: boolean, devoirs: boolean, generateursEval = false): string {
+  return `${horaire ? COLONNES_SEANCE_HORAIRE : COLONNES_SEANCE}${devoirs ? `, ${COLONNES_0007}` : ''}${devoirs && generateursEval ? `, ${COLONNES_0008}` : ''}`
 }
 
-/** `horaire` : 0003 appliqué (colonne `numero_heure_fin` présente) ; `devoirs` : 0007 appliqué. */
-export async function listerSeances(c: SupabaseClient, horaire = false, devoirs = false): Promise<Seance[]> {
-  const liste = (verifier(await c.from('seances').select(colonnesSeance(horaire, devoirs)).order('date_seance', { ascending: false })) ?? []) as unknown as Seance[]
+/** `horaire` : 0003 appliqué (colonne `numero_heure_fin` présente) ; `devoirs` : 0007 appliqué ;
+ * `generateursEval` : 0008 appliqué. */
+export async function listerSeances(c: SupabaseClient, horaire = false, devoirs = false, generateursEval = false): Promise<Seance[]> {
+  const liste = (verifier(await c.from('seances').select(colonnesSeance(horaire, devoirs, generateursEval)).order('date_seance', { ascending: false })) ?? []) as unknown as Seance[]
   return liste.map(nettoyer)
 }
 
-/** Séances avec les colonnes de 0007 si elles existent ; sinon sans (`devoirs: false`, carnet d'avant). */
-export async function chargerSeances(c: SupabaseClient, horaire = false): Promise<{ seances: Seance[]; devoirs: boolean }> {
-  const avec = await c.from('seances').select(colonnesSeance(horaire, true)).order('date_seance', { ascending: false })
-  if (avec.error && colonne0007Absente(avec.error)) return { seances: await listerSeances(c, horaire, false), devoirs: false }
-  return { seances: ((verifier(avec) ?? []) as unknown as Seance[]).map(nettoyer), devoirs: true }
+/** Séances avec les colonnes de 0007 et de 0008 si elles existent ; sinon sans (`generateursEval: false`
+ * sans 0008, `devoirs: false` sans 0007 : carnet d'avant). */
+export async function chargerSeances(c: SupabaseClient, horaire = false): Promise<{ seances: Seance[]; devoirs: boolean; generateursEval: boolean }> {
+  const avec = await c.from('seances').select(colonnesSeance(horaire, true, true)).order('date_seance', { ascending: false })
+  if (avec.error && colonne0008Absente(avec.error)) {
+    const sans8 = await c.from('seances').select(colonnesSeance(horaire, true)).order('date_seance', { ascending: false })
+    if (sans8.error && colonne0007Absente(sans8.error)) return { seances: await listerSeances(c, horaire, false), devoirs: false, generateursEval: false }
+    return { seances: ((verifier(sans8) ?? []) as unknown as Seance[]).map(nettoyer), devoirs: true, generateursEval: false }
+  }
+  if (avec.error && colonne0007Absente(avec.error)) return { seances: await listerSeances(c, horaire, false), devoirs: false, generateursEval: false }
+  return { seances: ((verifier(avec) ?? []) as unknown as Seance[]).map(nettoyer), devoirs: true, generateursEval: true }
 }
 
-function ligneSeance(s: SaisieSeance, horaire: boolean, devoirs = false): Record<string, unknown> {
+function ligneSeance(s: SaisieSeance, horaire: boolean, devoirs = false, generateursEval = false): Record<string, unknown> {
   const evaluation = devoirs ? (s.evaluation_type ?? null) : null
   const avec0007 = devoirs
     ? {
@@ -149,6 +170,7 @@ function ligneSeance(s: SaisieSeance, horaire: boolean, devoirs = false): Record
         evaluation_type: evaluation,
         evaluation_parties: evaluation ? (s.evaluation_parties ?? []) : [],
         evaluation_evenement: evaluation === 'annonce' || evaluation === 'bilan' ? (s.evaluation_evenement ?? null) : null,
+        ...(generateursEval ? { evaluation_generateurs: evaluation ? (s.evaluation_generateurs ?? []) : [] } : {}),
       }
     : {}
   const heureDouble = horaire ? { numero_heure_fin: s.numero_heure !== null && s.numero_heure_fin !== null && s.numero_heure_fin !== undefined && s.numero_heure_fin > s.numero_heure ? s.numero_heure_fin : null } : {}
@@ -169,12 +191,12 @@ function ligneSeance(s: SaisieSeance, horaire: boolean, devoirs = false): Record
   }
 }
 
-export async function ajouterSeance(c: SupabaseClient, s: SaisieSeance, horaire = false, devoirs = false): Promise<Seance> {
-  return nettoyer(verifier(await c.from('seances').insert(ligneSeance(s, horaire, devoirs)).select(colonnesSeance(horaire, devoirs)).single()) as unknown as Seance)
+export async function ajouterSeance(c: SupabaseClient, s: SaisieSeance, horaire = false, devoirs = false, generateursEval = false): Promise<Seance> {
+  return nettoyer(verifier(await c.from('seances').insert(ligneSeance(s, horaire, devoirs, generateursEval)).select(colonnesSeance(horaire, devoirs, generateursEval)).single()) as unknown as Seance)
 }
 
-export async function modifierSeance(c: SupabaseClient, id: string, s: SaisieSeance, horaire = false, devoirs = false): Promise<void> {
-  verifier(await c.from('seances').update(ligneSeance(s, horaire, devoirs)).eq('id', id))
+export async function modifierSeance(c: SupabaseClient, id: string, s: SaisieSeance, horaire = false, devoirs = false, generateursEval = false): Promise<void> {
+  verifier(await c.from('seances').update(ligneSeance(s, horaire, devoirs, generateursEval)).eq('id', id))
 }
 
 /** Objectif et compétences transversales d'une séance (panneau « Texte pour l'agenda scolaire », 0007). */

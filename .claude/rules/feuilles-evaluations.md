@@ -1357,7 +1357,16 @@ Maquettes validées « EleveAssistant », « EleveTelephone », « EvaluationBla
   chapitre proposé ignorée → première année ; page d'un chapitre :
   verrouillé, « Changer de chapitre » → `/exercice`), notions = sections ayant au moins un générateur
   du registre (`notionsDuChapitre`), « Tout le chapitre » (exclusif : cocher une notion ne garde
-  qu'elle) ; téléphone : 3 puces + « + n » ; puis **Compétences** cochables Connaître / Appliquer /
+  qu'elle) ; **lien du professeur** (texte de l'interro annoncée du carnet, `.claude/rules/comptes.md`, « Générateurs de
+  l'évaluation annoncée ») sur une page de chapitre : `?notions=id1,id2` coche ces notions (`carnetMatiere.ts::lireListeUrl` :
+  id mal formé ou inconnu ignoré ; aucune reconnue, ou toutes : « Tout le chapitre » ; liste dépliée d'office sur téléphone si
+  une notion annoncée est derrière « + n ») ; `&exos=gen,gen` : case « Seulement les exercices annoncés par ton professeur »
+  (cochée d'office, ≥ 44 px, décochable ; affichée seulement si au moins un générateur du lien existe dans le chapitre) — les
+  candidats EXERCICES sont filtrés à ces générateurs AVANT tout (disponibilité, liste « exercice par exercice », composition,
+  feuille ET blanche) ; vrai/faux, formules, compréhension et démonstrations restent proposés (ce ne sont pas des
+  générateurs). Choix fait : filtrer plutôt que pré-remplir « Choisir exercice par exercice » — plus simple, vaut aussi pour
+  l'évaluation blanche, et l'élève voit et peut retirer le filtre. Rien n'est lu ni écrit ailleurs (aucune donnée d'élève) ;
+  `/exercice` ignore ces paramètres ; téléphone : 3 puces + « + n » ; puis **Compétences** cochables Connaître / Appliquer /
   Transférer (une à trois, les trois par défaut ; aide « Coche ce que ton professeur a annoncé pour
   l'interrogation. » pour la blanche ; feuille : voir « Feuille d'exercices de l'élève » plus bas —
   jamais de pourcentages pour la feuille ; évaluation blanche : parts et démonstrations annoncées,

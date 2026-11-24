@@ -27,11 +27,12 @@ import {
 import { champHeure, creneauPropose, creneauxDuJour, creneauxPonctuels, libelleCreneau, numerosCreneau, type CaseHoraire, type Creneau, type GrilleHoraire } from '../../lib/horaire'
 import { avertissementsInterro, dateJourLong, predicatSuppression } from '../../lib/agendaEvenements'
 import { ajouterJours } from '../../lib/calendrierFwb'
-import { aUnDevoir, choixDeLaDate, dateCourteDevoir, LIBELLE_EVALUATION, prochainsCours, type ChoixPourLe } from '../../lib/carnetDevoirs'
+import { aUnDevoir, choixDeLaDate, dateCourteDevoir, LIBELLE_EVALUATION, NOM_PROCESSUS, prochainsCours, type ChoixPourLe } from '../../lib/carnetDevoirs'
 import { urlEvaluationMatiere } from '../../lib/carnetMatiere'
 import { titreCourtChapitre } from '../../entrainement/export/examen'
 import { AvertissementsInterro, MessageAgendaInactif } from './AgendaUi'
 import { useCarnet } from './contexteCarnet'
+import { generateursEvaluation, useTableProcessus, type GenerateurEvaluation } from './processusCarnet'
 import { chapitreEnCours, chapitreParDefaut, heureCourte, jourMois } from './outilsCarnet'
 
 /** Interro à annoncer / contrôle-bilan : ce qu'il faut pour créer ou mettre à jour l'événement
@@ -201,6 +202,33 @@ export function FormulaireSeance({
   const [evalHeure, setEvalHeure] = useState(evenementLie && !evenementLie.journee_entiere && evenementLie.heure_debut !== null ? `${evenementLie.heure_debut}-${evenementLie.heure_fin}` : '')
   const [partiesEval, setPartiesEval] = useState<Set<string>>(() => new Set(initiale?.evaluation_parties ?? []))
   const [erreurEval, setErreurEval] = useState<string | null>(null)
+  // Générateurs de l'évaluation (table du panneau des évaluations, chargée à part) : sous chaque section
+  // cochée de « Matière », tous cochés par défaut ; on garde ceux que le professeur DÉCOCHE. Enregistré
+  // (0008) : la liste des retenus, vide = tous (règle d'avant 0008, et quand tout reste coché).
+  const tablePrete = useTableProcessus()
+  const gensEvalChapitre = useMemo<GenerateurEvaluation[] | null>(() => (chapitre && tablePrete ? generateursEvaluation(chapitre.slug) : null), [chapitre, tablePrete])
+  const [decochesEval, setDecochesEval] = useState<Set<string>>(() => new Set())
+  // Séance existante : les générateurs non retenus des sections évaluées, une fois la table arrivée.
+  const decochesInitialises = useRef(false)
+  useEffect(() => {
+    if (decochesInitialises.current || !gensEvalChapitre) return
+    decochesInitialises.current = true
+    const retenus = initiale?.evaluation_generateurs ?? []
+    if (retenus.length === 0) return
+    const parties = new Set(initiale?.evaluation_parties ?? [])
+    setDecochesEval(new Set(gensEvalChapitre.filter((g) => parties.has(g.sectionId) && !retenus.includes(g.generatorId)).map((g) => g.generatorId)))
+  }, [gensEvalChapitre, initiale])
+  const sectionsEvalCochees = structure.filter((x) => partiesEval.has(x.id)).map((x) => x.id)
+  /** Générateurs des sections cochées (ordre du chapitre, puis de la table). */
+  const gensSectionsEval = gensEvalChapitre ? sectionsEvalCochees.flatMap((sid) => gensEvalChapitre.filter((g) => g.sectionId === sid)) : []
+  const gensEvalRetenus = gensSectionsEval.filter((g) => !decochesEval.has(g.generatorId)).map((g) => g.generatorId)
+  /** Un choix partiel seulement (tout coché, ou rien : « tous ») ; table pas encore là : la liste d'avant. */
+  const choixGensPartiel = gensEvalRetenus.length > 0 && gensEvalRetenus.length < gensSectionsEval.length
+  const gensEvalEnregistres = gensEvalChapitre
+    ? choixGensPartiel
+      ? [...gensEvalRetenus, ...(initiale?.evaluation_generateurs ?? []).filter((id) => !gensEvalChapitre.some((g) => g.generatorId === id))]
+      : []
+    : (initiale?.evaluation_generateurs ?? [])
   const [blocs, setBlocs] = useState<Record<Bloc, boolean>>(() => ({
     matiere: true,
     devoir: true,
@@ -293,6 +321,7 @@ export function FormulaireSeance({
     setGens(new Set())
     setGensDevoir(new Set())
     setPartiesEval(new Set())
+    setDecochesEval(new Set())
   }
 
   function basculer(ids: string[], cocher: boolean) {
@@ -326,6 +355,7 @@ export function FormulaireSeance({
             evaluation_type: typeEval,
             evaluation_parties: typeEval ? structure.filter((x) => partiesEval.has(x.id)).map((x) => x.id) : [],
             evaluation_evenement: typeEval === 'annonce' || typeEval === 'bilan' ? (evenementLie?.id ?? null) : null,
+            evaluation_generateurs: typeEval ? gensEvalEnregistres : [],
           }
         : {}),
     }
@@ -422,7 +452,10 @@ export function FormulaireSeance({
       ? avertissementsInterro({ date: evalDate, ecoleId: classe.ecole_id, periodes: ctx.agenda.periodes, evenements: ctx.agenda.evenements.filter((e) => e.id !== evenementLie?.id), seuil: ctx.agenda.seuil, aujourdhui: dateIso(new Date()) })
       : []
   const sectionsChoisies = structure.filter((x) => partiesEval.has(x.id)).map((x) => x.id)
-  const lienEvaluation = chapitre && classe && sectionsChoisies.length > 0 ? urlEvaluationMatiere({ levelSlug: chapitre.levelSlug, chapitres: [{ slug: chapitre.slug, sections: sectionsChoisies }] }, '', classe.nom, classe.id) : null
+  const lienEvaluation =
+    chapitre && classe && sectionsChoisies.length > 0
+      ? urlEvaluationMatiere({ levelSlug: chapitre.levelSlug, chapitres: [{ slug: chapitre.slug, sections: sectionsChoisies, ...(gensEvalEnregistres.length > 0 ? { generateurs: gensEvalEnregistres } : {}) }] }, '', classe.nom, classe.id)
+      : null
   const lienCoffre = chapitre ? `/coffre?niveau=${encodeURIComponent(chapitre.levelSlug)}&q=${encodeURIComponent(titreCourtChapitre(chapitre.slug, texteBrut(chapitre.title)))}` : '/coffre'
   const resumeMatiere = chapitre ? `${nbCochees} partie${nbCochees > 1 ? 's' : ''}${nbGens > 0 ? ` · ${nbGens} exercice${nbGens > 1 ? 's' : ''}` : ''}` : ''
   const resumeDevoirBloc = aDuDevoir ? (dateRemise && devoirsActifs ? `pour le ${dateCourteDevoir(dateRemise)}` : 'noté') : ''
@@ -773,15 +806,59 @@ export function FormulaireSeance({
                   <legend className="carnet-etiquette-bloc">Matière (parties vues)</legend>
                   {sectionsEval.length === 0 && <p className="compte-aide">Aucune partie de ce chapitre n’est encore cochée pour cette classe : coche les sections évaluées.</p>}
                   <div className="carnet-sous-parties carnet-eval-parties">
-                    {(sectionsEval.length > 0 ? sectionsEval : structure).map((s) => (
-                      <label className="carnet-case" key={s.id}>
-                        <input type="checkbox" checked={partiesEval.has(s.id)} onChange={(e) => setPartiesEval((avant) => basculerDans(avant, s.id, e.target.checked))} />
-                        <span className="carnet-case-texte">
-                          § {s.numero} <RichText text={s.titre} />
-                        </span>
-                      </label>
-                    ))}
+                    {(sectionsEval.length > 0 ? sectionsEval : structure).map((s) => {
+                      const coche = partiesEval.has(s.id)
+                      const gensSection = coche && gensEvalChapitre ? gensEvalChapitre.filter((g) => g.sectionId === s.id) : []
+                      return (
+                        <div className="carnet-eval-section" key={s.id}>
+                          <label className="carnet-case">
+                            <input
+                              type="checkbox"
+                              checked={coche}
+                              onChange={(e) => {
+                                const cocher = e.target.checked
+                                setPartiesEval((avant) => basculerDans(avant, s.id, cocher))
+                                // Section (re)cochée : tous ses exercices cochés par défaut.
+                                if (cocher && gensEvalChapitre) setDecochesEval((avant) => new Set([...avant].filter((id) => !gensEvalChapitre.some((g) => g.sectionId === s.id && g.generatorId === id))))
+                              }}
+                            />
+                            <span className="carnet-case-texte">
+                              § {s.numero} <RichText text={s.titre} />
+                            </span>
+                          </label>
+                          {gensSection.length > 0 && (
+                            <div className="carnet-eval-gens" role="group" aria-label={`Exercices de la partie ${s.numero}`}>
+                              {gensSection.map((g) => (
+                                <label className="carnet-case" key={g.generatorId}>
+                                  <input type="checkbox" checked={!decochesEval.has(g.generatorId)} onChange={(e) => setDecochesEval((avant) => basculerDans(avant, g.generatorId, !e.target.checked))} />
+                                  <span className={`conc-pc conc-pc-${g.processus} conc-pc-petite`} title={NOM_PROCESSUS[g.processus]} aria-hidden="true">
+                                    {g.processus}
+                                  </span>
+                                  <span className="carnet-case-texte">
+                                    <span className="carnet-sr">{NOM_PROCESSUS[g.processus]} : </span>
+                                    <RichText text={libelleGenerateurEval(g, generateurs)} /> <span className="carnet-code-gen">({g.generatorId})</span>
+                                  </span>
+                                </label>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
+                  {gensEvalChapitre === null && sectionsEvalCochees.length > 0 && <p className="compte-aide">Chargement des exercices de ces parties…</p>}
+                  {gensSectionsEval.length > 0 && (
+                    <p className="compte-aide carnet-eval-gens-resume" role="status">
+                      {gensEvalRetenus.length === 0
+                        ? `Aucun exercice coché : « Préparer l’évaluation » reprendra les ${gensSectionsEval.length} exercices de ces parties.`
+                        : `${gensEvalRetenus.length} exercice${gensEvalRetenus.length > 1 ? 's' : ''} sur ${gensSectionsEval.length} retenu${gensEvalRetenus.length > 1 ? 's' : ''} pour « Préparer l’évaluation » et pour le lien d’entraînement des élèves.`}
+                    </p>
+                  )}
+                  {gensSectionsEval.length > 0 && !ctx.generateursEval && (
+                    <p className="compte-aide carnet-eval-gens-note">
+                      Pour garder les générateurs choisis, applique la migration 0008 (<code>supabase/migrations/0008_evaluation_generateurs.sql</code> dans l’éditeur SQL de Supabase). En attendant, ton choix vaut pour « Préparer l’évaluation » et pour le texte copié maintenant.
+                    </p>
+                  )}
                 </fieldset>
               )}
               {typeEval && typeEval !== 'faite' && <AvertissementsInterro avertissements={avertissementsEval} date={evalDate} />}
@@ -921,4 +998,10 @@ function BlocFormulaire({ id, titre, icone, ouvert, onBasculer, resume, children
       </div>
     </section>
   )
+}
+
+/** Nom d'un générateur de l'évaluation dans le carnet : libellé explicite de la table, sinon titre de la
+ * carte « S'entraîner » du chapitre, sinon nom du document (même ordre que `libelleGenerateurPanneau`). */
+function libelleGenerateurEval(g: GenerateurEvaluation, cartes: { id: string; titre: string }[]): string {
+  return g.libelle || cartes.find((c) => c.id === g.generatorId)?.titre || g.nom
 }

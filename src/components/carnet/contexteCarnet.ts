@@ -36,6 +36,8 @@ export interface ContexteCarnet {
   ouvrirEvenement: (e: Evenement) => void
   /** 0007 appliqué : devoirs (date de remise, exercices joints), évaluations, texte mémorisé. */
   devoirs: boolean
+  /** 0008 appliqué : les générateurs retenus pour une évaluation sont gardés avec la séance. */
+  generateursEval: boolean
   /** Rubriques du texte pour l'agenda scolaire et liste des compétences transversales (0007). */
   texte: ReglagesTexte
   /** Ouvre le panneau « Texte pour l'agenda scolaire » d'une séance (rubriques, objectif, compétences). */

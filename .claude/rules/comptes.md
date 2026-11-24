@@ -28,7 +28,9 @@ puis son horaire de la semaine (`0003_horaire.sql`, sous-section « Horaire de l
 zéro (`0004_heure_zero.sql`, même sous-section), puis l'agenda d'une période (sous-section « Agenda d'une
 période », sans migration), puis l'agenda : événements, périodes du bulletin et heures effectives
 (`0006_agenda.sql`, sous-section « Événements et bulletin »), puis devoirs, évaluations et texte en rubriques
-pour l'agenda scolaire (`0007_devoirs_evaluations.sql`, sous-section « Devoirs, évaluations et texte en rubriques »). Répartition d'EXAMEN Connaître / Appliquer / Transférer (« Préparer
+pour l'agenda scolaire (`0007_devoirs_evaluations.sql`, sous-section « Devoirs, évaluations et texte en rubriques »), puis
+les générateurs choisis dans l'annonce d'une évaluation (`0008_evaluation_generateurs.sql`, sous-section « Générateurs de
+l'évaluation annoncée »). Répartition d'EXAMEN Connaître / Appliquer / Transférer (« Préparer
 l'examen ») mémorisée dans le profil : `0005_repartition.sql` (section « Répartition mémorisée » en fin
 de fichier).
 Plus tard (pas fait) : partage entre collègues.
@@ -247,7 +249,8 @@ règle niveau / heures, coche ces chapitres et met UN exercice sur la première 
 celui du premier générateur retenu ; bandeau `.admin-eval-carnet` en tête (« Matière vue en 6e A
 depuis le 01/11/2026 : n sections, m générateurs pré-sélectionnés… ») ; les trois paramètres sont
 retirés de l'URL. Sans le paramètre, ou sur une page verrouillée (`/…/exercices`) : comportement
-inchangé.
+inchangé. Générateurs choisis dans le carnet (`chapitre:sections|gen,gen`, 0008) : voir « Générateurs de l'évaluation
+annoncée » plus bas.
 
 **Vérifications** (Playwright sur un build `NODE_ENV=development vite build --mode test` avec des
 variables Supabase factices et le faux client `window.__MB_FAUX_SUPABASE__`, iPhone 13 et 1 280 px,
@@ -825,6 +828,85 @@ No rows returned » ; recharger `/carnet` → Noter la séance → blocs Devoir 
 pour l'agenda scolaire » (adapter la liste des compétences au programme de l'école). À vérifier contre le
 vrai projet : séance avec devoir pour le prochain cours, interro annoncée (événement créé, lien), copie dans
 Smartschool (émojis lisibles ? sinon décocher « Émojis de section »).
+
+### Générateurs de l'évaluation annoncée (`supabase/migrations/0008_evaluation_generateurs.sql`, décision du 24/11/2026 : « toutes les propositions »)
+
+Dans le bloc **Évaluation** de « Noter la séance » (annonce, contrôle-bilan ET « faite aujourd'hui »), sous chaque section
+cochée de « Matière (parties vues) », la liste de SES générateurs — ceux du panneau des évaluations
+(`evaluationPayload.ts::GENERATEURS_EVALUATION_PILOTE`, ordre de la table), libellé de la table sans « (id) », sinon titre de
+la carte « S'entraîner » du chapitre, sinon nom du document, code en gris, processus en pastille `conc-pc` (couleurs
+`--procN`, nom lu par les lecteurs d'écran). Tous cochés quand on coche la section (cocher une section recoche tous ses
+générateurs) ; le professeur décoche ceux qu'il ne veut pas ; décocher la section retire ses générateurs. Résumé « 3
+exercices sur 6 retenus pour « Préparer l'évaluation » et pour le lien d'entraînement des élèves » ; aucun coché → « …
+reprendra les n exercices de ces parties ». Cases ≥ 44 px (`.carnet-eval-gens`, fin de `carnet.css`), lisible à 390 px.
+La table arrive par `processusCarnet.ts` (`generateursEvaluation(chapitreSlug)`, même `import()` que les processus, jamais
+dans le paquet du carnet) ; avant son arrivée : « Chargement des exercices de ces parties… ».
+
+**Règle de stockage** : `seances.evaluation_generateurs` = générateurs RETENUS ; **vide = tous** ceux des sections évaluées
+(règle d'avant 0008, aucune migration de données ; enregistré vide aussi quand tout reste coché — un générateur ajouté plus
+tard à la table est alors pris — ou quand rien n'est coché, ce que le résumé dit). Rouverte, la séance recoche les retenus
+(décochés = générateurs des sections évaluées absents de la liste) ; un id inconnu de la table (contenu modifié) est gardé
+tel quel à l'enregistrement.
+
+**Schéma 0008** (idempotent, à coller APRÈS 0007 ; « Success. No rows returned ») : `seances.evaluation_generateurs jsonb
+not null default '[]'` ; `seances_evaluation_generateurs_valides` (`tableau_de_textes`, 100 × 40, comme
+`devoir_generateurs`) ; `seances_evaluation_generateurs_coherents` (`evaluation_type is not null or evaluation_generateurs =
+'[]'`, comme les parties de 0007) ; commentaire de colonne ; RLS / droits de 0002 rappelés, rien d'autre. AUCUNE donnée
+d'élève. Vérifié sur Postgres 16 local (faux schéma `auth`, 0001 → 0007 + données, 0008 ×3, 0002 → 0007 relancés après lui
+puis 0008 encore : données, contraintes, politiques, droits identiques) : 52 vérifications (dossier de travail
+`annonce-evaluation/test_sql.py` : défaut des anciennes lignes, 100 × 40 accepté, 101 / 41 car. / vide / nombre / objet
+refusés — 23514 —, NULL — 23502 —, générateurs sans évaluation ou évaluation retirée en les gardant — 23514, superutilisateur
+compris —, RLS croisé, `anon` — 42501 —, compte désactivé, suppression de compte).
+
+**0008 pas appliqué** : `carnetDonnees.ts::chargerSeances` lit avec la colonne, et sur 42703 / PGRST204 la mentionnant
+(`colonne0008Absente`) relit sans → `generateursEval: false` (`ContexteCarnet.generateursEval`) ; `ligneSeance` ne l'écrit
+alors jamais. Le formulaire garde la liste et le choix : il vaut pour le lien « Préparer l'évaluation » ouvert depuis le
+panneau et pour le texte copié à l'enregistrement (« Enregistrer et copier » lit la saisie), pas pour une réouverture ; note
+discrète « Pour garder les générateurs choisis, applique la migration 0008 (…) ». 0007 absent : comme avant (bloc
+Évaluation « Pas encore activé »).
+
+**« Préparer l'évaluation »** (lien du carnet) : `carnetMatiere.ts::encoderMatiere` ajoute, seulement pour un choix PARTIEL,
+`|gen,gen` après les sections d'un chapitre (`5e-4h~suites:suites-geometriques,convergence|5gen15,5gen46,5gen16`) ;
+`decoderMatiere` le lit (id mal formé ignoré) ; un lien sans « | » garde le comportement d'avant. Panneau
+(`EvaluationGeneratorPanel`, effet `?matiere=`) : avec des générateurs, UN exercice (première variante disponible) sur
+chaque générateur COCHÉ seulement (un chapitre du lien sans générateur garde tous ceux de ses sections) ; bandeau « Matière
+vue en 5Ge : 2 sections, 3 générateurs choisis dans le carnet (un exercice chacun ; les autres générateurs de ces sections
+ne sont pas pris)… » ; boutons **« Composer selon la durée »** (ouvre « Façons de composer », la carte « Préparer
+l'évaluation » et son réglage des compétences, et compose) et **« Tout le catalogue »** (lève la limite). État
+`generateursCarnet` (clés `composer.ts::cleGenerateurComposer(chapitre, gen)`) → `ContexteComposition.generateursPermis` pour
+la façon « evaluation » seulement (les autres façons et le catalogue restent complets) : `composer.ts::unites` ne garde que
+ces lignes d'exercice (ni vrai/faux, ni formule, ni autre générateur) ; `processusComposables` aussi (le réglage des
+compétences dit « aucun exercice ici » / « aucun exercice parmi les générateurs choisis dans le carnet » — prop `ou` de
+`ReglageCompetences`). Message de composition « … Seulement les 3 générateurs choisis dans le carnet. » ; durée remplie <
+85 % de la cible (`ResultatComposition.duree`) → « Ces générateurs ne remplissent que ≈ m min sur les 50 min visées : ajoute
+des questions à la main, ou « Tout le catalogue » » ; rien de composable → « Rien à proposer avec les 3 générateurs choisis
+dans le carnet pour … ». Panneau ouvert sans ces paramètres : rien ne change (`generateursPermis` absent).
+
+**Lien élève dans le texte de l'annonce** (`carnetDevoirs.ts`, texte ET HTML de `TexteAgenda` / « Copier pour Smartschool » /
+« Enregistrer et copier ») : sous « 📅 Interro annoncée… » (et « Contrôle-bilan annoncé… », pas « faite »), ligne « Pour
+t'entraîner : https://math-belgium.vercel.app/{niveau}/{chapitre}/exercices?notions=id1,id2&exos=gen,gen »
+(`carnetMatiere.ts::urlEntrainementEleve`, `EvaluationTexte.entrainementEleve`, `PREFIXE_ENTRAINEMENT_ELEVE`) ; `&exos=`
+seulement si des générateurs sont retenus ; seulement avec la rubrique « Liens » ; HTML : lien cliquable. Page publique
+(assistant « Me préparer à l'évaluation », `.claude/rules/feuilles-evaluations.md`, « Parcours élève ») ; aucun nom d'élève,
+rien n'est enregistré.
+
+**Vérifications** (dossier de travail `annonce-evaluation/` : `purs.test.ts` — 19 vérifications : ancien lien décodé et
+ré-encodé à l'identique, aller-retour avec générateurs, id mal formé, lien élève, texte et HTML de l'annonce / du bilan /
+d'une interro faite, sans liens, sans 0008 —, `faux-supabase.js` étendu — colonne, option `evaluationGenerateursAbsent`
+(42703 / PGRST204), contraintes —, `parcours.mjs` sur un build `NODE_ENV=development vite build --mode test`, iPhone 13 et
+1 280 px, clair et sombre — 174 vérifications : 2 sections et 6 générateurs cochés d'office, pastilles, 3 décochés,
+section décochée / recochée, lien du panneau, cases ≥ 44 px, aucun champ numérique, enregistré puis rouvert (cases
+gardées), tout recoché = liste vide et lien d'avant, copie texte + HTML avec le lien élève, panneau du texte, panneau des
+évaluations : exactement 5gen15, 5gen46, 5gen16 (un exercice chacun), « Composer selon la durée » : seulement eux,
+compétence sans exercice → message, « Tout le catalogue » : d'autres générateurs reviennent, assistant élève : notions
+cochées, filtre coché, liste des types sans les générateurs décochés, valeurs inconnues ignorées ; sans 0008 : note,
+choix gardé dans le lien et le texte copié, séance enregistrée sans la colonne, colonne jamais écrite ; `scrollWidth` =
+largeur, 0 erreur console). Captures dans `annonce-evaluation/captures/`.
+
+**Mise en service** : SQL Editor → New query → coller TOUT `0008_evaluation_generateurs.sql` → Run → « Success. No rows
+returned » ; recharger `/carnet` → Noter la séance → Évaluation → décocher un exercice → Enregistrer → rouvrir. À vérifier
+contre le vrai projet : la séance rouverte garde les cases ; le texte copié dans Smartschool ouvre l'assistant élève avec
+les notions cochées.
 
 ## Page « Mon profil » refondue (21/11/2026 : proposition A, style du carnet, AUCUNE migration)
 

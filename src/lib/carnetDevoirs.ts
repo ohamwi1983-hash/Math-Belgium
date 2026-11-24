@@ -31,6 +31,7 @@ import {
   type TypeEvaluation,
 } from './carnet'
 import { creneauxDuJour, type CaseHoraire, type Creneau, type GrilleHoraire } from './horaire'
+import { urlEntrainementEleve } from './carnetMatiere'
 
 /* ------------------------------------------------------------------------------- constantes */
 
@@ -266,6 +267,10 @@ export interface EvaluationTexte {
   numeros: string[]
   /** Titres courts des sections évaluées (« suites géométriques »). */
   themes: string[]
+  /** Interro annoncée / contrôle-bilan : page publique d'entraînement de l'élève (assistant « Me préparer
+   * à l'évaluation » du chapitre, sections annoncées cochées, générateurs retenus seulement) ; absent
+   * pour une interro faite aujourd'hui. Aucun nom d'élève, rien n'est enregistré. */
+  entrainementEleve?: string
 }
 
 export interface DonneesTexteAgenda {
@@ -323,8 +328,9 @@ export function donneesTexteAgenda(
     const sections = structure.filter((s) => (seance.evaluation_parties ?? []).includes(s.id))
     const themes = sections.map((s) => minusculeInitiale(texteBrut(chapitre?.sections.find((x) => x.id === s.id)?.titreCourt ?? s.titre)))
     const numeros = sections.map((s) => `§ ${s.numero}`)
+    const entrainementEleve = chapitre ? absolu(urlEntrainementEleve(seance.niveau, seance.chapitre, sections.map((s) => s.id), seance.evaluation_generateurs ?? [])) : undefined
     if (t === 'faite') evaluation = { type: t, date: seance.date_seance, heure: null, numeros, themes }
-    else if (options.evenement) evaluation = { type: t, date: options.evenement.du, heure: heureEvenementTexte(options.evenement), numeros, themes }
+    else if (options.evenement) evaluation = { type: t, date: options.evenement.du, heure: heureEvenementTexte(options.evenement), numeros, themes, ...(entrainementEleve ? { entrainementEleve } : {}) }
   }
   return {
     entete: enteteSeance(r),
@@ -338,6 +344,9 @@ export function donneesTexteAgenda(
     evaluation,
   }
 }
+
+/** Ligne du lien élève sous l'interro annoncée (texte et HTML). */
+export const PREFIXE_ENTRAINEMENT_ELEVE = 'Pour t’entraîner : '
 
 const EMOJI = { objectif: '🎯', vu: '📘', competences: '🧭', entrainer: '✏️', devoir: '📌', interro: '📅', faite: '📝' }
 
@@ -390,7 +399,12 @@ function rubriques(d: DonneesTexteAgenda, o: Rubriques): Rubrique[] {
     const lignes = [...(d.devoir.consigne ? d.devoir.consigne.split(/\r?\n/).map((l) => l.trimEnd()) : []), ...d.devoir.exercices.map((g) => `• ${g.titre}${liens && g.url ? ` — ${g.url}` : ''}`)]
     r.push({ cle: 'devoir', titre: titreRubrique(EMOJI.devoir, titre, o.emojis), lignes })
   }
-  if (d.evaluation) r.push({ cle: 'interro', titre: titreRubrique(d.evaluation.type === 'faite' ? EMOJI.faite : EMOJI.interro, phraseEvaluation(d.evaluation), o.emojis), lignes: [] })
+  if (d.evaluation)
+    r.push({
+      cle: 'interro',
+      titre: titreRubrique(d.evaluation.type === 'faite' ? EMOJI.faite : EMOJI.interro, phraseEvaluation(d.evaluation), o.emojis),
+      lignes: liens && d.evaluation.entrainementEleve ? [`${PREFIXE_ENTRAINEMENT_ELEVE}${d.evaluation.entrainementEleve}`] : [],
+    })
   return r
 }
 
@@ -412,7 +426,8 @@ export function htmlAgenda(d: DonneesTexteAgenda, o: Rubriques = RUBRIQUES_DEFAU
   h.push('</p>')
   for (const rub of rubriques(d, o)) {
     if (rub.cle === 'interro') {
-      h.push(`<p><strong>${e(rub.titre)}</strong></p>`)
+      const eleve = o.liens && d.evaluation?.entrainementEleve ? `<br>${e(PREFIXE_ENTRAINEMENT_ELEVE)}${lien(d.evaluation.entrainementEleve, d.evaluation.entrainementEleve)}` : ''
+      h.push(`<p><strong>${e(rub.titre)}</strong>${eleve}</p>`)
       continue
     }
     h.push(`<p><strong>${e(rub.titre)}</strong>`)

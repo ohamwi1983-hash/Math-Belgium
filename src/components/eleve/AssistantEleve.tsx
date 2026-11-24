@@ -12,6 +12,7 @@ import { tirerGraine } from '../../entrainement/export/codeExercice'
 import { PART_MAX_HASARD, PART_MIN_HASARD, texteParts, type RepartitionPourcents } from '../../lib/repartitionProcessus'
 import { ReglageCompetences } from '../admin/conception/ReglageCompetences'
 import { RichText } from '../Math'
+import { lireListeUrl } from '../../lib/carnetMatiere'
 import {
   COMPETENCES_ELEVE,
   NOMBRE_FEUILLE_DEFAUT,
@@ -69,6 +70,11 @@ import {
  * autorisée (seulement des cas où elle sert : variantes toujours exactes écartées et grisées, jamais une
  * instance `calcul: 'exacte'`). Chapitre sans aucun cas « calculatrice » : case désactivée, avec la
  * raison. Changer la case refait le tirage ; rien n'est mémorisé.
+ * Lien du professeur (texte de l'interro annoncée, carnet) sur une page de chapitre : `?notions=id1,id2`
+ * coche ces notions (id inconnu ignoré ; aucune reconnue, ou toutes : « Tout le chapitre ») ; `&exos=gen…`
+ * ne garde, parmi les EXERCICES tirés, que ces générateurs — case « Seulement les exercices annoncés par
+ * ton professeur », cochée d'office, que l'élève peut décocher (vrai/faux, formules et démonstrations
+ * restent proposés : ce ne sont pas des générateurs). Rien n'est lu ni écrit ailleurs.
  * Aucune donnée d'élève : rien n'est enregistré.
  */
 
@@ -168,9 +174,21 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   const notions = useMemo(() => (chapitre ? notionsDuChapitre(chapitre) : []), [chapitre])
 
   const [type, setType] = useState<TypeEleve>('blanche')
+  // Lien du professeur (carnet : interro annoncée) : `?notions=` et `?exos=`, page d'un chapitre seulement.
+  const [annonceUrl] = useState(() => {
+    const q = new URLSearchParams(location.search)
+    return verrouille ? { notions: lireListeUrl(q.get('notions'), 'section'), exos: lireListeUrl(q.get('exos'), 'generateur') } : { notions: [], exos: [] }
+  })
   /** `null` : tout le chapitre. */
-  const [choisies, setChoisies] = useState<Set<string> | null>(null)
-  const [notionsDepliees, setNotionsDepliees] = useState(false)
+  const [choisies, setChoisies] = useState<Set<string> | null>(() => {
+    const ids = notions.map((n) => n.sectionId)
+    const garde = annonceUrl.notions.filter((id) => ids.includes(id))
+    return garde.length === 0 || garde.length === ids.length ? null : new Set(garde)
+  })
+  // Notions annoncées cachées derrière « + n » sur téléphone : liste dépliée d'office.
+  const [notionsDepliees, setNotionsDepliees] = useState(() => annonceUrl.notions.some((id) => notions.slice(3).some((n) => n.sectionId === id)))
+  /** Case « Seulement les exercices annoncés par ton professeur » (`?exos=`), cochée d'office. */
+  const [seulementAnnonces, setSeulementAnnonces] = useState(true)
   const [duree, setDuree] = useState<number>(30)
   /** Niveaux cochés (intention de l'élève) : tous par défaut, niveaux mélangés. */
   const [niveauxCoches, setNiveauxCoches] = useState<Set<CategorieNiveau>>(() => new Set(CATEGORIES_NIVEAU))
@@ -206,7 +224,15 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   const [modeNombre, setModeNombre] = useState<'global' | 'carte'>('global')
   const [parType, setParType] = useState<Record<string, number>>({})
 
-  const [candidats, setCandidats] = useState<Candidat[] | null>(null)
+  const [candidatsTous, setCandidats] = useState<Candidat[] | null>(null)
+  /** Générateurs annoncés par le professeur (`?exos=`) qui existent dans ce chapitre. */
+  const exosAnnonces = useMemo(() => (candidatsTous ? annonceUrl.exos.filter((id) => candidatsTous.some((c) => c.sorte === 'exercice' && c.generatorId === id)) : []), [candidatsTous, annonceUrl])
+  const filtreExos = seulementAnnonces && exosAnnonces.length > 0
+  /** Candidats utilisés partout (disponibilité, liste, composition) : filtrés aux générateurs annoncés. */
+  const candidats = useMemo(
+    () => (candidatsTous && filtreExos ? candidatsTous.filter((c) => c.sorte !== 'exercice' || exosAnnonces.includes(c.generatorId)) : candidatsTous),
+    [candidatsTous, filtreExos, exosAnnonces],
+  )
   const [progression, setProgression] = useState<{ fait: number; total: number } | null>(null)
   /** Plan préparé, avec la clé des réglages pour lesquels il a été tiré : un plan d'anciens réglages
    * (changement pas encore recalculé) n'est jamais affiché ni généré. */
@@ -285,7 +311,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
       ? { mode: 'hasard', graine: graineParts }
       : { mode: 'reglee', pourcents: partsManuelles, graine: graineParts }
     : undefined
-  const cleReglages = JSON.stringify([levelSlug, chapitreSlug, sections, duree, niveaux, competences, type, amenagee, tirage, parts ?? null, demosRetenues, exercices ?? null, calculatrice])
+  const cleReglages = JSON.stringify([levelSlug, chapitreSlug, sections, duree, niveaux, competences, type, amenagee, tirage, parts ?? null, demosRetenues, exercices ?? null, calculatrice, filtreExos])
   const prepare = prepareBrut && prepareBrut.cle === cleReglages ? prepareBrut : null
 
   // Candidats du chapitre (niveaux et durées estimés), calculés une variante à la fois.
@@ -647,6 +673,23 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
             </button>
           )}
         </div>
+        {exosAnnonces.length > 0 && (
+          <div className="eleve-reglage eleve-annonce-exos">
+            <div className="eleve-coches">
+              <button type="button" className="eleve-coche" aria-pressed={seulementAnnonces} aria-describedby="eleve-annonce-exos-aide" onClick={() => setSeulementAnnonces((v) => !v)}>
+                <span className="eleve-coche-case" aria-hidden="true">
+                  {seulementAnnonces ? '✓' : ''}
+                </span>
+                <span>Seulement les exercices annoncés par ton professeur</span>
+              </button>
+            </div>
+            <p className="eleve-aide" id="eleve-annonce-exos-aide">
+              {seulementAnnonces
+                ? `Ton professeur a choisi ${exosAnnonces.length} sorte${exosAnnonces.length > 1 ? 's' : ''} d’exercices : seuls ceux-là sont tirés (les questions de cours restent proposées). Décoche pour tous les exercices de ces notions.`
+                : 'Décochée : tous les exercices de ces notions peuvent être tirés.'}
+            </p>
+          </div>
+        )}
         <div className="eleve-reglage">
           <span className="eleve-etiquette" id="eleve-competences">
             Compétences

@@ -1628,6 +1628,11 @@ table.feature-table--synthese { font-family: inherit; font-size: 0.94em; }
 .lecture-entete.avec-carnet .lecture-outils { margin-left: auto; }
 /* Bandeau du panneau des évaluations ouvert depuis le carnet (`?matiere=`). */
 .admin-eval-carnet { margin: 0 0 16px; padding: 12px 14px; border: 1px solid var(--accent-soft-line); border-radius: var(--radius); background: var(--accent-soft); color: var(--accent-ink); font-size: 0.95rem; }
+.admin-eval-carnet > p { margin: 0; }
+.admin-eval-carnet-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 10px; }
+.admin-eval-carnet-actions .conc-bouton { min-height: 44px; }
+.admin-eval-carnet-actions .compte-bouton-lien { min-height: 44px; }
+.admin-eval-carnet-aide { flex: 1 1 260px; font-size: 0.85rem; }
 
 /* ---------- horaire de la semaine du carnet (0003) ----------
  * Grille d'école + aperçu calculé, tableau jours × heures (écran large) ou un jour à la fois

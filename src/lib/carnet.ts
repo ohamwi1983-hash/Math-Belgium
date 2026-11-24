@@ -75,6 +75,9 @@ export interface Seance {
   evaluation_parties?: string[]
   /** Événement « Interrogation » de l'agenda (0006) créé par « Annoncer » / « Contrôle-bilan ». */
   evaluation_evenement?: string | null
+  /** Générateurs retenus pour l'évaluation, parmi ceux des sections évaluées (`0008_evaluation_generateurs.sql`,
+   * absent tant que 0008 n'est pas appliqué) ; vide = tous ceux des sections évaluées. */
+  evaluation_generateurs?: string[]
 }
 
 /** Évaluation notée avec une séance (0007). « faite » : l'interro a eu lieu pendant la séance (aucun
@@ -103,6 +106,7 @@ export type SaisieSeance = Pick<
   | 'evaluation_type'
   | 'evaluation_parties'
   | 'evaluation_evenement'
+  | 'evaluation_generateurs'
 >
 
 /* ------------------------------------------------------------------------------- textes */
