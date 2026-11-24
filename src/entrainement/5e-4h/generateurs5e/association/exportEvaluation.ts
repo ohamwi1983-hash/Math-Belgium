@@ -1,7 +1,9 @@
 import katex from "katex";
-import { lettreCorrecte, nombreElementsAssociation } from "../../core5e/association.types";
+import { nombreElementsAssociation } from "../../core5e/association.types";
 import type {
   ExerciceAssociation,
+  ExerciceAssociationGrapheDeriveeAvancee,
+  FonctionRicheAssociation,
   ExerciceAssociationGrapheDerivee,
   ExerciceAssociationGrapheVerbal,
   ExerciceAssociationSymbolique,
@@ -22,7 +24,10 @@ import { echapperHtml } from "../../../export/genererFeuilleExercicesHtml";
 import { construireSvgFonction, type ViewBoxSvg } from "../../../export/svgGraph";
 import { consigneAssociation } from "../../ui5e/formatAssociation";
 import { evaluerPolynome } from "../domaineDefinition/polynome";
-import { CATALOGUE_FAMILLES, construireAvecFamilleId, derivee, formeCubique, genererExerciceAssociation } from "./index";
+import { CATALOGUE_FAMILLES, construireAvecFamilleId, derivee, evaluerDeriveeFonctionRiche, evaluerFonctionRiche, exclusionAffichageDerivee, exclusionAffichageF, formeCubique, genererExerciceAssociation } from "./index";
+import { fragmentsRiches5e } from "../../ui5e/retoursDerivees";
+import { consigneJustificationAssociation } from "../../ui5e/retoursAssociation";
+import { reponseCorrecteAssociation } from "../../core5e/association.types";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { correctionDetailleeAssociation, piegeSymboliqueAssociation } from "./corrigeDetaille";
 import { profilAssociation } from "../profilsEvaluationDerivees25-27";
@@ -60,8 +65,13 @@ const HAUTEUR_GRAPHE = 150;
 
 const CONSIGNE_GLOBALE = "Associe chaque élément numéroté à la lettre qui lui correspond.";
 
-/** Catalogue exposé par cet adaptateur — `CATALOGUE_FAMILLES` sans les entrées « A avancé ». */
-export const CATALOGUE_VARIANTES_EXPORT_ASSOCIATION = CATALOGUE_FAMILLES.filter((entree) => !entree.id.startsWith("grapheDeriveeAvancee"));
+/** Catalogue exposé par cet adaptateur — familles A, B, C d'abord (indices et codes imprimés
+ * inchangés), puis la famille « A avancée » AJOUTÉE EN FIN (lot C, question 2 de l'audit : points
+ * anguleux, rebroussements, tangentes verticales, discontinuités). */
+export const CATALOGUE_VARIANTES_EXPORT_ASSOCIATION = [
+  ...CATALOGUE_FAMILLES.filter((entree) => !entree.id.startsWith("grapheDeriveeAvancee")),
+  ...CATALOGUE_FAMILLES.filter((entree) => entree.id.startsWith("grapheDeriveeAvancee")),
+];
 
 // ============================================================================
 // Graphes (familles A et B).
@@ -143,9 +153,41 @@ function construireEnteteHtmlAssociation(exercice: ExerciceAssociation): string 
     case "symbolique":
       return enteteHtmlSymbolique(exercice);
     case "grapheDeriveeAvancee":
-      // Hors export (catalogue filtré, jamais tirée librement) — exclusion explicite.
-      throw new Error("Famille « A avancée » non prise en charge par l'export papier de 5gen25.");
+      return enteteHtmlGrapheDeriveeAvancee(exercice);
   }
+}
+
+/** Famille « A avancée » (lot C) : f à singularité (coin, rebroussement, tangente verticale,
+ * asymptote, saut, trou) ; la courbe est coupée près du point exclu. */
+function svgFonctionRiche(fo: FonctionRicheAssociation, deriveeDe: boolean, etiquette: string): string {
+  const excl = deriveeDe ? exclusionAffichageDerivee(fo) : exclusionAffichageF(fo);
+  const ev = (x: number): number | null => {
+    if (excl !== null && Math.abs(x - excl) < 0.06) return null;
+    const y = deriveeDe ? evaluerDeriveeFonctionRiche(fo, x) : evaluerFonctionRiche(fo, x);
+    return Number.isFinite(y) && Math.abs(y) < 40 ? y : null;
+  };
+  let yMin = Infinity;
+  let yMax = -Infinity;
+  for (let i = 0; i <= 160; i++) {
+    const y = ev(X_MIN_ASSOCIATION + ((X_MAX_ASSOCIATION - X_MIN_ASSOCIATION) * i) / 160);
+    if (y === null) continue;
+    yMin = Math.min(yMin, y);
+    yMax = Math.max(yMax, y);
+  }
+  if (!Number.isFinite(yMin)) {
+    yMin = -5;
+    yMax = 5;
+  }
+  const yBas = Math.max(yMin, -12);
+  const yHaut = Math.min(yMax, 12);
+  const marge = Math.max(1, (yHaut - yBas) * 0.15);
+  return construireSvgFonction(ev, { xMin: X_MIN_ASSOCIATION, xMax: X_MAX_ASSOCIATION, yMin: yBas - marge, yMax: yHaut + marge }, { largeur: LARGEUR_GRAPHE, hauteur: HAUTEUR_GRAPHE, classe: "graphe-cyclo", lettre: etiquette });
+}
+
+function enteteHtmlGrapheDeriveeAvancee(exercice: ExerciceAssociationGrapheDeriveeAvancee): string {
+  const elements = exercice.fonctions.map((fo, i) => svgFonctionRiche(fo, false, String(i + 1)));
+  const candidats = exercice.ordreLettres.map((source, j) => svgFonctionRiche(exercice.fonctions[source], true, LETTRES[j] ?? String(j + 1)));
+  return `${titreListe("Graphiques de f (numérotés)")}${grilleGraphes(elements)}${titreListe("Graphiques de f' (lettrés)")}${grilleGraphes(candidats)}`;
 }
 
 // ============================================================================
@@ -156,15 +198,23 @@ function enteteTexte(exercice: ExerciceAssociation): FragmentConsigne[] {
   return [texte(consigneAssociation(exercice))];
 }
 
-/** Une seule étape à l'écran (l'association) : une seule question. */
+/** Deux étapes à l'écran (lot C) : l'association, puis la justification d'une association. */
 function construireEnonceAssociation(exercice: ExerciceAssociation): SectionExercice {
-  return { enteteFragments: enteteTexte(exercice), enteteHtml: construireEnteteHtmlAssociation(exercice), questions: [{ consigne: [texte(CONSIGNE_GLOBALE)] }] };
+  return {
+    enteteFragments: enteteTexte(exercice),
+    enteteHtml: construireEnteteHtmlAssociation(exercice),
+    questions: [{ consigne: [texte(CONSIGNE_GLOBALE)] }, { consigne: fragmentsRiches5e(consigneJustificationAssociation(exercice)) }],
+  };
 }
 
 function enoncePapierAssociation(exercice: ExerciceAssociation): EnoncePapier {
   return {
     // `consigneAssociation` dit déjà quoi associer à quoi : seule la forme de la réponse s'ajoute.
-    section: { enteteFragments: [...enteteTexte(exercice), texte(" Donne ta réponse sous la forme « 1 → … ; 2 → … ».")], enteteHtml: construireEnteteHtmlAssociation(exercice), questions: [] },
+    section: {
+      enteteFragments: [...enteteTexte(exercice), texte(" Donne ta réponse sous la forme « 1 → … ; 2 → … ». "), ...fragmentsRiches5e(consigneJustificationAssociation(exercice))],
+      enteteHtml: construireEnteteHtmlAssociation(exercice),
+      questions: [],
+    },
   };
 }
 
@@ -173,7 +223,8 @@ function enoncePapierAssociation(exercice: ExerciceAssociation): EnoncePapier {
 // ============================================================================
 
 function lettreDe(exercice: ExerciceAssociation, i: number): string {
-  return LETTRES[lettreCorrecte(exercice.ordreLettres, i)] ?? "?";
+  const r = reponseCorrecteAssociation(exercice.ordreLettres, exercice.famille === "grapheDeriveeAvancee" ? exercice.singulier : undefined, i);
+  return r === "aucune" ? "f' n'existe pas" : (LETTRES[r] ?? "?");
 }
 
 function correspondance(exercice: ExerciceAssociation): string {
@@ -193,13 +244,17 @@ function piegeAssociation(exercice: ExerciceAssociation): string {
     case "symbolique":
       return "Pour une puissance de ax + b, ne pas oublier de multiplier par a (la dérivée de l'intérieure).";
     case "grapheDeriveeAvancee":
-      return "";
+      return "Une courbe continue n'est pas forcément dérivable : en un coin ou en un point à tangente verticale, f′ n'existe pas.";
   }
 }
 
 function baremeAssociation(exercice: ExerciceAssociation): BaremeExercice {
   const n = nombreElementsAssociation(exercice);
-  const criteres: CritereBareme[] = Array.from({ length: n }, (_, i) => ({ sousQuestion: LETTRES_ETAPES[0], critere: [texte(`Élément ${i + 1} associé à la lettre ${lettreDe(exercice, i)}`)], points: 4 / n }));
+  // Lot C : 3 points pour l'association, 1 point pour la justification (étape b).
+  const criteres: CritereBareme[] = [
+    ...Array.from({ length: n }, (_, i) => ({ sousQuestion: LETTRES_ETAPES[0], critere: [texte(`Élément ${i + 1} associé à ${lettreDe(exercice, i) === "f' n'existe pas" ? "« f′ n'existe pas »" : `la lettre ${lettreDe(exercice, i)}`}`)], points: 3 / n })),
+    { sousQuestion: LETTRES_ETAPES[1], critere: [texte(exercice.famille === "symbolique" ? "Justification : dérivée de la fonction choisie correcte" : "Justification : deux propriétés lues sur les graphiques (extremums ou inflexion, sens de variation / signe de f′ ; point particulier)")], points: 1 },
+  ];
   return {
     reponseFinale: reponseBreveAssociation(exercice),
     criteres,
@@ -224,7 +279,8 @@ function criteresDifficulteAssociation(exercice: ExerciceAssociation): CriteresD
     });
     memesVariations = new Set(sig).size < sig.length;
   }
-  return { ...etapesDuCorrige(corrige, ["a"]), methode: exercice.famille === "grapheVerbal" ? 1 : 0, piege: memesVariations ? 1 : 0, nombres: 0 };
+  // Famille avancée : la singularité est un piège des données (courbe continue mais non dérivable).
+  return { ...etapesDuCorrige(corrige, ["a"]), methode: exercice.famille === "grapheVerbal" ? 1 : 0, piege: memesVariations || exercice.famille === "grapheDeriveeAvancee" ? 1 : 0, nombres: 0 };
 }
 
 /** Ancien corrigé (repli, documents Word). */

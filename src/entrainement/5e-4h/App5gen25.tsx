@@ -1,6 +1,11 @@
 import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
-import { CATALOGUE_FAMILLES, construireAvecFamilleId, derivee, genererExerciceAssociation } from "./generateurs5e/association/index";
+import { CATALOGUE_FAMILLES, construireAvecFamilleId, derivee, genererExerciceAssociation, genererExerciceAssociationLibre } from "./generateurs5e/association/index";
+import { EcranJustificationAssociation } from "./components5e/EcranJustificationAssociation";
+import { specJustification } from "./moteur5e/justificationAssociation";
+import { messageChoixJustification } from "./ui5e/retoursAssociation";
+import { PREFIXE_CHOIX_FERME } from "./ui5e/retoursDerivees";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import { CATALOGUE_VARIANTES_EXPORT_ASSOCIATION } from "./generateurs5e/association/exportEvaluation";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { correctionDetailleeAssociation } from "./generateurs5e/association/corrigeDetaille";
@@ -11,6 +16,7 @@ import {
   demarrerSessionAssociation,
   niveauAideMaxAssociation,
   soumettreReponseAssociation,
+  soumettreReponseJustification,
 } from "./moteur5e/sessionAssociation";
 import type { EtatSessionAssociation } from "./moteur5e/typesAssociation";
 import { diagnostiquerLignes } from "./moteur5e/verificationAssociation";
@@ -30,12 +36,13 @@ import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
 /** Une seule tentative : avec autant de menus que de lettres, plusieurs essais permettraient de
  * trouver l'association par élimination (audit 5c5a, point 8). */
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 1 };
+// Association : une tentative (forcée par le moteur) ; justification : 3 tentatives sur les champs.
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 const LETTRES = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
 function nouvelleSession(): EtatSessionAssociation {
-  return demarrerSessionAssociation(REGLAGES_DEMO, genererExerciceAssociation);
+  return demarrerSessionAssociation(REGLAGES_DEMO, genererExerciceAssociationLibre);
 }
 
 /** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
@@ -87,6 +94,7 @@ function reponseAttendueAssociation(exercice: ExerciceAssociation) {
 interface TransitionEnAttente {
   etatSuivant: EtatSessionAssociation;
   revele: boolean;
+  messageRevele?: string | null;
 }
 
 export function App5gen25() {
@@ -97,9 +105,19 @@ export function App5gen25() {
   const [numeroGeneration, setNumeroGeneration] = useState(0);
 
   function terminerEtape(nouvelEtat: EtatSessionAssociation) {
-    const transitionDEcran = nouvelEtat.terminee !== etat.terminee;
+    const transitionDEcran = nouvelEtat.terminee !== etat.terminee || nouvelEtat.phase !== etat.phase || nouvelEtat.indexExercice !== etat.indexExercice;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      const revele = nouvelEtat.derniereEtapeRevelee;
+      // Choix fermés (une tentative) : message propre au choix au lieu de « Tentatives épuisées ».
+      const message =
+        !revele
+          ? null
+          : etat.phase === "association"
+            ? `${PREFIXE_CHOIX_FERME} Compare le signe de la pente de f (montée / descente) avec le signe de chaque candidat.`
+            : etat.etapeCourante.tentativesUtilisees + 1 < etat.reglages.tentativesMax
+              ? messageChoixJustification(etat.exerciceCourant)
+              : null;
+      setEnAttente({ etatSuivant: nouvelEtat, revele, messageRevele: message });
       return;
     }
     setEtat(nouvelEtat);
@@ -125,11 +143,13 @@ export function App5gen25() {
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
   const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${exercice.famille}`;
 
+  const lettreEcran = etat.phase === "association" ? "a" : "b";
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: reponseAttendueAssociation(exercice),
-        ...(exercice.famille === "grapheDeriveeAvancee" ? {} : { corrigeDetaille: <CorrigeDetailleEcran etapes={correctionDetailleeAssociation(exercice)} /> }),
+        ...(enAttente.messageRevele ? { messageRevele: enAttente.messageRevele } : {}),
+        reponseAttendue: etat.phase === "association" ? reponseAttendueAssociation(exercice) : undefined,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeAssociation(exercice), lettreEcran)} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -165,8 +185,28 @@ export function App5gen25() {
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          {etat.phase === "justification" ? (
+            <EcranJustificationAssociation
+              key={`${cleEcran}-justification`}
+              exercice={exercice}
+              rappel={
+                <div className="association-item-contenu">
+                  <p className="field-label field-label-minuscule">{specJustification(exercice).item + 1}</p>
+                  {renderItem(specJustification(exercice).item)}
+                </div>
+              }
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMax}
+              onActiverAide={onActiverAide}
+              onValider={(r) => terminerEtape(soumettreReponseJustification(etat, r))}
+              validation={validation}
+            />
+          ) : (
           <ComposantAssociation
             key={cleEcran}
+            reponsesAttendues={Array.from({ length: nombreElementsAssociation(exercice) }, (_, i) => reponseCorrecteAssociation(exercice.ordreLettres, exercice.famille === "grapheDeriveeAvancee" ? exercice.singulier : undefined, i))}
             nombreItems={nombreElementsAssociation(exercice)}
             renderItem={renderItem}
             renderCandidat={renderCandidat}
@@ -186,6 +226,7 @@ export function App5gen25() {
             libelleOptionSupplementaire={exercice.famille === "grapheDeriveeAvancee" ? "f' n'existe pas ici" : undefined}
             validation={validation}
           />
+          )}
         </div>
       </main>
     </div>

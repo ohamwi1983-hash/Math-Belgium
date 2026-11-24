@@ -493,6 +493,12 @@ export function genererExerciceAssociation(familleForcee?: ExerciceAssociation["
   return genererExerciceSymbolique();
 }
 
+/** Tirage libre de l'APPLI (lot C, question 2) : la famille « A avancée » une fois sur quatre ; le
+ * tirage libre de l'adaptateur et les codes imprimés restent ceux de `genererExerciceAssociation`. */
+export function genererExerciceAssociationLibre(): ExerciceAssociation {
+  return Math.random() < 0.25 ? genererExerciceGrapheDeriveeAvancee() : genererExerciceAssociation();
+}
+
 export const CATALOGUE_FAMILLES: { id: string; label: string }[] = [
   { id: "grapheDerivee-3", label: "A — Graphe f ↔ graphe f' (3 éléments)" },
   { id: "grapheDerivee-5", label: "A — Graphe f ↔ graphe f' (5 éléments)" },
