@@ -1451,11 +1451,15 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
   'definition-derivee': [
     { cle: 'sur une fonction quadratique', enonce: "Soit $f(x) = x^2 - 3$. Calcule $f'(2)$ par la définition : $f(2)$, puis $f(2+h)$ développé, le taux d'accroissement simplifié, et enfin sa limite quand $h \\to 0$." },
     { cle: 'sur une fonction rationnelle', enonce: "Soit $f(x) = \\dfrac{2x+1}{x-1}$. Calcule $f'(2)$ par la définition, en simplifiant le taux d'accroissement par $h$ avant de passer à la limite." },
+    { cle: "avec une racine (expression conjuguée)", enonce: "Soit $f(x) = \\sqrt{x+5}$. Calcule $f'(4)$ par la définition du nombre dérivé." },
   ],
   'tangentes': [
     { cle: 'tangente en un point donné', enonce: "Soit $f(x) = x^2 - 2x + 1$. Détermine l'équation de la tangente à la courbe de $f$ au point d'abscisse $3$." },
     { cle: 'approximation affine', enonce: "Estime $1{,}02^3$ sans calculatrice à l'aide de la tangente à la courbe de $f(x) = x^3$ au point d'abscisse $1$, puis compare à la valeur exacte." },
     { cle: 'double tangence', enonce: "Soit $f(x) = x^4 - 2x^2 + 2x + 1$. Détermine la tangente à la courbe de $f$ au point d'abscisse $1$, puis montre que cette droite est aussi tangente à la courbe en un second point, que tu détermineras." },
+    { cle: "aucune tangente horizontale", enonce: "Soit $f(x) = x^3 - 3x^2 + 6x$. La courbe de $f$ admet-elle des tangentes horizontales ? Justifie." },
+    { cle: "sur une tangente tracée", enonce: "La courbe d'une fonction $f$ passe par le point $A(1\\,;2)$ ; sa tangente en A passe aussi par le point $B(3\\,;1)$. Donne $f(1)$ et $f'(1)$, puis l'équation de la tangente en A." },
+    { cle: "a est racine double de f(x) − t(x)", enonce: "Soit $f$ une fonction polynomiale et $t(x) = f(a) + f'(a)(x-a)$ sa tangente au point d'abscisse $a$. Démontre que $f(x) - t(x)$ est divisible par $(x-a)^2$." },
   ],
   'fonction-derivee': [
     { cle: 'obtenue directement par la définition', enonce: "Soit $f(x) = 2x^2 - 3x$. Détermine $f'(x)$ à partir de la définition, comme limite du taux d'accroissement $\\dfrac{f(x+h)-f(x)}{h}$." },
@@ -1463,9 +1467,17 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'règle du produit', enonce: "Calcule la dérivée de $f(x) = (2x+1)(x^2-3)$ à l'aide de la règle du produit, puis réduis le résultat." },
     { cle: 'règle du quotient', enonce: "Calcule la dérivée de $f(x) = \\dfrac{x^2+1}{x-2}$ à l'aide de la règle du quotient, puis réduis le numérateur." },
     { cle: 'règle de la chaîne', enonce: "Calcule la dérivée de $f(x) = (2x-1)^3$ en identifiant la fonction intérieure et la fonction extérieure." },
+    { cle: "unité et signe", enonce: "La température d'une serre vaut $T(t) = -0{,}5t^2 + 4t + 12$ (en °C, $t$ en heures, $t \\in [0\\,;8]$). Calcule le taux de variation moyen de $T$ entre $t = 2$ et $t = 4$, puis $T'(3)$ et $T'(6)$, en précisant leur unité, et interprète leur signe." },
+    { cle: "(k·u)′ = k·u′ et (u + v)′ = u′ + v′", enonce: "Démontre, à partir de la définition du nombre dérivé, que $(k \\cdot u)' = k \\cdot u'$ et que $(u+v)' = u' + v'$." },
+    { cle: "la dérivée d’un produit", enonce: "Démontre, à partir de la définition du nombre dérivé, que $(uv)' = u'v + uv'$ pour deux fonctions $u$ et $v$ dérivables." },
+    { cle: "(x²)′ = 2x", enonce: "Démontre, à partir de la définition du nombre dérivé, que $(x^2)' = 2x$ et $(x^3)' = 3x^2$, puis que $(x^n)' = n\\,x^{n-1}$ pour tout entier $n \\geq 1$." },
+    { cle: "la dérivée d’un quotient", enonce: "Démontre, à partir de la définition du nombre dérivé, que $\\left(\\dfrac{1}{v}\\right)' = -\\dfrac{v'}{v^2}$, puis déduis-en que $\\left(\\dfrac{u}{v}\\right)' = \\dfrac{u'v - uv'}{v^2}$." },
+    { cle: "(tan x)′", enonce: "Démontre que $(\\tan x)' = \\dfrac{1}{\\cos^2 x}$ là où $\\cos x \\neq 0$, puis que $(\\tan x)' = 1 + \\tan^2 x$." },
   ],
   'signe-derivees': [
     { cle: 'sur une cubique', enonce: "Soit $f(x) = x^3 - 3x$. Étudie le signe de $f'(x)$ et de $f''(x)$, puis déduis-en les variations de $f$, ses extremums locaux et sa concavité (avec l'éventuel point d'inflexion)." },
+    { cle: "extremum intérieur", enonce: "Soit $f$ une fonction dérivable en un point $a$ intérieur à son domaine, où elle admet un maximum local. Démontre que $f'(a) = 0$." },
+    { cle: "dérivable en a est continue", enonce: "Démontre qu'une fonction dérivable en $a$ est continue en $a$. La réciproque est-elle vraie ? Justifie." },
   ],
   'etude-locale': [
     { cle: 'tableau de signes complet', enonce: "Pour $f(x) = x^3 - 3x$, dresse le tableau de signes complet de $f'$, déduis-en les variations de $f$, puis classe chaque zéro de $f'$ (maximum local ou minimum local) en donnant la valeur de $f$." },
@@ -1473,6 +1485,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'racines irrationnelles', enonce: "Soit $f(x) = x^3 - 3x^2 - 3x + 1$. Détermine et classe les extremums locaux de $f$, en donnant leurs abscisses et les valeurs de $f$ sous forme exacte." },
     { cle: 'domaine et colonnes ∄', enonce: "Soit $f(x) = \\dfrac{4}{(x-1)^2 - 4}$. Détermine le domaine de $f$, calcule $f'(x)$, dresse le tableau de signes de $f'$ (avec les valeurs exclues) et déduis-en les extremums locaux de $f$." },
     { cle: "tableau de f'' : concavité", enonce: "Soit $f(x) = x^3 - 3x^2 - 3x + 1$. Calcule $f''(x)$, dresse son tableau de signes et détermine la concavité de $f$ ainsi que les coordonnées de son point d'inflexion." },
+    { cle: "quatre conditions", enonce: "Détermine la fonction $f(x) = ax^3 + bx^2 + cx + d$ dont la courbe passe par $A(0\\,;2)$ et par $B(2\\,;0)$, dont la tangente en A a pour pente $-3$ et qui a un point d'inflexion en $x = 1$. Vérifie ensuite la nature du point d'abscisse 1." },
   ],
   'lecture-graphique-derivees': [
     { cle: 'lecture directe', enonce: "Le graphique d'une fonction $f$ (sans formule) décroît jusqu'à un point A, croît de A jusqu'à un point B, puis décroît après B. Entre A et B, la courbe a d'abord la forme d'un bol, puis celle d'un dôme, le changement se faisant en un point P. Décris les variations de $f$, ses extremums locaux, le signe de $f'$, sa concavité et le signe de $f''$, puis indique la nature du point P." },
@@ -1487,11 +1500,14 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'rectangle de périmètre fixé', enonce: "Un rectangle a un périmètre de 40 m. Détermine ses dimensions pour que son aire soit maximale, en justifiant la nature de l'extremum par un tableau de signes." },
     { cle: 'boîte sans couvercle', enonce: "Dans un carton carré de 30 cm de côté, on découpe un carré de côté $x$ à chaque coin, puis on relève les bords pour former une boîte sans couvercle. Détermine $x$ pour que le volume de la boîte soit maximal, en justifiant la nature de l'extremum, et calcule ce volume." },
     { cle: 'affiche avec marges', enonce: "Une affiche contient une zone imprimée rectangulaire de 32 dm², entourée d'une marge de 1 dm à gauche et à droite et de 2 dm en haut et en bas. Détermine les dimensions de la zone imprimée qui rendent la surface totale de l'affiche minimale, et donne cette surface." },
+    { cle: "le plus proche", enonce: "Détermine le point $M$ de la courbe de $f(x) = \\sqrt{x}$ le plus proche du point $A(4{,}5\\,;0)$, et la distance $AM$." },
+    { cle: "le rectangle d’aire maximale est un carré", enonce: "Démontre qu'à périmètre fixé, le rectangle d'aire maximale est un carré. Démontre ensuite qu'une canette cylindrique de volume $V$ fixé utilise le moins de métal (fond, couvercle et paroi) quand sa hauteur vaut le double de son rayon." },
   ],
   'contexte-economique': [
     { cle: 'discret vs dérivée', enonce: "Le coût total de production de $q$ unités vaut $C(q) = q^2 + 4q + 100$ €. Calcule le coût marginal en $q = 10$ de deux façons, $C(11) - C(10)$ et $C'(10)$, puis l'écart en pourcentage entre les deux." },
-    { cle: 'bénéfice maximal', enonce: "Un produit se vend au prix $p(x) = 50 - x$ € l'unité pour $x$ unités vendues ; le coût total vaut $C(x) = x^2 + 10x + 20$ €. Détermine la quantité qui maximise le bénéfice, vérifie que la recette marginale égale alors le coût marginal, et calcule ce bénéfice maximal." },
-    { cle: 'coût moyen minimal', enonce: "Le coût total vaut $C(q) = q^3 - 6q^2 + 20q + 50$ (en centaines d'euros, $q$ en centaines d'unités). Établis l'équation qui donne le minimum du coût moyen $C_M(q) = \\dfrac{C(q)}{q}$, puis approche sa solution par dichotomie à partir de l'intervalle $[4\\,;5]$, en quatre étapes." },
+    { cle: 'bénéfice maximal, vérification', enonce: "Un produit se vend au prix $p(x) = 50 - x$ € l'unité pour $x$ unités vendues ; le coût total vaut $C(x) = x^2 + 10x + 20$ €. Détermine la quantité qui maximise le bénéfice, vérifie que la recette marginale égale alors le coût marginal, et calcule ce bénéfice maximal." },
+    { cle: 'coût moyen minimal, par dichotomie', enonce: "Le coût total vaut $C(q) = q^3 - 6q^2 + 20q + 50$ (en centaines d'euros, $q$ en centaines d'unités). Établis l'équation qui donne le minimum du coût moyen $C_M(q) = \\dfrac{C(q)}{q}$, puis approche sa solution par dichotomie à partir de l'intervalle $[4\\,;5]$, en quatre étapes." },
+    { cle: "Rm = Cm ; coût moyen minimal", enonce: "Démontre que, si le bénéfice $B(x) = R(x) - C(x)$ est maximal en une quantité $x$ intérieure à son domaine, alors $R'(x) = C'(x)$. Démontre ensuite que, si le coût moyen $C_M(q) = \\dfrac{C(q)}{q}$ est minimal en $q$, alors $C'(q) = C_M(q)$." },
   ],
   'extrema-bornes': [
     { cle: 'intervalle fermé', enonce: "Soit $f(t) = t^3 - 6t^2 + 9t + 2$ sur l'intervalle $[0\\,;5]$. Détermine le maximum absolu et le minimum absolu de $f$ sur cet intervalle, et les valeurs de $t$ où ils sont atteints." },
@@ -1500,6 +1516,7 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'position, vitesse, accélération', enonce: "Un mobile a pour position $s(t) = -t^2 + 8t$ (en m, $t$ en s, $t \\in [0\\,;8]$). Détermine sa vitesse et son accélération, l'instant où il s'arrête et sa position à cet instant, puis décris le sens de son mouvement." },
     { cle: 'distance de freinage', enonce: "Une voiture roulant à 14 m/s freine avec une décélération constante de 7 m/s² : sa position depuis le début du freinage vaut $s(t) = 14t - 3{,}5t^2$ (en m, $t$ en s). Détermine l'instant de l'arrêt et la distance de freinage, puis refais le calcul pour une vitesse initiale de 21 m/s. Que constates-tu ?" },
     { cle: 'atteindre une distance', enonce: "Une voiture déjà lancée a pour position $s(t) = t^2 + 4t$ (en m, $t$ en s) jusqu'à un repère situé à 45 m du départ ; elle roule ensuite à vitesse constante jusqu'à l'arrivée, à 115 m du départ. Quand franchit-elle le repère ? À quelle vitesse (en m/s et en km/h) ? Quand arrive-t-elle ?" },
+    { cle: "on s’arrête après v₀² / (2a)", enonce: "Une voiture roule à la vitesse $v_0$ (en m/s) et freine avec une décélération constante $a > 0$ (en m/s²) : sa position vaut $s(t) = v_0\\,t - \\dfrac{a}{2}\\,t^2$. Démontre que sa distance de freinage vaut $\\dfrac{v_0^2}{2a}$, puis explique ce que devient cette distance quand la vitesse double." },
   ],
   },
   'fonctions-logarithmes': {

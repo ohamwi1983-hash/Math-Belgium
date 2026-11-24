@@ -174,6 +174,17 @@ export const deriveesApplications: ChapterContent = {
           result: { tag: 'passer à la limite', text: '$f\'(2) = \\displaystyle\\lim_{h \\to 0} \\dfrac{-3}{1+h} = -3$' },
         },
         {
+          kind: 'exemple',
+          badge: 'f′(a) par la définition, avec une racine (expression conjuguée)',
+          formula: '$f(x) = \\sqrt{x+5}$, a = 4. Calcule f′(4) par la définition.',
+          steps: [
+            { tag: 'f(4) et f(4+h)', text: '$f(4) = \\sqrt{9} = 3$ ; $f(4+h) = \\sqrt{9+h}$' },
+            { tag: 'taux d\'accroissement — forme 0⁄0 : multiplier par l\'expression conjuguée', text: '$\\dfrac{\\sqrt{9+h}-3}{h} = \\dfrac{(\\sqrt{9+h}-3)(\\sqrt{9+h}+3)}{h\\,(\\sqrt{9+h}+3)}$' },
+            { tag: 'simplifier par h', text: '$= \\dfrac{(9+h)-9}{h\\,(\\sqrt{9+h}+3)} = \\dfrac{1}{\\sqrt{9+h}+3}$ (valable pour h≠0)' },
+          ],
+          result: { tag: 'passer à la limite', text: '$f\'(4) = \\displaystyle\\lim_{h \\to 0} \\dfrac{1}{\\sqrt{9+h}+3} = \\dfrac{1}{6}$. Contrôle par la règle de la chaîne (section 3) : $f\'(x) = \\dfrac{1}{2\\sqrt{x+5}}$, d\'où $f\'(4) = \\dfrac{1}{6}$.' },
+        },
+        {
           kind: 'historique',
           titre: 'Le vrai premier inventeur de la dérivée ?',
           text:
@@ -307,6 +318,48 @@ export const deriveesApplications: ChapterContent = {
           ],
         },
         {
+          kind: 'exemple',
+          badge: 'aucune tangente horizontale (Δ < 0)',
+          formula: '$f(x) = x^3-3x^2+6x$. La courbe de f a-t-elle des tangentes horizontales ?',
+          steps: [
+            { tag: 'dériver', text: '$f\'(x) = 3x^2-6x+6 = 3(x^2-2x+2)$' },
+            { tag: 'résoudre f′(x) = 0 — discriminant', text: '$x^2-2x+2 = 0$ : $\\Delta = 4-8 = -4 < 0$, aucune solution réelle' },
+            { tag: 'signe de f′', text: '$x^2-2x+2 = (x-1)^2+1 > 0$, donc $f\'(x) > 0$ pour tout x' },
+          ],
+          result: { tag: 'conclusion', text: 'aucune tangente horizontale : $f\'$ ne s\'annule jamais. La pente la plus faible vaut $f\'(1) = 3$, et f est croissante sur $\\mathbb{R}$.' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'lire f(a) et f′(a) sur une tangente tracée',
+          formula: 'Le graphique ci-dessous montre la courbe d\'une fonction f et sa tangente au point A d\'abscisse 1 (la formule de f n\'est pas donnée). Lis $f(1)$ et $f\'(1)$, puis écris l\'équation de la tangente.',
+          steps: [
+            { tag: 'f(1) — ordonnée du point A de la courbe', text: '$A(1\\,;2)$ est sur la courbe : $f(1) = 2$' },
+            { tag: 'f′(1) — pente de la tangente, entre deux de ses points pris sur des nœuds', text: '$A(1\\,;2)$ et $B(3\\,;1)$ : $f\'(1) = \\dfrac{\\Delta y}{\\Delta x} = \\dfrac{1-2}{3-1} = -\\dfrac{1}{2}$' },
+            { tag: 'équation de la tangente', text: '$y = 2-\\dfrac{1}{2}(x-1)$, soit $y = -\\dfrac{1}{2}x+\\dfrac{5}{2}$' },
+          ],
+          result: { tag: 'piège', text: '$f\'(1)$ n\'est pas l\'ordonnée du point (c\'est $f(1) = 2$) : c\'est une pente, le quotient $\\dfrac{\\Delta y}{\\Delta x}$ lu sur la tangente — négatif ici, car la tangente descend.' },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => (x * x) / 4 - x + 11 / 4, tone: 'accent' },
+              { fn: (x) => 2.5 - 0.5 * x, tone: 'good', xMin: -1, xMax: 5 },
+            ],
+            xMin: -1.5,
+            xMax: 5.5,
+            xTicks: [-1, 1, 2, 3, 4, 5],
+            yTicks: [1, 2, 3, 4],
+            grid: true,
+            fixedYRange: { min: -0.6, max: 4.8 },
+            points: [
+              { x: 1, y: 2, label: 'A', tone: 'accent', labelPos: 'above' },
+              { x: 3, y: 1, label: 'B', tone: 'good', labelPos: 'below' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption: 'La courbe de f (orange) et sa tangente en A (verte). $f(1)$ se lit sur la courbe ; $f\'(1)$ est la pente de la tangente, lue entre A et B : 1 carreau vers le bas pour 2 carreaux vers la droite.',
+          },
+        },
+        {
           kind: 'attention',
           label: 'Tangente ≠ sécante',
           text:
@@ -373,6 +426,17 @@ export const deriveesApplications: ChapterContent = {
             'racine (au moins) double : tu peux donc diviser par $(x-a)^2$. Le quotient donne les ' +
             'autres points communs. Un point commun q n\'est un point de tangence que si, en plus, ' +
             '$f\'(q)$ est égal à la pente de la droite.',
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — au point de contact a, a est racine double de f(x) − t(x)',
+          blocks: [
+            { kind: 'para', text: 'Soit f une fonction polynomiale et $t(x) = f(a)+f\'(a)(x-a)$ sa tangente au point d\'abscisse a. Pose $g(x) = f(x)-t(x)$ : c\'est encore un polynôme.' },
+            { kind: 'para', text: '**Étape 1 — a est racine de g.** $g(a) = f(a)-f(a)-f\'(a) \\cdot 0 = 0$ : on peut factoriser g par $(x-a)$, $g(x) = (x-a)\\,Q(x)$, où Q est un polynôme.' },
+            { kind: 'para', text: '**Étape 2 — dériver g de deux façons.** D\'une part, $g\'(x) = f\'(x)-f\'(a)$, donc $g\'(a) = 0$. D\'autre part, par la règle du produit, $g\'(x) = Q(x)+(x-a)\\,Q\'(x)$, donc $g\'(a) = Q(a)$.' },
+            { kind: 'para', text: '**Étape 3 — conclure.** $Q(a) = 0$ : on factorise encore Q par $(x-a)$, $Q(x) = (x-a)\\,R(x)$, d\'où $f(x)-t(x) = (x-a)^2\\,R(x)$. La racine a est (au moins) double.' },
+            { kind: 'para', text: 'C\'est ce qu\'utilise l\'exemple de la double tangence : $x^4-2x^2+1 = (x-1)^2(x+1)^2$, racine double en 1 (point de contact) et racine double en $-1$ (second point de tangence).' },
+          ],
         },
         { kind: 'subheading', text: 'La tangente, meilleure approximation de la courbe' },
         {
@@ -558,6 +622,16 @@ export const deriveesApplications: ChapterContent = {
             'de f\'(a) dit si la grandeur augmente (f\'(a) > 0) ou diminue (f\'(a) < 0) à l\'instant a ; ' +
             'f\'(a) n\'est ni la valeur f(a) de la grandeur, ni sa variation moyenne sur un intervalle.',
         },
+        {
+          kind: 'exemple',
+          badge: 'unité et signe d\'un taux de variation',
+          formula: 'La température d\'une serre vaut $T(t) = -0{,}5t^2+4t+12$ (en °C, t en heures depuis 8 h, $t \\in [0\\,;8]$). Calcule le taux de variation moyen entre $t = 2$ et $t = 4$, puis $T\'(3)$ et $T\'(6)$, avec leur unité, et interprète leur signe.',
+          steps: [
+            { tag: 'taux moyen entre t = 2 et t = 4', text: '$T(2) = -2+8+12 = 18$ ; $T(4) = -8+16+12 = 20$ ; $\\dfrac{T(4)-T(2)}{4-2} = \\dfrac{2}{2} = 1$ °C/h' },
+            { tag: 'taux instantanés', text: '$T\'(t) = -t+4$ : $T\'(3) = 1$ °C/h et $T\'(6) = -2$ °C/h' },
+          ],
+          result: { tag: 'interprétation', text: 'à 11 h ($t = 3$), la température monte d\'environ 1 °C par heure ; à 14 h ($t = 6$), elle baisse d\'environ 2 °C par heure. $T\'(6) = -2$ n\'est ni la température ($T(6) = 18$ °C), ni une variation moyenne.' },
+        },
         { kind: 'subheading', text: 'Dérivées de référence' },
         {
           kind: 'featureTable',
@@ -619,6 +693,55 @@ export const deriveesApplications: ChapterContent = {
             '**Quotient** — $(u/v)\' = \\dfrac{u\'v - uv\'}{v^2}$ (l\'ordre compte dans le numérateur : u\' EN PREMIER).',
             '**Composée (chaîne)** — si $f(x)=g(u(x))$, alors $f\'(x) = u\'(x) \\cdot g\'(u(x))$. Dérive « de ' +
               'l\'extérieur vers l\'intérieur », puis multiplie par la dérivée de l\'intérieur.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — (k·u)′ = k·u′ et (u + v)′ = u′ + v′',
+          blocks: [
+            { kind: 'para', text: 'Soit u et v deux fonctions dérivables en x, et k un réel.' },
+            { kind: 'para', text: '**a.** Le taux d\'accroissement de $k \\cdot u$ vaut $\\dfrac{k\\,u(x+h)-k\\,u(x)}{h} = k \\cdot \\dfrac{u(x+h)-u(x)}{h}$, qui tend vers $k \\cdot u\'(x)$ quand $h \\to 0$. Donc $(k \\cdot u)\' = k \\cdot u\'$.' },
+            { kind: 'para', text: '**b.** Le taux d\'accroissement de $u+v$ vaut $\\dfrac{\\big(u(x+h)+v(x+h)\\big)-\\big(u(x)+v(x)\\big)}{h}$, qu\'on regroupe en $\\dfrac{u(x+h)-u(x)}{h}$ $+\\,\\dfrac{v(x+h)-v(x)}{h}$.' },
+            { kind: 'para', text: 'La limite d\'une somme est la somme des limites : quand $h \\to 0$, on obtient $u\'(x)+v\'(x)$. Donc $(u+v)\' = u\'+v\'$.' },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la dérivée d’un produit, à partir de la définition',
+          blocks: [
+            { kind: 'para', text: 'Soit $f = u \\cdot v$, avec u et v dérivables en x. On cherche la limite de $\\dfrac{u(x+h)\\,v(x+h)-u(x)\\,v(x)}{h}$.' },
+            { kind: 'para', text: '**L\'astuce : ajouter et retirer** $u(x)\\,v(x+h)$ au numérateur, puis regrouper : $u(x+h)\\,v(x+h)-u(x)\\,v(x)$ $= \\big(u(x+h)-u(x)\\big)\\,v(x+h)$ $+\\,u(x)\\,\\big(v(x+h)-v(x)\\big)$.' },
+            { kind: 'para', text: 'On divise par h : $\\dfrac{f(x+h)-f(x)}{h} = \\dfrac{u(x+h)-u(x)}{h} \\cdot v(x+h)$ $+\\,u(x) \\cdot \\dfrac{v(x+h)-v(x)}{h}$.' },
+            { kind: 'para', text: 'Quand $h \\to 0$ : le premier quotient tend vers $u\'(x)$, le second vers $v\'(x)$, et $v(x+h)$ tend vers $v(x)$, car v, dérivable, est continue (section 4). Donc $(uv)\'(x) = u\'(x)\\,v(x)+u(x)\\,v\'(x)$.' },
+            { kind: 'para', text: 'Pourquoi pas $u\' \\cdot v\'$ ? Quand x avance de h, l\'aire d\'un rectangle de côtés u et v gagne deux bandes, $v \\cdot \\Delta u$ et $u \\cdot \\Delta v$, plus un petit coin $\\Delta u \\cdot \\Delta v$, négligeable devant h quand h tend vers 0 (atelier « le rectangle qui grandit »).' },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — (x²)′ = 2x, (x³)′ = 3x², puis (xⁿ)′ = n·xⁿ⁻¹',
+          blocks: [
+            { kind: 'para', text: '**a.** $(x+h)^2-x^2 = 2xh+h^2$ : le taux d\'accroissement vaut $2x+h$, qui tend vers $2x$. Donc $(x^2)\' = 2x$.' },
+            { kind: 'para', text: '**b.** $(x+h)^3-x^3 = 3x^2h+3xh^2+h^3$ : le taux vaut $3x^2+3xh+h^2$, qui tend vers $3x^2$. Donc $(x^3)\' = 3x^2$.' },
+            { kind: 'para', text: '**c. De proche en proche.** Suppose que $(x^n)\' = n\\,x^{n-1}$ pour un entier $n \\geq 1$ (c\'est vrai pour $n = 1$ : $(x)\' = 1$). Comme $x^{n+1} = x \\cdot x^n$, la règle du produit donne $(x^{n+1})\' = 1 \\cdot x^n+x \\cdot n\\,x^{n-1} = (n+1)\\,x^n$.' },
+            { kind: 'para', text: 'La formule passe donc d\'un entier n au suivant : vraie pour $n = 1$, elle l\'est pour 2, puis pour 3, puis pour 4… donc pour tout entier $n \\geq 1$. C\'est un raisonnement par récurrence.' },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la dérivée d’un quotient, à partir de celle de 1⁄v',
+          blocks: [
+            { kind: 'para', text: '**a. La dérivée de** $\\dfrac{1}{v}$, avec v dérivable et $v(x) \\neq 0$. Le taux d\'accroissement vaut $\\dfrac{1}{h}\\left(\\dfrac{1}{v(x+h)}-\\dfrac{1}{v(x)}\\right) = \\dfrac{v(x)-v(x+h)}{h\\,v(x)\\,v(x+h)}$ $= -\\dfrac{v(x+h)-v(x)}{h} \\cdot \\dfrac{1}{v(x)\\,v(x+h)}$.' },
+            { kind: 'para', text: 'Quand $h \\to 0$, il tend vers $-v\'(x) \\cdot \\dfrac{1}{v(x)^2}$ : $\\left(\\dfrac{1}{v}\\right)\' = -\\dfrac{v\'}{v^2}$ (la ligne $\\dfrac{1}{u}$ du tableau de la règle de la chaîne, plus bas).' },
+            { kind: 'para', text: '**b. Le quotient est un produit** : $\\dfrac{u}{v} = u \\cdot \\dfrac{1}{v}$. La règle du produit donne $\\left(\\dfrac{u}{v}\\right)\' = u\' \\cdot \\dfrac{1}{v}+u \\cdot \\left(-\\dfrac{v\'}{v^2}\\right)$ $= \\dfrac{u\'v}{v^2}-\\dfrac{uv\'}{v^2} = \\dfrac{u\'v-uv\'}{v^2}$.' },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — (tan x)′ = 1 / cos² x',
+          blocks: [
+            { kind: 'para', text: '$\\tan x = \\dfrac{\\sin x}{\\cos x}$, pour $\\cos x \\neq 0$. Avec $u = \\sin x$, $u\' = \\cos x$, $v = \\cos x$ et $v\' = -\\sin x$, la règle du quotient donne :' },
+            { kind: 'para', text: '$(\\tan x)\' = \\dfrac{\\cos x \\cdot \\cos x-\\sin x \\cdot (-\\sin x)}{\\cos^2 x} = \\dfrac{\\cos^2 x+\\sin^2 x}{\\cos^2 x} = \\dfrac{1}{\\cos^2 x}$, car $\\cos^2 x+\\sin^2 x = 1$.' },
+            { kind: 'para', text: 'En coupant la fraction en deux, $\\dfrac{\\cos^2 x}{\\cos^2 x}+\\dfrac{\\sin^2 x}{\\cos^2 x}$, on obtient aussi $(\\tan x)\' = 1+\\tan^2 x$.' },
           ],
         },
         { kind: 'subheading', text: 'La règle de la chaîne : cas particuliers courants' },
@@ -900,6 +1023,17 @@ export const deriveesApplications: ChapterContent = {
             'extremum, $f(x)=x^3$ en $x=0$).',
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — en un extremum intérieur où f est dérivable, f′(a) = 0',
+          blocks: [
+            { kind: 'para', text: 'Suppose que f admet un maximum local en a, intérieur à son domaine, et que f est dérivable en a. Pour h assez proche de 0, $f(a+h) \\leq f(a)$, donc $f(a+h)-f(a) \\leq 0$.' },
+            { kind: 'para', text: '**À droite** ($h > 0$) : un nombre négatif ou nul divisé par un nombre positif, donc $\\dfrac{f(a+h)-f(a)}{h} \\leq 0$. Sa limite quand $h \\to 0^+$ vérifie donc $f\'(a) \\leq 0$.' },
+            { kind: 'para', text: '**À gauche** ($h < 0$) : on divise par un nombre négatif, donc $\\dfrac{f(a+h)-f(a)}{h} \\geq 0$. Sa limite quand $h \\to 0^-$ vérifie donc $f\'(a) \\geq 0$.' },
+            { kind: 'para', text: 'f est dérivable en a : ces deux limites sont le même nombre $f\'(a)$, qui vérifie $f\'(a) \\leq 0$ et $f\'(a) \\geq 0$. Donc $f\'(a) = 0$. Pour un minimum local, même raisonnement, inégalités inversées.' },
+            { kind: 'para', text: 'Les deux hypothèses comptent : à une borne d\'un intervalle fermé (section 10), un seul côté existe ; en un point anguleux comme $|x|$ en 0, les deux limites diffèrent et $f\'(0)$ n\'existe pas.' },
+          ],
+        },
+        {
           kind: 'astuce',
           label: 'Lire d\'abord f\', puis seulement f\'\'',
           text:
@@ -924,6 +1058,16 @@ export const deriveesApplications: ChapterContent = {
               'avec une tangente horizontale, où f\'(a) = 0.',
             '**Dérivable ⟹ continue** — si f\'(a) existe, la courbe ne fait pas de saut en a. ' +
               'L\'inverse est faux : $|x|$ est continue en 0 (pas de saut) mais n\'y est pas dérivable.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — une fonction dérivable en a est continue en a',
+          blocks: [
+            { kind: 'para', text: 'Suppose que f est dérivable en a. Pour $h \\neq 0$, écris l\'écart entre $f(a+h)$ et $f(a)$ comme un produit : $f(a+h)-f(a) = \\dfrac{f(a+h)-f(a)}{h} \\cdot h$.' },
+            { kind: 'para', text: 'Quand $h \\to 0$, le premier facteur tend vers le nombre réel $f\'(a)$ et le second vers 0 : $\\displaystyle\\lim_{h \\to 0} \\big(f(a+h)-f(a)\\big) = f\'(a) \\cdot 0 = 0$.' },
+            { kind: 'para', text: 'Donc $\\displaystyle\\lim_{h \\to 0} f(a+h) = f(a)$ : la courbe ne fait pas de saut en a, f est continue en a.' },
+            { kind: 'para', text: 'La réciproque est fausse : $|x|$ est continue en 0, mais n\'y est pas dérivable (point anguleux). En revanche, une fonction qui fait un saut en a n\'y est jamais dérivable.' },
           ],
         },
         {
@@ -1396,6 +1540,18 @@ export const deriveesApplications: ChapterContent = {
             'une tangente de pente m en $x_0$ donne $f\'(x_0)=m$ ; un point d\'inflexion en $x_1$ donne ' +
             '$f\'\'(x_1)=0$. En $x=0$ tout se lit vite : $f(0)=d$ et $f\'(0)=c$. On résout le système, ' +
             'puis on VÉRIFIE : une tangente horizontale n\'est un extremum que si $f\'$ y change de signe.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'déterminer une fonction par quatre conditions',
+          formula: 'Détermine $f(x) = ax^3+bx^2+cx+d$ sachant que sa courbe passe par $A(0\\,;2)$, que la tangente en A a pour pente $-3$, que la courbe a un point d\'inflexion en $x = 1$ et qu\'elle passe par $B(2\\,;0)$.',
+          steps: [
+            { tag: 'dérivées', text: '$f\'(x) = 3ax^2+2bx+c$ ; $f\'\'(x) = 6ax+2b$' },
+            { tag: 'traduire chaque condition par une équation', text: '$f(0) = d = 2$ ; $f\'(0) = c = -3$ ; $f\'\'(1) = 6a+2b = 0$ ; $f(2) = 8a+4b-6+2 = 0$' },
+            { tag: 'résoudre le système', text: '$b = -3a$, puis $8a-12a = 4 \\iff a = -1$, et $b = 3$' },
+            { tag: 'vérifier le point d\'inflexion', text: '$f\'\'(x) = -6x+6$ change bien de signe en 1 (+ puis −) ; $f\'(x) = -3x^2+6x-3 = -3(x-1)^2$ : la tangente y est horizontale, sans extremum' },
+          ],
+          result: { tag: 'fonction trouvée', text: '$f(x) = -x^3+3x^2-3x+2$ ; contrôle : $f(2) = -8+12-6+2 = 0$ ✓' },
         },
         {
           kind: 'entrainement',
@@ -1962,6 +2118,17 @@ export const deriveesApplications: ChapterContent = {
             'd\'une vraie canette ($\\dfrac{h}{r} \\approx 3{,}5$). Un modèle plus réaliste change la réponse.',
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — à périmètre fixé, le rectangle d’aire maximale est un carré ; la canette optimale a h = 2r',
+          blocks: [
+            { kind: 'para', text: '**a. Rectangle de périmètre P fixé.** Avec x la largeur, la longueur vaut $y = \\dfrac{P}{2}-x$, pour $x \\in \\left]0\\,;\\dfrac{P}{2}\\right[$. L\'aire vaut $A(x) = x\\left(\\dfrac{P}{2}-x\\right) = \\dfrac{P}{2}\\,x-x^2$.' },
+            { kind: 'para', text: '$A\'(x) = \\dfrac{P}{2}-2x$ s\'annule en $x = \\dfrac{P}{4}$ ; elle est positive avant, négative après : maximum. Alors $y = \\dfrac{P}{2}-\\dfrac{P}{4} = \\dfrac{P}{4} = x$ : le rectangle est un carré, quel que soit P.' },
+            { kind: 'para', text: '**b. Canette de volume V fixé.** La contrainte $\\pi r^2 h = V$ donne $h = \\dfrac{V}{\\pi r^2}$. Aire de métal (fond, couvercle et paroi) : $A(r) = 2\\pi r^2+2\\pi r h = 2\\pi r^2+\\dfrac{2V}{r}$, pour $r > 0$.' },
+            { kind: 'para', text: '$A\'(r) = 4\\pi r-\\dfrac{2V}{r^2} = \\dfrac{4\\pi r^3-2V}{r^2}$ a le signe de $4\\pi r^3-2V$ : négative, puis positive. Minimum quand $r^3 = \\dfrac{V}{2\\pi}$.' },
+            { kind: 'para', text: 'Alors $h = \\dfrac{V}{\\pi r^2} = \\dfrac{2\\pi r^3}{\\pi r^2} = 2r$ : la hauteur vaut le diamètre, pour tout volume V (330 cm³ donne $r \\approx 3{,}75$ cm, comme dans l\'application).' },
+          ],
+        },
+        {
           kind: 'entrainement',
           title: 'Optimisation géométrique',
           generatorId: '5gen32',
@@ -1983,6 +2150,36 @@ export const deriveesApplications: ChapterContent = {
             'Une longueur qui contient $\\sqrt{u}$ se dérive par la règle de la chaîne : $\\left(\\sqrt{u}\\right)\'=\\dfrac{u\'}{2\\sqrt{u}}$.',
             'Le **domaine réaliste** décide : si le zéro $x_0$ de la dérivée sort du domaine (abscisse négative alors que x ≥ 0, par exemple), la dérivée garde un seul signe et le minimum est à une **borne**. Compare toujours la valeur trouvée aux valeurs aux bornes.',
           ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'point d’une courbe le plus proche d’un point',
+          formula: 'Quel point M de la courbe de $f(x) = \\sqrt{x}$ est le plus proche du point $A(4{,}5\\,;0)$ ?',
+          steps: [
+            { tag: 'distance au carré, en fonction de x seul — M(x ; √x), avec x ≥ 0', text: '$D(x) = AM^2 = (x-4{,}5)^2+(\\sqrt{x})^2 = x^2-9x+20{,}25+x = x^2-8x+20{,}25$' },
+            { tag: 'dériver et résoudre D′(x) = 0', text: '$D\'(x) = 2x-8 = 0 \\iff x = 4$' },
+            { tag: 'nature et borne', text: '$D\' < 0$ sur $[0\\,;4[$ et $D\' > 0$ après : minimum en $x = 4$ ; à la borne, $D(0) = 20{,}25$ dépasse $D(4) = 4{,}25$' },
+          ],
+          result: { tag: 'conclusion', text: '$M(4\\,;2)$, à la distance $AM = \\sqrt{4{,}25} = \\dfrac{\\sqrt{17}}{2} \\approx 2{,}06$. Remarque : (AM), de pente $-4$, est perpendiculaire à la tangente en M, de pente $f\'(4) = \\dfrac{1}{4}$.' },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => Math.sqrt(Math.max(0, x)), tone: 'accent', xMin: 0, xMax: 7 },
+              { fn: (x) => 2 - 4 * (x - 4), tone: 'good', xMin: 4, xMax: 4.5 },
+            ],
+            xMin: -0.5,
+            xMax: 7,
+            xTicks: [1, 2, 3, 4, 5, 6],
+            yTicks: [1, 2],
+            fixedYRange: { min: -0.6, max: 3 },
+            points: [
+              { x: 4.5, y: 0, label: 'A(4,5 ; 0)', tone: 'bad', labelPos: 'right' },
+              { x: 4, y: 2, label: 'M(4 ; 2)', tone: 'good', labelPos: 'above' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption: 'La courbe de $f(x) = \\sqrt{x}$ et le segment [AM], le plus court entre A et la courbe.',
+          },
         },
         {
           kind: 'entrainement',
@@ -2126,6 +2323,16 @@ export const deriveesApplications: ChapterContent = {
             'Fais glisser x pour voir Rm et Cm se croiser au bénéfice maximal. Change le ' +
             'prix de départ a : l\'optimum $x^* = \\dfrac{a - 10}{4}$ se déplace. Change le coût fixe c ' +
             ': la courbe de B descend, mais $x^*$ ne bouge pas.',
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — bénéfice maximal : Rm = Cm ; coût moyen minimal : coût marginal = coût moyen',
+          blocks: [
+            { kind: 'para', text: '**a.** Le bénéfice $B(x) = R(x)-C(x)$ est dérivable. En un maximum intérieur, $B\'(x) = 0$ (section 4) : $R\'(x)-C\'(x) = 0$, donc $R\'(x) = C\'(x)$ — la recette marginale égale le coût marginal.' },
+            { kind: 'para', text: '**b.** Le coût moyen $C_M(q) = \\dfrac{C(q)}{q}$ est un quotient. Avec $u = C$ et $v = q$, la règle du quotient donne $C_M\'(q) = \\dfrac{C\'(q) \\cdot q-C(q) \\cdot 1}{q^2}$.' },
+            { kind: 'para', text: 'En un minimum intérieur, $C_M\'(q) = 0$, donc $q\\,C\'(q) = C(q)$, c\'est-à-dire $C\'(q) = \\dfrac{C(q)}{q} = C_M(q)$ : le coût marginal égale le coût moyen.' },
+            { kind: 'para', text: 'Dans les deux cas, l\'égalité n\'est qu\'une condition nécessaire : la nature de l\'extremum se vérifie par le signe de $B\'$ ou de $C_M\'$.' },
+          ],
         },
         { kind: 'subheading', text: 'Coût moyen minimal — et la dichotomie pour l\'approcher' },
         {
@@ -2498,6 +2705,16 @@ export const deriveesApplications: ChapterContent = {
               'vitesse multipliée par 1,5 → distance de freinage multipliée par $2{,}25 = 1{,}5^2$ : elle ' +
               'est proportionnelle au **carré** de la vitesse (sans compter la distance parcourue pendant le temps de réaction).',
           },
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — à décélération constante, on s’arrête après v₀² / (2a) : proportionnel au carré de la vitesse',
+          blocks: [
+            { kind: 'para', text: 'Une voiture roule à la vitesse $v_0$ (en m/s) et freine avec une décélération constante $a > 0$ (en m/s²). Depuis le début du freinage, sa position vaut $s(t) = v_0\\,t-\\dfrac{a}{2}\\,t^2$.' },
+            { kind: 'para', text: 'Vitesse : $v(t) = s\'(t) = v_0-at$ ; accélération : $s\'\'(t) = -a$, constante. La voiture s\'arrête quand $v(t) = 0$, en $t = \\dfrac{v_0}{a}$.' },
+            { kind: 'para', text: 'Distance de freinage : $s\\left(\\dfrac{v_0}{a}\\right) = v_0 \\cdot \\dfrac{v_0}{a}-\\dfrac{a}{2} \\cdot \\dfrac{v_0^2}{a^2} = \\dfrac{v_0^2}{a}-\\dfrac{v_0^2}{2a} = \\dfrac{v_0^2}{2a}$.' },
+            { kind: 'para', text: 'Elle est proportionnelle au carré de $v_0$ : vitesse × 1,5 → distance × 2,25 ; vitesse doublée → distance quadruplée. Contrôle avec l\'exemple : $\\dfrac{14^2}{2 \\cdot 7} = 14$ m et $\\dfrac{21^2}{2 \\cdot 7} = 31{,}5$ m.' },
+          ],
         },
         {
           kind: 'atelier',
