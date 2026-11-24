@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { correctionDetailleeVitessePosition, lettreEcranVitessePosition } from "./generateurs5e/vitessePosition/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceVitessePosition } from "./generateurs5e/vitessePosition/index";
@@ -175,6 +178,7 @@ export function App5gen35() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeVitessePosition(exercice), lettreEcranVitessePosition(exercice, etat.phase))} />,
         reponseAttendue: (
           <span className="equation-box-termes">
             {formatReponseAttenduePhaseLatex(exercice, etat.phase).map((frag, i) => (

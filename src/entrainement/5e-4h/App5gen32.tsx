@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { correctionDetailleeOptimisation, lettreEcranOptimisation } from "./generateurs5e/optimisationGeometrique/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOptimisation } from "./generateurs5e/optimisationGeometrique/index";
@@ -168,6 +171,7 @@ export function App5gen32() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeOptimisation(exercice), lettreEcranOptimisation(exercice, etat.phase))} />,
         reponseAttendue: <Katex expression={formatReponseAttendueEcranLatex(exercice, etat.phase)} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

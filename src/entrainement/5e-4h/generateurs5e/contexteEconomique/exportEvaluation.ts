@@ -1,17 +1,19 @@
-import type { ExerciceContexteEconomique, ExerciceContexteEconomiqueBonus } from "../../core5e/contexteEconomique.types";
+import type { ExerciceContexteEconomique } from "../../core5e/contexteEconomique.types";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { consigneEcranRiche, consigneGenerale, formatNombreTexte, formatReponseAttenduePhaseLatex, formatTermesDonneesLatex, texteAideNiveau1 } from "../../ui5e/formatContexteEconomique";
+import { consigneEcranRiche, consigneGenerale, formatNombreTexte, formatReponseAttenduePhaseLatex, formatTermesDonneesLatex } from "../../ui5e/formatContexteEconomique";
 import { ordreEcransContexteEconomique, type EcranContexteEconomique } from "../../moteur5e/typesContexteEconomique";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeContexteEconomique } from "./corrigeDetaille";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceContexteEconomique } from "./index";
 import { profilContexteEconomique } from "../profilsEvaluationDerivees31-33";
 
@@ -162,91 +164,6 @@ function enoncePapierContexteEconomique(exercice: ExerciceContexteEconomique): E
 // Corrigé détaillé.
 // ============================================================================
 
-const STYLE_TABLE = 'style="border-collapse:collapse;margin:4px 0;font-size:13px;font-family:Archivo, Arial, Helvetica, sans-serif"';
-const STYLE_CASE = 'style="border:1px solid #868e96;padding:3px 8px;text-align:center"';
-const STYLE_ENTETE = 'style="border:1px solid #868e96;padding:3px 8px;text-align:center;background:#f1f3f5"';
-
-function formatNombreLatexLocal(v: number): string {
-  return nombreTexte(v).replace(",", "{,}").replace("−", "-");
-}
-
-function nombreTexte(v: number): string {
-  return formatNombreTexte(v);
-}
-
-function tableauDichotomieHtml(exercice: ExerciceContexteEconomiqueBonus): string {
-  const lignes = exercice.iterations.map((it, i) => {
-    const garde = it.garderCote === "gauche" ? [it.gauche, it.milieu] : [it.milieu, it.droite];
-    const cases = [`${i + 1}`, `[${nombreTexte(it.gauche)} ; ${nombreTexte(it.droite)}]`, nombreTexte(it.milieu), it.signeMilieu > 0 ? "+" : "−", `[${nombreTexte(garde[0])} ; ${nombreTexte(garde[1])}]`];
-    return `<tr>${cases.map((c) => `<td ${STYLE_CASE}>${c}</td>`).join("")}</tr>`;
-  });
-  const tetes = ["Étape", "Intervalle", "Milieu m", "Signe de P(m)", "Intervalle gardé"].map((t) => `<th ${STYLE_ENTETE}>${t}</th>`).join("");
-  return `<table ${STYLE_TABLE}><thead><tr>${tetes}</tr></thead><tbody>${lignes.join("")}</tbody></table>`;
-}
-
-function methode(exercice: ExerciceContexteEconomique, ecran: EcranContexteEconomique): FragmentConsigne[] {
-  const a = texteAideNiveau1(ecran, exercice);
-  return [...fragmentsRiches(a.texte), ...(a.latex ? [texte(" "), latex(a.latex)] : [])];
-}
-
-function lignesEtape(exercice: ExerciceContexteEconomique, ecran: EcranContexteEconomique): EtapeCorrection[] {
-  const sq = lettreDe(exercice, ecran);
-  const l = (label: string, fragments: FragmentConsigne[], figureHtml?: string): EtapeCorrection => ({ label, sousQuestion: sq, fragments, ...(figureHtml ? { figureHtml } : {}) });
-  const valeurs = (suffixe = ".") => [...joindre(attendu(exercice, ecran)), texte(suffixe)];
-  switch (ecran) {
-    case "coutMarginalDiscret":
-      return [l("Calcul", valeurs(" €."))];
-    case "deriveeSymbolique":
-      return [l("Méthode", methode(exercice, ecran)), l("Calcul", valeurs())];
-    case "deriveeValeur":
-      return [l("Calcul", valeurs(" €."))];
-    case "comparaisonEcart":
-      return [l("Méthode", methode(exercice, ecran)), l("Calcul", valeurs()), l("Piège", [texte("L'écart en pourcentage se rapporte à l'estimation par la dérivée, pas à l'estimation par différence.")])];
-    case "extremum": {
-      const coutMoyen = exercice.famille === "A" && exercice.minimum.grandeur === "coutMoyen";
-      return [
-        l("Méthode", methode(exercice, ecran)),
-        l("Conclusion", valeurs(" €.")),
-        l("Piège", coutMoyen ? [texte("On dérive le coût MOYEN (le coût total divisé par q), pas le coût total, qui croît toujours.")] : [texte("On dérive le coût marginal C′ (donc C″ = 0), pas le coût total, qui croît toujours.")]),
-      ];
-    }
-    case "recetteTotale":
-    case "marginales":
-    case "beneficeFormule":
-    case "beneficeDerivee":
-      return [l("Méthode", methode(exercice, ecran)), l("Calcul", valeurs())];
-    case "resoudreEgaliteMarginales":
-      return [l("Méthode", methode(exercice, ecran)), l("Calcul", valeurs()), l("Piège", [texte("Une quantité produite est positive : la solution négative est rejetée.")])];
-    case "tableauSigneBenefice":
-      return [l("Méthode", [texte("B′ positive avant la quantité retenue et négative après : B croît puis décroît.")]), l("Conclusion", valeurs())];
-    case "confirmationCoherence":
-      return [];
-    case "beneficeMaximum":
-      return [l("Méthode", methode(exercice, ecran)), l("Conclusion", [...joindre(attendu(exercice, ecran)), texte(" centaines d'euros.")]), l("Piège", [texte("On remplace x dans B(x), pas dans B′(x).")])];
-    case "poserEquationReduite":
-      return [l("Méthode", methode(exercice, ecran)), l("Calcul", valeurs())];
-    case "iteration0":
-    case "iteration1":
-    case "iteration2":
-      return [l("Calcul", valeurs())];
-    case "iteration3":
-      return [l("Calcul", valeurs(), exercice.famille === "bonus" ? tableauDichotomieHtml(exercice) : undefined)];
-    case "racineApprochee": {
-      if (exercice.famille !== "bonus") return [l("Conclusion", valeurs())];
-      const der = exercice.iterations[exercice.iterations.length - 1];
-      const [g, d] = der.garderCote === "gauche" ? [der.gauche, der.milieu] : [der.milieu, der.droite];
-      return [
-        l("Méthode", methode(exercice, ecran)),
-        l("Conclusion", [latex(`q\\approx\\dfrac{${formatNombreLatexLocal(g)}+${formatNombreLatexLocal(d)}}{2}=${formatNombreLatexLocal((g + d) / 2)}`), texte(" (la solution vaut environ "), ...joindre(attendu(exercice, ecran).map((t) => t.replace("q\\approx", ""))), texte(")."), ]),
-      ];
-    }
-  }
-}
-
-function correctionDetailleeContexteEconomique(exercice: ExerciceContexteEconomique): EtapeCorrection[] {
-  return ordreEcransContexteEconomique(exercice).flatMap((e) => lignesEtape(exercice, e));
-}
-
 function reponseBreveContexteEconomique(exercice: ExerciceContexteEconomique, parQuestion = false): FragmentConsigne[] {
   const prefixe = (lettre: string) => (parQuestion ? [texte(`${lettre}) `)] : []);
   if (exercice.famille === "A") {
@@ -315,8 +232,11 @@ function baremeContexteEconomique(exercice: ExerciceContexteEconomique): BaremeE
   };
 }
 
-function difficulteContexteEconomique(exercice: ExerciceContexteEconomique): 1 | 2 | 3 {
-  return exercice.famille === "A" ? 2 : 3;
+/** Niveau 1–7 : méthode 1 (A : construire le coût moyen ou dériver le coût marginal ; B : bénéfice
+ * et égalité des marginales), 0 pour la dichotomie (démarche imposée pas à pas) ; piège 1 en B (racine
+ * négative de l'égalité des marginales, toujours à rejeter), 0 sinon ; aucun écran de pure lecture. */
+function criteresDifficulteContexteEconomique(exercice: ExerciceContexteEconomique): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeContexteEconomique(exercice), []), methode: exercice.famille === "bonus" ? 0 : 1, piege: exercice.famille === "B" ? 1 : 0 };
 }
 
 /** Repli (documents Word) : les lignes du corrigé détaillé, en paragraphes. */
@@ -334,12 +254,11 @@ export const adaptateurEvaluationContexteEconomique: AdaptateurFeuilleExercices<
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce: construireEnonceContexteEconomique,
   construireCorrection: construireCorrectionContexteEconomique,
-  difficulte: difficulteContexteEconomique,
+  criteresDifficulte: criteresDifficulteContexteEconomique,
   reponseBreve: (exercice) => reponseBreveContexteEconomique(exercice),
   correctionDetaillee: correctionDetailleeContexteEconomique,
   bareme: baremeContexteEconomique,
   enoncePapier: enoncePapierContexteEconomique,
-  dureeMinutes: 15,
   profilInstance: profilContexteEconomique,
   calculatriceIndispensable: ["A-degre3-sans-extremum", "bonus"],
 };

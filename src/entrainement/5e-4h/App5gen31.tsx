@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { correctionDetailleeEtudierFonction, lettreEcranEtudierFonction } from "./generateurs5e/etudierFonction/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lignesDeLEtape } from "../export/corrigeTableau";
 import type { ReactNode } from "react";
 import type { EnsembleReelGuide } from "./core5e/domaineDefinition.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
@@ -239,7 +242,13 @@ export function App5gen31() {
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
   const validation: ValidationEtapeProps | null = enAttente
-    ? { revele: enAttente.revele, reponseAttendue: reponseAttenduePhase(exercice, etat.phase), labelSuivant: "Écran suivant", onSuivant: passerEcranSuivant }
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttenduePhase(exercice, etat.phase),
+        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEtudierFonction(exercice), lettreEcranEtudierFonction(exercice, etat.phase))} />,
+        labelSuivant: "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
     : null;
   const etatPuces = enAttente ? enAttente.etatSuivant : etat;
 
