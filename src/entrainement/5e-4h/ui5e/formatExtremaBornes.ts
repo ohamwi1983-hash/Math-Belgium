@@ -56,13 +56,15 @@ function intervalleTexte(exercice?: ExerciceExtremaBornes): string {
 /** Version TEXTE (Unicode, sans `$`) — lue par l'adaptateur papier (`exportEvaluation.ts`). */
 export function consigneGeneraleExtremaBornes(exercice: ExerciceExtremaBornes): string {
   const { grandeur, unite, variableDef, uniteTemps } = exercice.contexte;
-  return `f(t) modélise ${grandeur} (en ${unite}), où t est ${variableDef} (en ${uniteTemps}). Le modèle n'est valable que sur l'intervalle ${intervalleTexte(exercice)}.`;
+  void uniteTemps;
+  return `f(t) modélise ${grandeur} (en ${unite}), où t est ${variableDef}. Le modèle n'est valable que sur l'intervalle ${intervalleTexte(exercice)}.`;
 }
 
 /** Version ÉCRAN — même phrase, formules en `$…$` (rendue par `TexteRiche5e`). */
 export function consigneGeneraleExtremaBornesRiche(exercice: ExerciceExtremaBornes): string {
   const { grandeur, unite, variableDef, uniteTemps } = exercice.contexte;
-  return `$f(t)$ modélise ${grandeur} (en ${unite}), où $t$ est ${variableDef} (en ${uniteTemps}). Le modèle n'est valable que sur l'intervalle $[0\\,;\\,${exercice.T}]$.`;
+  void uniteTemps;
+  return `$f(t)$ modélise ${grandeur} (en ${unite}), où $t$ est ${variableDef}. Le modèle n'est valable que sur l'intervalle $[0\\,;\\,${exercice.T}]$.`;
 }
 
 /** Texte brut (bandeau `QuestionFinale`) — l'intervalle réel quand l'exercice est connu. */
@@ -142,28 +144,31 @@ export function texteAideNiveau1ExtremaBornes(ecran: EcranExtremaBornes, exercic
   }
 }
 
-export function texteAideNiveau2ExtremaBornes(ecran: EcranExtremaBornes, exercice?: ExerciceExtremaBornes): AideExtremaBornes {
+export function texteAideNiveau2ExtremaBornes(ecran: EcranExtremaBornes, exercice: ExerciceExtremaBornes): AideExtremaBornes {
+  const marqueurs = [0, ...exercice.racinesFPrime, exercice.T];
+  const tests = marqueurs.slice(0, -1).map((a, k) => {
+    const b = marqueurs[k + 1];
+    const m = Math.round((a + b) / 2);
+    return m > a && m < b ? m : (a + b) / 2;
+  });
   switch (ecran) {
     case "deriver":
-      return { texte: "Exemple :", latex: "f(t)=2t^3-6t^2+5 \\;\\Longrightarrow\\; f'(t)=6t^2-12t" };
+      return { texte: "Dérive chaque terme de la fonction ; la constante disparaît :", latex: formatFDeTLatex(exercice) };
     case "racines": {
-      if (exercice && exercice.degre === 4) {
+      if (exercice.degre === 4) {
         const r1 = exercice.racinesFPrime[0];
         return { texte: `Une racine entière de $f'(t)$ est $t=${r1}$. Divise $f'(t)$ par $(t-${r1})$ avec la méthode de Horner, puis résous l'équation du second degré obtenue.`, latex: null };
       }
-      return { texte: "Exemple :", latex: "6t^2-24t+18=0 \\iff t^2-4t+3=0,\\ \\Delta=4 \\;\\Longrightarrow\\; t=1 \\text{ ou } t=3" };
+      return { texte: "Avec la dérivée trouvée, résous (mets d'abord le coefficient de $t^2$ en évidence) :", latex: `${formatFPrimeDeTLatex(exercice).replace(/^f'\(t\)=/, "")}=0` };
     }
     case "tableauFPrime":
-      return { texte: "Exemple :", latex: "f'(t)=6t(t-2) : \\quad f'(1)=-6<0,\\ f'(3)=18>0 \\;\\Longrightarrow\\; \\text{minimum local en } t=2" };
+      return { texte: "Calcule le signe de $f'$ en une valeur de chaque intervalle, par exemple :", latex: tests.map((x) => `f'(${`${x}`.replace(".", "{,}")})`).join(",\\ ") };
     case "valeursExtremums":
-      return { texte: "Exemple, pour $f(t)=2t^3-6t^2+5$ et un extremum en $t=2$ :", latex: "f(2)=2\\cdot2^3-6\\cdot2^2+5=16-24+5=-3" };
+      return { texte: "Remplace $t$ par chaque abscisse trouvée dans $f(t)$ (pas dans $f'(t)$) :", latex: formatFDeTLatex(exercice) };
     case "valeursBornes":
-      return { texte: "Exemple, pour le même $f$ sur $[0\\,;\\,5]$ :", latex: "f(0)=5 \\qquad f(5)=2\\cdot125-6\\cdot25+5=105" };
+      return { texte: `Remplace $t$ par $0$ puis par $${exercice.T}$ dans :`, latex: formatFDeTLatex(exercice) };
     case "comparaison":
-      return {
-        texte: "Exemple du piège : les extremums locaux valent 8 (maximum local) et 2 (minimum local), mais $f(T)=15$. Le maximum absolu est alors 15, atteint à la borne : 8 n'est qu'un maximum local.",
-        latex: null,
-      };
+      return { texte: "Range TOUTES les valeurs trouvées — extremums locaux ET bornes — avant de conclure :", latex: [...exercice.racinesFPrime, 0, exercice.T].sort((a, b) => a - b).map((t) => `f(${t})=${evalPoly(exercice.coeffs, t)}`).join(",\\ ") };
   }
 }
 

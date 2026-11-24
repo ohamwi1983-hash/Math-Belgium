@@ -10,6 +10,7 @@ import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { TexteRiche5e } from "./TexteRiche5e";
 import { AideExtremaBornesBloc } from "./AideExtremaBornesBloc";
+import { classeOptionChoixFerme } from "../../4e/ui/choixFige";
 
 interface Props {
   exercice: ExerciceExtremaBornes;
@@ -47,6 +48,9 @@ export function EtapeComparaisonExtremaBornes({ exercice, tentativesUtilisees, t
   const complet = indexMax !== null && indexMin !== null;
 
   function classeBouton(groupe: "max" | "min", i: number): string {
+    // Écran clos (choix fermé : une seule tentative) : choix JUGÉ — ✗ rouge sur le choix faux, ✓ vert
+    // sur la bonne option (`4e/ui/choixFige.ts`).
+    if (validation) return classeOptionChoixFerme<number | null>(i, { selection: groupe === "max" ? indexMax : indexMin, choisie: groupe === "max" ? indexMax : indexMin, bonne: groupe === "max" ? indexMaxAbsoluBorne(exercice) : indexMinAbsoluBorne(exercice) });
     const selectionne = groupe === "max" ? indexMax === i : indexMin === i;
     if (!selectionne) return "btn";
     const cibleReelle = groupe === "max" ? indexMaxAbsoluBorne(exercice) : indexMinAbsoluBorne(exercice);
@@ -70,7 +74,7 @@ export function EtapeComparaisonExtremaBornes({ exercice, tentativesUtilisees, t
       </p>
       <div className="options-grid">
         {candidats.map((c, i) => (
-          <button type="button" key={`max-${i}`} className={classeBouton("max", i)} onClick={() => setIndexMax(i)}>
+          <button type="button" key={`max-${i}`} className={classeBouton("max", i)} disabled={!!validation} onClick={() => setIndexMax(i)}>
             <Katex expression={formatCandidatLatex(c)} />
           </button>
         ))}
@@ -81,7 +85,7 @@ export function EtapeComparaisonExtremaBornes({ exercice, tentativesUtilisees, t
       </p>
       <div className="options-grid">
         {candidats.map((c, i) => (
-          <button type="button" key={`min-${i}`} className={classeBouton("min", i)} onClick={() => setIndexMin(i)}>
+          <button type="button" key={`min-${i}`} className={classeBouton("min", i)} disabled={!!validation} onClick={() => setIndexMin(i)}>
             <Katex expression={formatCandidatLatex(c)} />
           </button>
         ))}

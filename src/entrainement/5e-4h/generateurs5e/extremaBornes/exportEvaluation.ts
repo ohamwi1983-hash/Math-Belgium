@@ -168,5 +168,10 @@ export const adaptateurEvaluationExtremaBornes: AdaptateurFeuilleExercices<Exerc
   bareme: baremeExtremaBornes,
   enoncePapier: enoncePapierExtremaBornes,
   profilInstance: profilExtremaBornes,
+  // Lot D (audit : `groupe_position_extremums`) : le nom de chaque variante dit où sont le maximum et
+  // le minimum absolus ; dans le panneau d'évaluation, une seule rangée. Niveau et durée suivent le
+  // travail réel (3 zéros de f′ = Horner et une valeur de plus : 6 · 18 min, contre 5 · 15) — non
+  // égalisés : la copie d'évaluation n'imprime ni niveau ni durée (même choix que 5gen10 et 5gen24).
+  groupesVerdict: [{ id: "groupe_position_extremums", label: "Extremums absolus — à un extremum local ou à une borne (tirés au hasard)", variantes: ["max-local-min-local", "max-local-min-borne", "max-borne-min-local", "max-borne-min-borne"] }],
   calculatriceIndispensable: [...VARIANTES_CALCULATRICE_EXTREMA_BORNES],
 };

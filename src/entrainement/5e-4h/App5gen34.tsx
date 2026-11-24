@@ -19,19 +19,12 @@ import type { EcranExtremaBornes, EtatSessionExtremaBornes } from "./moteur5e/ty
 import {
   candidatsComparaisonBorne,
   controlerSaisieRacinesBorne,
-  diagnostiquerCalculerDeriveeBorne,
-  diagnostiquerRacineBorne,
-  diagnostiquerChampParmiCiblesBorne,
   indexMaxAbsoluBorne,
   indexMinAbsoluBorne,
   tableauFPrimeBorneAttendu,
-  valeursFAuxBornes,
-  valeursFAuxExtremumsBorne,
 } from "./moteur5e/verificationExtremaBornes";
 import type { ReponseTableauFPrimeBorne } from "./moteur5e/verificationExtremaBornes";
-import { EtapeDeriverExtremaBornes } from "./components5e/EtapeDeriverExtremaBornes";
 import { EtapeTableauFPrimeExtremaBornes } from "./components5e/EtapeTableauFPrimeExtremaBornes";
-import { EtapeChampsNumeriquesExtremaBornes } from "./components5e/EtapeChampsNumeriquesExtremaBornes";
 import { EtapeComparaisonExtremaBornes } from "./components5e/EtapeComparaisonExtremaBornes";
 import { TableauEtudeLocaleRecap } from "./components5e/TableauEtudeLocaleRecap";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
@@ -53,6 +46,11 @@ import {
   questionFinaleExtremaBornes,
 } from "./ui5e/formatExtremaBornes";
 import { EnTeteExercice } from "./components5e/EnTeteExercice";
+import { EcranSaisieLimites } from "./components5e/EcranSaisieLimites";
+import { aidesExtremaBornes, cibleExtremaBornes, messageComparaisonExtremaBornes } from "./ui5e/retoursExtremaBornes";
+import { fragmentsRiches5e } from "./ui5e/retoursDerivees";
+import { consigneEcranExtremaBornes } from "./ui5e/formatExtremaBornes";
+import { refusSaisieExtremaBornes } from "./moteur5e/sessionExtremaBornes";
 import { QuestionFinale } from "./components/QuestionFinale";
 import { correctionDetailleeExtremaBornes, lettreEcranExtremaBornes } from "./generateurs5e/extremaBornes/corrigeDetaille";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
@@ -113,6 +111,7 @@ function reponseAttendueEcran(exercice: EtatSessionExtremaBornes["exerciceCouran
 interface TransitionEnAttente {
   etatSuivant: EtatSessionExtremaBornes;
   revele: boolean;
+  messageRevele?: string | null;
 }
 
 /** Ordre d'affichage des puces de progression — séquence FIXE à 6 écrans
@@ -185,14 +184,14 @@ export function App5gen34() {
    * écran) n'est jamais poussé : `calculerRecapitulatifExtremaBornes` ne le voit jamais non plus
    * (voir sa tête de fichier), et sa puce reste "courante" tant que `enAttente` est actif, puis
    * l'exercice entier redémarre à zéro dès "Nouvel exercice". */
-  function terminerEtape(nouvelEtat: EtatSessionExtremaBornes, votreReponse?: ReactNode) {
+  function terminerEtape(nouvelEtat: EtatSessionExtremaBornes, votreReponse?: ReactNode, messageRevele?: string | null) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
       if (votreReponse !== undefined) {
         ajouterHistorique(votreReponse, nouvelEtat);
       }
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee, messageRevele: nouvelEtat.derniereEtapeRevelee ? messageRevele : null });
       return;
     }
     setEtat(nouvelEtat);
@@ -229,6 +228,7 @@ export function App5gen34() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        ...(enAttente.messageRevele ? { messageRevele: enAttente.messageRevele } : {}),
         corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeExtremaBornes(exercice), lettreEcranExtremaBornes(etat.phase))} />,
         reponseAttendue: reponseAttendueEcran(exercice, etat.phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
@@ -291,7 +291,7 @@ interface EcranProps {
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
-  terminerEtape: (nouvelEtat: EtatSessionExtremaBornes, votreReponse?: ReactNode) => void;
+  terminerEtape: (nouvelEtat: EtatSessionExtremaBornes, votreReponse?: ReactNode, messageRevele?: string | null) => void;
   setEtat: (etat: EtatSessionExtremaBornes) => void;
   validation: ValidationEtapeProps | null;
 }
@@ -303,15 +303,21 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
   switch (phase) {
     case "deriver":
       return (
-        <EtapeDeriverExtremaBornes
+        <EcranSaisieLimites
           key={cleEcran}
-          tentativesUtilisees={tentativesUtilisees}
-          tentativesMax={tentativesMax}
+          enTete={null}
+          consigne={fragmentsRiches5e(consigneEcranExtremaBornes("deriver", exercice))}
+          champs={[{ label: "f'(t)=", placeholder: "ex : 5t² − 2t + 1", apercu: true }]}
+          aides={aidesExtremaBornes(exercice, "deriver")}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseDeriverBorne(etat, texte), `f'(t) = ${texte}`)}
-          diagnostiquer={(t) => diagnostiquerCalculerDeriveeBorne(t, exercice)}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          texteIllisible={(v) => refusSaisieExtremaBornes("deriver", v) ?? ""}
+          illisible={(v) => refusSaisieExtremaBornes("deriver", v) !== null}
+          cible={(v) => cibleExtremaBornes(exercice, "deriver", v)}
+          onValider={(v) => terminerEtape(soumettreReponseDeriverBorne(etat, v[0]), `f′(t) = ${v[0]}`)}
           validation={validation}
         />
       );
@@ -319,26 +325,27 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
     case "racines": {
       const labels = labelsChampsRacines(exercice);
       return (
-        <EtapeChampsNumeriquesExtremaBornes
+        <EcranSaisieLimites
           key={cleEcran}
-          phase="racines"
-          exercice={exercice}
-          labels={labels}
-          placeholders={placeholdersChampsRacines()}
-          avecCalculatrice={false}
-          controlerAvantSoumission={(valeurs) => {
+          enTete={null}
+          consigne={fragmentsRiches5e(consigneEcranExtremaBornes("racines", exercice))}
+          champs={labels.map((label, i) => ({ label, placeholder: placeholdersChampsRacines()[i] ?? "" }))}
+          aides={aidesExtremaBornes(exercice, "racines")}
+          niveauAide={etat.niveauAide}
+          niveauAideMax={niveauAideMax}
+          onActiverAide={onActiverAide}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          texteIllisible={(v) => refusSaisieExtremaBornes("racines", v) ?? ""}
+          illisible={(v) => refusSaisieExtremaBornes("racines", v) !== null}
+          controleSansTentative={(valeurs) => {
             const controle = controlerSaisieRacinesBorne(valeurs);
             if (controle === "manque") return `Il manque une solution : l'équation f'(t) = 0 en a ${labels.length} dans l'intervalle, remplis tous les champs.`;
             if (controle === "doublon") return "Tu as écrit deux fois la même solution : chaque champ doit contenir une solution différente.";
             return null;
           }}
-          tentativesUtilisees={tentativesUtilisees}
-          tentativesMax={tentativesMax}
-          niveauAide={etat.niveauAide}
-          niveauAideMax={niveauAideMax}
-          onActiverAide={onActiverAide}
+          cible={(v) => cibleExtremaBornes(exercice, "racines", v)}
           onValider={(reponses) => terminerEtape(soumettreReponseRacinesBorne(etat, reponses), <Katex expression={formatReponseChampsLatex(labels, reponses)} />)}
-          diagnostiquer={(t) => diagnostiquerRacineBorne(t, exercice)}
           validation={validation}
         />
       );
@@ -362,21 +369,21 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
     case "valeursExtremums": {
       const labels = labelsChampsExtremums(exercice);
       return (
-        <EtapeChampsNumeriquesExtremaBornes
+        <EcranSaisieLimites
           key={cleEcran}
-          phase="valeursExtremums"
-          exercice={exercice}
-          labels={labels}
-          placeholders={placeholdersChampsExtremums()}
-          tentativesUtilisees={tentativesUtilisees}
-          tentativesMax={tentativesMax}
+          enTete={null}
+          consigne={fragmentsRiches5e(consigneEcranExtremaBornes("valeursExtremums", exercice))}
+          champs={labels.map((label, i) => ({ label, placeholder: placeholdersChampsExtremums()[i] ?? "" }))}
+          aides={aidesExtremaBornes(exercice, "valeursExtremums")}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponses) =>
-            terminerEtape(soumettreReponseValeursExtremumsBorne(etat, reponses), <Katex expression={formatReponseChampsLatex(labels, reponses)} />)
-          }
-          diagnostiquer={(t) => diagnostiquerChampParmiCiblesBorne(t, valeursFAuxExtremumsBorne(exercice))}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          texteIllisible={(v) => refusSaisieExtremaBornes("valeursExtremums", v) ?? ""}
+          illisible={(v) => refusSaisieExtremaBornes("valeursExtremums", v) !== null}
+          cible={(v) => cibleExtremaBornes(exercice, "valeursExtremums", v)}
+          onValider={(reponses) => terminerEtape(soumettreReponseValeursExtremumsBorne(etat, reponses), <Katex expression={formatReponseChampsLatex(labels, reponses)} />)}
           validation={validation}
         />
       );
@@ -385,21 +392,21 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
     case "valeursBornes": {
       const labels = labelsChampsBornes(exercice);
       return (
-        <EtapeChampsNumeriquesExtremaBornes
+        <EcranSaisieLimites
           key={cleEcran}
-          phase="valeursBornes"
-          exercice={exercice}
-          labels={labels}
-          placeholders={placeholdersChampsBornes()}
-          tentativesUtilisees={tentativesUtilisees}
-          tentativesMax={tentativesMax}
+          enTete={null}
+          consigne={fragmentsRiches5e(consigneEcranExtremaBornes("valeursBornes", exercice))}
+          champs={labels.map((label, i) => ({ label, placeholder: placeholdersChampsBornes()[i] ?? "" }))}
+          aides={aidesExtremaBornes(exercice, "valeursBornes")}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponses) =>
-            terminerEtape(soumettreReponseValeursBornes(etat, reponses), <Katex expression={formatReponseChampsLatex(labels, reponses)} />)
-          }
-          diagnostiquer={(t) => diagnostiquerChampParmiCiblesBorne(t, valeursFAuxBornes(exercice))}
+          tentativesUtilisees={tentativesUtilisees}
+          tentativesMax={tentativesMax}
+          texteIllisible={(v) => refusSaisieExtremaBornes("valeursBornes", v) ?? ""}
+          illisible={(v) => refusSaisieExtremaBornes("valeursBornes", v) !== null}
+          cible={(v) => cibleExtremaBornes(exercice, "valeursBornes", v)}
+          onValider={(reponses) => terminerEtape(soumettreReponseValeursBornes(etat, reponses), <Katex expression={formatReponseChampsLatex(labels, reponses)} />)}
           validation={validation}
         />
       );
@@ -415,7 +422,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponse) => terminerEtape(soumettreReponseComparaisonBorne(etat, reponse))}
+          onValider={(reponse) => terminerEtape(soumettreReponseComparaisonBorne(etat, reponse), undefined, messageComparaisonExtremaBornes(exercice, reponse))}
           validation={validation}
         />
       );

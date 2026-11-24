@@ -5,6 +5,7 @@
  * Séquence FIXE (6 écrans, TOUJOURS présents, voir `typesExtremaBornes.ts`) — aucune branche
  * réactive dépendant d'une réponse élève, même patron que `sessionEtudeLocale.ts`/`sessionTangentes.ts`.
  */
+import { MESSAGES_ILLISIBLE_DERIVEES, expressionLisibleDerivees, nombreIllisibleDerivees } from "./saisieDerivees";
 import type { ExerciceExtremaBornes } from "../core5e/extremaBornes.types";
 import type { ReglagesSession5e } from "../core5e/session5e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
@@ -109,7 +110,15 @@ function soumettreEcran<T>(etat: EtatSessionExtremaBornes, ecranAttendu: EcranEx
 // Écran "deriver" — champ symbolique f'(t).
 // ============================================================================
 
+/** Lot B : saisie refusée SANS tentative (illisible) — message, ou null. Partagé avec l'écran. */
+export function refusSaisieExtremaBornes(ecran: EcranExtremaBornes, valeurs: string[]): string | null {
+  if (ecran === "deriver") return expressionLisibleDerivees(valeurs[0] ?? "", "t") ? null : MESSAGES_ILLISIBLE_DERIVEES.expressionT;
+  if (valeurs.some((v) => v.trim() !== "" && nombreIllisibleDerivees(v.replace(/^[^=]*=/, "")))) return MESSAGES_ILLISIBLE_DERIVEES.nombre;
+  return null;
+}
+
 export function soumettreReponseDeriverBorne(etat: EtatSessionExtremaBornes, texte: string): EtatSessionExtremaBornes {
+  if (refusSaisieExtremaBornes("deriver", [texte]) !== null) return etat;
   return soumettreEcran(etat, "deriver", texte, (t) => diagnostiquerCalculerDeriveeBorne(t, etat.exerciceCourant) === "correct");
 }
 
@@ -118,6 +127,7 @@ export function soumettreReponseDeriverBorne(etat: EtatSessionExtremaBornes, tex
 // ============================================================================
 
 export function soumettreReponseRacinesBorne(etat: EtatSessionExtremaBornes, reponses: string[]): EtatSessionExtremaBornes {
+  if (refusSaisieExtremaBornes("racines", reponses) !== null) return etat;
   return soumettreEcran(etat, "racines", reponses, (r) => verifierRacinesBorne(r, etat.exerciceCourant));
 }
 
@@ -134,10 +144,12 @@ export function soumettreReponseTableauFPrimeBorne(etat: EtatSessionExtremaBorne
 // ============================================================================
 
 export function soumettreReponseValeursExtremumsBorne(etat: EtatSessionExtremaBornes, reponses: string[]): EtatSessionExtremaBornes {
+  if (refusSaisieExtremaBornes("valeursExtremums", reponses) !== null) return etat;
   return soumettreEcran(etat, "valeursExtremums", reponses, (r) => verifierEnsembleNumeriqueBorne(r, valeursFAuxExtremumsBorne(etat.exerciceCourant)));
 }
 
 export function soumettreReponseValeursBornes(etat: EtatSessionExtremaBornes, reponses: string[]): EtatSessionExtremaBornes {
+  if (refusSaisieExtremaBornes("valeursBornes", reponses) !== null) return etat;
   return soumettreEcran(etat, "valeursBornes", reponses, (r) => verifierEnsembleNumeriqueBorne(r, valeursFAuxBornes(etat.exerciceCourant)));
 }
 

@@ -5,8 +5,8 @@
  *
  * Mesures (5 000 tirages par variante, `scratchpad/5c5-R4/mesures.txt`) :
  * - 5gen34 : aucune instance ne raccourcit la résolution (toujours 2 ou 3 extremums locaux, deux
- *   bornes informatives, mêmes 6 étapes) : aucun cas particulier. `forme` = le cas croisé (maximum
- *   absolu à un extremum local ou à une borne × idem pour le minimum), imposé d'une série à l'autre.
+ *   bornes informatives, mêmes 6 étapes) : aucun cas particulier. `forme` = le degré (lot D : le cas
+ *   croisé — maximum / minimum absolu à un extremum local ou à une borne — est le verdict).
  *   `calcul` : une quartique (3 racines de f', Horner, valeurs jusqu'à quelques milliers) exige la
  *   calculatrice ; une cubique (f' du second degré, valeurs entières modestes) se traite à la main.
  *   Les variantes « max local — min à une borne » et « max à une borne — min local » sont TOUJOURS
@@ -33,9 +33,14 @@ function casCroise(e: ExerciceExtremaBornes): string {
   return `max-${max}-min-${min}`;
 }
 
+/** Lot D : le cas croisé est le VERDICT (où sont le maximum et le minimum absolus) — hors de la
+ * `forme`, qui ne garde que le degré (visible dans l'énoncé) ; les quatre variantes forment le
+ * groupe à verdict `groupe_position_extremums` (exportEvaluation). */
 export function profilExtremaBornes(e: ExerciceExtremaBornes): ProfilInstance {
-  return { casParticulier: null, forme: casCroise(e), calcul: e.degre === 4 ? "calculatrice" : undefined };
+  return { casParticulier: null, forme: `degre-${e.degre}`, calcul: e.degre === 4 ? "calculatrice" : undefined };
 }
+
+export { casCroise };
 
 /** Variantes de 5gen34 toujours quartiques (calculatrice indispensable). */
 export const VARIANTES_CALCULATRICE_EXTREMA_BORNES = ["max-local-min-borne", "max-borne-min-local"] as const;

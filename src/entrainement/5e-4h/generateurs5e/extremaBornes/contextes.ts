@@ -10,9 +10,9 @@
 import type { ContexteExtremaBornes } from "../../core5e/extremaBornes.types";
 
 export const CONTEXTES_EXTREMA_BORNES: ContexteExtremaBornes[] = [
-  { id: "conso-electrique", valeurMax: 5000, grandeur: "la consommation électrique du site", unite: "kWh", variableDef: "le nombre d'heures écoulées depuis minuit", uniteTemps: "heures" },
+  { id: "conso-electrique", valeurMax: 5000, grandeur: "la puissance électrique consommée par le site", unite: "kW", variableDef: "le nombre d'heures écoulées depuis minuit", uniteTemps: "heures" },
   { id: "temperature-serre", valeurMax: 45, grandeur: "la température à l'intérieur de la serre", unite: "°C", variableDef: "le nombre d'heures écoulées depuis l'aube", uniteTemps: "heures" },
-  { id: "ventes-soldes", valeurMax: 5000, grandeur: "le nombre d'articles vendus par la boutique", unite: "articles", variableDef: "le nombre de jours écoulés depuis le début des soldes", uniteTemps: "jours" },
+  { id: "ventes-soldes", valeurMax: 5000, grandeur: "le nombre d'articles vendus par jour par la boutique", unite: "articles", variableDef: "le nombre de jours écoulés depuis le début des soldes", uniteTemps: "jours" },
   { id: "frequentation-piscine", valeurMax: 2000, grandeur: "la fréquentation du bassin", unite: "baigneurs", variableDef: "le nombre d'heures écoulées depuis l'ouverture", uniteTemps: "heures" },
   { id: "altitude-drone", valeurMax: 400, grandeur: "l'altitude du drone", unite: "m", variableDef: "le nombre de secondes écoulées depuis le décollage", uniteTemps: "secondes" },
   { id: "stock-entrepot", valeurMax: 3000, grandeur: "le niveau de stock de l'entrepôt", unite: "palettes", variableDef: "le nombre de jours écoulés depuis le début du mois", uniteTemps: "jours" },
