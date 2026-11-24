@@ -1613,6 +1613,16 @@ export const deriveesApplications: ChapterContent = {
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 31. Étudier une fonction »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Détective d’erreurs : dérivées',
+          generatorId: '5gen72',
+          chantier: '5e-4h',
+          description: [
+            'La résolution d’un élève contient une seule ligne fausse : (uv)′ = u′v′, numérateur du quotient inversé, dérivée de l’intérieur oubliée, (1/x)′ = 1/x², « − a » oublié dans la tangente, signe du trinôme f′ inversé, solution −k oubliée, ou zéro de f′ sans changement de signe pris pour un extremum. Trouve la ligne, nomme l’erreur, puis corrige la résolution.',
+          ],
+          whereLabel: '5e (4h) → « 72. Détective d’erreurs : dérivées »',
+        },
       ],
     },
     {
@@ -1790,6 +1800,26 @@ export const deriveesApplications: ChapterContent = {
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 32. Optimisation géométrique »',
+        },
+        {
+          kind: 'methode',
+          label: 'Minimiser une distance ou un temps',
+          items: [
+            'Une **distance** se calcule par Pythagore : pour un point $M(x\\,;f(x))$ et un point $A$, on minimise le carré de la distance, $D(x)=AM^2$, avec $AM^2=(x-x_A)^2$ $+\\,(f(x)-y_A)^2$ : même point optimal que $AM$, et plus de racine à dériver. On prend la racine à la fin.',
+            'Un **temps** se calcule morceau par morceau : $t=\\dfrac{d}{v}$ sur chaque portion parcourue à vitesse constante (sable puis eau, route puis champ…).',
+            'Une longueur qui contient $\\sqrt{u}$ se dérive par la règle de la chaîne : $\\left(\\sqrt{u}\\right)\'=\\dfrac{u\'}{2\\sqrt{u}}$.',
+            'Le **domaine réaliste** décide : si le zéro $x_0$ de la dérivée sort du domaine (abscisse négative alors que x ≥ 0, par exemple), la dérivée garde un seul signe et le minimum est à une **borne**. Compare toujours la valeur trouvée aux valeurs aux bornes.',
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Optimisation : distance et temps minimaux',
+          generatorId: '5gen71',
+          chantier: '5e-4h',
+          description: [
+            'Point d’une courbe le plus proche d’un point (on minimise AM²), sauveteur qui court puis nage, câble qui passe par la rive : construis la fonction, dérive-la, résous f′(x) = 0, étudie le signe de la dérivée sur le domaine réaliste et compare aux bornes.',
+          ],
+          whereLabel: '5e (4h) → « 71. Optimisation : distance et temps minimaux »',
         },
       ],
     },

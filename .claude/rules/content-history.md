@@ -318,6 +318,13 @@ paths:
   Playwright réel sur le build de production : les 11 sections dans le nouvel ordre, le récapitulatif
   final réordonné à l'identique, aucun `$...$` non résolu, chaque nouvelle illustration capturée et
   relue individuellement (dont la correction du débordement ci-dessus).
+  **Nouveaux générateurs 5gen71–72** : bloc `methode` « Minimiser une distance ou un temps » (AM² par
+  Pythagore, t = d/v, (√u)′, domaine réaliste et bornes) puis carte 5gen71 « Optimisation : distance et
+  temps minimaux » en § 8 (après 5gen32) ; carte 5gen72 « Détective d'erreurs : dérivées » en § 7 (après
+  5gen31) ; registres (`registry.ts`, `evaluationAdapterRegistry.ts` avec `versionPapier`,
+  `evaluationPayload.ts`, processus 3 / 3 ; libellés pilotes de 5gen31 et 5gen32 remplis). Formule de
+  la méthode coupée en deux formules en ligne (elle sortait du cadre à 390 px). Détail :
+  `.claude/rules/feuilles-evaluations.md`, « 5e ch. 5, nouveaux générateurs — 5gen71–72 ».
 
 - **5e (4h), Chapitre 4 — Limites et asymptotes** (`limites-asymptotes`) : enrichi depuis une
   version plus ancienne du même artifact `plateforme-maths` (5e/4h) ; aucune section n'a dû être

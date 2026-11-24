@@ -118,6 +118,7 @@ export type IdGenerateurPilote =
   | '5gen20' | '5gen21' | '5gen22' | '5gen23' | '5gen24'
   | '5gen64' | '5gen65' | '5gen66' | '5gen67'
   | '5gen25' | '5gen26' | '5gen27' | '5gen28' | '5gen29' | '5gen30' | '5gen31' | '5gen32' | '5gen33' | '5gen34' | '5gen35'
+  | '5gen71' | '5gen72'
 
 export interface GeneratorConfig {
   chapitreSlug: string
@@ -439,8 +440,10 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'derivees-applications', sectionId: 'tangentes', generatorId: '5gen28', label: '' },
   { chapitreSlug: 'derivees-applications', sectionId: 'etude-locale', generatorId: '5gen29', label: '' },
   { chapitreSlug: 'derivees-applications', sectionId: 'lecture-graphique-derivees', generatorId: '5gen30', label: '' },
-  { chapitreSlug: 'derivees-applications', sectionId: 'etudier-fonction', generatorId: '5gen31', label: '' },
-  { chapitreSlug: 'derivees-applications', sectionId: 'optimisation-geometrique', generatorId: '5gen32', label: '', processus: 3 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'etudier-fonction', generatorId: '5gen31', label: 'Étudier une fonction (5gen31)' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'etudier-fonction', generatorId: '5gen72', label: "Détective d'erreurs : dérivées (5gen72)", processus: 3 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'optimisation-geometrique', generatorId: '5gen32', label: 'Optimisation géométrique (5gen32)', processus: 3 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'optimisation-geometrique', generatorId: '5gen71', label: 'Optimisation : distance et temps minimaux (5gen71)', processus: 3 },
   { chapitreSlug: 'derivees-applications', sectionId: 'contexte-economique', generatorId: '5gen33', label: '', processus: 3 },
   { chapitreSlug: 'derivees-applications', sectionId: 'extrema-bornes', generatorId: '5gen34', label: '', processus: 3 },
   { chapitreSlug: 'derivees-applications', sectionId: 'vitesse-position', generatorId: '5gen35', label: '', processus: 3 },

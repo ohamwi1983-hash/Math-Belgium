@@ -331,6 +331,8 @@ import { adaptateurEvaluationOptimisationGeometrique } from '../entrainement/5e-
 import { adaptateurEvaluationContexteEconomique } from '../entrainement/5e-4h/generateurs5e/contexteEconomique/exportEvaluation'
 import { adaptateurEvaluationExtremaBornes } from '../entrainement/5e-4h/generateurs5e/extremaBornes/exportEvaluation'
 import { adaptateurEvaluationVitessePosition } from '../entrainement/5e-4h/generateurs5e/vitessePosition/exportEvaluation'
+import { adaptateurEvaluationOptimisationDistance } from '../entrainement/5e-4h/generateurs5e/optimisationDistance/exportEvaluation'
+import { adaptateurEvaluationDetectiveDerivees } from '../entrainement/5e-4h/generateurs5e/detectiveDerivees/exportEvaluation'
 
 export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExercices<never>> = {
   '5gen1': versionPapier(adaptateurEvaluationDomaineDefinition) as unknown as AdaptateurFeuilleExercices<never>,
@@ -392,6 +394,8 @@ export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExe
   '5gen33': versionPapier(adaptateurEvaluationContexteEconomique) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen34': versionPapier(adaptateurEvaluationExtremaBornes) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen35': versionPapier(adaptateurEvaluationVitessePosition) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen71': versionPapier(adaptateurEvaluationOptimisationDistance) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen72': versionPapier(adaptateurEvaluationDetectiveDerivees) as unknown as AdaptateurFeuilleExercices<never>,
 }
 
 import { adaptateurEvaluationDenombrementFondamental } from '../entrainement/6e-6h/generateurs6e/denombrementFondamental/exportEvaluation'

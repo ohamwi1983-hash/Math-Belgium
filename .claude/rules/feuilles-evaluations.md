@@ -2120,6 +2120,80 @@ aménagée + feuille + Word du corrigé, calculatrice interdite / autorisée, av
 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error` ; `groupe_erreur` B ≠ A sur 30 plans ;
 `?code=` 36 / 36.
 
+## 5e ch. 5, nouveaux générateurs — 5gen71–72 (notés)
+
+Socle d'écrans du 5e (`AppEcransTrigo` + `DefinitionEcrans`) réutilisé SANS modification (options
+`copie`, `approchee`, `piegeChoixRevele`, `raccourcis`, `apercu`, `aidesChoixDeuxNiveaux`) ; lectures
+du lot G du 5e ch. 4 (`moteur5e/lectureLimitesLotG.ts` : `lireFonctionX` — expression comparée en
+cinq points, `racine(…)`, `sqrt(…)`, √, préfixe « y = » / « D(x) = » ignoré —, `lireLimite`,
+`estApprochee`) ; écritures `ui5e/ecrituresLimitesLotG.ts` (`polyL`, `fracL`, `exacteL`, `extraire`) et
+`ui5e/nombresTrigo.ts` (`Q`, `nbL`). Corrigés `generateurs5e/{optimisationDistance,detectiveDerivees}/corrigeDetaille.ts`,
+une lettre par écran, partagés par l'adaptateur et l'appli. Cartes : 5gen71 en § 8 « Optimisation
+géométrique » (après 5gen32, précédée d'un bloc `methode` « Minimiser une distance ou un temps » : AM²
+par Pythagore, t = d/v, (√u)′, domaine réaliste et bornes — le § 8 ne traitait qu'aires et volumes),
+5gen72 en § 7 « Étudier une fonction » (après 5gen31 : la copie mêle règles, tangente et signe) ;
+libellés pilotes de 5gen31 et 5gen32 remplis au passage.
+**5gen71 — Optimisation : distance et temps minimaux** (Transférer) : quatre variantes —
+`pointRacine` (M(x ; √(kx)) le plus proche de A(a ; 0), on minimise D(x) = AM² = (x − a)² + kx ;
+VERDICT tiré AVANT les nombres, `PROBA_BORNE` = 0,25 : x₀ = a − k/2 < 0, hors de [0 ; +∞[, minimum à
+la borne x = 0, M = O), `pointHyperbole` (y = k/x, x > 0, et O : D(x) = x² + k²/x², x₀ = √k, −√k à
+rejeter), `sauveteur` (course à v₁ sur le rivage puis nage à v₂ : T(x) = x/v₁ + √((L − x)² + h²)/v₂ sur
+[0 ; L] ; vitesses réalistes à √(v₁² − v₂²) décimal — 5,2/2, 6,5/2,5, 5/1,4, 7,5/2,1, 4,25/2 m/s —, h
+multiple du dénominateur de v₂/w : x₀ = L − h·v₂/w et MN ENTIERS ; VERDICT ≈ 25 % : L < MH, x₀ < 0, il
+faut nager tout de suite ; temps au dixième, tolérance 0,05 s), `cable` (A → M sur la rive → B :
+ℓ(x) = √(x² + a²) + √((L − x)² + b²), x₀ = aL/(a + b) ENTIER et longueur minimale √(L² + (a + b)²)
+entière : triplets 3-4-5, 4-3-5, 12-5-13, 15-8-17, q | a). Cinq écrans : modèle (expression),
+dérivée (expression), zéro x₀ (« pour x > 0 » seulement pour l'hyperbole), signe de la dérivée sur le
+domaine réaliste énoncé (choix fermé à quatre motifs « − puis + », « + partout », « − partout »,
+« + puis − » ; message ciblé révélé — x₀ hors / dans le domaine), optimum (x et valeur minimale ;
+point : distance exacte c√r/d, approchée refusée sans tentative). Messages ciblés : distance au lieu de
+son carré, carré de √(kx) oublié, signe de x_A, k²/x² écrit k/x², durée = distance × vitesse, vitesses
+échangées, maison inversée, facteur −1 de la chaîne oublié, 2 de (√u)′ oublié, signe / puissance de
+(1/x²)′, −√k gardée, MH donnée pour x, MK pour HM, x₀ hors domaine donné pour l'optimum, D donné pour
+la distance, T(x₀) hors domaine. Figure d'énoncé (SVG sans `id`, fond blanc, écran ET papier) : courbe
+et point A, M générique jamais à l'optimum, segment AM en pointillés ; plage (sable / mer, cote AH,
+HN) ; rivière (A, B, H, K, M, cotes) — aucune position optimale marquée. Corrigé : a) Pythagore / t =
+d/v ; b) chaîne (radicande nommé v, une règle par ligne) ; c) une transformation par ligne (sauveteur :
+z = L − x, carré, regroupement, z, x₀) ; d) signe sur le DOMAINE (x₀ hors domaine : signe de la
+dérivée à la borne ; sinon valeurs aux bornes ou forme factorisée) ; e) valeur, puis
+« Vérification » = comparaison aux bornes (D(0), limites en 0⁺ / +∞, T(0), T(L), ℓ(0), ℓ(L)). Énoncé
+papier : situation + figure + consigne globale (point / position, valeur minimale avec sa précision,
+justification par la dérivée sur le domaine). **5gen72 — Détective d'erreurs : dérivées**
+(Transférer, mécanique de 5gen67) : huit types d'erreur = variantes, deux groupes à verdict
+`groupe_erreur_tangente` (produit (uv)′ = u′v′, quotient au numérateur inversé, chaîne sans u′,
+(1/x)′ = 1/x², tangente y = f′(a)x + f(a)) et `groupe_erreur_signe` (signe du trinôme f′ inversé,
+x² = k² ⇒ x = k seulement, zéro double de f′ compté comme extremum) ; ligne fausse en position 1–4 à
+25 % (`d.av`, préliminaires justes : domaine, formule de la tangente / condition d'extremum) ; écran 3 :
+tangente (comparée en cinq points ; messages « pente juste mais pas le point » / « point juste mais
+pas la pente ») ou abscisses x_max, x_min avec « aucun » LISIBLE (aucune, rien, ∅, néant, n'existe
+pas…) ; résultat de la copie repris = message ciblé ; nombres choisis pour que l'erreur se voie
+(pente de la copie ≠ pente juste, extremums différents, |f(a)| ≤ 40, dénominateurs 1, 2, 4).
+Corrigé : a) la ligne refaite (« et non … comme dans la copie »), b) la règle illustrée (x·x, 1/x,
+(2x)², x² − 1, x² = 9, g(x) = x³), c) résolution reprise + vérification (point de tangence, f aux
+extremums). Regroupement a), b), c) : **écartés tous les deux** (problème en contexte propre à
+l'instance avec figure ; copie d'élève) — aucune entrée dans `REGROUPEMENTS`. Niveaux (`niveauEtDuree`,
+200 tirages par variante + 300 libres, CONSTANTS dans chaque verdict, `sansCharge`) : 5gen71 cinq
+étapes, méthode 2 (l'élève construit la fonction), piège 1 sauf `cable` (domaine qui peut exclure x₀,
+solution négative), nombres 1 pour `sauveteur` : pointRacine et pointHyperbole niv. 5, 14 min ;
+sauveteur niv. 6, 15 min ; cable niv. 4, 14 min. 5gen72 niv. 3, 8 min (comme 5gen67). Profils :
+`forme` = variante (jamais le verdict « borne » ni la ligne fausse) ; `calcul` « calculatrice » pour
+`sauveteur` (`calculatriceIndispensable: ["sauveteur"]`), « exacte » ailleurs ; aucun cas particulier
+(la borne est un verdict). Mesures : moteurs 2 000 tirages par variante (dérivée = dérivée numérique,
+x₀ zéro de f′, optimum = balayage de 20 000 points du domaine, valeur minimale recalculée, motif de
+signe échantillonné ; tangente = dérivée numérique en a et passage par A, extremums par balayage du
+signe de f′ ; saisies autrement écrites — « − », racine(…), sqrt, préfixes, fractions, « Aucun » —,
+illisible, approchée, copie, distance au lieu de D, −√k, x₀ hors domaine ; `?code=` reproductible) :
+0 anomalie ; part « borne » 24 % (pointRacine) et 24–26 % (sauveteur) ; ligne fausse ≈ 25 % par
+position dans chaque variante. Collecteur (outils de `corrige-5e4` recopiés, `env.ts` : D/T/ℓ et leur
+dérivée nommées, f et f′ de la copie, x₀, z) 3 000 tirages, ≈ 31 300 relations, 0 fausse. Plans réels
+`construirePlan` : 5gen71 3 séries × 4 essais (interdite : pointRacine ×2, pointHyperbole, cable ;
+autorisée : sauveteur ×3) même multiset (variante, forme, cas, calcul), nombres tous différents,
+verdict « borne » propre à chaque série ; groupes de 5gen72 : type d'erreur B ≠ A 30 / 30 chacun.
+iPhone 13 (toutes les variantes : illisible → message sans tentative, erreur ciblée, bonne réponse,
+mauvais choix fermé révélé) : scrollWidth 390, 0 erreur console, 0 `.katex-error`. Documents réels
+(2 plans : évaluation 2 séries + aménagée + corrigé + grille + feuille + Word du corrigé, interdite /
+autorisée) : 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error` ; QR `?code=` 24 / 24.
+
 ## 4e ch. 7, lot G — gen92–gen95 (nouveaux, notés)
 
 Coquille `components/AppTransfertSecondDegre.tsx` réutilisée ; seule extension (ajout pur, sans effet sur

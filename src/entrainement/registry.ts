@@ -286,6 +286,8 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '5gen33': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen33').then((m) => ({ default: m.App5gen33 }))),
   '5gen34': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen34').then((m) => ({ default: m.App5gen34 }))),
   '5gen35': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen35').then((m) => ({ default: m.App5gen35 }))),
+  '5gen71': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen71').then((m) => ({ default: m.App5gen71 }))),
+  '5gen72': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen72').then((m) => ({ default: m.App5gen72 }))),
   '5gen43': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen43').then((m) => ({ default: m.App5gen43 }))),
 
   // --- 6e, chapitre 1 : Fonctions réciproques & cyclométriques ---
