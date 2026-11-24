@@ -27,7 +27,8 @@ Aucune donnée d'élève. Phase 2 (faite, section « Phase 2 » en fin de fichie
 puis son horaire de la semaine (`0003_horaire.sql`, sous-section « Horaire de la semaine ») et l'heure
 zéro (`0004_heure_zero.sql`, même sous-section), puis l'agenda d'une période (sous-section « Agenda d'une
 période », sans migration), puis l'agenda : événements, périodes du bulletin et heures effectives
-(`0006_agenda.sql`, sous-section « Événements et bulletin »). Répartition d'EXAMEN Connaître / Appliquer / Transférer (« Préparer
+(`0006_agenda.sql`, sous-section « Événements et bulletin »), puis devoirs, évaluations et texte en rubriques
+pour l'agenda scolaire (`0007_devoirs_evaluations.sql`, sous-section « Devoirs, évaluations et texte en rubriques »). Répartition d'EXAMEN Connaître / Appliquer / Transférer (« Préparer
 l'examen ») mémorisée dans le profil : `0005_repartition.sql` (section « Répartition mémorisée » en fin
 de fichier).
 Plus tard (pas fait) : partage entre collègues.
@@ -682,6 +683,148 @@ n'est perdu) — sinon l'enregistrement d'une absence est refusé : `ErreurCarne
 …0006_agenda.sql… ».
 À vérifier contre le vrai projet : création d'un événement « certaines classes » (liaison), interro,
 périodes et seuil.
+
+### Devoirs, évaluations et texte en rubriques (`supabase/migrations/0007_devoirs_evaluations.sql`, maquettes « Noter » et « Texte » du 24/11/2026)
+
+Décisions de l'utilisateur (maquettes validées) : le panneau « Noter la séance » gagne un bloc **Devoir**
+(consigne, « Pour le », exercices en ligne joints) et un bloc **Évaluation** (annoncer une interro, interro
+faite aujourd'hui, contrôle / bilan) ; le texte « Copier pour Smartschool » devient un texte en **rubriques
+activables** (🎯 Objectif, 📘 Vu en classe, 🧭 Compétences travaillées, ✏️ Pour s'entraîner, 📌 Devoir pour
+le …, 📅 Interro annoncée), choix mémorisé dans les réglages. AUCUNE donnée d'élève.
+
+**Schéma 0007** (idempotent, à coller APRÈS 0006 ; « Success. No rows returned ») — des COLONNES, pas de
+nouvelle table : un devoir et une évaluation sont notés avec une séance (un par séance), lus et écrits
+avec elle ; les politiques RLS de 0002 (`proprietaire = auth.uid() and est_actif()`, toutes opérations,
+`anon` sans droit) couvrent déjà ces colonnes, sans jointure ni seconde écriture qui pourrait échouer à
+moitié. L'interro annoncée reste un ÉVÉNEMENT de l'agenda (0006 : une seule source pour sa date et son
+heure, modifiable depuis l'agenda) ; la séance n'en garde que le lien.
+
+| Table | Colonnes ajoutées | Contraintes |
+| --- | --- | --- |
+| `seances` | `devoir_pour` date, `devoir_generateurs` jsonb (`[]`), `objectif` text (`''`), `competences` jsonb (`[]`), `evaluation_type` (`annonce` / `faite` / `bilan`, NULL), `evaluation_parties` jsonb (`[]`), `evaluation_evenement` uuid | `seances_devoir_pour_valide` (≥ `date_seance`, ≤ + 366 j) ; `tableau_de_textes` : exercices ≤ 100 × 40, compétences ≤ 12 × 80, parties ≤ 100 × 80 ; objectif ≤ 300 ; `seances_evaluation_coherente` (sans type : ni parties ni lien ; « faite » : pas de lien) ; FK COMPOSÉE `seances_evaluation_evenement_du_proprietaire (evaluation_evenement, proprietaire) → evenements (id, proprietaire) ON DELETE SET NULL (evaluation_evenement)` (contrainte ajoutée `evenements_id_proprietaire_uniq` ; liste de colonnes de SET NULL : Postgres ≥ 15, Supabase l'est) |
+| `carnet_reglages` | `rubriques` jsonb (NULL = défaut), `competences_transversales` jsonb (NULL = liste proposée) | `rubriques_texte_valides(j)` (objet, clés `objectif`/`processus`/`transversales`/`liens`/`emojis`, valeurs booléennes ; `immutable`, `search_path = ''`, `anon` sans droit d'exécution) ; liste ≤ 12 × 80 |
+
+Lier l'interro d'un autre professeur : 23503 (sans rien révéler) ; supprimer l'interro dans l'agenda remet
+seulement le lien à NULL (la séance garde son type « annonce » : le texte omet alors la ligne de l'interro
+et le formulaire dit « supprimée de l'agenda : Enregistrer la recrée ») ; supprimer la classe emporte
+séances et interros (cascades existantes) ; `supprimer_mon_compte()` inchangé. Vérifié sur Postgres 16
+local (faux schéma `auth`, 0001 → 0006 + données, 0007 ×4, 0002 → 0006 relancés après lui puis 0007 encore :
+données, contraintes, politiques, droits et déclencheurs identiques) : 100 vérifications (dossier de
+travail `carnet-devoir/test_sql.py` : valeurs par défaut des anciennes lignes, écriture / relecture, toutes
+les limites — 23514 —, NOT NULL — 23502 —, interro d'un autre — 23503, superutilisateur compris —, RLS
+croisé, insertion au nom d'un autre — 42501 —, `anon` — 42501 —, SET NULL, compte désactivé, cascade de la
+classe, suppression de compte).
+
+**0007 pas appliqué** : `carnetDonnees.ts::chargerSeances` lit avec les colonnes de 0007 et, sur 42703 /
+PGRST204 mentionnant l'une d'elles (`colonne0007Absente`), relit SANS → `devoirs: false` ; `ligneSeance`
+n'écrit alors jamais ces colonnes ; `lireReglagesTexte` → `actif: false` (défauts). Le carnet marche comme
+avant : la consigne du devoir reste (colonne de 0002), « Pour le », les exercices joints et le bloc
+Évaluation affichent « Pas encore activé : … colle le fichier 0007_devoirs_evaluations.sql… »
+(`FormulaireSeance.tsx::MessageDevoirsInactif`), le texte en rubriques se copie (rubriques réglables pour la
+session, rien de mémorisé), Réglages affiche le même message à la place de la liste. Un 23514 / 23503 de ces
+colonnes a son message (`ErreurCarnet`).
+
+**Logique PURE** (`lib/carnetDevoirs.ts`, 98 vérifications esbuild + node, `carnet-devoir/devoirs.test.ts`) :
+- `prochainsCours({ classeId, apres, grilles, cases, evenements, classes, n })` : jours de cours EFFECTIFS
+  de la classe strictement après `apres` (horaire de la classe, week-ends / congés / vacances FWB exclus par
+  `creneauxDuJour`, heures supprimées par l'agenda exclues par `predicatSuppression` — journée pédagogique,
+  sortie de la classe, absence du professeur, « J'accompagne » ; une interro ne supprime rien), avec le
+  premier créneau du jour ; horizon 120 jours ; classe sans case → `[]`. `choixDeLaDate` (puce retrouvée à la
+  modification), `dateCourteDevoir` (« jeu. 26/11 »). Tests : maquette (mar. 24/11 → jeu. 26/11, lun.
+  30/11), Noël, Toussaint + fête des morts, Armistice, mardi gras, carnaval, JP, absence, sortie de la
+  classe ou à d'autres heures, J'accompagne, voyage de toute l'école.
+- `devoirsARendre(seances, date, classe?)`, `devoirsEntre`, `aUnDevoir` (consigne OU exercices joints),
+  `resumeDevoir`.
+- `processusDeduits(generateurs, processusDe)` : processus des exercices faits ET joints au devoir ; la
+  table (`evaluationPayload.ts::GENERATEURS_EVALUATION_PILOTE`, `processus ?? 2` comme `lignesInitiales`)
+  est INJECTÉE ; générateur absent de la table : ignoré, jamais deviné.
+- `objectifPropose(parties, chapitre)` : « Je suis capable d'expliquer et d'utiliser : <titres des
+  sous-parties cochées, ou titre court de la section entière> . » — il n'existe PAS de champ « objectif »
+  dans le contenu ; la phrase est une PROPOSITION à reformuler, jamais présentée comme venant du programme.
+  `essentielsDesParties` : « L'essentiel » des sections touchées, montré à côté comme aide (jamais copié).
+- `donneesTexteAgenda(seance, r, { lienGenerateur, processusDe, evenement, objectif, transversales })` →
+  `texteAgenda(d, rubriques)` / `htmlAgenda(d, rubriques)` : en-tête « Mardi 24 novembre 2026 · H4 (11h35 →
+  12h25) · 5Ge », « MATHÉMATIQUES — Chapitre 3 : Suites », puis les rubriques non vides séparées par une ligne
+  vide : objectif ; « • § 3 Titre » + « – sous-partie » + lien de l'ancre ; « • Processus : Appliquer (…) ·
+  Transférer (…) » et « • Transversales : … » (rubrique omise si les deux sont coupés ou vides) ; « • titre —
+  lien » des exercices faits ; « Devoir pour le jeudi 26/11 » (ou « Devoir ») + consigne + exercices joints ;
+  « Interro annoncée : lundi 7/12 (H2) — § 2 et § 3 (suites géométriques, convergence et divergence). »
+  (« Contrôle-bilan annoncé : … », « 📝 Interro faite en classe — … »). Rubriques (`Rubriques`, maquette) :
+  objectif, processus, transversales, liens, émojis — Vu en classe, Pour s'entraîner, Devoir et Interro
+  apparaissent dès qu'ils ont un contenu. HTML : titres en gras, listes imbriquées, liens cliquables.
+  La remarque n'est JAMAIS copiée. `lireRubriques` / `lireCompetences` (tolérants), `erreurCompetence`.
+- `COMPETENCES_TRANSVERSALES_DEFAUT` (S'approprier une situation · Raisonner et argumenter · Communiquer
+  en langage mathématique · Généraliser et structurer · Utiliser un outil numérique) : liste PROPOSÉE, pas
+  officielle — l'école peut suivre FESeC ou WBE (pas encore précisé par l'utilisateur) : renommable,
+  complétable, supprimable dans les réglages.
+- `carnet.ts` : `Seance` / `SaisieSeance` + champs facultatifs de 0007, `TypeEvaluation`, `OBJECTIF_MAX`,
+  `erreursSeance` (`devoirPour` : pas avant la séance, ≤ un an ; `objectif` ≤ 300).
+
+**Interface** :
+- `FormulaireSeance` (titre « Noter la séance ») : blocs repliables `BlocFormulaire` (bouton
+  `aria-expanded`, résumé quand replié — « 2 parties · 2 exercices », « pour le jeu. 26/11 », « interro
+  lun. 7/12 ») : Matière vue (chapitre, parties, exercices faits — inchangés), Devoir (consigne ; « Pour le » =
+  puces radio « prochain cours · jeu. 26/11 » / « lun. 30/11 » / « Autre date… » + `type="date"`, prochain
+  cours d'office ; sans horaire : autre date seule ; exercices en ligne à joindre = générateurs du chapitre ;
+  note « Le devoir apparaît aussi dans l'agenda du jeudi 26/11 (« À rendre ») et dans la page de la
+  classe »), Évaluation (type en puces ; « Pas d'évaluation pour cette séance » pour retirer ; annonce /
+  bilan : date — proposée au premier cours au moins une semaine après — et heure facultative = créneaux de
+  la classe ce jour-là ; parties = sections déjà vues par la classe dans le chapitre + cochées aujourd'hui,
+  toutes cochées ; `AvertissementsInterro` de 0006 ; « Préparer l'évaluation » = `urlEvaluationMatiere`
+  (`?matiere=` + `classe` + `cid`) et « Choisir dans mon coffre » = `/coffre?niveau=<levelSlug>&q=<titre
+  court du chapitre>`, LIENS dans un nouvel onglet : la saisie reste dans le panneau), Remarque privée, aperçu
+  du texte. Pied : Annuler · Enregistrer et copier · Enregistrer (principal). Annonce / bilan sans 0006 :
+  puces désactivées + `MessageAgendaInactif`.
+- `CarnetPage.enregistrerSeance(s, copier, annonce)` : annonce / bilan → crée (ou MET À JOUR, jamais de
+  doublon) l'événement « Interrogation » (intitulé « Contrôle-bilan » pour un bilan, chapitre de la séance),
+  puis la séance avec `evaluation_evenement` ; échec de la séance → l'interro qu'on vient de créer est
+  retirée ; passer à « faite » ou retirer l'évaluation supprime l'interro liée. Message « Séance enregistrée.
+  Interro du lundi 7/12 ajoutée à l'agenda. ». Supprimer une séance garde son interro dans l'agenda.
+- Copie : « Copier pour Smartschool » (`ActionsSeance`, « Enregistrer et copier ») = `contexteCarnet.ts::
+  textesSeance` avec les rubriques mémorisées ; l'objectif n'y figure que s'il a été validé dans le panneau
+  du texte (la phrase proposée n'est jamais copiée sans relecture). Le menu « … » gagne « Texte pour l'agenda
+  scolaire (rubriques)… » → `TexteAgenda.tsx` (panneau large `PanneauLateral large`, 1 180 px) : texte exact à
+  gauche (`<pre>`), à droite « Ce que contient le texte » (5 cases de la maquette, mémorisées dès qu'on les
+  change), objectif pré-rempli modifiable (« Reprendre la phrase proposée », L'essentiel replié en aide),
+  puces des compétences transversales de la liste (`aria-pressed`, ✓ ; une compétence cochée puis renommée
+  dans la liste reste affichée), « Copier pour Smartschool » (objectif et compétences enregistrés avec la
+  séance, `enregistrerTexteSeance`). L'agenda d'une période garde son texte d'avant (`texteSmartschool`).
+- Processus : table chargée À PART (`components/carnet/processusCarnet.ts`, `import()` de
+  `evaluationPayload.ts` — ≈ 1,9 Mo / 0,5 Mo compressé, partagé avec le panneau des évaluations — lancé 400 ms
+  après l'affichage du carnet) ; avant son arrivée, le texte n'a pas de ligne « Processus ».
+- « À rendre » (`DevoirsARendre.tsx`, bouton qui ouvre la séance où le devoir a été donné) : Aujourd'hui
+  (sur le premier créneau de la classe ce jour-là, sinon liste en tête), Ma semaine (rangée d'en-tête du
+  jour, à côté des événements et des remises), page de la classe (« À rendre en 5Ge », 4 semaines),
+  Agenda d'une période (« Devoirs à rendre de la période »). Carte de séance : « Devoir pour le jeudi 26/11 »,
+  exercices joints, « Évaluation : interro annoncée le lundi 7/12 (H2) — § 2, § 3 ».
+- Réglages du carnet : `ReglagesTexteAgenda` (rubriques par défaut ; « Mes compétences transversales » :
+  renommer — Entrée / Échap —, retirer, ajouter — doublon refusé, 12 au plus —, « Revenir à la liste
+  proposée » ; « pas une liste officielle … (FESeC, WBE…) »).
+- Coffre : `?q=` pré-remplit la recherche, `?niveau=` filtre le niveau s'il est présent dans le coffre ;
+  les deux sont retirés de l'adresse après lecture.
+- Styles : fin de `carnet.css` (blocs sur fond `--paper`, puces `.agenda-choix` de l'agenda, `.carnet-a-rendre`
+  sur `--accent-soft`, compétences cochées `--good-soft` ; clair et sombre par les jetons).
+
+**Vérifications** (dossier de travail `carnet-devoir/` : `devoirs.test.ts`, `test_sql.py`, `faux-supabase.js`
+étendu — colonnes 0007, option `devoirsAbsent` (42703 / PGRST204), contraintes, SET NULL —, `donnees.mjs` =
+maquette, mardi 24/11/2026 12h30, `parcours.mjs`, captures dans `captures/`) : Playwright sur un build
+`NODE_ENV=development vite build --mode test` (variables Supabase factices dans `.env.test.local`, non suivi),
+iPhone 13 et 1 280 px, clair et sombre — 363 vérifications : puces « Pour le » (maquette, JP du 26/11 qui
+décale à lun. 30/11), chaque « Pour le » enregistré puis retrouvé, date avant la séance refusée, exercices
+joints, interro annoncée (événement créé : date, heure, classe, chapitre ; avertissement « 4 jours de
+classe »), faite (événement retiré), contrôle-bilan (« Contrôle-bilan », journée), nouvelle annonce = même
+événement mis à jour, « À rendre » dans Aujourd'hui / Ma semaine / page classe / agenda d'une période,
+`?matiere=` → panneau d'évaluation « Matière vue en 5Ge : 2 sections », lien du coffre, copie relue (texte et
+HTML) avec rubriques coupées / rétablies, collage réel dans un `<textarea>` et en HTML, objectif et
+compétences enregistrés, compétences renommées / ajoutées / retirées (doublon refusé), 0007 absent (messages,
+séance enregistrée sans ces colonnes, aucune écriture de colonne 0007, copie), cibles ≥ 44 px, aucun champ
+numérique, `scrollWidth` = largeur, 0 erreur console. `npm run build` : 24 pages.
+
+**Mise en service** : SQL Editor → New query → coller TOUT `0007_devoirs_evaluations.sql` → Run → « Success.
+No rows returned » ; recharger `/carnet` → Noter la séance → blocs Devoir et Évaluation ; Réglages → « Texte
+pour l'agenda scolaire » (adapter la liste des compétences au programme de l'école). À vérifier contre le
+vrai projet : séance avec devoir pour le prochain cours, interro annoncée (événement créé, lien), copie dans
+Smartschool (émojis lisibles ? sinon décocher « Émojis de section »).
 
 ## Page « Mon profil » refondue (21/11/2026 : proposition A, style du carnet, AUCUNE migration)
 

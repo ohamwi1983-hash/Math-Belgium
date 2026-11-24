@@ -14,7 +14,7 @@ function focusables(racine: HTMLElement): HTMLElement[] {
  * focus revient à l'élément qui l'a ouvert ; défilement de la page bloqué pendant l'ouverture. Un
  * clic sur le voile ne ferme PAS (une saisie en cours ne doit pas se perdre sur un geste de travers).
  */
-export function PanneauLateral({ titreId, onFermer, children }: { titreId: string; onFermer: () => void; children: ReactNode }) {
+export function PanneauLateral({ titreId, onFermer, children, large = false }: { titreId: string; onFermer: () => void; children: ReactNode; large?: boolean }) {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const precedent = document.activeElement instanceof HTMLElement ? document.activeElement : null
@@ -56,7 +56,7 @@ export function PanneauLateral({ titreId, onFermer, children }: { titreId: strin
   return createPortal(
     <div className="carnet-panneau-fond" onKeyDown={clavier}>
       <div className="carnet-panneau-voile" aria-hidden="true" />
-      <div className="carnet-panneau" role="dialog" aria-modal="true" aria-labelledby={titreId} ref={ref} tabIndex={-1}>
+      <div className={`carnet-panneau${large ? ' large' : ''}`} role="dialog" aria-modal="true" aria-labelledby={titreId} ref={ref} tabIndex={-1}>
         {children}
       </div>
     </div>,

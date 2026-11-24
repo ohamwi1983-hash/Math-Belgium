@@ -16,10 +16,15 @@
  * Heure zéro (`0004_heure_zero.sql`, colonne `horaires_ecoles.heure_zero`, numéro 0 accepté) :
  * FACULTATIVE aussi. Sans 0004, `chargerHoraire` renvoie `heureZero: false` (grilles relues sans la
  * colonne) et le site n'écrit jamais ni la colonne ni le numéro 0.
+ *
+ * Devoirs, évaluations et texte en rubriques (`0007_devoirs_evaluations.sql`, colonnes de `seances`
+ * et de `carnet_reglages`) : FACULTATIFS. `chargerSeances` relit sans ces colonnes si 0007 n'est pas
+ * appliqué (`devoirs: false`), et le site ne les écrit alors jamais.
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { messageErreur } from './compteValidation'
 import { REGLAGES_DEFAUT, type Classe, type ReglagesCarnet, type SaisieSeance, type Seance } from './carnet'
+import { lireCompetences, lireRubriques, type Rubriques } from './carnetDevoirs'
 import { nettoyerGrille, type CaseHoraire, type GrilleHoraire, type SaisieGrille } from './horaire'
 
 /** Codes renvoyés quand une table n'existe pas encore (PostgREST : cache de schéma ; Postgres). */
@@ -34,6 +39,10 @@ export class ErreurCarnet extends Error {
     const absente = CODES_TABLE_ABSENTE.has(code) || /could not find the table|relation .* does not exist|schema cache/i.test(String(b.message ?? ''))
     let message: string
     if (absente) message = 'Carnet pas encore activé.'
+    else if (code === '23514' && /seances_devoir_pour_valide/i.test(String(b.message ?? ''))) message = 'Date de remise du devoir refusée : elle doit suivre la séance (un an au plus).'
+    else if (code === '23514' && /seances_(devoir_generateurs|objectif|competences|evaluation)/i.test(String(b.message ?? ''))) message = 'Devoir ou évaluation refusé par le serveur (valeur hors limites) : vérifie le formulaire.'
+    else if (code === '23514' && /carnet_reglages_(rubriques|competences)/i.test(String(b.message ?? ''))) message = 'Réglage du texte refusé par le serveur : recharge la page.'
+    else if (code === '23503' && /seances_evaluation_evenement/i.test(String(b.message ?? ''))) message = 'Interrogation introuvable dans l’agenda (supprimée ?) : recharge la page.'
     else if (code === '23505' && /periodes_bulletin/i.test(String(b.message ?? ''))) message = 'Une autre période a déjà ce numéro ou cette date (autre onglet ?) : recharge la page.'
     else if (code === '23505' && /evenements/i.test(String(b.message ?? ''))) message = 'Cette classe est déjà dans l’événement : recharge la page.'
     // Ancienne version de 0006 (sans « absence_professeur ») encore en place dans la base.
@@ -60,6 +69,15 @@ const COLONNES_CLASSE = 'id, ecole_id, nom, niveau, cree_le'
 const COLONNES_SEANCE = 'id, classe_id, date_seance, heure_debut, heure_fin, numero_heure, niveau, chapitre, parties, generateurs, devoir, remarque, cree_le, modifie_le'
 /** Avec 0003 : la dernière heure d'une heure double en plus. */
 const COLONNES_SEANCE_HORAIRE: string = `${COLONNES_SEANCE}, numero_heure_fin`
+/** Avec 0007 : devoir (date, exercices joints), objectif, compétences, évaluation. */
+const COLONNES_0007 = 'devoir_pour, devoir_generateurs, objectif, competences, evaluation_type, evaluation_parties, evaluation_evenement'
+const NOMS_0007 = /devoir_pour|devoir_generateurs|objectif|competences|evaluation_type|evaluation_parties|evaluation_evenement|rubriques|competences_transversales/i
+
+/** Colonne de 0007 inconnue : 0007 pas appliqué (Postgres 42703 en lecture, PGRST204 en écriture). */
+export function colonne0007Absente(erreur: unknown): boolean {
+  const e = (erreur ?? {}) as { code?: string; message?: string }
+  return NOMS_0007.test(String(e.message ?? '')) && (e.code === '42703' || e.code === 'PGRST204' || /does not exist|schema cache|could not find/i.test(String(e.message ?? '')))
+}
 const COLONNES_GRILLE = 'ecole_id, debut, duree_heure, nombre_heures, pauses, heures_mercredi, exceptions'
 /** Avec 0004 : l'heure zéro en plus. */
 const COLONNES_GRILLE_H0: string = `${COLONNES_GRILLE}, heure_zero`
@@ -86,18 +104,53 @@ export async function supprimerClasse(c: SupabaseClient, id: string): Promise<vo
 
 /* ------------------------------------------------------------------------------- séances */
 
+const textes = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [])
+
 function nettoyer(s: Seance): Seance {
-  return { ...s, parties: Array.isArray(s.parties) ? s.parties : [], generateurs: Array.isArray(s.generateurs) ? s.generateurs : [], devoir: s.devoir ?? '', remarque: s.remarque ?? '' }
+  const base: Seance = { ...s, parties: Array.isArray(s.parties) ? s.parties : [], generateurs: Array.isArray(s.generateurs) ? s.generateurs : [], devoir: s.devoir ?? '', remarque: s.remarque ?? '' }
+  if (!('devoir_generateurs' in s)) return base
+  return {
+    ...base,
+    devoir_pour: s.devoir_pour ?? null,
+    devoir_generateurs: textes(s.devoir_generateurs),
+    objectif: s.objectif ?? '',
+    competences: textes(s.competences),
+    evaluation_type: s.evaluation_type ?? null,
+    evaluation_parties: textes(s.evaluation_parties),
+    evaluation_evenement: s.evaluation_evenement ?? null,
+  }
 }
 
-/** `horaire` : 0003 appliqué (colonne `numero_heure_fin` présente). */
-export async function listerSeances(c: SupabaseClient, horaire = false): Promise<Seance[]> {
-  const colonnes: string = horaire ? COLONNES_SEANCE_HORAIRE : COLONNES_SEANCE
-  const liste = (verifier(await c.from('seances').select(colonnes).order('date_seance', { ascending: false })) ?? []) as unknown as Seance[]
+function colonnesSeance(horaire: boolean, devoirs: boolean): string {
+  return `${horaire ? COLONNES_SEANCE_HORAIRE : COLONNES_SEANCE}${devoirs ? `, ${COLONNES_0007}` : ''}`
+}
+
+/** `horaire` : 0003 appliqué (colonne `numero_heure_fin` présente) ; `devoirs` : 0007 appliqué. */
+export async function listerSeances(c: SupabaseClient, horaire = false, devoirs = false): Promise<Seance[]> {
+  const liste = (verifier(await c.from('seances').select(colonnesSeance(horaire, devoirs)).order('date_seance', { ascending: false })) ?? []) as unknown as Seance[]
   return liste.map(nettoyer)
 }
 
-function ligneSeance(s: SaisieSeance, horaire: boolean): Record<string, unknown> {
+/** Séances avec les colonnes de 0007 si elles existent ; sinon sans (`devoirs: false`, carnet d'avant). */
+export async function chargerSeances(c: SupabaseClient, horaire = false): Promise<{ seances: Seance[]; devoirs: boolean }> {
+  const avec = await c.from('seances').select(colonnesSeance(horaire, true)).order('date_seance', { ascending: false })
+  if (avec.error && colonne0007Absente(avec.error)) return { seances: await listerSeances(c, horaire, false), devoirs: false }
+  return { seances: ((verifier(avec) ?? []) as unknown as Seance[]).map(nettoyer), devoirs: true }
+}
+
+function ligneSeance(s: SaisieSeance, horaire: boolean, devoirs = false): Record<string, unknown> {
+  const evaluation = devoirs ? (s.evaluation_type ?? null) : null
+  const avec0007 = devoirs
+    ? {
+        devoir_pour: s.devoir_pour || null,
+        devoir_generateurs: s.devoir_generateurs ?? [],
+        objectif: (s.objectif ?? '').replace(/\s+/g, ' ').trim(),
+        competences: s.competences ?? [],
+        evaluation_type: evaluation,
+        evaluation_parties: evaluation ? (s.evaluation_parties ?? []) : [],
+        evaluation_evenement: evaluation === 'annonce' || evaluation === 'bilan' ? (s.evaluation_evenement ?? null) : null,
+      }
+    : {}
   const heureDouble = horaire ? { numero_heure_fin: s.numero_heure !== null && s.numero_heure_fin !== null && s.numero_heure_fin !== undefined && s.numero_heure_fin > s.numero_heure ? s.numero_heure_fin : null } : {}
   return {
     ...heureDouble,
@@ -112,16 +165,21 @@ function ligneSeance(s: SaisieSeance, horaire: boolean): Record<string, unknown>
     generateurs: s.generateurs,
     devoir: s.devoir.trim(),
     remarque: s.remarque.trim(),
+    ...avec0007,
   }
 }
 
-export async function ajouterSeance(c: SupabaseClient, s: SaisieSeance, horaire = false): Promise<Seance> {
-  const colonnes: string = horaire ? COLONNES_SEANCE_HORAIRE : COLONNES_SEANCE
-  return nettoyer(verifier(await c.from('seances').insert(ligneSeance(s, horaire)).select(colonnes).single()) as unknown as Seance)
+export async function ajouterSeance(c: SupabaseClient, s: SaisieSeance, horaire = false, devoirs = false): Promise<Seance> {
+  return nettoyer(verifier(await c.from('seances').insert(ligneSeance(s, horaire, devoirs)).select(colonnesSeance(horaire, devoirs)).single()) as unknown as Seance)
 }
 
-export async function modifierSeance(c: SupabaseClient, id: string, s: SaisieSeance, horaire = false): Promise<void> {
-  verifier(await c.from('seances').update(ligneSeance(s, horaire)).eq('id', id))
+export async function modifierSeance(c: SupabaseClient, id: string, s: SaisieSeance, horaire = false, devoirs = false): Promise<void> {
+  verifier(await c.from('seances').update(ligneSeance(s, horaire, devoirs)).eq('id', id))
+}
+
+/** Objectif et compétences transversales d'une séance (panneau « Texte pour l'agenda scolaire », 0007). */
+export async function enregistrerTexteSeance(c: SupabaseClient, id: string, valeurs: { objectif: string; competences: string[] }): Promise<void> {
+  verifier(await c.from('seances').update({ objectif: valeurs.objectif.replace(/\s+/g, ' ').trim(), competences: valeurs.competences }).eq('id', id))
 }
 
 export async function supprimerSeance(c: SupabaseClient, id: string): Promise<void> {
@@ -138,6 +196,30 @@ export async function lireReglages(c: SupabaseClient): Promise<{ reglages: Regla
 export async function enregistrerReglages(c: SupabaseClient, reglages: ReglagesCarnet, existe: boolean, proprietaire: string): Promise<void> {
   if (existe) verifier(await c.from('carnet_reglages').update({ format_horaire: reglages.format_horaire, duree_heure: reglages.duree_heure }).eq('proprietaire', proprietaire))
   else verifier(await c.from('carnet_reglages').insert({ format_horaire: reglages.format_horaire, duree_heure: reglages.duree_heure }))
+}
+
+/** Réglages du texte pour l'agenda scolaire (0007) : rubriques activées, liste des compétences
+ * transversales. `actif: false` : 0007 pas appliqué (défauts, rien n'est mémorisé). */
+export interface ReglagesTexte {
+  actif: boolean
+  rubriques: Rubriques
+  competences: string[]
+}
+
+export async function lireReglagesTexte(c: SupabaseClient): Promise<ReglagesTexte> {
+  const res = await c.from('carnet_reglages').select('rubriques, competences_transversales').maybeSingle()
+  if (res.error && colonne0007Absente(res.error)) return { actif: false, rubriques: lireRubriques(null), competences: lireCompetences(null) }
+  const ligne = verifier(res) as { rubriques?: unknown; competences_transversales?: unknown } | null
+  return { actif: true, rubriques: lireRubriques(ligne?.rubriques ?? null), competences: lireCompetences(ligne?.competences_transversales ?? null) }
+}
+
+/** Enregistre les rubriques et / ou la liste des compétences (ligne de réglages créée si besoin). */
+export async function enregistrerReglagesTexte(c: SupabaseClient, valeurs: { rubriques?: Rubriques; competences?: string[] }, existe: boolean, proprietaire: string): Promise<void> {
+  const ligne: Record<string, unknown> = {}
+  if (valeurs.rubriques) ligne.rubriques = valeurs.rubriques
+  if (valeurs.competences) ligne.competences_transversales = valeurs.competences
+  if (existe) verifier(await c.from('carnet_reglages').update(ligne).eq('proprietaire', proprietaire))
+  else verifier(await c.from('carnet_reglages').insert(ligne))
 }
 
 /* ------------------------------------------------------------------------------- horaire (0003) */

@@ -366,3 +366,101 @@ h3.carnet-date { font-size: 0.78rem; }
   .carnet-classe-actions > * { flex: 1 1 auto; }
   .carnet-classe-actions .principal { flex-basis: 100%; order: -1; }
 }
+
+/* ---------- Noter la séance : blocs repliables (maquette du 24/11/2026, 0007) ---------- */
+.carnet-form-panneau .carnet-panneau-corps { background: var(--paper); gap: 12px; }
+.carnet-bloc { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--radius); }
+.carnet-bloc-titre { margin: 0; font: inherit; }
+.carnet-bloc-tete {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; padding: 12px 16px; border: 0; background: none;
+  color: var(--ink); font: 600 1rem var(--sans); text-align: left; cursor: pointer; border-radius: var(--radius);
+}
+.carnet-bloc.ouvert .carnet-bloc-tete { border-bottom: 1px solid var(--line-soft); border-radius: var(--radius) var(--radius) 0 0; }
+.carnet-bloc-tete:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.carnet-bloc-icone { display: inline-flex; color: var(--accent); flex: none; }
+.carnet-bloc-nom { flex: none; }
+.carnet-bloc-resume { flex: 1 1 auto; min-width: 0; margin-left: 4px; font: 500 0.85rem var(--sans); color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
+.carnet-bloc-chevron { margin-left: auto; flex: none; color: var(--ink-soft); font-size: 0.85rem; }
+.carnet-bloc-corps { display: flex; flex-direction: column; gap: 14px; padding: 14px 16px 16px; }
+.carnet-bloc-corps[hidden] { display: none; }
+.carnet-etiquette-bloc { padding: 0; font: 600 0.95rem var(--sans); color: var(--ink); }
+.carnet-bloc .compte-champ label.carnet-etiquette-bloc { font-weight: 600; }
+.carnet-bloc .agenda-choix.bloque { opacity: 0.5; cursor: not-allowed; }
+.carnet-code-gen { color: var(--ink-soft); white-space: nowrap; }
+.carnet-devoir-note { margin: 0; }
+.carnet-retirer-eval { align-self: flex-start; min-height: 40px; }
+.carnet-eval-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.carnet-eval-actions .carnet-bouton { min-height: 52px; white-space: normal; justify-content: flex-start; text-align: left; }
+.carnet-devoirs-inactif { margin: 0; }
+.carnet-panneau-pied .carnet-bouton.principal { min-width: 160px; }
+.carnet-seance-joints { display: block; color: var(--ink-soft); }
+
+/* ---------- devoirs « À rendre » (Aujourd'hui, Ma semaine, page classe, agenda d'une période) ---------- */
+.carnet-a-rendre {
+  display: inline-flex; align-items: flex-start; gap: 6px; min-height: 36px; padding: 6px 10px; border: 1px dashed var(--accent-soft-line); border-radius: var(--radius);
+  background: var(--accent-soft); color: var(--accent-ink); font: 500 0.82rem/1.35 var(--sans); text-align: left; cursor: pointer; max-width: 100%; box-sizing: border-box;
+}
+.carnet-a-rendre svg { flex: none; margin-top: 2px; }
+.carnet-a-rendre span { min-width: 0; overflow-wrap: anywhere; }
+.carnet-a-rendre strong { font-weight: 700; }
+.carnet-a-rendre:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.carnet-a-rendre.compacte { min-height: 32px; padding: 3px 8px; font-size: 0.78rem; }
+.agenda-entete-jour .carnet-a-rendre { width: 100%; }
+.carnet-a-rendre-ligne { display: flex; margin-top: 4px; }
+.carnet-liste-a-rendre { display: flex; flex-direction: column; gap: 8px; }
+.carnet-liste-a-rendre h3 { margin: 0; font: 600 1rem var(--sans); }
+.carnet-liste-a-rendre ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.carnet-liste-a-rendre .carnet-a-rendre { min-height: 44px; width: 100%; align-items: center; }
+.carnet-liste-a-rendre .carnet-a-rendre svg { margin-top: 0; }
+
+/* ---------- panneau « Texte pour l'agenda scolaire » ---------- */
+.carnet-panneau.large { max-width: 1180px; }
+.carnet-texte-agenda { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.carnet-texte-corps { background: var(--paper); }
+.carnet-texte-colonnes { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+.carnet-texte-apercu { flex: 999 1 520px; min-width: 0; background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--radius); padding: 18px 20px; }
+.carnet-texte-pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: 400 0.9rem/1.55 var(--mono); color: var(--ink); }
+.carnet-texte-options { flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 12px; background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--radius); padding: 16px 18px; }
+.carnet-texte-options h3 { margin: 0; font: 600 1rem var(--sans); }
+.carnet-texte-options h4 { margin: 0; font: 600 0.88rem var(--sans); color: var(--ink-soft); }
+.carnet-texte-rubriques { display: flex; flex-direction: column; gap: 2px; }
+.carnet-texte-rubrique { display: flex; gap: 10px; align-items: flex-start; min-height: 44px; padding: 6px 0; cursor: pointer; }
+.carnet-texte-rubrique input { width: 22px; height: 22px; margin: 1px 0 0; flex: none; accent-color: var(--ink); }
+.carnet-texte-rubrique > span { display: flex; flex-direction: column; min-width: 0; }
+.carnet-texte-rubrique-nom { font: 500 0.95rem var(--sans); color: var(--ink); }
+.carnet-texte-rubrique-aide { font: 400 0.8rem var(--sans); color: var(--ink-soft); }
+.carnet-texte-note { margin: 0; }
+.carnet-texte-objectif, .carnet-texte-competences { border-top: 1px solid var(--line-soft); padding-top: 12px; display: flex; flex-direction: column; gap: 8px; margin: 0; }
+.carnet-texte-objectif label { font-weight: 600; }
+.carnet-texte-objectif .compte-bouton-lien { align-self: flex-start; min-height: 40px; }
+.carnet-texte-essentiel { margin: 0; padding-left: 18px; font-size: 0.85rem; color: var(--ink-soft); display: flex; flex-direction: column; gap: 4px; }
+.carnet-texte-puces { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.carnet-puce-competence {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface); color: var(--ink-soft); font: 600 0.82rem var(--sans); cursor: pointer; text-align: left;
+}
+.carnet-puce-competence.on { background: var(--good-soft); border-color: var(--good); color: var(--good); }
+.carnet-puce-competence:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.carnet-texte-copier { gap: 8px; }
+@media (max-width: 759px) {
+  .carnet-texte-apercu { padding: 14px; }
+  .carnet-texte-pre { font-size: 0.82rem; }
+  .carnet-eval-actions { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- réglages : texte pour l'agenda scolaire ---------- */
+.carnet-reglages-texte { display: flex; flex-direction: column; gap: 10px; }
+.carnet-reglages-sous-titre { margin: 8px 0 0; font: 600 0.95rem var(--sans); }
+.carnet-liste-competences { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.carnet-liste-competences > li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; border-top: 1px solid var(--line-soft); }
+.carnet-liste-competences > li:first-child { border-top: 0; }
+.carnet-competence-nom { flex: 1 1 200px; min-width: 0; overflow-wrap: anywhere; }
+.carnet-competence-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.carnet-competence-actions .carnet-bouton { min-height: 44px; }
+.carnet-competence-edition { flex-direction: column; align-items: stretch !important; }
+.carnet-competence-edition .compte-champ { margin: 0; }
+.carnet-competence-ajout { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; }
+.carnet-competence-ajout .compte-champ { flex: 1 1 240px; margin: 0; min-width: 0; }
+.carnet-competence-ajout .carnet-bouton { min-height: 44px; }
+.carnet-tous-gens { align-self: flex-start; min-height: 40px; }
+.carnet-puce-competence { gap: 5px; }
