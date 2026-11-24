@@ -97,6 +97,7 @@ export type IdGenerateurPilote =
   | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84' | '6gen82' | '6gen78' | '6gen80' | '6gen83' | '6gen79' | '6gen81'
   | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42' | '6gen93' | '6gen95' | '6gen94' | '6gen97' | '6gen96' | '6gen98' | '6gen99'
   | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
+  | '6gen162' | '6gen163'
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
@@ -254,6 +255,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'probabilites', sectionId: 'independancebayes', generatorId: '6gen74', label: 'Arbre, tableau, effectifs (6gen74)' },
   { chapitreSlug: 'probabilites', sectionId: 'probabilitesproblemes', generatorId: '6gen33', label: 'Problèmes de probabilités (6gen33)', processus: 3 },
   { chapitreSlug: 'probabilites', sectionId: 'probabilitesproblemes', generatorId: '6gen76', label: 'Paradoxes (6gen76)', processus: 3 },
+  { chapitreSlug: 'probabilites', sectionId: 'probabilitesensembles', generatorId: '6gen162', label: 'Probabilités géométriques (6gen162)', processus: 2 },
+  { chapitreSlug: 'probabilites', sectionId: 'probabilitesproblemes', generatorId: '6gen163', label: 'Détective d\'erreurs : probabilités (6gen163)', processus: 3 },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'points-droites-remarquables', generatorId: '6gen54', label: '' },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'cercles', generatorId: '6gen55', label: '' },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'lieux-elimination', generatorId: '6gen56', label: '' },
@@ -1797,6 +1800,8 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: "les trois écritures de l'indépendance", enonce: "Démontre que les trois écritures de l'indépendance de $A$ et $B$ — $P(A|B)=P(A)$, $P(A \\cap B)=P(A) \\times P(B)$ et $P(B|A)=P(B)$ — sont équivalentes lorsque $P(A)$ et $P(B)$ sont non nulles." },
       { cle: 'ce dé est-il truqué ?', enonce: "On lance un dé 600 fois et on obtient 130 fois le 6. Avec la règle de décision suivante — l'écart entre une fréquence $f$ et une probabilité $p$ est significatif quand l'écart relatif $\\frac{|f-p|}{p}$ dépasse 50 % pour moins de 100 essais, 25 % de 100 à 400 essais, 18 % de 401 à 1 000 essais et 12 % au-delà —, dis si le dé peut être considéré comme équilibré. Reprends ensuite la question avec 13 fois le 6 sur 60 lancers." },
       { cle: 'cœur et figure', enonce: "On tire une carte au hasard dans un jeu de 52 cartes. On note $A$ l'événement « tirer un cœur » et $B$ l'événement « tirer une figure ». Les événements $A$ et $B$ sont-ils indépendants ? Justifie par un calcul." },
+      { cle: 'fléchette sur une cible', enonce: "Une fléchette atteint toujours une cible circulaire de rayon 5 cm, chaque point de la cible ayant la même chance d'être atteint. Calcule la probabilité qu'elle tombe dans la couronne comprise entre les cercles de rayons 3 cm et 5 cm (valeur exacte)." },
+      { cle: 'rendez-vous entre 12 h et 13 h', enonce: "Anna et Ben arrivent chacun à un instant choisi au hasard entre 12 h et 13 h, indépendamment l'un de l'autre, et chacun attend l'autre 15 minutes avant de partir. Calcule la probabilité qu'ils se rencontrent." },
     ],
     tiragesarbres: [
       { cle: "pourquoi on multiplie le long d'un chemin", enonce: "Démontre que la probabilité d'un chemin d'un arbre pondéré est le produit des probabilités des branches qu'il traverse : $P(A \\cap B) = P(A) \\times P(B|A)$, puis $P(A \\cap B \\cap C) = P(A) \\times P(B|A) \\times P(C|A \\cap B)$." },

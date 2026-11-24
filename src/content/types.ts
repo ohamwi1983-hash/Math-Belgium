@@ -583,6 +583,10 @@ export type IllustrationSpec =
        * cercle) : certains diagrammes ont réellement besoin de 2 cercles affichés à la fois, pas
        * d'un cercle unique répété. */
       circles?: { cx: number; cy: number; r: number; tone?: 'accent' | 'faint' | 'good' }[]
+      /** Zones ombrées (dessinées sous tout le reste) — probabilités géométriques (6e ch. 6) : un
+       * polygone (`polygon`, coordonnées du plan) ou une couronne (`ring`, rayon intérieur 0 = disque
+       * plein ; rayon moyenné comme `circles`). Optionnel : aucun rendu existant ne change. */
+      regions?: { polygon?: { x: number; y: number }[]; ring?: { cx: number; cy: number; rOuter: number; rInner: number }; tone: 'accent' | 'good' | 'bad' }[]
       /** Courbe(s) réelles tracées par échantillonnage, y = fn(x) — même mécanique que
        * `curvePlot.curves`, pour une parabole d'axe vertical sur ce plan. */
       curves?: { fn: (x: number) => number; tone: 'accent' | 'good' | 'bad' | 'attn' | 'tip' | 'ink' | 'faint'; xMin?: number; xMax?: number }[]

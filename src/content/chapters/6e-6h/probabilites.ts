@@ -265,6 +265,107 @@ export const probabilites: ChapterContent = {
             '$\\dfrac{35}{50} = 70\\,\\%$. C\'est encore une fréquence, mais calculée sur des simulations.',
           domaines: ['Météorologie', 'Statistique'],
         },
+        { kind: 'subheading', text: 'Probabilités géométriques : des aires au lieu de cas' },
+        {
+          kind: 'definition',
+          label: 'Probabilité géométrique',
+          items: [
+            'Quand le résultat d\'une expérience est un **point choisi au hasard** dans une figure — deux zones de même ' +
+              'aire ayant la même chance de contenir le point —, on ne peut plus compter les cas : il y en a une ' +
+              'infinité. On compare alors des aires : $P(A)=\\dfrac{\\text{aire de la zone favorable}}{\\text{aire totale}}$.',
+            'Sur un segment, on compare des longueurs : si $M$ est choisi au hasard sur $[AB]$, la probabilité que $M$ ' +
+              'tombe dans une partie de $[AB]$ vaut $\\dfrac{\\text{longueur de cette partie}}{AB}$. C\'est la même idée ' +
+              'que « favorables / possibles » : l\'aire (ou la longueur) remplace le nombre de cas.',
+          ],
+        },
+        {
+          kind: 'illustrationGroup',
+          items: [
+            {
+              kind: 'vectorPlane',
+              xMin: -6,
+              xMax: 6,
+              yMin: -5.625,
+              yMax: 5.625,
+              showAxes: false,
+              regions: [{ ring: { cx: 0, cy: 0, rOuter: 5, rInner: 3 }, tone: 'accent' }],
+              circles: [
+                { cx: 0, cy: 0, r: 5, tone: 'accent' },
+                { cx: 0, cy: 0, r: 3, tone: 'accent' },
+              ],
+              vectors: [
+                { from: { x: 0, y: 0 }, to: { x: 5, y: 0 }, tone: 'ink', arrow: false },
+                { from: { x: 0, y: 0 }, to: { x: -1.5, y: 2.598 }, tone: 'ink', arrow: false },
+              ],
+              points: [
+                { x: 0, y: 0, tone: 'ink' },
+                { x: 4, y: 0, label: '5 cm', tone: 'ink', labelPos: 'above', node: false },
+                { x: -0.75, y: 1.3, label: '3 cm', tone: 'ink', labelPos: 'left', node: false },
+              ],
+              caption: 'Cible de rayon 5 cm : la couronne colorée, entre les cercles de rayons 3 cm et 5 cm, est la zone favorable.',
+            },
+            {
+              kind: 'vectorPlane',
+              xMin: -10,
+              xMax: 70,
+              yMin: -10,
+              yMax: 65,
+              regions: [{ polygon: [{ x: 0, y: 0 }, { x: 15, y: 0 }, { x: 60, y: 45 }, { x: 60, y: 60 }, { x: 45, y: 60 }, { x: 0, y: 15 }], tone: 'good' }],
+              vectors: [
+                { from: { x: 0, y: 60 }, to: { x: 60, y: 60 }, tone: 'ink', arrow: false },
+                { from: { x: 60, y: 0 }, to: { x: 60, y: 60 }, tone: 'ink', arrow: false },
+                { from: { x: 15, y: 0 }, to: { x: 60, y: 45 }, tone: 'good', arrow: false },
+                { from: { x: 0, y: 15 }, to: { x: 45, y: 60 }, tone: 'good', arrow: false },
+              ],
+              points: [
+                { x: 15, y: 0, label: '15', tone: 'ink', labelPos: 'below' },
+                { x: 60, y: 0, label: '60', tone: 'ink', labelPos: 'below' },
+                { x: 0, y: 15, label: '15', tone: 'ink', labelPos: 'left' },
+                { x: 0, y: 60, label: '60', tone: 'ink', labelPos: 'left' },
+              ],
+              caption: 'Arrivées d\'Anna ($x$) et de Ben ($y$), en minutes après 12 h : ils se rencontrent dans la bande verte $|x-y|\\le 15$ ; hors de la bande restent deux triangles.',
+            },
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'fléchette sur une cible',
+          formula:
+            'Une fléchette atteint toujours une cible circulaire de rayon 5 cm, chaque point de la cible ayant la même ' +
+            'chance d\'être atteint. Quelle est la probabilité qu\'elle tombe dans la couronne comprise entre les cercles ' +
+            'de rayons 3 cm et 5 cm ?',
+          steps: [
+            { tag: 'aire totale', text: '$\\pi \\times 5^2 = 25\\pi\\ \\text{cm}^2$' },
+            { tag: 'aire favorable', text: '$\\pi \\times 5^2 - \\pi \\times 3^2 = 25\\pi - 9\\pi = 16\\pi\\ \\text{cm}^2$' },
+            { tag: 'quotient', text: '$P = \\dfrac{16\\pi}{25\\pi} = \\dfrac{16}{25}$' },
+          ],
+          result: { tag: 'résultat', text: '$P = \\dfrac{16}{25} = 0{,}64$ — le $\\pi$ se simplifie, mais les rayons restent au carré.' },
+        },
+        {
+          kind: 'piege',
+          text:
+            'Comparer des **rayons** au lieu d\'aires : $\\dfrac{5-3}{5}=\\dfrac{2}{5}$ est faux ici. Doubler le rayon ' +
+            'multiplie l\'aire par 4 : une probabilité géométrique se calcule toujours avec les aires (les longueurs au carré).',
+        },
+        {
+          kind: 'exemple',
+          badge: 'rendez-vous entre 12 h et 13 h',
+          formula:
+            'Anna et Ben arrivent chacun à un instant choisi au hasard entre 12 h et 13 h, indépendamment l\'un de ' +
+            'l\'autre, et chacun attend l\'autre 15 minutes avant de partir. Quelle est la probabilité qu\'ils se rencontrent ?',
+          steps: [
+            {
+              tag: 'modèle',
+              text:
+                'On note $x$ et $y$ leurs instants d\'arrivée, en minutes après 12 h : le point $(x\\,;y)$ est choisi au ' +
+                'hasard dans un carré de côté 60, d\'aire $60^2=3600$. Ils se rencontrent quand $|x-y|\\le 15$ : la bande ' +
+                'autour de la diagonale.',
+            },
+            { tag: 'aire défavorable', text: 'Hors de la bande, deux triangles rectangles isocèles de côtés $60-15=45$ : $2\\times\\dfrac{45\\times 45}{2}=2025$.' },
+            { tag: 'contraire', text: '$P(\\text{pas de rencontre})=\\dfrac{2025}{3600}=\\dfrac{9}{16}$' },
+          ],
+          result: { tag: 'résultat', text: '$P(\\text{rencontre})=1-\\dfrac{9}{16}=\\dfrac{7}{16}\\approx 0{,}44$' },
+        },
         { kind: 'subheading', text: 'Représenter A∪B et A∩B' },
         {
           kind: 'illustrationGroup',
@@ -514,6 +615,17 @@ export const probabilites: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 75. Fréquence et probabilité »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Probabilités géométriques',
+          generatorId: '6gen162',
+          description: [
+            'Point au hasard dans une figure : cible et couronne, carré et disque inscrit, rectangle et quart de disque, ' +
+              'point sur un segment, rendez-vous. Probabilité = aire (ou longueur) favorable / aire totale, en valeur exacte.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 162. Probabilités géométriques »',
         },
       ],
     },
@@ -1782,6 +1894,17 @@ export const probabilites: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 76. Quand l\'intuition se trompe »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Détective d\'erreurs : probabilités',
+          generatorId: '6gen163',
+          description: [
+            'Une copie d\'élève contient une ligne fausse : contraire de « au moins un », réunion, probabilité ' +
+              'conditionnelle inversée, tirage sans remise, chemin d\'arbre, ordre oublié. Trouve la ligne, nomme l\'erreur, corrige.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 163. Détective d\'erreurs : probabilités »',
         },
       ],
     },
