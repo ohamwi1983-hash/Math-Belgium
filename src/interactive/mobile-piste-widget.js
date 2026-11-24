@@ -19,7 +19,7 @@
    * Fenêtres FIXES par mouvement. Web Component (Shadow DOM).
    * ================================================================ */
 
-  var VITESSES_KMH = [30, 50, 70, 90];
+  var VITESSES_KMH = [30, 50, 70, 75, 90]; // 50 et 75 km/h : exemple du cours (vitesse × 1,5, distance × 2,25)
   var D_BORNES = { min: 6, max: 8, step: 0.5, defaut: 7 };
   var DEFAUT_V0 = 50;
 

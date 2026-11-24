@@ -2532,6 +2532,42 @@ paths:
   `versionPapier`, `evaluationPayload.ts` : processus 2 / 3 / 2 ; libellés des lignes pilotes 5gen27,
   5gen28, 5gen29 remplis). Détail : `.claude/rules/feuilles-evaluations.md`, « 5e ch. 5, nouveaux
   générateurs — 5gen68–70 ».
+- **5e (4h), Chapitre 5 — Dérivées et applications** (suite) : audit du 24/11, lots A, E, F, G (toutes
+  les recommandations validées). **A (cours)** : astuce « La même méthode, même avec une racine » (le
+  taux de √x donne 0⁄0, jamais ∞ − ∞) ; dichotomie « à moins de 0,04 près » (dernier intervalle de
+  largeur 0,0625) ; Barrow QUITTE sa chaire (théologie) et RECOMMANDE Newton (plus de « cède à son
+  élève ») ; point critique sans extremum = inflexion « pour les fonctions de ce chapitre » ; sommet
+  lisse (en un point anguleux f′ n'existe pas) ; tableau taux / nombre dérivé transposé (une ligne par
+  lecture) ; Fermat 1601 ou 1607 ; Rm = Cm en KaTeX. Parcours : 3 parties (« Le nombre dérivé et la
+  tangente » 1–3, « Signe de f′ et de f″ : étudier une fonction » 4–7, « Optimiser et modéliser »
+  8–11), 11 `titreCourt`, 31 phrases d'`essentiel`, 42 cartes (une « Où est l'erreur ? » par section,
+  tirée de ses pièges). Formulaire : groupe « Conditions, unités, distances et temps » (5gen69–71) ;
+  banque « Formule » : unité de f′(a), conditions sur ax³ + bx² + cx + d, AM², t = d/v, freinage.
+  Questions de compréhension : « toujours » retiré (fonction dérivable, polynôme). **F** : 11
+  démonstrations tirables (D2–D12 : produit, (k·u)′ et (u + v)′, (xⁿ)′ de proche en proche, quotient
+  par 1⁄v, tan, racine double au contact, dérivable ⟹ continue, f′(a) = 0 en un extremum intérieur,
+  carré et canette h = 2r, Rm = Cm et C′ = C_M, freinage v₀²/(2a)) et 6 exemples (√(x + 5) par la
+  définition, Δ < 0 sans tangente horizontale, f(a) et f′(a) lus sur une tangente tracée, unité et
+  signe d'un taux, quatre conditions, point de √x le plus proche) ; 17 énoncés par clé — clés
+  « bénéfice maximal, vérification » et « coût moyen minimal, par dichotomie » précisées (sinon
+  ambiguës avec D11) ; le libellé de D12 évite « distance de freinage » (clé de l'exemple). D8/D9 sont
+  AU MILIEU du § 4 (l'exemple « dérivée à gauche et à droite » du lot H va en fin de § 4). **E** : quiz
+  5gen43 = 10 thèmes × 35 (18 V / 17 F), « applications en contexte » réparti en `optimisation`,
+  `economie`, `extremaBornes`, `mouvement` ; `nombreQuestions` / `etendueNombreQuestions` (accueil
+  calculé) ; `QUIZ_THEMES_EVALUATION_PILOTE` un thème par section (§ 5–6 partagés) — un plan enregistré
+  avec l'ancien thème `applicationsEnContexte` retombe sur plateforme-maths. **G** : 5 ateliers KaTeX
+  (`katex-shadow.js` + `limites-commun.js`) : `approximation-erreur-widget` (§ 2, erreur ÷ h²),
+  `rectangle-produit-widget` et `engrenages-chaine-widget` (§ 3), `fprime-vers-f-widget` (§ 6 :
+  prédictions jugées ✓ / ✗ puis f révélée — le mode « lecture inverse » de `f-fprime-fseconde-widget`
+  n'a ni prédiction ni f′ réglable), `etude-complete-widget` (§ 7, question → réponse, tableau et
+  figure construits étape par étape) ; `mobile-piste-widget` : 75 km/h ajouté (exemple 50/75 km/h).
+  Vérifié : KaTeX strict sur 1 375 champs (chapitre, quiz, « Formule ») et les 48 énoncés, 0 erreur ;
+  étapes et onglet Réviser iPhone 13 / 1 280 px, clair / sombre : scrollWidth = largeur, 0
+  `.katex-error`, 0 texte brut suspect, 0 erreur console, 42 cartes retournées ; ateliers ouverts dans
+  le panneau et manipulés : 0 NaN, 0 erreur ; quiz : chaque thème parcouru en entier (35 / 35, sans
+  répétition) ; documents réels (vrai/faux des 10 thèmes en une question, 6 démonstrations tirées).
+  Piège de mesure : les `<path>` des racines KaTeX (largeur en em) dépassent leur boîte — faux
+  « débordements », à exclure.
 
 - **6e (6h), Chapitre 5 — Nombres complexes** (`nombres-complexes`) : corrections issues de l'audit
   des générateurs (68 points, décisions A–M, toutes suivies ; 5 lots). Utilitaire commun

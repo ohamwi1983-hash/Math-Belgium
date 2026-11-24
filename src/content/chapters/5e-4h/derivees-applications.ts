@@ -179,7 +179,7 @@ export const deriveesApplications: ChapterContent = {
           formula: '$f(x) = \\sqrt{x+5}$, a = 4. Calcule f′(4) par la définition.',
           steps: [
             { tag: 'f(4) et f(4+h)', text: '$f(4) = \\sqrt{9} = 3$ ; $f(4+h) = \\sqrt{9+h}$' },
-            { tag: 'taux d\'accroissement — forme 0⁄0 : multiplier par l\'expression conjuguée', text: '$\\dfrac{\\sqrt{9+h}-3}{h} = \\dfrac{(\\sqrt{9+h}-3)(\\sqrt{9+h}+3)}{h\\,(\\sqrt{9+h}+3)}$' },
+            { tag: 'taux d\'accroissement — forme 0⁄0 : multiplier par l\'expression conjuguée', text: '$\\dfrac{\\sqrt{9+h}-3}{h}$ $= \\dfrac{(\\sqrt{9+h}-3)(\\sqrt{9+h}+3)}{h\\,(\\sqrt{9+h}+3)}$' },
             { tag: 'simplifier par h', text: '$= \\dfrac{(9+h)-9}{h\\,(\\sqrt{9+h}+3)} = \\dfrac{1}{\\sqrt{9+h}+3}$ (valable pour h≠0)' },
           ],
           result: { tag: 'passer à la limite', text: '$f\'(4) = \\displaystyle\\lim_{h \\to 0} \\dfrac{1}{\\sqrt{9+h}+3} = \\dfrac{1}{6}$. Contrôle par la règle de la chaîne (section 3) : $f\'(x) = \\dfrac{1}{2\\sqrt{x+5}}$, d\'où $f\'(4) = \\dfrac{1}{6}$.' },
@@ -322,7 +322,7 @@ export const deriveesApplications: ChapterContent = {
           badge: 'aucune tangente horizontale (Δ < 0)',
           formula: '$f(x) = x^3-3x^2+6x$. La courbe de f a-t-elle des tangentes horizontales ?',
           steps: [
-            { tag: 'dériver', text: '$f\'(x) = 3x^2-6x+6 = 3(x^2-2x+2)$' },
+            { tag: 'dériver', text: '$f\'(x) = 3x^2-6x+6$ $= 3(x^2-2x+2)$' },
             { tag: 'résoudre f′(x) = 0 — discriminant', text: '$x^2-2x+2 = 0$ : $\\Delta = 4-8 = -4 < 0$, aucune solution réelle' },
             { tag: 'signe de f′', text: '$x^2-2x+2 = (x-1)^2+1 > 0$, donc $f\'(x) > 0$ pour tout x' },
           ],
@@ -470,6 +470,13 @@ export const deriveesApplications: ChapterContent = {
             'h garde son signe : $\\sqrt{15{,}98}$ s\'écrit $f(16+h)$ avec $h=-0{,}02$. Pour sin, cos ' +
             'et tan, l\'angle est en **radians** : c\'est seulement en radians que $(\\sin x)\'=\\cos x$, ' +
             'd\'où $\\sin(0{,}1)\\approx \\sin 0+\\cos 0\\cdot 0{,}1=0{,}1$.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'approximation-erreur-widget',
+          label: 'Manipule toi-même : l\'erreur de l\'approximation affine',
+          caption:
+            'Choisis $\\sqrt{x}$ en 4, $x^5$ en 1 ou $\\dfrac{1}{x}$ en 1, puis fais varier h : le segment rouge est l\'erreur commise entre $f(a+h)$ et $f(a)+f\'(a)\\,h$. Le tableau montre que $\\dfrac{\\text{erreur}}{h^2}$ se stabilise quand h devient petit : diviser h par 10 divise l\'erreur par environ 100.',
         },
         {
           kind: 'historique',
@@ -700,7 +707,7 @@ export const deriveesApplications: ChapterContent = {
           label: 'Démonstration — (k·u)′ = k·u′ et (u + v)′ = u′ + v′',
           blocks: [
             { kind: 'para', text: 'Soit u et v deux fonctions dérivables en x, et k un réel.' },
-            { kind: 'para', text: '**a.** Le taux d\'accroissement de $k \\cdot u$ vaut $\\dfrac{k\\,u(x+h)-k\\,u(x)}{h} = k \\cdot \\dfrac{u(x+h)-u(x)}{h}$, qui tend vers $k \\cdot u\'(x)$ quand $h \\to 0$. Donc $(k \\cdot u)\' = k \\cdot u\'$.' },
+            { kind: 'para', text: '**a.** Le taux d\'accroissement de $k \\cdot u$ vaut $\\dfrac{k\\,u(x+h)-k\\,u(x)}{h}$ $= k \\cdot \\dfrac{u(x+h)-u(x)}{h}$, qui tend vers $k \\cdot u\'(x)$ quand $h \\to 0$. Donc $(k \\cdot u)\' = k \\cdot u\'$.' },
             { kind: 'para', text: '**b.** Le taux d\'accroissement de $u+v$ vaut $\\dfrac{\\big(u(x+h)+v(x+h)\\big)-\\big(u(x)+v(x)\\big)}{h}$, qu\'on regroupe en $\\dfrac{u(x+h)-u(x)}{h}$ $+\\,\\dfrac{v(x+h)-v(x)}{h}$.' },
             { kind: 'para', text: 'La limite d\'une somme est la somme des limites : quand $h \\to 0$, on obtient $u\'(x)+v\'(x)$. Donc $(u+v)\' = u\'+v\'$.' },
           ],
@@ -711,7 +718,7 @@ export const deriveesApplications: ChapterContent = {
           blocks: [
             { kind: 'para', text: 'Soit $f = u \\cdot v$, avec u et v dérivables en x. On cherche la limite de $\\dfrac{u(x+h)\\,v(x+h)-u(x)\\,v(x)}{h}$.' },
             { kind: 'para', text: '**L\'astuce : ajouter et retirer** $u(x)\\,v(x+h)$ au numérateur, puis regrouper : $u(x+h)\\,v(x+h)-u(x)\\,v(x)$ $= \\big(u(x+h)-u(x)\\big)\\,v(x+h)$ $+\\,u(x)\\,\\big(v(x+h)-v(x)\\big)$.' },
-            { kind: 'para', text: 'On divise par h : $\\dfrac{f(x+h)-f(x)}{h} = \\dfrac{u(x+h)-u(x)}{h} \\cdot v(x+h)$ $+\\,u(x) \\cdot \\dfrac{v(x+h)-v(x)}{h}$.' },
+            { kind: 'para', text: 'On divise par h : $\\dfrac{f(x+h)-f(x)}{h}$ $= \\dfrac{u(x+h)-u(x)}{h} \\cdot v(x+h)$ $+\\,u(x) \\cdot \\dfrac{v(x+h)-v(x)}{h}$.' },
             { kind: 'para', text: 'Quand $h \\to 0$ : le premier quotient tend vers $u\'(x)$, le second vers $v\'(x)$, et $v(x+h)$ tend vers $v(x)$, car v, dérivable, est continue (section 4). Donc $(uv)\'(x) = u\'(x)\\,v(x)+u(x)\\,v\'(x)$.' },
             { kind: 'para', text: 'Pourquoi pas $u\' \\cdot v\'$ ? Quand x avance de h, l\'aire d\'un rectangle de côtés u et v gagne deux bandes, $v \\cdot \\Delta u$ et $u \\cdot \\Delta v$, plus un petit coin $\\Delta u \\cdot \\Delta v$, négligeable devant h quand h tend vers 0 (atelier « le rectangle qui grandit »).' },
           ],
@@ -740,7 +747,7 @@ export const deriveesApplications: ChapterContent = {
           label: 'Démonstration — (tan x)′ = 1 / cos² x',
           blocks: [
             { kind: 'para', text: '$\\tan x = \\dfrac{\\sin x}{\\cos x}$, pour $\\cos x \\neq 0$. Avec $u = \\sin x$, $u\' = \\cos x$, $v = \\cos x$ et $v\' = -\\sin x$, la règle du quotient donne :' },
-            { kind: 'para', text: '$(\\tan x)\' = \\dfrac{\\cos x \\cdot \\cos x-\\sin x \\cdot (-\\sin x)}{\\cos^2 x} = \\dfrac{\\cos^2 x+\\sin^2 x}{\\cos^2 x} = \\dfrac{1}{\\cos^2 x}$, car $\\cos^2 x+\\sin^2 x = 1$.' },
+            { kind: 'para', text: '$(\\tan x)\' = \\dfrac{\\cos x \\cdot \\cos x-\\sin x \\cdot (-\\sin x)}{\\cos^2 x}$ $= \\dfrac{\\cos^2 x+\\sin^2 x}{\\cos^2 x} = \\dfrac{1}{\\cos^2 x}$, car $\\cos^2 x+\\sin^2 x = 1$.' },
             { kind: 'para', text: 'En coupant la fraction en deux, $\\dfrac{\\cos^2 x}{\\cos^2 x}+\\dfrac{\\sin^2 x}{\\cos^2 x}$, on obtient aussi $(\\tan x)\' = 1+\\tan^2 x$.' },
           ],
         },
@@ -798,6 +805,13 @@ export const deriveesApplications: ChapterContent = {
           right: '$u\'v+uv\' = 6x^2+2x-6 = f\'(x)$',
         },
         {
+          kind: 'atelier',
+          tag: 'rectangle-produit-widget',
+          label: 'Manipule toi-même : le rectangle qui grandit',
+          caption:
+            'Un rectangle de côtés $u$ et $v$ : quand x avance de h, son aire gagne deux bandes, $v\\cdot\\Delta u$ et $u\\cdot\\Delta v$, et un petit coin $\\Delta u\\cdot\\Delta v$. Fais tendre h vers 0 : les bandes donnent $u\'v+uv\'$ et le coin disparaît — $u\'\\cdot v\'$ n\'est jamais la dérivée.',
+        },
+        {
           kind: 'attention',
           label: '(uv)\' ≠ u\'·v\', et (u⁄v)\' ≠ u\'⁄v\'',
           text:
@@ -845,6 +859,13 @@ export const deriveesApplications: ChapterContent = {
             'Vérification par développement direct : $(2x-1)^3=8x^3-12x^2+6x-1$, dérivée $= ' +
             '24x^2-24x+6$. Et $6(2x-1)^2=6(4x^2-4x+1)=24x^2-24x+6$. Les deux méthodes tombent ' +
             'exactement d\'accord.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'engrenages-chaine-widget',
+          label: 'Manipule toi-même : les engrenages de la chaîne',
+          caption:
+            'Trois roues $x \\to u \\to y$, avec $u = 2x-1$ et $y = u^3$ comme dans l\'exemple : quand x avance un peu, u tourne 2 fois plus, et y tourne $3u^2$ fois plus que u. Les « vitesses » se multiplient : $\\dfrac{dy}{dx} = \\dfrac{du}{dx} \\cdot \\dfrac{dy}{du}$.',
         },
         {
           kind: 'astuce',
@@ -1742,6 +1763,13 @@ export const deriveesApplications: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'fprime-vers-f-widget',
+          label: 'Manipule toi-même : du graphique de f′ à la courbe de f',
+          caption:
+            'Règle la parabole de $f\'$ (sens et zéros), puis prédis, intervalle par intervalle, si f est croissante ou décroissante et si elle est convexe ou concave. « Afficher f » révèle la courbe et juge chaque réponse. Essaie deux zéros confondus : $f\'$ s\'annule sans changer de signe.',
+        },
+        {
           kind: 'entrainement',
           title: 'Lecture graphique — dérivées et applications',
           generatorId: '5gen30',
@@ -1916,6 +1944,13 @@ export const deriveesApplications: ChapterContent = {
             yAxisLabel: 'y',
             caption: 'f(x) = x³ − 3x² + 4 : maximum (0;4), minimum (2;0) sur l\'axe (racine double), point d\'inflexion (1;2).',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'etude-complete-widget',
+          label: 'Manipule toi-même : construis l\'étude complète',
+          caption:
+            'Les deux fonctions du cours, étape par étape : domaine, limites et asymptotes, $f\'$ et son signe, variations, $f\'\'$ et concavité, points remarquables, puis la courbe. Réponds à chaque question avant de « Montrer » : le tableau se remplit et la figure se construit au fur et à mesure.',
         },
         {
           kind: 'entrainement',
@@ -2156,7 +2191,7 @@ export const deriveesApplications: ChapterContent = {
           badge: 'point d’une courbe le plus proche d’un point',
           formula: 'Quel point M de la courbe de $f(x) = \\sqrt{x}$ est le plus proche du point $A(4{,}5\\,;0)$ ?',
           steps: [
-            { tag: 'distance au carré, en fonction de x seul — M(x ; √x), avec x ≥ 0', text: '$D(x) = AM^2 = (x-4{,}5)^2+(\\sqrt{x})^2 = x^2-9x+20{,}25+x = x^2-8x+20{,}25$' },
+            { tag: 'distance au carré, en fonction de x seul — M(x ; √x), avec x ≥ 0', text: '$D(x) = AM^2 = (x-4{,}5)^2+(\\sqrt{x})^2$ $= x^2-9x+20{,}25+x$ $= x^2-8x+20{,}25$' },
             { tag: 'dériver et résoudre D′(x) = 0', text: '$D\'(x) = 2x-8 = 0 \\iff x = 4$' },
             { tag: 'nature et borne', text: '$D\' < 0$ sur $[0\\,;4[$ et $D\' > 0$ après : minimum en $x = 4$ ; à la borne, $D(0) = 20{,}25$ dépasse $D(4) = 4{,}25$' },
           ],
@@ -2712,7 +2747,7 @@ export const deriveesApplications: ChapterContent = {
           blocks: [
             { kind: 'para', text: 'Une voiture roule à la vitesse $v_0$ (en m/s) et freine avec une décélération constante $a > 0$ (en m/s²). Depuis le début du freinage, sa position vaut $s(t) = v_0\\,t-\\dfrac{a}{2}\\,t^2$.' },
             { kind: 'para', text: 'Vitesse : $v(t) = s\'(t) = v_0-at$ ; accélération : $s\'\'(t) = -a$, constante. La voiture s\'arrête quand $v(t) = 0$, en $t = \\dfrac{v_0}{a}$.' },
-            { kind: 'para', text: 'Distance de freinage : $s\\left(\\dfrac{v_0}{a}\\right) = v_0 \\cdot \\dfrac{v_0}{a}-\\dfrac{a}{2} \\cdot \\dfrac{v_0^2}{a^2} = \\dfrac{v_0^2}{a}-\\dfrac{v_0^2}{2a} = \\dfrac{v_0^2}{2a}$.' },
+            { kind: 'para', text: 'Distance de freinage : $s\\left(\\dfrac{v_0}{a}\\right) = v_0 \\cdot \\dfrac{v_0}{a}-\\dfrac{a}{2} \\cdot \\dfrac{v_0^2}{a^2}$ $= \\dfrac{v_0^2}{a}-\\dfrac{v_0^2}{2a} = \\dfrac{v_0^2}{2a}$.' },
             { kind: 'para', text: 'Elle est proportionnelle au carré de $v_0$ : vitesse × 1,5 → distance × 2,25 ; vitesse doublée → distance quadruplée. Contrôle avec l\'exemple : $\\dfrac{14^2}{2 \\cdot 7} = 14$ m et $\\dfrac{21^2}{2 \\cdot 7} = 31{,}5$ m.' },
           ],
         },
