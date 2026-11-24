@@ -82,6 +82,22 @@ function Fenetre() {
   );
 }
 
+function BoiteSansCouvercle() {
+  // Carré de carton, coins découpés (carrés de côté x), pliures en pointillés.
+  const x0 = 55, y0 = 8, cote = 150, k = 30;
+  return (
+    <>
+      <path d={`M ${x0 + k} ${y0} H ${x0 + cote - k} V ${y0 + k} H ${x0 + cote} V ${y0 + cote - k} H ${x0 + cote - k} V ${y0 + cote} H ${x0 + k} V ${y0 + cote - k} H ${x0} V ${y0 + k} H ${x0 + k} Z`} style={STYLE_TRAIT} />
+      <rect x={x0} y={y0} width={cote} height={cote} style={STYLE_COTE} />
+      <rect x={x0 + k} y={y0 + k} width={cote - 2 * k} height={cote - 2 * k} style={STYLE_COTE} />
+      <text x={x0 + k / 2} y={y0 + k / 2 + 5} textAnchor="middle" style={STYLE_TEXTE}>x</text>
+      <text x={x0 + k + 4} y={y0 + k / 2 + 5} style={STYLE_TEXTE}>x</text>
+      <text x={x0 + cote / 2} y={y0 + cote / 2 + 5} textAnchor="middle" style={STYLE_TEXTE}>b</text>
+      <text x={x0 + cote / 2} y={y0 + cote + 14} textAnchor="middle" style={STYLE_TEXTE}>c</text>
+    </>
+  );
+}
+
 export function SchemaOptimisation({ exercice }: { exercice: ExerciceOptimisation }) {
   let contenu: ReactNode = null;
   let description = "";
@@ -103,6 +119,10 @@ export function SchemaOptimisation({ exercice }: { exercice: ExerciceOptimisatio
     case "fenetreB":
       contenu = <Fenetre />;
       description = "Fenêtre : rectangle de largeur 2r et de hauteur h surmonté d'un demi-cercle de rayon r";
+      break;
+    case "boite":
+      contenu = <BoiteSansCouvercle />;
+      description = "Carré de carton de côté c, un carré de côté x découpé à chaque coin ; la base de la boîte est le carré central de côté b";
       break;
     case "cubique":
       return null;

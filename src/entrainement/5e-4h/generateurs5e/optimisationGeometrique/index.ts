@@ -14,7 +14,9 @@
  * séparément ; les formules développées affichées (`ui5e/formatOptimisationGeometrique.ts`) sont
  * revérifiées par égalité numérique avec cette composition (scripts de l'audit 5e ch. 5).
  */
+import type { CatalogueVarianteEntree } from "../../../export/genererFeuilleExercices";
 import type {
+  ExerciceBoite,
   ExerciceCubique,
   ExerciceCylindre,
   ExerciceFenetre,
@@ -268,9 +270,16 @@ export function valeurFOptimisation(ex: ExerciceOptimisation, x: number): number
       const h = valeurLienFenetre(ex, x);
       return 2 * x + 2 * h + Math.PI * x;
     }
+    case "boite":
+      return x * (ex.c - 2 * x) ** 2;
     case "cubique":
       throw new Error("valeurFOptimisation : non applicable à la variante bonus 'cubique'");
   }
+}
+
+/** Boîte sans couvercle (famille E) : c = 6k (12 à 60 cm) ⇒ x = c/6 entier. */
+export function construireBoite(): ExerciceBoite {
+  return { famille: "boite", c: 6 * entierAleatoire(2, 10) };
 }
 
 // ============================================================================
@@ -321,6 +330,9 @@ const POIDS_FAMILLE: Record<FamilleOptimisation, number> = {
   // Hors du tirage libre (audit 5e ch. 5, décision H) : ce n'est pas de l'optimisation. Toujours
   // accessible par le sélecteur de variantes (`CATALOGUE_VARIANTES`).
   cubique: 0,
+  // Famille E ajoutée au lot C : poids 0 ici pour que le tirage libre de l'adaptateur et les codes
+  // imprimés restent identiques ; l'appli la tire via `genererExerciceOptimisationLibre`.
+  boite: 0,
 };
 const TOTAL_POIDS_FAMILLE = Object.values(POIDS_FAMILLE).reduce((a, b) => a + b, 0);
 
@@ -349,6 +361,8 @@ export function genererParFamille(famille: FamilleOptimisation): ExerciceOptimis
       return construireFenetreB();
     case "cubique":
       return construireCubique();
+    case "boite":
+      return construireBoite();
   }
 }
 
@@ -356,7 +370,12 @@ export function genererExerciceOptimisation(): ExerciceOptimisation {
   return genererParFamille(tirerFamille());
 }
 
-export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [
+/** Tirage libre de l'APPLI : la boîte sans couvercle une fois sur sept (comme une famille du tirage). */
+export function genererExerciceOptimisationLibre(): ExerciceOptimisation {
+  return Math.random() < 1 / 7 ? construireBoite() : genererExerciceOptimisation();
+}
+
+export const CATALOGUE_VARIANTES: CatalogueVarianteEntree[] = [
   { id: "trapeze", label: "A. Trapèze isocèle (angle α, signe de A')" },
   { id: "cylindre", label: "B. Cylindre à volume fixé" },
   { id: "cylindre-application", label: "B. Cylindre — bonus application numérique" },
@@ -364,7 +383,10 @@ export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [
   { id: "margesB", label: "C(b). Marges — aire imprimée fixée, minimiser l'aire totale" },
   { id: "fenetreA", label: "D(a). Fenêtre — périmètre fixé, maximiser l'aire" },
   { id: "fenetreB", label: "D(b). Fenêtre — aire fixée, minimiser le périmètre" },
-  { id: "cubique", label: "Hors tirage. Reconstruction d'un polynôme cubique" },
+  // Retirée (lot C) : elle recoupe 5gen69 (déterminer une fonction par des conditions) ; entrée
+  // gardée pour que les indices et les codes imprimés restent valables.
+  { id: "cubique", label: "Hors tirage. Reconstruction d'un polynôme cubique", retiree: true },
+  { id: "boite", label: "E. Boîte sans couvercle — volume maximal" },
 ];
 
 export function construireAvecVarianteId(id: string): ExerciceOptimisation {
@@ -385,6 +407,8 @@ export function construireAvecVarianteId(id: string): ExerciceOptimisation {
       return construireFenetreB();
     case "cubique":
       return construireCubique();
+    case "boite":
+      return construireBoite();
     default:
       throw new Error(`construireAvecVarianteId : id inconnu "${id}"`);
   }

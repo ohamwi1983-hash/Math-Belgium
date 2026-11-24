@@ -1,6 +1,6 @@
 import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, ligne, piege, resultat, utilise, verification } from "../../../export/corrigeTableau";
-import type { ExerciceCubique, ExerciceCylindre, ExerciceFenetre, ExerciceMarges, ExerciceOptimisation, ExerciceTrapeze, ValeurAvecPi } from "../../core5e/optimisationGeometrique.types";
+import type { ExerciceBoite, ExerciceCubique, ExerciceCylindre, ExerciceFenetre, ExerciceMarges, ExerciceOptimisation, ExerciceTrapeze, ValeurAvecPi } from "../../core5e/optimisationGeometrique.types";
 import { ordreEcransOptimisation, type EcranOptimisation } from "../../moteur5e/typesOptimisationGeometrique";
 import { formatReponseAttendueEcranLatex, formatValeurAvecPiLatex } from "../../ui5e/formatOptimisationGeometrique";
 import { alphaOptTrapeze, conclusionReelle, coutOptimalCylindre, pointsTest, uOptTrapeze, valeurFOptimisation, valeurNumeriqueAvecPi, xOptimal } from "../../moteur5e/verificationOptimisationGeometrique";
@@ -548,6 +548,66 @@ function cubique(e: ExerciceCubique): Etapes {
 }
 
 // ============================================================================
+// Boîte sans couvercle (famille E, lot C).
+// ============================================================================
+
+function boite(e: ExerciceBoite): Etapes {
+  const c = e.c;
+  const x = c / 6;
+  const b = c - 2 * x;
+  const V = x * b * b;
+  return {
+    lien: {
+      utilise: [t("Sur chaque côté du carton, on retire deux carrés découpés (un à chaque bout) : "), f("c=x+b+x"), t(" ; la hauteur de la boîte est x "), t(COURS_OPTIMISATION), t(".")],
+      blocs: [{ lignes: [ligne(`${c}=x+b+x`, [f(`c=${c}`)]), ligne(`b=${c}-2x`, "on isole b"), ligne(`0<x<${c / 2}`, "domaine : x > 0 et b > 0")] }],
+    },
+    construire: {
+      utilise: [t("Volume d'un pavé droit = aire de la base × hauteur : "), f("V=b^{2}\\cdot x"), t(" ; on remplace b "), t(COURS_OPTIMISATION), t(".")],
+      blocs: [{ lignes: [ligne("F(x)=b^{2}\\cdot x", "aire de la base carrée × hauteur"), ligne(`=(${c}-2x)^{2}\\cdot x`, "on remplace b"), ligne(`=x(${c}-2x)^{2}`)] }],
+    },
+    deriver: {
+      utilise: [t("Règle du produit "), f("(uv)'=u'v+uv'"), t(" avec "), f("u=x"), t(" et "), f(`v=(${c}-2x)^{2}`), t(", dont la dérivée est "), f(`2(${c}-2x)\\cdot(-2)`), t(" "), t(COURS_REGLES), t(".")],
+      blocs: [
+        {
+          lignes: [
+            ligne(`F'(x)=1\\cdot(${c}-2x)^{2}+x\\cdot 2(${c}-2x)\\cdot(-2)`, "règle du produit"),
+            ligne(`=(${c}-2x)^{2}-4x(${c}-2x)`),
+            ligne(`=(${c}-2x)\\left[(${c}-2x)-4x\\right]`, [t("mise en évidence de "), f(`(${c}-2x)`)]),
+            ligne(`=(${c}-2x)(${c}-6x)`),
+          ],
+        },
+      ],
+    },
+    resoudre: {
+      utilise: [t("Un produit est nul si l'un de ses facteurs est nul ; on garde la solution du domaine "), f(`0<x<${c / 2}`), t(" "), t(COURS_OPTIMISATION), t(".")],
+      blocs: [
+        {
+          lignes: [
+            ligne(`(${c}-2x)(${c}-6x)=0`, [f("F'(x)=0")]),
+            ligne(`${c}-2x=0\\ \\text{ou}\\ ${c}-6x=0`, "produit nul"),
+            ligne(`x=${c / 2}\\ \\text{ou}\\ x=${x}`),
+            ligne(`x=${x}`, [f(`x=${c / 2}`), t(" est rejetée : hors du domaine, la base serait nulle (boîte plate)")]),
+          ],
+        },
+      ],
+      piege: [t("Garder "), f(`x=${c / 2}`), t(" : elle annule F′ mais donne une boîte plate (volume nul), hors du domaine.")],
+    },
+    justifier: {
+      utilise: [t("Signe de F′ de part et d'autre de la valeur trouvée : + puis −, F croît puis décroît, maximum "), t(COURS_SIGNE), t(".")],
+      blocs: [{ lignes: lignesPointsTest(e, (s) => `(${c}-2\\cdot ${s})(${c}-6\\cdot ${s})`, (a) => (c - 2 * a) * (c - 6 * a)) }],
+    },
+    conclure: {
+      utilise: [t("On remplace x par "), f(`${x}`), t(" dans b(x) et dans F(x) "), t(COURS_OPTIMISATION), t(".")],
+      blocs: [
+        { label: "Côté de la base", lignes: [ligne(`b=${c}-2\\cdot ${x}`, "étape 1"), ligne(`=${b}`)] },
+        { label: "Volume", lignes: [ligne(`F(${x})=${x}\\cdot ${b}^{2}`, "étape 2"), ligne(`=${x}\\cdot ${b * b}`), ligne(`=${V}`)] },
+      ],
+      verification: { fr: [t("Dimensions de la boîte : "), f(`${b}\\times ${b}\\times ${x}`), t(" (cm), volume "), f(`${b * b}\\times ${x}=${V}`), t(" cm³ ✓.")] },
+    },
+  };
+}
+
+// ============================================================================
 // Assemblage.
 // ============================================================================
 
@@ -559,7 +619,7 @@ function piegeEcran(e: ExerciceOptimisation, ecran: EcranOptimisation): Fragment
 }
 
 export function correctionDetailleeOptimisation(e: ExerciceOptimisation): EtapeCorrection[] {
-  const donnees: Etapes = e.famille === "trapeze" ? trapeze(e) : e.famille === "cylindre" ? cylindre(e) : e.famille === "margesA" || e.famille === "margesB" ? marges(e) : e.famille === "cubique" ? cubique(e) : fenetre(e as ExerciceFenetre);
+  const donnees: Etapes = e.famille === "trapeze" ? trapeze(e) : e.famille === "cylindre" ? cylindre(e) : e.famille === "margesA" || e.famille === "margesB" ? marges(e) : e.famille === "cubique" ? cubique(e) : e.famille === "boite" ? boite(e) : fenetre(e as ExerciceFenetre);
   const out: EtapeCorrection[] = [];
   for (const ecran of ordreEcransOptimisation(e)) {
     const d = donnees[ecran];

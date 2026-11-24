@@ -11,12 +11,13 @@
  * verdict `groupe_extremums_poly` / `groupe_extremums_ao` (exportEvaluation). Lot C : ordonnées
  * EXACTES (e ± √r compris), `calcul` absent (la calculatrice ne fait pas l'étude).
  *
- * 5gen32 — `forme` = famille (gouttière, boîte, affiche ×2, fenêtre ×2, cubique), avec l'application
+ * 5gen32 — `forme` = famille (gouttière, cylindre, affiche ×2, fenêtre ×2, boîte sans couvercle,
+ * cubique retirée), avec l'application
  * numérique du cylindre comme structure à part (une question de plus). Aucun cas particulier (chaque
- * famille impose les mêmes étapes). `calcul` : `'exacte'` quand l'optimum est entier (régime exact du
+ * famille impose les mêmes étapes). `calcul` absent quand l'optimum est entier (régime exact du
  * générateur ; gouttière : seulement u = cos α = 1/2, α = 60°), `'calculatrice'` sinon ; l'application
  * numérique du cylindre (prix × aire avec π) exige toujours la calculatrice. La variante « cubique »
- * est hors du tirage libre : elle n'entre dans une évaluation que si le professeur la choisit.
+ * est retirée (lot C : elle recoupe 5gen69) ; la boîte sans couvercle (lot C) est toujours exacte.
  *
  * 5gen33 — `forme` = famille et degré (A degré 2 : coût moyen minimal ; A degré 3 : coût marginal
  * minimal ; B : bénéfice maximal ; dichotomie). Aucun cas particulier. `calcul` : `'exacte'` quand
@@ -63,6 +64,9 @@ export function profilOptimisation(e: ExerciceOptimisation): ProfilInstance {
       return { casParticulier: null, calcul: entier(e.rOpt) ? undefined : "calculatrice", forme: e.famille };
     case "cubique":
       return { casParticulier: null, forme: "cubique" };
+    case "boite":
+      // Toujours exacte, mais la calculatrice ne fait pas l'optimisation : `calcul` absent.
+      return { casParticulier: null, forme: "boite" };
   }
 }
 

@@ -25,7 +25,7 @@
  * interceptés et évalués en radians AVANT délégation à `evaluerExpressionGenerale` (câblé en
  * DEGRÉS nativement) — réplique locale de `evaluerRadians` (`verificationFonctionDerivee.ts`).
  */
-import type { ExerciceCubique, ExerciceCylindre, ExerciceFenetre, ExerciceMarges, ExerciceOptimisation, ExerciceTrapeze, ValeurAvecPi } from "../core5e/optimisationGeometrique.types";
+import type { ExerciceBoite, ExerciceCubique, ExerciceCylindre, ExerciceFenetre, ExerciceMarges, ExerciceOptimisation, ExerciceTrapeze, ValeurAvecPi } from "../core5e/optimisationGeometrique.types";
 import { evaluerExpressionGenerale } from "../moteur/expressionGenerale";
 import type { StatutVerification } from "../moteur/statutVerification";
 import type { EcranOptimisation } from "./typesOptimisationGeometrique";
@@ -95,9 +95,16 @@ export function valeurFOptimisation(ex: ExerciceOptimisation, x: number): number
       const h = valeurLienFenetre(ex, x);
       return 2 * x + 2 * h + Math.PI * x;
     }
+    case "boite":
+      return x * (ex.c - 2 * x) ** 2;
     case "cubique":
       throw new Error("valeurFOptimisation : non applicable à la variante bonus 'cubique'");
   }
+}
+
+/** Boîte sans couvercle : côté de la base carrée. */
+export function valeurLienBoite(ex: ExerciceBoite, x: number): number {
+  return ex.c - 2 * x;
 }
 
 export function valeurFCubique(ex: ExerciceCubique, x: number): number {
@@ -137,7 +144,14 @@ function trouverAppelTrig(expr: string): AppelTrigTrouve | null {
   return null;
 }
 
+/** α (et la lettre « a », plus facile à taper) se lisent comme la variable de la gouttière (lot C :
+ * l'angle s'appelle α partout ; x reste accepté). */
+export function versVariableX(texte: string): string {
+  return texte.replace(/α/g, "x").replace(/(?<![a-zA-Z])a(?![a-zA-Z])/g, "x");
+}
+
 function evaluerRadians(texte: string, xValeur: number): number {
+  texte = versVariableX(texte);
   let expr = texte.replace(/(?<![a-zA-Z])x(?![a-zA-Z])/g, `(${xValeur})`);
   let garde = 0;
   let appel: AppelTrigTrouve | null;
@@ -233,6 +247,8 @@ function pointsEchantillonDomaine(ex: ExerciceOptimisation): number[] {
       const rMax = Math.sqrt((2 * A) / Math.PI);
       return [0.15, 0.3, 0.5, 0.7, 0.85].map((f) => f * rMax);
     }
+    case "boite":
+      return [0.15, 0.3, 0.45, 0.7, 0.85].map((f) => (f * ex.c) / 2);
     case "cubique":
       return [0, 1, 2, -1, 3, -2];
   }
@@ -279,6 +295,8 @@ export function xOptimal(ex: ExerciceOptimisation): number {
     case "fenetreA":
     case "fenetreB":
       return ex.rOpt;
+    case "boite":
+      return ex.c / 6;
     case "cubique":
       throw new Error("xOptimal : non applicable à la variante bonus 'cubique'");
   }
@@ -300,6 +318,8 @@ function bornesDomaine(ex: ExerciceOptimisation): { min: number; max: number } {
     }
     case "margesA":
       return { min: 0, max: (ex.T as number) / (2 * ex.mv) - 2 * ex.mh };
+    case "boite":
+      return { min: 0, max: ex.c / 2 };
     default:
       return { min: 0, max: Infinity };
   }
@@ -381,6 +401,8 @@ function cibleLien(ex: ExerciceOptimisation): ((x: number) => number) | null {
     case "fenetreA":
     case "fenetreB":
       return (x) => valeurLienFenetre(ex, x);
+    case "boite":
+      return (x) => valeurLienBoite(ex, x);
     default:
       return null;
   }
@@ -416,8 +438,24 @@ export const OPTIONS_JUSTIFICATION_LONGUEUR: OptionChoix[] = [
   { id: "toutes_valables", label: "les deux racines sont physiquement valables" },
 ];
 
-export function justificationCorrecteId(): string {
-  return "positive_longueur";
+/** Boîte sans couvercle : l'autre solution (x = c/2) est positive mais hors du domaine. */
+export const OPTIONS_JUSTIFICATION_BOITE: OptionChoix[] = [
+  { id: "hors_domaine", label: "on rejette x = c/2 : hors du domaine 0 < x < c/2, la boîte serait plate" },
+  { id: "plus_petite", label: "on rejette la plus grande solution : on garde toujours la plus petite" },
+  { id: "toutes_valables", label: "les deux solutions sont physiquement valables" },
+];
+
+export function optionsJustification(ex: ExerciceOptimisation): OptionChoix[] {
+  return ex.famille === "boite" ? OPTIONS_JUSTIFICATION_BOITE : OPTIONS_JUSTIFICATION_LONGUEUR;
+}
+
+export function justificationCorrecteId(ex?: ExerciceOptimisation): string {
+  return ex?.famille === "boite" ? "hors_domaine" : "positive_longueur";
+}
+
+/** Familles dont l'écran « résoudre » demande de justifier le rejet de l'autre solution. */
+export function avecJustificationRejet(ex: ExerciceOptimisation): boolean {
+  return ex.famille === "margesA" || ex.famille === "margesB" || ex.famille === "fenetreB" || ex.famille === "boite";
 }
 
 /** Précisions ANNONCÉES à l'écran (`ui5e/formatOptimisationGeometrique.ts::PRECISION_*`) — les
@@ -497,6 +535,14 @@ export function diagnostiquerConclureMarges(reponses: { y: string; aire: string 
   };
 }
 
+export function diagnostiquerConclureBoite(reponses: { base: string; volume: string }, ex: ExerciceBoite): Record<string, StatutVerification> {
+  const x = ex.c / 6;
+  return {
+    base: diagnostiquerNombreTolerant(reponses.base, valeurLienBoite(ex, x), 1e-6),
+    volume: diagnostiquerNombreTolerant(reponses.volume, valeurFOptimisation(ex, x), 1e-6),
+  };
+}
+
 export function diagnostiquerConclureFenetre(reponses: { hauteur: string; objectif: string }, ex: ExerciceFenetre): Record<string, StatutVerification> {
   const objectif = valeurFOptimisation(ex, ex.rOpt);
   return {
@@ -563,7 +609,7 @@ export function diagnostiquerEcran(ex: ExerciceOptimisation, phase: EcranOptimis
         const { h, B } = diagnostiquerLienTrapeze(r("h"), r("B"), ex);
         return { h, B };
       }
-      const idChamp = ex.famille === "margesA" || ex.famille === "margesB" ? "y" : "h";
+      const idChamp = ex.famille === "margesA" || ex.famille === "margesB" ? "y" : ex.famille === "boite" ? "b" : "h";
       return { [idChamp]: diagnostiquerLien(r(idChamp), ex) };
     }
     case "construire":
@@ -576,8 +622,8 @@ export function diagnostiquerEcran(ex: ExerciceOptimisation, phase: EcranOptimis
       }
       const idRacine = ex.famille === "fenetreA" || ex.famille === "fenetreB" ? "r" : "x";
       const out: Record<string, StatutVerification> = { [idRacine]: diagnostiquerRacine(r(idRacine), ex) };
-      if (ex.famille === "margesA" || ex.famille === "margesB" || ex.famille === "fenetreB") {
-        out.justification = r("justification") === justificationCorrecteId() ? "correct" : "not_equivalent";
+      if (avecJustificationRejet(ex)) {
+        out.justification = r("justification") === justificationCorrecteId(ex) ? "correct" : "not_equivalent";
       }
       return out;
     }
@@ -611,6 +657,8 @@ export function diagnostiquerEcran(ex: ExerciceOptimisation, phase: EcranOptimis
           const { hauteur, objectif } = diagnostiquerConclureFenetre({ hauteur: r("hauteur"), objectif: r("perimetre") }, ex);
           return { hauteur, perimetre: objectif };
         }
+        case "boite":
+          return diagnostiquerConclureBoite({ base: r("base"), volume: r("volume") }, ex);
         case "cubique":
           return {};
       }
@@ -636,6 +684,18 @@ export const CHAMPS_CHOIX_FERME = ["justification", "conclusion"];
 export function choixFermeErrone(ex: ExerciceOptimisation, phase: EcranOptimisation, reponses: Record<string, string>): boolean {
   const statuts = diagnostiquerEcran(ex, phase, reponses);
   return CHAMPS_CHOIX_FERME.some((id) => statuts[id] !== undefined && statuts[id] !== "correct");
+}
+
+/** Saisie refusée SANS tentative (lot B) : un champ texte illisible — message, ou null. Appelé par le
+ * moteur (état inchangé) ET par l'écran. */
+export function refusSaisieOptimisation(ex: ExerciceOptimisation, phase: EcranOptimisation, reponses: Record<string, string>): string | null {
+  const statuts = diagnostiquerEcran(ex, phase, reponses);
+  const illisibles = Object.entries(statuts).filter(([id, st]) => st === "parse_error" && !CHAMPS_CHOIX_FERME.includes(id) && (reponses[id] ?? "").trim() !== "");
+  if (illisibles.length === 0) return null;
+  const symbolique = ["lien", "construire", "deriver", "relation", "expressionFinale"].includes(phase);
+  return symbolique
+    ? "Expression non reconnue : vérifie les parenthèses, les signes et la place de la variable. Cette saisie ne compte pas comme une tentative."
+    : "Nombre non reconnu : écris un nombre, par exemple 12,5, 96π ou 2√3 (virgule ou point). Cette saisie ne compte pas comme une tentative.";
 }
 
 export function verifierEcran(ex: ExerciceOptimisation, phase: EcranOptimisation, reponses: Record<string, string>): boolean {
