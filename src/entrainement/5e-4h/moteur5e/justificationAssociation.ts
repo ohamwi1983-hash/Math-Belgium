@@ -12,11 +12,12 @@
  *   n'est pas continue / pas définie, existe).
  * Fonction PURE de l'exercice : l'écran, le papier, le corrigé et la grille lisent la même spécification.
  */
-import type { ExerciceAssociation, PolynomeAssociation } from "../core5e/association.types";
+import type { ExerciceAssociation, FonctionVarieeAssociation, PolynomeAssociation } from "../core5e/association.types";
 import { estCategorie1, lettreCorrecte } from "../core5e/association.types";
 import { evaluerExpressionGenerale } from "../moteur/expressionGenerale";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { lireNombreDerivees } from "./saisieDerivees";
+import { evaluerVariee, extremumsVariee, intervalleApresPremierExtremum } from "../generateurs5e/association/fonctionsVariees";
 
 function diagnostiquerNombreTolerance(texte: string, cible: number, tol: number): StatutVerification {
   const v = lireNombreDerivees(texte.replace(/^[^=]*=/, ""));
@@ -68,6 +69,11 @@ const SIGNE = [
   { id: "positive", label: "positive" },
   { id: "negative", label: "négative" },
 ];
+const OPTIONS_F0 = [
+  { id: "dessus", label: "au-dessus de l'origine" },
+  { id: "origine", label: "à l'origine" },
+  { id: "dessous", label: "en dessous de l'origine" },
+];
 
 function champsLecture(c: PolynomeAssociation, k: number, avecSigneDerivee: boolean): ChampJustification[] {
   const fo = forme(c);
@@ -92,13 +98,31 @@ function champsLecture(c: PolynomeAssociation, k: number, avecSigneDerivee: bool
       kind: "choix",
       id: "f0",
       label: `La courbe de $f_${k + 1}$ coupe l'axe des ordonnées :`,
-      options: [
-        { id: "dessus", label: "au-dessus de l'origine" },
-        { id: "origine", label: "à l'origine" },
-        { id: "dessous", label: "en dessous de l'origine" },
-      ],
+      options: OPTIONS_F0,
       bonne: Math.abs(f0) < 1e-9 ? "origine" : f0 > 0 ? "dessus" : "dessous",
     });
+  }
+  return champs;
+}
+
+/** Fonctions « variées » (lot C, G18) : MÊMES champs que les cubiques — abscisses des sommets (entières,
+ * sur les nœuds), sens de variation sur l'intervalle qui suit le premier sommet (jusqu'au sommet
+ * suivant, à l'asymptote ou au bord du graphique), puis signe de f′ (A) ou position de f(0) (B). */
+function champsLectureVariee(f: FonctionVarieeAssociation, k: number, avecSigneDerivee: boolean): ChampJustification[] {
+  const ex = extremumsVariee(f);
+  const champs: ChampJustification[] =
+    ex.length === 2
+      ? [
+          { kind: "nombre", id: "x1", label: `x_1=`, cible: ex[0].x, groupe: "extremums" },
+          { kind: "nombre", id: "x2", label: `x_2=`, cible: ex[1].x, groupe: "extremums" },
+        ]
+      : [{ kind: "nombre", id: "x1", label: `x_{\\text{sommet}}=`, cible: ex[0].x, groupe: "extremums" }];
+  const { de, a, croissante } = intervalleApresPremierExtremum(f);
+  champs.push({ kind: "choix", id: "sens", label: `Sur $\\left]${nombreL(de)}\\,;\\,${nombreL(a)}\\right[$, $f_${k + 1}$ est :`, options: SENS, bonne: croissante ? "croissante" : "decroissante" });
+  if (avecSigneDerivee) champs.push({ kind: "choix", id: "signe", label: "donc $f'$ y est :", options: SIGNE, bonne: croissante ? "positive" : "negative" });
+  else {
+    const f0 = evaluerVariee(f, 0) ?? 0;
+    champs.push({ kind: "choix", id: "f0", label: `La courbe de $f_${k + 1}$ coupe l'axe des ordonnées :`, options: OPTIONS_F0, bonne: Math.abs(f0) < 1e-9 ? "origine" : f0 > 0 ? "dessus" : "dessous" });
   }
   return champs;
 }
@@ -111,6 +135,10 @@ export function latexVersExpression(l: string): string {
 export function itemJustifie(e: ExerciceAssociation): number {
   if (e.famille === "grapheDerivee" || e.famille === "grapheVerbal") {
     const i = e.fonctions.findIndex((c) => forme(c).extremums !== undefined);
+    return i >= 0 ? i : 0;
+  }
+  if (e.famille === "grapheDeriveeVariee" || e.famille === "grapheVerbalVarie") {
+    const i = e.fonctions.findIndex((f) => extremumsVariee(f).length === 2);
     return i >= 0 ? i : 0;
   }
   if (e.famille === "grapheDeriveeAvancee") {
@@ -133,6 +161,8 @@ export function specJustification(e: ExerciceAssociation): SpecJustification {
   const k = itemJustifie(e);
   if (e.famille === "grapheDerivee") return { item: k, famille: e.famille, champs: champsLecture(e.fonctions[k], k, true) };
   if (e.famille === "grapheVerbal") return { item: k, famille: e.famille, champs: champsLecture(e.fonctions[k], k, false) };
+  if (e.famille === "grapheDeriveeVariee") return { item: k, famille: e.famille, champs: champsLectureVariee(e.fonctions[k], k, true) };
+  if (e.famille === "grapheVerbalVarie") return { item: k, famille: e.famille, champs: champsLectureVariee(e.fonctions[k], k, false) };
   if (e.famille === "symbolique") {
     const g = e.gLatex[lettreCorrecte(e.ordreLettres, k)] ?? "0";
     const expr = latexVersExpression(g);

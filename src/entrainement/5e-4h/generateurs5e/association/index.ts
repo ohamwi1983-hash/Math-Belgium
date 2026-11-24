@@ -8,12 +8,15 @@
  */
 import { evaluerPolynome, formatPolynomeLatex } from "../domaineDefinition/polynome";
 import { estCategorie1 } from "../../core5e/association.types";
+import { genererFonctionsGrapheDeriveeVariee, genererFonctionsGrapheVerbalVarie } from "./fonctionsVariees";
 import type {
   CaracteristiqueAssociation,
   ExerciceAssociation,
   ExerciceAssociationGrapheDerivee,
   ExerciceAssociationGrapheDeriveeAvancee,
+  ExerciceAssociationGrapheDeriveeVariee,
   ExerciceAssociationGrapheVerbal,
+  ExerciceAssociationGrapheVerbalVarie,
   ExerciceAssociationSymbolique,
   FonctionRicheAssociation,
   PolynomeAssociation,
@@ -493,10 +496,27 @@ export function genererExerciceAssociation(familleForcee?: ExerciceAssociation["
   return genererExerciceSymbolique();
 }
 
-/** Tirage libre de l'APPLI (lot C, question 2) : la famille « A avancée » une fois sur quatre ; le
- * tirage libre de l'adaptateur et les codes imprimés restent ceux de `genererExerciceAssociation`. */
+// ============================================================================
+// Familles A et B « variées » (lot C, G18) : rationnelles simples, racines, trigonométriques simples —
+// voir `fonctionsVariees.ts`.
+// ============================================================================
+
+export function genererExerciceGrapheDeriveeVariee(nombreForce?: number): ExerciceAssociationGrapheDeriveeVariee {
+  return genererFonctionsGrapheDeriveeVariee(tirerNombreElements(nombreForce), tirerDerangement);
+}
+
+export function genererExerciceGrapheVerbalVarie(nombreForce?: number): ExerciceAssociationGrapheVerbalVarie {
+  return genererFonctionsGrapheVerbalVarie(tirerNombreElements(nombreForce), tirerDerangement);
+}
+
+/** Tirage libre de l'APPLI (lot C) : la famille « A avancée » une fois sur quatre, les familles A et B
+ * « variées » une fois sur quatre (moitié chacune) ; le tirage libre de l'adaptateur et les codes
+ * imprimés restent ceux de `genererExerciceAssociation`. */
 export function genererExerciceAssociationLibre(): ExerciceAssociation {
-  return Math.random() < 0.25 ? genererExerciceGrapheDeriveeAvancee() : genererExerciceAssociation();
+  const r = Math.random();
+  if (r < 0.25) return genererExerciceGrapheDeriveeAvancee();
+  if (r < 0.5) return Math.random() < 0.5 ? genererExerciceGrapheDeriveeVariee() : genererExerciceGrapheVerbalVarie();
+  return genererExerciceAssociation();
 }
 
 export const CATALOGUE_FAMILLES: { id: string; label: string }[] = [
@@ -513,6 +533,9 @@ export const CATALOGUE_FAMILLES: { id: string; label: string }[] = [
   { id: "grapheDeriveeAvancee-asymptoteVerticale", label: "A avancé — asymptote verticale (catégorie 2)" },
   { id: "grapheDeriveeAvancee-discontinuite", label: "A avancé — discontinuité (catégorie 2)" },
   { id: "grapheDeriveeAvancee-pointVide", label: "A avancé — point vide (catégorie 2)" },
+  // Lot C (G18) : AJOUTÉES EN FIN (codes imprimés des variantes précédentes inchangés).
+  { id: "grapheDeriveeVariee-4", label: "A — Graphe f ↔ graphe f′, rationnelles, racines, sinus (4 éléments)" },
+  { id: "grapheVerbalVarie-4", label: "B — Graphe f ↔ énoncé verbal, rationnelles, racines, sinus (4 éléments)" },
 ];
 
 export function construireAvecFamilleId(id: string): ExerciceAssociation {
@@ -543,6 +566,10 @@ export function construireAvecFamilleId(id: string): ExerciceAssociation {
       return genererExerciceGrapheDeriveeAvancee(3, "discontinuite");
     case "grapheDeriveeAvancee-pointVide":
       return genererExerciceGrapheDeriveeAvancee(3, "pointVide");
+    case "grapheDeriveeVariee-4":
+      return genererExerciceGrapheDeriveeVariee(4);
+    case "grapheVerbalVarie-4":
+      return genererExerciceGrapheVerbalVarie(4);
     default:
       throw new Error(`construireAvecFamilleId : id inconnu "${id}"`);
   }

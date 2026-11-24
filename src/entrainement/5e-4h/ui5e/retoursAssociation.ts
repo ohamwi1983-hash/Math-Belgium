@@ -20,6 +20,14 @@ export function consigneJustificationAssociation(e: ExerciceAssociation): string
       return `Justifie l'association de $f_${k}$ en la dérivant.`;
     case "grapheDeriveeAvancee":
       return `Justifie ta réponse pour $f_${k}$ (graphique n° ${k}) : que se passe-t-il pour sa dérivée au point particulier de la courbe ?`;
+    case "grapheDeriveeVariee":
+    case "grapheVerbalVarie": {
+      const deux = specJustification(e).champs.filter((c) => c.kind === "nombre").length === 2;
+      const sommets = deux ? "les abscisses de ses deux sommets" : "l'abscisse de son sommet";
+      return e.famille === "grapheDeriveeVariee"
+        ? `Justifie l'association de $f_${k}$ (graphique n° ${k}) : lis sur son graphique ${sommets} (${deux ? "ce sont les zéros" : "c'est le zéro"} de $f'$), puis son sens de variation et le signe de $f'$ qui en découle.`
+        : `Justifie l'association de $f_${k}$ (graphique n° ${k}) : lis sur son graphique ${sommets}, son sens de variation, puis l'endroit où la courbe coupe l'axe des ordonnées.`;
+    }
   }
 }
 
@@ -37,6 +45,14 @@ export function aidesJustificationAssociation(e: ExerciceAssociation): AideTrig[
       return [
         aideDepuis("Repère la structure de f (puissance, produit, puissance d'un binôme), puis applique la règle du cours :", "(x^n)'=nx^{n-1}\\qquad (uv)'=u'v+uv'\\qquad \\left(u^n\\right)'=n\\,u'\\,u^{n-1}"),
         aideDepuis(`La fonction à dériver :`, `f_${k}(x)=${(e as Extract<ExerciceAssociation, { famille: "symbolique" }>).fLatex[spec.item]}`),
+      ];
+    case "grapheDeriveeVariee":
+    case "grapheVerbalVarie":
+      return [
+        aideDepuis("Un sommet de f (bosse ou creux) est un zéro de f′ où f′ change de signe. Là où f croît, f′ est positive ; là où elle décroît, f′ est négative."),
+        aideDepuis(
+          `Sur le graphique n° ${k}, repère ${spec.champs.filter((c) => c.kind === "nombre").length === 2 ? "la bosse et le creux" : "le sommet"} : ${spec.champs.filter((c) => c.kind === "nombre").length === 2 ? "leurs abscisses tombent" : "son abscisse tombe"} sur une ligne verticale du quadrillage.${e.famille === "grapheVerbalVarie" ? " f(0) se lit là où la courbe coupe l'axe vertical." : ""}`,
+        ),
       ];
     case "grapheDeriveeAvancee":
       return [
@@ -57,5 +73,7 @@ export function cibleJustificationAssociation(e: ExerciceAssociation, r: Record<
 export function messageChoixJustification(e: ExerciceAssociation): string {
   return e.famille === "grapheDeriveeAvancee"
     ? `${PREFIXE_CHOIX_FERME} Coin = deux pentes différentes (f′ saute) ; tangente verticale ou rebroussement = pente infinie ; saut, trou ou asymptote = f pas continue.`
-    : `${PREFIXE_CHOIX_FERME} Là où la courbe monte, f est croissante et f′ positive ; là où elle descend, décroissante et f′ négative.`;
+    : e.famille === "grapheVerbal" || e.famille === "grapheVerbalVarie"
+      ? `${PREFIXE_CHOIX_FERME} Là où la courbe monte, f est croissante ; là où elle descend, décroissante. f(0) se lit là où la courbe coupe l'axe vertical : au-dessus de l'origine, en dessous, ou exactement à l'origine.`
+      : `${PREFIXE_CHOIX_FERME} Là où la courbe monte, f est croissante et f′ positive ; là où elle descend, décroissante et f′ négative.`;
 }

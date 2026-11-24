@@ -1220,8 +1220,8 @@ export const deriveesApplications: ChapterContent = {
           description: [
             'Associe un graphique de f à son graphique de f′ — ou à une description verbale de ' +
               'f′/f″. Reconnaissance directe du lien entre le signe de la dérivée et le ' +
-              'comportement de la courbe (en niveau avancé : points anguleux, rebroussements et ' +
-              'tangentes verticales).',
+              'comportement de la courbe, sur des polynômes, des fonctions rationnelles, des racines ' +
+              'et des sinus (en niveau avancé : points anguleux, rebroussements et tangentes verticales).',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 25. Association graphique/mots ↔ signe de f′/f″ »',

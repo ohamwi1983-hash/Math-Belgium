@@ -140,7 +140,7 @@ function etapesA(e: ExerciceContexteEconomiqueA, l: (x: EcranContexteEconomique)
       calcul(le, valeur, [], "Minimum"),
       resultat(le, [...rep(e, "extremum"), t(" €.")]),
       verification(le, [t("Signe de "), f("C'_M"), t(" : négatif avant cette production, positif après — "), f("C_M"), t(" décroît puis croît, c'est bien un minimum.")], [
-        ligne(`C'_M(${Math.max(1, Math.floor(e.minimum.q) - 1)})=${c.a}-\\dfrac{${c.c}}{${Math.max(1, Math.floor(e.minimum.q) - 1) ** 2}}`),
+        ligne(`C'_M(${Math.max(1, Math.floor(e.minimum.q) - 1)})=${c.a}-${Math.max(1, Math.floor(e.minimum.q) - 1) === 1 ? `${c.c}` : `\\dfrac{${c.c}}{${Math.max(1, Math.floor(e.minimum.q) - 1) ** 2}}`}`),
         ligne(`${egalApprox(c.a - c.c / Math.max(1, Math.floor(e.minimum.q) - 1) ** 2, 2)}<0`),
       ]),
       piege(le, [t("On dérive le coût moyen (le coût total divisé par q), pas le coût total, qui croît toujours.")]),
