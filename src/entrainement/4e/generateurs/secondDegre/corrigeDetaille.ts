@@ -195,7 +195,7 @@ function etapeReconnaissance(travail: E, l: string): EtapeCorrection[] {
     const base = lignesReconnaissance(t, "cas_general");
     return [
       utilise(l, utiliseReconnaissance()),
-      calcul(l, [...base.slice(0, -1), ligne("b^2\neq 4ac", "pas un carré parfait"), ligneRacineEvidente(travail)], intro),
+      calcul(l, [...base.slice(0, -1), ligne("b^2\\neq 4ac", "pas un carré parfait"), ligneRacineEvidente(travail)], intro),
       resultat(l, [texte(`Méthode : ${libelleMethode("racine_evidente")} ; la formule générale (Δ) est juste aussi, mais plus longue.`)]),
     ];
   }

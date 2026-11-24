@@ -254,7 +254,7 @@ export function texteAideNiveau2(exercice: ExerciceContexteEconomique, ecran: Ec
     }
     case "deriveeSymbolique": {
       const ex = exercice as ExerciceContexteEconomiqueA;
-      return { texte: "Dérive chaque terme de C_T ; le coût fixe (la constante) disparaît :", latex: `C_T(q)=${formatCoutTotalLatex(ex.coutTotal, "q")}` };
+      return { texte: "Dérive chaque terme de $C_T$ ; le coût fixe (la constante) disparaît :", latex: `C_T(q)=${formatCoutTotalLatex(ex.coutTotal, "q")}` };
     }
     case "deriveeValeur": {
       const ex = exercice as ExerciceContexteEconomiqueA;

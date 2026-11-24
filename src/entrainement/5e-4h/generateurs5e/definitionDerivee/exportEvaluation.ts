@@ -71,7 +71,7 @@ function baremeDefinitionDerivee(exercice: ExerciceDefinitionDerivee): BaremeExe
           c("a", `Valeur de f(${a})`, 0.5),
           c("a", `f(${a} + h) développé et réduit`, 1),
           c("b", `Différence f(${a} + h) − f(${a}) et simplification par h`, 1.5),
-          c("b", `Passage à la limite : valeur de f'(${a})`, 1),
+          c("b", `Passage à la limite : valeur de f′(${a})`, 1),
         ]
       : [
           c("a", `Valeur de f(${a})`, 0.5),
@@ -85,7 +85,7 @@ function baremeDefinitionDerivee(exercice: ExerciceDefinitionDerivee): BaremeExe
             1,
           ),
           c("b", "Taux d'accroissement simplifié (le facteur h a disparu)", 1.5),
-          c("c", `Passage à la limite : valeur de f'(${a})`, 1),
+          c("c", `Passage à la limite : valeur de f′(${a})`, 1),
         ];
   return {
     reponseFinale: reponseBreveDefinitionDerivee(exercice),

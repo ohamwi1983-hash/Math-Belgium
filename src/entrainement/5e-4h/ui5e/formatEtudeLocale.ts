@@ -249,6 +249,21 @@ export interface AideFragmentee {
   latex: string | null;
 }
 
+/** Numérateur d'un « \dfrac{N}{D} » de tête, accolades équilibrées (« 12x^{2}-36 » : l'ancienne
+ * expression régulière s'arrêtait à la première « } » et donnait « 12x^{2=0 », KaTeX invalide). */
+function numerateurDfrac(latex: string): string {
+  if (!latex.startsWith("\\dfrac{")) return latex;
+  let profondeur = 0;
+  for (let i = "\\dfrac".length; i < latex.length; i++) {
+    if (latex[i] === "{") profondeur++;
+    else if (latex[i] === "}") {
+      profondeur--;
+      if (profondeur === 0) return latex.slice("\\dfrac{".length, i);
+    }
+  }
+  return latex;
+}
+
 /** Niveau 2 posé pour CETTE fonction (lot B : plus d'« Exemple : 6x² − 6 = 0… »), jamais la réponse. */
 export function texteAideNiveau2EtudeLocale(ecran: EcranEtudeLocale, exercice: ExerciceEtudeLocale): AideFragmentee {
   const fp = formatFPrimeDeXLatex(exercice).replace(/^f'\(x\)=/, "");
@@ -266,7 +281,7 @@ export function texteAideNiveau2EtudeLocale(ecran: EcranEtudeLocale, exercice: E
     case "resoudreFPrime":
       return poly
         ? { texte: "Ici, divise par le coefficient de x² pour obtenir un trinôme plus simple, puis factorise ou calcule Δ :", latex: `${fp}=0` }
-        : { texte: "Ici, une fraction est nulle quand son numérateur est nul (et son dénominateur non nul) :", latex: `${fp.replace(/^\\dfrac\{([^}]*)\}.*$/, "$1")}=0` };
+        : { texte: "Ici, une fraction est nulle quand son numérateur est nul (et son dénominateur non nul) :", latex: `${numerateurDfrac(fp)}=0` };
     case "tableauFPrime":
       return { texte: "Ici, f′ est un trinôme ou une fraction : étudie le signe juste avant et juste après chaque zéro trouvé, par exemple en choisissant une valeur test dans chaque zone de :", latex: `f'(x)=${fp}` };
     case "extremums":
@@ -274,7 +289,7 @@ export function texteAideNiveau2EtudeLocale(ecran: EcranEtudeLocale, exercice: E
     case "resoudreFSeconde":
       return poly
         ? { texte: "Ici, c'est une équation du premier degré :", latex: `${fs}=0` }
-        : { texte: "Ici, seul le numérateur peut s'annuler :", latex: `${fs.replace(/^\\dfrac\{([^}]*)\}.*$/, "$1")}=0` };
+        : { texte: "Ici, seul le numérateur peut s'annuler :", latex: `${numerateurDfrac(fs)}=0` };
     case "tableauFSeconde":
       return { texte: "Ici, étudie le signe de f″ de part et d'autre de chaque zéro :", latex: `f''(x)=${fs}` };
     case "inflexions":

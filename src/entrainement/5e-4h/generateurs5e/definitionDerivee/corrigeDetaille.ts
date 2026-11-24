@@ -392,7 +392,7 @@ function piegeEtape(e: ExerciceDefinitionDerivee): EtapeCorrection {
   const a = nombreTexte(e.a);
   switch (e.famille) {
     case "affine":
-      return piege(lettreEcranDefinitionDerivee(e, "limite"), [t(`Le terme constant disparaît dans f(${a} + h) − f(${a}) : il ne s'ajoute pas au résultat, f'(${a}) vaut le coefficient de x.`)]);
+      return piege(lettreEcranDefinitionDerivee(e, "limite"), [t(`Le terme constant disparaît dans f(${a} + h) − f(${a}) : il ne s'ajoute pas au résultat, f′(${a}) vaut le coefficient de x.`)]);
     case "quadratique":
     case "quadratiqueComplete":
       return piege("a", [t(`En développant le carré de ${a} + h, ne pas oublier le double produit (terme en h) ni le signe du coefficient de x².`)]);

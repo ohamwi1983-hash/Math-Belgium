@@ -295,7 +295,7 @@ function marges(e: ExerciceMarges): Etapes {
         blocs: [{ lignes: [ligne(`\\left(\\dfrac{${T}x}{x+${2 * mh}}\\right)'=\\dfrac{${T}(x+${2 * mh})-${T}x}{(x+${2 * mh})^{2}}`, [f(`u=${T}x`), t(", "), f(`v=x+${2 * mh}`), t(", "), f("u'="), f(`${T}`), t(", "), f("v'=1")]), ligne(`=\\dfrac{${K}}{(x+${2 * mh})^{2}}`, "on réduit le numérateur"), ligne(`F'(x)=\\dfrac{${K}}{(x+${2 * mh})^{2}}-${2 * mv}`, [f(`(${2 * mv}x)'=${2 * mv}`)])] }],
       },
       resoudre: {
-        utilise: [t("On isole le carré, puis on prend la racine positive (x + 2m_h est une longueur) "), t(COURS_OPTIMISATION), t(".")],
+        utilise: [t("On isole le carré, puis on prend la racine positive ("), f("x+2m_h"), t(" est une longueur) "), t(COURS_OPTIMISATION), t(".")],
         blocs: [
           {
             lignes: [

@@ -69,7 +69,7 @@ function consignePapier(exercice: ExerciceEtudeLocale): string {
   const fSeconde = exercice.niveau === "avance" ? " Étudie de même le signe de f″ et la concavité de f, puis détermine ses éventuels points d'inflexion (abscisse et valeur)." : "";
   // Lot C (question 4) : valeurs exactes partout, racines irrationnelles comprises.
   const precision = " Donne des valeurs exactes.";
-  const derivees = exercice.deriveesACalculer ? (exercice.niveau === "avance" ? "Calcule f'(x) et f''(x). " : "Calcule f'(x). ") : "";
+  const derivees = exercice.deriveesACalculer ? (exercice.niveau === "avance" ? "Calcule f′(x) et f″(x). " : "Calcule f′(x). ") : "";
   return `${domaine}${derivees}${fPrime}${fSeconde}${precision}`;
 }
 
@@ -115,17 +115,22 @@ const CRITERE_ECRAN: Record<EcranEtudeLocale, string> = {
   resoudreFPrime: "Zéros de f′ (toutes les solutions)",
   tableauFPrime: "Tableau de signes de f′, variations et nature de chaque zéro",
   extremums: "Valeur de f en chaque extremum",
-  resoudreFSeconde: "Zéros de f''",
+  resoudreFSeconde: "Zéros de f″",
   tableauFSeconde: "Tableau de signes de f″, concavité et points d'inflexion",
   inflexions: "Valeur de f en chaque point d'inflexion",
 };
 
-/** Poids ramenés à un total de 4, au demi-point, aucun critère sous 0,5 (plus forts restes). */
+/** Poids ramenés à un total de 4, au demi-point, aucun critère sous 0,5 (plus forts restes). Au-delà
+ * de 8 critères (rationnelle, niveau avancé, dérivées à calculer : 9 écrans), 0,5 chacun ne tient plus
+ * dans 4 points : le total devient 0,5 × nombre de critères (4,5) — sans cette borne, la boucle de
+ * retrait ne trouvait plus aucun critère au-dessus de 0,5 et ne s'arrêtait jamais (barème, évaluation
+ * et feuille figés). */
 export function repartirSurQuatre(poids: number[]): number[] {
   const total = poids.reduce((t, p) => t + p, 0);
-  const brut = poids.map((p) => (p / total) * 8); // en demi-points
+  const demiPoints = Math.max(8, poids.length);
+  const brut = poids.map((p) => (p / total) * demiPoints); // en demi-points
   const unites = brut.map((b) => Math.max(1, Math.floor(b)));
-  let reste = 8 - unites.reduce((t, u) => t + u, 0);
+  let reste = demiPoints - unites.reduce((t, u) => t + u, 0);
   const ordre = brut.map((b, i) => ({ i, r: b - Math.floor(b) })).sort((a, b) => b.r - a.r || poids[b.i] - poids[a.i]);
   for (let k = 0; reste > 0; k = (k + 1) % ordre.length, reste--) unites[ordre[k].i]++;
   for (let k = ordre.length - 1; reste < 0; k = (k - 1 + ordre.length) % ordre.length) {

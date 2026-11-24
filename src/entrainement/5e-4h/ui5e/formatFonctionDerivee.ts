@@ -62,7 +62,7 @@ export function consigneEcran(ecran: EcranFonctionDerivee, typeRetenu: TypeDeriv
     if (typeRetenu === "quotient") return "Identifie le numérateur u(x) et le dénominateur v(x) de f(x).";
     return "Identifie la fonction intérieure u(x) et la fonction extérieure (exprimée en u).";
   }
-  return "Calcule f'(x).";
+  return "Calcule f′(x).";
 }
 
 // ============================================================================

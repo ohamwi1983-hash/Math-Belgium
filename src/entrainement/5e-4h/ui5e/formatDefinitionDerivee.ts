@@ -114,7 +114,7 @@ export function nombreTexte(n: number): string {
 }
 
 export function consigneGenerale(exercice: ExerciceDefinitionDerivee): string {
-  return `Calcule le nombre dérivé f'(${nombreTexte(exercice.a)}) à partir de sa définition en termes de limite.`;
+  return `Calcule le nombre dérivé f′(${nombreTexte(exercice.a)}) à partir de sa définition en termes de limite.`;
 }
 
 // ============================================================================
