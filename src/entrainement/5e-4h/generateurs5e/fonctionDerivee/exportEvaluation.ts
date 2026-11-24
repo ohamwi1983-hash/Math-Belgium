@@ -4,22 +4,16 @@ import type {
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import {
-  consigneEcran,
-  formatFDeXLatex,
-  formatReponseAttendueCalculerLatex,
-  formatTermesReponseAttendueDecomposerLatex,
-  LIBELLE_TYPE,
-  texteAideNiveau1,
-  texteReponseAttendueReconnaissance,
-} from "../../ui5e/formatFonctionDerivee";
-import { CATALOGUE_FAMILLES, construireAvecFamilleId, formatDeriveeAtomeLatex, genererExerciceFonctionDerivee } from "./index";
+import { consigneEcran, formatFDeXLatex, formatReponseAttendueCalculerLatex } from "../../ui5e/formatFonctionDerivee";
+import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceFonctionDerivee } from "./index";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeFonctionDerivee } from "./corrigeDetaille";
 import { profilFonctionDerivee } from "../profilsEvaluationDerivees25-27";
 
 /**
@@ -58,10 +52,6 @@ function aDecomposition(exercice: ExerciceFonctionDerivee): boolean {
   return exercice.famille !== "reglebase";
 }
 
-function lettreCalcul(exercice: ExerciceFonctionDerivee): string {
-  return aDecomposition(exercice) ? "c" : "b";
-}
-
 function construireEnonceFonctionDerivee(exercice: ExerciceFonctionDerivee): SectionExercice {
   const type = typePrincipal(exercice);
   const questions = [
@@ -80,49 +70,6 @@ function reponseBreveFonctionDerivee(exercice: ExerciceFonctionDerivee): Fragmen
   return [latex(formatReponseAttendueCalculerLatex(exercice))];
 }
 
-const JUSTIFICATION_TYPE: Record<TypeDerivee, string> = {
-  reglebase: "f(x) est une somme de termes en x seul : chaque terme se dérive séparément.",
-  produit: "f(x) est le produit de deux expressions en x.",
-  quotient: "f(x) est le quotient de deux expressions en x.",
-  composee: "f(x) est une seule expression appliquée à autre chose que x (une puissance, une racine ou un sinus/cosinus de ax + b).",
-};
-
-function lignesReconnaissance(exercice: ExerciceFonctionDerivee): EtapeCorrection[] {
-  const ambigu = exercice.typesAcceptes.length > 1;
-  return [
-    {
-      label: "Structure",
-      sousQuestion: "a",
-      fragments: [
-        texte(`${texteReponseAttendueReconnaissance(exercice)}. `),
-        texte(ambigu ? "Les deux lectures sont correctes ; on détaille la première." : JUSTIFICATION_TYPE[typePrincipal(exercice)]),
-      ],
-    },
-  ];
-}
-
-function lignesDecomposition(exercice: ExerciceFonctionDerivee): EtapeCorrection[] {
-  if (!aDecomposition(exercice)) return [];
-  const plusieurs = exercice.typesAcceptes.length > 1;
-  return exercice.typesAcceptes
-    .map((type): EtapeCorrection | null => {
-      const termes = formatTermesReponseAttendueDecomposerLatex(exercice, type);
-      if (termes.length === 0) return null;
-      return {
-        label: "Décomposition",
-        sousQuestion: "b",
-        fragments: [...(plusieurs ? [texte(`Lecture « ${LIBELLE_TYPE[type]} » : `)] : []), latex(termes.join(" \\quad "))],
-      };
-    })
-    .filter((l): l is EtapeCorrection => l !== null);
-}
-
-function deriveesFacteurs(exercice: ExerciceFonctionDerivee): [AtomeDerivable, AtomeDerivable] | null {
-  if (exercice.famille === "produit") return [exercice.atome1, exercice.atome2];
-  if (exercice.famille === "quotient" && !exercice.ambigu) return [exercice.atome1, exercice.atome2];
-  return null;
-}
-
 function piege(exercice: ExerciceFonctionDerivee): string {
   switch (typePrincipal(exercice)) {
     case "reglebase":
@@ -134,30 +81,6 @@ function piege(exercice: ExerciceFonctionDerivee): string {
     case "composee":
       return "Ne pas oublier de multiplier par la dérivée de l'intérieure (le coefficient de x dans ax + b).";
   }
-}
-
-function lignesCalcul(exercice: ExerciceFonctionDerivee): EtapeCorrection[] {
-  const l = lettreCalcul(exercice);
-  const regle = texteAideNiveau1("calculer", typePrincipal(exercice));
-  const lignes: EtapeCorrection[] = [{ label: "Règle", sousQuestion: l, fragments: [texte(regle.texte), ...(regle.latex ? [texte(" "), latex(regle.latex)] : [])] }];
-  const facteurs = deriveesFacteurs(exercice);
-  if (facteurs) {
-    lignes.push({
-      label: "Calcul",
-      sousQuestion: l,
-      fragments: [latex(`u'(x)=${formatDeriveeAtomeLatex(facteurs[0])} \\quad v'(x)=${formatDeriveeAtomeLatex(facteurs[1])}`)],
-    });
-  }
-  if (exercice.famille === "composee") {
-    lignes.push({ label: "Calcul", sousQuestion: l, fragments: [texte("Dérivée de l'intérieure : "), latex(`u'(x)=${exercice.atome.interieurA}`), texte(".")] });
-  }
-  lignes.push({ label: "Piège", sousQuestion: l, fragments: [texte(piege(exercice))] });
-  lignes.push({ label: "Conclusion", sousQuestion: l, fragments: [latex(formatReponseAttendueCalculerLatex(exercice))] });
-  return lignes;
-}
-
-function correctionDetailleeFonctionDerivee(exercice: ExerciceFonctionDerivee): EtapeCorrection[] {
-  return [...lignesReconnaissance(exercice), ...lignesDecomposition(exercice), ...lignesCalcul(exercice)];
 }
 
 function baremeFonctionDerivee(exercice: ExerciceFonctionDerivee): BaremeExercice {
@@ -196,16 +119,16 @@ function baremeFonctionDerivee(exercice: ExerciceFonctionDerivee): BaremeExercic
   };
 }
 
-function difficulteFonctionDerivee(exercice: ExerciceFonctionDerivee): 1 | 2 | 3 {
-  switch (exercice.famille) {
-    case "reglebase":
-      return 1;
-    case "produit":
-    case "composee":
-      return 2;
-    case "quotient":
-      return 3;
-  }
+/** Niveau 1–7 : la reconnaissance est une décision (une étape), la décomposition (b) une lecture des
+ * facteurs / de l'intérieure ; méthode 0 pour une somme de termes (règles de base imposées), 1 sinon
+ * (choisir la règle) ; piège dans les DONNÉES : facteur trigonométrique d'argument ax + b caché dans un
+ * produit ou un quotient (règle de la chaîne en plus), ou double lecture quotient / composée. */
+function criteresDifficulteFonctionDerivee(exercice: ExerciceFonctionDerivee): CriteresDifficulte {
+  const lecture = exercice.famille === "reglebase" ? [] : ["b"];
+  const argument = (at: AtomeDerivable) => at.noyau.type === "trig" && !(at.interieurA === 1 && at.interieurB === 0);
+  const cache = (exercice.famille === "produit" || (exercice.famille === "quotient" && !exercice.ambigu)) && (argument(exercice.atome1) || argument(exercice.atome2));
+  const piegeDonnees = cache || (exercice.famille === "quotient" && exercice.ambigu) ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeFonctionDerivee(exercice), lecture), methode: exercice.famille === "reglebase" ? 0 : 1, piege: piegeDonnees };
 }
 
 /** Ancien corrigé (repli, documents Word) : les lignes du corrigé détaillé, sans le piège. */
@@ -223,11 +146,10 @@ export const adaptateurEvaluationFonctionDerivee: AdaptateurFeuilleExercices<Exe
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id),
   construireEnonce: construireEnonceFonctionDerivee,
   construireCorrection: construireCorrectionFonctionDerivee,
-  difficulte: difficulteFonctionDerivee,
+  criteresDifficulte: criteresDifficulteFonctionDerivee,
   reponseBreve: reponseBreveFonctionDerivee,
   correctionDetaillee: correctionDetailleeFonctionDerivee,
   bareme: baremeFonctionDerivee,
   enoncePapier: enoncePapierFonctionDerivee,
-  dureeMinutes: 5,
   profilInstance: profilFonctionDerivee,
 };

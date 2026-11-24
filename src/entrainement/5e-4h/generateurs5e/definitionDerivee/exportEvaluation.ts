@@ -4,13 +4,15 @@ import type {
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { consigneGenerale, formatFDeXLatex, formatReponseAttendueEcranLatex, nombreTexte, questionSpecifiqueEcran, texteAideNiveau1 } from "../../ui5e/formatDefinitionDerivee";
+import { consigneGenerale, formatFDeXLatex, formatReponseAttendueEcranLatex, nombreTexte, questionSpecifiqueEcran } from "../../ui5e/formatDefinitionDerivee";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeDefinitionDerivee } from "./corrigeDetaille";
 import { ordreEcrans, type EcranDefinitionDerivee } from "../../moteur5e/typesDefinitionDerivee";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceDefinitionDerivee } from "./index";
 import { LIBELLE_CAS_DEFINITION_DERIVEE, profilDefinitionDerivee } from "../profilsEvaluationDerivees25-27";
@@ -30,8 +32,6 @@ import { LIBELLE_CAS_DEFINITION_DERIVEE, profilDefinitionDerivee } from "../prof
  *
  * `regroupable` : non — la consigne contient la valeur de a tirée.
  */
-
-const LETTRES = "abcdefgh";
 
 function fonctionLatex(exercice: ExerciceDefinitionDerivee): string {
   return formatFDeXLatex(exercice);
@@ -54,74 +54,12 @@ function enoncePapierDefinitionDerivee(exercice: ExerciceDefinitionDerivee): Eno
   return { section: { enteteFragments: [...entete(exercice), texte(` ${consigneGenerale(exercice)}`)], questions: [] } };
 }
 
-function lettre(exercice: ExerciceDefinitionDerivee, ecran: EcranDefinitionDerivee): string {
-  return LETTRES[ordreEcrans(exercice).indexOf(ecran)] ?? "a";
-}
-
 function valeurFinaleLatex(exercice: ExerciceDefinitionDerivee): string {
   return formatReponseAttendueEcranLatex(exercice, "limite")[0];
 }
 
 function reponseBreveDefinitionDerivee(exercice: ExerciceDefinitionDerivee): FragmentConsigne[] {
   return [latex(valeurFinaleLatex(exercice))];
-}
-
-function methode(exercice: ExerciceDefinitionDerivee, ecran: EcranDefinitionDerivee): FragmentConsigne[] {
-  const aide = texteAideNiveau1(exercice, ecran);
-  // Le piège de l'aide a sa propre ligne « Piège » : seule la méthode reste ici.
-  const coupe = aide.texte.indexOf(" Piège :");
-  const methodeSeule = coupe === -1 ? aide.texte : `${aide.texte.slice(0, coupe).replace(/\.$/, "")}${aide.latex ? " :" : "."}`;
-  return [texte(methodeSeule), ...(aide.latex ? [texte(" "), latex(aide.latex)] : [])];
-}
-
-function piege(exercice: ExerciceDefinitionDerivee): EtapeCorrection {
-  const a = nombreTexte(exercice.a);
-  switch (exercice.famille) {
-    case "affine":
-      return { label: "Piège", sousQuestion: lettre(exercice, "limite"), fragments: [texte(`Le terme constant disparaît dans f(${a} + h) − f(${a}) : ne l'ajoute pas au résultat, f'(${a}) vaut le coefficient de x.`)] };
-    case "quadratique":
-      return { label: "Piège", sousQuestion: "a", fragments: [texte(`En développant le carré de ${a} + h, ne pas oublier le terme croisé (le double produit) ni le signe du coefficient de x².`)] };
-    default:
-      return {
-        label: "Piège",
-        sousQuestion: lettre(exercice, "quotient"),
-        fragments: [texte(`Mets f(${a} + h) − f(${a}) au même dénominateur avant de diviser par h : sinon le facteur h ne peut pas se simplifier.`)],
-      };
-  }
-}
-
-function correctionDetailleeDefinitionDerivee(exercice: ExerciceDefinitionDerivee): EtapeCorrection[] {
-  const a = exercice.a;
-  const lignes: EtapeCorrection[] = [
-    {
-      label: "Définition",
-      sousQuestion: "a",
-      fragments: [latex(`f'(${a})=\\displaystyle\\lim_{h\\to 0}\\dfrac{f(${a}+h)-f(${a})}{h}`), texte(` : on calcule d'abord f(${nombreTexte(a)}) et f(${nombreTexte(a)} + h).`)],
-    },
-    { label: "Méthode", sousQuestion: "a", fragments: methode(exercice, "developper") },
-    { label: "Calcul", sousQuestion: "a", fragments: [latex(formatReponseAttendueEcranLatex(exercice, "developper").join(" \\quad "))] },
-  ];
-  if (exercice.famille !== "affine") {
-    lignes.push(
-      { label: "Méthode", sousQuestion: lettre(exercice, "quotient"), fragments: methode(exercice, "quotient") },
-      { label: "Calcul", sousQuestion: lettre(exercice, "quotient"), fragments: [latex(formatReponseAttendueEcranLatex(exercice, "quotient")[0])] },
-    );
-  }
-  const limite = questionSpecifiqueEcran(exercice, "limite").latex ?? "";
-  lignes.push(
-    { label: "Méthode", sousQuestion: lettre(exercice, "limite"), fragments: methode(exercice, "limite") },
-    {
-      label: "Conclusion",
-      sousQuestion: lettre(exercice, "limite"),
-      fragments: [latex(`${limite}=${valeurFinaleLatex(exercice).replace(/^f'\([^)]*\)=/, "")}`), texte(".")],
-    },
-  );
-  const p = piege(exercice);
-  const ordre = (l: EtapeCorrection) => LETTRES.indexOf(l.sousQuestion ?? "a");
-  // La ligne « Piège » se lit sous l'étape qu'elle concerne.
-  const position = lignes.reduce((dernier, l, i) => (ordre(l) <= ordre(p) ? i : dernier), -1);
-  lignes.splice(position + 1, 0, p);
-  return lignes;
 }
 
 function baremeDefinitionDerivee(exercice: ExerciceDefinitionDerivee): BaremeExercice {
@@ -154,17 +92,11 @@ function baremeDefinitionDerivee(exercice: ExerciceDefinitionDerivee): BaremeExe
   };
 }
 
-function difficulteDefinitionDerivee(exercice: ExerciceDefinitionDerivee): 1 | 2 | 3 {
-  switch (exercice.famille) {
-    case "affine":
-      return 1;
-    case "quadratique":
-      return 2;
-    case "rationnelleSimple":
-      return exercice.expo === 1 ? 2 : 3;
-    case "rationnelleLineaire":
-      return 3;
-  }
+/** Niveau 1–7 : méthode imposée (la définition, méthode 0) ; piège dans les DONNÉES : a négatif
+ * (signes en développant (a + h)² ou au même dénominateur), sauf pour une fonction affine où il
+ * disparaît. Aucun écran de pure lecture. */
+function criteresDifficulteDefinitionDerivee(exercice: ExerciceDefinitionDerivee): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeDefinitionDerivee(exercice), []), methode: 0, piege: exercice.famille !== "affine" && exercice.a < 0 ? 1 : 0 };
 }
 
 /** Ancien corrigé (repli, documents Word) : les lignes du corrigé détaillé, sans le piège. */
@@ -182,12 +114,11 @@ export const adaptateurEvaluationDefinitionDerivee: AdaptateurFeuilleExercices<E
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id),
   construireEnonce: construireEnonceDefinitionDerivee,
   construireCorrection: construireCorrectionDefinitionDerivee,
-  difficulte: difficulteDefinitionDerivee,
+  criteresDifficulte: criteresDifficulteDefinitionDerivee,
   reponseBreve: reponseBreveDefinitionDerivee,
   correctionDetaillee: correctionDetailleeDefinitionDerivee,
   bareme: baremeDefinitionDerivee,
   enoncePapier: enoncePapierDefinitionDerivee,
-  dureeMinutes: 8,
   profilInstance: profilDefinitionDerivee,
   libelleCasParticulier: LIBELLE_CAS_DEFINITION_DERIVEE,
 };

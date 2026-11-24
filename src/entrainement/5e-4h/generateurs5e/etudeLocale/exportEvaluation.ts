@@ -1,25 +1,21 @@
-import type { ExerciceEtudeLocale, ValeurLigne2Tableau, ValeurSigneTableau } from "../../core5e/etudeLocale.types";
+import type { ExerciceEtudeLocale } from "../../core5e/etudeLocale.types";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
   ErreurFrequente,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import {
-  consigneEcranEtudeLocale,
-  formatEnteteColonnesTableau,
-  formatReponseAttenduePhaseLatex,
-  formatTermesDonneesLatex,
-  texteAideNiveau1EtudeLocale,
-} from "../../ui5e/formatEtudeLocale";
+import { consigneEcranEtudeLocale, formatReponseAttenduePhaseLatex, formatTermesDonneesLatex } from "../../ui5e/formatEtudeLocale";
+import { tableauSignesEtudeLatex } from "../../ui5e/corrigeDerivees1";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeEtudeLocale } from "./corrigeDetaille";
 import { ordreEcransEtudeLocale, type EcranEtudeLocale } from "../../moteur5e/typesEtudeLocale";
-import { tableauFPrimeAttendu, tableauFSecondeAttendu, type TableauEtudeLocaleAttendu } from "../../moteur5e/verificationEtudeLocale";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEtudeLocale } from "./index";
 import { profilEtudeLocale } from "../profilsEvaluationDerivees28-30";
 
@@ -42,49 +38,7 @@ const LETTRES = "abcdefgh";
 // Tableau de signes en LaTeX (réutilisé par 5gen30, `lectureGraphiqueDerivees/exportEvaluation.ts`).
 // ============================================================================
 
-function signeLatex(v: ValeurSigneTableau): string {
-  return v === "∄" ? "\\|" : v;
-}
-
-function ligne2Latex(v: ValeurLigne2Tableau | null): string {
-  switch (v) {
-    case null:
-      return "\\|";
-    case "↗":
-      return "\\nearrow";
-    case "↘":
-      return "\\searrow";
-    case "∪":
-      return "\\cup";
-    case "∩":
-      return "\\cap";
-    case "max":
-      return "\\text{max}";
-    case "min":
-      return "\\text{min}";
-    case "ni_lun_ni_lautre":
-      return "\\text{ni max ni min}";
-    case "pi":
-      return "\\text{PI}";
-    case "pas_de_pi":
-      return "\\text{pas de PI}";
-  }
-}
-
-/** Tableau (environnement `array`) : ligne x (−∞, en-têtes des colonnes, +∞), ligne du signe de la
- * dérivée, ligne des variations (f') ou de la concavité (f'') de f. `entetes` : une entrée par
- * colonne de `attendu` (« » pour une zone). */
-export function tableauSignesEtudeLatex(attendu: TableauEtudeLocaleAttendu, entetes: string[], mode: "fprime" | "fseconde"): string {
-  const n = attendu.colonnes.length;
-  const ligne = (libelle: string, cellules: string[]) => [libelle, "", ...cellules, ""].join(" & ");
-  return [
-    `\\begin{array}{c|${"c".repeat(n + 2)}}`,
-    `${ligne("x", entetes).replace(/^x &  &/, "x & -\\infty &").replace(/ & $/, " & +\\infty")} \\\\ \\hline`,
-    `${ligne(mode === "fprime" ? "f'(x)" : "f''(x)", attendu.signes.map(signeLatex))} \\\\ \\hline`,
-    `${ligne("f(x)", attendu.ligne2.map(ligne2Latex))}`,
-    "\\end{array}",
-  ].join(" ");
-}
+export { tableauSignesEtudeLatex };
 
 // ============================================================================
 // Énoncé.
@@ -148,57 +102,6 @@ function reponseBreveEtudeLocale(exercice: ExerciceEtudeLocale): FragmentConsign
   return fragments;
 }
 
-function methode(exercice: ExerciceEtudeLocale, ecran: EcranEtudeLocale, sousQuestion: string): EtapeCorrection {
-  const aide = texteAideNiveau1EtudeLocale(ecran, exercice);
-  return { label: "Méthode", sousQuestion, fragments: [texte(aide.texte), ...(aide.latex ? [texte(" "), latex(aide.latex)] : [])] };
-}
-
-function tableau(exercice: ExerciceEtudeLocale, mode: "fprime" | "fseconde"): string {
-  const attendu = mode === "fprime" ? tableauFPrimeAttendu(exercice) : tableauFSecondeAttendu(exercice);
-  return tableauSignesEtudeLatex(attendu, formatEnteteColonnesTableau(exercice, attendu.colonnes, mode), mode);
-}
-
-function correctionDetailleeEtudeLocale(exercice: ExerciceEtudeLocale): EtapeCorrection[] {
-  const ordre = ordreEcransEtudeLocale(exercice);
-  const L = (e: EcranEtudeLocale) => LETTRES[ordre.indexOf(e)];
-  const lignes: EtapeCorrection[] = [];
-  for (const ecran of ordre) {
-    const l = L(ecran);
-    switch (ecran) {
-      case "domaine":
-        lignes.push(methode(exercice, ecran, l), { label: "Conclusion", sousQuestion: l, fragments: [latex(formatReponseAttenduePhaseLatex(exercice, "domaine")[0])] });
-        break;
-      case "resoudreFPrime":
-      case "resoudreFSeconde":
-        lignes.push(methode(exercice, ecran, l), { label: "Calcul", sousQuestion: l, fragments: [latex(formatReponseAttenduePhaseLatex(exercice, ecran)[0])] });
-        break;
-      case "tableauFPrime":
-        lignes.push({ label: "Tableau", sousQuestion: l, fragments: [latex(tableau(exercice, "fprime"))] });
-        lignes.push({ label: "Conclusion", sousQuestion: l, fragments: [...joindre(formatReponseAttenduePhaseLatex(exercice, "tableauFPrime")), ...(aExtremums(exercice) ? [] : [texte(" : f n'a aucun extremum.")])] });
-        lignes.push({
-          label: "Piège",
-          sousQuestion: l,
-          fragments: exercice.classificationFPrime.includes("ni_lun_ni_lautre")
-            ? [texte("f' s'annule sans changer de signe (racine double) : ce point n'est ni un maximum ni un minimum.")]
-            : [texte("Un zéro de f' n'est un extremum que si f' change de signe de part et d'autre : on le vérifie dans le tableau, jamais par principe.")],
-        });
-        break;
-      case "extremums":
-      case "inflexions":
-        lignes.push(methode(exercice, ecran, l), { label: "Calcul", sousQuestion: l, fragments: joindre(formatReponseAttenduePhaseLatex(exercice, ecran)) });
-        break;
-      case "tableauFSeconde":
-        lignes.push({ label: "Tableau", sousQuestion: l, fragments: [latex(tableau(exercice, "fseconde"))] });
-        lignes.push({ label: "Conclusion", sousQuestion: l, fragments: [...joindre(formatReponseAttenduePhaseLatex(exercice, "tableauFSeconde")), ...(aInflexions(exercice) ? [] : [texte(" : f n'a aucun point d'inflexion.")])] });
-        if (exercice.classificationFSeconde.includes("pas_de_pi")) {
-          lignes.push({ label: "Piège", sousQuestion: l, fragments: [texte("f'' s'annule sans changer de signe : la concavité ne change pas, ce n'est pas un point d'inflexion.")] });
-        }
-        break;
-    }
-  }
-  return lignes;
-}
-
 const POIDS_ECRAN: Record<EcranEtudeLocale, number> = { domaine: 0.5, resoudreFPrime: 2, tableauFPrime: 2, extremums: 1.5, resoudreFSeconde: 2, tableauFSeconde: 2, inflexions: 1.5 };
 
 const CRITERE_ECRAN: Record<EcranEtudeLocale, string> = {
@@ -243,9 +146,12 @@ function baremeEtudeLocale(exercice: ExerciceEtudeLocale): BaremeExercice {
   };
 }
 
-function difficulteEtudeLocale(exercice: ExerciceEtudeLocale): 1 | 2 | 3 {
-  if (exercice.type === "polynomiale" && exercice.natureRacines !== "irrationnelle" && exercice.niveau === "base") return 2;
-  return 3;
+/** Niveau 1–7 : f′ (et f″) DONNÉES, démarche imposée par la consigne (méthode 0) ; aucun écran de
+ * pure lecture (chaque écran calcule ou raisonne sur un signe) ; piège dans les DONNÉES : valeurs
+ * interdites à porter dans le tableau (rationnelle avec CE). La racine double n'est pas notée en piège :
+ * c'est le verdict de l'élève (nature du point). */
+function criteresDifficulteEtudeLocale(exercice: ExerciceEtudeLocale): CriteresDifficulte {
+  return { ...etapesDuCorrige(correctionDetailleeEtudeLocale(exercice), []), methode: 0, piege: exercice.type === "rationnelleAvecCE" ? 1 : 0 };
 }
 
 /** Ancien corrigé (repli, documents Word) : les lignes du corrigé détaillé, en paragraphes. */
@@ -263,12 +169,11 @@ export const adaptateurEvaluationEtudeLocale: AdaptateurFeuilleExercices<Exercic
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce: construireEnonceEtudeLocale,
   construireCorrection: construireCorrectionEtudeLocale,
-  difficulte: difficulteEtudeLocale,
+  criteresDifficulte: criteresDifficulteEtudeLocale,
   reponseBreve: reponseBreveEtudeLocale,
   correctionDetaillee: correctionDetailleeEtudeLocale,
   bareme: baremeEtudeLocale,
   enoncePapier: enoncePapierEtudeLocale,
-  dureeMinutes: 12,
   profilInstance: profilEtudeLocale,
   calculatriceIndispensable: ["polynomiale-irrationnelle-base", "polynomiale-irrationnelle-avance"],
 };

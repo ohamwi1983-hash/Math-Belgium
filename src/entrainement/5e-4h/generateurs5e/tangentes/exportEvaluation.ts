@@ -1,16 +1,18 @@
-import type { ExerciceTangente, ExerciceTangenteDoubleTangence } from "../../core5e/tangentes.types";
+import type { ExerciceTangente } from "../../core5e/tangentes.types";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { consigneGenerale, formatFDeXLatex, formatFPrimeDeXLatex, formatReponseAttenduePhaseLatex, texteAideNiveau1 } from "../../ui5e/formatTangentes";
+import { consigneGenerale, formatFDeXLatex, formatReponseAttenduePhaseLatex } from "../../ui5e/formatTangentes";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeTangente } from "./corrigeDetaille";
 import { ordreEcransTangente, type EcranTangente } from "../../moteur5e/typesTangentes";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTangente } from "./index";
 import { LIBELLE_CAS_TANGENTES, profilTangente } from "../profilsEvaluationDerivees28-30";
@@ -47,28 +49,6 @@ function lettre(exercice: ExerciceTangente, etape: EtapeTangente): string {
 /** Nombre en texte brut avec le « − » typographique. */
 function nombre(n: number): string {
   return n < 0 ? `−${Math.abs(n)}` : `${n}`;
-}
-
-/** « x − 2 », « x + 3 », « x » en LaTeX. */
-function facteurLatex(r: number): string {
-  if (r === 0) return "x";
-  return r > 0 ? `x-${r}` : `x+${Math.abs(r)}`;
-}
-
-/** « (x − 2)² », ou « x² » quand la racine est 0. */
-function carreLatex(r: number): string {
-  return r === 0 ? "x^2" : `(${facteurLatex(r)})^2`;
-}
-
-/** f'(x) de la double tangence — le quartique développé est dérivé terme à terme ; mis en forme par
- * le MÊME formateur que f (`formatFDeXLatex`, appliqué aux coefficients de la dérivée). */
-function fPrimeDoubleTangenceLatex(exercice: ExerciceTangenteDoubleTangence): string {
-  const derivee = exercice.coeffs.slice(1).map((c, i) => (i + 1) * c);
-  return formatFDeXLatex({ variante: "doubleTangence", coeffs: derivee, p: 0, q: 0 }).replace(/^f\(x\)/, "f'(x)");
-}
-
-function fPrimeLatex(exercice: ExerciceTangente): string {
-  return exercice.variante === "doubleTangence" ? fPrimeDoubleTangenceLatex(exercice) : formatFPrimeDeXLatex(exercice);
 }
 
 function consigneEtape(exercice: ExerciceTangente, etape: EtapeTangente): FragmentConsigne[] {
@@ -138,72 +118,6 @@ function reponseBreveTangente(exercice: ExerciceTangente): FragmentConsigne[] {
   }
 }
 
-/** Ligne « Méthode » tirée de l'aide de niveau 1 de l'écran (texte + formule à part). */
-function methode(exercice: ExerciceTangente, ecran: EcranTangente, sousQuestion: string): EtapeCorrection {
-  const aide = texteAideNiveau1(ecran, exercice);
-  return { label: "Méthode", sousQuestion, fragments: [texte(aide.texte), ...(aide.latex ? [texte(" "), latex(aide.latex)] : [])] };
-}
-
-function correctionDetailleeTangente(exercice: ExerciceTangente): EtapeCorrection[] {
-  const L = (e: EtapeTangente) => lettre(exercice, e);
-  if (exercice.variante === "pointDonne") {
-    const [fA, fPrimeA] = formatReponseAttenduePhaseLatex(exercice, "substituer");
-    const lignes: EtapeCorrection[] = [];
-    if (exercice.sousFamille === "radicale") {
-      lignes.push({ label: "Méthode", sousQuestion: L("deriver"), fragments: [texte("Règle de la chaîne : "), latex("\\left(\\sqrt{u}\\right)'=\\dfrac{u'}{2\\sqrt{u}}"), texte(".")] });
-    }
-    lignes.push(
-      { label: "Dérivée", sousQuestion: L("deriver"), fragments: [latex(fPrimeLatex(exercice))] },
-      { label: "Calcul", sousQuestion: L("substituer"), fragments: [latex(fA), texte(" et "), latex(fPrimeA), texte(".")] },
-      methode(exercice, "tangente", L("tangente")),
-      { label: "Conclusion", sousQuestion: L("tangente"), fragments: [latex(formatReponseAttenduePhaseLatex(exercice, "tangente")[0])] },
-      {
-        label: "Piège",
-        sousQuestion: L("tangente"),
-        fragments: [texte("La pente de la tangente est "), latex(`f'(${exercice.a})`), texte(" ; "), latex(`f(${exercice.a})`), texte(" est l'ordonnée du point de contact. Les intervertir donne une autre droite.")],
-      },
-    );
-    return lignes;
-  }
-  if (exercice.variante === "horizontale") {
-    const racineDouble = exercice.racines.length === 1;
-    return [
-      { label: "Dérivée", sousQuestion: L("deriver"), fragments: [latex(fPrimeLatex(exercice))] },
-      methode(exercice, "resoudre", L("resoudre")),
-      { label: "Calcul", sousQuestion: L("resoudre"), fragments: [latex(formatReponseAttenduePhaseLatex(exercice, "resoudre")[0]), texte(racineDouble ? " (racine double)." : ".")] },
-      { label: "Calcul", sousQuestion: L("coordonnees"), fragments: [...joindre(formatReponseAttenduePhaseLatex(exercice, "coordonnees")), texte(".")] },
-      {
-        label: "Piège",
-        sousQuestion: L("coordonnees"),
-        fragments: racineDouble
-          ? [texte("Une racine double ne donne qu'un seul point à tangente horizontale.")]
-          : [texte("Un point de tangence a deux coordonnées : l'abscisse seule ne suffit pas.")],
-      },
-    ];
-  }
-  const [fPrimeP, tangenteP] = formatReponseAttenduePhaseLatex(exercice, "tangenteEnP");
-  const [fPrimeQ, conclusion] = formatReponseAttenduePhaseLatex(exercice, "verifierPente");
-  const k = exercice.coeffs[4];
-  const kLatex = k === 1 ? "" : k === -1 ? "-" : `${k}`;
-  return [
-    { label: "Dérivée", sousQuestion: L("tangenteEnP"), fragments: [latex(fPrimeLatex(exercice))] },
-    { label: "Calcul", sousQuestion: L("tangenteEnP"), fragments: [latex(fPrimeP), texte(" ; tangente "), latex(tangenteP), texte(".")] },
-    methode(exercice, "trouverQ", L("trouverQ")),
-    {
-      label: "Calcul",
-      sousQuestion: L("trouverQ"),
-      fragments: [latex(`f(x)-t(x)=${kLatex}${carreLatex(exercice.p)}${carreLatex(exercice.q)}`), texte(" ; d'où "), latex(formatReponseAttenduePhaseLatex(exercice, "trouverQ")[0]), texte(".")],
-    },
-    { label: "Calcul", sousQuestion: L("verifierPente"), fragments: [latex(fPrimeQ), texte(", la même pente qu'en "), latex(`x=${exercice.p}`), texte(".")] },
-    { label: "Conclusion", sousQuestion: L("verifierPente"), fragments: [latex(conclusion)] },
-    {
-      label: "Piège",
-      sousQuestion: L("verifierPente"),
-      fragments: [texte("Un point commun ne suffit pas : la droite n'est tangente en q que si la pente de la courbe y est la même que celle de t.")],
-    },
-  ];
-}
-
 function baremeTangente(exercice: ExerciceTangente): BaremeExercice {
   const L = (e: EtapeTangente) => lettre(exercice, e);
   const c = (sousQuestion: string, texteCritere: string, points: number): CritereBareme => ({ sousQuestion, critere: [texte(texteCritere)], points });
@@ -238,10 +152,12 @@ function baremeTangente(exercice: ExerciceTangente): BaremeExercice {
   };
 }
 
-function difficulteTangente(exercice: ExerciceTangente): 1 | 2 | 3 {
-  if (exercice.variante === "doubleTangence") return 3;
-  if (exercice.variante === "pointDonne" && exercice.sousFamille === "polynomiale") return 1;
-  return 2;
+/** Niveau 1–7 : l'étape « dérivée » (papier) compte comme les écrans ; méthode 1 (formule de la
+ * tangente, ou f′(x) = 0 à poser) ; piège dans les DONNÉES : radicande (racine à simplifier, dénominateur
+ * à rendre rationnel), racine double de f′ (un seul point), double tangence (racine double cachée). */
+function criteresDifficulteTangente(exercice: ExerciceTangente): CriteresDifficulte {
+  const piege = exercice.variante === "doubleTangence" ? 1 : 0;
+  return { ...etapesDuCorrige(correctionDetailleeTangente(exercice), []), methode: 1, piege };
 }
 
 /** Ancien corrigé (repli, documents Word) : les lignes du corrigé détaillé, en paragraphes. */
@@ -259,12 +175,11 @@ export const adaptateurEvaluationTangentes: AdaptateurFeuilleExercices<ExerciceT
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce: construireEnonceTangente,
   construireCorrection: construireCorrectionTangente,
-  difficulte: difficulteTangente,
+  criteresDifficulte: criteresDifficulteTangente,
   reponseBreve: reponseBreveTangente,
   correctionDetaillee: correctionDetailleeTangente,
   bareme: baremeTangente,
   enoncePapier: enoncePapierTangente,
-  dureeMinutes: 7,
   profilInstance: profilTangente,
   libelleCasParticulier: LIBELLE_CAS_TANGENTES,
   // Regroupement a), b), c) : l'abscisse va dans la ligne (`export/regroupementsPapier.ts`, 5gen28).

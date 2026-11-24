@@ -12,17 +12,19 @@ import type {
   BaremeExercice,
   BlocCorrection,
   CritereBareme,
+  CriteresDifficulte,
   EnoncePapier,
-  EtapeCorrection,
   FragmentConsigne,
   SectionExercice,
 } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
+import { texte } from "../../../export/fragmentsDocx";
 import { echapperHtml } from "../../../export/genererFeuilleExercicesHtml";
 import { construireSvgFonction, type ViewBoxSvg } from "../../../export/svgGraph";
 import { consigneAssociation } from "../../ui5e/formatAssociation";
 import { evaluerPolynome } from "../domaineDefinition/polynome";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, derivee, formeCubique, genererExerciceAssociation } from "./index";
+import { etapesDuCorrige } from "../../../export/niveauDifficulte";
+import { correctionDetailleeAssociation, piegeSymboliqueAssociation } from "./corrigeDetaille";
 import { profilAssociation } from "../profilsEvaluationDerivees25-27";
 import { normaliserLimites } from "../../../../lib/notationLog";
 
@@ -182,69 +184,6 @@ function reponseBreveAssociation(exercice: ExerciceAssociation): FragmentConsign
   return [texte(correspondance(exercice))];
 }
 
-/** Nombre au dixième, virgule décimale et « − » typographique. */
-function dixieme(x: number): string {
-  const v = Math.round(x * 10) / 10;
-  const s = (Object.is(v, -0) ? 0 : v).toFixed(1).replace(/\.0$/, "").replace(".", ",");
-  return s.replace(/^-/, "−");
-}
-
-function justificationGrapheDerivee(coeffs: PolynomeAssociation): string {
-  const forme = formeCubique(coeffs);
-  if (forme.extremums) {
-    const [r1, r2] = forme.extremums;
-    return forme.signe > 0
-      ? `f croît, décroît puis croît (extremums en x ≈ ${dixieme(r1)} et x ≈ ${dixieme(r2)}) : f' est positive, s'annule en ${dixieme(r1)}, négative, s'annule en ${dixieme(r2)}, puis positive.`
-      : `f décroît, croît puis décroît (extremums en x ≈ ${dixieme(r1)} et x ≈ ${dixieme(r2)}) : f' est négative, s'annule en ${dixieme(r1)}, positive, s'annule en ${dixieme(r2)}, puis négative.`;
-  }
-  return forme.signe > 0
-    ? `f est croissante sur tout le graphique : f' reste positive ; elle est la plus petite en x ≈ ${dixieme(forme.inflexion)}, là où f a son point d'inflexion.`
-    : `f est décroissante sur tout le graphique : f' reste négative ; elle est la plus grande en x ≈ ${dixieme(forme.inflexion)}, là où f a son point d'inflexion.`;
-}
-
-function justificationGrapheVerbal(coeffs: PolynomeAssociation): string {
-  const forme = formeCubique(coeffs);
-  const ordonnee = Math.abs(forme.f0) < 1e-9 ? "la courbe passe par l'origine" : forme.f0 > 0 ? "la courbe coupe l'axe des ordonnées au-dessus de l'origine" : "la courbe coupe l'axe des ordonnées en dessous de l'origine";
-  if (forme.extremums) {
-    const [r1, r2] = forme.extremums;
-    const premier = forme.signe > 0 ? "maximum" : "minimum";
-    const second = forme.signe > 0 ? "minimum" : "maximum";
-    return `${premier} en x ≈ ${dixieme(r1)}, ${second} en x ≈ ${dixieme(r2)} ; ${ordonnee}.`;
-  }
-  return `${forme.signe > 0 ? "croissante" : "décroissante"} partout, point d'inflexion en x ≈ ${dixieme(forme.inflexion)} ; ${ordonnee}.`;
-}
-
-const majuscule = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
-
-function ligneElement(exercice: ExerciceAssociation, i: number): EtapeCorrection {
-  const label = `${i + 1} → ${lettreDe(exercice, i)}`;
-  switch (exercice.famille) {
-    case "grapheDerivee":
-      return { label, sousQuestion: "a", fragments: [texte(justificationGrapheDerivee(exercice.fonctions[i]))] };
-    case "grapheVerbal":
-      return { label, sousQuestion: "a", fragments: [texte(majuscule(justificationGrapheVerbal(exercice.fonctions[i])))] };
-    case "symbolique": {
-      const j = lettreCorrecte(exercice.ordreLettres, i);
-      return { label, sousQuestion: "a", fragments: [texte("En dérivant, on obtient "), latex(`f'(x)=${exercice.gLatex[j]}`), texte(".")] };
-    }
-    case "grapheDeriveeAvancee":
-      return { label, sousQuestion: "a", fragments: [] };
-  }
-}
-
-function methodeAssociation(exercice: ExerciceAssociation): FragmentConsigne[] {
-  switch (exercice.famille) {
-    case "grapheDerivee":
-      return [texte("Là où f croît, f' est positive (au-dessus de l'axe des x) ; là où f décroît, f' est négative ; en un extremum de f, f' s'annule en changeant de signe.")];
-    case "grapheVerbal":
-      return [texte("On lit sur chaque graphique le sens de variation, la position des extremums (ou du point d'inflexion) par rapport à l'axe des ordonnées et l'endroit où la courbe coupe cet axe.")];
-    case "symbolique":
-      return [texte("On dérive chaque fonction : une puissance de x, un produit de deux facteurs du premier degré (règle du produit) ou une puissance de ax + b (règle de la chaîne) :"), texte(" "), latex("\\big((ax+b)^n\\big)'=n\\,a\\,(ax+b)^{n-1}")];
-    case "grapheDeriveeAvancee":
-      return [];
-  }
-}
-
 function piegeAssociation(exercice: ExerciceAssociation): string {
   switch (exercice.famille) {
     case "grapheDerivee":
@@ -258,16 +197,6 @@ function piegeAssociation(exercice: ExerciceAssociation): string {
   }
 }
 
-function correctionDetailleeAssociation(exercice: ExerciceAssociation): EtapeCorrection[] {
-  const n = nombreElementsAssociation(exercice);
-  return [
-    { label: "Méthode", sousQuestion: "a", fragments: methodeAssociation(exercice) },
-    ...Array.from({ length: n }, (_, i) => ligneElement(exercice, i)),
-    { label: "Piège", sousQuestion: "a", fragments: [texte(piegeAssociation(exercice))] },
-    { label: "Conclusion", sousQuestion: "a", fragments: [texte(correspondance(exercice))] },
-  ];
-}
-
 function baremeAssociation(exercice: ExerciceAssociation): BaremeExercice {
   const n = nombreElementsAssociation(exercice);
   const criteres: CritereBareme[] = Array.from({ length: n }, (_, i) => ({ sousQuestion: LETTRES_ETAPES[0], critere: [texte(`Élément ${i + 1} associé à la lettre ${lettreDe(exercice, i)}`)], points: 4 / n }));
@@ -279,15 +208,28 @@ function baremeAssociation(exercice: ExerciceAssociation): BaremeExercice {
   };
 }
 
-function difficulteAssociation(exercice: ExerciceAssociation): 1 | 2 | 3 {
-  return nombreElementsAssociation(exercice) >= 4 ? 3 : 2;
+/** Niveau 1–7 : familles A et B = association lue sur les graphiques (écran de pure lecture, comme
+ * 6gen85 « associer ») ; famille C = dérivation de chaque fonction (une étape, chargée par le nombre de
+ * fonctions). Méthode : 0 en A (sens de variation → signe de f′, imposé), 1 en B (choisir les critères
+ * qui départagent) et en C (choisir la règle). Piège dans les DONNÉES : B, deux graphiques de mêmes
+ * variations ; C, une puissance de ax + b avec a ≠ 1. Nombres 0 : les « ≈ » sont des lectures. */
+function criteresDifficulteAssociation(exercice: ExerciceAssociation): CriteresDifficulte {
+  const corrige = correctionDetailleeAssociation(exercice);
+  if (exercice.famille === "symbolique") return { ...etapesDuCorrige(corrige, []), methode: 1, piege: piegeSymboliqueAssociation(exercice) ? 1 : 0, nombres: 0 };
+  let memesVariations = false;
+  if (exercice.famille === "grapheVerbal") {
+    const sig = exercice.fonctions.map((c) => {
+      const fo = formeCubique(c);
+      return `${fo.signe}|${fo.extremums ? 2 : 0}`;
+    });
+    memesVariations = new Set(sig).size < sig.length;
+  }
+  return { ...etapesDuCorrige(corrige, ["a"]), methode: exercice.famille === "grapheVerbal" ? 1 : 0, piege: memesVariations ? 1 : 0, nombres: 0 };
 }
 
 /** Ancien corrigé (repli, documents Word). */
 function construireCorrectionAssociation(exercice: ExerciceAssociation): BlocCorrection[] {
-  return correctionDetailleeAssociation(exercice)
-    .filter((l) => l.label !== "Piège" && l.label !== "Méthode")
-    .map((l) => ({ type: "paragraphe", fragments: l.fragments }));
+  return [{ type: "paragraphe", fragments: reponseBreveAssociation(exercice) }];
 }
 
 export const adaptateurEvaluationAssociation: AdaptateurFeuilleExercices<ExerciceAssociation> = {
@@ -298,11 +240,10 @@ export const adaptateurEvaluationAssociation: AdaptateurFeuilleExercices<Exercic
   genererInstanceAvecVariante: (id) => construireAvecFamilleId(id),
   construireEnonce: construireEnonceAssociation,
   construireCorrection: construireCorrectionAssociation,
-  difficulte: difficulteAssociation,
+  criteresDifficulte: criteresDifficulteAssociation,
   reponseBreve: reponseBreveAssociation,
   correctionDetaillee: correctionDetailleeAssociation,
   bareme: baremeAssociation,
   enoncePapier: enoncePapierAssociation,
-  dureeMinutes: 6,
   profilInstance: profilAssociation,
 };
