@@ -36,6 +36,14 @@ export function LectureGraphiqueLimitesGraph({ exercice }: Props) {
   const viewBox = calculerViewBoxLectureGraphique(exercice);
   const marqueurs = construireMarqueursPointIsole(exercice);
   const { infini } = exercice;
+  // Nombres de la grille : ils évitent la courbe et les asymptotes (fenêtre élargie pour le pan / zoom).
+  const largeurX = viewBox.x[1] - viewBox.x[0];
+  const hauteurY = viewBox.y[1] - viewBox.y[0];
+  const courbesEvitees = [
+    ...construireSegments(exercice, viewBox.x[0] - 3 * largeurX, viewBox.x[1] + 3 * largeurX, [viewBox.y[0] - 3 * hauteurY, viewBox.y[1] + 3 * hauteurY]).map((s) => ({ evaluer: s.evaluer, domaine: s.domaine })),
+    ...(infini.type === "horizontale" ? [{ evaluer: () => infini.limitePlusInfini }, { evaluer: () => infini.limiteMoinsInfini }] : []),
+    ...(infini.type === "oblique" ? [{ evaluer: (x: number) => infini.pente * x + infini.ordonnee }] : []),
+  ];
 
   return (
     <div className="mafs-graph graphe-lecture-limites" ref={wrapperRef} data-testid="mafs-graph-lecture-graphique-limites">
@@ -50,7 +58,7 @@ export function LectureGraphiqueLimitesGraph({ exercice }: Props) {
         pan={true}
         zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}
       >
-        <GrilleAdaptative5e largeur={largeur} hauteur={hauteur} />
+        <GrilleAdaptative5e largeur={largeur} hauteur={hauteur} courbes={courbesEvitees} verticales={exercice.vas.map((va) => va.position)} />
 
         <FenetreVisibleXY5e largeur={largeur} hauteur={hauteur}>
           {(visible, visibleY) =>

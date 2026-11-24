@@ -42,7 +42,7 @@ export function FonctionVarieeAssociationGraph({ fonction, derivee = false }: { 
   return (
     <div className="courbe-graph-conteneur mafs-graph">
       <Mafs width={LARGEUR} height={HAUTEUR} viewBox={{ x: [X_MIN_VARIEE, X_MAX_VARIEE], y: [yMin, yMax], padding: 0 }} preserveAspectRatio={false} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
-        <GrilleAdaptative5e largeur={LARGEUR} hauteur={HAUTEUR} onPasChange={(x, y) => setPas({ x, y })} />
+        <GrilleAdaptative5e largeur={LARGEUR} hauteur={HAUTEUR} onPasChange={(x, y) => setPas({ x, y })} courbes={[{ evaluer, domaine: [d0, d1] }]} verticales={excl === null ? [] : [excl]} />
         <FenetreVisibleXY5e largeur={LARGEUR} hauteur={HAUTEUR}>
           {(visibleX) => morceaux(visibleX[0], visibleX[1]).map(([a, b]) => <Plot.OfX key={a} y={evaluer} domain={[a, b]} color={COULEUR_COURBE} weight={EPAISSEUR_TRAIT_ACCENTUE} />)}
         </FenetreVisibleXY5e>

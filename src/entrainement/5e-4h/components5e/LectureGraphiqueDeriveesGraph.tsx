@@ -35,11 +35,19 @@ export function LectureGraphiqueDeriveesGraph({ exercice, surlignage }: Props) {
   const marqueurs = construireMarqueursPointIsole(exercice);
   const zoneBande = surlignage ? calculerZoneSurlignage(exercice, surlignage) : null;
   const { infini } = exercice.asymptotique;
+  // Nombres de la grille : ils évitent la courbe et les asymptotes (fenêtre élargie pour le pan / zoom).
+  const largeurX = viewBox.x[1] - viewBox.x[0];
+  const hauteurY = viewBox.y[1] - viewBox.y[0];
+  const courbesEvitees = [
+    ...construireSegmentsDerivees(exercice, viewBox.x[0] - 3 * largeurX, viewBox.x[1] + 3 * largeurX, [viewBox.y[0] - 3 * hauteurY, viewBox.y[1] + 3 * hauteurY]).map((s) => ({ evaluer: s.evaluer, domaine: s.domaine })),
+    ...(infini.type === "horizontale" ? [{ evaluer: () => infini.limitePlusInfini }, { evaluer: () => infini.limiteMoinsInfini }] : []),
+    ...(infini.type === "oblique" ? [{ evaluer: (x: number) => infini.pente * x + infini.ordonnee }] : []),
+  ];
 
   return (
     <div className="mafs-graph graphe-lecture-limites" ref={wrapperRef} data-testid="mafs-graph-lecture-graphique-derivees">
       <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBox.x, y: viewBox.y, padding: 0 }} preserveAspectRatio={false} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
-        <GrilleAdaptative5e largeur={largeur} hauteur={hauteur} />
+        <GrilleAdaptative5e largeur={largeur} hauteur={hauteur} courbes={courbesEvitees} verticales={exercice.asymptotique.vas.map((va) => va.position)} />
 
         {zoneBande && (
           <Polygon

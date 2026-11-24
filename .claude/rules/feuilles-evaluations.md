@@ -991,7 +991,7 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   6 · 18 min contre 5 · 15, la copie d'évaluation n'imprime ni niveau ni durée). Codes imprimés : inchangés sauf
   5gen27 produit / quotient sans trig, 5gen30 (grille), 5gen33 A degré 3 calculatrice ; options tirées en dernier.
   **Finitions avant mise en ligne (24/11)** : grille Mafs partagée `GrilleAdaptative5e` (5gen22, 5gen25, 5gen30,
-  5gen31) — nombres à côté des axes, « − », un sur deux s'ils se touchent, jamais rognés ; f′ / f″ typographiques
+  5gen31) — nombres à côté des axes, « − », un sur deux s'ils se touchent, jamais rognés, jamais traversés par une courbe ni une asymptote (props `courbes` / `verticales`, branchées aussi dans les graphes de 5gen22 / 5gen23 / 5gen31 ; « −1 » barré par la droite y = −1 se lisait « 1 ») ; f′ / f″ typographiques
   dans tout texte brut du chapitre (titres, cartes, consignes, barèmes ; libellés du `SelecteurVarianteDev`
   inchangés) ; 5gen25 familles A et B « variées » (`generateurs5e/association/fonctionsVariees.ts` : a((x − c) +
   k/(x − c)) + q, a/((x − c)² + 1) + q, a((x − p) − 2m√(x − p)) + q, a sin(π(x − c)/4) + q ; extremums, asymptote et

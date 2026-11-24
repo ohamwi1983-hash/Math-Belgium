@@ -51,7 +51,16 @@ export function EtudierFonctionGraph({ exercice, onTap, abscisseAide, propositio
   return (
     <div className="mafs-graph" ref={wrapperRef} data-testid="mafs-graph-etudier-fonction">
       <Mafs width={largeur} height={hauteur} viewBox={{ x: viewBox.x, y: viewBox.y, padding: 0 }} preserveAspectRatio={false} pan={false} onClick={(point) => onTap(point[0], point[1], echelle)}>
-        <GrilleAdaptative5e largeur={largeur} hauteur={hauteur} />
+        <GrilleAdaptative5e
+          largeur={largeur}
+          hauteur={hauteur}
+          courbes={[
+            ...(afficherCourbe ? segments.map((s) => ({ evaluer: s.evaluer, domaine: s.domaine })) : []),
+            ...(type === "horizontale" ? [{ evaluer: () => decalageVertical(exercice) }] : []),
+            ...(exercice.famille === "rationnelleAO" ? [{ evaluer: (x: number) => exercice.a * x + exercice.b }] : []),
+          ]}
+          verticales={exclusions}
+        />
 
         {abscisseAide !== null && (
           <Polygon

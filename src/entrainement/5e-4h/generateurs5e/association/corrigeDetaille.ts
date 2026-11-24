@@ -349,7 +349,7 @@ function etapesJustification(e: ExerciceAssociation): EtapeCorrection[] {
   const lignes: LigneCalcul[] = [];
   const nb = (v: number) => `${Math.round(v * 100) / 100}`.replace(".", "{,}");
   for (const c of spec.champs) {
-    if (c.kind === "nombre") lignes.push(ligne(`${c.label}${nb(c.cible)}`, c.groupe === "extremums" ? `sommet du graphique n° ${k} : zéro de f′` : `changement de courbure du graphique n° ${k} : extremum de f′`));
+    if (c.kind === "nombre") lignes.push(ligne(`${c.label}${nb(c.cible)}`, c.groupe === "extremums" ? `sommet du graphique n° ${k} : zéro de f′` : `changement de courbure du graphique n° ${k} : extremum de f′`));
     else if (c.kind === "expression") {
       const g = e.famille === "symbolique" ? e.gLatex[lettreCorrecte(e.ordreLettres, spec.item)] : "";
       lignes.push(ligne(`${c.label}${g}`, "règles de dérivation du cours"));

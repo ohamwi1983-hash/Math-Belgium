@@ -30,10 +30,17 @@ export function GrilleAdaptative5e({
   largeur,
   hauteur,
   onPasChange,
+  courbes,
+  verticales,
 }: {
   largeur: number;
   hauteur: number;
   onPasChange?: (pasX: number, pasY: number) => void;
+  /** Courbes tracées par-dessus la grille (et droites non verticales : asymptotes…) : un nombre
+   * qu'une courbe traverserait n'est pas écrit (« −1 » barré par la droite y = −1 se lisait « 1 »). */
+  courbes?: CourbeEvitee5e[];
+  /** Abscisses des droites verticales tracées (asymptotes) : mêmes règles. */
+  verticales?: number[];
 }) {
   const { viewTransform } = useTransformContext();
   const xSpan = largeur / viewTransform[0];
@@ -50,7 +57,7 @@ export function GrilleAdaptative5e({
   return (
     <Fragment>
       <Coordinates.Cartesian xAxis={{ lines: pasX, axis: true, labels: undefined }} yAxis={{ lines: pasY, axis: true, labels: undefined }} />
-      <GraduationsFlottantes5e largeur={largeur} hauteur={hauteur} pasX={pasX} pasY={pasY} />
+      <GraduationsFlottantes5e largeur={largeur} hauteur={hauteur} pasX={pasX} pasY={pasY} courbes={courbes} verticales={verticales} />
     </Fragment>
   );
 }
@@ -70,6 +77,15 @@ const ESPACE_ENTRE_NOMBRES = 6;
 export function etiquetteGraduation5e(valeur: number): string {
   return formatEtiquetteGrille(valeur).replace(/^-/, "−");
 }
+
+/** Courbe y = evaluer(x) (sur `domaine` s'il est donné) que les nombres de la grille évitent. */
+export interface CourbeEvitee5e {
+  evaluer: (x: number) => number;
+  domaine?: readonly [number, number];
+}
+
+/** Dégagement (pixels) entre un nombre et une courbe : demi-épaisseur du trait accentué + 2 px. */
+const DEGAGEMENT_COURBE = 4;
 
 interface BoiteTexte {
   x0: number;
@@ -115,9 +131,25 @@ function pasEcriture(ecart: number, encombrement: number): number {
  *   la police réelle (chiffres à chasse fixe de Mafs : 0,6 em par caractère) ;
  * - jamais rognés : un nombre qui dépasserait du cadre n'est pas écrit, ni un nombre de l'axe
  *   vertical qui toucherait un nombre de l'axe horizontal près de l'origine ;
- * - 0 n'est jamais écrit (`graduationsDansPlage`), comme les étiquettes natives de Mafs.
+ * - 0 n'est jamais écrit (`graduationsDansPlage`), comme les étiquettes natives de Mafs ;
+ * - jamais traversés par une courbe : un nombre qu'une des `courbes` (ou une `verticales`) toucherait
+ *   à `DEGAGEMENT_COURBE` près n'est pas écrit.
  */
-function GraduationsFlottantes5e({ largeur, hauteur, pasX, pasY }: { largeur: number; hauteur: number; pasX: number; pasY: number }) {
+function GraduationsFlottantes5e({
+  largeur,
+  hauteur,
+  pasX,
+  pasY,
+  courbes = [],
+  verticales = [],
+}: {
+  largeur: number;
+  hauteur: number;
+  pasX: number;
+  pasY: number;
+  courbes?: CourbeEvitee5e[];
+  verticales?: number[];
+}) {
   const { viewTransform, userTransform } = useTransformContext();
   const groupRef = useRef<SVGGElement>(null);
   const [origineX, origineY] = useOrigineLocaleSVG(groupRef);
@@ -133,6 +165,40 @@ function GraduationsFlottantes5e({ largeur, hauteur, pasX, pasY }: { largeur: nu
   const largeurTexte = (s: string) => s.length * police * 0.6;
   const demiHaut = police * 0.5;
 
+  // Passage repère → écran (coordonnées du groupe) pour tester si une courbe traverse un nombre.
+  const [p0x, p0y] = vec.transform([0, 0], matrice);
+  const [p1x, p1y] = vec.transform([1, 1], matrice);
+  const echX = p1x - p0x;
+  const echY = p1y - p0y;
+  const verticalesEcran = verticales.map((v) => p0x + echX * v - origineX);
+  const toucheCourbe = (b: BoiteTexte): boolean => {
+    const y0 = b.y0 - DEGAGEMENT_COURBE;
+    const y1 = b.y1 + DEGAGEMENT_COURBE;
+    if (verticalesEcran.some((xv) => xv >= b.x0 - DEGAGEMENT_COURBE && xv <= b.x1 + DEGAGEMENT_COURBE)) return true;
+    if (echX === 0) return false;
+    for (const c of courbes) {
+      let precedent: number | null = null;
+      for (let ex = b.x0 - DEGAGEMENT_COURBE; ex <= b.x1 + DEGAGEMENT_COURBE; ex += 1) {
+        const x = (ex + origineX - p0x) / echX;
+        if (c.domaine && (x < c.domaine[0] || x > c.domaine[1])) {
+          precedent = null;
+          continue;
+        }
+        const v = c.evaluer(x);
+        if (!Number.isFinite(v)) {
+          precedent = null;
+          continue;
+        }
+        const ey = p0y + echY * v - origineY;
+        if (ey >= y0 && ey <= y1) return true;
+        // Courbe raide : deux échantillons voisins de part et d'autre du nombre.
+        if (precedent !== null && Math.min(precedent, ey) < y0 && Math.max(precedent, ey) > y1 && Math.abs(precedent - ey) < hauteur * 4) return true;
+        precedent = ey;
+      }
+    }
+    return false;
+  };
+
   // --- Axe horizontal : nombres sous l'axe (au-dessus s'il n'y a pas la place en bas du cadre).
   const ticksX = graduationsDansPlage(visibleX[0], visibleX[1], pasX).map((x) => ({ v: x, e: vec.transform([x, 0], matrice)[0] - origineX, s: etiquetteGraduation5e(x) }));
   const baseX = Math.min(Math.max(ecranAxeY, 0), hauteur);
@@ -143,7 +209,7 @@ function GraduationsFlottantes5e({ largeur, hauteur, pasX, pasY }: { largeur: nu
   const nombresX = ticksX
     .filter((t) => Math.round(t.v / pasX) % kX === 0)
     .map((t) => ({ ...t, boite: { x0: t.e - largeurTexte(t.s) / 2, x1: t.e + largeurTexte(t.s) / 2, y0: yNombresX - demiHaut, y1: yNombresX + demiHaut } }))
-    .filter((t) => t.boite.x0 >= MARGE_BORD && t.boite.x1 <= largeur - MARGE_BORD);
+    .filter((t) => t.boite.x0 >= MARGE_BORD && t.boite.x1 <= largeur - MARGE_BORD && !toucheCourbe(t.boite));
 
   // --- Axe vertical : nombres à gauche de l'axe (à droite s'il n'y a pas la place à gauche).
   const ticksY = graduationsDansPlage(visibleY[0], visibleY[1], pasY).map((y) => ({ v: y, e: vec.transform([0, y], matrice)[1] - origineY, s: etiquetteGraduation5e(y) }));
@@ -160,7 +226,7 @@ function GraduationsFlottantes5e({ largeur, hauteur, pasX, pasY }: { largeur: nu
       const x0 = aGauche ? xNombresY - w : xNombresY;
       return { ...t, boite: { x0, x1: x0 + w, y0: t.e - demiHaut, y1: t.e + demiHaut } };
     })
-    .filter((t) => t.boite.y0 >= MARGE_BORD && t.boite.y1 <= hauteur - MARGE_BORD && !nombresX.some((n) => seChevauchent(n.boite, t.boite)));
+    .filter((t) => t.boite.y0 >= MARGE_BORD && t.boite.y1 <= hauteur - MARGE_BORD && !nombresX.some((n) => seChevauchent(n.boite, t.boite)) && !toucheCourbe(t.boite));
 
   return (
     <g ref={groupRef} className="mafs-shadow graduations-5e">

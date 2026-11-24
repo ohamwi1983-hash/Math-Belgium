@@ -59,7 +59,7 @@ export function FonctionRicheAssociationGraph({ fonction, derivee = false }: { f
         pan={true}
         zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}
       >
-        <GrilleAdaptative5e largeur={LARGEUR} hauteur={HAUTEUR} onPasChange={(x, y) => setPas({ x, y })} />
+        <GrilleAdaptative5e largeur={LARGEUR} hauteur={HAUTEUR} onPasChange={(x, y) => setPas({ x, y })} courbes={[{ evaluer }]} />
         <FenetreVisibleXY5e largeur={LARGEUR} hauteur={HAUTEUR}>
           {(visibleX) =>
             construireSegmentsExclusionUnique(visibleX[0], visibleX[1], exclusion).map(([a, b]) => (

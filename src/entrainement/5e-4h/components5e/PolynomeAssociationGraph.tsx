@@ -43,7 +43,7 @@ export function PolynomeAssociationGraph({ coeffs }: { coeffs: PolynomeAssociati
   return (
     <div className="courbe-graph-conteneur mafs-graph">
       <Mafs width={LARGEUR} height={HAUTEUR} viewBox={{ x: [X_MIN, X_MAX], y: [yMin, yMax], padding: 0 }} preserveAspectRatio={false} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }}>
-        <GrilleAdaptative5e largeur={LARGEUR} hauteur={HAUTEUR} onPasChange={(x, y) => setPas({ x, y })} />
+        <GrilleAdaptative5e largeur={LARGEUR} hauteur={HAUTEUR} onPasChange={(x, y) => setPas({ x, y })} courbes={[{ evaluer: (x) => evaluerPolynome(coeffs, x) }]} />
         <DomaineTraceX5e largeur={LARGEUR}>
           {(domaine) => <Plot.OfX y={(x) => evaluerPolynome(coeffs, x)} domain={domaine} color={COULEUR_COURBE} weight={EPAISSEUR_TRAIT_ACCENTUE} />}
         </DomaineTraceX5e>
