@@ -157,16 +157,73 @@ fenêtre « active » répond. Avancer = étape de révélation suivante, puis d
 diapo précédente revient ENTIÈRE). Clavier (écouteur posé par cette page seulement, rien ailleurs) :
 → ↓ Page suiv. Espace Entrée → suivant ; ← ↑ Page préc. Retour arrière ; Début / Fin ; B ou « . » écran
 blanc ; G vue d'ensemble ; Échap ferme ce qui est ouvert sinon ouvre la vue d'ensemble ; S stylo ;
-F / F5 plein écran. Une touche dans un champ, un bouton ou un atelier (Shadow DOM compris,
-`composedPath`) lui revient. Clic sur la diapo = suivant (sauf boutons, atelier, stylo actif) ;
+H surligneur ; Q équerre ; C compas ; K calculatrice ; Ctrl/Cmd+Z annuler ; F / F5 plein écran (aucune
+de ces lettres n'était prise). Une touche dans un champ ou un atelier (Shadow DOM compris,
+`composedPath`) lui revient ; sur un bouton, seules les lettres restent des raccourcis. Clic sur la diapo = suivant (sauf boutons, atelier, stylo actif) ;
 glisser au doigt = suivant / précédent.
-- Barre du bas (`BarreOutils`) : fil « chapitre · § n titre court », stylo (palette 4 couleurs, gomme,
-  tout effacer), minuteur (1/2/3/5/10 min, affiché en haut à droite, rouge clignotant à 0), écran blanc,
+- Barre du bas (`BarreOutils`) : fil « chapitre · § n titre court », stylo, équerre, compas,
+  calculatrice, minuteur (1/2/3/5/10 min, affiché en haut à droite, rouge clignotant à 0), écran blanc,
   vue d'ensemble (grille de vignettes `mode="vignette"`, atelier non monté), plein écran (Fullscreen
   API, refus ou absence → message « utilise F11 »), ‹ n / N ›, quitter (→ `#projeter`). Masquée (et le
-  curseur) après 3 s sans mouvement.
-- Stylo (`Annotations`, `Scene.tsx`) : canvas en coordonnées de diapo, traits gardés en mémoire
-  (redessinés à l'échelle), effacés au changement de diapo, envoyés à l'autre fenêtre.
+  curseur) après 3 s sans mouvement. Palettes centrées au-dessus (`.projection-palettes`) : fond de
+  l'écran blanc, dessin, minuteur. Infobulles = nom + raccourci.
+
+**Outils de dessin et instruments** (décision du 24/11/2026 « toutes tes propositions » ; maquettes D1
+palette, D2 équerre, D3 compas + calculatrice). Pointer events partout (souris, doigt, stylet, tableau
+interactif ; `touch-action: none` sur ce qui se manipule, classe `.projection-interactif` = jamais
+« diapo suivante » au clic ni au glisser).
+- `Tableau.tsx` (`Annotations`) par-dessus la diapo, en px logiques 1 280 × 720 : canvas **fluo**
+  dessous (`mix-blend-mode: multiply` — le conteneur `.projection-tableau` ne doit créer AUCUN contexte
+  d'empilement, sinon le fluo ne se fond plus avec la diapo) puis canvas **stylo** (traits, arcs) ; la
+  gomme (44 px, `destination-out`) passe sur les deux. Palette `PaletteDessin` (`BarreOutils.tsx`) :
+  stylo 4 couleurs, fluo 4 couleurs pastel (jaune, vert, rose, bleu ; trait 22 px, bouts plats), 3
+  épaisseurs (`EPAISSEURS` : 3 / 5 / 9 px, aussi pour les arcs), gomme, annuler, tout effacer.
+- **Gardées par diapo** : `Map<index, ElementAnnotation[]>` (traits, arcs, résultats épinglés) en
+  mémoire de la page SEULEMENT (rien en base, rien hors du navigateur) ; on les retrouve en revenant sur
+  la diapo. L'écran blanc est une page à part (clé −1). « Annuler » (bouton, Ctrl/Cmd+Z hors champ)
+  retire le dernier élément de la page courante (un trait de gomme annulé fait réapparaître ce qu'il
+  effaçait) ; « Tout effacer » vaut pour la page courante.
+- **Synchronisation** (deux écrans, même `BroadcastChannel`) : `trait` + `point` (tracé libre), `element`
+  (ajout OU remplacement par id : trait aimanté, arc en cours, étiquette déplacée), `retirer`, `effacer`,
+  `annotations` (tout, en réponse à la `demande` d'une fenêtre qui s'ouvre ou se recharge : la fenêtre
+  des diapos ouverte après coup reçoit ce qui était déjà écrit), `instruments`. Fond de l'écran blanc
+  dans `EtatProjection.fond`.
+- **Instruments** (`instruments.ts`, magasin externe `useSyncExternalStore` partagé entre fenêtres :
+  un déplacement ne redessine que l'instrument, jamais la diapo ; indépendants de la diapo, comme un
+  instrument posé au tableau) :
+  - **Équerre Aristo** (Q) : triangle rectangle isocèle transparent, hypoténuse de 13 carreaux graduée
+    en carreaux (0 au milieu, demi-graduations), rapporteur demi-cercle (traits tous les 5°,
+    étiquettes 30/45/60 de chaque côté), axe médian pointillé. Glisser le corps = déplacer ; poignée
+    ronde = tourner autour du 0, angle affiché en direct (sens mathématique) avec cran à ±3° sur les
+    multiples de 30° et de 45°. Un trait de stylo / fluo commencé à ≤ 12 px logiques d'un bord
+    (dedans ou dehors) **s'aimante** : segment droit le long de ce bord, borné au bord. Re-clic = masquée.
+  - **Compas** (C, outil de la palette : couleur et épaisseur du stylo) : appuyer sur le centre et
+    écarter (rayon), relâcher ; appuyer ensuite loin du centre et tourner = arc (angles « déroulés »,
+    tour complet possible) ; appuyer près du centre = nouveau centre. Rayon affiché dans UNE unité
+    fixe, 1 carreau = 40 px logiques (32 × 18 sur la diapo, la même que la graduation de l'équerre) :
+    « r = 6 carreaux » quand le quadrillage / repère est affiché (centre aimanté sur un nœud à 10 px,
+    rayon sur le demi-carreau à 4 px), sinon « r = 6,3 u » — même nombre dans les deux cas, choisi
+    parce que la diapo n'a pas d'échelle réelle (pas de « cm » honnête possible).
+  - **Calculatrice** (K, `Calculatrice.tsx` + `lib/projection/calculatrice.ts` PUR) : générique (aucune
+    apparence de marque), flottante, déplaçable par sa barre de titre, en px logiques (même place sur
+    les deux écrans ; dans la vue réduite du professeur agrandie jusqu'à 80 % de la taille réelle, sans
+    dépasser la diapo). Saisie libre au clavier JAMAIS bloquée (`type="text"`, pas d'`inputMode`, seul
+    `normaliserSigneMoins`) + touches (2nde → sin⁻¹…, ln, log, xʸ, e, sin, cos, tan, √, x², chiffres,
+    + − × ÷, parenthèses, π, virgule, Ans, =). Parseur MAISON (descente récursive, jamais
+    `eval`/`Function`) : multiplication implicite, −2² = −4, puissances à droite, parenthèses non fermées
+    fermées d'office, angles remarquables exacts en DEG. Affichage KaTeX : écho de l'expression (sin(40°)
+    en DEG), valeur à 10 chiffres significatifs (virgule, espaces fines, « − »), « ≈ » si arrondie ;
+    « Exact » = forme reconnue par la valeur à 10⁻¹¹ près quand le décimal est arrondi (fraction q ≤ 1 000,
+    multiple de π q ≤ 60, ±a√b/q), sinon décimal. Erreurs en clair (« « abc » n'est pas reconnu »,
+    « Division par zéro », hors du domaine), rien n'est effacé. « Épingler » pose « expression = valeur »
+    (KaTeX) sur la page courante : étiquette déplaçable, annulable, retirable à la gomme (×). Deux
+    écrans : bouton « Masquer à la classe » (vue du professeur seulement) — la calculatrice n'est plus
+    affichée sur l'écran projeté.
+- **Écran blanc** : choix « uni / quadrillé / repère » (palette au-dessus de la barre ; boutons à côté
+  d'« Écran blanc » dans la vue du professeur), partagé ; quadrillage de 40 px, repère = axes gradués,
+  origine au centre (`FondBlancTableau`). Les instruments marchent dessus.
+- Vue du professeur : stylo + équerre / compas / calculatrice au-dessus de la diapo projetée, palette
+  en dessous (sans les intitulés) ; tout ce qui y est fait apparaît au tableau, et inversement.
 - **Un écran** : « Lancer » demande le plein écran DANS le clic (la navigation interne le garde).
   **Deux écrans** : `window.open` DANS le clic (`lib/projection/fenetre.ts`, nom fixe) → fenêtre
   `role=diapos` (accueil « Plein écran / Continuer sans ») ; la page courante devient la vue du
@@ -183,6 +240,7 @@ leur place mesurée) ; le reste = image de fond 1 920 × 1 080 (SVG `<foreignObj
 site + polices Fraunces / Work Sans / Plex Mono — lues depuis la feuille Google Fonts — et KaTeX en
 `data:`, woff2 latin / latin-ext seulement ; Shadow DOM des ateliers aplati) ; notes = `notes` en texte
 (`texteBrut` / `latexEnTexte`). Une diapo par diapo finale, jamais une par étape de révélation.
+Les annotations, instruments et résultats épinglés ne sont PAS exportés (état de classe, non gardé).
 
 **Vérifications** (24/11/2026, dossier de travail `projection/` : `verif.mjs`, `verif-prod.mjs`,
 `compter_pptx.py`, `comparer_prerendu.py`) : build de test (`NODE_ENV=development vite build --mode test`
@@ -200,6 +258,19 @@ une image + des zones de texte + des notes par diapo ; rendu LibreOffice relu) �
 (20 vérifications). Pré-rendu : texte, balises méta et JSON-LD des 24 pages identiques à avant.
 Piège trouvé : un `BroadcastChannel` créé dans un `useMemo` et fermé au démontage se tait sous
 StrictMode (démontage / remontage simulé) — créer et fermer le canal dans le MÊME effet.
+Outils (24/11/2026, dossier de travail `projection-outils/` : `verif-outils.mjs`, `test-calc.ts`) : Vite
+de développement + faux client connecté, 4e ch. 6, 1 280 × 720 et 1 920 × 1 080 — fluo (multiply, gomme
+qui l'efface), 3 épaisseurs croissantes, annuler (bouton, Ctrl+Z, arc, étiquette), retour sur une diapo
+annotée identique au pixel près, équerre déplacée + tournée (cran à 30°) + trait aimanté (direction =
+celle de l'équerre à 0,01° près malgré un tracé en zigzag), compas sur quadrillage (centre aimanté,
+« r = 6 carreaux », arc de 90°), repère, calculatrice (8 × sin(40) ÷ sin(65) en DEG ≈ 5,673 901 241,
+écho sin(40°), saisie « 2 + abc » gardée avec message, √(12)÷3 exact 2√3/3, mode ≈), épingler +
+déplacer ; deux fenêtres (prof + diapos) : trait écrit avant l'ouverture reçu, fluo, équerre (position),
+compas, calculatrice, épingle, « Masquer à la classe », annuler, trait du tableau vu chez le
+professeur, repère partagé — 78 vérifications, 0 erreur console. Pièges : un `div` en
+`position: absolute; left: 50%` + `translateX(-50%)` plafonne sa largeur à la moitié du parent (les
+palettes passaient sur deux lignes) — `left/right` + `align-items: center` ; la vue du professeur
+change de taille quand la palette s'ouvre : recalculer les coordonnées d'écran après coup.
 
 ## Page d'un générateur `/entrainement/:chantier/:generatorId` (refonte du 22/11/2026)
 

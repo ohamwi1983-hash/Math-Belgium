@@ -11,8 +11,10 @@ import { RichText } from '../Math'
 import { SiteHeader } from '../SiteHeader'
 import { Diapo } from './Diapo'
 import { Paginateur } from './Paginateur'
-import { Annotations, Scene } from './Scene'
-import { BarreOutils, COULEURS_STYLO, DUREES_MINUTEUR, formatDuree, useResteMinuteur } from './BarreOutils'
+import { Scene } from './Scene'
+import { Annotations, FondBlancTableau } from './Tableau'
+import { BarreOutils, basculerCompas, basculerFluo, basculerStylo, BoutonsInstruments, COULEURS_FLUO, COULEURS_STYLO, DUREES_MINUTEUR, formatDuree, PaletteDessin, PaletteFond, useResteMinuteur } from './BarreOutils'
+import { useMagasinInstruments } from './instruments'
 import type { OutilsLocaux } from './BarreOutils'
 import { GardeProfesseur } from './GardeProfesseur'
 import { Pictogramme } from './Pictogrammes'
@@ -130,7 +132,8 @@ function usePleinEcran(signaler: (m: string) => void) {
 }
 
 /** Raccourcis clavier — UNIQUEMENT pendant la projection (écouteur posé par cette page). Une touche
- * frappée dans un champ, un curseur ou un bouton d'atelier (Shadow DOM compris) lui revient. */
+ * frappée dans un champ, un curseur ou un bouton d'atelier (Shadow DOM compris) lui revient ; sur un
+ * bouton (palette, calculatrice), seules les lettres restent des raccourcis (elles n'y font rien d'autre). */
 function useClavier(actions: Record<string, () => void>) {
   const ref = useRef(actions)
   ref.current = actions
@@ -138,7 +141,7 @@ function useClavier(actions: Record<string, () => void>) {
     const surTouche = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return
       const chemin = e.composedPath() as HTMLElement[]
-      const dansChamp = chemin.some((n) => n instanceof HTMLElement && (n.matches?.('input, textarea, select, [contenteditable="true"]') || (n.matches?.('button, a[href]') && e.key !== 'Escape' && !n.classList.contains('projection-outil'))))
+      const dansChamp = chemin.some((n) => n instanceof HTMLElement && (n.matches?.('input, textarea, select, [contenteditable="true"]') || (n.matches?.('button, a[href]') && e.key !== 'Escape' && !/^[a-z.]$/i.test(e.key) && !n.classList.contains('projection-outil'))))
       const dansAtelier = chemin.some((n) => n instanceof HTMLElement && n.classList?.contains('diapo-atelier'))
       if (dansChamp || (dansAtelier && e.key !== 'Escape' && e.key !== 'PageDown' && e.key !== 'PageUp')) return
       const a = ref.current
@@ -162,7 +165,15 @@ function useClavier(actions: Record<string, () => void>) {
                         ? a.pleinEcran
                         : touche === 's'
                           ? a.stylo
-                          : undefined
+                          : touche === 'h'
+                            ? a.fluo
+                            : touche === 'q'
+                              ? a.equerre
+                              : touche === 'c'
+                                ? a.compas
+                                : touche === 'k'
+                                  ? a.calc
+                                  : undefined
       if (!action) return
       e.preventDefault()
       action()
@@ -286,13 +297,17 @@ function etiquette(d: DonneesDiapo): string {
   }
 }
 
-const OUTILS_DEPART: OutilsLocaux = { stylo: false, outil: 'stylo', couleur: COULEURS_STYLO[0].valeur, ensemble: false, menuMinuteur: false, pleinEcran: false }
+const OUTILS_DEPART: OutilsLocaux = { stylo: false, outil: 'stylo', couleur: COULEURS_STYLO[0].valeur, fluo: COULEURS_FLUO[0].valeur, epaisseur: 'moyen', ensemble: false, menuMinuteur: false, pleinEcran: false }
+
+/** Sélecteur des éléments qui gardent leurs clics (jamais « diapo suivante »). */
+const INTERACTIFS = 'button, a, input, select, textarea, .diapo-atelier, .projection-barre, .projection-interactif'
 
 // ---------- un écran / fenêtre des diapos ----------
 
 function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; diapos: DonneesDiapo[]; role: Role; repli: boolean }) {
   const navigate = useNavigate()
   const projection = useProjection(chapter, diapos, role)
+  const magasin = useMagasinInstruments(projection)
   const { etat, suivant, precedent, aller, basculerBlanc } = projection
   const [message, signaler] = useMessage()
   const { plein, basculer } = usePleinEcran(signaler)
@@ -322,7 +337,11 @@ function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; 
     fin: () => aller(diapos.length - 1),
     blanc: basculerBlanc,
     ensemble: () => setOutils((o) => ({ ...o, ensemble: !o.ensemble })),
-    stylo: () => setOutils((o) => ({ ...o, stylo: !o.stylo })),
+    stylo: () => setOutils(basculerStylo),
+    fluo: () => setOutils(basculerFluo),
+    compas: () => setOutils(basculerCompas),
+    equerre: () => magasin.equerre({ visible: !magasin.lire().equerre.visible }),
+    calc: () => magasin.calc({ visible: !magasin.lire().calc.visible }),
     pleinEcran: basculer,
     echap: () => {
       if (accueil) setAccueil(false)
@@ -341,7 +360,7 @@ function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; 
           return
         }
         const cible = e.target as HTMLElement
-        if (cible.closest('button, a, input, select, textarea, .diapo-atelier, .projection-barre')) return
+        if (cible.closest(INTERACTIFS)) return
         suivant()
       }}
       onPointerDown={(e) => {
@@ -350,7 +369,7 @@ function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; 
       onPointerUp={(e) => {
         const g = glisse.current
         glisse.current = null
-        if (!g || outils.stylo || (e.target as HTMLElement).closest('.diapo-atelier')) return
+        if (!g || outils.stylo || (e.target as HTMLElement).closest('.diapo-atelier, .projection-interactif')) return
         const dx = e.clientX - g.x
         if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(e.clientY - g.y) * 1.5) (dx < 0 ? suivant : precedent)()
       }}
@@ -359,8 +378,8 @@ function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; 
         {(echelle) => (
           <>
             {d && <Diapo key={d.cle} diapo={d} chapter={chapter} pas={etat.pas} mode="direct" debut={etat.debut} />}
-            {etat.blanc && <div className="projection-blanc" aria-label="Écran blanc" />}
-            <Annotations projection={projection} actif={outils.stylo} outil={outils.outil} couleur={outils.couleur} echelle={echelle} />
+            {etat.blanc && <FondBlancTableau fond={etat.fond} />}
+            <Annotations projection={projection} magasin={magasin} outils={outils} echelle={echelle} role={role} grille={etat.blanc && etat.fond !== 'uni'} />
           </>
         )}
       </Scene>
@@ -374,6 +393,7 @@ function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; 
         visible={barreVisible}
         basculerPleinEcran={basculer}
         quitter={quitter}
+        magasin={magasin}
       />
       {outils.ensemble && <VueEnsemble chapter={chapter} diapos={diapos} projection={projection} fermer={() => setOutils((o) => ({ ...o, ensemble: false }))} />}
       {accueil && (
@@ -416,6 +436,7 @@ function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos:
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const projection = useProjection(chapter, diapos, 'prof')
+  const magasin = useMagasinInstruments(projection)
   const { etat, suivant, precedent, aller, basculerBlanc, lancerMinuteur, arreterMinuteur } = projection
   const [message, signaler] = useMessage()
   const { plein, basculer } = usePleinEcran(signaler)
@@ -463,7 +484,11 @@ function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos:
     fin: () => aller(diapos.length - 1),
     blanc: basculerBlanc,
     ensemble: () => setOutils((o) => ({ ...o, ensemble: !o.ensemble })),
-    stylo: () => setOutils((o) => ({ ...o, stylo: !o.stylo })),
+    stylo: () => setOutils(basculerStylo),
+    fluo: () => setOutils(basculerFluo),
+    compas: () => setOutils(basculerCompas),
+    equerre: () => magasin.equerre({ visible: !magasin.lire().equerre.visible }),
+    calc: () => magasin.calc({ visible: !magasin.lire().calc.visible }),
     pleinEcran: basculer,
     echap: () => setOutils((o) => (o.ensemble ? { ...o, ensemble: false } : o.stylo ? { ...o, stylo: false } : { ...o, ensemble: true })),
   })
@@ -494,6 +519,7 @@ function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos:
           <button type="button" className="projection-bouton" aria-pressed={etat.blanc} onClick={basculerBlanc} title="Écran blanc (B)">
             <Pictogramme nom="ecran-blanc" /> {etat.blanc ? 'Rallumer' : 'Écran blanc'}
           </button>
+          {etat.blanc && <PaletteFond projection={projection} compacte />}
           <button type="button" className="projection-bouton" aria-pressed={outils.ensemble} onClick={() => setOutils((o) => ({ ...o, ensemble: !o.ensemble }))} title="Vue d'ensemble (G)">
             <Pictogramme nom="grille" /> Vue d'ensemble
           </button>
@@ -516,39 +542,31 @@ function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos:
                 étape {Math.min(etat.pas, d.pas)} / {d.pas}
               </span>
             )}
-            <span className="prof-stylo">
-              <button type="button" className={`projection-outil${outils.stylo ? ' actif' : ''}`} aria-pressed={outils.stylo} aria-label="Stylo d'annotation (écrit aussi au tableau)" title="Stylo (S) — écrit aussi au tableau" onClick={() => setOutils((o) => ({ ...o, stylo: !o.stylo }))}>
+            <span className="prof-stylo" role="toolbar" aria-label="Outils (écrivent aussi au tableau)">
+              <button
+                type="button"
+                className={`projection-outil${outils.stylo && outils.outil !== 'compas' ? ' actif' : ''}`}
+                aria-pressed={outils.stylo && outils.outil !== 'compas'}
+                aria-label="Stylo d'annotation (écrit aussi au tableau)"
+                title="Stylo (S ; surligneur : H) — écrit aussi au tableau"
+                onClick={() => setOutils(basculerStylo)}
+              >
                 <Pictogramme nom="crayon" />
               </button>
-              {outils.stylo && (
-                <>
-                  {COULEURS_STYLO.map((c) => (
-                    <button
-                      key={c.valeur}
-                      type="button"
-                      className={`projection-couleur${outils.outil === 'stylo' && outils.couleur === c.valeur ? ' actif' : ''}`}
-                      style={{ ['--c' as string]: c.valeur }}
-                      aria-label={`Stylo ${c.nom.toLowerCase()}`}
-                      aria-pressed={outils.outil === 'stylo' && outils.couleur === c.valeur}
-                      onClick={() => setOutils((o) => ({ ...o, outil: 'stylo', couleur: c.valeur }))}
-                    />
-                  ))}
-                  <button type="button" className={`projection-outil${outils.outil === 'gomme' ? ' actif' : ''}`} aria-pressed={outils.outil === 'gomme'} aria-label="Gomme" onClick={() => setOutils((o) => ({ ...o, outil: o.outil === 'gomme' ? 'stylo' : 'gomme' }))}>
-                    <Pictogramme nom="gomme" />
-                  </button>
-                  <button type="button" className="projection-outil" aria-label="Tout effacer" onClick={() => window.dispatchEvent(new Event('projection:effacer'))}>
-                    <Pictogramme nom="effacer" />
-                  </button>
-                </>
-              )}
+              <BoutonsInstruments outils={outils} setOutils={setOutils} magasin={magasin} />
             </span>
           </div>
+          {outils.stylo && (
+            <div className="prof-palette">
+              <PaletteDessin outils={outils} setOutils={setOutils} />
+            </div>
+          )}
           <Scene className="prof-scene">
             {(echelle) => (
               <>
                 {d && (d.type === 'atelier' ? <DiapoAtelierProf diapo={d} chapter={chapter} /> : <Diapo key={d.cle} diapo={d} chapter={chapter} pas={etat.pas} mode="direct" debut={etat.debut} />)}
-                {etat.blanc && <div className="projection-blanc" aria-label="Écran blanc" />}
-                <Annotations projection={projection} actif={outils.stylo} outil={outils.outil} couleur={outils.couleur} echelle={echelle} />
+                {etat.blanc && <FondBlancTableau fond={etat.fond} />}
+                <Annotations projection={projection} magasin={magasin} outils={outils} echelle={echelle} role="prof" grille={etat.blanc && etat.fond !== 'uni'} />
               </>
             )}
           </Scene>
