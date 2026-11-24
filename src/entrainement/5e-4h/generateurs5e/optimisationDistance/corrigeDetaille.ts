@@ -112,7 +112,7 @@ function etapeCritique(e: E): EtapeCorrection[] {
         ligne(`2x^4=${2 * d.k * d.k}`, [t("on multiplie par "), f("x^3\\neq 0")]),
         ligne(`x^4=${d.k * d.k}`, "on divise par 2"),
         ligne(`x^2=${d.k}`, [f(`x^2=-${d.k}`), t(" est impossible")]),
-        ligne(`x_0=\\sqrt{${d.k}}${`\\sqrt{${d.k}}` === m.x0L ? "" : `=${m.x0L}`}`, [t("x > 0 : on rejette "), f(`-\\sqrt{${d.k}}`)]),
+        ligne(`x_0=\\sqrt{${d.k}}${`\\sqrt{${d.k}}` === m.x0L ? "" : `=${m.x0L}`}`, [f("x>0"), t(" : on rejette "), f(`-\\sqrt{${d.k}}`)]),
       ];
       break;
     case "sauveteur": {

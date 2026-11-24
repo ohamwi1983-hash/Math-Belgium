@@ -280,7 +280,14 @@ function enoncePapierOptimisation(exercice: ExerciceOptimisation): EnoncePapier 
 function reponseBreveSansApplication(exercice: ExerciceOptimisation): FragmentConsigne[] {
   if (exercice.famille === "cubique") return [latex(reponseEcran(exercice, "expressionFinale"))];
   const nature = conclusionReelle(exercice) === "max" ? "maximum" : "minimum";
-  return [latex(reponseEcran(exercice, "resoudre").replace(/\\ \\text\{\(l'autre[^}]*\}/, "")), texte(` (${nature}) ; `), latex(reponseEcran(exercice, "conclure"))];
+  return [latex(resoudreSurUneLigne(reponseEcran(exercice, "resoudre"))), texte(` (${nature}) ; `), latex(reponseEcran(exercice, "conclure"))];
+}
+
+/** Réponse brève : la valeur retenue seule (« l'autre, négative… » retiré), sur une ligne. */
+function resoudreSurUneLigne(s: string): string {
+  const m = s.match(/^\\begin\{gathered\}(.*?)\\\\ (.*)\\end\{gathered\}$/);
+  if (!m) return s;
+  return m[2]!.includes("l'autre") ? m[1]! : `${m[1]}\\ ${m[2]}`;
 }
 
 function reponseBreveOptimisation(exercice: ExerciceOptimisation): FragmentConsigne[] {

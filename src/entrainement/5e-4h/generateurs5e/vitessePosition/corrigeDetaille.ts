@@ -64,14 +64,14 @@ function etapeResoudre(e: ExerciceVitessePosition, l: string): EtapeCorrection[]
   if (e.a === 1) lignes.push(ligne(`t^{2}${termeT(2 * e.b)}=${2 * D}`, "on multiplie les deux membres par 2"));
   const sol = lignesTrinome(1, B, C, "t");
   if (B === 0) {
-    lignes.push(ligne(`t=\\pm\\sqrt{${-C}}`, [f(`t^{2}=k`), t(" avec k > 0 : deux solutions opposées")]));
+    lignes.push(ligne(`t=\\pm\\sqrt{${-C}}`, [f(`t^{2}=k`), t(" avec "), f("k>0"), t(" : deux solutions opposées")]));
     lignes.push(ligne(`=\\pm ${e.tCible}`, [t("car "), f(`${e.tCible}^{2}=${-C}`)]));
   } else {
     lignes.push(ligne(`t^{2}${termeT(B)}-${-C}=0`, "on ramène tout dans le membre de gauche"));
     lignes.push(...sol.lignes);
   }
   const verif: LigneCalcul[] = [
-    ligne(`s(${e.tCible})=${e.a === 2 ? `${e.tCible}^{2}` : `\\dfrac{1}{2}\\cdot ${e.tCible}^{2}`}${e.b === 0 ? "" : `+${e.b === 1 ? "" : `${e.b}\\cdot `}${e.tCible}`}`, `on remplace t par ${e.tCible}`),
+    ligne(`s(${e.tCible})=${e.a === 2 ? `${e.tCible}^{2}` : `\\dfrac{1}{2}\\cdot ${e.tCible}^{2}`}${e.b === 0 ? "" : `+${e.b === 1 ? "" : `${e.b}\\cdot `}${e.tCible}`}`, [t("on remplace "), f("t"), t(" par "), f(`${e.tCible}`)]),
     ligne(`=${(e.a / 2) * e.tCible * e.tCible}${e.b === 0 ? "" : `+${e.b * e.tCible}`}`),
     ligne(`=${D}`),
   ];
@@ -96,7 +96,7 @@ function etapeRejet(e: ExerciceVitessePosition, l: string): EtapeCorrection[] {
 function etapeVitessePointe(e: ExerciceVitessePosition, l: string): EtapeCorrection[] {
   const v = valeurVitesseExacte(e, e.tCible);
   const produit = e.a === 1 ? `${e.tCible}` : `${e.a}\\cdot ${e.tCible}`;
-  const lignes: LigneCalcul[] = [ligne(`v(${e.tCible})=${e.b === 0 ? produit : `${produit}+${e.b}`}`, [t("on remplace t par "), f(`${e.tCible}`), t(" dans "), f(`v(t)=${formatVitesseLatex(e.a, e.b)}`)])];
+  const lignes: LigneCalcul[] = [ligne(`v(${e.tCible})=${e.b === 0 ? produit : `${produit}+${e.b}`}`, [t("on remplace "), f("t"), t(" par "), f(`${e.tCible}`), t(" dans "), f(`v(t)=${formatVitesseLatex(e.a, e.b)}`)])];
   if (e.a !== 1 && e.b !== 0) lignes.push(ligne(`=${e.a * e.tCible}+${e.b}`));
   lignes.push(ligne(`=${v}`));
   return [

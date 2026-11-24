@@ -77,8 +77,8 @@ export function questionFinaleExtremaBornes(exercice?: ExerciceExtremaBornes): s
 // ============================================================================
 
 export const LIBELLE_ECRAN_EXTREMA_BORNES: Record<EcranExtremaBornes, string> = {
-  deriver: "Calculer f'(t)",
-  racines: "Résoudre f'(t) = 0",
+  deriver: "Calculer f′(t)",
+  racines: "Résoudre f′(t) = 0",
   tableauFPrime: "Tableau de signes de f′",
   valeursExtremums: "Valeur de f à chaque extremum local",
   valeursBornes: "Valeur de f aux deux bornes",

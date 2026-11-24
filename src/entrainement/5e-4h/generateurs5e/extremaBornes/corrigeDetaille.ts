@@ -134,7 +134,7 @@ function etapeRacines(e: ExerciceExtremaBornes, l: string): EtapeCorrection[] {
     lignes.push(ligne(`${polyV(unitaire, "t")}=0`, `on divise les deux membres par ${nbT(k)}`));
     blocs.push(calcul(l, lignes));
     const r1 = e.racinesFPrime[0];
-    const v = lignesValeurPoly(`g(${r1})`, unitaire, r1, `on remplace t par ${r1}`, "t");
+    const v = lignesValeurPoly(`g(${r1})`, unitaire, r1, [t("on remplace "), f("t"), t(" par "), f(`${r1}`)], "t");
     blocs.push(calcul(l, v.lignes, [t("On note "), f(`g(t)=${polyV(unitaire, "t")}`), t(` et on essaie les diviseurs entiers du terme constant ${nbT(unitaire[0])} :`)], "Racine entière"));
     const S = unitaire[2];
     const P = unitaire[1];
@@ -197,7 +197,7 @@ function etapeTableau(e: ExerciceExtremaBornes, l: string): EtapeCorrection[] {
 }
 
 function etapeValeursExtremums(e: ExerciceExtremaBornes, l: string): EtapeCorrection[] {
-  const blocs = e.racinesFPrime.map((r) => calcul(l, lignesValeurPoly(`f(${r})`, e.coeffs, r, `on remplace t par ${r} dans f(t)`, "t").lignes, [], `En t = ${r}`));
+  const blocs = e.racinesFPrime.map((r) => calcul(l, lignesValeurPoly(`f(${r})`, e.coeffs, r, [t("on remplace "), f("t"), t(" par "), f(`${r}`), t(" dans "), f("f(t)")], "t").lignes, [], `En t = ${r}`));
   return [
     utilise(l, [t("On remplace t par l'abscisse de chaque extremum local dans f(t) (et non dans f′(t)) "), t(COURS_BORNE), t(".")]),
     ...blocs,
@@ -207,7 +207,7 @@ function etapeValeursExtremums(e: ExerciceExtremaBornes, l: string): EtapeCorrec
 }
 
 function etapeValeursBornes(e: ExerciceExtremaBornes, l: string): EtapeCorrection[] {
-  const vT = lignesValeurPoly(`f(${e.T})`, e.coeffs, e.T, `on remplace t par ${e.T} dans f(t)`, "t");
+  const vT = lignesValeurPoly(`f(${e.T})`, e.coeffs, e.T, [t("on remplace "), f("t"), t(" par "), f(`${e.T}`), t(" dans "), f("f(t)")], "t");
   return [
     utilise(l, [t("Les bornes 0 et "), f(`${e.T}`), t(" de l'intervalle sont aussi candidates au maximum et au minimum absolus : on y calcule f "), t(COURS_BORNE), t(".")]),
     calcul(l, [ligne(`f(0)=${e.coeffs[0]}`, "tous les termes en t s'annulent : il reste le terme constant")], [], "En t = 0"),

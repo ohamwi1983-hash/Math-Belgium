@@ -28,26 +28,26 @@ function niveau2(e: ExerciceDefinitionDerivee, ecran: EcranDefinitionDerivee): A
   if (ecran === "developper") {
     switch (e.famille) {
       case "affine":
-        return { texte: [t("Ici, remplace x par "), l(`${a}+h`), t(", puis distribue :")], formules: [`f(${a}+h)=${coefDevant(e.m, ah)}${plusConst(e.p)}`] };
+        return { texte: [t("Ici, remplace "), l("x"), t(" par "), l(`${a}+h`), t(", puis distribue :")], formules: [`f(${a}+h)=${coefDevant(e.m, ah)}${plusConst(e.p)}`] };
       case "quadratique":
-        return { texte: [t("Ici, remplace x par "), l(`${a}+h`), t(" et développe d'abord le carré :")], formules: [`f(${a}+h)=${coefDevant(e.m, `${ah}^2`)}${plusConst(e.p)}\\qquad ${ah}^2=${a * a}${plusConst(2 * a)}h+h^2`] };
+        return { texte: [t("Ici, remplace "), l("x"), t(" par "), l(`${a}+h`), t(" et développe d'abord le carré :")], formules: [`f(${a}+h)=${coefDevant(e.m, `${ah}^2`)}${plusConst(e.p)}\\qquad ${ah}^2=${a * a}${plusConst(2 * a)}h+h^2`] };
       case "quadratiqueComplete":
         return {
-          texte: [t("Ici, remplace x par "), l(`${a}+h`), t(" dans les deux termes, et développe d'abord le carré :")],
+          texte: [t("Ici, remplace "), l("x"), t(" par "), l(`${a}+h`), t(" dans les deux termes, et développe d'abord le carré :")],
           formules: [`f(${a}+h)=${coefDevant(e.m, `${ah}^2`)}${e.n < 0 ? "-" : "+"}${Math.abs(e.n) === 1 ? "" : Math.abs(e.n)}${ah}${plusConst(e.p)}\\qquad ${ah}^2=${a * a}${plusConst(2 * a)}h+h^2`],
         };
       case "rationnelleSimple":
         return {
-          texte: [t("Ici, f("), l(`${a}`), t(") s'obtient en remplaçant x par "), l(par(a)), t(" (simplifie la fraction si possible) ; pour f("), l(`${a}+h`), t("), x devient :")],
+          texte: [t("Ici, "), l(`f(${a})`), t(" s'obtient en remplaçant "), l("x"), t(" par "), l(par(a)), t(" (simplifie la fraction si possible) ; pour "), l(`f(${a}+h)`), t(", "), l("x"), t(" devient :")],
           formules: [e.expo === 1 ? `x\\to ${par(a)}\\qquad x\\to ${a}+h` : `x^2\\to ${par(a)}^2\\qquad x^2\\to ${ah}^2`],
         };
       case "rationnelleLineaire":
         return {
-          texte: [t("Ici, remplace x par "), l(`${a}+h`), t(" au numérateur et au dénominateur, puis réduis chacun :")],
-          formules: [`f(${a}+h)=\\dfrac{${coefDevant(e.m, ah)}${plusConst(e.p)}}{${ah}${plusConst(-e.q)}}`],
+          texte: [t("Ici, remplace "), l("x"), t(" par "), l(`${a}+h`), t(" au numérateur et au dénominateur, puis réduis chacun :")],
+          formules: [`f(${a}+h)=\\dfrac{${coefDevant(e.m, ah)}${plusConst(e.p)}}{${e.q === 0 ? `${a}+h` : `${ah}${plusConst(-e.q)}`}}`],
         };
       case "racine":
-        return { texte: [t("Ici, remplace x par "), l(`${a}+h`), t(" sous la racine, puis réduis la somme :")], formules: [`f(${a})=${kRacine(e.k)}\\sqrt{${a}${plusConst(e.c)}}\\qquad f(${a}+h)=${kRacine(e.k)}\\sqrt{${ah}${plusConst(e.c)}}`] };
+        return { texte: [t("Ici, remplace "), l("x"), t(" par "), l(`${a}+h`), t(" sous la racine, puis réduis la somme :")], formules: [`f(${a})=${kRacine(e.k)}\\sqrt{${a}${plusConst(e.c)}}\\qquad f(${a}+h)=${kRacine(e.k)}\\sqrt{${ah}${plusConst(e.c)}}`] };
     }
   }
   const fa = valeurExacte(e, a);
@@ -72,9 +72,15 @@ function niveau2(e: ExerciceDefinitionDerivee, ecran: EcranDefinitionDerivee): A
   return { texte: [t("Ici, le taux simplifié de l'étape précédente n'a plus de facteur h au dénominateur : remplace h par 0 :")], formules: [`\\lim_{h\\to 0}\\left(${formatQuotientConfirmeLatex(e, a)}\\right)`] };
 }
 
+/** Deux égalités juxtaposées (« \qquad », « , \quad ») deviennent deux formules : sur téléphone,
+ * KaTeX coupait la seconde en plein milieu (« (−2 + h)² = 4 − | 4h + h² »). */
+function formulesSeparees(aide: AideTrig): AideTrig {
+  return { ...aide, formules: (aide.formules ?? []).flatMap((f) => f.split(/\s*,?\s*\\q?quad\s*/).filter((x) => x.trim() !== "")) };
+}
+
 export function aidesDefinitionDerivee(e: ExerciceDefinitionDerivee, ecran: EcranDefinitionDerivee): AideTrig[] {
   const n1 = texteAideNiveau1(e, ecran);
-  return [aideDepuis(n1.texte, n1.latex), niveau2(e, ecran)];
+  return [formulesSeparees(aideDepuis(n1.texte, n1.latex)), formulesSeparees(niveau2(e, ecran))];
 }
 
 /** Valeur d'une expression en h (null si illisible). */

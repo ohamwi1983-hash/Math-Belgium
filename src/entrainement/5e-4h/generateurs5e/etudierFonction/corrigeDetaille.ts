@@ -241,7 +241,7 @@ function etapeLimites(e: ExerciceEtudierFonction, l: string, avecDomaine: boolea
     for (const sens of ["gauche", "droite"] as const) {
       const s = sens === "gauche" ? -1 : 1;
       const sf = Math.sign(c) * s;
-      lignes.push(ligne(`${lim(cote(ee, sens))} (${xMoins(ee)})=${zeroSigne(s)}`, s < 0 ? `x < ${nbT(ee)}` : `x > ${nbT(ee)}`));
+      lignes.push(ligne(`${lim(cote(ee, sens))} (${xMoins(ee)})=${zeroSigne(s)}`, [f(s < 0 ? `x<${nbT(ee).replace("−", "-").replace(",", "{,}")}` : `x>${nbT(ee).replace("−", "-").replace(",", "{,}")}`)]));
       lignes.push(ligne(`${lim(cote(ee, sens))} f(x)=${infini(sf)}`, [f(`${coef(a)}x${signe(b)}\\to ${a * ee + b}`), t(" et "), f(`\\frac{${c}}{${zeroSigne(s)}}=${infini(sf)}`)]));
     }
     blocs.push(calcul(l, lignes, [], `En x = ${nbT(ee)}`));

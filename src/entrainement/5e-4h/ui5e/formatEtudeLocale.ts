@@ -141,12 +141,12 @@ export function questionFinaleEtudeLocale(exercice: ExerciceEtudeLocale): string
 
 export const LIBELLE_ECRAN_ETUDE_LOCALE: Record<EcranEtudeLocale, string> = {
   domaine: "Domaine de définition",
-  deriverFPrime: "Dérivée f'(x)",
+  deriverFPrime: "Dérivée f′(x)",
   deriverFSeconde: "Dérivée seconde f″(x)",
-  resoudreFPrime: "Résoudre f'(x)=0",
+  resoudreFPrime: "Résoudre f′(x)=0",
   tableauFPrime: "Tableau de signes de f′",
   extremums: "Valeur de f aux extremums",
-  resoudreFSeconde: "Résoudre f''(x)=0",
+  resoudreFSeconde: "Résoudre f″(x)=0",
   tableauFSeconde: "Tableau de signes de f″",
   inflexions: "Valeur de f aux points d'inflexion",
 };
@@ -539,7 +539,8 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceEtudeLocale, e
 // ============================================================================
 
 export function libelleSigneTableau(v: ValeurSigneTableau | null): string {
-  return v ?? "?";
+  // Affichage seulement : « − » typographique (la valeur stockée reste "-").
+  return v === "-" ? "−" : (v ?? "?");
 }
 
 export function libelleLigne2Tableau(v: ValeurLigne2Tableau | null): string {

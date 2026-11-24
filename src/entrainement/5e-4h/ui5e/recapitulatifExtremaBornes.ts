@@ -4,8 +4,8 @@ import type { EcranExtremaBornes, EtatSessionExtremaBornes } from "../moteur5e/t
 import type { EntreeRecapitulatif } from "./recapitulatif";
 
 const LIBELLE_PHASE: Record<EcranExtremaBornes, string> = {
-  deriver: "Dérivée f'(t)",
-  racines: "Solutions de f'(t) = 0",
+  deriver: "Dérivée f′(t)",
+  racines: "Solutions de f′(t) = 0",
   tableauFPrime: "Nature des extremums locaux",
   valeursExtremums: "Valeurs aux extremums",
   valeursBornes: "Valeurs aux bornes",

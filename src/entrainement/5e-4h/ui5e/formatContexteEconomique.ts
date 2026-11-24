@@ -210,7 +210,7 @@ export function texteAideNiveau1(ecran: EcranContexteEconomique, exercice?: Exer
     case "deriveeSymbolique":
       return { texte: "Dérive terme à terme :", latex: "\\left(a\\,q^n\\right)'=n\\,a\\,q^{n-1}" };
     case "deriveeValeur":
-      return { texte: "Remplace q par q₀ dans l'expression de la dérivée que tu viens de trouver.", latex: null };
+      return { texte: "Remplace $q$ par $q_0$ dans l'expression de la dérivée que tu viens de trouver.", latex: null };
     case "comparaisonEcart":
       return { texte: "L'écart en pourcentage se calcule par rapport à l'estimation par la dérivée :", latex: "\\text{écart en \\%}=\\dfrac{\\text{écart absolu}}{C'_T(q_0)}\\times 100" };
     case "extremum":
@@ -258,7 +258,7 @@ export function texteAideNiveau2(exercice: ExerciceContexteEconomique, ecran: Ec
     }
     case "deriveeValeur": {
       const ex = exercice as ExerciceContexteEconomiqueA;
-      return { texte: "Remplace q par q₀ dans la dérivée trouvée à l'écran précédent :", latex: `C'_T(q)=${formatDeriveeCoutTotalLatex(ex.coutTotal, "q")},\\quad q_0=${ex.q0}` };
+      return { texte: "Remplace $q$ par $q_0$ dans la dérivée trouvée à l'écran précédent :", latex: `C'_T(q)=${formatDeriveeCoutTotalLatex(ex.coutTotal, "q")},\\quad q_0=${ex.q0}` };
     }
     case "comparaisonEcart": {
       const ex = exercice as ExerciceContexteEconomiqueA;

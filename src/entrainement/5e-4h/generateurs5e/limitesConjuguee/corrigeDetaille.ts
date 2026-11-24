@@ -55,7 +55,7 @@ function etapeB(e: E): EtapeCorrection[] {
         ligne(`\\sqrt{${R}}=\\sqrt{x^2\\left(${rac.slice(6, -1)}\\right)}`, "x² en évidence (x ≠ 0)"),
         ligne(`=\\sqrt{x^2}\\cdot ${rac}`, "racine d'un produit de nombres positifs"),
         ligne(`=|x|${rac}`),
-        ligne(`=-x${rac}`, "x < 0, donc |x| = −x"),
+        ligne(`=-x${rac}`, [f("x<0"), t(", donc "), f("|x|=-x")]),
       ]),
       resultat("b", reponse(e, "transformer")),
       piege("b", [t("Écrire "), f("\\sqrt{x^2}=x"), t(" : pour x < 0, "), f("\\sqrt{x^2}=-x"), t(" (une racine n'est jamais négative).")]),
@@ -157,11 +157,11 @@ function etapeC(e: E): EtapeCorrection[] {
     usage = [t(`On divise le numérateur et le dénominateur par x, le terme dominant ; x ${neg ? "< 0" : "> 0"}, donc `), f(neg ? "x=-\\sqrt{x^2}" : "x=\\sqrt{x^2}"), t(" pour entrer x sous la racine (cours, § 1).")];
     lignes.push(ligne(`f(x)=\\dfrac{${ap.num}}{${ap.den}}`));
     if (e.sous === "B2") {
-      lignes.push(ligne(`\\dfrac{\\sqrt{${polyL([1, d.a, d.c])}}}{x}=\\sqrt{\\dfrac{${polyL([1, d.a, d.c])}}{x^2}}=${racineDiviseeL(1, d.a, d.c)}`, "x > 0 : x = √(x²)"));
+      lignes.push(ligne(`\\dfrac{\\sqrt{${polyL([1, d.a, d.c])}}}{x}=\\sqrt{\\dfrac{${polyL([1, d.a, d.c])}}{x^2}}=${racineDiviseeL(1, d.a, d.c)}`, [f("x>0"), t(" : "), f("x=\\sqrt{x^2}")]));
       lignes.push(ligne(`\\dfrac{\\sqrt{${polyL([1, d.b, d.d])}}}{x}=${racineDiviseeL(1, d.b, d.d)}`, "de même"));
     } else {
       const R = radicandeL(e);
-      lignes.push(ligne(`\\dfrac{\\sqrt{${R}}}{x}=${neg ? "-" : ""}\\sqrt{\\dfrac{${R}}{x^2}}=${neg ? "-" : ""}${racineDiviseeL(d.p * d.p, d.b, d.c)}`, neg ? "x < 0 : x = −√(x²)" : "x > 0 : x = √(x²)"));
+      lignes.push(ligne(`\\dfrac{\\sqrt{${R}}}{x}=${neg ? "-" : ""}\\sqrt{\\dfrac{${R}}{x^2}}=${neg ? "-" : ""}${racineDiviseeL(d.p * d.p, d.b, d.c)}`, neg ? [f("x<0"), t(" : "), f("x=-\\sqrt{x^2}")] : [f("x>0"), t(" : "), f("x=\\sqrt{x^2}")]));
     }
     lignes.push(ligne(`f(x)=\\dfrac{${as.num}}{${as.den}}`, "on divise numérateur et dénominateur par x"));
     lignes.push(ligne(`${L}\\left(${as.num}\\right)=${n}`, [t("les termes en "), f("\\dfrac{1}{x}"), t(" tendent vers 0")]));

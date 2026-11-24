@@ -85,7 +85,7 @@ function etapesA(e: ExerciceContexteEconomiqueA, l: (x: EcranContexteEconomique)
   // c) valeur
   const lc = l("deriveeValeur");
   out.push(
-    utilise(lc, [t("On remplace q par "), f(`q_0=${q0}`), t(" dans "), f(`C'_T(q)=${polyV(dC, "q")}`), t(" "), t(COURS_ECONOMIQUE), t(".")]),
+    utilise(lc, [t("On remplace "), f("q"), t(" par "), f(`q_0=${q0}`), t(" dans "), f(`C'_T(q)=${polyV(dC, "q")}`), t(" "), t(COURS_ECONOMIQUE), t(".")]),
     calcul(lc, lignesValeurPoly(`C'_T(${q0})`, dC, q0, undefined, "q").lignes),
     resultat(lc, [...rep(e, "deriveeValeur"), t(" €.")]),
   );
@@ -182,7 +182,7 @@ function etapesB(e: ExerciceContexteEconomiqueB, l: (x: EcranContexteEconomique)
   const la = l("recetteTotale");
   out.push(
     utilise(la, [t("Recette totale = quantité × prix unitaire : "), f("R_T(x)=x\\cdot p(x)"), t(" "), t(COURS_ECONOMIQUE), t(".")]),
-    calcul(la, [ligne(`R_T(x)=x\\cdot p(x)`, "définition"), ligne(`=x(${polyV(p)})`, [f(`p(x)=${polyV(p)}`)]), ligne(`=${polyV(R)}`, "on distribue x")]),
+    calcul(la, [ligne(`R_T(x)=x\\cdot p(x)`, "définition"), ligne(`=x(${polyV(p)})`, [f(`p(x)=${polyV(p)}`)]), ligne(`=${polyV(R)}`, [t("on distribue "), f("x")])]),
     resultat(la, [...rep(e, "recetteTotale"), t(".")]),
   );
   const lb = l("marginales");
@@ -239,10 +239,10 @@ function etapesB(e: ExerciceContexteEconomiqueB, l: (x: EcranContexteEconomique)
   const lg = l("beneficeMaximum");
   const vB = lignesValeurPoly(`B(${e.xOpt})`, B, e.xOpt);
   out.push(
-    utilise(lg, [t("Le bénéfice maximal est "), f(`B(${e.xOpt})`), t(" : on remplace x par la quantité retenue dans B(x), pas dans B′(x) "), t(COURS_ECONOMIQUE), t(".")]),
+    utilise(lg, [t("Le bénéfice maximal est "), f(`B(${e.xOpt})`), t(" : on remplace "), f("x"), t(" par la quantité retenue dans "), f("B(x)"), t(", pas dans "), f("B'(x)"), t(" "), t(COURS_ECONOMIQUE), t(".")]),
     calcul(lg, vB.lignes),
     resultat(lg, [...rep(e, "beneficeMaximum"), t(" centaines d'euros.")]),
-    piege(lg, [t("On remplace x dans B(x), pas dans B′(x).")]),
+    piege(lg, [t("On remplace "), f("x"), t(" dans "), f("B(x)"), t(", pas dans "), f("B'(x)"), t(".")]),
   );
   return out;
 }
@@ -273,12 +273,12 @@ function etapesBonus(e: ExerciceContexteEconomiqueBonus, l: (x: EcranContexteEco
   const out: EtapeCorrection[] = [];
   const la = l("poserEquationReduite");
   out.push(
-    utilise(la, [t("L'égalité "), f("C'_T(q)=C_M(q)=\\frac{C_T(q)}{q}"), t(" équivaut (q > 0) à "), f("q\\cdot C'_T(q)-C_T(q)=0"), t(" ; on développe et on réduit "), t(COURS_ECONOMIQUE), t(".")]),
+    utilise(la, [t("L'égalité "), f("C'_T(q)=C_M(q)=\\frac{C_T(q)}{q}"), t(" équivaut ("), f("q>0"), t(") à "), f("q\\cdot C'_T(q)-C_T(q)=0"), t(" ; on développe et on réduit "), t(COURS_ECONOMIQUE), t(".")]),
     calcul(la, [
       ligne(`C'_T(q)=${polyV(dC, "q")}`, "dérivée terme à terme"),
       ligne(`P(q)=q(${polyV(dC, "q")})-(${polyV(C, "q")})`, [f("P(q)=q\\cdot C'_T(q)-C_T(q)")]),
-      ligne(`=${polyV([0, ...dC], "q")}${polyV(C.map((x) => -x), "q").replace(/^(?!-)/, "+")}`, "on distribue q, puis le signe −"),
-      ligne(`=${polyV(P, "q")}`, "on regroupe : les termes en q s'annulent"),
+      ligne(`=${polyV([0, ...dC], "q")}${polyV(C.map((x) => -x), "q").replace(/^(?!-)/, "+")}`, [t("on distribue "), f("q"), t(", puis le signe −")]),
+      ligne(`=${polyV(P, "q")}`, [t("on regroupe : les termes en "), f("q"), t(" s'annulent")]),
     ]),
     resultat(la, [...rep(e, "poserEquationReduite"), t(".")]),
   );

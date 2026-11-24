@@ -266,7 +266,7 @@ function etapeLimitesGD(d: Donnees, x: Exclusion, l: string): EtapeCorrection[] 
     for (const sens of ["gauche", "droite"] as const) {
       const s = sens === "gauche" ? -1 : 1;
       const sl = sens === "gauche" ? sg : sd;
-      lignes.push(ligne(`${lim(cote(r, sens))} ${facteurR}=${zeroSigne(s)}`, s < 0 ? `x < ${nbT(r)}` : `x > ${nbT(r)}`));
+      lignes.push(ligne(`${lim(cote(r, sens))} ${facteurR}=${zeroSigne(s)}`, [f(s < 0 ? `x<${nbT(r).replace("−", "-").replace(",", "{,}")}` : `x>${nbT(r).replace("−", "-").replace(",", "{,}")}`)]));
       lignes.push(ligne(`${lim(cote(r, sens))} f(x)=${infini(sl)}`, [f(fracJ(s)), t(sl > 0 ? " : quotient positif" : " : quotient négatif")]));
     }
   }

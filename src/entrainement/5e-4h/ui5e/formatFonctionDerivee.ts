@@ -175,7 +175,7 @@ export function texteAideNiveau1(ecran: EcranFonctionDerivee, typeRetenu: TypeDe
 export const LIBELLE_ECRAN: Record<EcranFonctionDerivee, string> = {
   reconnaissance: "Type de dérivée",
   decomposer: "Décomposition",
-  calculer: "Dérivée f'(x)",
+  calculer: "Dérivée f′(x)",
 };
 
 /** Réponse "texte" attendue pour l'écran "reconnaissance" (pas de KaTeX : simple nom de

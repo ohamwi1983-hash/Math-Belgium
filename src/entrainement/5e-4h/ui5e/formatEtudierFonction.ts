@@ -98,9 +98,9 @@ export function questionFinaleEtudierFonction(): string {
 export const LIBELLE_ECRAN_ETUDIER_FONCTION: Record<EcranEtudierFonction, string> = {
   domaine: "Domaine de définition",
   limites: "Limites aux bornes et asymptotes",
-  calculerFPrime: "Calcul de f'(x)",
+  calculerFPrime: "Calcul de f′(x)",
   tableauFPrime: "Tableau de signes de f′ et variations",
-  calculerFSeconde: "Calcul de f''(x)",
+  calculerFSeconde: "Calcul de f″(x)",
   tableauFSeconde: "Tableau de signes de f″ et concavité",
   recap: "Récapitulatif",
   coordonnees: "Coordonnées des points remarquables",
