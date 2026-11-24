@@ -18,7 +18,7 @@ export const deriveesApplications: ChapterContent = {
     {
       id: 'definition-derivee',
       number: 1,
-      title: "Calculer f'(a) par la définition",
+      title: "Calculer f′(a) par la définition",
       kicker: "taux d'accroissement, limite quand h→0, interprétation géométrique (pente de la tangente)",
       titreCourt: 'f′(a) par la définition',
       partie: 'Le nombre dérivé et la tangente',
@@ -34,7 +34,7 @@ export const deriveesApplications: ChapterContent = {
         { question: '$f(x) = \\sqrt{x}$ : comment simplifier le taux d\'accroissement par h ?', reponse: 'On multiplie par l\'expression conjuguée $\\sqrt{x+h}+\\sqrt{x}$ : il reste $\\dfrac{1}{\\sqrt{x+h}+\\sqrt{x}}$.' },
       ],
       blocks: [
-        { kind: 'video', title: 'Calculer f\'(a) par la définition : taux d\'accroissement, sécante et tangente', youtubeId: 'H1pEUBMk200' },
+        { kind: 'video', title: 'Calculer f′(a) par la définition : taux d\'accroissement, sécante et tangente', youtubeId: 'H1pEUBMk200' },
         {
           kind: 'intuition',
           label: 'Pour visualiser',
@@ -43,7 +43,7 @@ export const deriveesApplications: ChapterContent = {
             "instant** — pas une moyenne sur tout le trajet, une valeur précise, là, maintenant. " +
             "C'est exactement ce que mesure une dérivée : pas une vitesse moyenne entre deux " +
             "points, mais la pente **exacte** de la courbe en un seul point. Le taux " +
-            "d'accroissement ci-dessous, c'est la vitesse moyenne du trajet. La dérivée f'(a), " +
+            "d'accroissement ci-dessous, c'est la vitesse moyenne du trajet. La dérivée f′(a), " +
             "c'est ce que ton compteur affiche à l'instant a.",
         },
         {
@@ -53,7 +53,7 @@ export const deriveesApplications: ChapterContent = {
             'Le **taux d\'accroissement** de f entre a et a+h, c\'est $\\dfrac{f(a+h)-f(a)}{h}$. ' +
               'C\'est la pente de la **sécante** — la droite qui relie les points (a;f(a)) et ' +
               '(a+h;f(a+h)). Fais tendre h vers 0, comme au chapitre précédent : la limite de ce ' +
-              'taux, c\'est le **nombre dérivé** f\'(a). $f\'(a) = \\displaystyle\\lim_{h \\to 0} \\dfrac{f(a+h)-f(a)}{h}$.',
+              'taux, c\'est le **nombre dérivé** f′(a). $f\'(a) = \\displaystyle\\lim_{h \\to 0} \\dfrac{f(a+h)-f(a)}{h}$.',
           ],
         },
         {
@@ -62,11 +62,11 @@ export const deriveesApplications: ChapterContent = {
             'Géométriquement, que se passe-t-il quand h se rapproche de 0 ? Le point ' +
             '(a+h;f(a+h)) glisse le long de la courbe, de plus en plus près de (a;f(a)). La ' +
             '**sécante** pivote petit à petit — jusqu\'à devenir la **tangente** en a. Sa pente ' +
-            'limite, c\'est exactement f\'(a).',
+            'limite, c\'est exactement f′(a).',
         },
         {
           kind: 'exemple',
-          badge: 'f\'(a) par la définition, sur une fonction quadratique',
+          badge: 'f′(a) par la définition, sur une fonction quadratique',
           formula: '$f(x) = x^2-3$, a = 2. Calcule f\'(2) par la définition.',
           steps: [
             { tag: 'f(2)', text: '$f(2) = 4-3 = 1$' },
@@ -94,7 +94,7 @@ export const deriveesApplications: ChapterContent = {
             yAxisLabel: 'f(x)',
             caption:
               '$f(x)=x^2-3$ — la sécante pour h=1 a une pente de 5, celle pour h=0,5 une pente de 4,5. ' +
-              'Elles se rapprochent de la tangente en A, de pente f\'(2)=4.',
+              'Elles se rapprochent de la tangente en A, de pente f′(2)=4.',
           },
         },
         {
@@ -139,7 +139,7 @@ export const deriveesApplications: ChapterContent = {
             'Forme le taux d\'accroissement $\\dfrac{f(a+h)-f(a)}{h}$, puis simplifie-le par h. ' +
               'Il est prêt quand il ne reste plus de facteur h qui annulerait le dénominateur — ' +
               'un h peut rester ailleurs, comme dans $\\dfrac{-3}{1+h}$.',
-            'Fais tendre h vers 0 sur l\'expression SIMPLIFIÉE. Tu obtiens f\'(a).',
+            'Fais tendre h vers 0 sur l\'expression SIMPLIFIÉE. Tu obtiens f′(a).',
           ],
         },
         {
@@ -162,7 +162,7 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: 'f\'(a) par la définition, sur une fonction rationnelle',
+          badge: 'f′(a) par la définition, sur une fonction rationnelle',
           formula: '$f(x) = \\dfrac{2x+1}{x-1}$, a = 2. Calcule f\'(2) par la définition.',
           steps: [
             { tag: 'f(2) et f(2+h), sans développer', text: '$f(2) = \\dfrac{5}{1} = 5$ ; $f(2+h) = \\dfrac{2(2+h)+1}{(2+h)-1} = \\dfrac{5+2h}{1+h}$' },
@@ -206,15 +206,15 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'entrainement',
-          title: 'Calculer f\'(a) par la définition',
+          title: 'Calculer f′(a) par la définition',
           generatorId: '5gen26',
           description: [
             'Calcule f(a) et f(a+h), simplifie le taux d\'accroissement, puis passe à la limite ' +
-              'pour obtenir f\'(a) — sur des fonctions affines, quadratiques et rationnelles ' +
+              'pour obtenir f′(a) — sur des fonctions affines, quadratiques et rationnelles ' +
               '(k⁄x, k⁄x², (mx + p) / (x − q)).',
           ],
           chantier: '5e-4h',
-          whereLabel: '5e (4h) → « 26. Calculer f\'(a) par la définition »',
+          whereLabel: '5e (4h) → « 26. Calculer f′(a) par la définition »',
         },
       ],
     },
@@ -222,7 +222,7 @@ export const deriveesApplications: ChapterContent = {
       id: 'tangentes',
       number: 2,
       title: 'Tangentes',
-      kicker: 'y=f(a)+f\'(a)(x−a) ; tangente horizontale ⟺ f\'(a)=0 ; tangente vs sécante ; double tangence',
+      kicker: 'y=f(a)+f′(a)(x−a) ; tangente horizontale ⟺ f′(a)=0 ; tangente vs sécante ; double tangence',
       titreCourt: 'Tangentes',
       partie: 'Le nombre dérivé et la tangente',
       essentiel: [
@@ -237,7 +237,7 @@ export const deriveesApplications: ChapterContent = {
         { question: 'Estime $1{,}02^3$ grâce à la tangente à $y = x^3$ en 1.', reponse: '$f(1) + f\'(1)\\cdot 0{,}02 = 1 + 3 \\cdot 0{,}02 = 1{,}06$ (valeur exacte : $1{,}061\\,208$).' },
       ],
       blocks: [
-        { kind: 'video', title: 'Équation d\'une tangente : y = f(a) + f\'(a)(x − a), tangente horizontale, tangente ≠ sécante', youtubeId: 'fD-HtssXw2w' },
+        { kind: 'video', title: 'Équation d\'une tangente : y = f(a) + f′(a)(x − a), tangente horizontale, tangente ≠ sécante', youtubeId: 'fD-HtssXw2w' },
         {
           kind: 'intuition',
           label: 'Zoome sur la courbe',
@@ -262,7 +262,7 @@ export const deriveesApplications: ChapterContent = {
           label: 'Rappel — équation de la tangente en un point',
           items: [
             'La tangente à la courbe de f, au point d\'abscisse a, c\'est la droite qui passe ' +
-              'par (a;f(a)) avec pour pente f\'(a). Sa pente EST le nombre dérivé — c\'est même ' +
+              'par (a;f(a)) avec pour pente f′(a). Sa pente EST le nombre dérivé — c\'est même ' +
               'sa définition (section 1) : $y = f(a) + f\'(a)(x-a)$.',
           ],
         },
@@ -282,8 +282,8 @@ export const deriveesApplications: ChapterContent = {
           formula: '$f(x) = x^2-2x+1$, a=3. Détermine l\'équation de la tangente en x=3.',
           steps: [
             { tag: 'f(3)', text: '$f(3) = 9-6+1 = 4$' },
-            { tag: 'f\'(x) puis f\'(3)', text: '$f\'(x) = 2x-2 \\implies f\'(3) = 6-2 = 4$' },
-            { tag: 'substituer dans y=f(a)+f\'(a)(x−a)', text: '$y = 4 + 4(x-3) = 4 + 4x - 12$' },
+            { tag: 'f′(x) puis f′(3)', text: '$f\'(x) = 2x-2 \\implies f\'(3) = 6-2 = 4$' },
+            { tag: 'substituer dans y=f(a)+f′(a)(x−a)', text: '$y = 4 + 4(x-3) = 4 + 4x - 12$' },
           ],
           result: { tag: 'équation simplifiée', text: '$y = 4x - 8$' },
           illustration: {
@@ -366,7 +366,7 @@ export const deriveesApplications: ChapterContent = {
             'Une **sécante** relie DEUX points distincts de la courbe, (a;f(a)) et (b;f(b)). Sa ' +
             'pente, c\'est $\\dfrac{f(b)-f(a)}{b-a}$ — le taux d\'accroissement de la section 1. ' +
             'La **tangente** en a est la position LIMITE de cette sécante quand b se rapproche ' +
-            'de a : sa pente est f\'(a). **Localement**, au voisinage du point de contact, elle ne ' +
+            'de a : sa pente est f′(a). **Localement**, au voisinage du point de contact, elle ne ' +
             'touche la courbe qu\'en ce point. Mais plus loin, elle peut très bien recouper la ' +
             'courbe : la tangente à $y=x^3$ en 1, $y=3x-2$, la recoupe en $x=-2$. Une même droite ' +
             'peut même être tangente en deux points (double tangence, ci-dessous).',
@@ -377,7 +377,7 @@ export const deriveesApplications: ChapterContent = {
           text:
             'Une équation de tangente correcte doit toujours vérifier DEUX choses. Elle passe ' +
             'par le point (a;f(a)) — teste x=a dans ton équation, tu dois retrouver f(a). Et ' +
-            'elle a la bonne pente — le coefficient de x doit être exactement f\'(a). Cette ' +
+            'elle a la bonne pente — le coefficient de x doit être exactement f′(a). Cette ' +
             'double vérification repère immédiatement une erreur.',
         },
         {
@@ -516,7 +516,7 @@ export const deriveesApplications: ChapterContent = {
           generatorId: '5gen68',
           description: [
             'Estime √4,02, 1,02⁵, 1/0,98 ou sin 0,1 sans calculatrice grâce à la tangente : ' +
-              'choisis a et h, calcule f(a) et f\'(a), puis f(a) + f\'(a)·h, et mesure l\'erreur ' +
+              'choisis a et h, calcule f(a) et f′(a), puis f(a) + f′(a)·h, et mesure l\'erreur ' +
               'commise. Aussi en contexte : un cube ou une plaque qui se dilate.',
           ],
           chantier: '5e-4h',
@@ -524,7 +524,7 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'entrainement',
-          title: 'Lire f(a) et f\'(a) sur un graphique',
+          title: 'Lire f(a) et f′(a) sur un graphique',
           generatorId: '5gen73',
           description: [
             'Une courbe et sa tangente tracée en A : lis f(a), calcule f′(a) avec deux points de la ' +
@@ -532,7 +532,7 @@ export const deriveesApplications: ChapterContent = {
               'dérivés en trois points. Ou l\'inverse : la tangente est donnée, retrouve le bon graphique.',
           ],
           chantier: '5e-4h',
-          whereLabel: '5e (4h) → « 73. Lire f(a) et f\'(a) sur un graphique »',
+          whereLabel: '5e (4h) → « 73. Lire f(a) et f′(a) sur un graphique »',
         },
       ],
     },
@@ -563,7 +563,7 @@ export const deriveesApplications: ChapterContent = {
           label: 'Tu connais déjà ça',
           text:
             "Tu connais déjà le taux d'accroissement d'une fonction du premier degré depuis la " +
-            "4e (le paramètre m, la pente de la droite). f'(a), c'est la même idée, appliquée à " +
+            "4e (le paramètre m, la pente de la droite). f′(a), c'est la même idée, appliquée à " +
             "N'IMPORTE QUELLE courbe, en un point précis plutôt que sur toute une droite. Rien " +
             "de neuf dans le principe — seulement dans le fait que la pente change maintenant " +
             "d'un point à l'autre.",
@@ -572,14 +572,14 @@ export const deriveesApplications: ChapterContent = {
           kind: 'rappel',
           label: 'Rappel — domaine de dérivabilité et fonction dérivée',
           items: [
-            'f est **dérivable en a** si f\'(a) existe — si la limite du taux d\'accroissement ' +
+            'f est **dérivable en a** si f′(a) existe — si la limite du taux d\'accroissement ' +
               'en a est un nombre réel (pas ±∞, pas indéfinie). L\'ensemble des réels où f est ' +
               'dérivable s\'appelle le **domaine de dérivabilité** de f, noté $\\text{dom}_d f$. ' +
               'Il peut être plus petit que dom f : $\\sqrt{x}$ est définie en 0, mais pas dérivable en 0 !',
-            'Calcule f\'(a) par la définition (section 1), mais pour un a QUELCONQUE de ' +
+            'Calcule f′(a) par la définition (section 1), mais pour un a QUELCONQUE de ' +
               '$\\text{dom}_d f$ — plutôt que pour une seule valeur fixée. Tu obtiens une ' +
-              'nouvelle fonction : la **fonction dérivée** f\', qui associe à chaque x son ' +
-              'nombre dérivé f\'(x).',
+              'nouvelle fonction : la **fonction dérivée** f′, qui associe à chaque x son ' +
+              'nombre dérivé f′(x).',
           ],
         },
         {
@@ -651,7 +651,7 @@ export const deriveesApplications: ChapterContent = {
         { kind: 'subheading', text: 'Dérivées de référence' },
         {
           kind: 'featureTable',
-          headers: ['f(x)', "f'(x)"],
+          headers: ['f(x)', "f′(x)"],
           rows: [
             ['$x^n$', '$n\\,x^{n-1}$'],
             ['$\\sqrt{x}$ (dérivable pour $x > 0$)', '$\\dfrac{1}{2\\sqrt{x}}$'],
@@ -763,7 +763,7 @@ export const deriveesApplications: ChapterContent = {
         { kind: 'subheading', text: 'La règle de la chaîne : cas particuliers courants' },
         {
           kind: 'featureTable',
-          headers: ['f(x) — u fonction dérivable de x', "f'(x)"],
+          headers: ['f(x) — u fonction dérivable de x', "f′(x)"],
           rows: [
             ['$u^n$', "$n\\,u^{n-1} \\cdot u'$"],
             ['$\\dfrac{1}{u}$', "$-\\dfrac{u'}{u^2}$"],
@@ -848,7 +848,7 @@ export const deriveesApplications: ChapterContent = {
           formula: '$f(x) = (2x-1)^3$. Calcule f\'(x).',
           steps: [
             { tag: 'décomposer — intérieure u(x)=2x−1, extérieure g(u)=u³', text: '$u\'(x)=2$ ; $g\'(u)=3u^2$' },
-            { tag: 'appliquer f\'(x)=u\'(x)·g\'(u(x))', text: '$f\'(x) = 2 \\cdot 3(2x-1)^2 = 6(2x-1)^2$' },
+            { tag: 'appliquer f′(x)=u′(x)·g′(u(x))', text: '$f\'(x) = 2 \\cdot 3(2x-1)^2 = 6(2x-1)^2$' },
           ],
           result: { tag: 'résultat', text: '$f\'(x) = 6(2x-1)^2$' },
           illustration: {
@@ -913,7 +913,7 @@ export const deriveesApplications: ChapterContent = {
           generatorId: '5gen27',
           description: [
             'Reconnais la structure de f(x) : règle de base, produit, quotient ou composée. ' +
-              'Décompose-la si besoin, puis calcule f\'(x) — avec ou sans fonctions trigonométriques.',
+              'Décompose-la si besoin, puis calcule f′(x) — avec ou sans fonctions trigonométriques.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 27. Fonction dérivée »',
@@ -924,7 +924,7 @@ export const deriveesApplications: ChapterContent = {
           generatorId: '5gen70',
           description: [
             'Température, altitude d\'un drone, bénéfice, population : calcule le taux de ' +
-              'variation moyen sur un intervalle, puis le taux instantané f\'(a), donne son unité ' +
+              'variation moyen sur un intervalle, puis le taux instantané f′(a), donne son unité ' +
               'et interprète son signe dans le contexte.',
           ],
           chantier: '5e-4h',
@@ -935,8 +935,8 @@ export const deriveesApplications: ChapterContent = {
     {
       id: 'signe-derivees',
       number: 4,
-      title: 'Signe de f\' et de f\'\' : variations et concavité',
-      kicker: 'signe de f\' ⟺ sens de variation ; signe de f\'\' ⟺ concavité ; point d\'inflexion',
+      title: 'Signe de f′ et de f″ : variations et concavité',
+      kicker: 'signe de f′ ⟺ sens de variation ; signe de f″ ⟺ concavité ; point d\'inflexion',
       titreCourt: 'Signe de f′ et de f″',
       partie: 'Signe de f′ et de f″ : étudier une fonction',
       essentiel: [
@@ -951,13 +951,13 @@ export const deriveesApplications: ChapterContent = {
         { question: 'La tangente en a est verticale : a-t-on $f\'(a) = 0$ ?', reponse: 'Non : le taux d\'accroissement tend vers $\\pm\\infty$, f′(a) n\'existe pas. $f\'(a) = 0$ donne une tangente horizontale.' },
       ],
       blocks: [
-        { kind: 'video', title: 'Signe de f\' et de f\'\' : variations, extremums, concavité, point d\'inflexion', youtubeId: 'oSM5X-KVRrk' },
+        { kind: 'video', title: 'Signe de f′ et de f″ : variations, extremums, concavité, point d\'inflexion', youtubeId: 'oSM5X-KVRrk' },
         {
           kind: 'para',
           text:
-            'Tu sais maintenant définir f\'(a) (section 1), l\'interpréter comme la pente ' +
-            'd\'une tangente (section 2), et calculer f\'(x) avec les règles de calcul ' +
-            '(section 3). Reste à savoir ce que le SIGNE de f\' (et de f\'\') révèle sur f : son ' +
+            'Tu sais maintenant définir f′(a) (section 1), l\'interpréter comme la pente ' +
+            'd\'une tangente (section 2), et calculer f′(x) avec les règles de calcul ' +
+            '(section 3). Reste à savoir ce que le SIGNE de f′ (et de f″) révèle sur f : son ' +
             'sens de variation, sa concavité, et la position de ses extremums.',
         },
         {
@@ -972,39 +972,39 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'rappel',
-          label: 'Rappel — signe de f\' ⟺ sens de variation de f',
+          label: 'Rappel — signe de f′ ⟺ sens de variation de f',
           items: [
             '$f\'(x) > 0$ sur un intervalle ⟹ f est **croissante** sur cet intervalle (la courbe monte).',
             '$f\'(x) < 0$ sur un intervalle ⟹ f est **décroissante** sur cet intervalle (la courbe descend).',
-            '$f\'(a) = 0$ ET f\' **change de signe** en a ⟹ f admet un **extremum local** en a. ' +
-              'Maximum si f\' passe de + à − ; minimum si f\' passe de − à +. (C\'est le cas d\'une ' +
+            '$f\'(a) = 0$ ET f′ **change de signe** en a ⟹ f admet un **extremum local** en a. ' +
+              'Maximum si f′ passe de + à − ; minimum si f′ passe de − à +. (C\'est le cas d\'une ' +
               'fonction dérivable en un point intérieur à son domaine : voir plus bas les points où ' +
-              'f\'(a) n\'existe pas.)',
+              'f′(a) n\'existe pas.)',
           ],
         },
         {
           kind: 'rappel',
-          label: 'Rappel — signe de f\'\' ⟺ concavité de f',
+          label: 'Rappel — signe de f″ ⟺ concavité de f',
           items: [
             '$f\'\'(x) > 0$ sur un intervalle ⟹ f est **convexe** (symbole ∪) : la courbe a la ' +
               'forme d\'un « bol » et reste au-dessus de chacune de ses tangentes.',
             '$f\'\'(x) < 0$ sur un intervalle ⟹ f est **concave** (symbole ∩) : la courbe a la ' +
               'forme d\'un « dôme » et reste en dessous de chacune de ses tangentes.',
-            'Un **point d\'inflexion** est un point où f\'\' **change de signe**. La courbe ' +
+            'Un **point d\'inflexion** est un point où f″ **change de signe**. La courbe ' +
               'traverse sa tangente à cet endroit, en passant d\'un type de concavité à l\'autre.',
           ],
         },
         {
           kind: 'exemple',
-          badge: 'signe de f\' et de f\'\' sur une cubique',
+          badge: 'signe de f′ et de f″ sur une cubique',
           formula: '$f(x) = x^3 - 3x$. Étudie le signe de f\'(x) et de f\'\'(x), et déduis-en variations, extremums et concavité.',
           steps: [
             { tag: 'dériver une première fois', text: '$f\'(x) = 3x^2-3 = 3(x-1)(x+1)$' },
             {
-              tag: 'signe de f\' — racines en x=−1 et x=1',
+              tag: 'signe de f′ — racines en x=−1 et x=1',
               text: '$x<-1$ : $f\'(x)>0$ (croissante) ; $-1<x<1$ : $f\'(x)<0$ (décroissante) ; $x>1$ : $f\'(x)>0$ (croissante)',
             },
-            { tag: 'extremums — là où f\' change de signe', text: 'max local en $x=-1$ : $f(-1)=-1+3=2$ ; min local en $x=1$ : $f(1)=1-3=-2$' },
+            { tag: 'extremums — là où f′ change de signe', text: 'max local en $x=-1$ : $f(-1)=-1+3=2$ ; min local en $x=1$ : $f(1)=1-3=-2$' },
             { tag: 'dériver une seconde fois', text: '$f\'\'(x) = 6x$' },
           ],
           result: {
@@ -1029,26 +1029,26 @@ export const deriveesApplications: ChapterContent = {
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
-            caption: 'f(x)=x³−3x — vert = f\'>0 (croissante), rouge = f\'<0 (décroissante), point orange = inflexion',
+            caption: 'f(x)=x³−3x — vert = f′>0 (croissante), rouge = f′<0 (décroissante), point orange = inflexion',
           },
         },
         {
           kind: 'atelier',
           tag: 'f-fprime-fseconde-widget',
-          label: 'Manipule toi-même : f, f\' et f\'\' côte à côte',
+          label: 'Manipule toi-même : f, f′ et f″ côte à côte',
           caption:
             'Fais glisser x : la pente de la tangente à f (violet) est exactement la ' +
-            'hauteur du point sur f\', et le signe de f\'\' donne la forme de f (vert : ' +
-            'convexe ∪, orange : concave ∩). Mode « devine f\' » : esquisse f\' avant de la ' +
+            'hauteur du point sur f′, et le signe de f″ donne la forme de f (vert : ' +
+            'convexe ∪, orange : concave ∩). Mode « devine f′ » : esquisse f′ avant de la ' +
             'révéler ; mode « lecture inverse » : retrouve les variations de f à partir de ' +
-            'f\' seule (comme en section 6).',
+            'f′ seule (comme en section 6).',
         },
         {
           kind: 'attention',
-          label: 'f\'(a)=0 ne garantit PAS un extremum',
+          label: 'f′(a)=0 ne garantit PAS un extremum',
           text:
             'Pour une fonction dérivable, la condition $f\'(a)=0$ est NÉCESSAIRE pour un extremum local en un point intérieur. Mais jamais suffisante ' +
-            'à elle seule : il faut en plus que f\' **change réellement de signe** autour de a. ' +
+            'à elle seule : il faut en plus que f′ **change réellement de signe** autour de a. ' +
             'Un cas classique où ça échoue est détaillé à la section 5 (point critique sans ' +
             'extremum, $f(x)=x^3$ en $x=0$).',
         },
@@ -1065,28 +1065,28 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'astuce',
-          label: 'Lire d\'abord f\', puis seulement f\'\'',
+          label: 'Lire d\'abord f′, puis seulement f″',
           text:
-            'Ne mélange jamais les deux lectures. Le signe de f\' renseigne sur la **direction** ' +
-            'de la courbe (monte/descend). Le signe de f\'\' renseigne sur sa **forme** ' +
-            '(bol/dôme). Un extremum se lit sur f\', un point d\'inflexion se lit sur f\'\' — ' +
+            'Ne mélange jamais les deux lectures. Le signe de f′ renseigne sur la **direction** ' +
+            'de la courbe (monte/descend). Le signe de f″ renseigne sur sa **forme** ' +
+            '(bol/dôme). Un extremum se lit sur f′, un point d\'inflexion se lit sur f″ — ' +
             'jamais l\'inverse !',
         },
         {
           kind: 'rappel',
-          label: 'Quand f\'(a) n\'existe pas : point anguleux, rebroussement, tangente verticale',
+          label: 'Quand f′(a) n\'existe pas : point anguleux, rebroussement, tangente verticale',
           items: [
             '**Point anguleux** — la courbe change brusquement de direction : les pentes à gauche ' +
               'et à droite sont différentes, le taux d\'accroissement n\'a pas de limite unique. ' +
               'Exemple : $|x|$ en 0 (pentes −1 et 1). La fonction peut y avoir un extremum (ici un ' +
-              'minimum) sans que f\'(a) vaille 0 — f\'(a) n\'existe pas.',
+              'minimum) sans que f′(a) vaille 0 — f′(a) n\'existe pas.',
             '**Point de rebroussement** — les deux morceaux de la courbe arrivent en pointe, en ' +
               'devenant verticaux, et repartent en arrière. Exemple : $\\sqrt{|x|}$ en 0.',
             '**Tangente verticale** — la tangente existe, mais elle est verticale : le taux ' +
-              'd\'accroissement tend vers $\\pm\\infty$, donc f\'(a) n\'existe pas (une droite ' +
+              'd\'accroissement tend vers $\\pm\\infty$, donc f′(a) n\'existe pas (une droite ' +
               'verticale n\'a pas de pente). Exemple : $\\sqrt[3]{x}$ en 0. À ne pas confondre ' +
-              'avec une tangente horizontale, où f\'(a) = 0.',
-            '**Dérivable ⟹ continue** — si f\'(a) existe, la courbe ne fait pas de saut en a. ' +
+              'avec une tangente horizontale, où f′(a) = 0.',
+            '**Dérivable ⟹ continue** — si f′(a) existe, la courbe ne fait pas de saut en a. ' +
               'L\'inverse est faux : $|x|$ est continue en 0 (pas de saut) mais n\'y est pas dérivable.',
           ],
         },
@@ -1187,7 +1187,7 @@ export const deriveesApplications: ChapterContent = {
             "semaine est sa dérivée $N'(t)$. Le moment où ces nouveaux cas sont les plus nombreux " +
             "(le « pic » de l'épidémie) est donc un maximum de $N'$, c'est-à-dire un point " +
             "d'inflexion de $N$, repéré par le changement de signe de $N''(t)$ — la même lecture " +
-            "que tu viens de faire sur f' et f''. Les épidémiologistes surveillent précisément ce " +
+            "que tu viens de faire sur f′ et f″. Les épidémiologistes surveillent précisément ce " +
             "point : tant que $N''(t) > 0$, l'épidémie accélère ; dès que $N''(t) < 0$, elle " +
             "ralentit, même si le nombre total de cas continue d'augmenter.",
           domaines: ['Santé publique', 'Biologie'],
@@ -1215,16 +1215,16 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'entrainement',
-          title: 'Association graphique/mots ↔ signe de f\'/f\'\'',
+          title: 'Association graphique/mots ↔ signe de f′/f″',
           generatorId: '5gen25',
           description: [
-            'Associe un graphique de f à son graphique de f\' — ou à une description verbale de ' +
-              'f\'/f\'\'. Reconnaissance directe du lien entre le signe de la dérivée et le ' +
+            'Associe un graphique de f à son graphique de f′ — ou à une description verbale de ' +
+              'f′/f″. Reconnaissance directe du lien entre le signe de la dérivée et le ' +
               'comportement de la courbe (en niveau avancé : points anguleux, rebroussements et ' +
               'tangentes verticales).',
           ],
           chantier: '5e-4h',
-          whereLabel: '5e (4h) → « 25. Association graphique/mots ↔ signe de f\'/f\'\' »',
+          whereLabel: '5e (4h) → « 25. Association graphique/mots ↔ signe de f′/f″ »',
         },
         {
           kind: 'entrainement',
@@ -1243,7 +1243,7 @@ export const deriveesApplications: ChapterContent = {
       id: 'etude-locale',
       number: 5,
       title: 'Étude locale (extremums et points critiques)',
-      kicker: 'tableau de signes de f\', extremums locaux, point critique sans extremum, racines irrationnelles, fonction rationnelle, concavité par f\'\'',
+      kicker: 'tableau de signes de f′, extremums locaux, point critique sans extremum, racines irrationnelles, fonction rationnelle, concavité par f″',
       titreCourt: 'Étude locale',
       partie: 'Signe de f′ et de f″ : étudier une fonction',
       essentiel: [
@@ -1258,28 +1258,28 @@ export const deriveesApplications: ChapterContent = {
         { question: 'Comment conclure sur un zéro a de f′ ?', reponse: 'Une valeur test de chaque côté : même signe des deux côtés → « pas d\'extremum ».' },
       ],
       blocks: [
-        { kind: 'video', title: 'Étude locale : tableau de signes de f\', extremums et points critiques', youtubeId: 'MqocKqLTkqY' },
+        { kind: 'video', title: 'Étude locale : tableau de signes de f′, extremums et points critiques', youtubeId: 'MqocKqLTkqY' },
         {
           kind: 'methode',
-          label: 'Tableau de signes de f\' complet',
+          label: 'Tableau de signes de f′ complet',
           items: [
             'Si f n\'est pas définie partout, détermine d\'abord son **domaine** : chaque valeur exclue ' +
               'aura sa colonne ∄ dans le tableau.',
-            'Résous f\'(x)=0 pour trouver les **zéros** de f\' : ce sont tes candidats extremums ' +
+            'Résous f′(x)=0 pour trouver les **zéros** de f′ : ce sont tes candidats extremums ' +
               '(garde les valeurs exactes, même irrationnelles, comme $1 \\pm \\sqrt{2}$).',
-            'Étudie le SIGNE de f\' entre et autour de ces zéros (tableau de signes).',
+            'Étudie le SIGNE de f′ entre et autour de ces zéros (tableau de signes).',
             'Déduis-en les **variations** de f (flèches ↗/↘), puis **classe** chaque zéro : ' +
-              'max local si f\' passe de + à −, min local si f\' passe de − à +.',
+              'max local si f′ passe de + à −, min local si f′ passe de − à +.',
           ],
         },
         {
           kind: 'exempleLibre',
           label: 'Exemple résolu — tableau de signes complet, 2 extremums réels',
           blocks: [
-            { kind: 'para', text: 'Reprends $f(x) = x^3-3x$ (section 4) et dresse le tableau de signes complet de f\'.' },
+            { kind: 'para', text: 'Reprends $f(x) = x^3-3x$ (section 4) et dresse le tableau de signes complet de f′.' },
             {
               kind: 'signTable',
-              caption: 'Signe de f\'(x) = 3(x−1)(x+1) et variations de f(x)=x³−3x',
+              caption: 'Signe de f′(x) = 3(x−1)(x+1) et variations de f(x)=x³−3x',
               rows: [
                 {
                   label: 'x',
@@ -1294,7 +1294,7 @@ export const deriveesApplications: ChapterContent = {
                   ],
                 },
                 {
-                  label: 'Signe de f\'(x)',
+                  label: 'Signe de f′(x)',
                   cells: [
                     { text: '', tone: 'plain' },
                     { text: '+', tone: 'pos' },
@@ -1322,7 +1322,7 @@ export const deriveesApplications: ChapterContent = {
             {
               kind: 'para',
               text:
-                'f\' change de signe aux DEUX zéros. Max local en x=−1 (f=2), min local en x=1 ' +
+                'f′ change de signe aux DEUX zéros. Max local en x=−1 (f=2), min local en x=1 ' +
                 '(f=−2) : ce sont bien de VRAIS extremums.',
             },
           ],
@@ -1331,8 +1331,8 @@ export const deriveesApplications: ChapterContent = {
           kind: 'piege',
           label: 'Un point critique n\'est pas toujours un extremum',
           text:
-            'f\'(a)=0 définit un **point critique** — un candidat à être un extremum. Mais ' +
-            'SEULEMENT si f\' change réellement de signe autour de a. Si f\' garde le MÊME ' +
+            'f′(a)=0 définit un **point critique** — un candidat à être un extremum. Mais ' +
+            'SEULEMENT si f′ change réellement de signe autour de a. Si f′ garde le MÊME ' +
             'signe des deux côtés (par exemple toujours positif), a n\'est PAS un extremum. ' +
             'Pour les fonctions de ce chapitre (polynômes, fonctions rationnelles), c\'est alors ' +
             'un point d\'inflexion à tangente horizontale.',
@@ -1348,7 +1348,7 @@ export const deriveesApplications: ChapterContent = {
           result: {
             tag: 'conclusion',
             text:
-              'f\'(0)=0, MAIS f\' ne change pas de signe (+ des deux côtés) ⟹ **pas d\'extremum** ' +
+              'f′(0)=0, MAIS f′ ne change pas de signe (+ des deux côtés) ⟹ **pas d\'extremum** ' +
               'en x=0. C\'est un point d\'inflexion à tangente horizontale : f reste croissante ' +
               'de part et d\'autre.',
           },
@@ -1365,26 +1365,26 @@ export const deriveesApplications: ChapterContent = {
             points: [{ x: 0, y: 2, label: 'point critique (0;2)', tone: 'accent', labelPos: 'above' }],
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
-            caption: 'f(x)=x³+2 — f\' reste ≥0 partout : la courbe ne fait que croiser sa tangente horizontale, aucun extremum',
+            caption: 'f(x)=x³+2 — f′ reste ≥0 partout : la courbe ne fait que croiser sa tangente horizontale, aucun extremum',
           },
         },
         {
           kind: 'astuce',
-          label: 'Vérifie TOUJOURS les deux côtés d\'un zéro de f\'',
+          label: 'Vérifie TOUJOURS les deux côtés d\'un zéro de f′',
           text:
-            'Trouver f\'(a)=0 n\'est que la moitié du travail. Évalue le signe de f\' juste ' +
+            'Trouver f′(a)=0 n\'est que la moitié du travail. Évalue le signe de f′ juste ' +
             'avant ET juste après a — une valeur test suffit de chaque côté. Si le signe est ' +
             'identique des deux côtés, conclus explicitement « pas d\'extremum ». Ne t\'arrête ' +
-            'jamais après le seul calcul de f\'(a)=0 !',
+            'jamais après le seul calcul de f′(a)=0 !',
         },
         {
           kind: 'atelier',
           tag: 'point-critique-signe-widget',
           label: 'Manipule toi-même : point critique ou vrai extremum ?',
           caption:
-            'f(x) = x³ − 3kx : fais glisser k et suis le tableau de signes de f\'. Pour k > ' +
-            '0, f\' change de signe aux deux zéros (2 vrais extremums) ; pour k = 0, f\'(x) = ' +
-            '3x² ne change jamais de signe : point critique SANS extremum. Coche f\'\' pour ' +
+            'f(x) = x³ − 3kx : fais glisser k et suis le tableau de signes de f′. Pour k > ' +
+            '0, f′ change de signe aux deux zéros (2 vrais extremums) ; pour k = 0, f′(x) = ' +
+            '3x² ne change jamais de signe : point critique SANS extremum. Coche f″ pour ' +
             'voir la concavité et le point d\'inflexion (0 ; 0).',
         },
         { kind: 'subheading', text: 'Racines irrationnelles, fonction rationnelle, dérivée seconde' },
@@ -1395,11 +1395,11 @@ export const deriveesApplications: ChapterContent = {
           steps: [
             { tag: 'dériver', text: '$f\'(x) = 3x^2 - 6x - 3$' },
             {
-              tag: 'résoudre f\'(x) = 0 — discriminant',
+              tag: 'résoudre f′(x) = 0 — discriminant',
               text: '$\\Delta = 36 + 36 = 72$, $\\sqrt{72} = 6\\sqrt{2}$ ⟹ $x = \\dfrac{6 \\pm 6\\sqrt{2}}{6} = 1 \\pm \\sqrt{2}$',
             },
             {
-              tag: 'signe de f\' — trinôme de coefficient 3 > 0',
+              tag: 'signe de f′ — trinôme de coefficient 3 > 0',
               text: '$f\'(x) > 0$ avant $1-\\sqrt{2}$, $f\'(x) < 0$ entre les racines, $f\'(x) > 0$ après $1+\\sqrt{2}$',
             },
             {
@@ -1434,12 +1434,12 @@ export const deriveesApplications: ChapterContent = {
               text:
                 '**Dérivée** (règle de $\\frac{1}{u}$, avec $u = (x-1)^2 - 4$ et $u\' = 2(x-1)$) : ' +
                 '$f\'(x) = \\dfrac{-4 \\cdot 2(x-1)}{\\left((x-1)^2-4\\right)^2} = \\dfrac{-8(x-1)}{\\left((x-1)^2-4\\right)^2}$. ' +
-                'Le dénominateur est un carré, positif sur le domaine : f\' a le signe de $-8(x-1)$, ' +
+                'Le dénominateur est un carré, positif sur le domaine : f′ a le signe de $-8(x-1)$, ' +
                 'et s\'annule seulement en $x = 1$.',
             },
             {
               kind: 'signTable',
-              caption: 'Signe de f\'(x) et variations de f',
+              caption: 'Signe de f′(x) et variations de f',
               rows: [
                 {
                   label: 'x',
@@ -1456,7 +1456,7 @@ export const deriveesApplications: ChapterContent = {
                   ],
                 },
                 {
-                  label: 'Signe de f\'(x)',
+                  label: 'Signe de f′(x)',
                   cells: [
                     { text: '', tone: 'plain' },
                     { text: '+', tone: 'pos' },
@@ -1495,7 +1495,7 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — tableau de f\'\' : concavité et point d\'inflexion',
+          label: 'Exemple résolu — tableau de f″ : concavité et point d\'inflexion',
           blocks: [
             {
               kind: 'para',
@@ -1505,7 +1505,7 @@ export const deriveesApplications: ChapterContent = {
             },
             {
               kind: 'signTable',
-              caption: 'Signe de f\'\'(x) et concavité de f (∪ convexe, ∩ concave, PI = point d\'inflexion)',
+              caption: 'Signe de f″(x) et concavité de f (∪ convexe, ∩ concave, PI = point d\'inflexion)',
               rows: [
                 {
                   label: 'x',
@@ -1518,7 +1518,7 @@ export const deriveesApplications: ChapterContent = {
                   ],
                 },
                 {
-                  label: 'Signe de f\'\'(x)',
+                  label: 'Signe de f″(x)',
                   cells: [
                     { text: '', tone: 'plain' },
                     { text: '−', tone: 'neg' },
@@ -1542,8 +1542,8 @@ export const deriveesApplications: ChapterContent = {
             {
               kind: 'para',
               text:
-                'f\'\' change de signe en 1 : la courbe passe de concave (∩) à convexe (∪). Point ' +
-                'd\'inflexion (PI) en $(1\\,;f(1)) = (1\\,;-4)$. Un zéro de f\'\' sans changement de ' +
+                'f″ change de signe en 1 : la courbe passe de concave (∩) à convexe (∪). Point ' +
+                'd\'inflexion (PI) en $(1\\,;f(1)) = (1\\,;-4)$. Un zéro de f″ sans changement de ' +
                 'signe ne serait PAS un point d\'inflexion (exemple : $x^4$ en 0).',
             },
           ],
@@ -1586,9 +1586,9 @@ export const deriveesApplications: ChapterContent = {
           title: 'Étude locale (extremums et points critiques)',
           generatorId: '5gen29',
           description: [
-            'Résous f\'(x)=0 (racines entières, double ou irrationnelles), dresse le tableau de ' +
+            'Résous f′(x)=0 (racines entières, double ou irrationnelles), dresse le tableau de ' +
               'signes — avec les colonnes ∄ d\'une fonction rationnelle — et classe chaque point ' +
-              'critique. En niveau avancé, même étude sur f\'\' : concavité (∪/∩) et points d\'inflexion.',
+              'critique. En niveau avancé, même étude sur f″ : concavité (∪/∩) et points d\'inflexion.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 29. Étude locale (extremums et points critiques) »',
@@ -1622,7 +1622,7 @@ export const deriveesApplications: ChapterContent = {
           description: [
             'Traduis des conditions (tangente donnée, tangente horizontale, point d\'inflexion, ' +
               'point de la courbe) en un système, résous-le pour trouver f(x) = ax³ + bx² + cx + d, ' +
-              'puis vérifie par le signe de f\' (ou de f\'\') la nature du point.',
+              'puis vérifie par le signe de f′ (ou de f″) la nature du point.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 69. Déterminer une fonction par des conditions »',
@@ -1659,12 +1659,12 @@ export const deriveesApplications: ChapterContent = {
           kind: 'methode',
           label: 'Ce qu\'il faut repérer sur un graphique de f',
           items: [
-            'La courbe MONTE ⟹ f\'>0 sur cet intervalle. La courbe DESCEND ⟹ f\'<0.',
+            'La courbe MONTE ⟹ f′>0 sur cet intervalle. La courbe DESCEND ⟹ f′<0.',
             'Un sommet (pic ou creux), là où la courbe change de direction ⟹ extremum local. ' +
-              'Si la courbe est lisse en ce point, f\' y vaut 0 et change de signe ; en un point ' +
-              'anguleux, f\' n\'existe pas (section 4).',
-            'La courbe a la forme d\'un « bol » (au-dessus de ses tangentes) ⟹ convexe, f\'\'>0. ' +
-              'La forme d\'un « dôme » (en-dessous de ses tangentes) ⟹ concave, f\'\'<0.',
+              'Si la courbe est lisse en ce point, f′ y vaut 0 et change de signe ; en un point ' +
+              'anguleux, f′ n\'existe pas (section 4).',
+            'La courbe a la forme d\'un « bol » (au-dessus de ses tangentes) ⟹ convexe, f″>0. ' +
+              'La forme d\'un « dôme » (en-dessous de ses tangentes) ⟹ concave, f″<0.',
             'Le point où la courbe passe de « bol » à « dôme » (ou l\'inverse) ⟹ point d\'inflexion.',
           ],
         },
@@ -1679,7 +1679,7 @@ export const deriveesApplications: ChapterContent = {
           result: {
             tag: 'concavité — forme de la courbe',
             text:
-              '« bol » (convexe, f\'\'>0) à gauche du point orange, « dôme » (concave, f\'\'<0) à ' +
+              '« bol » (convexe, f″>0) à gauche du point orange, « dôme » (concave, f″<0) à ' +
               'droite — ce point orange est donc un point d\'inflexion, aucun calcul requis pour l\'affirmer.',
           },
           illustration: {
@@ -1725,7 +1725,7 @@ export const deriveesApplications: ChapterContent = {
           result: {
             tag: 'conclusion',
             text:
-              'la tangente en C est bien horizontale (f\'(C)=0). Mais ce n\'est PAS un extremum : ' +
+              'la tangente en C est bien horizontale (f′(C)=0). Mais ce n\'est PAS un extremum : ' +
               'la courbe ralentit un instant, puis continue exactement dans le même sens. C\'est ' +
               'exactement le piège décrit dans l\'encadré ci-dessus — ici repéré par simple ' +
               'lecture, sans aucun calcul.',
@@ -1759,22 +1759,22 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'exemple',
-          badge: "lire le graphique de f' pour retrouver f",
+          badge: "lire le graphique de f′ pour retrouver f",
           formula:
             "Le graphique ci-dessous est celui de la DÉRIVÉE $f'(x) = x^2-x-2$, une parabole qui " +
             "coupe l'axe en $-1$ et en $2$. Sans chercher f, déduis-en les variations de f, ses " +
             'extremums et sa concavité.',
           steps: [
             {
-              tag: "signe de f' — courbe au-dessus ou en dessous de l'axe",
+              tag: "signe de f′ — courbe au-dessus ou en dessous de l'axe",
               text: "$f' > 0$ sur $]-\\infty\\,;-1[$ et sur $]2\\,;+\\infty[$ ; $f' < 0$ sur $]-1\\,;2[$",
             },
             {
               tag: 'variations de f',
-              text: "f croît, décroît, puis croît : maximum local en $x = -1$, minimum local en $x = 2$ (f' y change de signe)",
+              text: "f croît, décroît, puis croît : maximum local en $x = -1$, minimum local en $x = 2$ (f′ y change de signe)",
             },
             {
-              tag: "concavité — f' descend ou monte",
+              tag: "concavité — f′ descend ou monte",
               text: "$f'$ décroît avant son sommet $x = \\frac{1}{2}$ et croît après : $f'' < 0$ puis $f'' > 0$, donc f est concave puis convexe",
             },
           ],
@@ -1794,12 +1794,12 @@ export const deriveesApplications: ChapterContent = {
             points: [
               { x: -1, y: 0, label: '−1', tone: 'accent', labelPos: 'above' },
               { x: 2, y: 0, label: '2', tone: 'accent', labelPos: 'above' },
-              { x: 0.5, y: -2.25, label: "minimum de f'", tone: 'good', labelPos: 'below' },
+              { x: 0.5, y: -2.25, label: "minimum de f′", tone: 'good', labelPos: 'below' },
             ],
             xAxisLabel: 'x',
-            yAxisLabel: "f'(x)",
+            yAxisLabel: "f′(x)",
             caption:
-              "Attention : c'est le graphique de f' (pas de f). Ses zéros donnent les extremums de f, " +
+              "Attention : c'est le graphique de f′ (pas de f). Ses zéros donnent les extremums de f, " +
               "son minimum le point d'inflexion de f.",
           },
         },
@@ -1816,7 +1816,7 @@ export const deriveesApplications: ChapterContent = {
           generatorId: '5gen30',
           description: [
             'Un graphique de f est affiché : lis ses asymptotes, repère ses extremums, ses paliers ' +
-              'et ses points d\'inflexion, puis déduis-en le signe de f\' et de f\'\' (concavité). ' +
+              'et ses points d\'inflexion, puis déduis-en le signe de f′ et de f″ (concavité). ' +
               'Aucun calcul, calculatrice absente.',
           ],
           chantier: '5e-4h',
@@ -1824,14 +1824,14 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'entrainement',
-          title: 'Du graphique de f\' aux variations de f',
+          title: 'Du graphique de f′ aux variations de f',
           generatorId: '5gen74',
           description: [
             'Seul le graphique de f′ est donné : déduis-en le signe de f′, les extremums de f (attention ' +
               'aux zéros sans changement de signe), sa concavité et ses points d\'inflexion.',
           ],
           chantier: '5e-4h',
-          whereLabel: '5e (4h) → « 74. Du graphique de f\' aux variations de f »',
+          whereLabel: '5e (4h) → « 74. Du graphique de f′ aux variations de f »',
         },
       ],
     },
@@ -1839,7 +1839,7 @@ export const deriveesApplications: ChapterContent = {
       id: 'etudier-fonction',
       number: 7,
       title: 'Étudier une fonction',
-      kicker: 'domaine → limites/asymptotes → f\' et variations → f\'\' et concavité → coordonnées → graphique',
+      kicker: 'domaine → limites/asymptotes → f′ et variations → f″ et concavité → coordonnées → graphique',
       titreCourt: 'Étude complète',
       partie: 'Signe de f′ et de f″ : étudier une fonction',
       essentiel: [
@@ -1866,10 +1866,10 @@ export const deriveesApplications: ChapterContent = {
           items: [
             '**Domaine** — exclus les valeurs interdites (dénominateur nul, etc.).',
             '**Limites aux bornes du domaine et asymptotes** — techniques du chapitre précédent.',
-            '**Dérivée** f\'(x) et son **signe** — tableau de signes complet, y compris les colonnes ∄.',
-            '**Variations et extremums** — lus directement sur le tableau de signes de f\'.',
-            '**Dérivée seconde** f\'\'(x) et son signe — concavité (∪ convexe, ∩ concave) et points ' +
-              'd\'inflexion, là où f\'\' change de signe (jamais en une valeur exclue).',
+            '**Dérivée** f′(x) et son **signe** — tableau de signes complet, y compris les colonnes ∄.',
+            '**Variations et extremums** — lus directement sur le tableau de signes de f′.',
+            '**Dérivée seconde** f″(x) et son signe — concavité (∪ convexe, ∩ concave) et points ' +
+              'd\'inflexion, là où f″ change de signe (jamais en une valeur exclue).',
             '**Coordonnées des points remarquables** — calcule f(a) pour chaque extremum et chaque ' +
               'point d\'inflexion.',
             '**Synthèse et graphique** — domaine, tableau complet, asymptotes, points remarquables ' +
@@ -1888,9 +1888,9 @@ export const deriveesApplications: ChapterContent = {
             },
             { tag: 'asymptote oblique — le terme 4 / (x−1) tend vers 0 à l\'infini', text: '$y = x - 1$' },
             { tag: '3. dériver', text: '$f\'(x) = 1 - \\dfrac{4}{(x-1)^2}$' },
-            { tag: 'zéros de f\' — résoudre f\'(x)=0', text: '$1 = \\dfrac{4}{(x-1)^2} \\iff (x-1)^2 = 4 \\iff x-1 = \\pm 2 \\iff x = -1$ ou $x = 3$' },
+            { tag: 'zéros de f′ — résoudre f′(x)=0', text: '$1 = \\dfrac{4}{(x-1)^2} \\iff (x-1)^2 = 4 \\iff x-1 = \\pm 2 \\iff x = -1$ ou $x = 3$' },
             {
-              tag: 'signe de f\' — test en x=−2, x=0, x=2, x=4',
+              tag: 'signe de f′ — test en x=−2, x=0, x=2, x=4',
               text: '$f\'(-2)=1-\\frac{4}{9}>0$ ; $f\'(0)=1-4<0$ ; $f\'(2)=1-4<0$ ; $f\'(4)=1-\\frac{4}{9}>0$',
             },
             { tag: '4. extremums et leurs coordonnées', text: '$f(-1)=-2+\\frac{4}{-2}=-4$ (max local) ; $f(3)=2+\\frac{4}{2}=4$ (min local)' },
@@ -1945,7 +1945,7 @@ export const deriveesApplications: ChapterContent = {
             'Le domaine, la nature de l\'asymptote verticale (vraie asymptote ou point vide, ' +
             'test du numérateur), et l\'asymptote oblique (division euclidienne ou méthode des ' +
             'limites) : tout ça suit EXACTEMENT les techniques du chapitre 4. L\'étude complète ' +
-            'n\'ajoute que f\', f\'\' et leurs tableaux de signes, par-dessus ce que tu sais déjà.',
+            'n\'ajoute que f′, f″ et leurs tableaux de signes, par-dessus ce que tu sais déjà.',
         },
         {
           kind: 'exemple',
@@ -2009,7 +2009,7 @@ export const deriveesApplications: ChapterContent = {
           title: 'Étudier une fonction',
           generatorId: '5gen31',
           description: [
-            'Étude complète : domaine, limites et asymptotes, f\' et variations, f\'\' et ' +
+            'Étude complète : domaine, limites et asymptotes, f′ et variations, f″ et ' +
               'concavité, coordonnées des points remarquables, synthèse, puis placement de ces ' +
               'points sur le graphique.',
           ],
@@ -2535,7 +2535,7 @@ export const deriveesApplications: ChapterContent = {
           badge: 'maximum et minimum absolus sur un intervalle fermé',
           formula: '$f(t) = t^3-6t^2+9t+2$ sur l\'intervalle fermé $[0\\,;5]$. Détermine le maximum et le minimum absolus.',
           steps: [
-            { tag: 'dériver et résoudre f\'(t)=0', text: '$f\'(t) = 3t^2-12t+9 = 3(t-1)(t-3) = 0 \\iff t=1$ ou $t=3$ (tous deux dans $]0\\,;5[$)' },
+            { tag: 'dériver et résoudre f′(t)=0', text: '$f\'(t) = 3t^2-12t+9 = 3(t-1)(t-3) = 0 \\iff t=1$ ou $t=3$ (tous deux dans $]0\\,;5[$)' },
             { tag: 'classer les extremums locaux', text: '$f(1) = 1-6+9+2 = 6$ (max local) ; $f(3) = 27-54+27+2 = 2$ (min local)' },
             { tag: 'valeurs AUX BORNES — jamais oubliées', text: '$f(0) = 2$ ; $f(5) = 125-150+45+2 = 22$' },
           ],
@@ -2577,9 +2577,9 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'piege',
-          label: 'S\'arrêter au tableau de signes de f\' sans regarder les bornes',
+          label: 'S\'arrêter au tableau de signes de f′ sans regarder les bornes',
           text:
-            'Le tableau de signes de f\' répond correctement « $f(1)=6$ est un maximum LOCAL ». ' +
+            'Le tableau de signes de f′ répond correctement « $f(1)=6$ est un maximum LOCAL ». ' +
             'Mais répondre « donc le maximum de f sur $[0\\,;5]$ est 6 » est FAUX ici : $f(5)=22$ ' +
             'dépasse largement cette valeur ! Sur un intervalle borné, la comparaison finale aux ' +
             'bornes n\'est jamais une formalité — c\'est une étape qui peut renverser la conclusion.',
@@ -2607,7 +2607,7 @@ export const deriveesApplications: ChapterContent = {
           title: 'Extrema en contexte borné',
           generatorId: '5gen34',
           description: [
-            'Sur un intervalle fermé [0 ; T] : dérive, résous f\'(t)=0, dresse le tableau de ' +
+            'Sur un intervalle fermé [0 ; T] : dérive, résous f′(t)=0, dresse le tableau de ' +
               'signes (de 0 à T), calcule f aux points critiques et aux deux bornes, puis identifie ' +
               'le maximum et le minimum absolus parmi TOUTES ces valeurs.',
           ],
@@ -2887,14 +2887,14 @@ export const deriveesApplications: ChapterContent = {
         ],
       },
       {
-        title: 'Signe de f\' et de f\'\'',
+        title: 'Signe de f′ et de f″',
         formulas: [
           { text: '$f\'(x) > 0$', condition: 'f croissante' },
           { text: '$f\'(x) < 0$', condition: 'f décroissante' },
-          { text: '$f\'(a) = 0$ et f\' change de signe', condition: 'extremum local en a' },
+          { text: '$f\'(a) = 0$ et $f\'$ change de signe', condition: 'extremum local en a' },
           { text: '$f\'\'(x) > 0$', condition: 'f convexe (bol, ∪)' },
           { text: '$f\'\'(x) < 0$', condition: 'f concave (dôme, ∩)' },
-          { text: '$f\'\'(a) = 0$ et f\'\' change de signe', condition: 'point d\'inflexion en a' },
+          { text: '$f\'\'(a) = 0$ et $f\'\'$ change de signe', condition: 'point d\'inflexion en a' },
         ],
       },
       {

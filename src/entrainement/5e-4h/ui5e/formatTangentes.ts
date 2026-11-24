@@ -310,7 +310,7 @@ export function texteAideNiveau1(ecran: EcranTangente, exercice?: ExerciceTangen
       return { texte: "En chaque abscisse de contact t, la tangente est :", latex: "y=f(t)+f'(t)(x-t)" };
     case "substituer":
       return {
-        texte: "Deux substitutions indépendantes, aucune dérivation à faire : remplace x par l'abscisse du point dans f(x), puis dans f'(x) donnée.",
+        texte: "Deux substitutions indépendantes, aucune dérivation à faire : remplace x par l'abscisse du point dans f(x), puis dans f′(x) donnée.",
         latex: a !== null ? `f(${a}) \\quad \\text{et} \\quad f'(${a})` : null,
       };
     case "tangente":
@@ -341,7 +341,7 @@ export function texteAideNiveau1(ecran: EcranTangente, exercice?: ExerciceTangen
     case "verifierPente": {
       const q = exercice?.variante === "doubleTangence" ? exercice.q : null;
       return {
-        texte: "Reprends la dérivée f'(x) calculée au premier écran et remplace x par l'abscisse du second point :",
+        texte: "Reprends la dérivée f′(x) calculée au premier écran et remplace x par l'abscisse du second point :",
         latex: q !== null ? `f'(${q})` : "f'(q)",
       };
     }

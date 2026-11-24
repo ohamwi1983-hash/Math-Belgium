@@ -27,10 +27,10 @@ export function questionFinale(_exercice?: ExerciceLectureGraphiqueDerivees): st
 export const LIBELLE_ECRAN_LECTURE_GRAPHIQUE_DERIVEES: Record<EcranLectureGraphiqueDerivees, string> = {
   asymptotes: "Asymptotes",
   zerosFPrime: "Tangentes horizontales",
-  tableauFPrime: "Signe de f' et variations",
+  tableauFPrime: "Signe de f′ et variations",
   extremums: "Valeur des extremums",
   inflexions: "Points d'inflexion",
-  tableauFSeconde: "Signe de f'' et concavité",
+  tableauFSeconde: "Signe de f″ et concavité",
 };
 
 export function consigneEcran(ecran: EcranLectureGraphiqueDerivees): string {
@@ -40,13 +40,13 @@ export function consigneEcran(ecran: EcranLectureGraphiqueDerivees): string {
     case "zerosFPrime":
       return "Donne l'abscisse de chaque point où la tangente à la courbe est horizontale (f'(x) = 0). S'il n'y en a aucun, coche « Aucun point ».";
     case "tableauFPrime":
-      return "Complète le tableau de signes de f'(x), puis les variations de f.";
+      return "Complète le tableau de signes de f′(x), puis les variations de f.";
     case "extremums":
       return "Lis la valeur de f en chaque extremum.";
     case "inflexions":
       return "Donne l'abscisse de chaque point d'inflexion de la courbe. S'il n'y en a aucun, coche « Aucun point ».";
     case "tableauFSeconde":
-      return "Complète le tableau de signes de f''(x), puis la concavité de f.";
+      return "Complète le tableau de signes de f″(x), puis la concavité de f.";
   }
 }
 
@@ -59,13 +59,13 @@ export function texteAideNiveau1(ecran: EcranLectureGraphiqueDerivees): string {
     case "zerosFPrime":
       return "La tangente est horizontale au sommet d'une bosse, au fond d'un creux, et aussi là où la courbe s'aplatit un instant sans changer de sens (un palier).";
     case "tableauFPrime":
-      return "f' est positive là où la courbe monte (↗), négative là où elle descend (↘). En un point où f' s'annule : maximum si la courbe passe de ↗ à ↘, minimum si elle passe de ↘ à ↗, ni l'un ni l'autre si elle garde le même sens.";
+      return "f′ est positive là où la courbe monte (↗), négative là où elle descend (↘). En un point où f′ s'annule : maximum si la courbe passe de ↗ à ↘, minimum si elle passe de ↘ à ↗, ni l'un ni l'autre si elle garde le même sens.";
     case "extremums":
       return "La valeur d'un extremum est l'ordonnée du sommet (ou du fond) : lis-la sur l'axe vertical, à hauteur du point.";
     case "inflexions":
       return "Un point d'inflexion est un point où la courbe passe de ∪ (en forme de bol) à ∩ (en forme de colline), ou l'inverse. Entre une bosse et un creux voisins, il y en a toujours un.";
     case "tableauFSeconde":
-      return "f'' est positive là où la courbe est tournée vers le haut (∪), négative là où elle est tournée vers le bas (∩). Chaque point d'inflexion sépare deux zones de signes contraires.";
+      return "f″ est positive là où la courbe est tournée vers le haut (∪), négative là où elle est tournée vers le bas (∩). Chaque point d'inflexion sépare deux zones de signes contraires.";
   }
 }
 

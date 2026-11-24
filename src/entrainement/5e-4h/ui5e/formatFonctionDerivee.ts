@@ -16,7 +16,7 @@ export function questionFinale(): string {
 }
 
 export function consigneGenerale(): string {
-  return "Calcule la dérivée f'(x) : reconnais d'abord la structure de f(x), puis décompose-la si besoin.";
+  return "Calcule la dérivée f′(x) : reconnais d'abord la structure de f(x), puis décompose-la si besoin.";
 }
 
 export function formatTermesDonneesLatex(exercice: ExerciceFonctionDerivee): string[] {

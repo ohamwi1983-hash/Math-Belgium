@@ -121,7 +121,7 @@ function rendreLatex(expression: string): string {
 function enteteHtmlGrapheDerivee(exercice: ExerciceAssociationGrapheDerivee): string {
   const elements = exercice.fonctions.map((coeffs, i) => construireSvgPolynomeAssociation(coeffs, String(i + 1)));
   const candidats = exercice.ordreLettres.map((source, j) => construireSvgPolynomeAssociation(derivee(exercice.fonctions[source]), LETTRES[j] ?? String(j + 1)));
-  return `${titreListe("Graphiques de f (numérotés)")}${grilleGraphes(elements)}${titreListe("Graphiques de f' (lettrés)")}${grilleGraphes(candidats)}`;
+  return `${titreListe("Graphiques de f (numérotés)")}${grilleGraphes(elements)}${titreListe("Graphiques de f′ (lettrés)")}${grilleGraphes(candidats)}`;
 }
 
 function enteteHtmlGrapheVerbal(exercice: ExerciceAssociationGrapheVerbal): string {
@@ -187,7 +187,7 @@ function svgFonctionRiche(fo: FonctionRicheAssociation, deriveeDe: boolean, etiq
 function enteteHtmlGrapheDeriveeAvancee(exercice: ExerciceAssociationGrapheDeriveeAvancee): string {
   const elements = exercice.fonctions.map((fo, i) => svgFonctionRiche(fo, false, String(i + 1)));
   const candidats = exercice.ordreLettres.map((source, j) => svgFonctionRiche(exercice.fonctions[source], true, LETTRES[j] ?? String(j + 1)));
-  return `${titreListe("Graphiques de f (numérotés)")}${grilleGraphes(elements)}${titreListe("Graphiques de f' (lettrés)")}${grilleGraphes(candidats)}`;
+  return `${titreListe("Graphiques de f (numérotés)")}${grilleGraphes(elements)}${titreListe("Graphiques de f′ (lettrés)")}${grilleGraphes(candidats)}`;
 }
 
 // ============================================================================
@@ -224,7 +224,7 @@ function enoncePapierAssociation(exercice: ExerciceAssociation): EnoncePapier {
 
 function lettreDe(exercice: ExerciceAssociation, i: number): string {
   const r = reponseCorrecteAssociation(exercice.ordreLettres, exercice.famille === "grapheDeriveeAvancee" ? exercice.singulier : undefined, i);
-  return r === "aucune" ? "f' n'existe pas" : (LETTRES[r] ?? "?");
+  return r === "aucune" ? "f′ n'existe pas" : (LETTRES[r] ?? "?");
 }
 
 function correspondance(exercice: ExerciceAssociation): string {
@@ -238,7 +238,7 @@ function reponseBreveAssociation(exercice: ExerciceAssociation): FragmentConsign
 function piegeAssociation(exercice: ExerciceAssociation): string {
   switch (exercice.famille) {
     case "grapheDerivee":
-      return "Le signe de f' se lit sur la pente de f, pas sur le signe de f : f' est positive là où f monte, même si f est négative.";
+      return "Le signe de f′ se lit sur la pente de f, pas sur le signe de f : f′ est positive là où f monte, même si f est négative.";
     case "grapheVerbal":
       return "Deux énoncés peuvent décrire les mêmes variations : départage-les par la position des extremums et de f(0).";
     case "symbolique":
@@ -252,7 +252,7 @@ function baremeAssociation(exercice: ExerciceAssociation): BaremeExercice {
   const n = nombreElementsAssociation(exercice);
   // Lot C : 3 points pour l'association, 1 point pour la justification (étape b).
   const criteres: CritereBareme[] = [
-    ...Array.from({ length: n }, (_, i) => ({ sousQuestion: LETTRES_ETAPES[0], critere: [texte(`Élément ${i + 1} associé à ${lettreDe(exercice, i) === "f' n'existe pas" ? "« f′ n'existe pas »" : `la lettre ${lettreDe(exercice, i)}`}`)], points: 3 / n })),
+    ...Array.from({ length: n }, (_, i) => ({ sousQuestion: LETTRES_ETAPES[0], critere: [texte(`Élément ${i + 1} associé à ${lettreDe(exercice, i) === "f′ n'existe pas" ? "« f′ n'existe pas »" : `la lettre ${lettreDe(exercice, i)}`}`)], points: 3 / n })),
     { sousQuestion: LETTRES_ETAPES[1], critere: [texte(exercice.famille === "symbolique" ? "Justification : dérivée de la fonction choisie correcte" : "Justification : deux propriétés lues sur les graphiques (extremums ou inflexion, sens de variation / signe de f′ ; point particulier)")], points: 1 },
   ];
   return {
@@ -289,7 +289,7 @@ function construireCorrectionAssociation(exercice: ExerciceAssociation): BlocCor
 }
 
 export const adaptateurEvaluationAssociation: AdaptateurFeuilleExercices<ExerciceAssociation> = {
-  titreDocument: "Association graphique/mots ↔ signe de f'/f'' — Évaluation",
+  titreDocument: "Association graphique/mots ↔ signe de f′/f″ — Évaluation",
   nomFichierBase: "association-signe-derivees",
   genererInstance: genererExerciceAssociation,
   catalogueVariantes: CATALOGUE_VARIANTES_EXPORT_ASSOCIATION,

@@ -48,7 +48,7 @@ function entete(exercice: ExerciceEtudeLocale): FragmentConsigne[] {
   const avance = exercice.niveau === "avance";
   // Option « à calculer » (lot C) : seule f est donnée.
   if (exercice.deriveesACalculer) return [texte("On considère la fonction "), latex(formatTermesDonneesLatex(exercice)[0]), texte(".")];
-  return [texte(avance ? "On considère la fonction f ; ses dérivées f' et f'' sont données : " : "On considère la fonction f ; sa dérivée f' est donnée : "), latex(formatTermesDonneesLatex(exercice).join(" \\quad "))];
+  return [texte(avance ? "On considère la fonction f ; ses dérivées f′ et f″ sont données : " : "On considère la fonction f ; sa dérivée f′ est donnée : "), latex(formatTermesDonneesLatex(exercice).join(" \\quad "))];
 }
 
 function consigneEtape(ecran: EcranEtudeLocale): FragmentConsigne[] {
@@ -65,8 +65,8 @@ function irrationnelle(exercice: ExerciceEtudeLocale): boolean {
 
 function consignePapier(exercice: ExerciceEtudeLocale): string {
   const domaine = exercice.type !== "polynomiale" ? "Détermine le domaine de définition de f. " : "";
-  const fPrime = "Recherche les zéros de f', étudie le signe de f' et les variations de f, puis détermine les éventuels extremums de f (abscisse, nature et valeur).";
-  const fSeconde = exercice.niveau === "avance" ? " Étudie de même le signe de f'' et la concavité de f, puis détermine ses éventuels points d'inflexion (abscisse et valeur)." : "";
+  const fPrime = "Recherche les zéros de f′, étudie le signe de f′ et les variations de f, puis détermine les éventuels extremums de f (abscisse, nature et valeur).";
+  const fSeconde = exercice.niveau === "avance" ? " Étudie de même le signe de f″ et la concavité de f, puis détermine ses éventuels points d'inflexion (abscisse et valeur)." : "";
   // Lot C (question 4) : valeurs exactes partout, racines irrationnelles comprises.
   const precision = " Donne des valeurs exactes.";
   const derivees = exercice.deriveesACalculer ? (exercice.niveau === "avance" ? "Calcule f'(x) et f''(x). " : "Calcule f'(x). ") : "";
@@ -110,13 +110,13 @@ const POIDS_ECRAN: Record<EcranEtudeLocale, number> = { domaine: 0.5, deriverFPr
 
 const CRITERE_ECRAN: Record<EcranEtudeLocale, string> = {
   domaine: "Domaine de définition",
-  deriverFPrime: "Dérivée f'(x) correcte",
-  deriverFSeconde: "Dérivée seconde f''(x) correcte",
-  resoudreFPrime: "Zéros de f' (toutes les solutions)",
-  tableauFPrime: "Tableau de signes de f', variations et nature de chaque zéro",
+  deriverFPrime: "Dérivée f′(x) correcte",
+  deriverFSeconde: "Dérivée seconde f″(x) correcte",
+  resoudreFPrime: "Zéros de f′ (toutes les solutions)",
+  tableauFPrime: "Tableau de signes de f′, variations et nature de chaque zéro",
   extremums: "Valeur de f en chaque extremum",
   resoudreFSeconde: "Zéros de f''",
-  tableauFSeconde: "Tableau de signes de f'', concavité et points d'inflexion",
+  tableauFSeconde: "Tableau de signes de f″, concavité et points d'inflexion",
   inflexions: "Valeur de f en chaque point d'inflexion",
 };
 
@@ -141,8 +141,8 @@ function baremeEtudeLocale(exercice: ExerciceEtudeLocale): BaremeExercice {
   const ordre = ordreEcransEtudeLocale(exercice);
   const points = repartirSurQuatre(ordre.map((e) => POIDS_ECRAN[e]));
   const criteres: CritereBareme[] = ordre.map((e, i) => ({ sousQuestion: LETTRES[i], critere: [texte(CRITERE_ECRAN[e])], points: points[i] }));
-  const erreurs: ErreurFrequente[] = [{ description: [texte("Un zéro de f' déclaré extremum sans vérifier le changement de signe")], cout: "0 pt sur la nature de ce point" }];
-  erreurs.push({ description: [texte("Valeur de l'extremum calculée avec f' au lieu de f")], cout: "0 pt sur cette valeur" });
+  const erreurs: ErreurFrequente[] = [{ description: [texte("Un zéro de f′ déclaré extremum sans vérifier le changement de signe")], cout: "0 pt sur la nature de ce point" }];
+  erreurs.push({ description: [texte("Valeur de l'extremum calculée avec f′ au lieu de f")], cout: "0 pt sur cette valeur" });
   if (exercice.type === "rationnelleAvecCE") erreurs.push({ description: [texte("Valeurs interdites oubliées dans le tableau de signes")], cout: "−0,5" });
   return {
     reponseFinale: reponseBreveEtudeLocale(exercice),

@@ -132,7 +132,7 @@ export function cibleDefinitionDerivee(e: ExerciceDefinitionDerivee, ecran: Ecra
   const [v] = valeurs;
   const x = lireNombreDerivees(v);
   const d = valeurDeriveeExacte(e, a);
-  if (proche(x, f(a)) && !proche(f(a), d)) return [t("C'est f("), l(`${a}`), t(") : on demande la limite du taux d'accroissement, le nombre dérivé f'("), l(`${a}`), t(").")];
+  if (proche(x, f(a)) && !proche(f(a), d)) return [t("C'est "), l(`f(${a})`), t(" : on demande la limite du taux d'accroissement, le nombre dérivé "), l(`f'(${a})`), t(".")];
   if (d !== 0 && proche(x, -d)) return [t("Le signe est changé : reprends le taux simplifié, puis remplace h par 0.")];
   if (e.famille === "racine" && proche(x, 2 * d)) return [t("En h = 0, le dénominateur vaut "), l(`\\sqrt{0+${racineEnA(e) ** 2}}+${racineEnA(e)}=${2 * racineEnA(e)}`), t(" : les deux termes comptent.")];
   return null;

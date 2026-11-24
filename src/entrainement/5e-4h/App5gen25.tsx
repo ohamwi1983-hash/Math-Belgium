@@ -76,7 +76,7 @@ function reponseAttendueAssociation(exercice: ExerciceAssociation) {
 
   function labelLigne(numero: number): string {
     const reponse = reponseCorrecteAssociation(exercice.ordreLettres, singulier, numero);
-    return reponse === "aucune" ? `Élément ${numero + 1} → f' n'existe pas ici` : `Élément ${numero + 1} → ${LETTRES[reponse]}`;
+    return reponse === "aucune" ? `Élément ${numero + 1} → f′ n'existe pas ici` : `Élément ${numero + 1} → ${LETTRES[reponse]}`;
   }
 
   return (
@@ -179,7 +179,7 @@ export function App5gen25() {
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
-        <h1 className="app-title">Association graphique/mots ↔ signe de f'/f''</h1>
+        <h1 className="app-title">Association graphique/mots ↔ signe de f′/f″</h1>
         <p className="app-subtitle">Chapitre 5 — Dérivées et applications</p>
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
@@ -223,7 +223,7 @@ export function App5gen25() {
             }
             texteAideNiveau1={texteAideNiveau1Association(exercice)}
             aideNiveau2={texteAideNiveau2Association(exercice)}
-            libelleOptionSupplementaire={exercice.famille === "grapheDeriveeAvancee" ? "f' n'existe pas ici" : undefined}
+            libelleOptionSupplementaire={exercice.famille === "grapheDeriveeAvancee" ? "f′ n'existe pas ici" : undefined}
             validation={validation}
           />
           )}

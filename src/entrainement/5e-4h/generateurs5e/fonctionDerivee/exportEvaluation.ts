@@ -63,7 +63,7 @@ function construireEnonceFonctionDerivee(exercice: ExerciceFonctionDerivee): Sec
 }
 
 function enoncePapierFonctionDerivee(exercice: ExerciceFonctionDerivee): EnoncePapier {
-  return { section: { enteteFragments: [...entete(exercice), texte(" Calcule sa dérivée f'(x).")], questions: [] } };
+  return { section: { enteteFragments: [...entete(exercice), texte(" Calcule sa dérivée f′(x).")], questions: [] } };
 }
 
 function reponseBreveFonctionDerivee(exercice: ExerciceFonctionDerivee): FragmentConsigne[] {
@@ -88,7 +88,7 @@ function baremeFonctionDerivee(exercice: ExerciceFonctionDerivee): BaremeExercic
   let criteres: CritereBareme[];
   switch (typePrincipal(exercice)) {
     case "reglebase":
-      criteres = [c("a", "Structure reconnue (somme de termes)", 0.5), c("b", "Dérivée correcte de chaque terme", 2.5), c("b", "f'(x) complète, signes justes", 1)];
+      criteres = [c("a", "Structure reconnue (somme de termes)", 0.5), c("b", "Dérivée correcte de chaque terme", 2.5), c("b", "f′(x) complète, signes justes", 1)];
       break;
     case "produit":
     case "quotient":
@@ -96,7 +96,7 @@ function baremeFonctionDerivee(exercice: ExerciceFonctionDerivee): BaremeExercic
         c("a", "Structure reconnue", 0.5),
         c("b", "u(x) et v(x) identifiés", 1),
         c("c", "u'(x) et v'(x) corrects", 1),
-        c("c", typePrincipal(exercice) === "produit" ? "Formule u'v + uv' appliquée, f'(x) correcte" : "Formule (u'v − uv')/v² appliquée, f'(x) correcte", 1.5),
+        c("c", typePrincipal(exercice) === "produit" ? "Formule u'v + uv' appliquée, f′(x) correcte" : "Formule (u'v − uv')/v² appliquée, f′(x) correcte", 1.5),
       ];
       break;
     case "composee":
@@ -115,7 +115,7 @@ function baremeFonctionDerivee(exercice: ExerciceFonctionDerivee): BaremeExercic
       { description: [texte(piege(exercice))], cout: "−1" },
       { description: [texte("Résultat juste sans aucune étape (structure, décomposition) visible")], cout: "0 pt sur la structure et la décomposition" },
     ],
-    reponsesAcceptees: [[texte("Toute écriture équivalente de f'(x) (développée, factorisée, termes dans un autre ordre)")]],
+    reponsesAcceptees: [[texte("Toute écriture équivalente de f′(x) (développée, factorisée, termes dans un autre ordre)")]],
   };
 }
 

@@ -271,7 +271,7 @@ export function texteAideNiveau1(exercice: ExerciceDefinitionDerivee, ecran: Ecr
     return { texte: "Calcule f(a + h) − f(a) : les termes sans h s'annulent, il ne reste qu'un multiple de h, qui se simplifie avec le h du dénominateur.", latex: null };
   }
   return {
-    texte: "Dans le quotient simplifié, il ne reste plus de facteur h qui annulerait le dénominateur : remplace directement h par 0 pour obtenir f'(a).",
+    texte: "Dans le quotient simplifié, il ne reste plus de facteur h qui annulerait le dénominateur : remplace directement h par 0 pour obtenir f′(a).",
     latex: null,
   };
 }

@@ -96,7 +96,7 @@ function baremeDefinitionDerivee(exercice: ExerciceDefinitionDerivee): BaremeExe
         : { description: [texte("Remplacer h par 0 avant d'avoir simplifié le facteur h (forme 0/0)")], cout: "0 pt sur la limite" },
       { description: [texte("Résultat donné par les règles de dérivation, sans passer par la définition")], cout: "0 pt sur les étapes de calcul" },
     ],
-    reponsesAcceptees: [[texte("f'(a) sous forme de fraction irréductible ou de nombre décimal exact")]],
+    reponsesAcceptees: [[texte("f′(a) sous forme de fraction irréductible ou de nombre décimal exact")]],
   };
 }
 
@@ -115,7 +115,7 @@ function construireCorrectionDefinitionDerivee(exercice: ExerciceDefinitionDeriv
 }
 
 export const adaptateurEvaluationDefinitionDerivee: AdaptateurFeuilleExercices<ExerciceDefinitionDerivee> = {
-  titreDocument: "Calculer f'(a) par la définition — Évaluation",
+  titreDocument: "Calculer f′(a) par la définition — Évaluation",
   nomFichierBase: "definition-derivee",
   genererInstance: genererExerciceDefinitionDerivee,
   catalogueVariantes: CATALOGUE_FAMILLES,

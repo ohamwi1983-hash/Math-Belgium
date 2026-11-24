@@ -473,7 +473,7 @@ export function analyserCourbe(branches: BrancheConstruite[]): AnalyseCourbe {
         const h = m.x1 - m.x0;
         const A = (6 * m.y0) / h + 3 * m.s0 - (6 * m.y1) / h + 3 * m.s1;
         const B = (-6 * m.y0) / h - 4 * m.s0 + (6 * m.y1) / h - 2 * m.s1;
-        if (racinesQuadratiquesInterieures(A, B, m.s0).length > 0) return echec("f' s'annule dans un segment");
+        if (racinesQuadratiquesInterieures(A, B, m.s0).length > 0) return echec("f′ s'annule dans un segment");
       } else {
         // Gabarit : f' et f'' de signe constant sur le morceau (fonctions monotones de x ici).
         const xs = [m.x0, m.x1, (m.x0 + m.x1) / 2];

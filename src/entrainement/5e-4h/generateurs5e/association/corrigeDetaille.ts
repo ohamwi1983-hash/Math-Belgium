@@ -254,7 +254,7 @@ export function correctionDetailleeAssociation(e: ExerciceAssociation): EtapeCor
       if (e.singulier[i]) {
         const car = fo.caracteristique;
         const opt = OPTIONS_SINGULARITE.find((o) => o.id === (car?.type === "angulaire" ? "saute" : car?.type === "cuspide" || car?.type === "tangenteVerticale" ? "infini" : "discontinue"));
-        return ligne(`${i + 1}\\to\\ \\text{f' n'existe pas ici}`, opt ? opt.label : "");
+        return ligne(`${i + 1}\\to\\ f'\\text{ n'existe pas ici}`, opt ? opt.label : "");
       }
       return ligne(`${i + 1}\\to ${lettreDe(e, i)}`, "pente de f lue sur le graphique : signe de f′ zone par zone");
     });

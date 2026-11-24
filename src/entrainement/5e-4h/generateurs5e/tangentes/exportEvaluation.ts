@@ -141,24 +141,24 @@ function baremeTangente(exercice: ExerciceTangente): BaremeExercice {
   // f′ donnée : le point de la dérivée passe à l'étape suivante.
   const derive = !exercice.deriveeDonnee;
   if (exercice.variante === "pointDonne") {
-    criteres = [...(derive ? [c(L("deriver"), "Dérivée f'(x) correcte", 1)] : []), c(L("substituer"), "f(a) et f'(a) correctement calculés", derive ? 1 : 2), c(L("tangente"), "Équation de la tangente (formule du cours appliquée et réduite)", 2)];
+    criteres = [...(derive ? [c(L("deriver"), "Dérivée f′(x) correcte", 1)] : []), c(L("substituer"), "f(a) et f′(a) correctement calculés", derive ? 1 : 2), c(L("tangente"), "Équation de la tangente (formule du cours appliquée et réduite)", 2)];
   } else if (exercice.variante === "horizontale") {
     criteres =
       exercice.racines.length === 0
-        ? [...(derive ? [c(L("deriver"), "Dérivée f'(x) correcte", 1)] : []), c(L("resoudre"), "Discriminant de f'(x) = 0 calculé, négatif", derive ? 2 : 3), c(L("resoudre"), "Conclusion : aucune tangente horizontale", 1)]
-        : [...(derive ? [c(L("deriver"), "Dérivée f'(x) correcte", 1)] : []), c(L("resoudre"), "Résolution de f'(x) = 0 (toutes les solutions)", derive ? 1.5 : 2), c(L("coordonnees"), "Coordonnées de chaque point de tangence", derive ? 1.5 : 2)];
+        ? [...(derive ? [c(L("deriver"), "Dérivée f′(x) correcte", 1)] : []), c(L("resoudre"), "Discriminant de f'(x) = 0 calculé, négatif", derive ? 2 : 3), c(L("resoudre"), "Conclusion : aucune tangente horizontale", 1)]
+        : [...(derive ? [c(L("deriver"), "Dérivée f′(x) correcte", 1)] : []), c(L("resoudre"), "Résolution de f'(x) = 0 (toutes les solutions)", derive ? 1.5 : 2), c(L("coordonnees"), "Coordonnées de chaque point de tangence", derive ? 1.5 : 2)];
   } else if (exercice.variante === "pente") {
-    criteres = [...(derive ? [c(L("deriver"), "Dérivée f'(x) correcte", 1)] : []), c(L("resoudrePente"), "Équation f'(x) = m posée et résolue", derive ? 1 : 1.5), c(L("coordonnees"), "Ordonnée de chaque point de contact", 0.5), c(L("tangentesPente"), "Équation de chaque tangente", derive ? 1.5 : 2)];
+    criteres = [...(derive ? [c(L("deriver"), "Dérivée f′(x) correcte", 1)] : []), c(L("resoudrePente"), "Équation f'(x) = m posée et résolue", derive ? 1 : 1.5), c(L("coordonnees"), "Ordonnée de chaque point de contact", 0.5), c(L("tangentesPente"), "Équation de chaque tangente", derive ? 1.5 : 2)];
   } else if (exercice.variante === "pointExterieur") {
-    criteres = [...(derive ? [c(L("deriver"), "Dérivée f'(x) correcte", 0.5)] : []), c(L("condition"), "Condition « P est sur la tangente en t » posée et réduite", derive ? 1.5 : 2), c(L("abscissesContact"), "Abscisses des deux points de contact", 1), c(L("tangentesContact"), "Équations des deux tangentes", 1)];
+    criteres = [...(derive ? [c(L("deriver"), "Dérivée f′(x) correcte", 0.5)] : []), c(L("condition"), "Condition « P est sur la tangente en t » posée et réduite", derive ? 1.5 : 2), c(L("abscissesContact"), "Abscisses des deux points de contact", 1), c(L("tangentesContact"), "Équations des deux tangentes", 1)];
   } else {
-    criteres = [c(L("tangenteEnP"), "Dérivée, f'(p) et équation de la tangente t", 1.5), c(L("trouverQ"), "Second point commun q (factorisation par la racine double)", 1.5), c(L("verifierPente"), "f'(q) = f'(p) : tangence justifiée", 1)];
+    criteres = [c(L("tangenteEnP"), "Dérivée, f′(p) et équation de la tangente t", 1.5), c(L("trouverQ"), "Second point commun q (factorisation par la racine double)", 1.5), c(L("verifierPente"), "f'(q) = f'(p) : tangence justifiée", 1)];
   }
   const erreursFrequentes =
     exercice.variante === "pointDonne"
       ? [
           { description: [texte("Pente et ordonnée interverties (f(a) pris comme pente)")], cout: "0 pt sur l'équation" },
-          { description: [texte("Erreur de signe en distribuant f'(a)(x − a)")], cout: "−0,5" },
+          { description: [texte("Erreur de signe en distribuant f′(a)(x − a)")], cout: "−0,5" },
         ]
       : exercice.variante === "horizontale"
         ? [
