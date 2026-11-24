@@ -716,7 +716,7 @@ export function formatReponseAttendueEcranLatex(exercice: ExerciceOptimisation, 
       const opt = xOptimal(exercice);
       const rejet =
         exercice.famille === "boite"
-          ? `\\ \\text{(l'autre solution, x = ${exercice.c / 2}, est rejetée : hors du domaine, la boîte serait plate)}`
+          ? `\\ \\text{(}x=${exercice.c / 2}\\text{ est rejetée : boîte plate)}`
           : avecJustificationRejet(exercice)
             ? "\\ \\text{(l'autre solution, négative, est rejetée : une longueur est positive)}"
             : "";

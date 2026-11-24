@@ -211,6 +211,13 @@ function texteParPiege(e: ExerciceAssociation): string {
   }
 }
 
+const RESUME_SINGULARITE: Record<string, string> = {
+  saute: "f'_g(a)\\neq f'_d(a)",
+  infini: "|f'(x)|\\to+\\infty",
+  discontinue: "f\\text{ non continue en }a",
+  existe: "f'(a)\\text{ existe}",
+};
+
 /** Lot C : étape « b » — justification de l'association choisie par le générateur (même spécification
  * que l'écran : `moteur5e/justificationAssociation.ts`). */
 function etapesJustification(e: ExerciceAssociation): EtapeCorrection[] {
@@ -226,7 +233,11 @@ function etapesJustification(e: ExerciceAssociation): EtapeCorrection[] {
       lignes.push(ligne(`${c.label}${g}`, "règles de dérivation du cours"));
     } else {
       const o = c.options.find((x) => x.id === c.bonne);
-      lignes.push(ligne(`\\text{${(o?.label ?? "").replace(/′/g, "'")}}`, fragmentsRiches5e(c.label)));
+      // Les options « singularité » sont des phrases : la cellule de formule reçoit leur forme courte
+      // (le texte KaTeX, insécable, sortait de la chaîne en A4) et la phrase passe à droite.
+      const court = RESUME_SINGULARITE[o?.id ?? ""];
+      if (court) lignes.push(ligne(court, [...fragmentsRiches5e(c.label), t(` ${o?.label ?? ""}.`)]));
+      else lignes.push(ligne(`\\text{${(o?.label ?? "").replace(/′/g, "'")}}`, fragmentsRiches5e(c.label)));
     }
   }
   const conclusion = lettre ? [t("donc "), f(`${k}\\to ${lettre}`), t(".")] : [t("donc "), f(`f_{${k}}'`), t(" n'existe pas en ce point : aucune lettre.")];
