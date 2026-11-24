@@ -483,16 +483,29 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     ],
   },
   "5gen27": simple(String.raw`On considère la fonction (?<ligne>${M})\. Calcule sa dérivée f.?\(x\)\.`, "Calcule la dérivée de chaque fonction."),
+  // Lot C (5e ch. 5) : f′ peut être donnée (« ; sa dérivée est … ») ; familles « pente donnée » et
+  // « point extérieur » (la pente ou le point vont dans la ligne).
   "5gen28": {
     formes: [
       {
-        motif: re(String.raw`On considère la fonction (?<fx>${M})\.?\nDétermine l'équation de la tangente à la courbe de f au point d'abscisse (?<x>x = \S+?)\.(?<p_exactes> Donne des valeurs exactes \(racines carrées acceptées\)\.)?`),
+        motif: re(String.raw`On considère la fonction (?<fx>${M})(?: ; sa dérivée est (?<fp>${M}))?\.?\nDétermine l'équation de la tangente à la courbe de f au point d'abscisse (?<x>x = \S+?)\.(?<p_exactes> Donne des valeurs exactes \(racines carrées acceptées\)\.)?`),
         consigne: "Pour chaque fonction f, détermine l'équation de la tangente à la courbe de f au point d'abscisse indiqué.",
-        ligne: (g) => `${g.fx}, au point d'abscisse ${g.x}`,
+        ligne: (g) => `${g.fx}${g.fp ? ` (${g.fp})` : ""}, au point d'abscisse ${g.x}`,
       },
       {
-        motif: re(String.raw`On considère la fonction (?<ligne>${M})\.?\n(?<q>Détermine les points de la courbe de f où la tangente est horizontale.+)`),
+        motif: re(String.raw`On considère la fonction (?<fx>${M})(?: ; sa dérivée est (?<fp>${M}))?\.?\n(?<q>Détermine les points de la courbe de f où la tangente est horizontale.+)`),
         consigne: (g) => `Pour chaque fonction f, ${minusculeInitiale(g.q ?? "")}`,
+        ligne: (g) => `${g.fx}${g.fp ? ` (${g.fp})` : ""}`,
+      },
+      {
+        motif: re(String.raw`On considère la fonction (?<fx>${M})(?: ; sa dérivée est (?<fp>${M}))?\.?\nDétermine les points de la courbe de f où la tangente a pour pente (?<m>\S+?), puis l'équation de la tangente en chacun de ces points\.`),
+        consigne: "Pour chaque fonction f, détermine les points de la courbe de f où la tangente a la pente indiquée, puis l'équation de la tangente en chacun de ces points.",
+        ligne: (g) => `${g.fx}${g.fp ? ` (${g.fp})` : ""}, pente ${g.m}`,
+      },
+      {
+        motif: re(String.raw`On considère la fonction (?<fx>${M})(?: ; sa dérivée est (?<fp>${M}))?\.?\nLe point (?<P>P\(.+?\)) n'est pas sur la courbe de f\. Détermine les équations des tangentes à la courbe de f qui passent par P\.`),
+        consigne: "Pour chaque fonction f, détermine les équations des tangentes à la courbe de f qui passent par le point P indiqué (P n'est pas sur la courbe).",
+        ligne: (g) => `${g.fx}${g.fp ? ` (${g.fp})` : ""}, ${g.P}`,
       },
     ],
     precisions: { exactes: { texte: "Donne des valeurs exactes (racines carrées acceptées)." } },

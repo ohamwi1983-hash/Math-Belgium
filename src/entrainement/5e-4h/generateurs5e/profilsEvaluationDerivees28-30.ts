@@ -41,18 +41,29 @@ function cas(liste: (string | false)[]): string | null {
 
 export const LIBELLE_CAS_TANGENTES = "Inclure un cas particulier (point d'abscisse 0, tangente horizontale, ou solution nulle)";
 
+/** Option « f′ donnée / à calculer » (lot C, question 3) : case cochée (défaut) = dérivée à calculer ;
+ * décochée = f′ donnée dans l'énoncé. Marqueur d'absence : `derivee-donnee`. Sans objet pour la double
+ * tangence (`parametresNonApplicables`). */
+export const PARAMETRES_TANGENTES = [{ id: "derivee-donnee", label: "Dérivée f′ à calculer (décoché : f′ donnée dans l'énoncé)" }];
+
 export function profilTangente(e: ExerciceTangente): ProfilInstance {
+  const derivee = e.variante !== "doubleTangence" && !!e.deriveeDonnee && "derivee-donnee";
   switch (e.variante) {
     case "pointDonne":
       return {
-        casParticulier: cas([e.a === 0 && "abscisse-nulle", e.sousFamille === "polynomiale" && deriveeFPointDonne(e, e.a) === 0 && "pente-nulle"]),
+        casParticulier: cas([e.a === 0 && "abscisse-nulle", e.sousFamille === "polynomiale" && deriveeFPointDonne(e, e.a) === 0 && "pente-nulle", derivee]),
         calcul: "exacte",
         forme: `pointDonne-${e.sousFamille}`,
       };
     case "horizontale":
-      return { casParticulier: cas([e.racines.includes(0) && "racine-nulle"]), calcul: "exacte", forme: `horizontale-${e.racines.length === 1 ? "double" : "distinctes"}` };
+      // Lot D : 0, 1 ou 2 points est le VERDICT (groupe_horizontale) — jamais dans la `forme`.
+      return { casParticulier: cas([e.racines.includes(0) && "racine-nulle", derivee]), calcul: "exacte", forme: "horizontale" };
     case "doubleTangence":
-      return { casParticulier: cas([e.p === 0 && "abscisse-nulle", deriveeFDoubleTangence(e, e.p) === 0 && "pente-nulle"]), calcul: "exacte", forme: "doubleTangence" };
+      return { casParticulier: cas([e.p === 0 && "abscisse-nulle", deriveeFDoubleTangence(e, e.p) === 0 && "pente-nulle"]), calcul: "exacte", forme: "doubleTangence", parametresNonApplicables: ["derivee-donnee"] };
+    case "pente":
+      return { casParticulier: cas([derivee]), calcul: "exacte", forme: `pente-${e.racines.length}` };
+    case "pointExterieur":
+      return { casParticulier: cas([derivee]), calcul: "exacte", forme: "pointExterieur" };
   }
 }
 

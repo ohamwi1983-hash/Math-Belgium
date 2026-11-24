@@ -1,8 +1,8 @@
 import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, ligne, piege, resultat, utilise, verification } from "../../../export/corrigeTableau";
-import type { ExerciceTangente, ExerciceTangenteDoubleTangence, ExerciceTangenteHorizontale, ExerciceTangentePointDonne, ExerciceTangentePointDonneRadicale } from "../../core5e/tangentes.types";
+import type { ExerciceTangente, ExerciceTangenteDoubleTangence, ExerciceTangenteHorizontale, ExerciceTangentePente, ExerciceTangentePointDonne, ExerciceTangentePointDonneRadicale, ExerciceTangentePointExterieur } from "../../core5e/tangentes.types";
 import { ordreEcransTangente, type EcranTangente } from "../../moteur5e/typesTangentes";
-import { formatFDeXLatex, formatFPrimeDeXLatex, formatReponseAttenduePhaseLatex } from "../../ui5e/formatTangentes";
+import { conditionContactLatex, formatFDeXLatex, formatFPrimeDeXLatex, formatReponseAttenduePhaseLatex, pointPLatex } from "../../ui5e/formatTangentes";
 import {
   COURS_DERIVEE,
   COURS_TANGENTES,
@@ -28,7 +28,7 @@ import {
   xMoins,
   type Q,
 } from "../../ui5e/corrigeDerivees1";
-import { deriveeFDoubleTangence, deriveeFPointDonne, valeurFDoubleTangence, valeurFPointDonne } from "./index";
+import { coeffsTangente, deriveeFDoubleTangence, deriveeFPointDonne, deriveeFTangente, valeurFDoubleTangence, valeurFPointDonne, valeurFTangente } from "./index";
 
 /**
  * Corrigé détaillé « comme au tableau » de 5gen28 (tangentes) — règle
@@ -42,11 +42,12 @@ import { deriveeFDoubleTangence, deriveeFPointDonne, valeurFDoubleTangence, vale
 
 const LETTRES = "abcdefgh";
 
-type EtapeTangente = "deriver" | EcranTangente;
+type EtapeTangente = EcranTangente;
 
+/** Étapes du corrigé = écrans (lot C : l'écran « deriver » existe dès que f′ est à calculer ; f′
+ * donnée → pas d'étape « dérivée »). */
 export function etapesTangente(e: ExerciceTangente): EtapeTangente[] {
-  const ecrans = ordreEcransTangente(e);
-  return e.variante === "doubleTangence" ? ecrans : ["deriver", ...ecrans];
+  return ordreEcransTangente(e);
 }
 
 export function lettreEtapeTangente(e: ExerciceTangente, etape: EtapeTangente): string {
@@ -117,8 +118,10 @@ function etapesPointDonne(e: ExerciceTangentePointDonne): EtapeCorrection[] {
   const a = e.a;
   const etapes: EtapeCorrection[] = [];
   const fPrime = formatFPrimeDeXLatex(e);
-  // Dérivée.
-  if (e.sousFamille === "polynomiale") {
+  // Dérivée (seulement si elle est à calculer).
+  if (e.deriveeDonnee) {
+    // f′ donnée : rien à dériver.
+  } else if (e.sousFamille === "polynomiale") {
     etapes.push(
       utilise(L("deriver"), [t("Dérivée d'un polynôme : on dérive terme à terme avec "), f("(x^n)'=n\\,x^{n-1}"), t(`, une constante a pour dérivée 0 ${COURS_DERIVEE}.`)]),
       calcul(L("deriver"), lignesDeriveePoly("f'(x)", e.coeffs).lignes),
@@ -126,7 +129,7 @@ function etapesPointDonne(e: ExerciceTangentePointDonne): EtapeCorrection[] {
   } else {
     etapes.push(utilise(L("deriver"), [t("Règle de la chaîne pour une racine : "), f("(\\sqrt{u})'=\\frac{u'}{2\\sqrt{u}}"), t(`, ici u est du premier degré ${COURS_DERIVEE}.`)]), calcul(L("deriver"), lignesDeriveeRadicale(e)));
   }
-  etapes.push(resultat(L("deriver"), [f(fPrime)]));
+  if (!e.deriveeDonnee) etapes.push(resultat(L("deriver"), [f(fPrime)]));
   // f(a) et f'(a).
   const [faEcran, fpaEcran] = formatReponseAttenduePhaseLatex(e, "substituer");
   etapes.push(utilise(L("substituer"), [t(`f(${nbT(a)}) : on remplace x par ${nbT(a)} dans f(x) ; f′(${nbT(a)}) : dans f′(x) ${COURS_TANGENTES}.`)]));
@@ -164,20 +167,45 @@ function etapesPointDonne(e: ExerciceTangentePointDonne): EtapeCorrection[] {
 // Variante B — tangentes horizontales.
 // ============================================================================
 
+/** Étape « dérivée » d'un polynôme (seulement si f′ est à calculer). */
+function etapesDeriverPoly(e: ExerciceTangente, coeffs: number[]): EtapeCorrection[] {
+  if (e.deriveeDonnee) return [];
+  const L = lettreEtapeTangente(e, "deriver");
+  return [
+    utilise(L, [t("Dérivée d'un polynôme : on dérive terme à terme avec "), f("(x^n)'=n\\,x^{n-1}"), t(`, une constante a pour dérivée 0 ${COURS_DERIVEE}.`)]),
+    calcul(L, lignesDeriveePoly("f'(x)", coeffs).lignes),
+    resultat(L, [f(formatFPrimeDeXLatex(e))]),
+  ];
+}
+
 function etapesHorizontale(e: ExerciceTangenteHorizontale): EtapeCorrection[] {
   const L = (x: EtapeTangente) => lettreEtapeTangente(e, x);
   const coeffs = [e.d, e.c, e.b, e.a];
-  const { lignes: lignesDer, derivee } = lignesDeriveePoly("f'(x)", coeffs);
+  const { derivee } = lignesDeriveePoly("f'(x)", coeffs);
   const k = 3 * e.a;
   const B = derivee[1] / k;
   const C = derivee[0] / k;
+  if (e.racines.length === 0) {
+    // Lot C — aucune tangente horizontale (Δ < 0).
+    const delta = B * B - 4 * C;
+    return [
+      ...etapesDeriverPoly(e, coeffs),
+      utilise(L("resoudre"), [t("La tangente est horizontale là où sa pente est nulle : on résout "), f("f'(x)=0"), t(`, une équation du second degré ${COURS_TANGENTES}.`)]),
+      calcul(L("resoudre"), [
+        ligne(`${polyLatex(derivee)}=0`, "tangente horizontale : pente nulle, f′(x) = 0"),
+        ligne(`\\iff ${polyLatex([C, B, 1])}=0`, `on divise par ${nbT(k)}`),
+        ligne(`\\Delta=${par(B)}^{2}-4\\cdot 1\\cdot ${par(C)}`, [t("discriminant de "), f(polyLatex([C, B, 1]))]),
+        ligne(`=${delta}`, "Δ < 0 : le trinôme n'a aucune racine"),
+      ]),
+      resultat(L("resoudre"), [t("Aucune solution : la courbe de f n'a aucune tangente horizontale.")]),
+      piege(L("resoudre"), [t("Un discriminant négatif ne donne aucun point : il n'y a pas d'ordonnée à calculer.")]),
+    ];
+  }
   const resolution = lignesTrinomeUnitaireNul(B, C);
   const lignesRes: LigneCalcul[] = [ligne(`${polyLatex(derivee)}=0`, "tangente horizontale : pente nulle, f′(x) = 0"), ligne(`\\iff ${polyLatex([C, B, 1])}=0`, `on divise par ${nbT(k)}`), ...resolution.lignes];
   const racineDouble = e.racines.length === 1;
   const etapes: EtapeCorrection[] = [
-    utilise(L("deriver"), [t("Dérivée d'un polynôme : on dérive terme à terme avec "), f("(x^n)'=n\\,x^{n-1}"), t(`, une constante a pour dérivée 0 ${COURS_DERIVEE}.`)]),
-    calcul(L("deriver"), lignesDer),
-    resultat(L("deriver"), [f(formatFPrimeDeXLatex(e))]),
+    ...etapesDeriverPoly(e, coeffs),
     utilise(L("resoudre"), [t("La tangente est horizontale là où sa pente est nulle : on résout "), f("f'(x)=0"), t(`, une équation du second degré ${COURS_TANGENTES}.`)]),
     calcul(L("resoudre"), lignesRes),
     resultat(L("resoudre"), [f(formatReponseAttenduePhaseLatex(e, "resoudre")[0]), ...(racineDouble ? [t(" (racine double : un seul point)")] : [])]),
@@ -237,7 +265,104 @@ function etapesDoubleTangence(e: ExerciceTangenteDoubleTangence): EtapeCorrectio
   ];
 }
 
+// ============================================================================
+// Variante D (lot C) — tangentes de pente donnée.
+// ============================================================================
+
+function lignesTangenteFinale(e: ExerciceTangente, x0: number, droite: string): LigneCalcul[] {
+  return lignesTangenteEntiere(x0, valeurFTangente(e, x0), deriveeFTangente(e, x0), droite);
+}
+
+function etapesPente(e: ExerciceTangentePente): EtapeCorrection[] {
+  const L = (x: EtapeTangente) => lettreEtapeTangente(e, x);
+  const c = e.coeffs;
+  const derivee = c.slice(1).map((v, i) => (i + 1) * v);
+  const moinsM = derivee.map((v, i) => (i === 0 ? v - e.m : v));
+  const lignesRes: LigneCalcul[] = [ligne(`${polyLatex(derivee)}=${e.m}`, [t("pente imposée : "), f(`f'(x)=${e.m}`)]), ligne(`\\iff ${polyLatex(moinsM)}=0`, `on soustrait ${nbT(e.m)}`)];
+  if (c.length === 4) {
+    const k = moinsM[2];
+    const B = moinsM[1] / k;
+    const C = moinsM[0] / k;
+    lignesRes.push(ligne(`\\iff ${polyLatex([C, B, 1])}=0`, `on divise par ${nbT(k)}`), ...lignesTrinomeUnitaireNul(B, C).lignes);
+  } else {
+    lignesRes.push(ligne(`\\iff x=${e.racines[0]}`, `on divise par ${nbT(moinsM[1])}`));
+  }
+  const etapes: EtapeCorrection[] = [
+    ...etapesDeriverPoly(e, c),
+    utilise(L("resoudrePente"), [t("La pente de la tangente au point d'abscisse x est f′(x) : on résout "), f(`f'(x)=${e.m}`), t(` ${COURS_TANGENTES}.`)]),
+    calcul(L("resoudrePente"), sansDoublons(lignesRes)),
+    resultat(L("resoudrePente"), [f(formatReponseAttenduePhaseLatex(e, "resoudrePente")[0])]),
+    piege(L("resoudrePente"), [t("On résout "), f(`f'(x)=${e.m}`), t(", pas "), f("f'(x)=0"), t(" : la tangente n'est pas horizontale.")]),
+    utilise(L("coordonnees"), [t("Pour chaque solution x, l'ordonnée du point de contact est "), f("y=f(x)"), t(` ${COURS_TANGENTES}.`)]),
+  ];
+  for (const r of e.racines) etapes.push(calcul(L("coordonnees"), lignesValeurPoly(`f(${r})`, c, q(r)).lignes, [], `x = ${nbT(r)}`));
+  etapes.push(resultat(L("coordonnees"), [t(e.racines.length === 1 ? "Point de contact : " : "Points de contact : "), ...liste(formatReponseAttenduePhaseLatex(e, "coordonnees"))]));
+  etapes.push(utilise(L("tangentesPente"), [t("En chaque point de contact (x₀ ; f(x₀)), la tangente a la pente imposée : "), f(`y=f(x_0)+${par(e.m)}(x-x_0)`), t(` ${COURS_TANGENTES}.`)]));
+  const droites = formatReponseAttenduePhaseLatex(e, "tangentesPente");
+  e.racines.forEach((r, i) => etapes.push(calcul(L("tangentesPente"), lignesTangenteFinale(e, r, dernierMembre(droites[i])), [], `Tangente en x = ${nbT(r)}`)));
+  etapes.push(resultat(L("tangentesPente"), liste(droites)));
+  return etapes;
+}
+
+// ============================================================================
+// Variante E (lot C) — tangentes issues d'un point extérieur.
+// ============================================================================
+
+function etapesPointExterieur(e: ExerciceTangentePointExterieur): EtapeCorrection[] {
+  const L = (x: EtapeTangente) => lettreEtapeTangente(e, x);
+  const c = coeffsTangente(e) as number[];
+  const fT = polyLatex(c).replace(/(?<![a-z])x(?![a-z])/g, "t");
+  const fpT = polyLatex([e.b, 2 * e.a]).replace(/(?<![a-z])x(?![a-z])/g, "t");
+  const xpt = e.xP === 0 ? "-t" : `${e.xP}-t`;
+  const k = -e.a;
+  const cst = e.b * e.xP + e.c - e.yP;
+  const developpee = polyLatex([cst, 2 * e.a * e.xP, -e.a]).replace(/(?<![a-z])x(?![a-z])/g, "t");
+  const [t1, t2] = e.contacts;
+  const lignesCond: LigneCalcul[] = [
+    ligne(`y=f(t)+f'(t)(x-t)`, "tangente au point d'abscisse t"),
+    ligne(`${e.yP}=f(t)+f'(t)(${xpt})`, jf("P est sur la tangente : on remplace x et y par ", { l: pointPLatex(e) })),
+    ligne(`${e.yP}=${fT}+(${fpT})(${xpt})`, [t("on remplace "), f(`f(t)=${fT}`), t(" et "), f(`f'(t)=${fpT}`)]),
+    ligne(`0=${developpee}`, "on développe, on réduit et on passe tout dans un membre"),
+    ligne(`\\iff ${conditionContactLatex(e)}`, `on divise par ${nbT(k)}`),
+  ];
+  const etapes: EtapeCorrection[] = [
+    ...etapesDeriverPoly(e, c),
+    utilise(L("condition"), [t("La tangente au point d'abscisse t a pour équation "), f("y=f(t)+f'(t)(x-t)"), t(" ; elle passe par P si les coordonnées de P vérifient cette équation "), t(`${COURS_TANGENTES}.`)]),
+    calcul(L("condition"), sansDoublons(lignesCond)),
+    resultat(L("condition"), [f(conditionContactLatex(e))]),
+    utilise(L("abscissesContact"), [t("On résout l'équation du second degré en t : chaque solution est l'abscisse d'un point de contact.")]),
+    calcul(
+      L("abscissesContact"),
+      lignesTrinomeUnitaireNul(-(t1 + t2), t1 * t2).lignes.map((x) => {
+        const enT = (l: string) => l.replace(/(?<![a-z])x(?![a-z])/g, "t");
+        const j = x.justification;
+        return { ...x, latex: enT(x.latex), justification: typeof j === "string" || j === undefined ? j : j.map((fr) => (fr.type === "latex" ? { ...fr, valeur: enT(fr.valeur) } : fr)) };
+      }),
+    ),
+    resultat(L("abscissesContact"), [f(formatReponseAttenduePhaseLatex(e, "abscissesContact")[0])]),
+    piege(L("abscissesContact"), [t("P n'est pas sur la courbe : la pente f′("), f(`${e.xP}`), t(") n'est celle d'aucune tangente passant par P.")]),
+    utilise(L("tangentesContact"), [t("En chaque abscisse de contact t : "), f("y=f(t)+f'(t)(x-t)"), t(`, puis on distribue et on réduit ${COURS_TANGENTES}.`)]),
+  ];
+  const droites = formatReponseAttenduePhaseLatex(e, "tangentesContact");
+  e.contacts.forEach((u, i) => etapes.push(calcul(L("tangentesContact"), lignesTangenteFinale(e, u, dernierMembre(droites[i])), [], `Tangente en t = ${nbT(u)}`)));
+  etapes.push(resultat(L("tangentesContact"), liste(droites)));
+  etapes.push(
+    verification(L("tangentesContact"), [t("Chaque tangente passe bien par P :")], droites.map((d) => ligne(`${dernierMembre(d).replace(/x/g, `\\cdot ${par(e.xP)}`).replace(/^\\cdot /, "")}=${e.yP}`, `on remplace x par ${nbT(e.xP)}`))),
+  );
+  return etapes;
+}
+
 export function correctionDetailleeTangente(e: ExerciceTangente): EtapeCorrection[] {
-  const etapes = e.variante === "pointDonne" ? etapesPointDonne(e) : e.variante === "horizontale" ? etapesHorizontale(e) : etapesDoubleTangence(e);
-  return finaliser(etapes);
+  switch (e.variante) {
+    case "pointDonne":
+      return finaliser(etapesPointDonne(e));
+    case "horizontale":
+      return finaliser(etapesHorizontale(e));
+    case "doubleTangence":
+      return finaliser(etapesDoubleTangence(e));
+    case "pente":
+      return finaliser(etapesPente(e));
+    case "pointExterieur":
+      return finaliser(etapesPointExterieur(e));
+  }
 }

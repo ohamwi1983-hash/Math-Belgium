@@ -13,18 +13,8 @@ import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/eta
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { ecranApres, ecranInitial } from "./typesTangentes";
 import type { EcranTangente, EtatSessionTangente, ResultatExerciceTangente } from "./typesTangentes";
-import {
-  diagnostiquerEquationTangentePointDonne,
-  diagnostiquerEquationTangenteP,
-  diagnostiquerFAPointDonne,
-  diagnostiquerFPrimeAPointDonne,
-  diagnostiquerFPrimeP,
-  diagnostiquerFPrimeQ,
-  diagnostiquerQ,
-  verifierCoordonneesHorizontale,
-  verifierRacinesHorizontale,
-} from "./verificationTangentes";
-import type { PointSaisi } from "./verificationTangentes";
+import { refusSaisieTangente, verifierEcranTangente } from "./verificationTangentesLotC";
+import type { ReponseTangente } from "./verificationTangentesLotC";
 
 const POINTS_DE_BASE = 100;
 
@@ -87,73 +77,12 @@ function soumettreEcran<T>(etat: EtatSessionTangente, ecranAttendu: EcranTangent
 }
 
 // ============================================================================
-// Variante A ("pointDonne") — écran "substituer" (2 champs numériques, 1 tentative combinée) puis
-// "tangente" (1 champ symbolique).
+// Soumission UNIFIÉE (lots B et C) : chaque écran reçoit une `ReponseTangente` ; une saisie refusée
+// (illisible, approchée, répétée, incomplète) laisse l'état INCHANGÉ — aucune tentative consommée.
 // ============================================================================
 
-export interface ReponseSubstituer {
-  fA: string;
-  fPrimeA: string;
-}
-
-export function soumettreReponseSubstituer(etat: EtatSessionTangente, reponse: ReponseSubstituer): EtatSessionTangente {
+export function soumettreReponseTangente(etat: EtatSessionTangente, reponse: ReponseTangente): EtatSessionTangente {
   const exercice = etat.exerciceCourant;
-  if (exercice.variante !== "pointDonne") throw new Error('soumettreReponseSubstituer : exercice hors variante "pointDonne"');
-  return soumettreEcran(etat, "substituer", reponse, (r) => diagnostiquerFAPointDonne(r.fA, exercice) === "correct" && diagnostiquerFPrimeAPointDonne(r.fPrimeA, exercice) === "correct");
-}
-
-export function soumettreReponseTangentePointDonne(etat: EtatSessionTangente, texte: string): EtatSessionTangente {
-  const exercice = etat.exerciceCourant;
-  if (exercice.variante !== "pointDonne") throw new Error('soumettreReponseTangentePointDonne : exercice hors variante "pointDonne"');
-  return soumettreEcran(etat, "tangente", texte, (t) => diagnostiquerEquationTangentePointDonne(t, exercice) === "correct");
-}
-
-// ============================================================================
-// Variante B ("horizontale") — écran "resoudre" (1 ou 2 champs numériques, ENSEMBLE) puis
-// "coordonnees" (1 ou 2 champs point "(x;y)", ENSEMBLE).
-// ============================================================================
-
-export function soumettreReponseResoudre(etat: EtatSessionTangente, reponses: string[]): EtatSessionTangente {
-  const exercice = etat.exerciceCourant;
-  if (exercice.variante !== "horizontale") throw new Error('soumettreReponseResoudre : exercice hors variante "horizontale"');
-  return soumettreEcran(etat, "resoudre", reponses, (r) => verifierRacinesHorizontale(r, exercice));
-}
-
-export function soumettreReponseCoordonnees(etat: EtatSessionTangente, reponses: PointSaisi[]): EtatSessionTangente {
-  const exercice = etat.exerciceCourant;
-  if (exercice.variante !== "horizontale") throw new Error('soumettreReponseCoordonnees : exercice hors variante "horizontale"');
-  return soumettreEcran(etat, "coordonnees", reponses, (r) => verifierCoordonneesHorizontale(r, exercice));
-}
-
-// ============================================================================
-// Variante C ("doubleTangence") — "tangenteEnP" (f'(p) + équation, 1 tentative combinée),
-// "trouverQ" (1 champ), "verifierPente" (1 champ).
-// ============================================================================
-
-export interface ReponseTangenteEnP {
-  fPrimeP: string;
-  tangente: string;
-}
-
-export function soumettreReponseTangenteEnP(etat: EtatSessionTangente, reponse: ReponseTangenteEnP): EtatSessionTangente {
-  const exercice = etat.exerciceCourant;
-  if (exercice.variante !== "doubleTangence") throw new Error('soumettreReponseTangenteEnP : exercice hors variante "doubleTangence"');
-  return soumettreEcran(
-    etat,
-    "tangenteEnP",
-    reponse,
-    (r) => diagnostiquerFPrimeP(r.fPrimeP, exercice) === "correct" && diagnostiquerEquationTangenteP(r.tangente, exercice) === "correct",
-  );
-}
-
-export function soumettreReponseTrouverQ(etat: EtatSessionTangente, texte: string): EtatSessionTangente {
-  const exercice = etat.exerciceCourant;
-  if (exercice.variante !== "doubleTangence") throw new Error('soumettreReponseTrouverQ : exercice hors variante "doubleTangence"');
-  return soumettreEcran(etat, "trouverQ", texte, (t) => diagnostiquerQ(t, exercice) === "correct");
-}
-
-export function soumettreReponseVerifierPente(etat: EtatSessionTangente, texte: string): EtatSessionTangente {
-  const exercice = etat.exerciceCourant;
-  if (exercice.variante !== "doubleTangence") throw new Error('soumettreReponseVerifierPente : exercice hors variante "doubleTangence"');
-  return soumettreEcran(etat, "verifierPente", texte, (t) => diagnostiquerFPrimeQ(t, exercice) === "correct");
+  if (refusSaisieTangente(exercice, etat.phase, reponse)) return etat;
+  return soumettreEcran(etat, etat.phase, reponse, (r) => verifierEcranTangente(exercice, etat.phase, r));
 }
