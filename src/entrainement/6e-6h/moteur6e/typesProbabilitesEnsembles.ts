@@ -11,7 +11,7 @@ import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
  * cohérence transversale du chantier même si la structure ici est plus simple.
  */
 
-export type PhaseProbabilitesEnsembles = "aEcran1" | "aEcran2" | "aEcran3" | "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4";
+export type PhaseProbabilitesEnsembles = "aEcran1" | "aEcran2" | "aEcran3" | "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4" | "cEcran1" | "cEcran2" | "cEcran3" | "cEcran4";
 
 /** Écrans à CHOIX FERMÉ (boutons) : `aEcran3`, `bEcran4`. */
 export function estPhaseChoix(phase: PhaseProbabilitesEnsembles): boolean {
@@ -19,7 +19,7 @@ export function estPhaseChoix(phase: PhaseProbabilitesEnsembles): boolean {
 }
 
 export function phaseInitiale(exercice: ExerciceProbabilitesEnsembles): PhaseProbabilitesEnsembles {
-  return exercice.famille === "A" ? "aEcran1" : "bEcran1";
+  return exercice.famille === "A" ? "aEcran1" : exercice.famille === "C" ? "cEcran1" : "bEcran1";
 }
 
 export function phaseApres(phase: PhaseProbabilitesEnsembles): PhaseProbabilitesEnsembles | "termine" {
@@ -37,6 +37,14 @@ export function phaseApres(phase: PhaseProbabilitesEnsembles): PhaseProbabilites
     case "bEcran3":
       return "bEcran4";
     case "bEcran4":
+      return "termine";
+    case "cEcran1":
+      return "cEcran2";
+    case "cEcran2":
+      return "cEcran3";
+    case "cEcran3":
+      return "cEcran4";
+    case "cEcran4":
       return "termine";
   }
 }

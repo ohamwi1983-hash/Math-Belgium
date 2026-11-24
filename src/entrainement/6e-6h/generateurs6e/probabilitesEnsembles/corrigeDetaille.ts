@@ -1,4 +1,6 @@
-import type { EvenementTableauA, ExerciceFamilleA, ExerciceFamilleB, ExerciceProbabilitesEnsembles } from "../../core6e/probabilitesEnsembles.types";
+import type { EvenementTableauA, ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, ExerciceProbabilitesEnsembles, ZoneVennTrois } from "../../core6e/probabilitesEnsembles.types";
+import { NOMS_C, ZONES_ECRAN1_C, effectifEnsembleC, effectifInterC, fractionEcran3C, fractionEcran4C, zonesConditionnelleC, zonesDemandeC } from "../../moteur6e/verificationVennTrois";
+import { latexConditionnelleC, latexDemandeC, reponseC, zoneL } from "../../ui6e/formatVennTrois";
 import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { phasesPourExercice } from "../../moteur6e/typesProbabilitesEnsembles";
 import type { PhaseProbabilitesEnsembles } from "../../moteur6e/typesProbabilitesEnsembles";
@@ -22,6 +24,7 @@ import {
   utiliseCours,
   valeur,
   vennDeuxHtml,
+  vennTroisHtml,
   verification,
 } from "../../ui6e/corrigeProbabilites";
 
@@ -369,16 +372,112 @@ function etapesB(e: ExerciceFamilleB): EtapeCorrection[] {
 }
 
 // ============================================================================
+// Famille C — diagramme de Venn à trois ensembles
+// ============================================================================
+
+/** Venn à trois ensembles : zones connues écrites, autres « ? » (`null` : toutes connues). */
+export function vennC(e: ExerciceFamilleC, connues: readonly ZoneVennTrois[] | null, surligner: readonly ZoneVennTrois[] = []): string {
+  const valeurs: Partial<Record<ZoneVennTrois, string>> = {};
+  for (const z of Object.keys(e.zones) as ZoneVennTrois[]) valeurs[z] = connues === null || connues.includes(z) ? String(e.zones[z]) : "?";
+  return vennTroisHtml(valeurs, "Diagramme de Venn à trois ensembles", { surligner });
+}
+
+const PAIRES: readonly [ZoneVennTrois, number, number][] = [
+  ["110", 0, 1],
+  ["101", 0, 2],
+  ["011", 1, 2],
+];
+
+function etapesC(e: ExerciceFamilleC): EtapeCorrection[] {
+  const [L1, L2, L3, L4] = (["cEcran1", "cEcran2", "cEcran3", "cEcran4"] as const).map((p) => lettreEcranProbabilitesEnsembles(e, p));
+  const z = e.zones;
+  const N = e.total;
+  const centre = z["111"];
+  const lignesA: LigneCalcul[] = [ligne(`n(A\\cap B\\cap C)=${centre}`, "donnée : le centre")];
+  for (const [zone, i, j] of PAIRES) {
+    const X = NOMS_C[i];
+    const Y = NOMS_C[j];
+    lignesA.push(ligne(`n(${zoneL(zone)})=n(${X}\\cap ${Y})-n(A\\cap B\\cap C)`, "on retire le centre"), ligne(`=${effectifInterC(e, i, j)}-${centre}`), ligne(`=${z[zone]}`));
+  }
+  const lignesB: LigneCalcul[] = [];
+  const seuls: ZoneVennTrois[] = ["100", "010", "001"];
+  seuls.forEach((zone, i) => {
+    const autres = (Object.keys(z) as ZoneVennTrois[]).filter((w) => w[i] === "1" && w !== zone);
+    lignesB.push(
+      ligne(`n(${zoneL(zone)})=n(${NOMS_C[i]})-${autres.map((w) => z[w]).join("-")}`, `on retire les trois autres zones de ${NOMS_C[i]}`),
+      ligne(`=${effectifEnsembleC(e, i)}-${autres.map((w) => z[w]).join("-")}`),
+      ligne(`=${z[zone]}`),
+    );
+  });
+  const sept = (Object.keys(z) as ZoneVennTrois[]).filter((w) => w !== "000");
+  const U = N - z["000"];
+  lignesB.push(
+    ligne(`n(A\\cup B\\cup C)=${sept.map((w) => z[w]).join("+")}`, "les sept zones des disques"),
+    ligne(`=${U}`),
+    ligne(`n(\\overline{A}\\cap\\overline{B}\\cap\\overline{C})=N-n(A\\cup B\\cup C)`, "l'extérieur"),
+    ligne(`=${N}-${U}`),
+    ligne(`=${z["000"]}`),
+  );
+  const [n3, d3] = fractionEcran3C(e);
+  const zones3 = zonesDemandeC(e);
+  const [n4, d4] = fractionEcran4C(e);
+  const { condition, favorables } = zonesConditionnelleC(e);
+  const c = e.conditionnelle;
+  const nCond = c.type === "XsachantNonY" ? `n(\\overline{${NOMS_C[c.y]}})` : "n(\\text{au moins deux})";
+  const nFav = c.type === "XsachantNonY" ? `n(${NOMS_C[c.x]}\\cap\\overline{${NOMS_C[c.y]}})` : `n(${NOMS_C[c.x]}\\cap\\text{au moins deux})`;
+  const lignesD: LigneCalcul[] = [
+    ligne(`${nFav}=${favorables.map((w) => z[w]).join("+")}`, favorables.length > 1 ? `zones de la condition dans ${NOMS_C[c.x]}` : `zone de la condition dans ${NOMS_C[c.x]}`),
+    ...(favorables.length > 1 ? [ligne(`=${n4}`)] : []),
+    ...(c.type === "XsachantNonY"
+      ? [ligne(`${nCond}=N-n(${NOMS_C[c.y]})`, "contraire"), ligne(`=${N}-${effectifEnsembleC(e, c.y)}`), ligne(`=${d4}`)]
+      : [ligne(`${nCond}=${condition.map((w) => z[w]).join("+")}`, "trois zones « deux seulement » et le centre"), ligne(`=${d4}`)]),
+    ligne(`${latexConditionnelleC(e)}=\\dfrac{${nFav}}{${nCond}}`, "on choisit dans la condition"),
+    ...lignesFraction("", n4, d4, "on remplace"),
+  ];
+  const sommeIE = effectifEnsembleC(e, 0) + effectifEnsembleC(e, 1) + effectifEnsembleC(e, 2);
+  return [
+    utiliseCours(L1, [texte("Méthode « du centre vers l'extérieur » : le centre "), latex("A\\cap B\\cap C"), texte(" est donné ; une intersection de deux ensembles est faite de sa zone « deux seulement » et du centre, donc la zone « deux seulement » vaut l'intersection moins le centre")], COURS_ENSEMBLES),
+    calcul(L1, lignesA),
+    { ...resultat(L1, listeEt(reponseC(e, "cEcran1"))), figureHtml: vennC(e, ["111", ...ZONES_ECRAN1_C]) },
+    piege(L1, [texte("Écrire l'intersection donnée, "), latex(`n(A\\cap B)=${effectifInterC(e, 0, 1)}`), texte(", dans la zone « A et B seulement » : le centre y serait compté deux fois.")]),
+    utiliseCours(L2, [texte("Chaque ensemble est fait de quatre zones (la sienne seule, ses deux zones « deux seulement », le centre) : on retire de son effectif les trois zones déjà connues ; l'extérieur est le total moins les sept zones des disques")], COURS_ENSEMBLES),
+    calcul(L2, lignesB),
+    { ...resultat(L2, listeEt(reponseC(e, "cEcran2"))), figureHtml: vennC(e, null) },
+    verification(L2, [texte("Inclusion-exclusion à trois ensembles : "), latex("n(A\\cup B\\cup C)=n(A)+n(B)+n(C)-n(A\\cap B)-n(A\\cap C)-n(B\\cap C)+n(A\\cap B\\cap C)")], [
+      ligne(`${sommeIE}-${effectifInterC(e, 0, 1) + effectifInterC(e, 0, 2) + effectifInterC(e, 1, 2)}+${centre}=${U}`, "même effectif que la somme des sept zones"),
+    ]),
+    piege(L2, [texte("Calculer l'extérieur par "), latex("N-n(A)-n(B)-n(C)"), texte(" : les zones communes seraient retirées plusieurs fois.")]),
+    utiliseCours(L3, [texte("Équiprobabilité : "), latex("P(E)=\\dfrac{n(E)}{N}"), texte(e.demandeEcran3 === "union" ? ", où n(E) est la somme des sept zones des disques" : e.demandeEcran3 === "exactementUn" ? ", où n(E) est la somme des trois zones « un seul ensemble »" : ", où n(E) est la somme des trois zones « deux seulement » et du centre")], COURS_ENSEMBLES),
+    calcul(L3, [ligne(`${latexDemandeC(e)}=\\dfrac{${zones3.map((w) => z[w]).join("+")}}{${N}}`, "zones de l'événement sur le total"), ...lignesFraction("", n3, d3)]),
+    { ...resultat(L3, listeEt(reponseC(e, "cEcran3"))), figureHtml: vennC(e, null, zones3) },
+    piege(
+      L3,
+      e.demandeEcran3 === "union"
+        ? [texte("Additionner "), latex("n(A)+n(B)+n(C)"), texte(" : les zones communes seraient comptées plusieurs fois.")]
+        : e.demandeEcran3 === "exactementUn"
+          ? [texte("Prendre "), latex("n(A)+n(B)+n(C)"), texte(" ou la réunion : « exactement un » exclut les zones communes.")]
+          : [texte("Oublier le centre : « au moins deux » comprend aussi les individus des trois ensembles.")],
+    ),
+    utiliseCours(L4, [texte("Probabilité conditionnelle : on ne choisit que dans la condition, "), latex("P(X|Y)=\\dfrac{n(X\\cap Y)}{n(Y)}")], COURS_ENSEMBLES),
+    calcul(L4, lignesD),
+    { ...resultat(L4, listeEt(reponseC(e, "cEcran4"))), figureHtml: vennC(e, null, favorables) },
+    piege(L4, [texte("Diviser par l'effectif total "), latex(`N=${N}`), texte(" : on ne choisit que parmi les individus de la condition.")]),
+  ];
+}
+
+// ============================================================================
 // Point d'entrée
 // ============================================================================
 
 export function correctionDetailleeProbabilitesEnsembles(e: Ex): EtapeCorrection[] {
   if (e.famille === "A") return finaliser([...etapeA1(e), ...etapeA2(e), ...etapeA3(e)]);
+  if (e.famille === "C") return finaliser(etapesC(e));
   return finaliser(etapesB(e));
 }
 
 /** Verdict de la dernière étape, en minuscules au fil d'une phrase. */
 export function verdictProbabilitesEnsembles(e: Ex): Fragments {
+  if (e.famille === "C") return [];
   if (e.famille === "A" && e.sousTypeEcran3 === "comparaisonConditionnelle") {
     const comp = comparaisonConditionnellesA(e);
     return [latex(`P(A|\\overline{B})${comp === "egal" ? "=" : comp === "superieur" ? ">" : "<"}P(A|B)`)];

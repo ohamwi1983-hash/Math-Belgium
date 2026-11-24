@@ -1,4 +1,4 @@
-import type { ExerciceFamilleA, ExerciceProbabilitesEnsembles } from "../../core6e/probabilitesEnsembles.types";
+import type { ExerciceFamilleA, ExerciceFamilleC, ExerciceProbabilitesEnsembles } from "../../core6e/probabilitesEnsembles.types";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
@@ -13,7 +13,10 @@ import { latex, texte } from "../../../export/fragmentsDocx";
 import { phasesPourExercice } from "../../moteur6e/typesProbabilitesEnsembles";
 import { relationPaireEcran3 } from "../../moteur6e/verificationProbabilitesEnsembles";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
-import { LATEX_EVENEMENT_A, casesA as cases, correctionDetailleeProbabilitesEnsembles, lettreEcranProbabilitesEnsembles, tableauEnonceA, verdictProbabilitesEnsembles } from "./corrigeDetaille";
+import { LATEX_EVENEMENT_A, casesA as cases, correctionDetailleeProbabilitesEnsembles, lettreEcranProbabilitesEnsembles, tableauEnonceA, vennC, verdictProbabilitesEnsembles } from "./corrigeDetaille";
+import { latexConditionnelleC, latexDemandeC, phraseConditionnelleC, phraseDemandeC, reponseC, zoneL } from "../../ui6e/formatVennTrois";
+import { ZONES_ECRAN1_C, ZONES_ECRAN2_C, effectifInterC, fractionEcran3C, fractionEcran4C } from "../../moteur6e/verificationVennTrois";
+import { listeEt } from "../../ui6e/corrigeProbabilites";
 import {
   LIBELLE_PHASE,
   blocDonnees,
@@ -62,7 +65,7 @@ const proba = (n: number, d: number) => formatProbaLatex(n, d);
 // Énoncé
 // ============================================================================
 
-function questionEtape3(e: Ex): FragmentConsigne[] {
+function questionEtape3(e: Exclude<Ex, ExerciceFamilleC>): FragmentConsigne[] {
   if (e.famille === "B") return [texte(" Enfin, "), latex("A"), texte(" et "), latex("B"), texte(" sont-ils indépendants ? Justifie par un calcul.")];
   if (e.sousTypeEcran3 === "relation" && e.paireEcran3) {
     const [x, y] = e.paireEcran3;
@@ -76,6 +79,9 @@ function latexDemandeA(e: ExerciceFamilleA): string {
 }
 
 function consigneGlobale(e: Ex): FragmentConsigne[] {
+  if (e.famille === "C") {
+    return [texte(" Complète le diagramme de Venn (effectif de chaque zone), en partant du centre. Calcule ensuite "), ...(phraseDemandeC(e) as FragmentConsigne[]), texte(", puis "), ...(phraseConditionnelleC(e) as FragmentConsigne[]), texte("."), texte(PRECISION)];
+  }
   if (e.famille === "A") {
     const debut: FragmentConsigne[] =
       e.troisiemeDonnee === "PAetB"
@@ -89,18 +95,28 @@ function consigneGlobale(e: Ex): FragmentConsigne[] {
   return [texte(" Calcule "), latex("P(A)"), texte(" et "), latex("P(B)"), texte(", puis "), latex(ope), texte(" et la probabilité conditionnelle "), latex("P(A|B)"), texte("."), ...questionEtape3(e), texte(PRECISION)];
 }
 
+/** Données en formules séparées (famille C : huit données, une formule affichée unique sortait de la
+ * colonne) ; familles A et B : la liste d'origine. */
+function donnees(e: Ex): FragmentConsigne[] {
+  if (e.famille === "C") return [texte(" Données : "), ...listeEt(blocDonnees(e)), texte(".")];
+  return [texte(" Données : "), latex(`${blocDonnees(e).join(",\\quad ")}.`)];
+}
+
 function entetePapier(e: Ex): FragmentConsigne[] {
+  if (e.famille === "C") return [...(consigneGenerale(e) as FragmentConsigne[]), ...donnees(e), ...consigneGlobale(e)];
   return [...(consigneGenerale(e) as FragmentConsigne[]), texte(" Données : "), latex(`${blocDonnees(e).join(",\\quad ")}.`), ...consigneGlobale(e)];
 }
 
 function figureEnonce(e: Ex): string | undefined {
+  if (e.famille === "C") return vennC(e, []);
   return e.famille === "A" ? tableauEnonceA(e) : undefined;
 }
 
 /** Énoncé « par écrans » : ses questions donnent les titres d'étapes du corrigé (« Étape n — … »). */
 function construireEnonce(e: Ex): SectionExercice {
   return {
-    enteteFragments: [...(consigneGenerale(e) as FragmentConsigne[]), texte(" Données : "), latex(`${blocDonnees(e).join(",\\quad ")}.`)],
+    enteteFragments: [...(consigneGenerale(e) as FragmentConsigne[]), ...donnees(e)],
+    ...(e.famille === "C" ? { enteteHtml: vennC(e, []) } : {}),
     questions: phasesPourExercice(e).map((phase) => ({ consigne: consigneEcran(e, phase) as FragmentConsigne[] })),
   };
 }
@@ -126,6 +142,7 @@ function construireCorrection(e: Ex): BlocCorrection[] {
 const verdict = verdictProbabilitesEnsembles;
 
 function reponseBreve(e: Ex): FragmentConsigne[] {
+  if (e.famille === "C") return [...listeEt([...reponseC(e, "cEcran1"), ...reponseC(e, "cEcran2")]), texte(" ; "), latex(reponseC(e, "cEcran3")[0]), texte(" ; "), latex(reponseC(e, "cEcran4")[0])];
   if (e.famille === "A") {
     const N = e.denominateur;
     const c = cases(e);
@@ -145,6 +162,13 @@ function reponseBreve(e: Ex): FragmentConsigne[] {
  * test d'indépendance). Étape du verdict sans charge. Aucun piège dans les données (verdict jamais noté). Nombres 0 : fractions
  * exactes d'effectifs, la valeur décimale n'est qu'une écriture équivalente. */
 function criteresDifficulte(e: Ex): CriteresDifficulte {
+  if (e.famille === "C") {
+    // Venn à trois ensembles : quatre étapes qui transforment, méthode 1 (imposée sur l'écran,
+    // « complète le diagramme » sur papier), piège 1 dans les données (chaque intersection donnée
+    // contient le centre : la zone « deux seulement » n'est pas l'intersection), nombres 0.
+    // Étapes 1 et 2 : le même calcul répété pour trois zones (« termes proches ») → sans charge.
+    return { ...etapesDuCorrige(correctionDetailleeProbabilitesEnsembles(e)), lettresSansCharge: [lettre(e, "cEcran1"), lettre(e, "cEcran2")], methode: 1, piege: 1, nombres: 0 };
+  }
   const lecture = e.famille === "A" && (e.demandeEcran2 === "AetBbar" || e.demandeEcran2 === "AbaretB") ? [lettre(e, "aEcran2")] : [];
   const base = etapesDuCorrige(correctionDetailleeProbabilitesEnsembles(e), lecture);
   // Étape du verdict sans charge : sa longueur dépend de l'issue (fractions simplifiables ou non),
@@ -155,7 +179,29 @@ function criteresDifficulte(e: Ex): CriteresDifficulte {
 
 const crit = (sousQuestion: string, points: number, ...critere: FragmentConsigne[]): CritereBareme => ({ sousQuestion, points, critere });
 
+function baremeC(e: ExerciceFamilleC): BaremeExercice {
+  const [L1, L2, L3, L4] = (["cEcran1", "cEcran2", "cEcran3", "cEcran4"] as const).map((ph) => lettre(e, ph));
+  const [n3, d3] = fractionEcran3C(e);
+  const [n4, d4] = fractionEcran4C(e);
+  return {
+    reponseFinale: reponseBreve(e),
+    criteres: [
+      crit(L1, 1, texte("Centre et zones « deux seulement » (intersection moins le centre) : "), latex(ZONES_ECRAN1_C.map((z) => e.zones[z]).join(",\\ "))),
+      crit(L2, 1, texte("Zones « un seul » et extérieur : "), latex(ZONES_ECRAN2_C.map((z) => e.zones[z]).join(",\\ "))),
+      crit(L3, 1, latex(`${latexDemandeC(e)}=${frac(n3, d3)}`)),
+      crit(L4, 1, latex(`${latexConditionnelleC(e)}=${frac(n4, d4)}`), texte(" (dénominateur : effectif de la condition)")),
+    ],
+    erreursFrequentes: [
+      { description: [texte("Intersection donnée écrite dans la zone « deux seulement », par exemple "), latex(`n(${zoneL("110")})=${effectifInterC(e, 0, 1)}`), texte(" (centre compté deux fois)")], cout: "−0,5 par zone" },
+      { description: [texte("Extérieur calculé par "), latex("N-n(A)-n(B)-n(C)")], cout: "−0,5" },
+      { description: [texte("Probabilité conditionnelle divisée par l'effectif total")], cout: "0 pt sur l'étape 4" },
+    ],
+    reponsesAcceptees: [[texte("Fractions non simplifiées, décimaux arrondis au centième (au millième sous 0,1) ou pourcentages ; zones remplies dans un autre ordre si les effectifs sont justes")]],
+  };
+}
+
 function bareme(e: Ex): BaremeExercice {
+  if (e.famille === "C") return baremeC(e);
   if (e.famille === "A") {
     const N = e.denominateur;
     const c = cases(e);

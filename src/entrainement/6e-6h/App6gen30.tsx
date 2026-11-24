@@ -1,7 +1,9 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProbabilitesEnsembles } from "./generateurs6e/probabilitesEnsembles";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProbabilitesEnsembles, genererExerciceProbabilitesEnsemblesLibre } from "./generateurs6e/probabilitesEnsembles";
+import { vennEcranHtml } from "./ui6e/formatVennTrois";
+import type { PhaseC } from "./ui6e/formatVennTrois";
 import type { IdVarianteProbabilitesEnsembles } from "./generateurs6e/probabilitesEnsembles";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionProbabilitesEnsembles, soumettreReponseEcran, tentativesMaxPhase } from "./moteur6e/sessionProbabilitesEnsembles";
 import { phasesPourExercice } from "./moteur6e/typesProbabilitesEnsembles";
@@ -33,7 +35,8 @@ import { correctionDetailleeProbabilitesEnsembles, lettreEcranProbabilitesEnsemb
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionProbabilitesEnsembles {
-  return demarrerSessionProbabilitesEnsembles(REGLAGES_DEMO, genererExerciceProbabilitesEnsembles);
+  // Tirage libre de l'appli : famille C (Venn à trois ensembles) une fois sur quatre.
+  return demarrerSessionProbabilitesEnsembles(REGLAGES_DEMO, genererExerciceProbabilitesEnsemblesLibre);
 }
 
 /** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
@@ -203,6 +206,7 @@ export function App6gen30() {
             {...propsCommun}
             champs={champsEcran(exercice, phase)}
             tableau={tableauEcran(exercice, phase)}
+            figureHtml={exercice.famille === "C" ? vennEcranHtml(exercice, phase as PhaseC) : null}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
             onValider={(valeurs) =>
               terminerEtape(soumettreReponseEcran(etat, valeurs), champsEcran(exercice, phase).map((c, i) => `${c.label} : ${valeurs[i]}`).join(" ; "))

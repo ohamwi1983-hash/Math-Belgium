@@ -338,6 +338,34 @@ export const probabilites: ChapterContent = {
             'Additionner $P(A)+P(B)$ **sans** retirer $P(A \\cap B)$ donne $\\dfrac{33}{40}$ ici — **faux** ! Les 6 ' +
             'personnes de l\'intersection sont comptées deux fois. La bonne valeur reste $\\dfrac{27}{40}$.',
         },
+        { kind: 'subheading', text: 'Trois ensembles : du centre vers l\'extérieur' },
+        {
+          kind: 'methode',
+          label: 'Méthode — remplir un diagramme de Venn à trois ensembles',
+          items: [
+            'On part du **centre** : $n(A \\cap B \\cap C)$, en général donné.',
+            'Puis les trois zones « **deux seulement** » : chaque intersection donnée contient le centre, donc ' +
+              '$n(A \\cap B \\cap \\overline{C})=n(A \\cap B)-n(A \\cap B \\cap C)$, et de même pour les deux autres.',
+            'Puis les trois zones « **un seul** » : de $n(A)$, on retire les trois autres zones de $A$ ' +
+              '(ses deux zones « deux seulement » et le centre) ; de même pour $B$ et $C$.',
+            'Enfin l\'**extérieur** : l\'effectif total moins la somme des sept zones des disques. On vérifie avec ' +
+              '$n(A \\cup B \\cup C)=n(A)+n(B)+n(C)-n(A \\cap B)-n(A \\cap C)-n(B \\cap C)+n(A \\cap B \\cap C)$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'trois langues sur 60 élèves',
+          formula:
+            'Sur 60 élèves, $n(A)$=30, $n(B)$=24, $n(C)$=20, $n(A \\cap B)$=10, $n(A \\cap C)$=8, $n(B \\cap C)$=6 et ' +
+            '$n(A \\cap B \\cap C)$=3 :',
+          steps: [
+            { tag: 'centre', text: '$n(A \\cap B \\cap C)=3$.' },
+            { tag: 'deux seulement', text: '$10-3=7$ (A et B), $8-3=5$ (A et C), $6-3=3$ (B et C).' },
+            { tag: 'un seul', text: '$30-7-5-3=15$ (A), $24-7-3-3=11$ (B), $20-5-3-3=9$ (C).' },
+            { tag: 'extérieur', text: '$15+11+9+7+5+3+3=53$ élèves étudient au moins une langue, donc $60-53=7$ n\'en étudient aucune.' },
+          ],
+          result: { tag: 'résultat', text: '$P(\\text{exactement une langue})=\\frac{15+11+9}{60}=\\frac{35}{60}=\\frac{7}{12}$' },
+        },
         { kind: 'subheading', text: 'Tableau à double entrée et complémentaire' },
         {
           kind: 'methode',

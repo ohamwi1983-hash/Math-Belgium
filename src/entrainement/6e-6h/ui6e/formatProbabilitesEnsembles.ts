@@ -3,6 +3,8 @@ import type { PhaseProbabilitesEnsembles } from "../moteur6e/typesProbabilitesEn
 import { estPhaseChoix } from "../moteur6e/typesProbabilitesEnsembles";
 import type { CleQuantiteEcran1A } from "../moteur6e/verificationProbabilitesEnsembles";
 import { champsEcran1A, comparaisonConditionnellesA, effectifEvenementA, effectifIntersectionA, independantsB, relationPaireEcran3 } from "../moteur6e/verificationProbabilitesEnsembles";
+import { LIBELLE_PHASE_C, aideNiveau1C, aideNiveau2C, blocDonneesC, champsC, consigneEcranC, consigneGeneraleC, reponseC } from "./formatVennTrois";
+import type { PhaseC } from "./formatVennTrois";
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen30`. Dispatch sur
@@ -414,18 +416,22 @@ function justificationEcran4B(ex: ExerciceFamilleB): string[] {
 // ============================================================================
 
 export function consigneGenerale(exercice: ExerciceProbabilitesEnsembles): FragmentConsigne[] {
+  if (exercice.famille === "C") return consigneGeneraleC(exercice);
   return exercice.famille === "A" ? consigneGeneraleA(exercice) : consigneGeneraleB(exercice);
 }
 
 export function blocDonnees(exercice: ExerciceProbabilitesEnsembles): string[] {
+  if (exercice.famille === "C") return blocDonneesC(exercice);
   return exercice.famille === "A" ? blocDonneesA(exercice) : blocDonneesB(exercice);
 }
 
 export function consigneEcran(exercice: ExerciceProbabilitesEnsembles, phase: PhaseProbabilitesEnsembles): FragmentConsigne[] {
+  if (exercice.famille === "C") return consigneEcranC(exercice, phase as PhaseC);
   return exercice.famille === "A" ? consigneEcranA(exercice, phase) : consigneEcranB(exercice, phase);
 }
 
 export function etatActuel(exercice: ExerciceProbabilitesEnsembles, phase: PhaseProbabilitesEnsembles): string[] | null {
+  if (exercice.famille === "C") return null;
   return exercice.famille === "A" ? etatActuelA(exercice, phase) : etatActuelB(exercice, phase);
 }
 
@@ -444,19 +450,22 @@ export function tableauEcran(exercice: ExerciceProbabilitesEnsembles, phase: Pha
 
 export function champsEcran(exercice: ExerciceProbabilitesEnsembles, phase: PhaseProbabilitesEnsembles): ChampDef[] {
   if (estEcranChoix(phase)) return [];
+  if (exercice.famille === "C") return champsC(exercice, phase as PhaseC);
   return exercice.famille === "A" ? champsA(exercice, phase as "aEcran1" | "aEcran2") : champsB(exercice, phase as "bEcran1" | "bEcran2" | "bEcran3");
 }
 
 export function choixEcran(exercice: ExerciceProbabilitesEnsembles, phase: PhaseProbabilitesEnsembles): OptionChoix[] {
-  if (!estEcranChoix(phase)) return [];
+  if (!estEcranChoix(phase) || exercice.famille === "C") return [];
   return exercice.famille === "A" ? choixA(exercice) : OPTIONS_INDEPENDANCE;
 }
 
 export function aideNiveau1(exercice: ExerciceProbabilitesEnsembles, phase: PhaseProbabilitesEnsembles): AideAvecLatex {
+  if (exercice.famille === "C") return aideNiveau1C(exercice, phase as PhaseC);
   return exercice.famille === "A" ? aideNiveau1A(exercice, phase) : aideNiveau1B(phase);
 }
 
 export function aideNiveau2(exercice: ExerciceProbabilitesEnsembles, phase: PhaseProbabilitesEnsembles): AideAvecLatex {
+  if (exercice.famille === "C") return aideNiveau2C(exercice, phase as PhaseC);
   return exercice.famille === "A" ? aideNiveau2A(exercice, phase) : aideNiveau2B(exercice, phase);
 }
 
@@ -468,17 +477,19 @@ export const LIBELLE_PHASE: Record<PhaseProbabilitesEnsembles, string> = {
   bEcran2: "Étape 2 (intersection/union)",
   bEcran3: "Étape 3 (probabilité conditionnelle)",
   bEcran4: "Étape 4 (indépendance)",
+  ...LIBELLE_PHASE_C,
 };
 
 export const LIBELLE_FAMILLE: Record<ExerciceProbabilitesEnsembles["famille"], string> = {
   A: "A — Inclusion-exclusion, tableau à double entrée",
   B: "B — Cartes, dés et indépendance",
+  C: "C — Diagramme de Venn à trois ensembles",
 };
 
 /** Libellé du choix correct d'un écran à choix (`null` pour un écran à saisie) — affiché en texte,
  * devant la justification mathématique de `formatReponseAttenduePhaseLatex`. */
 export function libelleChoixCorrect(exercice: ExerciceProbabilitesEnsembles, phase: PhaseProbabilitesEnsembles): string | null {
-  if (!estPhaseChoix(phase)) return null;
+  if (!estPhaseChoix(phase) || exercice.famille === "C") return null;
   const id = exercice.famille === "A" ? (exercice.sousTypeEcran3 === "relation" ? relationPaireEcran3(exercice) : comparaisonConditionnellesA(exercice)) : independantsB(exercice) ? "independants" : "non_independants";
   return choixEcran(exercice, phase).find((o) => o.id === id)?.label ?? null;
 }
@@ -488,6 +499,7 @@ export function libelleChoixCorrect(exercice: ExerciceProbabilitesEnsembles, pha
  * mathématique (le libellé du choix, du texte, vient de `libelleChoixCorrect` — jamais de prose en
  * mode math). */
 export function formatReponseAttenduePhaseLatex(exercice: ExerciceProbabilitesEnsembles, phase: PhaseProbabilitesEnsembles): string[] {
+  if (exercice.famille === "C") return reponseC(exercice, phase as PhaseC);
   if (exercice.famille === "A") {
     if (phase === "aEcran1") {
       const N = exercice.denominateur;

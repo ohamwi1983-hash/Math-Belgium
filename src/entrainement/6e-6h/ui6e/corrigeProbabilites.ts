@@ -199,22 +199,67 @@ export function tableauDoubleHtml(entetesLignes: string[], entetesColonnes: stri
 
 const POLICE = "Georgia, 'Times New Roman', serif";
 
-function placer(x: number, y: number, v: string): string {
-  return `<span style="position:absolute;left:${x}px;top:${y}px;transform:translate(-50%,-50%);white-space:nowrap">${rendre(v)}</span>`;
+/** Étiquette centrée en (x, y) d'une figure W × H, positionnée EN POURCENTAGES : quand la carte est
+ * plus étroite que la figure (téléphone), le SVG rétrécit (`max-width:100%`) et les étiquettes suivent
+ * (en px, elles restaient en place et glissaient sur les contours). */
+function placer(x: number, y: number, v: string, W: number, H: number): string {
+  return `<span style="position:absolute;left:${((100 * x) / W).toFixed(2)}%;top:${((100 * y) / H).toFixed(2)}%;transform:translate(-50%,-50%);white-space:nowrap">${rendre(v)}</span>`;
+}
+
+/** Valeur d'une zone dessinée DANS le SVG (entier, décimal `{,}`, `\\dfrac{a}{b}`, « ? ») : la figure
+ * reste juste quand elle rétrécit, et le Word (qui ne rasterise que le `<svg>`) garde les valeurs.
+ * Autre écriture → `null` (étiquette KaTeX en HTML, `placer`). */
+function etiquetteSvg(x: number, y: number, v: string): string | null {
+  const t = (txt: string, yb: number, couleur = COULEURS.encre) => `<text x="${x}" y="${yb}" text-anchor="middle" font-size="16" font-family="${POLICE}" fill="${couleur}">${txt}</text>`;
+  const nombre = (m: string) => m.replace("{,}", ",").replace(/^-/, "−");
+  if (v === "?") return t("?", y + 6, "#8a8f98");
+  if (/^-?\d+(\{,\}\d+)?$/.test(v)) return t(nombre(v), y + 6);
+  const f = /^(-?)\\d?frac\{(\d+)\}\{(\d+)\}$/.exec(v);
+  if (!f) return null;
+  const largeur = 9 * Math.max(f[2].length, f[3].length) + 6;
+  const signe = f[1] ? `<text x="${x - largeur / 2 - 7}" y="${y + 6}" text-anchor="middle" font-size="16" font-family="${POLICE}" fill="${COULEURS.encre}">−</text>` : "";
+  return `${signe}${t(f[2], y - 5)}<line x1="${x - largeur / 2}" y1="${y}" x2="${x + largeur / 2}" y2="${y}" stroke="${COULEURS.encre}" stroke-width="1.1"/>${t(f[3], y + 17)}`;
+}
+
+/** Étiquettes d'une figure : dans le SVG quand c'est possible, sinon en HTML (KaTeX) par-dessus. */
+function etiquettes(liste: [number, number, string][], W: number, H: number): { svg: string; html: string } {
+  let svg = "";
+  let html = "";
+  for (const [x, y, v] of liste) {
+    const e = etiquetteSvg(x, y, v);
+    if (e !== null) svg += e;
+    else html += placer(x, y, v, W, H);
+  }
+  return { svg, html };
+}
+
+/** Cadre d'une figure W × H qui rétrécit en gardant ses proportions (SVG à 100 %, étiquettes en %). */
+function cadreFigure(libelle: string, W: number, H: number, contenu: string): string {
+  return `<div role="img" aria-label="${libelle}" style="position:relative;width:${W}px;max-width:100%;aspect-ratio:${W} / ${H};margin:0.5em auto">${contenu}</div>`;
 }
 
 /** Diagramme de Venn à deux ensembles dans l'univers Ω : une valeur (LaTeX) par zone. */
 export function vennDeuxHtml(valeurs: { aSeul: string; ab: string; bSeul: string; dehors: string }, libelle: string, noms: [string, string] = ["A", "B"]): string {
   const W = 340;
   const H = 200;
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="position:absolute;left:0;top:0" aria-hidden="true">`;
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="100%" height="100%" style="position:absolute;left:0;top:0" aria-hidden="true">`;
   svg += `<rect x="4" y="4" width="${W - 8}" height="${H - 8}" rx="6" fill="none" stroke="${COULEURS.doux}" stroke-width="1.3"/>`;
   svg += `<circle cx="130" cy="104" r="70" fill="${COULEURS.accentDoux}" fill-opacity="0.55" stroke="${COULEURS.encre}" stroke-width="1.4"/>`;
   svg += `<circle cx="210" cy="104" r="70" fill="${COULEURS.bonDoux}" fill-opacity="0.55" stroke="${COULEURS.encre}" stroke-width="1.4"/>`;
   svg += `<text x="70" y="38" font-size="17" font-style="italic" font-family="${POLICE}" fill="${COULEURS.encre}">${noms[0]}</text>`;
   svg += `<text x="260" y="38" font-size="17" font-style="italic" font-family="${POLICE}" fill="${COULEURS.encre}">${noms[1]}</text>`;
-  svg += `<text x="14" y="26" font-size="15" font-family="${POLICE}" fill="${COULEURS.doux}">Ω</text></svg>`;
-  return `<div role="img" aria-label="${libelle}" style="position:relative;width:${W}px;height:${H}px;margin:0.5em auto;max-width:100%">${svg}${placer(98, 108, valeurs.aSeul)}${placer(170, 108, valeurs.ab)}${placer(242, 108, valeurs.bSeul)}${placer(305, 180, valeurs.dehors)}</div>`;
+  svg += `<text x="14" y="26" font-size="15" font-family="${POLICE}" fill="${COULEURS.doux}">Ω</text>`;
+  const et = etiquettes(
+    [
+      [98, 108, valeurs.aSeul],
+      [170, 108, valeurs.ab],
+      [242, 108, valeurs.bSeul],
+      [305, 170, valeurs.dehors],
+    ],
+    W,
+    H,
+  );
+  return cadreFigure(libelle, W, H, `${svg}${et.svg}</svg>${et.html}`);
 }
 
 /** Les 8 zones d'un diagramme de Venn à trois ensembles A, B, C (Ω compris). Clé = appartenance à
@@ -226,12 +271,12 @@ export const ZONES_VENN_TROIS: readonly ZoneVennTrois[] = ["111", "110", "101", 
 const POSITION_ZONE: Record<ZoneVennTrois, [number, number]> = {
   "111": [170, 152],
   "110": [170, 98],
-  "101": [128, 176],
-  "011": [212, 176],
+  "101": [136, 166],
+  "011": [204, 166],
   "100": [104, 104],
   "010": [236, 104],
   "001": [170, 226],
-  "000": [302, 278],
+  "000": [44, 268],
 };
 
 /**
@@ -250,7 +295,7 @@ export function vennTroisHtml(valeurs: Partial<Record<ZoneVennTrois, string | nu
   const cA: [number, number] = [128, 118];
   const cB: [number, number] = [212, 118];
   const cC: [number, number] = [170, 190];
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="position:absolute;left:0;top:0" aria-hidden="true">`;
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="100%" height="100%" style="position:absolute;left:0;top:0" aria-hidden="true">`;
   svg += `<rect x="4" y="4" width="${W - 8}" height="${H - 8}" rx="6" fill="none" stroke="${COULEURS.doux}" stroke-width="1.3"/>`;
   const surl = options.surligner ?? [];
   if (surl.length) {
@@ -278,13 +323,12 @@ export function vennTroisHtml(valeurs: Partial<Record<ZoneVennTrois, string | nu
   svg += `<text x="38" y="52" font-size="17" font-style="italic" font-family="${POLICE}" fill="${COULEURS.encre}">${noms[0]}</text>`;
   svg += `<text x="290" y="52" font-size="17" font-style="italic" font-family="${POLICE}" fill="${COULEURS.encre}">${noms[1]}</text>`;
   svg += `<text x="252" y="268" font-size="17" font-style="italic" font-family="${POLICE}" fill="${COULEURS.encre}">${noms[2]}</text>`;
-  svg += `<text x="14" y="26" font-size="15" font-family="${POLICE}" fill="${COULEURS.doux}">Ω</text></svg>`;
-  let etiquettes = "";
+  svg += `<text x="14" y="26" font-size="15" font-family="${POLICE}" fill="${COULEURS.doux}">Ω</text>`;
+  const liste: [number, number, string][] = [];
   for (const z of ZONES_VENN_TROIS) {
     const v = valeurs[z];
-    if (v === null || v === undefined) continue;
-    const [x, y] = POSITION_ZONE[z];
-    etiquettes += v === "?" ? `<span style="position:absolute;left:${x}px;top:${y}px;transform:translate(-50%,-50%);color:#8a8f98">?</span>` : placer(x, y, v);
+    if (v !== null && v !== undefined) liste.push([...POSITION_ZONE[z], v]);
   }
-  return `<div role="img" aria-label="${libelle}" style="position:relative;width:${W}px;height:${H}px;margin:0.5em auto;max-width:100%">${svg}${etiquettes}</div>`;
+  const et = etiquettes(liste, W, H);
+  return cadreFigure(libelle, W, H, `${svg}${et.svg}</svg>${et.html}`);
 }

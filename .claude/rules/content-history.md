@@ -168,6 +168,7 @@ paths:
   `criteresDifficulte` à la place des étoiles, profils `calcul` relus (aucun changement : rien n'est donné
   directement par la calculatrice). Détails : `.claude/rules/feuilles-evaluations.md`, section « Corrigé
   détaillé — comme au tableau ».
+- **6e (6h), Chapitre 6 — Venn à trois ensembles (6gen30 famille C)** : § 1 gagne le sous-titre « Trois ensembles : du centre vers l'extérieur » (méthode + exemple résolu « trois langues sur 60 élèves », placé avant « Tableau à double entrée et complémentaire ») ; énoncé apparié dans `ENONCES_DEMONSTRATION`.
 - **6e (6h), Chapitre 6 — Les probabilités** (`probabilites`) : migré une première fois, puis
   **complété/enrichi à son tour** quand l'artifact source a grandi (nouvelles sections, nouveaux
   exemples résolus, et des diagrammes de plus, portant l'artifact à 11 diagrammes). La mise à jour a
