@@ -92,11 +92,44 @@ export interface ExerciceAssociationSymbolique {
   ordreLettres: number[];
 }
 
+/**
+ * Fonctions « variées » (lot C de l'audit du 5e ch. 5, G18 : autre chose que des cubiques), pour les
+ * familles A (f ↔ f′) et B (f ↔ description) — toujours lues sur un graphique, jamais données par
+ * leur expression. Extremums TOUJOURS en des abscisses entières (nœuds du quadrillage d'une unité) :
+ * - `rationnelle` : f(x) = a·((x − c) + k/(x − c)) + q — extremums en c ± √k, asymptote verticale x = c ;
+ * - `cloche` : f(x) = a/((x − c)² + 1) + q — un extremum en c, asymptote horizontale y = q ;
+ * - `racine` : f(x) = a·((x − p) − 2m√(x − p)) + q, définie pour x ≥ p — un extremum en p + m² ;
+ * - `trig` : f(x) = a·sin(π(x − c)/4) + q — deux extremums en c − 2 et c + 2 dans [−4 ; 4].
+ */
+export type FonctionVarieeAssociation =
+  | { type: "rationnelle"; a: number; c: number; k: 1 | 4; q: number }
+  | { type: "cloche"; a: number; c: number; q: number }
+  | { type: "racine"; a: number; p: number; m: 1 | 2; q: number }
+  | { type: "trig"; a: number; c: number; q: number };
+
+/** Famille A « variée » — graphique de f (numéroté) ↔ graphique de f′ (lettré), f non cubique. */
+export interface ExerciceAssociationGrapheDeriveeVariee {
+  famille: "grapheDeriveeVariee";
+  fonctions: FonctionVarieeAssociation[];
+  ordreLettres: number[];
+}
+
+/** Famille B « variée » — graphique de f (numéroté) ↔ énoncé verbal (lettré), f non cubique. */
+export interface ExerciceAssociationGrapheVerbalVarie {
+  famille: "grapheVerbalVarie";
+  fonctions: FonctionVarieeAssociation[];
+  /** `enonces[j]` décrit `fonctions[ordreLettres[j]]`. */
+  enonces: string[];
+  ordreLettres: number[];
+}
+
 export type ExerciceAssociation =
   | ExerciceAssociationGrapheDerivee
   | ExerciceAssociationGrapheDeriveeAvancee
   | ExerciceAssociationGrapheVerbal
-  | ExerciceAssociationSymbolique;
+  | ExerciceAssociationSymbolique
+  | ExerciceAssociationGrapheDeriveeVariee
+  | ExerciceAssociationGrapheVerbalVarie;
 
 export type GenerateurExerciceAssociation = () => ExerciceAssociation;
 

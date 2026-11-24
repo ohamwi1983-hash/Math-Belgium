@@ -1501,12 +1501,12 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'point critique SANS extremum', enonce: "Soit $f(x) = x^3 + 2$. Montre que $f'(0) = 0$, puis détermine si $f$ admet un extremum en $x = 0$. Justifie par le signe de $f'$." },
     { cle: 'racines irrationnelles', enonce: "Soit $f(x) = x^3 - 3x^2 - 3x + 1$. Détermine et classe les extremums locaux de $f$, en donnant leurs abscisses et les valeurs de $f$ sous forme exacte." },
     { cle: 'domaine et colonnes ∄', enonce: "Soit $f(x) = \\dfrac{4}{(x-1)^2 - 4}$. Détermine le domaine de $f$, calcule $f'(x)$, dresse le tableau de signes de $f'$ (avec les valeurs exclues) et déduis-en les extremums locaux de $f$." },
-    { cle: "tableau de f'' : concavité", enonce: "Soit $f(x) = x^3 - 3x^2 - 3x + 1$. Calcule $f''(x)$, dresse son tableau de signes et détermine la concavité de $f$ ainsi que les coordonnées de son point d'inflexion." },
+    { cle: "tableau de f″ : concavité", enonce: "Soit $f(x) = x^3 - 3x^2 - 3x + 1$. Calcule $f''(x)$, dresse son tableau de signes et détermine la concavité de $f$ ainsi que les coordonnées de son point d'inflexion." },
     { cle: "quatre conditions", enonce: "Détermine la fonction $f(x) = ax^3 + bx^2 + cx + d$ dont la courbe passe par $A(0\\,;2)$ et par $B(2\\,;0)$, dont la tangente en A a pour pente $-3$ et qui a un point d'inflexion en $x = 1$. Vérifie ensuite la nature du point d'abscisse 1." },
   ],
   'lecture-graphique-derivees': [
     { cle: 'lecture directe', enonce: "Le graphique d'une fonction $f$ (sans formule) décroît jusqu'à un point A, croît de A jusqu'à un point B, puis décroît après B. Entre A et B, la courbe a d'abord la forme d'un bol, puis celle d'un dôme, le changement se faisant en un point P. Décris les variations de $f$, ses extremums locaux, le signe de $f'$, sa concavité et le signe de $f''$, puis indique la nature du point P." },
-    { cle: "lire le graphique de f'", enonce: "On connaît seulement le graphique de la dérivée : $f'(x) = x^2 - x - 2$, une parabole qui coupe l'axe des abscisses en $-1$ et en $2$ et atteint son minimum en $x = \\frac{1}{2}$. Sans chercher $f$, détermine ses variations, ses extremums locaux, sa concavité et l'abscisse de son point d'inflexion." },
+    { cle: "lire le graphique de f′", enonce: "On connaît seulement le graphique de la dérivée : $f'(x) = x^2 - x - 2$, une parabole qui coupe l'axe des abscisses en $-1$ et en $2$ et atteint son minimum en $x = \\frac{1}{2}$. Sans chercher $f$, détermine ses variations, ses extremums locaux, sa concavité et l'abscisse de son point d'inflexion." },
     { cle: "n'est PAS un extremum", enonce: "Le graphique d'une fonction $f$ (sans formule) croît partout ; en un point C, la tangente à la courbe est horizontale. Que vaut $f'$ en C ? Le point C est-il un extremum ? Justifie à l'aide du signe de $f'$ de part et d'autre de C." },
   ],
   'etudier-fonction': [

@@ -114,7 +114,7 @@ export function nombreTexte(n: number): string {
 }
 
 export function consigneGenerale(exercice: ExerciceDefinitionDerivee): string {
-  return `Calcule le nombre dérivé f'(${nombreTexte(exercice.a)}) à partir de sa définition en termes de limite.`;
+  return `Calcule le nombre dérivé f′(${nombreTexte(exercice.a)}) à partir de sa définition en termes de limite.`;
 }
 
 // ============================================================================
@@ -218,60 +218,60 @@ export function texteAideNiveau1(exercice: ExerciceDefinitionDerivee, ecran: Ecr
         return { texte: "Développe simplement, aucun terme au carré ici :", latex: "f(a+h)=m(a+h)+p=ma+mh+p" };
       case "quadratique":
         return {
-          texte: "Développe d'abord le carré, puis multiplie par m. Piège : oublier le terme croisé 2ah, ou une erreur de signe si m est négatif :",
+          texte: "Développe d'abord le carré, puis multiplie par $m$. Piège : oublier le terme croisé $2ah$, ou une erreur de signe si $m$ est négatif :",
           latex: "f(a+h)=m(a+h)^2+p, \\quad (a+h)^2=a^2+2ah+h^2",
         };
       case "rationnelleSimple":
         return exercice.expo === 1
-          ? { texte: "Remplace x par a + h : le numérateur ne change pas, le dénominateur devient a + h, que tu peux garder tel quel :", latex: "f(a+h)=\\dfrac{k}{a+h}" }
-          : { texte: "Remplace x par a + h : le numérateur ne change pas, le dénominateur devient le carré de a + h :", latex: "f(a+h)=\\dfrac{k}{(a+h)^2}" };
+          ? { texte: "Remplace $x$ par $a+h$ : le numérateur ne change pas, le dénominateur devient $a+h$, que tu peux garder tel quel :", latex: "f(a+h)=\\dfrac{k}{a+h}" }
+          : { texte: "Remplace $x$ par $a+h$ : le numérateur ne change pas, le dénominateur devient le carré de $a+h$ :", latex: "f(a+h)=\\dfrac{k}{(a+h)^2}" };
       case "rationnelleLineaire":
         return {
-          texte: "Remplace x par a + h au numérateur et au dénominateur, puis réduis chacun des deux :",
+          texte: "Remplace $x$ par $a+h$ au numérateur et au dénominateur, puis réduis chacun des deux :",
           latex: "f(a+h)=\\dfrac{m(a+h)+p}{(a+h)-q}",
         };
       case "quadratiqueComplete":
         return {
-          texte: "Développe d'abord le carré, puis distribue m et n. Piège : oublier le double produit 2ah, ou le terme en h qui vient de n(a + h) :",
+          texte: "Développe d'abord le carré, puis distribue $m$ et $n$. Piège : oublier le double produit $2ah$, ou le terme en $h$ qui vient de $n(a+h)$ :",
           latex: "f(a+h)=m(a+h)^2+n(a+h)+p, \\quad (a+h)^2=a^2+2ah+h^2",
         };
       case "racine":
-        return { texte: "Remplace x par a + h sous la racine, puis réduis la somme sous la racine :", latex: "f(a+h)=k\\sqrt{(a+h)+c}" };
+        return { texte: "Remplace $x$ par $a+h$ sous la racine, puis réduis la somme sous la racine :", latex: "f(a+h)=k\\sqrt{(a+h)+c}" };
     }
   }
   if (ecran === "quotient") {
     switch (exercice.famille) {
       case "affine":
-        return { texte: "Le h se simplifie directement, sans reste :", latex: "\\dfrac{f(a+h)-f(a)}{h}=\\dfrac{mh}{h}=m" };
+        return { texte: "Le $h$ se simplifie directement, sans reste :", latex: "\\dfrac{f(a+h)-f(a)}{h}=\\dfrac{mh}{h}=m" };
       case "quadratique":
         return {
-          texte: "Mets h en évidence au numérateur de f(a + h) − f(a) avant de diviser par h. Une fois le h simplifié, il doit rester :",
+          texte: "Mets $h$ en évidence au numérateur de $f(a+h)-f(a)$ avant de diviser par $h$. Une fois le $h$ simplifié, il doit rester :",
           latex: "2ma+mh",
         };
       case "rationnelleSimple":
         return {
-          texte: "Mets f(a + h) − f(a) au même dénominateur avant de diviser par h — sinon impossible de mettre h en évidence au numérateur pour le simplifier.",
+          texte: "Mets $f(a+h)-f(a)$ au même dénominateur avant de diviser par $h$ — sinon impossible de mettre $h$ en évidence au numérateur pour le simplifier.",
           latex: null,
         };
       case "rationnelleLineaire":
         return {
-          texte: "Mets f(a + h) − f(a) au même dénominateur avant de diviser par h — le numérateur se réduit alors à un multiple de h, qui se simplifie avec le h du quotient. Dénominateur commun :",
+          texte: "Mets $f(a+h)-f(a)$ au même dénominateur avant de diviser par $h$ — le numérateur se réduit alors à un multiple de $h$, qui se simplifie avec le $h$ du quotient. Dénominateur commun :",
           latex: "(a+h-q)(a-q)",
         };
       case "quadratiqueComplete":
-        return { texte: "Dans f(a + h) − f(a), les termes sans h s'annulent : mets h en évidence au numérateur, puis simplifie par h. Il doit rester :", latex: "2ma+n+mh" };
+        return { texte: "Dans $f(a+h)-f(a)$, les termes sans $h$ s'annulent : mets $h$ en évidence au numérateur, puis simplifie par $h$. Il doit rester :", latex: "2ma+n+mh" };
       case "racine":
         return {
-          texte: "Multiplie le numérateur et le dénominateur par l'expression conjuguée du numérateur : le produit fait disparaître les racines au numérateur, et h se simplifie :",
+          texte: "Multiplie le numérateur et le dénominateur par l'expression conjuguée du numérateur : le produit fait disparaître les racines au numérateur, et $h$ se simplifie :",
           latex: "\\left(\\sqrt{A}-\\sqrt{B}\\right)\\left(\\sqrt{A}+\\sqrt{B}\\right)=A-B",
         };
     }
   }
   if (exercice.famille === "affine") {
-    return { texte: "Calcule f(a + h) − f(a) : les termes sans h s'annulent, il ne reste qu'un multiple de h, qui se simplifie avec le h du dénominateur.", latex: null };
+    return { texte: "Calcule $f(a+h)-f(a)$ : les termes sans $h$ s'annulent, il ne reste qu'un multiple de $h$, qui se simplifie avec le $h$ du dénominateur.", latex: null };
   }
   return {
-    texte: "Dans le quotient simplifié, il ne reste plus de facteur h qui annulerait le dénominateur : remplace directement h par 0 pour obtenir f'(a).",
+    texte: "Dans le quotient simplifié, il ne reste plus de facteur $h$ qui annulerait le dénominateur : remplace directement $h$ par 0 pour obtenir $f'(a)$.",
     latex: null,
   };
 }

@@ -7,8 +7,11 @@ import type {
   ExerciceAssociationGrapheDerivee,
   ExerciceAssociationGrapheVerbal,
   ExerciceAssociationSymbolique,
+  ExerciceAssociationGrapheDeriveeVariee,
+  ExerciceAssociationGrapheVerbalVarie,
   PolynomeAssociation,
 } from "../../core5e/association.types";
+import { extremumsVariee } from "./fonctionsVariees";
 import type {
   AdaptateurFeuilleExercices,
   BaremeExercice,
@@ -29,7 +32,7 @@ import { fragmentsRiches5e } from "../../ui5e/retoursDerivees";
 import { consigneJustificationAssociation } from "../../ui5e/retoursAssociation";
 import { reponseCorrecteAssociation } from "../../core5e/association.types";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
-import { correctionDetailleeAssociation, piegeSymboliqueAssociation } from "./corrigeDetaille";
+import { correctionDetailleeAssociation, piegeSymboliqueAssociation, svgFonctionVariee } from "./corrigeDetaille";
 import { profilAssociation } from "../profilsEvaluationDerivees25-27";
 import { normaliserLimites } from "../../../../lib/notationLog";
 
@@ -68,9 +71,13 @@ const CONSIGNE_GLOBALE = "Associe chaque élément numéroté à la lettre qui l
 /** Catalogue exposé par cet adaptateur — familles A, B, C d'abord (indices et codes imprimés
  * inchangés), puis la famille « A avancée » AJOUTÉE EN FIN (lot C, question 2 de l'audit : points
  * anguleux, rebroussements, tangentes verticales, discontinuités). */
+const estVariee = (id: string) => /^(grapheDeriveeVariee|grapheVerbalVarie)-/.test(id);
+const estAvancee = (id: string) => id.startsWith("grapheDeriveeAvancee");
 export const CATALOGUE_VARIANTES_EXPORT_ASSOCIATION = [
-  ...CATALOGUE_FAMILLES.filter((entree) => !entree.id.startsWith("grapheDeriveeAvancee")),
-  ...CATALOGUE_FAMILLES.filter((entree) => entree.id.startsWith("grapheDeriveeAvancee")),
+  ...CATALOGUE_FAMILLES.filter((entree) => !estAvancee(entree.id) && !estVariee(entree.id)),
+  ...CATALOGUE_FAMILLES.filter((entree) => estAvancee(entree.id)),
+  // Lot C (G18) : familles A et B « variées » (rationnelles, racines, sinus), AJOUTÉES EN FIN.
+  ...CATALOGUE_FAMILLES.filter((entree) => estVariee(entree.id)),
 ];
 
 // ============================================================================
@@ -121,7 +128,7 @@ function rendreLatex(expression: string): string {
 function enteteHtmlGrapheDerivee(exercice: ExerciceAssociationGrapheDerivee): string {
   const elements = exercice.fonctions.map((coeffs, i) => construireSvgPolynomeAssociation(coeffs, String(i + 1)));
   const candidats = exercice.ordreLettres.map((source, j) => construireSvgPolynomeAssociation(derivee(exercice.fonctions[source]), LETTRES[j] ?? String(j + 1)));
-  return `${titreListe("Graphiques de f (numérotés)")}${grilleGraphes(elements)}${titreListe("Graphiques de f' (lettrés)")}${grilleGraphes(candidats)}`;
+  return `${titreListe("Graphiques de f (numérotés)")}${grilleGraphes(elements)}${titreListe("Graphiques de f′ (lettrés)")}${grilleGraphes(candidats)}`;
 }
 
 function enteteHtmlGrapheVerbal(exercice: ExerciceAssociationGrapheVerbal): string {
@@ -154,6 +161,10 @@ function construireEnteteHtmlAssociation(exercice: ExerciceAssociation): string 
       return enteteHtmlSymbolique(exercice);
     case "grapheDeriveeAvancee":
       return enteteHtmlGrapheDeriveeAvancee(exercice);
+    case "grapheDeriveeVariee":
+      return enteteHtmlGrapheDeriveeVariee(exercice);
+    case "grapheVerbalVarie":
+      return enteteHtmlGrapheVerbalVarie(exercice);
   }
 }
 
@@ -184,10 +195,22 @@ function svgFonctionRiche(fo: FonctionRicheAssociation, deriveeDe: boolean, etiq
   return construireSvgFonction(ev, { xMin: X_MIN_ASSOCIATION, xMax: X_MAX_ASSOCIATION, yMin: yBas - marge, yMax: yHaut + marge }, { largeur: LARGEUR_GRAPHE, hauteur: HAUTEUR_GRAPHE, classe: "graphe-cyclo", lettre: etiquette });
 }
 
+function enteteHtmlGrapheDeriveeVariee(exercice: ExerciceAssociationGrapheDeriveeVariee): string {
+  const elements = exercice.fonctions.map((fo, i) => svgFonctionVariee(fo, false, String(i + 1)));
+  const candidats = exercice.ordreLettres.map((source, j) => svgFonctionVariee(exercice.fonctions[source], true, LETTRES[j] ?? String(j + 1)));
+  return `${titreListe("Graphiques de f (numérotés)")}${grilleGraphes(elements)}${titreListe("Graphiques de f′ (lettrés)")}${grilleGraphes(candidats)}`;
+}
+
+function enteteHtmlGrapheVerbalVarie(exercice: ExerciceAssociationGrapheVerbalVarie): string {
+  const elements = exercice.fonctions.map((fo, i) => svgFonctionVariee(fo, false, String(i + 1)));
+  const candidats = exercice.enonces.map((enonce, j) => `<li style="margin:0.25em 0;"><strong>${LETTRES[j] ?? j + 1}.</strong> ${echapperHtml(enonce)}</li>`).join("");
+  return `${titreListe("Graphiques de f (numérotés)")}${grilleGraphes(elements)}${titreListe("Énoncés (lettrés)")}<ul style="list-style:none;padding-left:0;margin:0.2em 0 0.6em;">${candidats}</ul>`;
+}
+
 function enteteHtmlGrapheDeriveeAvancee(exercice: ExerciceAssociationGrapheDeriveeAvancee): string {
   const elements = exercice.fonctions.map((fo, i) => svgFonctionRiche(fo, false, String(i + 1)));
   const candidats = exercice.ordreLettres.map((source, j) => svgFonctionRiche(exercice.fonctions[source], true, LETTRES[j] ?? String(j + 1)));
-  return `${titreListe("Graphiques de f (numérotés)")}${grilleGraphes(elements)}${titreListe("Graphiques de f' (lettrés)")}${grilleGraphes(candidats)}`;
+  return `${titreListe("Graphiques de f (numérotés)")}${grilleGraphes(elements)}${titreListe("Graphiques de f′ (lettrés)")}${grilleGraphes(candidats)}`;
 }
 
 // ============================================================================
@@ -224,7 +247,7 @@ function enoncePapierAssociation(exercice: ExerciceAssociation): EnoncePapier {
 
 function lettreDe(exercice: ExerciceAssociation, i: number): string {
   const r = reponseCorrecteAssociation(exercice.ordreLettres, exercice.famille === "grapheDeriveeAvancee" ? exercice.singulier : undefined, i);
-  return r === "aucune" ? "f' n'existe pas" : (LETTRES[r] ?? "?");
+  return r === "aucune" ? "f′ n'existe pas" : (LETTRES[r] ?? "?");
 }
 
 function correspondance(exercice: ExerciceAssociation): string {
@@ -238,13 +261,17 @@ function reponseBreveAssociation(exercice: ExerciceAssociation): FragmentConsign
 function piegeAssociation(exercice: ExerciceAssociation): string {
   switch (exercice.famille) {
     case "grapheDerivee":
-      return "Le signe de f' se lit sur la pente de f, pas sur le signe de f : f' est positive là où f monte, même si f est négative.";
+      return "Le signe de f′ se lit sur la pente de f, pas sur le signe de f : f′ est positive là où f monte, même si f est négative.";
     case "grapheVerbal":
       return "Deux énoncés peuvent décrire les mêmes variations : départage-les par la position des extremums et de f(0).";
     case "symbolique":
       return "Pour une puissance de ax + b, ne pas oublier de multiplier par a (la dérivée de l'intérieure).";
     case "grapheDeriveeAvancee":
       return "Une courbe continue n'est pas forcément dérivable : en un coin ou en un point à tangente verticale, f′ n'existe pas.";
+    case "grapheDeriveeVariee":
+      return "Le signe de f′ se lit sur la pente de f, pas sur le signe de f ; à une asymptote verticale de f, f′ n'existe pas non plus (son graphique est coupé au même endroit).";
+    case "grapheVerbalVarie":
+      return "Deux énoncés peuvent décrire les mêmes variations : départage-les par l'asymptote ou le début de la courbe, la position des sommets et celle de f(0).";
   }
 }
 
@@ -252,7 +279,7 @@ function baremeAssociation(exercice: ExerciceAssociation): BaremeExercice {
   const n = nombreElementsAssociation(exercice);
   // Lot C : 3 points pour l'association, 1 point pour la justification (étape b).
   const criteres: CritereBareme[] = [
-    ...Array.from({ length: n }, (_, i) => ({ sousQuestion: LETTRES_ETAPES[0], critere: [texte(`Élément ${i + 1} associé à ${lettreDe(exercice, i) === "f' n'existe pas" ? "« f′ n'existe pas »" : `la lettre ${lettreDe(exercice, i)}`}`)], points: 3 / n })),
+    ...Array.from({ length: n }, (_, i) => ({ sousQuestion: LETTRES_ETAPES[0], critere: [texte(`Élément ${i + 1} associé à ${lettreDe(exercice, i) === "f′ n'existe pas" ? "« f′ n'existe pas »" : `la lettre ${lettreDe(exercice, i)}`}`)], points: 3 / n })),
     { sousQuestion: LETTRES_ETAPES[1], critere: [texte(exercice.famille === "symbolique" ? "Justification : dérivée de la fonction choisie correcte" : "Justification : deux propriétés lues sur les graphiques (extremums ou inflexion, sens de variation / signe de f′ ; point particulier)")], points: 1 },
   ];
   return {
@@ -279,8 +306,15 @@ function criteresDifficulteAssociation(exercice: ExerciceAssociation): CriteresD
     });
     memesVariations = new Set(sig).size < sig.length;
   }
-  // Famille avancée : la singularité est un piège des données (courbe continue mais non dérivable).
-  return { ...etapesDuCorrige(corrige, ["a"]), methode: exercice.famille === "grapheVerbal" ? 1 : 0, piege: memesVariations || exercice.famille === "grapheDeriveeAvancee" ? 1 : 0, nombres: 0 };
+  if (exercice.famille === "grapheVerbalVarie") {
+    const sig = exercice.fonctions.map((fo) => extremumsVariee(fo).map((e) => e.nature).join("-"));
+    memesVariations = new Set(sig).size < sig.length;
+  }
+  // Famille avancée : la singularité est un piège des données (courbe continue mais non dérivable) ;
+  // famille A variée : une asymptote verticale (f′ n'y existe pas, son graphique est coupé).
+  const asymptote = exercice.famille === "grapheDeriveeVariee" && exercice.fonctions.some((fo) => fo.type === "rationnelle");
+  const methode = exercice.famille === "grapheVerbal" || exercice.famille === "grapheVerbalVarie" ? 1 : 0;
+  return { ...etapesDuCorrige(corrige, ["a"]), methode, piege: memesVariations || asymptote || exercice.famille === "grapheDeriveeAvancee" ? 1 : 0, nombres: 0 };
 }
 
 /** Ancien corrigé (repli, documents Word). */
@@ -289,7 +323,7 @@ function construireCorrectionAssociation(exercice: ExerciceAssociation): BlocCor
 }
 
 export const adaptateurEvaluationAssociation: AdaptateurFeuilleExercices<ExerciceAssociation> = {
-  titreDocument: "Association graphique/mots ↔ signe de f'/f'' — Évaluation",
+  titreDocument: "Association graphique/mots ↔ signe de f′/f″ — Évaluation",
   nomFichierBase: "association-signe-derivees",
   genererInstance: genererExerciceAssociation,
   catalogueVariantes: CATALOGUE_VARIANTES_EXPORT_ASSOCIATION,

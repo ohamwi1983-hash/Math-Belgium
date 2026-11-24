@@ -42,6 +42,15 @@ import {
  * l'adaptateur ET par `App5gen29.tsx`.
  */
 
+/** Abscisse LaTeX → texte de l'intitulé d'un bloc (rendu en texte brut) : « √3 », « −3/2 », « 2 − √3 ». */
+function racineEnTexte(latex: string): string {
+  return latex
+    .replace(/\\dfrac\{([^{}]+)\}\{([^{}]+)\}/g, "$1/$2")
+    .replace(/\\sqrt\{(\d+)\}/g, "√$1")
+    .replace(/-/g, "−")
+    .replace(/\s*([+−])\s*/g, (_m, s, i) => (i === 0 ? s : ` ${s} `));
+}
+
 const LETTRES = "abcdefghijkl";
 
 export function lettreEcranEtudeLocale(e: ExerciceEtudeLocale, ecran: EcranEtudeLocale): string {
@@ -200,11 +209,11 @@ function lignesValeurIrrationnelle(p: ExerciceEtudeLocalePolynomiale, nom: strin
   const Q = A * s + B * e;
   const lignes: LigneCalcul[] = [];
   if (e === 0) {
-    lignes.push(ligne(`${nom}^{2}=(${x0})^{2}`, `on remplace ${nom}`), ligne(`=${r}`, jf({ l: `(\\sqrt{${r}})^2=${r}` })));
+    lignes.push(ligne(`${nom}^{2}=(${x0})^{2}`, jf("on remplace ", { l: nom })), ligne(`=${r}`, jf({ l: `(\\sqrt{${r}})^2=${r}` })));
     lignes.push(ligne(`${nom}^{3}=${r}\\cdot (${x0})`, jf({ l: `x^3=x^2\\cdot x` })), ligne(`=${ab(0, r * s, r)}`));
   } else {
     lignes.push(
-      ligne(`${nom}^{2}=(${x0})^{2}`, `on remplace ${nom}`),
+      ligne(`${nom}^{2}=(${x0})^{2}`, jf("on remplace ", { l: nom })),
       ligne(`=${somme([`${e * e}`, ab(0, 2 * e * s, r), `${r}`])}`, jf("identité remarquable, ", { l: `(\\sqrt{${r}})^2=${r}` })),
       ligne(`=${ab(A, B, r)}`, "on réduit"),
       ligne(`${nom}^{3}=(${ab(A, B, r)})(${x0})`, jf({ l: "x^3=x^2\\cdot x" })),
@@ -352,7 +361,7 @@ export function correctionDetailleeEtudeLocale(e: ExerciceEtudeLocale): EtapeCor
         e.racinesFPrime.forEach((r, i) => {
           if (e.classificationFPrime[i] === "ni_lun_ni_lautre") return;
           const nom = e.racinesFPrime.length > 1 ? `x_${i + 1}` : "x_0";
-          etapes.push(calcul(l, lignesValeur(e, r, nom), [t(`${NATURE[e.classificationFPrime[i]]} en `), f(`${r.exact ? "x" : nom}=${formatRacineLatex(r)}`)], `f(${formatRacineLatex(r).replace(/\\sqrt\{(\d+)\}/g, "√$1").replace(/-/g, "−")})`));
+          etapes.push(calcul(l, lignesValeur(e, r, nom), [t(`${NATURE[e.classificationFPrime[i]]} en `), f(`${r.exact ? "x" : nom}=${formatRacineLatex(r)}`)], `f(${racineEnTexte(formatRacineLatex(r))})`));
         });
         const natures = e.racinesFPrime.map((_, i) => e.classificationFPrime[i]).filter((c) => c !== "ni_lun_ni_lautre");
         etapes.push(resultat(l, valeurs.flatMap((v, i) => [...(i > 0 ? [t(". ")] : []), t(`${NATURE[natures[i]].replace(/^./, (x) => x.toUpperCase())} : `), f(v)])));
@@ -380,7 +389,7 @@ export function correctionDetailleeEtudeLocale(e: ExerciceEtudeLocale): EtapeCor
         etapes.push(utilise(l, [t("Ordonnée du point d'inflexion : "), f("f(x_0)"), t(` — on remplace dans f(x), pas dans f″(x) ${COURS_ETUDE}.`)]));
         e.racinesFSeconde.forEach((r, i) => {
           if (e.classificationFSeconde[i] !== "pi") return;
-          etapes.push(calcul(l, lignesValeur(e, r, "x_0"), [], `f(${formatRacineLatex(r).replace(/\\sqrt\{(\d+)\}/g, "√$1").replace(/-/g, "−")})`));
+          etapes.push(calcul(l, lignesValeur(e, r, "x_0"), [], `f(${racineEnTexte(formatRacineLatex(r))})`));
         });
         etapes.push(resultat(l, liste(formatReponseAttenduePhaseLatex(e, "inflexions"))));
         break;

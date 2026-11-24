@@ -97,8 +97,8 @@ export function questionFinale(exercice: ExerciceVitessePosition): string {
 // ============================================================================
 
 export const LIBELLE_ECRAN: Record<EcranVitessePosition, string> = {
-  derivee: "Vitesse v(t) = s'(t)",
-  acceleration: "Accélération a(t) = v'(t)",
+  derivee: "Vitesse v(t) = s′(t)",
+  acceleration: "Accélération a(t) = v′(t)",
   resoudre: "Solutions de l'équation",
   rejet: "Solution rejetée",
   vitessePointe: "Vitesse atteinte",
@@ -208,7 +208,8 @@ function vAtCible(exercice: ExerciceVitessePosition): number {
 }
 
 function formatAccelerationConfirmeeLatex(exercice: ExerciceVitessePosition): string {
-  return `a(t)=${exercice.a}\\text{ m/s}^2 \\;(>0\\text{ : la vitesse augmente})`;
+  // Formule courte : une formule KaTeX ne passe pas à la ligne (rognée à 390 px dans « Ce qu'on sait déjà »).
+  return `a(t)=${exercice.a}\\text{ m/s}^2>0`;
 }
 
 function formatRacineRetenueConfirmeeLatex(exercice: ExerciceVitessePosition): string {
@@ -220,7 +221,7 @@ function formatRacineRejeteeConfirmeeLatex(exercice: ExerciceVitessePosition): s
 }
 
 function formatRejetConfirmeLatex(exercice: ExerciceVitessePosition): string {
-  return `t=${exercice.racineRejetee}<0\\text{ : le temps est compté à partir du départ}`;
+  return `t=${exercice.racineRejetee}<0\\text{ (rejetée)}`;
 }
 
 function formatVitessePointeConfirmeeLatex(exercice: ExerciceVitessePosition): string {

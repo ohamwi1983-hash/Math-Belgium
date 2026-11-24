@@ -98,10 +98,10 @@ export function questionFinaleEtudierFonction(): string {
 export const LIBELLE_ECRAN_ETUDIER_FONCTION: Record<EcranEtudierFonction, string> = {
   domaine: "Domaine de définition",
   limites: "Limites aux bornes et asymptotes",
-  calculerFPrime: "Calcul de f'(x)",
-  tableauFPrime: "Tableau de signes de f' et variations",
-  calculerFSeconde: "Calcul de f''(x)",
-  tableauFSeconde: "Tableau de signes de f'' et concavité",
+  calculerFPrime: "Calcul de f′(x)",
+  tableauFPrime: "Tableau de signes de f′ et variations",
+  calculerFSeconde: "Calcul de f″(x)",
+  tableauFSeconde: "Tableau de signes de f″ et concavité",
   recap: "Récapitulatif",
   coordonnees: "Coordonnées des points remarquables",
   graphique: "Graphique — points remarquables",
@@ -116,11 +116,11 @@ export function consigneEcranEtudierFonction(ecran: EcranEtudierFonction): strin
     case "calculerFPrime":
       return "Dérive f(x) — utilise la règle de dérivation adaptée à la forme de f.";
     case "tableauFPrime":
-      return "Complète le tableau de signes de f'(x), puis les variations de f qui en découlent à chaque zone et à chaque racine.";
+      return "Complète le tableau de signes de f′(x), puis les variations de f qui en découlent à chaque zone et à chaque racine.";
     case "calculerFSeconde":
-      return "Dérive f'(x) — même méthode qu'à l'écran précédent, appliquée cette fois à f'.";
+      return "Dérive f′(x) — même méthode qu'à l'écran précédent, appliquée cette fois à f′.";
     case "tableauFSeconde":
-      return "Complète le tableau de signes de f''(x), puis la concavité de f qui en découle à chaque zone et à chaque racine.";
+      return "Complète le tableau de signes de f″(x), puis la concavité de f qui en découle à chaque zone et à chaque racine.";
     case "recap":
       return "Voici la synthèse de ton étude : vérifie-la avant de calculer les coordonnées des points remarquables.";
     case "coordonnees":

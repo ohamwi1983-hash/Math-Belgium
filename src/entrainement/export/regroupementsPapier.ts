@@ -514,7 +514,7 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     formes: [
       {
         motif: re(
-          String.raw`On considère la fonction f ; (?<intro>sa dérivée f' est donnée|ses dérivées f' et f'' sont données) : (?<ligne>${M})\n(?<q>.+?)(?: (?:(?<p_exactes>Donne des valeurs exactes\.)|(?<p_abscisses>Donne les abscisses en valeur exacte ; les valeurs de f peuvent être arrondies au centième\.)))?`,
+          String.raw`On considère la fonction f ; (?<intro>sa dérivée f[′'] est donnée|ses dérivées f[′'] et f(?:″|'') sont données) : (?<ligne>${M})\n(?<q>.+?)(?: (?:(?<p_exactes>Donne des valeurs exactes\.)|(?<p_abscisses>Donne les abscisses en valeur exacte ; les valeurs de f peuvent être arrondies au centième\.)))?`,
         ),
         consigne: (g) => `Dans chaque cas, on considère la fonction f ; ${g.intro}. ${g.q}`,
       },

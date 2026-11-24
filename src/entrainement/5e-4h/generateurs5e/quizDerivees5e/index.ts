@@ -13,10 +13,10 @@ import { randomInt } from "./aleatoire";
 import { BANQUE_QUIZ_DERIVEES_5E } from "./banque";
 
 export const CATALOGUE_VARIANTES: { id: VarianteQuizDerivees5e; label: string }[] = [
-  { id: "calculParDefinition", label: "Calculer f'(a) par la définition" },
+  { id: "calculParDefinition", label: "Calculer f′(a) par la définition" },
   { id: "tangentes", label: "Tangentes et approximation affine" },
   { id: "fonctionDerivee", label: "Fonction dérivée — règles de dérivation" },
-  { id: "reconnaissanceGraphique", label: "Signe de f' et de f'' — variations et concavité" },
+  { id: "reconnaissanceGraphique", label: "Signe de f′ et de f″ — variations et concavité" },
   { id: "etudeLocaleEtGraphique", label: "Étude locale et lecture graphique" },
   { id: "etudeComplete", label: "Étudier une fonction" },
   { id: "optimisation", label: "Optimisation géométrique" },

@@ -198,7 +198,7 @@ export const LIBELLE_ECRAN: Record<EcranOptimisation, string> = {
   lien: "Lien entre les inconnues",
   construire: "Fonction à optimiser",
   deriver: "Dérivée",
-  resoudre: "Résolution de F'(x) = 0",
+  resoudre: "Résolution de F′(x) = 0",
   justifier: "Nature de l'extremum",
   conclure: "Conclusion",
   application: "Application numérique",
@@ -513,7 +513,7 @@ export function texteAideNiveau2(exercice: ExerciceOptimisation, phase: EcranOpt
     case "lien":
       switch (exercice.famille) {
         case "trapeze":
-          return { texte: "La grande base dépasse le fond de deux projections horizontales, chacune égale à :", latex: `${exercice.l}\\cos x` };
+          return { texte: "La grande base dépasse le fond de deux projections horizontales, chacune égale à :", latex: `${exercice.l}\\cos\\alpha` };
         case "cylindre":
           return { texte: "Avec les données :", latex: `${formatValeurAvecPiLatex({ rationnel: 0, coeffPi: exercice.coeffV })}=\\pi x^2 h` };
         case "margesA":
@@ -716,11 +716,14 @@ export function formatReponseAttendueEcranLatex(exercice: ExerciceOptimisation, 
       const opt = xOptimal(exercice);
       const rejet =
         exercice.famille === "boite"
-          ? `\\ \\text{(}x=${exercice.c / 2}\\text{ est rejetée : boîte plate)}`
+          ? `\\text{(}x=${exercice.c / 2}\\text{ est rejetée : boîte plate)}`
           : avecJustificationRejet(exercice)
-            ? "\\ \\text{(l'autre solution, négative, est rejetée : une longueur est positive)}"
+            ? "\\text{(l'autre, négative, est rejetée)}"
             : "";
-      return `${v === "r" ? "r" : "x"}${egalOuEnviron(opt)}${formatNombreLatex(opt)}${unites(exercice).l}${rejet}`;
+      // Rejet sur une seconde ligne (`gathered`) : une formule KaTeX ne passe pas à la ligne et
+      // sortait de l'écran à 390 px.
+      const valeur = `${v === "r" ? "r" : "x"}${egalOuEnviron(opt)}${formatNombreLatex(opt)}${unites(exercice).l}`;
+      return rejet ? `\\begin{gathered}${valeur}\\\\ ${rejet}\\end{gathered}` : valeur;
     }
     case "justifier": {
       const pts = pointsTest(exercice);
@@ -728,7 +731,7 @@ export function formatReponseAttendueEcranLatex(exercice: ExerciceOptimisation, 
       const unite = exercice.famille === "trapeze" ? "^\\circ" : "";
       const nature = conclusionReelle(exercice) === "max" ? "maximum" : "minimum";
       const signe = (x: number) => (x > 0 ? ">0" : "<0");
-      return `F'(${formatNombreLatex(pts.affichageAvant)}${unite})\\approx ${formatNombreLatex(valeurs.avant)}${signe(valeurs.avant)},\\ F'(${formatNombreLatex(pts.affichageApres)}${unite})\\approx ${formatNombreLatex(valeurs.apres)}${signe(valeurs.apres)} \\Rightarrow \\text{${nature}}`;
+      return `\\begin{gathered}F'(${formatNombreLatex(pts.affichageAvant)}${unite})\\approx ${formatNombreLatex(valeurs.avant)}${signe(valeurs.avant)}\\\\ F'(${formatNombreLatex(pts.affichageApres)}${unite})\\approx ${formatNombreLatex(valeurs.apres)}${signe(valeurs.apres)}\\\\ \\Rightarrow \\text{${nature}}\\end{gathered}`;
     }
     case "conclure":
       return formatConclureLatex(exercice);

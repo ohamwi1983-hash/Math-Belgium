@@ -123,12 +123,12 @@ export function formatTermesDonneesLatex(exercice: ExerciceEtudeLocale): string[
 // ============================================================================
 
 export const CONSIGNE_GENERALE_ETUDE_LOCALE =
-  "Les dérivées f'(x) et, si besoin, f''(x) sont données : inutile de dériver. Étudie les points critiques de f à partir de ces expressions.";
+  "Les dérivées f′(x) et, si besoin, f″(x) sont données : inutile de dériver. Étudie les points critiques de f à partir de ces expressions.";
 
 /** Consigne générale selon l'option « f′ et f″ données / à calculer » (lot C). */
 export function consigneGeneraleEtudeLocale(exercice: ExerciceEtudeLocale): string {
   if (!exercice.deriveesACalculer) return CONSIGNE_GENERALE_ETUDE_LOCALE;
-  return exercice.niveau === "avance" ? "Calcule f'(x) puis f''(x), et étudie les points critiques de f à partir de ces expressions." : "Calcule f'(x), puis étudie les points critiques de f à partir de cette expression.";
+  return exercice.niveau === "avance" ? "Calcule f′(x) puis f″(x), et étudie les points critiques de f à partir de ces expressions." : "Calcule f′(x), puis étudie les points critiques de f à partir de cette expression.";
 }
 
 export function questionFinaleEtudeLocale(exercice: ExerciceEtudeLocale): string {
@@ -141,13 +141,13 @@ export function questionFinaleEtudeLocale(exercice: ExerciceEtudeLocale): string
 
 export const LIBELLE_ECRAN_ETUDE_LOCALE: Record<EcranEtudeLocale, string> = {
   domaine: "Domaine de définition",
-  deriverFPrime: "Dérivée f'(x)",
-  deriverFSeconde: "Dérivée seconde f''(x)",
-  resoudreFPrime: "Résoudre f'(x)=0",
-  tableauFPrime: "Tableau de signes de f'",
+  deriverFPrime: "Dérivée f′(x)",
+  deriverFSeconde: "Dérivée seconde f″(x)",
+  resoudreFPrime: "Résoudre f′(x)=0",
+  tableauFPrime: "Tableau de signes de f′",
   extremums: "Valeur de f aux extremums",
-  resoudreFSeconde: "Résoudre f''(x)=0",
-  tableauFSeconde: "Tableau de signes de f''",
+  resoudreFSeconde: "Résoudre f″(x)=0",
+  tableauFSeconde: "Tableau de signes de f″",
   inflexions: "Valeur de f aux points d'inflexion",
 };
 
@@ -156,19 +156,19 @@ export function consigneEcranEtudeLocale(ecran: EcranEtudeLocale): string {
     case "domaine":
       return "Détermine le domaine de définition de f.";
     case "deriverFPrime":
-      return "Calcule la dérivée f'(x).";
+      return "Calcule la dérivée f′(x).";
     case "deriverFSeconde":
-      return "Calcule la dérivée seconde f''(x), en dérivant f'(x).";
+      return "Calcule la dérivée seconde f″(x), en dérivant f′(x).";
     case "resoudreFPrime":
-      return "Calcule les éventuels zéros de f'(x).";
+      return "Calcule les éventuels zéros de f′(x).";
     case "tableauFPrime":
-      return "Complète le tableau de signes de f'(x), puis les variations de f qui en découlent dans chaque zone et en chaque zéro de f'(x).";
+      return "Complète le tableau de signes de f′(x), puis les variations de f qui en découlent dans chaque zone et en chaque zéro de f′(x).";
     case "extremums":
-      return "Pour chaque zéro de f'(x) classé maximum ou minimum au tableau précédent, calcule f(x).";
+      return "Pour chaque zéro de f′(x) classé maximum ou minimum au tableau précédent, calcule f(x).";
     case "resoudreFSeconde":
-      return "Calcule les éventuels zéros de f''(x).";
+      return "Calcule les éventuels zéros de f″(x).";
     case "tableauFSeconde":
-      return "Complète le tableau de signes de f''(x), puis la concavité de f qui en découle dans chaque zone et en chaque zéro de f''(x).";
+      return "Complète le tableau de signes de f″(x), puis la concavité de f qui en découle dans chaque zone et en chaque zéro de f″(x).";
     case "inflexions":
       return "Pour chaque point classé PI (point d'inflexion) au tableau précédent, calcule f(x).";
   }
@@ -178,7 +178,7 @@ export function consigneEcranEtudeLocale(ecran: EcranEtudeLocale): string {
  * confond sinon avec la réunion d'ensembles, et « PI » n'est défini nulle part à l'écran. */
 export function legendeTableauEtudeLocale(mode: "fprime" | "fseconde"): string {
   return mode === "fprime"
-    ? "↗ : f croissante · ↘ : f décroissante · « ni l'un ni l'autre » : f' s'annule sans changer de signe."
+    ? "↗ : f croissante · ↘ : f décroissante · « ni l'un ni l'autre » : f′ s'annule sans changer de signe."
     : "∪ : f convexe (tournée vers le haut) · ∩ : f concave (tournée vers le bas) · PI : point d'inflexion.";
 }
 
@@ -216,27 +216,27 @@ export function texteAideNiveau1EtudeLocale(ecran: EcranEtudeLocale, exercice?: 
       };
     case "tableauFPrime":
       return {
-        texte: "Piège : une racine double de f' l'annule sans que son signe change ; ce point n'est alors ni un maximum ni un minimum. Compare toujours le signe juste avant et juste après chaque zéro.",
+        texte: "Piège : une racine double de f′ l'annule sans que son signe change ; ce point n'est alors ni un maximum ni un minimum. Compare toujours le signe juste avant et juste après chaque zéro.",
         latex: null,
       };
     case "extremums":
       return {
-        texte: "Remplace x par l'abscisse dans f(x) — pas dans f'(x), qui ne donne que la pente :",
+        texte: "Remplace x par l'abscisse dans f(x) — pas dans f′(x), qui ne donne que la pente :",
         latex: "f(x_0)",
       };
     case "resoudreFSeconde":
       return {
-        texte: "Même démarche que pour f', mais cette équation renseigne sur la concavité de f, pas sur ses variations :",
+        texte: "Même démarche que pour f′, mais cette équation renseigne sur la concavité de f, pas sur ses variations :",
         latex: "f''(x)=0",
       };
     case "tableauFSeconde":
       return {
-        texte: "Piège : f' renseigne sur les variations, f'' sur la concavité. Un zéro de f'' n'est un point d'inflexion que si le signe de f'' change de part et d'autre.",
+        texte: "Piège : f′ renseigne sur les variations, f″ sur la concavité. Un zéro de f″ n'est un point d'inflexion que si le signe de f″ change de part et d'autre.",
         latex: null,
       };
     case "inflexions":
       return {
-        texte: "Remplace x par l'abscisse du point d'inflexion dans f(x) — pas dans f''(x) :",
+        texte: "Remplace x par l'abscisse du point d'inflexion dans f(x) — pas dans f″(x) :",
         latex: "f(x_0)",
       };
   }
@@ -247,6 +247,21 @@ export function texteAideNiveau1EtudeLocale(ecran: EcranEtudeLocale, exercice?: 
 export interface AideFragmentee {
   texte: string;
   latex: string | null;
+}
+
+/** Numérateur d'un « \dfrac{N}{D} » de tête, accolades équilibrées (« 12x^{2}-36 » : l'ancienne
+ * expression régulière s'arrêtait à la première « } » et donnait « 12x^{2=0 », KaTeX invalide). */
+function numerateurDfrac(latex: string): string {
+  if (!latex.startsWith("\\dfrac{")) return latex;
+  let profondeur = 0;
+  for (let i = "\\dfrac".length; i < latex.length; i++) {
+    if (latex[i] === "{") profondeur++;
+    else if (latex[i] === "}") {
+      profondeur--;
+      if (profondeur === 0) return latex.slice("\\dfrac{".length, i);
+    }
+  }
+  return latex;
 }
 
 /** Niveau 2 posé pour CETTE fonction (lot B : plus d'« Exemple : 6x² − 6 = 0… »), jamais la réponse. */
@@ -266,7 +281,7 @@ export function texteAideNiveau2EtudeLocale(ecran: EcranEtudeLocale, exercice: E
     case "resoudreFPrime":
       return poly
         ? { texte: "Ici, divise par le coefficient de x² pour obtenir un trinôme plus simple, puis factorise ou calcule Δ :", latex: `${fp}=0` }
-        : { texte: "Ici, une fraction est nulle quand son numérateur est nul (et son dénominateur non nul) :", latex: `${fp.replace(/^\\dfrac\{([^}]*)\}.*$/, "$1")}=0` };
+        : { texte: "Ici, une fraction est nulle quand son numérateur est nul (et son dénominateur non nul) :", latex: `${numerateurDfrac(fp)}=0` };
     case "tableauFPrime":
       return { texte: "Ici, f′ est un trinôme ou une fraction : étudie le signe juste avant et juste après chaque zéro trouvé, par exemple en choisissant une valeur test dans chaque zone de :", latex: `f'(x)=${fp}` };
     case "extremums":
@@ -274,7 +289,7 @@ export function texteAideNiveau2EtudeLocale(ecran: EcranEtudeLocale, exercice: E
     case "resoudreFSeconde":
       return poly
         ? { texte: "Ici, c'est une équation du premier degré :", latex: `${fs}=0` }
-        : { texte: "Ici, seul le numérateur peut s'annuler :", latex: `${fs.replace(/^\\dfrac\{([^}]*)\}.*$/, "$1")}=0` };
+        : { texte: "Ici, seul le numérateur peut s'annuler :", latex: `${numerateurDfrac(fs)}=0` };
     case "tableauFSeconde":
       return { texte: "Ici, étudie le signe de f″ de part et d'autre de chaque zéro :", latex: `f''(x)=${fs}` };
     case "inflexions":
@@ -524,7 +539,8 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceEtudeLocale, e
 // ============================================================================
 
 export function libelleSigneTableau(v: ValeurSigneTableau | null): string {
-  return v ?? "?";
+  // Affichage seulement : « − » typographique (la valeur stockée reste "-").
+  return v === "-" ? "−" : (v ?? "?");
 }
 
 export function libelleLigne2Tableau(v: ValeurLigne2Tableau | null): string {

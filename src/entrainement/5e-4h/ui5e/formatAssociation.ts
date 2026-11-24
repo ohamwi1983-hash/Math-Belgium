@@ -9,26 +9,34 @@ export const CONSIGNE_GENERALE_ASSOCIATION = "Associe chaque élément numérot�
 export function consigneAssociation(exercice: ExerciceAssociation): string {
   switch (exercice.famille) {
     case "grapheDerivee":
-      return "Chaque graphique numéroté représente une fonction f. Associe-lui, parmi les graphiques lettrés, celui de sa dérivée f'.";
+      return "Chaque graphique numéroté représente une fonction f. Associe-lui, parmi les graphiques lettrés, celui de sa dérivée f′.";
     case "grapheDeriveeAvancee":
-      return "Chaque graphique numéroté représente une fonction f. Associe-lui, parmi les graphiques lettrés, celui de sa dérivée f' — ou choisis « f' n'existe pas ici » si f n'est pas dérivable partout sur son domaine.";
+      return "Chaque graphique numéroté représente une fonction f. Associe-lui, parmi les graphiques lettrés, celui de sa dérivée f′ — ou choisis « f′ n'existe pas ici » si f n'est pas dérivable partout sur son domaine.";
     case "grapheVerbal":
       return "Chaque graphique numéroté représente une fonction f. Associe-lui, parmi les énoncés lettrés, celui qui décrit correctement son comportement (variations, extremums, ordonnée à l'origine et concavité).";
     case "symbolique":
-      return "Chaque fonction f numérotée admet une dérivée parmi les expressions lettrées. Associe chaque f à sa dérivée f'.";
+      return "Chaque fonction f numérotée admet une dérivée parmi les expressions lettrées. Associe chaque f à sa dérivée f′.";
+    case "grapheDeriveeVariee":
+      return "Chaque graphique numéroté représente une fonction f (rationnelle, racine ou sinus). Associe-lui, parmi les graphiques lettrés, celui de sa dérivée f′.";
+    case "grapheVerbalVarie":
+      return "Chaque graphique numéroté représente une fonction f (rationnelle, racine ou sinus). Associe-lui, parmi les énoncés lettrés, celui qui décrit correctement son comportement (domaine ou asymptote, variations, extremums et ordonnée à l'origine).";
   }
 }
 
 export function texteAideNiveau1Association(exercice: ExerciceAssociation): string {
   switch (exercice.famille) {
     case "grapheDerivee":
-      return "Regarde le signe de la pente de f : là où f monte, f' est positive (au-dessus de l'axe) ; là où f descend, f' est négative (en-dessous).";
+      return "Regarde le signe de la pente de f : là où f monte, f′ est positive (au-dessus de l'axe) ; là où f descend, f′ est négative (en-dessous).";
     case "grapheDeriveeAvancee":
-      return "Regarde le signe de la pente de f comme d'habitude — mais cherche aussi un point anguleux, un rebroussement ou une tangente verticale : en un tel point, f' n'existe pas.";
+      return "Regarde le signe de la pente de f comme d'habitude — mais cherche aussi un point anguleux, un rebroussement ou une tangente verticale : en un tel point, f′ n'existe pas.";
     case "grapheVerbal":
-      return "Repère d'abord les intervalles où f croît ou décroît (signe de f'), la place de ses extremums par rapport à l'axe des ordonnées, puis l'endroit où la courbe coupe cet axe.";
+      return "Repère d'abord les intervalles où f croît ou décroît (signe de f′), la place de ses extremums par rapport à l'axe des ordonnées, puis l'endroit où la courbe coupe cet axe.";
     case "symbolique":
       return "Identifie la structure de f (puissance, produit, composée) avant d'appliquer la règle de dérivation correspondante.";
+    case "grapheDeriveeVariee":
+      return "Regarde le signe de la pente de f : là où f monte, f′ est positive (au-dessus de l'axe) ; là où f descend, f′ est négative (en dessous). Sous chaque sommet de f, f′ s'annule.";
+    case "grapheVerbalVarie":
+      return "Repère d'abord où f est définie (asymptote verticale, début de la courbe), puis les intervalles où f croît ou décroît, la place de ses sommets par rapport à l'axe des ordonnées et l'endroit où la courbe coupe cet axe.";
   }
 }
 
@@ -44,12 +52,12 @@ export function texteAideNiveau2Association(exercice: ExerciceAssociation): Aide
     case "grapheDerivee":
       return {
         texte:
-          "Là où f est dérivable, un maximum ou un minimum de f (à l'intérieur du graphique) correspond à un zéro de f' où f' change de signe : f' passe de positive à négative en un maximum, de négative à positive en un minimum.",
+          "Là où f est dérivable, un maximum ou un minimum de f (à l'intérieur du graphique) correspond à un zéro de f′ où f′ change de signe : f′ passe de positive à négative en un maximum, de négative à positive en un minimum.",
       };
     case "grapheDeriveeAvancee":
       return {
         texte:
-          "En un point anguleux (deux pentes différentes qui se rencontrent) ou en un point de rebroussement, la courbe n'a pas de tangente unique. En un point à tangente verticale, la tangente existe mais elle est verticale : sa pente serait infinie. Dans ces trois cas, f' n'existe pas en ce point.",
+          "En un point anguleux (deux pentes différentes qui se rencontrent) ou en un point de rebroussement, la courbe n'a pas de tangente unique. En un point à tangente verticale, la tangente existe mais elle est verticale : sa pente serait infinie. Dans ces trois cas, f′ n'existe pas en ce point.",
       };
     case "grapheVerbal":
       return {
@@ -58,5 +66,15 @@ export function texteAideNiveau2Association(exercice: ExerciceAssociation): Aide
       };
     case "symbolique":
       return { texte: "Commence par dériver la première fonction (règle de la puissance d'un binôme si besoin), puis cherche sa dérivée parmi les lettres :", latex: `f_1(x)=${exercice.fLatex[0]}` };
+    case "grapheDeriveeVariee":
+      return {
+        texte:
+          "Un sommet de f (bosse ou creux) correspond à un zéro de f′ où f′ change de signe. Là où f n'est pas définie (asymptote verticale), f′ ne l'est pas non plus : son graphique est coupé au même endroit. Au début d'une courbe de racine, la pente est très forte.",
+      };
+    case "grapheVerbalVarie":
+      return {
+        texte:
+          "Pour départager deux énoncés proches : où commence la courbe, ou où est son asymptote verticale ? De quel côté de l'axe des ordonnées sont ses sommets ? La courbe coupe-t-elle cet axe au-dessus de l'origine, en dessous, ou à l'origine ?",
+      };
   }
 }

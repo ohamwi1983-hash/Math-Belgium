@@ -211,7 +211,7 @@ function cylindre(e: ExerciceCylindre): Etapes {
     },
     construire: {
       utilise: [t("Aire totale = deux disques + surface latérale : "), f("S=2\\pi x^{2}+2\\pi x\\,h"), t(" ; on remplace h "), t(COURS_OPTIMISATION), t(".")],
-      blocs: [{ lignes: [ligne(`F(x)=2\\pi x^{2}+2\\pi x\\,h`, "aire totale"), ligne(`=2\\pi x^{2}+2\\pi x\\cdot\\dfrac{${V}}{x^{2}}`, "on remplace h"), ligne(`=2\\pi x^{2}+\\dfrac{${2 * V}\\pi}{x}`, "on simplifie par x")] }],
+      blocs: [{ lignes: [ligne(`F(x)=2\\pi x^{2}+2\\pi x\\,h`, "aire totale"), ligne(`=2\\pi x^{2}+2\\pi x\\cdot\\dfrac{${V}}{x^{2}}`, [t("on remplace "), f("h")]), ligne(`=2\\pi x^{2}+\\dfrac{${2 * V}\\pi}{x}`, [t("on simplifie par "), f("x")])] }],
     },
     deriver: {
       utilise: [t("On dérive terme à terme : "), f("(x^{2})'=2x"), t(" et "), f("\\left(\\frac{k}{x}\\right)'=-\\frac{k}{x^{2}}"), t(" "), t(COURS_REGLES), t(".")],
@@ -288,14 +288,14 @@ function marges(e: ExerciceMarges): Etapes {
       },
       construire: {
         utilise: [t("Aire imprimée = "), f("x\\cdot y"), t(" ; on remplace y "), t(COURS_OPTIMISATION), t(".")],
-        blocs: [{ lignes: [ligne(`F(x)=x\\cdot y`, "aire de la zone imprimée"), ligne(`=x\\left(\\dfrac{${T}}{x+${2 * mh}}-${2 * mv}\\right)`, "on remplace y"), ligne(`=\\dfrac{${T}x}{x+${2 * mh}}-${2 * mv}x`, "on distribue x")] }],
+        blocs: [{ lignes: [ligne(`F(x)=x\\cdot y`, "aire de la zone imprimée"), ligne(`=x\\left(\\dfrac{${T}}{x+${2 * mh}}-${2 * mv}\\right)`, [t("on remplace "), f("y")]), ligne(`=\\dfrac{${T}x}{x+${2 * mh}}-${2 * mv}x`, [t("on distribue "), f("x")])] }],
       },
       deriver: {
         utilise: [t("Règle du quotient pour le premier terme, "), f("\\left(\\frac{u}{v}\\right)'=\\frac{u'v-uv'}{v^{2}}"), t(", puis dérivée du terme en x "), t(COURS_REGLES), t(".")],
         blocs: [{ lignes: [ligne(`\\left(\\dfrac{${T}x}{x+${2 * mh}}\\right)'=\\dfrac{${T}(x+${2 * mh})-${T}x}{(x+${2 * mh})^{2}}`, [f(`u=${T}x`), t(", "), f(`v=x+${2 * mh}`), t(", "), f("u'="), f(`${T}`), t(", "), f("v'=1")]), ligne(`=\\dfrac{${K}}{(x+${2 * mh})^{2}}`, "on réduit le numérateur"), ligne(`F'(x)=\\dfrac{${K}}{(x+${2 * mh})^{2}}-${2 * mv}`, [f(`(${2 * mv}x)'=${2 * mv}`)])] }],
       },
       resoudre: {
-        utilise: [t("On isole le carré, puis on prend la racine positive (x + 2m_h est une longueur) "), t(COURS_OPTIMISATION), t(".")],
+        utilise: [t("On isole le carré, puis on prend la racine positive ("), f("x+2m_h"), t(" est une longueur) "), t(COURS_OPTIMISATION), t(".")],
         blocs: [
           {
             lignes: [
@@ -340,7 +340,7 @@ function marges(e: ExerciceMarges): Etapes {
         {
           lignes: [
             ligne(`F(x)=(x+${2 * mh})(y+${2 * mv})`, "aire totale"),
-            ligne(`=(x+${2 * mh})\\left(\\dfrac{${A}}{x}+${2 * mv}\\right)`, "on remplace y"),
+            ligne(`=(x+${2 * mh})\\left(\\dfrac{${A}}{x}+${2 * mv}\\right)`, [t("on remplace "), f("y")]),
             ligne(`=${A}+${2 * mv}x+\\dfrac{${K}}{x}+${4 * mh * mv}`, "on développe"),
             ligne(`=${cst}+${2 * mv}x+\\dfrac{${K}}{x}`, "on regroupe les constantes"),
           ],
@@ -403,7 +403,7 @@ function fenetre(e: ExerciceFenetre): Etapes {
             lignes: [
               ligne(`F(r)=2r\\,h+\\dfrac{\\pi r^{2}}{2}`, "aire de la fenêtre"),
               ligne(`=r(${Pi(P)}-(2+\\pi)r)+\\dfrac{\\pi r^{2}}{2}`, [f("2r\\cdot\\frac{\\ldots}{2}=r(\\ldots)")]),
-              ligne(`=${PiF(P)}r-(2+\\pi)r^{2}+\\dfrac{\\pi}{2}r^{2}`, "on distribue r"),
+              ligne(`=${PiF(P)}r-(2+\\pi)r^{2}+\\dfrac{\\pi}{2}r^{2}`, [t("on distribue "), f("r")]),
               ligne(`=${PiF(P)}r-\\left(2+\\dfrac{\\pi}{2}\\right)r^{2}`, [t("on regroupe les termes en "), f("r^{2}")]),
             ],
           },
@@ -558,12 +558,12 @@ function boite(e: ExerciceBoite): Etapes {
   const V = x * b * b;
   return {
     lien: {
-      utilise: [t("Sur chaque côté du carton, on retire deux carrés découpés (un à chaque bout) : "), f("c=x+b+x"), t(" ; la hauteur de la boîte est x "), t(COURS_OPTIMISATION), t(".")],
-      blocs: [{ lignes: [ligne(`${c}=x+b+x`, [f(`c=${c}`)]), ligne(`b=${c}-2x`, "on isole b"), ligne(`0<x<${c / 2}`, "domaine : x > 0 et b > 0")] }],
+      utilise: [t("Sur chaque côté du carton, on retire deux carrés découpés (un à chaque bout) : "), f("c=x+b+x"), t(" ; la hauteur de la boîte est "), f("x"), t(" "), t(COURS_OPTIMISATION), t(".")],
+      blocs: [{ lignes: [ligne(`${c}=x+b+x`, [f(`c=${c}`)]), ligne(`b=${c}-2x`, [t("on isole "), f("b")]), ligne(`0<x<${c / 2}`, [t("domaine : "), f("x>0"), t(" et "), f("b>0")])] }],
     },
     construire: {
-      utilise: [t("Volume d'un pavé droit = aire de la base × hauteur : "), f("V=b^{2}\\cdot x"), t(" ; on remplace b "), t(COURS_OPTIMISATION), t(".")],
-      blocs: [{ lignes: [ligne("F(x)=b^{2}\\cdot x", "aire de la base carrée × hauteur"), ligne(`=(${c}-2x)^{2}\\cdot x`, "on remplace b"), ligne(`=x(${c}-2x)^{2}`)] }],
+      utilise: [t("Volume d'un pavé droit = aire de la base × hauteur : "), f("V=b^{2}\\cdot x"), t(" ; on remplace "), f("b"), t(" "), t(COURS_OPTIMISATION), t(".")],
+      blocs: [{ lignes: [ligne("F(x)=b^{2}\\cdot x", "aire de la base carrée × hauteur"), ligne(`=(${c}-2x)^{2}\\cdot x`, [t("on remplace "), f("b")]), ligne(`=x(${c}-2x)^{2}`)] }],
     },
     deriver: {
       utilise: [t("Règle du produit "), f("(uv)'=u'v+uv'"), t(" avec "), f("u=x"), t(" et "), f(`v=(${c}-2x)^{2}`), t(", dont la dérivée est "), f(`2(${c}-2x)\\cdot(-2)`), t(" "), t(COURS_REGLES), t(".")],

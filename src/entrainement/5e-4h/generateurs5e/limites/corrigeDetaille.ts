@@ -240,7 +240,7 @@ function etapesInfiniePoint(e: ExerciceLimiteInfiniePoint): EtapeCorrection[] {
     const signeFacteur = simple ? s : 1;
     const signeD = sens === "gauche" ? e.signeDenominateurGauche : e.signeDenominateurDroite;
     const signeL = sens === "gauche" ? e.signeLimiteGauche : e.signeLimiteDroite;
-    lignesSignes.push(ligne(`${lim(cote(a, sens))} ${facteurA}=${zeroSigne(signeFacteur)}`, simple ? (s < 0 ? `x < ${nbT(a)}` : `x > ${nbT(a)}`) : "un carré est positif des deux côtés"));
+    lignesSignes.push(ligne(`${lim(cote(a, sens))} ${facteurA}=${zeroSigne(signeFacteur)}`, simple ? [f(s < 0 ? `x<${nbT(a).replace("−", "-").replace(",", "{,}")}` : `x>${nbT(a).replace("−", "-").replace(",", "{,}")}`)] : "un carré est positif des deux côtés"));
     lignesSignes.push(
       ligne(`${lim(cote(a, sens))} D(x)=${zeroSigne(signeD)}`, [t("signe de "), f(simple ? `${par(kD)}\\cdot(${signeFacteur > 0 ? "+" : "-"})\\cdot(${a - r > 0 ? "+" : "-"})` : `${par(kD)}\\cdot(+)`)]),
     );

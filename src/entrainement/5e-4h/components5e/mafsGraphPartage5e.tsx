@@ -8,7 +8,6 @@ import {
   domaineVisibleY,
   formatEtiquetteGrille,
   graduationsDansPlage,
-  positionEcranClampee,
 } from "../ui/mafsTransformation";
 
 /**
@@ -56,23 +55,73 @@ export function GrilleAdaptative5e({
   );
 }
 
-/** Marge (pixels écran) entre une ligne de graduations flottantes et le bord du cadre visible — même
- * valeur que la version 4e (`components/mafsGraphPartage.tsx`), voir `positionEcranClampee`
- * (`ui/mafsTransformation.ts`). */
-const MARGE_GRADUATION_FLOTTANTE = 10;
+/** Écart (pixels écran) entre un axe et les nombres qui le graduent : les nombres sont posés À CÔTÉ
+ * de l'axe (sous l'axe horizontal, à gauche de l'axe vertical), jamais dessus — l'axe barrait les
+ * nombres (« 4—3—2—1 », « |−5 »). */
+const ECART_AXE = 4;
+/** Marge minimale (pixels) entre un nombre et le bord du cadre : un nombre qui ne tient pas n'est
+ * pas écrit (il était rogné : « 4 » pour « −4 »). */
+const MARGE_BORD = 1;
+/** Espace minimal (pixels) entre deux nombres voisins d'un même axe ; en dessous, on n'en écrit
+ * qu'un sur deux (puis un sur quatre…). */
+const ESPACE_ENTRE_NOMBRES = 6;
+
+/** « − » typographique (U+2212) pour les nombres négatifs. */
+export function etiquetteGraduation5e(valeur: number): string {
+  return formatEtiquetteGrille(valeur).replace(/^-/, "−");
+}
+
+interface BoiteTexte {
+  x0: number;
+  x1: number;
+  y0: number;
+  y1: number;
+}
+
+function seChevauchent(a: BoiteTexte, b: BoiteTexte): boolean {
+  return a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+}
+
+/** Taille de police réellement appliquée aux nombres (héritée de la page) — 16 px par défaut. */
+function useTaillePolice(ref: RefObject<SVGGElement | null>): number {
+  const [taille, setTaille] = useState(16);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || typeof getComputedStyle === "undefined") return;
+    const t = parseFloat(getComputedStyle(el).fontSize);
+    if (Number.isFinite(t) && t > 0) setTaille((precedente) => (Math.abs(t - precedente) > 0.1 ? t : precedente));
+  });
+  return taille;
+}
+
+/** Pas d'écriture (1, 2, 4…) : on n'écrit qu'une graduation sur `k` pour que deux nombres voisins
+ * gardent `ESPACE_ENTRE_NOMBRES` entre eux. */
+function pasEcriture(ecart: number, encombrement: number): number {
+  let k = 1;
+  while (ecart > 0 && ecart * k < encombrement + ESPACE_ENTRE_NOMBRES && k < 64) k *= 2;
+  return k;
+}
 
 /**
  * `prompt-audit-graduations-flottantes-mafs.md` — réimplémentée localement pour 5e, même raison/même
  * principe que `GrilleAdaptative5e` ci-dessus (jamais un import direct de
- * `components/mafsGraphPartage.tsx`) : voir la doc complète de `GraduationsFlottantes` (4e,
- * `components/mafsGraphPartage.tsx`) pour la mécanique exacte (pourquoi le clamp coïncide avec le
- * placement natif tant que l'axe reste dans le cadre, pourquoi `graduationsDansPlage` exclut déjà 0
- * sur les 2 axes comme `XLabels`/`YLabels` natifs de Mafs).
+ * `components/mafsGraphPartage.tsx`) : la ligne de nombres suit l'axe tant qu'il est dans le cadre,
+ * puis se fige au bord le plus proche (façon GeoGebra). Finitions (5e ch. 5, audit G17 ; partagé par
+ * 5gen22, 5gen25, 5gen30, 5gen31) :
+ * - nombres À CÔTÉ de l'axe : sous l'axe horizontal (au-dessus s'il touche le bas du cadre), à gauche
+ *   de l'axe vertical (à droite s'il touche le bord gauche) — jamais barrés par lui ;
+ * - « − » typographique ;
+ * - un nombre sur deux (puis sur quatre…) quand deux voisins se toucheraient, mesuré en pixels avec
+ *   la police réelle (chiffres à chasse fixe de Mafs : 0,6 em par caractère) ;
+ * - jamais rognés : un nombre qui dépasserait du cadre n'est pas écrit, ni un nombre de l'axe
+ *   vertical qui toucherait un nombre de l'axe horizontal près de l'origine ;
+ * - 0 n'est jamais écrit (`graduationsDansPlage`), comme les étiquettes natives de Mafs.
  */
 function GraduationsFlottantes5e({ largeur, hauteur, pasX, pasY }: { largeur: number; hauteur: number; pasX: number; pasY: number }) {
   const { viewTransform, userTransform } = useTransformContext();
   const groupRef = useRef<SVGGElement>(null);
   const [origineX, origineY] = useOrigineLocaleSVG(groupRef);
+  const police = useTaillePolice(groupRef);
   const matrice = vec.matrixMult(viewTransform, userTransform);
 
   const visibleX = domaineVisibleX(viewTransform, origineX, largeur);
@@ -81,23 +130,48 @@ function GraduationsFlottantes5e({ largeur, hauteur, pasX, pasY }: { largeur: nu
   const [axeLocalX, axeLocalY] = vec.transform([0, 0], matrice);
   const ecranAxeX = axeLocalX - origineX;
   const ecranAxeY = axeLocalY - origineY;
-  const yNombresX = positionEcranClampee(ecranAxeY, hauteur, MARGE_GRADUATION_FLOTTANTE) + origineY;
-  const xNombresY = positionEcranClampee(ecranAxeX, largeur, MARGE_GRADUATION_FLOTTANTE) + origineX;
-  const ancrageNombresY = ecranAxeX > largeur - MARGE_GRADUATION_FLOTTANTE ? "end" : "start";
+  const largeurTexte = (s: string) => s.length * police * 0.6;
+  const demiHaut = police * 0.5;
 
-  const ticksX = graduationsDansPlage(visibleX[0], visibleX[1], pasX);
-  const ticksY = graduationsDansPlage(visibleY[0], visibleY[1], pasY);
+  // --- Axe horizontal : nombres sous l'axe (au-dessus s'il n'y a pas la place en bas du cadre).
+  const ticksX = graduationsDansPlage(visibleX[0], visibleX[1], pasX).map((x) => ({ v: x, e: vec.transform([x, 0], matrice)[0] - origineX, s: etiquetteGraduation5e(x) }));
+  const baseX = Math.min(Math.max(ecranAxeY, 0), hauteur);
+  const dessous = baseX + ECART_AXE + police <= hauteur - MARGE_BORD;
+  const yNombresX = dessous ? baseX + ECART_AXE + demiHaut : baseX - ECART_AXE - demiHaut;
+  const ecartX = ticksX.length > 1 ? Math.abs(ticksX[1].e - ticksX[0].e) : Infinity;
+  const kX = pasEcriture(ecartX, Math.max(0, ...ticksX.map((t) => largeurTexte(t.s))));
+  const nombresX = ticksX
+    .filter((t) => Math.round(t.v / pasX) % kX === 0)
+    .map((t) => ({ ...t, boite: { x0: t.e - largeurTexte(t.s) / 2, x1: t.e + largeurTexte(t.s) / 2, y0: yNombresX - demiHaut, y1: yNombresX + demiHaut } }))
+    .filter((t) => t.boite.x0 >= MARGE_BORD && t.boite.x1 <= largeur - MARGE_BORD);
+
+  // --- Axe vertical : nombres à gauche de l'axe (à droite s'il n'y a pas la place à gauche).
+  const ticksY = graduationsDansPlage(visibleY[0], visibleY[1], pasY).map((y) => ({ v: y, e: vec.transform([0, y], matrice)[1] - origineY, s: etiquetteGraduation5e(y) }));
+  const baseY = Math.min(Math.max(ecranAxeX, 0), largeur);
+  const largeurMaxY = Math.max(0, ...ticksY.map((t) => largeurTexte(t.s)));
+  const aGauche = baseY - ECART_AXE - largeurMaxY >= MARGE_BORD;
+  const xNombresY = aGauche ? baseY - ECART_AXE : baseY + ECART_AXE;
+  const ecartY = ticksY.length > 1 ? Math.abs(ticksY[1].e - ticksY[0].e) : Infinity;
+  const kY = pasEcriture(ecartY, police);
+  const nombresY = ticksY
+    .filter((t) => Math.round(t.v / pasY) % kY === 0)
+    .map((t) => {
+      const w = largeurTexte(t.s);
+      const x0 = aGauche ? xNombresY - w : xNombresY;
+      return { ...t, boite: { x0, x1: x0 + w, y0: t.e - demiHaut, y1: t.e + demiHaut } };
+    })
+    .filter((t) => t.boite.y0 >= MARGE_BORD && t.boite.y1 <= hauteur - MARGE_BORD && !nombresX.some((n) => seChevauchent(n.boite, t.boite)));
 
   return (
-    <g ref={groupRef} className="mafs-shadow">
-      {ticksX.map((x) => (
-        <text key={`x${x}`} x={vec.transform([x, 0], matrice)[0]} y={yNombresX} textAnchor="middle" dominantBaseline="central" style={{ fill: "var(--mafs-origin-color)" }}>
-          {formatEtiquetteGrille(x)}
+    <g ref={groupRef} className="mafs-shadow graduations-5e">
+      {nombresX.map((t) => (
+        <text key={`x${t.v}`} x={t.e + origineX} y={yNombresX + origineY} textAnchor="middle" dominantBaseline="central" style={{ fill: "var(--mafs-origin-color)" }}>
+          {t.s}
         </text>
       ))}
-      {ticksY.map((y) => (
-        <text key={`y${y}`} x={xNombresY} y={vec.transform([0, y], matrice)[1]} textAnchor={ancrageNombresY} dominantBaseline="central" style={{ fill: "var(--mafs-origin-color)" }}>
-          {formatEtiquetteGrille(y)}
+      {nombresY.map((t) => (
+        <text key={`y${t.v}`} x={xNombresY + origineX} y={t.e + origineY} textAnchor={aGauche ? "end" : "start"} dominantBaseline="central" style={{ fill: "var(--mafs-origin-color)" }}>
+          {t.s}
         </text>
       ))}
     </g>

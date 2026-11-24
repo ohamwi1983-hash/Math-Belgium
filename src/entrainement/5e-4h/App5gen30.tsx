@@ -17,7 +17,11 @@ import {
 import type { EcranLectureGraphiqueDerivees, EtatSessionLectureGraphiqueDerivees } from "./moteur5e/typesLectureGraphiqueDerivees";
 import { ecranSansObjet, ORDRE_ECRANS_LECTURE_GRAPHIQUE_DERIVEES } from "./moteur5e/typesLectureGraphiqueDerivees";
 import type { ReponseNommerAsymptotes } from "./moteur5e/typesLectureGraphiqueLimites";
-import { tableauFPrimeAttendu, tableauFSecondeAttendu } from "./moteur5e/verificationLectureGraphiqueDerivees";
+import { positionsInflexions, positionsTangenteHorizontale, tableauFPrimeAttendu, tableauFSecondeAttendu } from "./moteur5e/verificationLectureGraphiqueDerivees";
+import { cibleAsymptotesDerivees, cibleExtremums, cibleListeAbscisses, cibleTableau, messageAucunFaux } from "./ui5e/retoursLectureGraphiqueDerivees";
+import { PREFIXE_CHOIX_FERME } from "./ui5e/retoursDerivees";
+import { RenduFragments } from "../4e/components/RenduFragments";
+import type { FragmentConsigne } from "../export/genererFeuilleExercices";
 import type { ReponseListeAbscisses, ReponseTableauEtudeLocale } from "./moteur5e/verificationLectureGraphiqueDerivees";
 import type { ExerciceLectureGraphiqueDerivees } from "./core5e/lectureGraphiqueDerivees.types";
 import { EtapeAsymptotesLectureGraphiqueDerivees } from "./components5e/EtapeAsymptotesLectureGraphiqueDerivees";
@@ -75,6 +79,8 @@ function reponseAttenduePhase(exercice: ExerciceLectureGraphiqueDerivees, phase:
 interface TransitionEnAttente {
   etatSuivant: EtatSessionLectureGraphiqueDerivees;
   revele: boolean;
+  /** Message propre à l'erreur, sous la réponse révélée (tableaux, verdict « aucun point » faux). */
+  messageRevele?: ReactNode;
 }
 
 /** Puces : 6 écrans pour TOUS les exercices (décision J) ; un écran sans objet n'apparaît comme tel
@@ -127,12 +133,12 @@ export function App5gen30() {
     ]);
   }
 
-  function terminerEtape(nouvelEtat: EtatSessionLectureGraphiqueDerivees, votreReponse?: ReactNode) {
+  function terminerEtape(nouvelEtat: EtatSessionLectureGraphiqueDerivees, votreReponse?: ReactNode, messageRevele?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       if (votreReponse !== undefined) ajouterHistorique(etat.phase, votreReponse, nouvelEtat);
       if (etat.niveauAide > 0) setAideParPhase((m) => ({ ...m, [etat.phase]: true }));
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee, ...(nouvelEtat.derniereEtapeRevelee && messageRevele ? { messageRevele } : {}) });
       return;
     }
     setEtat(nouvelEtat);
@@ -167,6 +173,7 @@ export function App5gen30() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
+        ...(enAttente.messageRevele ? { messageRevele: enAttente.messageRevele } : {}),
         reponseAttendue: reponseAttenduePhase(exercice, etat.phase),
         corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLectureGraphiqueDerivees(exercice), lettreEcranLectureGraphiqueDerivees(exercice, etat.phase))} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
@@ -216,6 +223,30 @@ function historiquePourPuce(historique: EntreeHistoriqueEtape[], etat: EtatSessi
   return historique[avant];
 }
 
+/** Message sous la réponse révélée : l'erreur ciblée de la dernière réponse (jamais la réponse). */
+function messageEpuise(cible: FragmentConsigne[] | null, prefixe = "Tentatives épuisées — ce n'était pas la bonne réponse."): ReactNode {
+  if (!cible || cible.length === 0) return undefined;
+  return (
+    <span>
+      {prefixe} <RenduFragments fragments={cible} />
+    </span>
+  );
+}
+
+function messageListe(exercice: ExerciceLectureGraphiqueDerivees, ecran: "zerosFPrime" | "inflexions", r: ReponseListeAbscisses): ReactNode {
+  const cibles = ecran === "zerosFPrime" ? positionsTangenteHorizontale(exercice) : positionsInflexions(exercice);
+  if (r.aucun !== (cibles.length === 0) && (r.aucun || cibles.length === 0)) return messageAucunFaux(ecran, r.aucun);
+  return messageEpuise(cibleListeAbscisses(exercice, ecran, r));
+}
+
+function messageExtremums(exercice: ExerciceLectureGraphiqueDerivees, r: string[]): ReactNode {
+  return messageEpuise(cibleExtremums(exercice, r));
+}
+
+function messageTableau(exercice: ExerciceLectureGraphiqueDerivees, ecran: "tableauFPrime" | "tableauFSeconde", r: ReponseTableauEtudeLocale): ReactNode {
+  return messageEpuise(cibleTableau(exercice, ecran, r), PREFIXE_CHOIX_FERME) ?? PREFIXE_CHOIX_FERME;
+}
+
 interface EcranProps {
   exercice: ExerciceLectureGraphiqueDerivees;
   phase: EcranLectureGraphiqueDerivees;
@@ -223,7 +254,7 @@ interface EcranProps {
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
-  terminerEtape: (nouvelEtat: EtatSessionLectureGraphiqueDerivees, votreReponse?: ReactNode) => void;
+  terminerEtape: (nouvelEtat: EtatSessionLectureGraphiqueDerivees, votreReponse?: ReactNode, messageRevele?: ReactNode) => void;
   setEtat: (etat: EtatSessionLectureGraphiqueDerivees) => void;
   validation: ValidationEtapeProps | null;
 }
@@ -235,16 +266,16 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
 
   switch (phase) {
     case "asymptotes":
-      return <EtapeAsymptotesLectureGraphiqueDerivees key={cleEcran} {...communs} tentativesMax={tentativesMax} onValider={(r) => terminerEtape(soumettreReponseAsymptotes(etat, r), texteAsymptotes(r))} />;
+      return <EtapeAsymptotesLectureGraphiqueDerivees key={cleEcran} {...communs} tentativesMax={tentativesMax} onValider={(r) => terminerEtape(soumettreReponseAsymptotes(etat, r), texteAsymptotes(r), messageEpuise(cibleAsymptotesDerivees(exercice, r)))} />;
     case "zerosFPrime":
-      return <EtapeListeAbscissesLectureGraphiqueDerivees key={cleEcran} {...communs} ecran="zerosFPrime" tentativesMax={tentativesMax} onValider={(r) => terminerEtape(soumettreReponseZerosFPrime(etat, r), texteListe(r))} />;
+      return <EtapeListeAbscissesLectureGraphiqueDerivees key={cleEcran} {...communs} ecran="zerosFPrime" tentativesMax={tentativesMax} onValider={(r) => terminerEtape(soumettreReponseZerosFPrime(etat, r), texteListe(r), messageListe(exercice, "zerosFPrime", r))} />;
     case "tableauFPrime":
-      return <EtapeTableauLectureGraphiqueDerivees key={cleEcran} {...communs} phase="tableauFPrime" onValider={(r) => terminerEtape(soumettreReponseTableauFPrime(etat, r), texteTableau(r))} />;
+      return <EtapeTableauLectureGraphiqueDerivees key={cleEcran} {...communs} phase="tableauFPrime" onValider={(r) => terminerEtape(soumettreReponseTableauFPrime(etat, r), texteTableau(r), messageTableau(exercice, "tableauFPrime", r))} />;
     case "extremums":
-      return <EtapeChampsLectureGraphiqueDerivees key={cleEcran} {...communs} tentativesMax={tentativesMax} onValider={(r) => terminerEtape(soumettreReponseExtremums(etat, r), r.join(" ; "))} />;
+      return <EtapeChampsLectureGraphiqueDerivees key={cleEcran} {...communs} tentativesMax={tentativesMax} onValider={(r) => terminerEtape(soumettreReponseExtremums(etat, r), r.join(" ; "), messageExtremums(exercice, r))} />;
     case "inflexions":
-      return <EtapeListeAbscissesLectureGraphiqueDerivees key={cleEcran} {...communs} ecran="inflexions" tentativesMax={tentativesMax} onValider={(r) => terminerEtape(soumettreReponseInflexions(etat, r), texteListe(r))} />;
+      return <EtapeListeAbscissesLectureGraphiqueDerivees key={cleEcran} {...communs} ecran="inflexions" tentativesMax={tentativesMax} onValider={(r) => terminerEtape(soumettreReponseInflexions(etat, r), texteListe(r), messageListe(exercice, "inflexions", r))} />;
     case "tableauFSeconde":
-      return <EtapeTableauLectureGraphiqueDerivees key={cleEcran} {...communs} phase="tableauFSeconde" onValider={(r) => terminerEtape(soumettreReponseTableauFSeconde(etat, r), texteTableau(r))} />;
+      return <EtapeTableauLectureGraphiqueDerivees key={cleEcran} {...communs} phase="tableauFSeconde" onValider={(r) => terminerEtape(soumettreReponseTableauFSeconde(etat, r), texteTableau(r), messageTableau(exercice, "tableauFSeconde", r))} />;
   }
 }

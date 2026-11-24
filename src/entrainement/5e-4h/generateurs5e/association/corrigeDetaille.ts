@@ -1,7 +1,8 @@
 import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, ligne, piege, resultat, utilise } from "../../../export/corrigeTableau";
-import { construireSvgFonction, type ViewBoxSvg } from "../../../export/svgGraph";
-import { lettreCorrecte, nombreElementsAssociation, type ExerciceAssociation, type PolynomeAssociation } from "../../core5e/association.types";
+import { construireSvgFonction, type OptionsSvgFonction, type ViewBoxSvg } from "../../../export/svgGraph";
+import { lettreCorrecte, nombreElementsAssociation, type ExerciceAssociation, type FonctionVarieeAssociation, type PolynomeAssociation } from "../../core5e/association.types";
+import { cadrageVariee, deriveeVariee, domaineVariee, evaluerVariee, exclusionVariee, extremumsVariee, nombreTexte, X_MAX_VARIEE, X_MIN_VARIEE } from "./fonctionsVariees";
 import { monomesDe } from "../../ui5e/corrigeLimites";
 import { COURS_DERIVEE, COURS_SIGNE, dixiemeL, dixiemeT, f, finaliser, jf, par, sansDoublons, somme, t } from "../../ui5e/corrigeDerivees1";
 import { evaluerPolynome } from "../domaineDefinition/polynome";
@@ -59,7 +60,7 @@ function lignesGraphe(coeffs: PolynomeAssociation, i: number, lettre: string, fa
     const croit = forme.signe > 0;
     lignes.push(ligne(`${fp}${croit ? ">" : "<"}0\\text{ sur tout le graphique}`, `graphique ${n} : la courbe ${croit ? "monte" : "descend"} partout`));
     if (famille === "grapheDerivee") {
-      lignes.push(ligne(`${fp}(x)${croit ? "\\geq" : "\\leq"} ${fp}(${dixiemeL(forme.inflexion)})`, `pente la ${croit ? "plus faible" : "plus forte (vers le bas)"} au point d'inflexion x ≈ ${dixiemeT(forme.inflexion)}`));
+      lignes.push(ligne(`${fp}(x)${croit ? "\\geq" : "\\leq"} ${fp}(${dixiemeL(forme.inflexion)})`, `${croit ? "montée" : "descente"} la plus douce au point d'inflexion x ≈ ${dixiemeT(forme.inflexion)}`));
       lignes.push(ligne(`\\Rightarrow ${fp}\\text{ : graphique }${lettre}`, `${lettre} reste ${croit ? "au-dessus" : "en dessous"} de l'axe des x, ${croit ? "minimum" : "maximum"} en x ≈ ${dixiemeT(forme.inflexion)}`));
     } else {
       const s = signeTxt(forme.inflexion);
@@ -114,6 +115,119 @@ function figureGraphes(e: ExerciceAssociation & { fonctions: PolynomeAssociation
     famille === "grapheDerivee"
       ? `<p style="margin:0.2em 0;font-size:0.85em;text-align:center">Trait plein : f ; pointillés orange : f′ (elle s'annule sous chaque sommet de f).</p>`
       : `<p style="margin:0.2em 0;font-size:0.85em;text-align:center">Points : sommets (ou point d'inflexion) ; croix verte : (0 ; f(0)).</p>`;
+  return `<div class="figure-corrige-association" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;justify-items:center;margin:0.4em 0;break-inside:avoid">${svgs.join("")}</div>${legende}`;
+}
+
+// ============================================================================
+// Familles A et B « variées » (lot C, G18) : rationnelles, racines, sinus — lues sur le graphique,
+// abscisses entières (nœuds du quadrillage).
+// ============================================================================
+
+const nL = (x: number) => `${x}`;
+const nT = (x: number) => nombreTexte(x);
+
+/** Graphique papier (énoncé ET corrigé) d'une fonction variée ou de sa dérivée : même cadrage que
+ * l'écran (`cadrageVariee`), quadrillage d'une unité en x, courbe coupée à l'asymptote verticale. */
+export function svgFonctionVariee(fo: FonctionVarieeAssociation, deriveeDe: boolean, etiquette: string, options: Partial<OptionsSvgFonction> = {}): string {
+  const { yMin, yMax } = cadrageVariee(fo, deriveeDe);
+  const ev = evaluateurVariee(fo, deriveeDe, yMin, yMax);
+  return construireSvgFonction(ev, { xMin: X_MIN_VARIEE, xMax: X_MAX_VARIEE, yMin, yMax }, { largeur: 210, hauteur: 150, classe: "graphe-cyclo", lettre: etiquette, divisionsX: 8, ...options });
+}
+
+function evaluateurVariee(fo: FonctionVarieeAssociation, deriveeDe: boolean, yMin: number, yMax: number): (x: number) => number | null {
+  const excl = exclusionVariee(fo);
+  return (x: number) => {
+    if (excl !== null && Math.abs(x - excl) < 0.03) return null;
+    if (deriveeDe && fo.type === "racine" && x - fo.p < 0.004) return null;
+    const y = deriveeDe ? deriveeVariee(fo, x) : evaluerVariee(fo, x);
+    if (y === null || !Number.isFinite(y)) return null;
+    return y < yMin - (yMax - yMin) || y > yMax + (yMax - yMin) ? null : y;
+  };
+}
+
+/** Signe de f′ morceau par morceau (de gauche à droite), coupé à l'asymptote d'une rationnelle. */
+function morceauxSigne(fo: FonctionVarieeAssociation): { de: number; a: number; signes: ("+" | "-")[] }[] {
+  const ex = extremumsVariee(fo);
+  const [d0, d1] = domaineVariee(fo);
+  const signes: ("+" | "-")[] = [ex[0].nature === "max" ? "+" : "-"];
+  for (const e of ex) signes.push(e.nature === "max" ? "-" : "+");
+  if (fo.type === "rationnelle") return [{ de: d0, a: fo.c, signes: signes.slice(0, 2) }, { de: fo.c, a: d1, signes: signes.slice(1) }];
+  return [{ de: d0, a: d1, signes }];
+}
+
+function texteSignes(signes: ("+" | "-")[]): string {
+  return signes.map((s, i) => `${i ? "\\text{ puis }" : ""}${s === "+" ? ">" : "<"}0`).join("");
+}
+
+function motsSignes(signes: ("+" | "-")[]): string {
+  return signes.map((s) => (s === "+" ? "monte" : "descend")).join(", puis ");
+}
+
+function lignesGrapheVariee(fo: FonctionVarieeAssociation, i: number, lettre: string, famille: "grapheDeriveeVariee" | "grapheVerbalVarie"): LigneCalcul[] {
+  const n = `${i + 1}`;
+  const fp = `f_{${n}}'`;
+  const ex = extremumsVariee(fo);
+  const lignes: LigneCalcul[] = [];
+  const morceaux = morceauxSigne(fo);
+  if (fo.type === "racine") lignes.push(ligne(`x\\geq ${nL(fo.p)}`, `graphique ${n} : la courbe commence en x = ${nT(fo.p)} (domaine de f)`));
+  if (fo.type === "rationnelle") lignes.push(ligne(`x\\neq ${nL(fo.c)}`, `graphique ${n} : asymptote verticale x = ${nT(fo.c)}, f n'y est pas définie`));
+  for (const m of morceaux) {
+    const sur = morceaux.length > 1 ? `\\text{ sur }\\left]${nL(m.de)}\\,;${nL(m.a)}\\right[` : "";
+    lignes.push(ligne(`${fp}${texteSignes(m.signes)}${sur}`, `${morceaux.length > 1 ? (m.de < (fo.type === "rationnelle" ? fo.c : 0) ? "à gauche de l'asymptote" : "à droite de l'asymptote") : `graphique ${n}`} : la courbe ${motsSignes(m.signes)}`));
+  }
+  if (famille === "grapheDeriveeVariee") {
+    const zeros = ex.map((e) => `x=${nL(e.x)}`).join("\\text{ et }");
+    lignes.push(ligne(`${fp}(x)=0\\text{ pour }${zeros}`, ex.length === 2 ? "tangentes horizontales aux deux sommets" : "tangente horizontale au sommet"));
+    const coupe = ex.map((e) => nT(e.x)).join(" et ");
+    const extra = fo.type === "rationnelle" ? `, coupé en x = ${nT(fo.c)}` : fo.type === "racine" ? `, commence en x = ${nT(fo.p)}` : "";
+    lignes.push(ligne(`\\Rightarrow ${fp}\\text{ : graphique }${lettre}`, `${lettre} coupe l'axe des x en ${coupe}${extra}, au-dessus là où f monte, en dessous là où elle descend`));
+  } else {
+    const nom = (e: { nature: "max" | "min" }) => (e.nature === "max" ? "x_{\\max}" : "x_{\\min}");
+    const rel = (x: number) => (x < 0 ? "<" : x > 0 ? ">" : "=");
+    const pos =
+      ex.length === 1
+        ? `${nom(ex[0])}${rel(ex[0].x)}0`
+        : ex[0].x < 0 && ex[1].x < 0
+          ? `${nom(ex[0])}<${nom(ex[1])}<0`
+          : ex[0].x > 0 && ex[1].x > 0
+            ? `0<${nom(ex[0])}<${nom(ex[1])}`
+            : `${nom(ex[0])}${ex[0].x === 0 ? "=" : "<"}0${ex[1].x === 0 ? "=" : "<"}${nom(ex[1])}`;
+    lignes.push(ligne(pos, `sommet${ex.length > 1 ? "s" : ""} du graphique ${n} (x = ${ex.map((e) => nT(e.x)).join(" et x = ")}) par rapport à l'axe des ordonnées`));
+    const f0 = evaluerVariee(fo, 0) ?? 0;
+    const s0 = Math.abs(f0) < 1e-9 ? 0 : f0 > 0 ? 1 : -1;
+    lignes.push(ligne(`f_{${n}}(0)${s0 > 0 ? ">" : s0 < 0 ? "<" : "="}0`, s0 > 0 ? "la courbe coupe l'axe des ordonnées au-dessus de l'origine" : s0 < 0 ? "la courbe coupe l'axe des ordonnées en dessous de l'origine" : "la courbe passe par l'origine"));
+    lignes.push(ligne(`\\Rightarrow \\text{énoncé }${lettre}`, "le seul énoncé qui dit toutes ces choses"));
+  }
+  return lignes;
+}
+
+function figureGraphesVariees(e: ExerciceAssociation & { fonctions: FonctionVarieeAssociation[] }, famille: "grapheDeriveeVariee" | "grapheVerbalVarie"): string {
+  const svgs = e.fonctions.map((fo, i) => {
+    const ex = extremumsVariee(fo);
+    const etiquette = `${i + 1} → ${lettreDe(e, i)}`;
+    if (famille === "grapheDeriveeVariee") {
+      const cf = cadrageVariee(fo, false);
+      const cd = cadrageVariee(fo, true);
+      const yMin = Math.min(cf.yMin, cd.yMin);
+      const yMax = Math.max(cf.yMax, cd.yMax);
+      return construireSvgFonction(evaluateurVariee(fo, false, yMin, yMax), { xMin: X_MIN_VARIEE, xMax: X_MAX_VARIEE, yMin, yMax }, {
+        largeur: 210,
+        hauteur: 150,
+        classe: "graphe-cyclo",
+        lettre: etiquette,
+        divisionsX: 8,
+        courbesSecondaires: [{ evaluer: evaluateurVariee(fo, true, yMin, yMax), couleur: "#c2410c", pointilles: true }],
+        verticales: ex.map((x) => ({ x: x.x, couleur: "#868e96", pointilles: true })),
+        points: ex.map((x) => ({ x: x.x, y: 0, couleur: "#c2410c" })),
+      });
+    }
+    const points = [...ex.map((x) => ({ x: x.x, y: evaluerVariee(fo, x.x) ?? 0, couleur: "#9a3b12" })), { x: 0, y: evaluerVariee(fo, 0) ?? 0, couleur: "#2b8a3e", forme: "croix" as const }];
+    return svgFonctionVariee(fo, false, etiquette, { points });
+  });
+  const legende =
+    famille === "grapheDeriveeVariee"
+      ? `<p style="margin:0.2em 0;font-size:0.85em;text-align:center">Trait plein : f ; pointillés orange : f′ (elle s'annule sous chaque sommet de f).</p>`
+      : `<p style="margin:0.2em 0;font-size:0.85em;text-align:center">Points : sommets ; croix verte : (0 ; f(0)).</p>`;
   return `<div class="figure-corrige-association" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;justify-items:center;margin:0.4em 0;break-inside:avoid">${svgs.join("")}</div>${legende}`;
 }
 
@@ -195,6 +309,10 @@ function utiliseFamille(e: ExerciceAssociation): EtapeCorrection {
       return utilise("a", [t(`Là où f croît, f′ > 0 (graphique de f′ au-dessus de l'axe des x) ; là où f décroît, f′ < 0 ; en un sommet de f, f′ s'annule en changeant de signe ${COURS_SIGNE}.`)]);
     case "grapheVerbal":
       return utilise("a", [t(`Sur chaque graphique, on lit le sens de variation (signe de f′), la position des sommets — ou du point d'inflexion — par rapport à l'axe des ordonnées, et f(0), là où la courbe coupe cet axe ${COURS_SIGNE}.`)]);
+    case "grapheDeriveeVariee":
+      return utilise("a", [t(`Là où f croît, f′ > 0 (graphique de f′ au-dessus de l'axe des x) ; là où f décroît, f′ < 0 ; en un sommet de f, f′ s'annule en changeant de signe ; là où f n'est pas définie (asymptote verticale), f′ ne l'est pas non plus ${COURS_SIGNE}.`)]);
+    case "grapheVerbalVarie":
+      return utilise("a", [t(`Sur chaque graphique, on lit où f est définie (asymptote verticale, début de la courbe), le sens de variation (signe de f′), la position des sommets par rapport à l'axe des ordonnées, et f(0), là où la courbe coupe cet axe ${COURS_SIGNE}.`)]);
     default:
       return utilise("a", [t("On dérive chaque fonction : "), f("(x^n)'=n\\,x^{n-1}"), t(", "), f("(uv)'=u'v+uv'"), t(", et pour une puissance de ax + b la règle de la chaîne "), f("(u^n)'=n\\,u^{n-1}\\cdot u'"), t(` ${COURS_DERIVEE}.`)]);
   }
@@ -206,6 +324,10 @@ function texteParPiege(e: ExerciceAssociation): string {
       return "Le signe de f′ se lit sur la pente de f, pas sur le signe de f : f′ est positive là où f monte, même si f est négative.";
     case "grapheVerbal":
       return "Deux énoncés peuvent décrire les mêmes variations : on les départage par la position des sommets et de f(0).";
+    case "grapheDeriveeVariee":
+      return "Le signe de f′ se lit sur la pente de f, pas sur le signe de f ; à une asymptote verticale de f, le graphique de f′ est coupé lui aussi.";
+    case "grapheVerbalVarie":
+      return "Deux énoncés peuvent décrire les mêmes variations : on les départage par l'asymptote ou le début de la courbe, la position des sommets et celle de f(0).";
     default:
       return "Pour une puissance de ax + b, ne pas oublier de multiplier par a (la dérivée de l'intérieure).";
   }
@@ -254,7 +376,7 @@ export function correctionDetailleeAssociation(e: ExerciceAssociation): EtapeCor
       if (e.singulier[i]) {
         const car = fo.caracteristique;
         const opt = OPTIONS_SINGULARITE.find((o) => o.id === (car?.type === "angulaire" ? "saute" : car?.type === "cuspide" || car?.type === "tangenteVerticale" ? "infini" : "discontinue"));
-        return ligne(`${i + 1}\\to\\ \\text{f' n'existe pas ici}`, opt ? opt.label : "");
+        return ligne(`${i + 1}\\to\\ f'\\text{ n'existe pas ici}`, opt ? opt.label : "");
       }
       return ligne(`${i + 1}\\to ${lettreDe(e, i)}`, "pente de f lue sur le graphique : signe de f′ zone par zone");
     });
@@ -272,13 +394,16 @@ export function correctionDetailleeAssociation(e: ExerciceAssociation): EtapeCor
     if (e.famille === "symbolique") {
       const j = lettreCorrecte(e.ordreLettres, i);
       etapes.push(calcul("a", lignesSymbolique(e.fLatex[i], e.gLatex[j], i, lettre), [t("Fonction "), f(`f_{${i + 1}}(x)=${e.fLatex[i]}`)], `${i + 1} → ${lettre}`));
+    } else if (e.famille === "grapheDeriveeVariee" || e.famille === "grapheVerbalVarie") {
+      etapes.push(calcul("a", lignesGrapheVariee(e.fonctions[i], i, lettre, e.famille), [], `${i + 1} → ${lettre}`));
     } else {
       etapes.push(calcul("a", lignesGraphe(e.fonctions[i], i, lettre, e.famille), [], `${i + 1} → ${lettre}`));
     }
   }
   const correspondance = Array.from({ length: n }, (_, i) => `${i + 1}\\to ${lettreDe(e, i)}`).join(",\\ ");
   const res = resultat("a", [f(correspondance)]);
-  etapes.push(e.famille === "symbolique" ? res : { ...res, figureHtml: figureGraphes(e, e.famille) });
+  const figure = e.famille === "symbolique" ? null : e.famille === "grapheDeriveeVariee" || e.famille === "grapheVerbalVarie" ? figureGraphesVariees(e, e.famille) : figureGraphes(e, e.famille);
+  etapes.push(figure === null ? res : { ...res, figureHtml: figure });
   etapes.push(piege("a", [t(texteParPiege(e))]));
   etapes.push(...etapesJustification(e));
   return finaliser(etapes);

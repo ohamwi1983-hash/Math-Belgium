@@ -990,6 +990,17 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   extremum / racine double » pris sur un jumeau (`lignesMinimales` pour la charge) — 5gen34 non égalisé (3 zéros :
   6 · 18 min contre 5 · 15, la copie d'évaluation n'imprime ni niveau ni durée). Codes imprimés : inchangés sauf
   5gen27 produit / quotient sans trig, 5gen30 (grille), 5gen33 A degré 3 calculatrice ; options tirées en dernier.
+  **Finitions avant mise en ligne (24/11)** : grille Mafs partagée `GrilleAdaptative5e` (5gen22, 5gen25, 5gen30,
+  5gen31) — nombres à côté des axes, « − », un sur deux s'ils se touchent, jamais rognés ; f′ / f″ typographiques
+  dans tout texte brut du chapitre (titres, cartes, consignes, barèmes ; libellés du `SelecteurVarianteDev`
+  inchangés) ; 5gen25 familles A et B « variées » (`generateurs5e/association/fonctionsVariees.ts` : a((x − c) +
+  k/(x − c)) + q, a/((x − c)² + 1) + q, a((x − p) − 2m√(x − p)) + q, a sin(π(x − c)/4) + q ; extremums, asymptote et
+  début de racine sur des abscisses entières), variantes `grapheDeriveeVariee-4` / `grapheVerbalVarie-4` AJOUTÉES EN
+  FIN du catalogue papier (après l'avancée), tirées 1 fois sur 4 par l'appli, justification en deux temps (mêmes
+  champs que les cubiques, `champsLectureVariee`), corrigé et figure, niveaux 2 · 5 min (A) et 2–3 · 5 min (B) ;
+  5gen29 `repartirSurQuatre` : 9 critères → total 4,5 (la boucle ne s'arrêtait jamais). Contrôle des textes rendus
+  (énoncé, brève, corrigé, barème, aides, messages ciblés) : outil `textes.ts` du dossier de travail
+  `finitions-5e5` (caractères de contrôle, LaTeX brut en texte, KaTeX invalide).
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 

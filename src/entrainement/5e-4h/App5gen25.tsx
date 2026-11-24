@@ -31,6 +31,7 @@ import {
 import { ComposantAssociation } from "./components5e/ComposantAssociation";
 import { PolynomeAssociationGraph } from "./components5e/PolynomeAssociationGraph";
 import { FonctionRicheAssociationGraph } from "./components5e/FonctionRicheAssociationGraph";
+import { FonctionVarieeAssociationGraph } from "./components5e/FonctionVarieeAssociationGraph";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
@@ -66,7 +67,8 @@ function reponseAttendueAssociation(exercice: ExerciceAssociation) {
   function contenuLigne(numero: number) {
     const lettre = lettreCorrecte(exercice.ordreLettres, numero);
     if (exercice.famille === "grapheDerivee") return <PolynomeAssociationGraph coeffs={exercice.fonctions[exercice.ordreLettres[lettre]]} />;
-    if (exercice.famille === "grapheVerbal") return <span>{exercice.enonces[lettre]}</span>;
+    if (exercice.famille === "grapheVerbal" || exercice.famille === "grapheVerbalVarie") return <span>{exercice.enonces[lettre]}</span>;
+    if (exercice.famille === "grapheDeriveeVariee") return <FonctionVarieeAssociationGraph fonction={exercice.fonctions[exercice.ordreLettres[lettre]]} derivee />;
     if (exercice.famille === "grapheDeriveeAvancee") {
       if (singulier?.[numero]) return null;
       return <FonctionRicheAssociationGraph fonction={exercice.fonctions[exercice.ordreLettres[lettre]]} derivee />;
@@ -76,7 +78,7 @@ function reponseAttendueAssociation(exercice: ExerciceAssociation) {
 
   function labelLigne(numero: number): string {
     const reponse = reponseCorrecteAssociation(exercice.ordreLettres, singulier, numero);
-    return reponse === "aucune" ? `Élément ${numero + 1} → f' n'existe pas ici` : `Élément ${numero + 1} → ${LETTRES[reponse]}`;
+    return reponse === "aucune" ? `Élément ${numero + 1} → f′ n'existe pas ici` : `Élément ${numero + 1} → ${LETTRES[reponse]}`;
   }
 
   return (
@@ -159,6 +161,7 @@ export function App5gen25() {
     if (exercice.famille === "grapheDerivee") return <PolynomeAssociationGraph coeffs={exercice.fonctions[index]} />;
     if (exercice.famille === "grapheVerbal") return <PolynomeAssociationGraph coeffs={exercice.fonctions[index]} />;
     if (exercice.famille === "grapheDeriveeAvancee") return <FonctionRicheAssociationGraph fonction={exercice.fonctions[index]} />;
+    if (exercice.famille === "grapheDeriveeVariee" || exercice.famille === "grapheVerbalVarie") return <FonctionVarieeAssociationGraph fonction={exercice.fonctions[index]} />;
     return <Katex expression={exercice.fLatex[index]} block />;
   }
 
@@ -167,7 +170,8 @@ export function App5gen25() {
       const numeroSource = exercice.ordreLettres[index];
       return <PolynomeAssociationGraph coeffs={derivee(exercice.fonctions[numeroSource])} />;
     }
-    if (exercice.famille === "grapheVerbal") return <p>{exercice.enonces[index]}</p>;
+    if (exercice.famille === "grapheVerbal" || exercice.famille === "grapheVerbalVarie") return <p>{exercice.enonces[index]}</p>;
+    if (exercice.famille === "grapheDeriveeVariee") return <FonctionVarieeAssociationGraph fonction={exercice.fonctions[exercice.ordreLettres[index]]} derivee />;
     if (exercice.famille === "grapheDeriveeAvancee") {
       const numeroSource = exercice.ordreLettres[index];
       return <FonctionRicheAssociationGraph fonction={exercice.fonctions[numeroSource]} derivee />;
@@ -179,7 +183,7 @@ export function App5gen25() {
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
-        <h1 className="app-title">Association graphique/mots ↔ signe de f'/f''</h1>
+        <h1 className="app-title">Association graphique/mots ↔ signe de f′/f″</h1>
         <p className="app-subtitle">Chapitre 5 — Dérivées et applications</p>
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
@@ -223,7 +227,7 @@ export function App5gen25() {
             }
             texteAideNiveau1={texteAideNiveau1Association(exercice)}
             aideNiveau2={texteAideNiveau2Association(exercice)}
-            libelleOptionSupplementaire={exercice.famille === "grapheDeriveeAvancee" ? "f' n'existe pas ici" : undefined}
+            libelleOptionSupplementaire={exercice.famille === "grapheDeriveeAvancee" ? "f′ n'existe pas ici" : undefined}
             validation={validation}
           />
           )}

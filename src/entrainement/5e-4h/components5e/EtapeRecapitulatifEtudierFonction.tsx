@@ -58,17 +58,17 @@ export function EtapeRecapitulatifEtudierFonction({ exercice, onContinuer }: Pro
       <div className="etat-actuel-box etat-actuel-box-termes">
         {exclusionsCE(exercice).length > 0 && <Katex expression={`\\text{dom}\\,f=${formatEnsembleReelGuideLatex(domaineAttendu(exercice))}`} />}
         {slots.map((slot, i) => {
-          const termeLimite = `${formatLabelSlotLimite(slot).replace("=\\,?", "")}${formatLimiteCibleLatex(slot)}`;
+          const termeLimite = `${formatLabelSlotLimite(slot).replace("\\,?", "")}${formatLimiteCibleLatex(slot)}`;
           return <Katex key={i} expression={termeLimite} block={termeLimite.includes("\\lim_{")} />;
         })}
         <Katex expression={formatFPrimeDeXLatex(exercice)} />
         <Katex expression={formatFSecondeDeXLatex(exercice)} />
       </div>
 
-      <p className="prompt-text">Tableau de variations (issu de f') :</p>
+      <p className="prompt-text">Tableau de variations (issu de f′) :</p>
       <TableauEtudeLocaleRecap colonnes={attenduFPrime.colonnes} enteteColonnes={enteteFPrime} mode="fprime" attendu={attenduFPrime} />
 
-      <p className="prompt-text">Tableau de concavité (issu de f'') :</p>
+      <p className="prompt-text">Tableau de concavité (issu de f″) :</p>
       <TableauEtudeLocaleRecap colonnes={attenduFSeconde.colonnes} enteteColonnes={enteteFSeconde} mode="fseconde" attendu={attenduFSeconde} />
 
       <button type="button" className="btn btn-primary" onClick={onContinuer}>

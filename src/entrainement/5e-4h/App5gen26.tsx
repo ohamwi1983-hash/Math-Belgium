@@ -168,7 +168,7 @@ export function App5gen26() {
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
-        <h1 className="app-title">Calculer f'(a) par la définition</h1>
+        <h1 className="app-title">Calculer f′(a) par la définition</h1>
         <p className="app-subtitle">Chapitre 5 — Dérivées et applications</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>

@@ -95,18 +95,87 @@ function contenu(s: SpecRepere): { corps: string; L: number; H: number } {
   o.push(`<path d="M ${f1(sxp(x0))},${MARGE - 10} l -4,7 l 8,0 z" fill="${AXE}"/>`);
   o.push(`<text x="${L - MARGE - 2}" y="${f1(syp(y0) - 5)}" font-size="${p}" font-style="italic" text-anchor="end" fill="${AXE}" font-family="Times New Roman, serif" ${HALO}>x</text>`);
   o.push(`<text x="${f1(sxp(x0) + 6)}" y="${MARGE + p * 0.7}" font-size="${p}" font-style="italic" fill="${AXE}" font-family="Times New Roman, serif" ${HALO}>${s.nomY ?? "y"}</text>`);
+  // Graduations : jamais sur un point, son étiquette, le titre ni le nom d'un axe (finitions 24/11) —
+  // une graduation gênée passe de l'autre côté de l'axe, sinon elle n'est pas écrite. Axe collé au
+  // bord gauche : nombres à droite de l'axe (à gauche, ils sortaient du cadre).
+  type Boite = [number, number, number, number];
+  const obstacles: Boite[] = [];
+  const largeurTexte = (t: string, taille: number) => t.length * taille * 0.58;
+  for (const pt of s.points ?? []) {
+    const cx = sxp(pt.x);
+    const cy = syp(pt.y);
+    obstacles.push([cx - 6, cy - 6, cx + 6, cy + 6]);
+    if (pt.label) {
+      const pos = pt.position ?? "ne";
+      const taille = p * 1.1;
+      const lx = cx + (pos === "ne" || pos === "se" ? 6 : -6);
+      const by = cy + (pos === "ne" || pos === "no" ? -6 : p + 4);
+      const w = largeurTexte(pt.label, taille) + 2;
+      obstacles.push(pos === "ne" || pos === "se" ? [lx - 1, by - taille, lx + w, by + 2] : [lx - w, by - taille, lx + 1, by + 2]);
+    }
+  }
+  if (s.titre) {
+    const taille = s.titreGrand ? p * 1.5 : p * 1.15;
+    obstacles.push([MARGE + 2, MARGE, MARGE + 6 + largeurTexte(s.titre, taille), MARGE + taille * 1.35]);
+  }
+  obstacles.push([L - MARGE - 2 - p, syp(y0) - 5 - p, L - MARGE, syp(y0) - 3]);
+  obstacles.push([sxp(x0) + 4, MARGE - 2, sxp(x0) + 8 + p, MARGE + p]);
+  const touche = (b: Boite) => b[0] < 1 || b[2] > L - 1 || obstacles.some((q) => b[0] < q[2] && b[2] > q[0] && b[1] < q[3] && b[3] > q[1]);
+  // Traits (courbes, segments) : évités de préférence — si les deux côtés en touchent un, le nombre
+  // reste du côté habituel (son halo blanc le garde lisible).
+  const traits: [number, number][] = [];
+  const dansCadre = (X: number, Y: number) => X >= MARGE && X <= L - MARGE && Y >= MARGE && Y <= H - MARGE;
+  for (const cb of s.courbes) {
+    const debut = Math.max(cb.de ?? -Infinity, s.xmin);
+    const fin = Math.min(cb.a ?? Infinity, s.xmax);
+    for (let i = 0; fin > debut && i <= 400; i++) {
+      const x = debut + ((fin - debut) * i) / 400;
+      const y = cb.f(x);
+      if (Number.isFinite(y) && dansCadre(sxp(x), syp(y))) traits.push([sxp(x), syp(y)]);
+    }
+  }
+  for (const sg of s.segments ?? []) {
+    for (let i = 0; i <= 60; i++) {
+      const X = sxp(sg.x1 + ((sg.x2 - sg.x1) * i) / 60);
+      const Y = syp(sg.y1 + ((sg.y2 - sg.y1) * i) / 60);
+      if (dansCadre(X, Y)) traits.push([X, Y]);
+    }
+  }
+  const surUnTrait = (b: Boite) => traits.some(([X, Y]) => X > b[0] - 1 && X < b[2] + 1 && Y > b[1] - 1 && Y < b[3] + 1);
+  /** Côté retenu : libre de tout, sinon libre des obstacles durs (premier d'abord), sinon aucun. */
+  const choisir = (premier: Boite, second: Boite): Boite | null => {
+    const possibles = [premier, second].filter((b) => !touche(b));
+    return possibles.find((b) => !surUnTrait(b)) ?? possibles[0] ?? null;
+  };
+  const graduation = (xt: number, yt: number, texte: string, ancre: "start" | "middle" | "end") =>
+    `<text x="${f1(xt)}" y="${f1(yt)}" font-size="${p}" text-anchor="${ancre}" fill="${AXE}" ${POLICE} ${HALO}>${texte}</text>`;
   const pas = c >= 1.8 * p ? 1 : 2;
   for (let k = 1; k < nx; k++) {
     const x = s.xmin + k * s.sx;
     if (Math.abs(x) < 1e-9 || Math.round((x - 0) / s.sx) % pas !== 0) continue;
-    o.push(`<text x="${f1(sxp(x))}" y="${f1(syp(y0) + p + 2)}" font-size="${p}" text-anchor="middle" fill="${AXE}" ${POLICE} ${HALO}>${nombreFigure(x)}</text>`);
+    const texte = nombreFigure(x);
+    const w = largeurTexte(texte, p) / 2;
+    const xc = sxp(x);
+    const dessous: Boite = [xc - w, syp(y0) + 2, xc + w, syp(y0) + p + 4];
+    const dessus: Boite = [xc - w, syp(y0) - p - 3, xc + w, syp(y0) - 2];
+    const cote = choisir(dessous, dessus);
+    if (cote) o.push(graduation(xc, cote === dessous ? syp(y0) + p + 2 : syp(y0) - 4, texte, "middle"));
   }
+  const axeAGauche = sxp(x0) - MARGE < 2 * p;
   for (let k = 1; k < ny; k++) {
     const y = s.ymin + k * s.sy;
     if (Math.abs(y) < 1e-9 || Math.round(y / s.sy) % pas !== 0) continue;
-    o.push(`<text x="${f1(sxp(x0) - 3)}" y="${f1(syp(y) + p / 2.8)}" font-size="${p}" text-anchor="end" fill="${AXE}" ${POLICE} ${HALO}>${nombreFigure(y)}</text>`);
+    const texte = nombreFigure(y);
+    const w = largeurTexte(texte, p);
+    const yb = syp(y) + p / 2.8;
+    const gauche: Boite = [sxp(x0) - 3 - w, yb - p * 0.8, sxp(x0) - 2, yb + 2];
+    const droite: Boite = [sxp(x0) + 2, yb - p * 0.8, sxp(x0) + 3 + w, yb + 2];
+    const [premier, second] = axeAGauche ? [droite, gauche] : [gauche, droite];
+    const ecrire = (b: Boite) => o.push(graduation(b === gauche ? sxp(x0) - 3 : sxp(x0) + 3, yb, texte, b === gauche ? "end" : "start"));
+    const cote = choisir(premier, second);
+    if (cote) ecrire(cote);
   }
-  if (s.xmin < 0 && s.ymin < 0) o.push(`<text x="${f1(sxp(0) - 3)}" y="${f1(syp(0) + p + 2)}" font-size="${p}" text-anchor="end" fill="${AXE}" ${POLICE} ${HALO}>0</text>`);
+  if (s.xmin < 0 && s.ymin < 0 && !touche([sxp(0) - 3 - p * 0.6, syp(0) + 2, sxp(0) - 2, syp(0) + p + 4])) o.push(graduation(sxp(0) - 3, syp(0) + p + 2, "0", "end"));
   // Zone de tracé rognée : verticales, puis courbes.
   const tx = (x: number) => ((x - s.xmin) / s.sx) * c;
   const ty = (y: number) => ((s.ymax - y) / s.sy) * c;

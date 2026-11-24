@@ -8,7 +8,8 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { LectureGraphiqueDeriveesGraph } from "./LectureGraphiqueDeriveesGraph";
-import { formatMessageErreur } from "../ui/messageErreur";
+import { MessageRetour } from "../../4e/components/RetourSaisie";
+import { cibleExtremums } from "../ui5e/retoursLectureGraphiqueDerivees";
 import { consigneEcran, consigneGenerale, labelsChampsExtremums, precisionAnnonceeExtremum, questionFinale, texteAideNiveau1 } from "../ui5e/formatLectureGraphiqueDerivees";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -32,6 +33,8 @@ export function EtapeChampsLectureGraphiqueDerivees({ exercice, tentativesUtilis
   const [valeurs, setValeurs] = useState<string[]>(() => labels.map(() => ""));
   const [champActif, setChampActif] = useState(0);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  /** Dernières valeurs transmises au moteur : le message ciblé porte sur elles. */
+  const [soumises, setSoumises] = useState<string[] | null>(null);
   const complet = labels.every((_, i) => (valeurs[i] ?? "").trim() !== "");
   const statuts = tentativesUtilisees > 0 && complet ? labels.map((_, i) => diagnostiquerValeurExtremum(valeurs[i] ?? "", exercice.extrema[i].valeur)) : null;
 
@@ -43,6 +46,7 @@ export function EtapeChampsLectureGraphiqueDerivees({ exercice, tentativesUtilis
     const s = labels.map((_, i) => diagnostiquerValeurExtremum(valeurs[i] ?? "", exercice.extrema[i].valeur));
     setDernierStatut(s.find((v) => v !== "correct") ?? "correct");
     if (s.includes("parse_error")) return; // écriture illisible : pas de tentative consommée
+    setSoumises(labels.map((_, i) => valeurs[i] ?? ""));
     onValider(labels.map((_, i) => valeurs[i] ?? ""));
   }
 
@@ -89,11 +93,7 @@ export function EtapeChampsLectureGraphiqueDerivees({ exercice, tentativesUtilis
               Écriture non reconnue : tape un nombre, par exemple 2,5 ou −1.
             </p>
           ) : (
-            tentativesUtilisees > 0 && (
-              <p className="alert-error" role="alert">
-                {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-              </p>
-            )
+            <MessageRetour illisible={false} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} cible={soumises ? cibleExtremums(exercice, soumises) : null} />
           )}
         </>
       )}

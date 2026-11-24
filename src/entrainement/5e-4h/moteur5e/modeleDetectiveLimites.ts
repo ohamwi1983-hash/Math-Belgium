@@ -359,7 +359,7 @@ function racineMoinsInfini(e: E): CopieDetectiveLim {
     corrigeC: {
       utilise: [t("On reprend avec "), l("\\sqrt{x^2}=-x"), t(" puis on divise par x (cours, § 1).")],
       lignes: [
-        ligne(`f(x)=\\dfrac{-x${rac}}{${D}}`, "x < 0"),
+        ligne(`f(x)=\\dfrac{-x${rac}}{${D}}`, [latex("x<0")]),
         ligne(`=\\dfrac{-${rac}}{${denDiv}}`, "on divise numérateur et dénominateur par x"),
         ligne(`${L}f(x)=\\dfrac{-\\sqrt{${m * m}}}{${p}}`, "les termes en 1/x et 1/x² tendent vers 0"),
         ligne(`=${fracL(-m, p)}`),

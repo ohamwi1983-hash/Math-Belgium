@@ -16,7 +16,7 @@ export function questionFinale(): string {
 }
 
 export function consigneGenerale(): string {
-  return "Calcule la dérivée f'(x) : reconnais d'abord la structure de f(x), puis décompose-la si besoin.";
+  return "Calcule la dérivée f′(x) : reconnais d'abord la structure de f(x), puis décompose-la si besoin.";
 }
 
 export function formatTermesDonneesLatex(exercice: ExerciceFonctionDerivee): string[] {
@@ -62,7 +62,7 @@ export function consigneEcran(ecran: EcranFonctionDerivee, typeRetenu: TypeDeriv
     if (typeRetenu === "quotient") return "Identifie le numérateur u(x) et le dénominateur v(x) de f(x).";
     return "Identifie la fonction intérieure u(x) et la fonction extérieure (exprimée en u).";
   }
-  return "Calcule f'(x).";
+  return "Calcule f′(x).";
 }
 
 // ============================================================================
@@ -175,7 +175,7 @@ export function texteAideNiveau1(ecran: EcranFonctionDerivee, typeRetenu: TypeDe
 export const LIBELLE_ECRAN: Record<EcranFonctionDerivee, string> = {
   reconnaissance: "Type de dérivée",
   decomposer: "Décomposition",
-  calculer: "Dérivée f'(x)",
+  calculer: "Dérivée f′(x)",
 };
 
 /** Réponse "texte" attendue pour l'écran "reconnaissance" (pas de KaTeX : simple nom de

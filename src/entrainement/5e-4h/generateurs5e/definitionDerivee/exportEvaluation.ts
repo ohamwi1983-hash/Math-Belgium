@@ -71,7 +71,7 @@ function baremeDefinitionDerivee(exercice: ExerciceDefinitionDerivee): BaremeExe
           c("a", `Valeur de f(${a})`, 0.5),
           c("a", `f(${a} + h) développé et réduit`, 1),
           c("b", `Différence f(${a} + h) − f(${a}) et simplification par h`, 1.5),
-          c("b", `Passage à la limite : valeur de f'(${a})`, 1),
+          c("b", `Passage à la limite : valeur de f′(${a})`, 1),
         ]
       : [
           c("a", `Valeur de f(${a})`, 0.5),
@@ -85,7 +85,7 @@ function baremeDefinitionDerivee(exercice: ExerciceDefinitionDerivee): BaremeExe
             1,
           ),
           c("b", "Taux d'accroissement simplifié (le facteur h a disparu)", 1.5),
-          c("c", `Passage à la limite : valeur de f'(${a})`, 1),
+          c("c", `Passage à la limite : valeur de f′(${a})`, 1),
         ];
   return {
     reponseFinale: reponseBreveDefinitionDerivee(exercice),
@@ -96,7 +96,7 @@ function baremeDefinitionDerivee(exercice: ExerciceDefinitionDerivee): BaremeExe
         : { description: [texte("Remplacer h par 0 avant d'avoir simplifié le facteur h (forme 0/0)")], cout: "0 pt sur la limite" },
       { description: [texte("Résultat donné par les règles de dérivation, sans passer par la définition")], cout: "0 pt sur les étapes de calcul" },
     ],
-    reponsesAcceptees: [[texte("f'(a) sous forme de fraction irréductible ou de nombre décimal exact")]],
+    reponsesAcceptees: [[texte("f′(a) sous forme de fraction irréductible ou de nombre décimal exact")]],
   };
 }
 
@@ -115,7 +115,7 @@ function construireCorrectionDefinitionDerivee(exercice: ExerciceDefinitionDeriv
 }
 
 export const adaptateurEvaluationDefinitionDerivee: AdaptateurFeuilleExercices<ExerciceDefinitionDerivee> = {
-  titreDocument: "Calculer f'(a) par la définition — Évaluation",
+  titreDocument: "Calculer f′(a) par la définition — Évaluation",
   nomFichierBase: "definition-derivee",
   genererInstance: genererExerciceDefinitionDerivee,
   catalogueVariantes: CATALOGUE_FAMILLES,
