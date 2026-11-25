@@ -2511,8 +2511,9 @@ probabilité. **6gen120 — Retrouver μ ou σ** (§ 6, Transférer) : `sigma`, 
 moyenne, écart-type, symétrie de Φ, règle empirique d'un côté, λ non ajusté, complément, uniforme, coefficient
 binomial, correction de continuité oubliée ; ligne fausse précédée de 0 à 3 lignes justes (`av` tiré en dernier).
 **Profils** : `forme` = variante (6gen116, 6gen118, 6gen120–6gen122 ; 6gen117 : variante + question posée pour la règle
-empirique) ; aucun cas particulier ; aucun `calcul` (lire la table EST l'exercice ; la Casio Graph Math+ a les lois et
-leurs inverses, mais modéliser, choisir, corriger est évalué : tiré « interdite » ET « autorisée ») ;
+empirique) ; aucun cas particulier ; 6gen116 `calcul: 'exacte'` (règle du 24/11 : NormCD / InvNormCD donnent Φ et sa
+réciproque directement, la lecture de table n'a de sens que « calculatrice interdite », comme 6gen51 A–D) ; 6gen117–122 sans
+`calcul` (modéliser, choisir, corriger est évalué : tiré « interdite » ET « autorisée ») ;
 `calculatriceIndispensable` en 6gen118 (√(np(1 − p)), loi binomiale exacte) et 6gen121 (e^(−λ), ln). `besoinTablePhi` :
 116, 118, 119, 120 toujours ; 122 pour « symétrie » et « continuité » (la copie montre déjà Φ) ; 117 et 121 jamais.
 Regroupement a), b), c) : **6gen116 activé** (entrée `6gen116` de `REGROUPEMENTS`, deux consignes : « calcule chaque

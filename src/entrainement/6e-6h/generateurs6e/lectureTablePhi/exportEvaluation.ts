@@ -15,8 +15,9 @@ import { correctionDetailleeLTP } from "./corrigeDetaille";
  * Lectures pures (case, valeur lue, z) : écrans de lecture ; méthode 0 (la propriété est imposée par
  * l'événement écrit), piège 1 quand une borne est négative (symétrie, intervalle à borne
  * négative) et TOUJOURS en lecture inverse par symétrie (le signe de z est la réponse : un niveau qui
- * varierait avec lui le trahirait sur la feuille). Aucun cas particulier, aucun `calcul` : la Casio Graph Math+ a la loi normale,
- * mais lire la table EST l'exercice (Connaître ; tiré « interdite » ET « autorisée »).
+ * varierait avec lui le trahirait sur la feuille). Aucun cas particulier ; `calcul: 'exacte'` partout (règle validée du 24/11 :
+ * la Casio Graph Math+ donne Φ et sa réciproque directement — NormCD / InvNormCD —, donc lire la table n'a de sens qu'en
+ * « calculatrice interdite », comme 6gen51 A–D).
  * Regroupement a), b), c) : entrée `6gen116` de `REGROUPEMENTS` (deux consignes : calcule / détermine z).
  */
 
@@ -80,7 +81,7 @@ function bareme(e: E): BaremeExercice {
 
 /** `forme` = variante (le type de lecture est écrit dans l'énoncé : aucun verdict caché). */
 export function profilLTP(e: E): ProfilInstance {
-  return { casParticulier: null, forme: e.variante };
+  return { casParticulier: null, forme: e.variante, calcul: "exacte" };
 }
 
 export const adaptateurEvaluationLTP: AdaptateurFeuilleExercices<E> = {
