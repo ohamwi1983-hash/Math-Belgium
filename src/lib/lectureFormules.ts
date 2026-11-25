@@ -1679,6 +1679,9 @@ class Lecteur {
       if (d && d.type !== 'punct') {
         if (x.ferme) out.push(',')
         else if (x.queue === 'virgule' && d.type !== 'rel') out.push(',')
+        // Indice / exposant simple suivi d'un opérateur : pause (« u indice n, plus 1 » ≠ « u indice n
+        // plus 1 » = u₍ₙ₊₁₎ ; « x au carré, plus 1 ») — décision du professeur.
+        else if ((x.indice || x.exposant) && !x.queue && d.type === 'op') out.push(',')
         else if (x.queue === 'exposant') out.push(...(d.type === 'rel' ? [','] : [',', "fin d'exposant", ',']))
       }
     }

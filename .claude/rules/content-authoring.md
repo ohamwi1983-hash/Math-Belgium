@@ -168,9 +168,12 @@ et `CorrigeDetailleEcran`) et `lib/katexAccessible.ts` (`htmlKatexAccessible` : 
 racine d'un HTML `katex.renderToString` — corrigés en chaîne HTML, ateliers via `interactive/katex-shadow.js`).
 Les exports papier (Word, PDF, feuilles) n'en ont pas besoin et ne changent pas.
 
-Conventions (maquette planche 08) : « u indice n plus 1 égale 3 fois u indice n », « u indice n égale
-u indice 1 plus, parenthèse, n moins 1, fin de parenthèse, fois r », « S indice n égale : fraction, n fois,
-parenthèse, u indice 1 plus u indice n, fin de parenthèse, sur 2, fin de fraction », « 3 sur 4 » (fraction
+Conventions (maquette planche 08) : « u indice n plus 1 égale 3 fois u indice n » (u₍ₙ₊₁₎), mais
+« u indice n, plus 1 égale … » (uₙ + 1) — décision du professeur : un indice ou exposant SIMPLE suivi d'un
+opérateur prend une virgule (« x au carré, plus 1 »), un exposant composé suivi d'un opérateur se ferme
+(« x exposant n plus 1, fin d'exposant, plus 1 ») ; « u indice n égale u indice 1, plus, parenthèse, n moins 1,
+fin de parenthèse, fois r », « S indice n égale : fraction, n fois, parenthèse, u indice 1, plus u indice n,
+fin de parenthèse, sur 2, fin de fraction », « l n de x » et « log de x » (comme les professeurs le disent), « 3 sur 4 » (fraction
 simple : numérateur nombre/lettre/produit simple, dénominateur d'un seul tenant), « racine carrée de 3, sur 2 »,
 « x au carré », « x puissance n », « x exposant moins 1 », « e exposant x », « f prime de x », « f réciproque de x »,
 « l'intervalle ouvert en moins l'infini, fermé en moins 2 », « R privé de 2 et 3 », « probabilité de A sachant B »,
