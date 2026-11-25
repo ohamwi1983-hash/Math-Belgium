@@ -1,386 +1,138 @@
-import type { ExerciceBinomialeA, ExerciceBinomialeB, ExerciceBinomialeSequenceOrdonnee, StrategieBinomialeA } from "../core6e/binomialeSequenceOrdonnee.types";
-import { coefficientBinomial } from "../generateurs6e/combinatoire";
+import type { ExerciceBinomialeA, ExerciceBinomialeSequenceOrdonnee, StrategieBinomialeA } from "../core6e/binomialeSequenceOrdonnee.types";
 import type { PhaseBinomialeSequenceOrdonnee } from "../moteur6e/typesBinomialeSequenceOrdonnee";
+import { resultatExact, termesExacts } from "../moteur6e/verificationBinomialeSequenceOrdonnee";
+import { arrangementBig, rationnel, versNombre, vaut } from "../moteur6e/saisieCombinatoire";
+import type { Rationnel } from "../moteur6e/saisieCombinatoire";
+import { arrondiLatex, decimalLatex, decimalesAffichage, f, fractionLatex, milliers, t } from "./fragmentsCombinatoire";
+import type { ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen48`. Dispatch sur
- * `exercice.famille` PUIS `phase`, mirroir `formatDenombrementFondamental.ts` (6gen43), jamais
- * importé par un autre générateur (chaque générateur reste indépendant — CLAUDE.md).
- *
- * **Vigilance signe orphelin / groupe LaTeX vide / texte français en mode maths** — toute clause en
- * français mêlée à du LaTeX passe TOUJOURS par `\text{...}`, jamais du texte brut en mode maths.
- * Couverture de régression : `formatBinomialeSequenceOrdonnee.test.ts`, scan sur de nombreux
- * tirages aléatoires à la recherche d'un `++`/`+-`/`--`/groupe `{}` vide.
- *
- * `p` (famille A) est toujours DÉCIMAL en interne (`0.2`...`0.8`) mais toujours AFFICHÉ sous forme
- * de FRACTION irréductible (convention transversale CLAUDE.md, "jamais de décimal pour toute valeur
- * générée par la plateforme") — voir `FRACTIONS_P` ci-dessous, table statique car `p` est toujours
- * tiré d'un ensemble FIXE de candidats (`generateurs6e/binomialeSequenceOrdonnee/familleA.ts`).
+ * Textes de `6gen48` (6e ch. 7, § 6) — audit, lots B et C : succès nommé (« la flèche atteint la
+ * cible »), p en décimal comme dans le cours, virgule décimale (plus « 0.21875 »), fraction exacte en
+ * premier, stratégie jamais donnée par une aide (avant : l'aide 2 livrait la stratégie et les termes),
+ * placeholders retirés (ils étaient les réponses dans 100 % des exercices B).
  */
 
-export type TypeChamp = "texte" | "choix";
+type E = ExerciceBinomialeSequenceOrdonnee;
+type P = PhaseBinomialeSequenceOrdonnee;
 
-export interface OptionChoix {
-  valeur: string;
-  label: string;
-}
+export const ANNONCE_PRECISION_48 = "Donne la valeur exacte (une fraction) ou un arrondi au millième (davantage de décimales pour une très petite probabilité).";
 
-export interface ChampDef {
-  type: TypeChamp;
-  label: string;
-  placeholder?: string;
-  options?: OptionChoix[];
-}
-
-export interface AideAvecLatex {
-  texte: string;
-  latex: string | null;
-}
-
-/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
- * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md) ; rendu via
- * `components/RenduFragments.tsx`. */
-export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
-
-function texte(valeur: string): FragmentConsigne {
-  return { type: "texte", valeur };
-}
-function latex(valeur: string): FragmentConsigne {
-  return { type: "latex", valeur };
-}
-
-const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
-
-/** Annonce de tolérance pour tout champ de PROBABILITÉ décimale de la famille A (`diagnostiquerValeur`,
- * `moteur6e/verificationProbabilites.ts`, tolérance `0,01`) — même texte standard que
- * `formatProbabiliteHypergeometrique.ts` (6gen47, même chapitre) et le reste du chapitre 8
- * (6gen30/33) : annonce la tolérance RÉELLEMENT vérifiée côté `diagnostiquerXxx` (convention
- * transversale CLAUDE.md, "Annonce de précision"), jamais utilisée pour la famille B (fractions
- * EXACTES, `diagnostiquerProduitFinal`) ni pour les champs entiers (k, dénominateurs). */
-const ANNONCE_TOLERANCE = "(forme exacte ou décimale arrondie au centième)";
-
-function champTexte(label: string, placeholder: string): ChampDef {
-  return { type: "texte", label, placeholder };
-}
-
-/** Vérifié empiriquement par capture d'écran Playwright à 375px (mobile) — pas seulement par
- * comptage de caractères : la leçon `docs/historique-6e.md` héritée de 6gen43 ("la cinquantaine de
- * caractères") documentait un débordement mesuré sur desktop ; à 375px, une entrée de 50 caractères
- * en `\text{}` (police KaTeX ~1.3em) déborde ENCORE de `.equation-box`, tronquée symétriquement des
- * 2 côtés (texte centré + `overflow-x:auto`, la position de scroll par défaut reste centrée sur
- * mobile plutôt que ramenée au bord gauche — ni "Un footba" ni "e succès" ne restaient visibles).
- * Seuil resserré à 28 caractères après ce constat, revérifié capture à l'appui (0 débordement). */
-const LONGUEUR_MAX_LIGNE = 28;
-
-/** Découpe un texte français long en PLUSIEURS entrées `string[]` — piège documenté CLAUDE.md/
- * 6gen43 : un fragment KaTeX est rendu en `white-space: nowrap` (interne à KaTeX, indépendant de
- * `\text{...}`), donc UNE SEULE entrée du tableau `blocDonnees` déborde `.equation-box` au-delà
- * d'un certain nombre de caractères (voir `LONGUEUR_MAX_LIGNE` ci-dessus) — même en répartissant
- * plusieurs `\text{...}` DANS la même entrée, ça ne change rien : le rendu reste sur UNE seule ligne
- * tant que c'est le même appel KaTeX. Seule une répartition sur PLUSIEURS entrées de tableau
- * (chacune son propre appel KaTeX, `.equation-box-donnees` étant déjà en `flex-direction: column`)
- * évite le débordement. Découpe aux frontières de MOTS uniquement (jamais au milieu d'un mot). Les
- * contextes narratifs de `generateurs6e/binomialeSequenceOrdonnee/familleA.ts`/`familleB.ts`
- * dépassent tous ce seuil — ce découpage s'applique donc systématiquement à `contexte.texte` dans
- * `blocDonneesA`/`blocDonneesB` ci-dessous. */
-function decouperEnFragmentsTexte(texte: string): string[] {
-  const mots = texte.split(" ");
-  const lignes: string[] = [];
-  let courante = "";
-  for (const mot of mots) {
-    const candidate = courante === "" ? mot : `${courante} ${mot}`;
-    if (candidate.length > LONGUEUR_MAX_LIGNE && courante !== "") {
-      lignes.push(courante);
-      courante = mot;
-    } else {
-      courante = candidate;
-    }
-  }
-  if (courante !== "") lignes.push(courante);
-  return lignes.map((ligne) => `\\text{${ligne}}`);
-}
-
-const FRACTIONS_P: Record<string, string> = {
-  "0.5": "\\dfrac{1}{2}",
-  "0.2": "\\dfrac{1}{5}",
-  "0.3": "\\dfrac{3}{10}",
-  "0.4": "\\dfrac{2}{5}",
-  "0.6": "\\dfrac{3}{5}",
-  "0.7": "\\dfrac{7}{10}",
-  "0.8": "\\dfrac{4}{5}",
-};
-function formatP(p: number): string {
-  return FRACTIONS_P[`${p}`] ?? `${p}`;
-}
-
-/** Décimal EXACT (jamais arrondi de façon trompeuse — `p` a toujours un dénominateur divisant 10,
- * donc `p^k(1-p)^{n-k}` a toujours une écriture décimale FINIE en au plus `n` décimales). */
-function formatDecimalExact(v: number): string {
-  const s = v.toFixed(10).replace(/0+$/, "").replace(/\.$/, "");
-  return s === "" || s === "-" ? "0" : s;
-}
-
-const LIBELLE_STRATEGIE: Record<StrategieBinomialeA, string> = {
-  termeUnique: "un seul terme",
-  somme: "une somme de plusieurs termes",
-  complement: "un complément (1 moins un terme)",
+const OPTIONS_STRATEGIE: Record<StrategieBinomialeA, string> = {
+  termeUnique: "Un seul terme : $P(X=k)$",
+  somme: "Une somme de quelques termes : $P(X=k_1)+P(X=k_2)+\\ldots$",
+  complement: "Le complément : $1-\\big(P(X=k_1)+\\ldots\\big)$",
 };
 
-function estEcran1A(phase: PhaseBinomialeSequenceOrdonnee): boolean {
-  return phase === "aTermeUniqueEcran1" || phase === "aSommeEcran1" || phase === "aComplementEcran1";
-}
-function estEcran2A(phase: PhaseBinomialeSequenceOrdonnee): boolean {
-  return phase === "aTermeUniqueEcran2" || phase === "aSommeEcran2" || phase === "aComplementEcran2";
-}
-
-// ============================================================================
-// Famille A — Probabilité binomiale.
-// ============================================================================
-
-export function consigneGeneraleA(): FragmentConsigne[] {
-  return [texte("n épreuves indépendantes sont répétées, chacune avec la même probabilité de succès p. Identifie la stratégie de calcul adaptée à la question, puis calcule la probabilité demandée.")];
-}
-
-/** Notation mathématique de la question — reste COURTE (mode maths pur, jamais de `\text{}`
- * français mêlé) pour ne jamais s'approcher du seuil de débordement (voir `decouperEnFragmentsTexte`
- * ci-dessus) ; le qualificatif français associé est un fragment SÉPARÉ (`formatQuestionQualificatifA`,
- * sa propre entrée du tableau `blocDonnees`). */
-function formatQuestionMathA(e: ExerciceBinomialeA): string {
+function evenementLatex(e: ExerciceBinomialeA): string {
   switch (e.typeQuestion) {
     case "exactement":
-      return `P(X=${e.k})`;
+      return `X=${e.k}`;
     case "auMoins":
-      return `P(X\\geq ${e.k})`;
+      return `X\\geq ${e.k}`;
     case "auPlus":
-      return `P(X\\leq ${e.k})`;
+      return `X\\leq ${e.k}`;
     case "aucun":
-      return "P(X=0)";
+      return "X=0";
     case "tous":
-      return `P(X=${e.n})`;
+      return `X=${e.n}`;
   }
 }
 
-function formatQuestionQualificatifA(e: ExerciceBinomialeA): string {
-  switch (e.typeQuestion) {
-    case "exactement":
-      return `(exactement ${e.k} succès)`;
-    case "auMoins":
-      return `(au moins ${e.k} succès)`;
-    case "auPlus":
-      return `(au plus ${e.k} succès)`;
-    case "aucun":
-      return "(aucun succès)";
-    case "tous":
-      return "(tous des succès)";
-  }
+function valeur(r: Rationnel): string {
+  const x = versNombre(r);
+  return `${fractionLatex(r)}\\approx ${arrondiLatex(x, decimalesAffichage(x))}`;
 }
 
-export function blocDonneesA(e: ExerciceBinomialeA): string[] {
-  return [...decouperEnFragmentsTexte(e.contexte.texte), `n=${e.n}`, `p=${formatP(e.p)}`, `\\text{Demandé : }${formatQuestionMathA(e)}`, ...decouperEnFragmentsTexte(formatQuestionQualificatifA(e))];
+function termeLatex(e: ExerciceBinomialeA, k: number): string {
+  return `C_{${e.n}}^{${k}}\\times ${decimalLatex(e.p)}^{${k}}\\times ${decimalLatex(1 - e.p)}^{${e.n - k}}`;
 }
 
-export function consigneEcranA(e: ExerciceBinomialeA, phase: PhaseBinomialeSequenceOrdonnee): FragmentConsigne[] {
-  if (estEcran1A(phase))
-    return [texte("Identifie la stratégie de calcul (un seul terme, une somme de plusieurs termes, ou un complément), puis indique le(s) nombre(s) de succès k pour lesquels il faut calculer "), latex("P(X=k)"), texte(".")];
-  if (estEcran2A(phase))
-    return [texte("Calcule la valeur de chaque terme "), latex("P(X=k)"), texte(" identifié à l'étape précédente, à l'aide de la formule "), latex("C_n^k\\cdot p^k\\cdot(1-p)^{n-k}"), texte(".")];
-  return e.strategie === "somme"
-    ? [texte("Additionne les termes CONFIRMÉS de l'étape précédente pour obtenir la probabilité demandée.")]
-    : [texte("Calcule 1 moins le terme CONFIRMÉ de l'étape précédente pour obtenir la probabilité demandée.")];
+function sommeTermes(e: ExerciceBinomialeA): string {
+  return e.termesACalculer.map((k) => `P(X=${k})`).join("+");
 }
 
-export function etatActuelA(e: ExerciceBinomialeA, phase: PhaseBinomialeSequenceOrdonnee): string[] | null {
-  if (estEcran2A(phase)) {
-    const termes = e.termesACalculer.map((k) => `P(X=${k})`).join(",\\ ");
-    return [...decouperEnFragmentsTexte(`Stratégie : ${LIBELLE_STRATEGIE[e.strategie]}`), `\\text{Termes : }${termes}`];
-  }
-  if (phase === "aSommeEcran3" || phase === "aComplementEcran3") {
-    const termes = e.termesACalculer.map((k) => `P(X=${k})`).join(",\\ ");
-    return [
-      ...decouperEnFragmentsTexte(`Stratégie : ${LIBELLE_STRATEGIE[e.strategie]}`),
-      `\\text{Termes : }${termes}`,
-      ...e.termesACalculer.map((k, i) => `P(X=${k})=${formatDecimalExact(e.valeursTermes[i])}\\text{ (confirmé)}`),
-    ];
-  }
-  return null;
-}
-
-export function champsA(e: ExerciceBinomialeA, phase: PhaseBinomialeSequenceOrdonnee): ChampDef[] {
-  if (estEcran1A(phase)) {
-    return [
-      {
-        type: "choix",
-        label: "Stratégie =",
-        options: [
-          { valeur: "termeUnique", label: "Un seul terme" },
-          { valeur: "somme", label: "Une somme de plusieurs termes" },
-          { valeur: "complement", label: "Un complément (1 moins un terme)" },
-        ],
-      },
-      champTexte("Nombre(s) de succès k à calculer (séparés par une virgule) =", "ex : 3"),
-    ];
-  }
-  if (estEcran2A(phase)) {
-    return e.termesACalculer.map((k) => champTexte(`P(X=${k}) =`, `ex : 0,22 ${ANNONCE_TOLERANCE}`));
-  }
-  return [champTexte("Résultat final (probabilité demandée) =", `ex : 0,5 ${ANNONCE_TOLERANCE}`)];
-}
-
-export function niveauAideMaxA(phase: PhaseBinomialeSequenceOrdonnee): number {
-  return estEcran1A(phase) || estEcran2A(phase) ? 2 : 0;
-}
-
-export function aideNiveau1A(phase: PhaseBinomialeSequenceOrdonnee): AideAvecLatex {
-  if (estEcran1A(phase)) {
-    return {
-      texte: "3 stratégies possibles selon la formulation de la question : un seul terme (« exactement »/« aucun »/« tous »), une somme de plusieurs termes (« au plus »/« au moins », en sommant directement quand il y a peu de termes), ou un complément (1 moins un terme extrême, ex. « au moins 1 » = 1 − P(X=0)).",
-      latex: null,
-    };
-  }
-  if (estEcran2A(phase)) {
-    return { texte: "Rappel de la formule :", latex: "P(X=k)=C_n^{k}\\cdot p^k\\cdot(1-p)^{n-k}" };
-  }
-  return AUCUNE_AIDE;
-}
-
-export function aideNiveau2A(e: ExerciceBinomialeA, phase: PhaseBinomialeSequenceOrdonnee): AideAvecLatex {
-  if (estEcran1A(phase)) {
-    const strategie = LIBELLE_STRATEGIE[e.strategie];
-    if (e.strategie === "termeUnique") return { texte: `La stratégie identifiée dans l'énoncé est : ${strategie}.`, latex: `P(X=${e.k})` };
-    if (e.strategie === "complement") return { texte: `La stratégie identifiée dans l'énoncé est : ${strategie}.`, latex: `1-P(X=${e.termesACalculer[0]})` };
-    const somme = e.termesACalculer.map((k) => `P(X=${k})`).join("+");
-    return { texte: `La stratégie identifiée dans l'énoncé est : ${strategie}.`, latex: somme };
-  }
-  if (estEcran2A(phase)) {
-    const premierK = e.termesACalculer[0];
-    const coefficient = coefficientBinomial(e.n, premierK);
-    return { texte: `Coefficient binomial déjà calculé pour le premier terme (les puissances de p et 1−p restent à substituer) :`, latex: `C_{${e.n}}^{${premierK}}=${coefficient}` };
-  }
-  return AUCUNE_AIDE;
-}
-
-// ============================================================================
-// Famille B — Probabilité d'une séquence exacte, sans remise.
-// ============================================================================
-
-export function consigneGeneraleB(): FragmentConsigne[] {
-  return [texte("On tire k éléments l'un après l'autre, SANS REMISE, parmi n éléments tous distincts. Détermine la probabilité d'obtenir un ordre précis donné, une position à la fois.")];
-}
-
-export function blocDonneesB(e: ExerciceBinomialeB): string[] {
-  return [...decouperEnFragmentsTexte(e.contexte.texte), `n=${e.n}`, `k=${e.k}`, ...decouperEnFragmentsTexte("Probabilité d'obtenir l'ordre exact demandé, tirage après tirage")];
-}
-
-export function consigneEcranB(phase: PhaseBinomialeSequenceOrdonnee): FragmentConsigne[] {
-  if (phase === "bEcran1") return [texte("Pose, SANS LE CALCULER, le produit des fractions correspondant à chaque tirage successif : donne le dénominateur de chaque fraction (le numérateur vaut toujours 1).")];
-  return [texte("Calcule la valeur finale du produit CONFIRMÉ à l'étape précédente.")];
-}
-
-/** Notation COMPACTE (`1/12` en ligne, jamais `\dfrac{1}{12}` empilée) — un produit de `k`∈{3,4,5}
- * fractions en `\dfrac` empilées serait visuellement bien plus large qu'un simple compte de
- * caractères ne le suggère (chaque `\dfrac` a sa propre largeur de colonne) ; la notation en ligne
- * reste largement assez claire pour une simple CONFIRMATION déjà validée à l'écran précédent
- * (jamais un champ de saisie, seulement `etatActuelB` ci-dessous). */
-function formatProduitLatex(denominateurs: number[]): string {
-  return denominateurs.map((d) => `1/${d}`).join("\\times ");
-}
-
-export function etatActuelB(e: ExerciceBinomialeB, phase: PhaseBinomialeSequenceOrdonnee): string[] | null {
-  if (phase === "bEcran2") return [`${formatProduitLatex(e.denominateurs)}\\text{ (confirmé)}`];
-  return null;
-}
-
-export function champsB(e: ExerciceBinomialeB, phase: PhaseBinomialeSequenceOrdonnee): ChampDef[] {
-  if (phase === "bEcran1") {
-    return e.denominateurs.map((_, i) => champTexte(`Position ${i + 1} — dénominateur (1/⬚) =`, `ex : ${e.n - i}`));
-  }
-  return [champTexte("Valeur finale =", `ex : 1/${e.denominateurs.reduce((a, b) => a * b, 1)}`)];
-}
-
-export function niveauAideMaxB(phase: PhaseBinomialeSequenceOrdonnee): number {
-  return phase === "bEcran1" ? 2 : 0;
-}
-
-export function aideNiveau1B(phase: PhaseBinomialeSequenceOrdonnee): AideAvecLatex {
-  if (phase !== "bEcran1") return AUCUNE_AIDE;
-  return { texte: "À chaque tirage successif sans remise, un seul élément parmi ceux qui restent correspond exactement à la position demandée — la probabilité de cette étape est donc 1/(nombre d'éléments restants à ce moment).", latex: null };
-}
-
-export function aideNiveau2B(e: ExerciceBinomialeB, phase: PhaseBinomialeSequenceOrdonnee): AideAvecLatex {
-  if (phase !== "bEcran1") return AUCUNE_AIDE;
-  const [d0, d1] = e.denominateurs;
-  return { texte: "Les deux premières fractions sont déjà posées, les suivantes restent à déterminer :", latex: `\\dfrac{1}{${d0}}\\times\\dfrac{1}{${d1}}` };
-}
-
-// ============================================================================
-// Dispatch commun.
-// ============================================================================
-
-export function consigneGenerale(exercice: ExerciceBinomialeSequenceOrdonnee): FragmentConsigne[] {
-  return exercice.famille === "A" ? consigneGeneraleA() : consigneGeneraleB();
-}
-
-export function blocDonnees(exercice: ExerciceBinomialeSequenceOrdonnee): string[] {
-  return exercice.famille === "A" ? blocDonneesA(exercice) : blocDonneesB(exercice);
-}
-
-export function consigneEcran(exercice: ExerciceBinomialeSequenceOrdonnee, phase: PhaseBinomialeSequenceOrdonnee): FragmentConsigne[] {
-  return exercice.famille === "A" ? consigneEcranA(exercice, phase) : consigneEcranB(phase);
-}
-
-export function etatActuel(exercice: ExerciceBinomialeSequenceOrdonnee, phase: PhaseBinomialeSequenceOrdonnee): string[] | null {
-  return exercice.famille === "A" ? etatActuelA(exercice, phase) : etatActuelB(exercice, phase);
-}
-
-export function champsEcran(exercice: ExerciceBinomialeSequenceOrdonnee, phase: PhaseBinomialeSequenceOrdonnee): ChampDef[] {
-  return exercice.famille === "A" ? champsA(exercice, phase) : champsB(exercice, phase);
-}
-
-export function niveauAideMaxEcran(exercice: ExerciceBinomialeSequenceOrdonnee, phase: PhaseBinomialeSequenceOrdonnee): number {
-  return exercice.famille === "A" ? niveauAideMaxA(phase) : niveauAideMaxB(phase);
-}
-
-export function aideNiveau1(exercice: ExerciceBinomialeSequenceOrdonnee, phase: PhaseBinomialeSequenceOrdonnee): AideAvecLatex {
-  return exercice.famille === "A" ? aideNiveau1A(phase) : aideNiveau1B(phase);
-}
-
-export function aideNiveau2(exercice: ExerciceBinomialeSequenceOrdonnee, phase: PhaseBinomialeSequenceOrdonnee): AideAvecLatex {
-  return exercice.famille === "A" ? aideNiveau2A(exercice, phase) : aideNiveau2B(exercice, phase);
-}
-
-export const LIBELLE_PHASE: Record<PhaseBinomialeSequenceOrdonnee, string> = {
-  aTermeUniqueEcran1: "Étape 1 (stratégie + terme à calculer)",
-  aTermeUniqueEcran2: "Étape 2 (calcul du terme)",
-  aSommeEcran1: "Étape 1 (stratégie + termes à calculer)",
-  aSommeEcran2: "Étape 2 (calcul des termes)",
-  aSommeEcran3: "Étape 3 (somme des termes)",
-  aComplementEcran1: "Étape 1 (stratégie + terme à calculer)",
-  aComplementEcran2: "Étape 2 (calcul du terme)",
-  aComplementEcran3: "Étape 3 (complément)",
-  bEcran1: "Étape 1 (produit posé)",
-  bEcran2: "Étape 2 (valeur finale)",
-};
-
-export const LIBELLE_FAMILLE: Record<ExerciceBinomialeSequenceOrdonnee["famille"], string> = {
-  A: "A — Probabilité binomiale",
-  B: "B — Séquence exacte, sans remise",
-};
-
-/** Récapitulatif final : affiche toujours la réponse CORRECTE connue de l'exercice — jamais
- * recalculée depuis la saisie élève. */
-export function formatReponseAttenduePhaseLatex(exercice: ExerciceBinomialeSequenceOrdonnee, phase: PhaseBinomialeSequenceOrdonnee): string[] {
-  if (exercice.famille === "A") {
-    if (estEcran1A(phase)) {
-      const termes = exercice.termesACalculer.map((k) => `k=${k}`).join(",\\ ");
-      return [...decouperEnFragmentsTexte(LIBELLE_STRATEGIE[exercice.strategie]), termes];
+export const FORMAT_6GEN48: FormatCombinatoire<E, P> = {
+  consigneGenerale(e) {
+    if (e.famille === "B") return [t("Tirages successifs sans remise d'objets tous différents : la probabilité d'une séquence précise est un produit de fractions. "), t(ANNONCE_PRECISION_48)];
+    return [...f("Loi binomiale : $P(X=k)=C_n^k\\,p^k\\,(1-p)^{n-k}$. "), t(ANNONCE_PRECISION_48)];
+  },
+  donnees(e): FragmentConsigne[][] {
+    if (e.famille === "B") return [[t(e.contexte.texte)], [t(`Il y a ${e.n} objets ; on en tire ${e.k}, et l'on veut obtenir un objet précis à chaque tirage, dans un ordre donné.`)]];
+    return [[t(e.contexte.texte)], f(`On note $X$ le nombre de fois où ${e.contexte.labelSucces}. On cherche $P(${evenementLatex(e)})$.`)];
+  },
+  consigneEcran(e, p) {
+    if (e.famille === "B") return p === "bEcran1" ? [t("Quelle est la probabilité de tirer l'objet voulu à chaque tirage (sachant que les précédents ont été réussis) ?")] : [t("Quelle est la probabilité d'obtenir toute la séquence ?")];
+    if (p === "aStrategie") return f(`Quelle est la stratégie la plus courte pour calculer $P(${evenementLatex(e)})$ ?`);
+    if (p === "aTermes") return f("Quelles valeurs de $k$ faut-il utiliser dans cette stratégie ? Sépare-les par des points-virgules.");
+    if (p === "aValeurs") return [t("Calcule chaque terme.")];
+    return f(`Déduis-en $P(${evenementLatex(e)})$.`);
+  },
+  champs(e, p): ChampCombi[] {
+    if (e.famille === "B") {
+      if (p === "bEcran1") return e.denominateurs.map((_, i) => ({ type: "texte", label: i === 0 ? "1ᵉʳ tirage" : `${i + 1}ᵉ tirage` }));
+      return [{ type: "texte", label: "Probabilité de la séquence", apercu: true }];
     }
-    if (estEcran2A(phase)) {
-      return exercice.termesACalculer.map((k, i) => `P(X=${k})=${formatDecimalExact(exercice.valeursTermes[i])}`);
+    if (p === "aStrategie") return [{ type: "choix", label: "", options: (Object.keys(OPTIONS_STRATEGIE) as StrategieBinomialeA[]).map((v) => ({ valeur: v, label: OPTIONS_STRATEGIE[v] })) }];
+    if (p === "aTermes") return [{ type: "texte", label: "Valeurs de $k$", placeholder: "a ; b ; c" }];
+    if (p === "aValeurs") return e.termesACalculer.map((k) => ({ type: "texte", label: `$P(X=${k})$`, apercu: true }));
+    return [{ type: "texte", label: `$P(${evenementLatex(e)})$`, apercu: true }];
+  },
+  aides(e, p) {
+    if (e.famille === "B") {
+      if (p === "bEcran1") return [{ texte: "Sans remise, il reste un objet de moins à chaque tirage, et un seul est le bon." }, { texte: `Premier tirage : ${e.n} objets ; deuxième : ${e.n - 1}…` }];
+      return [{ texte: "Règle du produit : on multiplie les probabilités des tirages successifs." }, { texte: "Multiplie les fractions de l'écran précédent." }];
     }
-    return [formatDecimalExact(exercice.resultatFinal)];
-  }
-  if (phase === "bEcran1") return [exercice.denominateurs.join(",\\ ")];
-  const produit = exercice.denominateurs.reduce((a, b) => a * b, 1);
-  return [`\\dfrac{1}{${produit}}\\approx ${formatDecimalExact(exercice.produitFinal)}`];
-}
-
+    if (p === "aStrategie") return [{ texte: "« Exactement », « aucun », « tous » : un seul terme. « Au moins », « au plus » : une somme, ou 1 moins la somme des termes de l'événement contraire — on choisit le calcul qui a le moins de termes." }, { texte: `$X$ prend les valeurs de 0 à ${e.n} : compte les termes de l'événement, puis ceux de son contraire.` }];
+    if (p === "aTermes") return [{ texte: "L'événement contraire de « au moins $k$ » est « au plus $k-1$ » ; celui de « au plus $k$ » est « au moins $k+1$ »." }, { texte: `Liste les valeurs de $X$ (de 0 à ${e.n}) dont tu as besoin pour la stratégie choisie.` }];
+    if (p === "aValeurs") return [{ texte: "Pour chaque $k$ :", latex: "P(X=k)=C_n^k\\,p^k\\,(1-p)^{n-k}" }, { texte: `Ici $n=${e.n}$, $p=${decimalLatex(e.p)}$ et $1-p=${decimalLatex(1 - e.p)}$.` }];
+    return [{ texte: e.strategie === "complement" ? "Le complément : $P(A)=1-P(\\overline{A})$." : "Les événements $X=k$ sont incompatibles : on additionne leurs probabilités." }, { texte: "Utilise les termes de l'écran précédent." }];
+  },
+  reponseAttendue(e, p) {
+    if (e.famille === "B") {
+      if (p === "bEcran1") return [e.denominateurs.map((d) => `\\dfrac{1}{${d}}`).join("\\;;\\;")];
+      return [valeur(rationnel(1n, arrangementBig(e.n, e.k)))];
+    }
+    if (p === "aStrategie") return [e.strategie === "termeUnique" ? "\\text{un seul terme}" : e.strategie === "somme" ? "\\text{une somme}" : "\\text{le complément}"];
+    if (p === "aTermes") return [`k\\in\\{${e.termesACalculer.join("\\,;\\,")}\\}`];
+    if (p === "aValeurs") return termesExacts(e).map((r, i) => `P(X=${e.termesACalculer[i]})=${valeur(r)}`);
+    return [valeur(resultatExact(e))];
+  },
+  explication(e, p) {
+    if (e.famille === "B") {
+      if (p === "bEcran1") return [f(`À chaque tirage, un seul objet convient parmi ceux qui restent : $${e.denominateurs.map((d) => `\\dfrac{1}{${d}}`).join(",\\ ")}$.`)];
+      return [f(`$${e.denominateurs.map((d) => `\\dfrac{1}{${d}}`).join("\\times ")}=\\dfrac{1}{${milliers(arrangementBig(e.n, e.k))}}$ (et non $\\dfrac{1}{${e.n}^{${e.k}}}$, qui serait avec remise).`)];
+    }
+    if (p === "aStrategie") {
+      const comp = e.n + 1 - e.termesACalculer.length;
+      return [f(e.strategie === "termeUnique" ? "L'événement correspond à une seule valeur de $X$ : un seul terme." : e.strategie === "somme" ? `L'événement compte ${e.termesACalculer.length} valeurs de $X$, son contraire ${comp} : la somme est plus courte.` : `L'événement compte ${comp} valeurs de $X$, son contraire seulement ${e.termesACalculer.length} : le complément est plus court.`)];
+    }
+    if (p === "aTermes") return [f(`$k\\in\\{${e.termesACalculer.join("\\,;\\,")}\\}$${e.strategie === "complement" ? " (valeurs de l'événement contraire)" : ""}.`)];
+    if (p === "aValeurs") return termesExacts(e).map((r, i) => f(`$P(X=${e.termesACalculer[i]})=${termeLatex(e, e.termesACalculer[i])}=${valeur(r)}$`));
+    return [f(e.strategie === "complement" ? `$P(${evenementLatex(e)})=1-(${sommeTermes(e)})=${valeur(resultatExact(e))}$.` : e.strategie === "somme" ? `$P(${evenementLatex(e)})=${sommeTermes(e)}=${valeur(resultatExact(e))}$.` : `$${valeur(resultatExact(e))}$.`)];
+  },
+  libellePhase(e, p) {
+    if (e.famille === "B") return p === "bEcran1" ? "Chaque tirage" : "Séquence";
+    return p === "aStrategie" ? "Stratégie" : p === "aTermes" ? "Valeurs de k" : p === "aValeurs" ? "Termes" : "Résultat";
+  },
+  messageCible(e, p, valeurs) {
+    const v = valeurs[valeurs.length - 1] ?? "";
+    if (e.famille === "B") {
+      if (p === "bEcran2" && vaut(v, rationnel(1n, BigInt(e.n) ** BigInt(e.k)))) return [t("C'est la probabilité avec remise : sans remise, il reste un objet de moins à chaque tirage.")];
+      return null;
+    }
+    if (p === "aValeurs") {
+      for (let i = 0; i < e.termesACalculer.length; i++) {
+        const k = e.termesACalculer[i];
+        const sansC = rationnel(BigInt(Math.round(e.p * 10)) ** BigInt(k) * BigInt(10 - Math.round(e.p * 10)) ** BigInt(e.n - k), 10n ** BigInt(e.n));
+        if (vaut(valeurs[i] ?? "", sansC) && e.termesACalculer.length > 0 && !(k === 0 || k === e.n)) return f("Il manque le coefficient $C_n^k$ : il compte les ordres possibles des succès.");
+      }
+      return null;
+    }
+    if (p === "aResultat" && e.strategie === "complement") {
+      const somme = termesExacts(e).reduce((a, r) => rationnel(a.n * r.d + r.n * a.d, a.d * r.d), rationnel(0));
+      if (vaut(v, somme)) return [t("C'est la probabilité de l'événement contraire : retire-la de 1.")];
+    }
+    return null;
+  },
+};

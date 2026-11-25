@@ -1,102 +1,141 @@
 import { arrangements, coefficientBinomial, factorielle } from "../combinatoire";
-import type { ExerciceDenombrementC } from "../../core6e/denombrementFondamental.types";
-import { tirerEntier, tirerParmi } from "./aleatoire";
+import type { ExerciceDenombrementC, FormuleC } from "../../core6e/denombrementFondamental.types";
+import { MOTS_LETTRES_DISTINCTES } from "./familleD";
+import { melanger, tirerEntier, tirerParmi } from "./aleatoire";
 
 /**
- * Couche A (6e) — génération, famille C ("Arrangements et combinaisons classiques") de `6gen43`.
- * Première utilisation, dans ce chapitre, des fondations `generateurs6e/combinatoire.ts`
- * (`factorielle`/`coefficientBinomial`/`arrangements`).
- *
- * ============================================================================
- * **Choix concrets de paramétrage** (documentés ici comme demandé par la mission)
- * ============================================================================
- * - "cartesContraintes" : jeu de `n=52` cartes standard. `m`∈{1,2} cartes DÉJÀ fixées :
- *   `varianteCartes="inclues"` → ces `m` cartes font PARTIE de la main, reste à choisir
- *   `C(52-m,k-m)` parmi les `52-m` cartes restantes ; `varianteCartes="exclues"` → ces `m` cartes ne
- *   peuvent JAMAIS être choisies, reste à choisir `C(52-m,k)`. `k`∈{3,4,5} (toujours `k>m`).
- * - "motsLettresDistinctes" : `n`∈{4,...,7} lettres toutes différentes, nombre de mots (= ordres
- *   possibles) = `n!`.
- * - "motsRepetition" : alphabet de `n`∈{2,...,5} lettres, mots de `k`∈{2,...,4} lettres avec
- *   répétition autorisée = `n^k`.
- * - "motsPositionFixee" : mot de `n`∈{5,...,8} lettres toutes différentes, `k`∈{1,2} lettres fixées
- *   à des positions données, arrangements des `n-k` positions restantes = `(n-k)!`.
+ * Famille C de `6gen43` — reconnaître le groupement parmi les quatre du cours qui n'ont pas de
+ * répétition à compter (permutation P, arrangement A, arrangement avec répétition B, combinaison C),
+ * puis calculer (audit 6e ch. 7, lot C). Le contexte ne nomme JAMAIS la structure (avant : « répétition
+ * autorisée → puissance », « jeu de 52 cartes → combinaison », 100 % devinable), et la formule
+ * attendue est tirée AVANT le contexte, à parts égales (`construireFamilleC`).
  */
 
-const LETTRES = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-
-function tirerLettresDistinctes(count: number): string[] {
-  const disponibles = [...LETTRES];
-  const resultat: string[] = [];
-  while (resultat.length < count) {
-    const l = tirerParmi(disponibles.filter((x) => !resultat.includes(x)));
-    resultat.push(l);
-  }
-  return resultat;
-}
-
-// ============================================================================
-// Cartes avec contraintes.
-// ============================================================================
-
-const N_CARTES = 52;
+const PERSONNES = ["coureurs", "nageuses", "élèves", "candidats", "musiciens"];
 
 export function construireCartesContraintes(): ExerciceDenombrementC {
+  const N = tirerParmi([32, 52] as const);
   const k = tirerEntier(3, 5);
-  const m = tirerEntier(1, Math.min(2, k - 1));
-  const varianteCartes: "inclues" | "exclues" = tirerParmi(["inclues", "exclues"] as const);
-  const resultat = varianteCartes === "inclues" ? coefficientBinomial(N_CARTES - m, k - m) : coefficientBinomial(N_CARTES - m, k);
-  return { famille: "C", sousType: "cartesContraintes", formule: "combinaison", resultat, n: N_CARTES, k, m, varianteCartes };
+  const m = tirerEntier(1, 2);
+  const inclues = Math.random() < 0.5;
+  const cartes = m === 1 ? "l'as de cœur" : "l'as de cœur et l'as de pique";
+  const contexte = inclues
+    ? `On tire au hasard une main de ${k} cartes dans un jeu de ${N} cartes. On ne garde que les mains qui contiennent ${cartes}.`
+    : `Avant la donne, on retire ${cartes} d'un jeu de ${N} cartes. On tire ensuite une main de ${k} cartes parmi les cartes restantes.`;
+  const n = N - m;
+  const p = inclues ? k - m : k;
+  return { famille: "C", sousType: "cartesContraintes", formule: "combinaison", contexte, question: "Combien de mains différentes peut-on obtenir ?", n, p, resultat: coefficientBinomial(n, p) };
 }
-
-// ============================================================================
-// Mots, lettres distinctes.
-// ============================================================================
 
 export function construireMotsLettresDistinctes(): ExerciceDenombrementC {
-  const n = tirerEntier(4, 7);
-  return { famille: "C", sousType: "motsLettresDistinctes", formule: "permutation", resultat: factorielle(n), n };
+  const mot = tirerParmi(MOTS_LETTRES_DISTINCTES.filter((x) => x.length <= 7));
+  const n = mot.length;
+  return {
+    famille: "C",
+    sousType: "motsLettresDistinctes",
+    formule: "permutation",
+    contexte: `On écrit des « mots » (qui n'ont pas besoin d'avoir un sens) en utilisant une fois et une seule chacune des lettres du mot ${mot}.`,
+    question: "Combien de mots différents peut-on écrire ?",
+    n,
+    p: n,
+    resultat: factorielle(n),
+  };
 }
-
-// ============================================================================
-// Mots, répétition autorisée.
-// ============================================================================
-
-export function construireMotsRepetition(): ExerciceDenombrementC {
-  const n = tirerEntier(2, 5);
-  const k = tirerEntier(2, 4);
-  return { famille: "C", sousType: "motsRepetition", formule: "puissance", resultat: n ** k, n, k };
-}
-
-// ============================================================================
-// Mots, position fixée.
-// ============================================================================
 
 export function construireMotsPositionFixee(): ExerciceDenombrementC {
-  const n = tirerEntier(5, 8);
-  const k = tirerParmi([1, 2] as const);
-  const lettres = tirerLettresDistinctes(n);
-  const positionsFixees = tirerPositionsDistinctes(k, n);
-  const lettresFixees = positionsFixees.map((position, i) => ({ position, lettre: lettres[i] }));
-  const resultat = arrangements(n - k, n - k); // = (n-k)! — arrangement de toutes les positions restantes
-  return { famille: "C", sousType: "motsPositionFixee", formule: "permutation", resultat, n, k, lettresFixees };
+  const mot = tirerParmi(MOTS_LETTRES_DISTINCTES.filter((x) => x.length >= 5));
+  const lettres = melanger(mot.split(""));
+  const deux = Math.random() < 0.5;
+  const contrainte = deux ? `qui commencent par ${lettres[0]} et finissent par ${lettres[1]}` : `qui commencent par ${lettres[0]}`;
+  const n = mot.length - (deux ? 2 : 1);
+  return {
+    famille: "C",
+    sousType: "motsPositionFixee",
+    formule: "permutation",
+    contexte: `On écrit des « mots » (qui n'ont pas besoin d'avoir un sens) en utilisant une fois et une seule chacune des lettres du mot ${mot}. On ne garde que les mots ${contrainte}.`,
+    question: "Combien de mots différents peut-on écrire ?",
+    n,
+    p: n,
+    resultat: factorielle(n),
+  };
 }
 
-function tirerPositionsDistinctes(count: number, n: number): number[] {
-  const disponibles = Array.from({ length: n }, (_, i) => i + 1);
-  const resultat: number[] = [];
-  while (resultat.length < count) {
-    const p = tirerParmi(disponibles.filter((x) => !resultat.includes(x)));
-    resultat.push(p);
+export function construireMotsRepetition(): ExerciceDenombrementC {
+  const forme = tirerParmi(["cadenas", "symboles", "lettres"] as const);
+  if (forme === "cadenas") {
+    const k = tirerEntier(3, 5);
+    return {
+      famille: "C",
+      sousType: "motsRepetition",
+      formule: "arrangementRepetition",
+      contexte: `Un cadenas possède ${k} molettes ; chaque molette affiche un des chiffres de 0 à 9, et un même chiffre peut apparaître sur plusieurs molettes.`,
+      question: "Combien de codes différents peut-on former ?",
+      n: 10,
+      p: k,
+      resultat: 10 ** k,
+    };
   }
-  return resultat.sort((a, b) => a - b);
+  const n = tirerEntier(3, 7);
+  const k = tirerEntier(2, n <= 4 ? 5 : 4);
+  const contexte =
+    forme === "symboles"
+      ? `Un message est une suite de ${k} signaux ; chaque signal est choisi parmi ${n} couleurs de lampe, et une même couleur peut être utilisée plusieurs fois.`
+      : `On écrit des « mots » de ${k} lettres avec les ${n} premières lettres de l'alphabet ; une lettre peut être écrite plusieurs fois.`;
+  return { famille: "C", sousType: "motsRepetition", formule: "arrangementRepetition", contexte, question: forme === "symboles" ? "Combien de messages différents peut-on envoyer ?" : "Combien de mots différents peut-on écrire ?", n, p: k, resultat: n ** k };
 }
 
-// ============================================================================
-// Dispatch.
-// ============================================================================
+export function construireArrangement(): ExerciceDenombrementC {
+  const forme = tirerParmi(["podium", "bureau", "tierce"] as const);
+  if (forme === "bureau") {
+    const n = tirerEntier(8, 25);
+    return {
+      famille: "C",
+      sousType: "arrangement",
+      formule: "arrangement",
+      contexte: `Une association de ${n} membres élit un président, un secrétaire et un trésorier ; une même personne ne peut occuper qu'un seul poste.`,
+      question: "Combien de bureaux différents peut-on former ?",
+      n,
+      p: 3,
+      resultat: arrangements(n, 3),
+    };
+  }
+  if (forme === "tierce") {
+    const n = tirerEntier(10, 18);
+    return {
+      famille: "C",
+      sousType: "arrangement",
+      formule: "arrangement",
+      contexte: `${n} chevaux prennent le départ d'une course. Un parieur doit annoncer le premier, le deuxième et le troisième à l'arrivée.`,
+      question: "Combien de pronostics différents peut-il faire ?",
+      n,
+      p: 3,
+      resultat: arrangements(n, 3),
+    };
+  }
+  const n = tirerEntier(6, 15);
+  const p = tirerParmi([2, 3, 4] as const);
+  const qui = tirerParmi(PERSONNES);
+  return {
+    famille: "C",
+    sousType: "arrangement",
+    formule: "arrangement",
+    contexte: `${n} ${qui} participent à une épreuve. On récompense les ${p} premiers par ${p === 2 ? "une médaille d'or et une d'argent" : p === 3 ? "une médaille d'or, une d'argent et une de bronze" : "quatre prix différents"}.`,
+    question: "Combien de classements des récompensés sont possibles ?",
+    n,
+    p,
+    resultat: arrangements(n, p),
+  };
+}
 
-const CONSTRUCTEURS_C: (() => ExerciceDenombrementC)[] = [construireCartesContraintes, construireMotsLettresDistinctes, construireMotsRepetition, construireMotsPositionFixee];
+const PAR_FORMULE: Record<FormuleC, (() => ExerciceDenombrementC)[]> = {
+  permutation: [construireMotsLettresDistinctes, construireMotsPositionFixee],
+  arrangement: [construireArrangement],
+  arrangementRepetition: [construireMotsRepetition],
+  combinaison: [construireCartesContraintes],
+};
 
+/** Formule attendue tirée d'abord, à parts égales (verdict équilibré), puis le contexte. */
 export function construireFamilleC(): ExerciceDenombrementC {
-  return tirerParmi(CONSTRUCTEURS_C)();
+  const formule = tirerParmi(["permutation", "arrangement", "arrangementRepetition", "combinaison"] as const);
+  return tirerParmi(PAR_FORMULE[formule])();
 }

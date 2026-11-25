@@ -5575,3 +5575,38 @@ Restent, voulues : « ou » entre mots/sigles (vrai/faux, EV/CV…, f′/f″, s
 « (1/2) », unités (g/L, rad/s, tr/min…), notes « 13/20 », sources. Badges/labels modifiés ⇒ clés de
 `ENONCES_DEMONSTRATION` (`evaluationPayload.ts`) mises à jour (24) : le build échoue sinon. Vérifié : KaTeX strict
 (0 erreur nouvelle), 0 `$` en champ brut, 148 étapes iPhone 13 sans débordement, 0 `.katex-error`, PDF de 3 chapitres.
+
+## 6e (6h), Chapitre 7 — lots B et C de l'audit (générateurs 6gen43–6gen48)
+
+Lot B (socle commun, détail dans `feuilles-evaluations.md`, « 6e ch. 7 (lots B et C) ») : les six
+moteurs, les sept écrans et les six récapitulatifs d'origine sont remplacés par `sessionCombinatoire`,
+`EcranCombinatoire`, `AppCombinatoire` et la lecture `saisieCombinatoire` (illisible gratuit, choix fermés
+seuls et à une tentative, plus aucun exemple de champ qui soit une réponse, aides à deux niveaux sans la
+réponse, écrans « formule » qui vérifient la forme, `?code=`, champs vidés, KaTeX partout, messages
+ciblés, explication après échec). Lot C :
+- 6gen43 : famille A sur un ensemble de chiffres tiré (dix chiffres ou 6 à 8, avec ou sans 0 ; avant,
+  deux énoncés « total » sur 2 000 tirages) ; C en contexte, quatre groupements du cours (P, A, B, C,
+  formule tirée d'abord) + variante `C_arrangement` en fin ; E en contexte (table / ronde / bracelet /
+  anneau) ; tirage libre à parts égales par variante (avant : chaque A à 3 %).
+- 6gen44 : multinomiale n ≤ 15 (≤ 630 630), tailles ≥ 2 ; B et D en prose (plus « TOUTES », « NE PEUVENT
+  PAS ») ; Γₙᵖ pour p = 2 à 4 ; comparaison dés discernables / indiscernables à verdict tiré (quatre
+  options A, B, C, Γ) ; D verdict 50 / 50, n ≤ 25 ; `E_anagrammes` en fin (Mississippi : 34 650 mots,
+  34 649 anagrammes ; ANANAS, ABRACADABRA…).
+- 6gen45 : terme de rang r = T₍ₖ₊₁₎ (écran « valeur de k ») ; polynôme final comparé exactement et
+  DÉVELOPPÉ (« (2x − 3)⁴ » refusé sans tentative) ; C = vraie approximation (1 + nε, terme négligé
+  Cₙ²ε², valeur au dix-millième ; |nε| ≤ 0,3) ; `D_pascal` en fin (ligne suivante, somme 2ⁿ⁺¹) ; profil :
+  D `exacte`, C plus de `calcul`.
+- 6gen46 : poker sur un jeu tiré (6 à 13 hauteurs × 3 ou 4 couleurs) ; B = groupes non nommés de même
+  taille (décision de l'utilisateur ; vérifié par énumération) ; C sans 2⁴ / 4² ni n = k, message ciblé
+  base / exposant ; D : trois dés, sommes 7–14, verdict S₁ / S₂ / égales tiré au tiers, comparaison sur
+  son propre écran.
+- 6gen47 : vérification exacte (plus de tolérance 0,01) ; contextes en prose avec N, K, n ; B a ∈ {1, 2},
+  rouge / bleue, écrans séquence → nombre d'ordres → composition ; C « 0 bon numéro bonus » à 50 %.
+- 6gen48 : famille A propre (`familleA6gen48.ts` ; `familleA.ts` inchangé, utilisé par 6gen50 / 6gen53) :
+  contexte cohérent avec p (pièce, vrai / faux : 0,5), stratégie tirée au tiers et toujours la plus
+  courte (≤ 3 termes), termes ≥ 0,001, écrans stratégie (seule) → valeurs de k → termes → résultat,
+  4 puces tant que la stratégie n'est pas jugée ; variantes du sélecteur aléatoires (n, p) ; B :
+  probabilité de chaque tirage puis produit, message « avec remise ».
+Hors périmètre, à faire : cartes du chapitre (6gen46 « 32 cartes », « répartitions en boîtes » ; 6gen45
+« triangle de Pascal » désormais vrai), refonte papier (lot E : profils, corrigé « comme au tableau »,
+niveaux, `versionPapier`).

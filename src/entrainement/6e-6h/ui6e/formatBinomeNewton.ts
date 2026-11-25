@@ -1,488 +1,225 @@
-import type { ExerciceBinomeA, ExerciceBinomeB, ExerciceBinomeC, ExerciceBinomeNewton, FamilleBinomeNewton } from "../core6e/binomeNewton.types";
+import type { ExerciceBinomeNewton } from "../core6e/binomeNewton.types";
 import type { PhaseBinomeNewton } from "../moteur6e/typesBinomeNewton";
+import { approximationC, termeNegligeC, valeurExacteC } from "../moteur6e/verificationBinomeNewton";
+import { combinaisonBig, versNombre, vaut } from "../moteur6e/saisieCombinatoire";
+import { arrondiLatex, decimalLatex, f, milliers, t } from "./fragmentsCombinatoire";
+import type { ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen45`. Dispatch sur
- * `exercice.famille` PUIS `phase`, mirroir `formatDenombrementFondamental.ts` (6gen43), jamais
- * importé par un autre générateur (chaque générateur reste indépendant — CLAUDE.md).
- *
- * **Vigilance signe orphelin / groupe LaTeX vide / texte français en mode maths** — toute clause en
- * français mêlée à du LaTeX passe TOUJOURS par `\text{...}`, jamais du texte brut en mode maths.
- * `consigneGenerale`/`consigneEcran` renvoient un `FragmentConsigne[]` (texte brut mêlé à du LaTeX
- * inline court, même contrat que `ui/formatEquationDroite.ts` et son rendu
- * `components/RenduFragments.tsx`) : tout `(ax+b)ⁿ`/`Cₙᵏ`/équation qui y apparaît est un fragment
- * `latex`, jamais une sous-chaîne Unicode littérale — `aide.texte` (`AideAvecLatex`, pattern
- * séparé) reste lui du texte BRUT. Couverture de régression : `formatBinomeNewton.test.ts`, scan
- * sur de nombreux tirages aléatoires à la recherche d'un `++`/`+-`/`--`/groupe `{}` vide.
+ * Textes de `6gen45` (6e ch. 7, § 3) — audit, lots B et C : terme de rang r = T₍ₖ₊₁₎ (convention du
+ * cours et du formulaire), notation KaTeX partout (plus de « (ax)^{n-k} » ni de « b^k = » en clair),
+ * « × » comme dans le cours, aides à deux niveaux sans les termes, approximation 1 + nε enfin travaillée,
+ * triangle de Pascal.
  */
 
-export type TypeChamp = "texte" | "choix";
+type E = ExerciceBinomeNewton;
+type P = PhaseBinomeNewton;
 
-export interface OptionChoix {
-  valeur: string;
-  label: string;
+function facteurX(a: number): string {
+  return a === 1 ? "x" : a === -1 ? "-x" : `${a}x`;
 }
 
-export interface ChampDef {
-  type: TypeChamp;
-  label: string;
-  placeholder?: string;
-  options?: OptionChoix[];
+export function binomeLatex(a: number, b: number, n: number): string {
+  return `(${facteurX(a)}${b < 0 ? "-" : "+"}${Math.abs(b)})^{${n}}`;
 }
 
-export interface AideAvecLatex {
-  texte: string;
-  latex: string | null;
+function puissanceX(e: number): string {
+  return e === 0 ? "" : e === 1 ? "x" : `x^{${e}}`;
 }
 
-/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
- * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md) ; rendu via
- * `components/RenduFragments.tsx`. */
-export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
-
-function texte(valeur: string): FragmentConsigne {
-  return { type: "texte", valeur };
-}
-function latex(valeur: string): FragmentConsigne {
-  return { type: "latex", valeur };
+function monome(c: number, e: number, premier: boolean): string {
+  const signe = c < 0 ? "-" : premier ? "" : "+";
+  const abs = Math.abs(c);
+  const coef = abs === 1 && e > 0 ? "" : milliers(abs);
+  return `${signe}${coef}${puissanceX(e)}`;
 }
 
-const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
-
-function champTexte(label: string, placeholder: string): ChampDef {
-  return { type: "texte", label, placeholder };
+export function polynomeLatex(termes: { coefficient: number; exposant: number }[]): string {
+  const nonNuls = termes.filter((x) => x.coefficient !== 0);
+  return nonNuls.map((x, i) => monome(x.coefficient, x.exposant, i === 0)).join("");
 }
 
-const CHIFFRES_INDICE: Record<string, string> = { "0": "₀", "1": "₁", "2": "₂", "3": "₃", "4": "₄", "5": "₅", "6": "₆", "7": "₇", "8": "₈", "9": "₉" };
-const CHIFFRES_EXPOSANT: Record<string, string> = { "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" };
-
-function versIndice(valeur: number): string {
-  return String(valeur)
-    .split("")
-    .map((c) => CHIFFRES_INDICE[c] ?? c)
-    .join("");
+function par(x: number): string {
+  return x < 0 ? `(${x})` : `${x}`;
 }
 
-/** `Cₙᵏ` en Unicode indice/exposant (jamais de vrai KaTeX ici, label de champ rendu en texte BRUT —
- * voir en-tête de fichier) — approximation valable UNIQUEMENT pour des valeurs NUMÉRIQUES CONCRÈTES
- * (tous les chiffres 0-9 ont un équivalent Unicode indice/exposant), utilisée par `champsEcranA`/
- * `champsEcranC` où `e.n`/`t.k` sont déjà résolus en nombres concrets. */
-function labelCombinaison(n: number, k: number): string {
-  const exposant = String(k)
-    .split("")
-    .map((c) => CHIFFRES_EXPOSANT[c] ?? c)
-    .join("");
-  return `C${versIndice(n)}${exposant}`;
+function epsilonLatex(c: number): string {
+  return decimalLatex(c / 100);
+}
+function baseLatex(c: number): string {
+  return decimalLatex(1 + c / 100);
 }
 
-/** Variante de `labelCombinaison` où le 2ᵉ paramètre reste la lettre GÉNÉRIQUE littérale "k" (dans
- * l'ensemble Unicode exposant disponible, voir CLAUDE.md/piège notation combinatoire) — utilisée par
- * `champsEcranB` (`bPoserEcran`) où seul `n` est déjà résolu numériquement. */
-function labelCoefficientNK(n: number): string {
-  return `C${versIndice(n)}ᵏ`;
+function ligneLatex(l: number[]): string {
+  return l.map((x) => milliers(x)).join("\\;\\;\\;");
 }
 
-// ============================================================================
-// Petits formateurs LaTeX partagés par les 3 familles.
-// ============================================================================
-
-/** `ax` avec coefficient implicite ±1 omis ("x"/"-x"), mirroir des conventions déjà en place
- * ailleurs sur le chantier (jamais "1x"/"−1x"). */
-function formatCoeffX(a: number): string {
-  if (a === 1) return "x";
-  if (a === -1) return "-x";
-  return `${a}x`;
-}
-
-/** Second terme d'un binôme, signe toujours explicite ("+3" ou "-5" — jamais "+-5"). */
-function formatSigneTerme(b: number): string {
-  return b >= 0 ? `+${b}` : `${b}`;
-}
-
-function formatBinomeBase(a: number, b: number, n: number): string {
-  return `\\left(${formatCoeffX(a)}${formatSigneTerme(b)}\\right)^{${n}}`;
-}
-
-/** Liste d'entiers séparés par des virgules — mirroir `champsPositions`/listes de
- * `formatDenombrementFondamental.ts`. Utilisée pour `blocDonnees`/`etatActuel` (1 seul fragment
- * `<Katex block>`, jamais besoin de retour à la ligne interne à cet endroit). */
-function formatListeEntiers(valeurs: number[]): string {
-  return valeurs.map((v) => `${v}`).join(",\\,");
-}
-
-/** Version FRAGMENTÉE (1 élément par valeur, virgule collée SAUF le dernier) de
- * `formatListeEntiers` — pour le récapitulatif final (`formatReponseAttenduePhaseLatex`), rendu en
- * KaTeX INLINE dans `.equation-box-termes` (`display:flex;flex-wrap:wrap`, conçu précisément pour
- * accueillir plusieurs fragments courts qui s'enroulent proprement sur mobile étroit — jamais 1
- * seule formule KaTeX longue et insécable, qui déborderait sans retour à la ligne possible : bug
- * d'overflow trouvé par inspection visuelle réelle du récapitulatif, `n=5/6` coupait la fin de la
- * liste sans aucun indice visuel). */
-function fragmentsListeEntiers(valeurs: number[]): string[] {
-  return valeurs.map((v, i) => `${v}${i < valeurs.length - 1 ? "," : ""}`);
-}
-
-/** Équivalent décimal de `fragmentsListeEntiers`, même raison. */
-function fragmentsListeDecimaux(valeurs: number[]): string[] {
-  return valeurs.map((v, i) => `${formatDecimalFrancaisLatex(v)}${i < valeurs.length - 1 ? "," : ""}`);
-}
-
-/** Décimal FRANÇAIS (virgule, `{,}` LaTeX) — même convention que `formatEquationsExponentielles.ts`
- * (chapitre 2, 6e), dupliquée localement (chaque générateur reste indépendant). `toFixed` (jamais
- * `String(valeur)`) : un très petit terme de la famille C (ex. `1e-10`) s'afficherait en notation
- * scientifique JS ("1e-10") via `String`, illisible/invalide en LaTeX — `toFixed(12)` couvre toutes
- * les magnitudes rencontrées ici (ε a au plus 2 décimales, k≤5 ⟹ au plus 10 décimales), les zéros de
- * fin sont ensuite retirés. */
-function formatDecimalFrancaisLatex(valeur: number): string {
-  const brut = valeur.toFixed(12).replace(/0+$/, "").replace(/\.$/, "");
-  const nettoye = brut === "" || brut === "-" ? "0" : brut;
-  return nettoye.replace(".", "{,}");
-}
-
-/** Monôme `coefAbs·x^{exp}` (SANS signe — le signe est géré par l'appelant, voir
- * `formatPolynomeLatex`), coefficient `1` omis, exposant `0`/`1` simplifiés ("x" jamais "x^{1}",
- * nombre nu jamais "x^{0}"). */
-function formatMonome(coefAbs: number, exposant: number): string {
-  if (exposant === 0) return `${coefAbs}`;
-  const partieX = exposant === 1 ? "x" : `x^{${exposant}}`;
-  const coeffAffiche = coefAbs === 1 ? "" : `${coefAbs}`;
-  return `${coeffAffiche}${partieX}`;
-}
-
-/** Polynôme final assemblé, ordonné par puissances décroissantes (déjà l'ordre naturel de
- * `termes`, k=0 donnant l'exposant le plus élevé — voir `core6e/binomeNewton.types.ts`) — signe de
- * CHAQUE terme géré indépendamment (jamais une simple alternance, cohérent avec le piège de la
- * mission). */
-function formatPolynomeLatex(termes: { coefficientFinal: number; exposantX: number }[]): string {
-  return termes.map((t, i) => `${t.coefficientFinal < 0 ? "-" : i === 0 ? "" : "+"}${formatMonome(Math.abs(t.coefficientFinal), t.exposantX)}`).join("");
-}
-
-// ============================================================================
-// Famille A — Développement complet de (ax+b)ⁿ.
-// ============================================================================
-
-function consigneGeneraleA(): FragmentConsigne[] {
-  return [
-    texte("On développe "),
-    latex("(ax+b)^n"),
-    texte(" à l'aide du binôme de Newton : "),
-    latex("(ax+b)^n=\\sum C_n^k\\cdot(ax)^{n-k}\\cdot b^k"),
-    texte(" pour "),
-    latex("k=0,...,n"),
-    texte(". Détermine, étape par étape, les coefficients binomiaux, puis chaque terme du développement, puis le polynôme final."),
-  ];
-}
-
-function blocDonneesA(e: ExerciceBinomeA): string[] {
-  // La formule générale abstraite `(ax+b)^n=\sum...` (déjà donnée en toutes lettres dans
-  // `consigneGeneraleA`) a été RETIRÉE d'ici — trop large pour tenir dans `.equation-box` sur un
-  // écran mobile 375px (bug trouvé par inspection visuelle réelle, jamais par `scrollWidth` seul :
-  // le fragment se centrait et se faisait couper des DEUX côtés sans aucun indice visuel de
-  // troncature). Seules les données concrètes de CET exercice restent affichées ici, toutes
-  // courtes.
-  return [formatBinomeBase(e.a, e.b, e.n), `n=${e.n}`];
-}
-
-function consigneEcranA(phase: PhaseBinomeNewton): FragmentConsigne[] {
-  if (phase === "aEcran1") return [texte("Identifie les n+1 coefficients binomiaux "), latex("C_n^k"), texte(" du développement, pour k=0 jusqu'à n.")];
-  if (phase === "aEcran2")
-    return [texte("Calcule chaque terme du développement (coefficient binomial × puissance de a × puissance de b). Attention au signe : b élevé à la puissance k doit être recalculé pour CHAQUE terme, jamais déduit par simple alternance.")];
-  return [texte("Assemble le polynôme final en ordonnant les termes par puissances décroissantes de x.")];
-}
-
-// Chaque `etatActuel*` renvoie l'étiquette et la liste de valeurs comme 2 fragments SÉPARÉS
-// (jamais 1 seul long fragment `\text{...}: valeurs` — bug d'overflow mobile trouvé par inspection
-// visuelle réelle : pour n=5/6 (6-7 valeurs), le fragment combiné dépasse `.equation-box` en
-// 375px, centré et coupé des 2 côtés sans indice visuel de troncature — voir aussi `blocDonnees*`
-// plus haut, même correction déjà appliquée là pour la même raison).
-function etatActuelA(e: ExerciceBinomeA, phase: PhaseBinomeNewton): string[] | null {
-  if (phase === "aEcran1") return null;
-  if (phase === "aEcran2") return [`\\text{Coefficients confirmés :}`, formatListeEntiers(e.termes.map((t) => t.coefficientBinomial))];
-  return [
-    `\\text{Coefficients confirmés :}`,
-    formatListeEntiers(e.termes.map((t) => t.coefficientBinomial)),
-    `\\text{Termes confirmés (k=0 à n) :}`,
-    formatListeEntiers(e.termes.map((t) => t.coefficientFinal)),
-  ];
-}
-
-function champsEcranA(e: ExerciceBinomeA, phase: PhaseBinomeNewton): ChampDef[] {
-  if (phase === "aEcran1") return e.termes.map((t) => champTexte(`${labelCombinaison(e.n, t.k)} =`, "ex : 6"));
-  if (phase === "aEcran2") return e.termes.map((t) => champTexte(`Terme k=${t.k} (coefficient) =`, "ex : -96"));
-  return [champTexte("Polynôme final =", "ex : 16x^4-96x^3+216x^2-216x+81")];
-}
-
-function niveauAideMaxA(phase: PhaseBinomeNewton): number {
-  return phase === "aEcran2" ? 2 : 0;
-}
-
-function aideNiveau1A(): AideAvecLatex {
-  return { texte: "Rappel : chaque terme vaut Cₙᵏ·(ax)^{n-k}·b^k. Fais bien attention au signe de b élevé à la puissance k (négatif si b<0 ET k impair).", latex: "C_n^{k}\\cdot(ax)^{n-k}\\cdot b^{k}" };
-}
-
-function aideNiveau2A(e: ExerciceBinomeA): AideAvecLatex {
-  const deuxPremiers = e.termes.slice(0, 2);
-  return { texte: "Les 2 premiers termes sont déjà calculés ci-dessous ; les suivants restent à calculer.", latex: `${formatListeEntiers(deuxPremiers.map((t) => t.coefficientFinal))}\\text{, puis }\\ldots` };
-}
-
-function reponseAttendueA(e: ExerciceBinomeA, phase: PhaseBinomeNewton): string[] {
-  if (phase === "aEcran1") return fragmentsListeEntiers(e.termes.map((t) => t.coefficientBinomial));
-  if (phase === "aEcran2") return fragmentsListeEntiers(e.termes.map((t) => t.coefficientFinal));
-  return [formatPolynomeLatex(e.termes)];
-}
-
-// ============================================================================
-// Famille B — Terme spécifique sans développement complet.
-// ============================================================================
-
-function consigneGeneraleB(): FragmentConsigne[] {
-  return [texte("On cherche UN SEUL terme du développement de "), latex("(ax+b)^n"), texte(", sans écrire tout le développement — isole directement ce terme grâce au binôme de Newton.")];
-}
-
-function blocDonneesB(e: ExerciceBinomeB): string[] {
-  // Fragment "cible" scindé en 2 lignes COURTES (jamais 1 seule phrase française longue en mode
-  // maths — bug d'overflow mobile trouvé par inspection visuelle réelle sur le sous-type
-  // "puissance", dont la formulation complète dépassait `.equation-box` en 375px, centrée et
-  // coupée des deux côtés sans indice visuel).
-  const cible = e.sousType === "rang" ? [`\\text{Terme demandé : rang}`, `k=${e.k}`] : [`\\text{Terme demandé : exposant}`, `p=${e.p}`];
-  return [formatBinomeBase(e.a, e.b, e.n), `n=${e.n}`, ...cible];
-}
-
-function consigneEcranB(phase: PhaseBinomeNewton): FragmentConsigne[] {
-  if (phase === "bTrouverKEcran") return [texte("Détermine k tel que l'exposant de x dans le terme général vaille p (résous "), latex("n-k=p"), texte(").")];
-  if (phase === "bPoserEcran")
-    return [
-      texte("Pose le terme général : donne le coefficient binomial "),
-      latex("C_n^k"),
-      texte(" et la valeur de "),
-      latex("b^k"),
-      texte(", SANS calculer le terme complet (ni la puissance de a, ni le produit final)."),
-    ];
-  return [texte("Calcule la valeur du coefficient final de ce terme (n'oublie pas la puissance de a).")];
-}
-
-// Fragments scindés (étiquette / valeurs), même raison que `etatActuelA` (overflow mobile).
-function etatActuelB(e: ExerciceBinomeB, phase: PhaseBinomeNewton): string[] | null {
-  if (phase === "bTrouverKEcran") return null;
-  if (phase === "bPoserEcran") return e.sousType === "puissance" ? [`\\text{Valeur de }k\\text{ confirmée :}`, `k=${e.k}`] : null;
-  if (e.sousType === "puissance") {
-    return [
-      `\\text{Valeur de }k\\text{ confirmée :}`,
-      `k=${e.k}`,
-      `\\text{Confirmé :}`,
-      `C_{${e.n}}^{${e.k}}=${e.coefficientBinomial},\\ b^{${e.k}}=${e.bPuissanceK}`,
-    ];
-  }
-  return [`\\text{Confirmé :}`, `C_{${e.n}}^{${e.k}}=${e.coefficientBinomial},\\ b^{${e.k}}=${e.bPuissanceK}`];
-}
-
-function champsEcranB(e: ExerciceBinomeB, phase: PhaseBinomeNewton): ChampDef[] {
-  if (phase === "bTrouverKEcran") return [champTexte("k =", "ex : 2")];
-  if (phase === "bPoserEcran") return [champTexte(`${labelCoefficientNK(e.n)} =`, "ex : 6"), champTexte("b^k =", "ex : 9")];
-  return [champTexte("Coefficient final =", "ex : -96")];
-}
-
-function niveauAideMaxB(phase: PhaseBinomeNewton): number {
-  return phase === "bTrouverKEcran" ? 2 : 0;
-}
-
-function aideNiveau1B(): AideAvecLatex {
-  return { texte: "Rappel : dans le terme général Cₙᵏ(ax)^{n-k}b^k, l'exposant de x vaut n-k. Pose n-k=p et résous pour k.", latex: "n-k=p" };
-}
-
-function aideNiveau2B(e: ExerciceBinomeB): AideAvecLatex {
-  return { texte: "Voici l'équation à résoudre (résolution non faite) :", latex: `${e.n}-k=${e.p}` };
-}
-
-function reponseAttendueB(e: ExerciceBinomeB, phase: PhaseBinomeNewton): string[] {
-  if (phase === "bTrouverKEcran") return [`k=${e.k}`];
-  if (phase === "bPoserEcran") return [`C_{${e.n}}^{${e.k}}=${e.coefficientBinomial},\\ b^{${e.k}}=${e.bPuissanceK}`];
-  return [`${e.coefficientFinal}`];
-}
-
-// ============================================================================
-// Famille C — Approximation décimale via développement binomial.
-// ============================================================================
-
-function consigneGeneraleC(): FragmentConsigne[] {
-  return [texte("On calcule "), latex("(1+\\varepsilon)^n"), texte(" EXACTEMENT à l'aide du développement binomial, plutôt que par un calcul direct de puissance.")];
-}
-
-function blocDonneesC(e: ExerciceBinomeC): string[] {
-  // Fragment "à écrire sous la forme..." scindé en 3 lignes COURTES (jamais 1 seule phrase
-  // française longue en mode maths — bug d'overflow mobile trouvé par inspection visuelle réelle,
-  // la version à 1 fragment dépassait `.equation-box` en 375px, centrée et coupée des 2 côtés).
-  return [`${formatDecimalFrancaisLatex(e.base)}^{${e.n}}`, `\\text{À écrire } (1+\\varepsilon)^{n}`, `\\varepsilon=${formatDecimalFrancaisLatex(e.epsilon)},\\ n=${e.n}`];
-}
-
-function consigneEcranC(phase: PhaseBinomeNewton): FragmentConsigne[] {
-  if (phase === "cEcran1") return [texte("Identifie les n+1 coefficients binomiaux "), latex("C_n^k"), texte(" du développement de "), latex("(1+\\varepsilon)^n"), texte(".")];
-  if (phase === "cEcran2") return [texte("Calcule chaque terme "), latex("C_n^k\\cdot\\varepsilon^k"), texte(" du développement.")];
-  return [texte("Somme tous les termes pour obtenir la valeur exacte de "), latex("(1+\\varepsilon)^n"), texte(".")];
-}
-
-// Voir commentaire de `etatActuelA` — mêmes fragments SÉPARÉS (étiquette / liste) pour la même
-// raison (overflow mobile).
-function etatActuelC(e: ExerciceBinomeC, phase: PhaseBinomeNewton): string[] | null {
-  if (phase === "cEcran1") return null;
-  if (phase === "cEcran2") return [`\\text{Coefficients confirmés :}`, formatListeEntiers(e.termes.map((t) => t.coefficientBinomial))];
-  // Liste DÉCIMALE (pas juste entière) : fragmentée en 1 valeur par ligne — bug d'overflow mobile
-  // trouvé par inspection visuelle réelle, une liste de décimaux (ex. "0,001, -0,00001,
-  // 0,00000005, -0,0000000001") est bien plus large qu'une liste d'entiers de même longueur et
-  // dépassait `.etat-actuel-box` (n=5/6) même après avoir isolé l'étiquette sur sa propre ligne.
-  return [
-    `\\text{Coefficients confirmés :}`,
-    formatListeEntiers(e.termes.map((t) => t.coefficientBinomial)),
-    `\\text{Termes confirmés :}`,
-    ...fragmentsListeDecimaux(e.termes.map((t) => t.valeurTerme)),
-  ];
-}
-
-function champsEcranC(e: ExerciceBinomeC, phase: PhaseBinomeNewton): ChampDef[] {
-  if (phase === "cEcran1") return e.termes.map((t) => champTexte(`${labelCombinaison(e.n, t.k)} =`, "ex : 10"));
-  if (phase === "cEcran2") return e.termes.map((t) => champTexte(`Terme k=${t.k} =`, "ex : 0,001"));
-  return [champTexte("Valeur finale =", "ex : 1,05101")];
-}
-
-function niveauAideMaxC(phase: PhaseBinomeNewton): number {
-  return phase === "cEcran1" ? 2 : 0;
-}
-
-function aideNiveau1C(): AideAvecLatex {
-  return { texte: "Rappel : tout décimal proche de 1 peut s'écrire 1+ε avec ε petit, ce qui permet d'utiliser le développement binomial plutôt qu'un calcul direct de puissance.", latex: "(1+\\varepsilon)^{n}" };
-}
-
-function aideNiveau2C(e: ExerciceBinomeC): AideAvecLatex {
-  return { texte: "La valeur de ε est déjà identifiée ci-dessous ; le développement (les coefficients) reste à poser.", latex: `\\varepsilon=${formatDecimalFrancaisLatex(e.epsilon)}` };
-}
-
-function reponseAttendueC(e: ExerciceBinomeC, phase: PhaseBinomeNewton): string[] {
-  if (phase === "cEcran1") return fragmentsListeEntiers(e.termes.map((t) => t.coefficientBinomial));
-  if (phase === "cEcran2") return fragmentsListeDecimaux(e.termes.map((t) => t.valeurTerme));
-  return [formatDecimalFrancaisLatex(e.valeurFinale)];
-}
-
-// ============================================================================
-// Dispatchers génériques — point d'entrée consommé par `App6gen45.tsx`/`EtapeChampsBinomeNewton.tsx`.
-// ============================================================================
-
-export function consigneGenerale(exercice: ExerciceBinomeNewton): FragmentConsigne[] {
-  switch (exercice.famille) {
-    case "A":
-      return consigneGeneraleA();
-    case "B":
-      return consigneGeneraleB();
-    case "C":
-      return consigneGeneraleC();
-  }
-}
-
-export function blocDonnees(exercice: ExerciceBinomeNewton): string[] {
-  switch (exercice.famille) {
-    case "A":
-      return blocDonneesA(exercice);
-    case "B":
-      return blocDonneesB(exercice);
-    case "C":
-      return blocDonneesC(exercice);
-  }
-}
-
-export function consigneEcran(exercice: ExerciceBinomeNewton, phase: PhaseBinomeNewton): FragmentConsigne[] {
-  switch (exercice.famille) {
-    case "A":
-      return consigneEcranA(phase);
-    case "B":
-      return consigneEcranB(phase);
-    case "C":
-      return consigneEcranC(phase);
-  }
-}
-
-export function etatActuel(exercice: ExerciceBinomeNewton, phase: PhaseBinomeNewton): string[] | null {
-  switch (exercice.famille) {
-    case "A":
-      return etatActuelA(exercice, phase);
-    case "B":
-      return etatActuelB(exercice, phase);
-    case "C":
-      return etatActuelC(exercice, phase);
-  }
-}
-
-export function champsEcran(exercice: ExerciceBinomeNewton, phase: PhaseBinomeNewton): ChampDef[] {
-  switch (exercice.famille) {
-    case "A":
-      return champsEcranA(exercice, phase);
-    case "B":
-      return champsEcranB(exercice, phase);
-    case "C":
-      return champsEcranC(exercice, phase);
-  }
-}
-
-export function niveauAideMaxEcran(exercice: ExerciceBinomeNewton, phase: PhaseBinomeNewton): number {
-  switch (exercice.famille) {
-    case "A":
-      return niveauAideMaxA(phase);
-    case "B":
-      return niveauAideMaxB(phase);
-    case "C":
-      return niveauAideMaxC(phase);
-  }
-}
-
-export function aideNiveau1(exercice: ExerciceBinomeNewton, phase: PhaseBinomeNewton): AideAvecLatex {
-  if (niveauAideMaxEcran(exercice, phase) === 0) return AUCUNE_AIDE;
-  switch (exercice.famille) {
-    case "A":
-      return aideNiveau1A();
-    case "B":
-      return aideNiveau1B();
-    case "C":
-      return aideNiveau1C();
-  }
-}
-
-export function aideNiveau2(exercice: ExerciceBinomeNewton, phase: PhaseBinomeNewton): AideAvecLatex {
-  if (niveauAideMaxEcran(exercice, phase) === 0) return AUCUNE_AIDE;
-  switch (exercice.famille) {
-    case "A":
-      return aideNiveau2A(exercice);
-    case "B":
-      return aideNiveau2B(exercice);
-    case "C":
-      return aideNiveau2C(exercice);
-  }
-}
-
-export const LIBELLE_PHASE: Record<PhaseBinomeNewton, string> = {
-  aEcran1: "Étape 1 (coefficients binomiaux)",
-  aEcran2: "Étape 2 (termes calculés)",
-  aEcran3: "Étape 3 (polynôme final)",
-  bTrouverKEcran: "Étape 1 (trouver k)",
-  bPoserEcran: "Étape 2 (terme posé)",
-  bCalculerEcran: "Étape 3 (terme calculé)",
-  cEcran1: "Étape 1 (coefficients binomiaux)",
-  cEcran2: "Étape 2 (termes calculés)",
-  cEcran3: "Étape 3 (valeur finale)",
+export const FORMAT_6GEN45: FormatCombinatoire<E, P> = {
+  consigneGenerale(e) {
+    switch (e.famille) {
+      case "A":
+        return f("Développe à l'aide de la formule du binôme : $(a+b)^n=\\displaystyle\\sum_{k=0}^{n}C_n^k\\,a^{n-k}\\,b^k$.");
+      case "B":
+        return f("Dans le développement ordonné selon les puissances décroissantes de $x$, le terme de rang $k+1$ est $T_{k+1}=C_n^k\\,a^{n-k}\\,b^k$.");
+      case "C":
+        return f("Pour $\\varepsilon$ proche de 0 et $n\\varepsilon$ petit, $(1+\\varepsilon)^n\\approx 1+n\\varepsilon$ : les termes suivants du binôme sont négligeables.");
+      case "D":
+        return f("Triangle de Pascal : chaque nombre est la somme des deux nombres situés au-dessus de lui, $C_{n+1}^{k}=C_n^{k-1}+C_n^{k}$.");
+    }
+  },
+  donnees(e): FragmentConsigne[][] {
+    switch (e.famille) {
+      case "A":
+        return [f(`On développe $${binomeLatex(e.a, e.b, e.n)}$.`)];
+      case "B":
+        return e.sousType === "rang"
+          ? [f(`Dans le développement de $${binomeLatex(e.a, e.b, e.n)}$, on cherche le terme de rang ${e.rang}, $T_{${e.rang}}$.`)]
+          : [f(`Dans le développement de $${binomeLatex(e.a, e.b, e.n)}$, on cherche le coefficient du terme en $${puissanceX(e.p)}$.`)];
+      case "C":
+        return [f(`On veut une valeur approchée de $(${baseLatex(e.epsilonCentiemes)})^{${e.n}}=(1${e.epsilonCentiemes < 0 ? "-" : "+"}${epsilonLatex(Math.abs(e.epsilonCentiemes))})^{${e.n}}$.`)];
+      case "D":
+        return [f(`Ligne $n=${e.n}$ du triangle de Pascal (de $C_{${e.n}}^{0}$ à $C_{${e.n}}^{${e.n}}$) :`), f(`$${ligneLatex(e.ligne)}$`)];
+    }
+  },
+  consigneEcran(e, p) {
+    switch (e.famille) {
+      case "A":
+        if (p === "aEcran1") return f(`Donne les coefficients $C_{${e.n}}^{k}$, pour $k$ de 0 à ${e.n}.`);
+        if (p === "aEcran2") return [t("Donne le coefficient de chaque terme du développement (signe compris).")];
+        return [t("Écris le polynôme développé et réduit.")];
+      case "B":
+        if (p === "bTrouverKEcran") return e.sousType === "rang" ? f(`Le terme cherché est $T_{${e.rang}}=T_{k+1}$ : quelle est la valeur de $k$ ?`) : f(`Quelle valeur de $k$ donne la puissance $${puissanceX(e.p)}$ ?`);
+        if (p === "bPoserEcran") return [t("Calcule les trois facteurs du terme.")];
+        return e.sousType === "rang" ? f(`Quel est le coefficient de $T_{${e.rang}}$ ?`) : f(`Quel est le coefficient du terme en $${puissanceX(e.p)}$ ?`);
+      case "C":
+        if (p === "cEcran1") return f("Calcule l'approximation $1+n\\varepsilon$.");
+        if (p === "cEcran2") return f("Calcule le premier terme négligé, $C_n^2\\,\\varepsilon^2$ : il donne l'ordre de grandeur de l'erreur.");
+        return f(`À la calculatrice, donne $(${baseLatex(e.epsilonCentiemes)})^{${e.n}}$ arrondi au dix-millième, et compare.`);
+      case "D":
+        if (p === "dEcran1") return f(`Complète la ligne $n=${e.n + 1}$ : donne les nombres demandés.`);
+        return f(`Que vaut la somme de tous les nombres de la ligne $n=${e.n + 1}$ ?`);
+    }
+  },
+  champs(e, p): ChampCombi[] {
+    switch (e.famille) {
+      case "A":
+        if (p === "aEcran1") return e.termes.map((x) => ({ type: "texte", label: `$C_{${e.n}}^{${x.k}}$` }));
+        if (p === "aEcran2") return e.termes.map((x) => ({ type: "texte", label: x.exposantX === 0 ? "Terme constant" : `Terme en $${puissanceX(x.exposantX)}$` }));
+        return [{ type: "texte", label: "Polynôme développé", apercu: true, nature: "polynome" }];
+      case "B":
+        if (p === "bTrouverKEcran") return [{ type: "texte", label: "$k$" }];
+        if (p === "bPoserEcran")
+          return [
+            { type: "texte", label: `$C_{${e.n}}^{${e.k}}$` },
+            { type: "texte", label: `$${par(e.a)}^{${e.n - e.k}}$` },
+            { type: "texte", label: `$${par(e.b)}^{${e.k}}$` },
+          ];
+        return [{ type: "texte", label: "Coefficient" }];
+      case "C":
+        if (p === "cEcran1") return [{ type: "texte", label: "$1+n\\varepsilon$" }];
+        if (p === "cEcran2") return [{ type: "texte", label: "$C_n^2\\,\\varepsilon^2$" }];
+        return [{ type: "texte", label: "Valeur arrondie" }];
+      case "D":
+        if (p === "dEcran1") return e.positions.map((k) => ({ type: "texte", label: `$C_{${e.n + 1}}^{${k}}$` }));
+        return [{ type: "texte", label: "Somme de la ligne" }];
+    }
+  },
+  aides(e, p) {
+    switch (e.famille) {
+      case "A":
+        if (p === "aEcran1") return [{ texte: "Les coefficients $C_n^k$ forment la ligne $n$ du triangle de Pascal ; ils sont symétriques : $C_n^k=C_n^{n-k}$." }, { texte: `Commence et termine par 1 ; calcule $C_{${e.n}}^{1}$, $C_{${e.n}}^{2}$… (touche nCr).` }];
+        if (p === "aEcran2") return [{ texte: "Coefficient du terme d'indice $k$ :", latex: "C_n^k\\times a^{n-k}\\times b^k" }, { texte: `Ici $a=${e.a}$ et $b=${e.b}$ ; attention au signe des puissances de ${e.b < 0 ? "$b$, négatif" : e.a < 0 ? "$a$, négatif" : "chaque facteur"}.` }];
+        return [{ texte: "Écris chaque terme « coefficient × puissance de $x$ », du plus haut degré au terme constant." }, { texte: "Au clavier, une puissance s'écrit avec l'accent circonflexe, ou directement en exposant." }];
+      case "B":
+        if (p === "bTrouverKEcran") return e.sousType === "rang" ? [{ texte: "Le premier terme est $T_1$ (k = 0), le deuxième $T_2$ (k = 1)…" }, { texte: "Le rang dépasse $k$ de 1." }] : [{ texte: "Dans $C_n^k\\,(ax)^{n-k}\\,b^k$, la puissance de $x$ est $n-k$." }, { texte: `Résous $${e.n}-k=${e.p}$.` }];
+        if (p === "bPoserEcran") return [{ texte: "Le terme $T_{k+1}$ contient $C_n^k$, $a^{n-k}$ et $b^k$." }, { texte: "Une puissance paire d'un nombre négatif est positive, une puissance impaire est négative." }];
+        return [{ texte: "Le coefficient est le produit des trois facteurs." }, { texte: "Utilise les trois valeurs de l'écran précédent, avec leur signe." }];
+      case "C":
+        if (p === "cEcran1") return [{ texte: "On garde les deux premiers termes du binôme : $1+C_n^1\\,\\varepsilon=1+n\\varepsilon$." }, { texte: `Ici $n=${e.n}$ et $\\varepsilon=${epsilonLatex(e.epsilonCentiemes)}$.` }];
+        if (p === "cEcran2") return [{ texte: "Le terme suivant du binôme est $C_n^2\\,\\varepsilon^2=\\dfrac{n(n-1)}{2}\\,\\varepsilon^2$." }, { texte: `Calcule $C_{${e.n}}^{2}$, puis $\\varepsilon^2=(${epsilonLatex(e.epsilonCentiemes)})^2$.` }];
+        return [{ texte: "Tape la puissance à la calculatrice, puis arrondis au dix-millième (4 décimales)." }, { texte: "L'écart entre la valeur et l'approximation doit être proche du premier terme négligé." }];
+      case "D":
+        if (p === "dEcran1") return [{ texte: "Relation de Pascal :", latex: "C_{n+1}^{k}=C_n^{k-1}+C_n^{k}" }, { texte: "Additionne les deux nombres voisins de la ligne donnée, celui de gauche et celui de droite." }];
+        return [{ texte: "La somme des nombres de la ligne $n$ vaut $2^n$ (c'est le développement de $(1+1)^n$)." }, { texte: `Applique-le à la ligne $n=${e.n + 1}$.` }];
+    }
+  },
+  reponseAttendue(e, p) {
+    switch (e.famille) {
+      case "A":
+        if (p === "aEcran1") return [e.termes.map((x) => milliers(x.coefficientBinomial)).join("\\;;\\;")];
+        if (p === "aEcran2") return [e.termes.map((x) => milliers(x.coefficientFinal)).join("\\;;\\;")];
+        return [polynomeLatex(e.termes.map((x) => ({ coefficient: x.coefficientFinal, exposant: x.exposantX })))];
+      case "B":
+        if (p === "bTrouverKEcran") return [`k=${e.k}`];
+        if (p === "bPoserEcran") return [`C_{${e.n}}^{${e.k}}=${milliers(e.coefficientBinomial)}`, `${par(e.a)}^{${e.n - e.k}}=${milliers(e.aPuissance)}`, `${par(e.b)}^{${e.k}}=${milliers(e.bPuissance)}`];
+        return [milliers(e.coefficientFinal)];
+      case "C":
+        if (p === "cEcran1") return [fractionDecimale(versNombre(approximationC(e)))];
+        if (p === "cEcran2") return [fractionDecimale(versNombre(termeNegligeC(e)))];
+        return [`\\approx ${arrondiLatex(versNombre(valeurExacteC(e)), 4)}`];
+      case "D":
+        if (p === "dEcran1") return [e.positions.map((k) => `C_{${e.n + 1}}^{${k}}=${milliers(Number(combinaisonBig(e.n + 1, k)))}`).join("\\;;\\;")];
+        return [`2^{${e.n + 1}}=${milliers(2 ** (e.n + 1))}`];
+    }
+  },
+  explication(e, p) {
+    switch (e.famille) {
+      case "A":
+        if (p === "aEcran1") return [f(`Ligne ${e.n} du triangle de Pascal : $${e.termes.map((x) => x.coefficientBinomial).join("\\;;\\;")}$.`)];
+        if (p === "aEcran2")
+          return e.termes.map((x) => f(`$k=${x.k}$ : $${x.coefficientBinomial}\\times ${par(e.a)}^{${x.exposantX}}\\times ${par(e.b)}^{${x.k}}=${milliers(x.coefficientFinal)}$`));
+        return [f(`$${binomeLatex(e.a, e.b, e.n)}=${polynomeLatex(e.termes.map((x) => ({ coefficient: x.coefficientFinal, exposant: x.exposantX })))}$`)];
+      case "B":
+        if (p === "bTrouverKEcran") return [f(e.sousType === "rang" ? `$T_{${e.rang}}=T_{k+1}$ donne $k=${e.rang}-1=${e.k}$.` : `$${e.n}-k=${e.p}$ donne $k=${e.k}$.`)];
+        if (p === "bPoserEcran") return [f(`$C_{${e.n}}^{${e.k}}=${milliers(e.coefficientBinomial)}$, $${par(e.a)}^{${e.n - e.k}}=${milliers(e.aPuissance)}$, $${par(e.b)}^{${e.k}}=${milliers(e.bPuissance)}$.`)];
+        return [f(`$${milliers(e.coefficientBinomial)}\\times ${par(e.aPuissance)}\\times ${par(e.bPuissance)}=${milliers(e.coefficientFinal)}$, donc ${e.sousType === "rang" ? `$T_{${e.rang}}=${monome(e.coefficientFinal, e.p, true)}$` : `le terme est $${monome(e.coefficientFinal, e.p, true)}$`}.`)];
+      case "C": {
+        const eps = epsilonLatex(e.epsilonCentiemes);
+        if (p === "cEcran1") return [f(`$1+${e.n}\\times ${par(e.epsilonCentiemes) === `${e.epsilonCentiemes}` ? eps : `(${eps})`}=${fractionDecimale(versNombre(approximationC(e)))}$.`)];
+        if (p === "cEcran2") return [f(`$C_{${e.n}}^{2}\\times (${eps})^2=${e.n * (e.n - 1) / 2}\\times ${decimalLatex((e.epsilonCentiemes / 100) ** 2)}=${fractionDecimale(versNombre(termeNegligeC(e)))}$.`)];
+        const v = versNombre(valeurExacteC(e));
+        const ecart = v - versNombre(approximationC(e));
+        return [f(`$(${baseLatex(e.epsilonCentiemes)})^{${e.n}}\\approx ${arrondiLatex(v, 4)}$ ; l'écart avec l'approximation vaut environ $${arrondiLatex(ecart, 4)}$, proche du premier terme négligé.`)];
+      }
+      case "D":
+        if (p === "dEcran1") return e.positions.map((k) => f(`$C_{${e.n + 1}}^{${k}}=${milliers(e.ligne[k - 1])}+${milliers(e.ligne[k])}=${milliers(e.ligne[k - 1] + e.ligne[k])}$`));
+        return [f(`$2^{${e.n + 1}}=${milliers(2 ** (e.n + 1))}$ (double de la somme de la ligne ${e.n}, $2^{${e.n}}=${milliers(2 ** e.n)}$).`)];
+    }
+  },
+  libellePhase(e, p) {
+    switch (e.famille) {
+      case "A":
+        return p === "aEcran1" ? "Coefficients binomiaux" : p === "aEcran2" ? "Coefficients des termes" : "Polynôme développé";
+      case "B":
+        return p === "bTrouverKEcran" ? "Valeur de k" : p === "bPoserEcran" ? "Trois facteurs" : "Coefficient";
+      case "C":
+        return p === "cEcran1" ? "Approximation" : p === "cEcran2" ? "Terme négligé" : "Valeur et comparaison";
+      case "D":
+        return p === "dEcran1" ? "Ligne suivante" : "Somme de la ligne";
+    }
+  },
+  messageCible(e, p, valeurs) {
+    const v = valeurs[valeurs.length - 1] ?? "";
+    switch (e.famille) {
+      case "B":
+        if (p === "bTrouverKEcran" && e.sousType === "rang" && vaut(v, e.rang)) return f(`Le terme $T_{k+1}$ a pour indice $k$ : le rang dépasse $k$ de 1.`);
+        if (p === "bTrouverKEcran" && e.sousType === "puissance" && vaut(v, e.p)) return f("$k$ est l'exposant de $b$, pas celui de $x$.");
+        if (p === "bCalculerEcran" && vaut(v, -e.coefficientFinal)) return [t("Vérifie le signe : une puissance impaire d'un nombre négatif est négative.")];
+        return null;
+      case "C":
+        if (p === "cEcran1" && vaut(v, 1 + e.epsilonCentiemes / 100)) return f("N'oublie pas de multiplier $\\varepsilon$ par $n$.");
+        return null;
+      case "D":
+        if (p === "dEcran2" && vaut(v, 2 ** e.n)) return [t("Cette somme est celle de la ligne donnée ; on demande celle de la ligne suivante.")];
+        return null;
+      default:
+        return null;
+    }
+  },
 };
 
-export const LIBELLE_FAMILLE: Record<FamilleBinomeNewton, string> = {
-  A: "A — Développement complet de (ax+b)ⁿ",
-  B: "B — Terme spécifique",
-  C: "C — Approximation décimale (1+ε)ⁿ",
-};
-
-/** Récapitulatif final : affiche toujours la réponse CORRECTE connue de l'exercice — jamais
- * recalculée depuis la saisie élève. */
-export function formatReponseAttenduePhaseLatex(exercice: ExerciceBinomeNewton, phase: PhaseBinomeNewton): string[] {
-  switch (exercice.famille) {
-    case "A":
-      return reponseAttendueA(exercice, phase);
-    case "B":
-      return reponseAttendueB(exercice, phase);
-    case "C":
-      return reponseAttendueC(exercice, phase);
-  }
+/** Décimal exact en KaTeX (« 1{,}16 », « 0{,}0028 »). */
+function fractionDecimale(x: number): string {
+  return decimalLatex(x, 12);
 }
 
