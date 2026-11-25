@@ -32,6 +32,9 @@ export interface SegmentExtraSolide3D {
   b: Point3D;
   couleur: string;
   pointille?: boolean;
+  /** Épaisseur du trait (gen40, droite prolongée d'une arête, triangle KLM). Absent : comportement
+   * historique inchangé (épaisseur de la feuille de style). */
+  epaisseur?: number;
 }
 
 interface Props {
@@ -147,7 +150,7 @@ export function Solide3DSketch({ solide, plan, droite, droitePoints, droitesSupp
             x2={p2.x}
             y2={p2.y}
             className={`solide3d-segment-extra${segment.pointille ? " is-pointille" : ""}`}
-            style={{ stroke: segment.couleur }}
+            style={segment.epaisseur ? { stroke: segment.couleur, strokeWidth: segment.epaisseur } : { stroke: segment.couleur }}
           />
         );
       })}

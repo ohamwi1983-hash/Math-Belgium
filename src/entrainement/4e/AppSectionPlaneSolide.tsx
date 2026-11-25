@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import type { EtapeCorrection } from "../export/genererFeuilleExercices";
-import { etapesFaceSection, etapesLignesSection, etapesSegmentSection } from "./generateurs/sectionPlaneSolide/corrigeDetaille";
+import { etapesAppuiSection, etapesFaceSection, etapesLignesSection, etapesParalleleSection, etapesSegmentSection } from "./generateurs/sectionPlaneSolide/corrigeDetaille";
+import { etapeParallele, facesPretesPourSegment } from "./moteur/verificationSectionPlaneSolide";
+import { EtapeParalleleSection } from "./components/EtapeParalleleSection";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -9,6 +11,7 @@ import {
   soumettreConclusion,
   soumettreReponseAuxiliaireFace,
   soumettreReponseAuxiliaireLignes,
+  soumettreReponseParallele,
   soumettreReponseSegmentDirect,
   tentativesMaxPhase,
 } from "./moteur/sessionSectionPlaneSolide";
@@ -28,13 +31,18 @@ import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import {
   calculerRecapitulatifSectionPlaneSolide,
+  consigneGeneraleSection,
+  coteKLMDeLaFace,
   faceDuSegmentTrace,
   libelleFace,
   libelleLigne,
+  nomCoteKLM,
   messageFaceAuxiliaireFausse,
+  messageCoteParalleleFaux,
   messageFaceSegmentFausse,
   texteReponseFace,
   texteReponseLignes,
+  texteReponseParallele,
   texteReponseSegmentDirect,
 } from "./ui/formatSectionPlaneSolide";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
@@ -50,7 +58,15 @@ function corrigeEcran(etat: EtatSessionSectionPlaneSolide, suivant: EtatSessionS
     if (!nouveau) return [];
     const face = faceDuSegmentTrace(exercice, nouveau);
     const [a, b] = nouveau.split("-").map(Number) as [number, number];
-    return face === null ? [] : etapesSegmentSection(exercice, connus, face, a, b, "a");
+    if (face === null) return [];
+    // Variantes du manuel : côté obtenu par un point donné hors section.
+    const appui = facesPretesPourSegment(exercice, new Set(connus), new Set(etat.segmentsTraces)).find((f) => f.face === face && f.appui !== undefined);
+    if (appui) return etapesAppuiSection(exercice, connus, { face, appui: appui.appui!, pointConnu: appui.pointA, pointCible: appui.pointB }, "a");
+    return etapesSegmentSection(exercice, connus, face, a, b, "a");
+  }
+  if (etat.phase === "parallele") {
+    const etape = etapeParallele(exercice, connus);
+    return etape ? etapesParalleleSection(exercice, connus, { face: etape.face, cote: coteKLMDeLaFace(exercice, etape.face), pointConnu: etape.depuis, pointCible: etape.vers }, "a") : [];
   }
   if (etat.phase === "auxiliaireLignes") {
     const paire = suivant.ligneAuxiliaireChoisie;
@@ -60,8 +76,6 @@ function corrigeEcran(etat: EtatSessionSectionPlaneSolide, suivant: EtatSessionS
   return construction ? etapesFaceSection(exercice, connus, construction, "I", "a") : [];
 }
 
-const CONSIGNE_GENERALE = "Détermine la section plane de ce solide.";
-
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
   tentativesMax: 3,
@@ -69,7 +83,8 @@ const REGLAGES_DEMO: ReglagesSession = {
   affichageExplication: true,
 };
 
-/** Tirage libre de l'appli : la section triangulaire une fois sur six (`…Libre`) ; un `?code=` imprimé
+/** Tirage libre de l'appli : la section triangulaire une fois sur six, chaque variante du manuel une
+ * fois sur neuf (`…Libre`) ; un `?code=` imprimé
  * reprend, lui, le tirage de l'adaptateur (`genererExerciceSectionPlaneSolide`, inchangé). */
 function nouvelleSession(): EtatSessionSectionPlaneSolide {
   return demarrerSessionSectionPlaneSolide(REGLAGES_DEMO, genererExerciceSectionPlaneSolideLibre);
@@ -90,6 +105,7 @@ const LIBELLE_PHASE: Record<PhaseSectionPlaneSolide, string> = {
   segmentDirect: "Tracer un segment",
   auxiliaireLignes: "Point auxiliaire — droites",
   auxiliaireFace: "Point auxiliaire — face",
+  parallele: "Tracer une parallèle",
   conclusion: "Conclusion",
 };
 
@@ -108,6 +124,8 @@ interface TransitionEnAttente {
   corrige: EtapeCorrection[];
   /** Face retenue (choix de face jugé ✗ / ✓) et message propre au choix faux. */
   faceJuste: number | null;
+  /** Écran « parallèle » : côté de KLM juste. */
+  coteJuste: number | null;
   messageRevele?: string;
 }
 
@@ -135,6 +153,10 @@ function reponseConfirmee(etat: EtatSessionSectionPlaneSolide, suivant: EtatSess
   if (etat.phase === "auxiliaireLignes") {
     return suivant.ligneAuxiliaireChoisie ? texteReponseLignes(exercice, connus, suivant.ligneAuxiliaireChoisie) : "";
   }
+  if (etat.phase === "parallele") {
+    const etape = etapeParallele(exercice, connus);
+    return etape ? texteReponseParallele(exercice, connus, etape) : "";
+  }
   return suivant.derniereConstruction ? texteReponseFace(exercice, connus, suivant.derniereConstruction) : "";
 }
 
@@ -142,6 +164,7 @@ const TITRE_ECRAN: Record<PhaseSectionPlaneSolide, string> = {
   segmentDirect: "Tracer un segment",
   auxiliaireLignes: "Point auxiliaire — droites",
   auxiliaireFace: "Point auxiliaire — face",
+  parallele: "Tracer une parallèle",
   conclusion: "Conclusion",
 };
 
@@ -181,9 +204,13 @@ export function AppSectionPlaneSolide() {
       const revele = nouvelEtat.revelesAccumules[nouvelEtat.revelesAccumules.length - 1]!;
       const reponseAttendue = reponseConfirmee(etat, nouvelEtat);
       const faceJuste = faceConfirmee(etat, nouvelEtat);
+      const etapePar = etat.phase === "parallele" ? etapeParallele(etat.exerciceCourant, etat.connus) : null;
+      const coteJuste = etapePar ? coteKLMDeLaFace(etat.exerciceCourant, etapePar.face) : null;
       const messageRevele =
         revele && faceChoisie !== null
-          ? etat.phase === "segmentDirect"
+          ? etapePar
+            ? messageCoteParalleleFaux(etat.exerciceCourant, etapePar.face, faceChoisie)
+            : etat.phase === "segmentDirect"
             ? messageFaceSegmentFausse(etat.exerciceCourant, etat.connus, faceChoisie)
             : etat.phase === "auxiliaireFace" && etat.ligneAuxiliaireChoisie
               ? messageFaceAuxiliaireFausse(etat.exerciceCourant, etat.connus, etat.ligneAuxiliaireChoisie, faceChoisie)
@@ -192,7 +219,7 @@ export function AppSectionPlaneSolide() {
       // Corrigé calculé que l'écran soit réussi ou révélé : « Voir comment on y arrive » après une
       // bonne réponse, et la fiche de la puce, déplient les MÊMES lignes (décision du 25/11/2026).
       const corrige = corrigeEcran(etat, nouvelEtat);
-      setEnAttente({ etatSuivant: nouvelEtat, revele, reponseAttendue, corrige, faceJuste, messageRevele });
+      setEnAttente({ etatSuivant: nouvelEtat, revele, reponseAttendue, corrige, faceJuste, coteJuste, messageRevele });
       setHistorique((h) => [...h, { titre: TITRE_ECRAN[etat.phase], votreReponse: saisie, correcte: !revele, reponseAttendue, aide: etat.niveauAide > 0, corrigeDetaille: <CorrigeDetailleEcran etapes={corrige} /> }]);
       return;
     }
@@ -265,7 +292,7 @@ export function AppSectionPlaneSolide() {
 
       <main className="card">
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+          <EnTeteExercice consigneGenerale={consigneGeneraleSection(exercice)} blocDonnees={null} />
           <RecapitulatifPanel entrees={calculerRecapitulatifSectionPlaneSolide(exercice, etat.connus, etat.segmentsTraces)} />
           {etat.phase === "segmentDirect" ? (
             <EtapeSegmentDirect
@@ -297,6 +324,18 @@ export function AppSectionPlaneSolide() {
               }
               validation={validation}
               paireConfirmee={enAttente?.etatSuivant.ligneAuxiliaireChoisie ?? null}
+            />
+          ) : etat.phase === "parallele" ? (
+            <EtapeParalleleSection
+              key={cleEcran}
+              exercice={exercice}
+              connus={etat.connus}
+              segmentsTraces={etat.segmentsTraces}
+              niveauAide={etat.niveauAide}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(cote) => terminerEtape(soumettreReponseParallele(etat, cote), `Côté ${nomCoteKLM(exercice, cote)}`, cote)}
+              validation={validation}
+              coteJuste={enAttente?.coteJuste ?? null}
             />
           ) : etat.phase === "auxiliaireFace" && etat.ligneAuxiliaireChoisie ? (
             <EtapeAuxiliaireFace

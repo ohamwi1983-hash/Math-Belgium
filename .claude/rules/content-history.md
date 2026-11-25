@@ -2639,6 +2639,12 @@ paths:
   la main, rotation au doigt) — `cavaliere-reglage-widget` (§ 1), `positions-cube-widget` (§ 3–4,
   défi), `trois-plans-widget` (§ 6), `section-cube-widget` (§ 9), `fenetre-durer-widget` (§ 10),
   `point-de-fuite-widget` (§ 11), `ombre-soleil-lampe-widget` (§ 12).
+  **Manuel, chantier B (25/11/2026)** : description de la carte gen40 (§ 9 `section`) complétée pour annoncer
+  les trois variantes inspirées du manuel (point dans une face, points sur le prolongement d'une arête, plan
+  parallèle à un plan donné) et le tableau d'appartenance du corrigé ; aucun bloc de cours ajouté (la
+  méthode « deux points d'une même face », le point auxiliaire et « un plan coupe deux plans parallèles
+  suivant deux droites parallèles » sont déjà aux § 5 et § 9). Détail : `.claude/rules/feuilles-evaluations.md`,
+  « 4e ch. 8, manuel — gen40 ».
 
 - **Ateliers — figure épinglée pendant la manipulation (tous chapitres)** : retour utilisateur « les
   curseurs/boutons sont trop éloignés du dessin : en les manipulant, on ne voit plus le graphe ».

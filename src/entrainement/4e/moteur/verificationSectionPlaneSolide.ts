@@ -1,6 +1,6 @@
 import type { Point3D } from "../core/geometrieEspace.types";
 import type { ExerciceSectionPlaneSolide } from "../core/sectionPlaneSolide.types";
-import { intersectionDeuxDroites3D, normalePlan, normeCarree3D, points3AlignesDistincts, produitScalaire3D, soustraire3D } from "./geometrieEspace";
+import { intersectionDeuxDroites3D, normalePlan, normeCarree3D, points3AlignesDistincts, produitScalaire3D, produitVectoriel3D, soustraire3D } from "./geometrieEspace";
 
 /**
  * Couche B — vérification "Section plane d'un solide" (40e générateur, chapitre "Géométrie dans
@@ -42,6 +42,24 @@ export interface FacePreteSegment {
   face: number;
   pointA: number;
   pointB: number;
+  /** Variantes du manuel : le plan de la face contient un point donné hors section (`appui`) et le
+   * point de section connu `pointA` ; la droite qui les joint donne le côté et le point `pointB`,
+   * encore inconnu (`nouveau`). Absents pour un segment entre deux points de section connus. */
+  appui?: number;
+  nouveau?: number;
+}
+
+/** Le point est dans le PLAN de la face `face` du solide (recalculé, jamais lu dans le contrat). */
+function pointDansPlanFace(exercice: ExerciceSectionPlaneSolide, point: Point3D, face: number): boolean {
+  const [a, b, c] = exercice.solide.faces[face].map((nom) => exercice.solide.sommets[nom]);
+  const normale = normalePlan(a, b, c);
+  return Math.abs(produitScalaire3D(normale, soustraire3D(point, a))) / Math.sqrt(normeCarree3D(normale)) < 1e-6;
+}
+
+/** Position d'un point connu : sommet de section (`points`) ou point donné hors section
+ * (`pointsAppui`, variantes du manuel). */
+export function positionPointConnu(exercice: ExerciceSectionPlaneSolide, id: number): Point3D | null {
+  return exercice.points.find((p) => p.id === id)?.position ?? exercice.pointsAppui?.find((x) => x.id === id)?.position ?? null;
 }
 
 /** Faces croisées ayant leurs 2 points de section déjà CONNUS (état vivant), dont le segment n'est
@@ -54,14 +72,61 @@ export function facesPretesPourSegment(
   segmentsTraces: ReadonlySet<string>,
 ): FacePreteSegment[] {
   const resultat: FacePreteSegment[] = [];
+  const appuis = (exercice.pointsAppui ?? []).filter((x) => connus.has(x.id));
   for (const face of exercice.facesCroisees) {
     const pointsConnusDeLaFace = exercice.points.filter((p) => p.faces.includes(face) && connus.has(p.id));
+    if (pointsConnusDeLaFace.length === 1 && appuis.length > 0) {
+      // Variantes du manuel : un point donné hors section dans le plan de la face, aligné avec le
+      // point connu et l'autre point de section de la face.
+      const connu = pointsConnusDeLaFace[0];
+      const cible = exercice.points.find((p) => p.faces.includes(face) && p.id !== connu.id);
+      const appui = cible && appuis.find((x) => pointDansPlanFace(exercice, x.position, face) && points3AlignesDistincts(connu.position, x.position, cible.position));
+      if (cible && appui) resultat.push({ face, pointA: connu.id, pointB: cible.id, appui: appui.id, nouveau: cible.id });
+      continue;
+    }
     if (pointsConnusDeLaFace.length !== 2) continue;
     const [a, b] = pointsConnusDeLaFace;
     if (segmentsTraces.has(cleSegment(a.id, b.id))) continue;
     resultat.push({ face, pointA: a.id, pointB: b.id });
   }
   return resultat;
+}
+
+// --- Variante « parallele » ------------------------------------------------------------------------
+
+export interface EtapeParallele {
+  face: number;
+  depuis: number;
+  vers: number;
+}
+
+/** Prochain côté de la section par π : depuis le dernier point trouvé, en suivant l'ordre cyclique
+ * à partir de P — `null` quand il ne reste que le côté qui referme (ou rien). */
+export function etapeParallele(exercice: ExerciceSectionPlaneSolide, connus: readonly number[]): EtapeParallele | null {
+  const { ordreCyclique, idsDepart } = exercice;
+  const indexP = ordreCyclique.indexOf(idsDepart[0]);
+  const ordre = [...ordreCyclique.slice(indexP), ...ordreCyclique.slice(0, indexP)];
+  const i = connus.length - 1;
+  if (i + 1 >= ordre.length) return null;
+  const depuis = exercice.points.find((p) => p.id === ordre[i]);
+  const vers = exercice.points.find((p) => p.id === ordre[i + 1]);
+  if (!depuis || !vers) return null;
+  const face = depuis.faces.find((f) => vers.faces.includes(f));
+  return face === undefined ? null : { face, depuis: depuis.id, vers: vers.id };
+}
+
+/** Le côté `cote` du triangle KLM est-il parallèle au côté de la section de l'étape courante ?
+ * Recalculé sur les positions (jamais l'indice stocké dans la résolution de référence). */
+export function verifierCoteParallele(exercice: ExerciceSectionPlaneSolide, connus: readonly number[], cote: number): boolean {
+  const etape = etapeParallele(exercice, connus);
+  const plan = exercice.planParallele;
+  const c = plan?.cotes[cote];
+  if (!etape || !plan || !c) return false;
+  const a = positionPointConnu(exercice, etape.depuis)!;
+  const b = positionPointConnu(exercice, etape.vers)!;
+  const u = soustraire3D(b, a);
+  const v = soustraire3D(plan.points[c.b].position, plan.points[c.a].position);
+  return normeCarree3D(produitVectoriel3D(u, v)) / (normeCarree3D(u) * normeCarree3D(v)) < 1e-12;
 }
 
 /** Écran A : la face choisie doit réellement figurer parmi les faces prêtes — jamais une face à 0

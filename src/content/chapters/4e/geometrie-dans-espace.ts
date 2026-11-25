@@ -1674,7 +1674,10 @@ export const geometrieDansEspace: ChapterContent = {
             'Reconstruis progressivement le polygone de section d\'un solide en perspective ' +
               'cavalière, un point ou un segment à la fois. Segment direct dès que 2 points d\'une ' +
               'face sont connus, sinon construction d\'un point auxiliaire. Le dernier côté se ' +
-              'referme tout seul.',
+              'referme tout seul. Variantes : un point donné à l\'intérieur d\'une face, des points ' +
+              'donnés sur le prolongement d\'une arête (hors du solide), et la section par un plan ' +
+              'parallèle à un plan donné, construite à coups de parallèles. Le corrigé se termine par ' +
+              'le tableau d\'appartenance des points aux faces.',
           ],
           chantier: '4e',
           whereLabel: "4e → « 40. Section plane d'un solide »",

@@ -25,7 +25,9 @@ import type { EtatEtapeTentatives } from "./etapeTentatives";
  * toujours disponible tant que le polygone n'est pas fermé.
  */
 
-export type PhaseSectionPlaneSolide = "segmentDirect" | "auxiliaireLignes" | "auxiliaireFace" | "conclusion";
+/** « parallele » : variante du manuel « plan parallèle à (KLM) passant par P » — un écran par côté,
+ * choix du côté de KLM auquel il est parallèle. */
+export type PhaseSectionPlaneSolide = "segmentDirect" | "auxiliaireLignes" | "auxiliaireFace" | "parallele" | "conclusion";
 
 /** Un score par action notée (segment direct, ou les 2 sous-étapes — lignes puis face — d'une
  * construction auxiliaire) — longueur toujours variable selon le nombre d'itérations réellement

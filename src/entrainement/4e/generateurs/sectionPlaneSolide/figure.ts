@@ -1,5 +1,5 @@
 import type { ExerciceSectionPlaneSolide } from "../../core/sectionPlaneSolide.types";
-import { elementsConstructionAuxiliaire, pointsExtraConnus, segmentsExtraTraces } from "../../ui/formatSectionPlaneSolide";
+import { COULEUR_CONSTRUCTION, decorDonnees, elementsConstructionAuxiliaire, pointsExtraConnus, premierSommetDonne, segmentsExtraTraces } from "../../ui/formatSectionPlaneSolide";
 import { calculerAretesAvecVisibilite, calculerEchelleProjection, calculerLabelsSommetsPixel, calculerSommetsPixel, HAUTEUR_SVG, LARGEUR_SVG, projeter3DVersPixel } from "../../ui/solide3DSketch";
 
 /**
@@ -17,7 +17,7 @@ const COULEUR_ARETE_CACHEE = "#adb5bd";
 export function ordreLabelsDepuisExercice(exercice: ExerciceSectionPlaneSolide): number[] {
   const ordre: number[] = [...exercice.idsDepart];
   for (const etape of exercice.resolutionReference) {
-    if (etape.type === "auxiliaire" && !ordre.includes(etape.pointCible)) ordre.push(etape.pointCible);
+    if (etape.type !== "segment" && !ordre.includes(etape.pointCible)) ordre.push(etape.pointCible);
   }
   for (const id of exercice.ordreCyclique) if (!ordre.includes(id)) ordre.push(id); // garde défensive
   return ordre;
@@ -26,8 +26,8 @@ export function ordreLabelsDepuisExercice(exercice: ExerciceSectionPlaneSolide):
 /** `ordreCyclique`, re-décalé pour commencer par P (id `idsDepart[0]`) — même cycle, juste plus
  * lisible en correction papier ("P → … → P") qu'un point de départ arbitraire. */
 export function ordreCycliqueDepuisP(exercice: ExerciceSectionPlaneSolide): number[] {
-  const { idsDepart, ordreCyclique } = exercice;
-  const indexP = ordreCyclique.indexOf(idsDepart[0]);
+  const { ordreCyclique } = exercice;
+  const indexP = ordreCyclique.indexOf(premierSommetDonne(exercice));
   return [...ordreCyclique.slice(indexP), ...ordreCyclique.slice(0, indexP)];
 }
 
@@ -158,7 +158,39 @@ export function construireSvgSectionPlaneSolide(exercice: ExerciceSectionPlaneSo
       }
       rang++;
     }
+    // Variantes du manuel : droite (point donné, point connu) prolongée jusqu'au nouveau point.
+    for (const etape of exercice.resolutionReference) {
+      if (etape.type !== "appui") continue;
+      const x = exercice.pointsAppui?.find((p) => p.id === etape.appui)?.position;
+      const a = exercice.points.find((p) => p.id === etape.pointConnu)?.position;
+      const b = exercice.points.find((p) => p.id === etape.pointCible)?.position;
+      if (!x || !a || !b) continue;
+      const loin = Math.hypot(a.x - x.x, a.y - x.y, a.z - x.z) >= Math.hypot(b.x - x.x, b.y - x.y, b.z - x.z) ? a : b;
+      const p1 = projeter(x);
+      const p2 = projeter(loin);
+      constructionsHtml += `<line x1="${p1.x.toFixed(1)}" y1="${p1.y.toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" stroke="${COULEUR_CONSTRUCTION}" stroke-width="1.5" stroke-dasharray="5 3"/>`;
+    }
   }
+
+  // Données propres aux variantes du manuel (droite prolongée d'une arête, triangle KLM) — vides sinon.
+  const decor = decorDonnees(exercice);
+  let decorHtml = decor.segments
+    .map((segment) => {
+      const p1 = projeter(segment.a);
+      const p2 = projeter(segment.b);
+      return `<line x1="${p1.x.toFixed(1)}" y1="${p1.y.toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" stroke="${segment.couleur}" stroke-width="${segment.epaisseur ?? 2}"/>`;
+    })
+    .join("");
+  decorHtml += decor.points
+    .map((point) => {
+      const p = projeter(point.position);
+      const etiquette = positionEtiquette(p, centre, 15);
+      return (
+        `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4" fill="${point.couleur}" stroke="#ffffff" stroke-width="1.5"/>` +
+        `<text x="${etiquette.x.toFixed(1)}" y="${etiquette.y.toFixed(1)}" font-size="12" font-weight="700" fill="${point.couleur}" text-anchor="middle">${point.label}</text>`
+      );
+    })
+    .join("");
 
   const pointsHtml = pointsExtraConnus(exercice, ordreLabels)
     .filter((_, index) => idsAffiches.includes(ordreLabels[index]))
@@ -172,12 +204,13 @@ export function construireSvgSectionPlaneSolide(exercice: ExerciceSectionPlaneSo
     })
     .join("");
 
-  const cadre = cadreFigure(pointsAuxiliairesPixel);
+  const cadre = cadreFigure([...pointsAuxiliairesPixel, ...(exercice.pointsAppui ?? []).map((x) => projeter(x.position))]);
   const largeurAffichee = Math.min(cadre.largeur, 520);
   const hauteurAffichee = (cadre.hauteur * largeurAffichee) / cadre.largeur;
   return `<svg width="${largeurAffichee.toFixed(0)}" height="${hauteurAffichee.toFixed(0)}" viewBox="${cadre.x.toFixed(1)} ${cadre.y.toFixed(1)} ${cadre.largeur.toFixed(1)} ${cadre.hauteur.toFixed(1)}" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:8px auto 14px;border:1px solid #e6e6f0;border-radius:8px;background:#ffffff;">
 <rect x="${cadre.x.toFixed(1)}" y="${cadre.y.toFixed(1)}" width="${cadre.largeur.toFixed(1)}" height="${cadre.hauteur.toFixed(1)}" fill="#ffffff"/>
 ${construireSvgSolide(exercice)}
+${decorHtml}
 ${constructionsHtml}
 ${segmentsHtml}
 ${pointsHtml}

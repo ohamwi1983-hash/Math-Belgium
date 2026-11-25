@@ -7,6 +7,7 @@ import {
   apercuLignesChoisies,
   elementsConstructionAuxiliaire,
   groupesLignesAuxiliaires,
+  decorDonnees,
   pointsExtraConnus,
   segmentsExtraTraces,
   texteAideLignesNiveau2,
@@ -65,12 +66,12 @@ export function EtapeAuxiliaireLignes({ exercice, connus, segmentsTraces, tentat
   return (
     <div>
       <p className="prompt-text">{CONSIGNE_AUXILIAIRE_LIGNES}</p>
-      <p className="prompt-fact">{texteProgression(connus, segmentsTraces)}</p>
+      <p className="prompt-fact">{texteProgression(connus, segmentsTraces, exercice)}</p>
 
       <Solide3DSketch
         solide={exercice.solide}
-        pointsExtra={[...pointsExtraConnus(exercice, connus), ...(construction?.points ?? [])]}
-        segmentsExtra={[...segmentsExtraTraces(exercice, segmentsTraces), ...(construction ? construction.segments : apercuLignesChoisies(exercice, selection))]}
+        pointsExtra={[...decorDonnees(exercice).points, ...pointsExtraConnus(exercice, connus), ...(construction?.points ?? [])]}
+        segmentsExtra={[...decorDonnees(exercice).segments, ...segmentsExtraTraces(exercice, segmentsTraces), ...(construction ? construction.segments : apercuLignesChoisies(exercice, selection))]}
       />
 
       {groupes.map((groupe) => (
