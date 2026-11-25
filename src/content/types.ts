@@ -217,6 +217,11 @@ export type InteractiveWidgetTag =
   | 'table-ronde-collier-widget'
   | 'mots-binome-widget'
   | 'approximation-binome-widget'
+  | 'binomiale-vers-normale-widget'
+  | 'table-phi-widget'
+  | 'densite-repartition-widget'
+  | 'balance-esperance-widget'
+  | 'deux-echelles-standardisation-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }
