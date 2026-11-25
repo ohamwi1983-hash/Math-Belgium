@@ -3,22 +3,29 @@ import type { VarianteQuizCombinatoire } from "./core6e/quizCombinatoire.types";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { demarrerSessionQuizCombinatoire, soumettreReponseQuizCombinatoire } from "./moteur6e/sessionQuizCombinatoire";
 import type { EtatSessionQuizCombinatoire, ResultatExerciceQuizCombinatoire } from "./moteur6e/typesQuizCombinatoire";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs6e/quizCombinatoire";
+import {
+  CATALOGUE_VARIANTES,
+  construireAvecVarianteId,
+  creerGenerateurSansRepetition,
+  etendueNombreQuestions,
+  nombreQuestions,
+} from "./generateurs6e/quizCombinatoire";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { EtapeQuestionQuizCombinatoire } from "./components6e/EtapeQuestionQuizCombinatoire";
 import { ResultatPanelQuizCombinatoire } from "./components6e/ResultatPanelQuizCombinatoire";
 import { ResumeSessionQuizCombinatoire } from "./components6e/ResumeSessionQuizCombinatoire";
 
-/** `nombreExercices: 35` correspond exactement à la taille de la banque par thème (voir
- * `generateurs6e/quizCombinatoire/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une
- * session parcourt donc les 35 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession6e = {
-  nombreExercices: 35,
-  tentativesMax: 1,
-};
+/** Une session = toutes les questions du thème choisi (`nombreQuestions`, taille réelle de la banque,
+ * jamais une constante en dur), couplé à `creerGenerateurSansRepetition` : aucune question n'est
+ * répétée. */
+function reglagesPourTheme(theme: VarianteQuizCombinatoire): ReglagesSession6e {
+  return { nombreExercices: nombreQuestions(theme), tentativesMax: 1 };
+}
+
+const ETENDUE_QUESTIONS = etendueNombreQuestions();
 
 function nouvelleSession(theme: VarianteQuizCombinatoire): EtatSessionQuizCombinatoire {
-  return demarrerSessionQuizCombinatoire(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizCombinatoire(reglagesPourTheme(theme), creerGenerateurSansRepetition(theme));
 }
 
 /** Contrairement à la plupart des générateurs, le thème (variante) n'est pas tiré au hasard : c'est
@@ -47,7 +54,7 @@ export function App6gen70() {
     const theme = varianteId as VarianteQuizCombinatoire;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizCombinatoire(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizCombinatoire(reglagesPourTheme(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
@@ -77,7 +84,11 @@ export function App6gen70() {
         {!etat ? (
           <div>
             <h2 className="result-title">Choisis un thème</h2>
-            <p className="result-subtitle">6 thèmes, 35 affirmations vrai/faux chacun — révision complète du chapitre 9.</p>
+            <p className="result-subtitle">
+              {CATALOGUE_VARIANTES.length} thèmes, un par section du cours,{" "}
+              {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max ? ETENDUE_QUESTIONS.min : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max}`} affirmations vrai/faux
+              chacun — révision complète du chapitre 7.
+            </p>
             <div className="accueil-choix">
               {CATALOGUE_VARIANTES.map((variante, index) => (
                 <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>
