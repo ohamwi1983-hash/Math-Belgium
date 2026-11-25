@@ -4156,6 +4156,73 @@ d'`index.ts` : pas d'import circulaire).
   Word copie / corrigé / grille) : 0 `.katex-error`, 0 débordement à 680 / 820 / 1 280 px, structure (variante + `forme`)
   B = A. `npm run build` : 25 pages pré-rendues.
 
+## 4e ch. 8, manuel — gen135 « Réalité ou illusion ? » (nouveau, noté, 25/11, chantier A)
+
+D'après l'exercice 1 du manuel (fig. 35 : « Ces solides, dont les faces sont supposées planes, paraissent
+« normaux »… »). § 6 « Positions de trois plans », processus 3 TRANSFÉRER (sur papier, rien n'indique ni le
+théorème ni les plans ; l'élève applique le théorème par l'absurde, à travers le dessin). Coquille
+`4e/components/AppEspaceLotH.tsx` réutilisée telle quelle (`AppRealiteIllusion.tsx`), trois écrans `choix`
+(une tentative, ✗ / ✓ figés, message propre au choix faux) ; fichiers `core/realiteIllusion.types.ts`,
+`generateurs/realiteIllusion/{index,corrigeDetaille,exportEvaluation}.ts`, `ui/formatRealiteIllusion.ts`.
+- **Solide** ABCDEF : base ABC (z = 0), dessus DEF, arêtes latérales [AD], [BE], [CF], faces latérales
+  ABED, BCFE, ACFD ; figure `figureEspaceSvg` du lot H (même cavalière, visibilité des arêtes). Variantes
+  (= `forme` du profil, jamais le verdict) : `tronc` (sommet S au-dessus, D, E, F sur (SA), (SB), (SC) à des
+  hauteurs différentes — dessus oblique) et `prisme` (arêtes verticales, hauteurs différentes ; prolongements
+  vers le haut ou le bas à parts égales). Base quadrilatère ÉCARTÉE : quatre faces latérales planes n'imposent
+  PAS des arêtes concourantes (contre-exemple : base [0 ; 4] × [0 ; 2], dessus [1 ; 3] × [0 ; 2] — faces
+  planes, (AE) ∩ (BF) ≠ (CG) ∩ (DH)), et trois faces latérales ne sont jamais deux à deux adjacentes : le
+  théorème ne conclut pas. « Cube percé » (fig. 34) écarté aussi (pas de façon sûre de le dessiner faux).
+- **Verdict** existe / impossible tiré à parts égales AVANT le dessin (puis le sens, avant la boucle de rejet :
+  sinon le taux de rejet propre à chaque verdict faisait du sens un indice — mesuré avant correction, 23 / 3
+  « haut » sur 26 troncs). Un dessin impossible est un dessin POSSIBLE déjà contrôlé dont une arête latérale
+  est déplacée (mêmes bases, dessus et hauteurs) : tronc — le sommet du dessus glisse parallèlement à (Ox)
+  jusqu'à la droite (pied, J), J sur une autre arête à 35–80 px de S ; prisme — arête penchée d'au moins 12°.
+  Sur le dessin : I (les deux autres arêtes), J, K ; I à 26 px au moins de l'arête déplacée, hauteurs de IJK
+  ≥ 20 px, côtés ≥ 30 px, points au-delà du dessus (ou de la base) sur chaque prolongement. Contrôles communs
+  aux deux verdicts : faces latérales convexes sur le dessin, dessus non aplati, arêtes du tronc ouvertes
+  d'au moins 10° deux à deux, même visibilité que le solide de référence, aucun sommet à moins de 12 px d'une
+  arête qui ne passe pas par lui, sommets ≥ 22 px, solide ≥ 120 × 110 px dans un cadre qui contient DÈS
+  L'ÉNONCÉ les extrémités des prolongements (la figure ne saute pas ; place pour prolonger sur papier).
+- **Écrans** : a) « Quels plans du solide faut-il considérer ? » (les trois faces latérales ; leurres : base
+  + deux faces → trois droites par un même sommet, « on n'apprend rien » ; dessus + deux faces ; base, dessus
+  et une face → pas d'arête commune) ; b) arêtes prolongées « concourantes / parallèles toutes les trois / ni
+  concourantes ni parallèles » (ordre fixe ; arêtes en couleur après a, prolongements et S ou I, J, K après b
+  seulement) ; c) verdict, quatre options aux textes FIXES (peut exister / impossible avec la justification
+  du théorème / « arêtes toujours parallèles » / « on ne peut pas conclure sur un dessin »), explications selon
+  l'instance. Ordres des écrans a et c tirés une fois (`ordre1`, `ordre3`). Aides à deux niveaux (théorème, puis
+  posé pour l'instance ; jamais la réponse).
+- **Corrigé** (une lettre par écran) : a) trois lignes `(ABED)\cap(BCFE)=(BE)`… ; b) cavalière = projection
+  parallèle (§ 1), lignes « sur le dessin » (`\cap`, `\in`, `\notin`, `\parallel`, `\nparallel`), figure annotée
+  (`figureHtml`, prolongements pointillés de la couleur de chaque arête) ; c) conclusion par l'absurde
+  (impossible) ou « pyramide SABC / prisme coupé par le plan (DEF) ; trois points sont toujours dans un plan »
+  (existe), remarque « une face seule ne permet pas de conclure ». Un Piège par étape.
+- **Papier** : « On a dessiné en perspective cavalière le solide ABCDEF ci-dessous (base ABC, dessus DEF). » +
+  figure SANS prolongement + « Ce solide, dont les faces sont supposées planes, peut-il exister ? Justifie. »
+  (consigne du professeur, sans méthode) ; étapes dans le corrigé ; barème 1 + 1 + 2. Figure papier annoncée à
+  300 px (`width="300"`, au lieu de 380) : un groupe a), b), c) en imprime DEUX par rangée (seuil 316 px) sur la
+  copie, le corrigé et l'aménagée, une par rangée dans la feuille (QR code). **Regroupé** (`REGROUPEMENTS.gen135`,
+  `fig`, ligne vide) : « On a dessiné en perspective cavalière chacun des solides ABCDEF ci-dessous (base ABC,
+  dessus DEF). Chacun de ces solides, dont les faces sont supposées planes, peut-il exister ? Justifie. » —
+  première exception à « solides et espace jamais regroupés » : seule la figure change d'une instance à l'autre.
+- **Niveau** : deux étapes qui raisonnent + une lecture (b), méthode 2, piège 0, `sansCharge` → 3 · moyen,
+  9 min, constant dans les deux verdicts et les deux variantes. Profil : `forme` = variante, aucun cas
+  particulier, pas de `calcul`, aucun groupe à verdict (le nom des variantes ne dit pas la réponse). Pilote
+  `trois-plans`, processus 3 ; carte en § 6 après gen101.
+
+Mesures (dossier de travail `4e-ch8-A` : `sim135.mts`, `diag135.mts`, `code135.mts`, `figs.cjs`, `parcours.cjs`,
+`docsA.cjs`, `deborde.cjs`, `page.cjs`) : 800 tirages (400 par variante) — disposition recalculée sur le dessin
+(intersection des droites projetées) et planéité des faces latérales en 3D : 0 écart (existe ⟺ faces planes ⟺
+concourantes / parallèles) ; verdicts 198 / 202 et 208 / 192, libres 205 / 195 ; une seule bonne option par
+écran, textes d'options identiques pour tous les tirages (1 ensemble par écran) ; corrigé KaTeX strict, 0 NaN /
+notation clavier / « déterminant » / radian ; barème = 4 ; niveau 3 · 9 min pour 100 % des tirages. Temps de
+tirage : tronc ≈ 17 ms en moyenne (impossible : ≤ 0,3 s au pire), prisme ≈ 3 ms. `?code=` : 180 / 180 (60
+graines × libre + 2 variantes) appli = adaptateur. iPhone 13 et 1 280 px (2 variantes × 3 graines : juste,
+faux, mélange) : scrollWidth = largeur, 0 erreur console, réponse et corrigé révélés après un choix faux, choix
+vides après « Nouvel exercice ». Documents réels (2 plans : interdite 2 × 2, autorisée deux colonnes 3 × 2 ;
+évaluation 2 séries + aménagée + corrigé + grille, feuille + aménagée, Word copie / corrigé / grille) : groupes
+à figure formés (4 et 6 cellules), 0 `.katex-error`, 0 débordement à 680 / 820 / 1 280 px. Page du chapitre
+(390 px) : carte après gen101, 0 « $ » ni « ** ».
+
 ## 5e ch. 6, lot H1 — 5gen76, 5gen77, 5gen36–5gen38 (nouveaux, notés)
 
 

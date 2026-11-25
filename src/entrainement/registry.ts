@@ -208,6 +208,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen106: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppOmbreLampe').then((m) => ({ default: m.AppOmbreLampe }))),
   gen133: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppLireSolidePerspective').then((m) => ({ default: m.AppLireSolidePerspective }))),
   gen134: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppIntersectionPlansParallelisme').then((m) => ({ default: m.AppIntersectionPlansParallelisme }))),
+  gen135: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppRealiteIllusion').then((m) => ({ default: m.AppRealiteIllusion }))),
   gen67: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppRelationsRacines').then((m) => ({ default: m.AppRelationsRacines }))),
   gen119: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppProblemesFraction').then((m) => ({ default: m.AppProblemesFraction }))),
   gen120: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppConstruireInequation').then((m) => ({ default: m.AppConstruireInequation }))),

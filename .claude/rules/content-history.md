@@ -2646,6 +2646,14 @@ paths:
   suivant deux droites parallèles » sont déjà aux § 5 et § 9). Détail : `.claude/rules/feuilles-evaluations.md`,
   « 4e ch. 8, manuel — gen40 ».
 
+  **Manuel, chantier A (25/11)** : nouveau générateur gen135 « Réalité ou illusion ? » (exercice 1 du manuel,
+  processus 3) — carte « S'entraîner » ajoutée en § 6 `trois-plans`, juste après celle de gen101 (description en
+  texte brut) ; aucun autre changement du cours (la description de la section n'a pas été touchée : le § 6 énonce
+  déjà le théorème, et le § 1 dit que la cavalière projette parallèlement). Registres (`registry.ts`,
+  `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts` : union + pilote `trois-plans`,
+  processus 3 ; `regroupementsPapier.ts`). Détail : `.claude/rules/feuilles-evaluations.md`, « 4e ch. 8, manuel —
+  gen135 ».
+
 - **Ateliers — figure épinglée pendant la manipulation (tous chapitres)** : retour utilisateur « les
   curseurs/boutons sont trop éloignés du dessin : en les manipulant, on ne voit plus le graphe ».
   Mesuré sur les 125 ateliers montés : contrôles jusqu'à ~1 000 px sous la figure (section-cube,
