@@ -16,11 +16,10 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceBinomiale
  * énoncé = situation en prose (n, p, X nommé, événement en KaTeX) + consigne de précision ; la stratégie,
  * les valeurs de k et les termes passent dans le corrigé (une lettre par écran, partagé avec l'appli).
  *
- * Profil (tirage équilibré, Casio Graph Math+) — consigne du lot E : `exacte` seulement quand la
- * calculatrice donnerait directement la réponse ET que le calcul à la main reste raisonnable (p = 1/2 en
- * binomiale) :
- * - A « exactement / aucun / tous » : p = 1/2 → `exacte` ; p ≠ 1/2 → `calculatrice` (puissances de 0,7…) ;
- * - A « au moins / au plus » : la stratégie est évaluée → rien si p = 1/2, `calculatrice` sinon ;
+ * Profil (tirage équilibré, Casio Graph Math+) — règle validée par l'utilisateur (revue des profils,
+ * 24/11/2026) : `exacte` SEULEMENT si la calculatrice donne directement la réponse demandée :
+ * - A « exactement / aucun / tous » : n, p, k donnés, terme unique, `BinomialPD(k, n, p)` → `exacte` ;
+ * - A « au moins / au plus » : choisir somme ou complément est le travail évalué → pas de `calcul` ;
  * - B : produit de fractions → rien.
  * Cas particulier « aucun » / « tous » (un coefficient vaut 1, une puissance disparaît). La stratégie
  * (somme / complément) est un verdict de l'élève : jamais dans le profil.
@@ -35,9 +34,8 @@ export const LIBELLE_CAS_PARTICULIER_6GEN48 = "Inclure un cas particulier (aucun
 export function profilBinomialeSequenceOrdonnee(e: E): ProfilInstance {
   if (e.famille === "B") return { casParticulier: null };
   const cas = e.typeQuestion === "aucun" || e.typeQuestion === "tous" ? e.typeQuestion : null;
-  const demi = Math.abs(e.p - 0.5) < 1e-9;
-  if (e.strategie === "termeUnique") return { casParticulier: cas, calcul: demi ? "exacte" : "calculatrice" };
-  return demi ? { casParticulier: cas } : { casParticulier: cas, calcul: "calculatrice" };
+  if (e.strategie === "termeUnique") return { casParticulier: cas, calcul: "exacte" };
+  return { casParticulier: cas };
 }
 
 function reponseBreve(e: E): FragmentConsigne[] {

@@ -1122,8 +1122,8 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   est jamais) ; `calcul` : 6gen44 A `calculatrice` + `calculatriceIndispensable: ['A_multinomial']` ;
   6gen44 B, D et 6gen43 C « combinaison », 6gen47 C : `calculatrice` quand une combinaison dépasse 2 000 ;
   6gen44 E dès 9 lettres ; 6gen46 B dès 8 personnes ; 6gen45 C `calculatrice` (valeur au dix-millième),
-  D `exacte` ; 6gen47 A `exacte` (décision du 24/11 gardée) ; 6gen48 A « terme unique » p = 1/2 `exacte`,
-  p ≠ 1/2 `calculatrice`, « au moins / au plus » p ≠ 1/2 `calculatrice` (rien si p = 1/2) ; aucune `forme`.
+  D `exacte` ; 6gen47 A `exacte` (décision du 24/11 gardée) ; 6gen48 A « terme unique » `exacte` (BinomialPD,
+  décision du 24/11), « au moins / au plus » sans `calcul` (la stratégie est évaluée) ; aucune `forme`.
   Groupes à verdict (le nom dit la réponse) : 6gen43 `groupe_groupement` (C), `groupe_cercle` (E) ; 6gen44
   `groupe_structure` (B), `groupe_contrainte` (D) — `sansCharge` + nombres 0 : niveau et durée constants
   (2 · 6, 2 · 6, 2 · 6, 3 · 8) ; 6gen46 D (verdict dans la variante) 5 · 12 pour les trois verdicts, 6gen48
