@@ -6,6 +6,7 @@ import { ApercuCartouche, type SurlignageCartouche } from '../components/compte/
 import { BandeauEspace } from '../components/compte/BandeauEspace'
 import { Champ } from '../components/compte/Champ'
 import { MenuEspace } from '../components/compte/MenuEspace'
+import { OrdreChapitresCarte } from '../components/compte/OrdreChapitresCarte'
 import { EnTeteCompte, PageCompte, PageReservee } from '../components/compte/PageReservee'
 import '../components/compte/profil.css'
 import { estConnecteActif, useCompte } from '../lib/compteContexte'
@@ -386,6 +387,8 @@ function Profil() {
                   )}
                 </div>
               </section>
+
+              <OrdreChapitresCarte client={compte.client} proprietaire={profil.id} />
 
               <section className="profil-carte" aria-labelledby={`${id}-compte`}>
                 <div className="profil-carte-tete">

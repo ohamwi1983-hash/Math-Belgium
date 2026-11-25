@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Session, SupabaseClient } from '@supabase/supabase-js'
 import { chargerSupabase, jetonStockePresent, jetonsDansUrl, supabaseConfigure } from './supabase'
-import { deconnecter, lireEcoles, lireProfil } from './compteDonnees'
+import { deconnecter, lireEcoles, lireOrdreChapitres, lireProfil } from './compteDonnees'
+import { definirEtatOrdreChapitres } from './ordreChapitres'
 import { messageErreur, type Ecole, type Profil } from './compteValidation'
 
 /**
@@ -46,6 +47,16 @@ export function CompteProvider({ children }: { children: ReactNode }) {
   const idCharge = useRef<string | null>(null)
 
   const chargerDonnees = useCallback(async (c: SupabaseClient, id: string) => {
+    // « Mon ordre des chapitres » (0011) : lu à part, une panne ou une migration absente ne bloque
+    // jamais le profil (ordre du site, titres seuls).
+    definirEtatOrdreChapitres({ etat: 'chargement', ordre: null })
+    void lireOrdreChapitres(c)
+      .then((l) => {
+        if (idCharge.current === id) definirEtatOrdreChapitres(l.actif ? { etat: 'active', ordre: l.ordre } : { etat: 'absente', ordre: null })
+      })
+      .catch(() => {
+        if (idCharge.current === id) definirEtatOrdreChapitres({ etat: 'absente', ordre: null })
+      })
     try {
       const [p, e] = await Promise.all([lireProfil(c, id), lireEcoles(c)])
       if (idCharge.current !== id) return
@@ -62,6 +73,7 @@ export function CompteProvider({ children }: { children: ReactNode }) {
     async (c: SupabaseClient, session: Session | null) => {
       if (!session?.user) {
         idCharge.current = null
+        definirEtatOrdreChapitres({ etat: 'sans-compte', ordre: null })
         setUtilisateur(null)
         setProfil(null)
         setEcoles([])

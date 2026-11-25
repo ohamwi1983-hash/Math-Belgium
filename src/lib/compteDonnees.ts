@@ -13,6 +13,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PlanDocument } from './evaluationLocal'
 import { messageErreur, normaliserCodeInvitation, plansLocauxAImporter, typeDuPlan, type Ecole, type PlanLocal, type Profil, type TypePlan } from './compteValidation'
 import { estRepartitionDefaut, repartitionValide, type RepartitionPourcents } from './repartitionProcessus'
+import { lireRangement, type OrdreChapitres } from './ordreChapitres'
 
 export class ErreurCompte extends Error {
   constructor(brute: unknown) {
@@ -143,6 +144,48 @@ export async function enregistrerRepartition(c: SupabaseClient, id: string, r: R
   const res = await c.from('profils').update({ repartition: valeur }).eq('id', id)
   if (res.error) {
     if (colonneRepartitionAbsente(res.error)) return false
+    throw new ErreurCompte(res.error)
+  }
+  return true
+}
+
+/* -------------------------------------------------------------------- ordre des chapitres (0011) */
+
+/** Colonnes `carnet_reglages.ordre_chapitres` / `ordre_sans_numero` inconnues (0011 pas collée), ou
+ * table `carnet_reglages` absente (0002 pas collée) : le site garde l'ordre du site. */
+export function ordreChapitresAbsent(erreur: unknown): boolean {
+  const e = (erreur ?? {}) as { code?: string; message?: string }
+  const m = String(e.message ?? '')
+  if (['PGRST205', '42P01'].includes(String(e.code)) || /could not find the table|relation .* does not exist/i.test(m)) return true
+  return /ordre_(chapitres|sans_numero)/i.test(m) && (e.code === '42703' || e.code === 'PGRST204' || /does not exist|schema cache|could not find/i.test(m))
+}
+
+/** `actif: false` = 0011 pas appliquée ; `ordre: null` = aucun réglage (ordre du site). */
+export type LectureOrdreChapitres = { actif: true; ordre: OrdreChapitres | null; ligneExiste: boolean } | { actif: false }
+
+export async function lireOrdreChapitres(c: SupabaseClient): Promise<LectureOrdreChapitres> {
+  const res = await c.from('carnet_reglages').select('ordre_chapitres, ordre_sans_numero').maybeSingle()
+  if (res.error) {
+    if (ordreChapitresAbsent(res.error)) return { actif: false }
+    throw new ErreurCompte(res.error)
+  }
+  const ligne = res.data as { ordre_chapitres?: unknown; ordre_sans_numero?: unknown } | null
+  if (!ligne) return { actif: true, ordre: null, ligneExiste: false }
+  const niveaux = lireRangement(ligne.ordre_chapitres)
+  const numeroter = ligne.ordre_sans_numero !== true
+  return { actif: true, ordre: Object.keys(niveaux).length === 0 && numeroter ? null : { niveaux, numeroter }, ligneExiste: true }
+}
+
+/** Enregistre l'ordre (aucune année rangée → NULL). Ligne de réglages créée si besoin. Renvoie
+ * `false` si 0011 n'est pas appliquée (rien n'est écrit). */
+export async function enregistrerOrdreChapitres(c: SupabaseClient, proprietaire: string, ordre: OrdreChapitres, ligneExiste: boolean): Promise<boolean> {
+  const niveaux = lireRangement(ordre.niveaux)
+  const valeur = { ordre_chapitres: Object.keys(niveaux).length === 0 ? null : niveaux, ordre_sans_numero: !ordre.numeroter }
+  const res = ligneExiste ? await c.from('carnet_reglages').update(valeur).eq('proprietaire', proprietaire) : await c.from('carnet_reglages').insert(valeur)
+  if (res.error) {
+    if (ordreChapitresAbsent(res.error)) return false
+    // Ligne créée entre-temps (autre onglet) : on la met à jour.
+    if (!ligneExiste && res.error.code === '23505') return enregistrerOrdreChapitres(c, proprietaire, ordre, true)
     throw new ErreurCompte(res.error)
   }
   return true
