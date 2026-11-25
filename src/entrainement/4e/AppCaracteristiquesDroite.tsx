@@ -126,7 +126,7 @@ export function AppCaracteristiquesDroite() {
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       setHistorique((h) => [
         ...h,
-        { titre: TITRES_ECRANS[etat.phase], votreReponse, correcte: !revele, reponseAttendue: construireReponseAttendue(etat.exerciceCourant, etat.phase) },
+        { corrigeDetaille: corrigeDetailleEcranCourant(), titre: TITRES_ECRANS[etat.phase], votreReponse, correcte: !revele, reponseAttendue: construireReponseAttendue(etat.exerciceCourant, etat.phase) },
       ]);
       return;
     }
@@ -155,11 +155,17 @@ export function AppCaracteristiquesDroite() {
   const exercice = etat.exerciceCourant;
   const recapitulatif = calculerRecapitulatifCaracteristiquesDroite(etat);
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCaracteristiquesDroite(exercice), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : construireReponseAttendue(exercice, etat.phase),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCaracteristiquesDroite(exercice), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

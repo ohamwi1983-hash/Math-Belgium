@@ -187,6 +187,7 @@ export function App5gen7() {
     setHistorique((h) => [
       ...h,
       {
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         titre: LIBELLE_PHASE[phaseClose],
         votreReponse,
         correcte: !revele,
@@ -240,11 +241,17 @@ export function App5gen7() {
   const tentativesMax = etat.reglages.tentativesMax;
   const niveauAideMaxEcran = niveauAideMax(etat.phase);
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePolygonesArcsSecteurs(exercice), lettrePolygone(exercice, etat.phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttenduePhase(exercice, etat.phase),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePolygonesArcsSecteurs(exercice), lettrePolygone(exercice, etat.phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

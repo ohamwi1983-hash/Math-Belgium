@@ -43,6 +43,9 @@ export interface ConfigAppEcrans<E, P extends string> {
    * (6e ch. 1, « Fonctions réciproques & cyclométriques »). */
   eyebrow?: string;
   sousTitre?: string;
+  /** La figure de l'énoncé reste visible sous le bandeau replié (opt-in, 6gen106 ; absent : rien ne
+   * change). */
+  figureToujoursVisible?: boolean;
 }
 
 interface TransitionEnAttente<E, P extends string> {
@@ -149,6 +152,7 @@ export function AppEcransTrigo<E, P extends string>({ config }: { config: Config
     setHistorique((h) => [
       ...h,
       {
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         titre: def.libelle(e, phase),
         votreReponse: texteSaisie(def, e, phase, valeurs),
         correcte: !revele,
@@ -175,13 +179,20 @@ export function AppEcransTrigo<E, P extends string>({ config }: { config: Config
   const indexPhase = phases.indexOf(phase);
   // Choix fermé faux (une seule tentative) : message ciblé de `piege` avec la réponse (opt-in).
   const piegeChoix = def.piegeChoixRevele && choix && enAttente?.revele ? def.piege(e, phase, enAttente.valeurs) : null;
+
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(def.correction(e), lettreEtape(indexPhase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: <ReponseAttendue fragments={def.reponseAttendue(e, phase)} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: suivant,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(def.correction(e), lettreEtape(indexPhase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         ...(choix && enAttente.revele
           ? { messageRevele: `Ce n'était pas le bon choix (une seule tentative sur un choix fermé).${def.explicationChoix ? ` ${def.explicationChoix(e, phase)}` : ""}` }
           : {}),
@@ -254,6 +265,8 @@ export function AppEcransTrigo<E, P extends string>({ config }: { config: Config
           messageIllisible={def.messageIllisible(e, phase)}
           approchee={def.approchee ? (v) => def.approchee!(e, phase, v) : undefined}
           bonneOption={choix && def.bonneOption ? def.bonneOption(e, phase) : undefined}
+          apercuEnonce={def.apercuEnonce ? def.apercuEnonce(e) : undefined}
+          figureToujoursVisible={config.figureToujoursVisible && figure ? <FigureSvg svg={figure} largeurMax={config.largeurFigure} /> : undefined}
           onValider={(v) => terminerEtape(soumettreEcran(def, etat, v), v)}
         />
       </main>

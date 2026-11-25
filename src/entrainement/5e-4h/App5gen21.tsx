@@ -210,7 +210,7 @@ export function App5gen21() {
       return;
     }
     const revele = suivante.etat.derniereEtapeRevelee;
-    setHistorique((h) => [...h, { titre: libellePhase(session, phase), votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttendue(session, phase) : undefined }]);
+    setHistorique((h) => [...h, { corrigeDetaille: corrigeDetailleEcranCourant(), titre: libellePhase(session, phase), votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttendue(session, phase) : undefined }]);
     if (session.etat.niveauAide > 0) setAideParPhase((m) => ({ ...m, [phase]: true }));
     setEnAttente({ suivante, revele, messageRevele: revele ? messageRevele : null });
   }
@@ -232,6 +232,12 @@ export function App5gen21() {
       ? lignesDeLEtape(correctionDetailleePosition(session.etat.exerciceCourant), lettrePhasePosition(phase as PhasePositionAsymptote))
       : lignesDeLEtape(correctionDetailleeAsymptoteOblique(session.etat.exerciceCourant), lettrePhaseAsymptoteOblique(session.etat.exerciceCourant, phase as PhaseAsymptoteOblique));
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={corrige} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -245,7 +251,7 @@ export function App5gen21() {
             }
           : {}),
         reponseAttendue: reponseAttendue(session, phase),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={corrige} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.suivante.etat.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

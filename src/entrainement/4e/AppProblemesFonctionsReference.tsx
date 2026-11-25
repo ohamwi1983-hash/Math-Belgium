@@ -136,7 +136,7 @@ export function AppProblemesFonctionsReference() {
     const transition = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transition) {
       const revele = nouvelEtat.revele[etat.phase];
-      setHistorique((h) => [...h, ecranClos(TITRES[etat.phase], votreReponse, revele, etat.aideUtilisee[etat.phase], reponseAttendue(etat.phase, exercice))]);
+      setHistorique((h) => [...h, ecranClos(TITRES[etat.phase], votreReponse, revele, etat.aideUtilisee[etat.phase], reponseAttendue(etat.phase, exercice), corrigeDetailleEcranCourant())]);
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       setMessageErreur(null);
       return;
@@ -169,6 +169,12 @@ export function AppProblemesFonctionsReference() {
     nouvelExercice(varianteId);
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeProblemesFonctionsReference(exercice), LETTRE_PHASE[etat.phase])} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -176,7 +182,7 @@ export function AppProblemesFonctionsReference() {
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         ...(etat.phase === "domaine" || etat.phase === "interpretation" ? { messageRevele: MESSAGE_CHOIX_FERME } : {}),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeProblemesFonctionsReference(exercice), LETTRE_PHASE[etat.phase])} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

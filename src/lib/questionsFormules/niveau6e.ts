@@ -764,6 +764,8 @@ export const FORMULES_6E: BanqueFormules = {
 
   // ── Ch. 7 — Analyse combinatoire ───────────────────────────────────────────────────────────────
   'analyse-combinatoire': {
+    // Notation du cours (audit 6e ch. 7, lot A) : n éléments disponibles, p choisis ; k = rang d'un
+    // terme ou nombre de succès ; r = nombre de types. Ids gardés quand la question existait déjà.
     denombrementfondamental: [
       {
         id: r`$n! = n \times (n-1) \times \ldots \times 1$`,
@@ -772,27 +774,27 @@ export const FORMULES_6E: BanqueFormules = {
       },
       {
         id: r`$A_n^k = \dfrac{n!}{(n-k)!}$`,
-        enonce: r`On choisit $k$ éléments parmi $n$ et l'ordre compte. Donne le nombre d'arrangements $A_n^k$ à l'aide de factorielles.`,
-        corrige: r`$A_n^k = \dfrac{n!}{(n-k)!}$.`,
+        enonce: r`On choisit $p$ éléments parmi $n$ et l'ordre compte. Donne le nombre d'arrangements $A_n^p$ à l'aide de factorielles.`,
+        corrige: r`$A_n^p = \dfrac{n!}{(n-p)!} = n \times (n-1) \times \ldots \times (n-p+1)$.`,
       },
       {
         id: r`$C_n^k = \dfrac{n!}{k!(n-k)!} = \dfrac{A_n^k}{k!}$`,
-        enonce: r`On choisit $k$ éléments parmi $n$ et l'ordre ne compte pas. Donne le nombre de combinaisons $C_n^k$ à l'aide de factorielles, puis à l'aide de $A_n^k$.`,
-        corrige: r`$C_n^k = \dfrac{n!}{k!(n-k)!} = \dfrac{A_n^k}{k!}$.`,
+        enonce: r`On choisit $p$ éléments parmi $n$ et l'ordre ne compte pas. Donne le nombre de combinaisons $C_n^p$ à l'aide de factorielles, puis à l'aide de $A_n^p$.`,
+        corrige: r`$C_n^p = \dfrac{n!}{p!\,(n-p)!} = \dfrac{A_n^p}{p!}$.`,
       },
       {
         id: r`$C_n^k = C_n^{n-k}$`,
-        enonce: r`Quelle autre combinaison est toujours égale à $C_n^k$ ? Pourquoi ?`,
-        corrige: r`$C_n^k = C_n^{n-k}$ : choisir $k$ éléments parmi $n$ revient à laisser les $n-k$ autres de côté.`,
+        enonce: r`Quelle autre combinaison d'éléments parmi $n$ est toujours égale à $C_n^p$ ? Pourquoi ?`,
+        corrige: r`$C_n^p = C_n^{n-p}$ : choisir les $p$ éléments que l'on garde revient à choisir les $n-p$ éléments que l'on laisse.`,
       },
       {
-        id: r`$\dfrac{n!}{n_1! \times n_2! \times \ldots \times n_k!}$`,
-        enonce: r`Combien de permutations distinctes peut-on former avec $n$ objets, parmi lesquels $n_1$ sont identiques, $n_2$ autres identiques, …, $n_k$ autres identiques ?`,
-        corrige: r`$\dfrac{n!}{n_1! \times n_2! \times \ldots \times n_k!}$ (même nombre pour $n$ personnes réparties en groupes nommés de tailles $n_1, \ldots, n_k$).`,
+        id: r`$P_n = n!$`,
+        enonce: r`De combien de façons peut-on ranger, dans un ordre, les $n$ éléments distincts d'un ensemble (permutation simple $P_n$) ?`,
+        corrige: r`$P_n = A_n^n = n!$.`,
       },
       {
         id: r`table : $(n-1)!$`,
-        enonce: r`De combien de façons peut-on disposer $n$ objets distincts autour d'une table ronde (rotations équivalentes) ? Et sur un collier (rotations et réflexions équivalentes) ?`,
+        enonce: r`De combien de façons peut-on disposer $n$ objets distincts autour d'une table ronde (rotations équivalentes) ? Et sur un collier (rotations et réflexions équivalentes, $n \geq 3$) ?`,
         corrige: r`Table : $(n-1)!$ ; collier : $\dfrac{(n-1)!}{2}$.`,
       },
       {
@@ -801,12 +803,42 @@ export const FORMULES_6E: BanqueFormules = {
         corrige: r`L'ordre compte : $B_n^p = n^p$. L'ordre ne compte pas : $\Gamma_n^p = C_{n+p-1}^p$.`,
       },
       {
+        id: r`au moins un de chaque type : $C_{p-1}^{n-1}$`,
+        enonce: r`On choisit $p$ objets parmi $n$ types, avec répétition et sans ordre, et chaque type doit apparaître au moins une fois ($p \geq n$). Combien de choix sont possibles ?`,
+        corrige: r`$\Gamma_n^{p-n} = C_{p-1}^{p-n} = C_{p-1}^{n-1}$ (on place d'abord un objet de chaque type).`,
+      },
+      {
         id: r`$D(n) = \dfrac{n(n-3)}{2}$`,
-        enonce: r`Combien de diagonales a un polygone à $n$ côtés ?`,
+        enonce: r`Combien de diagonales a un polygone convexe à $n$ côtés ?`,
         corrige: r`$D(n) = \dfrac{n(n-3)}{2}$.`,
+      },
+      {
+        id: r`$\dfrac{(n+1)!}{(n-1)!} = n(n+1)$`,
+        enonce: r`Simplifie $\dfrac{(n+1)!}{(n-1)!}$, puis écris $A_n^2$ et $C_n^2$ comme des polynômes en $n$.`,
+        corrige: r`$\dfrac{(n+1)!}{(n-1)!} = n(n+1)$ ; $A_n^2 = n(n-1)$ ; $C_n^2 = \dfrac{n(n-1)}{2}$.`,
       },
     ],
     denombrementcombine: [
+      {
+        id: r`$\dfrac{n!}{n_1! \times n_2! \times \ldots \times n_k!}$`,
+        enonce: r`$n$ personnes sont réparties en $r$ groupes nommés, de tailles fixées $n_1, n_2, \ldots, n_r$ (avec $n_1 + \ldots + n_r = n$). Donne le nombre de répartitions possibles. Que compte encore ce nombre pour un mot de $n$ lettres ?`,
+        corrige: r`$\dfrac{n!}{n_1! \times n_2! \times \ldots \times n_r!}$ ; c'est aussi le nombre de permutations distinctes de $n$ lettres dont $n_1, \ldots, n_r$ sont identiques.`,
+      },
+      {
+        id: r`groupes non nommés de même taille`,
+        enonce: r`$n$ personnes sont réparties en $r$ groupes de même taille qui n'ont ni nom ni numéro. Comment obtient-on le nombre de répartitions à partir du cas des groupes nommés ?`,
+        corrige: r`On divise le nombre de répartitions en groupes nommés par $r!$, le nombre de façons de nommer les $r$ groupes.`,
+      },
+      {
+        id: r`anagrammes : permutations distinctes $-1$`,
+        enonce: r`Un mot compte $P$ permutations distinctes de ses lettres. Combien a-t-il d'anagrammes ?`,
+        corrige: r`$P - 1$ : une anagramme est un mot différent du mot de départ.`,
+      },
+      {
+        id: r`bloc`,
+        enonce: r`Comment compte-t-on les rangements de lettres où certaines lettres doivent rester côte à côte ? Et ceux où deux lettres ne doivent jamais être côte à côte ?`,
+        corrige: r`Côte à côte : (rangements du bloc et des autres lettres) $\times$ (ordres dans le bloc). Jamais côte à côte : total $-$ (rangements où elles forment un bloc).`,
+      },
       {
         id: r`ET indépendant $\Rightarrow$ multiplier`,
         enonce: r`Dans un dénombrement en plusieurs choix, quand multiplie-t-on les nombres de possibilités ? Quand les additionne-t-on ?`,
@@ -816,6 +848,21 @@ export const FORMULES_6E: BanqueFormules = {
         id: r`exclusion : total $-$ (les deux ensemble)`,
         enonce: r`On forme un groupe dans lequel deux personnes sont soumises à une contrainte. Comment compte-t-on les groupes si elles refusent d'être ensemble ? Et si elles sont inséparables ?`,
         corrige: r`Refus : total $-$ (groupes où les deux sont ensemble). Inséparables : (groupes où les deux sont ensemble) $+$ (groupes où les deux sont absentes).`,
+      },
+      {
+        id: r`au moins un : total $-$ aucun`,
+        enonce: r`Comment compte-t-on rapidement les choix qui contiennent « au moins un » élément d'un certain type ?`,
+        corrige: r`Par le complément : total $-$ (choix qui n'en contiennent aucun).`,
+      },
+      {
+        id: r`inclusion-exclusion`,
+        enonce: r`Comment compte-t-on les objets qui ont à la fois la propriété $A$ et la propriété $B$, à partir de ceux qui ratent $A$, de ceux qui ratent $B$ et de ceux qui ratent les deux ?`,
+        corrige: r`$N(A \text{ et } B) = \text{total} - N(\text{pas } A) - N(\text{pas } B) + N(\text{ni } A \text{ ni } B)$.`,
+      },
+      {
+        id: r`$C_n^2 + n = C_{n+1}^2$`,
+        enonce: r`On choisit 2 valeurs parmi $n$, sans ordre, une même valeur pouvant être prise deux fois (comme les deux moitiés d'un domino). Combien de choix ?`,
+        corrige: r`$C_n^2 + n = C_{n+1}^2 = \Gamma_n^2$.`,
       },
     ],
     binomenewton: [
@@ -830,19 +877,29 @@ export const FORMULES_6E: BanqueFormules = {
         corrige: r`$T_{k+1} = C_n^k \times a^{n-k} \times b^k$.`,
       },
       {
+        id: r`terme indépendant de $x$`,
+        enonce: r`Comment trouve-t-on le terme indépendant de $x$ dans le développement d'un binôme comme $\left(x^2 - \dfrac{2}{x}\right)^n$ ?`,
+        corrige: r`On écrit le terme général $T_{k+1}$, on réduit la puissance de $x$, et on cherche l'entier $k$ ($0 \leq k \leq n$) qui rend cet exposant nul ; s'il n'existe pas, il n'y a pas de terme indépendant.`,
+      },
+      {
         id: r`$C_n^k = C_{n-1}^{k-1}+C_{n-1}^k$`,
-        enonce: r`Énonce la relation de Pascal : $C_n^k = \ldots$ (à l'aide de deux combinaisons de $n-1$ éléments).`,
-        corrige: r`$C_n^k = C_{n-1}^{k-1}+C_{n-1}^k$.`,
+        enonce: r`Énonce la relation de Pascal : $C_n^k = \ldots$ (à l'aide de deux combinaisons de $n-1$ éléments), en précisant pour quels $k$ elle est valable.`,
+        corrige: r`$C_n^k = C_{n-1}^{k-1}+C_{n-1}^k$, pour $1 \leq k \leq n-1$.`,
       },
       {
         id: r`$\displaystyle\sum_{k=0}^{n} C_n^k = 2^n$`,
-        enonce: r`Que vaut la somme $\displaystyle\sum_{k=0}^{n} C_n^k$ ?`,
-        corrige: r`$\displaystyle\sum_{k=0}^{n} C_n^k = 2^n$ (on développe $(1+1)^n$).`,
+        enonce: r`Que vaut la somme $\displaystyle\sum_{k=0}^{n} C_n^k$ ? Combien de parties possède un ensemble à $n$ éléments ?`,
+        corrige: r`$\displaystyle\sum_{k=0}^{n} C_n^k = 2^n$ (on développe $(1+1)^n$) ; un ensemble à $n$ éléments a $2^n$ parties.`,
+      },
+      {
+        id: r`chemins : $C_{m+n}^n$`,
+        enonce: r`Sur un quadrillage de $m$ cases de large et $n$ de haut, combien de chemins vont d'un coin au coin opposé en avançant uniquement d'une case vers la droite ou vers le haut ?`,
+        corrige: r`$C_{m+n}^n$ : on choisit les $n$ pas vers le haut parmi les $m+n$ pas.`,
       },
       {
         id: r`$(1+\varepsilon)^n \approx 1+n\varepsilon$`,
-        enonce: r`Pour $\varepsilon$ petit, donne une approximation de $(1+\varepsilon)^n$.`,
-        corrige: r`$(1+\varepsilon)^n \approx 1+n\varepsilon$.`,
+        enonce: r`Donne une approximation de $(1+\varepsilon)^n$, et la condition pour qu'elle soit bonne.`,
+        corrige: r`$(1+\varepsilon)^n \approx 1+n\varepsilon$, valable quand $n\varepsilon$ est petit.`,
       },
     ],
     probabilitehypergeometrique: [
@@ -850,6 +907,11 @@ export const FORMULES_6E: BanqueFormules = {
         id: r`$P(k) = \dfrac{C_K^k \times C_{N-K}^{n-k}}{C_N^n}$`,
         enonce: r`Une population de $N$ éléments contient $K$ succès ; on en tire $n$ sans remise. Donne la probabilité d'obtenir exactement $k$ succès.`,
         corrige: r`$P(k) = \dfrac{C_K^k \times C_{N-K}^{n-k}}{C_N^n}$ (loi hypergéométrique).`,
+      },
+      {
+        id: r`séquence exacte : $\dfrac{1}{A_n^p}$`,
+        enonce: r`On tire $p$ éléments, sans remise, parmi $n$ éléments distincts. Quelle est la probabilité d'obtenir une séquence précise, imposée à l'avance ?`,
+        corrige: r`$\dfrac{1}{n} \times \dfrac{1}{n-1} \times \ldots \times \dfrac{1}{n-p+1} = \dfrac{1}{A_n^p}$.`,
       },
     ],
     binomialesequence: [

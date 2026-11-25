@@ -187,8 +187,11 @@ export function AppSectionPlaneSolide() {
               ? messageFaceAuxiliaireFausse(etat.exerciceCourant, etat.connus, etat.ligneAuxiliaireChoisie, faceChoisie)
               : undefined
           : undefined;
-      setEnAttente({ etatSuivant: nouvelEtat, revele, reponseAttendue, corrige: revele ? corrigeEcran(etat, nouvelEtat) : [], faceJuste, messageRevele });
-      setHistorique((h) => [...h, { titre: TITRE_ECRAN[etat.phase], votreReponse: saisie, correcte: !revele, reponseAttendue, aide: etat.niveauAide > 0 }]);
+      // Corrigé calculé que l'écran soit réussi ou révélé : « Voir comment on y arrive » après une
+      // bonne réponse, et la fiche de la puce, déplient les MÊMES lignes (décision du 25/11/2026).
+      const corrige = corrigeEcran(etat, nouvelEtat);
+      setEnAttente({ etatSuivant: nouvelEtat, revele, reponseAttendue, corrige, faceJuste, messageRevele });
+      setHistorique((h) => [...h, { titre: TITRE_ECRAN[etat.phase], votreReponse: saisie, correcte: !revele, reponseAttendue, aide: etat.niveauAide > 0, corrigeDetaille: <CorrigeDetailleEcran etapes={corrige} /> }]);
       return;
     }
     setEtat(nouvelEtat);

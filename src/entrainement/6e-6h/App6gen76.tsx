@@ -117,7 +117,7 @@ export function App6gen76() {
     }
     const revele = nouvelEtat.derniereTransitionRevelee;
     setAideParPhase((prev) => ({ ...prev, [phase]: etat.niveauAide > 0 }));
-    setHistorique((h) => [...h, { titre: libellePhase(exercice, phase), votreReponse: votreReponse(valeurs), correcte: !revele, reponseAttendue: revele ? reponseAttendue(exercice, phase) : undefined }]);
+    setHistorique((h) => [...h, { corrigeDetaille: corrigeDetailleEcranCourant(), titre: libellePhase(exercice, phase), votreReponse: votreReponse(valeurs), correcte: !revele, reponseAttendue: revele ? reponseAttendue(exercice, phase) : undefined }]);
     setEnAttente({ etatSuivant: nouvelEtat, revele });
   }
 
@@ -152,13 +152,20 @@ export function App6gen76() {
 
   const mode = modeEcran(exercice, phase);
   const choix = estPhaseChoix(phase);
+
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeParadoxes(exercice), lettreEcranParadoxes(phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendue(exercice, phase),
         // Corrigé détaillé « comme au tableau » de l'écran (même source que le papier), affiché par
         // `ValidationEcran` quand les tentatives sont épuisées.
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeParadoxes(exercice), lettreEcranParadoxes(phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         ...(choix ? { messageRevele: "Ce n'était pas la bonne réponse (une seule tentative sur un choix fermé)." } : {}),

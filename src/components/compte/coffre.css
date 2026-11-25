@@ -145,6 +145,16 @@
 .coffre-liee-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0; font-size: 0.9rem; color: var(--ink); }
 .coffre-liee-texte { flex: 1 1 200px; min-width: 0; overflow-wrap: anywhere; }
 
+/* ---------- partage avec un collègue (0009) ---------- */
+.coffre-partage { background: color-mix(in srgb, var(--accent-soft) 35%, var(--surface)); }
+.coffre-partage-etat { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 0; font-size: 0.9rem; color: var(--ink); }
+.coffre-partage-lien { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+.coffre-partage-lien input {
+  flex: 1 1 220px; min-width: 0; min-height: 40px; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); color: var(--ink); font: 400 0.85rem var(--mono); text-overflow: ellipsis;
+}
+.coffre-partage-lien input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+
 .coffre-fiche-actions { padding: 16px 18px; }
 .coffre-danger { color: var(--bad); }
 .carnet-bouton.coffre-danger:hover:not(:disabled) { color: var(--bad); border-color: var(--bad); }
@@ -216,4 +226,8 @@
   .coffre-fiche-actions .profil-actions .carnet-bouton { flex: 1 1 40%; }
   .coffre-fiche-actions .profil-actions .carnet-bouton.principal { flex-basis: 100%; }
   .coffre-liee-ligne .profil-lien-bouton { min-height: 44px; }
+  .dans-tiroir .coffre-partage { margin: 0 -16px; padding: 12px 16px; }
+  .coffre-partage-lien input, .coffre-partage-lien .carnet-bouton { min-height: 44px; font-size: 16px; }
+  .coffre-partage-lien .carnet-bouton { flex: 1 1 100%; }
+  .coffre-partage .profil-actions .carnet-bouton { min-height: 44px; }
 }

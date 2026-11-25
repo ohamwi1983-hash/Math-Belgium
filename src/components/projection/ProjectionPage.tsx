@@ -13,8 +13,8 @@ import { Diapo } from './Diapo'
 import { Paginateur } from './Paginateur'
 import { Scene } from './Scene'
 import { Annotations, FondBlancTableau } from './Tableau'
-import { BarreOutils, basculerCompas, basculerFluo, basculerStylo, BoutonsInstruments, COULEURS_FLUO, COULEURS_STYLO, DUREES_MINUTEUR, formatDuree, PaletteDessin, PaletteFond, useResteMinuteur } from './BarreOutils'
-import { useMagasinInstruments } from './instruments'
+import { BarreOutils, basculerCompas, basculerFluo, basculerStylo, BoutonsInstruments, COULEURS_FLUO, COULEURS_STYLO, DUREES_MINUTEUR, formatDuree, PaletteDessin, PaletteEquerre, PaletteFond, useResteMinuteur } from './BarreOutils'
+import { useInstrument, useMagasinInstruments } from './instruments'
 import type { OutilsLocaux } from './BarreOutils'
 import { GardeProfesseur } from './GardeProfesseur'
 import { Pictogramme } from './Pictogrammes'
@@ -437,6 +437,7 @@ function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos:
   const [params] = useSearchParams()
   const projection = useProjection(chapter, diapos, 'prof')
   const magasin = useMagasinInstruments(projection)
+  const equerreVisible = useInstrument(magasin, (e) => e.equerre.visible)
   const { etat, suivant, precedent, aller, basculerBlanc, lancerMinuteur, arreterMinuteur } = projection
   const [message, signaler] = useMessage()
   const { plein, basculer } = usePleinEcran(signaler)
@@ -556,9 +557,10 @@ function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos:
               <BoutonsInstruments outils={outils} setOutils={setOutils} magasin={magasin} />
             </span>
           </div>
-          {outils.stylo && (
+          {(outils.stylo || equerreVisible) && (
             <div className="prof-palette">
-              <PaletteDessin outils={outils} setOutils={setOutils} />
+              {outils.stylo && <PaletteDessin outils={outils} setOutils={setOutils} />}
+              {equerreVisible && <PaletteEquerre magasin={magasin} />}
             </div>
           )}
           <Scene className="prof-scene">

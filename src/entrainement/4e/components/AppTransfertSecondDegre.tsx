@@ -107,7 +107,7 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
       return;
     }
     const attendue = reponseAttendue(def);
-    setHistorique((h) => [...h, ecranClos(def.titre, votreReponse, resultat.revele, etat.niveauAide > 0, attendue)]);
+    setHistorique((h) => [...h, ecranClos(def.titre, votreReponse, resultat.revele, etat.niveauAide > 0, attendue, corrigeDetailleEcranCourant())]);
     setEtat(resultat.etat);
     setEnAttente({
       revele: resultat.revele,
@@ -137,6 +137,13 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
 
   // Corrigé de l'étape ; quand il est révélé et porte déjà sa figure, `figureApres` n'est pas répétée.
   const corrigeEtape = lignesDeLEtape(props.correction(e), lettreEtape(ecran));
+
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={corrigeEtape} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -151,7 +158,7 @@ export function AppTransfertSecondDegre<E>(props: PropsAppTransfert<E>) {
         ) : (
           enAttente.messageRevele
         ),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={corrigeEtape} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

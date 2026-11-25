@@ -16,6 +16,12 @@ export interface EtatEquerre {
   y: number
   /** Rotation à l'écran, en degrés (sens horaire positif, 0 = hypoténuse horizontale en bas). */
   angle: number
+  /** Trait tracé le long d'un bord : segment (borné au bord) ou droite (prolongée jusqu'aux bords de la diapo). */
+  trace: 'segment' | 'droite'
+  /** Rotation verrouillée (poignée remplacée par un cadenas) : on fait glisser l'équerre pour tracer des parallèles. */
+  verrou: boolean
+  /** Repère pendant un tracé le long de l'hypoténuse graduée : abscisses (repère de l'équerre) des deux extrémités. */
+  mesure: { u0: number; u1: number; couleur: string } | null
 }
 
 export interface EtatCompas {
@@ -52,7 +58,7 @@ export interface EtatInstruments {
 export const LARGEUR_CALC = 336
 
 const DEPART: EtatInstruments = {
-  equerre: { visible: false, x: 640, y: 470, angle: 0 },
+  equerre: { visible: false, x: 640, y: 470, angle: 0, trace: 'segment', verrou: false, mesure: null },
   compas: null,
   calc: { visible: false, x: 1280 - LARGEUR_CALC - 24, y: 24, masque: false, saisie: '', mode: 'deg', exact: true, inverse: false, resultat: null, ans: 0 },
 }

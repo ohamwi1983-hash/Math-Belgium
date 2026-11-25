@@ -208,6 +208,15 @@ export type InteractiveWidgetTag =
   | 'projections-domaine-image-widget'
   | 'image-inter-domaine-widget'
   | 'commutent-affines-widget'
+  | 'pascal-vivant-widget'
+  | 'ordre-repetition-widget'
+  | 'hypergeometrique-binomiale-widget'
+  | 'etoiles-barres-widget'
+  | 'mains-poker-widget'
+  | 'anagrammes-fusion-widget'
+  | 'table-ronde-collier-widget'
+  | 'mots-binome-widget'
+  | 'approximation-binome-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

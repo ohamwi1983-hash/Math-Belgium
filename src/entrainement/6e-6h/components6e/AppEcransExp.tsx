@@ -147,6 +147,7 @@ export function AppEcransExp<E, P extends string>({ config }: { config: ConfigAp
     setHistorique((h) => [
       ...h,
       {
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         titre: def.libelle(e, phase),
         votreReponse: texteSaisie(def, e, phase, valeurs),
         correcte: !revele,
@@ -174,13 +175,20 @@ export function AppEcransExp<E, P extends string>({ config }: { config: ConfigAp
   // Choix fermé faux (une seule tentative) : le message ciblé de `piege` s'affiche avec la réponse,
   // puisque l'écran ne se rejoue pas (sur un champ, il s'affiche à chaque tentative fausse).
   const piegeChoix = choix && enAttente?.revele ? def.piege(e, phase, enAttente.valeurs) : null;
+
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(def.correction(e), lettreEtape(indexPhase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: <ReponseAttendue fragments={def.reponseAttendue(e, phase)} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: suivant,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(def.correction(e), lettreEtape(indexPhase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         ...(choix && enAttente.revele
           ? { messageRevele: `Ce n'était pas le bon choix (une seule tentative sur un choix fermé).${def.explicationChoix ? ` ${def.explicationChoix(e, phase)}` : ""}` }
           : {}),

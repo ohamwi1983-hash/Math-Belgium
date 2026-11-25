@@ -122,7 +122,7 @@ export function App5gen49() {
       return;
     }
     const attendue = reponseAttendue(e, ecran);
-    setHistorique((h) => [...h, ecranClos(TITRES_ECRANS[ecran]!, votreReponse, resultat.revele, etat.niveauAide > 0, attendue)]);
+    setHistorique((h) => [...h, ecranClos(TITRES_ECRANS[ecran]!, votreReponse, resultat.revele, etat.niveauAide > 0, attendue, corrigeDetailleEcranCourant())]);
     setEtat(resultat.etat);
     setEnAttente({
       revele: resultat.revele,
@@ -150,6 +150,12 @@ export function App5gen49() {
     (window as unknown as { __debug5gen49?: unknown }).__debug5gen49 = { exercice: e, ecran };
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDetectiveSuites(e), lettreEtape(ecran))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -158,7 +164,7 @@ export function App5gen49() {
         onSuivant: passerEcranSuivant,
         // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
         // `generateurs5e/detectiveSuites/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDetectiveSuites(e), lettreEtape(ecran))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         messageRevele: enAttente.messageRevele,
       }
     : null;

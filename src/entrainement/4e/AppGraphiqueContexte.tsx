@@ -124,7 +124,7 @@ export function AppGraphiqueContexte() {
     const index = etat.indexEcran;
     setHistorique((h) => {
       const copie = [...h];
-      copie[index] = { titre: titreEcran(index), votreReponse, correcte: bilan !== "revele", reponseAttendue: reponseAttendueEcran(etat, question) };
+      copie[index] = { corrigeDetaille: corrigeDetailleEcranCourant(), titre: titreEcran(index), votreReponse, correcte: bilan !== "revele", reponseAttendue: reponseAttendueEcran(etat, question) };
       return copie;
     });
     setEnAttente({ etatSuivant: nouvelEtat, revele: bilan === "revele" });
@@ -166,6 +166,12 @@ export function AppGraphiqueContexte() {
 
   const blocDonnees = <div className="graphique-contexte-figure" style={{ margin: "12px 0 4px" }} dangerouslySetInnerHTML={{ __html: svg }} />;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeGraphiqueContexte(exercice), lettreEtape(etat.indexEcran))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -173,7 +179,7 @@ export function AppGraphiqueContexte() {
         messageRevele: ecranLecture ? undefined : "Ce n'était pas la caractéristique demandée.",
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeGraphiqueContexte(exercice), lettreEtape(etat.indexEcran))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

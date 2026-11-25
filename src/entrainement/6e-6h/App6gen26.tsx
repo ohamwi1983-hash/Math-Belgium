@@ -88,6 +88,7 @@ export function App6gen26() {
     setHistorique((h) => [
       ...h,
       {
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         titre: derniere.libelle,
         votreReponse,
         correcte: !derniere.revele,
@@ -144,6 +145,12 @@ export function App6gen26() {
     (window as unknown as { __debug6gen26?: unknown }).__debug6gen26 = { exercice, phase };
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCalculAires(exercice), lettreEtape(phasesCorrige26(exercice).indexOf(phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -158,7 +165,7 @@ export function App6gen26() {
         onSuivant: passerEcranSuivant,
         // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
         // `generateurs6e/calculAires/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCalculAires(exercice), lettreEtape(phasesCorrige26(exercice).indexOf(phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

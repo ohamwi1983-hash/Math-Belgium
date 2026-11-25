@@ -199,7 +199,7 @@ export function AppTexteTriangle() {
       return;
     }
     const attendue = reponseAttendue(e, type);
-    setHistorique((h) => [...h, ecranClos(titres[etat.ecran]!, votreReponse, resultat.revele, etat.niveauAide > 0, attendue)]);
+    setHistorique((h) => [...h, ecranClos(titres[etat.ecran]!, votreReponse, resultat.revele, etat.niveauAide > 0, attendue, corrigeDetailleEcranCourant())]);
     const entree = entreeRecap(e, type, resultat.revele);
     if (entree) setRecap((r) => [...r, entree]);
     setEtat(resultat.etat);
@@ -222,13 +222,19 @@ export function AppTexteTriangle() {
     setEnAttente(null);
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTexteTriangle(e), lettreEtape(etat.ecran))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTexteTriangle(e), lettreEtape(etat.ecran))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         messageRevele: enAttente.messageRevele,
       }
     : null;

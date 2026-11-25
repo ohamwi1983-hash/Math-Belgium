@@ -111,6 +111,7 @@ export function AppConstructionDroite() {
       setHistorique((h) => [
         ...h,
         {
+          corrigeDetaille: corrigeDetailleEcranCourant(),
           titre: TITRES_ECRANS[etat.phase],
           votreReponse,
           correcte: !revele,
@@ -144,11 +145,17 @@ export function AppConstructionDroite() {
     setEtat(demarrerSessionConstructionDroite(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteConstructionDroite)));
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeConstructionDroite(exercice, etat.cible1 && etat.cible2 ? [etat.cible1, etat.cible2] : undefined), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: construireReponseAttendue(exercice, etat.phase, etat.cible1, etat.cible2),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeConstructionDroite(exercice, etat.cible1 && etat.cible2 ? [etat.cible1, etat.cible2] : undefined), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

@@ -158,7 +158,7 @@ export function AppMethodeRapide() {
                 : etat.phase === "champ1"
                   ? nouvelEtat.champPrincipalRevele
                   : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.zerosRevele;
-      setHistorique((h) => [...h, ecranClos(titreEcran(etat.phase, etat.exerciceCourant, etat.methodeRetenue), votreReponse, revele, aideEcran(etat), reponseAttenduePour(etat.phase, nouvelEtat))]);
+      setHistorique((h) => [...h, ecranClos(titreEcran(etat.phase, etat.exerciceCourant, etat.methodeRetenue), votreReponse, revele, aideEcran(etat), reponseAttenduePour(etat.phase, nouvelEtat), corrigeDetailleEcranCourant(nouvelEtat))]);
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
@@ -244,16 +244,23 @@ export function AppMethodeRapide() {
   }
   const reponseAttendue = enAttente ? reponseAttenduePour(phase, enAttente.etatSuivant) : null;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). `etatSuivant` :
+   * l'état après la réponse (la méthode retenue y est fixée). */
+  function corrigeDetailleEcranCourant(etatSuivant: EtatSession) {
+    return (
+      <CorrigeDetailleEcran
+        etapes={lignesDeLEtape(correctionDetailleeSecondDegre(etat.exerciceOriginal, etatSuivant.methodeRetenue ?? etat.methodeRetenue), lettrePhaseSecondDegre(etat.exerciceOriginal, phase))}
+      />
+    );
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         messageRevele: phase === "reconnaissance" ? "Ce n'était pas la bonne réponse." : undefined,
         reponseAttendue,
-        corrigeDetaille: (
-          <CorrigeDetailleEcran
-            etapes={lignesDeLEtape(correctionDetailleeSecondDegre(etat.exerciceOriginal, enAttente.etatSuivant.methodeRetenue ?? etat.methodeRetenue), lettrePhaseSecondDegre(etat.exerciceOriginal, phase))}
-          />
-        ),
+        corrigeDetaille: corrigeDetailleEcranCourant(enAttente.etatSuivant),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

@@ -104,6 +104,7 @@ export function AppCombinaisonVecteurs() {
     setHistorique((h) => [
       ...h,
       {
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         titre: derniere.libelle,
         votreReponse,
         correcte: !derniere.revele,
@@ -151,10 +152,16 @@ export function AppCombinaisonVecteurs() {
     setEtat(demarrerSessionCombinaisonVecteurs(REGLAGES_DEMO, () => construireAvecVarianteId(id as VarianteCombinaisonVecteurs)));
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCombinaisonVecteurs(exercice), etat.phase === "simplification" || phaseInitiale(exercice) === "composantes" ? "a" : "b")} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCombinaisonVecteurs(exercice), etat.phase === "simplification" || phaseInitiale(exercice) === "composantes" ? "a" : "b")} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : etat.phase === "simplification" ? (
           <Katex expression={formatEquationReduiteLatex(exercice)} />
         ) : (

@@ -57,7 +57,7 @@ export function PascalTriangle({ rowCount, pascalRelation }: Props) {
                 y={p.y + 5}
                 textAnchor="middle"
                 className={cls}
-                stroke="none"
+                style={{ stroke: 'none' }}
                 fontFamily="IBM Plex Mono, monospace"
                 fontSize="15.5"
                 fontWeight={isChild(n, k) || isParent(n, k) ? 700 : 600}

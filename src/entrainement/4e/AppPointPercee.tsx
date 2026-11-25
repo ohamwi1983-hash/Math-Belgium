@@ -121,7 +121,7 @@ export function AppPointPercee() {
 
   function conclure(correct: boolean, votreReponse: string, attendue: string, messageRevele: string) {
     const reponse = <p style={{ margin: 0 }}>{attendue}</p>;
-    setHistorique((h) => [...h, ecranClos(TITRES_ECRANS[ecran]!, <p style={{ margin: 0 }}>{votreReponse}</p>, !correct, niveauAide > 0, reponse)]);
+    setHistorique((h) => [...h, ecranClos(TITRES_ECRANS[ecran]!, <p style={{ margin: 0 }}>{votreReponse}</p>, !correct, niveauAide > 0, reponse, corrigeDetailleEcranCourant())]);
     setEnAttente({ revele: !correct, reponseAttendue: reponse, messageRevele, derniere: ecran >= total - 1 });
   }
 
@@ -136,6 +136,12 @@ export function AppPointPercee() {
     setEnAttente(null);
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePercee(e, indexSuivi, paire ?? undefined), lettreEtape(ecran))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -143,7 +149,7 @@ export function AppPointPercee() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePercee(e, indexSuivi, paire ?? undefined), lettreEtape(ecran))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

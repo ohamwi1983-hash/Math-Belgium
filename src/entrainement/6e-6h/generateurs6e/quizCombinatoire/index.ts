@@ -1,5 +1,5 @@
 /**
- * Couche A — "Analyse combinatoire" (quiz vrai/faux), 6gen70, ajout ultérieur au chapitre 9. Tire
+ * Couche A — "Analyse combinatoire" (quiz vrai/faux), 6gen70, chapitre 7 de 6e (6h). Tire
  * une question dans la banque pré-écrite (`banque.ts`) du thème (variante) actif — jamais de
  * génération procédurale, voir `core6e/quizCombinatoire.types.ts`. Structure identique à 6gen69
  * (`quizProbabilites`) et 6gen68/67/66/65.
@@ -18,9 +18,20 @@ export const CATALOGUE_VARIANTES: { id: VarianteQuizCombinatoire; label: string 
   { id: "denombrementCombine", label: "Dénombrement combiné et sélections" },
   { id: "binomeNewton", label: "Binôme de Newton" },
   { id: "denombrementProblemes", label: "Dénombrement : problèmes" },
-  { id: "probabiliteHypergeometrique", label: "Probabilité hypergéométrique" },
-  { id: "binomialeSequence", label: "Probabilité binomiale et séquence" },
+  { id: "probabiliteHypergeometrique", label: "Probabilité hypergéométrique et séquence exacte" },
+  { id: "binomialeSequence", label: "Probabilité binomiale" },
 ];
+
+/** Taille RÉELLE de la banque d'un thème (jamais une constante : `.claude/rules/quiz-generators.md`). */
+export function nombreQuestions(varianteId: VarianteQuizCombinatoire): number {
+  return BANQUE_QUIZ_COMBINATOIRE[varianteId].length;
+}
+
+/** Bornes min/max des tailles de thèmes, pour un texte d'accueil toujours exact. */
+export function etendueNombreQuestions(): { min: number; max: number } {
+  const tailles = CATALOGUE_VARIANTES.map((v) => nombreQuestions(v.id));
+  return { min: Math.min(...tailles), max: Math.max(...tailles) };
+}
 
 function tirerQuestion(varianteId: VarianteQuizCombinatoire): QuestionVraiFaux {
   const banque = BANQUE_QUIZ_COMBINATOIRE[varianteId];
@@ -53,7 +64,7 @@ function melanger<T>(items: readonly T[]): T[] {
 
 /**
  * Générateur SANS RÉPÉTITION pour un thème donné — chaque session étudiant porte sur un thème
- * unique et compte autant d'exercices que de questions dans la banque de ce thème (35) : sans
+ * unique et compte autant d'exercices que de questions dans la banque de ce thème (`nombreQuestions`) : sans
  * cette précaution, le tirage indépendant habituel (`genererExerciceQuizCombinatoire`) pourrait
  * répéter une question avant d'avoir couvert les 34 autres. État interne (file mélangée, ré-
  * mélangée à chaque épuisement) enfermé dans la fermeture, jamais partagé entre deux appels de

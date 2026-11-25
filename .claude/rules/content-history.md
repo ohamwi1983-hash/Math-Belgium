@@ -175,6 +175,40 @@ paths:
   sections `denombrementfondamental`, `denombrementfondamental`, `binomenewton`, `denombrementcombine`,
   `denombrementfondamental`). Descriptions de carte en Unicode (Aₙ², Γₙᵖ, x₁), jamais de `$…$`. Détail :
   `.claude/rules/feuilles-evaluations.md`, « 6e ch. 7, lot H — 6gen100–6gen104 ».
+  **Audit appliqué, lots A, F, D et parcours (25/11, agent AFD)** — lot A : trois dés attribués à **Galilée** (cours,
+  carte 6gen46, question de compréhension, quiz ; renvoi au ch. 6), P(0) = 0,1291 (la « somme 1,0001 » venait de
+  l'erreur), Newton (découverte vers 1665, lettres à Leibniz en 1676, imprimé par Wallis en 1685), Kramp sans
+  l'anecdote du « cri » (Arbogast, notation anglaise), image du triangle = **Zhu Shijie** 1303 (al-Karaji, Jia Xian,
+  Apianus, Stifel, Tartaglia ; traité de Pascal écrit en 1654, publié en 1665), foudre « au cours d'une vie », mot de
+  passe ≈ 1,6 milliard de fois plus grand, ADN ($4^L$ contre une composition fixée), piège du comité mixte,
+  **Mississippi** (11 lettres, 34 650 permutations, 34 649 anagrammes ; tuiles et quiz), notation n / p / k / r,
+  35 virgules `{,}`, champs bruts en Unicode, méthode « 3 questions » numérotée de 1 à 3, Pascal pour 1 ≤ k ≤ n − 1,
+  collier n ≥ 3, $n\varepsilon$ petit (attention : $1{,}01^{100} \approx 2{,}705$), « séparer les doubles » relié à
+  Γ + attention « issues non équiprobables », tableau binomial transposé, axes de la somme de ligne, légende des
+  séquences raccourcie ; composants : `PascalTriangle` (le 10 « fantôme » = trait CSS `.svg-good` sur le texte,
+  `style={{ stroke: 'none' }}`), `CircularPermutation` (axe du collier par les milieux de deux côtés, étiquette
+  « rotation » + pointe de flèche). Séquence exacte sans remise déplacée au § 5 (décision ; § 5 « … et séquence
+  exacte », § 6 « Probabilité binomiale (épreuves indépendantes) »). Lot F : 16 exemples sans énoncé réécrits (énoncé
+  en contexte, titre qui dit ce qu'on fait, plus de 2e cas dans le cadre résultat), démonstrations (a)–(l), § 1
+  séparation des cas, équations combinatoires, cornets et « au moins un de chaque » ; § 2 groupes non nommés, bloc,
+  complément (piège « une femme imposée »), inclusion-exclusion ; § 3 chemins dans un quadrillage (`vectorPlane`
+  quadrillé), terme indépendant ; § 4 partition complète du poker (full 1 344, sans répétition 57 344, total
+  201 376), historique Galilée, symétrie $s \leftrightarrow 21-s$ ; § 6 « Ce que tu sais déjà » ($N_k = C_n^k$),
+  Bernoulli, symétrie pour $p = 0{,}5$, renvoi au ch. 8 ; formulaire et synthèse complétés ; 57 énoncés par clé.
+  Parcours : 3 parties (« Compter : les outils » § 1–2, « Le binôme et les problèmes » § 3–4, « Des comptages aux
+  probabilités » § 5–6), 6 `titreCourt`, 15 phrases d'`essentiel`, 21 cartes. Formules longues coupées en plusieurs
+  `$…$` (aucune ne défile plus à 390 px, tiroirs ouverts). Les cartes des générateurs 6gen100–109 et les ateliers
+  sont ajoutés par d'autres agents. Détail : `.claude/rules/feuilles-evaluations.md`, « 6e ch. 7, lots A, F, D ».
+  **Lot H, seconde moitié (6gen105–6gen109, nouveaux générateurs, agent H2)** : cartes 6gen105 « Au moins un : le
+  complément » en fin de § 2 (après 6gen44) ; 6gen107 « Terme indépendant » en fin de § 3, précédée d'un `methode`
+  « Méthode — terme indépendant de x » (terme général, exposant de x, k entier ou « aucun », exemple
+  (x² − 2/x)⁹ → 5376) ; 6gen106 « Chemins dans un quadrillage » en fin de § 4, précédée d'un `methode` « Méthode —
+  chemins dans un quadrillage » (mot de m + n flèches, C₍ₘ₊ₙ₎ⁿ, passer par P = produit, éviter P = complément) ;
+  6gen108 « Avec ou sans remise ? Choisir le modèle » puis 6gen109 « Détective d'erreurs : analyse combinatoire » en
+  fin de § 6 (avant la vidéo de synthèse). Aucun `exemple` ajouté (donc rien dans `ENONCES_DEMONSTRATION`) ;
+  registres (`registry.ts`, `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts`, processus
+  3 / 3 / 2 / 3 / 3, sections `denombrementcombine`, `denombrementproblemes`, `binomenewton`, `binomialesequence` ×2).
+  Descriptions de carte en texte brut. Détail : `.claude/rules/feuilles-evaluations.md`, « 6e ch. 7, lot H2 ».
 
 - **6e (6h), Chapitre 6 — corrigé « comme au tableau » et niveaux (6gen30–33, 6gen74–76)** : corrigés détaillés
   typés partagés écran / papier (`generateurs6e/*/corrigeDetaille.ts`, brique `ui6e/corrigeProbabilites.ts`),
@@ -5623,3 +5657,84 @@ ciblés, explication après échec). Lot C :
 Hors périmètre, à faire : cartes du chapitre (6gen46 « 32 cartes », « répartitions en boîtes » ; 6gen45
 « triangle de Pascal » désormais vrai), refonte papier (lot E : profils, corrigé « comme au tableau »,
 niveaux, `versionPapier`).
+## 6e (6h), Chapitre 7 — lot G de l'audit, première moitié (5 ateliers, agent G1, 25/11/2026)
+
+Le chapitre n'avait aucun atelier. Cinq blocs `atelier` ajoutés, seuls (aucun autre bloc touché), notation
+du tableau de classification (n, p ; Aₙᵖ, Cₙᵖ, Bₙᵖ = nᵖ, Γₙᵖ = Cₙ₊ₚ₋₁ᵖ) et du § 3 (Cₙᵏ), KaTeX dans les
+Shadow DOM (`katex-shadow.js`), légendes en Unicode (« K⁄N » : barre de fraction U+2044) :
+- **`ordre-repetition-widget`** (§ 1, après l'astuce « La question 1 coupe le tableau ») : n lettres (2 à 5),
+  longueur p (1 à 3), interrupteurs ordre / répétition ; TOUS les groupements listés en tuiles. Ordre : les
+  mots aux mêmes lettres rangés dans un cadre ; couper l'ordre fait FUSIONNER chaque cadre en une tuile
+  « ×k » (animation Web Animations, zone à hauteur gardée pendant la fusion, rien si `prefers-reduced-motion`).
+  Avec répétition, cadres de tailles différentes (×6, ×3, sans badge) : d'où Γₙᵖ ≠ nᵖ / p!. Compteurs A, C,
+  B, Γ en tableau 2 × 2 (cases cliquables). Sans SVG : pas d'épinglage.
+- **`etoiles-barres-widget`** (§ 1, après le piège « confondre Γ et C ») : p boules (1 à 8), n parfums (2 à 5),
+  barres GLISSÉES à la souris et au doigt (Pointer Events + capture, `touch-action: none` sur la figure),
+  flèches du clavier ; lecture « 2 vanille, 0 fraise, 1 chocolat », effectif sous chaque compartiment,
+  compteur des répartitions construites, liste complète si ≤ 84. Mode « au moins un de chaque » : barres au
+  bord ou collées en rouge, Cₚ₋₁ⁿ⁻¹ = Γₙᵖ⁻ⁿ.
+- **`pascal-vivant-widget`** (§ 3, après le piège « mauvais partenaire de symétrie ») : n de 0 à 15, une unité
+  SVG = un pixel (cases de taille et de place constantes, défilement horizontal au-delà de la largeur) ; clic
+  ou Entrée sur une case : parents (ou parent unique au bord), case symétrique, bande de la ligne, panneau
+  Pascal / symétrie / somme = 2ⁿ. « Colorier les impairs » : cadre FIXE des 16 lignes ajusté à la largeur
+  (Sierpiński entier sur téléphone, 81 impairs) ; « Développement de (a + b)ⁿ » : terme de la case encadré.
+- **`mains-poker-widget`** (§ 4, après le diagramme des catégories) : 32 cartes, classement par hauteurs
+  seulement (comme le cours), cartes de la combinaison mises en évidence, calcul en deux étapes de la
+  catégorie (pièges full 8 × 7 / deux paires C₈²) ; simulation par 10 000, échelle FIXE 0 à 0,6 ; partition
+  224 + 1 344 + 10 752 + 24 192 + 107 520 + 57 344 = 201 376 = C₃₂⁵.
+- **`hypergeometrique-binomiale-widget`** (§ 5, après l'astuce « hypergéométrique contre binomiale ») : N parmi
+  10 à 1 000 (K suit la proportion choisie), K, n de 1 à 10 ; barres jumelées, fenêtre FIXE (k de 0 à 10, P de
+  0 à 1), valeurs du k choisi au-dessus des barres, tableau à 4 décimales, calcul exact (BigInt) jusqu'à
+  13 chiffres au dénominateur ; « Faire grandir N » ; « Exemple du cours » (N = 20, K = 6, n = 5 : 0,1291…).
+Vérifié (Vite, page réelle, panneau, iPhone 13 clair / sombre et 1 280 px) : 0 erreur console, scrollWidth
+390, 0 `.katex-error`, Shadow DOM sans `^ $ \ * NaN undefined Infinity`, 0 étiquette rognée ; balayages :
+136 cases de Pascal (parents, symétrique, 2ⁿ), 46 réglages ordre / répétition (tuiles = formule, badges =
+mots), 240 réglages N, K, n (valeurs recalculées, axes identiques), 54 réglages étoiles (liste = formule),
+glisser au doigt (CDP) et à la souris, 300 mains classées, 30 000 mains simulées (écart < 4σ) ; épinglage
+dans le panneau 0 KO à 390 × 664 et 375 × 667. Scripts et captures : `scratchpad/g1-6e7/`.
+
+## 6e (6h), Chapitre 7 — lot G de l'audit, seconde moitié (4 ateliers, agent G2, 25/11/2026)
+
+Quatre blocs `atelier` ajoutés (aucun autre bloc touché), même style que G1 (`katex-shadow.js`, palette
+accent / sky / good / plan / rose / tip, tuiles et cadres, boutons ≥ 44 px) :
+- **`table-ronde-collier-widget`** (§ 1, après le piège « oublier la division par 2 ») : n de 2 à 6,
+  modes table / collier ; « Tourner » (animation de rotation), « Retourner » (miroir autour de l'axe
+  vertical, place du haut fixe ; la disposition retournée remplace l'ancienne à mi-course, jamais de
+  lettres en miroir), échange de deux perles au toucher, « Au hasard ». Après chaque geste : « même table
+  / autre table » (classes comparées par forme canonique). Files de la classe (n rotations, + n
+  retournées pour un collier, pâles quand déjà vues : n = 2). Classes ÉNUMÉRÉES (n ≤ 5) en petits
+  cercles cliquables : 1, 2, 6, 24 tables ; 1, 1, 3, 12 colliers ; n = 2 → 1 collier, « et non 1⁄2 ».
+  Géométrie fixe (même cercle pour tout n), sens de lecture fléché à droite de l'axe (jamais dessus).
+- **`anagrammes-fusion-widget`** (§ 2, après l'astuce « sans lettre répétée, on retrouve n! ») : champ
+  texte JAMAIS filtré (ni `maxlength`, ni transformation à la frappe : la saisie est seulement lue —
+  accents retirés, majuscules, non-lettres ignorées et SIGNALÉES) ; limites affichées (calcul jusqu'à
+  20 lettres en BigInt, liste ≤ 360 mots, lettres discernables ≤ 5 lettres) ; effectifs en pastilles,
+  n! ÷ (n₁! × …) (1! compris, comme l'exemple du cours) en `texEgalites`, anagrammes = résultat − 1
+  (« aucune » pour AAA). Liste : lettres identiques indicées (P₁, P₂), cadres de n₁! × n₂! × …
+  permutations ; « indiscernables » → FUSION animée (fantômes, comme `ordre-repetition`) en tuiles
+  « ×k » ; « Retirer le mot de départ » le barre et recompte. Exemples PAPA, RADAR, ANANAS, MATHS,
+  MISSISSIPPI (34 650 ; 34 649).
+- **`mots-binome-widget`** (§ 3, après la démonstration du binôme par dénombrement) : n de 1 à 6, les 2ⁿ
+  mots (a pâle, b gras, bord coloré selon le nombre de b) en grille puis « Regrouper par nombre de b »
+  (transition CSS des `<g>`) en colonnes de hauteurs Cₙᵏ, étiquettes Cₙᵏ et monômes ; dans chaque
+  colonne, trait pointillé entre les mots finissant par a et par b (relation de Pascal, expliquée) ;
+  mini-triangle de Pascal, ligne n encadrée aux couleurs des colonnes ; mot touché → facteurs qui
+  fournissent b et terme encadré du développement. viewBox fixe pour un n (grille et colonnes dans le
+  même cadre ; grille d'autant de rangées que la plus haute colonne, centrée).
+- **`approximation-binome-widget`** (§ 3, après l'avertissement « quand nε n'est plus petit ») : n de 1 à
+  100, ε de −0,1 à 0,1 au millième ; exemples 1,01⁴ / 1,01¹⁰⁰ / 0,99¹⁰ / 1,05²⁰. Valeur exacte,
+  1 + nε et erreur calculées en BigInt ((1000 + 1000ε)ⁿ ÷ 1000ⁿ : exactes si ≤ 10 décimales, sinon ≈ à
+  6 décimales : 1,01¹⁰⁰ ≈ 2,704814) ; verdict par l'erreur relative (< 1 %, < 10 %, échec) avec nε ;
+  tableau des termes Cₙᵏεᵏ (k ≤ 4, valeurs exactes) et somme des suivants. Graphique à fenêtre FIXE en
+  abscisse nε (−2 à 3, y de −1 à 5) : points (nε ; (1 + ε)ⁿ) pour n = 0 à 100, droite y = 1 + nε, bande
+  « nε petit », segment d'erreur rouge ; hors cadre, un message le dit. Lignes de valeurs empilées (une
+  grille dt / dd laissait déborder la chaîne d'égalités à 390 px).
+Vérifié (Vite, page réelle, panneau, iPhone 13 clair / sombre et 1 280 px) : 0 erreur console, scrollWidth
+390, 0 `.katex-error`, Shadow DOM sans `^ $ \ * NaN undefined Infinity`, 0 étiquette SVG rognée ;
+balayages : table / collier n = 2 à 6 × 2 modes × 6 dispositions au hasard (rotation exacte, « même » après
+tourner, « autre table » / « même collier » après retourner, nombre de classes et de files), échange au
+doigt ; 80 mots tirés au hasard (tuiles = n! ou formule, cadres = formule, mots distincts), MISSISSIPPI,
+accents, caractères ignorés, 25 lettres (champ intact), mot vide ; 2ⁿ mots n = 1 à 6 × 2 vues (2ⁿ tuiles
+distinctes dans le cadre, 0 chevauchement, colonnes = Cₙᵏ) ; 160 réglages (n, ε) comparés à `Math.pow`
+(valeur, approximation, erreur). Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667 (9 ateliers du
+chapitre). Scripts et captures : `scratchpad/g2-6e7/`.

@@ -132,7 +132,7 @@ export function AppDispersion() {
       const revele = revelePhase(etat.phase, nouvelEtat);
       setHistorique((h) => [
         ...h,
-        { titre: TITRE_PHASE[etat.phase], votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttenduePhase(etat.phase) : undefined },
+        { corrigeDetaille: corrigeDetailleEcranCourant(), titre: TITRE_PHASE[etat.phase], votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttenduePhase(etat.phase) : undefined },
       ]);
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
@@ -177,13 +177,19 @@ export function AppDispersion() {
     );
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDispersion(exercice), lettreEtape(ordrePhasesDispersion(exercice).indexOf(etat.phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttenduePhase(etat.phase),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDispersion(exercice), lettreEtape(ordrePhasesDispersion(exercice).indexOf(etat.phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

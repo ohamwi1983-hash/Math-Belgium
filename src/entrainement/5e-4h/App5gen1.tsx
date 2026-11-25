@@ -195,6 +195,7 @@ export function App5gen1() {
         setHistorique((h) => [
           ...h,
           {
+            corrigeDetaille: corrigeDetailleEcranCourant(),
             titre: TITRE_PHASE[etat.phase],
             votreReponse,
             correcte: !revele,
@@ -222,6 +223,12 @@ export function App5gen1() {
   const exercice: ExerciceDomaineDefinition = etat.exerciceCourant;
   const cibleCE = enAttente?.revele && etat.phase === "ce" && derniereCE ? cibleCE5gen1(exercice, derniereCE) : null;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDomaineDefinition(exercice), lettrePhaseDomaine(exercice, etat.phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -235,7 +242,7 @@ export function App5gen1() {
             }
           : {}),
         reponseAttendue: reponseAttenduePhase(exercice, etat.phase),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDomaineDefinition(exercice), lettrePhaseDomaine(exercice, etat.phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

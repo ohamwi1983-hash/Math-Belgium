@@ -181,6 +181,7 @@ export function AppFormeCanoniqueFonctionsReference() {
         setHistorique((h) => [
           ...h,
           {
+            corrigeDetaille: corrigeDetailleEcranCourant(),
             titre: TITRE_PHASE[phaseClose],
             votreReponse,
             correcte: !revele,
@@ -215,15 +216,21 @@ export function AppFormeCanoniqueFonctionsReference() {
 
   const exercice = etat.exerciceCourant;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return (
+          <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeFormeCanoniqueFonctionsReference(exercice), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />
+        );
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : reponseAttenduePhase(etat.phase, exercice),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: (
-          <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeFormeCanoniqueFonctionsReference(exercice), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />
-        ),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

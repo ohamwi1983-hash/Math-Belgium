@@ -208,6 +208,15 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'projections-domaine-image-widget': () => import('../../interactive/register-projections-domaine-image-widget.js'),
   'image-inter-domaine-widget': () => import('../../interactive/register-image-inter-domaine-widget.js'),
   'commutent-affines-widget': () => import('../../interactive/register-commutent-affines-widget.js'),
+  'pascal-vivant-widget': () => import('../../interactive/register-pascal-vivant-widget.js'),
+  'ordre-repetition-widget': () => import('../../interactive/register-ordre-repetition-widget.js'),
+  'hypergeometrique-binomiale-widget': () => import('../../interactive/register-hypergeometrique-binomiale-widget.js'),
+  'etoiles-barres-widget': () => import('../../interactive/register-etoiles-barres-widget.js'),
+  'mains-poker-widget': () => import('../../interactive/register-mains-poker-widget.js'),
+  'anagrammes-fusion-widget': () => import('../../interactive/register-anagrammes-fusion-widget.js'),
+  'table-ronde-collier-widget': () => import('../../interactive/register-table-ronde-collier-widget.js'),
+  'mots-binome-widget': () => import('../../interactive/register-mots-binome-widget.js'),
+  'approximation-binome-widget': () => import('../../interactive/register-approximation-binome-widget.js'),
 }
 
 /**

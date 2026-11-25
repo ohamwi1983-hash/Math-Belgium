@@ -107,7 +107,7 @@ export function AppBoiteMoustaches() {
             : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.revele;
       const titre = TITRE_PHASE_COMPARAISON[etat.phase];
       if (titre && votreReponse !== undefined) {
-        setHistorique((h) => [...h, { titre, votreReponse, correcte: !revele, reponseAttendue: revele ? calculerReponseAttendue() : undefined }]);
+        setHistorique((h) => [...h, { titre, votreReponse, correcte: !revele, reponseAttendue: revele ? calculerReponseAttendue() : undefined, corrigeDetaille: corrigeDetailleEcranCourant() }]);
       }
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
@@ -156,13 +156,19 @@ export function AppBoiteMoustaches() {
   const reponseAttendue = enAttente ? calculerReponseAttendue() : undefined;
   const segmentsProgression = calculerSegmentsProgression(etat);
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeBoiteMoustaches(exercice), lettrePhaseBoiteMoustaches(etat.phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeBoiteMoustaches(exercice), lettrePhaseBoiteMoustaches(etat.phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

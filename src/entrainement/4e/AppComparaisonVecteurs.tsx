@@ -122,7 +122,7 @@ export function AppComparaisonVecteurs() {
         etat.phase === "selection" ? nouvelEtat.selectionRevele : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.egaliteRevele;
       setHistorique((h) => [
         ...h,
-        { titre: titreEcran(exercice, etat.phase), votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttendue : undefined },
+        { corrigeDetaille: corrigeDetailleEcranCourant(), titre: titreEcran(exercice, etat.phase), votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttendue : undefined },
       ]);
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
@@ -149,11 +149,17 @@ export function AppComparaisonVecteurs() {
     setEtat(demarrerSessionComparaisonVecteurs(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as ProprieteComparaison)));
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeComparaisonVecteurs(exercice), etat.phase === "selection" ? "a" : "b")} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : reponseAttendue,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeComparaisonVecteurs(exercice), etat.phase === "selection" ? "a" : "b")} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

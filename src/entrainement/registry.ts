@@ -364,6 +364,11 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '6gen102': entree(CH_6E_ANALYSE_COMBINATOIRE, () => import('./6e-6h/App6gen102').then((m) => ({ default: m.App6gen102 }))),
   '6gen103': entree(CH_6E_ANALYSE_COMBINATOIRE, () => import('./6e-6h/App6gen103').then((m) => ({ default: m.App6gen103 }))),
   '6gen104': entree(CH_6E_ANALYSE_COMBINATOIRE, () => import('./6e-6h/App6gen104').then((m) => ({ default: m.App6gen104 }))),
+  '6gen105': entree(CH_6E_ANALYSE_COMBINATOIRE, () => import('./6e-6h/App6gen105').then((m) => ({ default: m.App6gen105 }))),
+  '6gen106': entree(CH_6E_ANALYSE_COMBINATOIRE, () => import('./6e-6h/App6gen106').then((m) => ({ default: m.App6gen106 }))),
+  '6gen107': entree(CH_6E_ANALYSE_COMBINATOIRE, () => import('./6e-6h/App6gen107').then((m) => ({ default: m.App6gen107 }))),
+  '6gen108': entree(CH_6E_ANALYSE_COMBINATOIRE, () => import('./6e-6h/App6gen108').then((m) => ({ default: m.App6gen108 }))),
+  '6gen109': entree(CH_6E_ANALYSE_COMBINATOIRE, () => import('./6e-6h/App6gen109').then((m) => ({ default: m.App6gen109 }))),
 
   // --- 6e, chapitre 8 : Variables aléatoires et lois de probabilités ---
   '6gen49': entree(CH_6E_VARIABLES_ALEATOIRES, () => import('./6e-6h/App6gen49').then((m) => ({ default: m.App6gen49 }))),

@@ -161,7 +161,7 @@ export function AppChoisirModele() {
     setClotures((liste) => liste.map((c, i) => (i === ecran ? cloture : c)));
     setHistorique((liste) =>
       liste.map((h, i) =>
-        i === ecran ? { titre: TITRES[ecran], votreReponse, correcte: correct, reponseAttendue: correct ? undefined : reponseAttendue(exercice, ecran) } : h,
+        i === ecran ? { corrigeDetaille: corrigeDetailleEcranCourant(), titre: TITRES[ecran], votreReponse, correcte: correct, reponseAttendue: correct ? undefined : reponseAttendue(exercice, ecran) } : h,
       ),
     );
     setEnAttente({ revele: !correct });
@@ -176,6 +176,12 @@ export function AppChoisirModele() {
     setEcran((ecran + 1) as Ecran);
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeChoisirModele(exercice), lettreEtape(ecran))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -183,7 +189,7 @@ export function AppChoisirModele() {
         labelSuivant: ecran === NB_ECRANS - 1 ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerSuivant,
         messageRevele: TENTATIVES_MAX[ecran] === 1 ? "Ce n'était pas la bonne réponse." : undefined,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeChoisirModele(exercice), lettreEtape(ecran))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

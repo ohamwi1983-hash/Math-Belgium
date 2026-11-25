@@ -346,7 +346,7 @@ export function AppSignesProduit() {
       }
     })();
 
-    setHistorique((h) => [...h, ecranClos(titreEcran(nouvelEtat), votreReponse, revele, aideEcran(), reponseAttendueEcran(etat.phase, nouvelEtat))]);
+    setHistorique((h) => [...h, ecranClos(titreEcran(nouvelEtat), votreReponse, revele, aideEcran(), reponseAttendueEcran(etat.phase, nouvelEtat), corrigeDetailleEcranCourant())]);
     setEnAttente({ etatSuivant: nouvelEtat, revele });
   }
 
@@ -400,6 +400,16 @@ export function AppSignesProduit() {
     }
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return (
+          <CorrigeDetailleEcran
+            etapes={lignesDeLEtape(correctionDetailleeSignesProduit(etat.exerciceInitial), lettreEcranSignesProduit(etat.exerciceInitial, etat.phase, etat.indexFacteurExercice))}
+          />
+        );
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -411,11 +421,7 @@ export function AppSignesProduit() {
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : reponseAttendueEcran(etat.phase, enAttente.etatSuivant),
         // Corrigé détaillé de l'écran (mêmes lignes que le papier), calculé sur l'instance INITIALE
         // (avant réduction d'un facteur) : la lettre suit la séquence de la session.
-        corrigeDetaille: (
-          <CorrigeDetailleEcran
-            etapes={lignesDeLEtape(correctionDetailleeSignesProduit(etat.exerciceInitial), lettreEcranSignesProduit(etat.exerciceInitial, etat.phase, etat.indexFacteurExercice))}
-          />
-        ),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

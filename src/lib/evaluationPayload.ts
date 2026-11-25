@@ -94,6 +94,7 @@ export type IdGenerateurPilote =
   | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22' | '6gen90' | '6gen85' | '6gen91' | '6gen88' | '6gen86' | '6gen92' | '6gen89' | '6gen87'
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
   | '6gen100' | '6gen101' | '6gen102' | '6gen103' | '6gen104'
+  | '6gen105' | '6gen106' | '6gen107' | '6gen108' | '6gen109'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
   | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84' | '6gen82' | '6gen78' | '6gen80' | '6gen83' | '6gen79' | '6gen81'
   | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42' | '6gen93' | '6gen95' | '6gen94' | '6gen97' | '6gen96' | '6gen98' | '6gen99'
@@ -216,6 +217,11 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'analyse-combinatoire', sectionId: 'binomenewton', generatorId: '6gen102', label: 'Triangle de Pascal et propriétés (6gen102)', processus: 1 },
   { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementcombine', generatorId: '6gen103', label: 'Anagrammes et contraintes (6gen103)', processus: 2 },
   { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementfondamental', generatorId: '6gen104', label: 'Étoiles et barres (6gen104)', processus: 2 },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementcombine', generatorId: '6gen105', label: 'Au moins un : le complément (6gen105)', processus: 3 },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementproblemes', generatorId: '6gen106', label: 'Chemins dans un quadrillage (6gen106)', processus: 3 },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'binomenewton', generatorId: '6gen107', label: 'Terme indépendant (6gen107)', processus: 2 },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'binomialesequence', generatorId: '6gen108', label: 'Avec ou sans remise ? Choisir le modèle (6gen108)', processus: 3 },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'binomialesequence', generatorId: '6gen109', label: 'Détective d\'erreurs : analyse combinatoire (6gen109)', processus: 3 },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'variablesdiscretes', generatorId: '6gen49', label: '' },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'loibinomiale', generatorId: '6gen50', label: '' },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'loinormale', generatorId: '6gen51', label: '' },
@@ -1839,31 +1845,77 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
   },
   'analyse-combinatoire': {
+    // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`, audit 6e ch. 7, lot F) — la
+    // clé est le badge (`exemple`) ou le label (`exempleLibre`) du bloc ; chaque énoncé reprend les
+    // nombres du cours ; une démonstration dit QUOI démontrer, jamais la méthode.
     denombrementfondamental: [
-      undefined,
-      "Démontre que $A_n^k = C_n^k \\times k!$.",
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      "Démontre, sans calculer de factorielles, que $C_5^3+2\\times C_5^2+C_5^1 = C_7^3$, puis déduis-en que $\\Gamma_5^3 = C_{5+3-1}^3$.",
+      { cle: 'Aₙᵖ = n! ÷ (n − p)!', enonce: "Démontre que le nombre d'arrangements de $p$ éléments choisis parmi $n$ vaut $A_n^p = \\dfrac{n!}{(n-p)!}$." },
+      { cle: 'symétrie Cₙᵖ = Cₙⁿ⁻ᵖ', enonce: "Démontre que, pour $0 \\leq p \\leq n$, $C_n^p = C_n^{n-p}$." },
+      { cle: 'aligner ou emporter 3 livres parmi 8', enonce: "Tu possèdes 8 livres. De combien de façons peux-tu en aligner 3 sur une étagère ? De combien de façons peux-tu en emporter 3 dans ton sac ? Explique le lien entre les deux résultats." },
+      { cle: 'Aₙᵖ = Cₙᵖ × p!', enonce: "Démontre que $A_n^p = C_n^p \\times p!$." },
+      { cle: 'nombres de 4 chiffres tous différents', enonce: "Combien de nombres de 4 chiffres ont leurs 4 chiffres tous différents ?" },
+      { cle: 'nombres pairs de 3 chiffres', enonce: "Combien de nombres pairs de 3 chiffres ont leurs 3 chiffres tous différents ?" },
+      { cle: 'écrits avec 1, 2, 5, 7, 8 et 9', enonce: "Avec les chiffres 1, 2, 5, 7, 8 et 9, combien de nombres de 4 chiffres peux-tu écrire si chaque chiffre ne sert qu'une fois ? Et si un chiffre peut être répété ?" },
+      { cle: 'mots de 4 lettres avec A, E, M, R', enonce: "Combien de mots (avec ou sans sens) peux-tu écrire en utilisant une fois chacune des lettres A, E, M et R ?" },
+      { cle: 'D(n) = n(n − 3) ÷ 2', enonce: "Démontre qu'un polygone convexe à $n$ côtés possède $D(n) = \\dfrac{n(n-3)}{2}$ diagonales." },
+      { cle: "diagonales d'un polygone à 9 côtés", enonce: "Combien de diagonales a un polygone convexe à 9 côtés ? Quel polygone convexe a exactement 27 diagonales ?" },
+      { cle: 'tournoi de 45 matchs', enonce: "Dans un tournoi, chaque équipe rencontre une fois chacune des autres, et 45 matchs ont été joués en tout. Combien d'équipes participent ?" },
+      { cle: "dispositions autour d'une table ronde", enonce: "Démontre que $n$ objets distincts peuvent être disposés de $(n-1)!$ façons différentes autour d'une table ronde, deux dispositions qui se déduisent l'une de l'autre par une rotation étant considérées comme identiques." },
+      { cle: 'table ronde et collier à 7 éléments', enonce: "De combien de façons 7 personnes peuvent-elles s'asseoir autour d'une table ronde, si seules les places relatives comptent ? De combien de façons peut-on enfiler 7 perles toutes différentes sur un collier fermé ?" },
+      { cle: 'groupes de 3 lettres parmi 5', enonce: "Combien de groupes de 3 lettres, sans ordre et avec répétition, peut-on former avec les lettres A, B, C, D et E ? Compte-les de deux façons différentes." },
+      { cle: 'par les étoiles et les barres', enonce: "Démontre que le nombre de façons de choisir $p$ éléments parmi $n$ types, avec répétition et sans tenir compte de l'ordre, vaut $\\Gamma_n^p = C_{n+p-1}^p$." },
+      { cle: 'cornets de 3 boules parmi 4 parfums', enonce: "Un glacier propose 4 parfums. Combien de cornets de 3 boules différents peux-tu commander, si un parfum peut être répété et si l'ordre des boules ne compte pas ?" },
+    ],
+    denombrementcombine: [
+      { cle: '10 personnes en 3 groupes nommés', enonce: "10 élèves sont répartis en trois équipes : 5 au football, 3 au volley et 2 au tennis. Combien de répartitions sont possibles ? Calcule ce nombre de deux façons différentes." },
+      { cle: 'la multinomiale comme produit de combinaisons', enonce: "Démontre que, si $n = n_1 + n_2 + \\ldots + n_r$, alors $C_n^{n_1} \\times C_{n-n_1}^{n_2} \\times \\ldots \\times C_{n_r}^{n_r} = \\dfrac{n!}{n_1! \\times n_2! \\times \\ldots \\times n_r!}$." },
+      { cle: '6 personnes en 3 binômes', enonce: "De combien de façons peut-on répartir 6 élèves en 3 binômes, les binômes n'ayant ni nom ni numéro ?" },
+      { cle: 'anagrammes du mot MISSISSIPPI', enonce: "Combien de mots différents peut-on écrire en permutant les 11 lettres du mot MISSISSIPPI ? Combien d'anagrammes ce mot possède-t-il ?" },
+      { cle: 'anagrammes de CAHIER', enonce: "On permute les 6 lettres du mot CAHIER. Combien de mots obtient-on si les voyelles A, I et E restent côte à côte ? Combien si les lettres C et R ne sont jamais côte à côte ?" },
+      { cle: '1 président et 2 vice-présidents', enonce: "Un club de 10 membres élit un président et 2 vice-présidents ; les deux vice-présidents ont le même rôle. Combien de bureaux différents sont possibles ?" },
+      { cle: 'comité mixte', enonce: "Combien de comités différents peut-on former avec 2 hommes choisis parmi 8 et 2 femmes choisies parmi 6 ?" },
+      { cle: 'toutes de la même section', enonce: "Une association a deux sections, l'une de 10 membres, l'autre de 15. De combien de façons peut-on choisir 3 personnes qui appartiennent toutes à la même section ?" },
+      { cle: 'dominos à 6 valeurs', enonce: "Chaque moitié d'un domino porte une valeur de 0 à 5, et un domino peut se retourner. Combien de dominos différents existe-t-il ?" },
+      { cle: 'Cₙ² + n = Cₙ₊₁²', enonce: "Démontre que, pour tout entier $n \\geq 1$, $C_n^2 + n = C_{n+1}^2$." },
+      { cle: 'résultats de 2 dés', enonce: "On lance deux dés à 6 faces. Combien de résultats différents peut-on noter si les dés sont discernables ? Et s'ils sont indiscernables ? Les résultats obtenus avec des dés indiscernables sont-ils équiprobables ?" },
+      { cle: 'Xavier et Yann', enonce: "On forme un comité de 6 personnes parmi 20, dont Xavier et Yann. Combien de comités sont possibles si Xavier et Yann refusent de siéger ensemble ? Et s'ils refusent de siéger l'un sans l'autre ?" },
+      { cle: 'au moins une femme', enonce: "Un club compte 8 hommes et 6 femmes. Combien de comités de 3 personnes comprennent au moins une femme ?" },
+      { cle: 'contenant un 0 et un 9', enonce: "Un code de cadenas compte 4 chiffres de 0 à 9, répétitions permises. Combien de codes contiennent au moins un 0 et au moins un 9 ?" },
     ],
     binomenewton: [
-      "Démontre que, dans le développement de $(a+b)^4$, le coefficient du terme en $a^{4-i}b^i$ est $C_4^i$, puis généralise ce résultat à $(a+b)^n$.",
-      "Développe complètement $(2x-1)^5$ à l'aide de la formule du binôme de Newton, puis vérifie ton résultat en $x=1$.",
-      "Démontre que $C_{n-1}^{k-1}+C_{n-1}^k = C_n^k$.",
-      undefined,
-      "Démontre que $C_n^0+C_n^1+\\ldots+C_n^n = 2^n$.",
-      undefined,
-      undefined,
+      { cle: 'formule du binôme, par dénombrement', enonce: "Démontre que, dans le développement de $(a+b)^4$, le coefficient du terme en $a^{4-i}b^i$ est $C_4^i$, puis généralise ce résultat à $(a+b)^n$." },
+      { cle: 'Développement complet de (2x − 1)⁵', enonce: "Développe complètement $(2x-1)^5$ à l'aide de la formule du binôme de Newton, puis vérifie ton résultat en $x=1$." },
+      { cle: 'relation de Pascal, par dénombrement', enonce: "Démontre que $C_n^k = C_{n-1}^{k-1}+C_{n-1}^k$ pour $1 \\leq k \\leq n-1$." },
+      { cle: 'relation de Pascal, par le calcul', enonce: "Démontre que $C_{n-1}^{k-1}+C_{n-1}^k = C_n^k$ pour $1 \\leq k \\leq n-1$." },
+      { cle: 'Retour au § 1', enonce: "Vérifie, en appliquant la relation de Pascal, que $C_5^3+2 \\times C_5^2+C_5^1 = C_7^3$, puis interprète ce résultat à l'aide de $\\Gamma_5^3$." },
+      { cle: 'les trois propriétés sur la ligne n = 5', enonce: "Sur la ligne $n=5$ du triangle de Pascal, calcule $C_5^2$ à partir de la ligne 4, donne l'autre coefficient de la ligne qui lui est égal, puis vérifie que la somme de la ligne vaut $2^5$." },
+      { cle: "la somme d'une ligne vaut 2ⁿ", enonce: "Démontre que $C_n^0+C_n^1+\\ldots+C_n^n = 2^n$." },
+      { cle: 'un ensemble à n éléments a 2ⁿ parties', enonce: "Démontre qu'un ensemble à $n$ éléments possède $2^n$ parties." },
+      { cle: 'chemins de A à B', enonce: "Sur un quadrillage de 4 cases de large et 3 de haut, on va du coin A(0 ; 0) au coin B(4 ; 3) en avançant d'une case vers la droite ou vers le haut. Combien de chemins existe-t-il ? Combien passent par P(2 ; 1) ? Combien évitent P ?" },
+      { cle: 'terme en x² de (2x − 1)⁵', enonce: "Sans développer complètement, donne le terme en $x^2$ de $(2x-1)^5$." },
+      { cle: 'terme indépendant de x', enonce: "Le développement de $\\left(x^2-\\dfrac{2}{x}\\right)^6$ possède-t-il un terme indépendant de $x$ ? Si oui, calcule-le. Même question pour $\\left(x^2-\\dfrac{2}{x}\\right)^5$." },
+      { cle: 'valeur approchée de 1,01⁴', enonce: "Donne, sans calculatrice, une valeur approchée de $1{,}01^4$, puis compare-la à la valeur exacte $1{,}04060401$." },
+    ],
+    denombrementproblemes: [
+      { cle: 'mains « carré »', enonce: "On distribue 5 cartes d'un jeu de 32 cartes (8 hauteurs, 4 couleurs). Combien de mains contiennent un carré, c'est-à-dire les 4 cartes d'une même hauteur ?" },
+      { cle: 'Toutes les mains de poker à 32 cartes', enonce: "Dans un jeu de 32 cartes (8 hauteurs, 4 couleurs), on classe les mains de 5 cartes selon la répétition des hauteurs : carré, full, brelan, deux paires, une paire, aucune hauteur répétée. Dénombre chaque catégorie, puis vérifie que leur total vaut $C_{32}^5$." },
+      { cle: 'somme 9 ou somme 10', enonce: "On lance trois dés. Les sommes 9 et 10 s'écrivent chacune de 6 façons sans tenir compte de l'ordre. Laquelle des deux sommes a le plus de chances de sortir ? Justifie ta réponse." },
+      { cle: '12 objets dans 3 boîtes', enonce: "On range 12 objets différents dans 3 boîtes numérotées qui contiennent exactement 6, 4 et 2 objets. Combien de rangements sont possibles ?" },
+      { cle: '3 curseurs', enonce: "Une table de mixage a 3 curseurs, chacun réglable sur 4 positions. Combien de réglages sont possibles ? Et si les 3 curseurs doivent être sur des positions toutes différentes ?" },
     ],
     probabilitehypergeometrique: [
-      undefined,
-      undefined,
-      "Pour une urne de 5 boules rouges et 5 boules bleues (3 tirages sans remise), démontre que la probabilité de la composition « 2 rouges et 1 bleue » est égale à $C_3^2$ fois la probabilité d'une séquence précise, et retrouve ainsi $\\dfrac{5}{12}$.",
-      undefined,
+      { cle: 'la formule de la loi hypergéométrique', enonce: "Une population de $N$ éléments contient $K$ succès ; on en tire $n$ au hasard, sans remise. Démontre que la probabilité d'obtenir exactement $k$ succès vaut $P(k) = \\dfrac{C_K^k \\times C_{N-K}^{n-k}}{C_N^n}$." },
+      { cle: 'contrôle de 5 pièces', enonce: "Un lot de 20 pièces contient 6 pièces défectueuses. On prélève 5 pièces au hasard, sans remise. Calcule la probabilité qu'exactement 2 d'entre elles soient défectueuses." },
+      { cle: 'séquence RRB ou composition', enonce: "Une urne contient 5 boules rouges et 5 boules bleues ; on tire 3 boules, l'une après l'autre, sans remise. Calcule la probabilité d'obtenir rouge, rouge, bleue dans cet ordre, puis celle d'obtenir 2 rouges et 1 bleue dans n'importe quel ordre." },
+      { cle: "composition = nombre d'ordres", enonce: "Pour une urne de 5 boules rouges et 5 boules bleues (3 tirages sans remise), démontre que la probabilité de la composition « 2 rouges et 1 bleue » est égale à $C_3^2$ fois la probabilité d'une séquence précise, et retrouve ainsi $\\dfrac{5}{12}$." },
+      { cle: "deviner l'ordre exact", enonce: "Neuf jetons portent les lettres A à I. On en tire 4, l'un après l'autre, sans remise. Calcule la probabilité d'obtenir exactement la séquence B, A, C, H, puis la probabilité de deviner en plus la 5e lettre tirée." },
+      { cle: 'petit loto', enonce: "Dans un petit loto, 4 numéros gagnants sont tirés parmi 10 ; tu coches 2 numéros et tu gagnes la grille s'ils sont tous les deux gagnants. Indépendamment, un numéro bonus est tiré parmi 5 et tu en coches 1. Calcule la probabilité de gagner la grille et le bonus." },
+    ],
+    binomialesequence: [
+      { cle: 'les Nₖ chemins sont Cₙᵏ', enonce: "On répète $n$ fois, de façon indépendante, une épreuve dont le succès a une probabilité $p$. Démontre que la probabilité d'obtenir exactement $k$ succès vaut $P(X=k) = C_n^k \\times p^k \\times (1-p)^{n-k}$." },
+      { cle: 'exactement 2 lancers francs', enonce: "Une joueuse réussit un lancer franc avec une probabilité de $0{,}4$, ses lancers étant indépendants. Sur 6 lancers, calcule la probabilité qu'elle en réussisse exactement 2." },
+      { cle: 'au moins 1, au plus 5', enonce: "Une joueuse réussit un lancer franc avec une probabilité de $0{,}4$ ; elle tire 6 lancers indépendants. Calcule la probabilité qu'elle réussisse au moins 1 lancer, au plus 5 lancers, puis au moins 4 lancers." },
+      { cle: 'la somme des P(X = k) vaut 1', enonce: "Démontre que, pour une loi binomiale de paramètres $n$ et $p$, $\\displaystyle\\sum_{k=0}^{n} P(X=k) = 1$." },
     ],
   },
   'lieux-geometriques': {
@@ -1997,7 +2049,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-reciproques-cyclometriques', 'fonctions-logarithmes', 'fonctions-exponentielles', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees', 'probabilites']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-reciproques-cyclometriques', 'fonctions-logarithmes', 'fonctions-exponentielles', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees', 'probabilites', 'analyse-combinatoire']
 
 /** Bloc de DÉMONSTRATION (« Démonstration — … », « Démonstration alternative — … ») : seuls ces
  * blocs alimentent le type « Formule + démonstration ». Les exemples résolus (calculs) ne sont plus
@@ -4226,12 +4278,12 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       {
         enonce: "Qu'est-ce qui distingue un arrangement d'une combinaison ? Quelle question faut-il toujours se poser en premier ?",
         corrige:
-          "La question à se poser est : permuter les éléments choisis change-t-il le résultat ? Si oui (un podium, un mot de passe), c'est un arrangement $A_n^k$ : l'ordre fait partie du résultat. Si non (un comité, une main de cartes), c'est une combinaison $C_n^k$ : seul l'ensemble choisi compte, peu importe l'ordre dans lequel on l'a composé. « Choisir 3 parmi 8 » peut ainsi donner 336 résultats différents (arrangement) ou seulement 56 (combinaison), selon cette seule question.",
+          "La question à se poser est : permuter les éléments choisis change-t-il le résultat ? Si oui (un podium, un mot de passe), c'est un arrangement $A_n^p$ : l'ordre fait partie du résultat. Si non (un comité, une main de cartes), c'est une combinaison $C_n^p$ : seul l'ensemble choisi compte, peu importe l'ordre dans lequel on l'a composé. « Choisir 3 parmi 8 » peut ainsi donner 336 résultats différents (arrangement) ou seulement 56 (combinaison), selon cette seule question.",
       },
       {
-        enonce: "Pourquoi $C_n^k$ s'obtient-il en divisant $A_n^k$ par $k!$, et pas par un autre nombre ?",
+        enonce: "Pourquoi $C_n^p$ s'obtient-il en divisant $A_n^p$ par $p!$, et pas par un autre nombre ?",
         corrige:
-          "Choisir $k$ éléments puis les ordonner revient exactement à les arranger directement : chaque groupe non ordonné de $k$ éléments se décline en $k!$ ordres différents, tous comptés séparément par $A_n^k$. Diviser par $k!$ retire précisément ces réordonnancements internes d'un même groupe, qui ne produisent plus de résultat distinct une fois l'ordre ignoré — d'où $C_n^k=A_n^k/k!$, une division et non une soustraction.",
+          "Choisir $p$ éléments puis les ordonner revient exactement à les arranger directement : chaque groupe non ordonné de $p$ éléments se décline en $p!$ ordres différents, tous comptés séparément par $A_n^p$. Diviser par $p!$ retire précisément ces réordonnancements internes d'un même groupe, qui ne produisent plus de résultat distinct une fois l'ordre ignoré — d'où $C_n^p=\\dfrac{A_n^p}{p!}$, une division et non une soustraction.",
       },
     ],
     denombrementcombine: [
@@ -4265,9 +4317,9 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
           "Chaque contrainte supplémentaire (fixer 4 cartes de même hauteur pour un carré, par exemple) réduit la liberté laissée pour composer le reste de la main : moins de cartes restent à choisir librement, donc moins de mains différentes peuvent en résulter. C'est pourquoi 224 mains « carré » (très contraintes) sont bien moins nombreuses que les 107 520 mains « paire » (contrainte plus légère) — le nombre de mains total $C_{32}^5=201\\,376$ reste la seule limite commune aux deux.",
       },
       {
-        enonce: "Pourquoi le paradoxe du Chevalier de Méré se résout-il en comptant les triplets ORDONNÉS plutôt que les partitions non ordonnées de chaque somme ?",
+        enonce: "Avec trois dés, les sommes 9 et 10 s'écrivent chacune de 6 façons sans tenir compte de l'ordre. Pourquoi le problème des trois dés de Galilée se résout-il en comptant les triplets ordonnés plutôt que ces décompositions ?",
         corrige:
-          "Les 6 partitions de la somme 9 et les 6 partitions de la somme 10 donnent une fausse impression d'égalité, car elles ne représentent pas le même nombre de façons RÉELLES d'obtenir chaque somme avec 3 dés distincts : une partition aux 3 valeurs différentes correspond à $3!=6$ lancers ordonnés possibles, une partition avec une paire de valeurs identiques n'en correspond qu'à 3, et une partition aux 3 valeurs identiques qu'à 1 seul. En comptant ces arrangements ordonnés, la somme 9 totalise 25 triplets contre 27 pour la somme 10 — un écart invisible tant qu'on ne compte que les partitions.",
+          "Les 6 partitions de la somme 9 et les 6 partitions de la somme 10 donnent une fausse impression d'égalité, car elles ne sont pas équiprobables : elles ne représentent pas le même nombre de façons réelles d'obtenir chaque somme avec 3 dés distincts : une partition aux 3 valeurs différentes correspond à $3!=6$ lancers ordonnés possibles, une partition avec une paire de valeurs identiques n'en correspond qu'à 3, et une partition aux 3 valeurs identiques qu'à 1 seul. En comptant ces arrangements ordonnés, la somme 9 totalise 25 triplets contre 27 pour la somme 10 — un écart invisible tant qu'on ne compte que les partitions.",
       },
     ],
     probabilitehypergeometrique: [
@@ -4281,17 +4333,22 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         corrige:
           "Une séquence précise fixe l'ORDRE exact d'apparition (par exemple rouge puis rouge puis bleue) : sa probabilité est un simple produit de fractions décroissantes, position par position. Une composition (par exemple « 2 rouges et 1 bleue », ordre libre) regroupe TOUTES les séquences qui y mènent — ici 3 séquences équiprobables — et sa probabilité est donc la somme de leurs probabilités individuelles, toujours plus grande que celle d'une seule séquence. C'est cette seconde probabilité, celle de la composition, que calcule directement la formule hypergéométrique.",
       },
+      {
+        enonce: "Pourquoi la probabilité d'une séquence exacte de $p$ éléments distincts tirés sans remise parmi $n$ se calcule-t-elle par un produit de fractions qui changent à chaque étape, et non par $\\dfrac{1}{n^p}$ comme pour un tirage avec remise ?",
+        corrige:
+          "Sans remise, chaque élément tiré disparaît réellement du reste : il y a un élément de moins à chaque étape suivante ($n$, puis $n-1$, puis $n-2$…), donc la probabilité de tirer exactement l'élément attendu vaut $\\dfrac{1}{n}$, puis $\\dfrac{1}{n-1}$, puis $\\dfrac{1}{n-2}$… — alors qu'avec remise, le nombre d'éléments disponibles reste $n$, d'où la probabilité constante $\\dfrac{1}{n}$ et le produit $\\dfrac{1}{n^p}$. Sans remise, le produit vaut $\\dfrac{1}{A_n^p}$ : une seule des $A_n^p$ séquences ordonnées possibles convient.",
+      },
     ],
     binomialesequence: [
       {
         enonce: "Pourquoi le coefficient binomial $C_n^k$ n'est-il jamais optionnel dans la formule $P(X=k)=C_n^kp^k(1-p)^{n-k}$ dès que $0<k<n$ ?",
         corrige:
-          "$p^k(1-p)^{n-k}$ ne donne que la probabilité d'UNE seule façon précise d'obtenir ces $k$ succès parmi les $n$ épreuves ; mais ces $k$ succès peuvent occuper $C_n^k$ positions différentes parmi les $n$ épreuves, toutes aussi probables les unes que les autres. Oublier ce facteur revient à ne compter qu'une seule de ces positions : avec $n=6$, $p=0,4$, $k=2$, cela donnerait un résultat 15 fois trop petit, exactement $C_6^2=15$.",
+          "$p^k(1-p)^{n-k}$ ne donne que la probabilité d'UNE seule façon précise d'obtenir ces $k$ succès parmi les $n$ épreuves ; mais ces $k$ succès peuvent occuper $C_n^k$ positions différentes parmi les $n$ épreuves, toutes aussi probables les unes que les autres. Oublier ce facteur revient à ne compter qu'une seule de ces positions : avec $n=6$, $p=0{,}4$, $k=2$, cela donnerait un résultat 15 fois trop petit, exactement $C_6^2=15$.",
       },
       {
-        enonce: "Pourquoi la probabilité d'une séquence exacte sans remise se calcule-t-elle par un produit de fractions qui diminuent à chaque étape, et non par $1/n^k$ comme pour un tirage avec remise ?",
+        enonce: "Pourquoi le nombre de chemins de l'arbre qui comptent exactement $k$ succès en $n$ épreuves vaut-il $C_n^k$ ?",
         corrige:
-          "Sans remise, chaque élément tiré disparaît réellement du reste : il y a un élément de moins disponible à chaque étape suivante (n, puis n-1, puis n-2...), donc la probabilité de deviner exactement le bon élément augmente d'étape en étape — alors qu'avec remise, le nombre d'éléments disponibles reste constamment $n$, d'où la probabilité constante $1/n$ à chaque tirage et le produit $1/n^k$. Utiliser $1/n^k$ sans remise ignorerait que le nombre de concurrents restants diminue réellement à chaque tirage.",
+          "Un chemin est une suite de $n$ résultats, succès ou échec. Un chemin à $k$ succès est entièrement déterminé par les $k$ rangs, parmi les $n$ épreuves, où se trouvent les succès : choisir ces rangs, c'est choisir $k$ éléments parmi $n$ sans ordre (l'ordre dans lequel on énumère les rangs ne change pas le chemin). Il y a donc $C_n^k$ tels chemins — c'est le nombre $N_k$ que le chapitre 6 comptait un par un sur l'arbre.",
       },
     ],
   },

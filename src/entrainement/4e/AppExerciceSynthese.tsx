@@ -332,6 +332,7 @@ export function AppExerciceSynthese() {
       setHistorique((h) => [
         ...h,
         {
+          corrigeDetaille: corrigeDetailleEcranCourant(),
           titre: TITRE_ECRAN[etat.phase],
           votreReponse,
           correcte: !revele,
@@ -384,13 +385,19 @@ export function AppExerciceSynthese() {
       <TableEffectifsClasses exercice={medianeClasses} />
     ) : null;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeExerciceSynthese(exercice), lettrePhaseExerciceSynthese(exercice, phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: <div className="answer-reveal">{reponseAttenduePhase(phase, exercice)}</div>,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeExerciceSynthese(exercice), lettrePhaseExerciceSynthese(exercice, phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

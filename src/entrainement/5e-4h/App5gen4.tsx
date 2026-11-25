@@ -105,7 +105,7 @@ export function App5gen4() {
     if (!derniere) return;
     setHistorique((h) => [
       ...h,
-      { titre: derniere.libelle, votreReponse, correcte: !derniere.revele, reponseAttendue: derniere.revele ? derniere.valeur : undefined },
+      { corrigeDetaille: corrigeDetailleEcranCourant(), titre: derniere.libelle, votreReponse, correcte: !derniere.revele, reponseAttendue: derniere.revele ? derniere.valeur : undefined },
     ]);
   }
 
@@ -165,6 +165,12 @@ export function App5gen4() {
   const choixFaux = enAttente?.revele && derniere && derniere.resultatExiste !== question.resultatExiste;
   const cibleChoix = choixFaux && derniere ? cibleComposeeGraphique(exercice, question, { resultatExiste: derniere.resultatExiste, valeur: null }) : null;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeComposeeGraphique(exercice), lettreEtape(etat.indexQuestion))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -183,7 +189,7 @@ export function App5gen4() {
             {resultatLatex(question).existe ? null : " n'existe pas"}
           </span>
         ),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeComposeeGraphique(exercice), lettreEtape(etat.indexQuestion))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

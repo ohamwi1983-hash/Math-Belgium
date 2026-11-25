@@ -86,7 +86,7 @@ export function AppConstructionParabole() {
     setMessageErreur(null);
     const attendues = ecran.type === "trace" ? null : resultat.revele ? tracesAttendues(e, ecran, resultat.etat.acquis) : traces;
     const attendueTexte = <RenduFragments fragments={bilanEcran(ecran)} />;
-    setHistorique((h) => [...h, ecranClos(titreEcran(ecran), votreReponse, resultat.revele, etat.niveauAide > 0, attendueTexte)]);
+    setHistorique((h) => [...h, ecranClos(titreEcran(ecran), votreReponse, resultat.revele, etat.niveauAide > 0, attendueTexte, corrigeDetailleEcranCourant())]);
     setEnAttente({ revele: resultat.revele, derniere: etat.ecran >= total - 1, tracesClos: attendues });
   }
 
@@ -112,13 +112,19 @@ export function AppConstructionParabole() {
     setEnAttente(null);
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeConstructionParabole(e), lettreEtape(etat.ecran))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: enAttente.revele ? (ecran.type === "trace" ? "La courbe passe par les points de proche en proche, d'une extrémité à l'autre, en passant par le sommet." : "La construction attendue est dessinée sur la figure.") : undefined,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeConstructionParabole(e), lettreEtape(etat.ecran))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

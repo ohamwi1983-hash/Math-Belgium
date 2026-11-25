@@ -532,6 +532,7 @@ export function AppCaracteristiquesAlgebriques() {
         // 2e solution à valider : même segment, réponses mises bout à bout.
         copie[index] = {
           titre: existante.titre,
+          corrigeDetaille: corrigeDetailleEcranCourant(),
           votreReponse: (
             <>
               {existante.votreReponse}
@@ -549,7 +550,7 @@ export function AppCaracteristiquesAlgebriques() {
           ),
         };
       } else {
-        copie[index] = { titre: TITRE_PHASE[etat.phase], votreReponse, correcte: !revele, reponseAttendue: attendue };
+        copie[index] = { titre: TITRE_PHASE[etat.phase], votreReponse, correcte: !revele, reponseAttendue: attendue, corrigeDetaille: corrigeDetailleEcranCourant() };
       }
       return copie;
     });
@@ -587,17 +588,23 @@ export function AppCaracteristiquesAlgebriques() {
     setEnAttente(null);
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return (
+      <CorrigeDetailleEcran
+        etapes={lignesDeLEtape(correctionDetailleeCaracteristiquesAlgebriques(etat.exerciceCourant), lettrePhaseCaracteristiquesAlgebriques(etat.exerciceCourant, etat.phase))}
+      />
+    );
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttenduePhase(etat),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: (
-          <CorrigeDetailleEcran
-            etapes={lignesDeLEtape(correctionDetailleeCaracteristiquesAlgebriques(etat.exerciceCourant), lettrePhaseCaracteristiquesAlgebriques(etat.exerciceCourant, etat.phase))}
-          />
-        ),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

@@ -105,6 +105,10 @@ interface Props {
   validation?: ValidationEtapeProps | null;
   /** Choix fermé jugé ✗ / ✓ une fois l'écran clos (`DefinitionEcrans.bonneOption`) ; absent : ancien rendu. */
   bonneOption?: string;
+  /** Résumé du bandeau replié (`DefinitionEcrans.apercuEnonce`) ; absent : aperçu automatique. */
+  apercuEnonce?: Frag[] | null;
+  /** Figure gardée visible sous le bandeau replié (`ConfigAppEcrans.figureToujoursVisible`). */
+  figureToujoursVisible?: ReactNode;
 }
 
 const LIGNE_VIDE: LigneIntervalle = { ouvrant: "[", gauche: "", droite: "", fermant: "]" };
@@ -165,6 +169,8 @@ export function EtapeEcransTrigo({
   approchee,
   validation,
   bonneOption,
+  apercuEnonce,
+  figureToujoursVisible,
 }: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => valeursInitiales(mode));
   const [statutsSoumis, setStatutsSoumis] = useState<StatutVerification[] | null>(null);
@@ -250,7 +256,12 @@ export function EtapeEcransTrigo({
 
   return (
     <div>
-      <EnTeteExercice consigneGenerale={<Fragments fragments={consigneGenerale} />} blocDonnees={blocDonnees} />
+      <EnTeteExercice
+        consigneGenerale={<Fragments fragments={consigneGenerale} />}
+        blocDonnees={blocDonnees}
+        apercu={apercuEnonce ? <Fragments fragments={apercuEnonce} /> : undefined}
+        figureToujoursVisible={figureToujoursVisible}
+      />
       <p className="prompt-text">
         <Fragments fragments={consigneEcran} />
       </p>
