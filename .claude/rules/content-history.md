@@ -5832,6 +5832,22 @@ pilotes avec processus, `regroupementsPapier.ts` : 6gen111, 6gen114). Aucun bloc
 encore E(aX + b) = aE(X) + b et V(aX + b) = a²V(X) (6gen111, démonstration D2 du lot F), ni P(a < X ≤ b) = F(b) − F(a) pour
 une variable discrète (6gen112 escalier), ni « trouver k » (6gen113) ni le sens inverse de la loi uniforme (6gen115).
 
+## 6e (6h), Chapitre 10 — lot H2 de l'audit (nouveaux générateurs 6gen138–6gen143, 25/11/2026)
+
+Six générateurs nouveaux sur le socle `AppEcransTrigo` (détail, profils et mesures : `.claude/rules/feuilles-evaluations.md`,
+section « 6e ch. 10, lot H2 ») : 6gen138 tangente par la dérivée et forme dédoublée (§ 5 `tangentes`, Appliquer), 6gen139
+position d'une droite et d'une conique selon un paramètre (§ 4–5, carte au § 5, Transférer), 6gen140 miroirs en contexte
+(§ 6 `optique`, Transférer), 6gen141 orbites et ellipses : Kepler (§ 1 et § 3, carte au § 3 `airefocale`, Transférer),
+6gen142 hyperbole de navigation : LORAN (§ 6, Transférer), 6gen143 détective d'erreurs : coniques (fin, carte en fin de § 6,
+Transférer). Convention y² = 2px partout. Cartes « S'entraîner » ajoutées en fin de section (après 6gen60 : 141 ; après
+6gen62 : 138, 139 ; après 6gen63 : 140, 142, 143) ; registres par ajout (`registry.ts` après 6gen73,
+`evaluationAdapterRegistry.ts` avec `versionPapier` après 6gen63, `evaluationPayload.ts` : union et entrées pilotes,
+processus 2 / 3 / 3 / 3 / 3 / 3, `regroupementsPapier.ts` : 6gen138, 6gen139). Aucun bloc de cours ajouté ; le cours doit
+porter (lot F) : la condition de tangence k² = a²m² ± b² et le cas « droite parallèle à une asymptote / à l'axe : un
+seul point, pas une tangente » (6gen139), FT = FP pour la parabole (6gen140 `ftfp`), la distance focale D²/(16h) d'une
+antenne et les trajets 2a du lithotriteur (6gen140), le LORAN avec ses deux intersections possibles (6gen142). Module de
+figures propre au lot (`ui6e/outilsConiquesLotH2.ts`) : la figure de coniques des lots BC / H1 n'était pas fusionnée.
+
 ## 6e (6h), Chapitre 9 — lot H2 de l'audit (nouveaux générateurs 6gen128–6gen131, 25/11/2026)
 
 Quatre générateurs nouveaux sur le socle `AppEcransTrigo` (détail, profils et mesures : `.claude/rules/feuilles-evaluations.md`,
