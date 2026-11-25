@@ -9,6 +9,7 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { PlanPolygoneRegulier } from "./PlanPolygoneRegulier";
 import type { FigurePolygone } from "./PlanPolygoneRegulier";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 export type ModeEcranPolygones = { type: "champs"; champs: ChampPolygones[] } | { type: "choix"; options: OptionChoix[] };
 
@@ -141,7 +142,7 @@ export function EtapePolygonesReguliers({
       )}
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
+          <p><TexteInsistance texte={aideNiveau1.texte} /></p>
           {aideNiveau1.latex && (
             <div style={{ overflowX: "auto", maxWidth: "100%" }}>
               <Katex expression={aideNiveau1.latex} block />
@@ -149,7 +150,7 @@ export function EtapePolygonesReguliers({
           )}
           {niveauAide >= 2 && aideNiveau2.texte && (
             <>
-              <p>{aideNiveau2.texte}</p>
+              <p><TexteInsistance texte={aideNiveau2.texte} /></p>
               {aideNiveau2.latex && (
                 <div style={{ overflowX: "auto", maxWidth: "100%" }}>
                   <Katex expression={aideNiveau2.latex} block />

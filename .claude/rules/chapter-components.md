@@ -443,6 +443,11 @@ partagé ; contenu, aides, tentatives et vérification inchangés, `SelecteurVar
   et `ConfigAppEcrans.figureToujoursVisible` (6gen106 seulement aujourd'hui). C : `EtapeSelectionGraphiqueQCM` (6gen8/11/20/21) et `EtapeApparierGraphiqueCyclo`
   (6gen5) en grille 2 × 2 dès 312 px, carte cliquable (même sélection), `LoupeGraphique` plein écran ;
   6gen20 : graphique de f épinglé (`ReferenceEpinglee`). 5gen25 : grille dès qu'il y a la place.
+- Confort de lecture (lot G, 25/11/2026) : taille du texte (`calc(Npx * var(--g-t|--g-ui, 1))` dans `cadre.css` / `theme.css`,
+  variables dans `confortLecture.css`), « Aa » dans `BarreGenerateur`, corrigé « Lire ligne par ligne »
+  (`CorrigeDetailleEcran`), « Je bloque » (`JeBloque`, exemple de la section rendu par `ExemplePasAPas` /
+  `ExempleLibrePasAPas`, exportés de `ContenuEtape.tsx`), majuscules d'insistance en gras (`TexteInsistance`) :
+  voir `.claude/rules/cote-eleve.md`, « Générateurs ».
 - Styles : `src/entrainement/cadre.css`, chargé APRÈS `theme.css`, tout sous `.entrainement`.
   Échelle 12 (capitales) / 14 / 16 / 18 px ; Andika (`--lecture`) pour énoncé et consignes. Piège
   trouvé : `.btn:hover:not(:disabled)` (plus spécifique que `.btn-primary:hover`) rendait « Valider »

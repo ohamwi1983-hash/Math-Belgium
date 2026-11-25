@@ -12,6 +12,7 @@ import { PiedAnalytique } from "./PiedAnalytique";
 import { ILLISIBLE_ANALYTIQUE, t } from "../ui/retoursAnalytique";
 import { normaliserSigneMoins as normaliserMoins } from "../../../lib/normaliserSaisie";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceEquationParaboleDeveloppee;
@@ -71,7 +72,7 @@ export function EtapeRegroupementEquationParaboleDeveloppee({ exercice, tentativ
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
           <p>{TEXTE_AIDE_REGROUPEMENT_NIVEAU1}</p>
-          {niveauAide >= 2 && <p>{texteAideRegroupementNiveau2(exercice)}</p>}
+          {niveauAide >= 2 && <p><TexteInsistance texte={texteAideRegroupementNiveau2(exercice)} /></p>}
         </div>
       )}
       {!validation && (

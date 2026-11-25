@@ -80,7 +80,7 @@ function explicationPoints(e: ExerciceDeuxPlans, paire: [number, number]): strin
     return [...paire.map((i) => raisonCandidat(e, e.candidats[i]!)), `La droite d'intersection des deux plans passe par ces deux points : c'est ${droitePaire(e, paire)}.`];
   }
   const lignes: string[] = [];
-  if (paire.every((i) => estCommun(e, e.candidats[i]!))) lignes.push("Ces deux points sont confondus : il faut deux points DISTINCTS.");
+  if (paire.every((i) => estCommun(e, e.candidats[i]!))) lignes.push("Ces deux points sont confondus : il faut deux points distincts.");
   for (const i of paire) if (!estCommun(e, e.candidats[i]!)) lignes.push(raisonCandidat(e, e.candidats[i]!));
   const attendue = e.paireAttendue!;
   lignes.push(`Par exemple, ${libellePaire(e, attendue)} conviennent :`);

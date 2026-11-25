@@ -7,6 +7,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceSuiteRecurrenteAffine;
@@ -63,9 +64,9 @@ export function EtapeRegimePermanent({ exercice, tentativesUtilisees, tentatives
       )}
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{aide1.texte}</p>
+          <p><TexteInsistance texte={aide1.texte} /></p>
           {aide1.latex.length > 0 && <Katex expression={aide1.latex} block />}
-          {niveauAide >= 2 && aide2.texte.length > 0 && <p>{aide2.texte}</p>}
+          {niveauAide >= 2 && aide2.texte.length > 0 && <p><TexteInsistance texte={aide2.texte} /></p>}
           {niveauAide >= 2 && aide2.latex.length > 0 && <Katex expression={aide2.latex} block />}
         </div>
       )}

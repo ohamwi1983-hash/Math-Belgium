@@ -11,6 +11,7 @@ import { PiedAnalytique } from "./PiedAnalytique";
 import { ILLISIBLE_ANALYTIQUE, l, lireNombreAnalytique, t } from "../ui/retoursAnalytique";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceEquationCercle;
@@ -66,10 +67,10 @@ export function EtapeRayonEquationCercle({ exercice, tentativesUtilisees, tentat
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideRayonNiveau1(exercice)}</p>
+          <p><TexteInsistance texte={texteAideRayonNiveau1(exercice)} /></p>
           {niveauAide >= 2 && (
             <>
-              <p>{texteAideRayonNiveau2(exercice)}</p>
+              <p><TexteInsistance texte={texteAideRayonNiveau2(exercice)} /></p>
               {latexAide2 && (
                 <p>
                   <Katex expression={latexAide2} />

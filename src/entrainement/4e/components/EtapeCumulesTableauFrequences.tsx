@@ -11,6 +11,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { nombreFrTypo } from "../ui/nombreFr";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceTableauFrequences;
@@ -95,7 +96,7 @@ export function EtapeCumulesTableauFrequences({ exercice, tentativesUtilisees, t
 
       {niveauAide >= 1 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideCumulesNiveau1(exercice)}</p>
+          <p><TexteInsistance texte={texteAideCumulesNiveau1(exercice)} /></p>
           {niveauAide >= 2 && (
             <p>
               Effectifs cumulés déjà connus : {reveles.map((r) => `${nombreFrTypo(r.valeur)} → ${r.effectifCumule}`).join(", ")}. Reste à trouver

@@ -42,6 +42,7 @@ import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
 import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { expressionLibreVersLatex } from "./ui/formatExpressionLatex";
+import { TexteInsistance } from "../components/TexteInsistance";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -173,7 +174,7 @@ function reponseAttenduePour(exercice: ExerciceCourant, phase: PhaseEquationIneq
       return <>{formatValidationAttendueTexte(exercice)}</>;
     case "interpretation": {
       const optionCorrecte = exercice.optionsInterpretation.find((option) => option.correcte);
-      return optionCorrecte ? <>{optionCorrecte.texte}</> : undefined;
+      return optionCorrecte ? <><TexteInsistance texte={optionCorrecte.texte} /></> : undefined;
     }
   }
 }

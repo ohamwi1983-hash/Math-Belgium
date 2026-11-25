@@ -11,6 +11,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { nombreFrTypo } from "../ui/nombreFr";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceTableauFrequences;
@@ -160,8 +161,8 @@ export function EtapeIdentificationTableauFrequences({ exercice, tentativesUtili
 
       {niveauAide >= 1 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideIdentificationNiveau1(exercice)}</p>
-          {niveauAide >= 2 && <p>{texteAideIdentificationNiveau2(exercice)}</p>}
+          <p><TexteInsistance texte={texteAideIdentificationNiveau1(exercice)} /></p>
+          {niveauAide >= 2 && <p><TexteInsistance texte={texteAideIdentificationNiveau2(exercice)} /></p>}
         </div>
       )}
       {!validation && (

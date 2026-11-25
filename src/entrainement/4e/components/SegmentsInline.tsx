@@ -1,4 +1,5 @@
 import { Katex } from "./Katex";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 export type SegmentTexte = { type: "texte"; valeur: string } | { type: "katex"; valeur: string };
 
@@ -19,7 +20,7 @@ export function SegmentsInline({ segments }: Props) {
   return (
     <>
       {segments.map((segment, index) =>
-        segment.type === "texte" ? <span key={index}>{segment.valeur}</span> : <Katex key={index} expression={segment.valeur} />,
+        segment.type === "texte" ? <span key={index}><TexteInsistance texte={segment.valeur} debutDePhrase={index === 0} /></span> : <Katex key={index} expression={segment.valeur} />,
       )}
     </>
   );

@@ -1,6 +1,7 @@
 import { Katex } from "../components/Katex";
 import type { ArbreAffichage, EnTeteTableau, TableauEffectifsAffichage } from "../ui6e/formatArbreTableauEffectifs";
 import { arbreSvg } from "../ui6e/figuresArbreTableauEffectifs";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 /**
  * Figures de `6gen74`. L'arbre pondéré est la MÊME figure que sur papier (`ui6e/
@@ -23,7 +24,7 @@ function EnTete({ entete }: { entete: EnTeteTableau }) {
       <Katex expression={entete.latex} />
     </span>
   ) : (
-    <>{entete.texte}</>
+    <><TexteInsistance texte={entete.texte} /></>
   );
 }
 

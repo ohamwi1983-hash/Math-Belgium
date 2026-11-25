@@ -274,7 +274,7 @@ export function LecteurVideo({ bloc }: { bloc: BlocVideo }) {
  * cours, `pas-tout` = « Tout montrer » touché, plus rien n'est mis en avant), et « Écouter l'étape n »
  * (`lib/voixLecture.ts`), seulement à l'écran et si le navigateur a une synthèse vocale. Option
  * « Correspondances » : la légende des paires annotées (`correspondances`), sous l'énoncé. */
-function ExemplePasAPas({ bloc }: { bloc: BlocDe<'exemple'> }) {
+export function ExemplePasAPas({ bloc }: { bloc: BlocDe<'exemple'> }) {
   const aUnResultat = bloc.result.tag.trim() !== '' || bloc.result.text.trim() !== ''
   const total = bloc.steps.length + (aUnResultat ? 1 : 0)
   const [vus, setVus] = useState(Math.min(1, total))
@@ -357,7 +357,7 @@ function LegendeCorrespondances({ paires }: { paires: [string, string][] }) {
 }
 
 /** Exemple en forme libre : chaque bloc (paragraphe, tableau, figure…) est une étape. */
-function ExempleLibrePasAPas({ bloc }: { bloc: BlocDe<'exempleLibre'> }) {
+export function ExempleLibrePasAPas({ bloc }: { bloc: BlocDe<'exempleLibre'> }) {
   const total = bloc.blocks.length
   const [vus, setVus] = useState(Math.min(1, total))
   const [toutDemande, setToutDemande] = useState(false)

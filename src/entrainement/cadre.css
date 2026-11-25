@@ -21,7 +21,7 @@
   --barre-h: 0px;
   --radius-md: 10px;
   --radius-lg: 12px;
-  font: 16px/1.5 var(--sans);
+  font: calc(16px * var(--g-t, 1))/1.5 var(--sans);
   background: var(--surface);
   min-height: 100vh;
   min-height: 100svh;
@@ -85,7 +85,7 @@
 
 .entrainement .gen-barre-contexte {
   margin: 0;
-  font: 600 12px/1.3 var(--sans);
+  font: 600 calc(12px * var(--g-ui, 1))/1.3 var(--sans);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -143,7 +143,7 @@
 
 .entrainement .gen-barre-etape {
   margin: 0;
-  font: 600 14px/1.2 var(--sans);
+  font: 600 calc(14px * var(--g-ui, 1))/1.2 var(--sans);
   color: var(--ink-soft);
   white-space: nowrap;
 }
@@ -152,7 +152,7 @@
 .entrainement .video-generateur-lien {
   min-height: 44px;
   margin: 4px var(--gouttiere) 0;
-  font: 600 14px var(--sans);
+  font: 600 calc(14px * var(--g-ui, 1)) var(--sans);
 }
 
 /* ---------- A — page, en-tête du générateur ---------- */
@@ -181,7 +181,7 @@
 }
 
 .entrainement .app-title {
-  font: 600 18px/1.3 var(--sans);
+  font: 600 calc(18px * var(--g-titre, 1))/1.3 var(--sans);
   letter-spacing: 0;
 }
 
@@ -232,7 +232,7 @@
 }
 
 .entrainement .entete-exercice-label {
-  font: 600 12px/1.3 var(--sans);
+  font: 600 calc(12px * var(--g-ui, 1))/1.3 var(--sans);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -240,7 +240,7 @@
 }
 
 .entrainement .entete-exercice .prompt-text {
-  font: 400 18px/1.5 var(--lecture);
+  font: 400 calc(18px * var(--g-t, 1))/1.5 var(--lecture);
   color: var(--ink);
 }
 
@@ -250,7 +250,7 @@
 }
 
 .entrainement .entete-exercice .bloc-donnees-ligne {
-  font: 400 16px/1.5 var(--lecture);
+  font: 400 calc(16px * var(--g-t, 1))/1.5 var(--lecture);
 }
 
 /* Bouton « Énoncé ▾ » (énoncé repliable, maquette B). */
@@ -285,20 +285,20 @@
 
 /* Consignes et question de l'écran : Andika, sans filet orange. */
 .entrainement .prompt-text {
-  font: 400 16px/1.5 var(--lecture);
+  font: 400 calc(16px * var(--g-t, 1))/1.5 var(--lecture);
   color: var(--ink-soft);
 }
 
 .entrainement .prompt-text:not(:has(~ .prompt-text)),
 .entrainement .prompt-text.prompt-text--question-multiple {
-  font: 700 18px/1.4 var(--lecture);
+  font: 700 calc(18px * var(--g-t, 1))/1.4 var(--lecture);
   color: var(--ink);
   padding-left: 0;
   border-left: 0;
 }
 
 .entrainement .entete-exercice .prompt-text:not(:has(~ .prompt-text)) {
-  font: 400 18px/1.5 var(--lecture);
+  font: 400 calc(18px * var(--g-t, 1))/1.5 var(--lecture);
 }
 
 .entrainement .bloc-donnees-ligne {
@@ -322,7 +322,7 @@
 /* ---------- A — champs et boutons ---------- */
 
 .entrainement .field-label {
-  font: 600 14px/1.35 var(--sans);
+  font: 600 calc(14px * var(--g-t, 1))/1.35 var(--sans);
   letter-spacing: 0;
   text-transform: none;
 }
@@ -379,7 +379,7 @@
 .entrainement .ce-ligne-compacte .text-input,
 .entrainement .summary-table .text-input {
   min-height: 44px;
-  font-size: 16px;
+  font-size: calc(16px * var(--g-ui, 1));
 }
 
 .entrainement .ce-select,
@@ -390,7 +390,7 @@
 .entrainement .btn {
   min-height: 48px;
   padding: 12px 16px;
-  font-size: 16px;
+  font-size: calc(16px * var(--g-ui, 1));
 }
 
 .entrainement .btn-aide {
@@ -421,7 +421,7 @@
 .entrainement .btn-primary {
   min-height: 52px;
   border-radius: var(--radius-md);
-  font: 700 16px/1.25 var(--sans);
+  font: 700 calc(16px * var(--g-ui, 1))/1.25 var(--sans);
 }
 
 /* Survol/toucher du bouton principal : `.btn:hover:not(:disabled)` (plus spécifique) lui donnait le
@@ -443,7 +443,7 @@
 .entrainement .alert-error,
 .entrainement .alert-success {
   padding: 10px 12px;
-  font: 600 14px/1.45 var(--sans);
+  font: 600 calc(14px * var(--g-t, 1))/1.45 var(--sans);
   border: 1px solid transparent;
 }
 
@@ -457,7 +457,7 @@
 
 .entrainement .aide-5e,
 .entrainement .triangle-quelconque-aide {
-  font: 400 16px/1.5 var(--lecture);
+  font: 400 calc(16px * var(--g-t, 1))/1.5 var(--lecture);
   border-left: 0;
   border: 1px solid color-mix(in srgb, var(--tip) 35%, transparent);
 }
@@ -814,7 +814,7 @@
   padding: 0;
   border: 0;
   background: none;
-  font: 700 16px/1.4 var(--sans);
+  font: 700 calc(16px * var(--g-t, 1))/1.4 var(--sans);
   align-items: flex-start;
 }
 
@@ -830,7 +830,7 @@
 }
 
 .entrainement .validation-reponse-attendue-label {
-  font: 600 12px/1.3 var(--sans);
+  font: 600 calc(12px * var(--g-ui, 1))/1.3 var(--sans);
   letter-spacing: 0.06em;
   color: var(--ink-soft);
 }
@@ -841,19 +841,19 @@
 }
 
 .entrainement .validation-reponse-attendue {
-  font: 400 16px/1.5 var(--lecture);
+  font: 400 calc(16px * var(--g-t, 1))/1.5 var(--lecture);
   color: var(--ink);
 }
 
 .entrainement .corrige-ecran {
   padding: 14px 16px;
   border-radius: var(--radius-lg);
-  font-size: 16px;
+  font-size: calc(16px * var(--g-t, 1));
 }
 
 .entrainement .corrige-ecran-titre {
   margin-bottom: 8px;
-  font: 600 12px/1.3 var(--sans);
+  font: 600 calc(12px * var(--g-ui, 1))/1.3 var(--sans);
   letter-spacing: 0.06em;
 }
 
@@ -863,7 +863,7 @@
 
 .entrainement .corrige-ecran-lbl {
   margin-bottom: 4px;
-  font: 700 14px/1.35 var(--sans);
+  font: 700 calc(14px * var(--g-ui, 1))/1.35 var(--sans);
   color: var(--accent-ink);
 }
 
@@ -873,7 +873,7 @@
 
 /* Justifications lisibles : 14 px, droites, encre secondaire (plus de petit italique gris). */
 .entrainement .corrige-ecran-calcul .cc-j {
-  font: 400 14px/1.4 var(--lecture);
+  font: 400 calc(14px * var(--g-t, 1))/1.4 var(--lecture);
   font-style: normal;
   color: var(--ink-soft);
 }
@@ -887,7 +887,7 @@
 }
 
 .entrainement .corrige-ecran-piege-lbl {
-  font-size: 12px;
+  font-size: calc(12px * var(--g-ui, 1));
 }
 
 /* `CorrigeDepliable.tsx` — « Voir comment on y arrive » : corrigé replié sous « Bonne réponse ! » et
@@ -907,7 +907,7 @@
   border-color: var(--line);
   background: var(--surface);
   color: var(--accent-ink);
-  font: 600 16px/1.25 var(--sans);
+  font: 600 calc(16px * var(--g-ui, 1))/1.25 var(--sans);
   text-align: left;
 }
 
@@ -954,7 +954,7 @@
 
 .entrainement .recap-panel-titre {
   margin: 0 0 8px;
-  font: 600 12px/1.3 var(--sans);
+  font: 600 calc(12px * var(--g-ui, 1))/1.3 var(--sans);
   letter-spacing: 0.06em;
 }
 
@@ -971,7 +971,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface);
-  font: 400 16px/1.4 var(--sans);
+  font: 400 calc(16px * var(--g-t, 1))/1.4 var(--sans);
   color: var(--ink);
 }
 
@@ -1019,7 +1019,7 @@
 
 .entrainement .recap-note {
   display: block;
-  font-size: 14px;
+  font-size: calc(14px * var(--g-t, 1));
   color: var(--bad);
 }
 
@@ -1031,7 +1031,7 @@
   border-radius: var(--radius-md);
   background: none;
   color: var(--ink-soft);
-  font: 600 14px var(--sans);
+  font: 600 calc(14px * var(--g-ui, 1)) var(--sans);
   white-space: nowrap;
   cursor: pointer;
 }
@@ -1058,11 +1058,11 @@
 .entrainement .fiche-reponse-eyebrow,
 .entrainement .fiche-reponse-badge,
 .entrainement .fiche-reponse-bloc-label {
-  font-size: 12px;
+  font-size: calc(12px * var(--g-ui, 1));
 }
 
 .entrainement .fiche-reponse-bloc-valeur {
-  font-size: 16px;
+  font-size: calc(16px * var(--g-t, 1));
 }
 
 .entrainement .fiche-reponse-fermer {
@@ -1106,7 +1106,7 @@
 
 .entrainement .gen-tiroir-titre {
   margin: 0 0 8px;
-  font: 600 12px/1.3 var(--sans);
+  font: 600 calc(12px * var(--g-ui, 1))/1.3 var(--sans);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--tip);
@@ -1177,7 +1177,7 @@
   margin: 0;
   padding: 10px 10px 4px;
   min-height: 24px;
-  font: 700 14px/1.3 var(--sans);
+  font: 700 calc(14px * var(--g-ui, 1))/1.3 var(--sans);
   color: var(--ink);
 }
 
@@ -1198,7 +1198,7 @@
 .entrainement .graphe-qcm-carte .options-grid-compact .btn {
   min-height: 44px;
   padding: 8px 6px;
-  font-size: 14px;
+  font-size: calc(14px * var(--g-ui, 1));
 }
 
 .entrainement .graphe-qcm-carte .mafs-graph-legende,
@@ -1270,14 +1270,14 @@
 }
 
 .entrainement .graphe-reference-titre {
-  font: 600 12px/1.3 var(--sans);
+  font: 600 calc(12px * var(--g-ui, 1))/1.3 var(--sans);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ink-soft);
 }
 
 .entrainement .graphe-reference-aide {
-  font: 400 14px/1.3 var(--sans);
+  font: 400 calc(14px * var(--g-ui, 1))/1.3 var(--sans);
   color: var(--ink-soft);
 }
 
@@ -1343,7 +1343,7 @@
 
 .entrainement .gen-loupe-titre {
   margin: 0;
-  font: 700 16px/1.3 var(--sans);
+  font: 700 calc(16px * var(--g-ui, 1))/1.3 var(--sans);
 }
 
 .entrainement .gen-loupe-figure {
@@ -1453,5 +1453,5 @@
 .entrainement .construction-recentrer {
   min-height: 44px;
   padding: 4px 14px;
-  font-size: 14px;
+  font-size: calc(14px * var(--g-ui, 1));
 }

@@ -167,7 +167,7 @@ export function App6gen19() {
 
   function messageErreurB(textes: string[], utilisees: number, max: number): string {
     if (exercice.famille !== "B") return formatMessageErreur(utilisees, max);
-    if (estApproximationB(exercice, textes)) return `Valeur approchée — donne la valeur EXACTE, avec une racine (sqrt(…)). Tentative ${utilisees}/${max}.`;
+    if (estApproximationB(exercice, textes)) return `Valeur approchée — donne la valeur exacte, avec une racine (sqrt(…)). Tentative ${utilisees}/${max}.`;
     return formatMessageErreur(utilisees, max, diagnostiquerBValeurs(exercice, textes));
   }
 

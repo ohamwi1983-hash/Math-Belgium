@@ -19,6 +19,7 @@ import { PiedAnalytique } from "./PiedAnalytique";
 import { ILLISIBLE_ANALYTIQUE, l, nombreOuNaN, nombresLisibles, surDroite, t as txt } from "../ui/retoursAnalytique";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceIntersectionDroites;
@@ -153,7 +154,7 @@ export function EtapePointIntersectionDroites({ exercice, tentativesUtilisees, t
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAidePointNiveau1(exercice)}</p>
+          <p><TexteInsistance texte={texteAidePointNiveau1(exercice)} /></p>
           {niveauAide >= 2 && (
             <p>
               <Katex expression={formatAidePointNiveau2Latex(exercice)} />

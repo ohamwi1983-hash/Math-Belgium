@@ -5,11 +5,13 @@ import { ENTRAINEMENT_REGISTRY, LEVEL_LABELS } from '../entrainement/registry'
 import { LienVideoGenerateur } from '../entrainement/components/LienVideoGenerateur'
 import { BarreGenerateur } from '../entrainement/components/BarreGenerateur'
 import { CadreActions } from '../entrainement/components/CadreActions'
+import { JeBloque } from '../entrainement/components/JeBloque'
 import { CadreGenerateurContext, creerStoreCadre } from '../entrainement/components/cadreGenerateur'
 import { noterEssai, ecransDepuisPuces, observerProgression } from '../lib/suiviEssais'
 import { SuiviEssaiContext, SuiviVerdictContext, type NoterEssai } from '../lib/suiviContexte'
 import '../entrainement/theme.css'
 import '../entrainement/cadre.css'
+import '../entrainement/confortLecture.css'
 
 /** Page générique `/entrainement/:chantier/:generatorId` pour TOUT générateur rapatrié depuis
  * plateforme-maths (voir `ENTRAINEMENT_REGISTRY`) — remplace une page dédiée par générateur :
@@ -64,6 +66,35 @@ export function EntrainementPage() {
     [generatorId, entry],
   )
 
+  // Confort de lecture (lot G) : un réglage changé (attributs `data-*` de <html> : taille, police…), une
+  // police chargée, ou le panneau « Aa » ouvert sur ordinateur (classe `lecture-panneau-ouvert` : page
+  // décalée de 420 px) change la géométrie sans toucher au DOM du générateur — le cadre (énoncé épinglé
+  // à gauche, aperçu replié, barre du bas) se recalcule sur `resize` : on le lui envoie.
+  useEffect(() => {
+    let raf = 0
+    const html = document.documentElement
+    const etat = () => ['taille', 'police', 'interligne', 'espacement'].map((c) => html.getAttribute(`data-${c}`)).join('|') + html.classList.contains('lecture-panneau-ouvert')
+    let avant = etat()
+    const signaler = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => window.dispatchEvent(new Event('resize')))
+    }
+    // Seulement quand un réglage ou l'ouverture du panneau change (jamais en boucle sur une autre classe).
+    const observateur = new MutationObserver(() => {
+      const maintenant = etat()
+      if (maintenant === avant) return
+      avant = maintenant
+      signaler()
+    })
+    observateur.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-taille', 'data-police', 'data-interligne', 'data-espacement'] })
+    document.fonts?.addEventListener?.('loadingdone', signaler)
+    return () => {
+      observateur.disconnect()
+      document.fonts?.removeEventListener?.('loadingdone', signaler)
+      cancelAnimationFrame(raf)
+    }
+  }, [])
+
   const section = useMemo(() => {
     if (!entry || !generatorId) return undefined
     const chapter = findChapter(entry.chantier, entry.chapitreSlug)
@@ -88,6 +119,7 @@ export function EntrainementPage() {
         {generatorId && <LienVideoGenerateur generatorId={generatorId} />}
         <Suspense fallback={null}>{Component && <Component />}</Suspense>
         <CadreActions racineRef={racineRef} />
+        {generatorId && <JeBloque racineRef={racineRef} generatorId={generatorId} chantier={entry.chantier} chapitreSlug={entry.chapitreSlug} />}
       </div>
       </SuiviVerdictContext.Provider>
       </SuiviEssaiContext.Provider>

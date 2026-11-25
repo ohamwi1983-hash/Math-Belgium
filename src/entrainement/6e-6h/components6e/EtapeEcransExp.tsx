@@ -11,6 +11,7 @@ import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 /** Espaces insécables avant « ? ! : ; » et après « « » : le signe ne passe jamais seul à la ligne. */
 function espacesInsecables(texte: string): string {
@@ -19,7 +20,7 @@ function espacesInsecables(texte: string): string {
 
 /** Rendu de fragments texte / KaTeX en ligne, sans conteneur. */
 export function Fragments({ fragments }: { fragments: Frag[] }) {
-  return <>{fragments.map((f, i) => (f.type === "texte" ? <span key={i}>{espacesInsecables(f.valeur)}</span> : <Katex key={i} expression={f.valeur} />))}</>;
+  return <>{fragments.map((f, i) => (f.type === "texte" ? <span key={i}><TexteInsistance texte={espacesInsecables(f.valeur)} debutDePhrase={i === 0} /></span> : <Katex key={i} expression={f.valeur} />))}</>;
 }
 
 /** Figure SVG (chaîne) adaptée à la largeur du conteneur. */

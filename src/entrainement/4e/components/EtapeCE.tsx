@@ -7,6 +7,7 @@ import { BoutonAide } from "./BoutonAide";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 type Choix = "aucune" | "auMoinsUne";
 
@@ -155,7 +156,7 @@ export function EtapeCE({ exercice, tentativesUtilisees, tentativesMax, niveauAi
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideCE()}</p>
+          <p><TexteInsistance texte={texteAideCE()} /></p>
         </div>
       )}
       {!validation && (

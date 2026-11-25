@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { estClos, estConsultable, useEtatCadre, useStoreCadre } from "./cadreGenerateur";
+import { BoutonLecture } from "../../components/lecture/BoutonLecture";
 
 interface Props {
   /** Lien vers le chapitre (et la section qui renvoie vers ce générateur, voir `EntrainementPage`). */
@@ -29,6 +30,9 @@ const LIBELLES: Record<string, string> = {
  * couleurs : vert juste, jaune juste avec aide, rouge révélée, orange en cours). Un segment clos reste
  * cliquable quand le générateur a une fiche (même `onSegmentClick` qu'avant) : zone de toucher de toute
  * la hauteur de la barre de progression, pas seulement le trait de 6 px.
+ *
+ * Bouton « Aa » (confort de lecture, côté élève, lot G) en bout de barre : il ouvre le panneau commun
+ * (taille, police, couleurs…), qui s'applique aussi au générateur (`confortLecture.css`).
  */
 export function BarreGenerateur({ lienChapitre, libelleRetour, contexte }: Props) {
   const { segments, consultable } = useEtatCadre();
@@ -72,6 +76,7 @@ export function BarreGenerateur({ lienChapitre, libelleRetour, contexte }: Props
           Étape {etape}&nbsp;/&nbsp;{total}
         </p>
       )}
+      <BoutonLecture variante="etape" />
     </div>
   );
 }

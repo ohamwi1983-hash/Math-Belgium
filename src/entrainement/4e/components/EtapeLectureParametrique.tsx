@@ -14,6 +14,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { PiedAnalytique } from "./PiedAnalytique";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 
 /** Aide de niveau 2 (avec les deux points surlignés sur le graphe) : la règle posée, jamais la réponse. */
@@ -103,7 +104,7 @@ export function EtapeLectureParametrique({ exercice, tentativesUtilisees, tentat
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideNiveau1(exercice)}</p>
+          <p><TexteInsistance texte={texteAideNiveau1(exercice)} /></p>
           {niveauAide >= 2 && (
             <p>
               <RenduFragments fragments={AIDE_NIVEAU_2} />

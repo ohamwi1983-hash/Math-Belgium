@@ -8,6 +8,7 @@ import { domaineAttendu } from "../moteur5e/verificationEtudeLocale";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceEtudeLocale;
@@ -54,7 +55,7 @@ export function EtapeDomaineEtudeLocale({ exercice, tentativesUtilisees, tentati
             const aide1 = texteAideNiveau1EtudeLocale("domaine", exercice);
             return (
               <>
-                <p>{aide1.texte}</p>
+                <p><TexteInsistance texte={aide1.texte} /></p>
                 {aide1.latex && <Katex expression={aide1.latex} block />}
               </>
             );
@@ -64,7 +65,7 @@ export function EtapeDomaineEtudeLocale({ exercice, tentativesUtilisees, tentati
               const aide2 = texteAideNiveau2EtudeLocale("domaine", exercice);
               return (
                 <>
-                  <p>{aide2.texte}</p>
+                  <p><TexteInsistance texte={aide2.texte} /></p>
                   {aide2.latex && <Katex expression={aide2.latex} block />}
                 </>
               );

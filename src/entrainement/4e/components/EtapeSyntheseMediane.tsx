@@ -10,6 +10,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceMedianeClasses;
@@ -127,7 +128,7 @@ export function EtapeSyntheseMediane({ exercice, tentativesUtilisees, tentatives
             <Katex expression={LABEL_X_MIN} />
             {TEXTE_AIDE_SYNTHESE_1_APRES}
           </p>
-          {niveauAide >= 2 && <p>{texteAideSyntheseNiveau2(exercice)}</p>}
+          {niveauAide >= 2 && <p><TexteInsistance texte={texteAideSyntheseNiveau2(exercice)} /></p>}
         </div>
       )}
       {!validation && (

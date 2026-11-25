@@ -11,6 +11,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { nombreFrTypo } from "../ui/nombreFr";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceTableauFrequences;
@@ -109,7 +110,7 @@ export function EtapeFrequencesCumuleesTableauFrequences({
 
       {niveauAide >= 1 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideFrequencesCumuleesNiveau1(exercice)}</p>
+          <p><TexteInsistance texte={texteAideFrequencesCumuleesNiveau1(exercice)} /></p>
           {niveauAide >= 2 && (
             <p>
               Fréquences cumulées déjà connues : {reveles.map((r) => `${nombreFrTypo(r.valeur)} → ${nombreFrTypo(r.frequenceCumulee)} %`).join(", ")}. Reste à

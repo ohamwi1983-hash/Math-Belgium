@@ -9,6 +9,7 @@ import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   consigneEcran: string;
@@ -79,11 +80,11 @@ export function EtapeChampGraphiqueDeriveeLogarithme({
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
+          <p><TexteInsistance texte={aideNiveau1.texte} /></p>
           {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
           {niveauAide >= 2 && (
             <>
-              <p>{aideNiveau2.texte}</p>
+              <p><TexteInsistance texte={aideNiveau2.texte} /></p>
               {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
             </>
           )}

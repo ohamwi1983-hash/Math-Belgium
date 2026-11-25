@@ -9,6 +9,7 @@ import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 type Choix = "aucun" | "auMoinsUn";
 
@@ -132,7 +133,7 @@ export function EtapeZerosAlgebrique({ exercice, tentativesUtilisees, tentatives
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideZeros(exercice)}</p>
+          <p><TexteInsistance texte={texteAideZeros(exercice)} /></p>
         </div>
       )}
       {!validation && (

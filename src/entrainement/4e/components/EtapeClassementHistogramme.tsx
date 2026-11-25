@@ -11,6 +11,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { nombreFrTypo } from "../ui/nombreFr";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceHistogramme;
@@ -115,8 +116,8 @@ export function EtapeClassementHistogramme({ exercice, tentativesUtilisees, tent
 
       {niveauAide >= 1 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideClassementNiveau1(exercice)}</p>
-          {niveauAide >= 2 && <p>{texteAideClassementNiveau2(exercice, evaluation)}</p>}
+          <p><TexteInsistance texte={texteAideClassementNiveau1(exercice)} /></p>
+          {niveauAide >= 2 && <p><TexteInsistance texte={texteAideClassementNiveau2(exercice, evaluation)} /></p>}
         </div>
       )}
       {!validation && (

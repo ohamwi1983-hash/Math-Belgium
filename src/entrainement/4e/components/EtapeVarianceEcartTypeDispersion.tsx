@@ -10,6 +10,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceDispersion;
@@ -122,7 +123,7 @@ export function EtapeVarianceEcartTypeDispersion({
           <Katex expression={texteAideVarianceEcartTypeNiveau1().latex} block />
           {niveauAide >= 2 && (
             <>
-              <p>{aide2.texte}</p>
+              <p><TexteInsistance texte={aide2.texte} /></p>
               <Katex expression={aide2.latex} block />
             </>
           )}

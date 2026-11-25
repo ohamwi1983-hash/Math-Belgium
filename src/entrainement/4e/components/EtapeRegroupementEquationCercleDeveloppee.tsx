@@ -11,6 +11,7 @@ import { ILLISIBLE_ANALYTIQUE, t } from "../ui/retoursAnalytique";
 import { normaliserSigneMoins as normaliserMoins } from "../../../lib/normaliserSaisie";
 import { diagnostiquerEquationCercle } from "../moteur/verificationEquationCercle";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceEquationCercleDeveloppee;
@@ -66,7 +67,7 @@ export function EtapeRegroupementEquationCercleDeveloppee({ exercice, tentatives
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideRegroupementNiveau1(exercice)}</p>
+          <p><TexteInsistance texte={texteAideRegroupementNiveau1(exercice)} /></p>
           {niveauAide >= 2 && (
             <p>
               <Katex expression={formatAideRegroupementNiveau2Latex(exercice)} />

@@ -10,6 +10,7 @@ import type { StatutVerification } from "../moteur/statutVerification";
 import { diagnostiquerNombre } from "../moteur5e/verificationSuiteArithmetique";
 import { ciblesCalculerTermesAlgebrique } from "../moteur5e/sessionSuiteArithmetique";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 type PhaseTermesMultiples = "termesProches" | "calculerTermesAlgebrique";
 
@@ -107,7 +108,7 @@ export function EtapeTermesMultiples({ exercice, phase, tentativesUtilisees, ten
       ))}
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          {PHASES_AIDE1_LATEX.has(phase) ? <Katex expression={texteAideNiveau1(exercice, phase)} block /> : <p>{texteAideNiveau1(exercice, phase)}</p>}
+          {PHASES_AIDE1_LATEX.has(phase) ? <Katex expression={texteAideNiveau1(exercice, phase)} block /> : <p><TexteInsistance texte={texteAideNiveau1(exercice, phase)} /></p>}
           {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
         </div>
       )}

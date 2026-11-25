@@ -1,5 +1,6 @@
 import type { FragmentConsigne } from "../ui/formatEquationDroite";
 import { Katex } from "./Katex";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   fragments: FragmentConsigne[];
@@ -25,7 +26,7 @@ function espacesInsecables(texte: string): string {
 export function RenduFragments({ fragments }: Props) {
   return (
     <>
-      {fragments.map((fragment, index) => (fragment.type === "texte" ? <span key={index}>{espacesInsecables(fragment.valeur)}</span> : <Katex key={index} expression={fragment.valeur} />))}
+      {fragments.map((fragment, index) => (fragment.type === "texte" ? <span key={index}><TexteInsistance texte={espacesInsecables(fragment.valeur)} debutDePhrase={index === 0} /></span> : <Katex key={index} expression={fragment.valeur} />))}
     </>
   );
 }

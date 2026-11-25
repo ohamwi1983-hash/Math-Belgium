@@ -8,6 +8,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { TableauEtudeLocaleBuilder } from "./TableauEtudeLocaleBuilder";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceEtudeLocale;
@@ -49,7 +50,7 @@ export function EtapeTableauEtudeLocale({ exercice, phase, tentativesUtilisees, 
             const aide1 = texteAideNiveau1EtudeLocale(phase, exercice);
             return (
               <>
-                <p>{aide1.texte}</p>
+                <p><TexteInsistance texte={aide1.texte} /></p>
                 {aide1.latex && <Katex expression={aide1.latex} block />}
               </>
             );
@@ -59,7 +60,7 @@ export function EtapeTableauEtudeLocale({ exercice, phase, tentativesUtilisees, 
               const aide2 = texteAideNiveau2EtudeLocale(phase, exercice);
               return (
                 <>
-                  <p>{aide2.texte}</p>
+                  <p><TexteInsistance texte={aide2.texte} /></p>
                   {aide2.latex && <Katex expression={aide2.latex} block />}
                 </>
               );

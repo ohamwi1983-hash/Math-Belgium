@@ -11,6 +11,7 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceSuiteGeometrique;
@@ -83,7 +84,7 @@ export function EtapeSommeInfinie({ exercice, phase, tentativesUtilisees, tentat
 
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          {noteAideNiveau1(exercice, phase as PhaseSuiteGeometrique) && <p>{noteAideNiveau1(exercice, phase as PhaseSuiteGeometrique)}</p>}
+          {noteAideNiveau1(exercice, phase as PhaseSuiteGeometrique) && <p><TexteInsistance texte={noteAideNiveau1(exercice, phase as PhaseSuiteGeometrique)} /></p>}
           <Katex expression={texteAideNiveau1(exercice, phase as PhaseSuiteGeometrique)} block />
           {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
         </div>
