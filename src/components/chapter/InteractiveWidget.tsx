@@ -226,6 +226,11 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'simulateur-jeu-esperance-widget': () => import('../../interactive/register-simulateur-jeu-esperance-widget.js'),
   'regle-empirique-widget': () => import('../../interactive/register-regle-empirique-widget.js'),
   'bayes-trois-categories-widget': () => import('../../interactive/register-bayes-trois-categories-widget.js'),
+  'trace-lieu-widget': () => import('../../interactive/register-trace-lieu-widget.js'),
+  'points-remarquables-widget': () => import('../../interactive/register-points-remarquables-widget.js'),
+  'generatrices-animees-widget': () => import('../../interactive/register-generatrices-animees-widget.js'),
+  'courbe-parametree-widget': () => import('../../interactive/register-courbe-parametree-widget.js'),
+  'aire-variable-widget': () => import('../../interactive/register-aire-variable-widget.js'),
 }
 
 /**
