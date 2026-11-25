@@ -435,6 +435,8 @@ personnel), grille `44px 1fr auto auto` (écart 8 px sous 400 px) : la barre res
   48 composants — scripts `brancher_aides.py`, `brancher_aides_fonctions.py` du dossier de travail). Deux
   chaînes affichées telles quelles hors de ces rendus passées en minuscules dans la source (gen101
   « deux points distincts », 6gen19 « la valeur exacte »).
+- `TexteInsistance` pose aussi les **espaces insécables** (avant « : ; ? ! », à l'intérieur de « … ») dans
+  tous ces rendus — ce que le « fait d'office » du cours (`RichText`) laissait au lot G pour `TexteRiche`.
 - **Nouveau texte d'écran** : passer par `TexteRiche`, des fragments, ou `<TexteInsistance texte={…} />` ;
   écrire de préférence directement en minuscules (le gras n'existe pas dans les données).
 - **Contrôle** : `majuscules.mts` (recherche dans les sources : littéraux et texte JSX, jugés par la règle du
