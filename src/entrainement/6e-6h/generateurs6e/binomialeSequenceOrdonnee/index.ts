@@ -1,14 +1,17 @@
-import type { ExerciceBinomialeSequenceOrdonnee, FamilleBinomialeSequenceOrdonnee } from "../../core6e/binomialeSequenceOrdonnee.types";
-import { construireAvecTypeQuestion, genererFamilleA, probabiliteExactement, determinerStrategieA } from "./familleA";
+import type { ExerciceBinomialeSequenceOrdonnee } from "../../core6e/binomialeSequenceOrdonnee.types";
+import { construireAvecTypeQuestion, determinerStrategieA, genererFamilleA, probabiliteExactement } from "./familleA";
+import { construireExerciceA } from "./familleA6gen48";
 import { construireFamilleB, genererFamilleB, produitFractionsDecroissantes } from "./familleB";
+import { tirerParmi } from "./aleatoire";
 
-export { construireAvecTypeQuestion, genererFamilleA, probabiliteExactement, determinerStrategieA, construireFamilleB, genererFamilleB, produitFractionsDecroissantes };
+export { construireAvecTypeQuestion, genererFamilleA, probabiliteExactement, determinerStrategieA, construireFamilleB, genererFamilleB, produitFractionsDecroissantes, construireExerciceA };
 
 /**
- * Couche A (6e) — point d'entrée `6gen48` ("Probabilité binomiale et séquence exacte sans remise").
- * Tirage à 2 niveaux (mirroir `generateurs6e/denombrementFondamental/index.ts`, 6gen43) : la
- * FAMILLE (A ou B) est tirée ÉQUIPROBABLE en premier, PUIS le générateur de famille tire le reste
- * (contexte, n, p, typeQuestion pour A ; contexte, n, k pour B) en interne.
+ * Couche A (6e) — `6gen48` « Probabilité binomiale et séquence exacte » (6e ch. 7, § 6).
+ * Catalogue : ordre figé (codes imprimés). Audit (G22) : chaque variante tire maintenant n, p (et la
+ * stratégie pour « au moins / au plus ») — avant, le sélecteur donnait toujours n = 8, p = 1/2 et
+ * (10, 4). Tirage libre : la stratégie (terme unique, somme, complément) est tirée à parts égales ;
+ * famille B une fois sur quatre.
  */
 
 export type IdVarianteBinomialeSequenceOrdonnee = "A_exactement" | "A_auMoins" | "A_auPlus" | "A_aucun" | "A_tous" | "B_sequence";
@@ -22,34 +25,23 @@ export const CATALOGUE_VARIANTES: { id: IdVarianteBinomialeSequenceOrdonnee; lab
   { id: "B_sequence", label: "B — Séquence exacte, sans remise" },
 ];
 
-const N_DEFAUT_A = 8;
-const P_DEFAUT_A = 0.5;
-
 export function construireAvecVarianteId(id: IdVarianteBinomialeSequenceOrdonnee): ExerciceBinomialeSequenceOrdonnee {
   switch (id) {
     case "A_exactement":
-      return construireAvecTypeQuestion(N_DEFAUT_A, P_DEFAUT_A, "exactement");
+      return construireExerciceA("termeUnique", ["exactement"]);
     case "A_auMoins":
-      return construireAvecTypeQuestion(N_DEFAUT_A, P_DEFAUT_A, "auMoins");
+      return construireExerciceA(tirerParmi(["somme", "complement"] as const), ["auMoins"]);
     case "A_auPlus":
-      return construireAvecTypeQuestion(N_DEFAUT_A, P_DEFAUT_A, "auPlus");
+      return construireExerciceA(tirerParmi(["somme", "complement"] as const), ["auPlus"]);
     case "A_aucun":
-      return construireAvecTypeQuestion(N_DEFAUT_A, P_DEFAUT_A, "aucun");
+      return construireExerciceA("termeUnique", ["aucun"]);
     case "A_tous":
-      return construireAvecTypeQuestion(N_DEFAUT_A, P_DEFAUT_A, "tous");
+      return construireExerciceA("termeUnique", ["tous"]);
     case "B_sequence":
-      return construireFamilleB(10, 4);
+      return genererFamilleB();
   }
 }
 
-const FAMILLES: FamilleBinomialeSequenceOrdonnee[] = ["A", "B"];
-
-const CONSTRUCTEURS_PAR_FAMILLE: Record<FamilleBinomialeSequenceOrdonnee, () => ExerciceBinomialeSequenceOrdonnee> = {
-  A: genererFamilleA,
-  B: genererFamilleB,
-};
-
 export function genererExerciceBinomialeSequenceOrdonnee(): ExerciceBinomialeSequenceOrdonnee {
-  const famille = FAMILLES[Math.floor(Math.random() * FAMILLES.length)];
-  return CONSTRUCTEURS_PAR_FAMILLE[famille]();
+  return Math.random() < 0.75 ? construireExerciceA() : genererFamilleB();
 }

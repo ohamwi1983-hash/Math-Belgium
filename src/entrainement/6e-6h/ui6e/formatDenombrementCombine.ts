@@ -1,497 +1,272 @@
-import type {
-  ExerciceDenombCombA,
-  ExerciceDenombCombB,
-  ExerciceDenombCombC,
-  ExerciceDenombCombD,
-  ExerciceDenombrementCombine,
-  SousTypeDenombCombB,
-  TypeContrainteD,
-} from "../core6e/denombrementCombine.types";
+import type { ExerciceDenombrementCombine, SousTypeDenombCombB } from "../core6e/denombrementCombine.types";
 import type { PhaseDenombrementCombine } from "../moteur6e/typesDenombrementCombine";
+import { vaut } from "../moteur6e/saisieCombinatoire";
+import { f, milliers, t } from "./fragmentsCombinatoire";
+import type { FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen44`. Dispatch sur
- * `exercice.famille` PUIS `sousType` PUIS `phase`, mirroir `formatDenombrementFondamental.ts`
- * (6gen43), jamais importé par un autre générateur (chaque générateur reste indépendant — CLAUDE.md).
- *
- * **Vigilance signe orphelin / groupe LaTeX vide / texte français en mode maths** (bug déjà rencontré
- * et corrigé sur plusieurs générateurs 6e, documenté par CLAUDE.md) — toute clause en français mêlée
- * à du LaTeX passe TOUJOURS par `\text{...}`, jamais du texte brut en mode maths. **Vigilance
- * débordement horizontal** (bug 6gen43, leçon documentée `docs/historique-6e.md`) — jamais une phrase
- * française de plus d'une cinquantaine de caractères dans un seul fragment `\text{...}` : toujours
- * répartie sur plusieurs entrées du tableau `string[]` retourné par `blocDonnees`/`etatActuel`.
- * Couverture de régression : `formatDenombrementCombine.test.ts`, scan sur de nombreux tirages
- * aléatoires à la recherche d'un `++`/`+-`/`--`/groupe `{}` vide, et `scrollWidth` en Playwright.
+ * Textes de `6gen44` (6e ch. 7, § 2) — audit, lots B et C : consignes, options et libellés en KaTeX
+ * (plus de « C(n1,k1)×C(n2,k2) », « 10!/(3!*3!*4!) » ni « Cₙ₊₁² » en Unicode), aucun exemple de champ
+ * qui soit une réponse, réponse attendue de l'écran « formule » = la FORMULE (avant : le nombre, affiché
+ * aussi dans « Ce qu'on sait déjà »), aides à deux niveaux sans la réponse, messages ciblés.
  */
 
-export type TypeChamp = "texte" | "choix";
+type E = ExerciceDenombrementCombine;
+type P = PhaseDenombrementCombine;
 
-export interface OptionChoix {
-  valeur: string;
-  label: string;
-}
-
-export interface ChampDef {
-  type: TypeChamp;
-  label: string;
-  placeholder?: string;
-  options?: OptionChoix[];
-}
-
-export interface AideAvecLatex {
-  texte: string;
-  latex: string | null;
-}
-
-const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
-
-function champTexte(label: string, placeholder: string): ChampDef {
-  return { type: "texte", label, placeholder };
-}
-
-const CHIFFRES_INDICE: Record<string, string> = { "0": "₀", "1": "₁", "2": "₂", "3": "₃", "4": "₄", "5": "₅", "6": "₆", "7": "₇", "8": "₈", "9": "₉" };
-const CHIFFRES_EXPOSANT: Record<string, string> = { "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" };
-
-/** Notation `Cₙᵏ` en Unicode indice/exposant (jamais de vrai KaTeX ici, ce label de champ est rendu
- * en texte BRUT — voir en-tête de fichier) — approximation valable UNIQUEMENT pour des valeurs
- * NUMÉRIQUES CONCRÈTES (chiffres 0-9, tous ont un équivalent Unicode indice/exposant), jamais pour
- * une lettre générique hors de l'ensemble Unicode restreint (voir CLAUDE.md/piège notation
- * combinatoire) — usage ICI limité aux 2 champs `champsD` où `e.n`/`e.k` sont déjà résolus en
- * nombres concrets par l'appelant. */
-function labelCombinaison(n: number, k: number): string {
-  const indice = String(n)
-    .split("")
-    .map((c) => CHIFFRES_INDICE[c] ?? c)
-    .join("");
-  const exposant = String(k)
-    .split("")
-    .map((c) => CHIFFRES_EXPOSANT[c] ?? c)
-    .join("");
-  return `C${indice}${exposant}`;
-}
-
-// ============================================================================
-// Famille A — Répartition en groupes de tailles données (multinomiale).
-// ============================================================================
-
-export function consigneGeneraleA(): string {
-  return "n personnes sont réparties en k équipes nommées, de tailles fixées et toutes différentes. Détermine, par la formule multinomiale, le nombre de répartitions possibles.";
-}
-
-export function blocDonneesA(e: ExerciceDenombCombA): string[] {
-  const lignesGroupes = e.noms.map((nom, i) => `\\text{${nom} : }${e.tailles[i]}\\text{ personnes}`);
-  return [`n=${e.n}\\text{ personnes}`, `k=${e.k}\\text{ équipes}`, ...lignesGroupes];
-}
-
-export function consigneEcranA(phase: PhaseDenombrementCombine): string {
-  if (phase === "aEcran1") return "Pose la formule multinomiale (NON calculée). Utilise ! pour une factorielle (ex : 10!/(3!*3!*4!)).";
-  return "Calcule la valeur du résultat à partir de la formule CONFIRMÉE.";
-}
-
-export function etatActuelA(e: ExerciceDenombCombA, phase: PhaseDenombrementCombine): string[] | null {
-  if (phase !== "aEcran2") return null;
-  const denominateur = e.tailles.map((t) => `${t}!`).join("\\cdot\\,");
-  return [`\\text{Formule confirmée :}`, `\\dfrac{${e.n}!}{${denominateur}}`];
-}
-
-export function champsA(phase: PhaseDenombrementCombine): ChampDef[] {
-  if (phase === "aEcran1") return [champTexte("Formule =", "ex : 10!/(3!*3!*4!)")];
-  return [champTexte("Résultat =", "ex : 4200")];
-}
-
-export function niveauAideMaxA(phase: PhaseDenombrementCombine): number {
-  return phase === "aEcran1" ? 2 : 0;
-}
-
-export function aideNiveau1A(): AideAvecLatex {
-  return { texte: "Répartir n objets en groupes de tailles fixées (sans ordre à l'intérieur de chaque groupe) suit la formule multinomiale : n! divisé par le produit des factorielles de chaque taille.", latex: "\\dfrac{n!}{k_1!\\,k_2!\\,\\cdots\\,k_m!}" };
-}
-
-export function aideNiveau2A(e: ExerciceDenombCombA): AideAvecLatex {
-  return { texte: "Numérateur déjà posé (dénominateur non assemblé) :", latex: `${e.n}!` };
-}
-
-// ============================================================================
-// Famille B — Sélections combinées indépendantes.
-// ============================================================================
-
-export const LIBELLE_STRUCTURE_B: Record<SousTypeDenombCombB, string> = {
-  roleDistingue: "Rôle distingué + reste en combinaison : n×Cₙ₋₁ᵏ",
-  // poolsSepares/memeContrainte : notation NON convertie en Unicode (indices composés n1/k1/n2/k2,
-  // équivalent LaTeX C_{n_1}^{k_1} — un sous-indice DANS le sous-indice, impossible à représenter
-  // fidèlement avec les caractères Unicode indice/exposant à un seul niveau) — voir
-  // `LIBELLE_STRUCTURE_B_COURT` juste en dessous pour la version KaTeX réelle, correctement rendue.
-  poolsSepares: "Pools séparés indépendants (ET) : C(n1,k1)×C(n2,k2)",
-  memeContrainte: "Même contrainte sur 2 groupes (OU) : C(n1,k)+C(n2,k)",
-  partitionComplementaire: "Partition en 2 groupes complémentaires : Cₙᵏ",
+const OPTIONS_B: Record<SousTypeDenombCombB, string> = {
+  roleDistingue: "Un rôle à part, puis un groupe : $n\\times C_{n-1}^{k}$",
+  poolsSepares: "Deux choix indépendants : $C_{n_1}^{k_1}\\times C_{n_2}^{k_2}$",
+  memeContrainte: "L'un ou l'autre groupe : $C_{n_1}^{k}+C_{n_2}^{k}$",
+  partitionComplementaire: "Un seul choix, le reste suit : $C_n^{k}$",
 };
 
-/** Version COURTE (juste la forme algébrique, sans le nom descriptif) — utilisée dans les fragments
- * KaTeX `etatActuel`/`formatReponseAttenduePhaseLatex` (contrainte de largeur `.equation-box`, voir
- * en-tête de fichier), jamais dans les boutons QCM (`champsB`, qui utilisent la version complète —
- * un bouton peut être plus long, pas de contrainte `nowrap` KaTeX). */
-const LIBELLE_STRUCTURE_B_COURT: Record<SousTypeDenombCombB, string> = {
-  roleDistingue: "n\\times C_{n-1}^{k}",
-  poolsSepares: "C_{n_1}^{k_1}\\times C_{n_2}^{k_2}",
-  memeContrainte: "C_{n_1}^{k}+C_{n_2}^{k}",
-  partitionComplementaire: "C_n^{k}",
-};
+const OPTIONS_C = [
+  { valeur: "A", label: "$A_n^p$" },
+  { valeur: "B", label: "$B_n^p=n^p$" },
+  { valeur: "C", label: "$C_n^p$" },
+  { valeur: "Gamma", label: "$\\Gamma_n^p=C_{n+p-1}^{p}$" },
+];
 
-export function consigneGeneraleB(): string {
-  return "Identifie la structure de la sélection (rôle distingué, pools séparés, contrainte sur le même groupe, ou partition complémentaire), pose la formule, puis calcule le résultat.";
+function formuleMultinomiale(n: number, tailles: number[]): string {
+  return `\\dfrac{${n}!}{${tailles.map((x) => `${x}!`).join("\\times ")}}`;
 }
 
-export function blocDonneesB(e: ExerciceDenombCombB): string[] {
+function formuleB(e: E & { famille: "B" }): string {
   switch (e.sousType) {
     case "roleDistingue":
-      return [`n=${e.n}\\text{ personnes}`, `\\text{1 rôle distingué, puis }k=${e.k}\\text{ personnes}`, `\\text{pour un rôle commun}`];
+      return `${e.n}\\times C_{${e.n - 1}}^{${e.k}}`;
     case "poolsSepares":
-      return [`\\text{Groupe 1 : }n_1=${e.n1}\\text{, choisir }k_1=${e.k1}`, `\\text{Groupe 2 : }n_2=${e.n2}\\text{, choisir }k_2=${e.k2}`, `\\text{(les 2 choix sont indépendants)}`];
+      return `C_{${e.n1}}^{${e.k1}}\\times C_{${e.n2}}^{${e.k2}}`;
     case "memeContrainte":
-      return [`\\text{Groupe 1 : }n_1=${e.n1}\\text{ personnes}`, `\\text{Groupe 2 : }n_2=${e.n2}\\text{ personnes}`, `\\text{Choisir }k=${e.k}\\text{ personnes,}`, `\\text{TOUTES du même groupe}`];
+      return `C_{${e.n1}}^{${e.k}}+C_{${e.n2}}^{${e.k}}`;
     case "partitionComplementaire":
-      return [`n=${e.n}\\text{ éléments}`, `\\text{Choisir un sous-groupe de taille }k=${e.k}`];
+      return `C_{${e.n}}^{${e.k}}`;
   }
 }
 
-export function consigneEcranB(phase: PhaseDenombrementCombine): string {
-  if (phase === "bEcran1") return "Les 2 choix sont-ils liés par un ET (indépendants → multiplication) ou par un OU exclusif (l'un ou l'autre → addition) ? Choisis la structure appropriée.";
-  return "Calcule le résultat à partir de la structure CONFIRMÉE.";
+function lettresMot(e: E & { famille: "E" }): string {
+  return [...new Set(e.mot)].map((c) => `${e.mot.split(c).length - 1}`).join(", ");
 }
 
-export function etatActuelB(e: ExerciceDenombCombB, phase: PhaseDenombrementCombine): string[] | null {
-  if (phase !== "bEcran2") return null;
-  return [`\\text{Structure confirmée :}`, LIBELLE_STRUCTURE_B_COURT[e.sousType]];
+function formuleE(e: E & { famille: "E" }): string {
+  return formuleMultinomiale(e.n, e.repetitions.map((r) => r.fois));
 }
 
-export function champsB(phase: PhaseDenombrementCombine): ChampDef[] {
-  if (phase === "bEcran1") {
-    return [
-      {
-        type: "choix",
-        label: "Structure =",
-        options: (["roleDistingue", "poolsSepares", "memeContrainte", "partitionComplementaire"] as const).map((v) => ({ valeur: v, label: LIBELLE_STRUCTURE_B[v] })),
-      },
-    ];
-  }
-  return [champTexte("Résultat =", "ex : 120")];
+function termesD(e: E & { famille: "D" }): [string, string] {
+  return e.typeContrainte === "exclusion" ? [`C_{${e.n}}^{${e.k}}`, `C_{${e.n - 2}}^{${e.k - 2}}`] : [`C_{${e.n - 2}}^{${e.k - 2}}`, `C_{${e.n - 2}}^{${e.k}}`];
 }
 
-export function niveauAideMaxB(phase: PhaseDenombrementCombine): number {
-  return phase === "bEcran1" ? 2 : 0;
-}
-
-export function aideNiveau1B(phase: PhaseDenombrementCombine): AideAvecLatex {
-  if (phase !== "bEcran1") return AUCUNE_AIDE;
-  return { texte: "Distingue si les 2 choix sont liés par un ET (les deux se produisent ensemble → multiplication) ou par un OU exclusif (l'un OU l'autre, jamais les deux → addition).", latex: null };
-}
-
-const AIDE_2_STRUCTURE_B: Record<SousTypeDenombCombB, string> = {
-  roleDistingue: "Choix successif : 1 rôle précis, PUIS un groupe pour un rôle commun — un ET (multiplication), formule précise non posée.",
-  poolsSepares: "Les 2 choix sont indépendants l'un de l'autre — un ET (multiplication de 2 termes), formule précise non posée.",
-  memeContrainte: "La contrainte porte sur un OU exclusif entre 2 groupes — une addition de 2 termes, formule précise non posée.",
-  partitionComplementaire: "Choisir le 1ᵉʳ sous-groupe détermine automatiquement le second — une seule combinaison suffit, formule précise non posée.",
-};
-
-export function aideNiveau2B(e: ExerciceDenombCombB, phase: PhaseDenombrementCombine): AideAvecLatex {
-  if (phase !== "bEcran1") return AUCUNE_AIDE;
-  return { texte: AIDE_2_STRUCTURE_B[e.sousType], latex: null };
-}
-
-// ============================================================================
-// Famille C — Combinaisons avec répétition et distinguabilité.
-// ============================================================================
-
-const LIBELLE_ATTRIBUTION_C = { carre: "n² (résultats ORDONNÉS)", combinaisonRep: "Cₙ₊₁² (résultats NON ORDONNÉS, avec répétition)" };
-
-export function consigneGeneraleC(): string {
-  return "Détermine, selon le contexte, le nombre de résultats distincts (répétition et/ou distinguabilité des objets).";
-}
-
-export function blocDonneesC(e: ExerciceDenombCombC): string[] {
-  if (e.sousType === "repetition") {
-    return [`n=${e.n}\\text{ valeurs possibles}`, `\\text{Choisir 2 valeurs, répétition autorisée,}`, `\\text{ordre indifférent}`];
-  }
-  return [`n=${e.n}\\text{ faces/valeurs possibles}`, `\\text{2 objets, chacun donnant 1 valeur parmi les }n`];
-}
-
-export function consigneEcranC(e: ExerciceDenombCombC, phase: PhaseDenombrementCombine): string {
-  if (e.sousType === "repetition") {
-    if (phase === "cEcran1") return "Pose la formule (NON calculée). Utilise C(a,b) pour un coefficient binomial si besoin (ex : C(n,2)+n).";
-    return "Calcule le résultat à partir de la formule CONFIRMÉE.";
-  }
-  if (phase === "cEcran1") return "Le contexte précise si les 2 objets peuvent être distingués l'un de l'autre (ex : couleurs différentes) ou non (ex : objets identiques). Attribue la bonne formule à chaque cas.";
-  return "Calcule les 2 valeurs correspondantes, à partir de l'attribution CONFIRMÉE.";
-}
-
-export function etatActuelC(e: ExerciceDenombCombC, phase: PhaseDenombrementCombine): string[] | null {
-  if (e.sousType === "comparaison" && phase === "cEcran2") {
-    return [`\\text{Discernable}\\to n^2\\text{ (confirmé)}`, `\\text{Indiscernable}\\to C_{n+1}^{2}\\text{ (confirmé)}`];
-  }
-  return null;
-}
-
-export function champsC(e: ExerciceDenombCombC, phase: PhaseDenombrementCombine): ChampDef[] {
-  if (e.sousType === "repetition") {
-    if (phase === "cEcran1") return [champTexte("Formule =", "ex : C(n,2)+n")];
-    return [champTexte("Résultat =", "ex : 28")];
-  }
-  if (phase === "cEcran1") {
-    const options = (["carre", "combinaisonRep"] as const).map((v) => ({ valeur: v, label: LIBELLE_ATTRIBUTION_C[v] }));
-    return [
-      { type: "choix", label: "Discernables (ex : couleurs différentes) =", options },
-      { type: "choix", label: "Indiscernables (ex : objets identiques) =", options },
-    ];
-  }
-  return [champTexte("Résultat discernable =", "ex : 36"), champTexte("Résultat indiscernable =", "ex : 21")];
-}
-
-export function niveauAideMaxC(phase: PhaseDenombrementCombine): number {
-  return phase === "cEcran1" ? 2 : 0;
-}
-
-export function aideNiveau1C(e: ExerciceDenombCombC, phase: PhaseDenombrementCombine): AideAvecLatex {
-  if (phase !== "cEcran1") return AUCUNE_AIDE;
-  if (e.sousType === "repetition") {
-    return { texte: "Choisir 2 valeurs avec répétition et sans ordre revient à choisir 2 éléments parmi n+1 (bijection classique), ou à séparer le cas des 2 valeurs identiques (n façons) de celui de 2 valeurs distinctes.", latex: "C_{n+1}^{2}" };
-  }
-  return { texte: "2 objets de couleurs différentes peuvent être distingués (discernables) ; 2 objets identiques, une fois le résultat obtenu, ne peuvent plus être distingués l'un de l'autre (indiscernables).", latex: null };
-}
-
-export function aideNiveau2C(e: ExerciceDenombCombC, phase: PhaseDenombrementCombine): AideAvecLatex {
-  if (phase !== "cEcran1") return AUCUNE_AIDE;
-  if (e.sousType === "repetition") {
-    return { texte: "Cas des 2 valeurs identiques déjà compté (l'autre cas reste à déterminer) :", latex: `${e.n}` };
-  }
-  return { texte: "Distinguer les 2 objets (discernables) donne des résultats ORDONNÉS — attribution précise non donnée.", latex: null };
-}
-
-// ============================================================================
-// Famille D — Sélections avec restrictions.
-// ============================================================================
-
-export const LIBELLE_CONTRAINTE_D: Record<TypeContrainteD, string> = {
-  exclusion: "Exclusion mutuelle (ne peuvent être ensemble) : Cₙᵏ − Cₙ₋₂ᵏ⁻²",
-  indissociable: "Couple indissociable (ensemble ou pas du tout) : Cₙ₋₂ᵏ⁻² + Cₙ₋₂ᵏ",
-};
-
-/** Version COURTE — mêmes raisons que `LIBELLE_STRUCTURE_B_COURT` ci-dessus. */
-const LIBELLE_CONTRAINTE_D_COURT: Record<TypeContrainteD, string> = {
-  exclusion: "C_n^{k}-C_{n-2}^{k-2}",
-  indissociable: "C_{n-2}^{k-2}+C_{n-2}^{k}",
-};
-
-export function consigneGeneraleD(): string {
-  return "n éléments, dont 2 éléments précis notés X et Y, soumis à une contrainte sur leur présence conjointe dans une sélection de k éléments. Identifie la contrainte, calcule chaque terme, puis combine-les.";
-}
-
-export function blocDonneesD(e: ExerciceDenombCombD): string[] {
-  const base = [`n=${e.n}\\text{ éléments, dont X et Y}`, `\\text{Choisir }k=${e.k}\\text{ éléments au total}`];
-  if (e.sousType === "coupleIndissociable") {
-    return [...base, `\\text{X et Y : ENSEMBLE ou PAS DU TOUT}`];
-  }
-  if (e.sousType === "contrainteRiche") {
-    return [`\\text{Catégorie A : }n_A=${e.nA}\\text{ (contient X et Y)}`, `\\text{Catégorie B : }n_B=${e.nB}`, `\\text{Choisir }k=${e.k}\\text{ éléments au total}`, `\\text{X et Y NE PEUVENT PAS être ensemble}`];
-  }
-  return [...base, `\\text{X et Y NE PEUVENT PAS être ensemble}`];
-}
-
-export function consigneEcranD(phase: PhaseDenombrementCombine): string {
-  if (phase === "dEcran1") return "La contrainte empêche-t-elle X et Y d'être ensemble, ou les oblige-t-elle à être ensemble ? Choisis le type de contrainte.";
-  if (phase === "dEcran2") return "Calcule séparément les 2 termes nécessaires, à partir du type de contrainte CONFIRMÉ.";
-  return "Combine les 2 termes CONFIRMÉS (soustraction pour une exclusion, addition pour un couple indissociable) pour obtenir le résultat final.";
-}
-
-export function etatActuelD(e: ExerciceDenombCombD, phase: PhaseDenombrementCombine): string[] | null {
-  if (phase === "dEcran2") return [`\\text{Type confirmé :}`, LIBELLE_CONTRAINTE_D_COURT[e.typeContrainte]];
-  if (phase === "dEcran3")
-    return [
-      `\\text{Type confirmé :}`,
-      LIBELLE_CONTRAINTE_D_COURT[e.typeContrainte],
-      `\\text{Terme 1 = }${e.terme1}\\text{ (confirmé)}`,
-      `\\text{Terme 2 = }${e.terme2}\\text{ (confirmé)}`,
-    ];
-  return null;
-}
-
-export function champsD(e: ExerciceDenombCombD, phase: PhaseDenombrementCombine): ChampDef[] {
-  if (phase === "dEcran1") {
-    return [
-      {
-        type: "choix",
-        label: "Type de contrainte =",
-        options: (["exclusion", "indissociable"] as const).map((v) => ({ valeur: v, label: LIBELLE_CONTRAINTE_D[v] })),
-      },
-    ];
-  }
-  if (phase === "dEcran2") {
-    if (e.typeContrainte === "exclusion") {
-      return [champTexte(`${labelCombinaison(e.n, e.k)} =`, "ex : 15504"), champTexte(`${labelCombinaison(e.n - 2, e.k - 2)} =`, "ex : 816")];
+export const FORMAT_6GEN44: FormatCombinatoire<E, P> = {
+  consigneGenerale(e) {
+    switch (e.famille) {
+      case "A":
+        return [t("Répartis les personnes dans les groupes de tailles imposées : écris la formule, puis calcule.")];
+      case "B":
+        return [t("Reconnais comment la sélection se construit (et, ou, un rôle à part, un seul choix), puis calcule.")];
+      case "C":
+        return e.sousType === "repetition" ? [t("Choix sans ordre, avec répétition possible : écris la formule, puis calcule.")] : [t("Décide quel groupement compte les résultats, puis calcule.")];
+      case "D":
+        return [t("Deux personnes précises sont soumises à une contrainte : reconnais-la, calcule les deux termes, puis combine-les.")];
+      case "E":
+        return [t("Anagrammes : écris la formule du nombre de mots, calcule-le, puis déduis le nombre d'anagrammes.")];
     }
-    return [champTexte(`${labelCombinaison(e.n - 2, e.k - 2)} =`, "ex : 816"), champTexte(`${labelCombinaison(e.n - 2, e.k)} =`, "ex : 8568")];
-  }
-  return [champTexte("Résultat final =", "ex : 14688")];
-}
-
-export function niveauAideMaxD(phase: PhaseDenombrementCombine): number {
-  return phase === "dEcran1" ? 2 : 0;
-}
-
-export function aideNiveau1D(phase: PhaseDenombrementCombine): AideAvecLatex {
-  if (phase !== "dEcran1") return AUCUNE_AIDE;
-  return { texte: "« Ne peuvent être ensemble » se traite par soustraction (total moins le cas où les 2 sont présents) ; « vont toujours ensemble » se traite par addition de 2 cas complémentaires.", latex: null };
-}
-
-export function aideNiveau2D(e: ExerciceDenombCombD, phase: PhaseDenombrementCombine): AideAvecLatex {
-  if (phase !== "dEcran1") return AUCUNE_AIDE;
-  return { texte: `Type de contrainte identifié : ${e.typeContrainte === "exclusion" ? "exclusion mutuelle" : "couple indissociable"} — expression de comptage précise non posée.`, latex: null };
-}
-
-// ============================================================================
-// Dispatch commun.
-// ============================================================================
-
-export function consigneGenerale(exercice: ExerciceDenombrementCombine): string {
-  switch (exercice.famille) {
-    case "A":
-      return consigneGeneraleA();
-    case "B":
-      return consigneGeneraleB();
-    case "C":
-      return consigneGeneraleC();
-    case "D":
-      return consigneGeneraleD();
-  }
-}
-
-export function blocDonnees(exercice: ExerciceDenombrementCombine): string[] {
-  switch (exercice.famille) {
-    case "A":
-      return blocDonneesA(exercice);
-    case "B":
-      return blocDonneesB(exercice);
-    case "C":
-      return blocDonneesC(exercice);
-    case "D":
-      return blocDonneesD(exercice);
-  }
-}
-
-export function consigneEcran(exercice: ExerciceDenombrementCombine, phase: PhaseDenombrementCombine): string {
-  switch (exercice.famille) {
-    case "A":
-      return consigneEcranA(phase);
-    case "B":
-      return consigneEcranB(phase);
-    case "C":
-      return consigneEcranC(exercice, phase);
-    case "D":
-      return consigneEcranD(phase);
-  }
-}
-
-export function etatActuel(exercice: ExerciceDenombrementCombine, phase: PhaseDenombrementCombine): string[] | null {
-  switch (exercice.famille) {
-    case "A":
-      return etatActuelA(exercice, phase);
-    case "B":
-      return etatActuelB(exercice, phase);
-    case "C":
-      return etatActuelC(exercice, phase);
-    case "D":
-      return etatActuelD(exercice, phase);
-  }
-}
-
-export function champsEcran(exercice: ExerciceDenombrementCombine, phase: PhaseDenombrementCombine): ChampDef[] {
-  switch (exercice.famille) {
-    case "A":
-      return champsA(phase);
-    case "B":
-      return champsB(phase);
-    case "C":
-      return champsC(exercice, phase);
-    case "D":
-      return champsD(exercice, phase);
-  }
-}
-
-export function niveauAideMaxEcran(exercice: ExerciceDenombrementCombine, phase: PhaseDenombrementCombine): number {
-  switch (exercice.famille) {
-    case "A":
-      return niveauAideMaxA(phase);
-    case "B":
-      return niveauAideMaxB(phase);
-    case "C":
-      return niveauAideMaxC(phase);
-    case "D":
-      return niveauAideMaxD(phase);
-  }
-}
-
-export function aideNiveau1(exercice: ExerciceDenombrementCombine, phase: PhaseDenombrementCombine): AideAvecLatex {
-  switch (exercice.famille) {
-    case "A":
-      return niveauAideMaxA(phase) === 0 ? AUCUNE_AIDE : aideNiveau1A();
-    case "B":
-      return aideNiveau1B(phase);
-    case "C":
-      return aideNiveau1C(exercice, phase);
-    case "D":
-      return aideNiveau1D(phase);
-  }
-}
-
-export function aideNiveau2(exercice: ExerciceDenombrementCombine, phase: PhaseDenombrementCombine): AideAvecLatex {
-  switch (exercice.famille) {
-    case "A":
-      return niveauAideMaxA(phase) === 0 ? AUCUNE_AIDE : aideNiveau2A(exercice);
-    case "B":
-      return aideNiveau2B(exercice, phase);
-    case "C":
-      return aideNiveau2C(exercice, phase);
-    case "D":
-      return aideNiveau2D(exercice, phase);
-  }
-}
-
-export const LIBELLE_PHASE: Record<PhaseDenombrementCombine, string> = {
-  aEcran1: "Étape 1 (formule multinomiale)",
-  aEcran2: "Étape 2 (calcul)",
-  bEcran1: "Étape 1 (structure identifiée)",
-  bEcran2: "Étape 2 (calcul)",
-  cEcran1: "Étape 1 (formule / attribution)",
-  cEcran2: "Étape 2 (calcul)",
-  dEcran1: "Étape 1 (type de contrainte)",
-  dEcran2: "Étape 2 (termes séparés)",
-  dEcran3: "Étape 3 (combinaison finale)",
+  },
+  donnees(e) {
+    switch (e.famille) {
+      case "A": {
+        const liste = e.noms.map((nom, i) => `${e.tailles[i]} dans l'équipe ${nom}`).join(", ");
+        return [[t(`On répartit ${e.n} ${e.objets} en ${e.k} équipes : ${liste}.`)], [t("De combien de façons peut-on former ces équipes ?")]];
+      }
+      case "B":
+        return [f(e.contexte), [t("De combien de façons peut-on faire ce choix ?")]];
+      case "C":
+        return [f(e.contexte), [t(e.sousType === "repetition" ? "Combien de choix différents y a-t-il ?" : "Combien de résultats différents y a-t-il ?")]];
+      case "D":
+        return [[t(e.contexte)], [t("Combien de choix sont possibles ?")]];
+      case "E":
+        return [[t(`On considère le mot ${e.mot} (${e.n} lettres). Une anagramme est un mot formé des mêmes lettres, dans un autre ordre (il n'a pas besoin d'avoir un sens).`)]];
+    }
+  },
+  consigneEcran(e, p) {
+    switch (e.famille) {
+      case "A":
+        return p === "aEcran1" ? [t("Écris la formule du nombre de répartitions, sans la calculer.")] : [t("Calcule ce nombre.")];
+      case "B":
+        return p === "bEcran1" ? [t("Quelle formule correspond à cette sélection ?")] : [t("Calcule le nombre de choix.")];
+      case "C":
+        if (e.sousType === "repetition") return p === "cEcran1" ? [t("Écris la formule du nombre de choix, sans la calculer.")] : [t("Calcule ce nombre.")];
+        return p === "cEcran1" ? [t("Quel groupement compte ces résultats ?")] : [t("Calcule le nombre de résultats.")];
+      case "D":
+        if (p === "dEcran1") return [t("Comment traite-t-on cette contrainte ?")];
+        if (p === "dEcran2") return [t("Calcule les deux termes de cette formule.")];
+        return [t("Combine les deux termes : combien de choix sont possibles ?")];
+      case "E":
+        if (p === "eEcran1") return [t("Écris la formule du nombre de mots que l'on peut former avec toutes ces lettres, sans la calculer.")];
+        if (p === "eEcran2") return [t("Calcule ce nombre de mots.")];
+        return [t("Combien d'anagrammes de ce mot y a-t-il ?")];
+    }
+  },
+  champs(e, p) {
+    switch (e.famille) {
+      case "A":
+        return p === "aEcran1" ? [{ type: "texte", label: "Formule", apercu: true, nature: "formule" }] : [{ type: "texte", label: "Nombre de répartitions" }];
+      case "B":
+        return p === "bEcran1" ? [{ type: "choix", label: "", options: (Object.keys(OPTIONS_B) as SousTypeDenombCombB[]).map((v) => ({ valeur: v, label: OPTIONS_B[v] })) }] : [{ type: "texte", label: "Nombre de choix" }];
+      case "C":
+        if (e.sousType === "comparaison") return p === "cEcran1" ? [{ type: "choix", label: "", options: OPTIONS_C }] : [{ type: "texte", label: "Nombre de résultats" }];
+        return p === "cEcran1" ? [{ type: "texte", label: "Formule", apercu: true, nature: "formule" }] : [{ type: "texte", label: "Nombre de choix" }];
+      case "D": {
+        if (p === "dEcran1")
+          return [
+            {
+              type: "choix",
+              label: "",
+              options: [
+                { valeur: "exclusion", label: "Tous les choix, moins ceux qui contiennent les deux : $C_n^{k}-C_{n-2}^{k-2}$" },
+                { valeur: "indissociable", label: "Les deux, plus aucun des deux : $C_{n-2}^{k-2}+C_{n-2}^{k}$" },
+              ],
+            },
+          ];
+        if (p === "dEcran2") {
+          const [a, b] = termesD(e);
+          return [
+            { type: "texte", label: `$${a}$` },
+            { type: "texte", label: `$${b}$` },
+          ];
+        }
+        return [{ type: "texte", label: "Nombre de choix" }];
+      }
+      case "E":
+        if (p === "eEcran1") return [{ type: "texte", label: "Formule", apercu: true, nature: "formule" }];
+        return [{ type: "texte", label: p === "eEcran2" ? "Nombre de mots" : "Nombre d'anagrammes" }];
+    }
+  },
+  aides(e, p) {
+    switch (e.famille) {
+      case "A":
+        if (p === "aEcran1") return [{ texte: "Répartir $n$ personnes en groupes nommés de tailles $n_1, n_2, \\ldots$ (sans ordre dans un groupe) :", latex: "\\dfrac{n!}{n_1!\\times n_2!\\times\\cdots}" }, { texte: `Ici $n=${e.n}$ et les tailles sont ${e.tailles.join(", ")}. Utilise « ! » et des parenthèses autour du dénominateur.` }];
+        return [{ texte: "Calcule chaque factorielle (ou utilise la touche $x!$ de la calculatrice), puis divise." }, { texte: "Tu peux aussi choisir les groupes l'un après l'autre : $C_n^{n_1}\\times C_{n-n_1}^{n_2}\\times\\cdots$" }];
+      case "B":
+        if (p === "bEcran1") return [{ texte: "« Et » (deux choix faits ensemble) se traduit par une multiplication, « ou » (l'un, ou bien l'autre) par une addition ; choisir une partie fixe aussi le reste." }, { texte: e.sousType === "roleDistingue" ? "Une personne a-t-elle un rôle différent des autres ?" : e.sousType === "poolsSepares" ? "Les deux choix se font-ils tous les deux, dans deux ensembles différents ?" : e.sousType === "memeContrainte" ? "Faut-il choisir dans un groupe ou bien dans l'autre, jamais dans les deux ?" : "Une fois le premier groupe choisi, reste-t-il un choix à faire pour l'autre ?" }];
+        return [{ texte: "Calcule chaque combinaison avec $C_n^k=\\dfrac{n!}{k!\\,(n-k)!}$ (touche nCr)." }, { texte: `Formule de la situation : $${formuleB(e)}$.` }];
+      case "C":
+        if (e.sousType === "repetition")
+          return p === "cEcran1"
+            ? [{ texte: "Choisir $p$ éléments parmi $n$, sans ordre, avec répétition possible (cours, § 1) :", latex: "\\Gamma_n^p=C_{n+p-1}^{p}" }, { texte: `Ici $n=${e.n}$ (nombre de sortes) et $p=${e.p}$ (nombre d'éléments choisis). Au clavier, une combinaison s'écrit avec la lettre C suivie des deux nombres entre parenthèses.` }]
+            : [{ texte: "Calcule la combinaison avec la touche nCr, ou $\\dfrac{m!}{p!\\,(m-p)!}$." }, { texte: `Il s'agit de $C_{${e.n + e.p - 1}}^{${e.p}}$.` }];
+        if (p === "cEcran1") return [{ texte: "Si l'on peut distinguer les objets, un résultat est une liste ordonnée (avec répétition) ; sinon, c'est un choix sans ordre, avec répétition." }, { texte: "Deux résultats qui ne diffèrent que par le dé qui donne chaque face sont-ils différents ici ?" }];
+        return [{ texte: "$B_n^p=n^p$ ; $\\Gamma_n^p=C_{n+p-1}^{p}$." }, { texte: `Ici $n=${e.n}$ faces et $p=${e.p}$ dés.` }];
+      case "D":
+        if (p === "dEcran1") return [{ texte: "« Jamais ensemble » : on compte tout, puis on retire les choix où les deux sont présents. « Ensemble ou pas du tout » : on additionne les deux cas permis." }, { texte: "Relis la contrainte : interdit-elle un cas, ou n'en permet-elle que deux ?" }];
+        if (p === "dEcran2") return [{ texte: "$C_n^k=\\dfrac{n!}{k!\\,(n-k)!}$ (touche nCr)." }, { texte: "Les deux personnes placées (ou écartées), il reste $n-2$ personnes." }];
+        return [{ texte: e.typeContrainte === "exclusion" ? "Retire du total les choix qui contiennent les deux personnes." : "Additionne les choix « avec les deux » et « sans aucun des deux »." }, { texte: "Utilise les deux termes de l'écran précédent." }];
+      case "E":
+        if (p === "eEcran1") return [{ texte: "Mots formés de $n$ lettres dont certaines se répètent $n_1, n_2, \\ldots$ fois (permutation avec répétition) :", latex: "\\dfrac{n!}{n_1!\\times n_2!\\times\\cdots}" }, { texte: `Compte chaque lettre du mot ${e.mot} : ${lettresMot(e)} (une lettre seule donne $1!=1$).` }];
+        if (p === "eEcran2") return [{ texte: "Calcule les factorielles, puis divise." }, { texte: `Il y a ${e.n} lettres en tout.` }];
+        return [{ texte: "Une anagramme est un autre mot que le mot de départ." }, { texte: "Parmi tous les mots comptés, un seul est le mot lui-même." }];
+    }
+  },
+  reponseAttendue(e, p) {
+    switch (e.famille) {
+      case "A":
+        return p === "aEcran1" ? [formuleMultinomiale(e.n, e.tailles)] : [milliers(e.resultat)];
+      case "B":
+        return p === "bEcran1" ? [formuleB(e)] : [milliers(e.resultat)];
+      case "C":
+        if (p === "cEcran1") return e.sousType === "comparaison" && e.discernables ? [`B_{${e.n}}^{${e.p}}=${e.n}^{${e.p}}`] : [`\\Gamma_{${e.n}}^{${e.p}}=C_{${e.n + e.p - 1}}^{${e.p}}`];
+        return [milliers(e.resultat)];
+      case "D":
+        if (p === "dEcran1") return [e.typeContrainte === "exclusion" ? `C_{${e.n}}^{${e.k}}-C_{${e.n - 2}}^{${e.k - 2}}` : `C_{${e.n - 2}}^{${e.k - 2}}+C_{${e.n - 2}}^{${e.k}}`];
+        if (p === "dEcran2") {
+          const [a, b] = termesD(e);
+          return [`${a}=${milliers(e.terme1)}`, `${b}=${milliers(e.terme2)}`];
+        }
+        return [milliers(e.resultatFinal)];
+      case "E":
+        if (p === "eEcran1") return [formuleE(e)];
+        return [milliers(p === "eEcran2" ? e.nombreMots : e.nombreMots - 1)];
+    }
+  },
+  explication(e, p) {
+    switch (e.famille) {
+      case "A":
+        return p === "aEcran1"
+          ? [f(`Groupes nommés de tailles ${e.tailles.join(", ")} parmi ${e.n} : $${formuleMultinomiale(e.n, e.tailles)}$.`)]
+          : [f(`$${formuleMultinomiale(e.n, e.tailles)}=${milliers(e.resultat)}$.`)];
+      case "B": {
+        const raisons: Record<SousTypeDenombCombB, string> = {
+          roleDistingue: "On choisit d'abord la personne qui a le rôle à part (n façons), puis le groupe parmi les autres : multiplication.",
+          poolsSepares: "On fait les deux choix, dans deux ensembles différents : multiplication.",
+          memeContrainte: "On choisit dans un groupe ou bien dans l'autre, jamais dans les deux : addition.",
+          partitionComplementaire: "Choisir le premier groupe fixe le second : une seule combinaison.",
+        };
+        return p === "bEcran1" ? [[t(raisons[e.sousType])], f(`Ici : $${formuleB(e)}$.`)] : [f(`$${formuleB(e)}=${milliers(e.resultat)}$.`)];
+      }
+      case "C":
+        if (p === "cEcran1" && e.sousType === "comparaison")
+          return [[t(e.discernables ? "Les dés se distinguent : un résultat est une liste ordonnée où une face peut revenir, soit un arrangement avec répétition." : "Les dés sont indiscernables : seul compte combien de fois chaque face sort, soit une combinaison avec répétition.")]];
+        if (p === "cEcran1") return [f(`Sans ordre, avec répétition : $\\Gamma_{${e.n}}^{${e.p}}=C_{${e.n + e.p - 1}}^{${e.p}}$.`)];
+        return [f(e.sousType === "comparaison" && e.discernables ? `$${e.n}^{${e.p}}=${milliers(e.resultat)}$.` : `$C_{${e.n + e.p - 1}}^{${e.p}}=${milliers(e.resultat)}$.`)];
+      case "D": {
+        const [a, b] = termesD(e);
+        if (p === "dEcran1") return [[t(e.typeContrainte === "exclusion" ? "Les deux personnes ne doivent pas être ensemble : on retire du total les choix qui les contiennent toutes les deux." : "Les deux personnes sont ensemble ou absentes : on additionne les deux cas permis.")]];
+        if (p === "dEcran2") return [f(`$${a}=${milliers(e.terme1)}$ et $${b}=${milliers(e.terme2)}$.`)];
+        return [f(e.typeContrainte === "exclusion" ? `$${milliers(e.terme1)}-${milliers(e.terme2)}=${milliers(e.resultatFinal)}$.` : `$${milliers(e.terme1)}+${milliers(e.terme2)}=${milliers(e.resultatFinal)}$.`)];
+      }
+      case "E":
+        if (p === "eEcran1") return [f(`${e.n} lettres, dont ${e.repetitions.map((r) => `${r.lettre} ${r.fois} fois`).join(", ")} : $${formuleE(e)}$.`)];
+        if (p === "eEcran2") return [f(`$${formuleE(e)}=${milliers(e.nombreMots)}$.`)];
+        return [f(`On retire le mot lui-même : $${milliers(e.nombreMots)}-1=${milliers(e.nombreMots - 1)}$.`)];
+    }
+  },
+  libellePhase(e, p) {
+    switch (e.famille) {
+      case "A":
+        return p === "aEcran1" ? "Formule" : "Calcul";
+      case "B":
+        return p === "bEcran1" ? "Structure" : "Calcul";
+      case "C":
+        return p === "cEcran1" ? (e.sousType === "comparaison" ? "Groupement" : "Formule") : "Calcul";
+      case "D":
+        return p === "dEcran1" ? "Contrainte" : p === "dEcran2" ? "Deux termes" : "Résultat";
+      case "E":
+        return p === "eEcran1" ? "Formule" : p === "eEcran2" ? "Nombre de mots" : "Anagrammes";
+    }
+  },
+  messageCible(e, p, valeurs): FragmentConsigne[] | null {
+    const v = valeurs[valeurs.length - 1] ?? "";
+    switch (e.famille) {
+      case "B":
+        if (p !== "bEcran2") return null;
+        if (e.sousType === "poolsSepares" && vaut(v, coef(e.n1, e.k1) + coef(e.n2, e.k2))) return [t("Les deux choix se font ensemble : on multiplie, on n'additionne pas.")];
+        if (e.sousType === "memeContrainte" && vaut(v, coef(e.n1, e.k) * coef(e.n2, e.k))) return [t("L'équipe vient d'un club ou bien de l'autre : on additionne.")];
+        if (e.sousType === "roleDistingue" && vaut(v, coef(e.n, e.k + 1))) return [t("Le capitaine a un rôle à part : il se choisit d'abord, séparément.")];
+        return null;
+      case "D":
+        if (p === "dEcran3" && e.typeContrainte === "exclusion" && vaut(v, e.terme1 + e.terme2)) return [t("Les choix qui contiennent les deux personnes sont interdits : on les retire.")];
+        if (p === "dEcran3" && e.typeContrainte === "indissociable" && vaut(v, e.terme2 - e.terme1)) return [t("Les deux cas permis s'ajoutent.")];
+        return null;
+      case "E":
+        if (p === "eEcran3" && vaut(v, e.nombreMots)) return [t("Le mot de départ n'est pas une anagramme de lui-même.")];
+        if (p === "eEcran2" && vaut(v, fact(e.n))) return [t("Échanger deux lettres identiques ne donne pas un nouveau mot : divise par les factorielles des répétitions.")];
+        return null;
+      case "C":
+        if (p === "cEcran2" && e.sousType === "comparaison" && !e.discernables && vaut(v, e.n ** e.p)) return [t("Les dés sont indiscernables : deux résultats qui ne diffèrent que par l'ordre sont les mêmes.")];
+        return null;
+      default:
+        return null;
+    }
+  },
 };
 
-export const LIBELLE_FAMILLE: Record<ExerciceDenombrementCombine["famille"], string> = {
-  A: "A — Répartition en groupes de tailles données",
-  B: "B — Sélections combinées indépendantes",
-  C: "C — Combinaisons avec répétition et distinguabilité",
-  D: "D — Sélections avec restrictions",
-};
-
-/** Récapitulatif final : affiche toujours la réponse CORRECTE connue de l'exercice — jamais
- * recalculée depuis la saisie élève. */
-export function formatReponseAttenduePhaseLatex(exercice: ExerciceDenombrementCombine, phase: PhaseDenombrementCombine): string[] {
-  if (exercice.famille === "A") {
-    return [`${exercice.resultat}`];
-  }
-  if (exercice.famille === "B") {
-    if (phase === "bEcran1") return [LIBELLE_STRUCTURE_B_COURT[exercice.sousType]];
-    return [`${exercice.resultat}`];
-  }
-  if (exercice.famille === "C") {
-    if (exercice.sousType === "repetition") return [`${exercice.resultat}`];
-    if (phase === "cEcran1") return [`\\text{Discernable : }n^2`, `\\text{Indiscernable : }C_{n+1}^{2}`];
-    return [`${exercice.resultatDiscernable},\\,${exercice.resultatIndiscernable}`];
-  }
-  // famille D
-  if (phase === "dEcran1") return [LIBELLE_CONTRAINTE_D_COURT[exercice.typeContrainte]];
-  if (phase === "dEcran2") return [`${exercice.terme1},\\,${exercice.terme2}`];
-  return [`${exercice.resultatFinal}`];
+function fact(n: number): number {
+  let r = 1;
+  for (let i = 2; i <= n; i++) r *= i;
+  return r;
 }
-
+function coef(n: number, k: number): number {
+  let r = 1;
+  for (let i = 0; i < k; i++) r = (r * (n - i)) / (i + 1);
+  return Math.round(r);
+}

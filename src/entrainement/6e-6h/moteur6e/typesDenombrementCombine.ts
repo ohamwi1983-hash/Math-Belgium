@@ -1,86 +1,28 @@
 import type { ExerciceDenombrementCombine } from "../core6e/denombrementCombine.types";
-import type { ReglagesSession6e } from "../core6e/session6e.types";
-import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
 /**
- * Couche B (6e) — types de session pour `6gen44`. Nombre d'écrans CONSTANT par famille (A=2, B=2,
- * C=2, D=3) — contrairement à `6gen43` (famille A à 2 OU 3 écrans selon le sous-type), aucun
- * sous-type de `6gen44` ne fait varier le nombre d'écrans, seulement les CHAMPS affichés à chaque
- * écran (piloté par `ui6e/formatDenombrementCombine.ts`, jamais par ce fichier).
+ * Écrans de `6gen44` (6e ch. 7, § 2). A : formule (forme vérifiée : « ! » ou C exigé), puis calcul ;
+ * B : structure (choix fermé seul), calcul ; C répétition : formule, calcul ; C comparaison : formule
+ * (choix fermé seul), calcul ; D : contrainte (choix fermé seul), deux termes, résultat ; E : formule,
+ * nombre de mots, nombre d'anagrammes.
  */
+export type PhaseDenombrementCombine = "aEcran1" | "aEcran2" | "bEcran1" | "bEcran2" | "cEcran1" | "cEcran2" | "dEcran1" | "dEcran2" | "dEcran3" | "eEcran1" | "eEcran2" | "eEcran3";
 
-export type PhaseDenombrementCombine = "aEcran1" | "aEcran2" | "bEcran1" | "bEcran2" | "cEcran1" | "cEcran2" | "dEcran1" | "dEcran2" | "dEcran3";
-
-export function phaseInitiale(exercice: ExerciceDenombrementCombine): PhaseDenombrementCombine {
-  switch (exercice.famille) {
+export function phasesPourExercice(e: ExerciceDenombrementCombine): PhaseDenombrementCombine[] {
+  switch (e.famille) {
     case "A":
-      return "aEcran1";
+      return ["aEcran1", "aEcran2"];
     case "B":
-      return "bEcran1";
+      return ["bEcran1", "bEcran2"];
     case "C":
-      return "cEcran1";
+      return ["cEcran1", "cEcran2"];
     case "D":
-      return "dEcran1";
+      return ["dEcran1", "dEcran2", "dEcran3"];
+    case "E":
+      return ["eEcran1", "eEcran2", "eEcran3"];
   }
 }
 
-export function phaseApres(phase: PhaseDenombrementCombine): PhaseDenombrementCombine | "termine" {
-  switch (phase) {
-    case "aEcran1":
-      return "aEcran2";
-    case "aEcran2":
-      return "termine";
-    case "bEcran1":
-      return "bEcran2";
-    case "bEcran2":
-      return "termine";
-    case "cEcran1":
-      return "cEcran2";
-    case "cEcran2":
-      return "termine";
-    case "dEcran1":
-      return "dEcran2";
-    case "dEcran2":
-      return "dEcran3";
-    case "dEcran3":
-      return "termine";
-  }
-}
-
-/** Liste ORDONNÉE des phases réellement traversées par CET exercice précis — mirroir 6gen43. */
-export function phasesPourExercice(exercice: ExerciceDenombrementCombine): PhaseDenombrementCombine[] {
-  const phases: PhaseDenombrementCombine[] = [];
-  let phase: PhaseDenombrementCombine | "termine" = phaseInitiale(exercice);
-  while (phase !== "termine") {
-    phases.push(phase);
-    phase = phaseApres(phase);
-  }
-  return phases;
-}
-
-export interface ResultatExerciceDenombrementCombine {
-  exercice: ExerciceDenombrementCombine;
-  scores: Partial<Record<PhaseDenombrementCombine, number>>;
-  /** même principe que `EtatSessionDenombrementCombine.revelesPartiels` (voir son commentaire). */
-  revelesPartiels: Partial<Record<PhaseDenombrementCombine, boolean>>;
-}
-
-export interface EtatSessionDenombrementCombine {
-  reglages: ReglagesSession6e;
-  generateur: () => ExerciceDenombrementCombine;
-  exerciceCourant: ExerciceDenombrementCombine;
-  phase: PhaseDenombrementCombine;
-  etapeCourante: EtatEtapeTentatives;
-  niveauAide: number;
-  scoresPartiels: Partial<Record<PhaseDenombrementCombine, number>>;
-  /** Vrai signal "révélé" par écran déjà clos — jusqu'au 2025-10, déduit de
-   * `scoresPartiels[phase] === 0`, une heuristique fausse ici : l'ancienne pénalité d'aide (supprimée)
-   * (`Math.max(0, score - niveauAide*20)` dans `sessionDenombrementCombine.ts`) pouvait ramener une
-   * RÉUSSITE fortement aidée à exactement 0, affichée à tort comme "révélée". Champ explicite
-   * ajouté pendant le balayage générique (point A), peuplé depuis `etapeCourante.revelee`. */
-  revelesPartiels: Partial<Record<PhaseDenombrementCombine, boolean>>;
-  indexExercice: number;
-  resultats: ResultatExerciceDenombrementCombine[];
-  terminee: boolean;
-  derniereTransitionRevelee: boolean;
+export function estChoixDenombrementCombine(e: ExerciceDenombrementCombine, p: PhaseDenombrementCombine): boolean {
+  return p === "bEcran1" || p === "dEcran1" || (p === "cEcran1" && e.famille === "C" && e.sousType === "comparaison");
 }

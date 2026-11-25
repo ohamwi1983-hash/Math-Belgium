@@ -1,39 +1,21 @@
 import type { ExerciceBinomeNewton } from "../../core6e/binomeNewton.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, ProfilInstance, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
-import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatBinomeNewton";
+import type { AdaptateurFeuilleExercices, ProfilInstance } from "../../../export/genererFeuilleExercices";
+import { FORMAT_6GEN45 } from "../../ui6e/formatBinomeNewton";
 import { phasesPourExercice } from "../../moteur6e/typesBinomeNewton";
+import { correctionPapierCombinatoire, enoncePapierCombinatoire } from "../adaptateurCombinatoire";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceBinomeNewton } from "./index";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceBinomeNewton>` pour `6gen45` (Binôme de Newton) —
- * NOUVEAU, même principe que `denombrementFondamental/exportEvaluation.ts` (6gen43).
+ * Adaptateur papier de `6gen45` — mêmes fonctions de génération que l'appli (`?code=`) et mêmes
+ * textes que l'écran (`FORMAT_6GEN45`). Refonte papier complète : lot E de l'audit (à venir).
  */
 
-function entete(exercice: ExerciceBinomeNewton) {
-  return [...consigneGenerale(exercice), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
-}
-
-function construireEnonce(exercice: ExerciceBinomeNewton): SectionExercice {
-  const phases = phasesPourExercice(exercice);
-  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
-}
-
-function construireCorrection(exercice: ExerciceBinomeNewton): BlocCorrection[] {
-  const phases = phasesPourExercice(exercice);
-  const lettres = "abcdefghijklmnopqrstuvwxyz";
-  return phases.map((phase, i) => ({
-    type: "paragraphe",
-    fragments: [texte(`${lettres[i] ?? String(i + 1)}) `), latex(formatReponseAttenduePhaseLatex(exercice, phase).join(",\\ "))],
-  }));
-}
-
-/** Profil (tirage équilibré) : aucun cas particulier ni `forme` ; `calcul: 'exacte'` pour la famille C
- * seulement (« calcule 0,99³ EXACTEMENT à l'aide du binôme » : la calculatrice donne 0,970299
- * directement — revue des profils, 24/11/2026 ; jamais tirée « calculatrice autorisée »). A et B
- * (développement, terme de rang k) : pas de `calcul`. */
+/** Profil (tirage équilibré) : aucun cas particulier ni `forme`. Règle du 24/11 (Casio Graph Math+) :
+ * `exacte` seulement si la calculatrice donne directement la réponse — D (nombres du triangle :
+ * touche nCr). C est devenue une approximation (1 + nε, terme négligé : démarche évaluée) : plus de
+ * `calcul` (avant : « calcule 0,99³ exactement », `exacte`). A et B : pas de `calcul`. */
 export function profilBinomeNewton(exercice: ExerciceBinomeNewton): ProfilInstance {
-  return exercice.famille === "C" ? { casParticulier: null, calcul: "exacte" } : { casParticulier: null };
+  return exercice.famille === "D" ? { casParticulier: null, calcul: "exacte" } : { casParticulier: null };
 }
 
 export const adaptateurEvaluationBinomeNewton: AdaptateurFeuilleExercices<ExerciceBinomeNewton> = {
@@ -42,7 +24,7 @@ export const adaptateurEvaluationBinomeNewton: AdaptateurFeuilleExercices<Exerci
   genererInstance: genererExerciceBinomeNewton,
   catalogueVariantes: CATALOGUE_VARIANTES,
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
-  construireEnonce,
-  construireCorrection,
+  construireEnonce: enoncePapierCombinatoire(FORMAT_6GEN45, phasesPourExercice),
+  construireCorrection: correctionPapierCombinatoire(FORMAT_6GEN45, phasesPourExercice),
   profilInstance: profilBinomeNewton,
 };

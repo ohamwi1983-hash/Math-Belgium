@@ -1,7 +1,7 @@
 import type { ExerciceBinomialeSequenceOrdonnee } from "../../core6e/binomialeSequenceOrdonnee.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, ProfilInstance, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
-import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatBinomialeSequenceOrdonnee";
+import type { AdaptateurFeuilleExercices, ProfilInstance } from "../../../export/genererFeuilleExercices";
+import { FORMAT_6GEN48 } from "../../ui6e/formatBinomialeSequenceOrdonnee";
+import { correctionPapierCombinatoire, enoncePapierCombinatoire } from "../adaptateurCombinatoire";
 import { phasesPourExercice } from "../../moteur6e/typesBinomialeSequenceOrdonnee";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceBinomialeSequenceOrdonnee } from "./index";
 
@@ -10,24 +10,6 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceBinomiale
  * (Probabilité binomiale et séquence exacte) — NOUVEAU, même principe que
  * `denombrementFondamental/exportEvaluation.ts` (6gen43).
  */
-
-function entete(exercice: ExerciceBinomialeSequenceOrdonnee) {
-  return [...consigneGenerale(exercice), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
-}
-
-function construireEnonce(exercice: ExerciceBinomialeSequenceOrdonnee): SectionExercice {
-  const phases = phasesPourExercice(exercice);
-  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
-}
-
-function construireCorrection(exercice: ExerciceBinomialeSequenceOrdonnee): BlocCorrection[] {
-  const phases = phasesPourExercice(exercice);
-  const lettres = "abcdefghijklmnopqrstuvwxyz";
-  return phases.map((phase, i) => ({
-    type: "paragraphe",
-    fragments: [texte(`${lettres[i] ?? String(i + 1)}) `), latex(formatReponseAttenduePhaseLatex(exercice, phase).join(",\\ "))],
-  }));
-}
 
 /** Profil (tirage équilibré) de 6gen48.
  * Calculatrice des élèves de 6e (6h) : Casio Graph Math+ (lois binomiale, normale, de Poisson et
@@ -51,7 +33,7 @@ export const adaptateurEvaluationBinomialeSequenceOrdonnee: AdaptateurFeuilleExe
   genererInstance: genererExerciceBinomialeSequenceOrdonnee,
   catalogueVariantes: CATALOGUE_VARIANTES,
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
-  construireEnonce,
-  construireCorrection,
+  construireEnonce: enoncePapierCombinatoire(FORMAT_6GEN48, phasesPourExercice),
+  construireCorrection: correctionPapierCombinatoire(FORMAT_6GEN48, phasesPourExercice),
   profilInstance: profilBinomialeSequenceOrdonnee,
 };

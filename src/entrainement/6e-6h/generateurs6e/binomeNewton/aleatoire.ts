@@ -10,3 +10,13 @@ export function tirerEntier(min: number, max: number): number {
 export function tirerParmi<T>(candidats: readonly T[]): T {
   return candidats[Math.floor(Math.random() * candidats.length)];
 }
+
+/** Mélange de Fisher–Yates (non biaisé — `sort(() => Math.random() − 0,5)` l'était). */
+export function melanger<T>(liste: readonly T[]): T[] {
+  const r = [...liste];
+  for (let i = r.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [r[i], r[j]] = [r[j], r[i]];
+  }
+  return r;
+}

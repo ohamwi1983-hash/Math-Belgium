@@ -1,102 +1,38 @@
-import type { ExerciceDenombCombA, ExerciceDenombCombB, ExerciceDenombCombC, ExerciceDenombCombD, ExerciceDenombrementCombine } from "../core6e/denombrementCombine.types";
-import { diagnostiquerValeurCombinatoire, diagnostiquerValeursCombinatoire } from "./expressionCombinatoire";
-import type { StatutVerification } from "../moteur/statutVerification";
+import type { ExerciceDenombrementCombine } from "../core6e/denombrementCombine.types";
+import { diagnostiquerAttentes } from "./attentesCombinatoire";
+import type { Attente } from "./attentesCombinatoire";
+import type { DefinitionSession } from "./sessionCombinatoire";
+import { estChoixDenombrementCombine, phasesPourExercice } from "./typesDenombrementCombine";
 import type { PhaseDenombrementCombine } from "./typesDenombrementCombine";
 
 /**
- * Couche B (6e) — vérification propre à `6gen44` (dispatch par famille/sous-type/écran). N'importe
- * JAMAIS rien de `src/generateurs6e/` (règle non négociable, CLAUDE.md) — voir
- * `generateurs6e/denombrementCombine/session.integration.test.ts` pour le seul fichier autorisé
- * Couche A + Couche B ensemble.
- *
- * Toutes les valeurs attendues sont déjà PRÉ-CALCULÉES par la Couche A dans l'exercice. Ce fichier se
- * contente de les comparer, dans l'ORDRE d'affichage, à la saisie élève — via l'évaluateur EXACT
- * `expressionCombinatoire.ts` (BigInt, ÉGALITÉ EXACTE, pas de tolérance flottante — voir son en-tête)
- * pour TOUT champ numérique/formule, familles A à D indifféremment. Les 3 écrans de CHOIX (jamais de
- * texte libre) — famille B écran 1 (structure), famille C écran 1 sous-type "comparaison"
- * (attribution discernable/indiscernable), famille D écran 1 (type de contrainte) — comparent
- * directement l'identifiant choisi (`correct`/`not_equivalent` uniquement, jamais `parse_error`).
+ * Vérification de `6gen44`. Audit 6e ch. 7 (G5) : l'écran « formule » exige une écriture avec « ! »
+ * ou C (un nombre y est refusé SANS tentative), l'écran « calcul » exige un nombre (la formule
+ * recopiée y est refusée sans tentative) — avant, les deux écrans acceptaient la même chose.
  */
 
-// ============================================================================
-// Famille A — 1 seul écran de formule (texte), 1 écran de calcul (texte) — même cible (`resultat`,
-// BigInt) aux 2 écrans.
-// ============================================================================
-
-export function diagnostiquerAEcran(exercice: ExerciceDenombCombA, _phase: PhaseDenombrementCombine, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeurCombinatoire(valeurs[0] ?? "", exercice.resultat);
-}
-
-// ============================================================================
-// Famille B — écran 1 : CHOIX (jamais de saisie libre) parmi les 4 structures. Écran 2 : calcul.
-// ============================================================================
-
-export function diagnostiquerBEcran1(exercice: ExerciceDenombCombB, valeurs: string[]): StatutVerification {
-  return valeurs[0] === exercice.sousType ? "correct" : "not_equivalent";
-}
-export function diagnostiquerBEcran2(exercice: ExerciceDenombCombB, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeurCombinatoire(valeurs[0] ?? "", exercice.resultat);
-}
-export function diagnostiquerBEcran(exercice: ExerciceDenombCombB, phase: PhaseDenombrementCombine, valeurs: string[]): StatutVerification {
-  return phase === "bEcran1" ? diagnostiquerBEcran1(exercice, valeurs) : diagnostiquerBEcran2(exercice, valeurs);
-}
-
-// ============================================================================
-// Famille C — sous-type "repetition" : écran 1 formule texte, écran 2 calcul texte (1 champ chacun).
-// sous-type "comparaison" : écran 1 ATTRIBUTION (2 champs `choix` — discernable puis indiscernable),
-// écran 2 calcul des 2 valeurs (2 champs texte).
-// ============================================================================
-
-export function diagnostiquerCEcran(exercice: ExerciceDenombCombC, phase: PhaseDenombrementCombine, valeurs: string[]): StatutVerification {
-  if (exercice.sousType === "repetition") {
-    return diagnostiquerValeurCombinatoire(valeurs[0] ?? "", exercice.resultat);
-  }
-  // sousType === "comparaison"
-  if (phase === "cEcran1") {
-    const attendu = ["carre", "combinaisonRep"]; // [discernable, indiscernable]
-    const statuts: StatutVerification[] = attendu.map((v, i) => (valeurs[i] === v ? "correct" : "not_equivalent"));
-    return statuts.every((s) => s === "correct") ? "correct" : "not_equivalent";
-  }
-  return diagnostiquerValeursCombinatoire(valeurs, [exercice.resultatDiscernable, exercice.resultatIndiscernable]);
-}
-
-// ============================================================================
-// Famille D — écran 1 : CHOIX (jamais de saisie libre) entre "exclusion" et "indissociable".
-// Écran 2 : calcul des 2 termes séparément. Écran 3 : combinaison finale (1 champ).
-// ============================================================================
-
-export function diagnostiquerDEcran1(exercice: ExerciceDenombCombD, valeurs: string[]): StatutVerification {
-  return valeurs[0] === exercice.typeContrainte ? "correct" : "not_equivalent";
-}
-export function diagnostiquerDEcran2(exercice: ExerciceDenombCombD, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeursCombinatoire(valeurs, [exercice.terme1, exercice.terme2]);
-}
-export function diagnostiquerDEcran3(exercice: ExerciceDenombCombD, valeurs: string[]): StatutVerification {
-  return diagnostiquerValeurCombinatoire(valeurs[0] ?? "", exercice.resultatFinal);
-}
-export function diagnostiquerDEcran(exercice: ExerciceDenombCombD, phase: PhaseDenombrementCombine, valeurs: string[]): StatutVerification {
-  if (phase === "dEcran1") return diagnostiquerDEcran1(exercice, valeurs);
-  if (phase === "dEcran2") return diagnostiquerDEcran2(exercice, valeurs);
-  return diagnostiquerDEcran3(exercice, valeurs);
-}
-
-// ============================================================================
-// Dispatcher générique.
-// ============================================================================
-
-export function diagnostiquerEcran(exercice: ExerciceDenombrementCombine, phase: PhaseDenombrementCombine, valeurs: string[]): StatutVerification {
-  switch (exercice.famille) {
+export function attentesDenombrementCombine(e: ExerciceDenombrementCombine, p: PhaseDenombrementCombine): Attente[] {
+  switch (e.famille) {
     case "A":
-      return diagnostiquerAEcran(exercice, phase, valeurs);
+      return [{ nature: p === "aEcran1" ? "formule" : "nombre", cible: e.resultat }];
     case "B":
-      return diagnostiquerBEcran(exercice, phase, valeurs);
+      return p === "bEcran1" ? [{ choix: e.sousType }] : [{ nature: "entier", cible: e.resultat }];
     case "C":
-      return diagnostiquerCEcran(exercice, phase, valeurs);
+      if (e.sousType === "comparaison") return p === "cEcran1" ? [{ choix: e.discernables ? "B" : "Gamma" }] : [{ nature: "entier", cible: e.resultat }];
+      return [{ nature: p === "cEcran1" ? "formule" : "nombre", cible: e.resultat }];
     case "D":
-      return diagnostiquerDEcran(exercice, phase, valeurs);
+      if (p === "dEcran1") return [{ choix: e.typeContrainte }];
+      if (p === "dEcran2") return [{ nature: "entier", cible: e.terme1 }, { nature: "entier", cible: e.terme2 }];
+      return [{ nature: "entier", cible: e.resultatFinal }];
+    case "E":
+      if (p === "eEcran1") return [{ nature: "formule", cible: e.nombreMots }];
+      if (p === "eEcran2") return [{ nature: "nombre", cible: e.nombreMots }];
+      return [{ nature: "entier", cible: e.nombreMots - 1 }];
   }
 }
 
-export function verifierEcran(exercice: ExerciceDenombrementCombine, phase: PhaseDenombrementCombine, valeurs: string[]): boolean {
-  return diagnostiquerEcran(exercice, phase, valeurs) === "correct";
-}
+export const DEFINITION_6GEN44: DefinitionSession<ExerciceDenombrementCombine, PhaseDenombrementCombine> = {
+  phases: phasesPourExercice,
+  estChoix: estChoixDenombrementCombine,
+  diagnostiquer: (e, p, valeurs) => diagnostiquerAttentes(attentesDenombrementCombine(e, p), valeurs),
+};

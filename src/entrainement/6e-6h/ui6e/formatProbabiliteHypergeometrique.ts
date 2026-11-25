@@ -1,394 +1,181 @@
-import type { ExerciceHypergeoA, ExerciceHypergeoB, ExerciceHypergeoC, ExerciceProbabiliteHypergeometrique } from "../core6e/probabiliteHypergeometrique.types";
+import type { ExerciceProbabiliteHypergeometrique } from "../core6e/probabiliteHypergeometrique.types";
 import type { PhaseProbabiliteHypergeometrique } from "../moteur6e/typesProbabiliteHypergeometrique";
+import { rationnel, vaut } from "../moteur6e/saisieCombinatoire";
+import { arrondiLatex, decimalesAffichage, f, fractionLatex, milliers, t } from "./fragmentsCombinatoire";
+import type { ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen47`. Dispatch sur
- * `exercice.famille` PUIS `phase`, mirroir `formatDenombrementFondamental.ts` (6gen43), jamais
- * importé par un autre générateur (chaque générateur reste indépendant — CLAUDE.md).
- *
- * **Vigilance signe orphelin / groupe LaTeX vide / texte français en mode maths** (bug déjà
- * rencontré et corrigé sur plusieurs générateurs 6e, documenté par CLAUDE.md) — toute clause en
- * français mêlée à du LaTeX passe TOUJOURS par `\text{...}`, jamais du texte brut en mode maths.
- * Couverture de régression : `formatProbabiliteHypergeometrique.test.ts`.
+ * Textes de `6gen47` (6e ch. 7, § 5) — audit, lots B et C : contexte en prose avec ses nombres (plus
+ * coupé à 390 px), couleurs nommées (plus « couleur 1 / couleur 2 »), « × » comme dans le cours,
+ * indices en KaTeX, réponse attendue de l'écran « formule » = la formule avec les nombres, aide de
+ * niveau 2 qui ne donne plus la réponse, messages ciblés (avec remise, Cₙᴺ au mauvais endroit).
  */
 
-export type TypeChamp = "texte" | "choix";
+type E = ExerciceProbabiliteHypergeometrique;
+type P = PhaseProbabiliteHypergeometrique;
 
-export interface OptionChoix {
-  valeur: string;
-  label: string;
+export const ANNONCE_PRECISION = "Donne la valeur exacte (une fraction) ou un arrondi au millième.";
+
+function frac(n: number, d: number): string {
+  return fractionLatex(rationnel(n, d));
 }
 
-export interface ChampDef {
-  type: TypeChamp;
-  label: string;
-  placeholder?: string;
-  options?: OptionChoix[];
+function valeur(n: number, d: number): string {
+  const x = n / d;
+  const r = rationnel(n, d);
+  return `${fractionLatex(r)}\\approx ${arrondiLatex(x, decimalesAffichage(x))}`;
 }
 
-export interface AideAvecLatex {
-  texte: string;
-  latex: string | null;
+function formuleA(e: E & { famille: "A" }): string {
+  return `\\dfrac{C_{${e.K}}^{${e.k}}\\times C_{${e.N - e.K}}^{${e.n - e.k}}}{C_{${e.N}}^{${e.n}}}`;
 }
 
-/** Fragment de consigne mêlant texte français et LaTeX court (CLAUDE.md, convention établie sur
- * `formatProprietesLogarithme.ts`/6gen13, dupliquée ici localement — chaque générateur garde la
- * sienne). */
-export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
-
-function texte(valeur: string): FragmentConsigne {
-  return { type: "texte", valeur };
+function couleur(c: "c1" | "c2"): string {
+  return c === "c1" ? "rouge" : "bleue";
 }
 
-function latexFrag(valeur: string): FragmentConsigne {
-  return { type: "latex", valeur };
-}
-
-const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
-const ANNONCE_TOLERANCE = "(forme exacte ou décimale arrondie au centième)";
-
-function champTexte(label: string, placeholder: string): ChampDef {
-  return { type: "texte", label, placeholder };
-}
-
-function pgcd(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b !== 0) [a, b] = [b, a % b];
-  return a || 1;
-}
-
-/** Fraction irréductible LaTeX pour un rationnel EXACT num/den — jamais de décimal (CLAUDE.md),
- * mirroir `ui6e/formatProbabilitesEnsembles.ts` (6gen30) — fichier PROPRE à ce générateur (pas de
- * pgcd/fraction partagé documenté entre générateurs 6e, chacun garde le sien). */
-export function formatFractionLatex(num: number, den: number): string {
-  if (num === 0) return "0";
-  const g = pgcd(num, den);
-  const n = num / g;
-  const d = den / g;
-  return d === 1 ? `${n}` : `\\dfrac{${n}}{${d}}`;
-}
-
-// ============================================================================
-// Famille A — Hypergéométrique de base.
-// ============================================================================
-
-export function consigneGeneraleA(): FragmentConsigne[] {
-  return [texte("On tire au hasard, sans remise, un échantillon dans une population divisée en 2 catégories (succès/échecs). Calcule la probabilité d'obtenir exactement le nombre de succès demandé, à l'aide de la formule hypergéométrique.")];
-}
-
-function descriptionK(e: ExerciceHypergeoA): string[] {
-  if (e.sousType === "aucun") return [`k=0`, `\\text{(aucun succès parmi les ${e.n} tirages)}`];
-  if (e.sousType === "tous") return [`k=n=${e.n}`, `\\text{(tous les tirages sont des succès)}`];
-  return [`k=${e.k}`, `\\text{(exactement ${e.k} succès)}`];
-}
-
-/** Une DONNÉE (variable=valeur) par ligne, JAMAIS accolée à sa description française sur la même
- * ligne (convention `.equation-box-donnees`, `App.css` : "listant plusieurs DONNÉES DISTINCTES...
- * jamais côte à côte, toujours une par ligne") — `.equation-box .katex` est agrandi à `1.3em`, une
- * ligne mêlant `VAR=valeur` ET une parenthèse française dépasse largement un viewport mobile (piège
- * trouvé par inspection visuelle réelle — voir devlog). */
-export function blocDonneesA(e: ExerciceHypergeoA): string[] {
-  return [
-    ...e.contexte.phraseContexte,
-    `N=${e.N}`,
-    `\\text{(nombre total de ${e.contexte.labelPopulation})}`,
-    `K=${e.K}`,
-    `\\text{(nombre de ${e.contexte.labelSucces})}`,
-    `n=${e.n}`,
-    `\\text{(nombre de ${e.contexte.labelTirage})}`,
-    ...descriptionK(e),
-  ];
-}
-
-export function consigneEcranA(phase: PhaseProbabiliteHypergeometrique): FragmentConsigne[] {
-  // Formule reprise en vrai LaTeX (même expression que `etatActuelA`/`aideNiveau1A`) : `_{K}`/`^{k}`
-  // fonctionnent avec n'importe quelle casse en KaTeX, contrairement à l'ancien habillage Unicode
-  // indice/exposant (limité aux lettres minuscules) qui justifiait l'ancienne notation C(K,k) en
-  // texte brut.
-  if (phase === "aEcran1") return [texte("Pose la formule hypergéométrique "), latexFrag("P(k\\text{ succès})=\\dfrac{C_{K}^{k}\\cdot C_{N-K}^{n-k}}{C_{N}^{n}}"), texte(" — calcule chaque coefficient binomial toi-même et utilise ses valeurs numériques dans l'expression (une fraction non réduite est acceptée, inutile de la simplifier).")];
-  return [texte("Calcule la valeur de cette probabilité, à partir de la formule CORRECTE de l'étape précédente.")];
-}
-
-export function etatActuelA(e: ExerciceHypergeoA, phase: PhaseProbabiliteHypergeometrique): string[] | null {
-  if (phase !== "aEcran2") return null;
-  // Formule et annotation "(confirmée)" séparées en 2 fragments plutôt que combinées en un seul —
-  // une formule à fraction (`\dfrac`) est déjà large ; y coller une clause française pousse le
-  // fragment total au-delà de la largeur d'un écran mobile (piège CLAUDE.md/6gen43).
-  return [`P(k=${e.k})=\\dfrac{C_{${e.K}}^{${e.k}}\\cdot C_{${e.N - e.K}}^{${e.n - e.k}}}{C_{${e.N}}^{${e.n}}}`, "\\text{(formule confirmée)}"];
-}
-
-export function champsA(phase: PhaseProbabiliteHypergeometrique): ChampDef[] {
-  if (phase === "aEcran1") return [champTexte("Formule (valeur numérique) =", "ex : 6*35/120")];
-  return [champTexte("P(k succès) =", `ex : 0,3 ${ANNONCE_TOLERANCE}`)];
-}
-
-export function niveauAideMaxA(phase: PhaseProbabiliteHypergeometrique): number {
-  return phase === "aEcran1" ? 2 : 0;
-}
-
-export function aideNiveau1A(): AideAvecLatex {
-  return { texte: "Rappel de la structure de la formule : (façons de choisir les k succès parmi les K disponibles) × (façons de choisir les n−k échecs parmi les N−K disponibles), le tout divisé par (façons de choisir n éléments parmi N au total).", latex: "\\dfrac{C_{K}^{k}\\cdot C_{N-K}^{n-k}}{C_{N}^{n}}" };
-}
-
-export function aideNiveau2A(e: ExerciceHypergeoA): AideAvecLatex {
-  return { texte: "Numérateur (les deux facteurs), dénominateur non posé :", latex: `C_{${e.K}}^{${e.k}}\\cdot C_{${e.N - e.K}}^{${e.n - e.k}}` };
-}
-
-// ============================================================================
-// Famille B — Contraste ordre vs composition.
-// ============================================================================
-
-function libelleCouleur(c: "c1" | "c2"): string {
-  return c === "c1" ? "1" : "2";
-}
-
-const ORDINAL_TIRAGE = ["1ᵉʳ", "2ᵉ", "3ᵉ"];
-
-export function consigneGeneraleB(): FragmentConsigne[] {
-  return [texte("On tire successivement, sans remise, 3 boules d'une urne à 2 couleurs. Compare la probabilité d'une séquence précise (dans un ordre donné) à la probabilité de la même composition (mêmes couleurs), sans tenir compte de l'ordre.")];
-}
-
-/** Une DONNÉE (variable=valeur) par ligne, jamais accolée à sa description française — même
- * convention que `blocDonneesA` (voir son commentaire) : `.equation-box .katex` agrandi à `1.3em`,
- * une ligne mêlant `VAR=valeur` et du texte français déborde largement un viewport mobile (piège
- * trouvé par inspection visuelle réelle — voir devlog). */
-export function blocDonneesB(e: ExerciceHypergeoB): string[] {
-  return [
-    "\\text{Une urne contient des boules de 2 couleurs,}",
-    "\\text{tirées successivement, sans remise.}",
-    `n_1=${e.n1}`,
-    "\\text{(boules de couleur 1)}",
-    `n_2=${e.n2}`,
-    "\\text{(boules de couleur 2)}",
-    `N=${e.N}`,
-    "\\text{(boules au total)}",
-    "\\text{Séquence exacte tirée :}",
-    ...e.sequence.map((c, i) => `\\text{${ORDINAL_TIRAGE[i]} tirage : couleur ${libelleCouleur(c)}}`),
-  ];
-}
-
-export function consigneEcranB(phase: PhaseProbabiliteHypergeometrique): FragmentConsigne[] {
-  if (phase === "bEcran1") return [texte("Calcule la probabilité d'obtenir EXACTEMENT cette séquence, dans cet ordre précis (produit de fractions qui diminuent à chaque tirage, tirage après tirage).")];
-  if (phase === "bEcran2") return [texte("Calcule la probabilité d'obtenir cette même composition (mêmes couleurs, dans n'importe quel ordre) — formule hypergéométrique.")];
-  return [texte("Le rapport entre les 2 valeurs CONFIRMÉES des étapes précédentes est exactement égal au nombre d'arrangements distincts de cette séquence. Calcule ce rapport, puis ce nombre d'arrangements (indépendamment, par le calcul combinatoire).")];
-}
-
-export function etatActuelB(e: ExerciceHypergeoB, phase: PhaseProbabiliteHypergeometrique): string[] | null {
-  // Formule et "(confirmé)" séparés en 2 fragments — même raison que `etatActuelA` (voir son
-  // commentaire) : `P(...)=` + une fraction est déjà large en `1.3em`.
-  if (phase === "bEcran2") return [`P(\\text{séq.})=${formatFractionLatex(e.numerateurSequence, e.denominateurSequence)}`, "\\text{(confirmé)}"];
-  if (phase === "bEcran3") {
-    return [`P(\\text{séq.})=${formatFractionLatex(e.numerateurSequence, e.denominateurSequence)}`, `P(\\text{comp.})=${formatFractionLatex(e.numerateurComposition, e.denominateurComposition)}`, "\\text{(2 valeurs confirmées)}"];
+function produitSequence(e: E & { famille: "B" }): string {
+  let r1 = e.n1;
+  let r2 = e.n2;
+  let tot = e.N;
+  const facteurs: string[] = [];
+  for (const c of e.sequence) {
+    facteurs.push(`\\dfrac{${c === "c1" ? r1 : r2}}{${tot}}`);
+    if (c === "c1") r1--;
+    else r2--;
+    tot--;
   }
-  return null;
+  return facteurs.join("\\times ");
 }
 
-export function champsB(phase: PhaseProbabiliteHypergeometrique): ChampDef[] {
-  if (phase === "bEcran1") return [champTexte("P(séquence exacte) =", `ex : 0,08 ${ANNONCE_TOLERANCE}`)];
-  if (phase === "bEcran2") return [champTexte("P(composition) =", `ex : 0,4 ${ANNONCE_TOLERANCE}`)];
-  return [champTexte("Rapport (composition/séquence) =", "ex : 3"), champTexte("Nombre d'arrangements de la séquence =", "ex : 3")];
+function formuleC(cat: { N: number; K: number; n: number; k: number }): string {
+  return `\\dfrac{C_{${cat.K}}^{${cat.k}}\\times C_{${cat.N - cat.K}}^{${cat.n - cat.k}}}{C_{${cat.N}}^{${cat.n}}}`;
 }
 
-export function niveauAideMaxB(phase: PhaseProbabiliteHypergeometrique): number {
-  return phase === "bEcran3" ? 2 : 0;
-}
-
-export function aideNiveau1B(): AideAvecLatex {
-  return { texte: "Un tirage sans remise donne EXACTEMENT la même probabilité à chaque ordre spécifique d'une même composition. La probabilité de la composition est donc la SOMME de ces probabilités toutes égales, c'est-à-dire le nombre d'arrangements fois la probabilité d'un seul ordre.", latex: null };
-}
-
-export function aideNiveau2B(e: ExerciceHypergeoB): AideAvecLatex {
-  return { texte: "Nombre d'arrangements distincts de cette composition (calcul combinatoire) — le lien avec le rapport des 2 étapes précédentes reste à faire :", latex: `${e.nombreArrangements}` };
-}
-
-// ============================================================================
-// Famille C — Hypergéométrique à 2 catégories croisées (loto + bonus).
-// ============================================================================
-
-export function consigneGeneraleC(): FragmentConsigne[] {
-  return [texte("Un tirage de loto sélectionne des numéros principaux ET, indépendamment, des numéros bonus. Calcule la probabilité d'avoir exactement le nombre demandé de bons numéros dans CHAQUE catégorie, puis combine les 2 résultats.")];
-}
-
-/** Une DONNÉE (variable=valeur) par ligne — même convention que `blocDonneesA` (voir son
- * commentaire) : jamais 2 variables ni une variable+parenthèse française sur la même ligne. */
-export function blocDonneesC(e: ExerciceHypergeoC): string[] {
-  return [
-    "\\text{Un tirage de loto sélectionne des numéros}",
-    "\\text{principaux ET des numéros bonus,}",
-    "\\text{indépendamment l'un de l'autre.}",
-    `N_1=${e.principal.N}`,
-    `K_1=${e.principal.K}`,
-    "\\text{(principaux cochés)}",
-    `n_1=${e.principal.n}`,
-    `k_1=${e.principal.k}`,
-    `N_2=${e.bonus.N}`,
-    `K_2=${e.bonus.K}`,
-    "\\text{(bonus cochés)}",
-    `n_2=${e.bonus.n}`,
-    `k_2=${e.bonus.k}`,
-  ];
-}
-
-export function consigneEcranC(phase: PhaseProbabiliteHypergeometrique): FragmentConsigne[] {
-  if (phase === "cEcran1") return [texte("Calcule l'hypergéométrique de la catégorie PRINCIPALE : P(k₁ bons numéros parmi les n₁ tirés).")];
-  if (phase === "cEcran2") return [texte("Calcule l'hypergéométrique de la catégorie BONUS, INDÉPENDAMMENT de la première : P(k₂ bons numéros bonus parmi les n₂ tirés).")];
-  return [texte("Multiplie les 2 résultats CONFIRMÉS des étapes précédentes pour obtenir la probabilité combinée (les 2 tirages sont indépendants).")];
-}
-
-export function etatActuelC(e: ExerciceHypergeoC, phase: PhaseProbabiliteHypergeometrique): string[] | null {
-  // Formule et "(confirmé)" séparés en 2 fragments — même raison que `etatActuelA` (voir son
-  // commentaire).
-  if (phase === "cEcran2") return [`P_1=${formatFractionLatex(e.principal.numerateur, e.principal.denominateur)}`, "\\text{(confirmé)}"];
-  if (phase === "cEcran3") {
-    return [`P_1=${formatFractionLatex(e.principal.numerateur, e.principal.denominateur)}`, `P_2=${formatFractionLatex(e.bonus.numerateur, e.bonus.denominateur)}`, "\\text{(2 valeurs confirmées)}"];
-  }
-  return null;
-}
-
-export function champsC(phase: PhaseProbabiliteHypergeometrique): ChampDef[] {
-  if (phase === "cEcran1") return [champTexte("P₁(k₁ numéros principaux) =", `ex : 0,2 ${ANNONCE_TOLERANCE}`)];
-  if (phase === "cEcran2") return [champTexte("P₂(k₂ numéros bonus) =", `ex : 0,3 ${ANNONCE_TOLERANCE}`)];
-  return [champTexte("P(combinée) =", `ex : 0,06 ${ANNONCE_TOLERANCE}`)];
-}
-
-export function niveauAideMaxC(phase: PhaseProbabiliteHypergeometrique): number {
-  return phase === "cEcran3" ? 2 : 0;
-}
-
-export function aideNiveau1C(): AideAvecLatex {
-  return { texte: "2 tirages INDÉPENDANTS se combinent en MULTIPLIANT leurs probabilités (jamais en les additionnant).", latex: null };
-}
-
-export function aideNiveau2C(e: ExerciceHypergeoC): AideAvecLatex {
-  return { texte: "Les 2 valeurs confirmées, produit non fait :", latex: `${formatFractionLatex(e.principal.numerateur, e.principal.denominateur)}\\cdot ${formatFractionLatex(e.bonus.numerateur, e.bonus.denominateur)}` };
-}
-
-// ============================================================================
-// Dispatch commun.
-// ============================================================================
-
-export function consigneGenerale(exercice: ExerciceProbabiliteHypergeometrique): FragmentConsigne[] {
-  switch (exercice.famille) {
-    case "A":
-      return consigneGeneraleA();
-    case "B":
-      return consigneGeneraleB();
-    case "C":
-      return consigneGeneraleC();
-  }
-}
-
-export function blocDonnees(exercice: ExerciceProbabiliteHypergeometrique): string[] {
-  switch (exercice.famille) {
-    case "A":
-      return blocDonneesA(exercice);
-    case "B":
-      return blocDonneesB(exercice);
-    case "C":
-      return blocDonneesC(exercice);
-  }
-}
-
-export function consigneEcran(exercice: ExerciceProbabiliteHypergeometrique, phase: PhaseProbabiliteHypergeometrique): FragmentConsigne[] {
-  switch (exercice.famille) {
-    case "A":
-      return consigneEcranA(phase);
-    case "B":
-      return consigneEcranB(phase);
-    case "C":
-      return consigneEcranC(phase);
-  }
-}
-
-export function etatActuel(exercice: ExerciceProbabiliteHypergeometrique, phase: PhaseProbabiliteHypergeometrique): string[] | null {
-  switch (exercice.famille) {
-    case "A":
-      return etatActuelA(exercice, phase);
-    case "B":
-      return etatActuelB(exercice, phase);
-    case "C":
-      return etatActuelC(exercice, phase);
-  }
-}
-
-export function champsEcran(exercice: ExerciceProbabiliteHypergeometrique, phase: PhaseProbabiliteHypergeometrique): ChampDef[] {
-  switch (exercice.famille) {
-    case "A":
-      return champsA(phase);
-    case "B":
-      return champsB(phase);
-    case "C":
-      return champsC(phase);
-  }
-}
-
-export function niveauAideMaxEcran(exercice: ExerciceProbabiliteHypergeometrique, phase: PhaseProbabiliteHypergeometrique): number {
-  switch (exercice.famille) {
-    case "A":
-      return niveauAideMaxA(phase);
-    case "B":
-      return niveauAideMaxB(phase);
-    case "C":
-      return niveauAideMaxC(phase);
-  }
-}
-
-export function aideNiveau1(exercice: ExerciceProbabiliteHypergeometrique, phase: PhaseProbabiliteHypergeometrique): AideAvecLatex {
-  if (niveauAideMaxEcran(exercice, phase) === 0) return AUCUNE_AIDE;
-  switch (exercice.famille) {
-    case "A":
-      return aideNiveau1A();
-    case "B":
-      return aideNiveau1B();
-    case "C":
-      return aideNiveau1C();
-  }
-}
-
-export function aideNiveau2(exercice: ExerciceProbabiliteHypergeometrique, phase: PhaseProbabiliteHypergeometrique): AideAvecLatex {
-  if (niveauAideMaxEcran(exercice, phase) === 0) return AUCUNE_AIDE;
-  switch (exercice.famille) {
-    case "A":
-      return aideNiveau2A(exercice);
-    case "B":
-      return aideNiveau2B(exercice);
-    case "C":
-      return aideNiveau2C(exercice);
-  }
-}
-
-export const LIBELLE_PHASE: Record<PhaseProbabiliteHypergeometrique, string> = {
-  aEcran1: "Étape 1 (formule posée)",
-  aEcran2: "Étape 2 (calcul)",
-  bEcran1: "Étape 1 (probabilité de la séquence exacte)",
-  bEcran2: "Étape 2 (probabilité de la composition)",
-  bEcran3: "Étape 3 (rapport et arrangements)",
-  cEcran1: "Étape 1 (catégorie principale)",
-  cEcran2: "Étape 2 (catégorie bonus)",
-  cEcran3: "Étape 3 (probabilité combinée)",
+export const FORMAT_6GEN47: FormatCombinatoire<E, P> = {
+  consigneGenerale(e) {
+    switch (e.famille) {
+      case "A":
+        return [...f("Tirage sans remise : $P(X=k)=\\dfrac{C_K^k\\times C_{N-K}^{n-k}}{C_N^n}$. "), t(ANNONCE_PRECISION)];
+      case "B":
+        return [t("Tirages successifs sans remise : compare la probabilité d'une séquence précise (dans un ordre donné) et celle d'une composition (dans un ordre quelconque). "), t(ANNONCE_PRECISION)];
+      case "C":
+        return [t("Deux tirages sans remise, faits dans deux urnes différentes : ils sont indépendants. "), t(ANNONCE_PRECISION)];
+    }
+  },
+  donnees(e): FragmentConsigne[][] {
+    switch (e.famille) {
+      case "A":
+        return [[t(e.contexte.phrase)], [t(`On cherche la probabilité de ${e.contexte.evenement}.`)]];
+      case "B":
+        return [[t(`Une urne contient ${e.n1} boules rouges et ${e.n2} boules bleues. On tire trois boules l'une après l'autre, sans remise.`)], [t(`Séquence étudiée : ${e.sequence.map(couleur).join(", puis ")}.`)]];
+      case "C":
+        return [
+          [t(`Au jeu du Mini-Loto, on tire ${e.principal.n} numéros parmi ${e.principal.N}, puis, dans une autre urne, ${e.bonus.n} ${e.bonus.n > 1 ? "numéros bonus" : "numéro bonus"} parmi ${e.bonus.N}.`)],
+          [t(`Un joueur a coché ${e.principal.K} numéros principaux et ${e.bonus.K} numéros bonus.`)],
+          [t(`On cherche la probabilité qu'exactement ${e.principal.k} de ses numéros principaux sortent et ${e.bonus.k === 0 ? "qu'aucun de ses numéros bonus ne sorte" : `qu'exactement ${e.bonus.k} de ses numéros bonus ${e.bonus.k > 1 ? "sortent" : "sorte"}`}.`)],
+        ];
+    }
+  },
+  consigneEcran(e, p) {
+    switch (e.famille) {
+      case "A":
+        return p === "aEcran1" ? [t("Écris la probabilité cherchée avec des combinaisons, sans les calculer.")] : [t("Calcule cette probabilité.")];
+      case "B":
+        if (p === "bEcran1") return [t("Quelle est la probabilité d'obtenir exactement cette séquence, dans cet ordre ?")];
+        if (p === "bEcran2") return [t(`De combien d'ordres différents peut-on obtenir ${e.a} ${e.a > 1 ? "rouges" : "rouge"} et ${e.b} ${e.b > 1 ? "bleues" : "bleue"} en trois tirages ?`)];
+        return [t(`Quelle est la probabilité d'obtenir ${e.a} ${e.a > 1 ? "boules rouges" : "boule rouge"} et ${e.b} ${e.b > 1 ? "boules bleues" : "boule bleue"}, dans un ordre quelconque ?`)];
+      case "C":
+        if (p === "cEcran1") return [t(`Probabilité qu'exactement ${e.principal.k} numéros principaux cochés sortent.`)];
+        if (p === "cEcran2") return [t(e.bonus.k === 0 ? "Probabilité qu'aucun numéro bonus coché ne sorte." : `Probabilité qu'exactement ${e.bonus.k} ${e.bonus.k > 1 ? "numéros bonus cochés sortent" : "numéro bonus coché sorte"}.`)];
+        return [t("Probabilité des deux événements à la fois.")];
+    }
+  },
+  champs(e, p): ChampCombi[] {
+    switch (e.famille) {
+      case "A":
+        return p === "aEcran1" ? [{ type: "texte", label: "Probabilité (formule)", apercu: true, nature: "formule" }] : [{ type: "texte", label: "Probabilité" }];
+      case "B":
+        if (p === "bEcran2") return [{ type: "texte", label: "Nombre d'ordres" }];
+        return [{ type: "texte", label: p === "bEcran1" ? "Probabilité de la séquence" : "Probabilité de la composition", apercu: true }];
+      case "C":
+        return [{ type: "texte", label: p === "cEcran1" ? "$P_1$ (numéros principaux)" : p === "cEcran2" ? "$P_2$ (numéros bonus)" : "$P$", apercu: true }];
+    }
+  },
+  aides(e, p) {
+    switch (e.famille) {
+      case "A":
+        if (p === "aEcran1") return [{ texte: "Nombre de tirages favorables : choisir $k$ succès parmi les $K$, et les $n-k$ autres parmi les $N-K$ ; nombre total : choisir $n$ parmi $N$." }, { texte: `Ici $N=${e.N}$ (${e.contexte.labelPopulation}), $K=${e.K}$ (${e.contexte.labelSucces}), $n=${e.n}$ (${e.contexte.labelTirage}) et $k=${e.k}$.` }];
+        return [{ texte: "Calcule chaque combinaison (touche nCr), puis simplifie la fraction." }, { texte: "Une probabilité est comprise entre 0 et 1 : vérifie l'ordre de grandeur." }];
+      case "B":
+        if (p === "bEcran1") return [{ texte: "Règle du produit : on multiplie les probabilités des tirages successifs ; sans remise, l'urne perd une boule à chaque tirage." }, { texte: `Premier tirage : ${e.N} boules ; deuxième : ${e.N - 1} ; troisième : ${e.N - 2}.` }];
+        if (p === "bEcran2") return [{ texte: "Placer les boules rouges parmi les trois tirages : $C_3^a$ façons." }, { texte: `Ici $a=${e.a}$.` }];
+        return [{ texte: "Chaque ordre a la même probabilité que la séquence étudiée (mêmes facteurs, dans un autre ordre)." }, { texte: "Multiplie la probabilité de la séquence par le nombre d'ordres ; tu peux vérifier avec $\\dfrac{C_{n_1}^{a}\\times C_{n_2}^{b}}{C_N^3}$." }];
+      case "C":
+        if (p === "cEcran3") return [{ texte: "Deux événements indépendants : $P(A\\cap B)=P(A)\\times P(B)$." }, { texte: "Multiplie les deux probabilités des écrans précédents." }];
+        {
+          const cat = p === "cEcran1" ? e.principal : e.bonus;
+          return [{ texte: "Formule hypergéométrique :", latex: "\\dfrac{C_K^k\\times C_{N-K}^{n-k}}{C_N^n}" }, { texte: `Ici $N=${cat.N}$, $K=${cat.K}$, $n=${cat.n}$, $k=${cat.k}$.` }];
+        }
+    }
+  },
+  reponseAttendue(e, p) {
+    switch (e.famille) {
+      case "A":
+        return p === "aEcran1" ? [formuleA(e)] : [valeur(e.numerateurFacteur1 * e.numerateurFacteur2, e.denominateur)];
+      case "B":
+        if (p === "bEcran1") return [`${produitSequence(e)}=${valeur(e.numerateurSequence, e.denominateurSequence)}`];
+        if (p === "bEcran2") return [`C_3^{${e.a}}=${e.nombreArrangements}`];
+        return [valeur(e.numerateurComposition, e.denominateurComposition)];
+      case "C":
+        if (p === "cEcran1") return [valeur(e.principal.numerateur, e.principal.denominateur)];
+        if (p === "cEcran2") return [valeur(e.bonus.numerateur, e.bonus.denominateur)];
+        return [valeur(e.numerateurCombine, e.denominateurCombine)];
+    }
+  },
+  explication(e, p) {
+    switch (e.famille) {
+      case "A":
+        return p === "aEcran1"
+          ? [f(`Favorables : $C_{${e.K}}^{${e.k}}\\times C_{${e.N - e.K}}^{${e.n - e.k}}$ ; possibles : $C_{${e.N}}^{${e.n}}$.`)]
+          : [f(`$\\dfrac{${milliers(e.numerateurFacteur1)}\\times ${milliers(e.numerateurFacteur2)}}{${milliers(e.denominateur)}}=${valeur(e.numerateurFacteur1 * e.numerateurFacteur2, e.denominateur)}$.`)];
+      case "B":
+        if (p === "bEcran1") return [f(`$${produitSequence(e)}=${frac(e.numerateurSequence, e.denominateurSequence)}$ : le dénominateur diminue d'une unité à chaque tirage.`)];
+        if (p === "bEcran2") return [f(`On choisit les places des ${e.a === 1 ? "boule rouge" : "boules rouges"} parmi les trois tirages : $C_3^{${e.a}}=${e.nombreArrangements}$.`)];
+        return [f(`$${e.nombreArrangements}\\times ${frac(e.numerateurSequence, e.denominateurSequence)}=${frac(e.numerateurComposition, e.denominateurComposition)}$, soit aussi $\\dfrac{C_{${e.n1}}^{${e.a}}\\times C_{${e.n2}}^{${e.b}}}{C_{${e.N}}^{3}}$.`)];
+      case "C":
+        if (p === "cEcran1") return [f(`$${formuleC(e.principal)}=${frac(e.principal.numerateur, e.principal.denominateur)}$.`)];
+        if (p === "cEcran2") return [f(`$${formuleC(e.bonus)}=${frac(e.bonus.numerateur, e.bonus.denominateur)}$.`)];
+        return [f(`$${frac(e.principal.numerateur, e.principal.denominateur)}\\times ${frac(e.bonus.numerateur, e.bonus.denominateur)}=${valeur(e.numerateurCombine, e.denominateurCombine)}$.`)];
+    }
+  },
+  libellePhase(e, p) {
+    switch (e.famille) {
+      case "A":
+        return p === "aEcran1" ? "Formule" : "Probabilité";
+      case "B":
+        return p === "bEcran1" ? "Séquence" : p === "bEcran2" ? "Nombre d'ordres" : "Composition";
+      case "C":
+        return p === "cEcran1" ? "Numéros principaux" : p === "cEcran2" ? "Numéros bonus" : "Produit";
+    }
+  },
+  messageCible(e, p, valeurs) {
+    const v = valeurs[valeurs.length - 1] ?? "";
+    switch (e.famille) {
+      case "A":
+        if (vaut(v, rationnel(e.numerateurFacteur1, e.denominateur))) return f("Il manque le choix des $n-k$ autres éléments parmi les $N-K$.");
+        return null;
+      case "B": {
+        if (p === "bEcran1") {
+          const avecRemise = rationnel(BigInt(e.n1) ** BigInt(e.a) * BigInt(e.n2) ** BigInt(e.b), BigInt(e.N) ** 3n);
+          if (vaut(v, avecRemise)) return [t("C'est la probabilité avec remise : sans remise, l'urne perd une boule à chaque tirage.")];
+        }
+        if (p === "bEcran3" && vaut(v, rationnel(e.numerateurSequence, e.denominateurSequence))) return [t("C'est la probabilité d'un seul ordre : la composition peut être obtenue dans plusieurs ordres.")];
+        return null;
+      }
+      case "C":
+        if (p === "cEcran3" && vaut(v, rationnel(e.principal.numerateur * e.bonus.denominateur + e.bonus.numerateur * e.principal.denominateur, e.principal.denominateur * e.bonus.denominateur))) return [t("Les deux événements doivent se produire ensemble : on multiplie, on n'additionne pas.")];
+        return null;
+    }
+  },
 };
-
-export const LIBELLE_FAMILLE: Record<ExerciceProbabiliteHypergeometrique["famille"], string> = {
-  A: "A — Hypergéométrique de base",
-  B: "B — Ordre vs composition",
-  C: "C — Catégories croisées (loto + bonus)",
-};
-
-/** Récapitulatif final : affiche toujours la réponse CORRECTE connue de l'exercice, en fraction
- * exacte — jamais recalculée depuis la saisie élève, jamais de décimal (CLAUDE.md). */
-export function formatReponseAttenduePhaseLatex(exercice: ExerciceProbabiliteHypergeometrique, phase: PhaseProbabiliteHypergeometrique): string[] {
-  if (exercice.famille === "A") {
-    return [formatFractionLatex(exercice.numerateurFacteur1 * exercice.numerateurFacteur2, exercice.denominateur)];
-  }
-  if (exercice.famille === "B") {
-    if (phase === "bEcran1") return [formatFractionLatex(exercice.numerateurSequence, exercice.denominateurSequence)];
-    if (phase === "bEcran2") return [formatFractionLatex(exercice.numerateurComposition, exercice.denominateurComposition)];
-    return [`${exercice.nombreArrangements}\\text{ (rapport et nombre d'arrangements)}`];
-  }
-  // famille C
-  if (phase === "cEcran1") return [formatFractionLatex(exercice.principal.numerateur, exercice.principal.denominateur)];
-  if (phase === "cEcran2") return [formatFractionLatex(exercice.bonus.numerateur, exercice.bonus.denominateur)];
-  return [formatFractionLatex(exercice.numerateurCombine, exercice.denominateurCombine)];
-}
-
