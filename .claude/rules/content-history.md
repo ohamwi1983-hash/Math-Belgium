@@ -6299,3 +6299,75 @@ les deux différences, positions dans le cadre = celles d'une recherche indépen
 Gestes au doigt (CDP) et à la souris dans le panneau : poignées k et pente, P aimanté, P promené, navire et station
 glissés ; aucun défilement du panneau pendant un glisser. Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667
 (12 ateliers du chapitre). Scripts et captures : `scratchpad/g2-6e10/`.
+
+## 5e (4h), Chapitre 6 — Statistique à deux variables : ateliers (6 + 1 en option, agent G, 25/11/2026)
+
+Chapitre nouveau (squelette du coordinateur, cours rédigé en parallèle par le lot AF) : sept blocs `atelier` ajoutés
+SEULS, chacun en fin de section, après le paragraphe provisoire (le coordinateur les replacera à la fusion). Nouveau
+module `src/interactive/statistique-deux-variables-commun.js` : calculs écrits une fois (moyennes, V et σ divisés
+par n, Cov, a = Cov/V(x), b = ȳ − a x̄, r ; Mayer : tri selon x puis y, PREMIER groupe de ⌊n/2⌋ points — groupes
+de 3 et 4 pour n = 7, comme la proposition ; somme des carrés des écarts verticaux), interprétation de r selon le
+tableau validé (|r| = 1 parfaite ; 0,98 ≤ |r| < 1 très forte ; 0,80 forte ; 0,60 moyenne ; 0,35 faible ; sinon
+nulle — classement sur la valeur AFFICHÉE à 3 décimales, et un r qui s'arrondirait à ±1 sans l'être reçoit des
+décimales de plus : « 1 » réservé aux points alignés), écritures « = » (exact à 4 décimales) ou « ≈ »,
+`repereStat` (fenêtre FIXE, échelles x et y indépendantes, graduations dans les MARGES : jamais rognées ni cachées
+par un point, centrées mais gardées dans la figure), `nuageEditable` (toucher une place vide ajoute un point,
+glisser le déplace, mode « Retirer un point » ; aimant au demi ; capture du pointeur sur la `<svg>`, qui survit
+aux rendus), `[hidden]{display:none !important}` (sinon `.rangee{display:flex}` réaffiche un bloc masqué). KaTeX
+par `katex-shadow.js`, curseurs − / + par `variables-aleatoires-commun.js`, styles de tracé `CSS_LIEUX`. Figure
+seule dans sa `<svg>`, aucun bouton dans son conteneur. Légendes en Unicode (pas de `$`).
+- **`jusqu-ou-prevoir-widget`** (§ 2 ; endroit idéal : après la définition interpolation / extrapolation, il sert
+  aussi l'exemple « mortalité infantile » du § 6) : droite des moindres carrés RECALCULÉE, abscisse x₀ glissée sur
+  la figure ou au curseur ; bande verte « on interpole » (texte vertical si la bande est étroite), ocre « on
+  extrapole », rouge « impossible ». Mortalité infantile par périodes de 5 ans (1 = 1946-1950 ; valeurs d'exemple
+  61,3 ; 45,6 ; 34,2 ; 27,1 ; 22,4 ; 18,0, proches de celles du manuel) : y ≈ −8,38x + 64,09, r ≈ −0,967, nulle vers
+  x ≈ 7,65, période 12 (2001-2005) ≈ −36,4. Espérance de vie en Belgique 2000-2014 (Banque mondiale, valeurs du
+  document) : y ≈ 0,2133x − 348,80, r ≈ 0,983, 122 ans (record humain) vers 2207. Le calcul écrit utilise des
+  coefficients à 4 ou 5 décimales (ou la forme ȳ + a(x₀ − x̄)) pour que l'arrondi affiché soit celui du calcul
+  exact (vérifié pour chaque x₀).
+- **`nuage-mayer-widget`** (§ 3 ; endroit idéal : après la méthode en 5 étapes, ou l'exemple « 7 données ») :
+  repère 0–10 × 0–20, séries « exemple du cours » (1 ; 8)…(6 ; 15) et « 7 points en désordre » ; panneau des 5
+  étapes (ordre de saisie puis groupes triés, « sans le tri, les groupes seraient faux », x̄₁ = somme / n₁ écrite
+  — somme calculée au-delà de 6 valeurs —, pente non arrondie, b, équation, a x̄ + b = ȳ) ; verdict pair (G milieu de
+  [G₁G₂]) / impair (groupes de ⌊n/2⌋ et n − ⌊n/2⌋) / G₁ et G₂ de même abscisse (droite verticale refusée) ; frontière
+  des groupes en pointillés ; boutons « Point moyen G » et « G₁, G₂ et droite de Mayer ». 2 à 14 points.
+- **`moindres-carres-widget`** (§ 4 ; endroit idéal : après la définition par les écarts verticaux, avant les
+  formules) : repère ORTHONORMÉ 0–7 : chaque écart est le côté d'un VRAI carré (à droite du point). Droite réglée par
+  a, b (pas 0,05) ou par deux poignées (x = 3 : translation ; x = 6 : rotation autour de la première) ; écarts et
+  carrés écrits terme à terme, S, plus petit S atteint ; « Montrer la meilleure droite » (a = Cov/V(x), b, S minimal,
+  ses carrés en pointillés verts), « Droite de Mayer » (série du cours : 2,4 contre ≈ 2,444). « Autre nuage » : 5
+  ou 6 points entiers, 0,5 ≤ |r| < 0,97.
+- **`quadrants-covariance-widget`** (§ 5 ; endroit idéal : juste après l'image concrète des quatre quadrants) :
+  axes par G, rectangle de chaque point jusqu'à G, vert (produit > 0) / rouge (< 0), signes des quadrants dans les
+  coins ; bilan aires vertes − aires rouges = Σ, Cov = Σ / n, σx, σy, r ; produits listés ; nuages « croissante »,
+  « décroissante », « sans liaison », « en arc » (parabole symétrique : Cov = 0 exactement, « pas de lien LINÉAIRE »).
+- **`devine-r-widget`** (§ 5 ; endroit idéal : après le tableau d'interprétation ou l'exemple « cinq nuages, cinq
+  r ») : nuage de 12 à 30 points (ρ visé tiré : 15 % proche de ±1, 15 % proche de 0, sinon uniforme ; r CALCULÉ sur
+  les points), estimation au curseur (pas 0,01), « Vérifier » (vraie valeur, écart, interprétation, droite), six
+  derniers écarts (aucune note) ; mode « Fabrique un nuage » : cibles 0,9 ; −0,8 ; 0,5 ; −0,3 ; 0 ; 0,99 ; −0,95 ;
+  0,7 ; −0,6 ; 0,3, réussi ⟺ n ≥ 5 et |r − cible| ≤ 0,05 ; jauge −1…1 (estimation, cible, valeur) dans une seconde
+  `<svg>`, plus petite (l'épinglage prend la plus grande).
+- **`changer-unites-widget`** (§ 5, l'option ; endroit idéal : juste après la démonstration 7) : X = αx + β,
+  Y = γy + δ ; le nuage reste le MÊME dessin, seules les graduations changent ; espérance de vie (années brutes,
+  depuis 2000, centrées sur 2007 ; années ou mois) et taille / masse de six adolescents (valeurs d'exemple ; cm ou
+  m, kg ou g) ; droite et r recalculés sur les données transformées, a′ = a·γ/α écrit, r identique.
+- **`point-aberrant-widget`** (§ 6 ; endroit idéal : après « un point aberrant peut faire basculer la droite »,
+  avant le « Le sais-tu ? » d'Anscombe) : notes sur 20 de math (x) et de physique (y), 8 points fixes + P (rouge)
+  glissé (ou amené en touchant le cadre) ; droites AVEC P (orange) et SANS P (pointillés), équations, r et
+  interprétations, prévision pour 18 en math ; « Retirer P » (« seulement si on a une raison »), « P loin du nuage »
+  (16 ; 2 : r passe de 0,993 à 0,342). « Quartet d'Anscombe » : les VRAIES données de 1973, 2 × 2 repères dans la
+  même `<svg>` (même taille de figure), tableau x̄, ȳ, σx, σy, r, a, b recalculés à 2 décimales fixes (9,00 ; 7,50 ;
+  3,16 ; 1,94 ; 0,82 ; 0,50 ; 3,00 pour les quatre).
+Vérifié (Vite, page réelle, panneau, iPhone 13 clair / sombre et 1 280 px clair / sombre) : 0 erreur console,
+scrollWidth 390, 0 `.katex-error`, 0 KaTeX qui déborde, Shadow DOM sans `^ $ \ NaN undefined Infinity`, 0 étiquette
+SVG rognée. Balayages contre un recalcul indépendant (statistiques réécrites dans le script, sources LaTeX lues par
+un espion sur `katex.renderToString`, « = » seulement pour une valeur exacte) : 1 500 nuages de Mayer (2 à 14
+points : x̄, ȳ, G₁, G₂, a, b, a x̄ + b, effectifs, verdicts), 11 685 droites sur 41 nuages (S, a, b, S minimal,
+jamais S < minimum, 2,4 et 2,444 du cours), 1 500 nuages de covariance (Cov, σ, r, intensité, couleur de chaque
+rectangle), 400 « devine r » (r, écart, intensité, n, cadre) + 1 500 états « fabrique » (verdict ⟺ règle), 861
+positions de P (deux équations, deux r), 64 abscisses de prévision (valeur, calcul écrit, verdict interpole /
+extrapole / impossible), 10 combinaisons d'unités (a′, b′, r) : 0 faux. Gestes réels (CDP doigt et souris) :
+ajout, glisser, retrait (Mayer), poignées (moindres carrés), point glissé (quadrants), ajout en mode fabrique (et
+aucun ajout en mode devine), P glissé, ligne de prévision glissée ; défilement de la page pendant les 10 glissés au
+doigt : 0. Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667 (7 ateliers). Scripts et captures :
+`scratchpad/g-5e6/`.
