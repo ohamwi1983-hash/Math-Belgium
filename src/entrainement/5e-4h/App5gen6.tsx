@@ -123,6 +123,7 @@ export function App5gen6() {
     setHistorique((h) => [
       ...h,
       {
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         titre: LABELS[phaseClose as QuantiteArcSecteur],
         votreReponse,
         correcte: !revele,
@@ -179,11 +180,17 @@ export function App5gen6() {
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeArcSecteur(exercice), lettreEtape(exercice.mode === "conversion" ? 0 : quantitesManquantes(exercice).indexOf(etat.phase as QuantiteArcSecteur)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttenduePhase(exercice, etat.phase),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeArcSecteur(exercice), lettreEtape(exercice.mode === "conversion" ? 0 : quantitesManquantes(exercice).indexOf(etat.phase as QuantiteArcSecteur)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

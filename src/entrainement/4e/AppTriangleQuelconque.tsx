@@ -100,7 +100,7 @@ export function AppTriangleQuelconque() {
     if (!derniere) return;
     setHistorique((h) => [
       ...h,
-      { titre: derniere.libelle, votreReponse, correcte: !derniere.revele, reponseAttendue: derniere.revele ? derniere.valeur : undefined },
+      { corrigeDetaille: corrigeDetailleEcranCourant(), titre: derniere.libelle, votreReponse, correcte: !derniere.revele, reponseAttendue: derniere.revele ? derniere.valeur : undefined },
     ]);
   }
 
@@ -150,13 +150,19 @@ export function AppTriangleQuelconque() {
       <>Aire ≈ {formatAire(exercice, valeurAire(exercice))}</>
     );
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTriangleQuelconque(exercice), etat.phase === "donneeManquante" ? "a" : "b")} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTriangleQuelconque(exercice), etat.phase === "donneeManquante" ? "a" : "b")} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

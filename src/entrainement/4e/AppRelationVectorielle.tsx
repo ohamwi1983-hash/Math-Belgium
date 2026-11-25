@@ -109,6 +109,7 @@ export function AppRelationVectorielle() {
     setHistorique((h) => [
       ...h,
       {
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         titre: derniere.libelle,
         votreReponse,
         correcte: !derniere.revele,
@@ -156,10 +157,16 @@ export function AppRelationVectorielle() {
   const exercice = etat.exerciceCourant;
   const recapitulatif = calculerRecapitulatifRelationVectorielle(etat);
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeRelationVectorielle(exercice), etat.phase === "traduction" || exercice.variante === "translation" ? "a" : "b")} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeRelationVectorielle(exercice), etat.phase === "traduction" || exercice.variante === "translation" ? "a" : "b")} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : etat.phase === "traduction" ? (
           <Katex expression={formatTraductionAttendueLatex(exercice as ExerciceRelationGeneraleRV)} />
         ) : (

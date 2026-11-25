@@ -22,8 +22,10 @@ export interface EcranClos {
 }
 
 /** Entrée d'historique d'un écran qui vient de se clore. `reponseAttendue` n'est gardée que si
- * l'écran a été révélé (inutile de la répéter quand l'élève avait juste). */
-export function ecranClos(titre: string, votreReponse: ReactNode | undefined, revele: boolean, aideUtilisee: boolean, reponseAttendue?: ReactNode): EcranClos {
+ * l'écran a été révélé (inutile de la répéter quand l'élève avait juste). `corrigeDetaille` : le MÊME
+ * nœud que `validation.corrigeDetaille` de l'écran, gardé dans tous les cas (la fiche le déplie,
+ * réponse juste ou fausse). */
+export function ecranClos(titre: string, votreReponse: ReactNode | undefined, revele: boolean, aideUtilisee: boolean, reponseAttendue?: ReactNode, corrigeDetaille?: ReactNode): EcranClos {
   return {
     etat: revele ? "revele" : aideUtilisee ? "aide" : "correcte",
     entree: {
@@ -31,6 +33,7 @@ export function ecranClos(titre: string, votreReponse: ReactNode | undefined, re
       votreReponse: votreReponse ?? "—",
       correcte: !revele,
       reponseAttendue: revele ? reponseAttendue : undefined,
+      corrigeDetaille,
     },
   };
 }

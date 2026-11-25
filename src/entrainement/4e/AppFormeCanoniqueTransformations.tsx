@@ -102,6 +102,7 @@ export function AppFormeCanoniqueTransformations() {
     setHistorique((h) => [
       ...h,
       {
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         titre: derniere.libelle,
         votreReponse,
         correcte: !derniere.revele,
@@ -150,6 +151,12 @@ export function AppFormeCanoniqueTransformations() {
 
   const exercice = etat.exerciceCourant;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeFormeCanoniqueTransformations(exercice), lettrePhaseFormeCanonique(etat.phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -176,7 +183,7 @@ export function AppFormeCanoniqueTransformations() {
             <Katex expression={formeCanoniqueFinaleLatex(exercice)} />
           </span>
         ),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeFormeCanoniqueTransformations(exercice), lettrePhaseFormeCanonique(etat.phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

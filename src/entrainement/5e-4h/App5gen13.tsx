@@ -320,6 +320,7 @@ export function App5gen13() {
           setHistorique((h) => [
             ...h,
             {
+              corrigeDetaille: corrigeDetailleEcranCourant(),
               titre: derniere.libelle,
               votreReponse,
               correcte: !derniere.revele,
@@ -384,6 +385,12 @@ export function App5gen13() {
   const calculatriceEcranSupplementaire =
     ((technique === "b3" || technique === "donnee") && PHASES_CALC_B3.has(phase)) || (technique === "b2" && PHASES_CALC_B2.has(phase));
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeModelisationSinusoide(exercice), lettreEtape(ordreComplet(exercice).indexOf(phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -394,7 +401,7 @@ export function App5gen13() {
             ))}
           </span>
         ),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeModelisationSinusoide(exercice), lettreEtape(ordreComplet(exercice).indexOf(phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

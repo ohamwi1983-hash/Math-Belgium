@@ -222,7 +222,7 @@ export function AppBienaymeTchebychev() {
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       setHistorique((h) => [
         ...h,
-        { titre: titreEcran(etat.phase), votreReponse, correcte: !revele, reponseAttendue: construireReponseAttendue(etat, etat.exerciceCourant) },
+        { corrigeDetaille: corrigeDetailleEcranCourant(), titre: titreEcran(etat.phase), votreReponse, correcte: !revele, reponseAttendue: construireReponseAttendue(etat, etat.exerciceCourant) },
       ]);
       return;
     }
@@ -251,6 +251,12 @@ export function AppBienaymeTchebychev() {
     setEtat(demarrerSessionBienaymeTchebychev(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteBienaymeTchebychev)));
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeBienaymeTchebychev(exercice), lettreEtape(SEQUENCES[exercice.variante].indexOf(etat.phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -258,7 +264,7 @@ export function AppBienaymeTchebychev() {
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         // Corrigé détaillé « comme au tableau » de l'écran clos (mêmes lignes que le papier).
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeBienaymeTchebychev(exercice), lettreEtape(SEQUENCES[exercice.variante].indexOf(etat.phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

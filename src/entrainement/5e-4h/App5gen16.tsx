@@ -132,6 +132,7 @@ export function App5gen16() {
         setHistorique((h) => [
           ...h,
           {
+            corrigeDetaille: corrigeDetailleEcranCourant(),
             titre: LIBELLE_PHASE_CONVERGENCE_SUITE[etat.phase],
             votreReponse,
             correcte: !revele,
@@ -172,11 +173,17 @@ export function App5gen16() {
   const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeConvergenceSuite(exercice), lettreEtape(ordreComplet(exercice).indexOf(phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttenduePourPhase(exercice, phase),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeConvergenceSuite(exercice), lettreEtape(ordreComplet(exercice).indexOf(phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

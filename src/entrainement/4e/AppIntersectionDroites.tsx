@@ -121,7 +121,7 @@ export function AppIntersectionDroites() {
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       setHistorique((h) => [
         ...h,
-        { titre: TITRES_ECRANS[etat.phase], votreReponse, correcte: !revele, reponseAttendue: construireReponseAttendue(etat.exerciceCourant, etat.phase) },
+        { corrigeDetaille: corrigeDetailleEcranCourant(), titre: TITRES_ECRANS[etat.phase], votreReponse, correcte: !revele, reponseAttendue: construireReponseAttendue(etat.exerciceCourant, etat.phase) },
       ]);
       return;
     }
@@ -150,11 +150,17 @@ export function AppIntersectionDroites() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeIntersectionDroites(exercice), lettreEtape(sequencePourExercice(exercice).indexOf(phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: construireReponseAttendue(exercice, phase),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeIntersectionDroites(exercice), lettreEtape(sequencePourExercice(exercice).indexOf(phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

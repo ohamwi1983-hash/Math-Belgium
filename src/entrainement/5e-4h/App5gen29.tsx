@@ -203,6 +203,7 @@ export function App5gen29() {
     setHistorique((h) => [
       ...h,
       {
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         titre: derniere.libelle,
         votreReponse,
         correcte: !derniere.revele,
@@ -258,11 +259,17 @@ export function App5gen29() {
   const tentativesMax = tentativesMaxEcranEtudeLocale(etat);
   const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEtudeLocale(exercice), lettreEcranEtudeLocale(exercice, etat.phase))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendueEtudeLocale(exercice, etat.phase),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEtudeLocale(exercice), lettreEcranEtudeLocale(exercice, etat.phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

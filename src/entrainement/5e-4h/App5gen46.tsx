@@ -87,7 +87,7 @@ export function App5gen46() {
     }
     const revele = nouvelEtat.derniereTransitionRevelee;
     setAideParPhase((prev) => ({ ...prev, [phase]: etat.niveauAide > 0 }));
-    setHistorique((h) => [...h, { titre: libellePhase(phase), votreReponse: votreReponse(valeurs), correcte: !revele, reponseAttendue: revele ? reponseAttendue(exercice, phase) : undefined }]);
+    setHistorique((h) => [...h, { corrigeDetaille: corrigeDetailleEcranCourant(), titre: libellePhase(phase), votreReponse: votreReponse(valeurs), correcte: !revele, reponseAttendue: revele ? reponseAttendue(exercice, phase) : undefined }]);
     setEnAttente({ etatSuivant: nouvelEtat, revele });
   }
 
@@ -120,6 +120,12 @@ export function App5gen46() {
     (window as unknown as { __debug5gen46?: unknown }).__debug5gen46 = { exercice, phase };
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTroisTermes(exercice), lettreEtape(phasesJouees(exercice).indexOf(phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -128,7 +134,7 @@ export function App5gen46() {
         onSuivant: passerEcranSuivant,
         // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
         // `generateurs5e/troisTermes/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTroisTermes(exercice), lettreEtape(phasesJouees(exercice).indexOf(phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         messageRevele: phase === "relation" ? "Ce n'était pas la bonne relation (une seule tentative sur un choix)." : undefined,
       }
     : null;

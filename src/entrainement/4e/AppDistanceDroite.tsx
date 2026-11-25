@@ -158,6 +158,7 @@ export function AppDistanceDroite() {
           votreReponse,
           correcte: !revele,
           reponseAttendue: construireReponseAttendue(etat, etat.exerciceCourant, etat.phase, nouvelEtat.point),
+          corrigeDetaille: corrigeDetailleEcranCourant(nouvelEtat),
         },
       ]);
       return;
@@ -187,11 +188,18 @@ export function AppDistanceDroite() {
     setEtat(demarrerSessionDistanceDroite(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteDistanceDroite)));
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). `etatSuivant` :
+   * l'état après la réponse (le point P choisi y est fixé). */
+  function corrigeDetailleEcranCourant(etatSuivant: EtatSessionDistanceDroite) {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDistanceDroite(exercice, etatSuivant.point ?? etat.point), lettreEtape(sequencePourExercice(exercice).indexOf(etat.phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: construireReponseAttendue(etat, exercice, etat.phase, enAttente.etatSuivant.point),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDistanceDroite(exercice, enAttente.etatSuivant.point ?? etat.point), lettreEtape(sequencePourExercice(exercice).indexOf(etat.phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(enAttente.etatSuivant),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

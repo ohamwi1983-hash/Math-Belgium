@@ -102,7 +102,7 @@ export function AppOmbreSoleil() {
     }
     const revele = nouvelEtat.revelesAccumules[nouvelEtat.revelesAccumules.length - 1]!;
     setEnAttente({ etatSuivant: nouvelEtat, revele });
-    setHistorique((h) => [...h, { titre: TITRES_ECRANS[etat.phase], votreReponse: fiche.votreReponse, correcte: !revele, reponseAttendue: fiche.reponseAttendue }]);
+    setHistorique((h) => [...h, { corrigeDetaille: corrigeDetailleEcranCourant(), titre: TITRES_ECRANS[etat.phase], votreReponse: fiche.votreReponse, correcte: !revele, reponseAttendue: fiche.reponseAttendue }]);
   }
 
   function reinitialiser() {
@@ -128,12 +128,18 @@ export function AppOmbreSoleil() {
   const phase = etat.phase;
   const cle = `${numeroExercice}-${etat.scoresAccumules.length}-${phase}`;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeOmbreSoleil(exercice), lettreEtape(etat.scoresAccumules.length))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         labelSuivant: "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeOmbreSoleil(exercice), lettreEtape(etat.scoresAccumules.length))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

@@ -107,6 +107,7 @@ export function App6gen7() {
     setHistorique((h) => [
       ...h,
       {
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         titre: derniere.libelle,
         votreReponse,
         correcte: !derniere.revele,
@@ -210,12 +211,16 @@ export function App6gen7() {
   };
 
   // Corrigé détaillé « comme au tableau » de l'écran (source unique avec le papier).
-  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDomaineDeriveeExponentielles(exercice), lettreEtape(sequenceDomaineDeriveeExponentielles(exercice).indexOf(phase)))} />;
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDomaineDeriveeExponentielles(exercice), lettreEtape(sequenceDomaineDeriveeExponentielles(exercice).indexOf(phase)))} />;
+  }
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        corrigeDetaille,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         reponseAttendue: reponseAttenduePhase(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

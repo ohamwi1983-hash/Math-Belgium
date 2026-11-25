@@ -113,7 +113,7 @@ export function AppUnSansLautre() {
             ? nouvelEtat.valeurSigneeRevele
             : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.tangenteRevele;
       if (votreReponse !== undefined) {
-        setHistorique((h) => [...h, { titre: titreEcran(etat), votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttendue : undefined }]);
+        setHistorique((h) => [...h, { corrigeDetaille: corrigeDetailleEcranCourant(), titre: titreEcran(etat), votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttendue : undefined }]);
       }
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
@@ -151,12 +151,18 @@ export function AppUnSansLautre() {
       <Katex expression={`\\displaystyle ${formatValeurFinaleSimplifieeLatex(exercice)}`} />
     );
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeUnSansLautre(etat.exerciceCourant), lettreEcranUnSansLautre(etat.phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue,
         // Corrigé détaillé de l'écran qui se clôt (mêmes lignes que le papier).
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeUnSansLautre(etat.exerciceCourant), lettreEcranUnSansLautre(etat.phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

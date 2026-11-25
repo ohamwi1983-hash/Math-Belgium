@@ -1828,6 +1828,38 @@ formule y passe en fragments `[texte("car "), latex("i^{3}=-i")]`).
   `corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correction(exercice), lettreEtape(indexEcran))} />`
   dans son objet `validation` (`ValidationEtapeProps.corrigeDetaille`, affiché par `ValidationEcran`
   sous la réponse attendue quand elle est révélée) — aucun composant d'écran à modifier.
+- **Consultable après CHAQUE réponse** (décision du professeur, 25/11/2026) : écran révélé →
+  corrigé visible sous la réponse attendue (inchangé) ; bonne réponse → bouton « Voir comment on y
+  arrive » (replié, ≥ 44 px, `aria-expanded`, `components/CorrigeDepliable.tsx`) qui déplie le MÊME
+  nœud ; jamais avant la réponse (le bloc `validation` n'existe qu'une fois l'écran clos). Fiche
+  d'une puce (`FicheReponseEcran`) : même bouton, réponse juste OU fausse, alimenté par
+  `EntreeHistoriqueEtape.corrigeDetaille` (5e argument optionnel de plus pour `ecranClos(…,
+  reponseAttendue, corrigeDetaille)`). Une seule source par appli : la fonction locale
+  `corrigeDetailleEcranCourant()` (juste avant `const validation`, portée du composant) sert
+  `validation.corrigeDetaille` ET l'entrée d'historique, appelée quand l'étape se clôt (l'écran
+  courant est alors encore celui qui se ferme). Corrigé qui dépend de la réponse retenue :
+  paramètre (`corrigeDetailleEcranCourant(etatSuivant)` pour gen distanceDroite / méthode rapide /
+  5gen5, `(paire)` pour positionsPlans) ; section plane (gen40) calcule désormais son corrigé
+  même quand l'écran est réussi. Un corrigé qui ne rend rien (`CorrigeDetailleEcran` sans ligne
+  pour cette étape) n'affiche pas de bouton (détection dans le DOM avant peinture). Nouvelle
+  appli avec fiche : même schéma, rien d'autre à câbler. Applis avec corrigé mais SANS fiche
+  (puces non cliquables, seul le bouton de l'écran s'applique) : 35 de 4e (AppAnglesAssocies,
+  AppAssocierParaboles, AppBicarree, AppCercleConditions, AppChaslesSansFigure,
+  AppComparaisonSeries, AppConstructionVectorielle, AppConstruireInequation, AppDetectiveAnalytique,
+  AppDifferencesSecondes, AppDroiteCercle, AppDroitesParametre, AppDroitesRemarquables,
+  AppEquationParabolePoints, AppEquationParametre, AppHistogramme, AppIntersectionCercles,
+  AppIntersectionPlansParallelisme, AppLectureGraphiqueDroite, AppLectureParabole, AppLireDroite,
+  AppLireSolidePerspective, AppMoyennePonderee, AppParaboleDroite, AppPointVectoriel,
+  AppProblemesFraction, AppProjeteSymetrique, AppQuelAngle, AppReductionVectorielle,
+  AppTableauFrequences, AppTraduireLieu, AppTrajectoiresRencontre, AppTransformationsGraphiques,
+  AppTroisEcritures, AppVecteursDirecteurs), 5gen2, 5gen3, 5gen25, 6gen2, 6gen5 (5gen50–53 passent
+  par `CoqueTrig5e`, dont la fiche est branchée). Non branchés (refonte du 6e ch. 7 par d'autres
+  chantiers, à faire avec eux) : 6gen43–48, 6gen100–109. Vérifié 25/11 (dossier de travail
+  `corrige-puces`, `compare.mjs` / `visuel.mjs`) : 240 applis du registre, 417 écrans clos comparés
+  (377 révélés, 40 justes) — texte du corrigé de l'écran = texte du corrigé déplié dans la fiche de
+  la puce, 417 / 417 ; iPhone 13 et 1 280 px, clair / sombre (9 générateurs 4e / 5e / 6e, figure
+  dans le corrigé de 6gen148) : bouton 48 px, `aria-expanded` false → true, fiche défilable
+  (`overflow-y: auto`, 560 px), scrollWidth = largeur, 0 `.katex-error`, 0 erreur console.
   Adaptateur enveloppé par `avecFractionsNormalisees` (6gen37, 6gen39) : l'appli applique le même
   enveloppement.
 - Briques du chapitre « complexes » (`6e-6h/ui6e/corrigeComplexes.ts`, réutilisables) : produit,

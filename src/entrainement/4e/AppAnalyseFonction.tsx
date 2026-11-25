@@ -186,6 +186,7 @@ export function AppAnalyseFonction() {
     setHistorique((h) => [
       ...h,
       {
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         titre: derniere.libelle,
         votreReponse,
         correcte: !derniere.revele,
@@ -257,6 +258,12 @@ export function AppAnalyseFonction() {
 
   const exercice = etat.exerciceCourant;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeAnalyseFonction(exercice), lettrePhaseAnalyseFonction(exercice, etat.phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -270,7 +277,7 @@ export function AppAnalyseFonction() {
           </span>
         ),
         messageRevele: etat.phase === "allure" || etat.phase === "racinesReconnaissance" ? "Ce n'était pas la bonne réponse." : undefined,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeAnalyseFonction(exercice), lettrePhaseAnalyseFonction(exercice, etat.phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

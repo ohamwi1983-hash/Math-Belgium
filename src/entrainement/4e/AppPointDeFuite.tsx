@@ -107,7 +107,7 @@ export function AppPointDeFuite() {
   }
 
   function clore(revele: boolean, votreReponse: string, attendue: string, pointEleve: Pt | null) {
-    setHistorique((h) => [...h, ecranClos(titres[ecran]!, <p style={{ margin: 0 }}>{espacesInsecables(votreReponse)}</p>, revele, niveauAide > 0, <p style={{ margin: 0 }}>{espacesInsecables(attendue)}</p>)]);
+    setHistorique((h) => [...h, ecranClos(titres[ecran]!, <p style={{ margin: 0 }}>{espacesInsecables(votreReponse)}</p>, revele, niveauAide > 0, <p style={{ margin: 0 }}>{espacesInsecables(attendue)}</p>, corrigeDetailleEcranCourant())]);
     setMessage(null);
     setEnAttente({ revele, derniere: ecran >= TOTAL_ECRANS - 1, pointEleve });
   }
@@ -149,6 +149,12 @@ export function AppPointDeFuite() {
     setEnAttente(null);
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePointFuite(e), lettreEtape(ecran)).map((x) => ({ ...x, figureHtml: undefined }))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -157,7 +163,7 @@ export function AppPointDeFuite() {
         onSuivant: passerEcranSuivant,
         messageRevele: etape ? "Tentatives épuisées — la construction attendue est dessinée sur la figure." : "Ce n'était pas l'affirmation vraie (une seule tentative sur un choix fermé).",
         // Corrigé détaillé de l'étape (même source que le papier) ; la construction est déjà sur la figure.
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePointFuite(e), lettreEtape(ecran)).map((x) => ({ ...x, figureHtml: undefined }))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

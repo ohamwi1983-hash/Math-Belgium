@@ -204,7 +204,7 @@ export function AppCaracteristiquesFonction() {
         const attendue = reponseAttendueTexte(etat.phase);
         setHistorique((h) => {
           const copie = [...h];
-          copie[index] = { titre: TITRE_PHASE[etat.phase], votreReponse, correcte: !revele, reponseAttendue: attendue };
+          copie[index] = { corrigeDetaille: corrigeDetailleEcranCourant(), titre: TITRE_PHASE[etat.phase], votreReponse, correcte: !revele, reponseAttendue: attendue };
           return copie;
         });
       }
@@ -300,6 +300,14 @@ export function AppCaracteristiquesFonction() {
     <MafsGraphCaracteristiquesFonction exercice={exercice} surlignage={PHASES_AVEC_LISTE.has(etat.phase) ? morceauxCompletsPourSurlignage(liste) : undefined} />
   );
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return (
+          <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCaracteristiquesFonction(exercice), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />
+        );
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -334,9 +342,7 @@ export function AppCaracteristiquesFonction() {
             ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: (
-          <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeCaracteristiquesFonction(exercice), lettreEtape(ORDRE_PHASES.indexOf(etat.phase)))} />
-        ),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

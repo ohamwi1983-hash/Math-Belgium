@@ -437,6 +437,7 @@ export function App5gen5() {
         votreReponse,
         correcte: !revele,
         reponseAttendue: revele ? reponseAttenduePhase(nouvelEtat.exerciceCourant, phaseClose, nouvelEtat) : undefined,
+        corrigeDetaille: corrigeDetailleEcranCourant(nouvelEtat),
       },
     ]);
   }
@@ -488,18 +489,25 @@ export function App5gen5() {
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). `etatSuivant` :
+   * l'état après la réponse (valeurs retenues par l'élève). */
+  function corrigeDetailleEcranCourant(etatSuivant: EtatSessionProblemeContexte) {
+    return (
+      <CorrigeDetailleEcran
+        etapes={lignesDeLEtape(
+          correctionDetailleeProblemesContexte(exercice, { xOptimalRetenu: etatSuivant.xOptimalRetenu, aRetenu: etatSuivant.aRetenu, bRetenu: etatSuivant.bRetenu }),
+          lettrePhaseContexte(exercice, etat.phase),
+        )}
+      />
+    );
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttenduePhase(exercice, etat.phase, enAttente.etatSuivant),
-        corrigeDetaille: (
-          <CorrigeDetailleEcran
-            etapes={lignesDeLEtape(
-              correctionDetailleeProblemesContexte(exercice, { xOptimalRetenu: enAttente.etatSuivant.xOptimalRetenu, aRetenu: enAttente.etatSuivant.aRetenu, bRetenu: enAttente.etatSuivant.bRetenu }),
-              lettrePhaseContexte(exercice, etat.phase),
-            )}
-          />
-        ),
+        corrigeDetaille: corrigeDetailleEcranCourant(enAttente.etatSuivant),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

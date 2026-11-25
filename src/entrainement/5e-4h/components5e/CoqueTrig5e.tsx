@@ -89,7 +89,7 @@ export function CoqueTrig5e<E>(props: Props<E>) {
       return;
     }
     const attendue = props.reponseAttendue(e, ecran);
-    setHistorique((h) => [...h, ecranClos(props.titreEcran(e, ecran), votreReponse, r.revele, etat.niveauAide > 0, attendue)]);
+    setHistorique((h) => [...h, ecranClos(props.titreEcran(e, ecran), votreReponse, r.revele, etat.niveauAide > 0, attendue, corrigeDetailleEcranCourant())]);
     setEtat(r.etat);
     setEnAttente({
       revele: r.revele,
@@ -112,13 +112,19 @@ export function CoqueTrig5e<E>(props: Props<E>) {
   const modeDev = import.meta.env.DEV || new URLSearchParams(window.location.search).get("dev") === "1";
   if (modeDev) (window as unknown as Record<string, unknown>)[props.idDebug] = { exercice: e, ecran };
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(props.corrige(e), lettreEtape(ecran))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: suivant,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(props.corrige(e), lettreEtape(ecran))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         messageRevele: enAttente.messageRevele,
         figureApres: props.figureApres?.(e, ecran),
       }

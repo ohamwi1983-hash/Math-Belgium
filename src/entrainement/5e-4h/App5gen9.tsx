@@ -100,7 +100,7 @@ export function App5gen9() {
     if (!derniere) return;
     setHistorique((h) => [
       ...h,
-      { titre: derniere.libelle, votreReponse, correcte: !derniere.revele, reponseAttendue: derniere.revele ? <Katex expression={derniere.valeur} /> : undefined },
+      { corrigeDetaille: corrigeDetailleEcranCourant(), titre: derniere.libelle, votreReponse, correcte: !derniere.revele, reponseAttendue: derniere.revele ? <Katex expression={derniere.valeur} /> : undefined },
     ]);
   }
 
@@ -139,11 +139,17 @@ export function App5gen9() {
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeParametresSinusoideGraphique(exercice), lettreEtape(ORDRE_PHASES_SINUSOIDE_GRAPHIQUE.indexOf(etat.phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: <Katex expression={formatChampParametreGraphiqueLatex(exercice, etat.phase)} />,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeParametresSinusoideGraphique(exercice), lettreEtape(ORDRE_PHASES_SINUSOIDE_GRAPHIQUE.indexOf(etat.phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

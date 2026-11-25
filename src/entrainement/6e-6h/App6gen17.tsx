@@ -158,6 +158,7 @@ export function App6gen17() {
         setHistorique((h) => [
           ...h,
           {
+            corrigeDetaille: corrigeDetailleEcranCourant(),
             titre: LIBELLE_PHASE[etat.phase],
             votreReponse,
             correcte: !revele,
@@ -219,13 +220,17 @@ export function App6gen17() {
 
   // Corrigé détaillé « comme au tableau » de l'étape, toutes familles (mêmes lignes que le papier,
   // `corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
-  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLimitesLog(exercice), lettreEtape(sequenceReelle(exercice).indexOf(phase)))} />;
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLimitesLog(exercice), lettreEtape(sequenceReelle(exercice).indexOf(phase)))} />;
+  }
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         ...(enAttente.messageRevele ? { messageRevele: enAttente.messageRevele } : {}),
-        corrigeDetaille,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         reponseAttendue: reponseAttenduePhase(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

@@ -813,6 +813,54 @@
   font-size: 12px;
 }
 
+/* `CorrigeDepliable.tsx` — « Voir comment on y arrive » : corrigé replié sous « Bonne réponse ! » et
+ * dans la fiche d'une puce (décision du 25/11/2026). Bouton neutre pleine largeur (≥ 44 px), chevron
+ * qui pivote quand c'est déplié (`aria-expanded`). */
+.entrainement .corrige-depliable {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.entrainement .corrige-depliable-bouton {
+  width: 100%;
+  min-height: 48px;
+  justify-content: space-between;
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--accent-ink);
+  font: 600 16px/1.25 var(--sans);
+  text-align: left;
+}
+
+.entrainement .corrige-depliable-chevron {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-3px) rotate(45deg);
+  transition: transform 0.15s ease;
+}
+
+.entrainement .corrige-depliable-bouton[aria-expanded="true"] .corrige-depliable-chevron {
+  transform: translateY(2px) rotate(-135deg);
+}
+
+.entrainement .corrige-depliable-contenu {
+  min-width: 0;
+}
+
+.entrainement .corrige-depliable-contenu[hidden] {
+  display: none;
+}
+
+.entrainement .fiche-reponse-panneau .corrige-depliable {
+  margin-bottom: 14px;
+}
+
 /* ---------- E — rappels des écrans précédents, fiche « Revoir » ---------- */
 
 .entrainement .recap-panel {

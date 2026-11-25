@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { CorrigeDepliable } from "./CorrigeDepliable";
 
 /**
  * Une entrée par étape déjà close de l'exercice en cours — construite par `AppXxx.tsx` au moment
@@ -17,6 +18,11 @@ export interface EntreeHistoriqueEtape {
   /** Réponse correcte — affichée uniquement si `!correcte` (inutile de la répéter quand l'élève
    * avait déjà la bonne réponse sous les yeux). */
   reponseAttendue?: ReactNode;
+  /** Optionnel : corrigé détaillé « comme au tableau » de l'étape — le MÊME nœud que
+   * `ValidationEtapeProps.corrigeDetaille` de l'écran correspondant (même fonction, mêmes données),
+   * mis dans l'entrée au moment où l'étape se clôt. Déplié dans la fiche par « Voir comment on y
+   * arrive », que la réponse ait été juste ou fausse. Absent : pas de bouton (rien d'inventé). */
+  corrigeDetaille?: ReactNode;
 }
 
 interface Props {
@@ -55,6 +61,8 @@ export function FicheReponseEcran({ entree, onFermer }: Props) {
             <div className="fiche-reponse-bloc-valeur">{entree.reponseAttendue}</div>
           </div>
         )}
+
+        <CorrigeDepliable corrige={entree.corrigeDetaille} />
 
         <button type="button" className="btn btn-primary fiche-reponse-fermer" onClick={onFermer}>
           Fermer

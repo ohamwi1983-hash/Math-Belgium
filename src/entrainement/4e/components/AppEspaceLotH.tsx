@@ -167,7 +167,7 @@ export function AppEspaceLotH<E>(props: PropsAppEspace<E>) {
 
   function clore(juste: boolean, votreReponse: Fragments, message: Fragments | null, maj: Partial<EtatEcran> = {}) {
     const attendue = <RenduFragments fragments={reponseAttendue(def)} />;
-    setHistorique((h) => [...h, ecranClos(def.titre, <RenduFragments fragments={votreReponse} />, !juste, et.niveauAide > 0, attendue)]);
+    setHistorique((h) => [...h, ecranClos(def.titre, <RenduFragments fragments={votreReponse} />, !juste, et.niveauAide > 0, attendue, corrigeDetailleEcranCourant())]);
     setEtat({ ...et, ...maj, clos: true, revele: !juste, message });
   }
 
@@ -227,7 +227,11 @@ export function AppEspaceLotH<E>(props: PropsAppEspace<E>) {
     }
   }
 
-  const corrigeEtape = lignesDeLEtape(props.correction(e), lettreEtape(ecran));
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(props.correction(e), lettreEtape(ecran))} />;
+  }
   const messageRevele = et.message ? (
     <span>
       <RenduFragments fragments={et.message} />
@@ -370,7 +374,7 @@ export function AppEspaceLotH<E>(props: PropsAppEspace<E>) {
             labelSuivant={ecran >= tous.length - 1 ? "Nouvel exercice" : "Écran suivant"}
             onSuivant={suivant}
             messageRevele={messageRevele}
-            corrigeDetaille={<CorrigeDetailleEcran etapes={corrigeEtape} />}
+            corrigeDetaille={corrigeDetailleEcranCourant()}
           />
         )}
       </div>

@@ -95,7 +95,7 @@ export function App6gen75() {
       const revele = nouvelEtat.derniereTransitionRevelee;
       setHistorique((h) => [
         ...h,
-        { titre: LIBELLE_PHASE[etat.phase], votreReponse, correcte: !revele, reponseAttendue: revele ? <ReponseAttendue exercice={exercice} phase={etat.phase} /> : undefined },
+        { corrigeDetaille: corrigeDetailleEcranCourant(), titre: LIBELLE_PHASE[etat.phase], votreReponse, correcte: !revele, reponseAttendue: revele ? <ReponseAttendue exercice={exercice} phase={etat.phase} /> : undefined },
       ]);
       if (etat.niveauAide > 0) setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: true }));
       setEnAttente({ etatSuivant: nouvelEtat, revele });
@@ -138,6 +138,12 @@ export function App6gen75() {
     ? { type: "choix", options: optionsChoix(exercice, phase) }
     : { type: "champ", champ: champEcran(exercice, phase), diagnostiquer: (valeurs) => diagnostiquerEcran(exercice, phase, valeurs) };
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeFrequenceProbabilite(exercice), lettreEcranFrequenceProbabilite(exercice, phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -149,7 +155,7 @@ export function App6gen75() {
         ),
         // Corrigé détaillé « comme au tableau » de l'écran (même source que le papier), affiché par
         // `ValidationEcran` quand les tentatives sont épuisées.
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeFrequenceProbabilite(exercice), lettreEcranFrequenceProbabilite(exercice, phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         ...(choix ? { messageRevele: "Ce n'était pas la bonne réponse (une seule tentative sur un choix fermé)." } : {}),

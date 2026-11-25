@@ -79,7 +79,7 @@ export function AppSigneRacines() {
         <RenduFragments fragments={reponsePhase(e, phase)} />
       </p>
     );
-    setHistorique((h) => [...h, ecranClos(TITRES_PHASES[phase], votreReponse, resultat.revele, etat.niveauAide > 0, attendue)]);
+    setHistorique((h) => [...h, ecranClos(TITRES_PHASES[phase], votreReponse, resultat.revele, etat.niveauAide > 0, attendue, corrigeDetailleEcranCourant())]);
     setEtat(resultat.etat);
     setEnAttente({ revele: resultat.revele, reponseAttendue: attendue, messageRevele: phase === "verdict" ? "Ce n'était pas le bon signe." : undefined, derniere: etat.ecran >= liste.length - 1 });
   }
@@ -101,6 +101,12 @@ export function AppSigneRacines() {
     (window as unknown as { __debuggen114?: unknown }).__debuggen114 = { exercice: e, ecran: etat.ecran };
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSigneRacines(e), lettreEtape(etat.ecran))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -108,7 +114,7 @@ export function AppSigneRacines() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSigneRacines(e), lettreEtape(etat.ecran))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

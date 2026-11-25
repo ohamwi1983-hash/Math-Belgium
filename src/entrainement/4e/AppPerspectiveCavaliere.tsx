@@ -98,7 +98,7 @@ export function AppPerspectiveCavaliere() {
 
   function clore(nouvelEtat: EtatPerspectiveCavaliere, revele: boolean, votreReponse: ReactNode, bilan: string | null) {
     setEtat(nouvelEtat);
-    setHistorique((h) => [...h, ecranClos(titreEcran(e, ecran), votreReponse, revele, etat.niveauAide > 0, <p style={{ margin: 0 }}>{reponseEcran(e, ecran)}</p>)]);
+    setHistorique((h) => [...h, ecranClos(titreEcran(e, ecran), votreReponse, revele, etat.niveauAide > 0, <p style={{ margin: 0 }}>{reponseEcran(e, ecran)}</p>, corrigeDetailleEcranCourant())]);
     setEnAttente({ revele, derniere: ecran >= NOMBRE_ECRANS - 1, bilan });
   }
 
@@ -156,6 +156,12 @@ export function AppPerspectiveCavaliere() {
     reinitialiserEcran();
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePerspectiveCavaliere(e), lettreEtape(ecran)).map((x) => ({ ...x, figureHtml: undefined }))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -164,7 +170,7 @@ export function AppPerspectiveCavaliere() {
         onSuivant: passerEcranSuivant,
         messageRevele: ecran === 2 ? "Ce n'était pas le bon classement des arêtes." : undefined,
         // Corrigé détaillé de l'étape (même source que le papier) ; le dessin corrigé est déjà à l'écran.
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePerspectiveCavaliere(e), lettreEtape(ecran)).map((x) => ({ ...x, figureHtml: undefined }))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

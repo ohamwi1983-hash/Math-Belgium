@@ -137,7 +137,7 @@ export function AppDetectiveVecteurs() {
       return;
     }
     const attendue = reponseAttendue(e, ecran);
-    setHistorique((h) => [...h, ecranClos(TITRES_ECRANS[ecran]!, votreReponse, resultat.revele, etat.niveauAide > 0, attendue)]);
+    setHistorique((h) => [...h, ecranClos(TITRES_ECRANS[ecran]!, votreReponse, resultat.revele, etat.niveauAide > 0, attendue, corrigeDetailleEcranCourant())]);
     setEtat(resultat.etat);
     setEnAttente({
       revele: resultat.revele,
@@ -158,12 +158,18 @@ export function AppDetectiveVecteurs() {
     setEnAttente(null);
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDetectiveVecteurs(e), lettreEtape(etat.ecran))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: enAttente.reponseAttendue,
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDetectiveVecteurs(e), lettreEtape(etat.ecran))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
       }

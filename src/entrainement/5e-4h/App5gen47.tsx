@@ -112,7 +112,7 @@ export function App5gen47() {
     const revele = nouvelEtat.derniereTransitionRevelee;
     const explication = revele && estPhaseChoix(phase) ? explicationVerdictFaux(exercice) : null;
     setAideParPhase((prev) => ({ ...prev, [phase]: etat.niveauAide > 0 }));
-    setHistorique((h) => [...h, { titre: libellePhase(exercice, phase), votreReponse: votreReponse(valeurs), correcte: !revele, reponseAttendue: revele ? reponseAttendue(exercice, phase) : undefined }]);
+    setHistorique((h) => [...h, { corrigeDetaille: corrigeDetailleEcranCourant(), titre: libellePhase(exercice, phase), votreReponse: votreReponse(valeurs), correcte: !revele, reponseAttendue: revele ? reponseAttendue(exercice, phase) : undefined }]);
     setEnAttente({ etatSuivant: nouvelEtat, revele, explication });
   }
 
@@ -146,6 +146,13 @@ export function App5gen47() {
   }
 
   const choix = estPhaseChoix(phase);
+
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeModeliserSuite(exercice), lettreEtape(phasesPourExercice(exercice).indexOf(phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -154,7 +161,7 @@ export function App5gen47() {
         onSuivant: passerEcranSuivant,
         // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
         // `generateurs5e/modeliserSuite/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeModeliserSuite(exercice), lettreEtape(phasesPourExercice(exercice).indexOf(phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         ...(choix ? { messageRevele: `Ce n'était pas le bon type de suite (une seule tentative sur un choix fermé).${enAttente.explication ? ` ${enAttente.explication}` : ""}` } : {}),
       }
     : null;

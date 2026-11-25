@@ -209,6 +209,7 @@ export function AppFonctionsReference() {
     setHistorique((h) => [
       ...h,
       {
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         titre: "Famille",
         votreReponse,
         correcte: !revele,
@@ -249,17 +250,23 @@ export function AppFonctionsReference() {
     setEnAttente(null);
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return (
+          <CorrigeDetailleEcran
+            etapes={correctionDetailleeFonctionsReference(etat.exerciceCourant).filter((l) => (LETTRES_PHASE[etat.phase] as readonly string[]).includes(l.sousQuestion ?? ""))}
+          />
+        );
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttenduePhase(etat, enAttente.etatSuivant),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: (
-          <CorrigeDetailleEcran
-            etapes={correctionDetailleeFonctionsReference(etat.exerciceCourant).filter((l) => (LETTRES_PHASE[etat.phase] as readonly string[]).includes(l.sousQuestion ?? ""))}
-          />
-        ),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

@@ -96,6 +96,7 @@ export function App6gen42() {
         setHistorique((h) => [
           ...h,
           {
+            corrigeDetaille: corrigeDetailleEcranCourant(),
             titre: LIBELLE_PHASE[etat.phase],
             votreReponse,
             correcte: !revele,
@@ -150,10 +151,16 @@ export function App6gen42() {
     (window as unknown as { __debug6gen42?: unknown }).__debug6gen42 = { exercice, phase };
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeComplexesAvances(exercice), lettreEtape(phasesComplexesAvances(exercice).indexOf(phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeComplexesAvances(exercice), lettreEtape(phasesComplexesAvances(exercice).indexOf(phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         reponseAttendue: (
           <span className="equation-box-termes">
             {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (

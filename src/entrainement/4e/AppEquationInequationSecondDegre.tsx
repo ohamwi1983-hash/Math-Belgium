@@ -225,7 +225,7 @@ export function AppEquationInequationSecondDegre() {
         const exerciceClos = etat.exerciceCourant;
         setHistorique((h) => [
           ...h,
-          { titre: titrePhase(exerciceClos, phaseClose), votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttenduePour(exerciceClos, phaseClose) : undefined },
+          { corrigeDetaille: corrigeDetailleEcranCourant(), titre: titrePhase(exerciceClos, phaseClose), votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttenduePour(exerciceClos, phaseClose) : undefined },
         ]);
       }
       setEnAttente({ etatSuivant: nouvelEtat, revele });
@@ -255,11 +255,17 @@ export function AppEquationInequationSecondDegre() {
   const exercice = etat.exerciceCourant;
   const recapitulatif = calculerRecapitulatifEquationInequationSecondDegre(etat);
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationInequationSecondDegre(exercice), lettrePhaseEquationInequationSecondDegre(exercice, etat.phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : reponseAttenduePour(exercice, etat.phase),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationInequationSecondDegre(exercice), lettrePhaseEquationInequationSecondDegre(exercice, etat.phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
