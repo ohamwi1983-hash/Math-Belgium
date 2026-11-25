@@ -1421,6 +1421,16 @@ export const coniques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 136. Rayons focaux et triangle focal »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Orbites et ellipses : Kepler',
+          generatorId: '6gen141',
+          description: [
+            'Du périhélie et de l\'aphélie d\'un astéroïde, d\'une comète ou d\'un satellite, déduis a et c, place le corps central au bon endroit (un foyer, pas le centre), puis calcule l\'excentricité et le demi-petit axe.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 141. Orbites et ellipses : Kepler »',
+        },
       ],
     },
     {
@@ -1856,6 +1866,26 @@ export const coniques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 62. Tangentes à une conique »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Tangente par la dérivée et forme dédoublée',
+          generatorId: '6gen138',
+          description: [
+            'Choisis la fonction dont le graphique contient P, dérive-la pour obtenir la pente et l\'équation de la tangente, puis utilise la forme dédoublée en un autre point, sommet compris (tangente verticale).',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 138. Tangente par la dérivée et forme dédoublée »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Position d\'une droite et d\'une conique selon un paramètre',
+          generatorId: '6gen139',
+          description: [
+            'Pour les droites y = mx + k, trouve les valeurs de k qui donnent une tangente, puis décide si une droite de la famille est sécante, tangente, extérieure, ou n\'a qu\'un point commun sans être tangente (parallèle à une asymptote ou à l\'axe).',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 139. Position d\'une droite et d\'une conique selon un paramètre »',
+        },
       ],
     },
     {
@@ -2282,6 +2312,36 @@ export const coniques: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 63. Propriétés optiques des coniques »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Miroirs en contexte',
+          generatorId: '6gen140',
+          description: [
+            'Antenne satellite, phare, lithotriteur, télescope Cassegrain : reconnais la conique qui convient, écris son équation et calcule les distances utiles ; ou montre que FT = FP pour expliquer la réflexion vers le foyer.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 140. Miroirs en contexte »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Hyperbole de navigation : LORAN',
+          generatorId: '6gen142',
+          description: [
+            'Du retard entre deux signaux, déduis la différence des distances aux émetteurs, la branche d\'hyperbole sur laquelle se trouve le navire, son équation, puis la ou les positions possibles sur sa route.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 142. Hyperbole de navigation : LORAN »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Détective d\'erreurs : coniques',
+          generatorId: '6gen143',
+          description: [
+            'Trouve la ligne fausse dans la copie d\'un élève (c² = a² − b² pour une hyperbole, second membre négatif, foyer à p au lieu de p/2, Δ = 0, demi-ellipse, mauvaise branche, miroir elliptique, excentricité), explique l\'erreur et corrige.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 143. Détective d\'erreurs : coniques »',
         },
         { kind: 'video', title: 'Synthèse du chapitre', youtubeId: 'nebYPmMQg38' },
       ],
