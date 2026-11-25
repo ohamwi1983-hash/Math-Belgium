@@ -50,6 +50,20 @@ export const variablesAleatoires: ChapterContent = {
       id: 'variablesdiscretes',
       number: 1,
       title: 'Variables aléatoires discrètes et espérance',
+      kicker: 'E(X) = ∑ xᵢ · P(X = xᵢ) — une moyenne pondérée par les probabilités',
+      titreCourt: 'Variables discrètes',
+      partie: 'Lois discrètes : compter et pondérer',
+      essentiel: [
+        "L'**espérance** $E(X)=\\sum x_i\\,P(X=x_i)$ est une moyenne **pondérée** par les probabilités ; la **variance** $V(X)=E(X^2)-[E(X)]^2$ mesure la dispersion, et $\\sigma(X)=\\sqrt{V(X)}$.",
+        'Deux événements sont contraires si leur intersection est vide **et** leur union complète : le contraire de « au moins $k$ » est « au plus $k-1$ ».',
+        'Pour $Y=aX+b$ : $E(Y)=a\\,E(X)+b$ et $V(Y)=a^2\\,V(X)$.',
+      ],
+      cartes: [
+        { question: '$X$ vaut $-2$, $3$, $5$ avec les probabilités $0{,}4$ ; $0{,}35$ ; $0{,}25$. Que vaut $E(X)$ ?', reponse: '$E(X)=-0{,}8+1{,}05+1{,}25=1{,}5$ : le jeu est favorable.' },
+        { question: 'Comment calcule-t-on $V(X)$ le plus vite ?', reponse: 'Par la formule de König : $V(X)=E(X^2)-[E(X)]^2$.' },
+        { question: '« $X\\geq4$ » et « $X\\leq4$ » sont-ils contraires ?', reponse: 'Non : ils partagent la valeur $X=4$. Le contraire de « $X\\geq4$ » est « $X\\leq3$ ».' },
+        { question: '$E(X)=3$ et $\\sigma(X)=2$. Que valent $E(0{,}5X-1)$ et $\\sigma(0{,}5X-1)$ ?', reponse: '$E=0{,}5\\times3-1=0{,}5$ et $\\sigma=0{,}5\\times2=1$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Variable aléatoire, loi de probabilité et espérance', youtubeId: '7i_g1bBza6g' },
         { kind: 'video', title: 'Variance, écart-type et événements contraires', youtubeId: '3qi0zTgRcdA' },
@@ -557,6 +571,19 @@ export const variablesAleatoires: ChapterContent = {
       id: 'loibinomiale',
       number: 2,
       title: 'Loi binomiale',
+      kicker: 'P(X = k) = Cₙᵏ · pᵏ · (1 − p)ⁿ⁻ᵏ ; E(X) = np ; V(X) = np(1 − p)',
+      titreCourt: 'Loi binomiale',
+      partie: 'Lois discrètes : compter et pondérer',
+      essentiel: [
+        '$X\\sim\\mathcal{B}(n\\,;p)$ compte les succès de $n$ épreuves indépendantes de même probabilité $p$ : $P(X=k)=C_n^k\\,p^k(1-p)^{n-k}$.',
+        '$E(X)=np$, $V(X)=np(1-p)$ et $\\sigma(X)=\\sqrt{np(1-p)}$.',
+        'Le plus petit $n$ tel que $1-(1-p)^n>s$ vérifie $n>\\dfrac{\\ln(1-s)}{\\ln(1-p)}$ : le sens change car $\\ln(1-p)<0$.',
+      ],
+      cartes: [
+        { question: "Quelles sont les 4 conditions d'une loi binomiale ?", reponse: '$n$ fixé, épreuves indépendantes, 2 issues, $p$ constant.' },
+        { question: '$X\\sim\\mathcal{B}(5\\,;0{,}4)$ : que valent $E(X)$ et $V(X)$ ?', reponse: '$E(X)=2$ et $V(X)=5\\times0{,}4\\times0{,}6=1{,}2$.' },
+        { question: "$p=0{,}1$ : combien d'épreuves au minimum pour que $P(\\text{au moins 1 succès})>0{,}9$ ?", reponse: '$n>\\dfrac{\\ln(0{,}1)}{\\ln(0{,}9)}\\approx21{,}85$, donc $n=22$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'La loi binomiale', youtubeId: 'v5fGVg2Hco4' },
         {
@@ -877,6 +904,19 @@ export const variablesAleatoires: ChapterContent = {
       id: 'variablecontinue',
       number: 3,
       title: 'Variable aléatoire continue et densité de probabilité',
+      kicker: 'P(a ≤ X ≤ b) = ∫ f(t) dt — une aire sous la courbe de densité',
+      titreCourt: 'Densité de probabilité',
+      partie: 'Lois continues : des aires sous une courbe',
+      essentiel: [
+        "Une densité $f$ est positive, d'aire totale 1, et $P(a\\leq X\\leq b)=\\displaystyle\\int_a^b f(t)\\,dt$ : une **aire**, jamais une valeur $f(t)$.",
+        "Pour une variable continue, $P(X=a)=0$ : strict ou large ne change rien, et $P(a<X\\leq b)=F(b)-F(a)$ avec $F'=f$.",
+        '$E(X)=\\displaystyle\\int_u^v t\\,f(t)\\,dt$.',
+      ],
+      cartes: [
+        { question: '$f(t)=kt$ est une densité sur $[0\\,;2]$. Que vaut $k$ ?', reponse: '$\\displaystyle\\int_0^2 kt\\,dt=2k=1$, donc $k=\\dfrac{1}{2}$.' },
+        { question: 'Que vaut $P(X=3)$ pour une variable continue ?', reponse: '$0$ : seule une probabilité sur un intervalle a un sens.' },
+        { question: 'Quel lien entre la fonction de répartition $F$ et la densité $f$ ?', reponse: "$F'=f$, et $P(a<X\\leq b)=F(b)-F(a)$." },
+      ],
       blocks: [
         { kind: 'video', title: 'Variable aléatoire continue et densité de probabilité', youtubeId: '8GrFoKV_Y_0' },
         {
@@ -1057,6 +1097,18 @@ export const variablesAleatoires: ChapterContent = {
       id: 'discreteoucontinue',
       number: 4,
       title: 'Variable aléatoire discrète ? Variable aléatoire continue ?',
+      kicker: 'compter → discrète, somme ; mesurer → continue, intégrale',
+      titreCourt: 'Discrète ou continue',
+      partie: 'Lois continues : des aires sous une courbe',
+      essentiel: [
+        'On **compte** : variable discrète, probabilités calculées par des **sommes**. On **mesure** une grandeur sur un intervalle : variable continue, par des **intégrales**.',
+        '$\\sum p_i x_i$ devient $\\displaystyle\\int t\\,f(t)\\,dt$ : mêmes notions, deux outils.',
+      ],
+      cartes: [
+        { question: "Le temps d'attente à un guichet est-il discret ou continu ?", reponse: "Continu : c'est une mesure sur un intervalle ; on calcule avec une intégrale." },
+        { question: "Le nombre d'appels en une heure (sans maximum) est-il discret ?", reponse: 'Oui : ses valeurs 0, 1, 2, … se numérotent.' },
+        { question: 'Quelle formule continue correspond à $E(X)=\\sum p_i x_i$ ?', reponse: '$E(X)=\\displaystyle\\int_u^v t\\,f(t)\\,dt$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Discrète ou continue ? Loi uniforme continue', youtubeId: 'bmZ2Q-zl-F4' },
         {
@@ -1125,6 +1177,18 @@ export const variablesAleatoires: ChapterContent = {
       id: 'loiuniformecontinue',
       number: 5,
       title: 'Loi uniforme continue',
+      kicker: 'densité 1/(b − a) : seule la longueur de l’intervalle compte',
+      titreCourt: 'Loi uniforme continue',
+      partie: 'Lois continues : des aires sous une courbe',
+      essentiel: [
+        'Pour $X$ uniforme sur $[a\\,;b]$, la densité vaut $\\dfrac{1}{b-a}$ et $P(c\\leq X\\leq d)=\\dfrac{d-c}{b-a}$ pour $[c\\,;d]$ contenu dans $[a\\,;b]$.',
+        '$E(X)=\\dfrac{a+b}{2}$ et $V(X)=\\dfrac{(b-a)^2}{12}$.',
+      ],
+      cartes: [
+        { question: "Un bus passe toutes les 20 minutes. Probabilité d'attendre au plus 5 minutes ?", reponse: '$\\dfrac{5}{20}=0{,}25$.' },
+        { question: '$X$ uniforme sur $[0\\,;60]$ : que valent $E(X)$ et $V(X)$ ?', reponse: '$E(X)=30$ et $V(X)=\\dfrac{60^2}{12}=300$.' },
+        { question: '$E(X)=8$ et $V(X)=3$ pour une loi uniforme : que valent $a$ et $b$ ?', reponse: '$a+b=16$ et $b-a=\\sqrt{36}=6$, donc $a=5$ et $b=11$.' },
+      ],
       blocks: [
         {
           kind: 'definition',
@@ -1241,6 +1305,20 @@ export const variablesAleatoires: ChapterContent = {
       id: 'loinormale',
       number: 6,
       title: 'Loi normale',
+      kicker: 'Z = (X − μ) ÷ σ, puis la table : Φ(z) = P(Z ≤ z)',
+      titreCourt: 'Loi normale',
+      partie: 'Lois continues : des aires sous une courbe',
+      essentiel: [
+        '$X\\sim\\mathcal{N}(\\mu\\,;\\sigma)$ ($\\sigma$ = écart-type) se ramène à $Z=\\dfrac{X-\\mu}{\\sigma}\\sim\\mathcal{N}(0\\,;1)$, puis on lit $\\Phi(z)=P(Z\\leq z)$ dans la table.',
+        "$\\Phi(-z)=1-\\Phi(z)$, $P(Z\\geq z)=1-\\Phi(z)$, $P(a\\leq Z\\leq b)=\\Phi(b)-\\Phi(a)$ ; à l'envers, $x=\\mu+z\\sigma$.",
+        'Règle empirique : environ $68{,}3\\,\\%$, $95{,}4\\,\\%$ et $99{,}7\\,\\%$ dans $[\\mu-k\\sigma\\,;\\mu+k\\sigma]$ pour $k=1$, $2$, $3$.',
+      ],
+      cartes: [
+        { question: '$X\\sim\\mathcal{N}(50\\,;10)$ : que vaut $P(X\\leq65)$ ?', reponse: '$z=1{,}5$, donc $\\Phi(1{,}5)\\approx0{,}9332$.' },
+        { question: 'Que vaut $\\Phi(-1{,}5)$ ?', reponse: "$1-\\Phi(1{,}5)\\approx0{,}0668$ ($\\Phi$ n'est pas paire)." },
+        { question: 'Quel $z$ vérifie $\\Phi(z)=0{,}95$ ?', reponse: 'Entre $1{,}64$ et $1{,}65$ (à égale distance) : $z\\approx1{,}645$.' },
+        { question: "Quelle part d'une loi normale dépasse $\\mu+2\\sigma$ ?", reponse: 'Environ $2{,}3\\,\\%$ : la moitié des $4{,}6\\,\\%$ hors de $[\\mu-2\\sigma\\,;\\mu+2\\sigma]$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Loi normale (1/2) : la cloche et la règle empirique', youtubeId: 'oRr2_t58-9A' },
         { kind: 'video', title: 'Loi normale (2/2) : standardiser et lire la table de Φ', youtubeId: 'HRKbrDnIOmA' },
@@ -1634,6 +1712,18 @@ export const variablesAleatoires: ChapterContent = {
       id: 'extensionsbayes',
       number: 7,
       title: 'Extensions : binomiale, normale et Bayes',
+      kicker: 'P(Cⱼ | S) = P(Cⱼ) · P(S | Cⱼ) ÷ P(S) ; 𝓑(n ; p) ≈ 𝒩(np ; √(np(1 − p)))',
+      titreCourt: 'Bayes et approximation normale',
+      partie: 'Combiner, approcher, choisir',
+      essentiel: [
+        'Probabilités totales : $P(S)=\\sum P(C_i)\\,P(S\\mid C_i)$ ; Bayes : $P(C_j\\mid S)=\\dfrac{P(C_j)\\,P(S\\mid C_j)}{P(S)}$.',
+        "Si $n>30$ et $0{,}3<p<0{,}7$, $\\mathcal{B}(n\\,;p)$ s'approche par $\\mathcal{N}(np\\,;\\sqrt{np(1-p)})$, avec la correction de continuité : $P(X\\leq k)\\approx\\Phi\\!\\left(\\dfrac{k+0{,}5-\\mu}{\\sigma}\\right)$.",
+      ],
+      cartes: [
+        { question: 'Pourquoi multiplie-t-on $p_1\\times p_2$ pour deux épreuves indépendantes réussies ?', reponse: 'Un « ET » entre événements indépendants est un produit, jamais une somme.' },
+        { question: 'Assurance : $P(S)=0{,}22$ et $P(C_3)\\,P(S\\mid C_3)=0{,}1$. Que vaut $P(C_3\\mid S)$ ?', reponse: '$\\dfrac{0{,}1}{0{,}22}\\approx0{,}4545$.' },
+        { question: '$X\\sim\\mathcal{B}(100\\,;0{,}5)$ : quelle borne corrigée pour estimer $P(X\\leq55)$ ?', reponse: "$55{,}5$ : $z=\\dfrac{55{,}5-50}{5}=1{,}1$, d'où $\\Phi(1{,}1)\\approx0{,}8643$." },
+      ],
       blocks: [
         { kind: 'video', title: 'Extensions : épreuves composées, Bayes, approximation normale', youtubeId: 'EdM_I4B6wnA' },
         {
@@ -1923,6 +2013,20 @@ export const variablesAleatoires: ChapterContent = {
       id: 'loipoisson',
       number: 8,
       title: 'Loi de Poisson',
+      kicker: 'P(X = k) = e⁻λ · λᵏ ÷ k! ; E(X) = V(X) = λ',
+      titreCourt: 'Loi de Poisson et choix du modèle',
+      partie: 'Combiner, approcher, choisir',
+      essentiel: [
+        'La loi de Poisson compte des événements indépendants sur un intervalle, à taux moyen $\\lambda$ : $P(X=k)=e^{-\\lambda}\\dfrac{\\lambda^k}{k!}$, et $E(X)=V(X)=\\lambda$.',
+        "$\\lambda$ s'ajuste toujours à l'échelle de la question ; si $n\\geq30$, $p\\leq0{,}1$ et $np\\leq15$, $\\mathcal{B}(n\\,;p)$ s'approche par la loi de Poisson de paramètre $\\lambda=np$.",
+        'Pour choisir une loi : compter ou mesurer, avec ou sans remise, des épreuves ou un intervalle.',
+      ],
+      cartes: [
+        { question: '5 voitures par minute : quel $\\lambda$ pour 15 minutes ?', reponse: '$\\lambda=5\\times15=75$.' },
+        { question: '$\\lambda=4$ : comment obtenir $P(X=1)$ à partir de $P(X=0)$ ?', reponse: '$P(X=1)=P(X=0)\\times\\dfrac{4}{1}$.' },
+        { question: '$P(X=0)=0{,}135$ pour une loi de Poisson : que vaut $\\lambda$ ?', reponse: '$\\lambda=-\\ln(0{,}135)\\approx2$.' },
+        { question: 'Tirages sans remise dans une petite population : quelle loi ?', reponse: 'La loi hypergéométrique (pas la binomiale).' },
+      ],
       blocks: [
         { kind: 'video', title: 'La loi de Poisson', youtubeId: 'E6SK3Awv1fQ' },
         {
