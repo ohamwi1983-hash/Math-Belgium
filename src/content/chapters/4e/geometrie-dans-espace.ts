@@ -1155,6 +1155,10 @@ export const geometrieDansEspace: ChapterContent = {
             'Sur un solide en perspective cavalière, démontre qu\'une droite est parallèle à un plan, ou que ' +
               'deux plans sont parallèles : choisis le critère du cours, la ou les droites témoins, puis ' +
               'justifie chaque parallélisme (rectangle, parallélogramme, droite des milieux).',
+            'Variante « Trois points alignés » : sur une pyramide SABC, démontre que trois points I, J, K ' +
+              'sont alignés parce qu\'ils sont communs à deux plans sécants, donc sur leur droite ' +
+              'd\'intersection ; dans le cas particulier d\'un côté parallèle à la base, conclus par le ' +
+              'théorème du toit.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 103. Démontrer un parallélisme »',

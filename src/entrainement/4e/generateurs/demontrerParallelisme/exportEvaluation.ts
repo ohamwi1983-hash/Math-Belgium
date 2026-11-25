@@ -25,7 +25,9 @@ import {
   phraseSecantes,
 } from "../../ui/formatDemontrerParallelisme";
 import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDemontrerParallelisme, texteRaison } from "./index";
-import { profilDemontrerParallelisme } from "./profil";
+import { LIBELLE_CAS_GEN103, profilDemontrerParallelisme } from "./profil";
+import { figureTroisPointsAlignesSvg } from "../../ui/figureTroisPointsAlignes";
+import { dA, droiteFinale, nomsConstruits } from "../../ui/formatTroisPointsAlignes";
 
 /**
  * Adaptateur feuilles d'exercices / évaluations de gen103 (« Démontrer un parallélisme »).
@@ -45,11 +47,28 @@ function echapper(t: string): string {
 }
 
 function enteteHtml(e: ExerciceDemontrerParallelisme): string {
-  return `<p class="paragraphe">${echapper(enonce(e))}</p>${figurePositionsPlansSvg(e, { mode: "papier", ...elementsFigure(e, null, false) })}`;
+  // Trois points alignés : la pyramide, M, N, P et le triangle MNP seulement — les côtés prolongés et
+  // I, J, K sont à construire (corrigé : `figureHtml`).
+  const figure = e.variante === "alignes" ? figureTroisPointsAlignesSvg(e, { mode: "papier", construction: false, finale: false }) : figurePositionsPlansSvg(e, { mode: "papier", ...elementsFigure(e, null, false) });
+  return `<p class="paragraphe">${echapper(enonce(e))}</p>${figure}`;
 }
 
 /** Consignes des étapes (titres « Étape n — … » du corrigé), rédigées pour le papier. */
 function consignesEtapes(e: ExerciceDemontrerParallelisme): string[] {
+  if (e.variante === "alignes") {
+    const noms = nomsConstruits(e);
+    return e.cas === "general"
+      ? [
+          `Explique comment démontrer que trois points sont alignés à l'aide de deux plans.`,
+          `Montre que ${noms} appartiennent à la fois au plan (MNP) et au plan (ABC).`,
+          `Montre que ces deux plans sont sécants et conclus.`,
+        ]
+      : [
+          `Explique comment démontrer que ${dA(droiteFinale(e))} est parallèle à ${dA(e.paralleles![1])}.`,
+          `Montre que ${dA(droiteFinale(e))} est la droite d'intersection des plans (MNP) et (ABC).`,
+          `Conclus à l'aide du théorème du toit.`,
+        ];
+  }
   if (e.variante === "droite-plan") {
     return [
       `Énonce le critère du cours qui permet de démontrer qu'une droite est parallèle à un plan.`,
@@ -76,11 +95,20 @@ function construireEnonce(e: ExerciceDemontrerParallelisme): SectionExercice {
 function enoncePapier(e: ExerciceDemontrerParallelisme): EnoncePapier {
   return {
     section: { enteteFragments: [], enteteHtml: enteteHtml(e), questions: [{ consigne: [texte(consigneGlobale(e))] }] },
-    etapesParQuestion: [e.variante === "droite-plan" ? ["a", "b", "c"] : ["a", "b", "c", "d"]],
+    etapesParQuestion: [e.variante === "deux-plans" ? ["a", "b", "c", "d"] : ["a", "b", "c"]],
   };
 }
 
 function reponseBreve(e: ExerciceDemontrerParallelisme): FragmentConsigne[] {
+  if (e.variante === "alignes") {
+    const noms = nomsConstruits(e);
+    const sur = e.construits.map((x) => `${x.nom} ∈ ${dA(x.droiteHaut)} et ${dA(x.droiteBase)}`).join(", ");
+    if (e.cas === "general") {
+      return [texte(`${noms} sont communs aux plans (MNP) et (ABC) (${sur}) ; ces plans sont distincts (M ∉ (ABC)) et sécants : ${noms} sont sur leur droite d'intersection, donc alignés.`)];
+    }
+    const [h, b] = e.paralleles!;
+    return [texte(`${dA(droiteFinale(e))} est la droite d'intersection des plans (MNP) et (ABC) (${sur}) ; ces plans contiennent ${dA(h)} ∥ ${dA(b)} : par le théorème du toit, ${dA(droiteFinale(e))} ∥ ${dA(b)}.`)];
+  }
   if (e.variante === "droite-plan") {
     return [texte(`${libelle(e.droite)} ∥ ${libelle(e.raison.droite2)}, une droite du plan ${nomP(e)} : ${texteRaison(e.raison)}`)];
   }
@@ -103,6 +131,37 @@ function construireCorrection(e: ExerciceDemontrerParallelisme): BlocCorrection[
 function bareme(e: ExerciceDemontrerParallelisme): BaremeExercice {
   const c = (sousQuestion: string, critere: string, points: number): CritereBareme => ({ sousQuestion, critere: [texte(critere)], points });
   const err = (description: string, cout: string): ErreurFrequente => ({ description: [texte(description)], cout });
+  if (e.variante === "alignes" && e.cas === "general") {
+    return {
+      reponseFinale: reponseBreve(e),
+      criteres: [
+        c("a", "Idée : des points communs à deux plans sécants sont sur leur droite d'intersection", 1),
+        c("b", "Chaque point placé dans les deux plans, par une droite de chaque plan qui le contient", 1.5),
+        c("c", "Plans distincts (M hors du plan de la base) et sécants, droite d'intersection, conclusion", 1.5),
+      ],
+      erreursFrequentes: [
+        err("Points déclarés alignés parce qu'ils sont dans un même plan", "0 pt sur c)"),
+        err("Points placés « sur les côtés des triangles » au lieu des droites prolongées", "0,5 pt sur b)"),
+        err("Plans sécants « en un point »", "0,5 pt sur c)"),
+      ],
+      reponsesAcceptees: [[texte("Toute rédaction qui montre que les trois points sont communs à deux plans distincts et sécants ; le nom donné à la droite d'intersection est libre.")]],
+    };
+  }
+  if (e.variante === "alignes") {
+    return {
+      reponseFinale: reponseBreve(e),
+      criteres: [
+        c("a", "Idée : la droite est l'intersection des deux plans, puis le théorème du toit", 1),
+        c("b", "Les deux points communs justifiés, plans distincts : la droite d'intersection", 1.5),
+        c("c", "Théorème du toit appliqué aux deux droites parallèles de l'énoncé, chacune dans son plan", 1.5),
+      ],
+      erreursFrequentes: [
+        err("Parallélisme affirmé parce que les deux droites sont dans le plan de la base", "0 pt sur c)"),
+        err("Parallélisme affirmé « au jugé » sur la figure", "0 pt sur c)"),
+      ],
+      reponsesAcceptees: [[texte("Toute rédaction exacte qui établit que la droite est l'intersection des deux plans, puis applique le théorème du toit.")]],
+    };
+  }
   if (e.variante === "droite-plan") {
     return {
       reponseFinale: reponseBreve(e),
@@ -138,13 +197,20 @@ function bareme(e: ExerciceDemontrerParallelisme): BaremeExercice {
 /** Niveau (grille commune) : une étape par écran (critère, témoin(s), justification(s)) ; méthode 1
  * (l'énoncé papier dit QUOI démontrer, l'élève choisit le critère et la figure plane) ; aucun piège
  * dans les données. Constant dans chaque variante : 3 étapes (droite ∥ plan, 8 min) ou 4 (deux plans,
- * 10 min). */
+ * 10 min). Trois points alignés : 3 étapes (idée, points communs, conclusion), méthode 1, piège 0,
+ * dans le cas général comme dans le cas toit (8 min). */
 function criteresDifficulte(e: ExerciceDemontrerParallelisme): CriteresDifficulte {
   return { ...etapesDuCorrige(correctionDetaillee(e)), methode: 1, piege: 0 };
 }
 
 export const adaptateurEvaluationDemontrerParallelisme: AdaptateurFeuilleExercices<ExerciceDemontrerParallelisme> = {
   profilInstance: profilDemontrerParallelisme,
+  libelleCasParticulier: LIBELLE_CAS_GEN103,
+  // Trois points alignés : notion des § 5 (points communs à deux plans sécants) et § 8 (théorème du
+  // toit) plutôt que des critères de parallélisme (§ 7) ; les deux autres variantes gardent le titre
+  // de leur section.
+  titrePapier: (e) =>
+    e.variante !== "alignes" ? null : e.cas === "general" ? { titre: "Positions de deux plans", sectionId: "deux-plans" } : { titre: "Intersection de deux plans", sectionId: "percee" },
   titreDocument: "Démontrer un parallélisme — Évaluation",
   nomFichierBase: "demontrer-parallelisme",
   genererInstance: genererExerciceDemontrerParallelisme,

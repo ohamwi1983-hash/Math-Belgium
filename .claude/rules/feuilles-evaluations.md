@@ -4023,6 +4023,66 @@ différents ; documents (2 plans, interdite / autorisée en deux colonnes ; éva
 corrigé + grille + feuille + aménagée + Word copie / corrigé / grille) : 0 `.katex-error`, 0 débordement à
 680 / 820 / 1 280 px ; page du chapitre 390 px : cartes présentes, 0 « $ » ni « ** ».
 
+## 4e ch. 8, manuel — gen103 « Trois points alignés » (variante ajoutée, 25/11, chantier C)
+
+D'après l'exercice 11 « Démontrer » du manuel (pyramide SABC, M, N, P sur les arêtes issues du sommet ;
+a) I, J, K alignés ; b) cas MP ∥ AC). Variante `alignes` AJOUTÉE EN FIN de `CATALOGUE_VARIANTES` (indice 2) :
+`?code=` des variantes 0 et 1 et tirage libre de l'adaptateur et des codes inchangés (`VARIANTES_HISTORIQUES`,
+mesuré : 60 graines × libre / droite-plan / deux-plans, 180 / 180 exercices identiques au code d'avant) ;
+l'appli tire « alignes » une fois sur trois (`genererExerciceDemontrerParallelismeLibre`, mesuré 34 %).
+- **Situation** (`generateurs/demontrerParallelisme/alignes.ts`) : pyramide SABC propre (A(0 ; 2 ; 0), B(3 ; 0 ; 0),
+  C(6 ; 3 ; 0), S(3 ; 1,7 ; 5), faces au format du socle `Solide3D` ; seule [AC] cachée, comme la figure du
+  manuel — le tétraèdre du socle dessinait [DB] et [DC] presque l'un sur l'autre, N et P s'y confondaient).
+  SM = a·SA, SN = b·SB, SP = c·SC, rapports continus dans [0,2 ; 0,8], jamais montrés ; (MN) coupe (AB) en
+  A + λ(B − A), λ = b(1 − a)/(b − a). Rejet : rapports écartés de 0,12 (0,15 pour le côté non parallèle du cas
+  toit), cadre ≤ 1,75 fois celui du solide, points construits à 40 px l'un de l'autre et à 22 px des sommets
+  et de M, N, P.
+- **Cas toit = cas particulier du profil** (pas une `forme`, pas une variante séparée) : tiré une fois sur trois
+  AVANT les données, côté parallèle (MN ∥ AB, NP ∥ BC ou MP ∥ AC) à parts égales ; l'énoncé le DIT (« de sorte
+  que les droites (MP) et (AC) sont parallèles »), la question change (« Démontre que la droite (IJ) est
+  parallèle à la droite (AC). ») — ce n'est pas un verdict. Choix : en évaluation, le cas général (l'exercice
+  du manuel) sort par défaut, le professeur ajoute le cas toit par la case de la rangée « Trois points
+  alignés » (`LIBELLE_CAS_GEN103`, même dans toutes les séries, dernière question de la variante) ; la feuille
+  d'exercices et l'appli gardent les deux cas. `forme` = variante (inchangée pour les deux autres).
+- **Écrans** (choix fermés figés ✗ / ✓, une tentative, `EtapeChoixPlans`, message propre dans `messageRevele`) :
+  « Méthode » (trois points communs à deux plans sécants ; toit : (IJ) = intersection des plans puis théorème
+  du toit ; leurres « un même plan », « les trois côtés du triangle ABC », « à la règle », « plans
+  parallèles » ; toit « droite des milieux », « (IJ) parallèle au plan (MNP) », « dessin », « même plan »),
+  « Points communs » (chaque point sur un côté de MNP ⊂ (MNP) et sur un côté de ABC ⊂ (ABC) ; leurres « une
+  moitié seulement », « sur les côtés des triangles », « plans des faces latérales », côtés de MNP décalés
+  d'un cran — lecture de l'énoncé), « Conclusion » (plans distincts car M ∉ (ABC), sécants, droite commune ;
+  leurres « confondus », « parallèles car triangles disjoints », « dans (MNP) donc alignés », « sécants en un
+  point ») ou « Théorème du toit » (leurres « deux droites de (ABC) », « (IJ) et (MP) dans (MNP) », « aucun
+  point commun sur la figure », « plans parallèles »). 3 leurres sur 4 tirés, ordre mélangé ; aides à deux
+  niveaux (propriété du cours, puis posée pour l'instance), jamais la réponse.
+- **Figure** (`ui/figureTroisPointsAlignes.ts`, même cavalière, visibilité et couleurs que gen101 / gen103,
+  aucun identifiant SVG) : pyramide, M, N, P, triangle MNP (violet, côté caché en pointillé) ; côtés prolongés
+  (bleu) et I, J, K (rouge) seulement une fois l'écran « Points communs » clos et dans le corrigé ; droite
+  d'intersection (rouge) et, cas toit, les deux parallèles (vert) à la fin. Cadre IDENTIQUE à chaque état (il
+  contient toujours I, J, K : pas de saut, et la place de construire sur papier) ; étiquettes placées une
+  fois pour toutes en évitant tous les traits du dessin COMPLET (`placerEtiquettes`). Appli : figure gardée
+  sous l'énoncé replié (`EnTeteExercice.figureToujoursVisible`, aperçu = la consigne) ; la copie gardée était
+  aussi rendue sur bureau (≥ 1 024 px, énoncé jamais replié) : masquée par `cadre.css` (vaut pour tous les
+  générateurs qui l'utilisent).
+- **Papier** : énoncé en prose + figure (pyramide, M, N, P, triangle MNP) + « Démontre que les points I, J et
+  K sont alignés. » ; étapes a, b, c dans le corrigé (`corrigeAlignes.ts` : `I\in(MN)\subset(MNP)`, `M\notin(ABC)`,
+  `(MNP)\neq(ABC)`, `(MNP)\cap(ABC)=d`, conclusion `I,\,J,\,K\in d` ; toit : `I\neq J` justifié, `(MNP)\cap(ABC)=(IJ)`,
+  `I\notin(AC)`, théorème du toit), figure complète en `figureHtml` ; barème 1 + 1,5 + 1,5 ; `titrePapier`
+  « Positions de deux plans » (§ 5) ou, cas toit, « Intersection de deux plans » (§ 8). Jamais regroupé (comme
+  les autres variantes de gen103). Niveau mesuré : 3 · 8 min dans les deux cas (3 étapes, méthode 1, piège 0).
+- **Mesures** (dossier de travail `4e-ch8-C` : `coll.mts`, `code.mts`, `parcours.cjs`, `planche.cjs`,
+  `docs.cjs`, `deborde.cjs`, `capdoc.cjs`) : 2 000 tirages (dont 400 par le tirage libre de l'appli) ;
+  géométrie recalculée (chaque point construit sur ses deux droites, I, J, K alignés, (IJ) ∥ côté de la base
+  dans le cas toit, parallélisme déclaré ⟺ géométrie), une seule option valable par écran, rang de la bonne
+  option 25 % chacun, 27 800 relations du corrigé contrôlées sur les positions 3D : 0 anomalie, 0 KaTeX
+  invalide, 0 NaN / notation clavier / majuscules d'insistance / « déterminant » ; cas toit 34 %, côtés
+  parallèles 1/3 chacun ; iPhone 13 et 1 280 px (deux cas généraux, deux cas toit, réponses justes et
+  fausses, et les deux anciennes variantes) : 0 erreur console, scrollWidth = largeur, I, J, K absents avant
+  la fin de l'écran 2, présents après ; documents réels (2 plans, interdite / autorisée en deux colonnes, cas
+  toit coché ou non : évaluation 2 séries + aménagée + corrigé + grille + feuille + aménagée + Word copie /
+  corrigé / grille) : 0 `.katex-error`, 0 débordement à 680 / 820 / 1 280 px, cas toit sur une question de
+  chaque série quand la case est cochée, jamais sinon.
+
 ## 5e ch. 6, lot H1 — 5gen76, 5gen77, 5gen36–5gen38 (nouveaux, notés)
 
 Socle d'écrans `AppEcransTrigo` sans modification (choix jugés ✗ / ✓ en une tentative, champs en trois, `approchee` et

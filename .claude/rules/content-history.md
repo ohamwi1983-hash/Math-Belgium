@@ -4401,6 +4401,20 @@ paths:
   `components/EtapesDemontrerParallelisme.tsx`, `core/demontrerParallelisme.types.ts`,
   `moteur/sessionDemontrerParallelisme.ts`, `ui/formatDemontrerParallelisme.ts`,
   `generateurs/demontrerParallelisme/` (geometrieParallelisme, index, profil, exportEvaluation).
+  **Manuel, ex. 11 « Démontrer » (25/11, chantier C)** : variante « Trois points alignés » AJOUTÉE EN FIN
+  de catalogue (indice 2 ; `?code=` des deux autres variantes et tirage libre de l'adaptateur inchangés,
+  l'appli la tire une fois sur trois par `genererExerciceDemontrerParallelismeLibre`). Pyramide SABC
+  propre (`alignes.ts::pyramideSABC`, faces au format du socle ; le tétraèdre du socle dessinait [DB] et
+  [DC] presque l'un sur l'autre), M, N, P sur [SA], [SB], [SC] (rapports tirés dans [0,2 ; 0,8], jamais
+  montrés), I = (MN) ∩ (AB), J = (NP) ∩ (BC), K = (MP) ∩ (AC) ; cas « toit » une fois sur trois (un côté de
+  MNP parallèle à la base, DIT par l'énoncé, le point correspondant n'existe pas : « Démontre que (JK) est
+  parallèle à (AB) »). Écrans : idée / points communs / conclusion (ou théorème du toit). Figure propre
+  `ui/figureTroisPointsAlignes.ts` ; textes `ui/formatTroisPointsAlignes.ts` ; corrigé
+  `corrigeAlignes.ts`. Carte de la section `parallelisme` : un paragraphe de description ajouté. Le cours
+  dit déjà (§ 5) que deux plans distincts qui partagent un point partagent toute une droite par ce point,
+  mais n'énonce pas en toutes lettres « des points communs à deux plans sécants sont alignés » (proposition
+  de phrase dans le rapport, cours non réécrit). Détail : `.claude/rules/feuilles-evaluations.md`,
+  « 4e ch. 8, manuel — gen103 « Trois points alignés » ».
 - **4e, Chapitre 8 — gen102 « Point de percée par plan auxiliaire »** (section `percee`, processus
   2). La méthode du cours, un écran par étape, sur parallélépipède, cube ou prisme droit (et
   tétraèdre pour un plan par trois points) : d = (XY) passe par des sommets, milieux d'arêtes,

@@ -2,7 +2,8 @@ import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuill
 import { calcul, ligne, piege, resultat, texte, utilise } from "../../../export/corrigeTableau";
 import type { DroiteNommee2, ExerciceDemontrerParallelisme, ExerciceDeuxPlansParalleles, ExerciceDroitePlanParallele, RaisonParallele } from "../../core/demontrerParallelisme.types";
 import { figurePositionsPlansSvg } from "../../ui/figurePositionsPlans";
-import { conclusionJustification, critereValable, elementsFigure, libelle, libelleCandidat, nomP, nommeDansPlan } from "../../ui/formatDemontrerParallelisme";
+import { conclusionJustification, critereValable, elementsFigure, libelle, libelleCandidat, nomP, nommeDansPlan, type ExerciceParallelisme } from "../../ui/formatDemontrerParallelisme";
+import { corrigeAlignes } from "./corrigeAlignes";
 import { descriptionPlan } from "../../ui/formatPositionsPlans";
 import { COURS_PARALLELISME, COURS_PLAN, dL, finaliserEspace2, ligneMilieu, lignesDroiteDansPlan, nomL, paralleleL, planL } from "../../ui/corrigeEspace2";
 import { texteRaison } from "./index";
@@ -18,7 +19,7 @@ import { texteRaison } from "./index";
  * de « deux plans », ceux de l'élève s'ils sont justes — les écrans 3 et 4 portent sur eux).
  */
 
-type E = ExerciceDemontrerParallelisme;
+type E = ExerciceParallelisme;
 
 function planLatex(e: E, i: number): string {
   return planL(e.plans[i]!);
@@ -152,6 +153,7 @@ function corrigeDeuxPlans(e: ExerciceDeuxPlansParalleles, paires: [number, numbe
   ];
 }
 
-export function correctionDetailleeDemontrerParallelisme(e: E, paires: [number, number] | null = null): EtapeCorrection[] {
+export function correctionDetailleeDemontrerParallelisme(e: ExerciceDemontrerParallelisme, paires: [number, number] | null = null): EtapeCorrection[] {
+  if (e.variante === "alignes") return finaliserEspace2(corrigeAlignes(e));
   return finaliserEspace2(e.variante === "droite-plan" ? corrigeDroitePlan(e) : corrigeDeuxPlans(e, paires));
 }

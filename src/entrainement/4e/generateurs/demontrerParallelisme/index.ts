@@ -16,6 +16,7 @@ import { GABARITS_SOLIDE3D } from "../solide3D/gabarits";
 import { aretesSolide, dansPlan, donneesSolide, droiteDansPlan, droitesParalleles, memeDroite, memePlan, plansParalleles, relationDroitePlan, type DonneesSolide, type PlanGeo, type PointDispo } from "../positionsPlans/geometriePlans";
 import { choisirPlan, droitesNommees, type DroiteNommee } from "../positionsPlans";
 import { faitsSolide, memesDroitesQueFait, plansNommage, tirerTriangle, trianglesNommage, type FaitParallele, type Triangle } from "./geometrieParallelisme";
+import { genererAlignes } from "./alignes";
 
 /**
  * Générateur de gen103 — « Démontrer un parallélisme » (4e, chapitre 8, section `parallelisme`).
@@ -666,15 +667,30 @@ function memeCandidat(a: CandidatBrut, b: CandidatBrut, lignes: DroiteNommee[]):
 // Catalogue
 // ================================================================================================
 
+/** « Trois points alignés » (manuel, ex. 11) AJOUTÉE EN FIN : les indices des deux variantes
+ * historiques, donc les `?code=` déjà imprimés, ne changent pas. */
 export const CATALOGUE_VARIANTES: { id: VarianteDemontrerParallelisme; label: string }[] = [
   { id: "droite-plan", label: "Droite parallèle à un plan" },
   { id: "deux-plans", label: "Deux plans parallèles" },
+  { id: "alignes", label: "Trois points alignés" },
 ];
 
+/** Les deux variantes du tirage libre historique (adaptateur et `?code=` libres). */
+const VARIANTES_HISTORIQUES = CATALOGUE_VARIANTES.slice(0, 2);
+
 export function construireAvecVariante(id: string): ExerciceDemontrerParallelisme {
+  if (id === "alignes") return genererAlignes();
   return id === "deux-plans" ? genererDeuxPlans() : genererDroitePlan();
 }
 
+/** Tirage libre de l'ADAPTATEUR et des `?code=` : inchangé (droite ∥ plan ou deux plans, à parts
+ * égales) — les codes libres déjà imprimés rouvrent le même exercice. */
 export function genererExerciceDemontrerParallelisme(): ExerciceDemontrerParallelisme {
-  return construireAvecVariante(choisir(CATALOGUE_VARIANTES).id);
+  return construireAvecVariante(choisir(VARIANTES_HISTORIQUES).id);
+}
+
+/** Tirage libre de l'APPLI : « trois points alignés » une fois sur trois (les trois variantes à parts
+ * égales), sinon le tirage libre historique. */
+export function genererExerciceDemontrerParallelismeLibre(): ExerciceDemontrerParallelisme {
+  return Math.random() < 1 / 3 ? genererAlignes() : genererExerciceDemontrerParallelisme();
 }
