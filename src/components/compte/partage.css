@@ -1,0 +1,50 @@
+/* ---------- page d'un lien de partage `/partage/:jeton` (0009, décision du 25/11/2026) ----------
+ * Chargée seulement avec la page (`routes/PartagePage.tsx`, morceau à la demande), APRÈS `carnet.css`,
+ * `profil.css` et `coffre.css` dont elle réutilise les classes (bandeau, cartes, questions par processus,
+ * pastilles de type) sans les modifier. Jetons du site (clair / sombre) ; cibles ≥ 44 px. */
+
+.partage-grille { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+.partage-carte { flex: 1 1 340px; }
+.partage-contenu { flex-grow: 3; }
+.partage-ajout { flex-grow: 2; position: sticky; top: 16px; }
+.partage-sous-titre { overflow-wrap: anywhere; }
+
+.partage-faits { margin: 0; padding: 14px 20px; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 16px; border-bottom: 1px solid var(--line-soft); }
+.partage-faits > div { display: contents; }
+.partage-faits dt { font: 600 0.72rem/1.9 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.partage-faits dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+.partage-questions { padding: 4px 20px 12px; }
+
+.partage-modes { margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.partage-modes legend { padding: 0; margin-bottom: 8px; font: 600 0.72rem var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.partage-mode {
+  display: flex; gap: 10px; align-items: flex-start; min-height: 44px; padding: 12px; cursor: pointer;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface);
+}
+.partage-mode input { flex: none; width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--accent); }
+.partage-mode strong { display: block; color: var(--ink); }
+.partage-mode-aide { display: block; margin-top: 2px; font-size: 0.86rem; color: var(--ink-soft); }
+.partage-mode.choisi { border: 2px solid var(--accent); padding: 11px; background: color-mix(in srgb, var(--accent-soft) 45%, var(--surface)); }
+.partage-mode.desactive { cursor: not-allowed; border-style: dashed; }
+.partage-mode.desactive strong { color: var(--ink-soft); }
+.partage-mode:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.partage-avis { padding: 8px 10px; border-radius: var(--radius); background: var(--attn-soft); color: var(--ink); }
+.partage-bouton { min-width: 220px; }
+.partage-fait { display: flex; flex-direction: column; gap: 10px; }
+.partage-fait-titre { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 0; color: var(--ink); }
+.partage-fait-titre:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.partage-refus h2 { margin: 0; font: 600 1.25rem var(--serif); color: var(--ink); }
+.partage-refus p { margin: 0; color: var(--ink-soft); }
+
+@media (max-width: 759px) {
+  .partage-ajout { position: static; }
+  /* Le sous-titre du bandeau du coffre est masqué sur téléphone ; celui-ci dit qui partage : gardé. */
+  .coffre-bandeau-sous-titre.partage-sous-titre { display: block; }
+  .partage-faits { grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 12px 16px; }
+  .partage-faits dd { margin-bottom: 8px; }
+  .partage-questions { padding: 4px 16px 10px; }
+  .partage-carte .profil-carte-tete, .partage-carte .profil-carte-corps { padding-left: 16px; padding-right: 16px; }
+  .partage-bouton, .partage-carte .profil-actions .carnet-bouton { flex: 1 1 100%; min-height: 44px; }
+  .partage-refus .profil-actions .carnet-bouton { flex: 1 1 100%; min-height: 44px; }
+}

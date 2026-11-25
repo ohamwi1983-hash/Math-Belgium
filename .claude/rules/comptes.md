@@ -4,7 +4,8 @@ paths:
   - "src/lib/compte*"
   - "src/lib/coffre*"
   - "src/components/compte/**"
-  - "src/routes/{Connexion,Inscription,Profil,Coffre,Admin,MotDePasse,Evaluation,Carnet,Exercice,ChapterExercice}*"
+  - "src/routes/{Connexion,Inscription,Profil,Coffre,Admin,MotDePasse,Evaluation,Carnet,Exercice,ChapterExercice,Partage}*"
+  - "src/lib/partage*"
   - "src/lib/carnet*"
   - "src/lib/horaire.ts"
   - "src/lib/repartitionProcessus.ts"
@@ -33,7 +34,8 @@ les générateurs choisis dans l'annonce d'une évaluation (`0008_evaluation_gen
 l'évaluation annoncée »). Répartition d'EXAMEN Connaître / Appliquer / Transférer (« Préparer
 l'examen ») mémorisée dans le profil : `0005_repartition.sql` (section « Répartition mémorisée » en fin
 de fichier).
-Plus tard (pas fait) : partage entre collègues.
+Partage d'un enregistrement du coffre avec un collègue par un lien : `0009_partages_plans.sql` (section « Partage
+entre collègues » après « Page « Mon coffre » refondue »). Plus tard (pas fait) : envoi direct par adresse, partage du carnet.
 
 ## Décisions de l'utilisateur
 
@@ -92,8 +94,8 @@ p_note)`, `admin_revoquer_code(p_id)` (non utilisé seulement), `admin_lister_in
 e-mail de l'utilisateur), `admin_lister_professeurs()` (inscription, dernière connexion, nombre de plans
 et d'écoles), `admin_definir_actif(p_id, p_actif)` (jamais soi-même). Toutes vérifient `est_admin()`.
 
-Partage plus tard : table `partages (plan_id, destinataire, droit)` + politique SELECT AJOUTÉE sur
-`plans`. Phase 2 : `classes`, `seances`, `carnet_reglages` (`0002_carnet.sql`, voir plus bas).
+Partage (fait autrement, 0009) : PAS de politique ajoutée sur `plans` — un lien = une COPIE figée dans
+`partages_plans`, lue par jeton via des fonctions SECURITY DEFINER (section « Partage entre collègues »). Phase 2 : `classes`, `seances`, `carnet_reglages` (`0002_carnet.sql`, voir plus bas).
 
 ## Code
 
@@ -984,6 +986,114 @@ supprimer, « Ouvrir dans le panneau » = `routeDuPlan` + `?plan=`, messages `ro
   rechargement, renommer — vide refusé, Échap —, dupliquer, supprimer — Échap, confirmer, remédiation
   orpheline —, ouvrir puis retour arrière, import, panne puis Réessayer, tiroir : focus, poignée, « … »,
   Échap, ×, cibles ≥ 44 px) ; `scrollWidth` = largeur, 0 erreur console.
+
+## Partage entre collègues (25/11/2026 : `supabase/migrations/0009_partages_plans.sql`)
+
+Décisions du professeur (toutes les recommandations acceptées) : dans « Mon coffre », « Partager » sur un
+enregistrement (évaluation, examen, feuille, remédiation : le coffre les range de la même façon) crée un lien
+`/partage/<jeton>` + « Copier le lien » ; le destinataire DOIT être un professeur connecté ; il voit titre,
+chapitre(s), nombre de questions, durée estimée, « partagé par <nom affiché> », puis « Ajouter à mon coffre ».
+**Copie, pas document partagé** : l'ajout met une COPIE dans SES `plans`, rien ne remonte (dans aucun sens).
+Contenu partagé = réglages (chapitres, lignes / variantes, points, options, consignes, graines) ; cartouche
+école / professeur RETIRÉ (le destinataire imprime avec le sien) ; rien sur les classes ni le carnet. À
+l'import : « Mêmes exercices » (mêmes graines, épreuve commune entre classes parallèles — DÉFAUT) ou « Nouveaux
+exercices » (même structure, nouveau tirage). Expiration 30 jours ; « Arrêter le partage » le désactive tout
+de suite. Pas d'envoi direct par adresse (plus tard si besoin). AUCUNE donnée d'élève.
+
+**Schéma 0009** (idempotent, ne dépend que de 0001, à coller APRÈS 0008 ; « Success. No rows returned ») :
+
+| Table | Colonnes | Règles |
+| --- | --- | --- |
+| `partages_plans` | `jeton` (64 hex = deux `gen_random_uuid` sans tirets, 244 bits, tiré par la base, unique), `proprietaire` (défaut `auth.uid()`), `plan_id` (origine, NULL si supprimé), `type`, `titre` (1–200), `resume` jsonb (objet ≤ 4 Ko), `contenu` jsonb (copie figée, objet ≤ 2 Mo), `cree_le`, `expire_le`, `revoque` / `revoque_le`, `nombre_ajouts` | FK composée `(plan_id, proprietaire) → plans (id, proprietaire)` ON DELETE SET NULL (plan_id) (contrainte ajoutée `plans_id_proprietaire_uniq`) : un partage ne vise qu'un plan à soi, et survit à sa suppression ; `partages_plans_dates_valides` (expire ≤ créé + 30 j) |
+| `partages_ajouts` | `(partage_id, destinataire)` clé, `ajoute_le` | AUCUN droit client : tenue par `ajouter_partage` (un collègue compte une fois) |
+
+- Déclencheur `partages_plans_avant_insertion` (SECURITY INVOKER) : retire `entete.cartouche` du contenu, impose
+  `revoque = false`, `nombre_ajouts = 0`, `cree_le = now()`, `expire_le = now() + 30 jours` ; refuse un 101e
+  partage ACTIF du professeur (23514, message en français).
+- Droits : `anon` RIEN (tables et fonctions) ; `authenticated` : `select`, `delete` et
+  `insert (plan_id, type, titre, resume, contenu)` SEULEMENT (droits de colonne : jeton, dates, révocation,
+  compteur, propriétaire → 42501) ; pas d'`update` (arrêter = fonction). RLS : le propriétaire lit / crée /
+  supprime SES partages, compte actif. Un collègue ne lit JAMAIS la table : aucune liste, aucune recherche →
+  aucune énumération ; l'admin ne voit rien de plus.
+- `lire_partage(p_jeton)` (SECURITY DEFINER, `search_path = ''`) : professeur connecté ET actif (sinon 42501) ;
+  jeton exact au format `^[0-9a-f]{64}$` ; renvoie `statut` `ok` (titre, type, résumé, contenu, `partage_par` =
+  `nom_affiche`, dates, `deja_ajoute`, `est_proprietaire`) / `expire` (date seule) / `revoque` (arrêté, ou
+  compte de l'auteur désactivé) / `inconnu` — aucun contenu hors `ok`.
+- `ajouter_partage(p_jeton, p_mode 'memes' | 'nouveaux', p_contenu)` : mêmes contrôles (P0002 inconnu, P0001
+  arrêté / expiré, 22023 mode ou plan invalide) ; `memes` = la copie figée, `nouveaux` = le plan re-tiré envoyé
+  par le site (objet ≤ 2 Mo ; le lecteur pourrait de toute façon l'enregistrer) ; cartouche retiré ; insère
+  dans `plans` (propriétaire = l'appelant, type et titre du partage) ; compteur +1 au premier ajout d'un
+  collègue, jamais pour le propriétaire ; renvoie l'id du nouvel enregistrement.
+- `arreter_partage(p_id)` : ses partages seulement (P0002 sinon), définitif (« Partager à nouveau » crée un
+  nouveau lien). `supprimer_mon_compte()` inchangé : partages et ajouts partent en cascade avec le profil ;
+  les copies déjà ajoutées par les collègues restent.
+
+**Code** :
+- `lib/partages.ts` (client injecté) : `listerPartages` (`{ actif: false }` sans 0009), `creerPartage` (résumé
+  `resumePartage` + `planSansCartouche`), `arreterPartage`, `lirePartage` (`statut: 'absent'` sans 0009),
+  `ajouterPartage`, `partagesAbsents` (PGRST205 / PGRST202 / 42P01 / 42883 / « schema cache »), `PartagesAbsents`,
+  `etatPartage` (`actif` / `expire` / `arrete`), `partageDuPlan` (le plus récent de l'enregistrement),
+  `urlPartage` (`window.location.origin`), `texteAjouts`, `jetonValide` (un jeton mal formé n'est jamais envoyé).
+- `lib/partageTirage.ts` (LOURD, `import()` sur la page du lien seulement) : `nouveauTirage` = pipeline du
+  panneau (`construireItemsPayload` → `construirePlan`, nombre de séries du plan, sans cartouche — jamais un
+  second moteur ; une ligne « groupe à verdict » re-tire ses variantes réelles, comme tout nouveau tirage) ;
+  `peutRetirer` (faux pour une remédiation ou hors génération locale) ; `dureeEstimeePlan` = `dureeEstimeeMinutes`
+  des items de la série A (même calcul que la copie, arrondi aux 5 min).
+- Coffre (`routes/CoffrePage.tsx`) : partages lus à côté des plans (une panne ne bloque jamais le coffre) ;
+  fiche : bouton « Partager » (« Partager à nouveau » après un lien arrêté / expiré), bloc « Partager avec un
+  collègue » (`BlocPartage`, `.coffre-partage` de `coffre.css`) : « Partagé · ajouté par n collègue(s) · expire
+  le … », lien en lecture seule + « Copier le lien » (focus après création ; repli : sélectionner à la main),
+  texte d'aide (connecté, copie, école et nom non transmis), « Arrêter le partage » avec confirmation DANS le bloc
+  (focus Annuler, Échap) ; lien arrêté / expiré : « Partage arrêté » / « Lien expiré le … » + compteur. Liste :
+  « · partagé » dans la ligne d'un lien actif. Téléphone : « … » du tiroir → « Partager » / « Lien de partage »
+  (ouvre la fiche complète). 0009 absente : le bouton affiche « Applique la migration 0009 pour partager : … ».
+- Page `/partage/:jeton` (`routes/PartagePage.tsx`, `components/compte/partage.css`, chargée à la demande,
+  `noindex`, jamais pré-rendue) : `PageReservee` (visiteur → `/connexion?retour=/partage/<jeton>`, retour après
+  connexion) ; `MenuEspace` + bandeau (titre du document, « Partagé par … · lien valable jusqu'au … ») ; carte
+  « Ce que contient le document » (partagé par, niveau, chapitre(s), questions · points · séries, durée estimée
+  « calcul… » puis « ≈ n min », questions de la série A par compétence) ; carte « Ajouter à mon coffre » (radios
+  « Mêmes exercices » — défaut — / « Nouveaux exercices », désactivé avec sa raison pour une remédiation ; avis
+  « déjà ajouté » / « ton propre partage ») → « ✓ Ajouté » (focus), « Ouvrir dans le panneau » (`?plan=` : le
+  panneau applique l'école et le nom du DESTINATAIRE — `rendrePlan`) et « Voir dans mon coffre ». Refus :
+  « Ce partage a été arrêté », « Ce lien a expiré » (30 jours), « Lien de partage inconnu », « Partage pas encore
+  activé » (0009 absente).
+
+**Vérifications** (dossier de travail `partage-evaluations/`) :
+- `test_sql.py` (Postgres 16 local, faux schéma `auth`, 0001 → 0008 + données, 0009 ×3, 0001 → 0008 relancés
+  après, 0009 encore) : 115 vérifications — sortie vide, plans / partages / contraintes / droits identiques à
+  chaque relance ; jeton 64 hex différent à chaque lien, 30 jours, cartouche retiré ; jeton / expiration /
+  compteur / propriétaire choisis par le client refusés (42501), plan d'un autre (23503), titre vide ou > 200,
+  type inconnu, contenu non objet ou > 2 Mo, résumé > 4 Ko (23514), pas d'UPDATE ; un collègue ne voit aucune
+  ligne de la table ni de `partages_ajouts` ; `anon` refusé partout ; lecture par jeton exact (mal formé,
+  inexistant, en majuscules → inconnu), ajout « mêmes » (graines identiques, sans cartouche) et « nouveaux »
+  (plan envoyé gardé, cartouche retiré), compteur de collègues distincts (le propriétaire ne compte pas),
+  erreurs 22023 / P0002 ; comptes désactivés (lecteur 42501, auteur → `revoque`) ; arrêt (un autre → P0002,
+  idempotent, copies gardées) ; expiration (statut, ajout refusé, > 30 jours refusé même au superutilisateur) ;
+  100 partages actifs au plus ; plan d'origine supprimé (lien NULL, copie lisible) ; suppressions de comptes.
+- Playwright (`parcours.mjs`, build `NODE_ENV=development vite build --mode test` servi sur :5985, faux client
+  `faux-supabase.js` étendu — « serveur » de partages commun aux onglets en `localStorage`, deux onglets = deux
+  professeurs, option `partagesAbsent`) : 1 280 px et iPhone 13, clair et sombre —
+  81 vérifications : « Partager » → lien `/partage/<64 hex>`, état « Partagé · pas encore ajouté par un collègue
+  · expire le » (+ 30 jours), focus sur « Copier le lien », presse-papiers relu, « · partagé » dans la liste,
+  insertion limitée aux cinq colonnes, copie figée sans cartouche ; second onglet = autre professeur : titre,
+  « partagé par M. Essai » (civilité insécable), niveau, chapitre, questions, durée « ≈ 30 min », « Mêmes
+  exercices » coché d'office → copie dans SON coffre aux graines identiques, sans cartouche ; « déjà ajouté » ;
+  « Nouveaux exercices » → mêmes lignes, mêmes séries, mêmes générateurs (variantes réelles du groupe à verdict
+  de gen1 re-tirées), graines différentes, en-tête gardé ; compteur 1 collègue (même collègue deux fois) ;
+  « Ouvrir dans le panneau » → plan chargé avec l'école de B, jamais celle de A ; A voit « ajouté par 1
+  collègue » ; « Arrêter le partage » (focus Annuler, Échap, focus rendu, confirmer) → « Partage arrêté »,
+  « Partager à nouveau », lien refusé « Ce partage a été arrêté » ; nouveau lien expiré → « Ce lien a expiré »
+  et « Lien expiré le … » dans le coffre ; jeton inexistant / mal formé (aucun appel) → inconnu ; remédiation :
+  « Nouveaux exercices » désactivé avec sa raison, ajout « mêmes » ; son propre partage → avis ; visiteur non
+  connecté → `/connexion?retour=/partage/<jeton>` ; 0009 absente → coffre normal, « Applique la migration 0009
+  pour partager », page du lien « Partage pas encore activé » ; téléphone : « … » du tiroir → « Partager »,
+  boutons, choix et bouton d'ajout ≥ 44 px ; `scrollWidth` = largeur partout, 0 erreur console. Captures dans
+  `partage-evaluations/captures/`.
+
+**Mise en service** : SQL Editor → New query → coller TOUT `0009_partages_plans.sql` → Run → « Success. No rows
+returned » ; recharger `/coffre` → choisir une évaluation → « Partager » → « Copier le lien » → l'ouvrir avec
+un autre compte professeur → « Ajouter à mon coffre ». À vérifier contre le vrai projet : création du lien
+(droits de colonne), lecture par un autre compte, ajout dans les deux modes, arrêt, compteur.
 
 ## Page « Administration » refondue (22/11/2026 : proposition B « tableaux » + deux ajouts de C, AUCUN SQL)
 
