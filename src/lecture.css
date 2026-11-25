@@ -1,0 +1,271 @@
+/* ==========================================================================
+   Confort de lecture (panneau « Aa ») — côté élève, sans compte (planches 01 à 06, 25/11/2026).
+   Voir `.claude/rules/cote-eleve.md`. Importé par `main.tsx` APRÈS `index.css`.
+
+   Les réglages arrivent comme attributs sur <html> (`src/lib/reglagesLecture.ts`, et AVANT l'affichage
+   par le script en ligne d'`index.html`) : `data-police`, `data-taille`, `data-interligne`,
+   `data-espacement`, `data-largeur`, `data-theme`, `data-animations`, `data-lecture-perso`. Sans
+   attribut (réglage du site, page pré-rendue), RIEN ici ne change le rendu d'avant.
+   Tout est limité à l'ÉCRAN : l'impression (Ctrl+P, version aménagée, export HTML) a ses propres
+   réglages et ne change pas. La projection (`.projection`, professeur) non plus : chaque thème est
+   gardé par `:not(:has(.projection))` (navigateur sans `:has()` : thème de l'appareil, comme avant).
+   ========================================================================== */
+
+/* ---------- 0. OpenDyslexic : pas de `@font-face` ici. Elle est enregistrée par `FontFace` (JS,
+   `reglagesLecture.ts::chargerOpenDyslexic`) SEULEMENT quand l'élève la choisit : ni téléchargée pour
+   les autres, ni recopiée dans l'export HTML d'un chapitre (`buildHtml.ts` inline toutes les polices
+   des feuilles de style). ---------- */
+
+/* ---------- 1. Thèmes choisis par l'élève ----------
+   « Auto » = aucun attribut = le site suit l'appareil (`@media (prefers-color-scheme)` d'`index.css`).
+   Un choix explicite gagne sur l'appareil : jeux COMPLETS de jetons (copie des valeurs claires et
+   sombres d'`index.css` — à tenir à jour si un jeton de couleur y est ajouté), spécificité plus forte
+   que `:root`. Crème et Contraste élevé dérivent du jeu clair ; les quatre rôles d'encadrés gardent leur
+   teinte. Contrastes mesurés (règle `cote-eleve.md`). */
+@media screen {
+  :root:is([data-theme="clair"], [data-theme="creme"], [data-theme="contraste"]):not(:has(.projection)) {
+    --paper: #eef2f5; --surface: #ffffff; --surface-2: #f7f9fb; --ink: #182430; --ink-soft: #51626f; --ink-faint: #8a97a1;
+    --line: #ccd8e0; --line-soft: #dfe7ec; --accent: #b65c1f; --accent-ink: #7a3c11; --accent-soft: #f4e3d1; --accent-soft-line: #e6c8a4;
+    --good: #2f7a4f; --good-soft: #dcefe2; --bad: #b23a3a; --bad-soft: #f6dede; --attn: #96650c; --attn-soft: #f7ecd6;
+    --tip: #8a7200; --tip-soft: #faf3d5; --plan: #5b4ea3; --plan-ink: #443a80; --plan-soft: #ece9f8;
+    --sky: #2f6fb0; --sky-ink: #1f4e7d; --sky-soft: #dde9f5; --on-sky: #f3f8fd; --rose: #b23a7a;
+    --histoire: #7a4a2a; --histoire-soft: #f3e6d4; --parch-1: #f9f0dc; --parch-2: #f0dfb8; --dowel-light: #c8995f; --dowel-dark: #5c3016;
+    --on-accent: #fff8f0;
+    --proc1: #0c828a; --proc1-ink: #05585e; --proc1-soft: #d8f5f6; --on-proc1: #ffffff;
+    --proc2: #1d52a8; --proc2-ink: #133f87; --proc2-soft: #e3eefe; --on-proc2: #ffffff;
+    --proc3: #67152e; --proc3-ink: #60132a; --proc3-soft: #fbe7ea; --on-proc3: #ffffff;
+    --niv1-fond: #e7f3ea; --niv1-encre: #1b1d22; --niv2-fond: #efe0a0; --niv2-encre: #1b1d22; --niv3-fond: #eab06a; --niv3-encre: #1b1d22;
+    --niv4-fond: #b55a2e; --niv4-encre: #ffffff; --niv5-fond: #8f2d2b; --niv5-encre: #ffffff;
+    color-scheme: light;
+  }
+  :root[data-theme="sombre"]:not(:has(.projection)) {
+    --niv1-fond: #1f3527; --niv1-encre: #cfe9d7; --niv2-fond: #4a4120; --niv2-encre: #f3e2a2; --niv3-fond: #6e4a1f; --niv3-encre: #ffdcae;
+    --niv4-fond: #a04f28; --niv4-encre: #ffffff; --niv5-fond: #c0423c; --niv5-encre: #ffffff;
+    --paper: #10161d; --surface: #161f27; --surface-2: #1b252e; --ink: #e9eef2; --ink-soft: #a3b2bd; --ink-faint: #6d7d88;
+    --line: #2c3944; --line-soft: #232e37; --accent: #e0913f; --accent-ink: #f3b877; --accent-soft: #2c2013; --accent-soft-line: #4a341a;
+    --good: #57b884; --good-soft: #17281f; --bad: #e2807f; --bad-soft: #2c1a1a; --attn: #d9a53f; --attn-soft: #332510;
+    --tip: #d6bb4a; --tip-soft: #302c10; --plan: #a494e8; --plan-ink: #c3b8f2; --plan-soft: #221f33;
+    --sky: #6ea8e8; --sky-ink: #a8cdf2; --sky-soft: #17222c; --on-sky: #132840; --rose: #e07fb8;
+    --histoire: #d6a86b; --histoire-soft: #2e2113; --parch-1: #2a2013; --parch-2: #332815; --dowel-light: #f0c892; --dowel-dark: #8a5a2e;
+    --on-accent: #201404;
+    --proc1: #7be0df; --proc1-ink: #98e4e3; --proc1-soft: #112e30; --on-proc1: #10161d;
+    --proc2: #77a9f3; --proc2-ink: #a7c9fc; --proc2-soft: #1b273a; --on-proc2: #10161d;
+    --proc3: #c1628b; --proc3-ink: #e6afc4; --proc3-soft: #341d27; --on-proc3: #10161d;
+    color-scheme: dark;
+  }
+  /* Crème : fond chaud, moins éblouissant le soir ; texte 14:1, secondaire 7,8:1, discret ≥ 4,7:1. */
+  :root[data-theme="creme"]:not(:has(.projection)) {
+    --paper: #ece3cf; --surface: #f8f1e1; --surface-2: #f1e7d2; --ink: #2a2118; --ink-soft: #57483a; --ink-faint: #6f604f;
+    --line: #d6c6a8; --line-soft: #e4d7be; --accent: #a4521a; --accent-ink: #6e3410; --accent-soft: #f0dcc0; --accent-soft-line: #dcbd94;
+    --good: #2c6e47; --good-soft: #dde9cf; --bad: #a53636; --bad-soft: #f1d8cc; --attn: #87590a; --attn-soft: #f1e2c4;
+    --tip: #7a6500; --tip-soft: #f3e9c6; --plan: #54489a; --plan-ink: #3f3578; --plan-soft: #e6e0ec;
+    --sky: #2b649e; --sky-ink: #1d476f; --sky-soft: #dfe3e0; --on-sky: #f5f3ec; --on-accent: #fff8ee;
+    --histoire-soft: #efdfc4; --parch-1: #f5e8cc; --parch-2: #ecd7ab;
+  }
+  /* Contraste élevé : noir sur blanc, traits pleins de 2 px, liens soulignés ; secondaire ≥ 12:1.
+     `--line-soft` sert de filet ET de fond (pistes, onglets d'année) : #8f8f8f = 3,2:1 comme filet,
+     texte noir dessus 6,5:1 (le #4a4a4a de la maquette rendait les onglets d'année illisibles). */
+  :root[data-theme="contraste"]:not(:has(.projection)) {
+    --paper: #ffffff; --surface: #ffffff; --surface-2: #ffffff; --ink: #000000; --ink-soft: #1f1f1f; --ink-faint: #333333;
+    --line: #000000; --line-soft: #8f8f8f; --accent: #8c3b00; --accent-ink: #5c2600; --accent-soft: #ffe9d6; --accent-soft-line: #8c3b00;
+    --good: #0b5d2a; --good-soft: #e3f4e8; --bad: #9e0000; --bad-soft: #ffe5e5; --attn: #6b4500; --attn-soft: #fff1d6;
+    --tip: #5c4d00; --tip-soft: #fff7d1; --plan: #3d2f8f; --plan-ink: #2a1f6e; --plan-soft: #efebff;
+    --sky: #0f4f8f; --sky-ink: #0a3a6b; --sky-soft: #e6f0fb; --on-sky: #ffffff; --on-accent: #ffffff;
+    --histoire: #5a3418;
+  }
+  :root[data-theme="contraste"]:not(:has(.projection)) :is(.parcours .callout, .parcours .essentiel, .tiroirs, .carte-video, .carte-atoi, .accueil-chapitre, .card, .entete-exercice) {
+    border-width: 2px; border-color: #000;
+  }
+  :root[data-theme="contraste"]:not(:has(.projection)) .parcours .callout { border-left-width: 5px; }
+  /* Bouton désactivé des générateurs (fond `--line-soft`, texte `--ink-soft`) : illisible en noir sur gris
+     foncé ; ici blanc, trait tireté, texte gris foncé (8,9:1). */
+  :root[data-theme="contraste"]:not(:has(.projection)) .entrainement .btn-primary:disabled {
+    background: #ffffff; border: 2px dashed #4a4a4a; color: #4a4a4a;
+  }
+  :root[data-theme="contraste"]:not(:has(.projection)) :is(.parcours, .accueil, .entrainement) a:not(.btn-parcours, .btn-reprendre, .etape-lien, .accueil-chapitre, .accueil-reprendre, .accueil-preparer, [role="tab"]) {
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+
+  /* Jetons propres à un composant, posés eux aussi sous `@media (prefers-color-scheme: dark)` : le
+     thème choisi les fixe dans un sens ou dans l'autre (mêmes valeurs que leurs fichiers). */
+  :root:is([data-theme="clair"], [data-theme="creme"], [data-theme="contraste"]):not(:has(.projection)) {
+    --admin-sombre: #182430; --admin-sombre-2: #2b3a48; --admin-sur-sombre: #ffffff; --admin-sur-sombre-doux: #a3b2bd;
+    --admin-sur-sombre-accent: #e6c8a4; --admin-choisi: #fff8f0;
+    --profil-sombre: #182430; --profil-sombre-2: #2b3a48; --profil-sur-sombre: #ffffff; --profil-sur-sombre-doux: #a3b2bd;
+    --profil-sur-sombre-accent: #e6c8a4; --profil-surligne: #f4e3d1;
+    --agenda-sombre: #182430; --agenda-sur-sombre: #ffffff; --agenda-sur-sombre-doux: #a3b2bd; --agenda-sur-sombre-accent: #e6c8a4;
+    --carnet-sur-couleur: #ffffff; --carnet-a-noter: color-mix(in srgb, var(--accent-soft) 45%, var(--surface));
+  }
+  :root[data-theme="sombre"]:not(:has(.projection)) {
+    --admin-sombre: #0b1117; --admin-sombre-2: #1e2a35; --admin-sur-sombre: #e9eef2; --admin-sur-sombre-doux: #a3b2bd;
+    --admin-sur-sombre-accent: #f3b877; --admin-choisi: #241a10;
+    --profil-sombre: #0b1117; --profil-sombre-2: #1e2a35; --profil-sur-sombre: #e9eef2; --profil-sur-sombre-doux: #a3b2bd;
+    --profil-sur-sombre-accent: #f3b877; --profil-surligne: #f6d9b5;
+    --agenda-sombre: #0b1117; --agenda-sur-sombre: #e9eef2; --agenda-sur-sombre-doux: #a3b2bd; --agenda-sur-sombre-accent: #f3b877;
+    --carnet-sur-couleur: #10161d; --carnet-a-noter: color-mix(in srgb, var(--accent-soft) 70%, var(--surface));
+  }
+  :root:is([data-theme="clair"], [data-theme="creme"], [data-theme="contraste"]):not(:has(.projection)) .site-header { --logo-fond: #182430; }
+  :root[data-theme="sombre"]:not(:has(.projection)) .site-header { --logo-fond: #273645; }
+  :root:is([data-theme="clair"], [data-theme="creme"], [data-theme="contraste"]):not(:has(.projection)) .accueil {
+    --sombre: #182430; --sur-sombre: #ffffff; --sur-sombre-doux: #cfd8df; --sur-sombre-accent: #e6c8a4; --barre-sombre: #e09a62;
+    --piste-sombre: color-mix(in srgb, var(--sur-sombre) 85%, transparent);
+  }
+  :root[data-theme="sombre"]:not(:has(.projection)) .accueil {
+    --sombre: #0b1117; --sur-sombre: #e9eef2; --sur-sombre-doux: #a3b2bd; --sur-sombre-accent: #f3b877; --barre-sombre: #e0913f;
+    --piste-sombre: color-mix(in srgb, var(--sur-sombre) 28%, transparent);
+  }
+  :root:is([data-theme="clair"], [data-theme="creme"], [data-theme="contraste"]):not(:has(.projection)) .accueil-reprendre { border: 0; }
+  :root[data-theme="sombre"]:not(:has(.projection)) .accueil-reprendre { border: 1px solid var(--line); }
+  :root:is([data-theme="clair"], [data-theme="creme"], [data-theme="contraste"]):not(:has(.projection)) .eleve-recap { background: var(--ink); color: var(--paper); border: 0; }
+  :root[data-theme="sombre"]:not(:has(.projection)) .eleve-recap { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
+  :root:is([data-theme="clair"], [data-theme="creme"], [data-theme="contraste"]):not(:has(.projection)) .entrainement {
+    --solide3d-plan: #6d28d9; --solide3d-plan-opacite: 0.22; --solide3d-droite: #e8590c; --solide3d-droite-2: #1c7ed6;
+  }
+  :root[data-theme="sombre"]:not(:has(.projection)) .entrainement {
+    --solide3d-plan: #a78bfa; --solide3d-plan-opacite: 0.26; --solide3d-droite: #ff8f4d; --solide3d-droite-2: #74c0fc;
+  }
+}
+
+/* ---------- 2. Réglages → variables ---------- */
+:root {
+  --l-police: "Andika", "Work Sans", "Segoe UI", system-ui, sans-serif;
+  --l-echelle: 1;        /* taille du texte : 1 · 1,12 · 1,25 · 1,45 · 1,7 */
+  --l-echelle-ui: 1;     /* interface (barres, boutons) : grandit moins que le texte, reste sur une ligne */
+  --l-interligne: 1.6;   /* 1,6 (site) · 1,8 · 2 */
+  --l-lettres: 0em;      /* + 0 · 0,035 · 0,08 em */
+  --l-mots: 0em;         /* + 0 · 0,12 · 0,24 em */
+  --l-paragraphe: 1.1em;
+  --l-largeur: 32em;     /* ≈ 68 signes en Andika (plafond d'office ; mesuré : 2,1 signes par em) · 28em ≈ 60 · 23,5em ≈ 50 */
+}
+:root[data-police="atkinson"] { --l-police: "Atkinson Hyperlegible", Verdana, Tahoma, sans-serif; }
+:root[data-police="opendyslexic"] { --l-police: "OpenDyslexic", "Comic Sans MS", sans-serif; }
+:root[data-taille="2"] { --l-echelle: 1.12; --l-echelle-ui: 1.05; }
+:root[data-taille="3"] { --l-echelle: 1.25; --l-echelle-ui: 1.1; }
+:root[data-taille="4"] { --l-echelle: 1.45; --l-echelle-ui: 1.2; }
+:root[data-taille="5"] { --l-echelle: 1.7; --l-echelle-ui: 1.2; }
+:root[data-interligne="2"] { --l-interligne: 1.8; }
+:root[data-interligne="3"] { --l-interligne: 2; }
+:root[data-espacement="2"] { --l-lettres: 0.035em; --l-mots: 0.12em; --l-paragraphe: 1.4em; }
+:root[data-espacement="3"] { --l-lettres: 0.08em; --l-mots: 0.24em; --l-paragraphe: 1.8em; }
+:root[data-largeur="moyenne"] { --l-largeur: 28em; }
+:root[data-largeur="etroite"] { --l-largeur: 23.5em; }
+
+/* ---------- 3. Application (écran seulement) ---------- */
+@media screen {
+  /* Police : le site n'a qu'UN jeton de police de lecture (`--lecture`) ; on le redirige là où il est
+     défini (cours, accueil, générateurs). Titres (Fraunces) et interface (Work Sans) ne changent pas. */
+  :root[data-police]:not(:has(.projection)) :is(.chapter-layout.parcours, .accueil, .entrainement) { --lecture: var(--l-police); }
+
+  /* Cours : taille, titres plafonnés (× 1,35), formules en `em` qui suivent d'elles-mêmes. */
+  :root[data-taille] .parcours .page.chapter-main { font-size: calc(17px * var(--l-echelle)); }
+  :root[data-taille] .parcours h2.section-title { font-size: calc(1.75rem * min(var(--l-echelle), 1.35)); }
+  :root[data-taille] .parcours h3.sub-title { font-size: calc(1.22rem * min(var(--l-echelle), 1.35)); }
+  :root[data-taille] .parcours h1.chapter-title { font-size: calc(clamp(1.9rem, 7vw, 2.5rem) * min(var(--l-echelle), 1.35)); }
+  :root[data-taille] .parcours .page.chapter-main :is(.callout-label, .etiquette) { font-size: calc(14px * min(var(--l-echelle), 1.3)); }
+  :root[data-taille] .parcours .section-kicker { font-size: calc(15px * var(--l-echelle)); }
+  :root[data-taille] .parcours .etape-meta { font-size: calc(14px * min(var(--l-echelle), 1.25)); }
+  :root[data-taille] .parcours figcaption { font-size: calc(15px * var(--l-echelle)); }
+  :root[data-taille] .parcours :is(.chapter-lede) { font-size: calc(1.02rem * var(--l-echelle)); }
+  :root[data-taille] .parcours :is(.teste-toi-reponse) { font-size: calc(17px * var(--l-echelle)); }
+  :root[data-taille] .parcours :is(.fiche-texte, .carte-legende, .carte-desc) { font-size: calc(15.5px * min(var(--l-echelle), 1.3)); }
+  :root[data-taille] .parcours :is(.tiroir-bouton) { font-size: calc(16px * var(--l-echelle-ui)); }
+  :root[data-taille] .parcours :is(.btn-parcours) { font-size: calc(15px * var(--l-echelle-ui)); }
+  :root[data-taille] .etape-entete-texte p { font-size: calc(11.5px * var(--l-echelle-ui)); }
+
+  /* Interligne. */
+  :root[data-interligne] .parcours .page.chapter-main { line-height: var(--l-interligne); }
+  :root[data-interligne] .parcours .page.chapter-main :is(p, li, figcaption),
+  :root[data-interligne] .parcours :is(.carte-legende, .carte-desc) { line-height: var(--l-interligne); }
+
+  /* Espacement des lettres et des mots (+ paragraphes) — JAMAIS dans les formules : KaTeX place
+     chaque signe lui-même (testé : un espacement hérité décale indices, fractions et racines). */
+  :root[data-espacement] .parcours :is(.section-body, .chapter-lede, .teste-toi-reponse, .fiche-texte, .carte-legende, .carte-desc),
+  :root[data-espacement] .entrainement :is(.entete-exercice, .consigne, .card p) {
+    letter-spacing: var(--l-lettres); word-spacing: var(--l-mots);
+  }
+  :root[data-espacement] .parcours .section-body :is(p, .essentiel p) { margin-bottom: var(--l-paragraphe); }
+  :root[data-espacement] .parcours .section-body .essentiel p:last-child { margin-bottom: 0; }
+  :root[data-espacement] .katex, :root[data-espacement] .katex * { letter-spacing: normal; word-spacing: normal; }
+
+  /* Longueur des lignes : le plafond d'office d'`index.css` (`.section-body > …`) lit `--l-largeur`. */
+
+  /* Interface du cours : grandit moins que le texte (barre du bas sur une ligne). */
+  :root[data-taille] .etape-nav .btn-parcours { font-size: calc(15px * var(--l-echelle-ui)); }
+
+  /* Accueil : tout grandit un peu (interface + titres de chapitres), jamais au point de déborder. */
+  :root[data-taille]:not([data-taille="2"]) .accueil { zoom: var(--l-echelle-ui); }
+
+  /* Animations réduites (miroir de `prefers-reduced-motion`, déjà respecté par le site). */
+  :root[data-animations="reduites"]:not(:has(.projection)) *,
+  :root[data-animations="reduites"]:not(:has(.projection)) *::before,
+  :root[data-animations="reduites"]:not(:has(.projection)) *::after {
+    animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important; transition-delay: 0s !important; scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- 4. Formule trop large : dégradé « ça continue » (marquée par `lib/formulesDebordantes.ts`) ---------- */
+@media screen {
+  .math-inline[data-deborde] {
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 2.2em), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 2.2em), transparent);
+  }
+  .math-inline[data-deborde][data-defile] {
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 2.2em, #000 calc(100% - 2.2em), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 2.2em, #000 calc(100% - 2.2em), transparent);
+  }
+  .math-inline[data-deborde][data-defile][data-fin] {
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 2.2em);
+    mask-image: linear-gradient(90deg, transparent, #000 2.2em);
+  }
+}
+/* Ponctuation collée à la formule qui la précède (`RichText`) : jamais « , » seule en début de ligne. */
+.colle { white-space: nowrap; }
+.colle > .math-inline { max-width: calc(100% - 0.8em); }
+
+/* ---------- 5. Bouton « Aa » (en-tête du site, barre de l'étape, outils du chapitre) ---------- */
+.btn-lecture {
+  position: relative; flex: none; height: 44px; min-width: 44px; box-sizing: border-box;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 10px;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
+  font: 600 14px/1 var(--sans); cursor: pointer;
+}
+.btn-lecture .aa { font: 600 18px/1 var(--serif); letter-spacing: -0.02em; }
+.btn-lecture .aa small { font-size: 0.72em; }
+.btn-lecture-mot { display: none; }
+.btn-lecture:hover { border-color: var(--accent-soft-line); color: var(--accent-ink); background: var(--surface-2); }
+.btn-lecture:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn-lecture[aria-expanded="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+/* Pastille orange : un réglage personnel est actif (posée avant l'affichage, `data-lecture-perso`). */
+.pastille-reglee { display: none; position: absolute; top: 6px; right: 5px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+:root[data-lecture-perso] .pastille-reglee { display: block; }
+.lecture-outil .pastille-reglee { top: 2px; right: 8px; }
+.lecture-outil { position: relative; }
+.lecture-outil .aa-outil { font: 600 18px/19px var(--serif); height: 19px; letter-spacing: -0.02em; }
+.lecture-outil .aa-outil small { font-size: 0.72em; }
+.etape-entete .btn-lecture { flex: none; }
+/* Outils du chapitre (« Lecture » · « Feuilles » · « Imprimer », 12,5 px) : passent sous « Ce chapitre »
+   quand ils ne tiennent pas à côté dans la colonne de 232 px. */
+.lecture-entete { flex-wrap: wrap; row-gap: 4px; }
+@media (min-width: 900px) {
+  .site-header .btn-lecture .btn-lecture-mot { display: inline; }
+}
+@media print { .btn-lecture { display: none !important; } }
+/* Téléphone, étape d'un chapitre : le « Aa » est dans la barre collante de l'étape (sous le pouce),
+   pas dans l'en-tête du site. Ailleurs, « Professeur » passe en icône seule pour que marque · loupe ·
+   Aa · Professeur tiennent sur UNE ligne. */
+@media (max-width: 759.98px) {
+  body:has(.etape-entete) .site-header .btn-lecture { display: none; }
+}
+@media (max-width: 480px) {
+  body:not(:has(.etape-entete)) .site-header .menu-compte-lien { width: 44px; padding: 0; justify-content: center; font-size: 0; gap: 0; }
+  body:not(:has(.etape-entete)) .site-header .menu-compte-lien svg { width: 20px; height: 20px; }
+}
+/* Très petit écran (320 px) : marque · loupe · Aa · Professeur sur une ligne aussi (avant : deux lignes
+   sous 360 px, même sans « Aa »). « Professeur » en icône seule partout, marges resserrées. */
+@media (max-width: 359.98px) {
+  .site-header-inner { padding-left: 8px; padding-right: 8px; column-gap: 2px; }
+  body:not(:has(.etape-entete)) .site-header .brand-nom { font-size: 14px; }
+  .site-header .menu-compte-lien { width: 44px; padding: 0; justify-content: center; font-size: 0; gap: 0; }
+  .site-header .menu-compte-lien svg { width: 20px; height: 20px; }
+}

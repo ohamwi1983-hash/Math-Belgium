@@ -16,7 +16,11 @@ import '@fontsource/andika/latin-700-italic.css'
 import '@fontsource/atkinson-hyperlegible/latin-400.css'
 import '@fontsource/atkinson-hyperlegible/latin-700.css'
 import './index.css'
+// Confort de lecture (panneau « Aa », thèmes, réglages) — après `index.css` : `.claude/rules/cote-eleve.md`.
+import './lecture.css'
 import App from './App.tsx'
+import { appliquerReglages, reglagesCourants } from './lib/reglagesLecture'
+import { surveillerFormulesDebordantes } from './lib/formulesDebordantes'
 
 // Sans cet appel explicite, `vite-plugin-pwa` injecte un script d'enregistrement minimal
 // (juste `serviceWorker.register(...)`, sans aucune détection/rechargement automatique sur mise à
@@ -34,6 +38,11 @@ try {
 } catch {
   // stockage indisponible (navigation privée stricte…) : sans conséquence
 }
+
+// Réglages de lecture de l'élève : déjà posés avant l'affichage par le script en ligne d'`index.html` ;
+// réappliqués ici (couleur de la barre du navigateur, police OpenDyslexic chargée si elle est choisie).
+appliquerReglages(reglagesCourants())
+surveillerFormulesDebordantes()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

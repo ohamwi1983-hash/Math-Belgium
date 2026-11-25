@@ -3,6 +3,7 @@ import type { ChapterContent } from '../../content/types'
 import { RichText } from '../Math'
 import { titreCourt, useEtatCartes } from '../../lib/parcoursChapitre'
 import type { EtatCarte } from '../../lib/parcoursChapitre'
+import { animationsReduites } from '../../lib/reglagesLecture'
 import type { Aller } from './CarteChapitre'
 import { LienVue } from './CarteChapitre'
 
@@ -30,7 +31,7 @@ export function ReviserVue({ chapter, aller }: { chapter: ChapterContent; aller:
   )
   const fiche = chapter.sections.filter((s) => s.essentiel && s.essentiel.length > 0)
   const defiler = (selecteur: string) => {
-    const doux = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const doux = !animationsReduites()
     document.querySelector(selecteur)?.scrollIntoView({ behavior: doux ? 'smooth' : 'auto', block: 'start' })
   }
   const liens = [
