@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
 import { findChapter, trouverSectionGenerateur } from '../content/chaptersIndex'
 import { ENTRAINEMENT_REGISTRY, LEVEL_LABELS } from '../entrainement/registry'
@@ -6,6 +6,8 @@ import { LienVideoGenerateur } from '../entrainement/components/LienVideoGenerat
 import { BarreGenerateur } from '../entrainement/components/BarreGenerateur'
 import { CadreActions } from '../entrainement/components/CadreActions'
 import { CadreGenerateurContext, creerStoreCadre } from '../entrainement/components/cadreGenerateur'
+import { noterEssai, ecransDepuisPuces, observerProgression } from '../lib/suiviEssais'
+import { SuiviEssaiContext, SuiviVerdictContext, type NoterEssai } from '../lib/suiviContexte'
 import '../entrainement/theme.css'
 import '../entrainement/cadre.css'
 
@@ -35,6 +37,33 @@ export function EntrainementPage() {
 
   const Component = useMemo(() => (entry ? lazy(entry.importComponent) : null), [entry])
 
+  // « Mon suivi » (`lib/suiviEssais.ts`) : chaque exercice terminé (tous les écrans clos dans les puces
+  // publiées) est noté dans CE navigateur seulement. Les générateurs sans puces notent eux-mêmes via
+  // `SuiviEssaiContext`. Aucun effet visible sur le générateur.
+  const observateur = useMemo(() => (generatorId && entry ? observerProgression((ecrans) => noterEssai(generatorId, ecrans)) : null), [generatorId, entry])
+  useEffect(() => {
+    if (!observateur) return
+    observateur.segments(store.lire().segments)
+    return store.abonner(() => observateur.segments(store.lire().segments))
+  }, [store, observateur])
+  // « Aide » touchée pendant l'écran en cours (bouton du générateur ou tiroir du cadre, qui clique le même).
+  useEffect(() => {
+    const racine = racineRef.current
+    if (!racine || !observateur) return
+    const surClic = (e: MouseEvent) => {
+      if (e.target instanceof Element && e.target.closest('.btn-aide, [data-bouton-aide]')) observateur.aide()
+    }
+    racine.addEventListener('click', surClic, true)
+    return () => racine.removeEventListener('click', surClic, true)
+  }, [observateur])
+  const signalerVerdict = useCallback((revele: boolean) => observateur?.verdict(revele), [observateur])
+  const noterSansPuces = useCallback<NoterEssai>(
+    (ecrans, variante) => {
+      if (generatorId && entry) noterEssai(generatorId, ecransDepuisPuces(ecrans), variante)
+    },
+    [generatorId, entry],
+  )
+
   const section = useMemo(() => {
     if (!entry || !generatorId) return undefined
     const chapter = findChapter(entry.chantier, entry.chapitreSlug)
@@ -48,6 +77,8 @@ export function EntrainementPage() {
 
   return (
     <CadreGenerateurContext.Provider value={store}>
+      <SuiviEssaiContext.Provider value={noterSansPuces}>
+      <SuiviVerdictContext.Provider value={signalerVerdict}>
       <div className="entrainement" ref={racineRef}>
         <BarreGenerateur
           lienChapitre={lienChapitre}
@@ -58,6 +89,8 @@ export function EntrainementPage() {
         <Suspense fallback={null}>{Component && <Component />}</Suspense>
         <CadreActions racineRef={racineRef} />
       </div>
+      </SuiviVerdictContext.Provider>
+      </SuiviEssaiContext.Provider>
     </CadreGenerateurContext.Provider>
   )
 }

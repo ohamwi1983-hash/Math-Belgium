@@ -140,6 +140,25 @@ function CartePreparer({ reprise, niveau }: { reprise: Reprise | null; niveau: s
   )
 }
 
+/** « Mon suivi » (`/suivi`, planche 13) : étapes comprises, essais des générateurs, cartes et plan de
+ * révision de l'année — tout lu dans ce navigateur, rien d'envoyé. */
+function CarteSuivi({ niveau }: { niveau: string }) {
+  return (
+    <Link className="accueil-preparer accueil-suivi" to={`/suivi?niveau=${encodeURIComponent(niveau)}`}>
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+      </svg>
+      <span className="preparer-corps">
+        <span className="preparer-titre">Mon suivi</span>
+        <span className="preparer-desc">Ce que tu as compris, tes exercices, ton plan de révision. Gardé sur cet appareil.</span>
+      </span>
+      <span className="accueil-chevron" aria-hidden="true">
+        ›
+      </span>
+    </Link>
+  )
+}
+
 function ListeChapitres({ level, etats }: { level: LevelEntry; etats: EtatChapitre[] }) {
   return (
     <ul className="accueil-chapitres">
@@ -307,6 +326,7 @@ export function HomePage() {
               <div className="accueil-actions">
                 {reprise && <BandeauReprendre reprise={reprise} />}
                 <CartePreparer reprise={reprise} niveau={l.slug} />
+                <CarteSuivi niveau={l.slug} />
               </div>
               <h2 className="accueil-liste-titre">
                 Les {pluriel(l.chapters.length, 'chapitre')} de {l.label}

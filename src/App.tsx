@@ -25,6 +25,10 @@ const CoffrePage = lazy(() => import('./routes/CoffrePage').then((m) => ({ defau
 const CarnetPage = lazy(() => import('./routes/CarnetPage').then((m) => ({ default: m.CarnetPage })))
 /** Lien de partage d'un enregistrement du coffre (0009) : professeur connecté seulement. */
 const PartagePage = lazy(() => import('./routes/PartagePage').then((m) => ({ default: m.PartagePage })))
+/** « Mon suivi » et le plan de révision (élève, sans compte, planche 13) : tout reste dans le navigateur,
+ * chargés à la demande, jamais pré-rendus ni indexés — voir `.claude/rules/cote-eleve.md`. */
+const SuiviPage = lazy(() => import('./routes/SuiviPage').then((m) => ({ default: m.SuiviPage })))
+const PlanRevisionPage = lazy(() => import('./routes/PlanRevisionPage').then((m) => ({ default: m.PlanRevisionPage })))
 /** Mode « Projeter en classe » (professeur connecté) : diapos plein écran, chargé à la demande, jamais
  * pré-rendu ni indexé — voir `.claude/rules/chapter-components.md`, « Mode projection ». */
 const ProjectionPage = lazy(() => import('./components/projection/ProjectionPage').then((m) => ({ default: m.ProjectionPage })))
@@ -47,6 +51,8 @@ function App() {
           <Route path="/partage/:jeton" element={<PartagePage />} />
           {/* `/carnet/*` : sous-pages du carnet (Aujourd’hui, semaine, classe, agenda…), jamais pré-rendues. */}
           <Route path="/carnet/*" element={<CarnetPage />} />
+          <Route path="/suivi" element={<SuiviPage />} />
+          <Route path="/suivi/plan" element={<PlanRevisionPage />} />
           {/* Un seul générateur rapatrié depuis plateforme-maths = une entrée dans
            * `ENTRAINEMENT_REGISTRY` (voir `src/entrainement/registry.ts`), jamais une nouvelle route
            * ici — `EntrainementPage` charge le bon composant à la demande (`React.lazy`), lu depuis

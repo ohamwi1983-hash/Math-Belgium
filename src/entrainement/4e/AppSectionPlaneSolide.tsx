@@ -38,6 +38,7 @@ import {
   texteReponseSegmentDirect,
 } from "./ui/formatSectionPlaneSolide";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { SuiviVerdictContext, useNoterEssai } from "../../lib/suiviContexte";
 
 /** Corrigé détaillé de l'écran qui vient de se clore — mêmes constructeurs que le papier
  * (`generateurs/sectionPlaneSolide/corrigeDetaille.ts`), avec l'état CONFIRMÉ de la session (points
@@ -156,6 +157,7 @@ function puceDepuisHistorique(entree: EntreeHistoriqueSection): EtatPuceProgress
 }
 
 export function AppSectionPlaneSolide() {
+  const noterEssai = useNoterEssai();
   const [etat, setEtat] = useState<EtatSessionSectionPlaneSolide>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Numéro d'exercice — change à CHAQUE nouvel exercice (y compris via le panneau dev), pour que la
@@ -200,6 +202,8 @@ export function AppSectionPlaneSolide() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
+      // « Mon suivi » (`lib/suiviEssais.ts`) : exercice terminé, un résultat par écran (sans puces partagées ici).
+      noterEssai(historique.map(puceDepuisHistorique));
       demarrerNouvelExercice(nouvelleSession());
       return;
     }
@@ -211,8 +215,10 @@ export function AppSectionPlaneSolide() {
    * Valider, qui lance directement un nouvel exercice. */
   function continuerConclusion() {
     const nouvelEtat = soumettreConclusion(etat);
-    if (nouvelEtat.terminee) demarrerNouvelExercice(nouvelleSession());
-    else setEtat(nouvelEtat);
+    if (nouvelEtat.terminee) {
+      noterEssai(historique.map(puceDepuisHistorique));
+      demarrerNouvelExercice(nouvelleSession());
+    } else setEtat(nouvelEtat);
   }
 
   function forcerVariante(varianteId: string) {
@@ -240,6 +246,9 @@ export function AppSectionPlaneSolide() {
   const exercice = etat.exerciceCourant;
 
   return (
+    // Exercice noté en entier ci-dessus (pas de puces partagées) : les verdicts écran par écran de
+    // `ValidationEcran` ne doivent pas compter chacun pour un exercice.
+    <SuiviVerdictContext.Provider value={null}>
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
@@ -319,5 +328,6 @@ export function AppSectionPlaneSolide() {
         <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
       )}
     </div>
+    </SuiviVerdictContext.Provider>
   );
 }

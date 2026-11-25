@@ -8,6 +8,7 @@ import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { EtapeQuestionQuizIntegralesPrimitives } from "./components6e/EtapeQuestionQuizIntegralesPrimitives";
 import { ResultatPanelQuizIntegralesPrimitives } from "./components6e/ResultatPanelQuizIntegralesPrimitives";
 import { ResumeSessionQuizIntegralesPrimitives } from "./components6e/ResumeSessionQuizIntegralesPrimitives";
+import { useNoterEssai } from "../../lib/suiviContexte";
 
 /** `nombreExercices: 35` correspond exactement à la taille de la banque par thème (voir
  * `generateurs6e/quizIntegralesPrimitives/banque.ts`) : couplé à `creerGenerateurSansRepetition`,
@@ -26,6 +27,7 @@ function nouvelleSession(theme: VarianteQuizIntegralesPrimitives): EtatSessionQu
  * panneau dev (`SelecteurVarianteDev`) reste réservé au développement, jamais visible sur l'écran
  * normal donné aux élèves. */
 export function App6gen67() {
+  const noterEssai = useNoterEssai();
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizIntegralesPrimitives | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizIntegralesPrimitives | null>(null);
   const [dernierResultat, setDernierResultat] = useState<ResultatExerciceQuizIntegralesPrimitives | null>(null);
@@ -39,7 +41,10 @@ export function App6gen67() {
   function onValider(reponse: boolean) {
     if (!etat) return;
     const nouvelEtat = soumettreReponseQuizIntegralesPrimitives(etat, reponse);
-    setDernierResultat(nouvelEtat.resultats[nouvelEtat.resultats.length - 1]);
+    const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+    // « Mon suivi » (`lib/suiviEssais.ts`) : chaque affirmation répondue = un essai d'un écran, gardé sur l'appareil.
+    if (resultat && nouvelEtat.resultats.length > etat.resultats.length) noterEssai([resultat.revele ? "revele" : "correcte"], resultat.variante);
+    setDernierResultat(resultat);
     setEtat(nouvelEtat);
   }
 

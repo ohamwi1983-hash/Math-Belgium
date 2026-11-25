@@ -20,6 +20,7 @@ import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { EtapeQuestionQuizFonctionsLogarithmes } from "./components6e/EtapeQuestionQuizFonctionsLogarithmes";
 import { ResultatPanelQuizFonctionsLogarithmes } from "./components6e/ResultatPanelQuizFonctionsLogarithmes";
 import { ResumeSessionQuizFonctionsLogarithmes } from "./components6e/ResumeSessionQuizFonctionsLogarithmes";
+import { useNoterEssai } from "../../lib/suiviContexte";
 
 /** Une session = toutes les questions du thème choisi (`nombreQuestions`, jamais une constante en
  * dur), couplé à `creerGenerateurSansRepetition` : aucune question n'est répétée. */
@@ -37,6 +38,7 @@ function nouvelleSession(theme: VarianteQuizFonctionsLogarithmes): EtatSessionQu
  * l'ÉLÈVE qui le choisit sur un écran d'accueil dédié — même principe que 6gen65 (porté depuis
  * plateforme-maths, chapitre 3 « Fonctions logarithmes »). */
 export function App6gen66() {
+  const noterEssai = useNoterEssai();
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizFonctionsLogarithmes | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizFonctionsLogarithmes | null>(null);
   const [dernierResultat, setDernierResultat] = useState<ResultatExerciceQuizFonctionsLogarithmes | null>(null);
@@ -50,7 +52,10 @@ export function App6gen66() {
   function onValider(reponse: boolean) {
     if (!etat) return;
     const nouvelEtat = soumettreReponseQuizFonctionsLogarithmes(etat, reponse);
-    setDernierResultat(nouvelEtat.resultats[nouvelEtat.resultats.length - 1]);
+    const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+    // « Mon suivi » (`lib/suiviEssais.ts`) : chaque affirmation répondue = un essai d'un écran, gardé sur l'appareil.
+    if (resultat && nouvelEtat.resultats.length > etat.resultats.length) noterEssai([resultat.revele ? "revele" : "correcte"], resultat.variante);
+    setDernierResultat(resultat);
     setEtat(nouvelEtat);
   }
 

@@ -8,6 +8,7 @@ import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeQuestionQuizFonctionsReference } from "./components/EtapeQuestionQuizFonctionsReference";
 import { ResultatPanelQuizFonctionsReference } from "./components/ResultatPanelQuizFonctionsReference";
 import { ResumeSessionQuizFonctionsReference } from "./components/ResumeSessionQuizFonctionsReference";
+import { useNoterEssai } from "../../lib/suiviContexte";
 
 /** `nombreExercices` est calculé depuis la taille RÉELLE de la banque du thème choisi
  * (`nombreQuestions`, `generateurs/quizFonctionsReference/index.ts`) — jamais une constante fixe
@@ -32,6 +33,7 @@ function nouvelleSession(theme: VarianteQuizFonctionsReference): EtatSessionQuiz
  * second degré" (gen61). Le panneau dev (`SelecteurVarianteDev`) reste réservé au développement,
  * jamais visible sur l'écran normal donné aux élèves. */
 export function AppQuizFonctionsReference() {
+  const noterEssai = useNoterEssai();
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizFonctionsReference | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizFonctionsReference | null>(null);
   const [dernierResultat, setDernierResultat] = useState<ResultatExerciceQuizFonctionsReference | null>(null);
@@ -45,7 +47,10 @@ export function AppQuizFonctionsReference() {
   function onValider(reponse: boolean) {
     if (!etat) return;
     const nouvelEtat = soumettreReponseQuizFonctionsReference(etat, reponse);
-    setDernierResultat(nouvelEtat.resultats[nouvelEtat.resultats.length - 1]);
+    const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+    // « Mon suivi » (`lib/suiviEssais.ts`) : chaque affirmation répondue = un essai d'un écran, gardé sur l'appareil.
+    if (resultat && nouvelEtat.resultats.length > etat.resultats.length) noterEssai([resultat.revele ? "revele" : "correcte"], resultat.variante);
+    setDernierResultat(resultat);
     setEtat(nouvelEtat);
   }
 

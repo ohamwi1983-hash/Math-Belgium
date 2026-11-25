@@ -8,6 +8,7 @@ import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeQuestionQuizEquationsSecondDegre } from "./components/EtapeQuestionQuizEquationsSecondDegre";
 import { ResultatPanelQuizEquationsSecondDegre } from "./components/ResultatPanelQuizEquationsSecondDegre";
 import { ResumeSessionQuizEquationsSecondDegre } from "./components/ResumeSessionQuizEquationsSecondDegre";
+import { useNoterEssai } from "../../lib/suiviContexte";
 
 /** `nombreExercices` est calculé depuis la taille RÉELLE de la banque du thème choisi
  * (`nombreQuestions`, `generateurs/quizEquationsSecondDegre/index.ts`) — jamais une constante fixe
@@ -37,6 +38,7 @@ function nouvelleSession(theme: VarianteQuizEquationsSecondDegre): EtatSessionQu
  * (`SelecteurVarianteDev`) reste réservé au développement, jamais visible sur l'écran normal donné
  * aux élèves. */
 export function AppQuizEquationsSecondDegre() {
+  const noterEssai = useNoterEssai();
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizEquationsSecondDegre | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizEquationsSecondDegre | null>(null);
   const [dernierResultat, setDernierResultat] = useState<ResultatExerciceQuizEquationsSecondDegre | null>(null);
@@ -50,7 +52,10 @@ export function AppQuizEquationsSecondDegre() {
   function onValider(reponse: boolean) {
     if (!etat) return;
     const nouvelEtat = soumettreReponseQuizEquationsSecondDegre(etat, reponse);
-    setDernierResultat(nouvelEtat.resultats[nouvelEtat.resultats.length - 1]);
+    const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+    // « Mon suivi » (`lib/suiviEssais.ts`) : chaque affirmation répondue = un essai d'un écran, gardé sur l'appareil.
+    if (resultat && nouvelEtat.resultats.length > etat.resultats.length) noterEssai([resultat.revele ? "revele" : "correcte"], resultat.variante);
+    setDernierResultat(resultat);
     setEtat(nouvelEtat);
   }
 

@@ -8,6 +8,7 @@ import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeQuestionQuizStatistiqueDescriptive } from "./components/EtapeQuestionQuizStatistiqueDescriptive";
 import { ResultatPanelQuizStatistiqueDescriptive } from "./components/ResultatPanelQuizStatistiqueDescriptive";
 import { ResumeSessionQuizStatistiqueDescriptive } from "./components/ResumeSessionQuizStatistiqueDescriptive";
+import { useNoterEssai } from "../../lib/suiviContexte";
 
 /** `nombreExercices` = taille réelle de la banque du thème choisi (`nombreQuestions`,
  * `generateurs/quizStatistiqueDescriptive/index.ts`) — jamais une constante fixe : couplé à
@@ -33,6 +34,7 @@ function nouvelleSession(theme: VarianteQuizStatistiqueDescriptive): EtatSession
  * Le panneau dev (`SelecteurVarianteDev`) reste réservé au développement, jamais visible sur
  * l'écran normal donné aux élèves. */
 export function AppQuizStatistiqueDescriptive() {
+  const noterEssai = useNoterEssai();
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizStatistiqueDescriptive | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizStatistiqueDescriptive | null>(null);
   const [dernierResultat, setDernierResultat] = useState<ResultatExerciceQuizStatistiqueDescriptive | null>(null);
@@ -46,7 +48,10 @@ export function AppQuizStatistiqueDescriptive() {
   function onValider(reponse: boolean) {
     if (!etat) return;
     const nouvelEtat = soumettreReponseQuizStatistiqueDescriptive(etat, reponse);
-    setDernierResultat(nouvelEtat.resultats[nouvelEtat.resultats.length - 1]);
+    const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+    // « Mon suivi » (`lib/suiviEssais.ts`) : chaque affirmation répondue = un essai d'un écran, gardé sur l'appareil.
+    if (resultat && nouvelEtat.resultats.length > etat.resultats.length) noterEssai([resultat.revele ? "revele" : "correcte"], resultat.variante);
+    setDernierResultat(resultat);
     setEtat(nouvelEtat);
   }
 

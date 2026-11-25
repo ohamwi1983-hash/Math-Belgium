@@ -8,6 +8,7 @@ import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import { EtapeQuestionQuizFonctions5e } from "./components5e/EtapeQuestionQuizFonctions5e";
 import { ResultatPanelQuizFonctions5e } from "./components5e/ResultatPanelQuizFonctions5e";
 import { ResumeSessionQuizFonctions5e } from "./components5e/ResumeSessionQuizFonctions5e";
+import { useNoterEssai } from "../../lib/suiviContexte";
 
 /** `nombreExercices` = taille RÉELLE de la banque du thème (`.claude/rules/quiz-generators.md`,
  * piège du nombre fixe) : couplé à `creerGenerateurSansRepetition`, une session parcourt toutes les
@@ -29,6 +30,7 @@ function nouvelleSession(theme: VarianteQuizFonctions5e): EtatSessionQuizFonctio
  * l'accueil global de la plateforme (`onRetourAccueil`, réservé au bouton "← Accueil"). Le panneau
  * des variantes (`SelecteurVarianteDev`, 5e) reste visible, comme dans tous les générateurs. */
 export function App5gen39() {
+  const noterEssai = useNoterEssai();
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizFonctions5e | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizFonctions5e | null>(null);
   const [dernierResultat, setDernierResultat] = useState<ResultatExerciceQuizFonctions5e | null>(null);
@@ -42,7 +44,10 @@ export function App5gen39() {
   function onValider(reponse: boolean) {
     if (!etat) return;
     const nouvelEtat = soumettreReponseQuizFonctions5e(etat, reponse);
-    setDernierResultat(nouvelEtat.resultats[nouvelEtat.resultats.length - 1]);
+    const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+    // « Mon suivi » (`lib/suiviEssais.ts`) : chaque affirmation répondue = un essai d'un écran, gardé sur l'appareil.
+    if (resultat && nouvelEtat.resultats.length > etat.resultats.length) noterEssai([resultat.revele ? "revele" : "correcte"], resultat.variante);
+    setDernierResultat(resultat);
     setEtat(nouvelEtat);
   }
 
