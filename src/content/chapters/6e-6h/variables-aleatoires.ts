@@ -358,6 +358,16 @@ export const variablesAleatoires: ChapterContent = {
           label: 'Retrancher une constante ne demande jamais de refaire toute la somme',
           text: "Puisque $E(\\text{gain brut}-m)=E(\\text{gain brut})-m$ (linéarité), calcule $E(\\text{gain brut})$ **une seule fois**, puis résous l'équation du premier degré $E(\\text{gain brut})-m=0$ — inutile de refaire la somme de 3 termes à chaque valeur de $m$ essayée !",
         },
+        {
+          kind: 'atelier',
+          tag: 'simulateur-jeu-esperance-widget',
+          label: 'Manipule toi-même : simulateur de jeu',
+          caption:
+            'Joue 10, 100 ou 1 000 parties d’un coup (jusqu’à 10 000 par série, 3 séries superposées) : ' +
+            'le gain moyen s’agite au début, puis se rapproche de E(X). Le tableau compare les ' +
+            'fréquences observées aux probabilités. Règle la mise m, retirée de chaque gain : le jeu ' +
+            'devient équitable quand m = E(X) — 1,5 € pour le jeu du cours, 0,20 € pour le jeu avec mise.',
+        },
         { kind: 'subheading', text: 'Cas particulier — tirage sans remise (loi hypergéométrique)' },
         {
           kind: 'intuition',
@@ -1547,6 +1557,16 @@ export const variablesAleatoires: ChapterContent = {
         },
         {
           kind: 'atelier',
+          tag: 'regle-empirique-widget',
+          label: 'Manipule toi-même : la règle empirique',
+          caption:
+            'Règle μ, σ et k : la bande va de μ − kσ à μ + kσ. Teinte la bande, ce qui est hors de la ' +
+            'bande ou un seul côté : les pourcentages ne dépendent que de k (68,27 %, 95,45 %, 99,73 % ' +
+            'pour k = 1, 2, 3), un côté vaut 1 − Φ(k). « Comparer avec Tchebychev » montre le minimum ' +
+            'garanti pour n’importe quelle loi, 1 − 1/k².',
+        },
+        {
+          kind: 'atelier',
           tag: 'tchebychev-garantie-widget',
           label: 'Manipule toi-même : règle empirique et garantie de Tchebychev',
           caption:
@@ -1986,6 +2006,16 @@ export const variablesAleatoires: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'bayes-trois-categories-widget',
+          label: 'Manipule toi-même : Bayes à 3 catégories',
+          caption:
+            '1 000 carrés partagés en C₁, C₂, C₃ : dans chaque catégorie, les carrés où S survient ' +
+            's’allument. Les carrés allumés, regroupés sous la grille, représentent P(S) ; la ' +
+            'probabilité d’être dans Cⱼ sachant S est la part de la couleur j parmi eux. Réglage de ' +
+            'départ : l’exemple de l’assurance (220 carrés allumés, dont 100 à haut risque).',
+        },
+        {
           kind: 'attention',
           label: 'Confondre a priori et a posteriori',
           text: "Répondre $P(C_3)=0{,}25$ à la question « probabilité d'appartenir à la catégorie 3 sachant le sinistre » ignore complètement l'information du critère observé — tu confonds une probabilité **a priori** ($P(C_3)$, avant observation) avec une probabilité **a posteriori** ($P(C_3\\mid S)\\approx0{,}4545$, après observation).",
@@ -2321,6 +2351,16 @@ export const variablesAleatoires: ChapterContent = {
             caption:
               'Distribution de Poisson pour $\\lambda=4$ (valeurs arrondies au centième) : les 2 barres vertes ($k=0$ et $k=1$) forment $P(X\\leq1)\\approx0{,}0916$ — le reste, $P(X\\geq2)\\approx0{,}9084$, s\'obtient par complément. Le maximum est atteint deux fois, en $k=3$ et $k=4$.',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'poisson-ou-binomiale-widget',
+          label: 'Manipule toi-même : Poisson ou binomiale ?',
+          caption:
+            'Pour chaque valeur k, la barre de 𝓑(n ; p) et celle de la loi de Poisson de paramètre ' +
+            'λ = np, côte à côte. Les 3 conditions s’allument en vert ou en rouge, et l’écart maximal ' +
+            'entre deux barres est marqué. Réglage de départ : l’exemple du cours, P(X ≤ 1) ≈ 0,0827 ' +
+            'contre 0,0916.',
         },
         {
           kind: 'exempleLibre',

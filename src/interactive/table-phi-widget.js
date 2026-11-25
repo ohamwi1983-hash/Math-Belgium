@@ -9,14 +9,19 @@
  * TABLE (z arrondi au centième, Φ à 4 décimales) ; z négatif : la table
  * ne donne que z ≥ 0, on passe par Φ(−z) = 1 − Φ(z). Une case touchée
  * règle |z|. Couleurs : borne b / z = accent, borne a = bleu (texte,
- * case et trait de même couleur). Web Component (Shadow DOM).
+ * case et trait de même couleur). Table = celle du cours, z de 0,00 à
+ * 3,49 (valeurs et lecture inverse importées de `src/lib/tablePhi.ts`,
+ * seule source de la table du site). Web Component (Shadow DOM).
  * ================================================================ */
 import { styleKatex, tex, texEgalites, CSS_BASE, svgEl, defsFleche } from './katex-shadow.js'
-import { densite, arrondi, phiTable, texFixe, texCourt, txtFixe, curseurHTML, lierCurseur, majCurseur, borner } from './variables-aleatoires-commun.js'
+import { valeurTablePhi, valeurCase, lectureInverse, Z_MAX_TABLE, LIGNES_TABLE_PHI } from '../lib/tablePhi'
+import { densite, arrondi, texFixe, texCourt, txtFixe, curseurHTML, lierCurseur, majCurseur, borner } from './variables-aleatoires-commun.js'
 
 var W = 400, H = 210, GX = 14, DX = 14, HY = 22, BY = 30
 var XMIN = -4, XMAX = 4, YMAX = 0.43
-var ZMAX = 3.99
+// Table du cours (même source que le cours, les générateurs et l'annexe papier).
+var ZMAX = Z_MAX_TABLE
+var phiTable = valeurTablePhi
 var P_PRESETS = [0.95, 0.975, 0.9, 0.8, 0.05, 0.3]
 function sx(z) { return GX + ((z - XMIN) / (XMAX - XMIN)) * (W - GX - DX) }
 function sy(y) { return H - BY - (y / YMAX) * (H - BY - HY) }
@@ -92,11 +97,11 @@ class TablePhiWidget extends HTMLElement {
     if (this._monte) return
     this._monte = true
     var self = this, sh = this._sh
-    // Table : lignes 0,0 à 3,9, colonnes 0,00 à 0,09.
+    // Table du cours : lignes 0,0 à 3,4, colonnes 0,00 à 0,09.
     var h = ''
-    for (var r = 0; r < 40; r++) {
+    for (var r = 0; r < LIGNES_TABLE_PHI.length; r++) {
       h += '<tr><th scope="row" data-r="' + r + '">' + txtFixe(r / 10, 1) + '</th>'
-      for (var c = 0; c < 10; c++) h += '<td data-r="' + r + '" data-c="' + c + '">' + txtFixe(phiTable(r / 10 + c / 100), 4) + '</td>'
+      for (var c = 0; c < 10; c++) h += '<td data-r="' + r + '" data-c="' + c + '">' + txtFixe(valeurCase(r, c), 4) + '</td>'
       h += '</tr>'
     }
     sh.getElementById('corps').innerHTML = h
@@ -152,12 +157,7 @@ class TablePhiWidget extends HTMLElement {
 
   /** Meilleure(s) case(s) pour Φ(z) = q (q ≥ 0,5) : liste des z au centième à l'écart minimal. */
   _meilleures(q) {
-    var best = Infinity, res = []
-    for (var i = 0; i <= 399; i++) {
-      var t = i / 100, e = Math.abs(phiTable(t) - q)
-      if (e < best - 1e-9) { best = e; res = [t] } else if (Math.abs(e - best) < 1e-9) res.push(t)
-    }
-    return res
+    return lectureInverse(q) || []
   }
 
   _rendre(defiler) {
@@ -228,6 +228,7 @@ class TablePhiWidget extends HTMLElement {
       }
       note = 'Convention : on prend la case dont la valeur est la plus proche de la probabilité ; à égale distance de deux cases, on prend le milieu des deux valeurs de z.'
     }
+    if (!inv && (Math.abs(z) >= ZMAX - 1e-9 || (mode === 'ab' && Math.abs(a) >= ZMAX - 1e-9))) note += ' La table du cours s’arrête à 3,49 : au-delà, Φ(z) ≈ 1 (et Φ(−z) ≈ 0).'
     sh.getElementById('calc').innerHTML = calc
     sh.getElementById('note').innerHTML = note
 

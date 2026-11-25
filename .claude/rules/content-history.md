@@ -5875,3 +5875,43 @@ recalcul indépendant (Φ par Simpson, binomiale par produit récurrent, aires p
 doigt (CDP) : bloc glissé, toucher-poser, glisser k sous loupe, case de table touchée. Épinglage dans le panneau :
 0 KO à 390 × 664 et 375 × 667 (11 ateliers ; les cases de table rognées par leur boîte défilante sont exclues de la
 mesure). Scripts et captures : `scratchpad/g1-6e8/`.
+
+## 6e (6h), Chapitre 8 — lot G de l'audit, seconde moitié (4 ateliers + table de Φ alignée, agent G2, 25/11/2026)
+
+Quatre blocs `atelier` ajoutés, seuls, par ancre solide ; module partagé `variables-aleatoires-commun.js` réemployé
+(aucune modification), mêmes conventions que G1 (𝓑(n ; p), écritures à la belge, curseurs − / +, figure dans une
+`<svg>` sans bouton dans son conteneur, légendes en Unicode, « P(A|B) » jamais tapé dans une légende).
+- **`simulateur-jeu-esperance-widget`** (§ 1, après l'astuce « Retrancher une constante… », fin de « Jeux et
+  gains ») : jeu du cours (−2 / 3 / 5 €, E = 1,5), jeu avec mise du cours (10 / 4 / −6 €, E = 0,2), dé (12 / 3 / 0 €,
+  E = 2,5) ; +10 / +100 / +1 000 parties (10 000 max, 3 séries superposées), abscisse logarithmique FIXE 1 à 10 000 ;
+  mise m (pas 0,05) retirée de chaque gain : les parties sont gardées en sommes cumulées, changer m recalcule sans
+  rejouer ; pastille favorable / équitable / défavorable ; tableau (une ligne par issue : gain, probabilité, fréquence
+  observée — transposé, sinon il débordait à 390 px) ; « Loupe autour de E » (E ± 1 €).
+- **`regle-empirique-widget`** (§ 6, après l'attention « Diviser par 2 pour un seul côté », avant le réemploi
+  `tchebychev-garantie-widget`) : μ (30 à 70), σ (6 à 20), k (0,25 à 3,5, boutons k = 1, 2, 3), fenêtre FIXE
+  x de 0 à 100 ; zone teintée : bande, hors de la bande, un seul côté ; pourcentages EXACTS au centième de pour cent
+  (68,27 / 95,45 / 99,73, un côté 15,87 / 2,28 / 0,13 = tableau du cours), un côté = 1 − Φ(k) (jamais la moitié d'un
+  arrondi affiché) ; « ne dépendent que de k » ; option Tchebychev (au moins 1 − 1/k², rien pour k ≤ 1) en barres.
+- **`bayes-trois-categories-widget`** (§ 7, juste après l'exemple résolu de l'assurance) : 1 000 carrés (40 × 25,
+  colonne par colonne), C₁ / C₂ / C₃ en bleu / violet / orange ; P(C₁), P(C₂) au pas de 0,05 (P(C₃) déduite, ≥ 0,05),
+  P(S | Cᵢ) au pas de 0,02 → 1 000 × P(Cᵢ) × P(S | Cᵢ) toujours ENTIER, les carrés allumés donnent les probabilités
+  exactes ; barre des carrés allumés regroupés = P(Cⱼ | S) ; « Ne garder que S » ; a priori / a posteriori ;
+  exemples assurance (220 allumés, P(C₃ | S) ≈ 0,4545), trois machines, même taux partout (P(Cⱼ | S) = P(Cⱼ)).
+- **`poisson-ou-binomiale-widget`** (§ 8, après la figure de Poisson λ = 4 qui suit l'exemple 𝓑(50 ; 0,08)) : n (5 à
+  200), p (0,01 à 0,50), k ; X = k / X ≤ k / X ≥ k ; barres côte à côte (binomiale bleue, Poisson orange) ; fenêtre
+  λ ± 4√λ aux multiples de 5 ; écart maximal marqué et chiffré ; 3 conditions du cours (n ≥ 30, p ≤ 0,1, np ≤ 15) en
+  pastilles ; « au moins » par complément (Poisson sans valeur maximale) ; toucher / glisser la figure choisit k.
+  Exemples : cours (0,0827 contre 0,0916), contrôle qualité 𝓑(200 ; 0,02), p trop grand, n trop petit.
+- **`table-phi-widget` aligné sur la table du cours** : z de 0,00 à 3,49 (35 lignes, curseurs bornés à ±3,49) ;
+  valeurs des cases (`valeurCase`), lecture d'une case (`valeurTablePhi`) et sens inverse (`lectureInverse`)
+  IMPORTÉS de `src/lib/tablePhi.ts` (un `.js` de `src/interactive/` peut importer un `.ts` : Vite et `tsc` avec
+  `allowJs` l'acceptent) ; note « au-delà de 3,49, Φ(z) ≈ 1 » quand une borne atteint 3,49 ; modes inchangés. Le
+  `phiTable` du module commun (autres ateliers) donne les mêmes 350 cases (vérifié) ; il reste exact au-delà de 3,49.
+Vérifié (Vite, page réelle, panneau, iPhone 13 clair / sombre et 1 280 px) : 0 erreur console, scrollWidth 390,
+0 `.katex-error`, Shadow DOM sans `^ $ \ * NaN undefined Infinity`, 0 étiquette SVG rognée ; balayages contre un
+recalcul indépendant : 400 réglages Poisson / binomiale (binomiale par produit récurrent, Poisson par log-gamma,
+écart maximal et sa position, pastilles), 300 règles empiriques (Φ par Simpson, bornes, Tchebychev), 400 Bayes
+(carrés comptés dans le DOM, P(S), P(Cⱼ | S)), 303 simulations (E, verdict, gain moyen, fréquences, convergence à
+4,5 σ/√N sur 10 000 parties), 350 cases de table + 190 lectures inverses contre `lib/tablePhi.ts` : 0 faux ; gestes au
+doigt (CDP) : toucher / glisser k, boutons − / +. Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667
+(15 ateliers du chapitre). Scripts et captures : `scratchpad/g2-6e8/`.
