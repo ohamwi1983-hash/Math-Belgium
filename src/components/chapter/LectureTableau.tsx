@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type FocusEvent, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
 import { grilleLecture, latexVersTexte, resumeTableau, type CaseLecture, type GrilleLecture, type ModeleTableau } from '../../lib/lectureTableauSignes'
+import { changerDireCases, estPrerendu, lire, useVoix, voixDisponible } from '../../lib/voixLecture'
+import { resumesTableaux } from '../../lib/phrasesPage'
 
 /**
  * Lecture « case par case » d'un tableau de signes / de variations (planche 09, démo validée
@@ -11,8 +13,10 @@ import { grilleLecture, latexVersTexte, resumeTableau, type CaseLecture, type Gr
  *   par case » sous le tableau ; alors la case ET sa colonne sont surlignées, des boutons ← ↑ ↓ →
  *   (≥ 44 px) et « Résumé du tableau » apparaissent, avec la phrase de la case ;
  * - la phrase est annoncée par une région `aria-live` toujours présente (lecteurs d'écran) ;
- * - point d'accroche pour la voix (lot suivant) : chaque phrase émet l'événement DOM
- *   `EVENEMENT_PHRASE_TABLEAU` (bouillonne depuis l'enveloppe) et appelle `onPhrase`.
+ * - point d'accroche pour la voix : chaque phrase émet l'événement DOM `EVENEMENT_PHRASE_TABLEAU`
+ *   (bouillonne depuis l'enveloppe) et appelle `onPhrase` ; avec « Dire chaque case » (bouton du panneau,
+ *   gardé sur l'appareil), elle est aussi lue à voix haute (moteur `lib/voixLecture.ts`). « Écouter
+ *   l'étape » lit le résumé du tableau (`resumesTableaux` de `lib/phrasesPage.ts`).
  *
  * Le modèle vient de `modele` (bloc `signTable` du cours) ou, à défaut, est lu dans le DOM du
  * tableau (tableaux affichés des générateurs : texte des cellules, LaTeX des formules KaTeX lu dans
@@ -105,6 +109,19 @@ export function LectureTableau({ children, modele, etiquettes, titre, generateur
   const focusInterne = useRef(false)
 
   const table = () => racine.current?.querySelector('table') ?? null
+  const { cases: direCases } = useVoix()
+  const [voixPossible, setVoixPossible] = useState(false)
+  useEffect(() => setVoixPossible(voixDisponible() && !estPrerendu()), [])
+
+  // « Écouter l'étape » (lecture de la page) : le tableau se lit par son résumé.
+  useEffect(() => {
+    const el = racine.current
+    if (!el) return
+    resumesTableaux.set(el, () => (modeleLu.current ? resumeTableau(modeleLu.current) : null))
+    return () => {
+      resumesTableaux.delete(el)
+    }
+  }, [])
 
   // Après chaque rendu : (re)lire le modèle, poser les rôles de grille, la tabulation mobile et le
   // surlignage. Idempotent ; ne touche jamais au contenu ni aux classes posées par React.
@@ -160,8 +177,9 @@ export function LectureTableau({ children, modele, etiquettes, titre, generateur
     (detail: DetailPhraseTableau) => {
       racine.current?.dispatchEvent(new CustomEvent<DetailPhraseTableau>(EVENEMENT_PHRASE_TABLEAU, { detail, bubbles: true }))
       onPhrase?.(detail)
+      if (direCases && voixPossible) lire([{ texte: detail.phrase }], { source: 'tableau', titre: 'Tableau de signes', sansBarre: true })
     },
-    [onPhrase],
+    [onPhrase, direCases, voixPossible],
   )
 
   const annoncer = useCallback(
@@ -335,6 +353,24 @@ export function LectureTableau({ children, modele, etiquettes, titre, generateur
             <button type="button" className="lt-btn" onClick={resume}>
               Résumé du tableau
             </button>
+            {voixPossible && (
+              <button
+                type="button"
+                className="lt-btn lt-voix"
+                aria-pressed={direCases}
+                onClick={() => {
+                  const oui = !direCases
+                  changerDireCases(oui)
+                  if (oui && affiche) lire([{ texte: affiche.phrase }], { source: 'tableau', titre: 'Tableau de signes', sansBarre: true })
+                }}
+              >
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 5 6 9H2v6h4l5 4V5z" />
+                  <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+                </svg>
+                Dire chaque case
+              </button>
+            )}
             <button type="button" className="lt-btn lt-fermer" onClick={() => desactiver(true)}>
               Fermer
             </button>

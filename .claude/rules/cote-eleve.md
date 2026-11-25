@@ -21,6 +21,12 @@ paths:
   - "src/entrainement/components/{JeBloque,PanneauJeBloque,TexteInsistance,CorrigeDetailleEcran,BarreGenerateur}.tsx"
   - "src/entrainement/components/insistanceEcran.ts"
   - "src/lib/exempleJeBloque.ts"
+  - "src/lib/phrasesPage.ts"
+  - "src/lib/decoupagePhrases.ts"
+  - "src/lib/lectureTableauSignes.ts"
+  - "src/entrainement/components/EcouterAides.tsx"
+  - "src/entrainement/components/CadreActions.tsx"
+  - "src/entrainement/*/components*/EnTeteExercice.tsx"
 ---
 
 # Côté élève, sans compte
@@ -196,17 +202,139 @@ lignes), `unbloc` (non | oui), `exemples` (guides | libres — **guidés d'offic
   ressortir vers le navigateur —, Échap, clic sur le voile, focus rendu à la formule) : copie du
   rendu KaTeX en 2,4 em (réduite jusqu'à 1,4 em si trop large, au-delà elle défile), « Se lit : « … » » (=
   `aria-label` de la formule) et « Écouter ».
-- *Voix* : `src/lib/voixLecture.ts` — module MINIMAL : `dire(texte)` émet `lecture:dire` (`detail.texte`),
-  écouté par défaut par `speechSynthesis` (`fr-BE`, sinon `fr-FR`, sinon `fr-*`) ; `seTaire()` (`lecture:taire`),
-  `voixDisponible()`, `texteParleDe(element)` (texte visible, formules remplacées par leur `aria-label`). Le lot
-  « lecture à voix haute » le reprend : un lecteur complet prend la main par `preventDefault()` dans un écouteur
-  en capture.
+- *Voix* : moteur complet `src/lib/voixLecture.ts` (lot VX, voir « Lecture à voix haute » plus bas) ; la loupe
+  lit la formule par `lire(...)` (titre « Formule », formule entourée), fermer la loupe arrête la voix.
 - Panneau, onglet « Aides » : Suivre la ligne (Rien / Règle / Masque + hauteur 1–3 lignes), Lire pas à pas
   (Un bloc à la fois ; Exemples résolus guidés « activé d'office »), Formules (Agrandir au toucher ; Plus d'air
   autour des signes ; Couleurs et soulignés qui se correspondent, avec un échantillon). Interrupteurs
-  `role="switch"` décrits (`aria-describedby`). La voix (lecteur, vitesse) n'y est pas encore (lot suivant).
+  `role="switch"` décrits (`aria-describedby`). Section « Lecture à voix haute » : voir plus bas (lot VX).
 - Vérifications : dossier de travail `eleve-A2/` (`cap.mjs`, `contraste.mjs`, `debord.mjs`, `identite.mjs`,
   `verif.mjs`).
+
+## Lecture à voix haute (planche 08, lot VX)
+
+Modèle validé : démo `artefact-lecture/lecture-guidee.html` (onglet 8), maquette `etape.html` / planche 08. Synthèse
+vocale du NAVIGATEUR (`speechSynthesis`), en français, rien à installer, **rien n'est envoyé** ; gardé sur
+l'appareil : la vitesse (réglage `vitesse` de `ReglagesLecture`, `'1' | '0.75' | '1.25'`, table `R` d'`index.html`
+— `data-vitesse` sur `<html>`, sans CSS) et, clé `lecture:voix`, la voix choisie (`voix` : nom exact, vide =
+automatique) et « Dire chaque case » (`cases`). « Revenir au réglage du site » oublie les deux (`oublierPreferencesVoix`).
+
+### Moteur (`lib/voixLecture.ts`)
+
+- `lire(phrases, { source, titre, zone, depuis, sansBarre })` : FILE de `PhraseVoix` (`texte` déjà en français,
+  `range` = place dans la page, `bloc`, `zones` = formules dans le texte dit), **une `SpeechSynthesisUtterance` par
+  phrase** (Chrome coupe les textes longs ; la phrase est l'unité de « précédente / suivante » et du surlignage) ;
+  `lireTexte(texte)` découpe un texte brut. `pause()` coupe la voix et garde la place, `reprendre()` relit la phrase
+  en cours depuis son début (`speechSynthesis.pause()` est trop irrégulier : Android l'ignore, Chrome reste bloqué) ;
+  `phraseSuivante`, `phrasePrecedente`, `allerAPhrase(i)`, `arreter()`. Un `jeton` change à chaque phrase lancée :
+  un `onend` / `onerror` d'une phrase annulée est ignoré ; l'énoncé en cours est gardé en mémoire (iOS n'envoie
+  jamais `onend` à un énoncé ramassé) ; `speak()` 40 ms après `cancel()` (Chrome avale sinon la phrase).
+- Voix : `voixFrancaises()` — `fr-BE`, puis `fr-FR`, puis tout `fr-*`, locales avant distantes ; la voix choisie si
+  elle existe encore, sinon la première. Liste relue sur `voiceschanged` et à l'ouverture du panneau. Des voix
+  connues mais aucune française : **rien n'est lu**, message clair dans la barre (« Aucune voix française sur cet
+  appareil… La lecture en mots des formules reste visible… ») ; erreur `not-allowed` : « touche à nouveau
+  « Écouter » » ; autre erreur : message (voix absente hors ligne…). Sans `speechSynthesis` : aucun bouton
+  « Écouter » (la lecture en mots reste à la loupe), et le panneau le dit.
+- Vitesse changée pendant la lecture : la phrase en cours reprend à la nouvelle vitesse. `boundary` (bonus, jamais
+  une promesse) : la formule dont la zone contient `charIndex` est entourée ; sans `boundary`, une phrase qui n'est
+  qu'une formule l'est d'office.
+- Arrêt propre : changement de chemin ou de fragment (`HoteLecteurVoix`, donc d'étape et de vue), `pagehide`, bloc
+  de la phrase retiré du document, Échap (hors dialogue). **Aucune lecture sans geste** : seuls les boutons appellent
+  `lire`. Événements `lecture:phrase` (`{ index, total, texte, source }`) et `lecture:fin` (`{ source, raison }`) ;
+  contrat du lot A2 gardé : `dire(texte)` / `lecture:dire` et `seTaire()` / `lecture:taire` passent par ce moteur
+  (sauf `preventDefault()`).
+
+### Ce qui est lu (`lib/phrasesPage.ts`, `lib/decoupagePhrases.ts`)
+
+- `phrasesDe(racines, { exclure, prefixe })` : texte VISIBLE (`display: none`, `visibility: hidden`, `aria-hidden`,
+  `hidden`, `.sr-only`, boutons, champs, figures `svg`, images, widgets `x-y`, `dialog` exclus), formules = leur
+  `aria-label` (`lireFormule`, jamais de LaTeX). Un bloc (calculé par `display`) n'est jamais lu avec le suivant.
+  Cas du gabarit : carte « Manipuler » → « Atelier : titre. » ; carte / tiroir vidéo → « Vidéo : titre. » ; carte
+  « À toi » → « À toi : titre. » ; tiroir fermé → son titre seul (ouvert : titre + contenu) ; tableau enveloppé par
+  `LectureTableau` → « Tableau de signes : » + son résumé (`resumesTableaux`, `WeakMap` remplie par le composant,
+  rien dans le DOM) ; autre tableau → une phrase par ligne (cellules séparées par « , », vides sautées) ; chaîne de
+  calcul du corrigé → une ligne (`data-ligne`) = gauche + droite + « , justification ». Titres, légendes,
+  étiquettes d'encadrés : lus.
+- Symboles en TEXTE brut (titres de tiroirs, sous-titres, étiquettes « (n−1) », « uₙ ») dits en mots
+  (`enMots`) : indices / exposants Unicode, « − + × ÷ = ≤ ≥ ≠ ≈ ∞ √ ∈ ⟹ », « n° » → « numéro », « Ex. » →
+  « Exemple : », « · » → virgule, « ✓ ✗ » muets, notation clavier « _ » / « ^ » → « indice » / « exposant »
+  (trouvée : « log_a » dans un sous-titre et un titre d'exemple de 6e ch. 3 — à réécrire dans le contenu). Deux
+  formules qui se suivent sans texte (données côte à côte) : une virgule entre elles.
+- Découpage (`coupures`, PUR) : fin de phrase après « . ! ? … » (et « » ) " ») suivis d'une espace PUIS d'une
+  majuscule, d'un chiffre, de « « ( [ − » ou du début d'une formule ; jamais avant une minuscule, ni dans « 3,5 » /
+  « 3.5 », ni après « ex. cf. fig. c.-à-d. … » (jamais une lettre seule : « de raison r. La suite » finit une phrase),
+  ni dans la lecture en mots d'une formule ; > 180 signes : coupure à la virgule / au point-virgule / aux
+  deux-points suivants. Chaque phrase garde sa `Range` (début / fin exacts dans les nœuds texte, avant / après une
+  formule) et ses `zones`.
+
+### Où sont les boutons « Écouter »
+
+- **Étape du cours** : « Écouter l'étape » (`EcouterEtape`, `ChapterPage`) sous le titre et la méta de l'étape
+  active, avant le texte (choix : la maquette montre la barre, pas le bouton ; c'est l'endroit où l'élève commence
+  à lire, sans réglage à activer). Lit `phrasesEtape` : « Étape n : titre », sous-titre, « L'essentiel », corps,
+  annexes, colonne de droite (≥ 1 200 px). Pendant SA lecture, le bouton devient « Arrêter ».
+- **Exemples résolus guidés** : « Écouter l'étape n » / « Écouter le résultat » lit l'étape montrée phrase par phrase
+  (surlignée dans le tiroir). **Loupe** : « Écouter ». **Corrigé ligne par ligne** : « Écouter » (ligne surlignée).
+- **Tableau de signes** : bouton « Dire chaque case » (`aria-pressed`, gardé sur l'appareil) dans le panneau de
+  lecture case par case : chaque phrase de case / résumé est dite (`sansBarre` : la bulle affiche déjà la phrase).
+  Le petit lecteur local `lireTexteMath` est remplacé : `lireTexteMath(x) = lireFormule(unicodeVersLatex(x))`
+  (« ≈ 0,29 » → « environ 0 virgule 29 ») ; phrases inchangées (contrôle sur les 19 tableaux du cours : seules les
+  lectures d'expressions changent — « 2 virgule 5 », « x au carré, moins x moins 6 », conventions de `lireFormule`).
+- **Générateurs** (aucun `App*.tsx` réécrit) : énoncé — `EnTeteExercice` (×3) : petit « Écouter » en haut à droite
+  de l'énoncé déplié (`.entete-ecouter`, absent du bandeau replié / clavier ouvert ; ajouté aux listes de
+  `cadre.css` et à `HORS_DONNEES` de `CadreActions` pour que l'aperçu d'une ligne l'ignore) ; aides —
+  `EcouterAides` (monté par `EntrainementPage`) ajoute « Écouter l'aide » en dernier enfant de chaque
+  `.aide-5e` / `.triangle-quelconque-aide` (nœud DOM hors React, `data-voix-ajout`, remis en dernier si une aide de
+  niveau 2 arrive, retiré des copies du tiroir) et le tiroir d'aide du téléphone a le sien dans ses actions (lit
+  l'aide la plus récente) ; corrigé — « Écouter » dans l'en-tête de `CorrigeDetailleEcran` (corrigé complet).
+
+### Barre de lecture (`components/lecture/LecteurVoix.tsx` + `lecteurVoix.css`, chargés à la première lecture)
+
+- `HoteLecteurVoix` (dans `App`) : rien sans lecture (rien au pré-rendu). Barre `--ink` / `--surface` (claire en
+  thème sombre) : précédente / pause (52 px, accent) / suivante (masquées pour une seule phrase), « « phrase » »
+  sur deux lignes au plus, « titre · Phrase n sur N », vitesses 0,75 × / 1 × / 1,25 × (44 px), « Arrêter »,
+  progression. Téléphone : pleine largeur à 8 px des bords ; ≥ 760 px : 380 px en bas à droite. Posée AU-DESSUS de
+  ce qui est fixé en bas (`basLibre` : barre de l'étape, barre et tiroir d'aide des générateurs, barre collée du
+  corrigé ligne par ligne ; recalculée au défilement, au redimensionnement, après un clic). `--voix-haut` /
+  `--voix-hauteur` sur `<html>` (+ `data-voix-lecteur`) : « Bloc suivant » et les flèches de la règle remontent
+  au-dessus, le bas de la page aussi (`body` `padding-bottom`). Dialogue modal ouvert (loupe, « Je bloque »,
+  panneau « Aa ») : la barre y est rendue (portail), sinon elle serait inerte sous son voile.
+- Surlignage : `CSS.highlights` (`::highlight(voix-phrase)`, aucun nœud ajouté, React jamais dérangé), fond ET
+  couleur du texte imposés (formules comprises) — clair `#ffe08a` / `#182430` (12,2:1), sombre `#5c4512` /
+  `#fff6e0` (8,4:1), crème `#f0cc6a` / `#2a2118` (10,2:1), contraste `#ffe500` / `#000` (16,5:1). Sans l'API :
+  `data-voix-bloc` sur le bloc. Formule dite : `data-voix-formule` (cadre 2,5 px accent). Défilement doux vers la
+  phrase (entre les barres du haut et la barre de lecture ; direct si animations réduites ; dans un tiroir /
+  dialogue : `scrollIntoView` du bloc).
+- Toucher une phrase de la zone de la lecture (`data-voix-zone`, curseur main) : lire à partir d'elle
+  (`caretPositionFromPoint` / `caretRangeFromPoint` → `Range.comparePoint`) — jamais sur un lien, un bouton, un
+  champ, un élément à `tabindex`, une carte, un tiroir, un tableau lu case par case, un widget, ni pendant une
+  sélection.
+- « Essayer la voix » (panneau) : sans barre (elle couvrirait le bas du panneau), le bouton devient « Arrêter
+  l'essai ».
+
+### Panneau, onglet « Aides » : section « Lecture à voix haute »
+
+Texte d'intro (où sont les boutons), « Voix » (`select` : « Automatique (français de Belgique si l'appareil en a
+une) » + chaque voix `fr-*` « nom (langue) »), « Vitesse » (0,75 × plus lent / 1 × normal / 1,25 × plus rapide),
+« Essayer la voix », mention : « La qualité de la voix dépend de l'appareil : très bonne sur iPhone et Chrome
+récent, plus robotique sur certains Android ; sans connexion, certaines voix manquent. » Sans synthèse : « Ce
+navigateur ne sait pas lire à voix haute. La lecture en mots des formules reste disponible… ».
+
+### Vérifications (dossier de travail `eleve-VX/`)
+
+Faux moteur `faux-moteur.js` (Chromium headless n'a pas de voix : enregistre chaque phrase, `finir()`,
+`frontiere(i)`, `sansFr`). `verif-voix.mjs` : 3 étapes (4e « fonction du second degré » avec tableau de signes, 5e
+« Suites » étape 1 avec « un bloc à la fois », 6e « logarithmes ») × iPhone 13 / 1 280 × auto clair / auto sombre /
+crème / contraste / sombre / clair : bouton ≥ 44 px, barre au-dessus de la barre de l'étape et sous « Bloc
+suivant », surlignage, suivante / précédente / pause / reprise / 1,25 × (voix fr-BE), lecture complète (133, 95 et
+43 phrases, 0 LaTeX, 0 « undefined »), résumé du tableau, toucher une phrase, Échap, arrêt au changement d'étape,
+contrastes (phrase, textes de la barre ≥ 4,5:1), scrollWidth ; formule entourée sur `boundary` ; loupe (barre dans
+le dialogue, fermer = arrêt) ; tableau « Dire chaque case » ; sans voix française (message, rien lu) ; sans synthèse
+(aucun bouton) ; exemple guidé ; 5 générateurs × téléphone / ordinateur (5gen14, gen3, 6gen15, 5gen15, gen14) :
+énoncé, aide (tiroir et aide en place), corrigé complet et ligne par ligne — 0 erreur console. `verif-panneau.mjs`
+(build + `vite preview`) : section, voix proposées (fr seulement), mention, choix de la voix + 0,75 × + essai,
+gardé sur l'appareil, retour au réglage du site, cibles, contrastes, anti-flash de `data-vitesse`. `textes-dits.txt` :
+tout ce qui a été envoyé à la voix. Pas d'écoute réelle avec espeak-ng (installation refusée dans l'environnement).
 
 ## Vérifications (dossier de travail `eleve-A1/` : `verif.mjs`, `cap.mjs`, `montage.mjs`)
 

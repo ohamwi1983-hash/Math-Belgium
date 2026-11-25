@@ -33,148 +33,140 @@ export interface CaseLecture {
  * non navigable (borne vide, intervalle vide de la ligne des x). */
 export type GrilleLecture = (CaseLecture | null)[][]
 
+import { lireFormule } from './lectureFormules'
+
 /* ------------------------------------------------------------------------------------------ */
-/*  Lecture des nombres et expressions en mots.                                                 */
-/*  À REMPLACER PAR `lireFormule` (lot V, `src/lib/lectureFormules.ts`) quand il sera livré :    */
-/*  ce petit lecteur ne couvre que ce qui apparaît dans les tableaux de signes du site          */
-/*  (nombres, x + 3, x², x₁, f′(x), √2⁄2, 1⁄e, ±∞, parenthèses simples).                        */
+/*  Lecture des nombres et expressions en mots : `lireFormule` (lecteur des formules du site,       */
+/*  `src/lib/lectureFormules.ts`) — le même que pour les `aria-label` et la voix. Les cellules du     */
+/*  modèle sont écrites avec les symboles Unicode du site (x², x₁, f′(x), √2⁄2, 1⁄e, ±∞) :            */
+/*  `unicodeVersLatex` les ramène au LaTeX que lit `lireFormule`.                                     */
 /* ------------------------------------------------------------------------------------------ */
 
 const EXPOSANTS: Record<string, string> = {
   '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
-  '⁻': '−', '⁺': '+', 'ˣ': 'x', 'ⁿ': 'n',
+  '⁻': '-', '⁺': '+', 'ˣ': 'x', 'ⁿ': 'n',
 }
 const INDICES: Record<string, string> = {
   '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9', 'ₙ': 'n',
 }
-const LETTRE = /\p{L}/u
+/** Symboles propres aux tableaux, dits par une locution (jamais lus comme un opérateur). */
+const LOCUTIONS: Record<string, string> = {
+  '‖': 'double barre', '∄': "n'existe pas", '↗': 'croît', '↘': 'décroît',
+}
+const FONCTIONS = ['arcsin', 'arccos', 'arctan', 'sin', 'cos', 'tan', 'ln', 'log', 'exp']
 
-function parentheseFermante(s: string, ouvrante: number): number {
-  let prof = 0
-  for (let i = ouvrante; i < s.length; i++) {
-    if (s[i] === '(') prof++
-    else if (s[i] === ')') {
-      prof--
-      if (prof === 0) return i
+/** Notation Unicode du site → LaTeX (pour `lireFormule`). Exporté pour les tests. */
+export function unicodeVersLatex(source: string): string {
+  const s = source.replace(/\|\|/g, '‖').trim()
+  const out: string[] = []
+  // Dernier atome écrit (pour « a⁄b ») : indice de début dans `out`.
+  let debutAtome = -1
+  let i = 0
+  const lireAtome = (k: number): [string, number] => {
+    while (k < s.length && s[k] === ' ') k++
+    if (s[k] === '(') {
+      let prof = 0
+      for (let j = k; j < s.length; j++) {
+        if (s[j] === '(') prof++
+        else if (s[j] === ')' && --prof === 0) return [unicodeVersLatex(s.slice(k + 1, j)), j + 1]
+      }
+      return [unicodeVersLatex(s.slice(k + 1)), s.length]
     }
+    if (s[k] === '√') {
+      const [a, f] = lireAtome(k + 1)
+      return [`\\sqrt{${a}}`, f]
+    }
+    const m = /^(?:[0-9]+(?:,[0-9]+)?|(?:(?![ⁿˣₙ])\p{L})+[′″']*)/u.exec(s.slice(k))
+    if (m) return [unicodeVersLatex(m[0]), k + m[0].length]
+    return [s[k] ?? '', k + 1]
   }
-  return s.length
+  while (i < s.length) {
+    const c = s[i]
+    if (c in LOCUTIONS) {
+      out.push(`\\text{ ${LOCUTIONS[c]} }`)
+      debutAtome = -1
+      i++
+      continue
+    }
+    if (c in EXPOSANTS) {
+      let brut = ''
+      while (i < s.length && s[i] in EXPOSANTS) brut += EXPOSANTS[s[i++]]
+      out.push(`^{${brut}}`)
+      continue
+    }
+    if (c in INDICES) {
+      let brut = ''
+      while (i < s.length && s[i] in INDICES) brut += INDICES[s[i++]]
+      out.push(`_{${brut}}`)
+      continue
+    }
+    if (c === '⁄' || c === '/') {
+      const avant = debutAtome >= 0 ? out.splice(debutAtome).join('') : ''
+      const [apres, f] = lireAtome(i + 1)
+      debutAtome = out.length
+      out.push(`\\frac{${avant}}{${apres}}`)
+      i = f
+      continue
+    }
+    if (c === '√') {
+      const [a, f] = lireAtome(i + 1)
+      debutAtome = out.length
+      out.push(`\\sqrt{${a}}`)
+      i = f
+      continue
+    }
+    if (c === '(') {
+      const [a, f] = lireAtome(i)
+      debutAtome = out.length
+      out.push(`\\left(${a}\\right)`)
+      i = f
+      continue
+    }
+    if (/[0-9]/.test(c)) {
+      const m = /^[0-9]+(?:,[0-9]+)?/.exec(s.slice(i))!
+      debutAtome = out.length
+      out.push(m[0].replace(',', '{,}'))
+      i += m[0].length
+      continue
+    }
+    if (/\p{L}/u.test(c) && !'ⁿˣₙ'.includes(c)) {
+      // Lettres (jamais les lettres modificatrices ⁿ ˣ ₙ, qui sont des exposants / indices).
+      const m = /^(?:(?![ⁿˣₙ])\p{L})+/u.exec(s.slice(i))!
+      const mot = m[0]
+      debutAtome = out.length
+      const fn = FONCTIONS.find((f) => f === mot)
+      if (fn) out.push(`\\${fn} `)
+      else if (mot === 'π') out.push('\\pi ')
+      else if (mot.length > 1 && !/^[a-zA-Z]+$/.test(mot)) out.push(`\\text{${mot}}`)
+      else out.push(mot.length > 1 ? `\\mathrm{${mot}}` : mot)
+      i += mot.length
+      continue
+    }
+    if (c === ' ') {
+      out.push(' ')
+      i++
+      continue
+    }
+    debutAtome = c === '′' || c === '″' || c === "'" ? debutAtome : -1
+    out.push(c === '−' || c === '–' ? '-' : c === ';' ? '\\,;\\,' : c)
+    i++
+  }
+  return out.join('')
 }
 
 /** Lit en mots un nombre ou une expression écrits avec les symboles Unicode du site. */
 export function lireTexteMath(source: string): string {
-  const s = source.replace(/\|\|/g, '‖').trim()
-  const mots: string[] = []
-  let i = 0
-  // Dernier élément lu : une valeur (nombre, lettre, parenthèse fermée) appelle « fois » devant
-  // une parenthèse ouvrante (« (x − 1)(x − 4) »).
-  let derniereValeur = false
-  const suivantNonBlanc = (k: number) => {
-    while (k < s.length && /\s/.test(s[k])) k++
-    return k
-  }
-  while (i < s.length) {
-    const ch = s[i]
-    if (/\s/.test(ch)) {
-      i++
-      continue
-    }
-    if (/[0-9]/.test(ch)) {
-      const m = /^[0-9]+(?:,[0-9]+)?/.exec(s.slice(i))!
-      mots.push(m[0])
-      i += m[0].length
-      derniereValeur = true
-      continue
-    }
-    if (ch in EXPOSANTS) {
-      let brut = ''
-      while (i < s.length && s[i] in EXPOSANTS) brut += EXPOSANTS[s[i++]]
-      const apresParenthese = mots[mots.length - 1] === 'fin de parenthèse'
-      if (apresParenthese) mots[mots.length - 1] += ','
-      if (brut === '2') mots.push(apresParenthese ? 'au carré' : 'carré')
-      else if (brut === '3') mots.push('au cube')
-      else mots.push('puissance', lireTexteMath(brut))
-      derniereValeur = true
-      continue
-    }
-    if (ch in INDICES) {
-      let brut = ''
-      while (i < s.length && s[i] in INDICES) brut += INDICES[s[i++]]
-      mots.push('indice', brut)
-      derniereValeur = true
-      continue
-    }
-    if (LETTRE.test(ch)) {
-      let mot = ''
-      while (i < s.length && LETTRE.test(s[i]) && !(s[i] in EXPOSANTS) && !(s[i] in INDICES)) mot += s[i++]
-      let prime = ''
-      while (i < s.length && (s[i] === '′' || s[i] === '″' || s[i] === "'")) {
-        prime += s[i] === '″' ? ' seconde' : ' prime'
-        i++
-      }
-      const k = suivantNonBlanc(i)
-      const estFonction = s[k] === '(' && (prime !== '' || /^[fghuvFGH]$/.test(mot) || mot.length > 2)
-      mots.push(mot === 'π' ? 'pi' : mot === 'arctan' ? 'arc tangente' : mot + prime)
-      if (estFonction) {
-        const fin = parentheseFermante(s, k)
-        mots.push('de', lireTexteMath(s.slice(k + 1, fin)))
-        i = fin + 1
-      }
-      derniereValeur = true
-      continue
-    }
-    if (ch === '′' || ch === '″') {
-      mots.push(ch === '″' ? 'seconde' : 'prime')
-      i++
-      continue
-    }
-    if (ch === '−' || ch === '-' || ch === '–' || ch === '+') {
-      const k = suivantNonBlanc(i + 1)
-      const signe = ch === '+' ? 'plus' : 'moins'
-      if (s[k] === '∞') {
-        mots.push(`${signe} l'infini`)
-        i = k + 1
-        derniereValeur = true
-      } else {
-        mots.push(signe)
-        i++
-        derniereValeur = false
-      }
-      continue
-    }
-    if (ch === '(') {
-      const fin = parentheseFermante(s, i)
-      if (derniereValeur) mots.push('fois')
-      mots.push('parenthèse,', lireTexteMath(s.slice(i + 1, fin)) + ',', 'fin de parenthèse')
-      i = fin + 1
-      derniereValeur = true
-      continue
-    }
-    const SYMBOLES: Record<string, string> = {
-      '∞': "l'infini", '·': 'fois', '×': 'fois', '*': 'fois', '/': 'sur', '⁄': 'sur', '÷': 'sur',
-      '√': 'racine carrée de', '=': 'égale', '≈': 'environ', '<': 'plus petit que', '>': 'plus grand que',
-      '≤': 'plus petit ou égal à', '≥': 'plus grand ou égal à', ';': 'point-virgule', '‖': 'double barre',
-      '∄': "n'existe pas", '↗': 'croît', '↘': 'décroît', ',': ',', ')': '',
-    }
-    if (ch in SYMBOLES) {
-      if (SYMBOLES[ch]) mots.push(SYMBOLES[ch])
-      derniereValeur = ch === '∞'
-      i++
-      continue
-    }
-    mots.push(ch)
-    i++
-  }
-  return mots
-    .join(' ')
-    .replace(/\s+,/g, ',')
-    .replace(/,,/g, ',')
-    .replace(/\s+/g, ' ')
-    .trim()
+  if (!source.trim()) return ''
+  // Valeur approchée d'un tableau (« ≈ 0,29 ») : « environ 0 virgule 29 » (`lireFormule` dirait
+  // « vaut environ », et les phrases écrivent déjà « g vaut … »).
+  const approchee = /^\s*≈\s*(.+)$/.exec(source)
+  if (approchee) return `environ ${lireTexteMath(approchee[1])}`
+  return lireFormule(unicodeVersLatex(source)).replace(/\s+/g, ' ').trim()
 }
 
 /** Convertit un petit LaTeX de tableau (en-têtes et libellés des générateurs, lus dans
- * l'annotation KaTeX) vers la notation Unicode que lit `lireTexteMath`. */
+ * l'annotation KaTeX) vers la notation Unicode du modèle (repères visuels « Ligne « x² − 1 » » ; la
+ * lecture en mots passe ensuite par `lireTexteMath` → `lireFormule`). */
 export function latexVersTexte(latex: string): string {
   let s = latex
   const groupe = (k: number): [string, number] => {

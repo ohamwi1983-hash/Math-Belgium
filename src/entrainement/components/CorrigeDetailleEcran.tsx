@@ -5,7 +5,9 @@ import { normaliserLogDecimal } from "../../lib/notationLog";
 import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../export/genererFeuilleExercices";
 import { decouperLigneCalcul, estLignePiege } from "../export/corrigeTableau";
 import { TexteInsistance } from "./TexteInsistance";
-import { dire, texteParleDe, voixDisponible } from "../../lib/voixLecture";
+import { lire, texteParleDe, voixDisponible } from "../../lib/voixLecture";
+import { phrasesDe } from "../../lib/phrasesPage";
+import { BoutonEcouter } from "../../components/lecture/BoutonEcouter";
 import { animationsReduites } from "../../lib/reglagesLecture";
 
 /**
@@ -128,8 +130,8 @@ function lignesDeLEtapeCorrigee(e: EtapeCorrection): number {
  * bouton dans l'en-tête du corrigé — par défaut, le corrigé complet comme avant), les lignes se révèlent
  * une à une : la ligne en cours entourée, les précédentes plus discrètes, les suivantes masquées SANS
  * changer la mise en page (`visibility: hidden` : rien ne saute sous le doigt). « Ligne suivante »,
- * « Tout montrer » (retour au corrigé complet) et « Écouter » (point d'accroche de la voix,
- * `lib/voixLecture.ts` : événement `lecture:dire`), dans une barre collée en bas de l'écran (au-dessus de la barre fixe) tant que le
+ * « Tout montrer » (retour au corrigé complet) et « Écouter » (moteur de lecture à voix haute
+ * `lib/voixLecture.ts`, ligne surlignée), dans une barre collée en bas de l'écran (au-dessus de la barre fixe) tant que le
  * corrigé est à l'écran : les lignes masquées gardent leur place, les boutons restent sous le pouce.
  * Une ligne = le texte d'une étape, une ligne de calcul, ou un piège. Le choix n'est pas mémorisé :
  * chaque corrigé s'ouvre complet.
@@ -161,7 +163,8 @@ export function CorrigeDetailleEcran({ etapes, titre = "Corrigé détaillé de l
     if (pas === null) return;
     const courante = racineRef.current?.querySelectorAll(`[data-ligne="${pas - 1}"]`);
     if (!courante || courante.length === 0) return;
-    dire([...courante].map(texteParleDe).join(". "));
+    // Moteur de lecture (`voixLecture.ts`) : la ligne est surlignée pendant qu'elle est dite.
+    lire(phrasesDe([...courante]), { titre: `Ligne ${pas} sur ${total}`, source: "corrige-ligne" });
   };
   const suivante = () => {
     if (pas === null) return;
@@ -184,6 +187,16 @@ export function CorrigeDetailleEcran({ etapes, titre = "Corrigé détaillé de l
           <button type="button" className="corrige-pas-ouvrir no-export" onClick={commencer}>
             Lire ligne par ligne
           </button>
+        )}
+        {pas === null && (
+          <BoutonEcouter
+            className="ecouter-gen"
+            libelle="Écouter le corrigé"
+            libelleCourt="Écouter"
+            titre="Corrigé"
+            phrases={() => phrasesDe(racineRef.current, { exclure: ".corrige-pas-tete" })}
+            zone={() => racineRef.current}
+          />
         )}
       </div>
       {normales.map((e, i) => {
