@@ -728,6 +728,14 @@ paths:
   intersection droite-conique, tangentes, propriétés optiques) + une synthèse purement tabulaire
   (`recap.table`, 26 lignes Notion/Point clé, sur le modèle de `lieux-geometriques`) ; 6 liens
   générateur par section (`6gen58`-`6gen63`) + un quiz de synthèse (`6gen73`).
+  **Lot H, première moitié (6gen132–6gen137, nouveaux générateurs, agent H1)** : cartes 6gen132 « Lire une conique sur sa
+  figure ou son équation réduite », 6gen133 « Représenter une conique » et 6gen137 « Hyperbole équilatère et xy = k » en fin de
+  § 1 (après 6gen58), 6gen134 « Réduire par translation et donner tous les éléments » et 6gen135 « Équation depuis foyer,
+  directrice et excentricité » en fin de § 2 (après 6gen59), 6gen136 « Rayons focaux et triangle focal » en fin de § 3 (après
+  6gen60). Aucun bloc de cours ajouté (lot F : rayons focaux a ∓ ex, aire b²·tan(θ/2), k = a²/2 sont écrits par l'agent AFD).
+  Registres (`registry.ts`, `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts`, processus 1 / 1 / 2 /
+  2 / 2 / 2, sections `identifier`, `identifier`, `excentricite`, `excentricite`, `airefocale`, `identifier`). Descriptions de
+  carte en texte brut. Détail : `.claude/rules/feuilles-evaluations.md`, « 6e ch. 10, lot H1 — 6gen132–6gen137 ».
   **Aucune extension de schéma nécessaire** : les ~17 diagrammes du chapitre (parabole avec
   foyer/directrice, 4 orientations, ellipse et hyperbole avec foyers/sommets/asymptotes, comparaison
   cercle/ellipse, hyperbole équilatère et sa forme `xy=k`, 3 coniques de même foyer superposées, coupe
