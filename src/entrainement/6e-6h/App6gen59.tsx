@@ -1,3 +1,7 @@
+import { correctionDetailleeEquationConiqueCaracteristiques } from "./generateurs6e/equationConiqueCaracteristiques/corrigeDetaille";
+import { phasesPourExercice as phasesCorrige59 } from "./moteur6e/typesEquationConiqueCaracteristiques";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import type { ExerciceEquationConiqueCaracteristiques } from "./core6e/equationConiqueCaracteristiques.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationConiqueCaracteristiques } from "./generateurs6e/equationConiqueCaracteristiques";
 import type { PhaseEquationConiqueCaracteristiques } from "./moteur6e/typesEquationConiqueCaracteristiques";
@@ -27,6 +31,8 @@ const CONFIG: ConfigAppCombinatoire<ExerciceEquationConiqueCaracteristiques, Pha
     const svg = figure6gen59(e, closes);
     return svg ? <FigureLieux svg={svg} /> : null;
   },
+  // Corrigé « comme au tableau » de l'écran (lot E) : même source que le papier, une lettre par écran.
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleeEquationConiqueCaracteristiques(e), phasesCorrige59(e), p)} />,
 };
 
 export function App6gen59() {

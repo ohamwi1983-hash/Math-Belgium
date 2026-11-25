@@ -164,6 +164,8 @@ function simple(motif: string, consigne: string): SpecRegroupement {
 const dansChaqueCas = (g: Groupes) => (g.q ? `Dans chaque cas, ${minusculeInitiale(g.q)}` : null);
 /** Remplace un démonstratif (« cette équation ») par « chaque … » — `null` s'il est absent. */
 const chaque = (texte: string | undefined, cherche: string, remplace: string) => (texte && texte.includes(cherche) ? texte.replace(cherche, remplace) : null);
+/** Une seule forme « Dans chaque cas, <question> » (6e ch. 10, lot E). */
+const simpleQ = (motif: string): SpecRegroupement => ({ formes: [{ motif: re(motif), consigne: dansChaqueCas }] });
 
 /** Générateur à graphique : une figure par ligne (`figure: true`). */
 const fig = (...formes: FormeRegroupement[]): SpecRegroupement => ({ figure: true, formes });
@@ -1053,6 +1055,19 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
       { motif: re(String.raw`Dans un repère orthonormé, on donne l'hyperbole (?<ligne>\$[^$]*\$)\. Ses asymptotes sont les axes du repère[^\n]*\nCalcule \$a\^2\$[^\n]*`), consigne: "Pour chaque hyperbole $\\mathcal{H}$, on note $X^2-Y^2=a^2$ son équation dans le repère orthonormé $(X\\,;Y)$ dont les axes sont ses axes de symétrie (l'axe des X porté par la droite $y=x$). Calcule $a^2$, puis donne, dans le repère de départ, les coordonnées des sommets et des foyers de $\\mathcal{H}$." },
     ],
   },
+  // 6e ch. 10, lot E (6gen58–6gen63) : l'équation, la conique décrite ou les données (« On donne … ») sont la
+  // ligne, la consigne passe à « chaque » / « Dans chaque cas ». Écartés : 6gen60 B (condition géométrique
+  // longue, propre à l'instance) et 6gen63 (Transférer : miroir et rayon propres à l'instance).
+  "6gen58": {
+    formes: [
+      { motif: re(String.raw`On donne l'équation (?<ligne>${M})\.\n(?<q>Détermine [^\n]+)`), consigne: (g) => chaque(g.q, "cette équation", "chaque équation") },
+      { motif: re(String.raw`On donne la courbe ${M} d'équation (?<ligne>${M})\.\n(?<q>Détermine [^\n]+)`), consigne: (g) => (g.q ? `Pour chaque équation, on note $\\Gamma$ la courbe qu'elle décrit. ${g.q}` : null) },
+    ],
+  },
+  "6gen59": simpleQ(String.raw`(?<ligne>[^\n]+)\.\n(?<q>Détermine [^\n]+)`),
+  "6gen60": simpleQ(String.raw`On donne (?<ligne>l'ellipse [^\n]+)\.\n(?<q>Détermine [^\n]+)`),
+  "6gen61": simpleQ(String.raw`(?<ligne>[^\n]+)\.\n(?<q>(?:Détermine|Montre)[ ,][^\n]+)`),
+  "6gen62": simpleQ(String.raw`On donne (?<ligne>[^\n]+)\.\n(?<q>Détermine [^\n]+)`),
   // 6e ch. 9, lot E (6gen54–6gen57) : « On donne … » (les données de l'instance) est la ligne, la consigne
   // de l'énoncé papier passe à la forme « chaque ». Écartés : 6gen54 G et H (massif, dalle, miroir, billard :
   // contexte propre à l'instance), 6gen57 (Transférer : configuration de trois phrases propre à l'instance).

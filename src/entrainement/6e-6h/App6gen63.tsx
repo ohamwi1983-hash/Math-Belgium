@@ -1,3 +1,7 @@
+import { correctionDetailleeProprietesOptiquesConiques } from "./generateurs6e/proprietesOptiquesConiques/corrigeDetaille";
+import { phasesPourExercice as phasesCorrige63 } from "./moteur6e/typesProprietesOptiquesConiques";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import type { ExerciceProprietesOptiquesConiques } from "./core6e/proprietesOptiquesConiques.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProprietesOptiquesConiques } from "./generateurs6e/proprietesOptiquesConiques";
 import type { PhaseProprietesOptiquesConiques } from "./moteur6e/typesProprietesOptiquesConiques";
@@ -26,6 +30,8 @@ const CONFIG: ConfigAppCombinatoire<ExerciceProprietesOptiquesConiques, PhasePro
   recapSepare: true,
   format: FORMAT_6GEN63,
   complement: (e, _p, closes) => <FigureLieux svg={figure6gen63(e, closes)} />,
+  // Corrigé « comme au tableau » de l'écran (lot E) : même source que le papier, une lettre par écran.
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleeProprietesOptiquesConiques(e), phasesCorrige63(e), p)} />,
 };
 
 export function App6gen63() {

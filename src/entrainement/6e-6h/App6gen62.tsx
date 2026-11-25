@@ -1,3 +1,7 @@
+import { correctionDetailleeTangentesConique } from "./generateurs6e/tangentesConique/corrigeDetaille";
+import { phasesPourExercice as phasesCorrige62 } from "./moteur6e/typesTangentesConique";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import type { ExerciceTangentesConique } from "./core6e/tangentesConique.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTangentesConique } from "./generateurs6e/tangentesConique";
 import type { PhaseTangentesConique } from "./moteur6e/typesTangentesConique";
@@ -27,6 +31,8 @@ const CONFIG: ConfigAppCombinatoire<ExerciceTangentesConique, PhaseTangentesConi
   format: FORMAT_6GEN62,
   complement: (e, _p, closes) => <FigureLieux svg={figure6gen62(e, closes)} />,
   pucesMasquees: pucesMasquees6gen62,
+  // Corrigé « comme au tableau » de l'écran (lot E) : même source que le papier, une lettre par écran.
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleeTangentesConique(e), phasesCorrige62(e), p)} />,
 };
 
 export function App6gen62() {
