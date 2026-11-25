@@ -2,14 +2,19 @@ import { Fragment, memo } from 'react'
 import type { ReactNode } from 'react'
 import katex from 'katex'
 import { normaliserLogDecimal } from '../lib/notationLog'
+import { lireFormule } from '../lib/lectureFormules'
 
 /** Renders a single LaTeX expression inline via KaTeX. */
 export const MathInline = memo(function MathInline({ tex }: { tex: string }) {
-  const html = katex.renderToString(normaliserLogDecimal(tex), {
+  const source = normaliserLogDecimal(tex)
+  const html = katex.renderToString(source, {
     throwOnError: false,
     output: 'html',
   })
-  return <span className="math-inline" dangerouslySetInnerHTML={{ __html: html }} />
+  // Formule accessible : la sortie HTML de KaTeX est `aria-hidden` ; le conteneur porte la lecture
+  // en mots (`lib/lectureFormules.ts`), présente dès le HTML pré-rendu.
+  const lu = lireFormule(source)
+  return <span className="math-inline" role={lu ? 'img' : undefined} aria-label={lu || undefined} dangerouslySetInnerHTML={{ __html: html }} />
 })
 
 // Splits a content string on `$...$` (KaTeX) and `**...**` (bold) segments,

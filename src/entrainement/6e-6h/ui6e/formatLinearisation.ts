@@ -1,4 +1,5 @@
 import katex from "katex";
+import { htmlKatexAccessible } from "../../../lib/katexAccessible";
 import { arrondir, chaineLinearisation, DECIMALES_ETAPE, defContexte, logsAttendus, nombreDecimales } from "../core6e/linearisationDonnees";
 import type { ExerciceLinearisation, ModeleDonnees } from "../core6e/linearisationDonnees";
 import type { PhaseLinearisation } from "../moteur6e/typesLinearisation";
@@ -136,7 +137,8 @@ function ligneLatex(e: ExerciceLinearisation, indice: number): string {
 // ============================================================================
 
 function rendre(expr: string): string {
-  return katex.renderToString(normaliserLimites(expr), { throwOnError: false, output: "html" });
+  const source = normaliserLimites(expr);
+  return htmlKatexAccessible(katex.renderToString(source, { throwOnError: false, output: "html" }), source);
 }
 
 const BORD = "border:1px solid #888;padding:0.3em 0.55em;text-align:center;white-space:nowrap";

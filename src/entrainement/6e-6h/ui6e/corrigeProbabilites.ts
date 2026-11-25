@@ -1,4 +1,5 @@
 import katex from "katex";
+import { htmlKatexAccessible } from "../../../lib/katexAccessible";
 import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../export/corrigeTableau";
 import { normaliserLimites } from "../../../lib/notationLog";
@@ -178,7 +179,8 @@ export function finaliser(etapes: EtapeCorrection[]): EtapeCorrection[] {
 // ============================================================================
 
 function rendre(expr: string): string {
-  return katex.renderToString(normaliserLimites(expr), { throwOnError: false });
+  const source = normaliserLimites(expr);
+  return htmlKatexAccessible(katex.renderToString(source, { throwOnError: false }), source);
 }
 
 const BORD = "border:1px solid #888;padding:0.35em 0.9em;text-align:center;min-width:3.6em";

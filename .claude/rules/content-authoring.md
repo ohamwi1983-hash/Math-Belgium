@@ -3,6 +3,10 @@ paths:
   - "src/content/**"
   - "src/lib/generatorLink.ts"
   - "src/components/Math.tsx"
+  - "src/lib/lectureFormules.ts"
+  - "src/lib/katexAccessible.ts"
+  - "src/entrainement/components/KatexAccessible.tsx"
+  - "scripts/*lecture-formules*"
 ---
 
 # Conventions de rédaction du contenu (`ChapterContent`)
@@ -151,6 +155,39 @@ Les `label` de callout, `badge` et `tag` d'exemple, `kicker` de section, `descri
 `entrainement` et en-têtes de `featureTable` (sauf `recap.table`, voir « Synthèses en KaTeX ») sont rendus en texte BRUT — y écrire `$...$` affiche
 les dollars littéralement (détecté uniquement au rendu navigateur, jamais par `tsc`). Y mettre des
 caractères Unicode (2ⁿ, x², ×, −), jamais du LaTeX.
+
+## Lecture en mots des formules (`aria-label`, future lecture à voix haute)
+
+Chaque formule rendue porte sa lecture en français parlé : `role="img"` + `aria-label` sur le
+conteneur (la sortie HTML de KaTeX reste `aria-hidden`), présente dès le HTML pré-rendu. Lecteur
+MAISON `src/lib/lectureFormules.ts` (`lireFormule(tex)`, `analyserLecture(tex)` pour le diagnostic) :
+jetons → arbre → texte, jamais des regex en chaîne ; décision du professeur, pas de MathML + Speech Rule
+Engine. Branché dans `MathInline` (`components/Math.tsx`, cours), `entrainement/components/KatexAccessible.tsx`
+(remplaçants à l'identique de `InlineMath`/`BlockMath` de react-katex, utilisés par les trois `Katex.tsx`
+et `CorrigeDetailleEcran`) et `lib/katexAccessible.ts` (`htmlKatexAccessible` : attributs posés sur la
+racine d'un HTML `katex.renderToString` — corrigés en chaîne HTML, ateliers via `interactive/katex-shadow.js`).
+Les exports papier (Word, PDF, feuilles) n'en ont pas besoin et ne changent pas.
+
+Conventions (maquette planche 08) : « u indice n plus 1 égale 3 fois u indice n » (u₍ₙ₊₁₎), mais
+« u indice n, plus 1 égale … » (uₙ + 1) — décision du professeur : un indice ou exposant SIMPLE suivi d'un
+opérateur prend une virgule (« x au carré, plus 1 »), un exposant composé suivi d'un opérateur se ferme
+(« x exposant n plus 1, fin d'exposant, plus 1 ») ; « u indice n égale u indice 1, plus, parenthèse, n moins 1,
+fin de parenthèse, fois r », « S indice n égale : fraction, n fois, parenthèse, u indice 1, plus u indice n,
+fin de parenthèse, sur 2, fin de fraction », « l n de x » et « log de x » (comme les professeurs le disent), « 3 sur 4 » (fraction
+simple : numérateur nombre/lettre/produit simple, dénominateur d'un seul tenant), « racine carrée de 3, sur 2 »,
+« x au carré », « x puissance n », « x exposant moins 1 », « e exposant x », « f prime de x », « f réciproque de x »,
+« l'intervalle ouvert en moins l'infini, fermé en moins 2 », « R privé de 2 et 3 », « probabilité de A sachant B »,
+« X suit la loi binomiale de paramètres n et p », « C n k », « factorielle n », « A de coordonnées 2 ; moins 3 »,
+« vecteur A B de composantes 3 ; moins 4 », « limite quand x tend vers 0 par la droite, de … », « intégrale de a
+à b, de f de x d x », « 3 virgule 5 », « 1000 » (milliers sans espace : la voix dit « mille »), « y » → « i grec ».
+« parenthèse … fin de parenthèse » seulement quand le contenu est composé (« 2 fois moins 3 », « (−3)² » garde
+ses parenthèses). Les virgules et deux-points sont des PAUSES pour la voix, pas de la décoration.
+
+Ajouter une notation LaTeX nouvelle au site = vérifier sa lecture : `npm run controle:lecture` (toutes les
+formules des chapitres + adaptateurs papier ; échoue sur une commande inconnue, une lecture vide ou contenant
+`\`, `{`, `_`, `^`) et `npm run test:lecture` (cas figés de `scripts/lecture-formules-cas.json` ; `-- --ecrire`
+les réécrit, à RELIRE : une lecture doit se comprendre à l'oreille sans voir la formule). Une commande
+inconnue n'est jamais lue (ni « backslash », ni son nom) : seul son contenu l'est.
 
 ## Callout `intuition` — apports pédagogiques (image concrète, analogie, "pourquoi")
 

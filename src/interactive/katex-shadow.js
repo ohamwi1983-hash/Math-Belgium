@@ -10,6 +10,7 @@
  * Chromium, mais déjà déclarés globalement) : on les retire de la copie.
  * ================================================================ */
 import katex from 'katex'
+import { htmlKatexAccessible } from '../lib/katexAccessible'
 import katexCss from 'katex/dist/katex.min.css?inline'
 
 var CSS_SANS_POLICES = katexCss.replace(/@font-face\{[^}]*\}/g, '')
@@ -25,7 +26,7 @@ export function styleKatex() {
 
 /** Formule KaTeX en ligne (HTML). Jamais d'exception : une formule fautive s'affiche en rouge. */
 export function tex(source) {
-  return katex.renderToString(source, { throwOnError: false, output: 'html', strict: 'ignore' })
+  return htmlKatexAccessible(katex.renderToString(source, { throwOnError: false, output: 'html', strict: 'ignore' }), source)
 }
 
 /** Chaîne d'égalités a = b = c… : un morceau KaTeX par membre, pour que la ligne puisse se

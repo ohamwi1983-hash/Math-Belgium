@@ -71,7 +71,7 @@ tâches :
 
 | Fichier | Portée (`paths`) | Contenu |
 | --- | --- | --- |
-| `.claude/rules/content-authoring.md` | `src/content/**`, `src/lib/generatorLink.ts`, `src/components/Math.tsx` | Schéma `ChapterContent`/`Block` complet, mini-syntaxe `RichText` (KaTeX + gras) et ses pièges, convention de lien vers un générateur, déclaration des kinds `atelier`/`entrainement.widgetTag` côté contenu. |
+| `.claude/rules/content-authoring.md` | `src/content/**`, `src/lib/generatorLink.ts`, `src/components/Math.tsx`, `src/lib/lectureFormules.ts`, `src/lib/katexAccessible.ts`, `src/entrainement/components/KatexAccessible.tsx`, `scripts/*lecture-formules*` | Schéma `ChapterContent`/`Block` complet, mini-syntaxe `RichText` (KaTeX + gras) et ses pièges, convention de lien vers un générateur, déclaration des kinds `atelier`/`entrainement.widgetTag` côté contenu, lecture en mots des formules (`aria-label`, `npm run controle:lecture`). |
 | `.claude/rules/illustration-components.md` | `src/components/illustrations/**` | Catalogue complet des kinds d'`IllustrationSpec` (machine, curvePlot, vectorPlane, setMapping, pascalTriangle, etc.) et la convention des classes CSS `svg-*` du thème. |
 | `.claude/rules/chapter-components.md` | `src/components/chapter/**` | Composants du gabarit de chapitre (`ChapterPage`, `BlockRenderer`, Callouts, `ExempleResolu`, `SignTable`, `FeatureTable`, `OperationChain`...). |
 | `.claude/rules/interactive-widgets.md` | `src/interactive/**`, `src/components/chapter/InteractiveWidget.tsx`, `tsconfig.app.json` | Mécanisme de portage des Web Components vanilla (Shadow DOM) depuis un artifact, montage impératif, ordre d'import, et le piège UMD `module.exports`/Vite-Rollup. |

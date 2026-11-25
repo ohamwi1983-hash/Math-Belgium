@@ -1,4 +1,5 @@
 import katex from "katex";
+import { htmlKatexAccessible } from "../../../../lib/katexAccessible";
 import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, ligne, piege, resultat, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExercicePositionAsymptote } from "../../core5e/asymptoteOblique.types";
@@ -22,7 +23,7 @@ export function lettrePhasePosition(phase: PhasePositionAsymptote): string {
 }
 
 const CELLULE = "border:1px solid #555;padding:4px 10px;text-align:center;";
-const k = (s: string) => katex.renderToString(normaliserLimites(s), { throwOnError: false });
+const k = (s: string) => htmlKatexAccessible(katex.renderToString(normaliserLimites(s), { throwOnError: false }), normaliserLimites(s));
 const sg = (v: number) => (v > 0 ? "+" : "−");
 
 /** Tableau de signes de R(x), D(x) et de l'écart, avec la ligne « position » (figure du corrigé). */
