@@ -6434,3 +6434,13 @@ démonstrations ne sont pas numérotées dans le cours).
 **Vérifié** : `tsc` ; `verifier-enonces-evaluation` (chapitre strict) ; page à 390 / 1 280 px, clair / sombre, carte,
 6 étapes (tiroirs ouverts, « Tout montrer ») et Réviser : 0 `$`, 0 astérisque, 0 notation clavier, 0 `NaN`, 0
 `.katex-error`, 0 débordement, 0 erreur console ; aucune formule plus large que son bloc à 390 px.
+
+## 5e (4h), Chapitre 6 — Statistique à deux variables : générateurs 5gen78–5gen81 (lot H2, 25/11/2026)
+
+Quatre générateurs Transférer, sans bloc de cours ajouté : cartes 5gen79 « Quel est le meilleur ajustement ? » en fin de
+§ 4 (`moindres-carres`), 5gen78 « Modéliser et prévoir en contexte », 5gen80 « Corrélation ou causalité ? » et 5gen81
+« Détective d'erreurs : statistique à deux variables » en fin de § 6 (`interpreter`, après la dernière mise en garde) ;
+descriptions en texte brut (Unicode : x̄, ȳ, n − 1). Notations et seuils du cours (σ division par n, Cov, « très forte »
+dès 0,98, « parfaite » pour |r| = 1, renvois « cours, § n », touches de la TI-30XB reprises du § 4). Contextes du manuel
+du professeur, nombres nouveaux ; banque de 45 situations rédigées pour 5gen80. Registres par ajout. Détail (écrans,
+verdicts, profils, niveaux, mesures) : `.claude/rules/feuilles-evaluations.md`, « 5e ch. 6, lot H2 — 5gen78–5gen81 ».

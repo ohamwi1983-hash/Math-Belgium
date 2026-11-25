@@ -3443,6 +3443,100 @@ mauvais choix fermé révélé) : scrollWidth 390, 0 erreur console, 0 `.katex-e
 (2 plans : évaluation 2 séries + aménagée + corrigé + grille + feuille + Word du corrigé, interdite /
 autorisée) : 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error` ; QR `?code=` 24 / 24.
 
+## 5e ch. 6, lot H2 — 5gen78–5gen81 (nouveaux, notés)
+
+Socle d'écrans du 5e (`AppEcransTrigo` + `DefinitionEcrans`) réutilisé SANS modification (`bonneOption` = choix fermés
+jugés ✗ / ✓, `piegeChoixRevele`, `aidesChoixDeuxNiveaux`, `approchee` = saisie trop arrondie refusée SANS tentative,
+`copie` pour le détective, `tableau`, `figure`, `apercuEnonce`). Briques propres au lot (noms suffixés pour ne pas croiser
+le lot H1) : calculs `core5e/statistiqueLotH2.ts` (moyennes, σ division par n, Sx division par n − 1 pour les pièges, Cov,
+moindres carrés, régression de x en y, Mayer avec ou sans tri, somme des carrés, médiane) ; nuage `ui5e/figureNuageLotH2.ts`
+(repère « bien choisi » du § 1 : pas 1 / 2 / 2,5 / 5 × 10ᵏ, axes qui ne commencent pas à 0 avec BRISURE dessinée, titres
+d'axes, droites rognées par un `<svg>` imbriqué, points étiquetés, bande « données », point entouré ; AUCUN identifiant ;
+la même chaîne à l'écran, sur papier et dans le corrigé) ; nombres `ui5e/nombresStatLotH2.ts` (`nL` / `nT` virgule et espace
+des milliers dès 10 000, `nPlus` qui n'écrit rien pour un zéro arrondi — « 213 » + « 0 » donnait « 2130 » —, `droiteL`,
+`messageTropArrondi`). Lectures : `lireValeur` (5e ch. 2) et `lireFonctionX` (droite jugée AFFINE puis par a ± 0,005 et
+b ± 0,006). Corrigés `generateurs5e/{modeliserPrevoir,meilleurAjustement,correlationCausalite,detectiveStatistique}/corrigeDetaille.ts`
+(5gen80 : dans `ui5e/formatCorrelationCausalite.ts`), une lettre par écran, partagés par l'appli et l'adaptateur. Cartes :
+5gen79 en fin de § 4 « Droite des moindres carrés », 5gen78, 5gen80 puis 5gen81 en fin de § 6 « Interpréter » ; AUCUN bloc
+de cours ajouté. Registres par ajout (`registry.ts` sur la constante `CH_5E_STATISTIQUE_DEUX_VARIABLES` du lot AF,
+`evaluationAdapterRegistry.ts` avec `versionPapier` — l'adaptateur de 5gen81 s'appelle
+`adaptateurEvaluationDetectiveStatDeuxVariables`, celui du 4e `…DetectiveStatistique` existait —, `evaluationPayload.ts` :
+union + entrées pilotes processus 3, `regroupementsPapier.ts` : 5gen80).
+
+**5gen78 — Modéliser et prévoir en contexte** (§ 6, Transférer ; § 6 plutôt que § 4 : la compétence visée est le jugement
+— fiabilité, interpolation / extrapolation —, la droite et r ne sont que l'outil calculatrice du § 4–5). Six contextes du
+document du professeur, nombres nouveaux (variantes) : dilatation d'une barre de 10 m (seuil donné par une LONGUEUR, 10,0xx m
+→ allongement en mm), charge maximale d'une grue (longueur de flèche maximale), pièces défectueuses (seuil 5 %), prix et
+nombre d'entreprises acheteuses (sur 300), population d'une commune (x = années depuis 2010), consommation selon la
+puissance. VERDICTS tirés à parts égales AVANT les nombres : fiable (|r| ∈ [0,86 ; 0,995]) / peu fiable ([0,45 ; 0,74], loin
+du seuil 0,80), interpolation (x₀ dans ]min ; max[, hors tableau) / extrapolation ; série = loi affine + bruit gaussien
+(écart-type proportionnel à l'étendue), arrondie à la précision du tableau, r recalculé sur la série ARRONDIE et accepté dans
+la bande. Écrans : a, b (précision par contexte), r au millième, fiabilité (choix : |r| ≥ 0,80 / < 0,80 / « il faudrait
+r = ±1 » / « r ≠ 0 suffit » ou « r négatif = pas de lien »), prévision (tolérance PROPAGÉE : a et b arrondis ou non + demi-unité),
+nature (choix : interpolation / extrapolation / leurres « absent du tableau, donc … »), seuil (ax + b = seuil résolu,
+tolérance propagée). Messages ciblés (jamais sur une réponse juste, garde en tête de `piege`) : a et b échangés, listes
+échangées (régression de x en y), pente de Mayer, signe de a, R² au lieu de r, |r| au lieu de r négatif, x résolu au lieu de
+y calculé, seuil substitué au lieu de résolu, longueur non convertie (dilatation). Figure : nuage, puis la droite dès
+l'écran 2 ; corrigé : bande des données, verticale en x₀, point prévu, point du seuil. Papier : situation + tableau +
+TROIS vraies questions a) droite, r, fiabilité [a, b, c] b) prévision et sa nature [d, e] c) seuil [f]. `calcul:
+'calculatrice'` partout, `calculatriceIndispensable: true`, `forme` = contexte (jamais les verdicts). Niveau 4 · 14 min
+pour TOUS (écran r = lecture, méthode 1, nombres 1, `sansCharge` : le verdict ne change ni niveau ni durée).
+
+**5gen79 — Quel est le meilleur ajustement ?** (§ 4, Transférer). Variantes : `deuxDroites` (exercice 10 du document :
+cinéma / révision / voitures, six points entiers, deux droites à coefficients au dixième — écarts au dixième, carrés au
+centième —, écart d'un point, S₁, S₂ exactes, verdict ; |S₁ − S₂| ≥ max(0,6 ; 8 %)) ; `mayerMoindres` (six points, les
+droites de Mayer et des moindres carrés données SANS leur nom ; moyennes, pentes et ordonnées EXACTES à deux décimales
+trouvées par recherche ; G, S₁, S₂ au centième, verdict avec le leurre « les deux passent par G » ; S_Mayer − S_mc ≥ 0,1) ;
+`aberrant` (exercice 11 : glacier et travaux, loyer modéré, élève malade, voiture accidentée ; huit relevés, |r| ≥ 0,93 sans
+le point, le point aberrant est le plus éloigné de la droite des autres ; écrans : le point (choix parmi quatre), r avec et
+sans, droite sans, prévision). VERDICT tiré EN PREMIER : droite gagnante (deuxDroites) ou place de la droite des moindres
+carrés (mayerMoindres) à parts égales, rang du point aberrant uniforme (0–7). Messages : écart au signe inversé, écarts
+additionnés sans carré, valeurs absolues, somme de l'autre droite, médiane au lieu de moyenne pour G, r avec / sans échangés,
+R², droite avec le point aberrant, prévision avec cette droite. Papier : deuxDroites et mayerMoindres = situation (les deux
+droites) + tableau + UNE consigne (« Justifie par la somme des carrés des écarts verticaux » / « Justifie par un calcul ») ;
+aberrant = trois vraies questions [a] [b] [c, d]. Profils : aberrant `calculatrice` + `calculatriceIndispensable:
+['aberrant']` ; les deux autres sans `calcul` (à la main, tirés dans les deux modes) ; `forme` = variante. Niveaux :
+deuxDroites 2 · 10 min (méthode 0 : la consigne la donne), mayerMoindres 3 · 10, aberrant 4 · 10 (écran a = lecture).
+
+**5gen80 — Corrélation ou causalité ?** (§ 6, Transférer). Banque RÉDIGÉE et relue `core5e/banqueCorrelationCausalite.ts` :
+45 situations, 9 par type (cause commune, coïncidence, causalité inverse, effet décalé, causalité plausible), textes FIXES
+(aucun nombre tiré ; r écrit dans le texte), sources des cas réels en tête du fichier (document du professeur, Messerli 2012,
+corrélations fallacieuses de T. Vigen) ; pour chacune la bonne explication précise, trois leurres et une phrase de corrigé.
+Type = variante, tiré au cinquième AVANT la situation ; `groupe_explication` (les cinq). Écrans (choix fermés, 1 tentative) :
+type (cinq options fixes) puis explication précise (quatre options propres à la situation, ordre mélangé stocké pour le
+`?code=` ; « Quelle troisième grandeur explique les deux ? » pour une cause commune). Papier : la situation + « Cette
+corrélation traduit-elle une relation de cause à effet ? Explique-la : causalité plausible, cause commune (nomme-la),
+coïncidence, causalité inverse ou effet décalé dans le temps. » ; REGROUPÉ (entrée `5gen80`, ligne = la situation,
+consigne « Pour chaque situation, dis si … »). Aucun `calcul`, aucune `forme` ; niveau 2 · 6 min constant.
+
+**5gen81 — Détective d'erreurs : statistique à deux variables** (fin, carte en fin de § 6, mécanique de 5gen72 / 6gen131).
+Huit erreurs = variantes, `groupe_erreur` : Mayer sans tri (table en désordre, sommes de groupes divisibles par 3 dans
+les deux partages), pente arrondie au dixième avant b (G₁, G₂ donnés, |a − a_arrondi|·x₁ ≥ 0,15), médianes au lieu des
+moyennes pour G (droite donnée, la copie conclut à tort qu'elle ne passe pas par G), x̄ et ȳ échangés dans b, écarts-types
+divisés par n − 1 (catégorie de r changée), covariance sans diviser par n (r > 1), extrapolation abusive (mortalité
+infantile, taille à 40 ans, prix d'une voiture de 12 ans, ventes de la semaine 104), « donc x cause y » (librairies et vols de
+vélos, taille et lecture, ventilateurs et glaces, églises et cafés). Séries n = 5 à moyennes entières pour les calculs de r ;
+valeurs de la copie calculées avec les nombres QU'ELLE ÉCRIT (σ au millième), corrigé avec les racines exactes. Ligne fausse
+précédée de 0 à 3 lignes justes (`av` tiré en dernier). Correction : droite (champ), G (deux champs), r au centième (champ),
+ou conclusion (choix fermé, 1 tentative) pour les deux erreurs d'interprétation — seul écart au « corriger (champ) » du
+brief, une conclusion ne se saisit pas. Papier : exercice + tableau + copie (marge rouge) + consigne globale ; aucun
+`calcul`, `forme` = variante ; niveau 3 · 8 min constant.
+
+**Mesures** : collecteur (`…/scratchpad/h2-5e6/collecteur.ts`, `evalLatex.ts` recopié) 200 tirages par variante × 22
+variantes (+ 300 pour 5gen78 après la dernière retouche) : écran, aides, options, papier, barème (= 4), corrigé ; 0 NaN /
+notation clavier / KaTeX invalide / majuscule d'insistance ; ≈ 21 400 relations numériques du corrigé, 0 fausse ; réponses
+justes (plusieurs écritures, valeurs arrondies ou non) acceptées, pièges absents sur une réponse juste, copie du détective
+refusée avec son message ; réponses recalculées indépendamment (a, b, r par les sommes, verdicts fiabilité / interpolation,
+gagnante, droites de Mayer et des moindres carrés, |r| sans > |r| avec) ; verdicts 5gen78 46–57 / 200 par case (quatre
+cases), 5gen79 d1 / d2 110 / 90 et 101 / 99, rangs aberrants 21–31 / 200, situations de 5gen80 14–31 / 200, ligne fausse
+de 5gen81 39–60 / 200 par position ; `?code=` 160 / 160. Plans réels `construirePlan` (2 séries ; interdite × 6 : 5gen79
+deuxDroites / mayerMoindres + groupes 5gen80 / 5gen81 ; autorisée × 4 : tout) : même structure, nombres tous différents,
+verdicts tirés indépendamment, codes 72 + 104 / 176 ; iPhone 13 (chaque variante × 2 : illisible sans tentative, réponse
+fausse, réponse juste, choix fermé faux ✗ / ✓, « Nouvel exercice » à champs vides) 367 contrôles, scrollWidth 390, 0 erreur
+console, 0 `.katex-error` (le tableau d'interprétation, `array`, coupé à son « ≥ » par l'alignement du corrigé : passé en
+formule dans « Ce qu'on utilise ») ; documents réels (évaluation 2 séries + aménagée + corrigé + grille + feuille +
+aménagée + Word du corrigé, interdite et autorisée) 0 débordement à 680 / 820 / 1 280 px, 0 `.katex-error`.
+
 ## 5e ch. 5, lot H — 5gen73–75 (nouveaux, notés)
 
 Socle d'écrans du 5e (`AppEcransTrigo` + `DefinitionEcrans`) réutilisé SANS modification (options `figure`,

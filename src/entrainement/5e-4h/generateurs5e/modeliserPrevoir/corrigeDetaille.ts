@@ -53,9 +53,8 @@ function etapeCorrelation(e: E): EtapeCorrection[] {
 function etapeFiabilite(e: E): EtapeCorrection[] {
   const v = Math.abs(e.stats.r);
   return [
-    utilise("c", [t("La droite est un bon modèle quand la corrélation est forte ou très forte (tableau d'interprétation du cours, § 5) :")]),
+    utilise("c", [t("La droite est un bon modèle quand la corrélation est forte ou très forte (tableau d'interprétation du cours, § 5) : "), f(TABLEAU_R_LATEX)]),
     calcul("c", [
-      ligne(TABLEAU_R_LATEX),
       ligne(`|r|\\approx ${nL(v, 3, true)}${v >= 0.8 ? "\\geq" : "<"}0{,}80`, `corrélation ${categorieR(e.stats.r)}`),
     ]),
     resultat("c", fr(reponse(e, "fiabilite"))),
@@ -123,7 +122,7 @@ function etapeSeuil(e: E): EtapeCorrection[] {
     utilise("f", [t("Cette fois, on connaît y (le seuil) et on cherche x : on résout "), f("ax+b=\\text{seuil}"), t(".")]),
     calcul("f", lignes),
     { ...resultat("f", [...fr(reponse(e, "seuil")), t(" — "), ...interpretationSeuil(e)]), figureHtml: figureSeuil(e) },
-    verification("f", [t("Contrôle :")], [ligne(`${nL(e.stats.a, e.da + 2)}\\cdot ${nP(arrondi(x, e.ds), e.ds)}${nPlus(e.stats.b, e.db + 2)}\\approx ${nL(e.stats.a * arrondi(x, e.ds) + e.stats.b, 2)}`, "on retrouve le seuil, à l'arrondi de x près")]),
+    verification("f", [t("Contrôle :")], [ligne(`${nL(e.stats.a, e.da + 2)}\\cdot ${nP(arrondi(x, e.ds), e.ds)}${nPlus(e.stats.b, e.db + 2)}\\approx ${nL(arrondi(e.stats.a, e.da + 2) * arrondi(x, e.ds) + arrondi(e.stats.b, e.db + 2), 2)}`, "on retrouve le seuil, à l'arrondi de x près")]),
     ...(x > xMax(e) || x < xMin(e) ? [verification("f", [t("Cette valeur sort de l'intervalle des données : c'est une extrapolation, à prendre avec prudence.")])] : []),
     piege("f", [t("Remplacer x par le seuil au lieu de résoudre l'équation.")]),
   ];
