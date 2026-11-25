@@ -217,6 +217,11 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'table-ronde-collier-widget': () => import('../../interactive/register-table-ronde-collier-widget.js'),
   'mots-binome-widget': () => import('../../interactive/register-mots-binome-widget.js'),
   'approximation-binome-widget': () => import('../../interactive/register-approximation-binome-widget.js'),
+  'binomiale-vers-normale-widget': () => import('../../interactive/register-binomiale-vers-normale-widget.js'),
+  'table-phi-widget': () => import('../../interactive/register-table-phi-widget.js'),
+  'densite-repartition-widget': () => import('../../interactive/register-densite-repartition-widget.js'),
+  'balance-esperance-widget': () => import('../../interactive/register-balance-esperance-widget.js'),
+  'deux-echelles-standardisation-widget': () => import('../../interactive/register-deux-echelles-standardisation-widget.js'),
 }
 
 /**

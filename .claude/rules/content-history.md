@@ -5828,3 +5828,50 @@ avant les nombres ; variantes du sélecteur qui varient. Lot C :
   résultat entre 0,005 et 0,995 ; écran « stratégie » supprimé (le type de question le donnait).
 Cartes du chapitre (descriptions de 6gen49–53) réécrites. Hors périmètre : le cours (agent AFD), 6gen110–122,
 le papier définitif (lot E : corrigé « comme au tableau », niveaux, profils d'équilibre, annexe Φ).
+## 6e (6h), Chapitre 8 — lot G de l'audit, première moitié (5 ateliers + 6 réemplois, agent G1, 25/11/2026)
+
+Le chapitre n'avait aucun atelier. Onze blocs `atelier` ajoutés, seuls (aucun autre bloc touché), placés par
+ancre solide (le cours est réécrit en parallèle). Module partagé `src/interactive/variables-aleatoires-commun.js` :
+Φ en double précision (série de Marsaglia), `phiTable` (z arrondi au centième, Φ à 4 décimales : les ateliers
+calculent comme au cours, par la table), loi binomiale, écritures à la belge, curseurs − / +. Notation 𝓑(n ; p),
+𝒩(μ ; σ) (σ = écart-type), conditions d'approximation « du cours » (n > 30 ; 0,3 < p < 0,7), lectures de table
+écrites « ≈ ». Légendes en Unicode (texte brut).
+- **`balance-esperance-widget`** (§ 1, après la définition « Espérance E(X) ») : poutre graduée de −6 à 6, loi
+  faite de 20 blocs de 0,05 (somme toujours 1), bloc glissé au doigt / à la souris ou « toucher une pile puis une
+  valeur » ; appui en E(X) (centre de gravité), bande [E − σ ; E + σ] ; calculs exacts en vingtièmes (E, E(X²), V
+  par König, σ arrondi), sommes coupées terme par terme (une formule KaTeX ne se coupe pas). Lois prêtes :
+  exemple du cours (2 à 6, E = 3,85), jeu du cours (−2 / 3 / 5 €, E = 1,5), ±1 €, ±5 € ; « Garder en mémoire » /
+  « Deux jeux de même E(X) » (bande grise sous la poutre, même échelle).
+- **`densite-repartition-widget`** (§ 3, après la liste des propriétés de F et f) : densités uniforme, triangulaire
+  et parabole de la figure du cours sur [0 ; 6] ; a et b au dixième ; aire sous f = segment F(b) − F(a) de même
+  couleur sur le graphique de F (défini sur ℝ, fenêtre FIXE x de −1 à 7) ; tangente à F en b de pente f(b) ;
+  a = b → P(X = a) = 0.
+- **`table-phi-widget`** (§ 6, juste avant le sous-titre « Sens inverse ») : cloche 𝒩(0 ; 1) fenêtre fixe, table
+  complète 0,00 à 3,99 dans une boîte défilante (en-têtes collants), case + ligne + colonne allumées, case touchée
+  = |z| ; modes P(Z ≤ z), P(Z ≥ z), P(a ≤ Z ≤ b) (deux cases, intervalle symétrique 2Φ(k) − 1), sens inverse
+  (p donnée, case la plus proche ; à égale distance, milieu : 0,95 → 1,645 ; p < 0,5 → 1 − p puis signe).
+- **`deux-echelles-standardisation-widget`** (§ 6, après la définition « Standardisation ») : cloche de 𝒩(μ ; σ)
+  (x de 0 à 100, fixe) et référence 𝒩(50 ; 10) en pointillé ; seconde graduation z sous l'axe des x (traits en
+  μ + kσ) reliée à l'axe de Z ∼ 𝒩(0 ; 1) dessiné dessous ; même aire teintée sur les deux cloches ; hauteur du
+  sommet 1/(σ√(2π)).
+- **`binomiale-vers-normale-widget`** (§ 7, après l'exemple résolu n = 100, p = 0,5) : n de 5 à 200, p, k, X ≤ k /
+  X ≥ k / X = k ; histogramme de 𝓑(n ; p) sous la cloche ; P exacte, approchée sans correction (borne k) et avec
+  correction de continuité (k ± 0,5), écarts ; conditions en pastilles vertes / rouges (+ « la convention est
+  prudente » : n = 200, p = 0,2 est très bien approché). Abscisses de −0,5 à n + 0,5, ordonnées fixes pour un n
+  (indépendantes de p et k) ; « Loupe autour de k » (17 unités) ; toucher / glisser sur la figure choisit k (la
+  fenêtre de la loupe est FIGÉE pendant le glissement — sinon elle suivait k sous le doigt et k s'emballait).
+- **Réemplois** (blocs `atelier` seuls, légendes adaptées au ch. 8) : `stabilisation-frequences-widget` (§ 2, après
+  « Schéma de Bernoulli », pont E(X) = np), `binomiale-positions-widget` (§ 2, après l'exemple n = 5, p = 0,4 :
+  « règle p = 0,4 », le défaut du widget est 0,3), `fonction-aire-widget` (§ 3, F′ = f) et
+  `rectangle-valeur-moyenne-widget` (§ 3, après E / V continues : valeur moyenne d'une densité = 1/(v − u), et
+  « E(X) n'est PAS cette valeur moyenne »), `tchebychev-garantie-widget` (§ 6, après l'attention « Diviser par 2 » :
+  série en cloche, k = 2 → 95 % contre 75 % garantis), `bayes-test-medical-widget` (§ 7, juste après le sous-titre
+  « Théorème de Bayes à 3 catégories », en rappel ; légende sans « P(A|B) » tapé).
+Vérifié (Vite, page réelle, panneau, iPhone 13 clair / sombre et 1 280 px) : 0 erreur console, scrollWidth 390,
+0 `.katex-error`, Shadow DOM sans `^ $ \ * NaN undefined Infinity`, 0 étiquette SVG rognée ; balayages contre un
+recalcul indépendant (Φ par Simpson, binomiale par produit récurrent, aires par Simpson) : 420 lectures de table
+(dont 120 sens inverse), 900 valeurs binomiale / approximations, 480 aires et pentes, 600 contrôles de balance
+(200 déplacements au pointeur, somme 20 blocs, E, V, place de l'appui), 480 standardisations : 0 faux ; gestes au
+doigt (CDP) : bloc glissé, toucher-poser, glisser k sous loupe, case de table touchée. Épinglage dans le panneau :
+0 KO à 390 × 664 et 375 × 667 (11 ateliers ; les cases de table rognées par leur boîte défilante sont exclues de la
+mesure). Scripts et captures : `scratchpad/g1-6e8/`.

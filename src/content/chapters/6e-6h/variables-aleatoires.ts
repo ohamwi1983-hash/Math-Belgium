@@ -136,6 +136,17 @@ export const variablesAleatoires: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'balance-esperance-widget',
+          label: 'Manipule toi-même : la balance de l’espérance',
+          caption:
+            'Chaque bloc pèse 0,05 : la loi est posée sur une poutre graduée de −6 à 6, et la somme ' +
+            'des probabilités reste toujours égale à 1. Déplace des blocs : le point d’appui se place ' +
+            'en E(X), le centre de gravité, et la bande bleue va de E(X) − σ à E(X) + σ. « Deux jeux ' +
+            'de même E(X) » compare un jeu à ±1 € et un jeu à ±5 € : même espérance, pas le même ' +
+            'risque.',
+        },
+        {
           kind: 'historique',
           titre: 'Le premier livre sur... les jeux de hasard',
           text:
@@ -618,6 +629,16 @@ export const variablesAleatoires: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'stabilisation-frequences-widget',
+          label: 'Manipule toi-même : la fréquence se stabilise',
+          caption:
+            'Chaque lancer est une épreuve de Bernoulli. Lance la pièce ou le dé par paquets de 10, ' +
+            '100 ou 1 000 : la fréquence des succès se resserre autour de p (loi des grands nombres ' +
+            'de Jacques Bernoulli). C’est pourquoi on attend environ n × p succès en n épreuves : ' +
+            'E(X) = np.',
+        },
+        {
           kind: 'historique',
           titre: 'Un mathématicien, toute une famille de savants',
           text:
@@ -698,6 +719,15 @@ export const variablesAleatoires: ChapterContent = {
             },
             { kind: 'para', text: '$E(X)=5\\times0{,}4=2$ ; $V(X) = 5\\times0{,}4\\times0{,}6 = 1{,}2$ et $\\sigma(X) = \\sqrt{1{,}2} \\approx 1{,}095$' },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'binomiale-positions-widget',
+          label: 'Manipule toi-même : la loi binomiale complète',
+          caption:
+            'Rappel du chapitre 6 : fais glisser n et p, choisis k, et compare le calcul juste aux ' +
+            'deux pièges (oublier les positions, additionner les p). Règle n = 5 et p = 0,4 pour ' +
+            'retrouver la loi de l’exemple ci-dessus, avec P(X = 2) = 0,3456.',
         },
         {
           kind: 'exempleLibre',
@@ -1000,6 +1030,25 @@ export const variablesAleatoires: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'densite-repartition-widget',
+          label: 'Manipule toi-même : densité et fonction de répartition',
+          caption:
+            'Choisis une densité sur [0 ; 6] et déplace a et b : l’aire sous f entre a et b est la ' +
+            'longueur du segment F(b) − F(a) sur le graphique de F. La tangente à F en b a pour pente ' +
+            'f(b), car F′ = f. Fais a = b : l’aire devient nulle, P(X = a) = 0. La parabole est celle ' +
+            'de la figure ci-dessus.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'fonction-aire-widget',
+          label: 'Manipule toi-même : la fonction aire (rappel)',
+          caption:
+            'Rappel du chapitre « Intégrales et primitives » : l’aire sous f de a à x définit une ' +
+            'fonction A dont la dérivée est f. C’est le lien entre la densité et la fonction de ' +
+            'répartition : F(x) est l’aire sous la densité à gauche de x, donc F′ = f.',
+        },
+        {
           kind: 'astuce',
           label: 'Strict ou large : aucune différence en continu',
           text: "Puisque $P(X=a)=0$ pour toute valeur isolée, ajouter ou retirer une borne ne change **jamais** la probabilité d'un intervalle : $P(a<X<b)$ et $P(a\\leq X\\leq b)$ valent toujours pareil, $F(b)-F(a)$. C'est l'inverse exact du cas discret, où la valeur frontière $X=k$ pèse un vrai $P(X=k)$ et fait se recouvrir « au moins $k$ » et « au plus $k$ » (§ 1).",
@@ -1100,6 +1149,17 @@ export const variablesAleatoires: ChapterContent = {
             '$\\displaystyle E(X) = \\int_u^v t\\cdot f(t)\\,dt$',
             "Sa **variance** est $\\displaystyle V(X) = \\int_u^v [t-E(X)]^2\\cdot f(t)\\,dt$ $\\displaystyle = \\int_u^v t^2 f(t)\\,dt-[E(X)]^2$, et son **écart-type** en est la racine carrée : $\\sigma(X)=\\sqrt{V(X)}$.",
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'rectangle-valeur-moyenne-widget',
+          label: 'Manipule toi-même : la valeur moyenne d’une fonction (rappel)',
+          caption:
+            'Rappel du chapitre « Intégrales et primitives » : la valeur moyenne de f sur [a ; b] est ' +
+            'la hauteur du rectangle de même aire. Pour une densité, l’aire totale vaut 1 : sa valeur ' +
+            'moyenne sur [u ; v] vaut donc 1/(v − u), la hauteur de la densité uniforme (section 5). ' +
+            'Attention : E(X) n’est pas cette valeur moyenne, c’est la moyenne des valeurs t ' +
+            'pondérées par f(t).',
         },
         {
           kind: 'intuition',
@@ -1486,6 +1546,16 @@ export const variablesAleatoires: ChapterContent = {
           text: "La probabilité d'être seulement au-dessus de 70 (un seul côté) n'est **jamais** le complément total ($4{,}6\\,\\%$) ! La loi normale étant symétrique, ce complément se partage également entre les deux queues : $0{,}046\\div2=0{,}023$ (environ $2{,}3\\,\\%$) pour un seul côté. Oublier cette division par 2 est l'erreur la plus fréquente de cette règle.",
         },
         {
+          kind: 'atelier',
+          tag: 'tchebychev-garantie-widget',
+          label: 'Manipule toi-même : règle empirique et garantie de Tchebychev',
+          caption:
+            'Rappel de la 4e : pour n’importe quelle série, au moins (1 − 1/k²) × 100 % des valeurs ' +
+            'sont dans [x̄ − kσ ; x̄ + kσ]. Choisis la série en cloche et k = 2 : 95 % des valeurs ' +
+            'sont dans la bande, bien plus que les 75 % garantis et proche des 95,4 % de la règle ' +
+            'empirique — qui ne vaut que pour une loi normale.',
+        },
+        {
           kind: 'definition',
           label: 'Standardisation',
           items: [
@@ -1514,6 +1584,16 @@ export const variablesAleatoires: ChapterContent = {
               text: "On admet qu'une transformation affine d'une variable normale est encore normale : si $X\\sim\\mathcal{N}(\\mu\\,;\\sigma)$, alors $Z\\sim\\mathcal{N}(0\\,;1)$, et une seule table suffit pour toutes les lois normales.",
             },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'deux-echelles-standardisation-widget',
+          label: 'Manipule toi-même : deux échelles, x et z',
+          caption:
+            'Sous l’axe des x, une seconde graduation : z = (x − μ)/σ. Règle μ et σ : la cloche se ' +
+            'déplace, s’élargit ou s’affine (la cloche 𝒩(50 ; 10) reste en pointillé), et la même ' +
+            'aire est teintée sous la cloche de X et sous celle de Z. L’exemple du cours donne z = ' +
+            '1,5 et Φ(1,5) ≈ 0,9332.',
         },
         {
           kind: 'illustration',
@@ -1614,6 +1694,16 @@ export const variablesAleatoires: ChapterContent = {
             { tag: 'effectif', text: '$1\\,200\\times0{,}1056=126{,}72$, arrondi à l\'unité : $127$' },
           ],
           result: { tag: 'conclusion', text: 'Environ 127 élèves (effectif attendu = effectif total × probabilité).' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'table-phi-widget',
+          label: 'Manipule toi-même : la table de Φ',
+          caption:
+            'Déplace z au centième : l’aire à gauche de z se teinte et sa case s’allume dans la table ' +
+            '(ligne 1,2 et colonne 0,04 pour z = 1,24). Essaie aussi P(Z ≥ z), un intervalle P(a ≤ Z ' +
+            '≤ b) avec des bornes négatives, et le sens inverse : on donne une probabilité, tu ' +
+            'cherches la case la plus proche.',
         },
         { kind: 'subheading', text: 'Sens inverse — retrouver z (ou x) depuis une probabilité' },
         {
@@ -1822,6 +1912,16 @@ export const variablesAleatoires: ChapterContent = {
         },
         { kind: 'subheading', text: 'Théorème de Bayes à 3 catégories' },
         {
+          kind: 'atelier',
+          tag: 'bayes-test-medical-widget',
+          label: 'Manipule toi-même : Bayes à deux catégories (rappel)',
+          caption:
+            'Rappel du chapitre 6 avant de passer à trois catégories : règle la proportion de malades ' +
+            'et les deux taux de tests positifs, puis compare « malade sachant que le test est ' +
+            'positif » à « test positif sachant que la personne est malade ». Les fréquences ' +
+            'naturelles sur 1 000 personnes suivent la formule des probabilités totales.',
+        },
+        {
           kind: 'definition',
           label: 'Probabilités totales et formule de Bayes',
           items: [
@@ -1944,6 +2044,17 @@ export const variablesAleatoires: ChapterContent = {
               text: 'Comparaison : la valeur exacte (somme des 56 termes binomiaux) vaut $0{,}8644$ ; sans correction, $z=\\dfrac{55-50}{5}=1$ donnerait $\\Phi(1)\\approx0{,}8413$, soit 2,3 points d\'écart.',
             },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'binomiale-vers-normale-widget',
+          label: 'Manipule toi-même : de la binomiale à la normale',
+          caption:
+            'Règle n, p et k : l’histogramme de 𝓑(n ; p) se superpose à la cloche de 𝒩(np ; √(np(1 − ' +
+            'p))). Compare la probabilité exacte aux deux approximations : sans correction (borne k) ' +
+            'et avec correction de continuité (borne k ± 0,5, car la barre k va de k − 0,5 à k + ' +
+            '0,5). La loupe agrandit autour de k ; les conditions du cours s’allument en vert ou en ' +
+            'rouge.',
         },
         {
           kind: 'attention',
