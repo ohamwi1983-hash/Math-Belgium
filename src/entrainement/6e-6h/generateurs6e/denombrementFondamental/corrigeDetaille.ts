@@ -273,7 +273,7 @@ function corrigeE(e: ExerciceDenombrementE): EtapeCorrection[] {
     utiliseCours("b", fx("Factorielle : produit des entiers de 1 à $n-1$"), COURS_FONDAMENTAL),
     calcul("b", table ? [ligne(`N=${e.n - 1}!`), ligne(`=${milliers(e.resultat)}`)] : [ligne(`N=\\dfrac{${e.n - 1}!}{2}`), ligne(`=\\dfrac{${milliers(2 * e.resultat)}}{2}`), ligne(`=${milliers(e.resultat)}`)]),
     resultat("b", fx(`$N=${milliers(e.resultat)}$ dispositions.`)),
-    piege("b", fx(table ? "Diviser par 2 : une table ronde ne se retourne pas, le miroir échangerait les voisins de gauche et de droite." : `Calculer $(${e.n}-1)!$ seulement : le bracelet se retourne, deux dispositions symétriques sont identiques.`)),
+    piege("b", fx(table ? "Diviser par 2 : ici on ne peut pas retourner la disposition, le miroir échangerait les voisins de gauche et de droite." : `Calculer $(${e.n}-1)!$ seulement : l'objet se retourne, deux dispositions symétriques sont identiques.`)),
   ];
 }
 

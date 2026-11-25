@@ -15,13 +15,14 @@ import { CC, COURS_BINOME, par, calcul, decimalExact, finaliserCombinatoire, fx,
 
 type E = ExerciceBinomeNewton;
 
-/** Polynôme en morceaux insécables d'au plus trois termes (une formule longue ne se coupe jamais). */
-function polynomeEnMorceaux(gauche: string, termes: { coefficient: number; exposant: number }[]): FragmentConsigne[] {
+/** Polynôme en morceaux insécables (le binôme et le premier terme, puis deux termes par morceau) : une
+ * formule longue ne se coupe jamais et ne sort pas d'une carte étroite (« Je vérifie », deux colonnes). */
+export function polynomeEnMorceaux(gauche: string, termes: { coefficient: number; exposant: number }[]): FragmentConsigne[] {
   const r: FragmentConsigne[] = [];
   const nonNuls = termes.filter((x) => x.coefficient !== 0);
-  for (let i = 0; i < nonNuls.length; i += 3) {
+  for (let i = 0; i < nonNuls.length; i += i === 0 ? 1 : 2) {
     const morceau = nonNuls
-      .slice(i, i + 3)
+      .slice(i, i === 0 ? 1 : i + 2)
       .map((x, j) => monome45(x.coefficient, x.exposant, i === 0 && j === 0))
       .join("");
     if (i > 0) r.push(texte(" "));
@@ -45,10 +46,10 @@ function corrigeA(e: ExerciceBinomeA): EtapeCorrection[] {
   return [
     utiliseCours("a", fx("Les coefficients binomiaux $C_n^k$ forment la ligne $n$ du triangle de Pascal ; ils sont symétriques, $C_n^k=C_n^{n-k}$"), COURS_BINOME),
     calcul("a", lignesA),
-    resultat("a", fx(`Ligne ${e.n} : $${e.termes.map((x) => milliers(x.coefficientBinomial)).join("\\;;\\;")}$`)),
+    resultat("a", fx(`Ligne ${e.n} : ${e.termes.map((x) => `$${milliers(x.coefficientBinomial)}$`).join(" ; ")}`)),
     utiliseCours("b", fx(`Binôme de Newton : le terme d'indice $k$ est $C_n^k\\,(ax)^{n-k}\\,b^k$, de coefficient $C_n^k\\,a^{n-k}\\,b^k$ ; ici $a=${e.a}$ et $b=${e.b}$`), COURS_BINOME),
     calcul("b", e.termes.map((x) => ligne(`c_{${x.k}}=${milliers(x.coefficientBinomial)}\\times ${par45(e.a)}^{${x.exposantX}}\\times ${par45(e.b)}^{${x.k}}=${milliers(x.coefficientFinal)}`, x.exposantX === 0 ? "terme constant" : fx(`terme en $${puissanceX45(x.exposantX)}$`)))),
-    resultat("b", fx(`Coefficients : $${e.termes.map((x) => milliers(x.coefficientFinal)).join("\\;;\\;")}$`)),
+    resultat("b", fx(`Coefficients : ${e.termes.map((x) => `$${milliers(x.coefficientFinal)}$`).join(" ; ")}`)),
     utiliseCours("c", fx("On écrit chaque terme « coefficient × puissance de $x$ », du plus haut degré au terme constant"), COURS_BINOME),
     resultat("c", polynomeEnMorceaux(binome, termes)),
     verification("c", fx(`Pour $x=1$, le polynôme vaut la somme de ses coefficients, $${milliers(termes.reduce((s, x) => s + x.coefficient, 0))}$, et $(${e.a}${e.b < 0 ? "" : "+"}${e.b})^{${e.n}}=${milliers((e.a + e.b) ** e.n)}$.`)),

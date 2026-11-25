@@ -1,14 +1,14 @@
 import type { ExerciceBinomeNewton } from "../../core6e/binomeNewton.types";
 import type { AdaptateurFeuilleExercices, BaremeExercice, CriteresDifficulte, FragmentConsigne, ProfilInstance } from "../../../export/genererFeuilleExercices";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
-import { FORMAT_6GEN45, binomeLatex, polynomeLatex, questionsPapier45, situationPapier45 } from "../../ui6e/formatBinomeNewton";
+import { FORMAT_6GEN45, binomeLatex, questionsPapier45, situationPapier45 } from "../../ui6e/formatBinomeNewton";
 import { phasesPourExercice } from "../../moteur6e/typesBinomeNewton";
 import type { PhaseBinomeNewton } from "../../moteur6e/typesBinomeNewton";
 import { approximationC, termeNegligeC, valeurExacteC } from "../../moteur6e/verificationBinomeNewton";
 import { combinaisonBig, versNombre } from "../../moteur6e/saisieCombinatoire";
 import { arrondiLatex, decimalLatex, milliers } from "../../ui6e/fragmentsCombinatoire";
 import { construireAdaptateurCombinatoire } from "../adaptateurCombinatoire";
-import { correctionDetailleeBinomeNewton } from "./corrigeDetaille";
+import { correctionDetailleeBinomeNewton, polynomeEnMorceaux } from "./corrigeDetaille";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceBinomeNewton } from "./index";
 
 /**
@@ -40,14 +40,10 @@ export function profilBinomeNewton(e: E): ProfilInstance {
   }
 }
 
-function polynome(e: E & { famille: "A" }): string {
-  return polynomeLatex(e.termes.map((x) => ({ coefficient: x.coefficientFinal, exposant: x.exposantX })));
-}
-
 function reponseBreve(e: E): FragmentConsigne[] {
   switch (e.famille) {
     case "A":
-      return [l(`${binomeLatex(e.a, e.b, e.n)}=${polynome(e)}`)];
+      return polynomeEnMorceaux(binomeLatex(e.a, e.b, e.n), e.termes.map((x) => ({ coefficient: x.coefficientFinal, exposant: x.exposantX })));
     case "B":
       return e.sousType === "rang" ? [l(`T_{${e.rang}}=${milliers(e.coefficientFinal)}${e.p === 0 ? "" : e.p === 1 ? "x" : `x^{${e.p}}`}`)] : [t("Coefficient : "), l(milliers(e.coefficientFinal))];
     case "C":

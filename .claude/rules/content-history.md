@@ -5657,6 +5657,23 @@ ciblés, explication après échec). Lot C :
 Hors périmètre, à faire : cartes du chapitre (6gen46 « 32 cartes », « répartitions en boîtes » ; 6gen45
 « triangle de Pascal » désormais vrai), refonte papier (lot E : profils, corrigé « comme au tableau »,
 niveaux, `versionPapier`).
+
+## 6e (6h), Chapitre 7 — lot E de l'audit (papier et évaluations de 6gen43–6gen48, 25/11/2026)
+
+Adaptateurs provisoires remplacés par `construireAdaptateurCombinatoire` : énoncé papier = situation en
+prose (nombres en formules en ligne : plus rien de coupé à l'impression — l'audit mesurait 34 à 81 % visible
+en 6gen47 / 48) + consigne globale ; vraies questions seulement en 6gen47 B, 6gen45 C et D. Corrigés « comme au
+tableau » (une lettre par écran) partagés écran / papier, affichés dans les applis : écran révélé, bouton
+« Voir comment on y arrive » après une bonne réponse, fiche des puces (convention du 25/11 reprise dans
+`AppCombinatoire`). Barème par écran (somme 4), brève, `criteresDifficulte` mesurés, `versionPapier`,
+regroupements a), b), c), libellés pilotes. Profils (consigne du lot E, détail dans `feuilles-evaluations.md`,
+« 6e ch. 7 (lot E) ») : cas particuliers deux-groupes / unitaire / aucun-tous, `calcul` revu (6gen48 :
+`exacte` seulement pour p = 1/2), quatre groupes à verdict (6gen43 C, E ; 6gen44 B, D). Petite correction
+d'écran : 6gen47 A « On cherche la probabilité de que Léa… » → `laProbabiliteDe` (« la probabilité que Léa… »).
+Mesures : collecteur 250 tirages par variante (≈ 52 800 relations du corrigé recalculées, 0 fausse, 0 NaN,
+0 KaTeX invalide, 0 notation clavier) ; plans réels 2 séries interdite / autorisée : structure B = A,
+`?code=` = instance de l'adaptateur ; documents (feuille + aménagée, évaluation 2 séries + aménagée + corrigé
++ grille, Word) : 0 débordement, 0 formule coupée, 0 `.katex-error` à 680 / 820 / 1 280 px.
 ## 6e (6h), Chapitre 7 — lot G de l'audit, première moitié (5 ateliers, agent G1, 25/11/2026)
 
 Le chapitre n'avait aucun atelier. Cinq blocs `atelier` ajoutés, seuls (aucun autre bloc touché), notation

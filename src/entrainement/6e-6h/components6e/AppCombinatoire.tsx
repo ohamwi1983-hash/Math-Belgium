@@ -100,7 +100,7 @@ export function AppCombinatoire<E, P extends string>({ config }: { config: Confi
       return;
     }
     const revele = suivant.derniereRevelee;
-    setHistorique((h) => [...h, { titre: fmt.libellePhase(exercice, phase), votreReponse: votreReponse(phase, valeurs), correcte: !revele, reponseAttendue: revele ? reponseAttendue(phase) : undefined }]);
+    setHistorique((h) => [...h, { titre: fmt.libellePhase(exercice, phase), votreReponse: votreReponse(phase, valeurs), correcte: !revele, reponseAttendue: revele ? reponseAttendue(phase) : undefined, corrigeDetaille: corrigeDetailleEcranCourant() }]);
     setEnAttente({ suivant, revele, valeurs });
   }
 
@@ -131,21 +131,29 @@ export function AppCombinatoire<E, P extends string>({ config }: { config: Confi
   if (pucesAvant && etat.index === 0 && !enAttente) segments = Array.from({ length: pucesAvant }, (_, i) => (i === 0 ? "courante" : "a-venir"));
 
   const estChoix = def.estChoix(exercice, phase);
-  const explication = fmt.explication(exercice, phase);
+  /** Corrigé de l'écran courant : UNE seule source pour la validation (révélé : visible ; juste :
+   * replié derrière « Voir comment on y arrive ») ET pour l'entrée d'historique (fiche de la puce).
+   * Appelée quand l'écran se clôt : l'écran courant est encore celui qui se ferme. */
+  function corrigeDetailleEcranCourant(): ReactNode {
+    if (config.corrigeDetaille) return config.corrigeDetaille(exercice, phase);
+    const explication = fmt.explication(exercice, phase);
+    return explication.length > 0 ? (
+      <div className="aide-5e" style={{ marginTop: 8 }}>
+        {explication.map((l, i) => (
+          <p key={i} style={{ margin: "4px 0" }}>
+            <RenduFragments fragments={l} />
+          </p>
+        ))}
+      </div>
+    ) : undefined;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: estChoix ? undefined : reponseAttendue(phase),
         messageRevele: estChoix ? "Ce n'était pas le bon choix : la bonne réponse est marquée ✓." : undefined,
-        corrigeDetaille: config.corrigeDetaille?.(exercice, phase) ?? (explication.length > 0 ? (
-          <div className="aide-5e" style={{ marginTop: 8 }}>
-            {explication.map((l, i) => (
-              <p key={i} style={{ margin: "4px 0" }}>
-                <RenduFragments fragments={l} />
-              </p>
-            ))}
-          </div>
-        ) : undefined),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.suivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passer,
       }
