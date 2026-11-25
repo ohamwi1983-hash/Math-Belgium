@@ -6039,3 +6039,46 @@ demi-cercle) ; 204 réglages d'aire (aire de C₁ et C₂ par la formule des coo
 sur d, graphique touché, « Lancer » / « Pause ». Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667
 (10 ateliers du chapitre). `tsc`, `oxlint`, `npm run build` (24 pages) propres. Scripts et captures :
 `scratchpad/g1-6e9/`.
+
+## 6e (6h), Chapitre 9 — lot G de l'audit, seconde moitié (4 ateliers, agent G2, 25/11/2026)
+
+Quatre blocs `atelier` ajoutés (aucun autre bloc touché), même style que G1 : repère `geo-analytique-commun.js` à
+fenêtre FIXE et ORTHONORMÉ (même unité en x et y : cercles ronds), `katex-shadow.js`, curseurs − / +, figure dans une
+`<svg>` sans bouton dans son conteneur. Ajouts au module `lieux-geometriques-commun.js` (en fin de fichier, rien de
+modifié) : `racineEntiere`, `placeurEtiquettes` (première place libre parmi 8 autour du point, puis étiquette décalée
+pour rester ENTIÈREMENT dans le cadre), `marqueAngleDroit`, `texPolynome`.
+- **`repere-affine-widget`** (§ 1, juste après les deux panneaux « orthonormé / affine », avant l'astuce « vérifie que
+  le repère est orthonormé ») : angle ω entre les axes (30° à 150°) et rapport k des unités (0,5 à 2) ; quadrillage du
+  repère en parallélogrammes, unités « 1 » marquées en couleur sur chaque axe (corrige le point 23 de l'audit : aucune
+  unité n'était visible) ; l'ensemble x² + y² = 4 (vert) comparé au vrai cercle de rayon 2 (pointillés) : cercle
+  seulement pour ω = 90° et k = 1, sinon ellipse ; M parcourt l'ensemble (glissé, ou curseur t), coordonnées lues
+  parallèlement aux axes, √(x² + y²) = 2 contre la vraie longueur OM = √(x² + 2k·cos ω·xy + k²y²) (« la formule tombe
+  juste par hasard » sur un axe) ; préréglages orthonormé, unités différentes, axes obliques, quelconque.
+- **`cercles-deux-points-widget`** (§ 2, après le piège « n'en retenir qu'un seul », avant l'application des antennes) :
+  A et B entiers glissés (ou choisis puis réglés aux curseurs), r au pas de 0,5 ; centres = points communs aux cercles
+  de centres A et B et de rayon r (pointillés), sur la médiatrice (équation entière réduite) ; comparaison EXACTE de
+  (2r)² et AB², h = √(r² − (AB/2)²) en racine simplifiée, centres en fractions quand ils sont rationnels (sinon « ≈ ») ;
+  « Exemple du cours » A(0 ; 0), B(6 ; 0), r = 5 → (3 ; 4) et (3 ; −4).
+- **`tangentes-point-widget`** (§ 2, après la démonstration PT = √(OP² − r²), avant le réemploi `droite-cercle-widget`) :
+  cercle x² + y² = 25, P entier glissé ; méthode du cours (droite a(x − x_P) + b(y − y_P) = 0, dist(O ; d) = 5 →
+  équation homogène en a et b affichée) ; b = 0 solution ⟺ x_P² = 25 : tangente VERTICALE en évidence (« y = mx + p
+  l'aurait perdue »), sinon « pas de tangente verticale ici » ; équations entières quand PT est entier ou qu'une tangente
+  est verticale, sinon coefficients arrondis au centième (b = 1) ; points de contact, rayons [OT] et angles droits, PT ;
+  intérieur : aucune ; sur le cercle : une, de normale OP→. Préréglages P(0 ; 13), P(5 ; 3) (les deux exemples du
+  cours), P(3 ; 4), P(1 ; 2).
+- **`arc-capable-widget`** (§ 5, juste après l'application des radars, dont il reprend la figure) : A(−3 ; 0), B(3 ; 0),
+  θ de 40° à 150° (45° par défaut) ; « Lancer les radars » : faisceau de A d'angle α, de B d'angle α + θ (P par la loi
+  des sinus), le croisement trace l'arc ; P aussi glissé librement, angle APB mesuré, vert si P est à ≤ 0,12 du lieu ET
+  à 1,5° près de θ (près de A et B, l'angle varie trop vite pour la seule distance) ; « Montrer le lieu » : deux arcs
+  symétriques par rapport à (AB), A et B en ronds vides, restes des cercles en pointillés (angle 180° − θ), centre
+  (0 ; 3/tan θ) et rayon 3/sin θ exacts pour 45°, 60°, 90° (cercle de diamètre [AB], lien au § 4), 120°, 135°, 150°.
+Vérifié (Vite, page réelle, panneau, iPhone 13 clair / sombre et 1 280 px) : 0 erreur console, scrollWidth 390,
+0 `.katex-error`, 0 KaTeX qui déborde (aussi à 320 px), 0 étiquette SVG rognée ; balayages contre un recalcul
+indépendant (sources LaTeX lues par un espion sur `katex.renderToString`, et contrôle de CHAQUE état : textes, KaTeX,
+étiquettes) : 3 872 réglages A, B, r (médiatrice, AB, h, centres à distance r de A et B, nombre de cercles tracés),
+399 positions de P (tangentes par P et à distance 5 de O, verticale ⟺ x_P² = 25, contacts sur le cercle et la tangente,
+PT), 759 positions de faisceaux + 26 588 positions libres de P (✓ jamais à plus de 1,5° de θ, ✗ jamais sur le lieu),
+4 200 réglages ω, k, t (OM, M, courbe tracée vérifiant x² + y² = 4) : 0 faux. Gestes au doigt (CDP) et à la souris dans
+le panneau : A, B, P glissés, P promené sur l'arc (41 points de trace), « Lancer » / « Pause », M glissé ; aucun
+défilement du panneau pendant un glisser. Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667 (14 ateliers du
+chapitre). Scripts et captures : `scratchpad/g2-6e9/`.

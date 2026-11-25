@@ -231,6 +231,10 @@ export type InteractiveWidgetTag =
   | 'generatrices-animees-widget'
   | 'courbe-parametree-widget'
   | 'aire-variable-widget'
+  | 'cercles-deux-points-widget'
+  | 'tangentes-point-widget'
+  | 'arc-capable-widget'
+  | 'repere-affine-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

@@ -231,6 +231,10 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'generatrices-animees-widget': () => import('../../interactive/register-generatrices-animees-widget.js'),
   'courbe-parametree-widget': () => import('../../interactive/register-courbe-parametree-widget.js'),
   'aire-variable-widget': () => import('../../interactive/register-aire-variable-widget.js'),
+  'cercles-deux-points-widget': () => import('../../interactive/register-cercles-deux-points-widget.js'),
+  'tangentes-point-widget': () => import('../../interactive/register-tangentes-point-widget.js'),
+  'arc-capable-widget': () => import('../../interactive/register-arc-capable-widget.js'),
+  'repere-affine-widget': () => import('../../interactive/register-repere-affine-widget.js'),
 }
 
 /**
