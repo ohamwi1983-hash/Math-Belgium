@@ -5575,3 +5575,39 @@ Restent, voulues : « ou » entre mots/sigles (vrai/faux, EV/CV…, f′/f″, s
 « (1/2) », unités (g/L, rad/s, tr/min…), notes « 13/20 », sources. Badges/labels modifiés ⇒ clés de
 `ENONCES_DEMONSTRATION` (`evaluationPayload.ts`) mises à jour (24) : le build échoue sinon. Vérifié : KaTeX strict
 (0 erreur nouvelle), 0 `$` en champ brut, 148 étapes iPhone 13 sans débordement, 0 `.katex-error`, PDF de 3 chapitres.
+
+## 6e (6h), Chapitre 7 — lot G de l'audit, première moitié (5 ateliers, agent G1, 25/11/2026)
+
+Le chapitre n'avait aucun atelier. Cinq blocs `atelier` ajoutés, seuls (aucun autre bloc touché), notation
+du tableau de classification (n, p ; Aₙᵖ, Cₙᵖ, Bₙᵖ = nᵖ, Γₙᵖ = Cₙ₊ₚ₋₁ᵖ) et du § 3 (Cₙᵏ), KaTeX dans les
+Shadow DOM (`katex-shadow.js`), légendes en Unicode (« K⁄N » : barre de fraction U+2044) :
+- **`ordre-repetition-widget`** (§ 1, après l'astuce « La question 1 coupe le tableau ») : n lettres (2 à 5),
+  longueur p (1 à 3), interrupteurs ordre / répétition ; TOUS les groupements listés en tuiles. Ordre : les
+  mots aux mêmes lettres rangés dans un cadre ; couper l'ordre fait FUSIONNER chaque cadre en une tuile
+  « ×k » (animation Web Animations, zone à hauteur gardée pendant la fusion, rien si `prefers-reduced-motion`).
+  Avec répétition, cadres de tailles différentes (×6, ×3, sans badge) : d'où Γₙᵖ ≠ nᵖ / p!. Compteurs A, C,
+  B, Γ en tableau 2 × 2 (cases cliquables). Sans SVG : pas d'épinglage.
+- **`etoiles-barres-widget`** (§ 1, après le piège « confondre Γ et C ») : p boules (1 à 8), n parfums (2 à 5),
+  barres GLISSÉES à la souris et au doigt (Pointer Events + capture, `touch-action: none` sur la figure),
+  flèches du clavier ; lecture « 2 vanille, 0 fraise, 1 chocolat », effectif sous chaque compartiment,
+  compteur des répartitions construites, liste complète si ≤ 84. Mode « au moins un de chaque » : barres au
+  bord ou collées en rouge, Cₚ₋₁ⁿ⁻¹ = Γₙᵖ⁻ⁿ.
+- **`pascal-vivant-widget`** (§ 3, après le piège « mauvais partenaire de symétrie ») : n de 0 à 15, une unité
+  SVG = un pixel (cases de taille et de place constantes, défilement horizontal au-delà de la largeur) ; clic
+  ou Entrée sur une case : parents (ou parent unique au bord), case symétrique, bande de la ligne, panneau
+  Pascal / symétrie / somme = 2ⁿ. « Colorier les impairs » : cadre FIXE des 16 lignes ajusté à la largeur
+  (Sierpiński entier sur téléphone, 81 impairs) ; « Développement de (a + b)ⁿ » : terme de la case encadré.
+- **`mains-poker-widget`** (§ 4, après le diagramme des catégories) : 32 cartes, classement par hauteurs
+  seulement (comme le cours), cartes de la combinaison mises en évidence, calcul en deux étapes de la
+  catégorie (pièges full 8 × 7 / deux paires C₈²) ; simulation par 10 000, échelle FIXE 0 à 0,6 ; partition
+  224 + 1 344 + 10 752 + 24 192 + 107 520 + 57 344 = 201 376 = C₃₂⁵.
+- **`hypergeometrique-binomiale-widget`** (§ 5, après l'astuce « hypergéométrique contre binomiale ») : N parmi
+  10 à 1 000 (K suit la proportion choisie), K, n de 1 à 10 ; barres jumelées, fenêtre FIXE (k de 0 à 10, P de
+  0 à 1), valeurs du k choisi au-dessus des barres, tableau à 4 décimales, calcul exact (BigInt) jusqu'à
+  13 chiffres au dénominateur ; « Faire grandir N » ; « Exemple du cours » (N = 20, K = 6, n = 5 : 0,1291…).
+Vérifié (Vite, page réelle, panneau, iPhone 13 clair / sombre et 1 280 px) : 0 erreur console, scrollWidth
+390, 0 `.katex-error`, Shadow DOM sans `^ $ \ * NaN undefined Infinity`, 0 étiquette rognée ; balayages :
+136 cases de Pascal (parents, symétrique, 2ⁿ), 46 réglages ordre / répétition (tuiles = formule, badges =
+mots), 240 réglages N, K, n (valeurs recalculées, axes identiques), 54 réglages étoiles (liste = formule),
+glisser au doigt (CDP) et à la souris, 300 mains classées, 30 000 mains simulées (écart < 4σ) ; épinglage
+dans le panneau 0 KO à 390 × 664 et 375 × 667. Scripts et captures : `scratchpad/g1-6e7/`.

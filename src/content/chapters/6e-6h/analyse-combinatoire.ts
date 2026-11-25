@@ -118,6 +118,18 @@ export const analyseCombinatoire: ChapterContent = {
             'cas avec répétition et les 2 cas de permutation.',
         },
         {
+          kind: 'atelier',
+          tag: 'ordre-repetition-widget',
+          label: 'Manipule toi-même : ordre et répétition',
+          caption:
+            'Choisis n lettres et la longueur p des groupements : tous les groupements ' +
+            "s'affichent en tuiles. Quand l'ordre compte, les mots faits des mêmes lettres " +
+            "sont rangés dans un même cadre ; coupe l'ordre et chaque cadre fusionne en une " +
+            "seule tuile : Aₙᵖ = Cₙᵖ × p!. Active la répétition : les cadres n'ont plus " +
+            'tous la même taille, et le tableau des quatre compteurs montre pourquoi Γₙᵖ a ' +
+            'sa propre formule.',
+        },
+        {
           kind: 'piege',
           label: 'Piège classique — distinguer choisir-et-ordonner de choisir-seulement',
           text:
@@ -449,6 +461,17 @@ export const analyseCombinatoire: ChapterContent = {
             '$C_5^3=10$ seul (sans répétition) est bien plus petit que $\\Gamma_5^3=35$ (avec ' +
             "répétition) ! N'utilise jamais $C_n^p$ quand l'énoncé autorise explicitement la " +
             "répétition d'un même élément dans le groupe choisi.",
+        },
+        {
+          kind: 'atelier',
+          tag: 'etoiles-barres-widget',
+          label: 'Manipule toi-même : étoiles et barres',
+          caption:
+            'Glisse les barres (à la souris ou au doigt) entre les boules de glace : chaque ' +
+            'barre sépare deux parfums, et la répartition se lit en direct. Les p + n − 1 ' +
+            "places sont fixes : choisir les places des p étoiles suffit, d'où Γₙᵖ = " +
+            'Cₙ₊ₚ₋₁ᵖ répartitions. Le mode « au moins un de chaque » interdit les barres au ' +
+            'bord ou collées.',
         },
         {
           kind: 'application',
@@ -1083,6 +1106,17 @@ export const analyseCombinatoire: ChapterContent = {
             "$C_5^2$ est $C_5^{5-2}=C_5^3$, jamais $C_5^4$ obtenu en changeant l'indice au hasard.",
         },
         {
+          kind: 'atelier',
+          tag: 'pascal-vivant-widget',
+          label: 'Manipule toi-même : le triangle de Pascal vivant',
+          caption:
+            "Fais grandir le triangle jusqu'à la ligne 15 et touche une case : ses deux " +
+            'parents (relation de Pascal), sa case symétrique et la somme de sa ligne, 2ⁿ, ' +
+            "s'affichent. Colorie les impairs pour voir apparaître le triangle de " +
+            'Sierpiński, ou affiche le développement de (a + b)ⁿ qui utilise la ligne ' +
+            'choisie.',
+        },
+        {
           kind: 'exempleLibre',
           label: "Démonstration — pourquoi la somme d'une ligne vaut 2ⁿ",
           blocks: [
@@ -1280,6 +1314,17 @@ export const analyseCombinatoire: ChapterContent = {
               'ordres de grandeur) : 224, 10 752, 24 192, 107 520, comparées au total de 201 376 ' +
               'mains possibles.',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'mains-poker-widget',
+          label: 'Manipule toi-même : mains de poker',
+          caption:
+            'Tire une main de 5 cartes dans le jeu de 32 : elle est classée (carré, full, ' +
+            'brelan, deux paires, paire, sans paire) avec le calcul en deux étapes de sa ' +
+            'catégorie. Simule ensuite 10 000 mains : les fréquences observées rejoignent ' +
+            'les probabilités exactes, et les six effectifs remplissent exactement les 201 ' +
+            '376 mains possibles.',
         },
         {
           kind: 'application',
@@ -1649,6 +1694,17 @@ export const analyseCombinatoire: ChapterContent = {
             "le prélèvement ne la modifie presque pas. Les deux lois ne coïncident " +
             "qu'**approximativement** lorsque $N$ est très grand devant $n$ — jamais exactement " +
             'en général.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'hypergeometrique-binomiale-widget',
+          label: 'Manipule toi-même : avec ou sans remise ?',
+          caption:
+            'Règle la population N, le nombre de succès K et le nombre de tirages n : les ' +
+            "deux lois s'affichent en barres jumelées, la loi hypergéométrique (sans " +
+            'remise) et la loi binomiale de paramètre p = K⁄N (avec remise). Fais grandir N ' +
+            "à proportion K⁄N constante : l'écart entre les barres se referme. Touche une " +
+            'barre pour voir les deux calculs.',
         },
         {
           kind: 'entrainement',
