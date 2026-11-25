@@ -1381,6 +1381,55 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   LIGNE (`<p style="margin: 4px 0">` d'`EcranCombinatoire`) se collaient (« y+4=0(BC) : … ») — `cadre.css`,
   écart « bloc suivant » en `!important` (12 px mesurés au lieu de 0, autres aperçus inchangés) ; cours § 1 et quiz
   6gen72 (thème 1) : 2 droites, 1 seule ((AB)) ou une infinité selon la position de P.
+- **6e ch. 10 (lot E, papier de 6gen58–6gen63, notés, corrigé « comme au tableau », figure de la conique)** :
+  adaptateur commun du ch. 7 `construireAdaptateurCombinatoire` réutilisé (ch. 7 à 9 inchangés) ; l'adaptateur provisoire
+  `adaptateurConiques.ts` est supprimé. Brique `ui6e/corrigeConiques.ts` (sans `docx`) : `COURS_*` § 1–6, `ligneRacine`
+  (« c = √50 = 5√2 »), `lignesC` (c² = a² ∓ b²), `lignesDiscriminant` / `lignesSolutions` (Δ, √Δ, racines exactes, milliers
+  « 22\,500 »), `carreL` (« \left(\frac{6}{5}\right)^2 », jamais « \frac{6}{5}^2 »), `milliersDans`, `equationSubstituee`,
+  `yMK`, `avecFigureConique` (la chaîne SVG de l'écran, toutes les phases fermées, bornée à 9 cm ; rien pour l'ensemble vide).
+  Corrigés `generateurs6e/{identificationConiques,equationConiqueCaracteristiques,aireExcentriciteConique,intersectionsConiques,tangentesConique,proprietesOptiquesConiques}/corrigeDetaille.ts`
+  (une lettre par écran, UN Piège, notations du cours réécrit : y² = 2px et p = dist(F ; d), |PF|, « loi des cosinus »,
+  forme dédoublée en vérification, condition de tangence k² = a²m² + b² / a²m² − b² / a² − b²m²), branchés dans
+  `App6gen58–63` par `config.corrigeDetaille` (validation ET fiche de puce). 6gen58 : règle des signes (cas dégénérés),
+  complétion une transformation par ligne avec les VRAIS coefficients, forme réduite, a, b, c, foyers, asymptotes, foyer et
+  directrice, droites (« y − k = ±(v/u)(x − h) ») ou point, famille C : condition v ≥ k (ou ≤) notée AVANT d'élever au
+  carré, partie décrite (demi-conique en trait plein sur la figure). 6gen59 : a, c, b² justifiés, p = 2·SF ou P substitué.
+  6gen60 : |PF| + |PF′| = 2a, 4c² sans c, cos θ par numérateur / dénominateur, aire exacte (≈ au centième), vérification
+  b²·sin θ/(1 + cos θ) ; B : condition traduite (yP = b²/a et pentes égales ; loi des cosinus en B ; 2a²/c = k·2c), puis e².
+  6gen61 : nature de Γ décidée par c < a ou c > a, droite (pente, médiatrice ou hauteur par un vecteur normal),
+  substitution dans l'équation multipliée par le dénominateur commun, Δ, points vérifiés ; B : λ + A₂μ = B₂μ, cercle
+  développé, centre et rayon. 6gen62 : pente par la dérivée de la branche (formule posée avec les nombres), forme
+  dédoublée en vérification ; B condition sur k, comparaison aux asymptotes ; C équation en m, Δ et position de P
+  (x²/a² + y²/b² comparé à 1) ; D système en α, β (sans fraction de fraction), trinôme en α, la seule solution α > 0,
+  β > 0 ; E deux points de contact (forme dédoublée identifiée à y = mx + k), |k − k_d| comparés. 6gen63 : foyers,
+  droite du rayon, trinôme, Δ, racines, point d'impact choisi par le SENS (l'autre point commun est toujours derrière la
+  source : 0 / 25 000 tirages devant), propriété, droite (RF′) / (RF) / y = y_R et la demi-droite parcourue.
+  **Énoncés papier** = la conique / les données (« On donne … », « Γ est la conique de centre O… ») + UNE consigne sans
+  méthode ni verdict ; consigne IDENTIQUE pour toutes les natures d'une famille de 6gen58 (elle énumère les éléments
+  selon le cas : la nature est le verdict) ; 6gen58 C « précise la partie de cette conique réellement décrite par Γ » ;
+  6gen59 « Détermine la nature de cette conique, puis une équation… » (même axe, C) sinon « une équation de cette
+  ellipse / parabole / hyperbole », plus d'avertissement « c'est le foyer qui… » ; 6gen61 la conique SANS sa nature
+  (sommet + foyer : l'élève décide, audit I2), « … s'il y en a » ; 6gen62 B, C « s'il y en a », D la forme
+  x²/α ± y²/β = 1 (α > 0, β > 0) dans la consigne, E « qui ne coupe pas Γ » dans les données ; 6gen60 (processus 3) en
+  prose complète, cos θ = étape du corrigé ; 6gen63 (processus 3) miroir, foyer d'où part le rayon, sens et pente (ou
+  droite parallèle à l'axe), « … précise la partie de cette droite que parcourt le rayon ». « Donne des valeurs exactes. »
+  là où une racine peut apparaître ; décision 2 dans `reponsesAcceptees` (décimales acceptées si la calculatrice est
+  autorisée). `versionPapier` sur les six ; aucune nouvelle `REECRITURES` (titres d'étape par `formatPapier`).
+  **Regroupement a), b), c)** (`REGROUPEMENTS`, helper `simpleQ` = « Dans chaque cas, <question> ») : 6gen58 (« chaque
+  équation » ; C : « Pour chaque équation, on note Γ la courbe qu'elle décrit. … »), 6gen59, 6gen60 A, 6gen61 (A et B),
+  6gen62 ; écartés : 6gen60 B (condition propre à l'instance), 6gen63 (contexte propre, Transférer). **Profils** (aucun
+  `calcul` : décider une nature, établir une équation, une tangente, un trajet — règle du 24/11) : `forme` = famille
+  (6gen58 A1 / A2 / B / C ; 6gen59 famille-sous-type ; 6gen60 A / B-sous-type ; 6gen61 A-cercle|conique-droite / B ;
+  6gen62 A-nature, B, C, D-nature-axe, E ; 6gen63 conique, parabole-mode) ; cas particuliers mesurés (5 000 tirages par
+  variante) : 6gen58 `centreSurUnAxe` (B : 16–18 %), 6gen59 `sommetOrigine` (B : 0,7–1,0 % — tirage refait par BC, h, k
+  dans [−5 ; 5] ; l'audit mesurait 50 %), 6gen60 `angleDroit` (A_k_2 seul : 17,5 %) et `excentriciteRationnelle` (« k
+  carré parfait » élargi à toute e² carré parfait : abscisse 25,6 %, angle 54,6 %, directrices « carré parfait » 100 %,
+  « irrationnel » 0 %), 6gen61 `droiteHorizontale` (14–44 % selon la variante, contre 14,6 % avant BC), 6gen62 et 6gen63
+  aucun. Verdicts JAMAIS dans le profil ; critères FIXES par verdict (`sansCharge`) : 6gen58 par famille (A1, A2 3 · 8 ;
+  B, C 4 · 10), 6gen59 même axe et C 3 · 8, 6gen61 A 4 · 10, 6gen62 B et C 4 · 8. **Niveaux mesurés** (300 tirages par
+  variante) : 6gen59 axes perpendiculaires 3 · 7, deux sommets et D 2 · 6, B 3 · 8 ; 6gen60 3 · 8 (B : méthode 2) ;
+  6gen61 B 4 · 10 ; 6gen62 A et E 2 · 6, D 3 · 6 ; 6gen63 4 · 9 (parallèle 3 · 9). Libellés pilotes et processus 3 de
+  6gen60 / 6gen63 déjà remplis par BC (vérifié).
 - **6e ch. 7, lots A, F, D (cours, démonstrations, quiz 6gen70 ; générateurs : autres agents)** : notation du
   cours fixée — $n$ éléments disponibles, $p$ choisis ($A_n^p$, $C_n^p$, $B_n^p$, $\Gamma_n^p = C_{n+p-1}^p$, $P_n = n!$),
   $k$ = rang d'un terme du binôme ou nombre de succès ($T_{k+1}$, $P(X=k)$, $C_n^k$ au § 3), $r$ = nombre de types

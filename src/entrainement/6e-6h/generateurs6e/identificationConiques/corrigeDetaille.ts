@@ -163,7 +163,7 @@ function corrigeA1(e: ExerciceIdA1): EtapeCorrection[] {
         utiliseCours(d, fx(c.type === "ellipse" ? "Les foyers sont sur l'axe focal, à la distance $c$ du centre" : "Les foyers sont sur l'axe focal, à la distance $c$ du centre ; asymptotes : $y=\\pm\\frac{b}{a}x$ (axe focal horizontal) ou $y=\\pm\\frac{a}{b}x$ (axe focal vertical)"), COURS_IDENTIFIER),
         calcul(d, lignesFoyers(c)),
         avecFigureConique(resultat(d, fx(resultatFoyers(c))), figure(e)),
-        c.type === "ellipse" ? piege(b, fx("$a$ est toujours le demi-grand axe, sous le plus grand dénominateur — pas forcément sous $x^2$.")) : piege(b, fx("Pour une hyperbole, $c^2=a^2+b^2$ (et non $a^2-b^2$).")),
+        c.type === "ellipse" ? piege(b, fx("$a$ est toujours le demi-grand axe, sous le plus grand dénominateur — pas forcément sous $x^2$ dans l'équation réduite.")) : piege(b, fx("Pour une hyperbole, $c^2=a^2+b^2$ (et non $a^2-b^2$).")),
       );
       return out;
     }

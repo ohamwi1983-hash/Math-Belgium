@@ -432,7 +432,7 @@ function explication58(e: E, p: P): FragmentConsigne[][] {
       return L(
         `Forme réduite : $${latexConique(c)}$.`,
         `$a=${latexRacine(c.a2)}$, $b=${latexRacine(c.b2)}$${p === "cElements" ? "" : `, $c^2=${c.type === "ellipse" ? "a^2-b^2" : "a^2+b^2"}=${latexQ(c2Conique(c))}$, donc $c=${latexRacine(c2Conique(c))}$`}.`,
-        c.type === "ellipse" ? "Piège : $a$ est toujours le demi-grand axe, sous le plus grand dénominateur — pas forcément sous $x^2$." : "Piège : pour une hyperbole, $c^2=a^2+b^2$, et $a$ est sous le carré précédé de « + ».",
+        c.type === "ellipse" ? "Piège : $a$ est toujours le demi-grand axe, sous le plus grand dénominateur — pas forcément sous $x^2$ dans l'équation réduite." : "Piège : pour une hyperbole, $c^2=a^2+b^2$, et $a$ est sous le carré précédé de « + ».",
       );
     case "a1Foyers":
     case "bFoyers":
