@@ -7,6 +7,8 @@ import { BlockRenderer } from '../chapter/BlockRenderer'
 import { Illustration } from '../illustrations/Illustration'
 import { InteractiveWidget } from '../chapter/InteractiveWidget'
 import { titreCourt } from '../../lib/parcoursChapitre'
+import { qrCodeSvg } from '../../entrainement/export/qrSvg'
+import { disposerAtelier } from './dispositionAtelier'
 import { Pictogramme } from './Pictogrammes'
 import './projection.css'
 
@@ -24,18 +26,25 @@ export type ModeDiapo = 'direct' | 'vignette' | 'export' | 'mesure'
 
 export const DUREE_CARTE = 60
 
-export function Diapo({ diapo, chapter, pas, mode, debut }: { diapo: DonneesDiapo; chapter: ChapterContent; pas: number; mode: ModeDiapo; debut?: number }) {
+/** Atelier : plein écran (l'atelier seul sur toute la diapo) et bouton qui le bascule (mode `direct`). */
+export interface OptionsAtelier {
+  plein?: boolean
+  basculerPlein?: () => void
+}
+
+export function Diapo({ diapo, chapter, pas, mode, debut, atelier }: { diapo: DonneesDiapo; chapter: ChapterContent; pas: number; mode: ModeDiapo; debut?: number; atelier?: OptionsAtelier }) {
   const contenu = useRef<HTMLDivElement>(null)
   const racine = useRef<HTMLDivElement>(null)
   const toutVisible = mode === 'export' || mode === 'mesure'
   const p = toutVisible ? diapo.pas : Math.min(pas, diapo.pas)
   useAjustement(racine, contenu, mode !== 'mesure' && diapo.type !== 'atelier', diapo.cle)
+  const plein = diapo.type === 'atelier' && !!atelier?.plein && mode === 'direct'
 
   return (
-    <div ref={racine} className={`diapo theme-clair diapo--${diapo.type}`} data-mode={mode} data-cle={diapo.cle}>
+    <div ref={racine} className={`diapo theme-clair diapo--${diapo.type}`} data-mode={mode} data-cle={diapo.cle} data-plein={plein ? '' : undefined}>
       <div className="diapo-filet" aria-hidden="true" />
       <div ref={contenu} className="diapo-contenu">
-        <div className="diapo-pile">{corps(diapo, chapter, p, mode, toutVisible, debut)}</div>
+        <div className="diapo-pile">{corps(diapo, chapter, p, mode, toutVisible, debut, atelier)}</div>
       </div>
     </div>
   )
@@ -54,7 +63,12 @@ function majuscule(t: string): string {
   return t.charAt(0).toUpperCase() + t.slice(1)
 }
 
-function corps(d: DonneesDiapo, chapter: ChapterContent, pas: number, mode: ModeDiapo, toutVisible: boolean, debut?: number): ReactNode {
+/** Adresse affichée sous un QR code / un lien (sans « https:// » ni « www. »). */
+function adresseCourte(url: string): string {
+  return url.replace(/^https?:\/\/(www\.)?/, '')
+}
+
+function corps(d: DonneesDiapo, chapter: ChapterContent, pas: number, mode: ModeDiapo, toutVisible: boolean, debut?: number, atelier?: OptionsAtelier): ReactNode {
   switch (d.type) {
     case 'titre':
       return (
@@ -230,62 +244,212 @@ function corps(d: DonneesDiapo, chapter: ChapterContent, pas: number, mode: Mode
         </>
       )
     case 'atelier':
+      // Titre réduit à une ligne (surtitre) : l'atelier prend toute la surface de la diapo.
       return (
         <>
-          <p className="diapo-surtitre diapo-surtitre--atelier" data-pptx="">
-            Atelier · à manipuler en direct
+          <div className="diapo-atelier-tete">
+            <p className="diapo-surtitre diapo-surtitre--atelier" data-pptx="">
+              Atelier
+            </p>
+            <h2 className="diapo-atelier-titre" data-pptx="" title={d.label}>
+              {d.label}
+            </h2>
+            {mode === 'direct' && atelier?.basculerPlein && (
+              <button
+                type="button"
+                className="diapo-atelier-plein projection-interactif"
+                title="Plein écran : l'atelier seul sur tout l'écran (Échap pour revenir)"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  atelier.basculerPlein?.()
+                }}
+              >
+                <Pictogramme nom="plein-ecran" taille={18} /> Plein écran
+              </button>
+            )}
+          </div>
+          <ZoneAtelier tag={d.tag} monte={mode === 'direct' || mode === 'export'} />
+        </>
+      )
+    case 'entrainement':
+      return (
+        <>
+          <p className="diapo-surtitre diapo-surtitre--entrainement" data-pptx="">
+            S’entraîner · générateur {d.generatorId}
           </p>
           <h2 className="diapo-titre diapo-titre--moyen" data-pptx="">
-            {d.label}
+            {d.titre}
           </h2>
-          <ZoneAtelier tag={d.tag} monte={mode === 'direct' || mode === 'export'} />
+          <div className="diapo-corps diapo-entrainement">
+            <div className="diapo-entrainement-texte">
+              {d.description.map((t, i) => (
+                <p key={i} data-pptx="">
+                  {t}
+                </p>
+              ))}
+              <p className="diapo-entrainement-ou" data-pptx="">
+                Plateforme → {d.where}
+              </p>
+              {mode === 'direct' && (
+                <a
+                  className="diapo-entrainement-ouvrir projection-interactif"
+                  href={d.lien}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Ouvre le générateur dans un nouvel onglet (la projection reste ouverte)"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Ouvrir le générateur <span aria-hidden="true">↗</span>
+                </a>
+              )}
+            </div>
+            <figure className="diapo-qr">
+              <span className="diapo-qr-code" dangerouslySetInnerHTML={{ __html: qrCodeSvg(d.lienPublic, 350, `QR code : ${d.titre} (générateur ${d.generatorId})`) }} />
+              <figcaption>
+                <span className="diapo-qr-aide">Scanne pour t’entraîner</span>
+                <span className="diapo-qr-adresse" data-pptx="" data-pptx-lien={d.lienPublic}>
+                  {adresseCourte(d.lienPublic)}
+                </span>
+              </figcaption>
+            </figure>
+          </div>
+        </>
+      )
+    case 'video':
+      return (
+        <>
+          <p className="diapo-surtitre diapo-surtitre--video" data-pptx="">
+            Vidéo
+          </p>
+          <h2 className="diapo-titre diapo-titre--moyen" data-pptx="">
+            {d.titre}
+          </h2>
+          <LecteurVideo id={d.youtubeId} titre={d.titre} mode={mode} />
         </>
       )
   }
 }
 
-/** Atelier monté en direct, mis à l'échelle (`zoom`) pour tenir dans sa zone de la diapo. */
+/**
+ * Vidéo d'une diapo : lecteur YouTube embarqué (youtube-nocookie) chargé AU CLIC seulement (vignette +
+ * bouton de lecture avant : aucune requête vers le lecteur tant qu'on ne lance pas la vidéo) ; sans
+ * identifiant, le même « vidéo à venir » que le cours. PowerPoint : un iframe ne se capture pas → cadre +
+ * lien (zone de texte cliquable).
+ */
+function LecteurVideo({ id, titre, mode }: { id?: string; titre: string; mode: ModeDiapo }) {
+  const [lecture, setLecture] = useState(false)
+  if (!id) {
+    return (
+      <div className="diapo-video diapo-video--avenir">
+        <span className="diapo-video-icone" aria-hidden="true">
+          🎬
+        </span>
+        <span>Vidéo à venir — {titre}</span>
+      </div>
+    )
+  }
+  const lien = `https://www.youtube.com/watch?v=${id}`
+  if (mode === 'export' || mode === 'mesure') {
+    return (
+      <div className="diapo-video diapo-video--lien">
+        <span className="diapo-video-jouer" aria-hidden="true">
+          <Pictogramme nom="lecture" taille={44} />
+        </span>
+        <span className="diapo-video-adresse" data-pptx="" data-pptx-lien={lien}>
+          {adresseCourte(lien)}
+        </span>
+      </div>
+    )
+  }
+  if (lecture) {
+    return (
+      <div className="diapo-video">
+        <iframe
+          className="diapo-video-cadre projection-interactif"
+          src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`}
+          title={titre}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+          allowFullScreen
+        />
+      </div>
+    )
+  }
+  const vignette = (
+    <>
+      <img src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`} alt="" loading="lazy" referrerPolicy="no-referrer" />
+      <span className="diapo-video-jouer" aria-hidden="true">
+        <Pictogramme nom="lecture" taille={52} />
+      </span>
+    </>
+  )
+  // Vue d'ensemble, diapo suivante (déjà dans un bouton) : simple image, pas de second bouton imbriqué.
+  if (mode !== 'direct') {
+    return (
+      <div className="diapo-video">
+        <div className="diapo-video-facade">{vignette}</div>
+      </div>
+    )
+  }
+  return (
+    <div className="diapo-video">
+      <button
+        type="button"
+        className="diapo-video-facade projection-interactif"
+        aria-label={`Lire la vidéo : ${titre}`}
+        title="Lancer la vidéo (sur cet écran)"
+        onClick={(e) => {
+          e.stopPropagation()
+          setLecture(true)
+        }}
+      >
+        {vignette}
+      </button>
+    </div>
+  )
+}
+
+/** Atelier monté en direct ; sa disposition (telle quelle ou figure à côté des réglages) et son zoom sont
+ * choisis par `disposerAtelier` pour donner la plus grande figure possible dans la zone. */
 function ZoneAtelier({ tag, monte }: { tag: InteractiveWidgetTag; monte: boolean }) {
   const zone = useRef<HTMLDivElement>(null)
+  const place = useRef<HTMLDivElement>(null)
   const hote = useRef<HTMLDivElement>(null)
   useLayoutEffect(() => {
     const z = zone.current
+    const p = place.current
     const h = hote.current
-    if (!monte || !z || !h) return
-    const ajuster = () => {
-      h.style.zoom = '1'
-      const largeur = h.offsetWidth
-      const hauteur = h.scrollHeight
-      if (!largeur || !hauteur) return
-      // Tient dans la zone si possible ; jamais sous 0,8 (l'atelier doit rester manipulable : au-delà,
-      // la zone défile verticalement), jamais au-delà de la largeur disponible.
-      const largeurMax = (z.clientWidth - 8) / largeur
-      const f = Math.min(1.5, largeurMax, Math.max(0.8, (z.clientHeight - 8) / hauteur))
-      h.style.zoom = String(Math.round(f * 100) / 100)
-    }
-    ajuster()
-    const ro = new ResizeObserver(() => ajuster())
-    ro.observe(h)
-    const mo = new MutationObserver(() => ajuster())
-    mo.observe(h, { childList: true, subtree: true })
-    return () => {
-      ro.disconnect()
-      mo.disconnect()
-    }
+    if (!monte || !z || !p || !h) return
+    return disposerAtelier(z, p, h)
   }, [monte, tag])
   return (
-    <div ref={zone} className="diapo-atelier">
-      {monte ? (
-        <div ref={hote} className="diapo-atelier-hote">
-          <InteractiveWidget tag={tag} figuresTactiles sansEpingle />
-        </div>
-      ) : (
-        <div className="diapo-atelier-vide">
-          <Pictogramme nom="main" taille={56} />
-          <span>Atelier interactif</span>
-        </div>
+    <>
+      <div ref={zone} className="diapo-atelier">
+        {monte ? (
+          <div ref={place} className="diapo-atelier-place">
+            <div ref={hote} className="diapo-atelier-hote">
+              <InteractiveWidget tag={tag} figuresTactiles sansEpingle />
+            </div>
+          </div>
+        ) : (
+          <div className="diapo-atelier-vide">
+            <Pictogramme nom="main" taille={56} />
+            <span>Atelier interactif</span>
+          </div>
+        )}
+      </div>
+      {monte && (
+        <button
+          type="button"
+          className="diapo-atelier-suite projection-interactif"
+          onClick={(e) => {
+            e.stopPropagation()
+            zone.current?.scrollBy({ top: (zone.current.clientHeight || 400) * 0.7, behavior: 'smooth' })
+          }}
+        >
+          <span aria-hidden="true">↓</span> La suite de l’atelier
+        </button>
       )}
-    </div>
+    </>
   )
 }
 

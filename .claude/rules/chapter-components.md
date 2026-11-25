@@ -128,16 +128,18 @@ l'étape à côté — sauf phrases longues, > 300 caractères : la figure passe
 resterait sinon sous 28 px) ; puis dans l'ordre écrit : `figure` (chaque `illustration`/`illustrationGroup`, titre = dernier
 `subheading`), `exemple` (formule = énoncé, étapes + résultat révélés une à une), `libre` (`exempleLibre`
 bloc par bloc ; `demo` si son label commence par « Démonstration »), `atelier` (widget monté en
-direct) ; enfin une diapo `teste` par carte (`cartes` : question, minuteur 1 min, réponse au clic).
-Cases du lanceur (`INCLUSIONS`) : L'essentiel, Figures, Exemples, Teste-toi, Ateliers (cochées) et
-Démonstrations (décochée). Chaque diapo porte ses `notes` (corrigé, réponse, légende : vue du
+direct) ; puis, comme dans le cours (fin de l'étape : vidéos puis cartes « À toi »), les `video` et les
+`entrainement` de l'étape dans leur ordre d'écriture ; enfin une diapo `teste` par carte (`cartes` :
+question, minuteur 1 min, réponse au clic). Cases du lanceur (`INCLUSIONS`) : L'essentiel, Figures,
+Exemples, Teste-toi, Ateliers, Cartes « S'entraîner », Vidéos (cochées) et Démonstrations (décochée) ;
+un choix mémorisé avant le 25/11/2026 (sans `v: 2`) reçoit une fois les deux nouvelles cases. Chaque diapo porte ses `notes` (corrigé, réponse, légende : vue du
 professeur et notes PowerPoint) et son nombre d'étapes de révélation `pas`. Choix mémorisé par
 chapitre (`localStorage` `projection:{niveau}/{slug}`, try/catch) ; défaut : la dernière étape ouverte.
 
 **Rendu** (`Diapo.tsx` + `projection.css`) : 1 280 × 720 px logiques, mis à l'échelle par `Scene`
 (`transform: scale`, mesures toujours en px logiques). Composants du site réutilisés tels quels
-(`RichText`, `Illustration`, `BlockRenderer`, `InteractiveWidget sansEpingle` — atelier mis à l'échelle
-par `zoom`, jamais sous 0,8 : au-delà sa zone défile). Fond clair dans les deux thèmes : `.theme-clair`
+(`RichText`, `Illustration`, `BlockRenderer`, `InteractiveWidget sansEpingle` — atelier disposé et
+mis à l'échelle par `dispositionAtelier.ts`, voir « Atelier » ci-dessous). Fond clair dans les deux thèmes : `.theme-clair`
 recopie les jetons CLAIRS de `:root` (figures, encadrés, KaTeX) — à tenir à jour si un jeton de couleur
 est ajouté à `index.css`. Tailles en `calc(N * var(--echelle))` : corps 32 px (exemple), 30–32 px
 (essentiel), 28 px (démonstration), titres 42–76 px. Une étiquette d'étape longue (> 16 caractères)
@@ -149,6 +151,47 @@ passe au-dessus du texte ; PAS de `text-transform: uppercase` sur les étiquette
   le résultat seul sur une page. Même calcul dans les deux fenêtres et dans le PowerPoint.
 - **Ajustement** (`useAjustement`) : si le contenu déborde encore, `--echelle` descend par pas de 0,04
   (dernier recours ; mesuré : voir Vérifications).
+- **Atelier** (retour du professeur du 25/11/2026 : « une petite cadre au milieu de la diapo » — l'ancien
+  `zoom` plafonné à 1,5, calé sur la hauteur et jamais sous 0,8 laissait 8 ateliers sur 10 à ×0,8 avec
+  défilement, 31 % de la diapo) : titre réduit à UNE ligne (« ATELIER » + label, bouton « Plein écran »),
+  zone = presque toute la diapo (1 208 × 596 px logiques, 60 px gardés en bas pour la barre).
+  `components/projection/dispositionAtelier.ts` (`disposerAtelier`, aucun widget modifié) MESURE trois
+  dispositions et garde la plus grande figure (aire × zoom²) : `pile` (l'atelier tel quel, mais calé sur
+  son contenu RÉEL — union des textes au plus près, figures, contrôles, encadrés colorés —, pas sur les
+  760 px de l'hôte ; tenu en largeur ET en hauteur, zoom ≤ 3, centré) ; `cote` (bloc figure = plus grand
+  ancêtre de la plus grande `svg`/`canvas` — à défaut le plus grand `table` — sans contrôle, comme
+  l'épinglage de la page ; son parent devient une grille par une feuille adoptée + attributs
+  `data-proj-cote` / `data-proj-fig` / `data-proj-large` : figure en colonne 1 sur toute la hauteur,
+  `grid-template-rows: repeat(n, auto) 1fr`, réglages en colonne 2 de 340 / 440 / 560 px ; refusée si
+  la grille ne prend pas ou ne raccourcit pas l'atelier ; doit battre `pile` de 15 % d'aire) ; `defile`
+  (dernier recours, figure ×1,6 en aire : zoom pour que tout jusqu'au bas de la figure ET du premier
+  réglage qui la suit tienne ; le reste défile en douceur, pastille « ↓ La suite de l'atelier » tant
+  qu'on n'est pas en bas). Enveloppe `.diapo-atelier-place` en absolu (non zoomée) + hôte zoomé (`zoom`,
+  texte net, pointeurs justes). Remesure : nouvelle disposition si la zone change (plein écran) ; même
+  disposition, zoom recalculé si l'atelier change de taille (`ResizeObserver`, `MutationObserver` qui
+  repose la grille si le widget reconstruit son DOM). Mesuré sur 10 ateliers (4e, 5e, 6e, dont
+  `condition-initiale-widget` « choisis la bonne piste ») : figure à 1 920 × 1 080 de 456–672 px de
+  large à 827–1 134 px (×1,5 à ×1,9) ; 7 en `cote`, 2 en `pile` (déjà larges), 1 en `defile`
+  (`multiplication-k-widget` : repère + curseur k en ×1,53, tableau et lecture dessous).
+  **Plein écran de l'atelier** (`EtatProjection.atelierPlein`, partagé ; retombe à faux en changeant de
+  diapo) : l'atelier seul sur toute la diapo (`.diapo[data-plein]` : ni titre ni filet, marge 6 px,
+  nouvelle disposition mesurée), API Fullscreen demandée dans la fenêtre où l'on clique si la page n'y est
+  pas déjà (sinon le calque plein cadre de la projection suffit), rendue à la sortie ; sortir du plein
+  écran du navigateur fait sortir l'atelier. Barre masquée, revenue seulement à l'approche du bas
+  (96 px : on manipule à la souris), bouton flottant « Quitter le plein écran » (en haut à gauche,
+  visible au mouvement), Échap. Vue du professeur : bouton « Atelier en plein écran » (écran de la
+  classe).
+- **S'entraîner** (bloc `entrainement`) : surtitre « S'entraîner · générateur genN », titre,
+  description, « Plateforme → … », bouton « Ouvrir le générateur ↗ » (`<a target="_blank"
+  rel="noopener">`, lien de `generatorLink` : nouvel onglet dans la fenêtre où l'on clique, la
+  projection ne bouge pas) ; à droite, QR code de 350 px logiques (`entrainement/export/qrSvg.ts`, celui
+  des feuilles) vers l'adresse PUBLIQUE (`SITE_PUBLIC` + `/entrainement/…` pour un générateur rapatrié,
+  sinon l'URL plateforme-maths) — jamais `localhost` : les élèves le scannent —, adresse courte dessous.
+- **Vidéo** (bloc `video`) : titre + lecteur 16:9 aussi grand que la zone ; avec `youtubeId`, vignette
+  (`i.ytimg.com`) + bouton de lecture, `youtube-nocookie.com/embed/…?autoplay=1` chargé AU CLIC
+  seulement, dans la fenêtre cliquée (l'autre écran garde la même diapo) ; sans `youtubeId`, « Vidéo à
+  venir — titre » comme le cours. Vue d'ensemble / diapo suivante : simple image (jamais un bouton dans
+  le bouton de la vignette).
 
 **Projection** (`ProjectionPage.tsx`) : `useProjection` = état `{ index, pas, blanc, debut, minuteur }`
 partagé par `BroadcastChannel` (`math-belgium-projection:{niveau}/{slug}`) : chaque changement local est
@@ -235,10 +278,33 @@ interactif ; `touch-action: none` sur ce qui se manipule, classe `.projection-in
     en DEG), valeur à 10 chiffres significatifs (virgule, espaces fines, « − »), « ≈ » si arrondie ;
     « Exact » = forme reconnue par la valeur à 10⁻¹¹ près quand le décimal est arrondi (fraction q ≤ 1 000,
     multiple de π q ≤ 60, ±a√b/q), sinon décimal. Erreurs en clair (« « abc » n'est pas reconnu »,
-    « Division par zéro », hors du domaine), rien n'est effacé. « Épingler » pose « expression = valeur »
-    (KaTeX) sur la page courante : étiquette déplaçable, annulable, retirable à la gomme (×). Deux
-    écrans : bouton « Masquer à la classe » (vue du professeur seulement) — la calculatrice n'est plus
-    affichée sur l'écran projeté.
+    « Division par zéro », hors du domaine), rien n'est effacé. « Épingler le résultat » pose
+    « expression = valeur » (KaTeX) sur la page courante : étiquette déplaçable, annulable ; plusieurs
+    résultats sont empilés vers le haut, jamais l'un sur l'autre. Deux écrans : bouton « Masquer à la
+    classe » (vue du professeur seulement) — la calculatrice n'est plus affichée sur l'écran projeté.
+    **Bug « Épingler reste grisé » (25/11/2026)** — causes réelles reproduites (le bouton marchait au clic
+    sur « = » à l'écran, souris comme doigt, une ou deux fenêtres) : taper « 3*4= » au clavier donnait
+    « Caractère « = » non reconnu » (l'aide disait « puis « = » ») → `calculer` ignore les « = » finaux et
+    un « = » tapé en fin de saisie calcule ; à l'ouverture le champ n'avait pas le focus (frappe perdue,
+    Entrée = diapo suivante) → focus donné à l'ouverture (souris / clavier, pas au doigt : clavier
+    virtuel ; seulement si la fenêtre a le focus) et chiffres / opérateurs frappés hors d'un champ
+    renvoyés dans celui de la calculatrice (écouteur en capture : « . » n'éteint plus l'écran tant
+    qu'elle est ouverte) ; le bouton exigeait un « = » préalable → « Épingler le résultat » calcule
+    lui-même la saisie en cours (erreur affichée sinon). Désactivé (`aria-disabled`, cliquable : un
+    `disabled` n'affiche pas son infobulle partout) seulement sans aucun calcul, infobulle « Rien à épingler
+    pour l'instant : tape un calcul… ». **Punaise** (barre de titre, `EtatCalculatrice.garde`, partagée) :
+    sans elle la calculatrice se ferme au changement de diapo (pas à l'écran blanc) ; avec, elle reste
+    ouverte, à sa place, jusqu'à ce qu'on la ferme. `MagasinInstruments.calc` ne diffuse rien si rien ne
+    change (les deux fenêtres ferment la calculatrice au même changement de diapo).
+    **× des étiquettes** (demande du professeur du 25/11/2026) : toujours présent (avant : seulement avec
+    la gomme), `aria-label` « Retirer ce résultat », cible ≥ 44 px RÉELS (`--cible` = max(44, 44 /
+    échelle) px logiques : vue réduite du professeur comprise), pastille discrète de 26 px — à la souris
+    visible au survol de l'étiquette, au doigt toujours visible (`(hover: none)` / `(pointer: coarse)` ou
+    `data-tactile` posé au premier toucher) ; le glisser de l'étiquette ignore le bouton. Retrait diffusé
+    (`retirer`) et annulable : pile `retraits` par page (élément + nombre d'éléments juste après) —
+    Ctrl/Cmd+Z / « Annuler » le remet (diffusé en `element`) si rien n'a été ajouté depuis, sinon retire
+    d'abord ces ajouts. Écran de la CLASSE (deux écrans, `role=diapos`) : pas de × (affichage seulement),
+    sauf avec la gomme comme avant.
 - **Écran blanc** : choix « uni / quadrillé / repère » (palette au-dessus de la barre ; boutons à côté
   d'« Écran blanc » dans la vue du professeur), partagé ; quadrillage de 40 px, repère = axes gradués,
   origine au centre (`FondBlancTableau`). Les instruments marchent dessus.
@@ -252,7 +318,9 @@ interactif ; `touch-action: none` sur ce qui se manipule, classe `.projection-in
   écran blanc, vue d'ensemble, « Ouvrir la fenêtre des diapos » si elle est fermée. Fenêtre bloquée →
   un écran (`repli=1`) avec message.
 
-**PowerPoint** (`lib/projection/exportPptx.tsx`, chargé à la demande avec `pptxgenjs` 4.0.1 —
+**PowerPoint** (carte S'entraîner : QR code dans l'image, adresse en zone de texte CLIQUABLE ; vidéo :
+cadre + lien YouTube cliquable — un iframe ne se capture pas ; `data-pptx-lien` → `hyperlink` du run)
+(`lib/projection/exportPptx.tsx`, chargé à la demande avec `pptxgenjs` 4.0.1 —
 l'ancien `buildPptx`/html2canvas avait été retiré en septembre, voir `export-pipeline.md`) : mêmes
 diapos (même découpage), état final. Textes sans formule ni figure (surtitre, titre, phrases de
 l'essentiel, question, réponse) = vraies zones de texte modifiables (Georgia / Calibri / Consolas, à
@@ -303,6 +371,24 @@ sans glisser = rien, jamais de diapo suivante. Deux fenêtres : repère et longu
 le tracé du professeur, trait reçu, Droite / cadenas partagés, droite du tableau reçue chez le
 professeur, Ctrl+Z — 63 vérifications, 0 erreur console ; `verif-outils.mjs` repassé (77 + 1 : son
 repère d'écran du professeur, pris avant l'ouverture de la palette de l'équerre, est à recalculer).
+
+Retouches du 25/11/2026 (dossier de travail `projection-3/` : `repro-calc.mjs`, `repro2.mjs`,
+`ateliers.mjs`, `verif-p3.mjs`, `pptx.mjs`, `lire_pptx.py`) : Vite de développement + faux client
+connecté, 1 280 × 720 et 1 920 × 1 080. Reproduction d'abord (souris / doigt CDP, un et deux écrans : le
+« = » à l'écran marchait ; « 3*4= » au clavier et la frappe sans focus échouaient). `verif-p3.mjs` —
+calculatrice : focus à l'ouverture, bouton désactivé + infobulle, « 3*4= », touche puis clavier,
+épingler sans « = », frappe hors du champ, saisie illisible gardée, punaise (gardée à sa place sur
+3 diapos et à l'écran blanc, fermée sinon), doigt (pas de focus forcé, 7 × 6 + Épingler) ; × : caché /
+survol, 44 px, glisser intact, retrait, Ctrl+Z remet puis retire ; deux écrans : résultat et étiquette
+reçus, × absent au tableau, × ≥ 44 px dans la vue réduite, retrait et Ctrl+Z des deux côtés, punaise
+partagée ; atelier « choisis la bonne piste » en `cote`, curseur manipulé souris ET doigt sans changer
+de diapo, plein écran (zoom plus grand, barre masquée au milieu / revenue en bas, bouton, Échap), deux
+écrans (bouton du professeur, plein écran retombé au changement de diapo) ; ordre ateliers → vidéos →
+S'entraîner → Teste-toi, QR décodé par jsQR = adresse publique, « Ouvrir le générateur » en nouvel
+onglet sans quitter la diapo, vidéo chargée au clic seulement (youtube-nocookie, lecteur ≥ 55 % de la
+largeur), vidéo sans identifiant, deux écrans (lecture sur l'écran cliqué) ; 0 erreur console.
+PowerPoint (4e ch. 1 § 1) : 25 diapos comme à l'écran, une image chacune, liens cliquables YouTube et
+générateurs, atelier exporté en disposition `cote`.
 
 ## Page d'un générateur `/entrainement/:chantier/:generatorId` (refonte du 22/11/2026)
 

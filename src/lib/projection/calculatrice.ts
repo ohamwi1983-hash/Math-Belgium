@@ -480,7 +480,10 @@ export type Resultat =
 
 export function calculer(saisie: string, mode: ModeAngle, ans: number): Resultat {
   try {
-    const arbre = analyser(saisie)
+    // « 3 × 4 = » : le « = » final (geste naturel sur une calculatrice, et l'aide le propose) demande le
+    // calcul, il n'en fait pas partie. Avant le 25/11/2026 il donnait « Caractère « = » non reconnu » et
+    // « Épingler » restait grisé (retour du professeur).
+    const arbre = analyser(saisie.replace(/[=\s]+$/, ''))
     const valeur = evaluer(arbre, mode, ans)
     const d = formaterDecimal(valeur)
     return { ok: true, saisie, latexExpression: enLatex(arbre, mode), valeur, latexExact: formeExacte(valeur), latexDecimal: d.latex, texteDecimal: d.texte, tronque: d.tronque, mode }

@@ -88,7 +88,10 @@ couverts à l'arrivée en descendant, jamais visibles en entier) sur les 191 ate
 ateliers fautifs à chaque taille (10 et 8 éléments couverts à l'ouverture) ; après, 0 / 0 / 0 à
 375×667 et 390×664.
 
-**Diapo du mode projection (`InteractiveWidget sansEpingle`)** : aucun épinglage ; l'atelier entier est
-mis à l'échelle (`zoom`) pour tenir dans sa zone de la diapo, jamais sous 0,8 (au-delà la zone défile) —
-voir `chapter-components.md`, « Mode projection ». Pour l'export PowerPoint, son Shadow DOM est aplati
+**Diapo du mode projection (`InteractiveWidget sansEpingle`)** : aucun épinglage ; disposition et zoom
+choisis par `components/projection/dispositionAtelier.ts` (tel quel, figure à côté des réglages par une
+grille posée dans le Shadow DOM — feuille adoptée + attributs `data-proj-*` —, ou défilement en dernier
+recours), zoom jusqu'à ×3 — voir `chapter-components.md`, « Mode projection », « Atelier ». **Pour un
+NOUVEL atelier** : mêmes règles que pour l'épinglage (figure principale dans une `<svg>`, aucun contrôle
+dans le conteneur direct de la figure) ; c'est ce qui permet la disposition côte à côte en classe. Pour l'export PowerPoint, son Shadow DOM est aplati
 (feuilles adoptées et `<style>` recopiés, `:host` → `[data-hote]`) avant d'être photographié.

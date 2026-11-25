@@ -14,6 +14,8 @@ export interface EtatProjection {
   minuteur: { fin: number | null; duree: number }
   /** Fond de l'écran blanc : uni, quadrillé (carreaux de 40 px logiques) ou repère gradué. */
   fond: FondBlanc
+  /** Diapo d'atelier en plein écran (l'atelier seul occupe tout l'écran) ; retombe à faux en changeant de diapo. */
+  atelierPlein: boolean
 }
 
 export type FondBlanc = 'uni' | 'quadrille' | 'repere'
@@ -78,7 +80,7 @@ type Ecouteur = (m: MessageProjection) => void
  * répond. Rien n'est envoyé hors du navigateur.
  */
 export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Role) {
-  const [etat, setEtat] = useState<EtatProjection>(() => ({ index: 0, pas: 0, blanc: false, debut: Date.now(), minuteur: { fin: null, duree: 300 }, fond: 'uni' }))
+  const [etat, setEtat] = useState<EtatProjection>(() => ({ index: 0, pas: 0, blanc: false, debut: Date.now(), minuteur: { fin: null, duree: 300 }, fond: 'uni', atelierPlein: false }))
   const etatRef = useRef(etat)
   etatRef.current = etat
   const id = useMemo(() => Math.random().toString(36).slice(2), [])
@@ -114,7 +116,7 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
       if (m.type === 'etat') {
         actif.current = true
         const n = Math.max(0, Math.min(diapos.length - 1, m.etat.index))
-        const etatRecu = { ...m.etat, index: n, fond: m.etat.fond ?? 'uni' }
+        const etatRecu = { ...m.etat, index: n, fond: m.etat.fond ?? 'uni', atelierPlein: !!m.etat.atelierPlein }
         etatRef.current = etatRecu
         setEtat(etatRecu)
       } else if (m.type === 'demande') {
@@ -134,8 +136,10 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
   const appliquer = useCallback(
     (f: (e: EtatProjection) => EtatProjection) => {
       const avant = etatRef.current
-      const apres = f(avant)
+      let apres = f(avant)
       if (apres === avant) return
+      // Plein écran d'un atelier : propre à sa diapo.
+      if (apres.index !== avant.index && apres.atelierPlein) apres = { ...apres, atelierPlein: false }
       actif.current = true
       etatRef.current = apres
       setEtat(apres)
@@ -168,6 +172,7 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
   const basculerBlanc = useCallback(() => appliquer((e) => ({ ...e, blanc: !e.blanc })), [appliquer])
   const choisirFond = useCallback((fond: FondBlanc) => appliquer((e) => (e.fond === fond ? e : { ...e, fond })), [appliquer])
   const lancerMinuteur = useCallback((duree: number) => appliquer((e) => ({ ...e, minuteur: { duree, fin: Date.now() + duree * 1000 } })), [appliquer])
+  const basculerAtelierPlein = useCallback((plein?: boolean) => appliquer((e) => ((plein ?? !e.atelierPlein) === e.atelierPlein ? e : { ...e, atelierPlein: plein ?? !e.atelierPlein })), [appliquer])
   const arreterMinuteur = useCallback(() => appliquer((e) => ({ ...e, minuteur: { ...e.minuteur, fin: null } })), [appliquer])
 
   const ecouter = useCallback((f: Ecouteur) => {
@@ -177,7 +182,7 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
     }
   }, [])
 
-  return { etat, suivant, precedent, aller, basculerBlanc, choisirFond, lancerMinuteur, arreterMinuteur, envoyer, ecouter, id, synchro }
+  return { etat, suivant, precedent, aller, basculerBlanc, choisirFond, lancerMinuteur, arreterMinuteur, basculerAtelierPlein, envoyer, ecouter, id, synchro }
 }
 
 export type Projection = ReturnType<typeof useProjection>

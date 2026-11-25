@@ -19,7 +19,9 @@ import { downloadBlob } from '../export/downloadBlob'
  * - tout le reste (formules KaTeX, figures SVG, encadrés, atelier) forme l'image de fond de la diapo,
  *   rastérisée par un SVG `<foreignObject>` autonome (CSS du site + polices en `data:` URI, même
  *   technique que `katexImage.ts` et `buildHtml.ts`), à 1,5× (1 920 × 1 080) ;
- * - les notes de la diapo (corrigé, réponse, légende) vont dans les notes du présentateur, en texte.
+ * - les notes de la diapo (corrigé, réponse, légende) vont dans les notes du présentateur, en texte ;
+ * - carte « S'entraîner » : QR code dans l'image, adresse en zone de texte cliquable ; vidéo : un iframe ne
+ *   se capture pas → cadre + lien YouTube cliquable (`data-pptx-lien`).
  * Pas de diapo par étape de révélation : la diapo finale complète suffit (cahier des charges).
  */
 
@@ -143,7 +145,7 @@ interface TexteNatif {
   y: number
   w: number
   h: number
-  runs: { text: string; options: { bold?: boolean } }[]
+  runs: { text: string; options: { bold?: boolean; hyperlink?: { url: string; tooltip?: string } } }[]
   taille: number
   gras: boolean
   couleur: string
@@ -183,6 +185,9 @@ function textesNatifs(diapo: HTMLElement): TexteNatif[] {
       }
     }
     el.childNodes.forEach((k) => parcourir(k, false))
+    // Lien (carte « S'entraîner », vidéo) : zone de texte cliquable dans PowerPoint.
+    const lien = el.dataset.pptxLien
+    if (lien) for (const r of runs) r.options = { ...r.options, hyperlink: { url: lien, tooltip: lien } }
     if (runs.length) runs[0].text = runs[0].text.trimStart()
     if (runs.length) runs[runs.length - 1].text = runs[runs.length - 1].text.trimEnd()
     const taille = parseFloat(st.fontSize)

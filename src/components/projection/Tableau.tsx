@@ -160,6 +160,10 @@ export function Annotations({
   const canvasStylo = useRef<HTMLCanvasElement>(null)
   const racine = useRef<HTMLDivElement>(null)
   const parDiapo = useRef(new Map<number, ElementAnnotation[]>())
+  /** Résultats épinglés retirés au × (par page) : « Annuler » les remet, dans l'ordre inverse. `longueur` =
+   * nombre d'éléments de la page juste après le retrait (si on a ajouté autre chose depuis, « Annuler »
+   * retire d'abord ces ajouts). */
+  const retraits = useRef(new Map<number, { el: Epingle; longueur: number }[]>())
   const [, setVersion] = useState(0)
   const { etat, envoyer, ecouter, id } = projection
   // L'écran blanc est une page à part (clé −1) : ce qu'on y écrit ne salit pas la diapo, et inversement.
@@ -302,12 +306,32 @@ export function Annotations({
     [liste, envoyer, id, rafraichir],
   )
 
+  /** × d'une étiquette épinglée : retrait annulable (Ctrl/Cmd+Z, bouton « Annuler »). */
+  const retirerEpingle = useCallback(
+    (el: Epingle) => {
+      const i = indexRef.current
+      retirer(el.id)
+      const pile = retraits.current.get(i) ?? []
+      pile.push({ el, longueur: liste(i).length })
+      retraits.current.set(i, pile)
+    },
+    [retirer, liste],
+  )
+
   useEffect(() => {
     const annuler = () => {
       const l = liste()
+      const pile = retraits.current.get(indexRef.current)
+      const dernier = pile?.[pile.length - 1]
+      if (dernier && l.length <= dernier.longueur) {
+        pile!.pop()
+        ajouter(dernier.el)
+        return
+      }
       if (l.length) retirer(l[l.length - 1].id)
     }
     const effacer = () => {
+      retraits.current.delete(indexRef.current)
       liste().length = 0
       envoyer({ type: 'effacer', de: id, index: indexRef.current })
       rafraichir(indexRef.current, true)
@@ -327,7 +351,19 @@ export function Annotations({
       window.removeEventListener('projection:effacer', effacer)
       window.removeEventListener('keydown', surTouche)
     }
-  }, [liste, retirer, envoyer, id, rafraichir])
+  }, [liste, retirer, ajouter, envoyer, id, rafraichir])
+
+  // Écran tactile (tableau interactif, tablette) : le × des étiquettes reste visible (pas de survol au doigt).
+  useEffect(() => {
+    const noter = (e: PointerEvent) => {
+      const r = racine.current
+      if (!r) return
+      if (e.pointerType === 'touch') r.dataset.tactile = ''
+      else if (e.pointerType === 'mouse') delete r.dataset.tactile
+    }
+    window.addEventListener('pointerdown', noter, true)
+    return () => window.removeEventListener('pointerdown', noter, true)
+  }, [])
 
   // ---------- messages de l'autre fenêtre ----------
   useEffect(
@@ -586,7 +622,7 @@ export function Annotations({
   const gomme = actif && outils.outil === 'gomme'
 
   return (
-    <div ref={racine} className="projection-tableau">
+    <div ref={racine} className="projection-tableau" style={{ '--cible': `${Math.round(Math.max(44, echelle > 0 ? 44 / echelle : 44))}px` } as React.CSSProperties}>
       <canvas ref={canvasFluo} className="projection-annotations projection-annotations--fluo" aria-hidden="true" />
       <canvas
         ref={canvasStylo}
@@ -608,9 +644,22 @@ export function Annotations({
           onClick={(e) => e.stopPropagation()}
         >
           <MathInline tex={el.latex} />
-          {gomme && (
-            <button type="button" className="projection-epingle-retirer" aria-label="Retirer ce résultat" onClick={() => retirer(el.id)}>
-              <Pictogramme nom="fermer" taille={16} />
+          {/* × toujours là (discret à la souris : visible au survol ; toujours visible au doigt), sauf sur
+              l'écran de la CLASSE en mode deux écrans (affichage seulement) — là, seulement avec la gomme. */}
+          {(role !== 'diapos' || gomme) && (
+            <button
+              type="button"
+              className={`projection-epingle-retirer${gomme ? ' gomme' : ''}`}
+              aria-label="Retirer ce résultat"
+              title="Retirer ce résultat (Ctrl+Z pour le remettre)"
+              onClick={(e) => {
+                e.stopPropagation()
+                retirerEpingle(el)
+              }}
+            >
+              <span className="projection-epingle-croix" aria-hidden="true">
+                <Pictogramme nom="fermer" taille={14} />
+              </span>
             </button>
           )}
         </div>
@@ -636,10 +685,16 @@ export function Annotations({
         role={role}
         echelle={echelle}
         versDiapo={versDiapo}
+        diapo={index}
         epingler={(latex) => {
           const c = magasin.lire().calc
-          // En bas à gauche de la zone de contenu (hors de la calculatrice, au-dessus de la barre) : à déplacer ensuite.
-          ajouter({ genre: 'epingle', id: nouvelId(id), x: c.x < 560 ? 680 : 96, y: 560, latex })
+          // En bas de la zone de contenu, du côté opposé à la calculatrice (au-dessus de la barre) : à déplacer
+          // ensuite. Plusieurs résultats : empilés vers le haut, jamais posés l'un sur l'autre.
+          const x = c.x < 560 ? 680 : 96
+          const pris = liste().filter((e): e is Epingle => e.genre === 'epingle' && Math.abs(e.x - x) < 40)
+          let y = 560
+          while (y > 80 && pris.some((e) => Math.abs(e.y - y) < 56)) y -= 64
+          ajouter({ genre: 'epingle', id: nouvelId(id), x, y, latex })
         }}
       />
     </div>
