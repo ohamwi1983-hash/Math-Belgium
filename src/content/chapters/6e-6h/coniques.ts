@@ -551,6 +551,36 @@ export const coniques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 58. Identifier et caractériser une conique »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Lire une conique sur sa figure ou son équation réduite',
+          generatorId: '6gen132',
+          description: [
+            "Reconnais une conique sur son équation réduite ou sur sa figure : nature, axe focal ou sens d'ouverture, sommets, foyers, asymptotes ou directrice, et la propriété optique de chaque miroir.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 132. Lire une conique sur sa figure ou son équation réduite »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Représenter une conique',
+          generatorId: '6gen133',
+          description: [
+            "Place sur un repère quadrillé le centre, les sommets, les foyers, le rectangle des asymptotes ou la directrice d'une conique donnée par son équation, puis compare avec la courbe tracée.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 133. Représenter une conique »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Hyperbole équilatère et xy = k',
+          generatorId: '6gen137',
+          description: [
+            'Passe de x² − y² = a² à XY = k dans le repère des asymptotes, et inversement : constante k = a²/2, sommets et foyers dans le bon repère.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 137. Hyperbole équilatère et xy = k »',
+        },
       ],
     },
     {
@@ -825,6 +855,26 @@ export const coniques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: "6e (6h) → « 59. Excentricité, foyers, directrices et réduction d'équation »",
         },
+        {
+          kind: 'entrainement',
+          title: 'Réduire par translation et donner tous les éléments',
+          generatorId: '6gen134',
+          description: [
+            "Complète les carrés, écris l'équation réduite dans le repère translaté, identifie la conique, puis donne ses sommets, foyers, directrices ou asymptotes dans le repère de départ — parabole décentrée comprise.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 134. Réduire par translation et donner tous les éléments »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Équation depuis foyer, directrice et excentricité',
+          generatorId: '6gen135',
+          description: [
+            "À partir d'un foyer, d'une directrice et de l'excentricité, décide de la nature de la conique, établis son équation par |PF| = e·dist(P ; d) et trouve son sommet entre F et d.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 135. Équation depuis foyer, directrice et excentricité »',
+        },
       ],
     },
     {
@@ -1021,6 +1071,16 @@ export const coniques: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 60. Aire, rayons focaux et excentricité »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Rayons focaux et triangle focal',
+          generatorId: '6gen136',
+          description: [
+            "Calcule les rayons focaux a − ex et a + ex d'un point de l'ellipse, décide si un angle FPF′ donné peut être atteint, puis calcule l'aire du triangle focal b²·tan(θ/2).",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 136. Rayons focaux et triangle focal »',
         },
       ],
     },

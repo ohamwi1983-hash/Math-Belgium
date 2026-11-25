@@ -106,6 +106,7 @@ export type IdGenerateurPilote =
   | '6gen128' | '6gen129' | '6gen130' | '6gen131'
   | '6gen123' | '6gen124' | '6gen125' | '6gen126' | '6gen127'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
+  | '6gen132' | '6gen133' | '6gen134' | '6gen135' | '6gen136' | '6gen137'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
   | 'gen113' | 'gen114' | 'gen115' | 'gen116' | 'gen117' | 'gen118' | 'gen119' | 'gen120' | 'gen121' | 'gen122'
   | 'gen123' | 'gen124' | 'gen125'
@@ -307,6 +308,12 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'coniques', sectionId: 'intersection', generatorId: '6gen61', label: '' },
   { chapitreSlug: 'coniques', sectionId: 'tangentes', generatorId: '6gen62', label: '' },
   { chapitreSlug: 'coniques', sectionId: 'optique', generatorId: '6gen63', label: '' },
+  { chapitreSlug: 'coniques', sectionId: 'identifier', generatorId: '6gen132', label: 'Lire une conique sur sa figure ou son équation réduite (6gen132)', processus: 1 },
+  { chapitreSlug: 'coniques', sectionId: 'identifier', generatorId: '6gen133', label: 'Représenter une conique (6gen133)', processus: 1 },
+  { chapitreSlug: 'coniques', sectionId: 'excentricite', generatorId: '6gen134', label: 'Réduire par translation et donner tous les éléments (6gen134)', processus: 2 },
+  { chapitreSlug: 'coniques', sectionId: 'excentricite', generatorId: '6gen135', label: 'Équation depuis foyer, directrice et excentricité (6gen135)', processus: 2 },
+  { chapitreSlug: 'coniques', sectionId: 'airefocale', generatorId: '6gen136', label: 'Rayons focaux et triangle focal (6gen136)', processus: 2 },
+  { chapitreSlug: 'coniques', sectionId: 'identifier', generatorId: '6gen137', label: 'Hyperbole équilatère et xy = k (6gen137)', processus: 2 },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', generatorId: 'gen7', label: "Analyse d'une fonction (gen7)" },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', generatorId: 'gen123', label: 'Lire une parabole sur un graphique (gen123)', processus: 1 },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', generatorId: 'gen124', label: 'Premier ou second degré ? Différences secondes (gen124)', processus: 2 },

@@ -455,5 +455,11 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '6gen61': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen61').then((m) => ({ default: m.App6gen61 }))),
   '6gen62': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen62').then((m) => ({ default: m.App6gen62 }))),
   '6gen63': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen63').then((m) => ({ default: m.App6gen63 }))),
+  '6gen132': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen132').then((m) => ({ default: m.App6gen132 }))),
+  '6gen133': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen133').then((m) => ({ default: m.App6gen133 }))),
+  '6gen134': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen134').then((m) => ({ default: m.App6gen134 }))),
+  '6gen135': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen135').then((m) => ({ default: m.App6gen135 }))),
+  '6gen136': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen136').then((m) => ({ default: m.App6gen136 }))),
+  '6gen137': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen137').then((m) => ({ default: m.App6gen137 }))),
   '6gen73': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen73').then((m) => ({ default: m.App6gen73 }))),
 }
