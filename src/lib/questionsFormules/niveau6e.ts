@@ -928,8 +928,8 @@ export const FORMULES_6E: BanqueFormules = {
     variablesdiscretes: [
       {
         id: r`$F(x) = P(X \le x)$`,
-        enonce: r`Donne la définition de la fonction de répartition $F$ d'une variable aléatoire $X$.`,
-        corrige: r`$F(x) = P(X \le x)$.`,
+        enonce: r`Donne la définition de la fonction de répartition $F$ d'une variable aléatoire $X$, puis $P(a < X \le b)$ et $P(X > a)$ à l'aide de $F$.`,
+        corrige: r`$F(x) = P(X \le x)$ ; $P(a < X \le b) = F(b) - F(a)$ et $P(X > a) = 1 - F(a)$.`,
       },
       {
         id: r`$E(X) = \displaystyle\sum_i x_i \times P(X=x_i)$`,
@@ -938,8 +938,13 @@ export const FORMULES_6E: BanqueFormules = {
       },
       {
         id: r`$V(X) = E(X^2)-[E(X)]^2$`,
-        enonce: r`Donne la variance $V(X)$ à l'aide de $E(X^2)$ et de $E(X)$, puis l'écart-type $\sigma(X)$.`,
-        corrige: r`$V(X) = E(X^2)-[E(X)]^2$ et $\sigma(X) = \sqrt{V(X)}$.`,
+        enonce: r`Donne la variance $V(X)$ d'une variable aléatoire discrète à l'aide de $E(X^2)$ et de $E(X)$ (formule de König), puis l'écart-type $\sigma(X)$.`,
+        corrige: r`$V(X) = E(X^2)-[E(X)]^2$, avec $E(X^2)=\sum_i x_i^2\,P(X=x_i)$, et $\sigma(X) = \sqrt{V(X)}$.`,
+      },
+      {
+        id: r`$E(aX+b)=aE(X)+b$`,
+        enonce: r`$a$ et $b$ sont deux réels. Exprime $E(aX+b)$, $V(aX+b)$ et $\sigma(aX+b)$ à l'aide de $E(X)$, $V(X)$ et $\sigma(X)$.`,
+        corrige: r`$E(aX+b) = a\,E(X)+b$ ; $V(aX+b) = a^2\,V(X)$ ; $\sigma(aX+b) = |a|\,\sigma(X)$.`,
       },
       {
         id: r`$E(X) = nK/N$`,
@@ -949,67 +954,109 @@ export const FORMULES_6E: BanqueFormules = {
       {
         id: r`$E(X) = \dfrac{n+1}{2} \quad V(X) = \dfrac{n^2-1}{12}$`,
         enonce: r`$X$ suit la loi uniforme discrète sur les valeurs $1, 2, \ldots, n$ (toutes de probabilité $\dfrac{1}{n}$). Donne $E(X)$ et $V(X)$.`,
-        corrige: r`$E(X) = \dfrac{n+1}{2}$ et $V(X) = \dfrac{n^2-1}{12}$.`,
+        corrige: r`$E(X) = \dfrac{n+1}{2}$ et $V(X) = \dfrac{n^2-1}{12}$ (pour les valeurs $1, 2, \ldots, n$ seulement).`,
       },
     ],
     loibinomiale: [
       {
         id: r`$P(X=k) = C(n,k) \times p^k \times (1-p)^{n-k}$`,
-        enonce: r`$X$ suit la loi binomiale de paramètres $n$ et $p$. Donne $P(X=k)$.`,
-        corrige: r`$P(X=k) = C(n,k) \times p^k \times (1-p)^{n-k}$.`,
+        enonce: r`$X$ suit la loi binomiale $\mathcal{B}(n\,;p)$. Donne $P(X=k)$, pour $k = 0, 1, \ldots, n$.`,
+        corrige: r`$P(X=k) = C_n^k \times p^k \times (1-p)^{n-k}$.`,
       },
       {
         id: r`$E(X) = np \quad V(X) = np(1-p)$`,
-        enonce: r`Donne l'espérance et la variance d'une variable aléatoire qui suit la loi binomiale de paramètres $n$ et $p$.`,
-        corrige: r`$E(X) = np$ et $V(X) = np(1-p)$.`,
+        enonce: r`Donne l'espérance, la variance et l'écart-type d'une variable aléatoire $X\sim\mathcal{B}(n\,;p)$.`,
+        corrige: r`$E(X) = np$, $V(X) = np(1-p)$ et $\sigma(X) = \sqrt{np(1-p)}$.`,
       },
       {
         id: r`$n > \dfrac{\ln(1-\text{seuil})}{\ln(1-p)}$`,
-        enonce: r`Chaque épreuve réussit avec la probabilité $p$. Quelle inégalité doit vérifier le nombre $n$ d'épreuves pour que la probabilité d'obtenir au moins un succès dépasse un seuil donné ?`,
-        corrige: r`$1-(1-p)^n > \text{seuil} \iff n > \dfrac{\ln(1-\text{seuil})}{\ln(1-p)}$ (on prend le plus petit entier qui convient).`,
+        enonce: r`Chaque épreuve réussit avec la probabilité $p$, indépendamment des autres. Quelle inégalité doit vérifier le nombre $n$ d'épreuves pour que la probabilité d'obtenir au moins un succès dépasse un seuil $s$ ?`,
+        corrige: r`$1-(1-p)^n > s \iff n > \dfrac{\ln(1-s)}{\ln(1-p)}$ (le sens change car $\ln(1-p)<0$ ; on prend le plus petit entier qui convient).`,
       },
     ],
     variablecontinue: [
       {
         id: r`$\displaystyle\int_u^v f(t)\,dt = 1$`,
-        enonce: r`$f$ est la densité d'une variable aléatoire continue $X$ à valeurs dans $[u\,;v]$. Que vaut $\displaystyle\int_u^v f(t)\,dt$ ? Comment calcule-t-on $P(a \le X \le b)$ ?`,
-        corrige: r`$\displaystyle\int_u^v f(t)\,dt = 1$ et $P(a \le X \le b) = \displaystyle\int_a^b f(t)\,dt$.`,
+        enonce: r`$f$ est la densité d'une variable aléatoire continue $X$ à valeurs dans $[u\,;v]$. Quelles propriétés vérifie $f$ ? Comment calcule-t-on $P(a \le X \le b)$ ?`,
+        corrige: r`$f$ est positive et continue sur $[u\,;v]$, et $\displaystyle\int_u^v f(t)\,dt = 1$ ; $P(a \le X \le b) = \displaystyle\int_a^b f(t)\,dt$.`,
+      },
+      {
+        id: r`$E(X) = \displaystyle\int_u^v t\,f(t)\,dt$`,
+        enonce: r`$X$ est une variable aléatoire continue de densité $f$ sur $[u\,;v]$. Donne son espérance et sa variance.`,
+        corrige: r`$E(X) = \displaystyle\int_u^v t\,f(t)\,dt$ et $V(X) = \displaystyle\int_u^v t^2 f(t)\,dt - [E(X)]^2$.`,
+      },
+      {
+        id: r`fonction de répartition continue`,
+        enonce: r`$X$ est une variable aléatoire continue de densité $f$ et de fonction de répartition $F$. Que vaut $P(X=a)$ ? Exprime $P(a < X < b)$ à l'aide de $F$, et donne le lien entre $F$ et $f$.`,
+        corrige: r`$P(X=a) = 0$ ; $P(a < X < b) = P(a \le X \le b) = F(b) - F(a)$ ; $F' = f$ (là où $F$ est dérivable).`,
+      },
+    ],
+    discreteoucontinue: [
+      {
+        id: r`somme ou intégrale`,
+        enonce: r`Comment calcule-t-on l'espérance d'une variable aléatoire discrète ? Et celle d'une variable aléatoire continue de densité $f$ sur $[u\,;v]$ ?`,
+        corrige: r`Discrète : $E(X) = \displaystyle\sum_i x_i\,P(X=x_i)$ (une somme). Continue : $E(X) = \displaystyle\int_u^v t\,f(t)\,dt$ (une intégrale).`,
       },
     ],
     loiuniformecontinue: [
       {
         id: r`$P(c \le X \le d) = \dfrac{d-c}{b-a}$`,
-        enonce: r`$X$ suit la loi uniforme continue sur $[a\,;b]$. Donne $P(c \le X \le d)$, pour $[c\,;d]$ contenu dans $[a\,;b]$.`,
-        corrige: r`$P(c \le X \le d) = \dfrac{d-c}{b-a}$.`,
+        enonce: r`$X$ suit la loi uniforme continue sur $[a\,;b]$. Donne sa densité, puis $P(c \le X \le d)$ pour $[c\,;d]$ contenu dans $[a\,;b]$.`,
+        corrige: r`Densité $f(t) = \dfrac{1}{b-a}$ sur $[a\,;b]$ ; $P(c \le X \le d) = \dfrac{d-c}{b-a}$.`,
       },
       {
         id: r`$E(X) = \dfrac{a+b}{2} \quad V(X) = \dfrac{(b-a)^2}{12}$`,
-        enonce: r`Donne l'espérance et la variance d'une variable aléatoire qui suit la loi uniforme continue sur $[a\,;b]$.`,
-        corrige: r`$E(X) = \dfrac{a+b}{2}$ et $V(X) = \dfrac{(b-a)^2}{12}$.`,
+        enonce: r`Donne l'espérance, la variance et l'écart-type d'une variable aléatoire qui suit la loi uniforme continue sur $[a\,;b]$.`,
+        corrige: r`$E(X) = \dfrac{a+b}{2}$, $V(X) = \dfrac{(b-a)^2}{12}$ et $\sigma(X) = \dfrac{b-a}{\sqrt{12}}$.`,
+      },
+      {
+        id: r`retrouver $a$ et $b$`,
+        enonce: r`$X$ suit la loi uniforme continue sur $[a\,;b]$, et l'on connaît $E(X)$ et $V(X)$. Quelles relations donnent $a+b$ et $b-a$ ?`,
+        corrige: r`$a+b = 2E(X)$ et $b-a = \sqrt{12\,V(X)}$.`,
       },
     ],
     loinormale: [
       {
         id: r`$Z = \dfrac{X-\mu}{\sigma}$`,
-        enonce: r`$X$ suit une loi normale de moyenne $\mu$ et d'écart-type $\sigma$. Quelle variable $Z$ suit la loi normale centrée réduite ? Comment revient-on d'une valeur $z$ à la valeur $x$ correspondante ?`,
+        enonce: r`$X$ suit la loi normale $\mathcal{N}(\mu\,;\sigma)$, de moyenne $\mu$ et d'écart-type $\sigma$. Quelle variable $Z$ suit la loi normale centrée réduite ? Comment revient-on d'une valeur $z$ à la valeur $x$ correspondante ?`,
         corrige: r`$Z = \dfrac{X-\mu}{\sigma}$ ; retour : $x = \mu + z \times \sigma$.`,
       },
       {
         id: r`$\Phi(-z) = 1-\Phi(z)$`,
-        enonce: r`$\Phi$ est la fonction de répartition de la loi normale centrée réduite : $\Phi(z) = P(Z \le z)$. Exprime $\Phi(-z)$ à l'aide de $\Phi(z)$.`,
-        corrige: r`$\Phi(-z) = 1-\Phi(z)$ (symétrie de la courbe en cloche).`,
+        enonce: r`$\Phi$ est la fonction de répartition de la loi normale centrée réduite : $\Phi(z) = P(Z \le z)$. Exprime $\Phi(-z)$ et $P(Z \ge z)$ à l'aide de $\Phi(z)$.`,
+        corrige: r`$\Phi(-z) = 1-\Phi(z)$ (symétrie de la courbe en cloche) et $P(Z \ge z) = 1-\Phi(z)$.`,
+      },
+      {
+        id: r`$P(a \le Z \le b) = \Phi(b)-\Phi(a)$`,
+        enonce: r`$Z\sim\mathcal{N}(0\,;1)$. Exprime à l'aide de $\Phi$ : $P(a \le Z \le b)$, $P(0 \le Z \le t)$ pour $t>0$, et $P(-k \le Z \le k)$ pour $k>0$.`,
+        corrige: r`$P(a \le Z \le b) = \Phi(b)-\Phi(a)$ ; $P(0 \le Z \le t) = \Phi(t)-0{,}5$ ; $P(-k \le Z \le k) = 2\Phi(k)-1$.`,
+      },
+      {
+        id: r`règle empirique`,
+        enonce: r`$X\sim\mathcal{N}(\mu\,;\sigma)$. Énonce la règle empirique : quelle proportion des valeurs se trouve dans $[\mu-\sigma\,;\mu+\sigma]$, dans $[\mu-2\sigma\,;\mu+2\sigma]$ et dans $[\mu-3\sigma\,;\mu+3\sigma]$ ?`,
+        corrige: r`Environ $68{,}3\,\%$, $95{,}4\,\%$ et $99{,}7\,\%$ (d'un seul côté hors de l'intervalle : la moitié du reste).`,
+      },
+      {
+        id: r`lire la table de $\Phi$`,
+        enonce: r`Comment lit-on $\Phi(z)$ dans la table pour $z = 1{,}23$ ? Et comment lit-on la table « à l'envers », quand on connaît $\Phi(z)$ et qu'on cherche $z$ ?`,
+        corrige: r`Ligne $1{,}2$, colonne $0{,}03$ ($z$ arrondi au centième). À l'envers : la case dont la valeur est la plus proche, puis on lit $z$ en marge ; si $\Phi(z) < 0{,}5$, on cherche $1-\Phi(z)$ et on change le signe.`,
       },
     ],
     extensionsbayes: [
       {
         id: r`$P_{totale} = \displaystyle\sum_i q_i \times r_i$`,
-        enonce: r`Une population est partagée en catégories de proportions $q_i$ ; dans la catégorie $i$, la proportion qui vérifie un critère vaut $r_i$. Donne la probabilité totale de vérifier le critère, puis la probabilité d'appartenir à la catégorie $j$ sachant que le critère est vérifié.`,
-        corrige: r`$P_{totale} = \displaystyle\sum_i q_i \times r_i$ et $P(\text{cat.}\,j \mid \text{critère}) = \dfrac{q_j r_j}{P_{totale}}$ (Bayes).`,
+        enonce: r`Une population est partagée en catégories $C_1$, $C_2$, $C_3$ ; dans la catégorie $C_i$, un critère $S$ survient avec la probabilité $P(S \mid C_i)$. Donne $P(S)$, puis la probabilité d'appartenir à la catégorie $C_j$ sachant que le critère est survenu.`,
+        corrige: r`$P(S) = \displaystyle\sum_i P(C_i)\,P(S\mid C_i)$ et $P(C_j \mid S) = \dfrac{P(C_j)\,P(S\mid C_j)}{P(S)}$ (Bayes).`,
       },
       {
         id: r`$\mu=np \quad \sigma=\sqrt{np(1-p)}$`,
-        enonce: r`Par quelle loi normale (donne $\mu$ et $\sigma$) approche-t-on une loi binomiale de paramètres $n$ et $p$ ? À quelles conditions ?`,
+        enonce: r`Par quelle loi normale (donne $\mu$ et $\sigma$) approche-t-on une loi binomiale $\mathcal{B}(n\,;p)$ ? À quelles conditions, dans ce cours ?`,
         corrige: r`$\mu = np$ et $\sigma = \sqrt{np(1-p)}$, si $n > 30$ et $0{,}3 < p < 0{,}7$.`,
+      },
+      {
+        id: r`correction de continuité`,
+        enonce: r`$X\sim\mathcal{B}(n\,;p)$ est approchée par la loi normale de paramètres $\mu$ et $\sigma$. Avec la correction de continuité, comment estime-t-on $P(X \le k)$ et $P(X \ge k)$ ?`,
+        corrige: r`$P(X \le k) \approx \Phi\!\left(\dfrac{k+0{,}5-\mu}{\sigma}\right)$ et $P(X \ge k) \approx 1-\Phi\!\left(\dfrac{k-0{,}5-\mu}{\sigma}\right)$.`,
       },
     ],
     loipoisson: [
@@ -1020,8 +1067,18 @@ export const FORMULES_6E: BanqueFormules = {
       },
       {
         id: r`$\lambda=np$`,
-        enonce: r`Par quelle loi de Poisson approche-t-on une loi binomiale de paramètres $n$ et $p$ ? À quelles conditions ?`,
+        enonce: r`Par quelle loi de Poisson approche-t-on une loi binomiale $\mathcal{B}(n\,;p)$ ? À quelles conditions, dans ce cours ?`,
         corrige: r`Par la loi de Poisson de paramètre $\lambda = np$, si $n \ge 30$, $p \le 0{,}1$ et $np \le 15$.`,
+      },
+      {
+        id: r`récurrence de Poisson`,
+        enonce: r`$X$ suit la loi de Poisson de paramètre $\lambda$. Comment calcule-t-on $P(X=k)$ à partir de $P(X=k-1)$ ? Quelle est la valeur la plus probable de $X$ ?`,
+        corrige: r`$P(X=k) = P(X=k-1) \times \dfrac{\lambda}{k}$ ($k \ge 1$) ; la valeur la plus probable est le plus grand entier $k \le \lambda$ (deux valeurs, $\lambda-1$ et $\lambda$, si $\lambda$ est entier).`,
+      },
+      {
+        id: r`$\lambda = -\ln P(X=0)$`,
+        enonce: r`$X$ suit une loi de Poisson de paramètre $\lambda$ inconnu, et l'on connaît $P(X=0)$. Comment retrouve-t-on $\lambda$ ?`,
+        corrige: r`$P(X=0) = e^{-\lambda}$, donc $\lambda = -\ln P(X=0)$.`,
       },
     ],
   },

@@ -1200,6 +1200,35 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   remise, symétrie pour $p = 0{,}5$). Quiz : verdict T1 n° 10 réécrit (« vaut 504, car 0 interdit partout »), plus
   aucun grand calcul (formules sans valeur à recalculer, ou une seule opération), « chapitre 7 », 18 V / 17 F dans
   chacun des 6 thèmes, `nombreExercices` = `nombreQuestions(theme)` (`etendueNombreQuestions` pour l'accueil).
+- **6e ch. 8, lots A, F, D (cours, démonstrations, table de Φ, quiz 6gen71 ; générateurs : autres agents)** :
+  notation du cours fixée — $\mathcal{B}(n\,;p)$ (calligraphique, décision 4), $\mathcal{N}(\mu\,;\sigma)$ avec
+  $\sigma$ = écart-type (dit dans la définition), $C_n^k$, Bayes en $C_1, C_2, C_3$, $S$, $P(C_j)$, $P(S\mid C_j)$,
+  $P(C_j\mid S)$ (plus de $q_i$ / $r_i$) ; champs bruts en Unicode (𝓑(n ; p), 𝒩(μ ; σ), Cₙᵏ, P(Cᵢ)). **Table de Φ**
+  (décision 1) : `lib/tablePhi.ts` est la SEULE source — `LIGNES_TABLE_PHI` (0,0 à 3,4) × `COLONNES_TABLE_PHI`
+  (0,00 à 0,09), valeurs `phiExact` (série de erf, 1e-12) arrondies à 4 décimales (identiques à `math.erf` de
+  Python, 350 / 350) ; `arrondirZ` (z au centième), `phiTable(z)` (lecture, symétrie pour z < 0, dernière case
+  au-delà de 3,49), `lectureInverse(p)` (case la plus proche ; à égalité, les DEUX z : 0,95 → [1,64 ; 1,65], et le
+  cours prend le milieu 1,645 ; p < 0,5 : lecture de 1 − p puis changement de signe), `tablePhiHtml()` (HTML
+  autonome à styles en ligne, deux demi-tableaux pour une page A4). **Fusion avec le lot C (25/11)** : les deux
+  lots avaient créé `lib/tablePhi.ts` — un seul fichier, une seule `TABLE`, les deux API gardées (celle des
+  générateurs `phiExacte`, `phiInverse`, `valeurTablePhi` (case de |z|, sans symétrie), `lignesTablePhi`,
+  `lectureInverseTable` (tolérante : les deux cases qui encadrent p) est vérifiée identique à l'ancienne sur
+  14 000 entrées). Deux composants, deux usages : générateurs `entrainement/components/TablePhi.tsx`
+  (repliable, classes `.table-phi*` sous `.entrainement`) ; cours `components/TablePhi.tsx` (`surligner`,
+  `compact`, `legende`, colonne z collante, défile dans son cadre à 390 px, classes `.table-phi-cours*` —
+  jamais `.table-phi`, réservée au générateur) ; cours : bloc `tablePhi` (§ 6, avec la méthode « Lire la
+  table ») ; papier : `export/annexesPapier.ts::annexeTableNormale()`
+  — à brancher par le lot E (une seule fois par document, quand un item déclare en avoir besoin). Conditions
+  d'approximation présentées comme des CONVENTIONS du cours : normale $n>30$ et $0{,}3<p<0{,}7$, Poisson
+  $n\geq30$, $p\leq0{,}1$, $np\leq15$ ; correction de continuité enseignée (décision 2 : tableau des 4 cas, exemples
+  « 100 lancers » $P(X\leq55)\approx\Phi(1{,}1)=0{,}8643$, exacte $0{,}8644$, sans correction $0{,}8413$). Énoncés
+  de démonstration PAR CLÉ pour les 45 blocs `exemple` / `exempleLibre` du chapitre (chapitre ajouté à
+  `CHAPITRES_ENONCES_VERIFIES`), dont 15 démonstrations (D1–D14 de l'audit, D5 en deux : n = 3 et E = np
+  général). Banque « Formule » (`questionsFormules/niveau6e.ts`) : ids gardés, 28 questions (aX + b, densité,
+  F continue, somme ou intégrale, uniforme et retrouver a et b, table de Φ, 2Φ(k) − 1, règle empirique,
+  correction de continuité, récurrence et λ de Poisson). Quiz : « chapitre 8 », Q1–Q3, 15,87 %, cumuls de
+  Poisson, plus de grand calcul (« sachant que… »), 6ᵉ thème `densiteUniformeContinue` (§ 3 à § 5, ajouté au
+  pilote sur la section `variablecontinue`), 18 V / 17 F par thème, `nombreExercices` = `nombreQuestions(theme)`.
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 
@@ -1305,11 +1334,12 @@ Toutes décochées par défaut ; un plan enregistré sans le champ se recharge a
   l'aménagée).
   **Mécanisme générique d'annexes** : `AnnexeDocument` (`assemblerEvaluationHtml.ts`), liste
   construite par `evaluationLocal.ts::annexesDuDocument(plan, items)` et passée aux trois
-  générateurs. Seconde annexe déjà décidée, PAS encore implémentée : une table de la loi normale Φ,
-  ajoutée seulement si au moins une question du document en a besoin — écrire
-  `annexeTableNormale()` dans `annexesPapier.ts` et l'ajouter dans `annexesDuDocument` quand un item
-  le demande (par ex. un champ posé par l'adaptateur sur l'item). Champ déjà déclaré par les adaptateurs du 6e
-  ch. 8, lot H2 : `besoinTablePhi` (contrat d'adaptateur ci-dessus ; 6gen116, 118, 119, 120, 122).
+  générateurs. Seconde annexe déjà décidée : la table de la loi normale Φ, ajoutée seulement si au moins
+  une question du document en a besoin. `annexeTableNormale()` est écrite (`annexesPapier.ts`, table complète
+  de `lib/tablePhi.ts`, 6e ch. 8, lot F) ; reste à l'ajouter UNE fois dans `annexesDuDocument` quand un item
+  le demande (champ posé par l'adaptateur sur l'item, ex. `besoinTablePhi` — lot E du 6e ch. 8). Champ déjà
+  déclaré par les adaptateurs du 6e ch. 8, lot H2 : `besoinTablePhi` (contrat d'adaptateur ci-dessus ; 6gen116,
+  118, 119, 120, 122).
 - **« Économie de papier (deux colonnes) »** (`deuxColonnes`) : copie d'évaluation et énoncé de la
   feuille d'exercices seulement. Page nommée `@page compacte` (marges 0,9/1,2/1,4 cm, pour que
   « Je vérifie », le corrigé et les annexes gardent leurs marges), énoncés en deux colonnes

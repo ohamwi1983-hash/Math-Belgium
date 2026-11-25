@@ -207,6 +207,8 @@ export function textesBloc(b: Block): (string | undefined)[] {
       return [b.caption, ...b.headers, ...b.rows.flat().map((c) => (typeof c === 'string' ? c : c.text))]
     case 'operationChain':
       return [...b.nodes, ...b.operations]
+    case 'tablePhi':
+      return [b.caption]
     case 'entrainement':
     case 'video':
       return []

@@ -3,22 +3,29 @@ import type { VarianteQuizVariablesAleatoires } from "./core6e/quizVariablesAlea
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { demarrerSessionQuizVariablesAleatoires, soumettreReponseQuizVariablesAleatoires } from "./moteur6e/sessionQuizVariablesAleatoires";
 import type { EtatSessionQuizVariablesAleatoires, ResultatExerciceQuizVariablesAleatoires } from "./moteur6e/typesQuizVariablesAleatoires";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs6e/quizVariablesAleatoires";
+import {
+  CATALOGUE_VARIANTES,
+  construireAvecVarianteId,
+  creerGenerateurSansRepetition,
+  etendueNombreQuestions,
+  nombreQuestions,
+} from "./generateurs6e/quizVariablesAleatoires";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { EtapeQuestionQuizVariablesAleatoires } from "./components6e/EtapeQuestionQuizVariablesAleatoires";
 import { ResultatPanelQuizVariablesAleatoires } from "./components6e/ResultatPanelQuizVariablesAleatoires";
 import { ResumeSessionQuizVariablesAleatoires } from "./components6e/ResumeSessionQuizVariablesAleatoires";
 
-/** `nombreExercices: 35` correspond exactement à la taille de la banque par thème (voir
- * `generateurs6e/quizVariablesAleatoires/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une
- * session parcourt donc les 35 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession6e = {
-  nombreExercices: 35,
-  tentativesMax: 1,
-};
+/** Une session = toutes les questions du thème choisi (`nombreQuestions`, taille réelle de la banque,
+ * jamais une constante en dur), couplé à `creerGenerateurSansRepetition` : aucune question n'est
+ * répétée. */
+function reglagesPourTheme(theme: VarianteQuizVariablesAleatoires): ReglagesSession6e {
+  return { nombreExercices: nombreQuestions(theme), tentativesMax: 1 };
+}
+
+const ETENDUE_QUESTIONS = etendueNombreQuestions();
 
 function nouvelleSession(theme: VarianteQuizVariablesAleatoires): EtatSessionQuizVariablesAleatoires {
-  return demarrerSessionQuizVariablesAleatoires(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizVariablesAleatoires(reglagesPourTheme(theme), creerGenerateurSansRepetition(theme));
 }
 
 /** Contrairement à la plupart des générateurs, le thème (variante) n'est pas tiré au hasard : c'est
@@ -47,7 +54,7 @@ export function App6gen71() {
     const theme = varianteId as VarianteQuizVariablesAleatoires;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizVariablesAleatoires(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizVariablesAleatoires(reglagesPourTheme(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
@@ -77,7 +84,11 @@ export function App6gen71() {
         {!etat ? (
           <div>
             <h2 className="result-title">Choisis un thème</h2>
-            <p className="result-subtitle">5 thèmes, 35 affirmations vrai/faux chacun — révision complète du chapitre 10.</p>
+            <p className="result-subtitle">
+              {CATALOGUE_VARIANTES.length} thèmes,{" "}
+              {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max ? ETENDUE_QUESTIONS.min : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max}`} affirmations vrai/faux
+              chacun — révision complète du chapitre 8.
+            </p>
             <div className="accueil-choix">
               {CATALOGUE_VARIANTES.map((variante, index) => (
                 <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

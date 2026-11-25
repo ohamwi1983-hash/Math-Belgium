@@ -9,6 +9,7 @@ import { SignTable } from './SignTable'
 import { FeatureTable } from './FeatureTable'
 import { OperationChain } from './OperationChain'
 import { InteractiveWidget } from './InteractiveWidget'
+import { TablePhi } from '../TablePhi'
 
 /** Renders one content block. Sections/intros are just ordered arrays of these.
  *
@@ -96,6 +97,17 @@ export function BlockRenderer({ block, enTiroir }: { block: Block; enTiroir?: bo
       return <FeatureTable block={block} />
     case 'operationChain':
       return <OperationChain block={block} />
+    case 'tablePhi':
+      return (
+        <figure className="table-phi-cours-bloc">
+          <TablePhi />
+          {block.caption && (
+            <figcaption>
+              <RichText text={block.caption} />
+            </figcaption>
+          )}
+        </figure>
+      )
     case 'video':
       return block.youtubeId ? (
         <div className="video-embed no-export" id={`video-${block.youtubeId}`}>

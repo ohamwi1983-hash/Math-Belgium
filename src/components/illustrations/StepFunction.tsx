@@ -10,7 +10,7 @@ const TOP = 26
 const BOTTOM = 200
 
 /** Fonction de répartition d'une variable discrète, en escaliers — jamais une courbe. */
-export function StepFunction({ jumps, levels, levelLabels, xMin, xMax, yMax = 1, xAxisLabel, yAxisLabel }: Props) {
+export function StepFunction({ jumps, levels, levelLabels, xMin, xMax, yMax = 1, xAxisLabel, yAxisLabel, pointsAuxSauts = false }: Props) {
   const mapX = (x: number) => LEFT + ((x - xMin) / (xMax - xMin)) * (RIGHT - LEFT)
   const mapY = (v: number) => BOTTOM - (v / yMax) * (BOTTOM - TOP)
 
@@ -45,6 +45,14 @@ export function StepFunction({ jumps, levels, levelLabels, xMin, xMax, yMax = 1,
           strokeDasharray="3 3"
         />
       ))}
+
+      {pointsAuxSauts &&
+        jumps.map((x, i) => (
+          <g key={`pts-${i}`}>
+            <circle cx={mapX(x)} cy={mapY(levels[i])} r="4" strokeWidth="1.8" style={{ fill: 'var(--paper)', stroke: 'var(--accent)' }} />
+            <circle cx={mapX(x)} cy={mapY(levels[i + 1])} r="4.2" style={{ fill: 'var(--accent)', stroke: 'none' }} />
+          </g>
+        ))}
 
       {jumps.map((x, i) => (
         <g key={`tick-${i}`}>

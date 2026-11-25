@@ -1030,6 +1030,9 @@ export type IllustrationSpec =
       yMax?: number
       xAxisLabel: string
       yAxisLabel: string
+      /** Point PLEIN en haut à gauche de chaque marche (F(xᵢ) = valeur après le saut) et point VIDE en
+       * bas (valeur juste avant), pour dire sans ambiguïté ce que vaut F en xᵢ. Défaut : aucun point. */
+      pointsAuxSauts?: boolean
       caption: string
     }
   | {
@@ -1194,6 +1197,13 @@ export type Block =
       kind: 'featureTable'
       caption?: string
     } & FeatureTableData)
+  | {
+      /** Table COMPLÈTE de la loi normale centrée réduite Φ(z) = P(Z ≤ z), z de 0,00 à 3,49 (6e ch. 8,
+       * § 6). Rendu par le composant partagé `components/TablePhi.tsx` ; valeurs de `lib/tablePhi.ts`
+       * (même source que les générateurs et l'annexe papier). `caption` passe par `RichText`. */
+      kind: 'tablePhi'
+      caption?: string
+    }
   | {
       /** Chaîne de valeurs reliées par des opérations nommées sur les flèches (ex. décomposer
        * puis "défaire" une fonction opération par opération). HTML/flexbox, pas SVG : les nœuds

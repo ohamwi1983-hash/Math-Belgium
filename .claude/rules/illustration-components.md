@@ -79,6 +79,8 @@ figure/diagram-frame/figcaption pour toute illustration ; bascule sur `Illustrat
   (permutation avec répétitions / anagrammes).
 - `pascalTriangle` — triangle de Pascal, coefficients CALCULÉS par le composant ; `pascalRelation`
   met en évidence un coefficient et ses deux parents, reliés par les traits de la relation.
+- `stepFunction.pointsAuxSauts` (optionnel, 6e ch. 8) — point plein en haut de chaque saut (valeur de F en xᵢ) et
+  point vide en bas (valeur juste avant) ; absent : rendu inchangé.
 - `categoricalBarChart` — barres à catégories NOMMÉES (étiquettes textuelles), verticales ou
   horizontales, échelle linéaire ou logarithmique, une teinte par barre et la valeur affichée au
   bout. Distinct de `histogram`, dont les barres sont positionnées par `from`/`width` sur un axe
