@@ -2013,23 +2013,56 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
   },
   coniques: {
+    // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`, audit 6e ch. 10, lot F) — la
+    // clé est le label du bloc `exempleLibre` ; chaque énoncé reprend les nombres du cours ; une
+    // démonstration dit QUOI démontrer, jamais la méthode. Convention de la parabole : y² = 2px,
+    // p = dist(F ; d) (décision 1).
+    identifier: [
+      { cle: 'équation de la parabole à partir du foyer', enonce: "Démontre que la parabole de foyer $F\\left(\\dfrac{p}{2}\\,;0\\right)$ et de directrice $d \\equiv x=-\\dfrac{p}{2}$ ($p>0$) a pour équation $y^2=2px$." },
+      { cle: "équation réduite de l'ellipse", enonce: "Démontre que l'ellipse de foyers $F(c\\,;0)$ et $F'(-c\\,;0)$, ensemble des points dont la somme des distances aux foyers vaut $2a$ ($a>c>0$), a pour équation $\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1$, avec $b^2=a^2-c^2$." },
+      { cle: 'cercle aplati', enonce: "Démontre que l'ellipse $\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1$ ($0<b<a$) s'obtient à partir du cercle $x^2+y^2=a^2$ en multipliant l'ordonnée de chacun de ses points par $\\dfrac{b}{a}$." },
+      { cle: "équation réduite de l'hyperbole", enonce: "Démontre que l'hyperbole de foyers $F(c\\,;0)$ et $F'(-c\\,;0)$, ensemble des points dont la valeur absolue de la différence des distances aux foyers vaut $2a$ ($c>a>0$), a pour équation $\\dfrac{x^2}{a^2}-\\dfrac{y^2}{b^2}=1$, avec $b^2=c^2-a^2$." },
+      { cle: "les asymptotes de l'hyperbole", enonce: "Démontre que les droites $y=\\dfrac{b}{a}x$ et $y=-\\dfrac{b}{a}x$ sont asymptotes à l'hyperbole $\\dfrac{x^2}{a^2}-\\dfrac{y^2}{b^2}=1$." },
+      { cle: "l'hyperbole équilatère dans le repère de ses asymptotes", enonce: "Démontre que, dans un repère orthonormé dont les axes sont portés par ses asymptotes, l'hyperbole équilatère $x^2-y^2=a^2$ a pour équation $XY=\\dfrac{a^2}{2}$." },
+    ],
     excentricite: [
-      undefined,
-      "Un plan coupe un cône de révolution selon une ellipse ; deux sphères inscrites dans le cône sont tangentes à ce plan en F et F′. Démontre que $|PF|+|PF'|$ est la même pour tout point P de la section.",
-      "Réduis l'équation $16x^2-36y^2+80x+252y-197=0$ par translation d'axes, puis identifie la conique obtenue (nature, centre, sommets, foyers, directrices, asymptotes).",
+      { cle: "caractérisation foyer-directrice de l'ellipse", enonce: "Démontre que l'ellipse $\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1$, avec $c^2=a^2-b^2$ ($c>0$), est l'ensemble des points $P$ tels que $\\dfrac{|PF|}{\\text{dist}(P\\,;d)}=\\dfrac{c}{a}$, où $F(c\\,;0)$ et $d \\equiv x=\\dfrac{a^2}{c}$." },
+      { cle: "caractérisation foyer-directrice de l'hyperbole", enonce: "Démontre que l'hyperbole $\\dfrac{x^2}{a^2}-\\dfrac{y^2}{b^2}=1$, avec $c^2=a^2+b^2$, est l'ensemble des points $P$ tels que $\\dfrac{|PF|}{\\text{dist}(P\\,;d)}=\\dfrac{c}{a}$, où $F(c\\,;0)$ et $d \\equiv x=\\dfrac{a^2}{c}$." },
+      { cle: 'foyer F(0 ; 1), directrice d ≡ y = 4', enonce: "Détermine une équation de la conique de foyer $F(0\\,;1)$, de directrice $d \\equiv y=4$ et d'excentricité $\\dfrac{1}{2}$, puis identifie-la (nature, demi-axes, axe focal)." },
+      { cle: 'théorème de Dandelin-Quételet', enonce: "Un plan coupe un cône de révolution selon une ellipse ; deux sphères inscrites dans le cône sont tangentes à ce plan en $F$ et $F'$. Démontre que $|PF|+|PF'|$ est la même pour tout point $P$ de la section." },
+      { cle: '16x² − 36y² + 80x + 252y − 197 = 0', enonce: "Réduis l'équation $16x^2-36y^2+80x+252y-197=0$ par translation d'axes, puis identifie la conique obtenue (nature, centre, sommets, foyers, directrices, asymptotes)." },
+      { cle: 'y² − 4y − 8x + 28 = 0', enonce: "Réduis l'équation $y^2-4y-8x+28=0$ par translation d'axes, puis donne le sommet, l'axe focal, le foyer et la directrice de la parabole obtenue." },
+      { cle: 'trois équations qui ne sont pas des coniques', enonce: "Détermine l'ensemble des points $(x\\,;y)$ qui vérifient chacune des équations suivantes : a) $x^2+4y^2-2x+16y+17=0$ ; b) $x^2+4y^2-2x+16y+20=0$ ; c) $x^2-4y^2-2x+1=0$." },
     ],
     airefocale: [
-      "Pour l'ellipse $\\dfrac{x^2}{25}+\\dfrac{y^2}{16}=1$ et un point P tel que $|PF|=2\\cdot|PF'|$, calcule les rayons focaux $|PF|$ et $|PF'|$, l'angle $\\widehat{FPF'}$, puis l'aire du triangle $FPF'$.",
-      "Détermine l'excentricité d'une ellipse sachant que l'angle $\\widehat{FBF'}$ est droit, où B est le sommet de l'axe non focal.",
-      "Détermine l'excentricité d'une ellipse telle que $b=c$.",
-      "Exprime l'excentricité $e$ d'une ellipse en fonction de $k$, sachant que la distance entre les deux directrices vaut $k$ fois la distance entre les deux foyers.",
+      { cle: "les rayons focaux en fonction de l'abscisse", enonce: "Pour tout point $P(x\\,;y)$ de l'ellipse $\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1$, de foyers $F(c\\,;0)$ et $F'(-c\\,;0)$ ($c^2=a^2-b^2$, $e=\\frac{c}{a}$), démontre que $|PF|=a-ex$ et $|PF'|=a+ex$, et déduis-en que $a-c\\leq|PF|\\leq a+c$." },
+      { cle: 'périhélie 2 UA', enonce: "Une planète décrit une ellipse dont le Soleil occupe un foyer ; sa distance au Soleil vaut $2$ UA au périhélie et $8$ UA à l'aphélie. Détermine $a$, $c$, l'excentricité, $b$ et une équation de l'orbite." },
+      { cle: '|PF| = 2·|PF′|', enonce: "Pour l'ellipse $\\dfrac{x^2}{25}+\\dfrac{y^2}{16}=1$ et un point $P$ tel que $|PF|=2\\cdot|PF'|$, calcule les rayons focaux $|PF|$ et $|PF'|$, le cosinus de l'angle $\\widehat{FPF'}$, puis l'aire du triangle $FPF'$." },
+      { cle: 'aire du triangle focal', enonce: "Soit $P$ un point d'une ellipse de foyers $F$ et $F'$, de demi-petit axe $b$, non situé sur l'axe focal, et $\\theta=\\widehat{FPF'}$. Démontre que l'aire du triangle $FPF'$ vaut $b^2\\tan\\dfrac{\\theta}{2}$." },
+      { cle: 'sont à la distance a des foyers', enonce: "Démontre que les sommets $(0\\,;\\pm b)$ de l'ellipse $\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1$ sont à la distance $a$ de chaque foyer, et déduis-en que $a^2=b^2+c^2$." },
+      { cle: "Condition 1 — l'angle FBF′ est droit", enonce: "Détermine l'excentricité d'une ellipse sachant que l'angle $\\widehat{FBF'}$ est droit, où $B$ est un sommet de l'axe non focal." },
+      { cle: 'Condition 2', enonce: "L'ellipse $\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1$ a pour foyer $F(c\\,;0)$ et pour sommets $A'(-a\\,;0)$ et $B(0\\,;b)$. Le point $P$ de l'ellipse d'abscisse $c$ et d'ordonnée positive est tel que $(OP)$ est parallèle à $(A'B)$. Détermine l'excentricité de l'ellipse." },
+      { cle: 'Condition 3', enonce: "Exprime l'excentricité $e$ d'une ellipse en fonction de $k$, sachant que la distance entre ses deux directrices vaut $k$ fois la distance entre ses deux foyers. Pour quelles valeurs de $k$ une telle ellipse existe-t-elle ?" },
     ],
     intersection: [
-      "Détermine les points d'intersection entre la droite passant par $A(-4;0)$ et $B(0;-3)$ et la conique de foyer $F(3;-2)$, de directrice $d' \\equiv x=-1/5$ et d'excentricité $e=5/3$.",
+      { cle: 'droite par A(−4 ; 0) et B(0 ; −3)', enonce: "Détermine les points d'intersection entre la droite passant par $A(-4\\,;0)$ et $B(0\\,;-3)$ et la conique de foyer $F(3\\,;-2)$, de directrice $d' \\equiv x=-\\dfrac{1}{5}$ et d'excentricité $e=\\dfrac{5}{3}$." },
+      { cle: 'trois droites parallèles', enonce: "Détermine la position de chacune des droites $y=\\dfrac{1}{2}x+k$, pour $k=1$, $k=2$ et $k=3$, par rapport à l'ellipse $\\dfrac{x^2}{8}+\\dfrac{y^2}{2}=1$, et donne les points communs éventuels." },
+      { cle: 'x² + 2y² = 41', enonce: "Détermine les points communs à l'ellipse $x^2+2y^2=41$ et à l'hyperbole $y^2-x^2=7$." },
     ],
     tangentes: [
-      undefined,
-      "Détermine l'équation de la tangente à l'ellipse $\\dfrac{x^2}{25}+\\dfrac{y^2}{16}=1$ au point $P(3\\,;\\,16/5)$, par dérivation, puis vérifie ton résultat à l'aide de la forme dédoublée et du discriminant.",
+      { cle: "pente de la tangente à l'ellipse", enonce: "Démontre que la tangente à l'ellipse $\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1$ en un point $P(x_P\\,;y_P)$ avec $y_P\\neq0$ a pour pente $-\\dfrac{b^2x_P}{a^2y_P}$." },
+      { cle: "forme dédoublée de la tangente à l'ellipse", enonce: "Démontre que la tangente à l'ellipse $\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1$ en son point $P(x_P\\,;y_P)$ a pour équation $\\dfrac{x\\,x_P}{a^2}+\\dfrac{y\\,y_P}{b^2}=1$." },
+      { cle: 'forme dédoublée de la tangente à la parabole', enonce: "Démontre que la tangente à la parabole $y^2=2px$ en son point $P(x_P\\,;y_P)$ a pour équation $y\\,y_P=p(x+x_P)$." },
+      { cle: 'au point P(3 ; 16⁄5)', enonce: "Détermine l'équation de la tangente à l'ellipse $\\dfrac{x^2}{25}+\\dfrac{y^2}{16}=1$ au point $P\\left(3\\,;\\dfrac{16}{5}\\right)$, puis vérifie ton résultat de deux autres façons." },
+      { cle: 'tangentes à une hyperbole et à une parabole', enonce: "Détermine l'équation de la tangente à l'hyperbole $\\dfrac{x^2}{9}-\\dfrac{y^2}{16}=1$ au point $P\\left(5\\,;\\dfrac{16}{3}\\right)$, puis celle de la tangente à la parabole $y^2=4x$ au point $(4\\,;4)$ et son point d'intersection avec l'axe focal." },
+      { cle: 'condition de tangence', enonce: "Démontre que la droite $y=mx+k$ est tangente à l'ellipse $\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1$ si et seulement si $k^2=a^2m^2+b^2$." },
+      { cle: 'tangentes de pente 1⁄2', enonce: "Pour l'ellipse $\\dfrac{x^2}{8}+\\dfrac{y^2}{2}=1$, détermine les tangentes de pente $\\dfrac{1}{2}$, puis les tangentes issues du point $P(0\\,;2)$ et leurs points de contact." },
+    ],
+    optique: [
+      { cle: 'propriété optique de la parabole', enonce: "Démontre qu'en tout point $P$ de la parabole $y^2=2px$, autre que le sommet, la tangente fait des angles de même amplitude avec la droite $(PF)$ et avec la parallèle à l'axe passant par $P$." },
+      { cle: "antenne parabolique", enonce: "Une antenne parabolique a un diamètre de $60$ cm et une profondeur de $9$ cm. À quelle distance de son sommet faut-il placer le capteur ? Établis ensuite cette distance en fonction du diamètre $D$ et de la profondeur $h$." },
+      { cle: "propriété optique de l'ellipse", enonce: "Démontre qu'en tout point $P$ d'une ellipse de foyers $F$ et $F'$, la tangente fait des angles de même amplitude avec les droites $(PF)$ et $(PF')$." },
+      { cle: 'calculer un rayon réfléchi', enonce: "Un rayon issu de $F'(-3\\,;0)$ se réfléchit sur le miroir elliptique $\\dfrac{x^2}{25}+\\dfrac{y^2}{16}=1$ au point $\\left(4\\,;\\dfrac{12}{5}\\right)$ ; un rayon issu de $F(5\\,;0)$ se réfléchit sur le miroir hyperbolique $\\dfrac{x^2}{9}-\\dfrac{y^2}{16}=1$ au point $\\left(\\dfrac{15}{4}\\,;3\\right)$ ; un rayon issu du foyer se réfléchit sur le miroir parabolique $y^2=4x$ au point $(4\\,;4)$. Détermine chaque rayon réfléchi." },
     ],
   },
   'variables-aleatoires': {
@@ -2167,7 +2200,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-reciproques-cyclometriques', 'fonctions-logarithmes', 'fonctions-exponentielles', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees', 'probabilites', 'analyse-combinatoire', 'variables-aleatoires', 'lieux-geometriques']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-reciproques-cyclometriques', 'fonctions-logarithmes', 'fonctions-exponentielles', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees', 'probabilites', 'analyse-combinatoire', 'variables-aleatoires', 'lieux-geometriques', 'coniques']
 
 /** Bloc de DÉMONSTRATION (« Démonstration — … », « Démonstration alternative — … ») : seuls ces
  * blocs alimentent le type « Formule + démonstration ». Les exemples résolus (calculs) ne sont plus
@@ -4712,7 +4745,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce:
           "Pourquoi une parabole n'a-t-elle qu'un seul foyer et une seule directrice, alors que l'ellipse et l'hyperbole en ont chacune deux ?",
         corrige:
-          "La parabole est définie par une égalité de distance à UN point et UNE droite — rien dans sa définition n'impose de second élément. L'ellipse et l'hyperbole sont définies à partir de DEUX points fixes (les foyers) ; chacun des deux foyers possède sa propre directrice, par la même caractérisation focale appliquée à F puis à F′. La différence vient directement du nombre d'éléments fixes présents dans chaque définition.",
+          "La parabole est définie par une égalité de distance à un point et une droite — rien dans sa définition n'impose de second élément. L'ellipse et l'hyperbole sont définies à partir de deux points fixes (les foyers) ; chacun des deux foyers possède sa propre directrice, par la même caractérisation focale appliquée à F puis à F′. La différence vient directement du nombre d'éléments fixes présents dans chaque définition.",
       },
       {
         enonce:
@@ -4724,7 +4757,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce:
           "Pourquoi une équation $xy=k$ décrit-elle une hyperbole, alors qu'elle ne ressemble en rien à $x^2/a^2-y^2/b^2=1$ ?",
         corrige:
-          "Les deux équations décrivent la MÊME courbe, vue dans deux repères différents : la seconde utilise les axes de symétrie de l'hyperbole équilatère, la première utilise ses deux asymptotes comme axes. Un terme en xy signale justement que les axes de coordonnées choisis ne sont pas les axes de symétrie de la conique — ici, ce sont les asymptotes elles-mêmes.",
+          "Les deux équations décrivent des hyperboles équilatères vues dans deux repères différents : $x^2-y^2=a^2$ utilise ses axes de symétrie, $xy=k$ ses deux asymptotes comme axes (et alors $k=\\dfrac{a^2}{2}$). Un terme en xy signale justement que les axes de coordonnées choisis ne sont pas les axes de symétrie de la conique — ici, ce sont les asymptotes elles-mêmes.",
       },
     ],
     excentricite: [
@@ -4732,7 +4765,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce:
           "Pourquoi un seul nombre, l'excentricité, suffit-il à décider si une conique est une ellipse, une parabole ou une hyperbole ?",
         corrige:
-          "La caractérisation focale $dist(P;F)/dist(P;d)=e$ décrit les trois coniques avec la MÊME structure d'équation — seule la valeur de e change. Comme ce rapport $e=c/a$ fixe complètement la façon dont la distance au foyer croît par rapport à la distance à la directrice, les trois régimes ($e<1$, $e=1$, $e>1$) correspondent exactement aux trois formes de courbe possibles, sans aucune autre information nécessaire.",
+          "La caractérisation focale $\\dfrac{\\text{dist}(P\\,;F)}{\\text{dist}(P\\,;d)}=e$ décrit les trois coniques avec la même structure d'équation — seule la valeur de e change. Comme ce rapport $e=c/a$ fixe complètement la façon dont la distance au foyer croît par rapport à la distance à la directrice, les trois régimes ($e<1$, $e=1$, $e>1$) correspondent exactement aux trois formes de courbe possibles, sans aucune autre information nécessaire.",
       },
       {
         enonce: "Pourquoi le cercle est-il exclu de la caractérisation focale commune aux trois coniques ?",
@@ -4751,7 +4784,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce:
           "Pourquoi la relation $|PF|+|PF'|=2a$ est-elle le point de départ obligatoire pour calculer les deux rayons focaux d'un point, plutôt que de les calculer indépendamment l'un de l'autre ?",
         corrige:
-          "Un point P pris isolément ne fixe pas directement ses deux distances aux foyers par une seule formule, sauf aux deux sommets de l'axe non focal, où elles sont égales par symétrie. Mais la somme $|PF|+|PF'|$ vaut TOUJOURS 2a, quel que soit P sur l'ellipse : couplée à une autre donnée (un rapport entre les deux distances), elle forme un système que l'on peut résoudre pour trouver chaque rayon focal séparément.",
+          "Un point P pris isolément ne fixe pas directement ses deux distances aux foyers par une seule formule, sauf aux deux sommets de l'axe non focal, où elles sont égales par symétrie. Mais la somme $|PF|+|PF'|$ vaut toujours $2a$, quel que soit $P$ sur l'ellipse : couplée à une autre donnée (un rapport entre les deux distances), elle forme un système que l'on peut résoudre pour trouver chaque rayon focal séparément.",
       },
       {
         enonce:
@@ -4764,13 +4797,13 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       {
         enonce: "Pourquoi une droite ne peut-elle jamais couper une conique en plus de deux points ?",
         corrige:
-          "Substituer l'équation (du premier degré) de la droite dans celle (du second degré) de la conique produit toujours une équation du second degré à une seule inconnue, qui admet au maximum deux solutions réelles — quel que soit le nombre de termes dans l'équation de départ. C'est le degré de l'équation finale, pas la complexité apparente de la conique, qui fixe le nombre maximal de points communs.",
+          "Substituer l'équation (du premier degré) de la droite dans celle (du second degré) de la conique produit une équation à une seule inconnue de degré au plus 2 : en général du second degré, au plus deux solutions ; du premier degré quand le coefficient de $x^2$ s'annule (droite parallèle à une asymptote d'une hyperbole ou à l'axe d'une parabole), et alors un seul point. C'est le degré de l'équation finale, pas la complexité apparente de la conique, qui fixe le nombre maximal de points communs. Seule exception : une conique dégénérée formée de deux droites peut contenir la droite tout entière (l'équation devient $0=0$).",
       },
       {
         enonce:
           "Pourquoi un discriminant nul ($\\Delta=0$) signifie-t-il que la droite est tangente, et non qu'elle n'a aucun point commun avec la conique ?",
         corrige:
-          "$\\Delta=0$ donne une racine DOUBLE à l'équation du second degré — c'est-à-dire exactement un point d'intersection, compté deux fois (la droite touche la courbe sans la traverser). C'est $\\Delta<0$, l'absence de racine réelle, qui correspond à aucun point commun. Confondre les deux revient à déclarer extérieure une droite qui touche pourtant la courbe en un point précis.",
+          "$\\Delta=0$ donne une racine double à l'équation du second degré — c'est-à-dire exactement un point d'intersection, compté deux fois (la droite touche la courbe sans la traverser). C'est $\\Delta<0$, l'absence de racine réelle, qui correspond à aucun point commun. Confondre les deux revient à déclarer extérieure une droite qui touche pourtant la courbe en un point précis.",
       },
     ],
     tangentes: [
@@ -4792,7 +4825,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce:
           "Pourquoi la propriété optique de la parabole (concentrer des rayons parallèles en un seul point) ne s'applique-t-elle pas à l'ellipse ?",
         corrige:
-          "La propriété de l'ellipse relie les deux FOYERS entre eux (un rayon issu d'un foyer passe par l'autre) — elle ne dit rien sur des rayons parallèles à une direction donnée. La parabole, elle, n'a qu'un foyer, et sa propriété relie ce foyer à une DIRECTION plutôt qu'à un second point. Un faisceau de rayons parallèles envoyé sur un miroir elliptique ne rencontre donc aucun des deux foyers de façon systématique : il ne converge en aucun point.",
+          "La propriété de l'ellipse relie les deux foyers entre eux (un rayon issu d'un foyer passe par l'autre) — elle ne dit rien sur des rayons parallèles à une direction donnée. La parabole, elle, n'a qu'un foyer, et sa propriété relie ce foyer à une direction plutôt qu'à un second point. Un faisceau de rayons parallèles envoyé sur un miroir elliptique ne rencontre donc aucun des deux foyers de façon systématique : il ne converge en aucun point.",
       },
       {
         enonce: "En quel sens la propriété optique de la parabole est-elle un cas limite de celle de l'ellipse ?",
@@ -4803,7 +4836,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce:
           "Pourquoi les propriétés optiques des trois coniques dépendent-elles directement de leur définition par distance (foyer/directrice ou foyers) ?",
         corrige:
-          "La loi de la réflexion compare l'angle d'incidence et l'angle de réflexion par rapport à la tangente. Les démonstrations de ces propriétés optiques s'appuient précisément sur l'égalité de distances qui DÉFINIT chaque conique (égale distance à un foyer et une directrice pour la parabole, somme ou différence de distances à deux foyers pour l'ellipse et l'hyperbole) — c'est cette structure métrique qui produit, via la tangente, l'égalité d'angles caractéristique de chaque miroir.",
+          "La loi de la réflexion compare l'angle d'incidence et l'angle de réflexion par rapport à la tangente. Les démonstrations de ces propriétés optiques (section 6 : triangle isocèle $FPT$ pour la parabole, symétrique d'un foyer par rapport à la tangente pour l'ellipse) s'appuient précisément sur l'égalité de distances qui définit chaque conique (égale distance à un foyer et une directrice pour la parabole, somme ou différence de distances à deux foyers pour l'ellipse et l'hyperbole) — c'est cette structure métrique qui produit, via la tangente, l'égalité d'angles caractéristique de chaque miroir.",
       },
     ],
   },
