@@ -52,6 +52,8 @@ const SIGLES = new Set([
   // Mot dont on compte les anagrammes (banque de dénombrement) : ses capitales sont ses lettres.
   'MISSISSIPI', 'MISSISSIPPI',
   'ADN', 'ONU', 'TVA', 'PIB', 'CQFD', 'SNCB', 'STIB', 'FWB', 'CEB', 'CESS', 'PISA', 'NASA', 'LED', 'USB', 'PDF', 'URL', 'HTML',
+  // Système de navigation (6gen142, hyperboles) : un sigle, pas une insistance (relevé par le lot G).
+  'LORAN',
 ])
 
 /** Mots français courts (3–4 lettres, sans accent) écrits en capitales d'insistance — et les

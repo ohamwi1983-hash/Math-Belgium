@@ -443,3 +443,32 @@ personnel), grille `44px 1fr auto auto` (écart 8 px sous 400 px) : la barre res
   papier — 1 015 textes en prose dans 164 fichiers, presque tous des données) et `scan-majuscules.mjs` (rendu
   RÉEL, build de production, les 356 générateurs du registre : chargé, « Aide » jusqu'au bout, trois essais
   faux ou un choix faux, corrigé déplié ; texte visible hors formules et hors gras jugé par la même règle).
+  Mesure : rendus de fragments et `TexteRiche` seuls → 13 textes restants dans 12 générateurs (aides en chaîne
+  brute) ; après le branchement des aides → 0 sur les 368 générateurs (31 mots mis en gras rencontrés) ; seul
+  relevé : « LORAN » (6gen142), un sigle — ajouté à `SIGLES` (le papier l'aurait écrit « loran »).
+  Limite : seuls les états atteints par le parcours automatique sont vus (premier écran surtout) ; les autres
+  écrans passent par les mêmes composants de rendu.
+
+### Vérifications du lot G (dossier de travail `eleve-G/`, build de production + `vite preview`)
+
+- `verif-taille.mjs` : 15 générateurs de socles différents (gen3, gen5 grille de signes, gen7, gen23 construction
+  Mafs, gen42, 5gen10, 5gen14, 5gen25 choix entre graphiques, 5gen29 tableau d'étude locale, 6gen12
+  calculatrice, 6gen15, 6gen47 `AppCombinatoire`, 6gen51 table de Φ, 6gen65 quiz, 6gen100 `AppEcransTrigo`) ×
+  100 / 145 / 170 % × iPhone 13 / 1 280 px × clair / sombre : `scrollWidth` = largeur, barre du haut sur une
+  ligne (≤ 76 px, rien ne déborde), « Aa » 44 × 44, boutons du bas dans l'écran et texte qui tient, champs ≥ 52 px
+  et ≥ 20 px, saisie « −3,5 » gardée telle quelle, sélecteur de variante visible à 12 px, texte des figures
+  inchangé, 0 erreur console — 1 563 vérifications (3 « échecs » restants = variante tirée au hasard sans la
+  même figure à 100 % et à 145 %).
+- `verif-jebloque.mjs` : « Je bloque » et corrigé ligne par ligne sur 7 générateurs (5gen14, 5gen15, gen3, gen14,
+  6gen43, 6gen24, 6gen55), téléphone 145 % clair et ordinateur 100 % sombre : pas de bouton au 1er essai, bouton
+  au 2e (≥ 44 px, dans l'écran), panneau modal (focus dedans, exemple ou essentiel, pas à pas, lien `#…` en
+  nouvel onglet, rien ne déborde), Échap → focus rendu, saisie intacte ; bouton parti à l'écran clos ; corrigé :
+  focus « Ligne suivante », chaque ligne (en cours, à venir masquées, compteur, annonce), barre collée en bas,
+  focus « Tout montrer » à la fin, retour au complet — 292 vérifications, 0 échec.
+- `verif-divers.mjs` : sans réglage (rien sur `<html>`, tailles d'avant : base 16, titre 18, bouton 16, champ 18,
+  contexte 12) ; « Aa » de la barre (ouvre le panneau, 170 % appliqué en direct à 27,9 px, énoncé épinglé qui
+  suit la page décalée de 420 px, focus rendu, pastille) ; calculatrice de 6gen12 à 170 % (panneau dans l'écran,
+  aucune touche qui déborde) ; contrastes des éléments nouveaux dans les 5 thèmes + auto sombre (tous ≥ 6,3:1,
+  « Ligne suivante » et « Retour à l'exercice » sur `--accent-ink` : 8,0:1 en clair au lieu de 4,4:1 sur
+  `--accent`) — 103 vérifications, 0 échec.
+- `couverture-jebloque.ts` (esbuild + node) : exemple choisi pour chaque générateur du registre.
