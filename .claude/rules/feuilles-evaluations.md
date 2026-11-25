@@ -1941,19 +1941,34 @@ formule y passe en fragments `[texte("car "), latex("i^{3}=-i")]`).
   5gen5, `(paire)` pour positionsPlans) ; section plane (gen40) calcule désormais son corrigé
   même quand l'écran est réussi. Un corrigé qui ne rend rien (`CorrigeDetailleEcran` sans ligne
   pour cette étape) n'affiche pas de bouton (détection dans le DOM avant peinture). Nouvelle
-  appli avec fiche : même schéma, rien d'autre à câbler. Applis avec corrigé mais SANS fiche
-  (puces non cliquables, seul le bouton de l'écran s'applique) : 35 de 4e (AppAnglesAssocies,
-  AppAssocierParaboles, AppBicarree, AppCercleConditions, AppChaslesSansFigure,
-  AppComparaisonSeries, AppConstructionVectorielle, AppConstruireInequation, AppDetectiveAnalytique,
-  AppDifferencesSecondes, AppDroiteCercle, AppDroitesParametre, AppDroitesRemarquables,
-  AppEquationParabolePoints, AppEquationParametre, AppHistogramme, AppIntersectionCercles,
-  AppIntersectionPlansParallelisme, AppLectureGraphiqueDroite, AppLectureParabole, AppLireDroite,
-  AppLireSolidePerspective, AppMoyennePonderee, AppParaboleDroite, AppPointVectoriel,
-  AppProblemesFraction, AppProjeteSymetrique, AppQuelAngle, AppReductionVectorielle,
-  AppTableauFrequences, AppTraduireLieu, AppTrajectoiresRencontre, AppTransformationsGraphiques,
-  AppTroisEcritures, AppVecteursDirecteurs), 5gen2, 5gen3, 5gen25, 6gen2, 6gen5 (5gen50–53 passent
-  par `CoqueTrig5e`, dont la fiche est branchée). Non branchés (refonte du 6e ch. 7 par d'autres
-  chantiers, à faire avec eux) : 6gen43–48, 6gen100–109. Vérifié 25/11 (dossier de travail
+  appli avec fiche : même schéma, rien d'autre à câbler. **Toute appli à corrigé a désormais sa
+  fiche** (lot 2, 25/11 : l'élève revoit à tout moment, depuis la puce, sa réponse ET le corrigé,
+  juste ou faux) : les 24 applis sur coquille (`AppTransfertSecondDegre` ×22, `AppEspaceLotH` ×2)
+  et 6gen100–109 (socle `AppEcransTrigo`) l'avaient déjà par leur socle ; branchées une à une :
+  AppAnglesAssocies, AppComparaisonSeries, AppConstructionVectorielle, AppLectureGraphiqueDroite,
+  AppPointVectoriel, AppQuelAngle, AppReductionVectorielle, AppTransformationsGraphiques, 5gen2,
+  6gen2, 6gen5 (mono-écran : UNE puce, `segmentsDepuisHistorique(historique, 1, !enAttente)` —
+  « Étape 1 / 1 », cliquable dès l'écran clos, vidée au nouvel exercice), AppHistogramme,
+  AppMoyennePonderee, AppTableauFrequences, 5gen3, 5gen25 (puces historiques remplacées par
+  `segmentsDepuisHistorique` : la dernière étape se clôt et se consulte comme les autres). Même
+  outillage partout : `ecranClos`/`segmentsDepuisHistorique` (`4e/ui/historiqueProgression.tsx`,
+  aussi importés depuis 5e/6e), `reponseAttendueEcran()` + `corrigeDetailleEcranCourant()` locales
+  (une source pour la validation et la fiche). « Ta réponse » = la saisie RÉELLE, passée à
+  `terminerEtape(nouvelEtat, votreReponse)` depuis le `onValider` : texte libre → `saisieEnLatex`
+  (4e/5e) ou `saisieEnLatex6e` (`6e-6h/ui6e/saisieEnLatex6e.tsx`, lecteur 6e : π, √) ; nombre court →
+  `saisieTexte` ; valeur déjà relue en nombre → `nombreDecimalSaisi` (jusqu'à 6 décimales, jamais
+  arrondi à 2 comme `nombreSaisi`) ; choix → libellé de l'option. Quand le composant ne transmettait
+  que la valeur relue, il passe aussi le texte tapé en 2e argument de `onValider` (seuils de
+  `EtapeConditionsComposerFonctions`, `SaisiesApparierCyclo` de `EtapeApparierGraphiqueCyclo`) ;
+  domaines (`EnsembleReelGuide`) : l'ensemble construit, valeurs relues. 5gen25, écran
+  « justification » : pas de réponse attendue (comme à l'écran), le corrigé la donne. Non branchés
+  (à faire avec leurs chantiers) : 6gen43–48, 6gen49–53, 6gen71. Vérifié lot 2 (dossier
+  `corrige-puces-2`, `compare2.mjs` / `visuel2.mjs`, rejouant `?code=` pour le passage juste) : 50
+  applis, 101 écrans clos comparés (85 révélés, 16 justes), corrigé de l'écran = corrigé de la fiche
+  101 / 101, « Ta réponse » = la saisie, puces vides après « Nouvel exercice » ; 6 applis (gen17,
+  gen27, gen38, gen31, 5gen25, 6gen2) en iPhone 13 et 1 280 px, clair / sombre, fiche juste et
+  fiche fausse dépliées : bouton 48 px, `aria-expanded` true, scrollWidth = largeur, 0
+  `.katex-error`, 0 erreur console. Lot 1 : vérifié 25/11 (dossier de travail
   `corrige-puces`, `compare.mjs` / `visuel.mjs`) : 240 applis du registre, 417 écrans clos comparés
   (377 révélés, 40 justes) — texte du corrigé de l'écran = texte du corrigé déplié dans la fiche de
   la puce, 417 / 417 ; iPhone 13 et 1 280 px, clair / sombre (9 générateurs 4e / 5e / 6e, figure

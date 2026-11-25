@@ -328,7 +328,8 @@ partagé ; contenu, aides, tentatives et vérification inchangés, `SelecteurVar
   bouton `.validation-suivant` (libellé `labelSuivant` inchangé). Bonne réponse + `corrigeDetaille` :
   « Voir comment on y arrive » replié (`CorrigeDepliable`, aussi dans `FicheReponseEcran` via
   `EntreeHistoriqueEtape.corrigeDetaille`) — voir `feuilles-evaluations.md`, « Consultable après
-  CHAQUE réponse ». `PanneauRappels` (« Ce qu'on sait
+  CHAQUE réponse » ; toute appli à corrigé a sa fiche (un générateur mono-écran publie UNE puce,
+  « Étape 1 / 1 », cliquable dès l'écran clos). `PanneauRappels` (« Ce qu'on sait
   déjà » des 3 `RecapitulatifPanel` et des socles `AppEcransTrigo`/`AppEcransExp`) : une ligne ≥ 48 px
   par écran clos, ✓ vert / ✓ jaune (aide) / ✗ rouge, « Revoir › » seulement si la correspondance
   entrée ↔ écran clos est sûre (même nombre, même verdict) et que le générateur a une fiche.

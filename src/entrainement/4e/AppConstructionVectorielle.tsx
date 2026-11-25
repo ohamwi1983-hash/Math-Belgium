@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
 import { correctionDetailleeConstructionVectorielle } from "./generateurs/constructionVectorielle/corrigeDetaille";
@@ -11,6 +11,9 @@ import { EtapeConstructionVectorielle } from "./components/EtapeConstructionVect
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { consigneConstructionVectorielle } from "./ui/formatConstructionVectorielle";
+import { ProgressionPuces } from "../components/ProgressionPuces";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { ecranClos, nombreTexte, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 
 const CONSIGNE_GENERALE = "Construis ce vecteur sur la figure.";
 
@@ -45,6 +48,17 @@ function formatVecteurLatex(exercice: EtatSessionConstructionVectorielle["exerci
   return consigneConstructionVectorielle(exercice).latex;
 }
 
+/** Vecteur réellement tracé par l'élève : son origine, son extrémité et ses composantes. */
+function vecteurTraceAffiche(reponse: { depart: { x: number; y: number }; arrivee: { x: number; y: number } }): ReactNode {
+  const { depart, arrivee } = reponse;
+  const p = (pt: { x: number; y: number }) => `(${nombreTexte(pt.x)}\\,;\\,${nombreTexte(pt.y)})`;
+  return (
+    <Katex
+      expression={`\\text{de }${p(depart)}\\text{ à }${p(arrivee)}\\ :\\ ${formatVecteurColonneLatex({ x: arrivee.x - depart.x, y: arrivee.y - depart.y })}`}
+    />
+  );
+}
+
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -60,11 +74,22 @@ export function AppConstructionVectorielle() {
   /** Compteur d'exercices — `key` de l'étape : un nouvel exercice remonte le composant, donc
    * repart du tracé initial au lieu de garder celui de l'exercice précédent. */
   const [numeroExercice, setNumeroExercice] = useState(0);
+  /** Écrans clos de l'exercice en cours (puces cliquables → fiche en lecture seule). */
+  const [historique, setHistorique] = useState<EcranClos[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionConstructionVectorielle) {
+  function viderHistorique() {
+    setHistorique([]);
+    setFicheOuverteIndex(null);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionConstructionVectorielle, votreReponse: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.constructionRevele });
+      const revele = nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.constructionRevele;
+      // Pas d'aide sur cet écran : jamais « réussi avec aide ».
+      setHistorique((h) => [...h, ecranClos("Construction", votreReponse, revele, false, reponseAttendueEcran(), corrigeDetailleEcranCourant())]);
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -72,20 +97,33 @@ export function AppConstructionVectorielle() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    if (enAttente.etatSuivant.terminee) setNumeroExercice((n) => n + 1);
+    if (enAttente.etatSuivant.terminee) {
+      setNumeroExercice((n) => n + 1);
+      viderHistorique();
+    }
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
 
   const exercice = etat.exerciceCourant;
 
+  function reponseAttendueEcran() {
+    return !etat.reglages.affichageReponseApresEchec ? undefined : (
+      <Katex expression={`${formatVecteurLatex(exercice)} = ${formatVecteurColonneLatex(exercice.cibleComposantes)}`} />
+    );
+  }
+
+  /** Corrigé détaillé « comme au tableau » de l'écran unique — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique (fiche de la puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeConstructionVectorielle(exercice), "a")} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeConstructionVectorielle(exercice), "a")} />,
-        reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : (
-          <Katex expression={`${formatVecteurLatex(exercice)} = ${formatVecteurColonneLatex(exercice.cibleComposantes)}`} />
-        ),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
+        reponseAttendue: reponseAttendueEcran(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -100,6 +138,7 @@ export function AppConstructionVectorielle() {
       </header>
 
       <main className="card">
+        <ProgressionPuces segments={segmentsDepuisHistorique(historique, 1, !enAttente)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <EtapeConstructionVectorielle
@@ -107,11 +146,15 @@ export function AppConstructionVectorielle() {
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            onValider={(reponse) => terminerEtape(soumettreReponseConstruction(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseConstruction(etat, reponse), vecteurTraceAffiche(reponse))}
             validation={validation}
           />
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex].entree} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

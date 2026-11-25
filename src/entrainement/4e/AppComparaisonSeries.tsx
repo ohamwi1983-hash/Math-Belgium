@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -17,13 +17,17 @@ import { EtapeDispersionComparaison } from "./components/EtapeDispersionComparai
 import { EtapeInterpretationComparaison } from "./components/EtapeInterpretationComparaison";
 import { EtapeSeuilComparaison } from "./components/EtapeSeuilComparaison";
 import { SegmentsInline } from "./components/SegmentsInline";
-import { formatEnonceTexte, segmentsReponseAttendue } from "./ui/formatComparaisonSeries";
+import { OPTIONS_ARGUMENT_DISPERSION, formatEnonceTexte, segmentsReponseAttendue } from "./ui/formatComparaisonSeries";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { DonneesComparaisonSeries } from "./components/DonneesComparaisonSeries";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { correctionDetailleeComparaisonSeries } from "./generateurs/comparaisonSeries/corrigeDetaille";
+import { ProgressionPuces } from "../components/ProgressionPuces";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { ecranClos, saisieTexte, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
+import type { ReponseDispersion } from "./moteur/verificationComparaisonSeries";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -59,6 +63,24 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
+/** Réponse de l'écran « dispersion » telle que l'élève l'a choisie (série + libellés des arguments). */
+function reponseDispersionAffichee(reponse: ReponseDispersion): ReactNode {
+  return (
+    <>
+      Série {reponse.serie}
+      {reponse.arguments.map((id) => {
+        const option = OPTIONS_ARGUMENT_DISPERSION.find((o) => o.id === id);
+        return (
+          <span key={id}>
+            {" ; "}
+            {option ? <SegmentsInline segments={option.label} /> : id}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
 /** Pas de `Phase` (comme "Quel angle ?"/"Transformations graphiques") : un seul écran par
  * exercice, dont la FORME dépend de `exercice.question.type` (4 possibles) — voir
  * `sessionComparaisonSeries.ts`. Mono-écran : la transition n'est jamais qu'une clôture
@@ -66,11 +88,20 @@ interface TransitionEnAttente {
 export function AppComparaisonSeries() {
   const [etat, setEtat] = useState<EtatSessionComparaisonSeries>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Écrans clos de l'exercice en cours (puces cliquables → fiche en lecture seule). */
+  const [historique, setHistorique] = useState<EcranClos[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionComparaisonSeries) {
+  function viderHistorique() {
+    setHistorique([]);
+    setFicheOuverteIndex(null);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionComparaisonSeries, votreReponse: ReactNode) {
     const transitionDEcran = nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+      setHistorique((h) => [...h, ecranClos("Comparaison", votreReponse, resultat.revele, etat.niveauAide > 0, reponseAttendueEcran(), corrigeDetailleEcranCourant())]);
       setEnAttente({ etatSuivant: nouvelEtat, revele: resultat.revele });
       return;
     }
@@ -83,7 +114,10 @@ export function AppComparaisonSeries() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    if (enAttente.etatSuivant.terminee) setNumeroExercice((n) => n + 1);
+    if (enAttente.etatSuivant.terminee) {
+      setNumeroExercice((n) => n + 1);
+      viderHistorique();
+    }
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -93,17 +127,28 @@ export function AppComparaisonSeries() {
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    viderHistorique();
     setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionComparaisonSeries(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteComparaisonSeries)));
+  }
+
+  function reponseAttendueEcran() {
+    return <SegmentsInline segments={segmentsReponseAttendue(exercice)} />;
+  }
+
+  /** Corrigé détaillé « comme au tableau » de l'écran unique — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique (fiche de la puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeComparaisonSeries(exercice), lettreEtape(0))} />;
   }
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: <SegmentsInline segments={segmentsReponseAttendue(exercice)} />,
+        reponseAttendue: reponseAttendueEcran(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeComparaisonSeries(exercice), lettreEtape(0))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 
@@ -117,6 +162,7 @@ export function AppComparaisonSeries() {
       </header>
 
       <main className="card">
+        <ProgressionPuces segments={segmentsDepuisHistorique(historique, 1, !enAttente)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
 
         <div className="card-body">
           <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={<DonneesComparaisonSeries key={numeroExercice} exercice={exercice} />} />
@@ -129,7 +175,7 @@ export function AppComparaisonSeries() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(choix) => terminerEtape(soumettreReponseCentrage(etat, choix))}
+              onValider={(choix) => terminerEtape(soumettreReponseCentrage(etat, choix), `Série ${choix}`)}
               validation={validation}
             />
           ) : question.type === "dispersion" ? (
@@ -141,7 +187,7 @@ export function AppComparaisonSeries() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseDispersion(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseDispersion(etat, reponse), reponseDispersionAffichee(reponse))}
               validation={validation}
             />
           ) : question.type === "seuil" ? (
@@ -153,7 +199,7 @@ export function AppComparaisonSeries() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseSeuil(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseSeuil(etat, texte), saisieTexte(texte))}
               validation={validation}
             />
           ) : (
@@ -165,12 +211,16 @@ export function AppComparaisonSeries() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(choix) => terminerEtape(soumettreReponseInterpretation(etat, choix))}
+              onValider={(choix) => terminerEtape(soumettreReponseInterpretation(etat, choix), `Série ${choix}`)}
               validation={validation}
             />
           )}{" "}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex].entree} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

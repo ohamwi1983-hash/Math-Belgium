@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { correctionDetailleeMoyennePonderee } from "./generateurs/moyennePonderee/corrigeDetaille";
@@ -20,12 +20,15 @@ import { EtapeCentresMoyennePonderee } from "./components/EtapeCentresMoyennePon
 import { EtapeSommesMoyennePonderee } from "./components/EtapeSommesMoyennePonderee";
 import { EtapeQuotientMoyennePonderee } from "./components/EtapeQuotientMoyennePonderee";
 import { SegmentsInline } from "./components/SegmentsInline";
-import { formatCentresAttendusTexte, formatEnonceTexte, formatSommesAttenduesTexte } from "./ui/formatMoyennePonderee";
+import { LABEL_SOMME_N, LABEL_SOMME_XN, formatCentresAttendusTexte, formatClasseTexte, formatEnonceTexte, formatSommesAttenduesTexte } from "./ui/formatMoyennePonderee";
+import { Katex } from "./components/Katex";
+import type { ReponseSommes } from "./moteur/verificationMoyennePonderee";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { calculerRecapitulatifMoyennePonderee } from "./ui/recapitulatifMoyennePonderee";
-import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { ecranClos, saisieTexte, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 import { nombreFrTypo } from "./ui/nombreFr";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -56,21 +59,20 @@ function sequencePourExercice(exercice: ExerciceMoyennePonderee): PhaseMoyennePo
   return exercice.variante === "classes" ? ["centres", "sommes", "quotient"] : ["sommes", "quotient"];
 }
 
-/** "quotient" (dernière phase) n'a jamais besoin de sa propre branche "close" : un nouvel exercice
- * redémarre toujours juste après, donc elle reste "a-venir" jusqu'à devenir "courante" — jamais
- * consultée comme passée (même principe que la dernière phase d'`AppFormeCanoniqueTransformations`/
- * `AppOptimisation`). Puces purement visuelles (pas de `onSegmentClick`). */
-function calculerSegmentsProgression(etat: EtatSessionMoyennePonderee): EtatPuceProgression[] {
-  const sequence = sequencePourExercice(etat.exerciceCourant);
-  const indexCourant = sequence.indexOf(etat.phase);
-  return sequence.map((phase, index) => {
-    if (index === indexCourant) return "courante";
-    if (index > indexCourant) return "a-venir";
-    const revele = phase === "centres" ? etat.centresRevele : etat.sommesRevele;
-    if (revele) return "revele";
-    const niveauAide = phase === "centres" ? etat.niveauAideCentres : etat.niveauAideSommes;
-    return niveauAide > 0 ? "aide" : "correcte";
-  });
+/** Puces construites depuis l'historique des écrans clos (`segmentsDepuisHistorique`), cliquables
+ * (fiche en lecture seule de chaque écran, dernier compris). */
+const TITRES_PHASES: Record<PhaseMoyennePonderee, string> = { centres: "Centres des classes", sommes: "Sommes", quotient: "Moyenne pondérée" };
+
+/** Saisie de l'écran « sommes » : un produit par ligne, puis les deux sommes. */
+function sommesSaisiesAffichees(reponse: ReponseSommes): ReactNode {
+  return (
+    <>
+      <span style={{ display: "block" }}>Produits : {reponse.produits.map((p) => saisieTexte(p)).join(" ; ")}</span>
+      <span style={{ display: "block" }}>
+        <Katex expression={LABEL_SOMME_XN} /> = {saisieTexte(reponse.sommeXN)} ; <Katex expression={LABEL_SOMME_N} /> = {saisieTexte(reponse.sommeN)}
+      </span>
+    </>
+  );
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -89,8 +91,16 @@ export function AppMoyennePonderee() {
    * remonter leur état local — sans lui, un exercice à moins de classes gardait les champs de
    * l'exercice précédent et « Valider » restait désactivé. */
   const [numeroExercice, setNumeroExercice] = useState(0);
+  /** Écrans clos de l'exercice en cours (puces cliquables → fiche en lecture seule). */
+  const [historique, setHistorique] = useState<EcranClos[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionMoyennePonderee) {
+  function viderHistorique() {
+    setHistorique([]);
+    setFicheOuverteIndex(null);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionMoyennePonderee, votreReponse: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       const revele =
@@ -99,6 +109,8 @@ export function AppMoyennePonderee() {
           : etat.phase === "sommes"
             ? nouvelEtat.sommesRevele
             : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.quotientRevele;
+      const niveauAide = etat.phase === "centres" ? etat.niveauAideCentres : etat.phase === "sommes" ? etat.niveauAideSommes : etat.niveauAideQuotient;
+      setHistorique((h) => [...h, ecranClos(TITRES_PHASES[etat.phase], votreReponse, revele, niveauAide > 0, reponseAttendue, corrigeDetailleEcranCourant())]);
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
@@ -107,7 +119,10 @@ export function AppMoyennePonderee() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    if (enAttente.etatSuivant.terminee) setNumeroExercice((n) => n + 1);
+    if (enAttente.etatSuivant.terminee) {
+      setNumeroExercice((n) => n + 1);
+      viderHistorique();
+    }
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -118,6 +133,7 @@ export function AppMoyennePonderee() {
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    viderHistorique();
     setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionMoyennePonderee(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteMoyennePonderee)));
   }
@@ -133,13 +149,19 @@ export function AppMoyennePonderee() {
       <>Moyenne pondérée attendue : {nombreFrTypo(exercice.moyenne)}</>
     );
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeMoyennePonderee(exercice), lettreEtape(sequencePourExercice(exercice).indexOf(phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeMoyennePonderee(exercice), lettreEtape(sequencePourExercice(exercice).indexOf(phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 
@@ -150,7 +172,7 @@ export function AppMoyennePonderee() {
         <h1 className="app-title">Moyenne pondérée</h1>
         <p className="app-subtitle">Chapitre 4</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={segmentsDepuisHistorique(historique, sequencePourExercice(exercice).length, !enAttente)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
 
       <main className="card">
@@ -166,7 +188,7 @@ export function AppMoyennePonderee() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideCentres}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseCentres(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseCentres(etat, reponse), exercice.variante === "classes" ? exercice.classes.map((_, i) => `${formatClasseTexte(exercice, i)} → ${saisieTexte(reponse[i] ?? "")}`).join(", ") : reponse.map(saisieTexte).join(" ; "))}
               validation={validation}
             />
           ) : phase === "sommes" ? (
@@ -177,7 +199,7 @@ export function AppMoyennePonderee() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideSommes}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseSommes(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSommes(etat, reponse), sommesSaisiesAffichees(reponse))}
               validation={validation}
             />
           ) : phase === "quotient" ? (
@@ -188,12 +210,16 @@ export function AppMoyennePonderee() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideQuotient}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseQuotient(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseQuotient(etat, reponse), saisieTexte(reponse))}
               validation={validation}
             />
           ) : null}{" "}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex].entree} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }
