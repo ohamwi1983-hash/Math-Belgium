@@ -369,6 +369,26 @@ export const variablesAleatoires: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 49. Variables aléatoires discrètes et espérance »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Variance et écart-type d\'une loi discrète',
+          generatorId: '6gen110',
+          description: [
+            "Calcule l'espérance, E(X²), puis la variance par la formule de König et l'écart-type ; ou compare deux jeux de même espérance : lequel est le plus risqué ?",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 110. Variance et écart-type d\'une loi discrète »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Transformation affine Y = aX + b',
+          generatorId: '6gen111',
+          description: [
+            "Conversion de devise ou de température, mise retranchée, prime qui diminue : écris Y = aX + b, puis calcule E(Y), V(Y) et σ(Y) sans reconstruire la loi.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 111. Transformation affine Y = aX + b »',
+        },
       ],
     },
     {
@@ -676,6 +696,26 @@ export const variablesAleatoires: ChapterContent = {
           text:
             "Tu as déjà rencontré la moyenne et l'écart-type d'une série de données, en statistique descriptive. L'idée ne change pas ici : $E(X)$ reste une moyenne, $\\sigma(X)$ reste une mesure de dispersion autour de cette moyenne. Seul l'outil de calcul change — une somme devient une intégrale, parce que $X$ prend maintenant une infinité de valeurs possibles, pas un nombre fini.",
         },
+        {
+          kind: 'entrainement',
+          title: 'Fonction de répartition',
+          generatorId: '6gen112',
+          description: [
+            "Construis l'escalier d'une loi discrète et calcule des probabilités d'intervalles (attention aux bornes), ou reconnais la fonction de répartition d'une variable continue, puis P(X ≤ a), P(a < X < b) et la densité f = F′.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 112. Fonction de répartition »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Densité de probabilité',
+          generatorId: '6gen113',
+          description: [
+            "Trouve k pour que l'aire sous la densité vaille 1, puis calcule des probabilités comme des aires (densité tracée) ou par une primitive, et l'espérance.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 113. Densité de probabilité »',
+        },
       ],
     },
     {
@@ -712,6 +752,16 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'astuce',
           label: "Passer d'une colonne à l'autre : deux substitutions",
           text: "Chaque formule continue se lit comme sa jumelle discrète, en remplaçant $\\sum$ par $\\int$ et la probabilité ponctuelle $p_i=P(X=x_i)$ par $f(t)\\,dt$. L'espérance reste toujours une moyenne pondérée par le poids de probabilité — jamais une moyenne simple des valeurs possibles ! Seul l'écart-type s'écrit à l'identique dans les 2 colonnes : $\\sigma(X)=\\sqrt{V(X)}$, quelle que soit la nature de la variable.",
+        },
+        {
+          kind: 'entrainement',
+          title: 'Discrète ou continue ?',
+          generatorId: '6gen114',
+          description: [
+            "Classe la variable d'une situation (on compte ou on mesure exactement ?), donne l'ensemble de ses valeurs, puis l'outil de calcul : somme des P(X = k) ou intégrale d'une densité.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 114. Discrète ou continue ? »',
         },
       ],
     },
@@ -763,6 +813,16 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'astuce',
           label: 'Seule la longueur compte, jamais la position',
           text: '$P(10\\leq X\\leq25)=15/60=0,25$ et $P(35\\leq X\\leq50)=15/60=0,25$ sont identiques ! Deux intervalles de même longueur ont toujours la même probabilité, peu importe où ils se trouvent dans $[a;b]$.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Loi uniforme continue',
+          generatorId: '6gen115',
+          description: [
+            "Bus, livreur, panne sur un câble : densité, probabilité (même quand l'intervalle déborde), E(X), V(X) et σ(X) ; ou retrouve a et b à partir de E(X) et V(X).",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 115. Loi uniforme continue »',
         },
       ],
     },
