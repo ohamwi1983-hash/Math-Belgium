@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { estClos, useEtatCadre } from "../../components/cadreGenerateur";
+import { BoutonEcouter } from "../../../components/lecture/BoutonEcouter";
+import { phrasesDe } from "../../../lib/phrasesPage";
+
+/** Ce que « Écouter l'énoncé » ne lit pas : l'étiquette « Énoncé », l'aperçu replié, la figure gardée. */
+const HORS_LECTURE = ".entete-exercice-bascule, .entete-exercice-label, .entete-exercice-apercu, .entete-figure-replie";
 
 interface Props {
   consigneGenerale: ReactNode;
@@ -22,17 +27,30 @@ interface Props {
  * l'exercice est clos (segments publiés par `ProgressionPuces` dans le cadre de la page), l'énoncé se
  * REPLIE en une ligne — touche pour le déplier. Le contenu reste dans le DOM (seule la mise en page
  * change) ; sans progression publiée (générateur à un écran, quiz), il reste toujours déplié.
+ *
+ * « Écouter » (lecture à voix haute, planche 08 — `components/lecture/BoutonEcouter.tsx`) : petit bouton
+ * en haut à droite de l'énoncé déplié (absent du bandeau replié, au pré-rendu et sans synthèse vocale).
  */
 export function EnTeteExercice({ consigneGenerale, blocDonnees, apercu, figureToujoursVisible }: Props) {
   const { segments } = useEtatCadre();
   const repliable = !!segments && segments.some(estClos);
   const [deplie, setDeplie] = useState(false);
   const replie = repliable && !deplie;
+  const ref = useRef<HTMLDivElement>(null);
   return (
     <div
+      ref={ref}
       className={`entete-exercice${repliable ? " entete-repliable" : ""}${replie ? " est-replie" : ""}${apercu ? " avec-apercu" : ""}${figureToujoursVisible ? " entete-figure-visible" : ""}`}
       onClick={replie ? () => setDeplie(true) : undefined}
     >
+      <BoutonEcouter
+        className="ecouter-gen entete-ecouter"
+        libelle="Écouter l’énoncé"
+        libelleCourt="Écouter"
+        titre="Énoncé"
+        phrases={() => phrasesDe(ref.current, { exclure: HORS_LECTURE })}
+        zone={() => ref.current}
+      />
       {repliable ? (
         <button
           type="button"

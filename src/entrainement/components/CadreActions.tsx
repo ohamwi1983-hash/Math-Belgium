@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
+import { BoutonEcouter } from "../../components/lecture/BoutonEcouter";
+import { phrasesDe } from "../../lib/phrasesPage";
 
 /**
  * Cadre commun de la page d'un générateur, côté « actions » (refonte du 22/11/2026, maquettes A, B,
@@ -70,7 +72,7 @@ function choisirPrincipal(carte: Element): HTMLElement | null {
 
 const MEDIA_APERCU = "svg, img, canvas, table, figure, video, iframe";
 /** Enfants de l'énoncé qui ne font pas partie du bloc de données (bandeau compact). */
-const HORS_DONNEES = ".entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie";
+const HORS_DONNEES = ".entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie, .entete-ecouter";
 
 /** Le bloc de données a-t-il du texte hors figures, tableaux et images ? Sinon (figure seule : 6gen106,
  * 6gen162…) l'aperçu replié serait vide : la consigne prend sa place (`data-apercu-consigne`). */
@@ -379,6 +381,8 @@ export function CadreActions({ racineRef }: { racineRef: RefObject<HTMLDivElemen
         n.removeAttribute("role");
         n.removeAttribute("aria-live");
       });
+      // Bouton « Écouter l'aide » ajouté à l'original (`EcouterAides`) : le tiroir a le sien, dans ses actions.
+      copie.querySelectorAll("[data-voix-ajout]").forEach((n) => n.remove());
       copie.querySelectorAll("button, input, select, textarea, a").forEach((n) => n.setAttribute("tabindex", "-1"));
       return copie;
     });
@@ -414,6 +418,16 @@ export function CadreActions({ racineRef }: { racineRef: RefObject<HTMLDivElemen
           </p>
           <div className="gen-tiroir-contenu" ref={contenuRef} />
           <div className="gen-tiroir-actions">
+            <BoutonEcouter
+              className="ecouter-gen"
+              libelle="Écouter l’aide"
+              titre={`Aide ${tiroir.niveau}`}
+              phrases={() => {
+                const blocs = contenuRef.current?.children;
+                return blocs && blocs.length ? phrasesDe(blocs[blocs.length - 1]) : [];
+              }}
+              zone={() => contenuRef.current}
+            />
             {aideEncore && (
               <button type="button" className="btn gen-tiroir-suivante" onClick={() => aideRef.current?.click()}>
                 Aide suivante

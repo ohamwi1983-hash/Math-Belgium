@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useLocation } from 'react-router-dom'
 import type { HauteurBande, SuivreLigne } from '../../lib/reglagesLecture'
 import { animationsReduites } from '../../lib/reglagesLecture'
-import { dire, seTaire, voixDisponible } from '../../lib/voixLecture'
+import { lire, seTaire, voixDisponible } from '../../lib/voixLecture'
 import './aidesLecture.css'
 
 /**
@@ -637,7 +637,11 @@ function LoupeDialogue({ formule, fermer }: { formule: HTMLElement; fermer: () =
       )}
       {voix && (
         <div className="loupe-actions">
-          <button type="button" className="loupe-ecouter" onClick={() => dire(lu)}>
+          <button
+            type="button"
+            className="loupe-ecouter"
+            onClick={() => lire([{ texte: lu, zones: [{ el: formule, a: 0, b: lu.length }] }], { source: 'loupe', titre: 'Formule' })}
+          >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M8 5v14l11-7z" />
             </svg>
@@ -645,6 +649,7 @@ function LoupeDialogue({ formule, fermer }: { formule: HTMLElement; fermer: () =
           </button>
         </div>
       )}
+
     </dialog>,
     document.body,
   )

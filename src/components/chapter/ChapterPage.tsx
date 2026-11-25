@@ -17,6 +17,7 @@ import { Icone } from './Icones'
 import { dureeEtape, insecables, minusculeInitiale, titreCourt, useParcours } from '../../lib/parcoursChapitre'
 import { useMediaQuery } from '../../lib/useMediaQuery'
 import { BoutonLecture } from '../lecture/BoutonLecture'
+import { EcouterEtape } from '../lecture/BoutonEcouter'
 
 /** « Avant de commencer : qu'est-ce qu'un vecteur ? » → « Qu'est-ce qu'un vecteur ? » (le bouton
  * porte déjà « Avant de commencer »). */
@@ -250,6 +251,7 @@ function EtapeSection({
         <span className="etape-meta-num">Étape {section.number} · </span>≈ {duree} min
         {precedente && <> · tu as vu : {minusculeInitiale(titreCourt(precedente))}</>}
       </p>
+      {actif && <EcouterEtape numero={section.number} />}
       <div className="section-body">
         {section.kicker && <p className="section-kicker">{section.kicker}</p>}
         {section.essentiel && section.essentiel.length > 0 && <Essentiel phrases={section.essentiel} />}

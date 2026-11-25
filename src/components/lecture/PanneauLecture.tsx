@@ -13,6 +13,8 @@ import {
   useReglagesLecture,
 } from '../../lib/reglagesLecture'
 import type { CleReglage, ReglagesLecture } from '../../lib/reglagesLecture'
+import { VITESSES, arreter, choisirVoix, lire, oublierPreferencesVoix, rafraichirVoix, useLecture, useVoix, voixDisponible } from '../../lib/voixLecture'
+import { lireFormule } from '../../lib/lectureFormules'
 import { fermerPanneauLecture } from './etatPanneauLecture'
 import './panneauLecture.css'
 
@@ -388,11 +390,19 @@ export default function PanneauLecture() {
               </p>
             )}
           </Bloc>
+          <LectureVoixHaute vitesse={r.vitesse} choisirVitesse={(v) => choisir('vitesse', v)} />
         </div>
       </div>
 
       <div className="confort-pied">
-        <button type="button" className="confort-reset" onClick={revenirAuReglageDuSite}>
+        <button
+          type="button"
+          className="confort-reset"
+          onClick={() => {
+            revenirAuReglageDuSite()
+            oublierPreferencesVoix()
+          }}
+        >
           Revenir au réglage du site
         </button>
         <p className="mention-appareil">
@@ -460,5 +470,86 @@ function BoutonPolice({ actif, onClick, famille, nom, tag, children }: { actif: 
       </span>
       {children}
     </button>
+  )
+}
+
+/**
+ * Onglet « Aides », section « Lecture à voix haute » (planche 08) : voix de l'appareil (fr-BE d'abord, puis
+ * tout fr-*), vitesse, « Essayer la voix », mention honnête sur la qualité des voix. Rien n'est envoyé : la
+ * voix est celle du navigateur ; le choix reste sur l'appareil.
+ */
+function LectureVoixHaute({ vitesse, choisirVitesse }: { vitesse: ReglagesLecture['vitesse']; choisirVitesse: (v: ReglagesLecture['vitesse']) => void }) {
+  const voix = useVoix()
+  const lecture = useLecture()
+  const essaiEnCours = lecture?.source === 'essai' && !lecture.erreur
+  const idVoix = useId()
+  const [possible, setPossible] = useState<boolean | null>(null)
+  useEffect(() => {
+    setPossible(voixDisponible())
+    rafraichirVoix()
+  }, [])
+  if (possible === null) return null
+  return (
+    <Bloc titre="Lecture à voix haute">
+      {!possible ? (
+        <p className="confort-aide">
+          Ce navigateur ne sait pas lire à voix haute. La lecture en mots des formules reste disponible&nbsp;: active «&nbsp;Agrandir les formules au toucher&nbsp;» ci-dessus.
+        </p>
+      ) : (
+        <>
+          <p className="confort-aide">
+            Bouton «&nbsp;Écouter&nbsp;» sur chaque étape du cours, les exemples, la loupe des formules, les énoncés, aides et corrigés des exercices&nbsp;: le texte ET les formules («&nbsp;u indice n plus 1&nbsp;»), la phrase lue surlignée.
+          </p>
+          <label className="confort-sous" htmlFor={idVoix}>
+            Voix
+          </label>
+          <select id={idVoix} className="confort-select" value={voix.liste.some((v) => v.nom === voix.choisie) ? voix.choisie : ''} onChange={(e) => choisirVoix(e.target.value)}>
+            <option value="">{voix.liste.length ? 'Automatique (français de Belgique si l’appareil en a une)' : 'Voix française de l’appareil'}</option>
+            {voix.liste.map((v) => (
+              <option key={v.nom} value={v.nom}>
+                {v.nom} ({v.lang})
+              </option>
+            ))}
+          </select>
+          <p className="confort-sous">Vitesse</p>
+          <Segments
+            valeur={vitesse}
+            choisir={choisirVitesse}
+            options={VITESSES.map((v) => ({ v: v.v, contenu: <>{v.nom}<small>{v.v === '0.75' ? 'plus lent' : v.v === '1' ? 'normal' : 'plus rapide'}</small></> }))}
+          />
+          {/* Sans barre de lecture : elle couvrirait le bas du panneau ; le bouton devient « Arrêter l'essai ». */}
+          <button
+            type="button"
+            className="confort-essayer"
+            aria-pressed={essaiEnCours}
+            onClick={() =>
+              essaiEnCours
+                ? arreter()
+                : lire(
+                    [
+                      { texte: 'Bonjour ! Voici la voix choisie.' },
+                      { texte: `Une suite arithmétique : ${lireFormule('u_{n+1} = u_n + r')}.` },
+                    ],
+                    { source: 'essai', titre: 'Essai de la voix', sansBarre: true },
+                  )
+            }
+          >
+            {essaiEnCours ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <rect x="6" y="6" width="12" height="12" rx="1.5" />
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            )}
+            {essaiEnCours ? 'Arrêter l’essai' : 'Essayer la voix'}
+          </button>
+          <p className="confort-aide confort-aide-apres">
+            La qualité de la voix dépend de l’appareil&nbsp;: très bonne sur iPhone et Chrome récent, plus robotique sur certains Android&nbsp;; sans connexion, certaines voix manquent.
+          </p>
+        </>
+      )}
+    </Bloc>
   )
 }

@@ -6,6 +6,7 @@ import { EntrainementPage } from './routes/EntrainementPage'
 import { CompteProvider } from './lib/compteContexte'
 import { HotePanneauLecture } from './components/lecture/BoutonLecture'
 import { HoteAidesLecture } from './components/lecture/HoteAidesLecture'
+import { HoteLecteurVoix } from './components/lecture/BoutonEcouter'
 
 /** `AdminPage`/`ExercicePage`/`ChapterExercicePage` rendent toutes trois `EvaluationGeneratorPanel`,
  * qui embarque désormais `EVALUATION_ADAPTER_REGISTRY_4E` (55 adaptateurs + tout le pipeline
@@ -76,6 +77,8 @@ function App() {
       <HotePanneauLecture />
       {/* Aides de lecture (règle, un bloc à la fois, loupe), chargées seulement si l'élève en active une. */}
       <HoteAidesLecture />
+      {/* Lecture à voix haute : barre de lecture, seulement pendant une lecture lancée par « Écouter ». */}
+      <HoteLecteurVoix />
       </CompteProvider>
     </BrowserRouter>
   )

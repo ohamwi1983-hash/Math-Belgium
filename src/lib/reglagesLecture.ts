@@ -15,7 +15,7 @@
  *
  * Extensible : un réglage = son type, `ATTRIBUTS` (valeur du site en tête) et le script. L'onglet « Aides »
  * (lot A2) y a mis `ligne`, `bande`, `unbloc`, `exemples`, `loupe`, `signes`, `correspondances` ; la voix
- * (lot suivant) ajoutera les siennes.
+ * (lot VX) y a mis `vitesse`.
  */
 
 import { useSyncExternalStore } from 'react'
@@ -34,6 +34,8 @@ export type SuivreLigne = 'aucune' | 'regle' | 'masque'
 export type HauteurBande = '2' | '1' | '3'
 export type OuiNon = 'non' | 'oui'
 export type ExemplesGuides = 'guides' | 'libres'
+/** Lecture à voix haute (planche 08) : 1 × (site), 0,75 × ou 1,25 ×. */
+export type Vitesse = '1' | '0.75' | '1.25'
 
 export interface ReglagesLecture {
   police: Police
@@ -61,6 +63,8 @@ export interface ReglagesLecture {
   signes: OuiNon
   /** Couleurs ET soulignés qui se correspondent dans quelques exemples clés (`\htmlClass{m1}{…}`). */
   correspondances: OuiNon
+  /** Vitesse de la lecture à voix haute (la voix choisie, elle, est gardée par `voixLecture.ts`). */
+  vitesse: Vitesse
 }
 
 export type CleReglage = keyof ReglagesLecture
@@ -81,6 +85,7 @@ export const ATTRIBUTS: { [K in CleReglage]: readonly ReglagesLecture[K][] } = {
   loupe: ['non', 'oui'],
   signes: ['non', 'oui'],
   correspondances: ['non', 'oui'],
+  vitesse: ['1', '0.75', '1.25'],
 }
 
 const CLES = Object.keys(ATTRIBUTS) as CleReglage[]

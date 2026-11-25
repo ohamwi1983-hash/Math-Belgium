@@ -6,6 +6,7 @@ import { LienVideoGenerateur } from '../entrainement/components/LienVideoGenerat
 import { BarreGenerateur } from '../entrainement/components/BarreGenerateur'
 import { CadreActions } from '../entrainement/components/CadreActions'
 import { JeBloque } from '../entrainement/components/JeBloque'
+import { EcouterAides } from '../entrainement/components/EcouterAides'
 import { CadreGenerateurContext, creerStoreCadre } from '../entrainement/components/cadreGenerateur'
 import { noterEssai, ecransDepuisPuces, observerProgression } from '../lib/suiviEssais'
 import { SuiviEssaiContext, SuiviVerdictContext, type NoterEssai } from '../lib/suiviContexte'
@@ -119,6 +120,8 @@ export function EntrainementPage() {
         {generatorId && <LienVideoGenerateur generatorId={generatorId} />}
         <Suspense fallback={null}>{Component && <Component />}</Suspense>
         <CadreActions racineRef={racineRef} />
+        {/* Lecture à voix haute : « Écouter l'aide » ajouté aux aides de l'écran (aucun générateur réécrit). */}
+        <EcouterAides racineRef={racineRef} />
         {generatorId && <JeBloque racineRef={racineRef} generatorId={generatorId} chantier={entry.chantier} chapitreSlug={entry.chapitreSlug} />}
       </div>
       </SuiviVerdictContext.Provider>

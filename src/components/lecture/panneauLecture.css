@@ -157,3 +157,16 @@
 .confort-vue .interrupteur + .interrupteur { margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--line-soft); }
 .it-etiquette { display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 6px; background: var(--good-soft); color: var(--good); font: 600 12.5px/1.5 var(--sans); vertical-align: 1px; }
 .confort-corresp { margin: 10px 0 0; }
+/* Onglet « Aides », section « Lecture à voix haute » (lot VX). */
+label.confort-sous { display: block; }
+.confort-select {
+  width: 100%; min-height: 48px; padding: 8px 12px; box-sizing: border-box; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); color: var(--ink); font: 500 15px/1.3 var(--sans);
+}
+.confort-select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.confort-essayer {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 48px; margin-top: 12px; padding: 0 18px; cursor: pointer;
+  border: 1px solid var(--accent-ink); border-radius: var(--radius); background: var(--accent-ink); color: var(--surface); font: 600 15px/1 var(--sans);
+}
+.confort-essayer:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+:root[data-theme="contraste"] .confort-select { border: 2px solid #000; }

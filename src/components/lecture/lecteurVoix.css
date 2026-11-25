@@ -1,0 +1,96 @@
+/* ==========================================================================
+   Lecture à voix haute (planche 08) — barre de lecture, phrase surlignée, formule entourée. Chargé avec
+   `LecteurVoix.tsx` (première lecture seulement). Écran seulement. Voir `.claude/rules/cote-eleve.md`,
+   « Lecture à voix haute ». Le bouton « Écouter » lui-même est stylé dans `lecture.css` (§ 7).
+   ========================================================================== */
+
+/* Phrase lue : fond chaud ET couleur du texte imposée (≥ 4,5:1 dans chaque thème, formules comprises —
+   valeurs explicites : les variables ne sont pas toujours résolues dans `::highlight`). */
+::highlight(voix-phrase) { background-color: #ffe08a; color: #182430; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme]) ::highlight(voix-phrase) { background-color: #5c4512; color: #fff6e0; } }
+:root[data-theme="clair"] ::highlight(voix-phrase) { background-color: #ffe08a; color: #182430; }
+:root[data-theme="sombre"] ::highlight(voix-phrase) { background-color: #5c4512; color: #fff6e0; }
+:root[data-theme="creme"] ::highlight(voix-phrase) { background-color: #f0cc6a; color: #2a2118; }
+:root[data-theme="contraste"] ::highlight(voix-phrase) { background-color: #ffe500; color: #000000; }
+
+@media print {
+  .lecteur-voix { display: none !important; }
+}
+
+@media screen {
+  :root {
+    --voix-fond: #ffe08a; --voix-encre: #182430;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme]) { --voix-fond: #5c4512; --voix-encre: #fff6e0; } }
+  :root[data-theme="sombre"] { --voix-fond: #5c4512; --voix-encre: #fff6e0; }
+  :root[data-theme="creme"] { --voix-fond: #f0cc6a; --voix-encre: #2a2118; }
+  :root[data-theme="contraste"] { --voix-fond: #ffe500; --voix-encre: #000000; }
+
+  /* Secours (navigateur sans `CSS.highlights`) : le bloc de la phrase. */
+  [data-voix-bloc] {
+    background: var(--voix-fond) !important; color: var(--voix-encre) !important;
+    outline: 3px solid var(--voix-fond); outline-offset: 2px; border-radius: 3px;
+  }
+  /* Formule en cours d'être dite. */
+  [data-voix-formule] { outline: 2.5px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+  :root[data-theme="contraste"] [data-voix-formule] { outline-color: #000; outline-width: 3px; }
+  /* Zone de la lecture : une phrase se touche pour lire à partir d'elle. */
+  [data-voix-zone] :is(p, li, h2, h3, figcaption, .section-kicker) { cursor: pointer; }
+
+  /* Place réservée : la fin de la page passe au-dessus de la barre ; « Bloc suivant » et les flèches de
+     la règle remontent au-dessus d'elle. */
+  :root[data-voix-lecteur] body { padding-bottom: var(--voix-hauteur, 0px); }
+  :root[data-voix-lecteur] .bloc-flottant { bottom: max(calc(86px + env(safe-area-inset-bottom, 0px)), var(--voix-haut, 0px)); }
+  :root[data-voix-lecteur] .regle-fleches { bottom: max(calc(150px + env(safe-area-inset-bottom, 0px)), calc(var(--voix-haut, 0px) + 60px)); }
+  @media (min-width: 760px) {
+    :root[data-voix-lecteur] .bloc-flottant { bottom: max(24px, var(--voix-haut, 0px)); }
+    :root[data-voix-lecteur] .regle-fleches { bottom: max(88px, calc(var(--voix-haut, 0px) + 60px)); }
+  }
+
+  /* ---------- Barre de lecture ---------- */
+  .lecteur-voix {
+    position: fixed; left: 8px; right: 8px; bottom: 12px; z-index: 420; box-sizing: border-box;
+    display: flex; flex-direction: column; gap: 8px; padding: 10px 12px;
+    background: var(--ink); color: var(--surface); border-radius: 12px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.3);
+    font-family: var(--sans, 'Work Sans', system-ui, sans-serif);
+  }
+  @media (min-width: 760px) {
+    .lecteur-voix { left: auto; right: 24px; width: 380px; }
+  }
+  :root[data-theme="contraste"] .lecteur-voix { border: 2px solid #fff; outline: 2px solid #000; }
+  .lv-ligne { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .lv-btn {
+    flex: none; width: 44px; height: 44px; padding: 0; border-radius: 50%; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid color-mix(in srgb, var(--surface) 45%, transparent); background: transparent; color: var(--surface);
+  }
+  .lv-btn.lv-lecture { width: 52px; height: 52px; background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  :root[data-theme="contraste"] .lv-btn.lv-lecture { background: #fff; border-color: #fff; color: #000; }
+  .lv-btn:disabled { opacity: 1; cursor: default; border-style: dashed; color: color-mix(in srgb, var(--surface) 60%, var(--ink)); }
+  .lv-texte { flex: 1; min-width: 0; }
+  .lv-titre {
+    margin: 0; font: 600 calc(14px * var(--l-echelle-ui, 1))/1.3 var(--sans, system-ui, sans-serif);
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere;
+  }
+  .lv-sous { margin: 2px 0 0; font: 400 calc(12.5px * var(--l-echelle-ui, 1))/1.3 var(--sans, system-ui, sans-serif); color: color-mix(in srgb, var(--surface) 84%, var(--ink)); }
+  .lv-ligne-reglages { justify-content: space-between; flex-wrap: wrap; }
+  .lv-vitesse { display: flex; gap: 4px; }
+  .lv-vitesse button {
+    min-height: 44px; min-width: 58px; padding: 0 8px; border-radius: 999px; cursor: pointer;
+    border: 1px solid color-mix(in srgb, var(--surface) 45%, transparent); background: transparent; color: var(--surface);
+    font: 600 calc(13.5px * var(--l-echelle-ui, 1))/1 var(--sans, system-ui, sans-serif); font-variant-numeric: tabular-nums;
+  }
+  .lv-vitesse button[aria-pressed="true"] { background: var(--surface); color: var(--ink); border-color: var(--surface); }
+  .lv-arreter {
+    min-height: 44px; padding: 0 16px; border-radius: 999px; cursor: pointer;
+    border: 1px solid color-mix(in srgb, var(--surface) 45%, transparent); background: transparent; color: var(--surface);
+    font: 600 calc(14px * var(--l-echelle-ui, 1))/1 var(--sans, system-ui, sans-serif);
+  }
+  .lecteur-voix button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  :root[data-theme="contraste"] .lecteur-voix button:focus-visible { outline-color: #fff; }
+  .lv-progression { height: 4px; border-radius: 2px; background: color-mix(in srgb, var(--surface) 25%, transparent); overflow: hidden; }
+  .lv-progression span { display: block; height: 100%; background: var(--accent); }
+  :root[data-theme="contraste"] .lv-progression span { background: #fff; }
+  .lv-ligne-erreur { align-items: flex-start; }
+  .lv-erreur { flex: 1; margin: 0; font: 400 calc(14px * var(--l-echelle-ui, 1))/1.4 var(--sans, system-ui, sans-serif); }
+}

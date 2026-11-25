@@ -476,10 +476,10 @@ Maquette `signes.html` + planche 09 et démo validée `lecture-guidee.html` (ong
   « passe de plus à moins », « change de signe »). Rôles : `x − 2 (N)` (cours) ou `N : x − 2`
   (générateurs ; plusieurs lignes N → « facteur du numérateur »). Les phrases ne commencent JAMAIS par
   une formule à majuscule forcée (« En effet, x plus 3… », « C'est la racine… »).
-  **Lecture des nombres en mots** : `lireTexteMath` (symboles Unicode du site) et `latexVersTexte`
-  (LaTeX des en-têtes KaTeX des générateurs) — petit lecteur LOCAL, marqué « à remplacer par
-  `lireFormule` (lot V, `src/lib/lectureFormules.ts`) » : nombres à virgule, x², x₁, f′(x), √2⁄2, 1⁄e,
-  ±∞, parenthèses (« parenthèse, x plus 1, fin de parenthèse »).
+  **Lecture des nombres en mots** : `lireTexteMath(x) = lireFormule(unicodeVersLatex(x))` (lot VX : le
+  petit lecteur local a été remplacé par le lecteur des formules du site ; `unicodeVersLatex` ramène x²,
+  x₁, f′(x), √2⁄2, 1⁄e, ±∞, ‖ au LaTeX) ; `latexVersTexte` (LaTeX des en-têtes KaTeX des générateurs →
+  symboles Unicode du modèle) reste pour les repères visuels.
 - `components/chapter/LectureTableau.tsx` : enveloppe un `<table>` DÉJÀ rendu, sans changer son
   balisage ni son aspect au repos ; modèle passé (`SignTable`) ou lu dans le DOM (`modeleDepuisTable` :
   texte des cellules, LaTeX lu dans l'annotation KaTeX, éléments `aria-hidden` ignorés ; `etiquettes`
@@ -506,7 +506,9 @@ Maquette `signes.html` + planche 09 et démo validée `lecture-guidee.html` (ong
     (`scroll-margin-bottom` : barre fixe de l'étape). Bulle `aria-hidden` : l'annonce passe par un
     `<p class="sr-only" aria-live="polite">` TOUJOURS présent (une région créée en même temps que son
     texte n'est pas toujours lue).
-  - **Point d'accroche pour la voix** (lot suivant, aucun appel vocal ici) : chaque phrase émet
+  - **Voix** (lot VX) : bouton « Dire chaque case » du panneau (voir `cote-eleve.md`, « Lecture à voix
+    haute ») ; le résumé est inscrit dans `resumesTableaux` (`lib/phrasesPage.ts`) pour « Écouter l'étape ».
+  - **Point d'accroche pour la voix** : chaque phrase émet
     `EVENEMENT_PHRASE_TABLEAU` (`'lecture-tableau:phrase'`, `CustomEvent<DetailPhraseTableau>` qui
     bouillonne depuis l'enveloppe : `{ phrase, source: 'case' | 'relire' | 'resume', ligne?, colonne? }`)
     et appelle `onPhrase` s'il est fourni.

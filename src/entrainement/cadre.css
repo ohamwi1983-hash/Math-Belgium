@@ -626,8 +626,8 @@
 
   /* Énoncé sans bloc de données (consigne seule, ex. gen9) : l'aperçu montre la consigne au lieu
    * d'une ligne vide. */
-  .entrainement .entete-exercice.est-replie:not(:has(> :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, :empty))) > .prompt-text,
-  .entrainement[data-saisie] .entete-exercice:not(:has(> :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, :empty))) > .prompt-text {
+  .entrainement .entete-exercice.est-replie:not(:has(> :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-ecouter, :empty))) > .prompt-text,
+  .entrainement[data-saisie] .entete-exercice:not(:has(> :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-ecouter, :empty))) > .prompt-text {
     display: inline;
     margin: 0 0.9em 0 0;
     padding: 0;
@@ -646,18 +646,18 @@
     margin: 0 10px 0 0;
   }
 
-  .entrainement .entete-exercice.est-replie > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie),
-  .entrainement[data-saisie] .entete-exercice > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie) {
+  .entrainement .entete-exercice.est-replie > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie, .entete-ecouter),
+  .entrainement[data-saisie] .entete-exercice > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie, .entete-ecouter) {
     font-size: 0.82em;
   }
 
   /* Aplatissement : tout descendant du bloc de données passe en ligne, sauf KaTeX (structure
    * interne intacte) et ce qui est déjà masqué (`hidden`, `.sr-only`, `display: none` en ligne).
    * `!important` sur `display` : certains blocs de données posent `style="display: flex"` en ligne. */
-  .entrainement .entete-exercice.est-replie > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]),
-  .entrainement[data-saisie] .entete-exercice > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]),
-  .entrainement .entete-exercice.est-replie > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie) :not(.katex, .katex *, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]),
-  .entrainement[data-saisie] .entete-exercice > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie) :not(.katex, .katex *, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]) {
+  .entrainement .entete-exercice.est-replie > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie, .entete-ecouter, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]),
+  .entrainement[data-saisie] .entete-exercice > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie, .entete-ecouter, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]),
+  .entrainement .entete-exercice.est-replie > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie, .entete-ecouter) :not(.katex, .katex *, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]),
+  .entrainement[data-saisie] .entete-exercice > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie, .entete-ecouter) :not(.katex, .katex *, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]) {
     display: inline !important;
     position: static;
     width: auto;
@@ -728,8 +728,8 @@
     white-space: nowrap;
   }
 
-  .entrainement .entete-exercice.est-replie.avec-apercu > :not(.entete-exercice-label, .entete-exercice-bascule, .entete-exercice-apercu, .entete-figure-replie),
-  .entrainement[data-saisie] .entete-exercice.avec-apercu > :not(.entete-exercice-label, .entete-exercice-bascule, .entete-exercice-apercu, .entete-figure-replie) {
+  .entrainement .entete-exercice.est-replie.avec-apercu > :not(.entete-exercice-label, .entete-exercice-bascule, .entete-exercice-apercu, .entete-figure-replie, .entete-ecouter),
+  .entrainement[data-saisie] .entete-exercice.avec-apercu > :not(.entete-exercice-label, .entete-exercice-bascule, .entete-exercice-apercu, .entete-figure-replie, .entete-ecouter) {
     display: none !important;
   }
 
