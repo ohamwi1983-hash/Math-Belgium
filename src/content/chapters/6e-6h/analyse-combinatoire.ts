@@ -19,6 +19,19 @@ export const analyseCombinatoire: ChapterContent = {
       number: 1,
       title: 'Dénombrement fondamental et arrangements',
       kicker: 'Aₙᵖ : choisir ET ordonner ; Cₙᵖ : choisir seulement',
+      titreCourt: 'Arrangements et combinaisons',
+      partie: 'Compter : les outils',
+      essentiel: [
+        'Tu choisis $p$ éléments parmi $n$ : si l\'**ordre compte**, c\'est un arrangement $A_n^p = \\dfrac{n!}{(n-p)!}$ ; sinon, une combinaison $C_n^p = \\dfrac{A_n^p}{p!}$.',
+        'Avec répétition : $B_n^p = n^p$ si l\'ordre compte, $\\Gamma_n^p = C_{n+p-1}^p$ sinon ; tous les éléments rangés : $P_n = n!$.',
+        'Autour d\'une table ronde, $(n-1)!$ dispositions ; sur un collier, $\\dfrac{(n-1)!}{2}$.',
+      ],
+      cartes: [
+        { question: 'Combien de podiums (1er, 2e, 3e) peut-on former avec 8 coureurs ?', reponse: '$A_8^3 = 8 \\times 7 \\times 6 = 336$.' },
+        { question: 'Combien de comités de 3 personnes peut-on former parmi 8 ?', reponse: '$C_8^3 = \\dfrac{336}{3!} = 56$.' },
+        { question: 'Combien de cornets de 3 boules avec 4 parfums (répétition permise, sans ordre) ?', reponse: '$\\Gamma_4^3 = C_6^3 = 20$.' },
+        { question: 'Combien de diagonales a un polygone convexe à 9 côtés ?', reponse: '$D(9) = \\dfrac{9 \\times 6}{2} = 27$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Dénombrement fondamental et arrangements (1/3) — principe multiplicatif, Aₙᵖ et Cₙᵖ', youtubeId: 'NvocfnB8t2c' },
         { kind: 'video', title: 'Dénombrement fondamental et arrangements (2/3) — démonstration, chiffres distincts, répétitions, diagonales', youtubeId: '17zeoRHG2fM' },
@@ -61,7 +74,7 @@ export const analyseCombinatoire: ChapterContent = {
           items: [
             "Tu choisis $p$ éléments parmi $n$, et l'**ordre compte** (un podium, un mot de " +
               "passe, une suite de rôles) ? C'est un arrangement : " +
-              '$A_n^p = \\dfrac{n!}{(n-p)!} = n \\times (n-1) \\times \\ldots \\times (n-p+1)$.',
+              '$A_n^p = \\dfrac{n!}{(n-p)!}$ $= n \\times (n-1) \\times \\ldots \\times (n-p+1)$.',
           ],
         },
         {
@@ -79,7 +92,7 @@ export const analyseCombinatoire: ChapterContent = {
               kind: 'para',
               text:
                 'Multiplie et divise ce produit par $(n-p)! = (n-p) \\times \\ldots \\times 1$ : ' +
-                '$A_n^p = \\dfrac{n \\times (n-1) \\times \\ldots \\times (n-p+1) \\times (n-p)!}{(n-p)!}$ ' +
+                '$A_n^p = \\dfrac{n \\times \\ldots \\times (n-p+1) \\times (n-p)!}{(n-p)!}$ ' +
                 '— **on ne change pas un nombre en le multipliant et en le divisant par un même nombre non nul**.',
             },
             {
@@ -130,8 +143,8 @@ export const analyseCombinatoire: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Par la formule : $C_n^{n-p} = \\dfrac{n!}{(n-p)!\\,\\big(n-(n-p)\\big)!} = ' +
-                '\\dfrac{n!}{(n-p)!\\,p!}$ — **définition de** $C_n^p$ **appliquée à** $n-p$.',
+                'Par la formule : $C_n^{n-p} = \\dfrac{n!}{(n-p)!\\,\\big(n-(n-p)\\big)!}$ ' +
+                '$= \\dfrac{n!}{(n-p)!\\,p!}$ — **définition de** $C_n^p$ **appliquée à** $n-p$.',
             },
             {
               kind: 'para',
@@ -432,7 +445,7 @@ export const analyseCombinatoire: ChapterContent = {
             {
               kind: 'para',
               text:
-                '$D(n) = \\dfrac{n(n-1)}{2} - n = \\dfrac{n(n-1)-2n}{2} = \\dfrac{n(n-3)}{2}$ — **même ' +
+                '$D(n) = \\dfrac{n(n-1)}{2} - n$ $= \\dfrac{n(n-1)-2n}{2} = \\dfrac{n(n-3)}{2}$ — **même ' +
                 'dénominateur, puis mise en évidence de** $n$. Autre lecture : de chaque sommet partent ' +
                 '$n-3$ diagonales (ni vers lui-même ni vers ses deux voisins), et chaque diagonale est ' +
                 'comptée deux fois, une fois par extrémité.',
@@ -454,7 +467,7 @@ export const analyseCombinatoire: ChapterContent = {
             {
               tag: 'discriminant',
               text:
-                '$\\Delta = (-3)^2 - 4 \\times 1 \\times (-54) = 225 = 15^2$, donc ' +
+                '$\\Delta = (-3)^2 - 4 \\times 1 \\times (-54)$ $= 225 = 15^2$, donc ' +
                 '$n=\\dfrac{3+15}{2}=9$ ou $n=\\dfrac{3-15}{2}=-6$',
             },
           ],
@@ -489,7 +502,7 @@ export const analyseCombinatoire: ChapterContent = {
           items: [
             'Pour simplifier un quotient de factorielles, écris la plus grande comme un produit ' +
               'qui contient la plus petite : $\\dfrac{(n+1)!}{(n-1)!} = \\dfrac{(n+1) \\times n ' +
-              '\\times (n-1)!}{(n-1)!} = n(n+1)$.',
+              '\\times (n-1)!}{(n-1)!}$ $= n(n+1)$.',
             'Dans une équation, remplace $C_n^p$ ou $A_n^p$ par son produit ($A_n^2 = n(n-1)$, ' +
               '$C_n^2 = \\dfrac{n(n-1)}{2}$), résous, puis ne garde que les solutions **entières** ' +
               'avec $n \\geq p$.',
@@ -542,7 +555,7 @@ export const analyseCombinatoire: ChapterContent = {
               mode: 'reflection',
               caption:
                 "Collier (rotations ET réflexions équivalentes) — l'axe de symétrie identifie 2 " +
-                'dispositions de la table en une seule : $\\dfrac{120}{2}=60$.',
+                'dispositions de la table en une seule\u00a0: $\\dfrac{120}{2}=60$.',
             },
           ],
         },
@@ -616,7 +629,7 @@ export const analyseCombinatoire: ChapterContent = {
           steps: [
             {
               tag: 'par décomposition (3 distinctes, 2 + 1, 3 identiques)',
-              text: '$C_5^3 + 2 \\times C_5^2 + C_5^1 = 10+2 \\times 10+5 = 35$',
+              text: '$C_5^3 + 2 \\times C_5^2 + C_5^1$ $= 10+2 \\times 10+5 = 35$',
             },
             { tag: 'par la formule (n = 5, p = 3)', text: '$\\Gamma_5^3 = C_{5+3-1}^3 = C_7^3 = 35$' },
           ],
@@ -639,7 +652,7 @@ export const analyseCombinatoire: ChapterContent = {
                 'Code ce choix par une rangée de $p$ étoiles (les éléments choisis) et de $n-1$ ' +
                 'barres (les séparations entre les $n$ types) : les étoiles avant la 1re barre sont ' +
                 'du type 1, celles entre la 1re et la 2e barre du type 2, etc. Avec les 5 lettres ' +
-                'A, B, C, D, E et $p=3$ : « ★★|★||| » code A, A, B et « ||★|★|★ » code C, D, E — ' +
+                'A, B, C, D, E et $p=3$ : $\\star\\star|\\star|||$ code A, A, B et $||\\star|\\star|\\star$ code C, D, E — ' +
                 '**chaque choix donne une seule rangée, et chaque rangée un seul choix**.',
             },
             {
@@ -757,6 +770,19 @@ export const analyseCombinatoire: ChapterContent = {
       number: 2,
       title: 'Dénombrement combiné et sélections contraintes',
       kicker: 'ET indépendant → multiplier ; OU exclusif → additionner',
+      titreCourt: 'Dénombrements combinés',
+      partie: 'Compter : les outils',
+      essentiel: [
+        '$n$ personnes en groupes **nommés** de tailles $n_1, \\ldots, n_r$ : $\\dfrac{n!}{n_1! \\times n_2! \\times \\ldots \\times n_r!}$ répartitions — la même formule compte les mots aux lettres répétées.',
+        'Un « ET » entre choix indépendants **multiplie** ; un « OU » exclusif **additionne**.',
+        '« Au moins un » se compte par le complément : total − aucun.',
+      ],
+      cartes: [
+        { question: 'Combien d\'anagrammes a le mot MISSISSIPPI (1 M, 4 I, 4 S, 2 P) ?', reponse: '$\\dfrac{11!}{4! \\times 4! \\times 2!} - 1 = 34\\,650 - 1 = 34\\,649$.' },
+        { question: 'De combien de façons peut-on former 3 binômes (sans nom) avec 6 élèves ?', reponse: '$\\dfrac{6!}{2! \\times 2! \\times 2!} \\div 3! = \\dfrac{90}{6} = 15$.' },
+        { question: 'Comités de 3 parmi 8 hommes et 6 femmes, avec au moins une femme ?', reponse: '$C_{14}^3 - C_8^3 = 364 - 56 = 308$.' },
+        { question: 'Combien de dominos différents avec les valeurs de 0 à 5 ?', reponse: '$C_6^2 + 6 = 15 + 6 = 21$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Dénombrement combiné et sélections contraintes (1/2) — multinomiale, anagrammes, rôles distingués', youtubeId: 'zUXzGhnlZgE' },
         { kind: 'video', title: 'Dénombrement combiné et sélections contraintes (2/2) — ET / OU, dominos, dés, exclusion', youtubeId: 'TB-ZNUQoI6o' },
@@ -787,7 +813,7 @@ export const analyseCombinatoire: ChapterContent = {
             {
               tag: 'par étapes successives',
               text:
-                '$C_{10}^5 \\times C_5^3 \\times C_2^2 = 252 \\times 10 \\times 1 = 2520$ — chaque ' +
+                '$C_{10}^5 \\times C_5^3 \\times C_2^2$ $= 252 \\times 10 \\times 1 = 2520$ — chaque ' +
                 "facteur puise dans les personnes **restantes** (10, puis 5, puis 2), jamais dans les " +
                 "10 d'origine à chaque fois",
             },
@@ -822,8 +848,8 @@ export const analyseCombinatoire: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Il reste $C_n^{n_1} \\times C_{n-n_1}^{n_2} \\times \\ldots \\times C_{n_r}^{n_r} = ' +
-                '\\dfrac{n!}{n_1! \\times n_2! \\times \\ldots \\times n_r!}$.',
+                'Il reste $C_n^{n_1} \\times C_{n-n_1}^{n_2} \\times \\ldots \\times C_{n_r}^{n_r}$ ' +
+                '$= \\dfrac{n!}{n_1! \\times n_2! \\times \\ldots \\times n_r!}$.',
             },
           ],
         },
@@ -910,7 +936,7 @@ export const analyseCombinatoire: ChapterContent = {
             {
               tag: 'permutations distinctes',
               text:
-                '$\\dfrac{11!}{1! \\times 4! \\times 4! \\times 2!} = \\dfrac{39\\,916\\,800}{24 \\times 24 \\times 2} = 34\\,650$',
+                '$\\dfrac{11!}{1! \\times 4! \\times 4! \\times 2!}$ $= \\dfrac{39\\,916\\,800}{24 \\times 24 \\times 2} = 34\\,650$',
             },
             {
               tag: 'anagrammes',
@@ -1145,7 +1171,7 @@ export const analyseCombinatoire: ChapterContent = {
             {
               kind: 'para',
               text:
-                '$C_n^2 + n = \\dfrac{n(n-1)}{2} + \\dfrac{2n}{2} = \\dfrac{n(n-1)+2n}{2}$ — ' +
+                '$C_n^2 + n = \\dfrac{n(n-1)}{2} + \\dfrac{2n}{2}$ $= \\dfrac{n(n-1)+2n}{2}$ — ' +
                 '**définition de** $C_n^2$**, puis même dénominateur**.',
             },
             {
@@ -1287,8 +1313,8 @@ export const analyseCombinatoire: ChapterContent = {
             'Pour compter les objets qui ont **à la fois** deux propriétés, compte ceux qui en ' +
               'ratent au moins une, puis retire-les du total. Les objets qui ratent **les deux** ' +
               'sont comptés deux fois : il faut les rajouter une fois.',
-            'En formule : $N(A \\text{ et } B) = \\text{total} - N(\\text{pas } A) - N(\\text{pas } B) ' +
-              '+ N(\\text{ni } A \\text{ ni } B)$.',
+            'En formule : $N(A \\text{ et } B) = \\text{total} - N(\\text{pas } A)$ $- N(\\text{pas } B)$ ' +
+              '$+ N(\\text{ni } A \\text{ ni } B)$.',
           ],
         },
         {
@@ -1336,6 +1362,19 @@ export const analyseCombinatoire: ChapterContent = {
       number: 3,
       title: 'Binôme de Newton',
       kicker: "(a + b)ⁿ = ∑ Cₙᵏ · aⁿ⁻ᵏ · bᵏ — l'exposant de a décroît, celui de b croît",
+      titreCourt: 'Binôme de Newton',
+      partie: 'Le binôme et les problèmes',
+      essentiel: [
+        '$(a+b)^n = \\displaystyle\\sum_{k=0}^{n} C_n^k \\times a^{n-k} \\times b^k$, de terme général $T_{k+1} = C_n^k \\times a^{n-k} \\times b^k$.',
+        'Relation de Pascal $C_n^k = C_{n-1}^{k-1}+C_{n-1}^k$ ; symétrie $C_n^k = C_n^{n-k}$ ; la somme d\'une ligne vaut $2^n$.',
+        '$(1+\\varepsilon)^n \\approx 1+n\\varepsilon$ quand $n\\varepsilon$ est petit.',
+      ],
+      cartes: [
+        { question: 'Quel est le terme en $x^2$ de $(2x-1)^5$ ?', reponse: '$C_5^3 \\times (2x)^2 \\times (-1)^3 = -40x^2$.' },
+        { question: 'Que vaut $C_4^1 + C_4^2$ ?', reponse: '$C_5^2 = 10$ (relation de Pascal).' },
+        { question: 'Combien de parties possède un ensemble à 5 éléments ?', reponse: '$2^5 = 32$.' },
+        { question: 'Combien de chemins (droite ou haut) de A(0 ; 0) à B(4 ; 3) ?', reponse: '$C_7^3 = 35$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Binôme de Newton — formule, triangle de Pascal, terme précis, approximation', youtubeId: 'ZcnSsK93GQg' },
         {
@@ -1406,8 +1445,8 @@ export const analyseCombinatoire: ChapterContent = {
                 'Le nombre de mots à exactement $i$ lettres $b$ (et $4-i$ lettres $a$), c\'est ' +
                 'le nombre de façons de choisir les $i$ positions occupées par $b$ parmi les 4 ' +
                 "positions du mot — exactement $C_4^i$, sans besoin d'énumérer : 1, 4, 6, 4, 1 " +
-                'sont exactement $C_4^0$ à $C_4^4$. D\'où $(a+b)^4 = C_4^0a^4b^0 + C_4^1a^3b^1 + ' +
-                'C_4^2a^2b^2 + C_4^3a^1b^3 + C_4^4a^0b^4$.',
+                'sont exactement $C_4^0$ à $C_4^4$. D\'où $(a+b)^4 = C_4^0a^4b^0 + C_4^1a^3b^1$ ' +
+                '$+ C_4^2a^2b^2$ $+ C_4^3a^1b^3 + C_4^4a^0b^4$.',
             },
             {
               kind: 'para',
@@ -1443,7 +1482,7 @@ export const analyseCombinatoire: ChapterContent = {
             {
               kind: 'para',
               text:
-                '$(2x-1)^5 = 32x^5-80x^4+80x^3-40x^2+10x-1$. Vérification en $x=1$ : la somme des ' +
+                '$(2x-1)^5$ $= 32x^5-80x^4+80x^3$ $-40x^2+10x-1$. Vérification en $x=1$ : la somme des ' +
                 '6 termes doit redonner $(2-1)^5=1$, et $32-80+80-40+10-1=1$ ✓.',
             },
           ],
@@ -1500,8 +1539,8 @@ export const analyseCombinatoire: ChapterContent = {
             {
               kind: 'para',
               text:
-                '$C_{n-1}^{k-1}+C_{n-1}^k = \\dfrac{(n-1)!}{(k-1)!(n-k)!} + ' +
-                '\\dfrac{(n-1)!}{k!(n-1-k)!}$ — **définition de** $C_n^k$**, appliquée à** $n-1$.',
+                '$C_{n-1}^{k-1}+C_{n-1}^k = \\dfrac{(n-1)!}{(k-1)!(n-k)!}$ ' +
+                '$+ \\dfrac{(n-1)!}{k!(n-1-k)!}$ — **définition de** $C_n^k$**, appliquée à** $n-1$.',
             },
             {
               kind: 'para',
@@ -1512,8 +1551,8 @@ export const analyseCombinatoire: ChapterContent = {
             {
               kind: 'para',
               text:
-                '$= \\dfrac{(n-1) ! \\times (k+n-k)}{k!(n-k)!} = \\dfrac{(n-1)! \\times n}{k!(n-k)!} ' +
-                '= \\dfrac{n!}{k!(n-k)!}$ — **factorisation, puis** $(n-1)! \\times n = n!$.',
+                '$= \\dfrac{(n-1) ! \\times (k+n-k)}{k!(n-k)!}$ $= \\dfrac{(n-1)! \\times n}{k!(n-k)!}$ ' +
+                '$= \\dfrac{n!}{k!(n-k)!}$ — **factorisation, puis** $(n-1)! \\times n = n!$.',
             },
             {
               kind: 'para',
@@ -1717,7 +1756,7 @@ export const analyseCombinatoire: ChapterContent = {
             ],
             points: [
               { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'below' },
-              { x: 2, y: 1, label: 'P', tone: 'good', labelPos: 'below' },
+              { x: 2, y: 1, label: 'P', tone: 'good', labelPos: 'left' },
               { x: 4, y: 3, label: 'B', tone: 'ink', labelPos: 'above' },
             ],
             caption:
@@ -1767,7 +1806,7 @@ export const analyseCombinatoire: ChapterContent = {
             { tag: 'exposant de x', text: 'dans $T_{k+1}$, l\'exposant de $x$ est $5-k$ : $5-k=2$, soit $k=3$' },
             {
               tag: 'terme de rang 4',
-              text: '$T_4 = C_5^3 \\times (2x)^2 \\times (-1)^3 = 10 \\times 4x^2 \\times (-1) = -40x^2$',
+              text: '$T_4 = C_5^3 \\times (2x)^2 \\times (-1)^3$ $= 10 \\times 4x^2 \\times (-1) = -40x^2$',
             },
           ],
           result: { tag: 'conclusion', text: 'Le terme en $x^2$ est $-40x^2$ (coefficient $-40$).' },
@@ -1790,8 +1829,8 @@ export const analyseCombinatoire: ChapterContent = {
             {
               tag: 'terme général',
               text:
-                '$T_{k+1} = C_6^k \\,(x^2)^{6-k} \\left(-\\dfrac{2}{x}\\right)^k = C_6^k \\,(-2)^k\\, x^{12-2k-k} = ' +
-                'C_6^k \\,(-2)^k\\, x^{12-3k}$',
+                '$T_{k+1} = C_6^k \\,(x^2)^{6-k} \\left(-\\dfrac{2}{x}\\right)^k$, soit ' +
+                '$T_{k+1} = C_6^k \\,(-2)^k\\, x^{12-3k}$ (exposant de $x$ : $2(6-k)-k$)',
             },
             { tag: 'exposant de x nul', text: '$12-3k=0$, donc $k=4$ (entier entre 0 et 6 : il existe)' },
             { tag: 'valeur', text: '$T_5 = C_6^4 \\times (-2)^4 = 15 \\times 16 = 240$' },
@@ -1868,6 +1907,17 @@ export const analyseCombinatoire: ChapterContent = {
       number: 4,
       title: 'Dénombrement combinatoire pur : problèmes',
       kicker: 'identifier chaque étape, puis MULTIPLIER les étapes indépendantes',
+      titreCourt: 'Problèmes de dénombrement',
+      partie: 'Le binôme et les problèmes',
+      essentiel: [
+        'Identifie chaque étape, calcule son nombre de choix, puis **multiplie** les étapes indépendantes.',
+        'Pour une probabilité, compte des issues **équiprobables** : avec trois dés, 25 triplets ordonnés donnent 9 et 27 donnent 10.',
+      ],
+      cartes: [
+        { question: 'Combien de mains « carré » de 5 cartes dans un jeu de 32 cartes ?', reponse: '$(8 \\times C_4^4) \\times (7 \\times 4) = 224$.' },
+        { question: 'Avec trois dés, combien de triplets ordonnés donnent la somme 9 ? Et 10 ?', reponse: '25 et 27, sur $6^3 = 216$.' },
+        { question: 'Combien de réglages pour 3 curseurs à 4 positions chacun ?', reponse: '$4^3 = 64$ (base : les positions ; exposant : les curseurs).' },
+      ],
       blocks: [
         { kind: 'video', title: 'Dénombrement combinatoire pur : problèmes — mains de poker, sommes de trois dés, réemplois', youtubeId: 'OZA48JH9GUM' },
         {
@@ -1914,20 +1964,20 @@ export const analyseCombinatoire: ChapterContent = {
               kind: 'featureTable',
               headers: ['Catégorie', 'Calcul', 'Mains'],
               rows: [
-                ['carré (4 + 1)', '$(8 \\times C_4^4) \\times (7 \\times 4)$', '224'],
-                ['full (3 + 2)', '$(8 \\times C_4^3) \\times (7 \\times C_4^2)$', '1 344'],
-                ['brelan (3 + 1 + 1)', '$(8 \\times C_4^3) \\times (C_7^2 \\times 4^2)$', '10 752'],
-                ['deux paires (2 + 2 + 1)', '$(C_8^2 \\times (C_4^2)^2) \\times (6 \\times 4)$', '24 192'],
-                ['une paire (2 + 1 + 1 + 1)', '$(8 \\times C_4^2) \\times (C_7^3 \\times 4^3)$', '107 520'],
-                ['aucune hauteur répétée', '$C_8^5 \\times 4^5$', '57 344'],
+                ['carré', '$(8 \\times C_4^4) \\times (7 \\times 4)$', '$224$'],
+                ['full', '$(8 \\times C_4^3) \\times (7 \\times C_4^2)$', '$1344$'],
+                ['brelan', '$(8 \\times C_4^3) \\times (C_7^2 \\times 4^2)$', '$10\\,752$'],
+                ['deux paires', '$(C_8^2 \\times (C_4^2)^2) \\times (6 \\times 4)$', '$24\\,192$'],
+                ['une paire', '$(8 \\times C_4^2) \\times (C_7^3 \\times 4^3)$', '$107\\,520$'],
+                ['aucune hauteur répétée', '$C_8^5 \\times 4^5$', '$57\\,344$'],
               ],
             },
             {
               kind: 'para',
               text:
                 'Chaque main est dans une catégorie et une seule. Vérification : ' +
-                '$224 + 1344 + 10\\,752 + 24\\,192 + 107\\,520 + 57\\,344 = 201\\,376 = C_{32}^5$ — ' +
-                'le total de toutes les mains.',
+                '$224 + 1344 + 10\\,752$ $+\\,24\\,192 + 107\\,520$ $+\\,57\\,344 = 201\\,376$, ' +
+                'et $C_{32}^5 = 201\\,376$ : le total de toutes les mains.',
             },
           ],
         },
@@ -2127,7 +2177,7 @@ export const analyseCombinatoire: ChapterContent = {
             'et 2 objets. Combien de rangements sont possibles ?',
           steps: [
             { tag: 'groupes nommés de tailles fixées', text: 'même principe que des personnes réparties en groupes : la multinomiale' },
-            { tag: 'calcul', text: '$\\dfrac{12!}{6! \\times 4! \\times 2!} = C_{12}^6 \\times C_6^4 \\times C_2^2 = 924 \\times 15 \\times 1 = 13\\,860$' },
+            { tag: 'calcul', text: '$\\dfrac{12!}{6! \\times 4! \\times 2!}$ $= C_{12}^6 \\times C_6^4 \\times C_2^2$ $= 924 \\times 15 \\times 1 = 13\\,860$' },
           ],
           result: { tag: 'conclusion', text: '13 860 rangements.' },
         },
@@ -2175,6 +2225,17 @@ export const analyseCombinatoire: ChapterContent = {
       number: 5,
       title: 'Probabilité hypergéométrique et séquence exacte (tirage sans remise)',
       kicker: 'succès parmi les succès × échecs parmi les échecs ÷ tous les tirages — SANS remise',
+      titreCourt: 'Tirages sans remise',
+      partie: 'Des comptages aux probabilités',
+      essentiel: [
+        '$P(k) = \\dfrac{C_K^k \\times C_{N-K}^{n-k}}{C_N^n}$ pour un tirage **sans remise** ; le dénominateur est toujours $C_N^n$.',
+        'Une séquence précise se calcule par un produit de fractions ; la composition regroupe toutes les séquences qui y mènent.',
+      ],
+      cartes: [
+        { question: 'Lot de 20 pièces dont 6 défectueuses ; on en prélève 5 sans remise. $P$(exactement 2 défectueuses) ?', reponse: '$\\dfrac{C_6^2 \\times C_{14}^3}{C_{20}^5} = \\dfrac{5460}{15\\,504} \\approx 0{,}352$.' },
+        { question: 'Urne à 5 rouges et 5 bleues, 3 tirages sans remise : $P$(R, R, B dans cet ordre) ? Et $P$(2 R et 1 B) ?', reponse: '$\\dfrac{5}{36}$, puis $3 \\times \\dfrac{5}{36} = \\dfrac{5}{12}$.' },
+        { question: 'Probabilité de deviner l\'ordre exact de 4 lettres tirées sans remise parmi 9 ?', reponse: '$\\dfrac{1}{A_9^4} = \\dfrac{1}{3\\,024}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Probabilité hypergéométrique (tirage sans remise)', youtubeId: 'Kd667QJndTc' },
         {
@@ -2233,7 +2294,7 @@ export const analyseCombinatoire: ChapterContent = {
             { tag: 'paramètres', text: '$N=20$ pièces, $K=6$ défectueuses (les « succès »), $n=5$ prélevées, $k=2$' },
             {
               tag: 'formule',
-              text: '$P(2) = \\dfrac{C_6^2 \\times C_{14}^3}{C_{20}^5} = \\dfrac{15 \\times 364}{15\\,504} = \\dfrac{5460}{15\\,504}$',
+              text: '$P(2) = \\dfrac{C_6^2 \\times C_{14}^3}{C_{20}^5}$ $= \\dfrac{15 \\times 364}{15\\,504} = \\dfrac{5460}{15\\,504}$',
             },
           ],
           result: { tag: 'conclusion', text: '$P(2) = \\dfrac{5460}{15\\,504} \\approx 0{,}352$.' },
@@ -2255,7 +2316,7 @@ export const analyseCombinatoire: ChapterContent = {
           text:
             'Les 6 valeurs ($k=0$ à 5) couvrent tous les cas possibles ; la somme **exacte** ' +
             'des 6 fractions vaut $\\dfrac{15\\,504}{15\\,504}=1$. Ici, les arrondis à 4 décimales ' +
-            'donnent aussi $0{,}1291+0{,}3874+0{,}3522+0{,}1174+0{,}0135+0{,}0004=1{,}0000$ ; en ' +
+            'donnent aussi $0{,}1291+0{,}3874+0{,}3522$ $+\\,0{,}1174+0{,}0135+0{,}0004=1{,}0000$ ; en ' +
             "général, la somme d'arrondis peut s'écarter de 1 d'une unité au dernier chiffre, " +
             "sans que ce soit le signe d'une erreur.",
         },
@@ -2517,6 +2578,17 @@ export const analyseCombinatoire: ChapterContent = {
       number: 6,
       title: 'Probabilité binomiale (épreuves indépendantes)',
       kicker: 'P(X = k) = Cₙᵏ · pᵏ · (1 − p)ⁿ⁻ᵏ',
+      titreCourt: 'Loi binomiale',
+      partie: 'Des comptages aux probabilités',
+      essentiel: [
+        '$P(X=k) = C_n^k \\times p^k \\times (1-p)^{n-k}$ pour $n$ épreuves **indépendantes** de même probabilité de succès $p$.',
+        '« Exactement $k$ », « aucun » ou « tous » : un seul terme ; « au moins » ou « au plus » : une somme ou le complément, selon le nombre de termes.',
+      ],
+      cartes: [
+        { question: '$n = 6$, $p = 0{,}4$ : que vaut $P(X=2)$ ?', reponse: '$C_6^2 \\times 0{,}4^2 \\times 0{,}6^4 = 0{,}31104$.' },
+        { question: 'Comment calcule-t-on $P(X \\geq 1)$ le plus vite ?', reponse: '$1 - P(X=0) = 1 - (1-p)^n$.' },
+        { question: 'Combien de chemins de l\'arbre comptent exactement $k$ succès en $n$ épreuves ?', reponse: '$N_k = C_n^k$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Probabilité binomiale et séquence exacte', youtubeId: '1sdKwvmrzlE' },
         {
@@ -2579,7 +2651,7 @@ export const analyseCombinatoire: ChapterContent = {
             { tag: 'paramètres', text: '$n=6$ épreuves indépendantes, $p=0{,}4$, $k=2$' },
             {
               tag: 'formule',
-              text: '$P(X=2) = C_6^2 \\times 0{,}4^2 \\times 0{,}6^4 = 15 \\times 0{,}16 \\times 0{,}1296$',
+              text: '$P(X=2) = C_6^2 \\times 0{,}4^2 \\times 0{,}6^4$ $= 15 \\times 0{,}16 \\times 0{,}1296$',
             },
           ],
           result: { tag: 'conclusion', text: '$P(X=2) = 0{,}31104$.' },
@@ -2643,11 +2715,11 @@ export const analyseCombinatoire: ChapterContent = {
             'Même joueuse (6 lancers, $p=0{,}4$). Calcule la probabilité qu\'elle réussisse au moins ' +
             '1 lancer, puis au plus 5, puis au moins 4, en choisissant chaque fois la stratégie la plus courte.',
           steps: [
-            { tag: 'au moins 1 : complément de « aucun »', text: '$1-P(X=0) = 1-0{,}046656 = 0{,}953344$' },
-            { tag: 'au plus 5 : complément de « tous »', text: '$1-P(X=6) = 1-0{,}004096 = 0{,}995904$' },
+            { tag: 'au moins 1 : complément de « aucun »', text: '$1-P(X=0) = 1-0{,}046656$ $= 0{,}953344$' },
+            { tag: 'au plus 5 : complément de « tous »', text: '$1-P(X=6) = 1-0{,}004096$ $= 0{,}995904$' },
             {
               tag: 'au moins 4 : somme de 3 termes (le complément en aurait 4)',
-              text: '$P(4)+P(5)+P(6) = 0{,}13824+0{,}036864+0{,}004096 = 0{,}1792$',
+              text: '$P(4)+P(5)+P(6)$ $= 0{,}13824+0{,}036864+0{,}004096$ $= 0{,}1792$',
             },
           ],
           result: { tag: 'conclusion', text: '$0{,}953344$, $0{,}995904$ et $0{,}1792$.' },
@@ -2747,7 +2819,7 @@ export const analyseCombinatoire: ChapterContent = {
         title: 'Factorielle, arrangements, combinaisons',
         formulas: [
           { text: '$n! = n \\times (n-1) \\times \\ldots \\times 1$', condition: '$0!=1$' },
-          { text: '$A_n^p = \\dfrac{n!}{(n-p)!} = n \\times (n-1) \\times \\ldots \\times (n-p+1)$', condition: 'choisir $p$ parmi $n$ ET ordonner' },
+          { text: '$A_n^p = \\dfrac{n!}{(n-p)!}$ $= n \\times (n-1) \\times \\ldots \\times (n-p+1)$', condition: 'choisir $p$ parmi $n$ ET ordonner' },
           { text: '$C_n^p = \\dfrac{n!}{p!\\,(n-p)!} = \\dfrac{A_n^p}{p!}$', condition: 'choisir $p$ parmi $n$ seulement' },
           { text: 'symétrie : $C_n^p = C_n^{n-p}$', condition: 'garder $p$ éléments, c\'est en laisser $n-p$' },
           { text: '$\\dfrac{(n+1)!}{(n-1)!} = n(n+1)$', condition: 'simplifier un quotient de factorielles' },
@@ -2793,7 +2865,7 @@ export const analyseCombinatoire: ChapterContent = {
           { text: 'exclusion : total $-$ (les deux ensemble)' },
           { text: 'couple indissociable : (les deux ensemble) $+$ (les deux absents)' },
           { text: 'au moins un : total $-$ aucun', condition: 'complément' },
-          { text: '$N(A \\text{ et } B) = \\text{total} - N(\\text{pas } A) - N(\\text{pas } B) + N(\\text{ni } A \\text{ ni } B)$', condition: 'inclusion-exclusion' },
+          { text: '$N(A \\text{ et } B) = \\text{total} - N(\\text{pas } A)$ $- N(\\text{pas } B) + N(\\text{ni } A \\text{ ni } B)$', condition: 'inclusion-exclusion' },
           { text: 'bloc : (rangements du bloc et des autres) $\\times$ (ordres dans le bloc)', condition: 'éléments côte à côte' },
         ],
       },
