@@ -35,6 +35,7 @@ function lignesDessin(e: E): LigneCalcul[] {
 }
 
 const DISPOSITION_TEXTE = { concourantes: "concourantes", paralleles: "parallèles", aucune: "ni concourantes ni parallèles" } as const;
+const DISPOSITION_VERBE = { concourantes: "sont concourantes", paralleles: "sont parallèles", aucune: "ne sont ni concourantes ni parallèles" } as const;
 
 export function correctionDetailleeRealiteIllusion(e: E): EtapeCorrection[] {
   const existe = e.verdict === "existe";
@@ -50,7 +51,7 @@ export function correctionDetailleeRealiteIllusion(e: E): EtapeCorrection[] {
 
     utilise("b", [T(COURS_CAVALIERE)]),
     calcul("b", lignesDessin(e)),
-    { ...resultat("b", [T(`${constatDessin(e)} Sur le dessin, (AD), (BE) et (CF) sont ${DISPOSITION_TEXTE[e.disposition]}.`)]), figureHtml: figureCorrige(figureRI(e, "papier", 2)) },
+    { ...resultat("b", [T(`${constatDessin(e)} Sur le dessin, (AD), (BE) et (CF) ${DISPOSITION_VERBE[e.disposition]}.`)]), figureHtml: figureCorrige(figureRI(e, "papier", 2)) },
     piege("b", [T("Juger à l'œil sans prolonger : il faut prolonger les trois arêtes à la règle et vérifier que la troisième passe par le point de rencontre des deux autres, ou qu'elle a la même direction.")]),
 
     utilise("c", [T(`${COURS_TROIS_PLANS} Une projection parallèle garde ces droites concourantes ou parallèles sur le dessin.`)]),
