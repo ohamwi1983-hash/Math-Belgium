@@ -1006,4 +1006,20 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     consigne: (g) => `Chaque courbe ci-dessous représente la fonction f indiquée, ${g.ou}. ${g.s}. Pour chaque courbe, ${minusculeInitiale(g.q ?? "")}`,
     ligne: (g) => g.f ?? "",
   }),
+  // 6e ch. 7, lot H (6gen100–6gen104) : la situation (ou l'équation, l'égalité, le mot) est la ligne.
+  "6gen100": simple(String.raw`(?<ligne>[^\n]+)\nReconnais le type de groupement en répondant aux trois questions du cours .+, puis calcule le nombre demandé\.`, "Pour chaque situation, reconnais le type de groupement en répondant aux trois questions du cours (l'ordre compte-t-il ? la répétition est-elle permise ? tous les éléments sont-ils utilisés ?), puis calcule le nombre demandé."),
+  "6gen101": { formes: [{ motif: re(String.raw`Résous l'équation (?<ligne>${M}), d'inconnue naturelle \$(?<x>[nk])\$\.`), consigne: (g) => `Résous chaque équation, d'inconnue naturelle $${g.x}$.` }] },
+  // 6gen102 : seule la variante « identité » (une égalité à juger) se regroupe.
+  "6gen102": simple(String.raw`On considère l'égalité (?<ligne>${M})\.\nCette égalité est-elle vraie ou fausse \? Justifie sans calculatrice, par une propriété du cours\.`, "Chaque égalité est-elle vraie ou fausse ? Justifie sans calculatrice, par une propriété du cours."),
+  // 6gen103 : seule la variante « anagrammes » se regroupe (« le mot … » garde ses capitales sur papier).
+  "6gen103": {
+    formes: [
+      {
+        motif: re(String.raw`Une anagramme d'un mot [^\n]+\nCombien d'anagrammes le mot (?<w>[A-Z]+) a-t-il \? Justifie ton calcul\.`),
+        consigne: "Une anagramme d'un mot est un mot (ayant un sens ou non) écrit avec toutes ses lettres et différent de lui. Combien d'anagrammes chaque mot a-t-il ? Justifie tes calculs.",
+        ligne: (g) => `le mot ${g.w}`,
+      },
+    ],
+  },
+  "6gen104": simple(String.raw`(?<ligne>[^\n]+)\nCalcule ce nombre en justifiant par la méthode des étoiles et des barres\.`, "Dans chaque situation, calcule le nombre demandé en justifiant par la méthode des étoiles et des barres."),
 };

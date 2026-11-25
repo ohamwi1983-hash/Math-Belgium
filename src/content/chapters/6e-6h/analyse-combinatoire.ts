@@ -512,6 +512,60 @@ export const analyseCombinatoire: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 43. Dénombrement fondamental et arrangements »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Quelle formule ? Reconnaître le groupement',
+          generatorId: '6gen100',
+          description: [
+            "Avant de calculer, reconnais le groupement : l'ordre compte-t-il ? la répétition est-elle permise ? tous les éléments sont-ils utilisés ? Arrangement, combinaison, permutation (simple, avec répétition, circulaire) ou répartition multinomiale, puis le calcul.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 100. Quelle formule ? Reconnaître le groupement »',
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode — résoudre une équation combinatoire',
+          items: [
+            'Réécris chaque factorielle, $A_n^k$ ou $C_n^k$ comme un produit de facteurs : ' +
+              '$\\dfrac{(n+1)!}{(n-1)!}=(n+1)n$, $A_n^2=n(n-1)$, $C_n^2=\\dfrac{n(n-1)}{2}$. ' +
+              "L'équation devient une équation du second degré en $n$.",
+            'Résous cette équation (tout dans un membre, discriminant).',
+            'Ne garde que les solutions **naturelles** pour lesquelles l\'expression de départ existe ' +
+              '($n\\ge k$) : une solution négative est rejetée. Par exemple, $A_n^2=56$ donne ' +
+              '$n^2-n-56=0$, donc $n=8$ ou $n=-7$ : seul $n=8$ convient.',
+            'Si $C_n^p=C_n^q$ avec $p\\neq q$, la symétrie $C_n^k=C_n^{n-k}$ impose $p+q=n$ : ' +
+              'par exemple, $C_n^3=C_n^5$ donne $n=8$.',
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Factorielles et équations combinatoires',
+          generatorId: '6gen101',
+          description: [
+            'Simplifie un quotient de factorielles, résous Aₙ² = 56, Cₙ² = 45 ou Cₙ² + n = 21 en rejetant la solution négative, et utilise la symétrie pour Cₙ³ = Cₙ⁵.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 101. Factorielles et équations combinatoires »',
+        },
+        {
+          kind: 'astuce',
+          label: 'Au moins un objet par case',
+          text:
+            'Pour répartir $p$ objets identiques dans $n$ cases avec **au moins un** objet par case, ' +
+            'place d\'abord un objet dans chaque case : il en reste $p-n$, à répartir librement. Le ' +
+            'nombre de répartitions vaut donc $\\Gamma_n^{p-n}=C_{p-1}^{n-1}$. Par exemple, 10 bonbons ' +
+            'identiques pour 4 enfants, chacun au moins un : $\\Gamma_4^6=C_9^3=84$ façons.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Étoiles et barres',
+          generatorId: '6gen104',
+          description: [
+            'Boules de glace, bonbons dans des boîtes, votes, solutions entières de x₁ + … + xₙ = p : code la répartition par des étoiles et des barres, puis compte avec Γₙᵖ = Cₙ₊ₚ₋₁ᵖ, y compris avec au moins un objet par case.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 104. Étoiles et barres »',
+        },
       ],
     },
 
@@ -843,6 +897,16 @@ export const analyseCombinatoire: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 44. Dénombrement combiné et sélections contraintes »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Anagrammes et contraintes',
+          generatorId: '6gen103',
+          description: [
+            "Mots réels à lettres répétées : nombre d'anagrammes (sans oublier le mot lui-même), mots qui commencent par une lettre, voyelles groupées en un bloc, deux lettres identiques jamais côte à côte (par le complément).",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 103. Anagrammes et contraintes »',
         },
       ],
     },
@@ -1190,6 +1254,16 @@ export const analyseCombinatoire: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 45. Binôme de Newton »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Triangle de Pascal et propriétés',
+          generatorId: '6gen102',
+          description: [
+            "Complète une ligne du triangle, applique la symétrie et la relation de Pascal, compte les parties d'un ensemble (2ⁿ, 2ⁿ − 1…) et juge si une égalité entre coefficients est vraie ou fausse.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 102. Triangle de Pascal et propriétés »',
         },
       ],
     },

@@ -663,6 +663,17 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   toujours vraie/fausse), `forme` 5gen11 (mode) et 5gen13 (type de 2ᵉ partie). Niveau et durée
   diffèrent d'une technique à l'autre du groupe (directe 10,6 min, produit 15,2) : sans effet, la
   copie d'évaluation n'imprime ni l'un ni l'autre.
+- **6e ch. 7, lot H (6gen100–6gen104, nouveaux, notés)** : socle d'écrans du 5e (`AppEcransTrigo`, sans
+  modification ; `bonneOption` = choix jugés ✗ / ✓, `piegeChoixRevele`, `aidesChoixDeuxNiveaux`, `aReprendre` pour
+  une expression encore écrite avec « ! » / C / A, `nombrePuces` fixe en 6gen100). Lecture commune
+  `moteur6e/lectureCombinatoireLotH.ts` (évaluateur EXACT en rationnels BigInt : milliers « 34 650 », « × · * : ÷ »,
+  « − », « 5! », Cₙᵏ / Aₙᵏ / Γ en « C(10;3) », « C_10^3 », « C₁₀³ », touches « 10C3 » / « 10P3 », exposants ¹²³⁴…,
+  préfixe « N = », unité de comptage finale ; « 12 34 » et « 3,5 » illisibles ; listes « 8 ; −7 » / « n = 8 ou n = −7 » ;
+  polynômes en n comparés en 7 points) — la réponse peut être donnée sous forme de CALCUL (jamais de grand nombre à
+  recopier). Écritures `ui6e/nombresCombinatoireLotH.ts` (`mil` « 34\,650 », `CL`, `AL`, `GL`, multinomiale) ; mots
+  réels partagés `core6e/motsLotH.ts` (dont MISSISSIPPI, décision du 18/11). Aucune notation clavier dans un texte
+  visible (pas de « C(n ; k) » ni de « ^ » dans les consignes, messages ou boutons : seul le raccourci « ! »). Détail :
+  section « 6e ch. 7, lot H — 6gen100–6gen104 » plus bas.
 - **6e ch. 6, lot G — 6gen160–6gen161 (nouveaux, notés, corrigé « comme au tableau »)** : socle d'écrans du
   5e (`AppEcransTrigo`, sans modification : `bonneOption` → choix jugés ✗ / ✓, `piegeChoixRevele`,
   `aidesChoixDeuxNiveaux`) ; lecture commune `moteur6e/lectureProbaLotG.ts` (fraction, décimal, « % », préfixe
@@ -2158,6 +2169,51 @@ variante) : 6gen156 niv. 4 (réfraction, échelle) / 5 (réflexion, angle de vue
 « ≈ » en degrés convertie, `\limits` ignoré, variables indicées `\theta_2`) : 0 égalité fausse. Documents
 réels (`construirePlan` 2 séries + aménagée + feuille, calculatrice interdite / autorisée ; Word du
 corrigé) : 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error`.
+## 6e ch. 7, lot H — 6gen100–6gen104 (nouveaux, notés)
+
+Corrigés `generateurs6e/{quelleFormule,equationsCombinatoires,trianglePascal,anagrammesContraintes,etoilesBarres}/corrigeDetaille.ts`,
+une lettre par écran, partagés par l'appli (`CorrigeDetailleEcran`) et l'adaptateur ; textes `ui6e/format*.ts`,
+vérifications `moteur6e/verification*.ts`, modèles `core6e/*.ts`, définitions d'écrans `ui6e/definition*.ts`.
+- **6gen100 « Quelle formule ? »** (§ 1, Appliquer) : type tiré à 1/7 AVANT le contexte (arrangement, combinaison,
+  permutation, arrangement avec répétition, combinaison avec répétition, permutation avec répétition — qui
+  réunit la répartition multinomiale, même formule —, permutation circulaire ; 23 contextes : podium, bureau, codes,
+  comité, cartes, pizza, poignées de main, rangements, codes à répétition, urne avec remise, glaces, dominos, dés
+  identiques, mots réels, boules, groupes nommés, bilan d'une saison, table, ronde, bracelet = collier /2). Écrans :
+  les trois questions du cours (oui / non ; la 3ᵉ seulement si l'ordre compte — 5 puces fixes), le type (7 options),
+  le calcul. Raison par contexte (message d'un choix faux, corrigé) et « test » concret en aide 2. Variantes = types
+  → `groupe_type` (groupe à verdict) ; profil sans `forme` ni `calcul` ; critères FIXES (3 étapes, méthode 1,
+  `sansCharge`) : 3 · 8 min pour tous les types (le nombre d'écrans ne trahit pas le verdict).
+- **6gen101 « Factorielles et équations combinatoires »** (§ 1, Appliquer) : (n + s)!/(n + s − 2)!, Aₙ², Cₙ²,
+  Cₙ² + n = V (solution m tirée d'abord, l'autre racine toujours négative) : polynôme (`aReprendre` si « ! » / C / A
+  restent), deux racines (ordre libre), valeur admissible ; symétrie Cₙᵖ = Cₙ^q (n = p + q) ou C_N^k = C_N^{k+d}
+  (2k + d = N) : propriété (choix fermé, ordre des options propre à l'instance) puis solution. Méthode 0 / piège 1
+  (solution à rejeter), symétrie méthode 1 / piège 0 : 3 · 8 min et 2 · 6 min.
+- **6gen102 « Triangle de Pascal et propriétés »** (§ 3, Connaître) : `ligne` (lignes n et n + 1 en SVG sans
+  identifiant, « ? » en k et n + 1 − k ; figure complétée en `figureHtml` du corrigé), `symetrie` (valeurs données :
+  Cₙⁿ⁻ᵏ et Cₙ₊₁ᵏ⁺¹), `parties` (2ⁿ puis au moins un / au moins deux / pas tous), `identite` (propriété puis vrai /
+  faux, verdict 50/50 tiré AVANT, forme fausse rejetée si sa valeur coïncide). `calcul: 'exacte'` pour ligne,
+  symétrie, identité (touche nCr ; consignes « sans calculatrice ») ; parties sans `calcul`. Niveaux 1–2, 6–8 min.
+- **6gen103 « Anagrammes et contraintes »** (§ 2, Appliquer) : 18 mots réels ; anagrammes (permutations puis − 1),
+  commence par (lettre répétée une fois sur deux : piège), voyelles groupées (mots sans Y : ordre interne, bloc +
+  consonnes, produit), deux lettres identiques jamais côte à côte (total, collées, complément). Proportion
+  vérifiée dans le corrigé (total × nX / n). Niveaux 2–3, 6–8 min.
+- **6gen104 « Étoiles et barres »** (§ 1, Appliquer) : glaces / viennoiseries / dés identiques, bonbons / votes /
+  billes, x₁ + … + xₙ = p, au moins un par case (piège : niveau 4) ; écrans n et p (p − n pour « au moins un »),
+  symboles et barres, Γₙᵖ = C₍ₙ₊ₚ₋₁₎ⁿ⁻¹ ; n ≠ p libre (inversion visible). Niveaux 3–4, 8 min.
+- **Papier** : énoncé = situation (ou équation, égalité, mot) + consigne globale ; aucun cas particulier.
+  Regroupement a), b), c) (`REGROUPEMENTS`) : 6gen100 (« Pour chaque situation, reconnais le type… »), 6gen101
+  (« Résous chaque équation, d'inconnue naturelle n / k. »), 6gen102 identité seulement, 6gen103 anagrammes
+  seulement (ligne « le mot X » : capitales gardées par `majusculesPapier`), 6gen104 ; écartés : 6gen102 ligne
+  (figure), symétrie et parties (données propres à la consigne), 6gen103 autres contraintes (consigne propre).
+- **Mesures** : collecteur (`…/scratchpad/h1-6e7/collecteur.ts`, réponses recalculées indépendamment — énumération
+  des mots ≤ 7 lettres, des solutions de x₁ + … + xₙ = p, des parties, des dominos ; écritures justes variées, fausses,
+  illisibles, pièges) 250 tirages par variante : 0 anomalie, ≈ 53 400 relations du corrigé évaluées, 0 fausse ;
+  types 6gen100 250 × 7, verdicts 6gen102 113 / 137 ; plans réels 30 × 2 séries (interdite, autorisée) : structure
+  B = A 30 / 30, 0 instance identique, `groupe_type` B ≠ A 30 / 30 ; `?code=` 96 / 96 ; iPhone 13 (justes,
+  fausses, illisibles, aides, nouvel exercice à champs vides) ≈ 420 contrôles, scrollWidth 390, 0 erreur console ;
+  documents réels (évaluation 2 séries + aménagée + corrigé + grille + feuille + Word copie / corrigé) : 0
+  débordement à 680 / 820 / 1 280 px, 0 `.katex-error`.
+
 ## 6e ch. 6, lot G2 — 6gen162–6gen163 (nouveaux, notés)
 
 Corrigés `generateurs6e/{probabilitesGeometriques,detectiveProbabilites}/corrigeDetaille.ts`, une lettre par

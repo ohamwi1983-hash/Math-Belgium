@@ -162,6 +162,19 @@ paths:
   `featureTable` sont rendus en texte BRUT — y écrire `$...$` affiche les dollars littéralement (66
   occurrences dans le premier jet de ce chapitre, détectées seulement au rendu navigateur, pas par
   `tsc`). Y mettre des caractères Unicode (2ⁿ, x², ×, −), jamais du LaTeX.
+  **Lot H, première moitié (6gen100–6gen104, nouveaux générateurs)** : cartes 6gen100 « Quelle formule ?
+  Reconnaître le groupement », 6gen101 « Factorielles et équations combinatoires » et 6gen104 « Étoiles et
+  barres » en FIN de § 1 (après 6gen43), 6gen103 « Anagrammes et contraintes » en fin de § 2 (après 6gen44),
+  6gen102 « Triangle de Pascal et propriétés » en fin de § 3 (après 6gen45). Deux courts blocs de cours, juste
+  avant leur carte (le cours ne les traitait pas) : `methode` « Méthode — résoudre une équation combinatoire »
+  (réécrire en polynôme, résoudre, garder la solution naturelle ; symétrie Cₙᵖ = Cₙ^q ⇒ n = p + q) avant
+  6gen101, `astuce` « Au moins un objet par case » (Γₙ^{p−n} = C₍ₚ₋₁₎ⁿ⁻¹, 10 bonbons / 4 enfants : 84) avant
+  6gen104 ; aucun `exemple` ajouté (rien dans `ENONCES_DEMONSTRATION`). Le reste du cours (complément, blocs,
+  2ⁿ parties, étoiles et barres) est écrit par l'agent du cours (lot F). Registres (`registry.ts`,
+  `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts`, processus 2 / 2 / 1 / 2 / 2,
+  sections `denombrementfondamental`, `denombrementfondamental`, `binomenewton`, `denombrementcombine`,
+  `denombrementfondamental`). Descriptions de carte en Unicode (Aₙ², Γₙᵖ, x₁), jamais de `$…$`. Détail :
+  `.claude/rules/feuilles-evaluations.md`, « 6e ch. 7, lot H — 6gen100–6gen104 ».
 
 - **6e (6h), Chapitre 6 — corrigé « comme au tableau » et niveaux (6gen30–33, 6gen74–76)** : corrigés détaillés
   typés partagés écran / papier (`generateurs6e/*/corrigeDetaille.ts`, brique `ui6e/corrigeProbabilites.ts`),
