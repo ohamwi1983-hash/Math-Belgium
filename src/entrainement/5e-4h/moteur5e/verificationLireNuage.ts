@@ -28,12 +28,15 @@ export function piege(e: E, p: PhaseLireNuage, valeurs: string[]): Frag[] | null
     if (e.forme === "decolle" && v === "affine") return [tx("Le nuage monte de plus en plus vite : la pente de la fin est bien plus grande que celle du début, ce n'est pas une droite.")];
     if (e.forme === "aucune") return [tx("Les points sont dispersés sans aucune allure régulière : on ne peut ajuster aucune courbe.")];
     if (e.forme === "affine" && v !== "aucune") return [tx("Les points restent proches d'un même trait droit, d'un bout à l'autre du nuage.")];
-    return null;
+    if (v === "aucune") return [tx("Les points suivent une allure régulière : il y a bien une relation entre x et y.")];
+    if (e.forme === "arc") return [tx("Le nuage monte puis redescend (ou l'inverse) : une exponentielle ne change jamais de sens de variation.")];
+    if (e.forme === "decolle") return [tx("Le nuage ne redescend pas : il monte de plus en plus vite, c'est l'allure d'une exponentielle.")];
+    return [tx("Regarde l'allure générale du nuage, d'un bout à l'autre.")];
   }
   if (p === "sens") {
     if (e.sens === "montePuisDescend") return [tx("Regarde le nuage en entier : il change de sens en son milieu.")];
     if (e.sens === "aucun") return [tx("Sans forme, le nuage n'a aucune tendance.")];
-    return null;
+    return [tx(`Parcours le nuage de gauche à droite : dans l'ensemble, il ${e.sens === "croissant" ? "monte" : "descend"}.`)];
   }
   if (p === "sensCorr") return [tx("Le nuage " + (e.positif ? "monte" : "descend") + " de gauche à droite : la corrélation est " + (e.positif ? "positive." : "négative."))];
   if (p === "intensite") {

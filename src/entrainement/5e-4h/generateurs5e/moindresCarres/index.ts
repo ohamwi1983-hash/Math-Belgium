@@ -45,13 +45,13 @@ function construireCalculatrice(): ExerciceMoindresCarres {
     const xmax = Math.max(...xs);
     const e = xmax - xmin;
     const x0 = arrondi(xmin + e * (-0.1 + 1.2 * Math.random()), c.dx);
-    if (xs.some((x) => Math.abs(x - x0) < e / (3 * n)) || a * x0 + b <= 0) continue;
+    if (x0 < 0 || xs.some((x) => Math.abs(x - x0) < e / (3 * n)) || a * x0 + b <= 0) continue;
     const ys = points.map((p) => p.y);
     const ymin = Math.min(...ys);
     const ymax = Math.max(...ys);
     const y0 = arrondi(ymin + (ymax - ymin) * (0.15 + 0.7 * Math.random()), c.dy);
     if (ys.includes(y0)) continue;
-    return { variante: "calculatrice", contexteId: c.id, points, dx: c.dx, dy: c.dy, G, a, b, sXY, sX2, da: decimalesPente(a), db: 2, dp: Math.max(1, c.dy), dpx: c.dx + 1, x0, y0 };
+    return { variante: "calculatrice", contexteId: c.id, points, dx: c.dx, dy: c.dy, G, a, b, sXY, sX2, da: decimalesPente(a), db: 2, dp: c.dy === 0 ? 0 : Math.max(1, c.dy), dpx: c.dx + 1, x0, y0 };
   }
 }
 

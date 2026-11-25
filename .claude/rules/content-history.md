@@ -6434,3 +6434,23 @@ démonstrations ne sont pas numérotées dans le cours).
 **Vérifié** : `tsc` ; `verifier-enonces-evaluation` (chapitre strict) ; page à 390 / 1 280 px, clair / sombre, carte,
 6 étapes (tiroirs ouverts, « Tout montrer ») et Réviser : 0 `$`, 0 astérisque, 0 notation clavier, 0 `NaN`, 0
 `.katex-error`, 0 débordement, 0 erreur console ; aucune formule plus large que son bloc à 390 px.
+
+## 5e (4h), Chapitre 6 — Statistique à deux variables : générateurs 5gen76, 5gen77, 5gen36–5gen38 (lot H1, 25/11/2026)
+
+Cinq nouveaux générateurs notés sur le socle `AppEcransTrigo`, avec adaptateur papier complet (détail :
+`.claude/rules/feuilles-evaluations.md`, section « 5e ch. 6, lot H1 — 5gen76, 5gen77, 5gen36–5gen38 »). Cartes
+`entrainement` en FIN des sections du cours réel (fusionné depuis la branche commune : lot AF + ateliers du lot G) :
+5gen77 « Point moyen et valeurs manquantes » à la fin du § 1 (`nuage-point-moyen`), 5gen76 « Lire un nuage de points » à
+la fin du § 2 (`ajustement`), 5gen36 « Droite de Mayer » § 3 (`mayer`), 5gen37 « Droite des moindres carrés » § 4
+(`moindres-carres`), 5gen38 « Covariance et coefficient de corrélation » § 5 (`correlation`). Aucun bloc de cours
+ajouté. Registres par ajout (`registry.ts` : `CH_5E_STATISTIQUE_DEUX_VARIABLES` ; `evaluationAdapterRegistry.ts` avec
+`versionPapier` ; `evaluationPayload.ts`, processus 2 / 1 / 2 / 2 / 2 ; `regroupementsPapier.ts` pour 5gen76).
+Alignement sur le cours : convention de Mayer pour n impair (k puis k + 1 données), σ divisé par n (Sx signalé comme
+piège), seuils de r du cours (« très forte » 0,98 ≤ |r| < 1, « parfaite » |r| = 1), a = Cov/V(x), touches TI-30XB
+« 2-Var Stats », série de l'espérance de vie (Banque mondiale) reprise ; chaque ligne « Ce qu'on utilise » des corrigés
+renvoie à sa section (« (cours, § n) »). Corrections trouvées pendant la vérification : zéros finaux des entiers
+retirés (« 40 » → « 4 ») dans `nL`, boucle infinie des séries « très forte » (seuil de rejet trop large), arc du
+nuage de sens inversé, pas de 2,5 de la grue arrondi à l'affichage (pas de 5), « +0 » et « −−0,4 » dans les
+équations, prévision de x négative (série de l'espérance de vie), écran « associer » de 5gen76 : la planche des
+quatre nuages était illisible sous le bandeau replié (nuage de l'écran seul, en grand), points posés sur un axe ou sur
+la brisure (marges), tableau de 9 colonnes à en-tête long qui débordait dans l'aménagée (coupé en deux blocs).

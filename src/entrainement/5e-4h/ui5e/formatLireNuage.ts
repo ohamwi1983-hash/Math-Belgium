@@ -42,7 +42,8 @@ function unNuage(n: NuageGenere, avecModele: boolean, petit: boolean, numero?: s
     largeur: petit ? 170 : 320,
     hauteur: petit ? 140 : 230,
     numero,
-    fenetre: { xmin: 0, xmax: 10.5, ymin: Math.min(0, ...n.points.map((q) => q.y - 0.5)), ymax: Math.max(10, ...n.points.map((q) => q.y + 0.5)) },
+    // Marge d'une demi-unité : aucun point posé sur un axe (figures sans graduations).
+    fenetre: { xmin: -0.5, xmax: 10.5, ymin: Math.min(-0.5, ...n.points.map((q) => q.y - 0.5)), ymax: Math.max(10, ...n.points.map((q) => q.y + 0.5)) },
     courbes: avecModele ? courbeModele(n) : [],
   });
 }
@@ -51,6 +52,12 @@ function unNuage(n: NuageGenere, avecModele: boolean, petit: boolean, numero?: s
 export function figureEnonce(e: E): string {
   if (e.variante !== "associer") return unNuage(e.nuages[0]!, false, false);
   return planche(e.nuages.map((n, i) => unNuage(n, false, true, `${i + 1}`)));
+}
+
+/** Écran « associer » : le nuage de l'écran seul, en grand et numéroté (la planche des quatre nuages, trop
+ * petite sous le bandeau replié, reste celle du papier). */
+export function figureNuageSeul(e: E, i: number): string {
+  return unNuage(e.nuages[i]!, false, false, `${i + 1}`);
 }
 
 /** Corrigé : le même nuage avec sa courbe d'ajustement (droite des moindres carrés, parabole, exponentielle). */
@@ -115,13 +122,16 @@ export const libelle = (_e: E, p: PhaseLireNuage): string => {
   return `Nuage ${indiceNuage(p) + 1}`;
 };
 
-export function consigneGenerale(e: E): Frag[] {
+/** Consigne générale ; `papier` : la planche des quatre nuages est sous l'énoncé (à l'écran, un nuage par écran). */
+export function consigneGenerale(e: E, papier = false): Frag[] {
   if (e.variante === "forme") return [tx("Observe le nuage de points ci-dessous (une série statistique à deux variables x et y).")];
   if (e.variante === "intensite") return [tx("Observe le nuage de points ci-dessous : ses points sont à peu près alignés, un ajustement affine est justifié.")];
+  const valeurs = e.valeursR!.flatMap((v, i) => [...(i > 0 ? [tx(i === 3 ? " et " : ", ")] : []), lx(rL(v))]);
+  if (papier) return [tx("Voici quatre nuages de points, numérotés de 1 à 4, et quatre coefficients de corrélation : "), ...valeurs, tx(".")];
   return [
-    tx("Voici quatre nuages de points, numérotés de 1 à 4, et quatre coefficients de corrélation : "),
-    ...e.valeursR!.flatMap((v, i) => [...(i > 0 ? [tx(i === 3 ? " et " : ", ")] : []), lx(rL(v))]),
-    tx("."),
+    tx("Quatre nuages de points, numérotés de 1 à 4, ont pour coefficients de corrélation, dans le désordre, "),
+    ...valeurs,
+    tx(". Chaque écran montre un de ces nuages."),
   ];
 }
 

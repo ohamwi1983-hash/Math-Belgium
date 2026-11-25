@@ -66,7 +66,7 @@ function nuageArc(ouvertVersLeBas: boolean): NuageGenere {
     const x = abscisses(n);
     const h = 4 + 2 * Math.random();
     const A = 2.2 + Math.random();
-    const s = ouvertVersLeBas ? -1 : 1;
+    const s = ouvertVersLeBas ? 1 : -1;
     const pts = arrondir(x.map((v) => ({ x: v, y: 5 + s * (A - 0.064 * A * (v - h) ** 2) + 0.25 * normale() })));
     const ajust = ajustementSecondDegre(pts);
     const r = correlation(pts);

@@ -2,7 +2,7 @@ import type { EtapeCorrection } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExerciceCorrelation } from "../../core5e/covarianceCorrelation";
 import { arrondi, decimales, net, NOM_CLASSE, sommesEcarts } from "../../core5e/stat2vLotH1";
-import { nL, parL } from "../../ui5e/ecrituresStat2vLotH1";
+import { avecRenvoiCours, nL, parL } from "../../ui5e/ecrituresStat2vLotH1";
 import { figureCorrige, n, reponse, sxEch } from "../../ui5e/formatCovarianceCorrelation";
 
 /**
@@ -78,7 +78,7 @@ function calculatrice(e: E): EtapeCorrection[] {
 }
 
 export function correctionDetailleeCorrelation(e: E): EtapeCorrection[] {
-  return e.variante === "main" ? main(e) : calculatrice(e);
+  return avecRenvoiCours(e.variante === "main" ? main(e) : calculatrice(e), 5);
 }
 
 export const nomClasse = (e: E) => NOM_CLASSE[e.classe];

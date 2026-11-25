@@ -18,7 +18,7 @@ const t = texte;
 const fr = (x: unknown) => x as FragmentConsigne[];
 
 function construireEnonce(e: E): SectionExercice {
-  return { enteteFragments: fr(consigneGenerale(e)), enteteHtml: figureEnonce(e), questions: phases(e).map((p) => ({ consigne: fr(consigne(e, p)) })) };
+  return { enteteFragments: fr(consigneGenerale(e, true)), enteteHtml: figureEnonce(e), questions: phases(e).map((p) => ({ consigne: fr(consigne(e, p)) })) };
 }
 
 function consignePapier(e: E): FragmentConsigne[] {
@@ -30,7 +30,7 @@ function consignePapier(e: E): FragmentConsigne[] {
 function enonceEntete(e: E): FragmentConsigne[] {
   if (e.variante === "forme") return [t("Observe le nuage de points ci-dessous.")];
   if (e.variante === "intensite") return [t("Observe le nuage de points ci-dessous : il justifie un ajustement affine.")];
-  return fr(consigneGenerale(e));
+  return fr(consigneGenerale(e, true));
 }
 
 function reponseBreve(e: E): FragmentConsigne[] {

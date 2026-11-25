@@ -38,6 +38,7 @@ export function construire(variante: VarianteDroiteMayer): ExerciceDroiteMayer {
     const c = parmi(contextes);
     const n = c.reelles ? c.reelles.length : variante === "pair" ? parmi([6, 8, 10]) : variante === "impair" ? parmi([7, 9]) : entier(6, 9);
     let tries = serieDuContexte(c, n).sort((p, q) => p.x - q.x);
+    if (tries.length !== n) continue;
     const k = Math.floor(n / 2);
     if (!c.reelles) {
       const g1 = corrigerGroupe(tries.slice(0, k), c.dy);
@@ -58,7 +59,7 @@ export function construire(variante: VarianteDroiteMayer): ExerciceDroiteMayer {
     }
     const da = decimalesPente(m.a);
     const db = 2;
-    const dp = Math.max(1, c.dy);
+    const dp = c.dy === 0 ? 0 : Math.max(1, c.dy);
     const xmin = tries[0]!.x;
     const xmax = tries[n - 1]!.x;
     const pasX = (xmax - xmin) / (n - 1);

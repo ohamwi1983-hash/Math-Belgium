@@ -4,7 +4,7 @@ import type { ExerciceMoindresCarres } from "../core5e/moindresCarres";
 import { arrondi, decimales } from "../core5e/stat2vLotH1";
 import type { AideEcran, ChampEcran, Frag, TableauDonnees } from "./ecransTrigo.types";
 import { lx, tx } from "./ecransTrigo.types";
-import { droiteL, nL, nT, pointL, tableauEcran, tableauPapierL } from "./ecrituresStat2vLotH1";
+import { droiteL, nL, nT, parL, plusL, pointL, tableauEcran, tableauPapierL } from "./ecrituresStat2vLotH1";
 import { figureNuage } from "./figureNuageLotH1";
 import { nomPrecision } from "./formatDroiteMayer";
 
@@ -132,8 +132,8 @@ export function aide2(e: E, p: PhaseMoindresCarres): AideEcran | null {
   if (p === "g") return { texte: [tx(`Additionne les ${n} valeurs de x et divise par ${n} ; de même pour y. Ici les deux moyennes sont entières.`)] };
   if (p === "ecarts") return { texte: [tx("Avec "), lx(`\\bar{x}=${nL(e.G.x)}`), tx(" et "), lx(`\\bar{y}=${nL(e.G.y)}`), tx(" : pour le premier point, "), lx(`X_1=${nL(e.points[0]!.x)}-${nL(e.G.x)}`), tx(" et "), lx(`Y_1=${nL(e.points[0]!.y)}-${nL(e.G.y)}`), tx(".")] };
   if (p === "pente") return { texte: [tx("Ici : "), lx(`a=\\dfrac{${nL(e.sXY)}}{${nL(e.sX2)}}`), tx(".")] };
-  if (p === "equation") return { texte: [tx("Ici : "), lx(`b=${nL(e.G.y)}-${nL(e.a)}\\times${nL(e.G.x)}`), tx(".")] };
-  if (p === "prevision") return { texte: [tx("Calcule "), lx(`${nL(e.a)}\\times${nL(e.x0)}${e.b < 0 ? "" : "+"}${nL(e.b)}`), tx(".")] };
+  if (p === "equation") return { texte: [tx("Ici : "), lx(`b=${nL(e.G.y)}-${parL(e.a)}\\times${nL(e.G.x)}`), tx(".")] };
+  if (p === "prevision") return { texte: [tx("Calcule "), lx(`${nL(e.a)}\\times${nL(e.x0)}${plusL(e.b)}`), tx(".")] };
   if (p === "coefs") return { texte: [tx("Dans la liste des résultats de « 2-Var Stats », descends jusqu'à a et b (après Σxy). Ne confonds pas a (la pente) et b (l'ordonnée à l'origine).")] };
   if (p === "prevY") return { texte: [tx("Calcule "), lx(`a\\times${nL(e.x0)}+b`), tx(" avec les valeurs de a et b de la calculatrice.")] };
   return { texte: [tx("Résous "), lx(`ax+b=${nL(e.y0!)}`), tx(" : "), lx(`x=\\dfrac{${nL(e.y0!)}-b}{a}`), tx(".")] };

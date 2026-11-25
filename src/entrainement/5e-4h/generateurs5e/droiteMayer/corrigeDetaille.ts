@@ -2,7 +2,7 @@ import type { EtapeCorrection } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExerciceDroiteMayer } from "../../core5e/droiteMayer";
 import { arrondi, decimales, net, somme } from "../../core5e/stat2vLotH1";
-import { nL, nT, parL } from "../../ui5e/ecrituresStat2vLotH1";
+import { avecRenvoiCours, nL, nT, parL } from "../../ui5e/ecrituresStat2vLotH1";
 import { bAvecPenteArrondie, DECIMALES_G, figureEtat, n, nomPrecision, prevision, reponse } from "../../ui5e/formatDroiteMayer";
 
 /**
@@ -26,6 +26,10 @@ function tableauGroupes(e: E): string {
 }
 
 export function correctionDetailleeDroiteMayer(e: E): EtapeCorrection[] {
+  return avecRenvoiCours(corrigeBrut(e), 3);
+}
+
+function corrigeBrut(e: E): EtapeCorrection[] {
   const { m } = e;
   const k = m.k;
   const g1 = m.tries.slice(0, k);

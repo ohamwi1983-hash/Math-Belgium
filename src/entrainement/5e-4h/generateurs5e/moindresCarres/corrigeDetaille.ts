@@ -2,7 +2,7 @@ import type { EtapeCorrection } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExerciceMoindresCarres } from "../../core5e/moindresCarres";
 import { decimales, net } from "../../core5e/stat2vLotH1";
-import { nL, parL } from "../../ui5e/ecrituresStat2vLotH1";
+import { avecRenvoiCours, nL, parL, plusL } from "../../ui5e/ecrituresStat2vLotH1";
 import { figureEtat, prevX, prevY, reponse } from "../../ui5e/formatMoindresCarres";
 
 /**
@@ -42,7 +42,7 @@ function main(e: E): EtapeCorrection[] {
     piege("c", [t("Diviser par "), f("\\sum Y_i^2"), t(", ou multiplier les valeurs "), f("x_iy_i"), t(" au lieu des écarts : la formule utilise les écarts à la moyenne, et les carrés des écarts de x.")]),
     calcul("d", [ligne(`b=\\bar{y}-a\\,\\bar{x}=${nL(e.G.y)}-${parL(e.a)}\\times${parL(e.G.x)}=${nL(e.b)}`)], [t("La droite passe par G : "), f("\\bar{y}=a\\,\\bar{x}+b"), t(".")]),
     { ...resultat("d", reponse(e, "equation")), figureHtml: figureEtat(e, true) },
-    calcul("e", [ligne(`y=${nL(e.a)}\\times${parL(e.x0)}${e.b < 0 ? "" : "+"}${nL(e.b)}=${nL(prevY(e))}`)], [t("On remplace x par "), f(nL(e.x0)), t(" :")]),
+    calcul("e", [ligne(`y=${nL(e.a)}\\times${parL(e.x0)}${plusL(e.b)}=${nL(prevY(e))}`)], [t("On remplace x par "), f(nL(e.x0)), t(" :")]),
     resultat("e", reponse(e, "prevision")),
   ];
 }
@@ -63,5 +63,5 @@ function calculatrice(e: E): EtapeCorrection[] {
 }
 
 export function correctionDetailleeMoindresCarres(e: E): EtapeCorrection[] {
-  return e.variante === "main" ? main(e) : calculatrice(e);
+  return avecRenvoiCours(e.variante === "main" ? main(e) : calculatrice(e), 4);
 }

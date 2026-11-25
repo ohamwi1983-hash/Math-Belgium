@@ -70,7 +70,7 @@ export function serieCorrelation(c: ContextePetit, n: number, classe: ClasseR, p
       const sY2 = somme(y.map((v) => (v - ym) ** 2));
       if (sY2 === 0) continue;
       const r = correlation(points);
-      if (classeR(r) !== classe || distanceSeuil(r) < 0.025) continue;
+      if (classeR(r) !== classe || distanceSeuil(r) < (classe === "tresForte" ? 0.005 : 0.025)) continue;
       if ((r > 0) !== positif) continue;
       if (classe === "nulle" && Math.abs(r) < 0.03) continue;
       if (Math.abs(r) > 0.9995) continue;

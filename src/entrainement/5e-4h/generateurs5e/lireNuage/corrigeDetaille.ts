@@ -2,7 +2,7 @@ import type { EtapeCorrection } from "../../../export/genererFeuilleExercices";
 import { latex, piege, resultat, texte, utilise } from "../../../export/corrigeTableau";
 import type { ExerciceLireNuage } from "../../core5e/lireNuage";
 import { arrondi, classeR, NOM_CLASSE } from "../../core5e/stat2vLotH1";
-import { nL } from "../../ui5e/ecrituresStat2vLotH1";
+import { avecRenvoiCours, nL } from "../../ui5e/ecrituresStat2vLotH1";
 import { figureCorrige, reponse } from "../../ui5e/formatLireNuage";
 
 /**
@@ -58,7 +58,7 @@ function etapesAssocier(e: E): EtapeCorrection[] {
 }
 
 export function correctionDetailleeLireNuage(e: E): EtapeCorrection[] {
-  if (e.variante === "forme") return etapesForme(e);
-  if (e.variante === "intensite") return etapesIntensite(e);
-  return etapesAssocier(e);
+  if (e.variante === "forme") return avecRenvoiCours(etapesForme(e), 2);
+  if (e.variante === "intensite") return avecRenvoiCours(etapesIntensite(e), (l) => (l === "a" ? 2 : 5));
+  return avecRenvoiCours(etapesAssocier(e), 5);
 }

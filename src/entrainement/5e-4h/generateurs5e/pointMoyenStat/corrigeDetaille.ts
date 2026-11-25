@@ -2,7 +2,7 @@ import type { EtapeCorrection } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExercicePointMoyen, Manquant } from "../../core5e/pointMoyenStat";
 import { decimales, net } from "../../core5e/stat2vLotH1";
-import { nL, parL, pointL } from "../../ui5e/ecrituresStat2vLotH1";
+import { avecRenvoiCours, nL, parL, pointL } from "../../ui5e/ecrituresStat2vLotH1";
 import { figureMayer, figureNuageG, n, PRECISION_PREV_X, prevX, prevY, reponse, sommeConnue, sommeTotale, valeurManquante } from "../../ui5e/formatPointMoyenStat";
 
 /**
@@ -102,8 +102,8 @@ function etapesMayer(e: E): EtapeCorrection[] {
 }
 
 export function correctionDetailleePointMoyen(e: E): EtapeCorrection[] {
-  if (e.variante === "pointMoyen") return etapeG(e);
-  if (e.variante === "uneValeur") return etapesUne(e);
-  if (e.variante === "deuxValeurs") return etapesDeux(e);
-  return etapesMayer(e);
+  if (e.variante === "pointMoyen") return avecRenvoiCours(etapeG(e), 1);
+  if (e.variante === "uneValeur") return avecRenvoiCours(etapesUne(e), 1);
+  if (e.variante === "deuxValeurs") return avecRenvoiCours(etapesDeux(e), 1);
+  return avecRenvoiCours(etapesMayer(e), 3);
 }

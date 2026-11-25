@@ -77,6 +77,8 @@ function axeAutour(lo: number, hi: number, cible: number): Axe {
   let max = Math.ceil(hi / pas + 1e-9) * pas;
   if (min === lo) min -= pas;
   if (max === hi) max += pas;
+  // Au moins un demi-pas entre la plus petite valeur et le bord : sinon le point tombe sur la brisure.
+  if (min > 0 && lo - min < 0.5 * pas) min -= pas;
   // Proche de 0 : on part de 0 (pas de brisure inutile).
   let brise = false;
   if (min > 0) {

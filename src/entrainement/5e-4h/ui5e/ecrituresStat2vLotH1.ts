@@ -15,7 +15,8 @@ import { lx, tx } from "./ecransTrigo.types";
 export function nL(v: number, dec = 10): string {
   const r = arrondi(v, dec);
   if (r === 0) return "0";
-  const [ent, fr] = Math.abs(r).toFixed(Math.min(dec, 12)).replace(/\.?0+$/, "").split(".");
+  const fixe = Math.abs(r).toFixed(Math.min(dec, 12));
+  const [ent, fr] = (fixe.includes(".") ? fixe.replace(/0+$/, "").replace(/\.$/, "") : fixe).split(".");
   const e = ent!.length > 4 ? ent!.replace(/\B(?=(\d{3})+(?!\d))/g, "\\,") : ent!;
   return `${r < 0 ? "-" : ""}${e}${fr ? `{,}${fr}` : ""}`;
 }
@@ -79,10 +80,16 @@ export function tableauPapierL(p: readonly Pt[], ent: EnTetesTableau, dx: number
   );
 }
 
-/** Tableau papier à cellules déjà écrites en LaTeX (« ? » pour une valeur effacée). */
+/** Largeur approchée d'une cellule LaTeX, en caractères (« {,} » compte pour un, « \, » pour rien). */
+const largeurL = (s: string): number => s.replace(/\{,\}/g, ",").replace(/\\,/g, "").length;
+
+/** Tableau papier à cellules déjà écrites en LaTeX (« ? » pour une valeur effacée) ; coupé en deux blocs
+ * au-delà de 9 colonnes ou quand il serait trop large (en-tête long : la version aménagée, en grands
+ * caractères, déborderait de la page à 9 colonnes). */
 export function tableauCellulesL(cellules: [string, string][], ent: EnTetesTableau): string {
   const coupe = Math.ceil(cellules.length / 2);
-  const morceaux = cellules.length > 9 ? [cellules.slice(0, coupe), cellules.slice(coupe)] : [cellules];
+  const largeur = Math.max(ent.x.length, ent.y.length) + cellules.reduce((t, c) => t + Math.max(largeurL(c[0]), largeurL(c[1])) + 2, 0);
+  const morceaux = cellules.length > 9 || (cellules.length > 5 && largeur > 62) ? [cellules.slice(0, coupe), cellules.slice(coupe)] : [cellules];
   const bloc = (m: [string, string][]) =>
     `\\begin{array}{|l|${"c|".repeat(m.length)}}\\hline ${texteL(ent.x)}&${m.map((c) => c[0]).join("&")}\\\\\\hline ${texteL(ent.y)}&${m.map((c) => c[1]).join("&")}\\\\\\hline\\end{array}`;
   return morceaux.length === 1 ? bloc(morceaux[0]!) : `\\begin{array}{c}${morceaux.map(bloc).join("\\\\[6pt]")}\\end{array}`;
@@ -104,3 +111,18 @@ export function avantTableau(fr: Frag[]): Frag[] {
 
 /** Fragments « G(x̄ ; ȳ) = G(3 ; 4) ». */
 export const pointMoyenFr = (G: Pt): Frag[] => [lx(`G${coordL(G)}`)];
+
+/** Renvoi au cours (« (cours, § 3) ») ajouté à la fin de chaque ligne « Ce qu'on utilise » d'un corrigé —
+ * `section` : numéro de section, ou fonction de la lettre d'étape (5gen76 : § 2 ou § 5). */
+export function avecRenvoiCours<T extends { type?: string; sousQuestion?: string; fragments: Frag[] }>(etapes: T[], section: number | ((lettre: string) => number)): T[] {
+  return etapes.map((et) => {
+    if (et.type !== "utilise") return et;
+    const n = typeof section === "number" ? section : section(et.sousQuestion ?? "a");
+    const fr = [...et.fragments];
+    const d = fr[fr.length - 1];
+    const renvoi = ` (cours, § ${n})`;
+    if (d && d.type === "texte" && /\.\s*$/.test(d.valeur)) fr[fr.length - 1] = tx(d.valeur.replace(/\.\s*$/, `${renvoi}.`));
+    else fr.push(tx(`${renvoi}.`));
+    return { ...et, fragments: fr };
+  });
+}

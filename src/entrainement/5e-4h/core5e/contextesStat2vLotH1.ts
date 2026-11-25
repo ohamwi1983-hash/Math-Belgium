@@ -124,7 +124,7 @@ export const CONTEXTES_REELS: ContexteSerie[] = [
     questionX: (y0) => `Estime la longueur de flèche d'une grue qui lève au maximum ${y0} tonnes.`,
     uniteY: "t",
     uniteX: "m",
-    abscisses: () => pas(20, 60, 2.5),
+    abscisses: () => pas(20, 60, 5),
     modele: { a: -0.12, b: 9.4, bruit: 0.2 },
   },
   {

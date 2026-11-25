@@ -1,7 +1,7 @@
 import type { ExerciceLireNuage } from "../core5e/lireNuage";
 import type { DefinitionEcrans } from "./ecransTrigo.types";
 import type { PhaseLireNuage } from "./formatLireNuage";
-import { aide1, aide2, bonneOption, consigne, consigneGenerale, explicationChoix, figureEnonce, libelle, options, phases, recap, reponse } from "./formatLireNuage";
+import { aide1, aide2, bonneOption, consigne, consigneGenerale, explicationChoix, figureEnonce, figureNuageSeul, indiceNuage, libelle, options, phases, recap, reponse } from "./formatLireNuage";
 import { diagnostiquer, piege } from "../moteur5e/verificationLireNuage";
 import { correctionDetailleeLireNuage } from "../generateurs5e/lireNuage/corrigeDetaille";
 
@@ -12,7 +12,7 @@ export const DEFINITION_LIRE_NUAGE: DefinitionEcrans<ExerciceLireNuage, PhaseLir
   mode: (e, p) => ({ type: "choix", options: options(e, p) }),
   libelle,
   consigneGenerale,
-  figure: (e) => figureEnonce(e),
+  figure: (e, p) => (e.variante === "associer" ? figureNuageSeul(e, indiceNuage(p)) : figureEnonce(e)),
   consigne,
   aide1,
   aide2,
