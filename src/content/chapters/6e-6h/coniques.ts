@@ -987,6 +987,12 @@ export const coniques: ChapterContent = {
             caption: R`La parabole $(y-2)^2=8(x-3)$ : sommet $S(3\,;2)$, foyer $F(5\,;2)$, directrice $d\equiv x=1$, axe focal $y=2$. Pour $P(5\,;-2)$ : $|PF|=\text{dist}(P\,;d)=4$.`,
           },
         },
+        {
+          kind: 'piege',
+          label: 'Factoriser avant de lire le sommet, et lire p, pas 2p',
+          text:
+            R`Deux erreurs guettent la parabole décentrée. (1) Lire le sommet sur $(y-2)^2=8x-24$ : il faut d'abord **factoriser** le second membre, $8x-24=8(x-3)$, et le sommet est $(3\,;2)$, pas $(24\,;2)$ ni $(-24\,;2)$. (2) Prendre $p=8$ : le coefficient $8$ vaut $2p$, donc $p=4$, et le foyer est à $\frac{p}{2}=2$ du sommet. Avec $p=8$, on placerait $F(7\,;2)$ et $d\equiv x=-1$ : le contrôle $|PF|=\text{dist}(P\,;d)$ échoue aussitôt.`,
+        },
         { kind: 'subheading', text: 'Quand la réduction ne donne pas de conique : les cas dégénérés' },
         {
           kind: 'para',

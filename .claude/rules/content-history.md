@@ -269,6 +269,30 @@ paths:
   « 6e ch. 9, lots A, F, D »). Les cartes 6gen54 (renommée par le lot C), 6gen123–131 et les ateliers sont ajoutés par
   d'autres agents.
 
+- **6e (6h), Chapitre 10 — Les coniques** (`coniques`) : **audit appliqué, lots A, F, D et parcours (25/11, agent
+  AFD)** — lot A : erreurs C1–C12 corrigées, hyperbole d'axe focal VERTICAL (équation, foyers, asymptotes), convention
+  unique $y^2=2px$ avec $p=\mathrm{dist}(F\,;d)$ partout (cours, formulaire, « Formule », quiz), tangente $16x+15y=100$,
+  Cassegrain et LORAN refaits, lithotritie avec $2a$, formulaire et récapitulatif complétés, typographie (`\mathrm{dist}`,
+  pas de majuscules d'insistance). **Figures** : toutes isotropes (domaine 16/15), aucune courbe hors cadre (bornes
+  `yMin`/`yMax`, branches d'hyperbole par `curvesOfY`), aucune étiquette sur un tracé (contrôle `check.mjs` du dossier
+  `afd-6e10`), miroirs elliptique et hyperbolique en deux figures pleine largeur. Lot F : 18 démonstrations
+  (`exempleLibre` « Démonstration — … », les 5 anciennes recodées) : parabole foyer–directrice, ellipse et hyperbole
+  (équations réduites), ellipse = cercle « écrasé » de $\frac{b}{a}$, asymptotes, hyperbole équilatère $XY=\frac{a^2}{2}$
+  (repère $X=\frac{x+y}{\sqrt2}$, $Y=\frac{x-y}{\sqrt2}$), foyer–directrice de l'ellipse et de l'hyperbole, Dandelin-Quételet
+  (cas de l'ellipse), rayons focaux $a\mp ex$, aire du triangle focal $b^2\tan\frac{\theta}{2}$, sommets $(0\,;\pm b)$ à
+  distance $a$ des foyers, pente et forme dédoublée des tangentes, condition de tangence $k^2=a^2m^2+b^2$, propriétés
+  optiques (parabole : triangle $FPT$ isocèle ; ellipse : symétrique d'un foyer). Cours ajouté : « Ce que tu sais déjà
+  (4e) », **cas dégénérés** (point, vide, deux droites ; sous-titre au § 2, réciproque fausse de l'équation générale),
+  parabole décentrée $y^2-4y-8x+28=0$, méthode F / d / e (exemple F(0 ; 1), d ≡ y = 4, e = 1/2), périhélie / aphélie,
+  tangentes de pente donnée et issues de P(0 ; 2) à $\frac{x^2}{8}+\frac{y^2}{2}=1$, intersection de deux coniques
+  ($x^2+2y^2=41$ et $y^2-x^2=7$), miroir hyperbolique (P(15/4 ; 3), tangente $20x-9y=48$), antenne $\frac{D^2}{16h}$.
+  Énoncés par clé des 35 blocs, banque « Formule » (26 questions). Parcours : 3 parties (« Trois courbes, un seul
+  nombre e » § 1–2, « Distances, droites et tangentes » § 3–5, « Miroirs et applications » § 6), 6 `titreCourt`,
+  18 phrases d'`essentiel`, 23 cartes ; descriptions des cartes 6gen58, 59, 61, 62, 63 alignées sur le cours. Formules
+  longues coupées en plusieurs `$…$` (aucune ne défile à 390 px, tiroirs ouverts). Lot D : quiz 6gen73 (voir
+  `.claude/rules/feuilles-evaluations.md`, « 6e ch. 10, lots A, F, D »). Les cartes 6gen132–143, les générateurs
+  6gen58–63 et les ateliers sont ajoutés par d'autres agents.
+
 - **6e (6h), Chapitre 6 — corrigé « comme au tableau » et niveaux (6gen30–33, 6gen74–76)** : corrigés détaillés
   typés partagés écran / papier (`generateurs6e/*/corrigeDetaille.ts`, brique `ui6e/corrigeProbabilites.ts`),
   `criteresDifficulte` à la place des étoiles, profils `calcul` relus (aucun changement : rien n'est donné

@@ -1388,6 +1388,22 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   chaque fragment devenait une colonne — était déjà corrigée sur les 8 panneaux de quiz du 6e (un seul `<span>`,
   `dcda4bd`, 20/11) ; les panneaux 4e / 5e passent un `<p>` ou une chaîne unique. Vérifié : 5 thèmes joués en entier
   (iPhone 13), un seul enfant dans le conteneur, 0 colonne.
+- **6e ch. 10, lots A, F, D (cours, démonstrations, quiz 6gen73 ; générateurs : autres agents)** : énoncés de
+  démonstration PAR CLÉ pour les 35 blocs `exemple` / `exempleLibre` (chapitre ajouté à `CHAPITRES_ENONCES_VERIFIES`),
+  dont 18 démonstrations ; énoncés autosuffisants (foyers, $a$, $b$, $c$ et conditions de signe rappelés : « Démontre que
+  l'ellipse de foyers F(c ; 0) et F'(−c ; 0), ensemble des points dont la somme des distances aux foyers vaut 2a
+  (a > c > 0), a pour équation… »), convention unique $y^2=2px$, $p=\mathrm{dist}(F\,;d)$. Corrigés de compréhension :
+  `\text{dist}`, intersection droite–conique de degré 1 ou équation dégénérée, démonstrations optiques. Banque
+  « Formule » (`questionsFormules/niveau6e.ts`) : ids gardés, 26 questions, plus aucune question « recopie » (hyperbole
+  d'axe focal vertical, $xy=k$, équation depuis foyer + directrice + $e$, $(y-k)^2=2p(x-h)$, cas dégénérés, $a-ex$,
+  périhélie / aphélie, $b^2\tan\frac{\theta}{2}$, $k^2=a^2m^2\pm b^2$, $\frac{D^2}{16h}$). Quiz 6gen73 : 2 points
+  (plus de « codes »), Q3 (une justification = un seul bloc), majuscules d'insistance et grands calculs retirés,
+  7ᵉ thème `excentriciteReduction` (§ 2 : excentricité, directrices, réduction, cas dégénérés) ajouté au pilote sur la
+  section `excentricite` à côté de `equationDepuisCaracteristiques` (libellés distincts), 18 V / 17 F dans chacun des
+  7 thèmes (245 affirmations), `nombreExercices` = `nombreQuestions(theme)` (accueil de `App6gen73` calculé). Vérifié
+  dans le vrai pipeline (`evaluationLocal`, dossier `afd-6e10/docs.cjs`) : 18 démonstrations, 26 « Formule », 245
+  vrai/faux en évaluation (2 séries, aménagée, corrigé, grille) et feuille, Word copie / corrigé / grille : 0
+  `katex-error`, 0 `$`, 0 `**`, 0 `undefined` / `NaN`.
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 
