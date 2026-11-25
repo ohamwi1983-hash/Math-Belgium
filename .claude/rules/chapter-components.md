@@ -97,6 +97,9 @@ d'encadrés : orange (essentiel, définition, méthode, rappel), rouge (attentio
 (exemple), violet (À toi) ; astuce/intuition en neutre clair. Ordinateur (≥ 760 px) : étape = carte
 des étapes à gauche + article ≤ 760 px ; ≥ 1200 px : + colonne de droite. `OutilsChapitre`
 (Feuilles, Carnet, Projeter — ces deux-là professeur connecté seulement —, Imprimer) : bas de la carte et colonne de gauche d'une étape.
+Confort de lecture (25/11/2026) : « Lecture » en tête d'`OutilsChapitre`, « Aa » dans `EnteteEtape`,
+corrections « fait d'office » (sous-titre, étiquettes sans capitales, colonne ≈ 68 signes) et réglages de
+l'élève : voir `.claude/rules/cote-eleve.md`.
 
 ## Mode projection « Projeter en classe » (maquettes du 24/11/2026)
 

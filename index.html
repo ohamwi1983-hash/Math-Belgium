@@ -87,6 +87,32 @@
         } catch (e) {}
       })()
     </script>
+    <!-- Confort de lecture (panneau « Aa ») : réglages de l'élève posés sur <html> AVANT l'affichage
+         (pas de flash). À garder en accord avec src/lib/reglagesLecture.ts (ATTRIBUTS : mêmes clés,
+         mêmes valeurs, réglage du site en tête = aucun attribut). Rien d'envoyé : localStorage seulement. -->
+    <script>
+      (function () {
+        try {
+          var g = JSON.parse(localStorage.getItem('lecture:reglages') || 'null')
+          if (!g || typeof g !== 'object') return
+          var R = {
+            police: ['andika', 'atkinson', 'opendyslexic'],
+            taille: ['1', '2', '3', '4', '5'],
+            interligne: ['1', '2', '3'],
+            espacement: ['1', '2', '3'],
+            largeur: ['large', 'moyenne', 'etroite'],
+            theme: ['auto', 'clair', 'sombre', 'creme', 'contraste'],
+            animations: ['auto', 'reduites']
+          }
+          var h = document.documentElement, perso = false
+          for (var k in R) {
+            var i = R[k].indexOf(g[k])
+            if (i > 0) { h.setAttribute('data-' + k, g[k]); perso = true }
+          }
+          if (perso) h.setAttribute('data-lecture-perso', '')
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,0 +1,153 @@
+/* Panneau « Confort de lecture » (maquettes planches 01–06, `maquettes.css` § 5). Chargé avec le panneau
+   (`PanneauLecture.tsx`, à la demande). L'interface du panneau garde ses tailles (elle ne grandit pas avec
+   les réglages) ; seul l'APERÇU est réglé comme la page. */
+
+.confort {
+  position: fixed; inset: auto 0 0 0; z-index: 96; width: 100%; max-width: none; height: auto; max-height: 92dvh;
+  margin: 0; padding: 0; border: 0; box-sizing: border-box;
+  display: flex; flex-direction: column;
+  background: var(--surface); color: var(--ink); border-radius: 14px 14px 0 0; box-shadow: 0 -10px 40px rgb(0 0 0 / 0.22);
+  font-family: var(--sans); overflow: hidden;
+}
+.confort:not([open]) { display: none; }
+.confort::backdrop { background: rgb(10 14 18 / 0.45); }
+.confort-poignee { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 8px auto 0; flex: none; }
+.confort-tete { display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 16px; flex: none; }
+.confort-tete h2 { flex: 1; min-width: 0; margin: 0; font: 600 1.25rem/1.2 var(--serif); color: var(--ink); }
+.confort-fermer {
+  flex: none; min-height: 44px; padding: 0 14px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); color: var(--ink); font: 600 15px/1 var(--sans); cursor: pointer;
+}
+.confort-fermer:hover { border-color: var(--ink-soft); }
+.confort-defile { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 16px 16px; }
+.confort :is(button, [role="tab"]):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Aperçu EN DIRECT, collant en haut : un vrai paragraphe du cours, réglé comme la page. */
+.apercu-lecture {
+  position: sticky; top: 0; z-index: 2; margin: 0 -16px 12px; padding: 0 16px 12px; background: var(--surface);
+  border-bottom: 1px solid var(--line-soft);
+}
+.apercu-etiquette {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: 0 0 6px;
+  font: 500 12px/1.3 var(--mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-soft);
+}
+.apercu-source { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.apercu-reglage { flex: none; }
+.apercu-cadre {
+  --lecture: var(--l-police);
+  max-height: min(172px, 22dvh); overflow: hidden; position: relative; padding: 12px 14px;
+  border: 1px solid var(--line-soft); border-left: 3px solid var(--accent); border-radius: var(--radius); background: var(--paper);
+  font-family: var(--l-police); font-size: calc(17px * var(--l-echelle)); line-height: var(--l-interligne);
+  letter-spacing: var(--l-lettres); word-spacing: var(--l-mots); color: var(--ink);
+}
+.apercu-cadre p { margin: 0 0 0.4em; max-width: var(--l-largeur); }
+.apercu-cadre .katex { letter-spacing: normal; word-spacing: normal; }
+.apercu-cadre::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 28px; background: linear-gradient(transparent, var(--paper)); }
+
+.confort-onglets { display: flex; gap: 6px; margin: 0 0 14px; }
+.confort-onglets button {
+  flex: 1 1 0; min-width: 0; min-height: 44px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink);
+  font: 500 15px/1.1 var(--sans); cursor: pointer;
+}
+.confort-onglets button[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.confort-vue[hidden] { display: none; }
+
+.confort-bloc { margin: 0 0 18px; }
+.confort-bloc > h3 { margin: 0 0 6px; font: 600 15.5px/1.3 var(--sans); color: var(--ink); text-wrap: initial; }
+.confort-aide { margin: 0 0 8px; font: 400 14px/1.45 var(--sans); color: var(--ink-soft); }
+.confort-aide-apres { margin-top: 8px; }
+
+/* Préréglages en un clic */
+.prereglages { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.prereglage {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 76px; padding: 10px 12px; text-align: left;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); cursor: pointer; font-family: var(--sans);
+}
+.prereglage .pr-ech { line-height: 1.1; color: var(--accent-ink); }
+.prereglage .pr-nom { font: 600 15px/1.25 var(--sans); }
+.prereglage .pr-desc { font: 400 13px/1.35 var(--sans); color: var(--ink-soft); }
+.prereglage[aria-pressed="true"] { border: 2px solid var(--accent); padding: 9px 11px; background: color-mix(in srgb, var(--accent-soft) 45%, var(--surface)); }
+
+/* Choix segmentés (taille, interligne, espacement, longueur) */
+.segments { display: flex; flex-wrap: wrap; gap: 6px; }
+.segments button {
+  flex: 1 1 0; min-width: 56px; min-height: 48px; padding: 6px 6px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); color: var(--ink); font: 500 14px/1.15 var(--sans); cursor: pointer;
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+}
+.segments button small { font-size: 12px; color: var(--ink-soft); font-weight: 400; }
+.segments button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.segments button[aria-pressed="true"] small { color: var(--surface); }
+.segments .seg-a { font-family: Andika, var(--sans); line-height: 1; }
+
+/* Polices : chaque option écrite DANS sa police, avec ses forces et ses limites */
+.polices { display: flex; flex-direction: column; gap: 8px; }
+.police {
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 10px 12px; text-align: left; cursor: pointer;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); font-family: var(--sans);
+}
+.police[aria-pressed="true"] { border: 2px solid var(--accent); padding: 9px 11px; }
+.police .po-nom { font-size: 18px; line-height: 1.25; }
+.police .po-tag { font: 500 12px/1.4 var(--sans); color: var(--ink-soft); align-self: center; text-align: right; }
+.police .po-ech { grid-column: 1 / -1; font-size: 16px; color: var(--ink-soft); letter-spacing: 0.02em; }
+.police .po-plus, .police .po-moins { display: block; grid-column: 1 / -1; margin: 0; font: 400 13.5px/1.4 var(--sans); color: var(--ink-soft); }
+.police .po-plus b { color: var(--good); font-weight: 600; }
+.police .po-moins b { color: var(--bad); font-weight: 600; }
+
+/* Thèmes : vignette dessinée dans les couleurs du thème (fixes : c'est un échantillon) */
+.themes { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.theme {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 76px; padding: 8px 2px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); color: var(--ink); font: 500 12.5px/1.2 var(--sans); cursor: pointer; text-align: center; overflow-wrap: anywhere;
+}
+.theme[aria-pressed="true"] { border: 2px solid var(--accent); padding: 7px 1px; }
+.th-pastille {
+  width: 40px; height: 30px; border-radius: 3px; display: flex; align-items: center; justify-content: center;
+  font: 600 15px/1 var(--serif); border: 1px solid rgb(0 0 0 / 0.18);
+}
+.th-auto { background: linear-gradient(135deg, #ffffff 50%, #161f27 50%); color: transparent; position: relative; }
+.th-auto::before { content: "A"; position: absolute; left: 5px; top: 3px; font-size: 13px; color: #182430; }
+.th-auto::after { content: "a"; position: absolute; right: 6px; bottom: 4px; font-size: 13px; color: #e9eef2; }
+.th-clair { background: #ffffff; color: #182430; }
+.th-sombre { background: #161f27; color: #e9eef2; border-color: #161f27; }
+.th-creme { background: #f8f1e1; color: #2a2118; }
+.th-contraste { background: #ffffff; color: #000000; border: 2px solid #000000; }
+
+/* Interrupteur */
+.interrupteur { display: flex; align-items: flex-start; gap: 12px; padding: 4px 0; }
+.it-texte { flex: 1; min-width: 0; }
+.it-nom { display: block; font: 600 15px/1.3 var(--sans); }
+.it-desc { display: block; font: 400 13.5px/1.4 var(--sans); color: var(--ink-soft); margin-top: 2px; }
+.it-bouton {
+  flex: none; position: relative; width: 52px; height: 44px; border: 0; background: none; cursor: pointer; padding: 0;
+}
+.it-bouton::before { content: ""; position: absolute; left: 3px; top: 8px; width: 46px; height: 28px; border-radius: 14px; background: var(--ink-soft); }
+.it-bouton::after { content: ""; position: absolute; top: 11px; left: 6px; width: 22px; height: 22px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 2px rgb(0 0 0 / .3); }
+.it-bouton[aria-checked="true"]::before { background: var(--good); }
+.it-bouton[aria-checked="true"]::after { left: 24px; }
+@media (prefers-reduced-motion: no-preference) { :root:not([data-animations="reduites"]) .it-bouton::after { transition: left .15s ease; } }
+
+.confort-pied {
+  flex: none; display: flex; flex-direction: column; gap: 8px; padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line-soft); background: var(--surface);
+}
+.confort-reset {
+  width: 100%; min-height: 48px; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); color: var(--ink); font: 500 15.5px/1.2 var(--sans); cursor: pointer;
+}
+.confort-reset:hover { border-color: var(--ink-soft); }
+.mention-appareil { display: flex; align-items: center; gap: 8px; margin: 0; font: 400 13.5px/1.4 var(--sans); color: var(--ink-soft); }
+.mention-appareil svg { flex: none; color: var(--good); }
+
+/* Ordinateur : panneau à droite ; la page reste visible et réagit en direct à gauche, les colonnes
+   latérales de l'étape se retirent le temps du réglage (le texte garde sa largeur réelle). */
+@media (min-width: 900px) {
+  .confort { inset: 0 0 0 auto; width: 420px; height: 100dvh; max-height: none; border-radius: 0; border-left: 1px solid var(--line); box-shadow: -12px 0 36px rgb(0 0 0 / 0.14); }
+  .confort::backdrop { background: transparent; }
+  .confort-poignee { display: none; }
+  .confort-tete { padding-top: 14px; }
+  html.lecture-panneau-ouvert body { padding-right: 420px; }
+  html.lecture-panneau-ouvert .site-header-inner { max-width: none; }
+  html.lecture-panneau-ouvert .parcours[data-vue="etape"] { grid-template-columns: minmax(0, 760px); }
+  html.lecture-panneau-ouvert :is(.parcours-cote, .parcours-droite) { display: none; }
+}

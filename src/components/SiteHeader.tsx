@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { MenuCompte } from './compte/MenuCompte'
 import { RechercheSite } from './RechercheSite'
 import { supabaseConfigure } from '../lib/supabase'
+import { BoutonLecture } from './lecture/BoutonLecture'
 
 /** En-tête du site (bannière claire, maquette « A » du 22/11/2026) : petit logo + marque, recherche
  * (chapitres, étapes, sous-titres — `RechercheSite`), puis « Professeur » / « Mon compte »
@@ -32,6 +33,7 @@ export function SiteHeader({ breadcrumb }: { breadcrumb?: { label: string; to?: 
           </nav>
         )}
         <RechercheSite />
+        <BoutonLecture variante="entete" />
         {avecCompte && <MenuCompte />}
       </div>
     </header>

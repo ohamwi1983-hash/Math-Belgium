@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { ChapterContent } from '../../content/types'
 import { useCompte } from '../../lib/compteContexte'
+import { BoutonLecture } from '../lecture/BoutonLecture'
 import { imprimerChapitre, imprimerChapitreAmenage, imprimerFormulaireAmenage, imprimerFormulaireSeul, prechargerPolicesImpression } from '../../lib/imprimer'
 
 /**
@@ -18,6 +19,7 @@ import { imprimerChapitre, imprimerChapitreAmenage, imprimerFormulaireAmenage, i
  *   ne télécharge pas supabase-js et ne voit rien (même principe que `MenuCompte`).
  * - « Projeter » (professeur connecté SEULEMENT, même règle que « Carnet ») : lanceur du mode
  *   « Projeter en classe » (vue `#projeter`, voir `chapter-components.md`, « Mode projection »).
+ * - « Lecture » : panneau « Confort de lecture » (`lecture/BoutonLecture.tsx`, `.claude/rules/cote-eleve.md`).
  * `avantImpression` : ferme le tiroir du téléphone avant d'ouvrir la boîte d'impression.
  */
 export function OutilsChapitre({ chapter, avantImpression }: { chapter: ChapterContent; avantImpression?: () => void }) {
@@ -59,6 +61,8 @@ export function OutilsChapitre({ chapter, avantImpression }: { chapter: ChapterC
     <div className={`lecture-entete${professeur ? ' avec-carnet' : ''}`}>
       <p className="lecture-sheet-title">Ce chapitre</p>
       <div className="lecture-outils" ref={conteneurRef}>
+        {/* Confort de lecture (panneau « Aa ») : « Lecture », à côté de « Feuilles » et « Imprimer ». */}
+        <BoutonLecture variante="outil" />
         <Link className="lecture-outil" to={`/${chapter.levelSlug}/${chapter.slug}/exercices`} title="Feuilles d'exercices et évaluations du chapitre">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M8 3h8l4 4v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />

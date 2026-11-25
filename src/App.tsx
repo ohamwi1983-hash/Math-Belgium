@@ -4,6 +4,7 @@ import { HomePage } from './routes/HomePage'
 import { ChapterRoute } from './routes/ChapterRoute'
 import { EntrainementPage } from './routes/EntrainementPage'
 import { CompteProvider } from './lib/compteContexte'
+import { HotePanneauLecture } from './components/lecture/BoutonLecture'
 
 /** `AdminPage`/`ExercicePage`/`ChapterExercicePage` rendent toutes trois `EvaluationGeneratorPanel`,
  * qui embarque désormais `EVALUATION_ADAPTER_REGISTRY_4E` (55 adaptateurs + tout le pipeline
@@ -61,6 +62,8 @@ function App() {
           <Route path="*" element={<HomePage />} />
         </Routes>
       </Suspense>
+      {/* Panneau « Confort de lecture » (boutons « Aa »), un seul pour tout le site. */}
+      <HotePanneauLecture />
       </CompteProvider>
     </BrowserRouter>
   )

@@ -16,6 +16,7 @@ import { PanneauModal } from './PanneauModal'
 import { Icone } from './Icones'
 import { dureeEtape, insecables, minusculeInitiale, titreCourt, useParcours } from '../../lib/parcoursChapitre'
 import { useMediaQuery } from '../../lib/useMediaQuery'
+import { BoutonLecture } from '../lecture/BoutonLecture'
 
 /** « Avant de commencer : qu'est-ce qu'un vecteur ? » → « Qu'est-ce qu'un vecteur ? » (le bouton
  * porte déjà « Avant de commencer »). */
@@ -209,6 +210,7 @@ function EnteteEtape({ chapter, index, aller }: { chapter: ChapterContent; index
           <span style={{ width: `${(100 * (index + 1)) / total}%` }} />
         </div>
       </div>
+      <BoutonLecture variante="etape" />
     </div>
   )
 }

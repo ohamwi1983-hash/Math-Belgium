@@ -70,6 +70,9 @@ try {
     let reussi = false
     for (const delai of [45000, 90000]) {
       const page = await browser.newPage()
+      // Repère du pré-rendu : ce qui se MESURE à la largeur de l'écran (formules qui débordent,
+      // `src/lib/formulesDebordantes.ts`) n'est pas écrit dans la page pré-rendue.
+      await page.addInitScript(() => { window.__prerendu = true })
       try {
         await page.goto(new URL(route.slice(1), baseUrl).toString(), { waitUntil: 'networkidle', timeout: delai })
         // Marge de sécurité : les illustrations Mafs se dimensionnent via ResizeObserver, un cycle
