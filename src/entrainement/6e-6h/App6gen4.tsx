@@ -141,6 +141,7 @@ export function App6gen4() {
         setHistorique((h) => [
           ...h,
           {
+            corrigeDetaille: corrigeDetailleEcranCourant(),
             titre: titrePhase(etat.phase, etat.exerciceCourant),
             votreReponse,
             correcte: !info.revele,
@@ -186,12 +187,16 @@ export function App6gen4() {
   const indexEcran = sequenceDeriveesCyclometriques(exercice).indexOf(etat.phase);
   const reponseAttenduePhase = () => <Katex expression={resultatsEcransDerivees(exercice)[indexEcran] ?? ""} />;
 
-  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDeriveesCyclometriques(exercice), lettreEtape(indexEcran))} />;
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDeriveesCyclometriques(exercice), lettreEtape(indexEcran))} />;
+  }
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        corrigeDetaille,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         reponseAttendue: reponseAttenduePhase(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

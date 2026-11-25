@@ -111,6 +111,7 @@ export function App5gen32() {
     setHistorique((h) => [
       ...h,
       {
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         titre: LIBELLE_ECRAN[ecranClos],
         votreReponse,
         correcte: !nouvelEtat.derniereEtapeRevelee,
@@ -171,11 +172,17 @@ export function App5gen32() {
   const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
   const niveauAideMax = niveauAideMaxOptimisation();
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeOptimisation(exercice), lettreEcranOptimisation(exercice, etat.phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         ...(enAttente.messageRevele ? { messageRevele: enAttente.messageRevele } : {}),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeOptimisation(exercice), lettreEcranOptimisation(exercice, etat.phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         reponseAttendue: <Katex expression={formatReponseAttendueEcranLatex(exercice, etat.phase)} />,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

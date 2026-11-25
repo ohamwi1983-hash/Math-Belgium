@@ -126,7 +126,7 @@ export function AppPositionsPlans() {
 
   function conclure(correct: boolean, votreReponse: ReactNode, paire: [number, number] | null) {
     const attendue = <p style={{ margin: 0 }}>{reponseEcran(e, ecran)}</p>;
-    setHistorique((h) => [...h, ecranClos(courant.titre, votreReponse, !correct, etat.niveauAide > 0, attendue)]);
+    setHistorique((h) => [...h, ecranClos(courant.titre, votreReponse, !correct, etat.niveauAide > 0, attendue, corrigeDetailleEcranCourant(paire))]);
     setEnAttente({
       revele: !correct,
       reponseAttendue: attendue,
@@ -146,6 +146,13 @@ export function AppPositionsPlans() {
     setEnAttente(null);
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). `paire` : la paire
+   * de points choisie par l'élève sur cet écran (ou `null`). */
+  function corrigeDetailleEcranCourant(paire: [number, number] | null) {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePositionsPlans(e, paire), lettreEtape(ecran))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -153,7 +160,7 @@ export function AppPositionsPlans() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePositionsPlans(e, enAttente.paire), lettreEtape(ecran))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(enAttente.paire),
       }
     : null;
 

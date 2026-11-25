@@ -325,7 +325,10 @@ partagé ; contenu, aides, tentatives et vérification inchangés, `SelecteurVar
   Ordinateur : énoncé (`.entete-exercice`) en position fixe calculée sur la carte (`data-enonce-fixe`,
   `--col-x/-w/-top`), étapes à droite.
 - `ValidationEcran` : verdict + « Réponse attendue » dans un seul encadré (`.validation-verdict`),
-  bouton `.validation-suivant` (libellé `labelSuivant` inchangé). `PanneauRappels` (« Ce qu'on sait
+  bouton `.validation-suivant` (libellé `labelSuivant` inchangé). Bonne réponse + `corrigeDetaille` :
+  « Voir comment on y arrive » replié (`CorrigeDepliable`, aussi dans `FicheReponseEcran` via
+  `EntreeHistoriqueEtape.corrigeDetaille`) — voir `feuilles-evaluations.md`, « Consultable après
+  CHAQUE réponse ». `PanneauRappels` (« Ce qu'on sait
   déjà » des 3 `RecapitulatifPanel` et des socles `AppEcransTrigo`/`AppEcransExp`) : une ligne ≥ 48 px
   par écran clos, ✓ vert / ✓ jaune (aide) / ✗ rouge, « Revoir › » seulement si la correspondance
   entrée ↔ écran clos est sûre (même nombre, même verdict) et que le générateur a une fiche.

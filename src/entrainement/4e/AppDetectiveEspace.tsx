@@ -94,7 +94,7 @@ export function AppDetectiveEspace() {
   function conclure(choix: number) {
     const correct = verifierChoix(e, ecran, choix);
     const attendue = reponseAttendue(e, ecran);
-    setHistorique((h) => [...h, ecranClos(TITRES_ECRANS[ecran]!, reponseEcran(e, ecran, choix), !correct, etat.niveauAide > 0, attendue)]);
+    setHistorique((h) => [...h, ecranClos(TITRES_ECRANS[ecran]!, reponseEcran(e, ecran, choix), !correct, etat.niveauAide > 0, attendue, corrigeDetailleEcranCourant())]);
     setEnAttente({
       revele: !correct,
       reponseAttendue: attendue,
@@ -119,6 +119,12 @@ export function AppDetectiveEspace() {
     (window as unknown as { __debugGen107?: unknown }).__debugGen107 = { exercice: e, ecran };
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDetectiveEspace(e), lettreEtape(ecran))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -127,7 +133,7 @@ export function AppDetectiveEspace() {
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
         // Corrigé détaillé de l'étape (même source que le papier), figure corrigée comprise.
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDetectiveEspace(e), lettreEtape(ecran))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

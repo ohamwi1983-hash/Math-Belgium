@@ -212,7 +212,7 @@ export function AppOptimisation() {
         const phaseClose = etat.phase;
         setHistorique((h) => [
           ...h,
-          { titre: TITRE_PHASE[phaseClose], votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttenduePour(etat.exerciceCourant, phaseClose) : undefined },
+          { corrigeDetaille: corrigeDetailleEcranCourant(), titre: TITRE_PHASE[phaseClose], votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttenduePour(etat.exerciceCourant, phaseClose) : undefined },
         ]);
       }
       setEnAttente({ etatSuivant: nouvelEtat, revele });
@@ -246,12 +246,18 @@ export function AppOptimisation() {
 
   const reponseAttendue = reponseAttenduePour(exercice, phase);
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeOptimisation(exercice), lettreEtapeOptimisation(exercice, etapeDePhaseOptimisation(phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue,
         messageRevele: phase === "identification" || phase === "interpretation" ? "Ce n'était pas la bonne réponse." : undefined,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeOptimisation(exercice), lettreEtapeOptimisation(exercice, etapeDePhaseOptimisation(phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

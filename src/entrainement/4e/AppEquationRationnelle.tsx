@@ -403,7 +403,7 @@ export function AppEquationRationnelle() {
    * deux phases) — reproduit à l'identique. */
   function ajouterHistorique(votreReponse: ReactNode | undefined, nouvelEtat: EtatSessionEquationRationnelle) {
     const revele = releveRevelePhase(etat, nouvelEtat);
-    setHistorique((h) => [...h, ecranClos(titrePhase(etat), votreReponse, revele, aideUtiliseePhase(etat, etat.phase), reponseAttenduePhase(etat) ?? undefined)]);
+    setHistorique((h) => [...h, ecranClos(titrePhase(etat), votreReponse, revele, aideUtiliseePhase(etat, etat.phase), reponseAttenduePhase(etat) ?? undefined, corrigeDetailleEcranCourant())]);
   }
 
   /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
@@ -444,14 +444,20 @@ export function AppEquationRationnelle() {
   const { tentativesUtilisees } = etat.etapeCourante;
   const { tentativesMax } = etat.reglages;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return (
+          <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationRationnelle(etat.exerciceCourant), lettrePhaseEquationRationnelle(etat.exerciceCourant, etat.phase))} />
+        );
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         messageRevele: /econnaissance/.test(etat.phase) || (etat.phase === "ce" && etat.etapeCourante.tentativesUtilisees === 0) ? "Ce n'était pas la bonne réponse." : undefined,
         reponseAttendue: reponseAttenduePhase(etat),
-        corrigeDetaille: (
-          <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEquationRationnelle(etat.exerciceCourant), lettrePhaseEquationRationnelle(etat.exerciceCourant, etat.phase))} />
-        ),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

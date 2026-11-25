@@ -792,7 +792,7 @@ export function AppInequationRationnelle() {
     // récapitulatif (plusieurs phases n'avaient aucun bloc réponse → fiche « incorrecte » sans réponse).
     const nouvelle = entreeAjoutee(calculerRecapitulatifInequationRationnelle(etat), calculerRecapitulatifInequationRationnelle(nouvelEtat));
     const attendue = reponseAttenduePhase(etat) ?? (nouvelle ? valeurRecap(nouvelle) : undefined);
-    setHistorique((h) => [...h, ecranClos(TITRES_PHASE[etat.phase], votreReponse, revele, aideUtiliseePhase(etat, etat.phase), attendue)]);
+    setHistorique((h) => [...h, ecranClos(TITRES_PHASE[etat.phase], votreReponse, revele, aideUtiliseePhase(etat, etat.phase), attendue, corrigeDetailleEcranCourant())]);
   }
 
   /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
@@ -887,6 +887,14 @@ export function AppInequationRationnelle() {
     return exercice.niveau === "cubique" ? `\\text{Facteur quadratique restant : } ${quadratique}` : `N(x) = ${quadratique}`;
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return (
+          <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeInequationRationnelle(exerciceInitial), lettrePhaseInequationRationnelle(exerciceInitial, etat.phase))} />
+        );
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -902,9 +910,7 @@ export function AppInequationRationnelle() {
             />
           ) : undefined,
         reponseAttendue: reponseAttenduePhase(etat),
-        corrigeDetaille: (
-          <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeInequationRationnelle(exerciceInitial), lettrePhaseInequationRationnelle(exerciceInitial, etat.phase))} />
-        ),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

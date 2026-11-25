@@ -131,7 +131,7 @@ export function AppValeursRemarquables() {
     if (!derniere) return;
     setHistorique((h) => [
       ...h,
-      { titre: derniere.libelle, votreReponse, correcte: !derniere.revele, reponseAttendue: derniere.revele ? derniere.valeur : undefined },
+      { corrigeDetaille: corrigeDetailleEcranCourant(), titre: derniere.libelle, votreReponse, correcte: !derniere.revele, reponseAttendue: derniere.revele ? derniere.valeur : undefined },
     ]);
   }
 
@@ -179,6 +179,12 @@ export function AppValeursRemarquables() {
   const exercice = etat.exerciceCourant;
   const recapitulatif = calculerRecapitulatifValeursRemarquables(etat);
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeValeursRemarquables(exercice), lettreEcranValeursRemarquables(exercice, etat.phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -200,7 +206,7 @@ export function AppValeursRemarquables() {
           </>
         ),
         // Corrigé détaillé de l'écran qui se clôt (mêmes lignes que le papier).
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeValeursRemarquables(exercice), lettreEcranValeursRemarquables(exercice, etat.phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

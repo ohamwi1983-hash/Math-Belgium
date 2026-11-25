@@ -125,6 +125,7 @@ export function App5gen30() {
     setHistorique((h) => [
       ...h,
       {
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         titre: LIBELLE_ECRAN_LECTURE_GRAPHIQUE_DERIVEES[ecran],
         votreReponse,
         correcte: !revele,
@@ -170,12 +171,18 @@ export function App5gen30() {
   // Pendant la validation, les puces montrent déjà l'écran qui vient de se clore.
   const etatPuces = enAttente ? enAttente.etatSuivant : etat;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLectureGraphiqueDerivees(exercice), lettreEcranLectureGraphiqueDerivees(exercice, etat.phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         ...(enAttente.messageRevele ? { messageRevele: enAttente.messageRevele } : {}),
         reponseAttendue: reponseAttenduePhase(exercice, etat.phase),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLectureGraphiqueDerivees(exercice), lettreEcranLectureGraphiqueDerivees(exercice, etat.phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { CorrigeDepliable } from "./CorrigeDepliable";
 
 /**
  * Forme PARTAGÉE du prop `validation` de chaque composant d'écran (`EtapeXxx.tsx`) — toujours
@@ -19,9 +20,12 @@ export interface ValidationEtapeProps {
   /** Optionnel (rétrocompatible) : message affiché à la place de « Tentatives épuisées — … » quand
    * l'écran a été clos AVANT d'épuiser les tentatives (verdict fermé faux, qui ne se rejoue pas). */
   messageRevele?: ReactNode;
-  /** Optionnel (rétrocompatible) : corrigé détaillé « comme au tableau » de l'étape, affiché sous la
-   * réponse attendue quand elle est révélée — les MÊMES lignes que le corrigé papier
-   * (`correctionDetaillee` de l'adaptateur, rendu `CorrigeDetailleEcran.tsx`). */
+  /** Optionnel (rétrocompatible) : corrigé détaillé « comme au tableau » de l'étape — les MÊMES lignes
+   * que le corrigé papier (`correctionDetaillee` de l'adaptateur, rendu `CorrigeDetailleEcran.tsx`).
+   * Écran révélé : affiché sous la réponse attendue. Bonne réponse : replié derrière « Voir comment
+   * on y arrive » (`CorrigeDepliable`, décision du 25/11/2026). Jamais avant la réponse (ce bloc
+   * n'existe qu'une fois l'écran clos). Le MÊME nœud va dans l'entrée d'historique de l'étape
+   * (`EntreeHistoriqueEtape.corrigeDetaille`) pour la fiche de sa puce. */
   corrigeDetaille?: ReactNode;
   /** Optionnel (rétrocompatible) : figure montrée une fois l'écran validé, réussi OU révélé (ex. 4e
    * ch. 2 : courbe et tableau de signes de gen5/gen6). */
@@ -54,7 +58,7 @@ export function ValidationEcran({ revele, reponseAttendue, labelSuivant, onSuiva
         )}
       </div>
       {figureApres}
-      {revele && corrigeDetaille}
+      {revele ? corrigeDetaille : <CorrigeDepliable corrige={corrigeDetaille} />}
       <button type="button" className="btn btn-primary validation-suivant" onClick={onSuivant}>
         {labelSuivant}
       </button>

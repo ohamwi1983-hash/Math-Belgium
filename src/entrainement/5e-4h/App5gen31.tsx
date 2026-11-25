@@ -207,7 +207,7 @@ export function App5gen31() {
     const revele = nouvelEtat.revelesPartiels[ecran] ?? false;
     setHistorique((h) => [
       ...h,
-      { titre: LIBELLE_ECRAN_ETUDIER_FONCTION[ecran], votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttenduePhase(etat.exerciceCourant, ecran) : undefined },
+      { corrigeDetaille: corrigeDetailleEcranCourant(), titre: LIBELLE_ECRAN_ETUDIER_FONCTION[ecran], votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttenduePhase(etat.exerciceCourant, ecran) : undefined },
     ]);
   }
 
@@ -270,6 +270,13 @@ export function App5gen31() {
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
+
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEtudierFonction(exercice), lettreEcranEtudierFonction(exercice, etat.phase))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -283,7 +290,7 @@ export function App5gen31() {
             }
           : {}),
         reponseAttendue: reponseAttenduePhase(exercice, etat.phase),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeEtudierFonction(exercice), lettreEcranEtudierFonction(exercice, etat.phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

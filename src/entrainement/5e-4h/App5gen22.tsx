@@ -92,6 +92,7 @@ export function App5gen22() {
     setHistorique((h) => [
       ...h,
       {
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         titre: LIBELLE_PHASE_LECTURE_GRAPHIQUE[phaseClose],
         votreReponse,
         correcte: !revele,
@@ -129,6 +130,12 @@ export function App5gen22() {
   const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLectureGraphiqueLimites(exercice), lettrePhaseLectureGraphique(phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -150,7 +157,7 @@ export function App5gen22() {
             </span>
           ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLectureGraphiqueLimites(exercice), lettrePhaseLectureGraphique(phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.closTot
           ? listeAsymptotes(exercice).length > 0

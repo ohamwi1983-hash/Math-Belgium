@@ -95,7 +95,7 @@ export function AppRelationsRacines() {
           : etat.phase === "factorisation"
             ? nouvelEtat.factorisationRevele
             : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.equationDepuisRacinesRevele;
-      setHistorique((h) => [...h, ecranClos(TITRES[etat.phase], votreReponse, revele, aideEcran(etat), <Katex expression={recapDerniereReponse(etat)} />)]);
+      setHistorique((h) => [...h, ecranClos(TITRES[etat.phase], votreReponse, revele, aideEcran(etat), <Katex expression={recapDerniereReponse(etat)} />, corrigeDetailleEcranCourant())]);
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
@@ -126,11 +126,17 @@ export function AppRelationsRacines() {
   const exercice = etat.exerciceCourant;
   const recapitulatif = calculerRecapitulatifRelationsRacines(etat);
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeRelationsRacines(etat.exerciceCourant), lettrePhaseRelationsRacines(etat.phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : <Katex expression={recapDerniereReponse(etat)} />,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeRelationsRacines(etat.exerciceCourant), lettrePhaseRelationsRacines(etat.phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

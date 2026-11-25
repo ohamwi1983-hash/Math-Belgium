@@ -119,7 +119,7 @@ export function AppInequation() {
               ? nouvelEtat.signeARevele
               : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.intervalleRevele;
       const aide = etat.phase === "simplification" ? etat.aideSimplificationUtilisee : etat.phase === "intervalle" ? etat.aideUtilisee : false;
-      setHistorique((h) => [...h, ecranClos(TITRES[etat.phase], votreReponse, revele, aide, reponseAttendueEcran(etat.phase, nouvelEtat))]);
+      setHistorique((h) => [...h, ecranClos(TITRES[etat.phase], votreReponse, revele, aide, reponseAttendueEcran(etat.phase, nouvelEtat), corrigeDetailleEcranCourant())]);
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
@@ -150,6 +150,12 @@ export function AppInequation() {
   const exercice = etat.exerciceCourant;
   const recapitulatif = calculerRecapitulatifInequation(etat);
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeInequations(exercice), lettrePhaseInequation(exercice, etat.phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -165,7 +171,7 @@ export function AppInequation() {
                 : <>Réponse attendue : S = {formatSolutionEnsemble(exercice.solution)}</>,
         // Corrigé de l'exercice COURANT : après la simplification, il est déjà réduit (mêmes étapes
         // suivantes, sans l'écran de simplification — `phasesInequation`).
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeInequations(exercice), lettrePhaseInequation(exercice, etat.phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

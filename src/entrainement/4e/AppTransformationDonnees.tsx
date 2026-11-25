@@ -86,7 +86,7 @@ export function AppTransformationDonnees() {
       return;
     }
     const attendue = reponseAttendue(def);
-    setHistorique((h) => [...h, ecranClos(TITRES_ECRANS[ecran]!, votreReponse, resultat.revele, etat.niveauAide > 0, attendue)]);
+    setHistorique((h) => [...h, ecranClos(TITRES_ECRANS[ecran]!, votreReponse, resultat.revele, etat.niveauAide > 0, attendue, corrigeDetailleEcranCourant())]);
     setEtat(resultat.etat);
     setEnAttente({
       revele: resultat.revele,
@@ -108,6 +108,12 @@ export function AppTransformationDonnees() {
     setEnAttente(null);
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTransformationDonnees(e), lettreEtape(ecran))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -115,7 +121,7 @@ export function AppTransformationDonnees() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTransformationDonnees(e), lettreEtape(ecran))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

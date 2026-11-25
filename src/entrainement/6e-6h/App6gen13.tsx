@@ -75,6 +75,7 @@ export function App6gen13() {
         setHistorique((h) => [
           ...h,
           {
+            corrigeDetaille: corrigeDetailleEcranCourant(),
             titre: libellePhase(exercice, etat.phase),
             votreReponse,
             correcte: !revele,
@@ -127,12 +128,16 @@ export function App6gen13() {
 
   // Corrigé détaillé « comme au tableau » de l'étape algébrique (mêmes lignes que le papier,
   // `corrigeDetaille.ts`) : écran de choix et écran de transformation d'une même étape.
-  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeProprietesLogarithme(exercice), lettreEtape(ecran.etape))} />;
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeProprietesLogarithme(exercice), lettreEtape(ecran.etape))} />;
+  }
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        corrigeDetaille,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         reponseAttendue: (
           <span className="equation-box-termes">
             {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (

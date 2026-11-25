@@ -94,6 +94,7 @@ export function App6gen8() {
         const derniere = recap[0];
         if (derniere) {
           setHistoriqueDerivee({
+            corrigeDetaille: corrigeDetailleEcranCourant(),
             titre: derniere.libelle,
             votreReponse,
             correcte: !derniere.revele,
@@ -150,14 +151,18 @@ export function App6gen8() {
   }
 
   // Corrigé détaillé « comme au tableau » de l'écran (source unique avec le papier).
-  const corrigeDetaille = (
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return (
     <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeGraphiquesDeriveeExponentielles(exercice), lettreEtape(sequenceGraphiquesDeriveeExponentielles(exercice).indexOf(etat.phase)))} />
   );
+  }
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        corrigeDetaille,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         reponseAttendue:
           etat.phase === "derivee" ? (
             formatDeriveeCorrecteLatex(exercice) && <Katex expression={formatDeriveeCorrecteLatex(exercice) as string} />

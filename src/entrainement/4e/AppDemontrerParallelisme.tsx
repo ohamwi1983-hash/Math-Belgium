@@ -111,7 +111,7 @@ export function AppDemontrerParallelisme() {
 
   function conclure(correct: boolean, votreReponse: ReactNode, attendueTexte: string, messageRevele: string) {
     const attendue = <p style={{ margin: 0 }}>{attendueTexte}</p>;
-    setHistorique((h) => [...h, ecranClos(courant.titre, votreReponse, !correct, etat.niveauAide > 0, attendue)]);
+    setHistorique((h) => [...h, ecranClos(courant.titre, votreReponse, !correct, etat.niveauAide > 0, attendue, corrigeDetailleEcranCourant())]);
     setEnAttente({ revele: !correct, reponseAttendue: attendue, messageRevele, derniere: ecran >= total - 1 });
   }
 
@@ -125,6 +125,12 @@ export function AppDemontrerParallelisme() {
     setEnAttente(null);
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDemontrerParallelisme(e, paires), lettreEtape(ecran)).map((x) => ({ ...x, figureHtml: undefined }))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -133,7 +139,7 @@ export function AppDemontrerParallelisme() {
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
         // Corrigé détaillé de l'étape (même source que le papier) ; la figure finale est déjà à l'écran.
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDemontrerParallelisme(e, paires), lettreEtape(ecran)).map((x) => ({ ...x, figureHtml: undefined }))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

@@ -202,7 +202,7 @@ export function AppMediane() {
                         : dernierResultat().syntheseRevele;
       setHistorique((h) => [
         ...h,
-        { titre: TITRE_PHASE[etat.phase], votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttenduePhase(etat.phase) : undefined },
+        { corrigeDetaille: corrigeDetailleEcranCourant(), titre: TITRE_PHASE[etat.phase], votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttenduePhase(etat.phase) : undefined },
       ]);
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
@@ -307,13 +307,19 @@ export function AppMediane() {
     </>
   );
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeMediane(exercice), lettreEtape(sequencePourExercice(exercice).indexOf(phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeMediane(exercice), lettreEtape(sequencePourExercice(exercice).indexOf(phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

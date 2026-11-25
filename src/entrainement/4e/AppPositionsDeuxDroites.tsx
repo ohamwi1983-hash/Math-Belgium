@@ -108,7 +108,7 @@ export function AppPositionsDeuxDroites() {
       return;
     }
     const attendue = <RenduFragments fragments={def.reponse} />;
-    setHistorique((h) => [...h, ecranClos(def.titre, votreReponse, resultat.revele, etat.niveauAide > 0, attendue)]);
+    setHistorique((h) => [...h, ecranClos(def.titre, votreReponse, resultat.revele, etat.niveauAide > 0, attendue, corrigeDetailleEcranCourant())]);
     setEtat(resultat.etat);
     setEnAttente({
       revele: resultat.revele,
@@ -129,6 +129,12 @@ export function AppPositionsDeuxDroites() {
     setEnAttente(null);
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDeuxDroitesPlan(e), lettreEtape(ecran))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -136,7 +142,7 @@ export function AppPositionsDeuxDroites() {
         labelSuivant: enAttente.derniere ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDeuxDroitesPlan(e), lettreEtape(ecran))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

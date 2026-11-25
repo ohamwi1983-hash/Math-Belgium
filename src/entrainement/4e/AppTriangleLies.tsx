@@ -130,7 +130,7 @@ export function AppTriangleLies() {
     if (!entree) return;
     setHistorique((h) => [
       ...h,
-      { titre: entree.libelle, votreReponse, correcte: !entree.revele, reponseAttendue: entree.revele ? entree.valeur : undefined },
+      { corrigeDetaille: corrigeDetailleEcranCourant(), titre: entree.libelle, votreReponse, correcte: !entree.revele, reponseAttendue: entree.revele ? entree.valeur : undefined },
     ]);
   }
 
@@ -186,6 +186,12 @@ export function AppTriangleLies() {
   const reponseAttendue: ReactNode =
     etat.phase === "interpretation" ? optionCorrecte?.texte : entreeCourante?.valeur;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTriangleLies(exercice), lettreEtape(sequencePourVariante(exercice).indexOf(etat.phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -194,7 +200,7 @@ export function AppTriangleLies() {
         reponseAttendue,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTriangleLies(exercice), lettreEtape(sequencePourVariante(exercice).indexOf(etat.phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

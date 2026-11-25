@@ -82,7 +82,7 @@ export function App6gen20() {
         const revele = nouvelEtat.derniereTransitionRevelee;
         setHistorique((h) => [
           ...h,
-          { titre: "Graphique de f'", votreReponse: `Graphique ${LETTRES[indexChoisi] ?? indexChoisi + 1}`, correcte: !revele, reponseAttendue: revele ? reponseSelection : undefined },
+          { corrigeDetaille: corrigeDetailleEcranCourant(), titre: "Graphique de f'", votreReponse: `Graphique ${LETTRES[indexChoisi] ?? indexChoisi + 1}`, correcte: !revele, reponseAttendue: revele ? reponseSelection : undefined },
         ]);
       }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
@@ -118,12 +118,16 @@ export function App6gen20() {
 
   // Corrigé détaillé « comme au tableau » de l'étape (mêmes lignes que le papier, `corrigeDetaille.ts`),
   // affiché sous la réponse attendue quand elle est révélée.
-  const corrigeDetaille = <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeGraphiqueDeriveeLog(exercice), lettreEtape(etat.phase === "selection" ? 0 : 1))} />;
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeGraphiqueDeriveeLog(exercice), lettreEtape(etat.phase === "selection" ? 0 : 1))} />;
+  }
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        corrigeDetaille,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         reponseAttendue: etat.phase === "derivee" ? <Katex expression={formatDeriveeCorrecteLatex(exercice)} block /> : reponseSelection,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

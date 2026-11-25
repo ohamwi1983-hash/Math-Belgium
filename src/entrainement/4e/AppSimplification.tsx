@@ -208,7 +208,7 @@ export function AppSimplification() {
     // fraction simplifiée finale n'en ajoute pas) ; réponse attendue = celle de l'écran de validation.
     const nouvelle = entreeAjoutee(calculerRecapitulatifSimplification(etat), calculerRecapitulatifSimplification(nouvelEtat));
     const attendue = reponseAttendueEcran(etat.phase) ?? (nouvelle ? valeurRecap(nouvelle) : undefined);
-    setHistorique((h) => [...h, ecranClos(nouvelle?.libelle ?? "Fraction simplifiée", votreReponse, revele, aideEcran(etat), attendue)]);
+    setHistorique((h) => [...h, ecranClos(nouvelle?.libelle ?? "Fraction simplifiée", votreReponse, revele, aideEcran(etat), attendue, corrigeDetailleEcranCourant())]);
     setEnAttente({ etatSuivant: nouvelEtat, revele });
   }
 
@@ -238,12 +238,18 @@ export function AppSimplification() {
   const { tentativesMax } = etat.reglages;
   const exercice = etat.exerciceCourant;
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSimplification(exercice), lettrePhaseSimplification(exercice, etat.phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         messageRevele: /econnaissance/.test(etat.phase) ? "Ce n'était pas la bonne réponse." : undefined,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : reponseAttendueEcran(etat.phase),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSimplification(exercice), lettrePhaseSimplification(exercice, etat.phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

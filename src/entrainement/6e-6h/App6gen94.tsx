@@ -86,7 +86,7 @@ export function App6gen94() {
     }
     const revele = nouvelEtat.derniereTransitionRevelee;
     setAideParPhase((prev) => ({ ...prev, [phase]: etat.niveauAide > 0 }));
-    setHistorique((h) => [...h, { titre: libellePhase(phase), votreReponse: votreReponse(valeurs), correcte: !revele, reponseAttendue: revele ? reponseAttendue() : undefined }]);
+    setHistorique((h) => [...h, { corrigeDetaille: corrigeDetailleEcranCourant(), titre: libellePhase(phase), votreReponse: votreReponse(valeurs), correcte: !revele, reponseAttendue: revele ? reponseAttendue() : undefined }]);
     setEnAttente({ etatSuivant: nouvelEtat, revele });
   }
 
@@ -119,10 +119,16 @@ export function App6gen94() {
     (window as unknown as { __debug6gen94?: unknown }).__debug6gen94 = { exercice, phase };
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDeuxEcritures(exercice), lettreEtape(PHASES_DEUX_ECRITURES.indexOf(phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeDeuxEcritures(exercice), lettreEtape(PHASES_DEUX_ECRITURES.indexOf(phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         reponseAttendue: reponseAttendue(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,

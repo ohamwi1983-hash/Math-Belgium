@@ -100,7 +100,7 @@ export function App6gen74() {
       const revele = nouvelEtat.derniereTransitionRevelee;
       setAideParPhase((prev) => ({ ...prev, [phaseFermee]: etat.niveauAide > 0 }));
       if (votreReponse !== undefined) {
-        setHistorique((h) => [...h, { titre: LIBELLE_PHASE[phaseFermee], votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttendue(phaseFermee) : undefined }]);
+        setHistorique((h) => [...h, { corrigeDetaille: corrigeDetailleEcranCourant(), titre: LIBELLE_PHASE[phaseFermee], votreReponse, correcte: !revele, reponseAttendue: revele ? reponseAttendue(phaseFermee) : undefined }]);
       }
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
@@ -144,13 +144,19 @@ export function App6gen74() {
     aideNiveau2: aideNiveau2(exercice, phase),
   };
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeArbreTableauEffectifs(exercice), lettreEcranArbreTableau(exercice, phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
         reponseAttendue: reponseAttendue(phase),
         // Corrigé détaillé « comme au tableau » de l'écran (même source que le papier), affiché par
         // `ValidationEcran` quand les tentatives sont épuisées.
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeArbreTableauEffectifs(exercice), lettreEcranArbreTableau(exercice, phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
         ...(phase === "independance" ? { messageRevele: "Ce n'était pas la bonne réponse." } : {}),

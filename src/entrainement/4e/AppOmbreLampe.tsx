@@ -82,7 +82,7 @@ export function AppOmbreLampe() {
     const n = ecran as 0 | 1;
     const choisi = e.ecrans[n].candidats.find((c) => c.id === id)!;
     const juste = choisi.erreur === "aucune";
-    setHistorique((h) => [...h, ecranClos(titresEcrans(e)[n], fiche.votreReponse, !juste, niveauAide > 0, fiche.reponseAttendue)]);
+    setHistorique((h) => [...h, ecranClos(titresEcrans(e)[n], fiche.votreReponse, !juste, niveauAide > 0, fiche.reponseAttendue, corrigeDetailleEcranCourant())]);
     setEnAttente({ revele: !juste, messageRevele: messageErreur(choisi.erreur) });
   }
 
@@ -92,6 +92,12 @@ export function AppOmbreLampe() {
     setEnAttente(null);
   }
 
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeOmbreLampe(exercice, ""), lettreEtape(ecran))} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -99,7 +105,7 @@ export function AppOmbreLampe() {
         onSuivant: passerEcranSuivant,
         messageRevele: enAttente.messageRevele,
         // Corrigé détaillé de l'étape (même source que le papier) ; la construction complète suit à l'écran.
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeOmbreLampe(exercice, ""), lettreEtape(ecran))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 

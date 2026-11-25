@@ -123,6 +123,7 @@ export function App6gen10() {
         setHistorique((h) => [
           ...h,
           {
+            corrigeDetaille: corrigeDetailleEcranCourant(),
             titre: LIBELLE_PHASE_INEQ[etat.phase],
             votreReponse,
             correcte: !revele,
@@ -184,6 +185,13 @@ export function App6gen10() {
   }
 
   const contenuRecap = contenuRecapPhase(exercice, phase);
+
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={phase === "existence" ? lignesDeLEtape(etapesExistenceIneqExpo(exercice), "a") : lignesDeLEtape(correctionDetailleeInequationsExpo(exercice), lettrePhaseInequationExpo(exercice, phase))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -192,7 +200,7 @@ export function App6gen10() {
         onSuivant: passerEcranSuivant,
         // Corrigé détaillé « comme au tableau » de l'étape (mêmes lignes que le papier, `corrigeDetaille.ts`),
         // affiché sous la réponse attendue quand elle est révélée.
-        corrigeDetaille: <CorrigeDetailleEcran etapes={phase === "existence" ? lignesDeLEtape(etapesExistenceIneqExpo(exercice), "a") : lignesDeLEtape(correctionDetailleeInequationsExpo(exercice), lettrePhaseInequationExpo(exercice, phase))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 
