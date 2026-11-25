@@ -97,7 +97,7 @@ jetons sous `:root:is([data-theme=clair|creme|contraste])` (copie des valeurs cl
 leur palette (rôles d'encadrés gardés). Jetons de composant posés sous `prefers-color-scheme` repris
 dans les deux sens : `.site-header --logo-fond`, `.accueil` (`--sombre`…), `.accueil-reprendre`,
 `.eleve-recap`, `.entrainement --solide3d-*`, `--admin-*`, `--profil-*`, `--agenda-*`, `--carnet-*`.
-Contraste élevé : traits 2 px (encadrés, tiroirs, cartes), filet gauche 5 px, liens soulignés.
+Contraste élevé : traits 2 px (encadrés, tiroirs, cartes), filet gauche 5 px, liens soulignés ; `--line-soft` #8f8f8f (filet 3,2:1 ET fond de pistes / onglets d'année : texte noir dessus 6,5:1 — le #4a4a4a de la maquette rendait les onglets d'année illisibles) ; bouton désactivé des générateurs blanc à trait tireté.
 **Projection (professeur) jamais touchée** : chaque thème et « animations réduites » sont gardés par
 `:not(:has(.projection))` (navigateur sans `:has()` : thème de l'appareil, comme avant).
 Contrastes mesurés (Playwright, étape 1 de Suites, téléphone et 1 280 px) — sous-titre / fil d'Ariane /
@@ -110,7 +110,7 @@ chapitre » et parties de la carte (sur `--paper`) : clair 5,61, sombre 8,37, cr
   dans une étape ; `etape` — barre collante de l'étape ; `outil` — « Lecture » dans `OutilsChapitre`),
   pastille orange (`:root[data-lecture-perso] .pastille-reglee`, sans attendre le JS), `aria-expanded`,
   nom accessible « Confort de lecture… (réglage personnel actif) ». Téléphone ≤ 480 px hors étape :
-  « Professeur » en icône seule (une ligne d'en-tête). Bouton dans la barre des générateurs : lot G
+  « Professeur » en icône seule (une ligne d'en-tête) ; sous 360 px partout, marges resserrées : une ligne dès 320 px (avant : deux lignes sous 360 px). Bouton dans la barre des générateurs : lot G
   (`ouvrirPanneauLecture` suffit).
 - `etatPanneauLecture.ts` : un seul panneau (`HotePanneauLecture` dans `App`, panneau chargé à la demande
   à la première ouverture), focus rendu au bouton d'origine (sinon à un `[data-bouton-lecture]` visible).

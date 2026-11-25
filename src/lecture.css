@@ -62,10 +62,12 @@
     --sky: #2b649e; --sky-ink: #1d476f; --sky-soft: #dfe3e0; --on-sky: #f5f3ec; --on-accent: #fff8ee;
     --histoire-soft: #efdfc4; --parch-1: #f5e8cc; --parch-2: #ecd7ab;
   }
-  /* Contraste élevé : noir sur blanc, traits pleins de 2 px, liens soulignés ; secondaire ≥ 12:1. */
+  /* Contraste élevé : noir sur blanc, traits pleins de 2 px, liens soulignés ; secondaire ≥ 12:1.
+     `--line-soft` sert de filet ET de fond (pistes, onglets d'année) : #8f8f8f = 3,2:1 comme filet,
+     texte noir dessus 6,5:1 (le #4a4a4a de la maquette rendait les onglets d'année illisibles). */
   :root[data-theme="contraste"]:not(:has(.projection)) {
     --paper: #ffffff; --surface: #ffffff; --surface-2: #ffffff; --ink: #000000; --ink-soft: #1f1f1f; --ink-faint: #333333;
-    --line: #000000; --line-soft: #4a4a4a; --accent: #8c3b00; --accent-ink: #5c2600; --accent-soft: #ffe9d6; --accent-soft-line: #8c3b00;
+    --line: #000000; --line-soft: #8f8f8f; --accent: #8c3b00; --accent-ink: #5c2600; --accent-soft: #ffe9d6; --accent-soft-line: #8c3b00;
     --good: #0b5d2a; --good-soft: #e3f4e8; --bad: #9e0000; --bad-soft: #ffe5e5; --attn: #6b4500; --attn-soft: #fff1d6;
     --tip: #5c4d00; --tip-soft: #fff7d1; --plan: #3d2f8f; --plan-ink: #2a1f6e; --plan-soft: #efebff;
     --sky: #0f4f8f; --sky-ink: #0a3a6b; --sky-soft: #e6f0fb; --on-sky: #ffffff; --on-accent: #ffffff;
@@ -75,6 +77,11 @@
     border-width: 2px; border-color: #000;
   }
   :root[data-theme="contraste"]:not(:has(.projection)) .parcours .callout { border-left-width: 5px; }
+  /* Bouton désactivé des générateurs (fond `--line-soft`, texte `--ink-soft`) : illisible en noir sur gris
+     foncé ; ici blanc, trait tireté, texte gris foncé (8,9:1). */
+  :root[data-theme="contraste"]:not(:has(.projection)) .entrainement .btn-primary:disabled {
+    background: #ffffff; border: 2px dashed #4a4a4a; color: #4a4a4a;
+  }
   :root[data-theme="contraste"]:not(:has(.projection)) :is(.parcours, .accueil, .entrainement) a:not(.btn-parcours, .btn-reprendre, .etape-lien, .accueil-chapitre, .accueil-reprendre, .accueil-preparer, [role="tab"]) {
     text-decoration: underline; text-underline-offset: 3px;
   }
@@ -254,6 +261,11 @@
   body:not(:has(.etape-entete)) .site-header .menu-compte-lien { width: 44px; padding: 0; justify-content: center; font-size: 0; gap: 0; }
   body:not(:has(.etape-entete)) .site-header .menu-compte-lien svg { width: 20px; height: 20px; }
 }
+/* Très petit écran (320 px) : marque · loupe · Aa · Professeur sur une ligne aussi (avant : deux lignes
+   sous 360 px, même sans « Aa »). « Professeur » en icône seule partout, marges resserrées. */
 @media (max-width: 359.98px) {
+  .site-header-inner { padding-left: 8px; padding-right: 8px; column-gap: 2px; }
   body:not(:has(.etape-entete)) .site-header .brand-nom { font-size: 14px; }
+  .site-header .menu-compte-lien { width: 44px; padding: 0; justify-content: center; font-size: 0; gap: 0; }
+  .site-header .menu-compte-lien svg { width: 20px; height: 20px; }
 }
