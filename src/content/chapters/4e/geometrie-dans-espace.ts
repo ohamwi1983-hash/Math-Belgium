@@ -725,6 +725,12 @@ export const geometrieDansEspace: ChapterContent = {
             'passe par ce point.',
         },
         {
+          kind: 'para',
+          text:
+            '**Conséquence** : si deux plans sécants ont plusieurs points communs, tous ces points sont sur leur droite ' +
+            'd\'intersection — ils sont **alignés**. C\'est la méthode pour démontrer que trois points de l\'espace sont alignés.',
+        },
+        {
           kind: 'illustrationGroup',
           items: [
             {
