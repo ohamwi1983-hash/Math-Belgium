@@ -13,6 +13,7 @@ import { SuiviEssaiContext, SuiviVerdictContext, type NoterEssai } from '../lib/
 import '../entrainement/theme.css'
 import '../entrainement/cadre.css'
 import '../entrainement/confortLecture.css'
+import { libelleChapitre, useOrdreChapitres } from '../lib/ordreChapitres'
 
 /** Page générique `/entrainement/:chantier/:generatorId` pour TOUT générateur rapatrié depuis
  * plateforme-maths (voir `ENTRAINEMENT_REGISTRY`) — remplace une page dédiée par générateur :
@@ -96,6 +97,7 @@ export function EntrainementPage() {
     }
   }, [])
 
+  const { ordre } = useOrdreChapitres()
   const section = useMemo(() => {
     if (!entry || !generatorId) return undefined
     const chapter = findChapter(entry.chantier, entry.chapitreSlug)
@@ -103,6 +105,7 @@ export function EntrainementPage() {
   }, [entry, generatorId])
 
   if (!entry || entry.chantier !== chantier) return <Navigate to="/" replace />
+  const chapitreGen = findChapter(entry.chantier, entry.chapitreSlug)
 
   const lienChapitre = `/${entry.chantier}/${entry.chapitreSlug}${section ? `#${section.id}` : ''}`
   const libelleRetour = `Retour ${section ? `à « ${section.title} »` : `au chapitre « ${entry.chapitreTitle} »`}`
@@ -117,6 +120,14 @@ export function EntrainementPage() {
           libelleRetour={libelleRetour}
           contexte={`${LEVEL_LABELS[entry.chantier] ?? entry.chantier} · ${entry.chapitreTitle}`}
         />
+        {/* Ligne du chapitre IMPRIMÉE : les générateurs écrivent « Chapitre n — Titre » (numéro du site) dans
+            `.app-subtitle`, masquée à l'écran et désormais aussi à l'impression (`index.css`) ; à la place,
+            le titre seul, ou le numéro du professeur connecté qui a rangé ses chapitres (`lib/ordreChapitres.ts`). */}
+        {chapitreGen && (
+          <div className="gen-chapitre-imprime">
+            <span className="impression-seule">{`${LEVEL_LABELS[entry.chantier] ?? entry.chantier} · ${libelleChapitre(chapitreGen, ordre)}`}</span>
+          </div>
+        )}
         {generatorId && <LienVideoGenerateur generatorId={generatorId} />}
         <Suspense fallback={null}>{Component && <Component />}</Suspense>
         <CadreActions racineRef={racineRef} />
