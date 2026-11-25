@@ -868,7 +868,9 @@ export interface QuestionOuverte {
  * LaTeX brut s'afficher littéralement sur la copie imprimée. Le gras n'a pas d'équivalent dans
  * `FragmentTexte` et est donc aplati (délimiteurs retirés, texte conservé). */
 function parseRichText(texte: string): FragmentTexte[] {
-  const sansGras = texte.replace(/\*\*(.*?)\*\*/g, '$1')
+  // Correspondances des exemples clés (`\htmlClass{m1}{…}`, option élève à l'écran seulement) : retirées
+  // ici, le papier et le Word ne les connaissent pas (KaTeX sans `trust` les écrirait en rouge).
+  const sansGras = texte.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\\htmlClass\{m[1-3]\}/g, '')
   const morceaux = sansGras.split(/\$([^$]+)\$/g)
   const fragments: FragmentTexte[] = []
   morceaux.forEach((valeur, i) => {

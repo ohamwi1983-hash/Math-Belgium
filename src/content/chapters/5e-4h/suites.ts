@@ -101,10 +101,14 @@ export const suites: ChapterContent = {
           kind: 'exemple',
           badge: 'retrouver la raison',
           formula:
-            'Le premier terme d\'une suite arithmétique vaut $u_1 = 7$. Son sixième terme vaut ' +
-            '$u_6 = 22$. Calcule la raison $r$.',
+            'Le premier terme d\'une suite arithmétique vaut $\\htmlClass{m2}{u_1} = \\htmlClass{m2}{7}$. Son sixième terme vaut ' +
+            '$\\htmlClass{m1}{u_6} = \\htmlClass{m1}{22}$. Calcule la raison $r$.',
+          correspondances: [['u_6', '22'], ['u_1', '7'], ['(6-1)', '5']],
           steps: [
-            { tag: 'poser la formule générale pour n = 6', text: '$u_6 = u_1 + (6-1)r \\implies 22 = 7 + 5r$' },
+            {
+              tag: 'poser la formule générale pour n = 6',
+              text: '$\\htmlClass{m1}{u_6} = \\htmlClass{m2}{u_1} + \\htmlClass{m3}{(6-1)}r \\implies \\htmlClass{m1}{22} = \\htmlClass{m2}{7} + \\htmlClass{m3}{5}r$',
+            },
             { tag: 'isoler r', text: '$5r = 22 - 7 = 15 \\implies r = 3$' },
           ],
           result: { tag: 'résultat', text: 'r = 3 — la suite est (7 ; 10 ; 13 ; 16 ; 19 ; 22 ; ...)' },
@@ -431,10 +435,14 @@ export const suites: ChapterContent = {
           kind: 'exemple',
           badge: 'retrouver la raison',
           formula:
-            "Le premier terme d'une suite géométrique vaut $u_1 = \\frac{1}{2}$. Son septième " +
-            'terme vaut $u_7 = 32$. Calcule la raison $q$ (positive).',
+            "Le premier terme d'une suite géométrique vaut $\\htmlClass{m2}{u_1} = \\htmlClass{m2}{\\frac{1}{2}}$. Son septième " +
+            'terme vaut $\\htmlClass{m1}{u_7} = \\htmlClass{m1}{32}$. Calcule la raison $q$ (positive).',
+          correspondances: [['u_7', '32'], ['u_1', '\\frac{1}{2}']],
           steps: [
-            { tag: 'poser la formule générale pour n = 7', text: '$u_7 = u_1 \\times q^6 \\implies 32 = \\dfrac{1}{2} \\times q^6$' },
+            {
+              tag: 'poser la formule générale pour n = 7',
+              text: '$\\htmlClass{m1}{u_7} = \\htmlClass{m2}{u_1} \\times q^6 \\implies \\htmlClass{m1}{32} = \\htmlClass{m2}{\\dfrac{1}{2}} \\times q^6$',
+            },
             { tag: 'isoler q⁶ puis extraire la racine 6e', text: '$q^6 = 64 \\implies q = \\sqrt[6]{64} = 2$' },
           ],
           result: { tag: 'résultat', text: 'q = 2 — la suite est (0,5 ; 1 ; 2 ; 4 ; 8 ; 16 ; 32 ; ...)' },
