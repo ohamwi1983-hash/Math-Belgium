@@ -5870,6 +5870,22 @@ pilotes avec processus, `regroupementsPapier.ts` : 6gen111, 6gen114). Aucun bloc
 encore E(aX + b) = aE(X) + b et V(aX + b) = a²V(X) (6gen111, démonstration D2 du lot F), ni P(a < X ≤ b) = F(b) − F(a) pour
 une variable discrète (6gen112 escalier), ni « trouver k » (6gen113) ni le sens inverse de la loi uniforme (6gen115).
 
+## 6e (6h), Chapitre 10 — lot H2 de l'audit (nouveaux générateurs 6gen138–6gen143, 25/11/2026)
+
+Six générateurs nouveaux sur le socle `AppEcransTrigo` (détail, profils et mesures : `.claude/rules/feuilles-evaluations.md`,
+section « 6e ch. 10, lot H2 ») : 6gen138 tangente par la dérivée et forme dédoublée (§ 5 `tangentes`, Appliquer), 6gen139
+position d'une droite et d'une conique selon un paramètre (§ 4–5, carte au § 5, Transférer), 6gen140 miroirs en contexte
+(§ 6 `optique`, Transférer), 6gen141 orbites et ellipses : Kepler (§ 1 et § 3, carte au § 3 `airefocale`, Transférer),
+6gen142 hyperbole de navigation : LORAN (§ 6, Transférer), 6gen143 détective d'erreurs : coniques (fin, carte en fin de § 6,
+Transférer). Convention y² = 2px partout. Cartes « S'entraîner » ajoutées en fin de section (après 6gen60 : 141 ; après
+6gen62 : 138, 139 ; après 6gen63 : 140, 142, 143) ; registres par ajout (`registry.ts` après 6gen73,
+`evaluationAdapterRegistry.ts` avec `versionPapier` après 6gen63, `evaluationPayload.ts` : union et entrées pilotes,
+processus 2 / 3 / 3 / 3 / 3 / 3, `regroupementsPapier.ts` : 6gen138, 6gen139). Aucun bloc de cours ajouté ; le cours doit
+porter (lot F) : la condition de tangence k² = a²m² ± b² et le cas « droite parallèle à une asymptote / à l'axe : un
+seul point, pas une tangente » (6gen139), FT = FP pour la parabole (6gen140 `ftfp`), la distance focale D²/(16h) d'une
+antenne et les trajets 2a du lithotriteur (6gen140), le LORAN avec ses deux intersections possibles (6gen142). Module de
+figures propre au lot (`ui6e/outilsConiquesLotH2.ts`) : la figure de coniques des lots BC / H1 n'était pas fusionnée.
+
 ## 6e (6h), Chapitre 9 — lot H2 de l'audit (nouveaux générateurs 6gen128–6gen131, 25/11/2026)
 
 Quatre générateurs nouveaux sur le socle `AppEcransTrigo` (détail, profils et mesures : `.claude/rules/feuilles-evaluations.md`,
@@ -6230,3 +6246,128 @@ somme ou différence = |MM′|, rapport = sin θ / cos 30°) : 0 faux. Gestes au
 panneau : P glissé (ellipse, puis seconde branche), F glissé, P promené (trace), point d'impact glissé, P dans la vraie
 forme, boutons ; aucun défilement du panneau pendant un glisser. Épinglage dans le panneau : 0 KO à 390 × 664 et
 375 × 667 (8 ateliers du chapitre). Scripts et captures : `scratchpad/g1-6e10/`.
+
+## 6e (6h), Chapitre 10 — lot G de l'audit, seconde moitié (4 ateliers, agent G2, 25/11/2026)
+
+Quatre blocs `atelier` ajoutés, seuls (aucun autre bloc touché), placés par ancre solide (le cours est réécrit en
+parallèle). Même style que G1 : `geo-analytique-commun.js` à fenêtre FIXE et ORTHONORMÉ, `katex-shadow.js`, curseurs
+− / +, `placeurEtiquettes`, figure dans une `<svg>` sans bouton dans son conteneur ; `coniques-commun.js` réutilisé tel
+quel (rationnels exacts, tracés, chemins découpés, arcs d'angle), rien n'y est modifié. Convention y² = 2px partout.
+- **`triangle-focal-widget`** (§ 3 A, juste après la figure du triangle FPF′ de l'exemple |PF| = 2|PF′|) : a et b
+  entiers (b < a), P glissé sur l'ellipse ; |PF| = a − e·x_P et |PF′| = a + e·x_P comparés aux longueurs MESURÉES,
+  somme 2a, encadrement a − c ≤ |PF| ≤ a + c (exact) ; θ = F′PF mesuré, θ_max aux sommets (0 ; ±b) avec
+  sin(θ_max/2) = e ; aire de trois façons (½·|PF|·|PF′|·sin θ, c·|y_P|, b²·tan(θ/2)). Mode « Angle imposé » : θ au
+  degré, les quatre points construits (rayons racines de t² − 2at + 2b²/(1 + cos θ)) ou « aucun point » au-delà de
+  θ_max (le produit 2b²/(1 + cos θ) dépasserait a²). Préréglage « Exemple du cours » avec ses valeurs exactes (10/3,
+  20/3, cos θ = 11/25, aire 8√14/3).
+- **`droite-conique-widget`** (§ 4, juste après la figure de la droite qui coupe l'hyperbole de l'exemple résolu ;
+  base `droite-cercle-widget` du 4e, réécrite) : ellipse x² + 4y² = 8 et parabole y² = 2x (exemples du cours),
+  hyperbole 4x² − y² = 4 et hyperbole d'axe vertical y² − 4x² = 4 ; droite y = mx + k (m, k au pas de 1/4, deux
+  poignées : ordonnée à l'origine, pente) ou x = h. Substitution écrite en valeurs EXACTES (nombres p + q√r), équation
+  à coefficients entiers premiers entre eux (premier positif), Δ = B² − 4AC, points en fractions ou racines
+  simplifiées ; « Δ a le signe de 8m² + 2 − k² » (selon la conique). Verdicts : sécante, tangente (point double),
+  extérieure, et le cas C8 de l'audit — coefficient de x² nul (parallèle à une asymptote ou à l'axe) : premier degré,
+  UN point SANS tangence (y = 2x + 1 → (−5/4 ; −3/2), y = 3 → (9/2 ; 3)) — ou aucun point (l'asymptote elle-même).
+  « Garder la droite tangente » : k par Δ = 0 (racine exacte, « Autre tangente » pour le signe), la droite roule quand
+  m change ; tangentes verticales x = ±2√2, x = ±1, x = 0, aucune pour l'hyperbole verticale. **Bug évité, à retenir**
+  : pour l'hyperbole, k² = a²m² − b² = 0 (m = ±b/a) donne l'ASYMPTOTE, pas une tangente — condition stricte k² > 0
+  (le panneau le dit) ; trouvé par le balayage.
+- **`tangente-dedoublee-widget`** (§ 5, juste après la figure de la tangente à l'ellipse en P(3 ; 3,2)) : ellipse
+  x²/25 + y²/16 = 1, hyperbole x²/9 − y²/16 = 1 (deux branches), parabole y² = 4x (p = 2) ; P glissé, AIMANTÉ aux
+  points à coordonnées rationnelles simples (énumérés : x = n/d, d ≤ 6, y² carré rationnel ; parabole y = n/2) :
+  valeurs exactes là (vérification « P est sur la conique », forme dédoublée avec les nombres, forme entière ax + by = c,
+  y = mx + q ; pente −b²x_P/(a²y_P), b²x_P/(a²y_P) ou p/y_P, et y − y_P = m(x − x_P)), valeurs approchées ailleurs ;
+  demi-courbe de la fonction dérivée surlignée ; sommets : pas de pente, tangente verticale donnée par la forme
+  dédoublée (x = ±5, x = ±3, x = 0).
+- **`loran-widget`** (§ 6, juste après l'application « Trouver sa position en mer », avant la carte 6gen63) : deux
+  paires de stations glissées sur les nœuds (1 carreau = 100 km), différence d = |MA| − |MB| au curseur (pas 0,1,
+  |d| < |AB|) ou lue sur le navire N glissé ; Δt = d·100 km / 300 000 km/s en µs ; UNE branche (côté de la station la
+  plus proche), médiatrice pour d = 0 ; points communs par dichotomie le long de la première branche (jusqu'à 40
+  carreaux, hors cadre signalés) : aucun, un, ou deux (« Deux positions possibles » : A₂(−3 ; −3), B₂(2 ; −2), N(1,5 ; 3)
+  et N′(1,74 ; −4,47)) ; bouton « Seconde paire » (une seule mesure = toute une branche). Préréglages : figure du cours
+  (N(12/√7 ; 12/√7)), deux positions, Δt = 0.
+Vérifié (Vite, page réelle, panneau, iPhone 13 clair / sombre et 1 280 px) : 0 erreur console, scrollWidth 390,
+0 `.katex-error`, 0 KaTeX qui déborde, Shadow DOM sans `^ $ \ NaN undefined Infinity`, 0 étiquette SVG rognée ;
+balayages contre un recalcul INDÉPENDANT en flottants, à partir de ce qui est DESSINÉ (SVG ramené au repère) et
+AFFICHÉ (sources LaTeX lues par un espion sur `katex.renderToString`) : 4 718 réglages droite / conique (toute la grille
+m, k, h des 4 coniques + mode tangent : verdict, nombre et valeur exacte des points, points sur la conique, signe de Δ,
+points et droite dessinés), 1 604 positions de P (P sur la conique, tangente ⟂ gradient et par P, 376 positions
+exactes : équation entière proportionnelle, pente exacte, 54 sommets), 3 015 positions + 2 700 angles imposés du
+triangle focal (rayons formule = mesurés, θ, trois aires, point construit = point trouvé à part par dichotomie,
+existence ⟺ cos θ ≥ 1 − 2e²), 600 configurations LORAN aléatoires (branches dessinées, 747 positions affichées vérifiant
+les deux différences, positions dans le cadre = celles d'une recherche indépendante en polaire depuis B₂) : 0 faux.
+Gestes au doigt (CDP) et à la souris dans le panneau : poignées k et pente, P aimanté, P promené, navire et station
+glissés ; aucun défilement du panneau pendant un glisser. Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667
+(12 ateliers du chapitre). Scripts et captures : `scratchpad/g2-6e10/`.
+
+## 5e (4h), Chapitre 6 — Statistique à deux variables : ateliers (6 + 1 en option, agent G, 25/11/2026)
+
+Chapitre nouveau (squelette du coordinateur, cours rédigé en parallèle par le lot AF) : sept blocs `atelier` ajoutés
+SEULS, chacun en fin de section, après le paragraphe provisoire (le coordinateur les replacera à la fusion). Nouveau
+module `src/interactive/statistique-deux-variables-commun.js` : calculs écrits une fois (moyennes, V et σ divisés
+par n, Cov, a = Cov/V(x), b = ȳ − a x̄, r ; Mayer : tri selon x puis y, PREMIER groupe de ⌊n/2⌋ points — groupes
+de 3 et 4 pour n = 7, comme la proposition ; somme des carrés des écarts verticaux), interprétation de r selon le
+tableau validé (|r| = 1 parfaite ; 0,98 ≤ |r| < 1 très forte ; 0,80 forte ; 0,60 moyenne ; 0,35 faible ; sinon
+nulle — classement sur la valeur AFFICHÉE à 3 décimales, et un r qui s'arrondirait à ±1 sans l'être reçoit des
+décimales de plus : « 1 » réservé aux points alignés), écritures « = » (exact à 4 décimales) ou « ≈ »,
+`repereStat` (fenêtre FIXE, échelles x et y indépendantes, graduations dans les MARGES : jamais rognées ni cachées
+par un point, centrées mais gardées dans la figure), `nuageEditable` (toucher une place vide ajoute un point,
+glisser le déplace, mode « Retirer un point » ; aimant au demi ; capture du pointeur sur la `<svg>`, qui survit
+aux rendus), `[hidden]{display:none !important}` (sinon `.rangee{display:flex}` réaffiche un bloc masqué). KaTeX
+par `katex-shadow.js`, curseurs − / + par `variables-aleatoires-commun.js`, styles de tracé `CSS_LIEUX`. Figure
+seule dans sa `<svg>`, aucun bouton dans son conteneur. Légendes en Unicode (pas de `$`).
+- **`jusqu-ou-prevoir-widget`** (§ 2 ; endroit idéal : après la définition interpolation / extrapolation, il sert
+  aussi l'exemple « mortalité infantile » du § 6) : droite des moindres carrés RECALCULÉE, abscisse x₀ glissée sur
+  la figure ou au curseur ; bande verte « on interpole » (texte vertical si la bande est étroite), ocre « on
+  extrapole », rouge « impossible ». Mortalité infantile par périodes de 5 ans (1 = 1946-1950 ; valeurs d'exemple
+  61,3 ; 45,6 ; 34,2 ; 27,1 ; 22,4 ; 18,0, proches de celles du manuel) : y ≈ −8,38x + 64,09, r ≈ −0,967, nulle vers
+  x ≈ 7,65, période 12 (2001-2005) ≈ −36,4. Espérance de vie en Belgique 2000-2014 (Banque mondiale, valeurs du
+  document) : y ≈ 0,2133x − 348,80, r ≈ 0,983, 122 ans (record humain) vers 2207. Le calcul écrit utilise des
+  coefficients à 4 ou 5 décimales (ou la forme ȳ + a(x₀ − x̄)) pour que l'arrondi affiché soit celui du calcul
+  exact (vérifié pour chaque x₀).
+- **`nuage-mayer-widget`** (§ 3 ; endroit idéal : après la méthode en 5 étapes, ou l'exemple « 7 données ») :
+  repère 0–10 × 0–20, séries « exemple du cours » (1 ; 8)…(6 ; 15) et « 7 points en désordre » ; panneau des 5
+  étapes (ordre de saisie puis groupes triés, « sans le tri, les groupes seraient faux », x̄₁ = somme / n₁ écrite
+  — somme calculée au-delà de 6 valeurs —, pente non arrondie, b, équation, a x̄ + b = ȳ) ; verdict pair (G milieu de
+  [G₁G₂]) / impair (groupes de ⌊n/2⌋ et n − ⌊n/2⌋) / G₁ et G₂ de même abscisse (droite verticale refusée) ; frontière
+  des groupes en pointillés ; boutons « Point moyen G » et « G₁, G₂ et droite de Mayer ». 2 à 14 points.
+- **`moindres-carres-widget`** (§ 4 ; endroit idéal : après la définition par les écarts verticaux, avant les
+  formules) : repère ORTHONORMÉ 0–7 : chaque écart est le côté d'un VRAI carré (à droite du point). Droite réglée par
+  a, b (pas 0,05) ou par deux poignées (x = 3 : translation ; x = 6 : rotation autour de la première) ; écarts et
+  carrés écrits terme à terme, S, plus petit S atteint ; « Montrer la meilleure droite » (a = Cov/V(x), b, S minimal,
+  ses carrés en pointillés verts), « Droite de Mayer » (série du cours : 2,4 contre ≈ 2,444). « Autre nuage » : 5
+  ou 6 points entiers, 0,5 ≤ |r| < 0,97.
+- **`quadrants-covariance-widget`** (§ 5 ; endroit idéal : juste après l'image concrète des quatre quadrants) :
+  axes par G, rectangle de chaque point jusqu'à G, vert (produit > 0) / rouge (< 0), signes des quadrants dans les
+  coins ; bilan aires vertes − aires rouges = Σ, Cov = Σ / n, σx, σy, r ; produits listés ; nuages « croissante »,
+  « décroissante », « sans liaison », « en arc » (parabole symétrique : Cov = 0 exactement, « pas de lien LINÉAIRE »).
+- **`devine-r-widget`** (§ 5 ; endroit idéal : après le tableau d'interprétation ou l'exemple « cinq nuages, cinq
+  r ») : nuage de 12 à 30 points (ρ visé tiré : 15 % proche de ±1, 15 % proche de 0, sinon uniforme ; r CALCULÉ sur
+  les points), estimation au curseur (pas 0,01), « Vérifier » (vraie valeur, écart, interprétation, droite), six
+  derniers écarts (aucune note) ; mode « Fabrique un nuage » : cibles 0,9 ; −0,8 ; 0,5 ; −0,3 ; 0 ; 0,99 ; −0,95 ;
+  0,7 ; −0,6 ; 0,3, réussi ⟺ n ≥ 5 et |r − cible| ≤ 0,05 ; jauge −1…1 (estimation, cible, valeur) dans une seconde
+  `<svg>`, plus petite (l'épinglage prend la plus grande).
+- **`changer-unites-widget`** (§ 5, l'option ; endroit idéal : juste après la démonstration 7) : X = αx + β,
+  Y = γy + δ ; le nuage reste le MÊME dessin, seules les graduations changent ; espérance de vie (années brutes,
+  depuis 2000, centrées sur 2007 ; années ou mois) et taille / masse de six adolescents (valeurs d'exemple ; cm ou
+  m, kg ou g) ; droite et r recalculés sur les données transformées, a′ = a·γ/α écrit, r identique.
+- **`point-aberrant-widget`** (§ 6 ; endroit idéal : après « un point aberrant peut faire basculer la droite »,
+  avant le « Le sais-tu ? » d'Anscombe) : notes sur 20 de math (x) et de physique (y), 8 points fixes + P (rouge)
+  glissé (ou amené en touchant le cadre) ; droites AVEC P (orange) et SANS P (pointillés), équations, r et
+  interprétations, prévision pour 18 en math ; « Retirer P » (« seulement si on a une raison »), « P loin du nuage »
+  (16 ; 2 : r passe de 0,993 à 0,342). « Quartet d'Anscombe » : les VRAIES données de 1973, 2 × 2 repères dans la
+  même `<svg>` (même taille de figure), tableau x̄, ȳ, σx, σy, r, a, b recalculés à 2 décimales fixes (9,00 ; 7,50 ;
+  3,16 ; 1,94 ; 0,82 ; 0,50 ; 3,00 pour les quatre).
+Vérifié (Vite, page réelle, panneau, iPhone 13 clair / sombre et 1 280 px clair / sombre) : 0 erreur console,
+scrollWidth 390, 0 `.katex-error`, 0 KaTeX qui déborde, Shadow DOM sans `^ $ \ NaN undefined Infinity`, 0 étiquette
+SVG rognée. Balayages contre un recalcul indépendant (statistiques réécrites dans le script, sources LaTeX lues par
+un espion sur `katex.renderToString`, « = » seulement pour une valeur exacte) : 1 500 nuages de Mayer (2 à 14
+points : x̄, ȳ, G₁, G₂, a, b, a x̄ + b, effectifs, verdicts), 11 685 droites sur 41 nuages (S, a, b, S minimal,
+jamais S < minimum, 2,4 et 2,444 du cours), 1 500 nuages de covariance (Cov, σ, r, intensité, couleur de chaque
+rectangle), 400 « devine r » (r, écart, intensité, n, cadre) + 1 500 états « fabrique » (verdict ⟺ règle), 861
+positions de P (deux équations, deux r), 64 abscisses de prévision (valeur, calcul écrit, verdict interpole /
+extrapole / impossible), 10 combinaisons d'unités (a′, b′, r) : 0 faux. Gestes réels (CDP doigt et souris) :
+ajout, glisser, retrait (Mayer), poignées (moindres carrés), point glissé (quadrants), ajout en mode fabrique (et
+aucun ajout en mode devine), P glissé, ligne de prévision glissée ; défilement de la page pendant les 10 glissés au
+doigt : 0. Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667 (7 ateliers). Scripts et captures :
+`scratchpad/g-5e6/`.

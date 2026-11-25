@@ -303,9 +303,10 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         {
           kind: 'exemple',
           badge: 'cas général',
-          formula: '$2x^2 - 10x + 8 = 0$',
+          formula: '$\\htmlClass{m1}{2}x^2 - \\htmlClass{m2}{10}x + \\htmlClass{m3}{8} = 0$',
+          correspondances: [['a', '2'], ['b', '-10'], ['c', '8']],
           steps: [
-            { tag: 'discriminant', text: '$\\Delta = (-10)^2 - 4 \\cdot 2 \\cdot 8 = 100 - 64 = 36$' },
+            { tag: 'discriminant', text: '$\\Delta = (-\\htmlClass{m2}{10})^2 - 4 \\cdot \\htmlClass{m1}{2} \\cdot \\htmlClass{m3}{8} = 100 - 64 = 36$' },
             { tag: 'racine carrée de Δ', text: '$\\sqrt{36} = 6$' },
           ],
           result: { tag: 'solutions', text: '$x = \\dfrac{10+6}{4} = 4$ ou $x = \\dfrac{10-6}{4} = 1$' },

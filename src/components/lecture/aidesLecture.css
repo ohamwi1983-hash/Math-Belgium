@@ -1,0 +1,108 @@
+/* ==========================================================================
+   Aides de lecture (onglet « Aides » du panneau « Aa », planches 07 et 09) — chargé avec
+   `AidesLecture.tsx`, seulement quand l'élève active une aide. Écran seulement. Voir
+   `.claude/rules/cote-eleve.md`, « Aides de lecture ».
+   ========================================================================== */
+
+:root {
+  --aide-regle: color-mix(in srgb, var(--accent) 13%, transparent);
+  --aide-voile: rgba(16, 22, 29, 0.6);
+}
+@media (prefers-color-scheme: dark) { :root { --aide-regle: color-mix(in srgb, var(--accent) 17%, transparent); --aide-voile: rgba(0, 0, 0, 0.72); } }
+:root:is([data-theme="clair"], [data-theme="creme"], [data-theme="contraste"]) { --aide-regle: color-mix(in srgb, var(--accent) 13%, transparent); --aide-voile: rgba(16, 22, 29, 0.6); }
+:root[data-theme="sombre"] { --aide-regle: color-mix(in srgb, var(--accent) 17%, transparent); --aide-voile: rgba(0, 0, 0, 0.72); }
+
+@media print {
+  .regle-calque, .regle-fleches, .bloc-flottant, .loupe-dialogue { display: none !important; }
+}
+
+@media screen {
+  /* ---------- Règle / masque : calque transparent aux clics et au toucher ---------- */
+  .regle-calque { position: fixed; inset: 0; z-index: 400; pointer-events: none; overflow: hidden; }
+  .regle-bande {
+    position: absolute; left: 0; right: 0; top: 0; height: 52px; will-change: transform;
+    background: var(--aide-regle); border-top: 2px solid var(--accent); border-bottom: 2px solid var(--accent);
+  }
+  .regle-masque .regle-bande { background: transparent; border-color: transparent; }
+  .regle-voile { position: absolute; left: 0; right: 0; background: var(--aide-voile); }
+  .regle-voile-haut { top: 0; height: 0; }
+  .regle-voile-bas { top: 0; bottom: 0; }
+  :root[data-theme="contraste"] .regle-bande { border-width: 3px; border-color: #000; background: rgba(255, 233, 214, 0.45); }
+
+  /* Boutons ↑ ↓ discrets (au doigt seulement ; au clavier : les flèches). */
+  .regle-fleches { display: none; }
+  @media (pointer: coarse) {
+    .regle-fleches {
+      position: fixed; right: 10px; bottom: calc(150px + env(safe-area-inset-bottom, 0px)); z-index: 410;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+  }
+  .regle-fleches button {
+    width: 44px; height: 44px; display: grid; place-items: center; padding: 0; cursor: pointer;
+    border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--surface) 88%, transparent); color: var(--ink);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.14);
+  }
+  .regle-fleches button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- Un bloc à la fois ---------- */
+  :root[data-unbloc="oui"] [data-lb] { transition: opacity 0.2s ease; }
+  :root[data-unbloc="oui"] [data-lb]:not([data-lb-courant]) { opacity: 0.38; cursor: pointer; }
+  :root[data-unbloc="oui"] [data-lb]:not([data-lb-courant]):hover { opacity: 0.6; }
+  :root[data-unbloc="oui"] [data-lb-courant="cadre"] {
+    outline: 3px solid var(--accent); outline-offset: 6px; border-radius: 6px;
+  }
+  :root[data-unbloc="oui"] .parcours[data-vue="etape"] .page.chapter-main { padding-bottom: 168px; }
+  .bloc-flottant {
+    position: fixed; right: 12px; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); z-index: 410;
+    display: flex; align-items: center; gap: 6px; font-family: var(--sans);
+  }
+  .bloc-flottant button {
+    min-height: 48px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+    border-radius: 999px; font: 600 15px/1.2 var(--sans); box-shadow: 0 4px 14px rgb(0 0 0 / 0.22);
+  }
+  .bloc-prec { width: 48px; justify-content: center; padding: 0; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  .bloc-suiv { padding: 0 18px; border: 1px solid var(--ink); background: var(--ink); color: var(--surface); }
+  .bloc-compte { font: 500 13px/1 var(--mono, ui-monospace, monospace); font-variant-numeric: tabular-nums; opacity: 0.85; }
+  .bloc-flottant button:disabled { cursor: default; box-shadow: none; }
+  .bloc-prec:disabled { color: var(--ink-soft); border-style: dashed; }
+  .bloc-suiv:disabled { background: var(--surface); color: var(--ink); border-color: var(--line); }
+  .bloc-flottant button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  @media (min-width: 760px) {
+    .bloc-flottant { right: 24px; bottom: 24px; }
+    .regle-fleches { bottom: 88px; right: 24px; }
+  }
+
+  /* ---------- Loupe ---------- */
+  :root[data-loupe="oui"] [data-loupe-tab] { cursor: zoom-in; border-radius: 4px; }
+  :root[data-loupe="oui"] [data-loupe-tab]:hover { background: var(--sky-soft); }
+  :root[data-loupe="oui"] [data-loupe-tab]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .loupe-dialogue {
+    width: min(40rem, calc(100vw - 32px)); max-height: calc(100dvh - 32px); box-sizing: border-box; padding: 16px 18px 20px;
+    border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--ink);
+    box-shadow: 0 18px 50px rgb(0 0 0 / 0.3); overflow: auto;
+  }
+  .loupe-dialogue::backdrop { background: var(--aide-voile); }
+  .loupe-tete { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .loupe-titre { margin: 0; font: 600 12.5px/1.3 var(--mono, ui-monospace, monospace); letter-spacing: 0.06em; color: var(--ink-soft); }
+  .loupe-fermer {
+    min-height: 44px; padding: 0 16px; cursor: pointer; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--surface); color: var(--ink); font: 600 15px/1 var(--sans);
+  }
+  .loupe-grande {
+    font-size: 2.4em; line-height: 1.5; text-align: center; padding: 18px 2px 14px; margin: 0 0 12px;
+    overflow-x: auto; overflow-y: hidden; border-bottom: 1px solid var(--line-soft); color: var(--ink);
+  }
+  .loupe-grande .katex { font-size: 1em; }
+  .loupe-lu { margin: 0 0 14px; font: 400 17px/1.55 var(--l-police); color: var(--ink); }
+  .loupe-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .loupe-ecouter {
+    min-height: 48px; display: inline-flex; align-items: center; gap: 8px; padding: 0 18px; cursor: pointer;
+    border: 1px solid var(--accent); border-radius: 8px; background: var(--accent); color: var(--on-accent); font: 600 15.5px/1 var(--sans);
+  }
+  .loupe-dialogue button:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; }
+}
+
+@media screen and (prefers-reduced-motion: reduce) {
+  :root[data-unbloc="oui"] [data-lb] { transition: none; }
+}
+:root[data-animations="reduites"] [data-lb] { transition: none; }

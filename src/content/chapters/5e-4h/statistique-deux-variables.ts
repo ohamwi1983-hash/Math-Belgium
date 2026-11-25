@@ -368,6 +368,13 @@ export const statistiqueDeuxVariables: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'jusqu-ou-prevoir-widget',
+          label: 'Manipule toi-même : jusqu’où prévoir ?',
+          caption:
+            'Fais glisser l’abscisse de la prévision : dans l’intervalle des données (bande verte), on interpole ; au-delà (bande ocre), on extrapole. Avec la mortalité infantile, la droite d’ajustement finit par prévoir un taux négatif ; avec l’espérance de vie en Belgique (2000-2014), elle dépasse le record humain de 122 ans. Un bon ajustement ne permet pas de prévoir n’importe où.',
+        },
+        {
           kind: 'application',
           titre: 'Prévoir la consommation d’électricité de demain',
           text: R`Le gestionnaire du réseau électrique doit produire, à chaque instant, exactement l'électricité consommée. Pour s'y préparer, il prévoit la consommation du lendemain à partir de la température annoncée : en hiver, plus il fait froid, plus on chauffe, et le nuage (température ; consommation) des jours précédents est presque une droite. La prévision par la droite d'ajustement, corrigée du jour de la semaine (on consomme moins le dimanche), permet de décider la veille quelles centrales démarrer. Hors de la saison de chauffe, la droite d'hiver ne vaut plus : il en faut une autre.`,
@@ -502,6 +509,13 @@ export const statistiqueDeuxVariables: ChapterContent = {
             { kind: 'para', text: R`**Étape 2 — G est sur le segment.** Pose $t = \dfrac{n_2}{n}$, compris entre $0$ et $1$ ; alors $\dfrac{n_1}{n} = 1 - t$ et $\bar{x} = \bar{x}_1 + t\,(\bar{x}_2 - \bar{x}_1)$, $\bar{y} = \bar{y}_1 + t\,(\bar{y}_2 - \bar{y}_1)$. Autrement dit $\overrightarrow{G_1G} = t\,\overrightarrow{G_1G_2}$ : $G$ est sur le segment $[G_1G_2]$, donc sur la droite de Mayer.` },
             { kind: 'para', text: R`**Étape 3 — le milieu si les groupes sont égaux.** Si $n_1 = n_2$, $t = \dfrac{1}{2}$ : $G$ est le **milieu** de $[G_1G_2]$. Si $n$ est impair, $G$ est un peu plus près du point moyen du groupe le plus nombreux.` },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'nuage-mayer-widget',
+          label: 'Manipule toi-même : nuage, point moyen et droite de Mayer',
+          caption:
+            'Ajoute, déplace et retire des points : G, G₁, G₂ et la droite de Mayer suivent en direct, et le panneau refait les cinq étapes de la méthode (trier, partager, points moyens, pente, équation). Avec un nombre impair de points, les deux groupes diffèrent d’une unité : G n’est plus le milieu de [G₁G₂], mais il reste sur la droite.',
         },
         {
           kind: 'exemple',
@@ -686,6 +700,13 @@ export const statistiqueDeuxVariables: ChapterContent = {
           result: { tag: 'comparaison', text: R`$2{,}4 < 2{,}44$ : la droite des moindres carrés gagne, de peu. Les deux droites passent par $G(3\,;4)$ et se ressemblent ; aucune droite ne peut descendre sous $2{,}4$.` },
         },
         {
+          kind: 'atelier',
+          tag: 'moindres-carres-widget',
+          label: 'Manipule toi-même : ta droite contre celle des moindres carrés',
+          caption:
+            'Règle ou fais glisser ta droite. Chaque écart vertical est le côté d’un vrai carré : rends la somme de leurs aires la plus petite possible, puis compare avec la meilleure droite (et avec la droite de Mayer : 2,4 contre environ 2,44 pour la série du cours).',
+        },
+        {
           kind: 'historique',
           titre: 'Une planète perdue et retrouvée',
           text: R`Le 1er janvier 1801, l'astronome **Giuseppe Piazzi** découvre à Palerme un nouvel astre, Cérès. Il le suit pendant quelques semaines, puis le perd dans l'éclat du Soleil. Où le chercher quand il réapparaîtra ? Le jeune **Carl Friedrich Gauss**, 24 ans, calcule son orbite à partir des quelques observations disponibles, des mesures imparfaites qu'il faut concilier au mieux. Fin 1801, on retrouve Cérès presque exactement à l'endroit annoncé. Gauss affirmera plus tard utiliser depuis 1795 la **méthode des moindres carrés**, mais c'est le Français **Adrien-Marie Legendre** qui la publie le premier, en 1805 ; Gauss ne la publie qu'en 1809, ce qui déclenche une célèbre dispute de priorité.`,
@@ -811,6 +832,13 @@ export const statistiqueDeuxVariables: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'quadrants-covariance-widget',
+          label: 'Manipule toi-même : les quatre quadrants de la covariance',
+          caption:
+            'Deux axes passent par G. Chaque point dessine son rectangle jusqu’à G : vert en haut à droite et en bas à gauche (produit positif), rouge ailleurs (produit négatif). La covariance fait le bilan. Le nuage en arc donne une covariance nulle alors que les points sont liés.',
+        },
+        {
           kind: 'definition',
           label: 'Définition — covariance',
           items: [
@@ -893,6 +921,13 @@ export const statistiqueDeuxVariables: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'changer-unites-widget',
+          label: 'Manipule toi-même : changer d’unités',
+          caption:
+            'Passe des centimètres aux mètres, des kilogrammes aux grammes, ou centre les années : le nuage reste le même dessin, la pente change, mais r ne bouge pas (démonstration ci-dessus).',
+        },
+        {
           kind: 'methode',
           label: 'À la TI-30XB : r se lit, la covariance se calcule',
           items: [
@@ -926,6 +961,13 @@ export const statistiqueDeuxVariables: ChapterContent = {
             { kind: 'para', text: R`**Le signe d'abord.** Les nuages 4 et 5 descendent : ils reçoivent les deux valeurs négatives. Les nuages 1 et 2 montent nettement. Le nuage 3 ne montre aucune tendance.` },
             { kind: 'para', text: R`**Puis l'intensité.** Le nuage 2 est presque une droite : $r = 0{,}99$ ; le nuage 1 monte mais il est dispersé : $r = 0{,}70$. Le nuage 4 est serré autour d'une droite qui descend : $r = -0{,}93$ ; le nuage 5 descend à peine, très dispersé : $r = -0{,}45$. Le nuage 3 : $r = 0{,}05$, corrélation nulle.` },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'devine-r-widget',
+          label: 'Manipule toi-même : devine r',
+          caption:
+            'Estime le coefficient de corrélation d’un nuage tiré au hasard, puis vérifie. Dans l’autre mode, fabrique toi-même un nuage dont r vaut une valeur donnée, à 0,05 près.',
         },
         {
           kind: 'piege',
@@ -1038,6 +1080,13 @@ export const statistiqueDeuxVariables: ChapterContent = {
             ],
             caption: R`Le point de l'élève malade (en rouge) fait basculer la droite : sans lui, $r \approx 0{,}99$ ; avec lui, $r \approx 0{,}13$.`,
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'point-aberrant-widget',
+          label: 'Manipule toi-même : le point aberrant',
+          caption:
+            'Fais glisser le point rouge loin du nuage : la droite des moindres carrés bascule et r chute, alors que les huit autres points n’ont pas bougé. Le bouton « Quartet d’Anscombe » montre les quatre séries de 1973 : mêmes moyennes, mêmes écarts-types, même r, même droite… et quatre nuages très différents.',
         },
         {
           kind: 'illustrationGroup',

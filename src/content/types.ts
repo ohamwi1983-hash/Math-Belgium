@@ -240,6 +240,17 @@ export type InteractiveWidgetTag =
   | 'trois-miroirs-widget'
   | 'dandelin-cone-widget'
   | 'reduire-translation-widget'
+  | 'droite-conique-widget'
+  | 'tangente-dedoublee-widget'
+  | 'triangle-focal-widget'
+  | 'loran-widget'
+  | 'nuage-mayer-widget'
+  | 'moindres-carres-widget'
+  | 'quadrants-covariance-widget'
+  | 'devine-r-widget'
+  | 'point-aberrant-widget'
+  | 'jusqu-ou-prevoir-widget'
+  | 'changer-unites-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }
@@ -1191,6 +1202,14 @@ export type Block =
        */
       result: { tag: string; text: string; isEmpty?: boolean }
       illustration?: IllustrationSpec
+      /**
+       * Correspondances (option élève « Couleurs et soulignés qui se correspondent », planche 09) :
+       * légende des paires annotées dans `formula` / `steps` par `\htmlClass{m1}{…}`, `m2`, `m3`
+       * (LaTeX sans `$`, dans l'ordre m1, m2, m3 : trait plein, tirets, double trait). Montrée sous
+       * l'exemple pas à pas SEULEMENT quand l'élève a activé l'option. À réserver à quelques exemples
+       * clés (où l'œil doit relier deux lignes) — voir `.claude/rules/content-authoring.md`.
+       */
+      correspondances?: [string, string][]
     }
   | {
       /** "Exemple résolu" en forme libre : paragraphes de prose enchaînés (peut inclure une
