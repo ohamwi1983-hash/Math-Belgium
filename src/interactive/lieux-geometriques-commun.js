@@ -148,3 +148,91 @@ export var CSS_LIEUX =
   '.reglages{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:0 18px;}' +
   '.titre-panneau{font-weight:700;font-size:0.82rem;color:var(--ink-soft,#51626f);margin:0 0 4px;}' +
   '.panneau .ligne{line-height:2;}'
+
+/* ---------------- Ajouts des ateliers 6 à 9 (cercles par 2 points, tangentes, arc capable,
+ * repère affine) ---------------- */
+
+/** Racine entière de n si n est un carré parfait (n ≥ 0), sinon −1. */
+export function racineEntiere(n) {
+  if (n < 0) return -1
+  var s = Math.round(Math.sqrt(n))
+  return s * s === n ? s : -1
+}
+
+/**
+ * Placeur d'étiquettes dans une `<svg>` de L × H px : chaque étiquette prend la première place
+ * libre parmi huit autour de son point (ni sur une autre étiquette, ni sur un point déclaré), puis
+ * est décalée pour rester ENTIÈREMENT dans le cadre (jamais rognée).
+ */
+export function placeurEtiquettes(L, H) {
+  var boites = [], points = []
+  var OFFS = [[13, -9], [-13, -9], [13, 17], [-13, 17], [0, -13], [0, 22], [17, 5], [-17, 5]]
+  function chevauche(b) {
+    for (var i = 0; i < boites.length; i++) {
+      var c = boites[i]
+      if (b[0] < c[2] && b[2] > c[0] && b[1] < c[3] && b[3] > c[1]) return true
+    }
+    for (var j = 0; j < points.length; j++) {
+      var p = points[j]
+      if (p[0] + p[2] > b[0] && p[0] - p[2] < b[2] && p[1] + p[2] > b[1] && p[1] - p[2] < b[3]) return true
+    }
+    return false
+  }
+  function boite(cx, by, w) {
+    var x0 = cx - w / 2, x1 = cx + w / 2, y0 = by - 12, y1 = by + 3
+    if (x0 < 2) { x1 += 2 - x0; x0 = 2 }
+    if (x1 > L - 2) { x0 -= x1 - (L - 2); x1 = L - 2 }
+    if (y0 < 2) { y1 += 2 - y0; y0 = 2 }
+    if (y1 > H - 2) { y0 -= y1 - (H - 2); y1 = H - 2 }
+    return [x0, y0, x1, y1]
+  }
+  return {
+    /** Déclare un point (px) que les étiquettes doivent éviter. */
+    point: function (px, py, r) { points.push([px, py, r || 6]) },
+    /** Pose le texte `txt` près du point (px, py) ; `prefs` : indices de OFFS à essayer d'abord. */
+    poser: function (svg, px, py, txt, cls, prefs) {
+      var w = txt.length * 8 + 2, ordre = (prefs || []).concat([0, 1, 2, 3, 4, 5, 6, 7]), choix = null
+      for (var i = 0; i < ordre.length; i++) {
+        var o = OFFS[ordre[i]], b = boite(px + o[0], py + o[1], w)
+        if (!chevauche(b)) { choix = b; break }
+      }
+      if (!choix) { var o0 = OFFS[ordre[0]]; choix = boite(px + o0[0], py + o0[1], w) }
+      boites.push(choix)
+      var t = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+      t.setAttribute('x', ((choix[0] + choix[2]) / 2).toFixed(1))
+      t.setAttribute('y', (choix[3] - 3).toFixed(1))
+      t.setAttribute('text-anchor', 'middle')
+      t.setAttribute('class', 'et ' + (cls || ''))
+      t.textContent = txt
+      svg.appendChild(t)
+      return t
+    },
+  }
+}
+
+/** Marque d'angle droit (carré de `taille` px) au sommet T (px), entre les directions vers U et V (px). */
+export function marqueAngleDroit(svg, T, U, V, taille, cls) {
+  var s = taille || 9
+  var ux = U[0] - T[0], uy = U[1] - T[1], lu = Math.hypot(ux, uy)
+  var vx = V[0] - T[0], vy = V[1] - T[1], lv = Math.hypot(vx, vy)
+  if (lu < 1 || lv < 1) return
+  ux *= s / lu; uy *= s / lu; vx *= s / lv; vy *= s / lv
+  var d = 'M' + (T[0] + ux).toFixed(1) + ',' + (T[1] + uy).toFixed(1) +
+    ' L' + (T[0] + ux + vx).toFixed(1) + ',' + (T[1] + uy + vy).toFixed(1) +
+    ' L' + (T[0] + vx).toFixed(1) + ',' + (T[1] + vy).toFixed(1)
+  var p = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+  p.setAttribute('d', d); p.setAttribute('class', cls || 'trait-soft fin')
+  svg.appendChild(p)
+}
+
+/** Polynôme en LaTeX à partir de [coefficient entier, monôme] : [[3,'a^2'],[-2,'ab']] → « 3a^2-2ab ». */
+export function texPolynome(termes) {
+  var s = ''
+  termes.forEach(function (t) {
+    var c = t[0], m = t[1]
+    if (c === 0) return
+    var abs = Math.abs(c), corps = m ? (abs === 1 ? m : abs + m) : String(abs)
+    s += (s ? (c < 0 ? '-' : '+') : (c < 0 ? '-' : '')) + corps
+  })
+  return s || '0'
+}

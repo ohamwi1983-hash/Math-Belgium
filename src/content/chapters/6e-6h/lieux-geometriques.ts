@@ -111,6 +111,16 @@ export const lieuxGeometriques: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'repere-affine-widget',
+          label: 'Manipule toi-même : repère orthonormé ou affine ?',
+          caption:
+            'Règle l’angle ω entre les axes et le rapport k des unités (unité de l’axe des y = k fois ' +
+            'celle de l’axe des x). En vert, les points dont les coordonnées vérifient x² + y² = 4 : un ' +
+            'cercle de rayon 2 seulement si ω = 90° et k = 1, sinon une ellipse, comparée au vrai cercle ' +
+            '(pointillés). Promène M : la formule √(x² + y²) donne toujours 2, la vraie longueur OM non.',
+        },
+        {
           kind: 'astuce',
           text:
             "Avant d'écrire $\\mathrm{dist}(P\\,;d)=\\ldots$ ou une équation de cercle " +
@@ -1290,6 +1300,16 @@ export const lieuxGeometriques: ChapterContent = {
             'donne les deux solutions — et vérifie d\'abord, en comparant $2r$ à $AB$, combien il y en a.',
         },
         {
+          kind: 'atelier',
+          tag: 'cercles-deux-points-widget',
+          label: 'Manipule toi-même : cercles de rayon r par deux points',
+          caption:
+            'Fais glisser A et B, règle le rayon r. Le centre est à distance r de A et de B : c’est un ' +
+            'point commun aux cercles de centres A et B et de rayon r (pointillés), donc un point de la ' +
+            'médiatrice de [AB]. Compare 2r à AB : deux centres si 2r > AB, un seul (le milieu) si ' +
+            '2r = AB, aucun si 2r < AB. « Exemple du cours » : A(0 ; 0), B(6 ; 0), r = 5.',
+        },
+        {
           kind: 'application',
           titre: 'Localiser un téléphone mobile entre deux antennes',
           illustrations: [
@@ -1652,6 +1672,17 @@ export const lieuxGeometriques: ChapterContent = {
                 'longueur, $PT_1=PT_2$.',
             },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'tangentes-point-widget',
+          label: 'Manipule toi-même : tangentes menées par un point',
+          caption:
+            'Fais glisser P autour du cercle x² + y² = 25 : aucune tangente si P est intérieur, une ' +
+            'seule s’il est sur le cercle, deux s’il est extérieur. Comme le cours, l’atelier écrit une ' +
+            'droite quelconque par P sous forme implicite (verticale comprise) et impose dist(O ; d) = 5. Essaie ' +
+            'P(5 ; 3) : b = 0 est solution, la tangente verticale x = 5 apparaît. Compare PT à ' +
+            '√(OP² − r²).',
         },
         {
           kind: 'atelier',
@@ -2776,6 +2807,16 @@ export const lieuxGeometriques: ChapterContent = {
             alt: 'Antenne radar de poursuite longue portée',
             caption: 'Antenne du radar ALTAIR, atoll de Kwajalein. US Army, domaine public.',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'arc-capable-widget',
+          label: 'Manipule toi-même : l’arc capable des radars',
+          caption:
+            'Les radars A(−3 ; 0) et B(3 ; 0) de la figure ci-dessus. Lance-les : leurs faisceaux ' +
+            'tournent au même rythme, leur écart reste θ, et leur point de croisement P trace un arc de ' +
+            'cercle passant par A et B. Fais aussi glisser P toi-même : il devient vert quand il voit ' +
+            '[AB] sous l’angle θ. Change θ : à 90°, on retrouve le cercle de diamètre [AB] du § 4.',
         },
         {
           kind: 'attention',
