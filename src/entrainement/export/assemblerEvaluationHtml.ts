@@ -72,6 +72,11 @@ export interface ItemEvaluation {
    * (`enteteFragments`) et une question par ligne ; `bareme` réunit les critères des lignes, rattachés
    * à la lettre de leur ligne (`pointsParSousQuestion` redonne les points de chaque ligne). */
   groupe?: LigneGroupe[];
+  /** La question demande la table de la loi normale Φ (`AdaptateurFeuilleExercices.besoinTablePhi`) :
+   * la table complète est jointe UNE fois en annexe du document (`evaluationLocal.ts::annexesDuDocument`,
+   * copie Word : `tablePhiDocx.ts`). Posé seulement quand il vaut `true` (items des autres générateurs
+   * inchangés). Question regroupée : vrai dès qu'une ligne le demande. */
+  besoinTablePhi?: boolean;
 }
 
 /** Une ligne d'une question regroupée a), b), c). */
