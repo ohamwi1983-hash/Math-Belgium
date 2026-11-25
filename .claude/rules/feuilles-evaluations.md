@@ -1208,6 +1208,36 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   `generateurs6e/adaptateurLieux.ts` (mêmes textes que l'écran, données en prose — plus de question coupée —, une
   question par écran, réponses au corrigé) en attendant le lot E ; aucun `calcul` (règle du 24/11 : établir une
   équation, éliminer un paramètre, décider une nature).
+- **6e ch. 10 (lots B et C, 6gen58–6gen63)** : les six générateurs passent sur le socle du ch. 7 / ch. 9
+  (`AppCombinatoire` + `algebreLieux.ts` / `saisieLieux.ts`, choisi plutôt qu'`AppEcransTrigo` : réponses = équations
+  comparées par PROPORTIONNALITÉ exacte, points et droites comme des ENSEMBLES, `complement` pour tracer la réponse
+  APRÈS l'écran, `pucesMasquees`, `?code=` et corrigé consultable après chaque réponse déjà en place ; aucun changement
+  pour les ch. 7 à 9). Ajouts facultatifs : `algebreLieux.ts` exporte l'arbre de lecture (`lireMembres`,
+  `noeudVersPoly`, `evaluerNoeud`, `noeudDecimal`) ; `figureLieux.ts` : courbes `coupe: true` coupées au bord du
+  quadrillage (jamais dans la marge). Briques du chapitre : `moteur6e/algebreConiques.ts` (conique décrite par nature,
+  centre ou sommet, axe focal ; conventions du cours — a demi-grand axe / demi-axe focal, hyperbole d'axe Oy
+  y²/a² − x²/b² = 1, **parabole y² = 2px, p = dist(F ; d)**, décision 1 ; foyers et sommets h ± √R simplifiés,
+  asymptotes, directrices), `moteur6e/saisieConiques.ts` (équation sous une FORME imposée — « deux carrés » après
+  complétion, coefficients fractionnaires et forme réduite acceptés ; « v² = k·w » — juste mais d'une autre forme =
+  refus SANS tentative ; relation en a, b, c, e jugée par la valeur de e qu'elle impose : « 2a²/c = k·2c », « b = c »,
+  « e² = 1/2 »… ; relation toujours vraie signalée ; couple (λ ; μ) à un facteur près), `ui6e/traceConiques.ts`
+  (ellipse, hyperbole, parabole, cercle sur la figure commune, isotrope, foyers, asymptotes, directrices ;
+  `fenetreConique`), `ui6e/textesConiques.ts`. Verdicts tirés AVANT les paramètres, à parts égales : 6gen58 nature
+  (cas dégénérés gardés, décision 4), 6gen59 nature (A même axe, C), 6gen61 nombre de points communs (0 aussi pour
+  l'hyperbole), 6gen62 B (deux tangentes / aucune) et C (P extérieur / intérieur, tiré près de l'ellipse des deux
+  côtés) ; puces masquées tant que le verdict n'est pas jugé (6gen58, 6gen61, 6gen62 B / C). Figures : rien ne
+  trahit la réponse (6gen58 : la conique après la nature ; 6gen61 : la droite après le nombre de points ; 6gen62 C :
+  P après le verdict ; 6gen63 : foyers et rayon après l'écran des foyers, rayon réfléchi en demi-droite, prolongement
+  pointillé vers F′ pour l'hyperbole). Codes : indices gardés partout (libellés neutres), ajouts EN FIN : 6gen61
+  `A_hyperbole_0solution`, 6gen63 `parabole_depuisFoyer`, `parabole_parallele` ; tous les exercices tirés diffèrent
+  d'avant (générateurs refaits) ; 6gen60 `B_angleDroitSommetSecondaire` tire maintenant un angle FBF′ quelconque.
+  Groupes à verdict (décision 3) : 6gen58 A1 / A2 / B / C, 6gen59 « même axe » et les cinq paires de C, 6gen61 ellipse
+  et hyperbole (nombre de points), 6gen62 B et C. Adaptateurs PROVISOIRES `generateurs6e/adaptateurConiques.ts`
+  (mêmes textes que l'écran ; énoncé IMPRIMÉ = consigne + données en prose, SANS les étapes — leur nombre trahirait le
+  verdict — ; une question par écran pour les titres « Étape n » du corrigé, réponses rédigées avec les nombres) en
+  attendant le lot E ; aucun `calcul` (décider une nature, établir une équation, une tangente). 6gen63 : R et la pente
+  à dénominateur ≤ 12, l'autre racine de l'équation ≤ 40 (une corde focale à deux extrémités de petit dénominateur
+  n'existe presque pas pour ces ellipses).
 - **6e ch. 7 (lot E, papier de 6gen43–6gen48, notés, corrigé « comme au tableau »)** : adaptateur COMMUN
   `generateurs6e/adaptateurCombinatoire.ts::construireAdaptateurCombinatoire` (le générateur ne décrit que
   sa situation papier, ses questions, sa brève, son corrigé, son barème, ses critères et son profil ;

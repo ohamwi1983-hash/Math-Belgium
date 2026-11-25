@@ -1,69 +1,8 @@
 import type { ExerciceAireExcentriciteConique } from "../core6e/aireExcentriciteConique.types";
-import type { ReglagesSession6e } from "../core6e/session6e.types";
-import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
-/**
- * Couche B (6e) — types de session pour `6gen60`. Longueur de la chaîne d'écrans purement fonction
- * de `famille` (3 écrans pour A, 2 pour B) — jamais d'une propriété numérique de l'exercice tiré,
- * mirroir `typesEquationConiqueCaracteristiques.ts` (6gen59).
- *
- * - Famille A : aEcran1 → aEcran2 → aEcran3.
- * - Famille B : bEcran1 → bEcran2.
- */
+/** Écrans de `6gen60` (audit du 6e ch. 10, lots B et C). */
+export type PhaseAireExcentriciteConique = "aRayons" | "aCos" | "aAire" | "bRelation" | "bE";
 
-export type PhaseAireExcentriciteConique = "aEcran1" | "aEcran2" | "aEcran3" | "bEcran1" | "bEcran2";
-
-export function phaseInitiale(exercice: ExerciceAireExcentriciteConique): PhaseAireExcentriciteConique {
-  return exercice.famille === "A" ? "aEcran1" : "bEcran1";
-}
-
-const SUITE: Partial<Record<PhaseAireExcentriciteConique, PhaseAireExcentriciteConique>> = {
-  aEcran1: "aEcran2",
-  aEcran2: "aEcran3",
-  bEcran1: "bEcran2",
-};
-
-export function phaseApres(phase: PhaseAireExcentriciteConique): PhaseAireExcentriciteConique | "termine" {
-  return SUITE[phase] ?? "termine";
-}
-
-/** Liste ORDONNÉE des phases réellement traversées par CET exercice — purement fonction de
- * `phaseInitiale` (mirroir `phasesPourExercice`, 6gen59). */
-export function phasesPourExercice(exercice: ExerciceAireExcentriciteConique): PhaseAireExcentriciteConique[] {
-  const phases: PhaseAireExcentriciteConique[] = [];
-  let phase: PhaseAireExcentriciteConique | "termine" = phaseInitiale(exercice);
-  while (phase !== "termine") {
-    phases.push(phase);
-    phase = phaseApres(phase);
-  }
-  return phases;
-}
-
-export interface ResultatExerciceAireExcentriciteConique {
-  exercice: ExerciceAireExcentriciteConique;
-  scores: Partial<Record<PhaseAireExcentriciteConique, number>>;
-  /** même principe que `EtatSessionAireExcentriciteConique.revelesPartiels` (voir son commentaire). */
-  revelesPartiels: Partial<Record<PhaseAireExcentriciteConique, boolean>>;
-}
-
-export interface EtatSessionAireExcentriciteConique {
-  reglages: ReglagesSession6e;
-  generateur: () => ExerciceAireExcentriciteConique;
-  exerciceCourant: ExerciceAireExcentriciteConique;
-  phase: PhaseAireExcentriciteConique;
-  etapeCourante: EtatEtapeTentatives;
-  niveauAide: number;
-  scoresPartiels: Partial<Record<PhaseAireExcentriciteConique, number>>;
-  /** Vrai signal "révélé" par écran déjà clos — jusqu'au 2025-10, déduit de
-   * `scoresPartiels[phase] === 0`, une heuristique fausse ici : l'ancienne pénalité d'aide (supprimée)
-   * (`Math.max(0, score - niveauAide*20)` dans `sessionAireExcentriciteConique.ts`) pouvait ramener
-   * une RÉUSSITE fortement aidée à exactement 0, affichée à tort comme "révélée". Champ explicite
-   * ajouté pendant le balayage générique (point A), peuplé depuis `etapeCourante.revelee`. */
-  revelesPartiels: Partial<Record<PhaseAireExcentriciteConique, boolean>>;
-  indexExercice: number;
-  resultats: ResultatExerciceAireExcentriciteConique[];
-  terminee: boolean;
-  /** Vrai UNIQUEMENT juste après l'appel qui a clos un écran par épuisement des tentatives — piège
-   * "revele stale" documenté CLAUDE.md. */
-  derniereTransitionRevelee: boolean;
+export function phasesPourExercice(e: ExerciceAireExcentriciteConique): PhaseAireExcentriciteConique[] {
+  return e.famille === "A" ? ["aRayons", "aCos", "aAire"] : ["bRelation", "bE"];
 }

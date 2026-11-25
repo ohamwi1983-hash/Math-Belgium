@@ -1,39 +1,22 @@
 import type { ExerciceIdentificationConiques } from "../../core6e/identificationConiques.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
-import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatIdentificationConiques";
+import type { PhaseIdentificationConiques } from "../../moteur6e/typesIdentificationConiques";
 import { phasesPourExercice } from "../../moteur6e/typesIdentificationConiques";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIdentificationConiques } from "./index";
+import { FORMAT_6GEN58 } from "../../ui6e/formatIdentificationConiques";
+import { construireAdaptateurConiques } from "../adaptateurConiques";
+import { CATALOGUE_VARIANTES, GROUPES_VERDICT_6GEN58, construireAvecVarianteId, genererExerciceIdentificationConiques } from "./index";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceIdentificationConiques>` pour `6gen58` (Identification des coniques) — NOUVEAU,
- * même principe que les autres adaptateurs du chapitre « Les coniques ».
+ * Adaptateur papier de `6gen58` — PROVISOIRE (lots B et C du 6e ch. 10 ; lot E à venir). La nature est
+ * un VERDICT : groupes à verdict (décision 3) pour les quatre familles, jamais dans `forme`. Aucun
+ * `calcul` (règle du 24/11 : décider une nature, réduire une équation).
  */
-
-function entete(exercice: ExerciceIdentificationConiques) {
-  return [...consigneGenerale(exercice), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
-}
-
-function construireEnonce(exercice: ExerciceIdentificationConiques): SectionExercice {
-  const phases = phasesPourExercice(exercice);
-  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
-}
-
-function construireCorrection(exercice: ExerciceIdentificationConiques): BlocCorrection[] {
-  const phases = phasesPourExercice(exercice);
-  const lettres = "abcdefghijklmnopqrstuvwxyz";
-  return phases.map((phase, i) => ({
-    type: "paragraphe",
-    fragments: [texte(`${lettres[i] ?? String(i + 1)}) `), latex(formatReponseAttenduePhaseLatex(exercice, phase).join(",\\ "))],
-  }));
-}
-
-export const adaptateurEvaluationIdentificationConiques: AdaptateurFeuilleExercices<ExerciceIdentificationConiques> = {
-  titreDocument: "Identification des coniques — Évaluation",
+export const adaptateurEvaluationIdentificationConiques = construireAdaptateurConiques<ExerciceIdentificationConiques, PhaseIdentificationConiques>({
+  titreDocument: "Identifier une conique — Évaluation",
   nomFichierBase: "identification-coniques",
   genererInstance: genererExerciceIdentificationConiques,
   catalogueVariantes: CATALOGUE_VARIANTES,
-  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
-  construireEnonce,
-  construireCorrection,
-};
+  genererInstanceAvecVariante: construireAvecVarianteId,
+  format: FORMAT_6GEN58,
+  phases: phasesPourExercice,
+  groupesVerdict: GROUPES_VERDICT_6GEN58,
+});

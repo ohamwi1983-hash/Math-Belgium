@@ -1,56 +1,8 @@
 import type { ExerciceProprietesOptiquesConiques } from "../core6e/proprietesOptiquesConiques.types";
-import type { ReglagesSession6e } from "../core6e/session6e.types";
-import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
-/**
- * Couche B (6e) — types de session pour `6gen63`. Une seule famille, TOUJOURS 4 écrans (jamais de
- * branchement selon l'exercice, contrairement à `6gen61`/`6gen62`) — `phaseInitiale`/`phaseApres` ne
- * dépendent donc d'aucun champ de l'exercice, mais gardent la même signature que les autres
- * générateurs du chapitre pour rester interchangeables avec le dispatcher générique de `App6gen63.tsx`.
- */
+/** Écrans de `6gen63` (audit du 6e ch. 10, lots B et C) : quatre écrans pour les trois coniques. */
+export type PhaseProprietesOptiquesConiques = "foyers" | "impact" | "propriete" | "reflechi";
 
-export type PhaseProprietesOptiquesConiques = "ecran1" | "ecran2" | "ecran3" | "ecran4";
-
-export function phaseInitiale(): PhaseProprietesOptiquesConiques {
-  return "ecran1";
-}
-
-const SUITE: Record<PhaseProprietesOptiquesConiques, PhaseProprietesOptiquesConiques | "termine"> = {
-  ecran1: "ecran2",
-  ecran2: "ecran3",
-  ecran3: "ecran4",
-  ecran4: "termine",
-};
-
-export function phaseApres(phase: PhaseProprietesOptiquesConiques): PhaseProprietesOptiquesConiques | "termine" {
-  return SUITE[phase];
-}
-
-export const TOUTES_LES_PHASES: PhaseProprietesOptiquesConiques[] = ["ecran1", "ecran2", "ecran3", "ecran4"];
-
-export interface ResultatExerciceProprietesOptiquesConiques {
-  exercice: ExerciceProprietesOptiquesConiques;
-  scores: Partial<Record<PhaseProprietesOptiquesConiques, number>>;
-}
-
-export interface EtatSessionProprietesOptiquesConiques {
-  reglages: ReglagesSession6e;
-  generateur: () => ExerciceProprietesOptiquesConiques;
-  exerciceCourant: ExerciceProprietesOptiquesConiques;
-  phase: PhaseProprietesOptiquesConiques;
-  etapeCourante: EtatEtapeTentatives;
-  niveauAide: number;
-  scoresPartiels: Partial<Record<PhaseProprietesOptiquesConiques, number>>;
-  /** Un booléen "révélé" par écran déjà clos, même principe que `scoresPartiels` — jusqu'au 2025-10,
-   * déduit de `scoresPartiels[phase] === 0`, heuristique fausse ici : l'ancienne pénalité d'aide (supprimée)
-   * (`Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE)`) pouvait faire tomber une RÉUSSITE
-   * fortement aidée à exactement 0, affichée alors à tort comme "révélée". Champ explicite ajouté
-   * pendant le balayage générique (point A). */
-  revelesPartiels: Partial<Record<PhaseProprietesOptiquesConiques, boolean>>;
-  indexExercice: number;
-  resultats: ResultatExerciceProprietesOptiquesConiques[];
-  terminee: boolean;
-  /** Vrai UNIQUEMENT juste après l'appel qui a clos un écran par épuisement des tentatives — piège
-   * "revele stale" documenté CLAUDE.md. */
-  derniereTransitionRevelee: boolean;
+export function phasesPourExercice(_e: ExerciceProprietesOptiquesConiques): PhaseProprietesOptiquesConiques[] {
+  return ["foyers", "impact", "propriete", "reflechi"];
 }

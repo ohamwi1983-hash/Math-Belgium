@@ -1,39 +1,21 @@
 import type { ExerciceEquationConiqueCaracteristiques } from "../../core6e/equationConiqueCaracteristiques.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
-import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatEquationConiqueCaracteristiques";
+import type { PhaseEquationConiqueCaracteristiques } from "../../moteur6e/typesEquationConiqueCaracteristiques";
 import { phasesPourExercice } from "../../moteur6e/typesEquationConiqueCaracteristiques";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationConiqueCaracteristiques } from "./index";
+import { FORMAT_6GEN59 } from "../../ui6e/formatEquationConiqueCaracteristiques";
+import { construireAdaptateurConiques } from "../adaptateurConiques";
+import { CATALOGUE_VARIANTES, GROUPES_VERDICT_6GEN59, construireAvecVarianteId, genererExerciceEquationConiqueCaracteristiques } from "./index";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceEquationConiqueCaracteristiques>` pour `6gen59` (Équation d'une conique et caractéristiques) — NOUVEAU,
- * même principe que les autres adaptateurs du chapitre « Les coniques ».
+ * Adaptateur papier de `6gen59` — PROVISOIRE (lots B et C du 6e ch. 10 ; lot E à venir). Nature
+ * (ellipse / hyperbole) = VERDICT : groupes à verdict A « même axe » et C (décision 3). Aucun `calcul`.
  */
-
-function entete(exercice: ExerciceEquationConiqueCaracteristiques) {
-  return [...consigneGenerale(exercice), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
-}
-
-function construireEnonce(exercice: ExerciceEquationConiqueCaracteristiques): SectionExercice {
-  const phases = phasesPourExercice(exercice);
-  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
-}
-
-function construireCorrection(exercice: ExerciceEquationConiqueCaracteristiques): BlocCorrection[] {
-  const phases = phasesPourExercice(exercice);
-  const lettres = "abcdefghijklmnopqrstuvwxyz";
-  return phases.map((phase, i) => ({
-    type: "paragraphe",
-    fragments: [texte(`${lettres[i] ?? String(i + 1)}) `), latex(formatReponseAttenduePhaseLatex(exercice, phase).join(",\\ "))],
-  }));
-}
-
-export const adaptateurEvaluationEquationConiqueCaracteristiques: AdaptateurFeuilleExercices<ExerciceEquationConiqueCaracteristiques> = {
-  titreDocument: "Équation d'une conique et caractéristiques — Évaluation",
+export const adaptateurEvaluationEquationConiqueCaracteristiques = construireAdaptateurConiques<ExerciceEquationConiqueCaracteristiques, PhaseEquationConiqueCaracteristiques>({
+  titreDocument: "Équation d'une conique — Évaluation",
   nomFichierBase: "equation-conique-caracteristiques",
   genererInstance: genererExerciceEquationConiqueCaracteristiques,
   catalogueVariantes: CATALOGUE_VARIANTES,
-  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
-  construireEnonce,
-  construireCorrection,
-};
+  genererInstanceAvecVariante: construireAvecVarianteId,
+  format: FORMAT_6GEN59,
+  phases: phasesPourExercice,
+  groupesVerdict: GROUPES_VERDICT_6GEN59,
+});

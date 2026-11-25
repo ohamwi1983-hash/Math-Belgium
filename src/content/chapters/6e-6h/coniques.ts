@@ -660,7 +660,7 @@ export const coniques: ChapterContent = {
           title: 'Identifier et caractériser une conique',
           generatorId: '6gen58',
           description: [
-            "Reconnais la nature d'une conique à partir de son équation (réduite, ou à réduire par translation), puis retrouve ses foyers, sommets et asymptotes.",
+            "Reconnais la nature d'une conique (ou d'un cas dégénéré) à partir de son équation, réduis-la, puis retrouve son centre, ses demi-axes, ses foyers et ses asymptotes.",
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 58. Identifier et caractériser une conique »',
@@ -1111,13 +1111,13 @@ export const coniques: ChapterContent = {
         },
         {
           kind: 'entrainement',
-          title: "Excentricité, foyers, directrices et réduction d'équation",
+          title: "Équation d'une conique depuis ses caractéristiques",
           generatorId: '6gen59',
           description: [
-            "Établis l'équation d'une conique à partir de ses éléments (foyer, sommet, directrice, excentricité, point, asymptotes), puis identifie la conique obtenue.",
+            "Passe des sommets, des foyers, des asymptotes, de l'excentricité ou de la distance des directrices à l'équation réduite d'une ellipse, d'une hyperbole ou d'une parabole.",
           ],
           chantier: '6e-6h',
-          whereLabel: "6e (6h) → « 59. Excentricité, foyers, directrices et réduction d'équation »",
+          whereLabel: "6e (6h) → « 59. Équation d'une conique depuis ses caractéristiques »",
         },
         {
           kind: 'entrainement',
@@ -1830,7 +1830,7 @@ export const coniques: ChapterContent = {
           title: 'Tangentes à une conique',
           generatorId: '6gen62',
           description: [
-            "Détermine la tangente à une conique en un point, les tangentes de pente donnée ou issues d'un point, ou une conique tangente à une droite — forme dédoublée et condition de tangence.",
+            "Détermine la tangente en un point (par la dérivée ou la forme dédoublée), les tangentes de pente donnée ou issues d'un point, une conique tangente à une droite et le point le plus proche d'une droite.",
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 62. Tangentes à une conique »',
@@ -2250,7 +2250,7 @@ export const coniques: ChapterContent = {
           title: 'Propriétés optiques des coniques',
           generatorId: '6gen63',
           description: [
-            "Retrouve le trajet d'un rayon réfléchi par un miroir parabolique, elliptique ou hyperbolique à partir de ses foyers et de la propriété optique.",
+            "Retrouve, pour l'ellipse, l'hyperbole et la parabole, le trajet d'un rayon réfléchi grâce à leurs propriétés optiques.",
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 63. Propriétés optiques des coniques »',

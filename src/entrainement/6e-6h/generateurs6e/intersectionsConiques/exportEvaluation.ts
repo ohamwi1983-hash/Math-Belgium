@@ -1,39 +1,22 @@
 import type { ExerciceIntersectionsConiques } from "../../core6e/intersectionsConiques.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
-import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatIntersectionsConiques";
+import type { PhaseIntersectionsConiques } from "../../moteur6e/typesIntersectionsConiques";
 import { phasesPourExercice } from "../../moteur6e/typesIntersectionsConiques";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIntersectionsConiques } from "./index";
+import { FORMAT_6GEN61 } from "../../ui6e/formatIntersectionsConiques";
+import { construireAdaptateurConiques } from "../adaptateurConiques";
+import { CATALOGUE_VARIANTES, GROUPES_VERDICT_6GEN61, construireAvecVarianteId, genererExerciceIntersectionsConiques } from "./index";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceIntersectionsConiques>` pour `6gen61` (Intersections de coniques) — NOUVEAU,
- * même principe que les autres adaptateurs du chapitre « Les coniques ».
+ * Adaptateur papier de `6gen61` — PROVISOIRE (lots B et C du 6e ch. 10 ; lot E à venir). Le nombre de
+ * points communs est un VERDICT : groupes à verdict ellipse et hyperbole (décision 3), jamais dans
+ * `forme`. Aucun `calcul` ici (le lot E jugera les points seuls, donnés par l'application Équations).
  */
-
-function entete(exercice: ExerciceIntersectionsConiques) {
-  return [...consigneGenerale(exercice), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
-}
-
-function construireEnonce(exercice: ExerciceIntersectionsConiques): SectionExercice {
-  const phases = phasesPourExercice(exercice);
-  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
-}
-
-function construireCorrection(exercice: ExerciceIntersectionsConiques): BlocCorrection[] {
-  const phases = phasesPourExercice(exercice);
-  const lettres = "abcdefghijklmnopqrstuvwxyz";
-  return phases.map((phase, i) => ({
-    type: "paragraphe",
-    fragments: [texte(`${lettres[i] ?? String(i + 1)}) `), latex(formatReponseAttenduePhaseLatex(exercice, phase).join(",\\ "))],
-  }));
-}
-
-export const adaptateurEvaluationIntersectionsConiques: AdaptateurFeuilleExercices<ExerciceIntersectionsConiques> = {
-  titreDocument: "Intersections de coniques — Évaluation",
+export const adaptateurEvaluationIntersectionsConiques = construireAdaptateurConiques<ExerciceIntersectionsConiques, PhaseIntersectionsConiques>({
+  titreDocument: "Intersection d'une conique et d'une droite — Évaluation",
   nomFichierBase: "intersections-coniques",
   genererInstance: genererExerciceIntersectionsConiques,
   catalogueVariantes: CATALOGUE_VARIANTES,
-  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
-  construireEnonce,
-  construireCorrection,
-};
+  genererInstanceAvecVariante: construireAvecVarianteId,
+  format: FORMAT_6GEN61,
+  phases: phasesPourExercice,
+  groupesVerdict: GROUPES_VERDICT_6GEN61,
+});
