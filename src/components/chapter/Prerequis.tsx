@@ -66,7 +66,7 @@ export function CeChapitreUtilise({ chapter }: { chapter: ChapterContent }) {
               {chapitre.levelSlug !== chapter.levelSlug && <span className="utilise-annee"> ({chapitre.level})</span>}
             </p>
             <ul>
-              {[...lignes.values()].map((l) => (
+              {[...lignes.values()].sort((a, b) => a.cible.numero - b.cible.numero).map((l) => (
                 <li key={l.cible.href}>
                   <Link to={l.cible.href} className="utilise-lien">
                     <span className="utilise-num">{`Étape\u00a0${l.cible.numero}`}</span>
@@ -74,7 +74,9 @@ export function CeChapitreUtilise({ chapter }: { chapter: ChapterContent }) {
                   </Link>
                   <span className="utilise-detail">
                     {l.indispensable ? <strong className="utilise-indispensable">indispensable</strong> : 'utile'}
-                    {' · '}pour l’étape {l.pour.map((s) => s.number).join(', ')}
+                    {' · '}
+                    {l.pour.length > 1 ? 'pour les étapes ' : 'pour l’étape '}
+                    {l.pour.map((s) => s.number).join(', ')}
                   </span>
                 </li>
               ))}
