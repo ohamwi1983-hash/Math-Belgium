@@ -6,6 +6,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 const LETTRES = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
@@ -138,7 +139,7 @@ export function ComposantAssociation({
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1}</p>
-          {niveauAide >= 2 && aideNiveau2 && <p>{aideNiveau2.texte}</p>}
+          {niveauAide >= 2 && aideNiveau2 && <p><TexteInsistance texte={aideNiveau2.texte} /></p>}
           {niveauAide >= 2 && aideNiveau2?.latex && <Katex expression={aideNiveau2.latex} block />}
         </div>
       )}

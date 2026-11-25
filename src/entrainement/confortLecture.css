@@ -1,0 +1,402 @@
+/* Confort de lecture dans les générateurs — côté élève, sans compte, lot G (planche 10, 25/11/2026).
+ * Voir `.claude/rules/cote-eleve.md`, « Générateurs ». Chargé par `EntrainementPage` APRÈS `cadre.css`,
+ * tout sous `.entrainement`. Sans réglage (aucun attribut `data-*` sur <html>), RIEN ici ne change le
+ * rendu d'avant, sauf les éléments nouveaux (« Aa », « Je bloque », « Lire ligne par ligne »).
+ *
+ * TAILLE DU TEXTE — méthode : les tailles de `cadre.css` / `theme.css` sont écrites
+ * `calc(Npx * var(--g-t, 1))` (texte de lecture : énoncés, consignes, aides, messages, corrigés,
+ * rappels) ou `calc(Npx * var(--g-ui, 1))` (interface : boutons, barres, étiquettes, tableaux de saisie)
+ * — valeurs changées SUR PLACE, sans réordonner. Les variables ne sont définies qu'ici, à l'écran et
+ * seulement avec `data-taille` : sans réglage (et à l'impression), calc(16px × 1) = 16px.
+ * Pourquoi pas `zoom` (maquette) : sous un ancêtre zoomé, les positions fixes calculées en pixels
+ * réels par `CadreActions` (`--col-x/-w/-top` de l'énoncé épinglé, `--clavier`, `--barre-aide-w`) sont
+ * multipliées une seconde fois, et les figures Mafs (glisser un point) convertissent les coordonnées du
+ * doigt avec leur largeur non zoomée — iOS (ancien `zoom` de WebKit) et Chromium ne mesurent pas pareil.
+ * Avec la taille de police, figures, barres fixes et mesures restent exactes ; les formules KaTeX (en
+ * `em`) suivent le texte qui les porte ; les figures gardent leur taille (elles ont déjà la largeur de
+ * l'écran).
+ * Échelles : texte 1 · 1,08 · 1,18 · 1,35 · 1,55 (l'énoncé, 18 px, vaut alors 19,4 / 21,2 / 24,3 /
+ * 27,9 px ≈ le corps du cours, 17 px × 1,12 / 1,25 / 1,45 / 1,7) ; interface `--l-echelle-ui`
+ * (1 · 1,05 · 1,1 · 1,2 · 1,2 : la barre du bas et la barre du haut restent sur une ligne) ; titre
+ * plafonné. La calculatrice (panneau) et `SelecteurVarianteDev` gardent leur taille (seul le bouton
+ * flottant de la calculatrice suit l'interface). */
+
+@media screen {
+  :root[data-taille="2"] .entrainement { --g-t: 1.08; --g-ui: 1.05; --g-titre: 1.06; }
+  :root[data-taille="3"] .entrainement { --g-t: 1.18; --g-ui: 1.1; --g-titre: 1.12; }
+  :root[data-taille="4"] .entrainement { --g-t: 1.35; --g-ui: 1.2; --g-titre: 1.2; }
+  :root[data-taille="5"] .entrainement { --g-t: 1.55; --g-ui: 1.2; --g-titre: 1.25; }
+
+  /* Champs : 52 px de haut au moins et chiffres de 20 px dès que le texte grandit (aussi dans les
+     tableaux de saisie). La saisie n'est jamais filtrée (règle du site) : seule la taille change. */
+  :root[data-taille] .entrainement .text-input {
+    min-height: 52px;
+    font-size: max(20px, calc(18px * var(--g-t, 1)));
+  }
+  :root[data-taille] .entrainement :is(.tf-table, .morceau-row, .grille-signes, .liste-points-isoles, .ce-ligne-compacte, .summary-table) .text-input {
+    font-size: 20px;
+  }
+
+  /* Figures : leur texte (Mafs, SVG sans taille propre) hérite de la taille du texte — on lui rend sa
+     taille d'avant (la base `.entrainement` a grandi de `--g-t`), pour que les étiquettes ne se
+     chevauchent pas. Seulement la figure la plus extérieure (jamais divisé deux fois). */
+  :root[data-taille] .entrainement :is(.MafsView, svg):not(:is(.MafsView, svg, .katex) *) {
+    font-size: calc(1em / var(--g-t, 1));
+  }
+
+  /* Interligne choisi : aussi dans les textes de lecture du générateur (jamais sous 1,5). */
+  :root[data-interligne] .entrainement :is(.prompt-text, .bloc-donnees-ligne, .aide-5e, .triangle-quelconque-aide, .corrige-ecran-contenu, .validation-reponse-attendue, .recap-item, .je-bloque-corps) {
+    line-height: max(1.5, var(--l-interligne));
+  }
+}
+
+/* ---------- Bouton « Aa » dans la barre du générateur ---------- */
+.entrainement .gen-barre {
+  grid-template-columns: 44px minmax(0, 1fr) auto auto;
+}
+.entrainement .gen-barre .btn-lecture {
+  height: 44px;
+  min-width: 44px;
+}
+@media (max-width: 400px) {
+  .entrainement .gen-barre { column-gap: 8px; }
+}
+
+/* ---------- Plus de majuscules d'insistance : le gras les remplace (`TexteInsistance`) ---------- */
+.entrainement strong.insistance {
+  font-weight: 700;
+}
+.entrainement :is(.alert-error, .alert-success, .btn-primary, .validation-verdict) strong.insistance {
+  font-weight: 800;
+}
+
+/* ---------- Corrigé lu ligne par ligne (`CorrigeDetailleEcran`) ---------- */
+.entrainement .corrige-pas-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-bottom: 8px;
+}
+.entrainement .corrige-pas-tete .corrige-ecran-titre {
+  margin: 0;
+}
+.entrainement .corrige-pas-ouvrir {
+  min-height: 44px;
+  margin: -6px -8px -6px auto;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--accent-ink);
+  font: 600 calc(14px * var(--g-ui, 1))/1.2 var(--sans);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.entrainement .corrige-pas-ouvrir:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.entrainement .corrige-pas-compte {
+  font: 600 calc(13px * var(--g-ui, 1))/1.3 var(--sans);
+  color: var(--ink-soft);
+}
+/* Lignes déjà lues : encre secondaire (≥ 6:1 dans chaque thème), jamais une opacité qui ferait passer
+   les justifications, déjà secondaires, sous 4,5:1. */
+.entrainement .corrige-pas .cp-passe,
+.entrainement .corrige-pas .cp-passe .katex {
+  color: var(--ink-soft);
+}
+.entrainement .corrige-pas .cp-futur {
+  visibility: hidden;
+}
+/* Ligne en cours : fond accent clair et cadre de 2 px (une ligne de calcul = ses cases sur la rangée). */
+.entrainement .corrige-pas :is(.corrige-ecran-texte, .corrige-ecran-cadre, .corrige-ecran-piege, .corrige-ecran-figure).cp-courant {
+  background: color-mix(in srgb, var(--accent-soft) 80%, var(--surface));
+  box-shadow: 0 0 0 2px var(--accent);
+  border-radius: 4px;
+}
+.entrainement .corrige-pas .corrige-ecran-calcul :is(.cc-g, .cc-d, .cc-s).cp-courant {
+  background: color-mix(in srgb, var(--accent-soft) 80%, var(--surface));
+  box-shadow: inset 0 2px 0 var(--accent), inset 0 -2px 0 var(--accent);
+}
+.entrainement .corrige-pas .corrige-ecran-calcul .cc-g.cp-courant { box-shadow: inset 2px 2px 0 var(--accent), inset 0 -2px 0 var(--accent); border-radius: 4px 0 0 4px; padding-left: 4px; }
+.entrainement .corrige-pas .corrige-ecran-calcul .cc-d.cp-courant { box-shadow: inset -2px 2px 0 var(--accent), inset 0 -2px 0 var(--accent); border-radius: 0 4px 4px 0; }
+.entrainement .corrige-pas .corrige-ecran-calcul .cc-s.cp-courant { box-shadow: inset 0 0 0 2px var(--accent); border-radius: 4px; padding-left: 4px; }
+.entrainement .corrige-pas .corrige-ecran-calcul .cc-j.cp-courant {
+  color: var(--ink);
+  font-weight: 600;
+}
+.entrainement .corrige-pas .cp-courant {
+  scroll-margin-bottom: calc(var(--barre-h, 0px) + var(--clavier, 0px) + 150px);
+  scroll-margin-top: calc(var(--barre-haut-h, 60px) + 12px);
+}
+.entrainement .corrige-pas-boutons {
+  position: sticky;
+  bottom: calc(var(--barre-h, 0px) + var(--clavier, 0px) + 8px);
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px -8px 0;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface);
+  box-shadow: 0 4px 14px rgba(24, 36, 48, 0.12);
+}
+.entrainement .corrige-pas-boutons .corrige-pas-compte {
+  flex: 1 0 100%;
+}
+.entrainement .corrige-pas-boutons .btn {
+  min-height: 48px;
+  flex: 0 1 auto;
+}
+/* Fond `--accent-ink` (texte 9:1 en clair) : sur `--accent`, le texte clair n'a que 4,4:1. */
+.entrainement .corrige-pas-suivante {
+  background: var(--accent-ink);
+  border-color: var(--accent-ink);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+.entrainement .corrige-pas-suivante:hover:not(:disabled) {
+  background: var(--accent-ink);
+  border-color: var(--ink);
+  color: var(--on-accent);
+  text-decoration: underline;
+}
+.entrainement .corrige-pas-ecouter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.entrainement .corrige-pas-boutons .btn:focus-visible,
+.entrainement .corrige-pas-ouvrir:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media print {
+  .entrainement .corrige-pas .cp-futur { visibility: visible; }
+  .entrainement .corrige-pas .cp-passe { color: inherit; }
+}
+
+/* ---------- « Je bloque » (`JeBloque.tsx`, `PanneauJeBloque.tsx`) ---------- */
+.entrainement .je-bloque-bouton {
+  position: fixed;
+  z-index: 405;
+  left: var(--gouttiere);
+  bottom: calc(var(--clavier, 0px) + var(--barre-h, 0px) + var(--barre-retour-h, 0px) + 8px + env(safe-area-inset-bottom, 0px));
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid color-mix(in srgb, var(--sky) 45%, var(--surface));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sky-soft) 75%, var(--surface));
+  color: var(--sky-ink);
+  font: 700 calc(15px * var(--g-ui, 1))/1.2 var(--sans);
+  box-shadow: 0 4px 14px rgba(24, 36, 48, 0.16);
+  cursor: pointer;
+}
+/* La barre du bas a déjà ajouté sa propre hauteur : `--barre-h` vaut 0 hors de la barre fixe. */
+.entrainement:not([data-barre-active]) .je-bloque-bouton {
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+.entrainement .je-bloque-bouton:hover {
+  background: var(--sky-soft);
+  border-color: var(--sky);
+}
+.entrainement .je-bloque-bouton:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-animations="reduites"]) .entrainement .je-bloque-bouton {
+    animation: je-bloque-entree 0.2s ease-out;
+  }
+}
+@keyframes je-bloque-entree {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+/* Place réservée sous le contenu tant que le bouton est là (téléphone et tablette). */
+@media screen and (max-width: 1023.98px) {
+  .entrainement[data-barre-active][data-je-bloque] .app-shell {
+    padding-bottom: calc(var(--barre-h) + var(--barre-retour-h, 0px) + 24px + 52px);
+  }
+}
+/* Ordinateur : en bas de la colonne des étapes (l'énoncé épinglé est à gauche, la calculatrice à droite). */
+@media screen and (min-width: 1024px) {
+  .entrainement .je-bloque-bouton {
+    left: 24px;
+    bottom: 24px;
+  }
+  .entrainement[data-deux-colonnes] .je-bloque-bouton {
+    left: calc(var(--col-x, 0px) + var(--col-w, 0px) + 32px);
+  }
+}
+
+.je-bloque-panneau {
+  width: 100%;
+  max-width: 100%;
+  max-height: 92dvh;
+  margin: auto 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 16px 16px 0 0;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 -12px 36px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+.je-bloque-panneau[open] {
+  display: flex;
+}
+.je-bloque-panneau::backdrop {
+  background: rgba(16, 22, 29, 0.45);
+}
+.je-bloque-contenu {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  max-height: 92dvh;
+}
+.je-bloque-entete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px var(--gouttiere, 16px) 10px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.je-bloque-entete h2 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font: 700 calc(18px * var(--g-titre, 1))/1.3 var(--sans);
+  color: var(--sky-ink);
+}
+.je-bloque-fermer {
+  flex: none;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface);
+  color: var(--ink);
+  font: 600 calc(15px * var(--g-ui, 1))/1 var(--sans);
+  cursor: pointer;
+}
+.je-bloque-corps {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px var(--gouttiere, 16px) 8px;
+  font: 400 calc(17px * var(--g-t, 1))/1.6 var(--lecture);
+}
+.je-bloque-texte {
+  margin: 0 0 12px;
+}
+.je-bloque-etape {
+  margin: 0 0 12px;
+  font: 600 calc(14px * var(--g-ui, 1))/1.4 var(--sans);
+  color: var(--ink-soft);
+}
+.je-bloque-exemple {
+  margin: 0 0 8px;
+  padding: 12px 12px 12px 0;
+  border-radius: var(--radius-md, 10px);
+  background: color-mix(in srgb, var(--sky-soft) 60%, var(--surface));
+}
+.je-bloque-exemple-titre {
+  margin: 0 0 10px 17px;
+  font: 700 calc(16px * var(--g-ui, 1))/1.35 var(--sans);
+  color: var(--sky-ink);
+}
+.je-bloque-exemple .pas-a-pas {
+  margin-left: 0;
+}
+.je-bloque-panneau .btn-parcours {
+  font-size: calc(15px * var(--g-ui, 1));
+}
+.je-bloque-panneau .essentiel {
+  margin: 0 0 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--accent-soft-line);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius-md, 10px);
+  background: color-mix(in srgb, var(--accent-soft) 55%, var(--surface));
+}
+.je-bloque-panneau .essentiel .etiquette {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  font: 700 14px/1.3 var(--sans);
+  color: var(--accent-ink);
+}
+.je-bloque-panneau .essentiel p:not(.etiquette) {
+  margin: 0 0 0.5em;
+}
+.je-bloque-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px var(--gouttiere, 16px) calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line-soft);
+}
+.je-bloque-actions .btn {
+  flex: 1 1 200px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0 6px;
+  min-height: 48px;
+  text-decoration: none;
+  text-align: center;
+}
+.je-bloque-revoir {
+  color: var(--accent-ink);
+}
+.je-bloque-onglet {
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+.entrainement .btn-retour-exercice {
+  background: var(--accent-ink);
+  border-color: var(--accent-ink);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+.entrainement .btn-retour-exercice:hover:not(:disabled) {
+  background: var(--accent-ink);
+  border-color: var(--ink);
+  color: var(--on-accent);
+  text-decoration: underline;
+}
+.je-bloque-panneau :is(button, a):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (min-width: 900px) {
+  .je-bloque-panneau {
+    width: min(560px, 100vw);
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0 0 0 auto;
+    border-radius: 0;
+    border-left: 1px solid var(--line);
+    box-shadow: -12px 0 36px rgba(0, 0, 0, 0.18);
+  }
+  .je-bloque-contenu {
+    max-height: 100dvh;
+  }
+}
+@media print {
+  .je-bloque-bouton, .je-bloque-panneau { display: none !important; }
+}

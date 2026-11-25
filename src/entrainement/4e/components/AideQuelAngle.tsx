@@ -4,6 +4,7 @@ import { texteAideQuadrants } from "../ui/formatQuelAngle";
 import { CENTRE_CERCLE_TRIG, HAUTEUR_CERCLE_TRIG, RAYON_CERCLE_TRIG } from "../ui/cercleTrigGeometrie";
 import { CercleTrigBase } from "./CercleTrigBase";
 import { BoutonAide } from "./BoutonAide";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceQuelAngle;
@@ -53,7 +54,7 @@ export function AideQuelAngle({ exercice, aideActivee, onActiverAide, sansBouton
     <div>
       {aideActivee && (
         <div className="triangle-quelconque-aide">
-          {!sansBouton && <p>{texteAideQuadrants(exercice)}</p>}
+          {!sansBouton && <p><TexteInsistance texte={texteAideQuadrants(exercice)} /></p>}
           <CercleTrigBase ariaLabel="Cercle trigonométrique montrant les quadrants concernés, les points candidats et leurs projections">
             {exercice.fonction === "tan" && (
               <line x1={xTangente} y1={0} x2={xTangente} y2={HAUTEUR_CERCLE_TRIG} className="cercle-trig-tangente" />

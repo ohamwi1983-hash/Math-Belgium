@@ -12,6 +12,7 @@ import { MessageRetour } from "../../4e/components/RetourSaisie";
 import { cibleExtremums } from "../ui5e/retoursLectureGraphiqueDerivees";
 import { consigneEcran, consigneGenerale, labelsChampsExtremums, precisionAnnonceeExtremum, questionFinale, texteAideNiveau1 } from "../ui5e/formatLectureGraphiqueDerivees";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceLectureGraphiqueDerivees;
@@ -61,7 +62,7 @@ export function EtapeChampsLectureGraphiqueDerivees({ exercice, tentativesUtilis
       </p>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1("extremums")}</p>
+          <p><TexteInsistance texte={texteAideNiveau1("extremums")} /></p>
         </div>
       )}
       {labels.map((label, i) => (

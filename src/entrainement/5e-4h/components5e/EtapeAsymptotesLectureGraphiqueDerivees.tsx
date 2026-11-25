@@ -14,6 +14,7 @@ import { LectureGraphiqueDeriveesGraph } from "./LectureGraphiqueDeriveesGraph";
 import { MessageRetour } from "../../4e/components/RetourSaisie";
 import { cibleAsymptotesDerivees } from "../ui5e/retoursLectureGraphiqueDerivees";
 import "./lectureGraphiqueLimites.css";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceLectureGraphiqueDerivees;
@@ -77,7 +78,7 @@ export function EtapeAsymptotesLectureGraphiqueDerivees({ exercice, tentativesUt
       <p className="prompt-text">{consigneEcran("asymptotes")}</p>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1("asymptotes")}</p>
+          <p><TexteInsistance texte={texteAideNiveau1("asymptotes")} /></p>
         </div>
       )}
 

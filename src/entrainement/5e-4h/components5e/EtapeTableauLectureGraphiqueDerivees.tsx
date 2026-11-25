@@ -8,6 +8,7 @@ import { BoutonAide } from "./BoutonAide";
 import { LectureGraphiqueDeriveesGraph } from "./LectureGraphiqueDeriveesGraph";
 import { TableauEtudeLocaleBuilder } from "./TableauEtudeLocaleBuilder";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceLectureGraphiqueDerivees;
@@ -36,7 +37,7 @@ export function EtapeTableauLectureGraphiqueDerivees({ exercice, phase, tentativ
       <p className="prompt-text">{consigneEcran(phase)}</p>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(phase)}</p>
+          <p><TexteInsistance texte={texteAideNiveau1(phase)} /></p>
         </div>
       )}
       <TableauEtudeLocaleBuilder

@@ -13,6 +13,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { nombreFrTypo } from "../ui/nombreFr";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceDispersion;
@@ -145,7 +146,7 @@ export function EtapeTableauDispersion({ exercice, tentativesUtilisees, tentativ
           </p>
           {niveauAide >= 2 && (
             <>
-              <p>{aide2.texte}</p>
+              <p><TexteInsistance texte={aide2.texte} /></p>
               <Katex expression={aide2.latex} block />
             </>
           )}

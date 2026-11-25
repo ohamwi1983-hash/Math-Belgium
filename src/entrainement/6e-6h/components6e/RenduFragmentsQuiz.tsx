@@ -1,5 +1,6 @@
 import type { FragmentConsigne } from "../core6e/quizNombresComplexes.types";
 import { Katex } from "../components/Katex";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   fragments: FragmentConsigne[];
@@ -20,7 +21,7 @@ export function RenduFragmentsQuiz({ fragments }: Props) {
   for (let index = 0; index < fragments.length; index++) {
     const fragment = fragments[index];
     if (fragment.type === "texte") {
-      elements.push(<span key={index}>{fragment.valeur}</span>);
+      elements.push(<span key={index}><TexteInsistance texte={fragment.valeur} debutDePhrase={index === 0} /></span>);
       continue;
     }
     const suivant = fragments[index + 1];
@@ -30,7 +31,7 @@ export function RenduFragmentsQuiz({ fragments }: Props) {
       continue;
     }
     elements.push(<Katex key={index} expression={`${fragment.valeur}\\text{${ponctuation[1]}}`} />);
-    if (ponctuation[2] !== "") elements.push(<span key={`${index}-suite`}>{ponctuation[2]}</span>);
+    if (ponctuation[2] !== "") elements.push(<span key={`${index}-suite`}><TexteInsistance texte={ponctuation[2]} debutDePhrase={false} /></span>);
     index++;
   }
   return <>{elements}</>;

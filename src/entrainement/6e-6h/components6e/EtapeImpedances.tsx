@@ -9,6 +9,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 export type ModeEcranImpedances = { type: "champs"; champs: ChampDef[] } | { type: "choix"; options: OptionNature[] };
 
@@ -146,7 +147,7 @@ export function EtapeImpedances({
       )}
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
+          <p><TexteInsistance texte={aideNiveau1.texte} /></p>
           {aideNiveau1.latex && (
             <div style={{ overflowX: "auto", maxWidth: "100%" }}>
               <Katex expression={aideNiveau1.latex} block />
@@ -154,7 +155,7 @@ export function EtapeImpedances({
           )}
           {niveauAide >= 2 && aideNiveau2.texte && (
             <>
-              <p>{aideNiveau2.texte}</p>
+              <p><TexteInsistance texte={aideNiveau2.texte} /></p>
               {aideNiveau2.latex && (
                 <div style={{ overflowX: "auto", maxWidth: "100%" }}>
                   <Katex expression={aideNiveau2.latex} block />

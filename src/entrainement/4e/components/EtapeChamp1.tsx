@@ -13,6 +13,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { AidesNiveaux, MessageRetour, useTentativeLisible } from "./RetourSaisie";
 import type { FragmentConsigne } from "../ui/formatEquationDroite";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: Exercice;
@@ -200,7 +201,7 @@ export function EtapeChamp1({
               <div>
                 {aideActivee && (
                   <div className="triangle-quelconque-aide">
-                    <p>{texteAideChamp1(exercice.categorie)}</p>
+                    <p><TexteInsistance texte={texteAideChamp1(exercice.categorie)} /></p>
                   </div>
                 )}
                 <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />

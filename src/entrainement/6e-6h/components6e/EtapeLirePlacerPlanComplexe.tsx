@@ -11,6 +11,7 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { PlanComplexeInteractif } from "./PlanComplexeInteractif";
 import type { FlechePlan, PointFigurePlan } from "./PlanComplexeInteractif";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 export type ModeEcranLirePlacer =
   | { type: "champs"; champs: ChampLirePlacer[] }
@@ -182,11 +183,11 @@ export function EtapeLirePlacerPlanComplexe({
         ))}
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
+          <p><TexteInsistance texte={aideNiveau1.texte} /></p>
           {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
           {niveauAide >= 2 && aideNiveau2.texte && (
             <>
-              <p>{aideNiveau2.texte}</p>
+              <p><TexteInsistance texte={aideNiveau2.texte} /></p>
               {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
             </>
           )}

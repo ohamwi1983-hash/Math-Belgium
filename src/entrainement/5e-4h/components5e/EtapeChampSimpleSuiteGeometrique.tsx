@@ -10,6 +10,7 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceSuiteGeometrique;
@@ -77,7 +78,7 @@ export function EtapeChampSimpleSuiteGeometrique({ exercice, phase, tentativesUt
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          {noteAideNiveau1(exercice, phase) && <p>{noteAideNiveau1(exercice, phase)}</p>}
+          {noteAideNiveau1(exercice, phase) && <p><TexteInsistance texte={noteAideNiveau1(exercice, phase)} /></p>}
           <Katex expression={texteAideNiveau1(exercice, phase)} block />
           {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
         </div>

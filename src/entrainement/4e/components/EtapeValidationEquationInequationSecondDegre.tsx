@@ -15,6 +15,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { MESSAGE_BORNE_ILLISIBLE, MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
@@ -44,13 +45,13 @@ export function EtapeValidationEquationInequationSecondDegre({
     <>
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideValidationNiveau1()}</p>
+          <p><TexteInsistance texte={texteAideValidationNiveau1()} /></p>
           {niveauAide >= 2 && (
             <div>
               <Katex expression={texteAideValidationNiveau2(exercice)} block />
             </div>
           )}
-          {niveauAide >= 3 && <p>{texteAideValidationNiveau3(exercice)}</p>}
+          {niveauAide >= 3 && <p><TexteInsistance texte={texteAideValidationNiveau3(exercice)} /></p>}
         </div>
       )}
       <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_VALIDATION} onActiverAide={onActiverAide} />

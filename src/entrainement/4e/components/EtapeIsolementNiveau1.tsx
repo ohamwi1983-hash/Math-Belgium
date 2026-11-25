@@ -17,6 +17,7 @@ import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceCaracteristiquesAlgebriques;
@@ -89,7 +90,7 @@ export function EtapeIsolementNiveau1({ exercice, tentativesUtilisees, tentative
       </div>
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideIsolement(exercice)}</p>
+          <p><TexteInsistance texte={texteAideIsolement(exercice)} /></p>
         </div>
       )}
       {!validation && (

@@ -8,6 +8,7 @@ import { Solide3DSketch } from "./Solide3DSketch";
 import { BoutonAide } from "./BoutonAide";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 export interface CandidatOmbre {
   id: string;
@@ -129,7 +130,7 @@ export function ChoixCandidatsOmbre(props: Props) {
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
           {aides.slice(0, niveauAide).map((a, i) => (
-            <p key={i}>{a.texte}</p>
+            <p key={i}><TexteInsistance texte={a.texte} /></p>
           ))}
         </div>
       )}

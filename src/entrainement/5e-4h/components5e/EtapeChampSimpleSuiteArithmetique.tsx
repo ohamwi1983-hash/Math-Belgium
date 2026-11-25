@@ -9,6 +9,7 @@ import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 type PhaseChampSimple = "trouverR" | "trouverU1" | "formuleGenerale" | "termeEloigne" | "sommeSn" | "calculerSn" | "resoudreXAlgebrique" | "resoudreRangN";
 
@@ -87,7 +88,7 @@ export function EtapeChampSimpleSuiteArithmetique({ exercice, phase, tentativesU
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          {aide1EnLatex ? <Katex expression={texteAideNiveau1(exercice, phase as PhaseSuiteArithmetique)} block /> : <p>{texteAideNiveau1(exercice, phase as PhaseSuiteArithmetique)}</p>}
+          {aide1EnLatex ? <Katex expression={texteAideNiveau1(exercice, phase as PhaseSuiteArithmetique)} block /> : <p><TexteInsistance texte={texteAideNiveau1(exercice, phase as PhaseSuiteArithmetique)} /></p>}
           {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
         </div>
       )}

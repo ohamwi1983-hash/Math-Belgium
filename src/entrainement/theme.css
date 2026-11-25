@@ -39,7 +39,7 @@
    * reste du site. */
   --radius-md: 10px;
   --radius-lg: 14px;
-  font: 16px/1.5 var(--sans);
+  font: calc(16px * var(--g-t, 1))/1.5 var(--sans);
   color: var(--ink);
 }
 
@@ -504,7 +504,7 @@
  * même raison que `.prompt-fact` ci-dessous : hors du décompte de `:not(:has(~ .prompt-text))`,
  * toutes les lignes d'un même bloc gardent le même style (la dernière n'est pas « la question »). */
 .entrainement .bloc-donnees-ligne {
-  font-size: 14px;
+  font-size: calc(14px * var(--g-t, 1));
   color: var(--color-text);
   margin: 0 0 6px;
   /* Sur mobile, évite une unité seule sur la dernière ligne (« … = 14 » / « km »). */
@@ -516,7 +516,7 @@
 }
 
 .entrainement .prompt-fact {
-  font-size: 14px;
+  font-size: calc(14px * var(--g-t, 1));
   font-style: italic;
   color: var(--color-text-muted);
   margin: 0 0 10px;
@@ -527,7 +527,7 @@
  * de "la question" (`.prompt-text:not(:has(~ .prompt-text))` ci-dessus) en étant le dernier
  * `.prompt-text` de l'écran. Centré, discret, jamais en gras — jamais confondu avec une consigne. */
 .entrainement .prompt-connecteur {
-  font-size: 14px;
+  font-size: calc(14px * var(--g-t, 1));
   color: var(--color-text-muted);
   text-align: center;
   margin: 2px 0;
@@ -539,7 +539,7 @@
  * `<p>` retombait en `display:block`/marges par défaut, "∪" collé à gauche sous le premier
  * champ au lieu d'un vrai séparateur centré entre les deux. */
 .entrainement .union-separator {
-  font-size: 14px;
+  font-size: calc(14px * var(--g-t, 1));
   color: var(--color-text-muted);
   text-align: center;
   margin: 2px 0;
@@ -570,7 +570,7 @@
 }
 
 .entrainement .apercu-expression-latex-label {
-  font-size: 12px;
+  font-size: calc(12px * var(--g-ui, 1));
   font-weight: 600;
   color: var(--color-text-muted);
   margin-right: 8px;
@@ -825,7 +825,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
+  font-size: calc(14px * var(--g-t, 1));
   color: var(--color-text-muted);
 }
 
@@ -854,7 +854,7 @@
 
 .entrainement .construction-mode-emploi {
   margin: 0;
-  font-size: 14px;
+  font-size: calc(14px * var(--g-t, 1));
   color: var(--color-text-muted);
 }
 
@@ -884,7 +884,7 @@
   border-radius: var(--radius-md);
   border-left: 3px solid var(--color-primary);
   background: var(--color-surface);
-  font-size: 14px;
+  font-size: calc(14px * var(--g-t, 1));
   line-height: 1.5;
 }
 
@@ -1333,7 +1333,7 @@
 }
 
 .entrainement .ce-ligne-compacte .ce-slot-latex:not(.field-label) {
-  font-size: 19px;
+  font-size: calc(19px * var(--g-t, 1));
 }
 
 .entrainement .ce-ligne-compacte .ce-symbole-wrap {
@@ -1342,7 +1342,7 @@
 }
 
 .entrainement .ce-ligne-compacte .ce-select {
-  font-size: 18px;
+  font-size: calc(18px * var(--g-ui, 1));
   text-align: center;
 }
 
@@ -1354,7 +1354,7 @@
 .entrainement .ce-slot-latex:not(.field-label) {
   flex: none;
   white-space: nowrap;
-  font-size: 14.5px;
+  font-size: calc(14.5px * var(--g-t, 1));
   color: var(--color-text);
 }
 
@@ -1525,7 +1525,7 @@
   border-radius: var(--radius-md);
   background: var(--color-error-bg);
   color: var(--color-error);
-  font-size: 14px;
+  font-size: calc(14px * var(--g-t, 1));
   margin-bottom: 10px;
   overflow-x: auto;
 }
@@ -1558,7 +1558,7 @@
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 22px;
-  font-size: 14px;
+  font-size: calc(14px * var(--g-t, 1));
 }
 
 .entrainement .summary-table th,
@@ -1571,7 +1571,7 @@
 .entrainement .summary-table th {
   color: var(--color-text-muted);
   font-weight: 600;
-  font-size: 12px;
+  font-size: calc(12px * var(--g-ui, 1));
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -1879,7 +1879,7 @@
 
   .entrainement .morceau-row .text-input.morceau-input {
     padding: 10px 4px;
-    font-size: 16px;
+    font-size: calc(16px * var(--g-ui, 1));
   }
 
   .entrainement .morceau-separateur {
@@ -1941,7 +1941,7 @@
   min-height: 44px;
   min-width: 44px;
   font-weight: 700;
-  font-size: 16px;
+  font-size: calc(16px * var(--g-ui, 1));
   color: var(--color-error);
   background: var(--color-error-bg);
   border-color: var(--color-error-bg);
@@ -1961,7 +1961,7 @@
 .entrainement .liste-points-accolade {
   flex: none;
   font-family: var(--serif);
-  font-size: 20px;
+  font-size: calc(20px * var(--g-ui, 1));
   color: var(--color-text-muted);
 }
 
@@ -2032,7 +2032,7 @@
 .entrainement .grille-signes {
   border-collapse: collapse;
   width: 100%;
-  font-size: 13px;
+  font-size: calc(13px * var(--g-ui, 1));
 }
 
 .entrainement .grille-signes th,
@@ -2075,7 +2075,7 @@
  * défilement — l'élève voit toujours quelle ligne il remplit. */
 @media (max-width: 480px) {
   .entrainement .grille-signes {
-    font-size: 12px;
+    font-size: calc(12px * var(--g-ui, 1));
   }
 
   .entrainement .grille-signes th,
@@ -2149,7 +2149,7 @@
   }
 
   .entrainement .grille-signes.grille-signes--dense {
-    font-size: 11px;
+    font-size: calc(11px * var(--g-ui, 1));
   }
 
   .entrainement .grille-signes.grille-signes--dense th,
@@ -2168,7 +2168,7 @@
 
   .entrainement .grille-signes.grille-signes--dense .grille-signes-label {
     max-width: 56px;
-    font-size: 10px;
+    font-size: calc(10px * var(--g-ui, 1));
     overflow-wrap: normal;
     word-break: normal;
     padding-left: 2px;
@@ -2178,7 +2178,7 @@
   .entrainement .grille-signes.grille-signes--dense .toggle-signe {
     min-width: 24px;
     padding: 4px 1px;
-    font-size: 10.5px;
+    font-size: calc(10.5px * var(--g-ui, 1));
     white-space: normal;
     line-height: 1.15;
   }
@@ -2338,7 +2338,7 @@
   flex-direction: column;
   gap: 6px;
   flex: 1 1 160px;
-  font-size: 13px;
+  font-size: calc(13px * var(--g-ui, 1));
   font-weight: 700;
   color: var(--color-text);
 }
@@ -2370,7 +2370,7 @@
 .entrainement .tf-table {
   border-collapse: collapse;
   width: 100%;
-  font-size: 14px;
+  font-size: calc(14px * var(--g-ui, 1));
 }
 
 .entrainement .tf-table th,
@@ -2596,7 +2596,7 @@
   gap: 10px 18px;
   justify-content: center;
   margin-top: 10px;
-  font-size: 13px;
+  font-size: calc(13px * var(--g-ui, 1));
   color: var(--color-text-muted);
 }
 
@@ -3764,7 +3764,7 @@
   border-radius: 999px;
   background: var(--color-primary);
   color: var(--on-accent);
-  font: 600 14px/1 var(--sans);
+  font: 600 calc(14px * var(--g-ui, 1))/1 var(--sans);
   cursor: pointer;
   box-shadow: 0 10px 24px rgba(24, 36, 48, 0.28), 0 2px 6px rgba(24, 36, 48, 0.16);
 }

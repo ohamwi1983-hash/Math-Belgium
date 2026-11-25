@@ -7,6 +7,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import type { StatutChamp } from "../moteur/verificationAireTriangleSinus";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 /**
  * Écrans de gen75 (« Aire d'un triangle quelconque ») : choix fermé (formule, nombre
@@ -29,7 +30,7 @@ function BlocAides({ aides, niveauAide, onActiverAide }: PropsAides) {
             {/* Phrase, puis la formule sur sa propre ligne (lisible au téléphone). */}
             {aide.map((f, k) =>
               f.type === "texte" ? (
-                <span key={k}>{f.valeur}</span>
+                <span key={k}><TexteInsistance texte={f.valeur} debutDePhrase={k === 0} /></span>
               ) : (
                 <span key={k} style={{ display: "block", marginTop: 4, overflowX: "auto" }}>
                   <Katex expression={f.valeur} />

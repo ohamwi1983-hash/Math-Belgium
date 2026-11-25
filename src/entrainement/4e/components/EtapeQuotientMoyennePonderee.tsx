@@ -10,6 +10,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceMoyennePonderee;
@@ -63,7 +64,7 @@ export function EtapeQuotientMoyennePonderee({ exercice, tentativesUtilisees, te
 
       {niveauAide >= 1 && (
         <div className="triangle-quelconque-aide">
-          <p>{aide1.texte}</p>
+          <p><TexteInsistance texte={aide1.texte} /></p>
           <Katex expression={aide1.latex} block />
         </div>
       )}

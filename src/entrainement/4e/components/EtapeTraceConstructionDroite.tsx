@@ -10,6 +10,7 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceConstructionDroite;
@@ -76,7 +77,7 @@ export function EtapeTraceConstructionDroite({ exercice, cible1, cible2, tentati
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
           <p>{AIDE_TRACE_NIVEAU_1}</p>
-          {niveauAide >= 2 && <p>{texteAideTraceNiveau1(cible1)}</p>}
+          {niveauAide >= 2 && <p><TexteInsistance texte={texteAideTraceNiveau1(cible1)} /></p>}
         </div>
       )}
       {!validation && (

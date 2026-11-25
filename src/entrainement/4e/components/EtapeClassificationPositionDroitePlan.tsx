@@ -6,6 +6,7 @@ import { ariaOptionChoixFerme, classeOptionChoixFerme } from "../ui/choixFige";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExercicePositionDroitePlan;
@@ -61,7 +62,7 @@ export function EtapeClassificationPositionDroitePlan({ exercice, niveauAide, on
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
           <p>{TEXTE_AIDE_CLASSIFICATION_NIVEAU1}</p>
-          {niveauAide >= 2 && <p>{texteAideClassificationNiveau2(exercice)}</p>}
+          {niveauAide >= 2 && <p><TexteInsistance texte={texteAideClassificationNiveau2(exercice)} /></p>}
         </div>
       )}
       {!validation && (

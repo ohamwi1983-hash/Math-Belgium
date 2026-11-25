@@ -15,6 +15,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { MessageRetour, useTentativeLisible } from "./RetourSaisie";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
@@ -62,7 +63,7 @@ export function EtapePoserEquationInequationSecondDegre({ exercice, tentativesUt
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAidePoserEquationInequationNiveau1()}</p>
+          <p><TexteInsistance texte={texteAidePoserEquationInequationNiveau1()} /></p>
           {niveauAide >= 2 && (
             <p>
               Relation à traduire : <Katex expression={texteAidePoserEquationInequationNiveau2(exercice)} />

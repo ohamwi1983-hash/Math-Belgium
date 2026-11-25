@@ -9,6 +9,7 @@ import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelComparaisonSuites } from "./EtatActuelComparaisonSuites";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceComparaisonSuites;
@@ -82,8 +83,8 @@ export function EtapeConclusionComparaisonSuites({
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "conclusion")}</p>
-          {niveauAide >= 2 && aide2.texte.length > 0 && <p>{aide2.texte}</p>}
+          <p><TexteInsistance texte={texteAideNiveau1(exercice, "conclusion")} /></p>
+          {niveauAide >= 2 && aide2.texte.length > 0 && <p><TexteInsistance texte={aide2.texte} /></p>}
           {niveauAide >= 2 && aide2.latex.length > 0 && <Katex expression={aide2.latex} block />}
         </div>
       )}

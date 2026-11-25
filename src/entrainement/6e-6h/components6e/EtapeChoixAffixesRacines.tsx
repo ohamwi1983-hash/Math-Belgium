@@ -7,6 +7,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Option {
   id: string;
@@ -77,11 +78,11 @@ export function EtapeChoixAffixesRacines({ consigneGenerale, blocDonnees, consig
       </div>
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
+          <p><TexteInsistance texte={aideNiveau1.texte} /></p>
           {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
           {niveauAide >= 2 && (
             <>
-              <p>{aideNiveau2.texte}</p>
+              <p><TexteInsistance texte={aideNiveau2.texte} /></p>
               {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
             </>
           )}

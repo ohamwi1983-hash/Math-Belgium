@@ -15,6 +15,10 @@ paths:
   - "scripts/tester-plan-revision.mts"
   - "scripts/tester-suivi.mts"
   - "src/entrainement/components/ValidationEcran.tsx"
+  - "src/entrainement/confortLecture.css"
+  - "src/entrainement/components/{JeBloque,PanneauJeBloque,TexteInsistance,CorrigeDetailleEcran,BarreGenerateur}.tsx"
+  - "src/entrainement/components/insistanceEcran.ts"
+  - "src/lib/{exempleJeBloque,direLecture}.ts"
 ---
 
 # Côté élève, sans compte
@@ -84,8 +88,7 @@ screen` (sans attribut, rien ne change ; l'impression a ses propres réglages et
 - taille (cours) : corps `17px × e`, titres `× min(e, 1,35)`, étiquettes `14px × min(e, 1,3)`, légendes,
   sous-titre, Réviser ; interface (barre du bas, boutons, tiroirs, barre d'étape) `× --l-echelle-ui`
   pour rester sur une ligne ; accueil : `zoom: --l-echelle-ui` dès 125 % ; formules en `em` : suivent ;
-  générateurs : police + espacement + thème seulement (la TAILLE dans les générateurs = lot G : barres
-  fixes et calculatrices à valider) ;
+  générateurs : police + espacement + thème, et la TAILLE depuis le lot G (voir « Générateurs », plus bas) ;
 - espacement : jamais dans `.katex` (KaTeX place chaque signe lui-même) ;
 - zoom du navigateur à 200 % toujours possible (aucun `maximum-scale`).
 
@@ -118,8 +121,8 @@ chapitre » et parties de la carte (sur `--paper`) : clair 5,61, sombre 8,37, cr
   dans une étape ; `etape` — barre collante de l'étape ; `outil` — « Lecture » dans `OutilsChapitre`),
   pastille orange (`:root[data-lecture-perso] .pastille-reglee`, sans attendre le JS), `aria-expanded`,
   nom accessible « Confort de lecture… (réglage personnel actif) ». Téléphone ≤ 480 px hors étape :
-  « Professeur » en icône seule (une ligne d'en-tête) ; sous 360 px partout, marges resserrées : une ligne dès 320 px (avant : deux lignes sous 360 px). Bouton dans la barre des générateurs : lot G
-  (`ouvrirPanneauLecture` suffit).
+  « Professeur » en icône seule (une ligne d'en-tête) ; sous 360 px partout, marges resserrées : une ligne dès 320 px (avant : deux lignes sous 360 px). Bouton dans la barre des générateurs : `BarreGenerateur`
+  (variante `etape`, lot G).
 - `etatPanneauLecture.ts` : un seul panneau (`HotePanneauLecture` dans `App`, panneau chargé à la demande
   à la première ouverture), focus rendu au bouton d'origine (sinon à un `[data-bouton-lecture]` visible).
 - `PanneauLecture.tsx` : `<dialog>` modal (`showModal` : focus piégé, Échap → `cancel`, clic sur le
@@ -255,3 +258,116 @@ n'est remplacé sans que l'élève valide.
 uniquement (clair, sombre, tout thème qui les redéfinit) ; police de lecture `var(--l-police, Andika…)`.
 Cibles ≥ 44 px (cases du plan dans une zone de 44 px, liens, onglets), onglets des chapitres au clavier
 (flèches, Début, Fin), focus visible, la rangée d'onglets défile seule sur téléphone (jamais la page).
+
+## Générateurs (lot G, planche 10)
+
+Tout passe par le cadre commun de la page d'un générateur (`EntrainementPage`) et les composants de rendu
+partagés : **aucun `App*.tsx` réécrit**, `SelecteurVarianteDev` intact (ni masqué ni retouché, il garde même
+sa taille), aucune saisie filtrée, aucun chronomètre, aucun point.
+
+### Taille du texte (`src/entrainement/confortLecture.css`, chargé après `cadre.css`)
+
+- **Méthode** : les tailles de `cadre.css` / `theme.css` sont écrites `calc(Npx * var(--g-t, 1))` (texte de
+  lecture : base de `.entrainement`, énoncés, consignes, données, aides, messages, verdicts, réponse
+  attendue, corrigé, rappels, fiche) ou `calc(Npx * var(--g-ui, 1))` (interface : boutons, barre du haut,
+  étiquettes en capitales, tableaux de saisie, grilles de signes, curseurs, bouton flottant de la
+  calculatrice) — valeurs changées SUR PLACE (script `taille_css.py` du dossier de travail), rien réordonné.
+  Les variables ne sont définies que dans `confortLecture.css`, sous `@media screen` et `:root[data-taille]` :
+  sans réglage et à l'impression, calc(16px × 1) = 16px (rendu identique). Échelles : texte 1 · 1,08 ·
+  1,18 · 1,35 · 1,55 (énoncé 18 px → 19,4 / 21,2 / 24,3 / 27,9 px ≈ corps du cours 17 px × 1,12 / 1,25 /
+  1,45 / 1,7) ; interface = `--l-echelle-ui` (1 · 1,05 · 1,1 · 1,2 · 1,2) ; titre `--g-titre` plafonné à 1,25.
+  **Ajouter une taille de texte dans un générateur** : l'écrire de la même façon (`calc(14px * var(--g-t, 1))`).
+- **Pourquoi pas `zoom`** (maquette) : sous un ancêtre zoomé, les positions fixes que `CadreActions` calcule
+  en pixels réels (`--col-x/-w/-top` de l'énoncé épinglé, `--clavier`, `--barre-aide-w`) sont multipliées une
+  seconde fois, et les figures Mafs convertissent le doigt avec leur largeur non zoomée (Chromium et l'ancien
+  `zoom` de WebKit/iOS ne mesurent pas pareil). La taille de police laisse figures, barres fixes et mesures
+  exactes ; les formules (KaTeX en `em`) suivent le texte qui les porte ; le texte des figures (SVG, Mafs)
+  garde sa taille (vérifié).
+- **Champs** : dès qu'une taille est choisie, `.text-input` ≥ 52 px de haut, chiffres `max(20px, 18px × e)`
+  (tableaux de saisie : 20 px). Interligne choisi appliqué aux textes de lecture (jamais sous 1,5).
+- **Restent à leur taille** : `SelecteurVarianteDev`, le panneau de la calculatrice (touches en grille fixe),
+  le bandeau replié d'une ligne (15 px), la table de Φ, le texte des figures.
+- `EntrainementPage` : un réglage changé (`data-taille`, `data-police`, `data-interligne`, `data-espacement`
+  sur `<html>`), une police chargée ou le panneau « Aa » ouvert sur ordinateur (`lecture-panneau-ouvert`,
+  page décalée de 420 px) → un `resize` est envoyé (une fois, seulement si l'état change) : l'énoncé épinglé,
+  l'aperçu replié et la barre du bas se recalculent.
+
+### Bouton « Aa »
+
+`BarreGenerateur` : `<BoutonLecture variante="etape" />` en bout de barre (44 × 44 px, pastille du réglage
+personnel), grille `44px 1fr auto auto` (écart 8 px sous 400 px) : la barre reste sur une ligne de 320 px à
+170 % (« niveau · chapitre » coupé par « … » comme avant).
+
+### Corrigé ligne par ligne (`CorrigeDetailleEcran`)
+
+- **Choix** : un petit bouton « Lire ligne par ligne » dans l'en-tête du corrigé (et non une option du
+  panneau) — là où l'élève en a besoin, sans réglage caché à retrouver, et sans toucher l'onglet « Aides » du
+  panneau (autre lot). Par défaut : le corrigé complet, comme avant ; le choix n'est pas mémorisé. Vaut
+  partout où le corrigé typé est rendu : sous la réponse révélée, dans « Voir comment on y arrive »
+  (`CorrigeDepliable`) et dans la fiche d'une puce (`FicheReponseEcran`).
+- Une ligne = le texte d'une étape du corrigé, chaque ligne de calcul (avec sa justification), ou un piège ;
+  une figure apparaît avec la dernière ligne de son étape (seule, elle est une ligne). Ligne en cours : fond
+  accent clair + cadre 2 px (une ligne de calcul = ses cases sur la rangée) ; lignes lues en `--ink-soft`
+  (jamais une opacité : les justifications, déjà secondaires, passaient sous 4,5:1) ; lignes à venir en
+  `visibility: hidden` (place gardée : rien ne saute sous le doigt), étiquette d'étape masquée tant que sa
+  première ligne n'est pas atteinte. Barre collée en bas (au-dessus de la barre fixe et du clavier) : « Ligne
+  n sur N », « Ligne suivante » (focus donné à l'ouverture), « Tout montrer » (focus à la dernière ligne ;
+  retour au corrigé complet), « Écouter ». Ligne ramenée dans la vue, annoncée dans une région `aria-live`
+  (formules lues en mots).
+- **Point d'accroche de la voix** (`src/lib/direLecture.ts`) : `dire({ texte, source, element })` émet
+  `lecture:dire` (`CustomEvent<DetailDire>`, annulable, qui bouillonne depuis `element`) ; le module de voix
+  l'écoute sur `document` et appelle `preventDefault()` pour prendre la main. Sinon, repli minimal
+  `speechSynthesis` (voix `fr-BE`, puis `fr-*`). `texteLisible(el)` : texte de l'élément, formules remplacées
+  par leur `aria-label` en mots, rien de ce qui est `aria-hidden`. « Écouter » n'est affiché que si
+  `speechSynthesis` existe.
+- Les boutons ne sont jamais `.btn-primary` (sinon `CadreActions` les prendrait pour le bouton principal).
+
+### « Je bloque » (`JeBloque.tsx`, `PanneauJeBloque.tsx`, `lib/exempleJeBloque.ts`)
+
+- **Quand** : message partagé « Incorrect — tentative n/m » visible dans la carte avec 2 ≤ n < m (écran pas
+  clos) → bouton « Je bloque » ; il reste jusqu'à la fin de l'écran (bloc de validation affiché, ou autre
+  écran « en cours » dans les puces publiées). Repérage par le DOM (MutationObserver), comme `CadreActions`.
+  Les générateurs qui n'écrivent pas ce message (choix fermés à une tentative, quiz vrai/faux) n'ont pas de
+  bouton : un choix fermé faux révèle déjà la réponse et son corrigé.
+- **Où** : téléphone et tablette, pastille à gauche juste au-dessus du message de retour (lui-même au-dessus
+  de la barre fixe ; la calculatrice flottante de la tablette est à droite), place réservée sous le contenu
+  (`data-je-bloque`), champ actif remonté s'il passerait dessous ; ordinateur, en bas de la colonne des étapes.
+- **Quoi** : `<dialog>` modal (`showModal` : focus piégé, Échap, clic sur le voile, focus rendu au bouton) —
+  feuille du bas (92dvh) sur téléphone, panneau de 560 px à droite dès 900 px. « Tu bloques ? C'est normal. »,
+  « Deux essais sans réussir : revois l'exemple résolu… Ton exercice t'attend ici, rien n'est perdu. »,
+  « Étape n · titre », l'exemple révélé pas à pas avec les composants du cours (`ExemplePasAPas` /
+  `ExempleLibrePasAPas`, exportés par `ContenuEtape.tsx` — chargés à la première ouverture), à défaut
+  « L'essentiel » de l'étape ; « Revoir l'étape n (nouvel onglet) » (`target="_blank"` : l'exercice en cours
+  reste ouvert) et « Retour à l'exercice ». Rien de la réponse de l'écran.
+- **Exemple choisi** (`cibleJeBloque`, pur) : section = celle de la carte « S'entraîner » (la même que le lien
+  de retour) ; parmi ses `exemple` / `exempleLibre` (jamais une « Démonstration… »), le plus proche de la
+  carte, à égalité celui d'avant ; « Pour aller plus loin » seulement s'il n'y en a pas d'autre. Couverture
+  (356 générateurs au registre) : 311 avec un exemple, 27 avec « L'essentiel » seul, 18 quiz de fin de
+  chapitre hors de toute section (pas de bouton).
+- **Mon suivi** : l'ouverture n'est PAS notée comme une aide — le suivi recopie les puces (« juste avec aide »
+  = bouton « Aide » de l'écran) et revoir le cours n'est pas l'aide de l'écran.
+
+### Plus de majuscules d'insistance à l'écran (point 8 « fait d'office »)
+
+- **Règle** : `components/insistanceEcran.ts::segmentsInsistance` réutilise la règle du papier SANS la
+  changer (`export/majusculesPapier.ts::sansMajusculesDInsistance`, liste `SIGLES`, noms de points,
+  permutations, chiffres romains épargnés) : les lettres qu'elle met en minuscules désignent les mots
+  d'insistance ; chaque suite de mots transformés (« À LA FOIS ») est rendue dans UN
+  `<strong class="insistance">` en minuscules (majuscule initiale gardée en début de phrase). Aucune donnée
+  réécrite : le papier garde sa propre règle, identique.
+- **Branchement** (`TexteInsistance`, composant sans conteneur, `null` accepté) dans les rendus de texte
+  partagés : fragments texte / LaTeX (`RenduFragments` 4e et 6e, `RenduFragmentsQuiz`, `SegmentsInline` 4e et
+  5e, les `Fragments` locaux d'`EtapeEcransTrigo`, `EtapeEcransExp`, `EtapeDefinirSuite`,
+  `EtapeModeliserSuite`, `EtapeSommeInfinieSituation`, `EtapeTroisTermes`, `EtapeSommesTermes`,
+  `FragmentsConsigneSinusoide`, `EtapesChoisirModele`, `EtapesAireTriangleSinus`, corrigé
+  `CorrigeDetailleEcran`), `TexteRiche` (4e) et `TexteRiche5e`, et les aides rendues en chaîne brute
+  (`<p>{aideNiveau1.texte}</p>` : 210 rendus dans 110 composants ; `<p>{texteAide…(…)}</p>` : 54 rendus dans
+  48 composants — scripts `brancher_aides.py`, `brancher_aides_fonctions.py` du dossier de travail). Deux
+  chaînes affichées telles quelles hors de ces rendus passées en minuscules dans la source (gen101
+  « deux points distincts », 6gen19 « la valeur exacte »).
+- **Nouveau texte d'écran** : passer par `TexteRiche`, des fragments, ou `<TexteInsistance texte={…} />` ;
+  écrire de préférence directement en minuscules (le gras n'existe pas dans les données).
+- **Contrôle** : `majuscules.mts` (recherche dans les sources : littéraux et texte JSX, jugés par la règle du
+  papier — 1 015 textes en prose dans 164 fichiers, presque tous des données) et `scan-majuscules.mjs` (rendu
+  RÉEL, build de production, les 356 générateurs du registre : chargé, « Aide » jusqu'au bout, trois essais
+  faux ou un choix faux, corrigé déplié ; texte visible hors formules et hors gras jugé par la même règle).

@@ -9,6 +9,7 @@ import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceCaracteristiquesAlgebriques;
@@ -76,7 +77,7 @@ export function EtapeSeparation({ exercice, tentativesUtilisees, tentativesMax, 
       </div>
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideSeparation(exercice.famille)}</p>
+          <p><TexteInsistance texte={texteAideSeparation(exercice.famille)} /></p>
         </div>
       )}
       {!validation && (

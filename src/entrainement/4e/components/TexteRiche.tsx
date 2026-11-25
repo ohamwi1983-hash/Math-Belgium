@@ -1,4 +1,5 @@
 import { Katex } from "./Katex";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   texte: string;
@@ -10,5 +11,5 @@ interface Props {
  * s'affiche telle quelle. */
 export function TexteRiche({ texte }: Props) {
   const morceaux = texte.split(/\$([^$]+)\$/g);
-  return <>{morceaux.map((morceau, i) => (i % 2 === 1 ? <Katex key={i} expression={morceau} /> : morceau === "" ? null : <span key={i}>{morceau}</span>))}</>;
+  return <>{morceaux.map((morceau, i) => (i % 2 === 1 ? <Katex key={i} expression={morceau} /> : morceau === "" ? null : <span key={i}><TexteInsistance texte={morceau} debutDePhrase={i === 0} /></span>))}</>;
 }

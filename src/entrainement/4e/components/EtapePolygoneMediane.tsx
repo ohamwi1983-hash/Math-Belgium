@@ -10,6 +10,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { arrondirAuPas, pasCommun } from "../generateurs/bienaymeTchebychev/echelleContexte";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceMedianeClasses;
@@ -77,7 +78,7 @@ export function EtapePolygoneMediane({ exercice, tentativesUtilisees, tentatives
 
       {niveauAide >= 1 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAidePolygoneNiveau1()}</p>
+          <p><TexteInsistance texte={texteAidePolygoneNiveau1()} /></p>
         </div>
       )}
       {!validation && (

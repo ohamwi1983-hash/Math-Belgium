@@ -11,6 +11,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceHistogramme;
@@ -93,7 +94,7 @@ export function EtapeFrequencesHistogramme({ exercice, tentativesUtilisees, tent
 
       {niveauAide >= 1 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideFrequencesNiveau1(exercice)}</p>
+          <p><TexteInsistance texte={texteAideFrequencesNiveau1(exercice)} /></p>
           {niveauAide >= 2 && <p><SegmentsInline segments={texteAideFrequencesNiveau2(exercice)} /></p>}
         </div>
       )}

@@ -266,7 +266,7 @@ export function LecteurVideo({ bloc }: { bloc: BlocVideo }) {
 
 /** Exemple résolu révélé pas à pas : l'énoncé, puis une étape à la fois (« Montrer l'étape
  * suivante », « Tout montrer »), enfin le résultat encadré. */
-function ExemplePasAPas({ bloc }: { bloc: BlocDe<'exemple'> }) {
+export function ExemplePasAPas({ bloc }: { bloc: BlocDe<'exemple'> }) {
   const aUnResultat = bloc.result.tag.trim() !== '' || bloc.result.text.trim() !== ''
   const total = bloc.steps.length + (aUnResultat ? 1 : 0)
   const [vus, setVus] = useState(Math.min(1, total))
@@ -304,7 +304,7 @@ function ExemplePasAPas({ bloc }: { bloc: BlocDe<'exemple'> }) {
 }
 
 /** Exemple en forme libre : chaque bloc (paragraphe, tableau, figure…) est une étape. */
-function ExempleLibrePasAPas({ bloc }: { bloc: BlocDe<'exempleLibre'> }) {
+export function ExempleLibrePasAPas({ bloc }: { bloc: BlocDe<'exempleLibre'> }) {
   const total = bloc.blocks.length
   const [vus, setVus] = useState(Math.min(1, total))
   return (

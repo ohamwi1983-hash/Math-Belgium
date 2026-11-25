@@ -11,6 +11,7 @@ import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
@@ -54,7 +55,7 @@ export function EtapeInterpretationEquationInequationSecondDegre({ exercice, ten
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideInterpretationNiveau1()}</p>
+          <p><TexteInsistance texte={texteAideInterpretationNiveau1()} /></p>
         </div>
       )}
       {!validation && (

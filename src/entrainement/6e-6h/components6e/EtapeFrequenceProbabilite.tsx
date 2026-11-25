@@ -8,6 +8,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 export type ModeSaisieFrequence = { type: "champ"; champ: ChampDef; diagnostiquer: (valeurs: string[]) => StatutVerification } | { type: "choix"; options: OptionChoix[] };
 
@@ -53,7 +54,7 @@ function Figure({ svg }: { svg: string }) {
 function Aide({ aide }: { aide: AideFrequence }) {
   return (
     <>
-      <p>{aide.texte}</p>
+      <p><TexteInsistance texte={aide.texte} /></p>
       {aide.latex && <Katex expression={aide.latex} block />}
       {aide.figureHtml && <Figure svg={aide.figureHtml} />}
     </>

@@ -10,6 +10,7 @@ import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { expressionLibreVersLatex } from "../ui/formatExpressionLatex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 /**
  * Écrans de gen69 (« Choisir le bon modèle », `AppChoisirModele.tsx`). Chaque écran garde ses
@@ -23,7 +24,7 @@ export function RenduFragments({ fragments }: { fragments: FragmentConsigne[] })
   return (
     <>
       {fragments.map((fr, i) => {
-        if (fr.type === "texte") return <span key={i}>{fr.valeur}</span>;
+        if (fr.type === "texte") return <span key={i}><TexteInsistance texte={fr.valeur} debutDePhrase={i === 0} /></span>;
         const precedent = fragments[i - 1];
         const bloc = precedent?.type === "texte" && precedent.valeur.trimEnd().endsWith(":");
         return <Katex key={i} expression={fr.valeur} block={bloc} />;

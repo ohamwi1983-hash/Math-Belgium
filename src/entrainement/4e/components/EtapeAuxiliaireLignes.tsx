@@ -17,6 +17,7 @@ import { Solide3DSketch } from "./Solide3DSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 interface Props {
   exercice: ExerciceSectionPlaneSolide;
@@ -97,7 +98,7 @@ export function EtapeAuxiliaireLignes({ exercice, connus, segmentsTraces, tentat
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
           <p>{TEXTE_AIDE_AUXILIAIRE_NIVEAU1}</p>
-          {niveauAide >= 2 && <p>{texteAideLignesNiveau2(exercice, connus, segmentsTraces)}</p>}
+          {niveauAide >= 2 && <p><TexteInsistance texte={texteAideLignesNiveau2(exercice, connus, segmentsTraces)} /></p>}
         </div>
       )}
       {!validation && (

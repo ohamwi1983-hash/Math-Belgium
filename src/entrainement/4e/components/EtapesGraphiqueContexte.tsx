@@ -11,6 +11,7 @@ import { ListeMorceauxInput } from "./ListeMorceauxInput";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 /**
  * gen70 — les deux écrans d'une question « graphique en contexte ». La question (langage courant)
@@ -227,7 +228,7 @@ export function EtapeLectureGraphique({
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{texteAideNiveau1(question)}</p>
+          <p><TexteInsistance texte={texteAideNiveau1(question)} /></p>
           {niveauAide > 1 && <p>{TEXTE_AIDE_NIVEAU2}</p>}
         </div>
       )}

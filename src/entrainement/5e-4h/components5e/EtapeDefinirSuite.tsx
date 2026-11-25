@@ -11,6 +11,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { normaliserSigneMoins } from "../../../lib/normaliserSaisie";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
+import { TexteInsistance } from "../../components/TexteInsistance";
 
 export type ModeEcranDefinirSuite = { type: "champs"; champs: ChampDef[] } | { type: "choix"; options: OptionChoix[] };
 
@@ -21,7 +22,7 @@ function espacesInsecables(texte: string): string {
 
 /** Rendu d'un `FragmentConsigne[]` (texte brut mêlé à du LaTeX inline), sans conteneur. */
 export function RenduFragments5e({ fragments }: { fragments: FragmentConsigne[] }) {
-  return <>{fragments.map((f, i) => (f.type === "texte" ? <span key={i}>{espacesInsecables(f.valeur)}</span> : <Katex key={i} expression={f.valeur} />))}</>;
+  return <>{fragments.map((f, i) => (f.type === "texte" ? <span key={i}><TexteInsistance texte={espacesInsecables(f.valeur)} debutDePhrase={i === 0} /></span> : <Katex key={i} expression={f.valeur} />))}</>;
 }
 
 /** LaTeX de l'aperçu : moins typographique accepté, « u » de l'élève affiché uₙ. */
@@ -187,11 +188,11 @@ export function EtapeDefinirSuite({
       )}
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
+          <p><TexteInsistance texte={aideNiveau1.texte} /></p>
           {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
           {niveauAide >= 2 && aideNiveau2.texte && (
             <>
-              <p>{aideNiveau2.texte}</p>
+              <p><TexteInsistance texte={aideNiveau2.texte} /></p>
               {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
             </>
           )}
