@@ -504,7 +504,11 @@ personnel), grille `44px 1fr auto auto` (écart 8 px sous 400 px) : la barre res
 
 - **Choix** : un petit bouton « Lire ligne par ligne » dans l'en-tête du corrigé (et non une option du
   panneau) — là où l'élève en a besoin, sans réglage caché à retrouver, et sans toucher l'onglet « Aides » du
-  panneau (autre lot). Par défaut : le corrigé complet, comme avant ; le choix n'est pas mémorisé. Vaut
+  panneau (autre lot). Par défaut : le corrigé complet, comme avant. **Choix retenu sur l'appareil** (décision du
+  professeur, 25/11/2026 ; `lib/corrigeLigneParLigne.ts`, clé `corrige:ligne-par-ligne`) : après « Lire ligne par ligne », les
+  corrigés suivants s'ouvrent à la ligne 1 ; « Tout montrer » touché AVANT la dernière ligne revient au corrigé complet pour la
+  suite (à la dernière ligne, c'est la fin de la lecture : le choix reste) ; « Revenir au réglage du site » l'oublie. Testé
+  (`lpl.mjs`, gen3, iPhone 13 et 1 280 px) : 22 vérifications, 0 échec. Vaut
   partout où le corrigé typé est rendu : sous la réponse révélée, dans « Voir comment on y arrive »
   (`CorrigeDepliable`) et dans la fiche d'une puce (`FicheReponseEcran`).
 - Une ligne = le texte d'une étape du corrigé, chaque ligne de calcul (avec sa justification), ou un piège ;

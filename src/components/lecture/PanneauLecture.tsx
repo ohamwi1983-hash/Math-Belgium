@@ -13,6 +13,7 @@ import {
   useReglagesLecture,
 } from '../../lib/reglagesLecture'
 import type { CleReglage, ReglagesLecture } from '../../lib/reglagesLecture'
+import { oublierLigneParLigne } from '../../lib/corrigeLigneParLigne'
 import { VITESSES, arreter, choisirVoix, lire, oublierPreferencesVoix, rafraichirVoix, useLecture, useVoix, voixDisponible } from '../../lib/voixLecture'
 import { lireFormule } from '../../lib/lectureFormules'
 import { fermerPanneauLecture } from './etatPanneauLecture'
@@ -401,6 +402,7 @@ export default function PanneauLecture() {
           onClick={() => {
             revenirAuReglageDuSite()
             oublierPreferencesVoix()
+            oublierLigneParLigne()
           }}
         >
           Revenir au réglage du site

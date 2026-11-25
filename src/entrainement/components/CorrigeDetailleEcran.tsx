@@ -9,6 +9,7 @@ import { lire, texteParleDe, voixDisponible } from "../../lib/voixLecture";
 import { phrasesDe } from "../../lib/phrasesPage";
 import { BoutonEcouter } from "../../components/lecture/BoutonEcouter";
 import { animationsReduites } from "../../lib/reglagesLecture";
+import { ligneParLigneRetenue, retenirLigneParLigne } from "../../lib/corrigeLigneParLigne";
 
 /**
  * Corrigé détaillé « comme au tableau » d'UNE étape, à l'écran d'un générateur : affiché sous la
@@ -133,11 +134,16 @@ function lignesDeLEtapeCorrigee(e: EtapeCorrection): number {
  * « Tout montrer » (retour au corrigé complet) et « Écouter » (moteur de lecture à voix haute
  * `lib/voixLecture.ts`, ligne surlignée), dans une barre collée en bas de l'écran (au-dessus de la barre fixe) tant que le
  * corrigé est à l'écran : les lignes masquées gardent leur place, les boutons restent sous le pouce.
- * Une ligne = le texte d'une étape, une ligne de calcul, ou un piège. Le choix n'est pas mémorisé :
- * chaque corrigé s'ouvre complet.
+ * Une ligne = le texte d'une étape, une ligne de calcul, ou un piège. Le choix est RETENU sur l'appareil
+ * (décision du professeur, 25/11/2026 ; `CLE_LIGNE_PAR_LIGNE`) : après « Lire ligne par ligne », les
+ * corrigés suivants s'ouvrent directement à la ligne 1 ; « Tout montrer » touché AVANT la dernière ligne
+ * revient au corrigé complet pour la suite (à la dernière ligne, c'est seulement la fin de la lecture).
+ * Stockage : `lib/corrigeLigneParLigne.ts`.
  */
 export function CorrigeDetailleEcran({ etapes, titre = "Corrigé détaillé de l'étape" }: { etapes: EtapeCorrection[]; titre?: string }) {
-  const [pas, setPas] = useState<number | null>(null);
+  const normalesInit = etapes.filter((e) => !estLignePiege(e));
+  const totalInit = normalesInit.reduce((s, e) => s + lignesDeLEtapeCorrigee(e), 0) + (etapes.length - normalesInit.length);
+  const [pas, setPas] = useState<number | null>(() => (totalInit > 1 && ligneParLigneRetenue() ? 1 : null));
   const racineRef = useRef<HTMLDivElement>(null);
   const suivanteRef = useRef<HTMLButtonElement>(null);
   const toutRef = useRef<HTMLButtonElement>(null);
@@ -174,6 +180,7 @@ export function CorrigeDetailleEcran({ etapes, titre = "Corrigé détaillé de l
     if (prochaine >= total) requestAnimationFrame(() => toutRef.current?.focus({ preventScroll: true }));
   };
   const commencer = () => {
+    retenirLigneParLigne(true);
     setPas(1);
     requestAnimationFrame(() => suivanteRef.current?.focus({ preventScroll: true }));
   };
@@ -249,7 +256,16 @@ export function CorrigeDetailleEcran({ etapes, titre = "Corrigé détaillé de l
               Ligne suivante
             </button>
           )}
-          <button type="button" className="btn corrige-pas-tout" ref={toutRef} onClick={() => setPas(null)}>
+          <button
+            type="button"
+            className="btn corrige-pas-tout"
+            ref={toutRef}
+            onClick={() => {
+              // Avant la dernière ligne : l'élève préfère le corrigé complet (retenu pour la suite).
+              if (pas < total) retenirLigneParLigne(false);
+              setPas(null);
+            }}
+          >
             Tout montrer
           </button>
           {voixDisponible() && (
