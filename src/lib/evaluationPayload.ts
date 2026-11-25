@@ -107,6 +107,7 @@ export type IdGenerateurPilote =
   | '6gen123' | '6gen124' | '6gen125' | '6gen126' | '6gen127'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
   | '6gen132' | '6gen133' | '6gen134' | '6gen135' | '6gen136' | '6gen137'
+  | '6gen138' | '6gen139' | '6gen140' | '6gen141' | '6gen142' | '6gen143'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
   | 'gen113' | 'gen114' | 'gen115' | 'gen116' | 'gen117' | 'gen118' | 'gen119' | 'gen120' | 'gen121' | 'gen122'
   | 'gen123' | 'gen124' | 'gen125'
@@ -314,6 +315,12 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'coniques', sectionId: 'excentricite', generatorId: '6gen135', label: 'Équation depuis foyer, directrice et excentricité (6gen135)', processus: 2 },
   { chapitreSlug: 'coniques', sectionId: 'airefocale', generatorId: '6gen136', label: 'Rayons focaux et triangle focal (6gen136)', processus: 2 },
   { chapitreSlug: 'coniques', sectionId: 'identifier', generatorId: '6gen137', label: 'Hyperbole équilatère et xy = k (6gen137)', processus: 2 },
+  { chapitreSlug: 'coniques', sectionId: 'tangentes', generatorId: '6gen138', label: 'Tangente par la dérivée et forme dédoublée (6gen138)', processus: 2 },
+  { chapitreSlug: 'coniques', sectionId: 'tangentes', generatorId: '6gen139', label: 'Position d\'une droite et d\'une conique selon un paramètre (6gen139)', processus: 3 },
+  { chapitreSlug: 'coniques', sectionId: 'optique', generatorId: '6gen140', label: 'Miroirs en contexte (6gen140)', processus: 3 },
+  { chapitreSlug: 'coniques', sectionId: 'airefocale', generatorId: '6gen141', label: 'Orbites et ellipses : Kepler (6gen141)', processus: 3 },
+  { chapitreSlug: 'coniques', sectionId: 'optique', generatorId: '6gen142', label: 'Hyperbole de navigation : LORAN (6gen142)', processus: 3 },
+  { chapitreSlug: 'coniques', sectionId: 'optique', generatorId: '6gen143', label: 'Détective d\'erreurs : coniques (6gen143)', processus: 3 },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', generatorId: 'gen7', label: "Analyse d'une fonction (gen7)" },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', generatorId: 'gen123', label: 'Lire une parabole sur un graphique (gen123)', processus: 1 },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', generatorId: 'gen124', label: 'Premier ou second degré ? Différences secondes (gen124)', processus: 2 },
@@ -861,7 +868,9 @@ export interface QuestionOuverte {
  * LaTeX brut s'afficher littéralement sur la copie imprimée. Le gras n'a pas d'équivalent dans
  * `FragmentTexte` et est donc aplati (délimiteurs retirés, texte conservé). */
 function parseRichText(texte: string): FragmentTexte[] {
-  const sansGras = texte.replace(/\*\*(.*?)\*\*/g, '$1')
+  // Correspondances des exemples clés (`\htmlClass{m1}{…}`, option élève à l'écran seulement) : retirées
+  // ici, le papier et le Word ne les connaissent pas (KaTeX sans `trust` les écrirait en rouge).
+  const sansGras = texte.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\\htmlClass\{m[1-3]\}/g, '')
   const morceaux = sansGras.split(/\$([^$]+)\$/g)
   const fragments: FragmentTexte[] = []
   morceaux.forEach((valeur, i) => {

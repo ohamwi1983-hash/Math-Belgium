@@ -1151,6 +1151,11 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     String.raw`(?<ligne>[^\n]+)\nDonne la valeur exacte \(une fraction\) ou un arrondi au millième \(davantage de décimales pour une très petite probabilité\)\.`,
     "Dans chaque situation, calcule la probabilité demandée. Donne chaque fois la valeur exacte (une fraction) ou un arrondi au millième (davantage de décimales pour une très petite probabilité).",
   ),
+  // 6e ch. 10, lot H2 : la conique et ses données (points, famille de droites et valeur étudiée) forment la
+  // ligne ; la consigne de l'énoncé papier passe à la forme « Dans chaque cas, … ». Écartés : 6gen140, 6gen141,
+  // 6gen142 (situation propre à l'instance), 6gen143 (copie d'élève).
+  "6gen138": { formes: [{ motif: re(String.raw`Dans un repère orthonormé, on donne (?<ligne>[^\n]+ et ses points ${M} et ${M})\.\n(?<q>Détermine une équation de la tangente [^\n]+)`), consigne: dansChaqueCas }] },
+  "6gen139": { formes: [{ motif: re(String.raw`Dans un repère orthonormé, on donne (?<ligne>[^\n]+, obtenue pour ${M})\.\n(?<q>Détermine les valeurs de [^\n]+)`), consigne: dansChaqueCas }] },
   // 6gen116 : deux consignes (calculer une probabilité / retrouver z), ligne = l'événement.
   "6gen116": {
     formes: [

@@ -138,10 +138,20 @@ export function polyL(p: Poly): string {
 export const equationPolyL = (p: Poly): string => `${polyL(p)}=0`;
 
 /** Coefficients entiers premiers entre eux, premier coefficient non nul positif. */
+/** Dénominateur d'un rationnel (≤ 20 000 ; 1 si aucun ne convient). */
+function denominateurRationnel(v: number): number {
+  for (let d = 1; d <= 20000; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9 * Math.max(1, Math.abs(v * d))) return d;
+  return 1;
+}
 export function normaliserPoly(p: Poly): Poly {
   const vals = ORDRE.map((m) => p[m] ?? 0);
+  // Multiplicateur = PPCM des dénominateurs (l'ancienne recherche s'arrêtait à 60 et rendait alors une
+  // fausse équation : 12x/169 − 5y/26 = 1 devenait 4x − 12y − 61 = 0 ; résultat identique en deçà de 60).
   let k = 1;
-  for (; k <= 60; k++) if (vals.every((v) => Math.abs(v * k - Math.round(v * k)) < 1e-9)) break;
+  for (const v of vals) {
+    const q = denominateurRationnel(v);
+    k = (k / pgcd(k, q)) * q;
+  }
   const ent = vals.map((v) => Math.round(v * k));
   const g = ent.reduce((a, b) => pgcd(a, b), 0) || 1;
   const premier = ent.find((v) => v !== 0) ?? 1;
