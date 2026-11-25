@@ -13,7 +13,7 @@ import {
   type LigneGroupe,
 } from '../entrainement/export/assemblerEvaluationHtml'
 import { horaireExamen, lignesConsignes, mettreAEchelle, sessionParDefaut, titreCourtChapitre, type ChapitreExamen } from '../entrainement/export/examen'
-import { annexeFormulaire } from '../entrainement/export/annexesPapier'
+import { annexeFormulaire, annexeTableNormale } from '../entrainement/export/annexesPapier'
 import { niveauEtDuree, type NiveauDifficulte } from '../entrainement/export/niveauDifficulte'
 import { findChapter, LEVELS } from '../content/chaptersIndex'
 import { encoderCode, tirerGraine } from '../entrainement/export/codeExercice'
@@ -698,8 +698,27 @@ function itemExercice(el: Extract<ElementPlan, { type: 'exercice' }>, cache?: Ca
     bareme: adaptateur.bareme?.(instance),
     dureeMinutes: dureeItem([niveau], adaptateur.dureeMinutes, 1),
     code: codeInstance(el.generatorId, adaptateur, inst.varianteId, inst.graine),
+    ...(besoinTablePhiDe(adaptateur, instance) ? { besoinTablePhi: true } : {}),
   }
   return adaptateur.enoncePapier ? appliquerEnoncePapier(item, adaptateur.enoncePapier(instance)) : item
+}
+
+/** L'instance demande-t-elle la table de Φ (`AdaptateurFeuilleExercices.besoinTablePhi`) ? */
+function besoinTablePhiDe(adaptateur: Adaptateur, instance: never): boolean {
+  const b = adaptateur.besoinTablePhi
+  if (typeof b === 'function') {
+    try {
+      return b(instance) === true
+    } catch {
+      return false
+    }
+  }
+  return b === true
+}
+
+/** Un item (ou une ligne de son groupe a), b), c)) demande-t-il la table de Φ ? */
+export function itemDemandeTablePhi(item: ItemEvaluation): boolean {
+  return item.besoinTablePhi === true || (item.groupe ?? []).some((l) => l.item.besoinTablePhi === true)
 }
 
 /* ----------------------------------------------------------------------------------------------
@@ -850,6 +869,7 @@ export function assemblerGroupe(base: ItemEvaluation, consigne: FragmentConsigne
     bareme: baremeDuGroupe(lignes),
     dureeMinutes: durees.every((d): d is number => d !== undefined) ? durees.reduce((t, d) => t + d, 0) : undefined,
     groupe: lignes,
+    ...(lignes.some((l) => l.item.besoinTablePhi === true) ? { besoinTablePhi: true } : {}),
   }
 }
 
@@ -1096,10 +1116,12 @@ function enteteSerie(entete: EnTeteEvaluation, serieLettre: string, examen?: Exa
  * `AnnexeDocument`) — chacune UNE fois par document :
  * - formulaire du chapitre, si la case « Joindre le formulaire » est cochée (`entete.joindreFormulaire`) :
  *   une annexe par chapitre du plan qui a un formulaire, dans l'ordre du plan ;
- * - (prévu, pas encore implémenté) table de la loi normale Φ, seulement si une question des `items`
- *   en a besoin : la tester ici sur les items et ajouter `annexeTableNormale()` (`annexesPapier.ts`).
+ * - table de la loi normale Φ (6e ch. 8, décision de l'utilisateur du 18/11/2026) : UNE table complète,
+ *   seulement si au moins une question du document la demande (`ItemEvaluation.besoinTablePhi`, posé par
+ *   l'adaptateur via `besoinTablePhi`) — après les formulaires. Sans question concernée : liste inchangée,
+ *   documents identiques à avant.
  */
-export function annexesDuDocument(plan: PlanDocument, _items: ItemEvaluation[]): AnnexeDocument[] {
+export function annexesDuDocument(plan: PlanDocument, items: ItemEvaluation[]): AnnexeDocument[] {
   const annexes: AnnexeDocument[] = []
   if (plan.entete.joindreFormulaire) {
     for (const slug of plan.chapitresSlugs) {
@@ -1108,6 +1130,7 @@ export function annexesDuDocument(plan: PlanDocument, _items: ItemEvaluation[]):
       if (annexe) annexes.push(annexe)
     }
   }
+  if (items.some(itemDemandeTablePhi)) annexes.push(annexeTableNormale())
   return annexes
 }
 

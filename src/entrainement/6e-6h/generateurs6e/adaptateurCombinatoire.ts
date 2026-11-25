@@ -19,10 +19,13 @@ export interface SpecPapierCombinatoire<E, P extends string> {
   titreDocument: string;
   nomFichierBase: string;
   genererInstance: () => E;
-  catalogueVariantes: { id: string; label: string }[];
+  catalogueVariantes: { id: string; label: string; retiree?: boolean }[];
   genererInstanceAvecVariante: (id: string) => E;
   format: FormatCombinatoire<E, P>;
   phases: (e: E) => P[];
+  /** Écrans gardés sur papier (défaut : tous) — 6gen50 : l'écran « diagramme » (trois diagrammes de
+   * l'appli à comparer) n'est pas une étape du corrigé papier. */
+  phasesPapier?: (e: E) => P[];
   /** Situation (avec sa question) en prose, formules en ligne : rien n'est coupé à l'impression. */
   situation: (e: E) => FragmentConsigne[];
   /** Consigne globale (une seule question papier) ou vraies questions distinctes, avec les lettres
@@ -36,6 +39,8 @@ export interface SpecPapierCombinatoire<E, P extends string> {
   libelleCasParticulier?: string;
   calculatriceIndispensable?: boolean | string[];
   groupesVerdict?: GroupeVerdict[];
+  /** Table de la loi normale Φ en annexe du document (6e ch. 8, voir `AdaptateurFeuilleExercices.besoinTablePhi`). */
+  besoinTablePhi?: boolean | ((e: E) => boolean);
 }
 
 export function enoncePapierCombinatoire<E, P extends string>(format: FormatCombinatoire<E, P>, phases: (e: E) => P[]) {
@@ -83,8 +88,8 @@ export function construireAdaptateurCombinatoire<E, P extends string>(spec: Spec
     genererInstance: spec.genererInstance,
     catalogueVariantes: spec.catalogueVariantes,
     genererInstanceAvecVariante: spec.genererInstanceAvecVariante,
-    construireEnonce: enoncePapierCombinatoire(spec.format, spec.phases),
-    construireCorrection: correctionPapierCombinatoire(spec.format, spec.phases),
+    construireEnonce: enoncePapierCombinatoire(spec.format, spec.phasesPapier ?? spec.phases),
+    construireCorrection: correctionPapierCombinatoire(spec.format, spec.phasesPapier ?? spec.phases),
     criteresDifficulte: spec.criteres,
     reponseBreve,
     correctionDetaillee: spec.correction,
@@ -94,5 +99,6 @@ export function construireAdaptateurCombinatoire<E, P extends string>(spec: Spec
     ...(spec.libelleCasParticulier ? { libelleCasParticulier: spec.libelleCasParticulier } : {}),
     ...(spec.calculatriceIndispensable !== undefined ? { calculatriceIndispensable: spec.calculatriceIndispensable } : {}),
     ...(spec.groupesVerdict ? { groupesVerdict: spec.groupesVerdict } : {}),
+    ...(spec.besoinTablePhi !== undefined ? { besoinTablePhi: spec.besoinTablePhi } : {}),
   };
 }

@@ -49,6 +49,7 @@ import type { BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, 
 import { blocsDeColonnes, colonnesReponses, largeurColonneTableau, largeurFragments, largeurLibelleBloc, largeurLibelleTableau, segmentsDuGroupe, type TableauGroupe } from "./grilleCorrection";
 import { decouperLigneCalcul, estLignePiege } from "./corrigeTableau";
 import { cartoucheEffectif, morceauxSurtitre } from "./cartouche";
+import { annexeTablePhiDocx, copieDemandeTablePhi } from "./tablePhiDocx";
 
 /**
  * Export Word (.docx) d'une série d'évaluation, pour que le professeur puisse retoucher les
@@ -627,6 +628,7 @@ async function copieExamenDocx(entete: EnteteEvaluation, examen: ExamenDocument,
   }
   enfants.push(...(await consignesExamenDocx(entete, examen, items)));
   enfants.push(...(await questionsExamenDocx(entete, examen, items, false)));
+  if (copieDemandeTablePhi(items)) enfants.push(...annexeTablePhiDocx());
   return documentDocx(enfants, piedDocx(entete.serieLettre), enteteCourantDocx(entete, examen));
 }
 
@@ -679,6 +681,8 @@ export async function genererCopieEvaluationDocx(entete: EnteteEvaluation, items
   }
   enfants.push(...(await consignesDocx(entete, items)));
   enfants.push(...(await questionsDocx(entete, items, false)));
+  // Table de la loi normale Φ en annexe, seulement si une question la demande (6e ch. 8, lot E).
+  if (copieDemandeTablePhi(items)) enfants.push(...annexeTablePhiDocx());
   return documentDocx(enfants, piedDocx(entete.serieLettre));
 }
 

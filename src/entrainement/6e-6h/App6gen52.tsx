@@ -4,6 +4,10 @@ import type { PhaseExtensionsBinomialeNormaleBayes } from "./moteur6e/typesExten
 import { DEFINITION_6GEN52, attentesExtensions } from "./moteur6e/verificationExtensionsBinomialeNormaleBayes";
 import { FORMAT_6GEN52 } from "./ui6e/formatExtensionsBinomialeNormaleBayes";
 import { AppCombinatoire } from "./components6e/AppCombinatoire";
+import { phasesPourExercice } from "./moteur6e/typesExtensionsBinomialeNormaleBayes";
+import { correctionDetailleeExtensions } from "./generateurs6e/extensionsBinomialeNormaleBayes/corrigeDetaille";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import type { ConfigAppCombinatoire } from "./components6e/AppCombinatoire";
 
 /**
@@ -22,6 +26,8 @@ const CONFIG: ConfigAppCombinatoire<ExerciceExtensionsBinomialeNormaleBayes, Pha
   definition: DEFINITION_6GEN52,
   attentes: attentesExtensions,
   format: FORMAT_6GEN52,
+  // Corrigé « comme au tableau » de l'écran (lot E) : même source que le papier, une lettre par écran.
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleeExtensions(e), phasesPourExercice(e), p)} />,
 };
 
 export function App6gen52() {

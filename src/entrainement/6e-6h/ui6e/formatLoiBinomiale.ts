@@ -20,7 +20,7 @@ import type { ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmen
 type E = ExerciceLoiBinomiale;
 type P = PhaseLoiBinomiale;
 
-export const BINOMIALE = (n: string | number, p: string) => `\\mathscr{B}(${n}\\,;\\,${p})`;
+export const BINOMIALE = (n: string | number, p: string) => `\\mathcal{B}(${n}\\,;\\,${p})`;
 
 function pLatex(num: number, den: number): string {
   if (den === 10 || den === 100) return decimalLatex(num / den);

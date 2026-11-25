@@ -162,10 +162,10 @@ export const FORMAT_6GEN51: FormatCombinatoire<E, P> = {
         const bas = xL(arrondir(e.mu - e.k * e.sigma, 2));
         const haut = xL(arrondir(e.mu + e.k * e.sigma, 2));
         const quoi = !e.unCote
-          ? [t("On s'intéresse à l'événement « "), m(`X<${bas}`), t(" ou "), m(`X>${haut}`), t(" ».")]
+          ? [t("On s'intéresse à l'événement "), m(`X<${bas}`), t(" ou "), m(`X>${haut}`), t(".")]
           : e.coteDemande === "superieur"
-            ? [t("On s'intéresse à l'événement « "), m(`X>${haut}`), t(" ».")]
-            : [t("On s'intéresse à l'événement « "), m(`X<${bas}`), t(" ».")];
+            ? [t("On s'intéresse à l'événement "), m(`X>${haut}`), t(".")]
+            : [t("On s'intéresse à l'événement "), m(`X<${bas}`), t(".")];
         const lignes = [lignesContexte(e), quoi];
         if (e.population !== null) lignes.push([t(`On étudie un groupe de ${populationTexte(e.population)} ${e.contexte.individus}.`)]);
         return lignes;
