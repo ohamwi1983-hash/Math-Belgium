@@ -130,6 +130,7 @@ export type IdGenerateurPilote =
   | '5gen68' | '5gen69' | '5gen70'
   | '5gen71' | '5gen72'
   | '5gen73' | '5gen74' | '5gen75'
+  | '5gen76' | '5gen77' | '5gen36' | '5gen37' | '5gen38'
 
 export interface GeneratorConfig {
   chapitreSlug: string
@@ -506,6 +507,11 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'derivees-applications', sectionId: 'contexte-economique', generatorId: '5gen33', label: '', processus: 3 },
   { chapitreSlug: 'derivees-applications', sectionId: 'extrema-bornes', generatorId: '5gen34', label: '', processus: 3 },
   { chapitreSlug: 'derivees-applications', sectionId: 'vitesse-position', generatorId: '5gen35', label: '', processus: 3 },
+  { chapitreSlug: 'statistique-deux-variables', sectionId: 'nuage-point-moyen', generatorId: '5gen77', label: 'Point moyen et valeurs manquantes (5gen77)', processus: 2 },
+  { chapitreSlug: 'statistique-deux-variables', sectionId: 'ajustement', generatorId: '5gen76', label: 'Lire un nuage de points (5gen76)', processus: 1 },
+  { chapitreSlug: 'statistique-deux-variables', sectionId: 'mayer', generatorId: '5gen36', label: 'Droite de Mayer (5gen36)', processus: 2 },
+  { chapitreSlug: 'statistique-deux-variables', sectionId: 'moindres-carres', generatorId: '5gen37', label: 'Droite des moindres carrés (5gen37)', processus: 2 },
+  { chapitreSlug: 'statistique-deux-variables', sectionId: 'correlation', generatorId: '5gen38', label: 'Covariance et coefficient de corrélation (5gen38)', processus: 2 },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même

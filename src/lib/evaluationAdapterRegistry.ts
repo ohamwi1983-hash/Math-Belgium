@@ -339,6 +339,11 @@ import { adaptateurEvaluationDetectiveDerivees } from '../entrainement/5e-4h/gen
 import { adaptateurEvaluationLectureTangente } from '../entrainement/5e-4h/generateurs5e/lectureTangente/exportEvaluation'
 import { adaptateurEvaluationGraphiqueDerivee } from '../entrainement/5e-4h/generateurs5e/graphiqueDerivee/exportEvaluation'
 import { adaptateurEvaluationDerivabilite } from '../entrainement/5e-4h/generateurs5e/derivabilite/exportEvaluation'
+import { adaptateurEvaluationLireNuage } from '../entrainement/5e-4h/generateurs5e/lireNuage/exportEvaluation'
+import { adaptateurEvaluationPointMoyen } from '../entrainement/5e-4h/generateurs5e/pointMoyenStat/exportEvaluation'
+import { adaptateurEvaluationDroiteMayer } from '../entrainement/5e-4h/generateurs5e/droiteMayer/exportEvaluation'
+import { adaptateurEvaluationMoindresCarres } from '../entrainement/5e-4h/generateurs5e/moindresCarres/exportEvaluation'
+import { adaptateurEvaluationCorrelation } from '../entrainement/5e-4h/generateurs5e/covarianceCorrelation/exportEvaluation'
 
 export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExercices<never>> = {
   '5gen1': versionPapier(adaptateurEvaluationDomaineDefinition) as unknown as AdaptateurFeuilleExercices<never>,
@@ -408,6 +413,11 @@ export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExe
   '5gen73': versionPapier(adaptateurEvaluationLectureTangente) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen74': versionPapier(adaptateurEvaluationGraphiqueDerivee) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen75': versionPapier(adaptateurEvaluationDerivabilite) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen76': versionPapier(adaptateurEvaluationLireNuage) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen77': versionPapier(adaptateurEvaluationPointMoyen) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen36': versionPapier(adaptateurEvaluationDroiteMayer) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen37': versionPapier(adaptateurEvaluationMoindresCarres) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen38': versionPapier(adaptateurEvaluationCorrelation) as unknown as AdaptateurFeuilleExercices<never>,
 }
 
 import { adaptateurEvaluationDenombrementFondamental } from '../entrainement/6e-6h/generateurs6e/denombrementFondamental/exportEvaluation'
