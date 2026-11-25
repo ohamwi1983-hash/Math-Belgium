@@ -13,6 +13,9 @@ paths:
   - "src/lib/calendrierFwb.ts"
   - "src/lib/agenda*"
   - "src/components/carnet/**"
+  - "src/routes/ClassePage.tsx"
+  - "src/lib/pageClasse*"
+  - "src/components/eleve/classe.css"
   - "supabase/**"
   - ".env*"
 ---
@@ -36,6 +39,8 @@ l'examen ») mémorisée dans le profil : `0005_repartition.sql` (section « Ré
 de fichier).
 Partage d'un enregistrement du coffre avec un collègue par un lien : `0009_partages_plans.sql` (section « Partage
 entre collègues » après « Page « Mon coffre » refondue »). Plus tard (pas fait) : envoi direct par adresse, partage du carnet.
+Page de classe à code pour les élèves SANS compte (`/classe`), publiée depuis le carnet : `0010_page_classe.sql` (section
+« Page de classe » en fin de fichier).
 
 ## Décisions de l'utilisateur
 
@@ -1311,3 +1316,143 @@ garde des pages réservées) inchangés.
   largeur), 0 erreur console ; sous l'en-tête, captures de `/profil` et `/coffre` identiques au pixel près
   avant / après (bandeau déplacé sans changement). Captures avant / après dans `banniere/captures/`.
   `npm run build` : 24 pages pré-rendues, accueil avec ses 23 liens de chapitres.
+
+## Page de classe (25/11/2026 : `supabase/migrations/0010_page_classe.sql`, planche 12 des maquettes « côté élève »)
+
+Décisions du professeur (planche 12 validée) : l'élève ouvre `/classe` avec un CODE de 6 caractères (ou le QR code
+`/classe?code=…`), une seule fois ; rien ne lui est demandé (aucun nom, aucune adresse, aucun compte) ; il voit la
+prochaine interro (date, heure si publiée, compte à rebours, étapes avec précision, « Pour t'entraîner », « Préparer mon
+interro »), les devoirs à rendre et les 3 dernières séances (lien vers chaque étape). Côté professeur, dans le carnet :
+QR + code, « Projeter le code en classe », « Nouveau code », « Couper le code », interrupteurs de ce qui est publié,
+« Jamais publié », « Voir comme un élève ». **Le serveur ne contient QUE ce que le professeur publie ; aucune donnée
+d'élève ne remonte** (côté élève, seuls le code et la dernière version vue sont gardés dans le navigateur).
+
+**Schéma 0010** (idempotent, à coller APRÈS 0009 ; il ne dépend que de 0001 / 0002 ; « Success. No rows returned ») :
+
+| Table | Colonnes | Règles |
+| --- | --- | --- |
+| `pages_classe` | clé `(classe_id, proprietaire)`, `code` (NULL = coupé, unique, `^[A-HJ-NP-Z2-9]{6}$`), `code_cree_le`, `publier_interros` / `publier_devoirs` / `publier_matiere` (vrai), `publier_heure` / `publier_nom` (FAUX par défaut), `contenu` jsonb, `publie_le`, dates | FK COMPOSÉE `(classe_id, proprietaire) → classes` (cascade : classe ou compte supprimés → page supprimée ; viser la classe d'un autre → 23503 sans révéler qu'elle a une page) ; `pages_classe_contenu_valide` (objet ≤ 64 Ko, clés `v`, `interros`, `devoirs`, `seances` SEULES, listes en tableaux) ; déclencheur `pages_classe_avant_ecriture` (`publie_le` posé quand le contenu change) |
+| `essais_page_classe` | `cle` (`ip:<md5(sel \| ip)>` ou `global`), `debut`, `nombre` | AUCUN droit client (RLS sans politique) |
+| `page_classe_sel` | une ligne : sel aléatoire tiré une fois | AUCUN droit client |
+
+- Droits : `anon` RIEN sur les tables ; `authenticated` : `select`, `delete`, `insert (classe_id, publier_*, contenu)`,
+  `update (publier_*, contenu)` SEULEMENT (droits de colonne : code, dates, propriétaire → 42501). RLS « le sien, compte
+  actif » (`proprietaire = auth.uid() and est_actif()`), comme le carnet. L'administrateur ne voit rien de plus.
+- `nouveau_code_classe(p_classe)` (SECURITY DEFINER, `search_path = ''`) : professeur actif (42501 sinon), classe à soi
+  (P0002 sinon) ; tire le code PAR LA BASE (`tirer_code_classe`, interne : 6 octets d'un `gen_random_uuid` % 32, alphabet
+  de 0001 sans 0/O/1/I ; collision → nouveau tirage), crée la page si besoin ; l'ancien code cesse aussitôt.
+  `couper_code_classe(p_classe)` : code → NULL (contenu gardé ; « Nouveau code » rouvre).
+- `lire_page_classe(p_code)` (SECURITY DEFINER, `search_path = ''`, SEULE fonction ouverte à `anon` ; aussi
+  `authenticated` pour « Voir comme un élève ») : code normalisé (espaces, tirets, majuscules) ; renvoie un jsonb
+  `{statut:'ok', classe, mis_a_jour, [professeur], [interros], [devoirs], [seances]}` — seules les rubriques cochées,
+  « heure » retirée des interros et des séances si l'heure n'est pas publiée, interros passées et devoirs rendus retirés
+  (date de Bruxelles), nom du professeur ajouté SEULEMENT si coché (jamais stocké dans le contenu), jamais l'école ;
+  `{statut:'inconnu'}` pour un code mal formé, inconnu, renouvelé, coupé ou un compte désactivé (une seule réponse : rien
+  ne dit si un code a existé) ; `{statut:'trop_essais', reessayer_dans}`.
+- **Limitation des essais** (méthode et limites, aussi en tête du fichier SQL) : seuls les essais RATÉS comptent ; par
+  adresse IP hachée (md5 avec le sel secret, jamais l'adresse en clair ; en-têtes `cf-connecting-ip`, sinon premier
+  `x-forwarded-for`, sinon `x-real-ip`) : 30 ratés / 10 minutes (une classe entière derrière le wifi de l'école peut se
+  tromper) ; pour tout le site : 600 ratés / heure (filet si l'IP change à chaque essai). Au-delà : « trop_essais » SANS
+  regarder le code (sinon le blocage laisserait deviner les bons codes). Limites : si l'en-tête IP pouvait être imité,
+  seul le plafond global resterait ; un plafond global atteint bloque aussi, pour l'heure, les élèves qui TAPENT un code
+  (ceux qui l'ont gardé voient la dernière version). 32⁶ ≈ 1,07 milliard de codes : avec 1 000 pages et le plafond global
+  atteint en continu, ≈ 75 jours en moyenne pour tomber sur UNE page (dates d'interro et devoirs, sans aucun nom).
+  Ménage des vieux compteurs (> 1 jour) à 2 % des appels.
+
+**Ce qui est publié / jamais publié** (`lib/pageClasseContenu.ts::construireContenuPage`, logique PURE) :
+- interros : événements « Interrogation » de LA classe (0006) à partir d'aujourd'hui, 3 au plus — date, heure (si
+  publiée : « 2e heure » au réglage « numéro », « 09h35 → 10h25 » au réglage « plage », calculée sur la grille de
+  l'école ; jamais « H2 »), type interro / contrôle-bilan, titre court du chapitre, étapes = `evaluation_parties` de la
+  séance qui l'a annoncée (0007) avec une précision d'après ce que la CLASSE a vu dans le chapitre jusqu'à la date : étape
+  vue en entier → aucune (une liste de sous-titres gênait la lecture), en partie → la liste la plus courte (« seulement :
+  … » ou « sans : … ») ; générateurs = `evaluation_generateurs` retenus (0008), sinon ceux des étapes ;
+- devoirs : remise à partir d'aujourd'hui (sans date : donnés ces 7 derniers jours), 6 au plus — texte du devoir TEL
+  QU'ÉCRIT (affiché en texte brut, `pre-line`), exercices joints ;
+- séances : les 3 dernières jusqu'à aujourd'hui — date, heure (si publiée), chapitre, étapes vues (sous-parties si
+  partielles) ;
+- JAMAIS : remarque de séance, objectif et compétences, école, autres classes, autres événements (sorties, absences…),
+  nom du professeur (ajouté par la base seulement si coché). Titres d'étapes en RichText (KaTeX côté élève), liens
+  construits côté élève à partir des slugs / ids validés (aucune URL stockée).
+
+**Publication : AUTOMATIQUE** (choix « le plus sûr » demandé) — `CarnetPage::synchroniserPages` : dès que les données du
+carnet changent (toute action passe par `charger()` : séance, interro, devoir, événement, réglage de la page, et chaque
+ouverture du carnet, donc chaque nouveau jour), la copie de chaque classe dont le code est actif est recalculée et
+republiée SI elle diffère de celle du serveur (`memeContenu` : JSON à clés triées, Postgres réordonne les clés d'un
+jsonb) ; une interro déplacée ou supprimée ne reste jamais affichée parce qu'on a oublié un bouton. « Mettre à jour
+maintenant » relit le carnet et force la vérification (« déjà à jour » sinon). Une panne de publication s'affiche dans la
+page des élèves ; une panne de lecture des pages ne bloque jamais le carnet.
+
+**Code** :
+- `lib/pageClasse.ts` (PUR et LÉGER, seul fichier lu par la page élève avec `pageClasseDonnees.ts`) : alphabet,
+  `normaliserCodeClasse` (espaces, tirets « - ‐ – — − », points, majuscules ; la SAISIE n'est jamais filtrée),
+  `erreurCodeClasse` (messages à hauteur d'élève, avant tout appel), `codeAffiche` (« K7Q-4MX »), types du contenu,
+  `lireReponsePageClasse` (lecture tolérante et bornée : ids / slugs / dates validés), `pageAuJour` (la version gardée
+  est refiltrée à la date du jour), `lienEtape`, dates (« Jeudi 3 décembre », « hier à 16 h 20 », espaces insécables),
+  mémoire de l'appareil (clés `classe:code` et `classe:derniere` SEULES, try/catch partout). **Point d'accroche du plan
+  de révision (lot S)** : `ROUTE_PLAN_REVISION` (`null` tant que le plan n'existe pas : bouton absent) → `lienPlanRevision`
+  = `<route>?date=AAAA-MM-JJ&chapitre=<niveau>/<chapitre>&etapes=<id>,<id>` (à lire par le plan pour se pré-remplir) ;
+  le jour où la route existe, y mettre son chemin : le bouton « Mon plan de révision jusqu'au … » apparaît sous
+  « Préparer mon interro ».
+- `lib/pageClasseDonnees.ts` : `chargerPagesClasse` (`{ actif: false }` sans 0010 : PGRST205 / PGRST202 / 42P01 /
+  42883), `nouveauCode`, `couperCode`, `enregistrerReglagesPage`, `publierContenu`, `lirePageClasse` (élève : `absente`,
+  `injoignable` pour toute panne réseau ou serveur en veille), `ErreurPageClasse` (messages traduits).
+- `routes/ClassePage.tsx` + `components/eleve/classe.css` (route `/classe` publique, chargée à la demande, `noindex`,
+  JAMAIS pré-rendue) : `?code=` lu UNE fois (mode strict de React compris) puis retiré de l'adresse
+  (`history.replaceState`) avant tout appel ; `?apercu=1` (« Voir comme un élève ») : bandeau, rien n'est gardé, pas de
+  « Quitter ». Saisie : champ texte libre (pas d'`inputmode`, `autocapitalize="characters"`), aucun placeholder (il
+  ressemblait à un vrai code). « Scanner le QR code » de la maquette remplacé par une phrase « Scanne-le avec l'appareil
+  photo de ton téléphone » (le QR porte l'adresse `/classe?code=…` ; un lecteur dans la page demanderait la caméra et
+  `BarcodeDetector`, absent de Safari). Page : carte sombre de la prochaine interro (jetons inversés, lisible dans les deux
+  thèmes), interros suivantes en cartes claires, « Aucune interro annoncée pour l'instant » si la rubrique est publiée mais
+  vide ; une rubrique non publiée n'apparaît pas. Une version gardée s'affiche tout de suite (« vérification des
+  nouveautés… ») puis est remplacée. Code inconnu : « ne correspond à aucune classe » ; code gardé devenu inconnu
+  (renouvelé / coupé) : tout est oublié, « Ce code ne marche plus : … Demande-lui le nouveau code » ; hors ligne / serveur
+  injoignable : dernière version vue, « reçue aujourd'hui à 8 h 12 », « Réessayer » (et relance à l'événement `online`) ;
+  trop d'essais : idem avec « réessaie dans n minutes » ; 0010 absente : « pas encore activée » ; Supabase non configuré :
+  « Page de classe indisponible ». Pied : code + « Quitter cette classe sur cet appareil ». Fond uni.
+- Carnet : `components/carnet/PageClasseEleves.tsx` + `page-classe-eleves.css`, sous-page `/carnet/classe/:id/eleves`
+  (bouton « Page des élèves » de `PageClasse`, pastille « publiée » / « code coupé ») ; « Créer le code » → QR
+  (`entrainement/export/qrSvg.ts`, fond blanc), code, « Projeter le code en classe » (portail plein écran, plein écran du
+  navigateur demandé, fond blanc dans les deux thèmes, QR ≈ 58–66 vh, code en 12 vw, Échap / « Fermer », focus rendu),
+  « Nouveau code », « Couper le code » (confirmation DANS la page, focus Annuler, Échap), cinq interrupteurs
+  (`role="switch"`, 72 × 44 px), « Jamais publié », « Publié le … En ce moment : 1 interro à venir, 2 devoirs… »,
+  « Mettre à jour maintenant », « Voir comme un élève » (nouvel onglet). Textes au vouvoiement, comme la maquette.
+- **0010 pas appliquée** : le carnet marche comme avant ; la page des élèves dit « Pour activer la page de classe, collez
+  0010… » ; la page élève dit « pas encore activée ».
+
+**Vérifications** (dossier de travail `eleve-C/`) :
+- `test_sql.py` (Postgres 16 local, faux schéma `auth`, 0001 → 0009 + données, 0010 ×3 — sortie vide, données / sel /
+  sécurité / contraintes identiques —, 0001 → 0009 relancés après, 0010 encore) : 125 vérifications — droits `anon` /
+  `authenticated` (tables, fonctions, `tirer_code_classe`, compteurs, sel), colonnes interdites (code, `publie_le`,
+  propriétaire) 42501, RLS croisé (lecture, modification, suppression, nouveau code / coupure sur la classe d'un autre),
+  23503 sans révéler, contenu (tableau, clé `remarque`, > 64 Ko) 23514, code ambigu refusé au superutilisateur, lecture
+  (clés publiques seulement, aucune remarque ni école, interro passée / devoir rendu retirés, heure et nom selon les
+  interrupteurs, rubriques coupées absentes, saisie tolérante), renouvelé / coupé → inconnu, 30 codes distincts, codes mal
+  formés (dont une injection), compte désactivé, limite IP (31e essai bloqué même avec le bon code, autre IP libre, IP
+  hachée, fenêtre écoulée), plafond global, `cf-connecting-ip`, sans en-tête, ménage, cascades classe / compte.
+- `purs.test.ts` (esbuild + node, 37 vérifications) : normalisation et messages du code, liens (slug / id mal formés
+  refusés), plan de révision (sans / avec route), dates et « hier à 16 h 20 », lecture tolérante (ids, dates, clés
+  inconnues ignorées), `pageAuJour`, contenu (rien de privé, autre classe, séance future ignorée, devoirs datés puis sans
+  date récents, heure « plage » / « numéro » / heure double / journée entière, précisions « seulement » / « sans »),
+  `memeContenu` (ordre des clés).
+- `parcours.mjs` (Vite de développement :5315 + faux client `faux-supabase.js` étendu : « serveur » de pages commun aux
+  onglets, options `anonyme`, `pagesClasseAbsent`, `pagesClasseEchec`, `lectureEchoue`), iPhone 13 et 1 280 px, clair et
+  sombre — 347 vérifications : bouton « Page des élèves », création du code (format, QR, « Publiée »), contenu publié
+  (clés, rien de privé : remarques, objectif, autre classe, école, sortie, nom ; interro, étapes, générateurs, devoirs,
+  séances, sans heure), interrupteurs heure (republication « 09h35 → 10h25 ») et nom, « Voir comme un élève »,
+  projection (code ≥ 48 px, tout tient à l'écran, QR ≥ 300 px, focus, Échap), saisie élève (champ texte libre, noindex,
+  5 saisies mal formées refusées SANS appel, saisie jamais filtrée, code inconnu, code en minuscules avec tiret long),
+  page élève (classe, « Publié par », titre, date et heure, « dans 8 jours », liens d'étapes, « Préparer mon interro »,
+  pas de plan sans lot S, devoirs, séances, rien de privé, `localStorage` = `classe:code` + `classe:derniere` SEULS,
+  aucune écriture serveur, Tab → lien d'étape avec contour visible), rechargement direct, hors ligne (version datée), trop
+  d'essais, QR (`?code=` retiré, code gardé), aperçu (bandeau, rien gardé), nouveau code (ancien → « ne marche plus »,
+  tout oublié), couper (confirmation, Échap, coupé → saisie), publication automatique à l'ouverture du carnet, « déjà à
+  jour », interro supprimée → retirée, rubriques coupées absentes, quitter, 0010 absente (carnet intact, messages),
+  panne de lecture (aucun « Créer le code »), sans configuration ; cibles ≥ 44 px (téléphone), `scrollWidth` = largeur,
+  0 erreur console. Captures dans `eleve-C/captures/`.
+
+**Mise en service** : SQL Editor → New query → coller TOUT `0010_page_classe.sql` → Run → « Success. No rows returned » ;
+recharger `/carnet` → une classe → « Page des élèves » → « Créer le code ». À vérifier contre le vrai projet : création
+du code, publication automatique (« Publié le … »), lecture par un téléphone SANS compte (`/classe`, code tapé puis QR),
+« Nouveau code » (l'ancien refusé), « Couper le code », et que la limite d'essais reconnaît bien l'adresse (en-têtes de
+la passerelle Supabase : `select current_setting('request.headers', true)` depuis une fonction de test au besoin).

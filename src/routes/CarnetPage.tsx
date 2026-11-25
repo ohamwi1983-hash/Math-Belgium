@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, Navigate, Route, Routes, useParams, useSearchParams } from 'react-router-dom'
 import { BandeauEspace } from '../components/compte/BandeauEspace'
 import { IconeCarnet, MenuEspace } from '../components/compte/MenuEspace'
@@ -14,6 +14,7 @@ import { GestionClasses, type SaisieClasse } from '../components/carnet/GestionC
 import { MaSemaine } from '../components/carnet/MaSemaine'
 import { MessageHoraireInactif, MonHoraire } from '../components/carnet/MonHoraire'
 import { PageClasse } from '../components/carnet/PageClasse'
+import { PageClasseEleves } from '../components/carnet/PageClasseEleves'
 import { PanneauLateral } from '../components/carnet/PanneauLateral'
 import { FormulaireEvenement } from '../components/carnet/FormulaireEvenement'
 import { ReglagesAgenda } from '../components/carnet/ReglagesAgenda'
@@ -52,6 +53,9 @@ import { AGENDA_INACTIF, ajouterEvenement, ajouterPeriode, chargerAgenda, enregi
 import { predicatSuppression, type ContexteAgenda, type Evenement, type PeriodeBulletin, type SaisieEvenement } from '../lib/agendaEvenements'
 import { estConnecteActif, useCompte } from '../lib/compteContexte'
 import { messageErreur } from '../lib/compteValidation'
+import { construireContenuPage, memeContenu } from '../lib/pageClasseContenu'
+import type { ReglagesPageClasse } from '../lib/pageClasse'
+import { chargerPagesClasse, couperCode, enregistrerReglagesPage, nouveauCode, publierContenu, type PagesClasse } from '../lib/pageClasseDonnees'
 
 const DUREES = [40, 45, 50, 55, 60, 90, 100, 110]
 const TEXTE_DEFAUT = { rubriques: lireRubriques(null), competences: lireCompetences(null) }
@@ -97,6 +101,10 @@ interface Donnees {
   generateursEval: boolean
   /** Rubriques du texte et compétences transversales (défauts sans 0007). */
   texte: ReglagesTexte
+  /** Pages de classe des élèves (0010) ; `actif` faux tant que 0010 n'est pas appliquée. */
+  pages: PagesClasse
+  /** Panne de lecture des pages de classe (le carnet reste utilisable). */
+  erreurPages: string | null
 }
 
 type Panneau =
@@ -149,11 +157,28 @@ function Carnet() {
       // L'agenda (0006) est facultatif : sans lui (ou en cas de panne de lecture), le carnet reste utilisable.
       const [classes, r, horaire, agenda] = await Promise.all([listerClasses(client), lireReglages(client), chargerHoraire(client), chargerAgenda(client).catch(() => AGENDA_INACTIF)])
       // Devoirs / évaluations / texte (0007) : facultatifs, détectés à la lecture des séances.
-      const [{ seances, devoirs, generateursEval }, texte] = await Promise.all([
+      // Pages de classe des élèves (0010) : facultatives, une panne ne bloque jamais le carnet.
+      const [{ seances, devoirs, generateursEval }, texte, pagesLues] = await Promise.all([
         chargerSeances(client, horaire.actif),
         lireReglagesTexte(client).catch((): ReglagesTexte => ({ actif: false, ...TEXTE_DEFAUT })),
+        chargerPagesClasse(client).then(
+          (pages) => ({ pages, erreur: null }),
+          (ex: unknown) => ({ pages: { actif: true, pages: [] } as PagesClasse, erreur: messageErreur(ex) }),
+        ),
       ])
-      setDonnees({ classes, seances, reglages: r.reglages, reglagesExiste: r.existe, horaire, agenda, devoirs, generateursEval, texte: devoirs ? texte : { ...texte, actif: false } })
+      setDonnees({
+        classes,
+        seances,
+        reglages: r.reglages,
+        reglagesExiste: r.existe,
+        horaire,
+        agenda,
+        devoirs,
+        generateursEval,
+        texte: devoirs ? texte : { ...texte, actif: false },
+        pages: pagesLues.pages,
+        erreurPages: pagesLues.erreur,
+      })
       setAbsent(false)
       setErreurChargement(null)
     } catch (ex) {
@@ -237,6 +262,63 @@ function Carnet() {
     const supprimee = ctxAgenda ? predicatSuppression(ctxAgenda) : undefined
     return creneauxDuJour(d, donnees.horaire.grilles, donnees.horaire.cases, { supprimee }).creneaux.filter((c) => c.debut <= m && !seanceDuCreneau(c, seances)).length
   }, [donnees, seances, maintenant, ctxAgenda])
+
+  // Pages de classe des élèves (0010) : publication AUTOMATIQUE. Dès que le carnet change (séance,
+  // interro, devoir, événement, réglage de la page, nouveau jour), la copie de chaque classe dont le code
+  // est actif est recalculée ; si elle diffère de celle du serveur, elle est republiée. Choix plus sûr
+  // qu'un bouton seul : une interro déplacée ou supprimée ne reste jamais affichée aux élèves parce
+  // qu'on a oublié de cliquer (« Mettre à jour maintenant » ne fait que forcer cette vérification).
+  const aujourdhuiPublication = dateIso(maintenant)
+  const [etatPublication, setEtatPublication] = useState<{ message: string | null; erreur: string | null }>({ message: null, erreur: null })
+  const publicationEnCours = useRef(false)
+  const synchroniserPages = useCallback(
+    async (d: Donnees, forcerMessage = false): Promise<void> => {
+      if (!client || !d.pages.actif || publicationEnCours.current) return
+      const aPublier = d.pages.pages.flatMap((p) => {
+        const classe = d.classes.find((c) => c.id === p.classe_id)
+        if (!classe || p.code === null) return []
+        const contenu = construireContenuPage({
+          classe,
+          seances: d.seances,
+          evenements: d.agenda.actif ? d.agenda.evenements : [],
+          grilles: d.horaire.actif ? d.horaire.grilles : [],
+          format: d.reglages.format_horaire,
+          aujourdhui: aujourdhuiPublication,
+          avecHeure: p.publier_heure,
+        })
+        return memeContenu(contenu, p.contenu) ? [] : [{ classeId: p.classe_id, contenu }]
+      })
+      if (aPublier.length === 0) {
+        if (forcerMessage) setEtatPublication({ message: 'La page de classe est déjà à jour : elle suit le carnet.', erreur: null })
+        return
+      }
+      publicationEnCours.current = true
+      try {
+        const faites: { classeId: string; contenu: (typeof aPublier)[number]['contenu']; publieLe: string | null }[] = []
+        for (const x of aPublier) faites.push({ ...x, publieLe: await publierContenu(client, x.classeId, x.contenu) })
+        setDonnees((avant) =>
+          avant && avant.pages.actif
+            ? { ...avant, pages: { actif: true, pages: avant.pages.pages.map((p) => { const f = faites.find((y) => y.classeId === p.classe_id); return f ? { ...p, contenu: f.contenu, publie_le: f.publieLe } : p }) } }
+            : avant,
+        )
+        setEtatPublication({ message: `Page de classe mise à jour${faites.length > 1 ? ` (${faites.length} classes)` : ''} : les élèves voient la nouvelle version.`, erreur: null })
+      } catch (ex) {
+        setEtatPublication({ message: null, erreur: `Page de classe pas mise à jour : ${messageErreur(ex)}` })
+      } finally {
+        publicationEnCours.current = false
+      }
+    },
+    [client, aujourdhuiPublication],
+  )
+  useEffect(() => {
+    if (donnees) void synchroniserPages(donnees)
+  }, [donnees, synchroniserPages])
+  // « Mettre à jour maintenant » : carnet relu, puis vérification avec un message même s'il n'y a rien à publier.
+  const [forcerVerification, setForcerVerification] = useState(0)
+  useEffect(() => {
+    if (forcerVerification > 0 && donnees) void synchroniserPages(donnees, true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- seulement sur demande
+  }, [forcerVerification])
 
   /** Menu « Mon espace » (carnet déplié) + bandeau sombre autour de chaque état de la page. */
   function cadre(contenu: ReactNode) {
@@ -626,8 +708,54 @@ function Carnet() {
                       onNoter={(id) => noterLibre(id)}
                       onModifierClasse={(id, s: SaisieClasse) => agir(() => modifierClasse(client, id, s), 'Classe modifiée.')}
                       onSupprimerClasse={supprimerUneClasse}
+                      pageEleves={donnees.pages.actif ? (donnees.pages.pages.find((p) => p.classe_id === classe.id)?.code ? 'publiee' : donnees.pages.pages.some((p) => p.classe_id === classe.id) ? 'coupee' : 'aucune') : 'inactive'}
                     />
                   )}
+                  onVue={choisirClasse}
+                />
+              }
+            />
+            <Route
+              path="classe/:id/eleves"
+              element={
+                <RouteClasse
+                  classes={donnees.classes}
+                  rendu={(classe) => {
+                    const page = donnees.pages.actif ? donnees.pages.pages.find((p) => p.classe_id === classe.id) : undefined
+                    const action = (faire: () => Promise<unknown>, succes: string) => {
+                      setEtatPublication({ message: null, erreur: null })
+                      return agir(faire, succes)
+                    }
+                    const creer = () => void action(() => nouveauCode(client, classe.id), page?.code ? 'Nouveau code créé : l’ancien ne marche plus.' : 'Code créé : la page de classe est publiée.')
+                    return (
+                      <PageClasseEleves
+                        classe={classe}
+                        actif={donnees.pages.actif}
+                        erreurChargement={donnees.erreurPages}
+                        page={page}
+                        apercu={construireContenuPage({
+                          classe,
+                          seances: donnees.seances,
+                          evenements: donnees.agenda.actif ? donnees.agenda.evenements : [],
+                          grilles: horaire.actif ? horaire.grilles : [],
+                          format: reglages.format_horaire,
+                          aujourdhui: dateIso(maintenant),
+                          avecHeure: page?.publier_heure ?? false,
+                        })}
+                        occupe={occupe}
+                        message={etatPublication.message}
+                        erreur={etatPublication.erreur}
+                        onCreer={creer}
+                        onNouveau={creer}
+                        onCouper={() => void action(() => couperCode(client, classe.id), 'Code coupé : la page de classe ne s’ouvre plus.')}
+                        onReglages={(r: ReglagesPageClasse) => void action(() => enregistrerReglagesPage(client, classe.id, r), 'Ce que voient les élèves : enregistré.')}
+                        onMettreAJour={() => {
+                          setEtatPublication({ message: null, erreur: null })
+                          void charger().then(() => setForcerVerification((n) => n + 1))
+                        }}
+                      />
+                    )
+                  }}
                   onVue={choisirClasse}
                 />
               }

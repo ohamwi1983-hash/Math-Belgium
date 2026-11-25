@@ -25,6 +25,8 @@ const CoffrePage = lazy(() => import('./routes/CoffrePage').then((m) => ({ defau
 const CarnetPage = lazy(() => import('./routes/CarnetPage').then((m) => ({ default: m.CarnetPage })))
 /** Lien de partage d'un enregistrement du coffre (0009) : professeur connecté seulement. */
 const PartagePage = lazy(() => import('./routes/PartagePage').then((m) => ({ default: m.PartagePage })))
+/** Page de classe à code (élèves SANS compte, 0010) : publique, `noindex`, jamais pré-rendue. */
+const ClassePage = lazy(() => import('./routes/ClassePage').then((m) => ({ default: m.ClassePage })))
 /** Mode « Projeter en classe » (professeur connecté) : diapos plein écran, chargé à la demande, jamais
  * pré-rendu ni indexé — voir `.claude/rules/chapter-components.md`, « Mode projection ». */
 const ProjectionPage = lazy(() => import('./components/projection/ProjectionPage').then((m) => ({ default: m.ProjectionPage })))
@@ -45,6 +47,7 @@ function App() {
           <Route path="/profil" element={<ProfilPage />} />
           <Route path="/coffre" element={<CoffrePage />} />
           <Route path="/partage/:jeton" element={<PartagePage />} />
+          <Route path="/classe" element={<ClassePage />} />
           {/* `/carnet/*` : sous-pages du carnet (Aujourd’hui, semaine, classe, agenda…), jamais pré-rendues. */}
           <Route path="/carnet/*" element={<CarnetPage />} />
           {/* Un seul générateur rapatrié depuis plateforme-maths = une entrée dans

@@ -33,6 +33,7 @@ export function PageClasse({
   onNoter,
   onModifierClasse,
   onSupprimerClasse,
+  pageEleves = 'inactive',
 }: {
   classe: Classe
   seances: Seance[]
@@ -41,6 +42,8 @@ export function PageClasse({
   onNoter: (classeId: string) => void
   onModifierClasse: (id: string, s: SaisieClasse) => Promise<boolean>
   onSupprimerClasse: (c: Classe) => void
+  /** État de la page de classe des élèves (0010) : lien « Page des élèves » avec son état. */
+  pageEleves?: 'publiee' | 'coupee' | 'aucune' | 'inactive'
 }) {
   const id = useId()
   const ctx = useCarnet()
@@ -110,6 +113,10 @@ export function PageClasse({
           </button>
           <Link className="carnet-bouton" to={`/carnet/agenda?classe=${classe.id}`}>
             Agenda de la classe
+          </Link>
+          <Link className="carnet-bouton" to={`/carnet/classe/${classe.id}/eleves`}>
+            Page des élèves
+            {pageEleves === 'publiee' ? <span className="carnet-pastille-eleves">publiée</span> : pageEleves === 'coupee' ? <span className="carnet-pastille-eleves coupee">code coupé</span> : null}
           </Link>
           <button type="button" className="carnet-bouton principal" onClick={() => onNoter(classe.id)}>
             Noter une séance
