@@ -2,6 +2,10 @@ import type { ExerciceProbabiliteHypergeometrique } from "./core6e/probabiliteHy
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProbabiliteHypergeometrique } from "./generateurs6e/probabiliteHypergeometrique";
 import type { IdVarianteProbabiliteHypergeometrique } from "./generateurs6e/probabiliteHypergeometrique";
 import type { PhaseProbabiliteHypergeometrique } from "./moteur6e/typesProbabiliteHypergeometrique";
+import { phasesPourExercice } from "./moteur6e/typesProbabiliteHypergeometrique";
+import { correctionDetailleeProbabiliteHypergeometrique } from "./generateurs6e/probabiliteHypergeometrique/corrigeDetaille";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { DEFINITION_6GEN47, attentesProbabiliteHypergeometrique } from "./moteur6e/verificationProbabiliteHypergeometrique";
 import { FORMAT_6GEN47 } from "./ui6e/formatProbabiliteHypergeometrique";
 import { AppCombinatoire } from "./components6e/AppCombinatoire";
@@ -21,6 +25,7 @@ const CONFIG: ConfigAppCombinatoire<ExerciceProbabiliteHypergeometrique, PhasePr
   definition: DEFINITION_6GEN47,
   attentes: attentesProbabiliteHypergeometrique,
   format: FORMAT_6GEN47,
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleeProbabiliteHypergeometrique(e), phasesPourExercice(e), p)} />,
 };
 
 export function App6gen47() {

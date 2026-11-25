@@ -32,6 +32,9 @@ const REECRITURES: [RegExp, string | ((...groupes: string[]) => string)][] = [
   // Syntaxe de saisie au clavier.
   [/ \(écris une racine avec sqrt\(…\)\)/g, ""],
   [/ \(en notation scientifique si besoin, par exemple 3,2e-4 pour 3,2·10⁻⁴\)/g, " (en notation scientifique si besoin)"],
+  // 6e ch. 7 (6gen48) : format de saisie d'une liste de valeurs.
+  [/ Sépare-les par des points-virgules\./g, ""],
+  [/ \(une décomposition par ligne\)/g, ""],
 ];
 
 /** Début du rappel de SYNTAXE de saisie (« un logarithme de base numérique s'écrit ln(…)/ln(…) —

@@ -270,3 +270,21 @@ function coef(n: number, k: number): number {
   for (let i = 0; i < k; i++) r = (r * (n - i)) / (i + 1);
   return Math.round(r);
 }
+
+// ============================================================================
+// Papier (lot E) : la situation (données de l'écran, déjà en prose, avec leur question) + consigne globale
+// ============================================================================
+
+export const CONSIGNE_PAPIER_44 = "Réponds en justifiant ta démarche.";
+
+export function situationPapier44(e: E): FragmentConsigne[] {
+  const r: FragmentConsigne[] = [];
+  FORMAT_6GEN44.donnees(e).forEach((l, i) => {
+    if (i > 0) r.push(t(" "));
+    r.push(...l);
+  });
+  if (e.famille === "E") r.push(t(` Combien d'anagrammes le mot ${e.mot} a-t-il ?`));
+  return r;
+}
+
+export { formuleB as formuleB44, formuleMultinomiale as formuleMultinomiale44, termesD as termesD44 };

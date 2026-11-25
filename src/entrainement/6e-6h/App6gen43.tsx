@@ -2,6 +2,10 @@ import type { ExerciceDenombrementFondamental } from "./core6e/denombrementFonda
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceDenombrementFondamental } from "./generateurs6e/denombrementFondamental";
 import type { IdVarianteDenombrementFondamental } from "./generateurs6e/denombrementFondamental";
 import type { PhaseDenombrementFondamental } from "./moteur6e/typesDenombrementFondamental";
+import { phasesPourExercice } from "./moteur6e/typesDenombrementFondamental";
+import { correctionDetailleeDenombrementFondamental } from "./generateurs6e/denombrementFondamental/corrigeDetaille";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { DEFINITION_6GEN43, attentesDenombrementFondamental } from "./moteur6e/verificationDenombrementFondamental";
 import { FORMAT_6GEN43 } from "./ui6e/formatDenombrementFondamental";
 import { AppCombinatoire } from "./components6e/AppCombinatoire";
@@ -21,6 +25,7 @@ const CONFIG: ConfigAppCombinatoire<ExerciceDenombrementFondamental, PhaseDenomb
   definition: DEFINITION_6GEN43,
   attentes: attentesDenombrementFondamental,
   format: FORMAT_6GEN43,
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleeDenombrementFondamental(e), phasesPourExercice(e), p)} />,
 };
 
 export function App6gen43() {

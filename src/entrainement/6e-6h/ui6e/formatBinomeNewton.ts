@@ -2,7 +2,7 @@ import type { ExerciceBinomeNewton } from "../core6e/binomeNewton.types";
 import type { PhaseBinomeNewton } from "../moteur6e/typesBinomeNewton";
 import { approximationC, termeNegligeC, valeurExacteC } from "../moteur6e/verificationBinomeNewton";
 import { combinaisonBig, versNombre, vaut } from "../moteur6e/saisieCombinatoire";
-import { arrondiLatex, decimalLatex, f, milliers, t } from "./fragmentsCombinatoire";
+import { arrondiLatex, decimalLatex, f, m, milliers, t } from "./fragmentsCombinatoire";
 import type { ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
 
 /**
@@ -221,5 +221,44 @@ export const FORMAT_6GEN45: FormatCombinatoire<E, P> = {
 /** Décimal exact en KaTeX (« 1{,}16 », « 0{,}0028 »). */
 function fractionDecimale(x: number): string {
   return decimalLatex(x, 12);
+}
+
+// ============================================================================
+// Papier (lot E) : situation + consigne globale (A, B) ou vraies questions (C, D)
+// ============================================================================
+
+export { puissanceX as puissanceX45, monome as monome45, par as par45, baseLatex as baseLatex45, epsilonLatex as epsilonLatex45, ligneLatex as ligneLatex45 };
+
+export function situationPapier45(e: E): FragmentConsigne[] {
+  switch (e.famille) {
+    case "A":
+      return [t("On considère l'expression "), m(binomeLatex(e.a, e.b, e.n)), t(".")];
+    case "B":
+      return [t("On développe "), m(binomeLatex(e.a, e.b, e.n)), t(" et on ordonne les termes selon les puissances décroissantes de "), m("x"), t(".")];
+    case "C":
+      return [t("On veut une valeur approchée de "), m(`(${baseLatex(e.epsilonCentiemes)})^{${e.n}}`), t(", en l'écrivant "), m(`(1${e.epsilonCentiemes < 0 ? "-" : "+"}${epsilonLatex(Math.abs(e.epsilonCentiemes))})^{${e.n}}`), t(".")];
+    case "D":
+      return [t("Voici la ligne "), m(`n=${e.n}`), t(" du triangle de Pascal : "), m(ligneLatex(e.ligne)), t(".")];
+  }
+}
+
+export function questionsPapier45(e: E): { consigne: FragmentConsigne[]; etapes: string[] }[] {
+  switch (e.famille) {
+    case "A":
+      return [{ consigne: [t("Développe et réduis cette expression.")], etapes: ["a", "b", "c"] }];
+    case "B":
+      return [{ consigne: e.sousType === "rang" ? [t("Calcule le terme de rang "), m(`${e.rang}`), t(", noté "), m(`T_{${e.rang}}`), t(".")] : [t("Calcule le coefficient du terme en "), m(puissanceX(e.p)), t(".")], etapes: ["a", "b", "c"] }];
+    case "C":
+      return [
+        { consigne: [t("Donne l'approximation "), m("1+n\\varepsilon"), t(" de cette puissance.")], etapes: ["a"] },
+        { consigne: [t("Calcule le premier terme négligé du binôme, "), m("C_n^2\\,\\varepsilon^2"), t(".")], etapes: ["b"] },
+        { consigne: [t("Donne la valeur de la puissance arrondie au dix-millième (calculatrice), puis compare l'écart avec le terme négligé.")], etapes: ["c"] },
+      ];
+    case "D":
+      return [
+        { consigne: [t("Sans calculatrice, calcule les nombres "), ...e.positions.flatMap((k, i) => [...(i > 0 ? [t(i === e.positions.length - 1 ? " et " : ", ")] : []), m(`C_{${e.n + 1}}^{${k}}`)]), t(" de la ligne suivante.")], etapes: ["a"] },
+        { consigne: [t("Que vaut la somme de tous les nombres de la ligne "), m(`n=${e.n + 1}`), t(" ?")], etapes: ["b"] },
+      ];
+  }
 }
 

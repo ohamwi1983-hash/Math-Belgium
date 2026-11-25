@@ -2,6 +2,10 @@ import type { ExerciceBinomeNewton } from "./core6e/binomeNewton.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceBinomeNewton } from "./generateurs6e/binomeNewton";
 import type { IdVarianteBinomeNewton } from "./generateurs6e/binomeNewton";
 import type { PhaseBinomeNewton } from "./moteur6e/typesBinomeNewton";
+import { phasesPourExercice } from "./moteur6e/typesBinomeNewton";
+import { correctionDetailleeBinomeNewton } from "./generateurs6e/binomeNewton/corrigeDetaille";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { DEFINITION_6GEN45, attentesBinomeNewton } from "./moteur6e/verificationBinomeNewton";
 import { FORMAT_6GEN45 } from "./ui6e/formatBinomeNewton";
 import { AppCombinatoire } from "./components6e/AppCombinatoire";
@@ -21,6 +25,7 @@ const CONFIG: ConfigAppCombinatoire<ExerciceBinomeNewton, PhaseBinomeNewton> = {
   definition: DEFINITION_6GEN45,
   attentes: attentesBinomeNewton,
   format: FORMAT_6GEN45,
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleeBinomeNewton(e), phasesPourExercice(e), p)} />,
 };
 
 export function App6gen45() {

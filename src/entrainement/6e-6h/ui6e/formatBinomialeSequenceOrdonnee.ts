@@ -3,7 +3,7 @@ import type { PhaseBinomialeSequenceOrdonnee } from "../moteur6e/typesBinomialeS
 import { resultatExact, termesExacts } from "../moteur6e/verificationBinomialeSequenceOrdonnee";
 import { arrangementBig, rationnel, versNombre, vaut } from "../moteur6e/saisieCombinatoire";
 import type { Rationnel } from "../moteur6e/saisieCombinatoire";
-import { arrondiLatex, decimalLatex, decimalesAffichage, f, fractionLatex, milliers, t } from "./fragmentsCombinatoire";
+import { arrondiLatex, decimalLatex, decimalesAffichage, f, fractionLatex, m, milliers, t } from "./fragmentsCombinatoire";
 import type { ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
 
 /**
@@ -24,7 +24,7 @@ const OPTIONS_STRATEGIE: Record<StrategieBinomialeA, string> = {
   complement: "Le complément : $1-\\big(P(X=k_1)+\\ldots\\big)$",
 };
 
-function evenementLatex(e: ExerciceBinomialeA): string {
+export function evenementLatex(e: ExerciceBinomialeA): string {
   switch (e.typeQuestion) {
     case "exactement":
       return `X=${e.k}`;
@@ -136,3 +136,23 @@ export const FORMAT_6GEN48: FormatCombinatoire<E, P> = {
     return null;
   },
 };
+
+// ============================================================================
+// Papier (lot E) : situation en prose + consigne de précision, mêmes phrases que l'écran
+// ============================================================================
+
+const OBJETS_B: Record<string, string> = { sacLettres: "lettres", urneJetons: "jetons", cartesOrdre: "cartes" };
+
+export function nomObjetsB(e: ExerciceBinomialeSequenceOrdonnee & { famille: "B" }): string {
+  return OBJETS_B[e.contexte.id] ?? "objets";
+}
+
+export function situationPapier48(e: E): FragmentConsigne[] {
+  if (e.famille === "B") return [t(`${e.contexte.texte} Il y a ${e.n} ${nomObjetsB(e)} ; on en tire ${e.k}. Calcule la probabilité d'obtenir exactement la séquence voulue.`)];
+  return [t(`${e.contexte.texte} On note `), m("X"), t(` le nombre de fois où ${e.contexte.labelSucces}. Calcule `), m(`P(${evenementLatex(e)})`), t(".")];
+}
+
+export function questionsPapier48(e: E): { consigne: FragmentConsigne[]; etapes: string[] }[] {
+  const n = e.famille === "B" ? 2 : e.strategie === "termeUnique" ? 3 : 4;
+  return [{ consigne: [t(ANNONCE_PRECISION_48)], etapes: ["a", "b", "c", "d"].slice(0, n) }];
+}

@@ -462,3 +462,43 @@ function arr(n: number, k: number): number {
 export function libellePhaseDenombrementFondamental(e: E, p: P): string {
   return FORMAT_6GEN43.libellePhase(e, p);
 }
+
+// ============================================================================
+// Papier (lot E) : situation en prose avec sa question + consigne globale. Audit (§ 3.1) : les
+// nombres intermédiaires de l'écran (total, nombres « sans le chiffre ») ne sont plus donnés sur papier.
+// ============================================================================
+
+export const CONSIGNE_PAPIER_43 = "Réponds en justifiant ta démarche.";
+
+function joindre(lignes: FragmentConsigne[][]): FragmentConsigne[] {
+  const r: FragmentConsigne[] = [];
+  lignes.forEach((l, i) => {
+    if (i > 0) r.push(t(" "));
+    r.push(...l);
+  });
+  return r;
+}
+
+export function situationPapier43(e: E): FragmentConsigne[] {
+  switch (e.famille) {
+    case "A": {
+      const question =
+        e.sousType === "contientUnChiffre"
+          ? [t(`Combien de ces nombres contiennent le chiffre ${e.chiffre} ?`)]
+          : e.sousType === "contientDeuxChiffres"
+            ? [t(`Combien de ces nombres contiennent à la fois les chiffres ${e.chiffre} et ${e.chiffre2} ?`)]
+            : contrainteA(e);
+      return joindre([texteChiffres(e), [t(`On forme des nombres de ${e.n} chiffres, tous différents, dont le premier chiffre n'est pas 0.`)], question]);
+    }
+    case "B":
+      return e.sousType === "direct" ? [t(`Un polygone convexe a ${e.n} côtés. Combien de diagonales possède-t-il ?`)] : [t(`Un polygone convexe possède ${milliersT(e.diagonales)} diagonales. Combien de côtés a-t-il ?`)];
+    case "C":
+      return joindre([f(e.contexte), [t(e.question)]]);
+    case "D":
+      return joindre(donneesD(e));
+    case "E":
+      return [t(`${e.contexte} Combien de dispositions différentes y a-t-il ?`)];
+  }
+}
+
+export { LIBELLE_FORMULE_C as LIBELLE_FORMULE_C43, RAISON_C as RAISON_C43 };

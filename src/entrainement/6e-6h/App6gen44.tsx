@@ -2,6 +2,10 @@ import type { ExerciceDenombrementCombine } from "./core6e/denombrementCombine.t
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceDenombrementCombine } from "./generateurs6e/denombrementCombine";
 import type { IdVarianteDenombrementCombine } from "./generateurs6e/denombrementCombine";
 import type { PhaseDenombrementCombine } from "./moteur6e/typesDenombrementCombine";
+import { phasesPourExercice } from "./moteur6e/typesDenombrementCombine";
+import { correctionDetailleeDenombrementCombine } from "./generateurs6e/denombrementCombine/corrigeDetaille";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { DEFINITION_6GEN44, attentesDenombrementCombine } from "./moteur6e/verificationDenombrementCombine";
 import { FORMAT_6GEN44 } from "./ui6e/formatDenombrementCombine";
 import { AppCombinatoire } from "./components6e/AppCombinatoire";
@@ -21,6 +25,7 @@ const CONFIG: ConfigAppCombinatoire<ExerciceDenombrementCombine, PhaseDenombreme
   definition: DEFINITION_6GEN44,
   attentes: attentesDenombrementCombine,
   format: FORMAT_6GEN44,
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleeDenombrementCombine(e), phasesPourExercice(e), p)} />,
 };
 
 export function App6gen44() {

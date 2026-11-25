@@ -204,3 +204,29 @@ export const FORMAT_6GEN46: FormatCombinatoire<E, P> = {
     }
   },
 };
+
+// ============================================================================
+// Papier (lot E) : situation en prose avec sa question + consigne globale
+// ============================================================================
+
+export const CONSIGNE_PAPIER_46 = "Réponds en justifiant ta démarche.";
+
+export function situationPapier46(e: E): FragmentConsigne[] {
+  switch (e.famille) {
+    case "A":
+    case "B": {
+      const r: FragmentConsigne[] = [];
+      FORMAT_6GEN46.donnees(e).forEach((l, i) => {
+        if (i > 0) r.push(t(" "));
+        r.push(...l);
+      });
+      return r;
+    }
+    case "C":
+      return [t(`${e.contexte} Combien de possibilités différentes y a-t-il en tout ?`)];
+    case "D":
+      return [t(`On lance trois dés à six faces et on note les résultats dans l'ordre (premier dé, deuxième, troisième). Laquelle des sommes ${e.s1} et ${e.s2} sort le plus souvent ? Elles peuvent aussi être aussi fréquentes l'une que l'autre.`)];
+  }
+}
+
+export { triplet as tripletLatex46 };

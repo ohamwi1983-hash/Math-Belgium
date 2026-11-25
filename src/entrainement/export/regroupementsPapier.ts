@@ -1022,4 +1022,29 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     ],
   },
   "6gen104": simple(String.raw`(?<ligne>[^\n]+)\nCalcule ce nombre en justifiant par la méthode des étoiles et des barres\.`, "Dans chaque situation, calcule le nombre demandé en justifiant par la méthode des étoiles et des barres."),
+  // 6e ch. 7, lot E (6gen43–6gen48) : la situation (avec sa question) est la ligne ; la consigne commune
+  // est la consigne globale de l'énoncé papier. Énoncés à vraies questions (6gen45 C, D ; 6gen47 B) : jamais.
+  "6gen43": simple(String.raw`(?<ligne>[^\n]+)\nRéponds en justifiant ta démarche\.`, "Dans chaque situation, réponds à la question en justifiant ta démarche."),
+  "6gen44": simple(String.raw`(?<ligne>[^\n]+)\nRéponds en justifiant ta démarche\.`, "Dans chaque situation, réponds à la question en justifiant ta démarche."),
+  "6gen46": simple(String.raw`(?<ligne>[^\n]+)\nRéponds en justifiant ta démarche\.`, "Dans chaque situation, réponds à la question en justifiant ta démarche."),
+  "6gen45": {
+    formes: [
+      { motif: re(String.raw`On considère l'expression (?<ligne>${M})\.\nDéveloppe et réduis cette expression\.`), consigne: "Développe et réduis chaque expression." },
+      {
+        motif: re(String.raw`On développe (?<b>${M}) et on ordonne les termes selon les puissances décroissantes de ${M}\.\nCalcule le terme de rang ${M}, noté (?<T>${M})\.`),
+        consigne: "Dans chaque développement, ordonné selon les puissances décroissantes de $x$, calcule le terme demandé.",
+        ligne: (g) => `${g.b}, terme ${g.T}`,
+      },
+      {
+        motif: re(String.raw`On développe (?<b>${M}) et on ordonne les termes selon les puissances décroissantes de ${M}\.\nCalcule le coefficient du terme en (?<x>${M})\.`),
+        consigne: "Dans chaque développement, calcule le coefficient du terme demandé.",
+        ligne: (g) => `${g.b}, terme en ${g.x}`,
+      },
+    ],
+  },
+  "6gen47": simple(String.raw`(?<ligne>[^\n]+)\nDonne la valeur exacte \(une fraction\) ou un arrondi au millième\.`, "Dans chaque situation, calcule la probabilité demandée. Donne chaque fois la valeur exacte (une fraction) ou un arrondi au millième."),
+  "6gen48": simple(
+    String.raw`(?<ligne>[^\n]+)\nDonne la valeur exacte \(une fraction\) ou un arrondi au millième \(davantage de décimales pour une très petite probabilité\)\.`,
+    "Dans chaque situation, calcule la probabilité demandée. Donne chaque fois la valeur exacte (une fraction) ou un arrondi au millième (davantage de décimales pour une très petite probabilité).",
+  ),
 };

@@ -30,6 +30,12 @@ function formuleA(e: E & { famille: "A" }): string {
   return `\\dfrac{C_{${e.K}}^{${e.k}}\\times C_{${e.N - e.K}}^{${e.n - e.k}}}{C_{${e.N}}^{${e.n}}}`;
 }
 
+/** « la probabilité de n'obtenir… », « la probabilité d'obtenir… », « la probabilité que Léa… ». */
+export function laProbabiliteDe(evenement: string): string {
+  if (/^qu(e |')/.test(evenement)) return `la probabilité ${evenement}`;
+  return /^[aeéèêioôu]/i.test(evenement) ? `la probabilité d'${evenement}` : `la probabilité de ${evenement}`;
+}
+
 function couleur(c: "c1" | "c2"): string {
   return c === "c1" ? "rouge" : "bleue";
 }
@@ -66,7 +72,7 @@ export const FORMAT_6GEN47: FormatCombinatoire<E, P> = {
   donnees(e): FragmentConsigne[][] {
     switch (e.famille) {
       case "A":
-        return [[t(e.contexte.phrase)], [t(`On cherche la probabilité de ${e.contexte.evenement}.`)]];
+        return [[t(e.contexte.phrase)], [t(`On cherche ${laProbabiliteDe(e.contexte.evenement)}.`)]];
       case "B":
         return [[t(`Une urne contient ${e.n1} boules rouges et ${e.n2} boules bleues. On tire trois boules l'une après l'autre, sans remise.`)], [t(`Séquence étudiée : ${e.sequence.map(couleur).join(", puis ")}.`)]];
       case "C":
@@ -179,3 +185,39 @@ export const FORMAT_6GEN47: FormatCombinatoire<E, P> = {
     }
   },
 };
+
+// ============================================================================
+// Papier (lot E) : situation en prose + consigne globale, MÊMES phrases que l'écran
+// ============================================================================
+
+/** Situation imprimée (avec sa question pour A et C ; B a deux vraies questions). */
+export function situationPapier47(e: E): FragmentConsigne[] {
+  switch (e.famille) {
+    case "A":
+      return [t(`${e.contexte.phrase} Calcule ${laProbabiliteDe(e.contexte.evenement)}.`)];
+    case "B":
+      return [t(`Une urne contient ${e.n1} boules rouges et ${e.n2} boules bleues. On tire trois boules l'une après l'autre, sans remise. ${ANNONCE_PRECISION}`)];
+    case "C": {
+      const [l1, l2, l3] = FORMAT_6GEN47.donnees(e);
+      const question = l3.map((x) => x.valeur).join("").replace(/^On cherche/, "Calcule");
+      return [...l1, t(" "), ...l2, t(" "), t(question)];
+    }
+  }
+}
+
+export function sequenceTexte(e: E & { famille: "B" }): string {
+  return e.sequence.map((c, i) => (i === 0 ? `une boule ${couleur(c)}` : `une ${couleur(c)}`)).join(", puis ");
+}
+
+export function compositionTexte(e: E & { famille: "B" }): string {
+  return `${e.a} ${e.a > 1 ? "boules rouges" : "boule rouge"} et ${e.b} ${e.b > 1 ? "boules bleues" : "boule bleue"}`;
+}
+
+export function questionsPapier47(e: E): { consigne: FragmentConsigne[]; etapes: string[] }[] {
+  if (e.famille === "B")
+    return [
+      { consigne: [t(`Calcule la probabilité d'obtenir, dans cet ordre, ${sequenceTexte(e)}.`)], etapes: ["a"] },
+      { consigne: [t(`Calcule la probabilité d'obtenir ${compositionTexte(e)}, dans un ordre quelconque.`)], etapes: ["b", "c"] },
+    ];
+  return [{ consigne: [t(ANNONCE_PRECISION)], etapes: e.famille === "A" ? ["a", "b"] : ["a", "b", "c"] }];
+}
