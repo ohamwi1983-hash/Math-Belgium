@@ -3,7 +3,7 @@
  * chantier 6e (6h) déjà complet (6gen58-63). Même principe que 6gen64 (chapitre 1), 6gen65 (chapitre
  * 2), 6gen66 (chapitre 3), 6gen67 (chapitre 4), 6gen68 (chapitre 7), 6gen69 (chapitre 8), 6gen70
  * (chapitre 9), 6gen71 (chapitre 10) et 6gen72 ("Lieux géométriques") — banque de 210 affirmations
- * vrai/faux PRÉ-ÉCRITES (jamais générées procéduralement), 6 thèmes de 35 questions chacun — mais
+ * vrai/faux PRÉ-ÉCRITES (jamais générées procéduralement), 7 thèmes de 35 questions chacun (le 7ᵉ, « excentricité et réduction », ajouté au lot D de l'audit) — mais
  * contrat entièrement indépendant, jamais partagé entre chantiers ni avec 6gen64-72 (voir CLAUDE.md,
  * "3 chantiers indépendants").
  *
@@ -29,7 +29,8 @@ export type VarianteQuizConiques =
   | "aireExcentriciteConique"
   | "intersectionsConiques"
   | "tangentesConique"
-  | "proprietesOptiquesConiques";
+  | "proprietesOptiquesConiques"
+  | "excentriciteReduction";
 
 /** Une affirmation pré-écrite, sa réponse correcte et sa justification pédagogique — jamais
  * générée à partir de valeurs numériques tirées (même contrat que 6gen64-72), mais énoncé/
