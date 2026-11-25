@@ -544,6 +544,11 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     ],
   },
   "5gen46": { formes: [{ motif: re(String.raw`On note (?<ligne>${M}, ${M} et ${M})\. (?<q>Pour quelle.+)`), consigne: dansChaqueCas }] },
+  // 5e ch. 6, lot H2 : la situation rédigée (deux grandeurs corrélées et la conclusion hâtive) est la ligne.
+  "5gen80": simple(
+    String.raw`(?<ligne>.+)\nCette corrélation traduit-elle une relation de cause à effet \? Explique-la : causalité plausible, cause commune \(nomme-la\), coïncidence, causalité inverse ou effet décalé dans le temps\.`,
+    "Pour chaque situation, dis si la corrélation traduit une relation de cause à effet et explique-la : causalité plausible, cause commune (nomme-la), coïncidence, causalité inverse ou effet décalé dans le temps.",
+  ),
   "5gen55": {
     formes: [{ motif: re(String.raw`Résous dans (?<int>${M}) l'inéquation (?<ligne>${M})\. (?<s>Donne .+)`), consigne: (g) => `Résous dans ${g.int} chaque inéquation. ${g.s}` }],
   },

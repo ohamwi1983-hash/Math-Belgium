@@ -47,6 +47,7 @@ const CH_5E_TRIGONOMETRIE: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'tr
 const CH_5E_SUITES: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'suites', chapitreTitle: 'Suites' }
 const CH_5E_LIMITES_ASYMPTOTES: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'limites-asymptotes', chapitreTitle: 'Limites et asymptotes' }
 const CH_5E_DERIVEES_APPLICATIONS: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'derivees-applications', chapitreTitle: 'Dérivées et applications' }
+const CH_5E_STAT_DEUX_VARIABLES_H2: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'statistique-deux-variables', chapitreTitle: 'Statistique à deux variables' }
 const CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'fonctions-reciproques-cyclometriques', chapitreTitle: 'Fonctions réciproques & cyclométriques' }
 const CH_6E_FONCTIONS_EXPONENTIELLES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'fonctions-exponentielles', chapitreTitle: 'Fonctions exponentielles' }
 const CH_6E_FONCTIONS_LOGARITHMES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'fonctions-logarithmes', chapitreTitle: 'Fonctions logarithmes' }
@@ -295,6 +296,12 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '5gen68': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen68').then((m) => ({ default: m.App5gen68 }))),
   '5gen69': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen69').then((m) => ({ default: m.App5gen69 }))),
   '5gen70': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen70').then((m) => ({ default: m.App5gen70 }))),
+
+  // --- 5e, chapitre 6 : Statistique à deux variables (lot H2) ---
+  '5gen78': entree(CH_5E_STAT_DEUX_VARIABLES_H2, () => import('./5e-4h/App5gen78').then((m) => ({ default: m.App5gen78 }))),
+  '5gen79': entree(CH_5E_STAT_DEUX_VARIABLES_H2, () => import('./5e-4h/App5gen79').then((m) => ({ default: m.App5gen79 }))),
+  '5gen80': entree(CH_5E_STAT_DEUX_VARIABLES_H2, () => import('./5e-4h/App5gen80').then((m) => ({ default: m.App5gen80 }))),
+  '5gen81': entree(CH_5E_STAT_DEUX_VARIABLES_H2, () => import('./5e-4h/App5gen81').then((m) => ({ default: m.App5gen81 }))),
 
   // --- 6e, chapitre 1 : Fonctions réciproques & cyclométriques ---
   '6gen1': entree(CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES, () => import('./6e-6h/App6gen1').then((m) => ({ default: m.App6gen1 }))),

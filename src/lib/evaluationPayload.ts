@@ -130,6 +130,7 @@ export type IdGenerateurPilote =
   | '5gen68' | '5gen69' | '5gen70'
   | '5gen71' | '5gen72'
   | '5gen73' | '5gen74' | '5gen75'
+  | '5gen78' | '5gen79' | '5gen80' | '5gen81'
 
 export interface GeneratorConfig {
   chapitreSlug: string
@@ -506,6 +507,10 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'derivees-applications', sectionId: 'contexte-economique', generatorId: '5gen33', label: '', processus: 3 },
   { chapitreSlug: 'derivees-applications', sectionId: 'extrema-bornes', generatorId: '5gen34', label: '', processus: 3 },
   { chapitreSlug: 'derivees-applications', sectionId: 'vitesse-position', generatorId: '5gen35', label: '', processus: 3 },
+  { chapitreSlug: 'statistique-deux-variables', sectionId: 'moindres-carres', generatorId: '5gen79', label: 'Quel est le meilleur ajustement ? (5gen79)', processus: 3 },
+  { chapitreSlug: 'statistique-deux-variables', sectionId: 'interpreter', generatorId: '5gen78', label: 'Modéliser et prévoir en contexte (5gen78)', processus: 3 },
+  { chapitreSlug: 'statistique-deux-variables', sectionId: 'interpreter', generatorId: '5gen80', label: 'Corrélation ou causalité ? (5gen80)', processus: 3 },
+  { chapitreSlug: 'statistique-deux-variables', sectionId: 'interpreter', generatorId: '5gen81', label: "Détective d'erreurs : statistique à deux variables (5gen81)", processus: 3 },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même

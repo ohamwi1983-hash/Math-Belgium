@@ -339,6 +339,10 @@ import { adaptateurEvaluationDetectiveDerivees } from '../entrainement/5e-4h/gen
 import { adaptateurEvaluationLectureTangente } from '../entrainement/5e-4h/generateurs5e/lectureTangente/exportEvaluation'
 import { adaptateurEvaluationGraphiqueDerivee } from '../entrainement/5e-4h/generateurs5e/graphiqueDerivee/exportEvaluation'
 import { adaptateurEvaluationDerivabilite } from '../entrainement/5e-4h/generateurs5e/derivabilite/exportEvaluation'
+import { adaptateurEvaluationModeliserPrevoir } from '../entrainement/5e-4h/generateurs5e/modeliserPrevoir/exportEvaluation'
+import { adaptateurEvaluationMeilleurAjustement } from '../entrainement/5e-4h/generateurs5e/meilleurAjustement/exportEvaluation'
+import { adaptateurEvaluationCorrelationCausalite } from '../entrainement/5e-4h/generateurs5e/correlationCausalite/exportEvaluation'
+import { adaptateurEvaluationDetectiveStatDeuxVariables } from '../entrainement/5e-4h/generateurs5e/detectiveStatistique/exportEvaluation'
 
 export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExercices<never>> = {
   '5gen1': versionPapier(adaptateurEvaluationDomaineDefinition) as unknown as AdaptateurFeuilleExercices<never>,
@@ -408,6 +412,10 @@ export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExe
   '5gen73': versionPapier(adaptateurEvaluationLectureTangente) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen74': versionPapier(adaptateurEvaluationGraphiqueDerivee) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen75': versionPapier(adaptateurEvaluationDerivabilite) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen78': versionPapier(adaptateurEvaluationModeliserPrevoir) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen79': versionPapier(adaptateurEvaluationMeilleurAjustement) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen80': versionPapier(adaptateurEvaluationCorrelationCausalite) as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen81': versionPapier(adaptateurEvaluationDetectiveStatDeuxVariables) as unknown as AdaptateurFeuilleExercices<never>,
 }
 
 import { adaptateurEvaluationDenombrementFondamental } from '../entrainement/6e-6h/generateurs6e/denombrementFondamental/exportEvaluation'
