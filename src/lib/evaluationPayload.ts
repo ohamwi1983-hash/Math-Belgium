@@ -103,6 +103,7 @@ export type IdGenerateurPilote =
   | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
   | '6gen160' | '6gen161' | '6gen162' | '6gen163'
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
+  | '6gen128' | '6gen129' | '6gen130' | '6gen131'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
   | 'gen113' | 'gen114' | 'gen115' | 'gen116' | 'gen117' | 'gen118' | 'gen119' | 'gen120' | 'gen121' | 'gen122'
@@ -290,6 +291,10 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'lieux-geometriques', sectionId: 'cercles', generatorId: '6gen55', label: '' },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'lieux-elimination', generatorId: '6gen56', label: '' },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'methode-generatrices', generatorId: '6gen57', label: '' },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'lieux-elimination', generatorId: '6gen128', label: 'Traduire un lieu : réciproque et points exclus (6gen128)', processus: 3 },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'lieu-parametrique', generatorId: '6gen129', label: 'Courbe paramétrée : élimination et restriction (6gen129)', processus: 2 },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'methode-generatrices', generatorId: '6gen130', label: 'Lieux en contexte : un point qui bouge (6gen130)', processus: 3 },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'lieu-parametrique', generatorId: '6gen131', label: 'Détective d\'erreurs : lieux, droites et cercles (6gen131)', processus: 3 },
   { chapitreSlug: 'coniques', sectionId: 'identifier', generatorId: '6gen58', label: '' },
   { chapitreSlug: 'coniques', sectionId: 'excentricite', generatorId: '6gen59', label: '' },
   { chapitreSlug: 'coniques', sectionId: 'airefocale', generatorId: '6gen60', label: '' },

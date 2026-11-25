@@ -2619,6 +2619,16 @@ export const lieuxGeometriques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 56. Lieux géométriques et élimination de paramètre »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Traduire un lieu : réciproque et points exclus',
+          generatorId: '6gen128',
+          description: [
+            'Traduis une condition (angle droit, milieu d\'une corde, centres de cercles tangents, triangle isocèle ou rectangle) en une équation du lieu complet, puis vérifie la réciproque : combien de points faut-il exclure, lesquels, et pourquoi.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 128. Traduire un lieu : réciproque et points exclus »',
+        },
       ],
     },
 
@@ -3106,6 +3116,16 @@ export const lieuxGeometriques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 57. Problèmes de lieux : méthode des génératrices »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Lieux en contexte : un point qui bouge',
+          generatorId: '6gen130',
+          description: [
+            'Une échelle qui glisse, deux radars qui tournent au même rythme, un centre de gravité, le pied d\'une perpendiculaire : exprime le point mobile, élimine le paramètre, puis précise la partie du lieu imposée par la situation.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 130. Lieux en contexte : un point qui bouge »',
+        },
       ],
     },
 
@@ -3279,6 +3299,26 @@ export const lieuxGeometriques: ChapterContent = {
             '$x=\\sqrt{t}+1\\geq1$ : le lieu n\'est que la **demi-parabole** $x\\geq1$. De même, ' +
             "$x=2+3\\cos t$, $y=-1+3\\sin t$ décrit le cercle entier pour $t\\in[0\\,;2\\pi[$, mais seulement le " +
             'demi-cercle supérieur ($y\\geq-1$) pour $t\\in[0\\,;\\pi]$.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Courbe paramétrée : élimination et restriction',
+          generatorId: '6gen129',
+          description: [
+            'Élimine t grâce à une identité (cos² t + sin² t = 1, cos 2t = 2cos² t − 1) ou en l\'isolant, trouve l\'équation cartésienne, puis décide si M décrit toute la courbe, une moitié ou un arc, et par quelle condition.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 129. Courbe paramétrée : élimination et restriction »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Détective d\'erreurs : lieux, droites et cercles',
+          generatorId: '6gen131',
+          description: [
+            'Trouve la ligne fausse dans la copie d\'un élève (sommets du losange, théorème de la médiane, Apollonius pour k = 1, centre sans diviser par m, incentre, aire variable, tangente verticale, points exclus), explique l\'erreur et corrige.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 131. Détective d\'erreurs : lieux, droites et cercles »',
         },
       ],
     },
