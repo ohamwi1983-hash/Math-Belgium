@@ -5793,6 +5793,18 @@ pilotes avec processus, `regroupementsPapier.ts` : 6gen111, 6gen114). Aucun bloc
 encore E(aX + b) = aE(X) + b et V(aX + b) = a²V(X) (6gen111, démonstration D2 du lot F), ni P(a < X ≤ b) = F(b) − F(a) pour
 une variable discrète (6gen112 escalier), ni « trouver k » (6gen113) ni le sens inverse de la loi uniforme (6gen115).
 
+## 6e (6h), Chapitre 9 — lot H2 de l'audit (nouveaux générateurs 6gen128–6gen131, 25/11/2026)
+
+Quatre générateurs nouveaux sur le socle `AppEcransTrigo` (détail, profils et mesures : `.claude/rules/feuilles-evaluations.md`,
+section « 6e ch. 9, lot H2 ») : 6gen128 traduire un lieu : réciproque et points exclus (§ 4 `lieux-elimination`,
+Transférer), 6gen129 courbe paramétrée : élimination et restriction (§ 6 `lieu-parametrique`, Appliquer), 6gen130 lieux en
+contexte : un point qui bouge (§ 5 `methode-generatrices`, Transférer), 6gen131 détective d'erreurs : lieux, droites et
+cercles (fin, Transférer). Cartes « S'entraîner » ajoutées en fin de section (après 6gen56 : 128 ; après 6gen57 : 130 ; fin
+du § 6 : 129, 131) ; registres par ajout (`registry.ts`, `evaluationAdapterRegistry.ts` avec `versionPapier`,
+`evaluationPayload.ts` : union et entrées pilotes, processus 3 / 2 / 3 / 3). Aucun bloc de cours ajouté : le cours doit
+enseigner la réciproque et les points exclus d'un lieu (6gen128), la restriction d'une représentation paramétrique à
+l'intervalle de t (6gen129) et l'arc capable (6gen130 « radars » : la pente du faisceau est donnée dans l'énoncé).
+
 ## 6e (6h), Chapitre 8 — lot H2 de l'audit (nouveaux générateurs 6gen116–6gen122, 25/11/2026)
 
 Sept générateurs nouveaux sur le socle `AppEcransTrigo` (détail, profils et mesures : `.claude/rules/feuilles-evaluations.md`,

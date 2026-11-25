@@ -1364,6 +1364,16 @@ export const lieuxGeometriques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 56. Lieux géométriques et élimination de paramètre »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Traduire un lieu : réciproque et points exclus',
+          generatorId: '6gen128',
+          description: [
+            'Traduis une condition (angle droit, milieu d\'une corde, centres de cercles tangents, triangle isocèle ou rectangle) en une équation du lieu complet, puis vérifie la réciproque : combien de points faut-il exclure, lesquels, et pourquoi.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 128. Traduire un lieu : réciproque et points exclus »',
+        },
       ],
     },
 
@@ -1653,6 +1663,16 @@ export const lieuxGeometriques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 57. Problèmes de lieux : méthode des génératrices »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Lieux en contexte : un point qui bouge',
+          generatorId: '6gen130',
+          description: [
+            'Une échelle qui glisse, deux radars qui tournent au même rythme, un centre de gravité, le pied d\'une perpendiculaire : exprime le point mobile, élimine le paramètre, puis précise la partie du lieu imposée par la situation.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 130. Lieux en contexte : un point qui bouge »',
+        },
       ],
     },
 
@@ -1716,6 +1736,26 @@ export const lieuxGeometriques: ChapterContent = {
             'donne $\\cos\\lambda=0$, $\\sin\\lambda=1$, donc le point (0;1)) et vérifie qu\'il ' +
             "satisfait bien l'équation cartésienne obtenue — un contrôle rapide qui ne demande " +
             'aucun nouveau calcul.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Courbe paramétrée : élimination et restriction',
+          generatorId: '6gen129',
+          description: [
+            'Élimine t grâce à une identité (cos² t + sin² t = 1, cos 2t = 2cos² t − 1) ou en l\'isolant, trouve l\'équation cartésienne, puis décide si M décrit toute la courbe, une moitié ou un arc, et par quelle condition.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 129. Courbe paramétrée : élimination et restriction »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Détective d\'erreurs : lieux, droites et cercles',
+          generatorId: '6gen131',
+          description: [
+            'Trouve la ligne fausse dans la copie d\'un élève (sommets du losange, théorème de la médiane, Apollonius pour k = 1, centre sans diviser par m, incentre, aire variable, tangente verticale, points exclus), explique l\'erreur et corrige.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 131. Détective d\'erreurs : lieux, droites et cercles »',
         },
       ],
     },
