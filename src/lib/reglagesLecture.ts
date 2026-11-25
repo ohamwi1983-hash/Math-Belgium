@@ -13,8 +13,9 @@
  * mécanisme que `data-annee-accueil`). **À garder en accord** : `ATTRIBUTS` ci-dessous ↔ le tableau `R`
  * de ce script (mêmes clés, mêmes valeurs admises, même valeur par défaut en tête).
  *
- * Extensible : l'onglet « Aides » (règle / masque, un bloc à la fois, loupe, espacement des signes,
- * voix — lots suivants) ajoutera ses clés à `ReglagesLecture`, `DEFAUT`, `ATTRIBUTS` et au script.
+ * Extensible : un réglage = son type, `ATTRIBUTS` (valeur du site en tête) et le script. L'onglet « Aides »
+ * (lot A2) y a mis `ligne`, `bande`, `unbloc`, `exemples`, `loupe`, `signes`, `correspondances` ; la voix
+ * (lot suivant) ajoutera les siennes.
  */
 
 import { useSyncExternalStore } from 'react'
@@ -27,6 +28,12 @@ export type Cran = '1' | '2' | '3'
 export type Largeur = 'large' | 'moyenne' | 'etroite'
 export type Theme = 'auto' | 'clair' | 'sombre' | 'creme' | 'contraste'
 export type Animations = 'auto' | 'reduites'
+/** Onglet « Aides » (planches 07 et 09) : suivre la ligne, hauteur de la bande, un bloc à la fois,
+ * exemples résolus guidés, loupe sur les formules, plus d'air autour des signes, correspondances. */
+export type SuivreLigne = 'aucune' | 'regle' | 'masque'
+export type HauteurBande = '2' | '1' | '3'
+export type OuiNon = 'non' | 'oui'
+export type ExemplesGuides = 'guides' | 'libres'
 
 export interface ReglagesLecture {
   police: Police
@@ -40,6 +47,20 @@ export interface ReglagesLecture {
   largeur: Largeur
   theme: Theme
   animations: Animations
+  /** Règle de lecture (bande claire) ou masque (le reste assombri) qui suit le doigt, la souris, ↑ ↓. */
+  ligne: SuivreLigne
+  /** Hauteur de la bande : 2 lignes (site), 1 ou 3. */
+  bande: HauteurBande
+  /** Un bloc à la fois : le bloc en cours net et entouré, les autres effacés (jamais cachés). */
+  unbloc: OuiNon
+  /** Exemples résolus guidés (activé d'office) : étape en cours entourée, précédentes discrètes, « Écouter l'étape ». */
+  exemples: ExemplesGuides
+  /** Agrandir une formule au toucher (loupe avec « Se lit : … » et « Écouter »). */
+  loupe: OuiNon
+  /** Plus d'air autour de =, +, −, × (jamais dans un indice ni un exposant). */
+  signes: OuiNon
+  /** Couleurs ET soulignés qui se correspondent dans quelques exemples clés (`\htmlClass{m1}{…}`). */
+  correspondances: OuiNon
 }
 
 export type CleReglage = keyof ReglagesLecture
@@ -53,6 +74,13 @@ export const ATTRIBUTS: { [K in CleReglage]: readonly ReglagesLecture[K][] } = {
   largeur: ['large', 'moyenne', 'etroite'],
   theme: ['auto', 'clair', 'sombre', 'creme', 'contraste'],
   animations: ['auto', 'reduites'],
+  ligne: ['aucune', 'regle', 'masque'],
+  bande: ['2', '1', '3'],
+  unbloc: ['non', 'oui'],
+  exemples: ['guides', 'libres'],
+  loupe: ['non', 'oui'],
+  signes: ['non', 'oui'],
+  correspondances: ['non', 'oui'],
 }
 
 const CLES = Object.keys(ATTRIBUTS) as CleReglage[]

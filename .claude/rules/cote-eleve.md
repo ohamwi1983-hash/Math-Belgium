@@ -4,6 +4,8 @@ paths:
   - "src/lib/reglagesLecture.ts"
   - "src/lib/formulesDebordantes.ts"
   - "src/components/lecture/**"
+  - "src/lib/voixLecture.ts"
+  - "src/components/chapter/ContenuEtape.tsx"
   - "src/components/Math.tsx"
   - "src/components/SiteHeader.tsx"
   - "index.html"
@@ -18,7 +20,7 @@ paths:
   - "src/entrainement/confortLecture.css"
   - "src/entrainement/components/{JeBloque,PanneauJeBloque,TexteInsistance,CorrigeDetailleEcran,BarreGenerateur}.tsx"
   - "src/entrainement/components/insistanceEcran.ts"
-  - "src/lib/{exempleJeBloque,direLecture}.ts"
+  - "src/lib/exempleJeBloque.ts"
 ---
 
 # Côté élève, sans compte
@@ -70,8 +72,8 @@ Lecture confortable (Andika 112 %, 1,8, aéré, ≈ 60) ; Dys (Atkinson 112 %, 2
 Grand texte (Atkinson 145 %, 1,8, aéré, ≈ 60). Magasin : `reglagesCourants`, `changerReglages`,
 `revenirAuReglageDuSite`, `abonnerReglages`, `useReglagesLecture`, `animationsReduites()` (à utiliser
 au lieu de `matchMedia('(prefers-reduced-motion)')` seul ; `ReviserVue` le fait), événement `storage`
-(autre onglet). **Ajouter un réglage** (onglet « Aides » des lots suivants) : type + `ATTRIBUTS` + table
-`R` du script en ligne d'`index.html` + règles CSS.
+(autre onglet). **Ajouter un réglage** : type + `ATTRIBUTS` + table `R` du script en ligne d'`index.html` +
+règles CSS (onglet « Aides » : voir « Aides de lecture »).
 
 Mécanisme : chaque valeur ≠ défaut → attribut `data-<clé>` sur `<html>` (+ `data-lecture-perso` si au
 moins un) ; valeur par défaut → AUCUN attribut (le pré-rendu et un visiteur sans réglage ont le DOM
@@ -132,7 +134,79 @@ chapitre » et parties de la carte (sur `--paper`) : clair 5,61, sombre 8,37, cr
   étape 1), réglé par les mêmes variables. Onglets (`tablist`, flèches / Début / Fin) : Texte
   (préréglages, taille, police — textes honnêtes du rapport, OpenDyslexic « pas de lecture plus rapide ni
   plus juste… » —, interligne, espacement, longueur), Couleurs (5 thèmes, « Réduire les animations »),
-  Aides (« Bientôt »). Pied : « Revenir au réglage du site » + mention. Boutons ≥ 44 px.
+  Aides (voir « Aides de lecture » ci-dessous). Pied : « Revenir au réglage du site » + mention. Boutons ≥ 44 px.
+  Piège (dev seulement) : sous `StrictMode`, le panneau se referme aussitôt ouvert (le `close()` du nettoyage
+  de l'effet émet `close` APRÈS le remontage → `onClose`) ; le build n'a pas ce double montage : tester le
+  panneau sur `vite build` + `vite preview`.
+
+## Aides de lecture (onglet « Aides », planches 07 et 09, lot A2)
+
+Modèle validé : la démo `artefact-lecture/lecture-guidee.html` (onglets 7 et 9). Réglages ajoutés à
+`ReglagesLecture` (et à la table `R` d'`index.html`) : `ligne` (aucune | regle | masque), `bande` (2 | 1 | 3
+lignes), `unbloc` (non | oui), `exemples` (guides | libres — **guidés d'office**), `loupe` (non | oui), `signes`
+(non | oui), `correspondances` (non | oui). Valeur du site = aucun attribut, comme le reste.
+
+**Ce qui est CSS seul** (`lecture.css` § 6, juste dès l'affichage grâce au script anti-flash) :
+- *Plus d'air autour des signes* : `margin` 0,13 em de part et d'autre des `.mbin` / `.mrel` de KaTeX (un
+  « − » de signe est un `.mord` : il reste collé) ; remis à 0 dans `.msupsub`, `.op-limits`, `.root` (indices,
+  exposants, bornes, indice de racine) ; jamais d'espacement des lettres. Mesuré sur les 179 étapes à 390 px :
+  aucune page qui déborde ; 26 formules de plus passent en défilement avec dégradé (`formulesDebordantes`).
+- *Correspondances* : `.katex .enclosing.m1|m2|m3` → couleur `--corresp-1|2|3` ET trait (plein / tirets /
+  double, `border-bottom` en `em`) ; couleurs par thème (texte ≥ 5,4:1 sur le fond d'un tiroir d'exemple :
+  clair 5,5–6,1, sombre 7,5–7,8, crème 5,4–5,7, contraste 9,6–10). Mécanisme de contenu : règle
+  `content-authoring.md`, « Correspondances ».
+- *Exemples résolus guidés* (planche 07 ; le site montrait déjà une étape à la fois) : l'étape en cours = le
+  dernier `li` montré, entouré (2 px `--sky`, fond `--surface`) ; les précédentes en `--ink-soft` (≥ 5,5:1,
+  jamais d'opacité), numéro en cercle évidé. `pas-fin` (résultat montré) : c'est le résultat l'étape en cours ;
+  `pas-tout` (« Tout montrer » touché) : plus rien n'est mis en avant. Activé d'office : la démo validée par le
+  professeur l'avait coché, il ne fait qu'ajouter un repère (rien n'est caché ni déplacé) et ne touche ni
+  l'impression ni le pré-rendu (pas à pas absents du HTML pré-rendu : tiroirs de l'étape active seulement).
+  « Écouter l'étape n » / « Écouter le résultat » (`ContenuEtape.tsx`, `BoutonsPas`) : seulement après le
+  montage, si `speechSynthesis` existe, et en mode guidé.
+
+**Ce qui est du code** (`components/lecture/AidesLecture.tsx` + `aidesLecture.css`, chargés à la demande par
+`HoteAidesLecture` — dans `App`, à côté du panneau — dès qu'une aide est active ; jamais au pré-rendu) :
+- *Zone* : `.chapter-layout.parcours` (cours) ou `.entrainement` (générateurs), retrouvée à chaque navigation
+  et quand une page chargée à la demande arrive ; rien en projection.
+- *Règle / masque* : calque `position: fixed`, `pointer-events: none`, `z-index` 400 (au-dessus de la barre des
+  générateurs, 300) : la page et les widgets Shadow DOM restent manipulables à travers. Bande calée sur la
+  ligne de texte visée (`caretPositionFromPoint` / `caretRangeFromPoint`, hauteur de ligne de CE texte),
+  2 lignes = la ligne visée et la suivante. Position tenue en coordonnées de l'ÉCRAN : comme une règle posée,
+  le texte défile dessous, et la bande se recale sur la ligne arrivée sous elle quand la page s'arrête
+  (140 ms) — jamais poussée hors de l'écran ni tout l'écran assombri. Souris : suit le pointeur. Doigt :
+  `touchstart` / `touchmove` PASSIFS — toucher place la bande, glisser la déplace, la page défile normalement
+  (mesuré : même défilement avec et sans masque). Un seul calcul par image (`requestAnimationFrame`).
+  Clavier : ↑ ↓ quand le contenu a le focus (`contenuAuFocus` : pas dans un champ, un curseur, des onglets, un
+  dialogue, un Web Component) ; près d'une barre fixe, c'est la page qui défile d'une ligne. Boutons ↑ ↓ discrets (44 px) à droite,
+  au doigt seulement (`pointer: coarse`). Masque : voile `--aide-voile` (0,6 clair, 0,72 sombre).
+- *Un bloc à la fois* (cours, vue étape) : blocs = enfants du corps de l'étape (annexes dépliées en cartes et
+  tiroirs) puis colonne de droite ; un sous-titre (`h3.sub-title`, `.section-kicker`) s'attache au bloc qui
+  suit (net avec lui, pas entouré). Marques en ATTRIBUTS (`data-lb`, `data-lb-courant="cadre"` ; React ne les
+  efface pas), retirées au démontage. Effacés : `opacity: .38` (exception assumée au 4,5:1 : c'est le but de
+  l'aide ; un toucher, un clic ou le focus clavier rend un bloc net ; rien n'est caché aux lecteurs d'écran).
+  Bouton flottant « Bloc suivant n / N » + « Bloc précédent », au-dessus de la barre fixe (téléphone) ou en bas
+  à droite (≥ 760 px), annonce `aria-live`. Nouveau bloc : défilement doux sous les barres du haut (direct si
+  animations réduites). Rescan (MutationObserver, 120 ms) : tiroir ouvert, contenu chargé ; changement d'étape
+  → premier bloc visible. Pas de « un bloc à la fois » dans les générateurs (un écran = déjà un bloc).
+- *Loupe* : clic / toucher sur une formule (cours `.math-inline`, générateurs `[data-testid="react-katex"]`,
+  HTML en chaîne `.katex[role=img]`), jamais dans un élément qu'on touche pour agir (bouton, lien, choix,
+  ancêtre à `tabindex` ou au curseur « main ») ni pendant une sélection de texte. Formules affichées rendues
+  atteignables au clavier (`tabindex="0"` + `data-loupe-tab`, posés / retirés par la loupe), Entrée ouvre.
+  `<dialog>` modal (focus sur « Fermer », piégé — Tab tourne entre ses boutons, `showModal` seul laisse
+  ressortir vers le navigateur —, Échap, clic sur le voile, focus rendu à la formule) : copie du
+  rendu KaTeX en 2,4 em (réduite jusqu'à 1,4 em si trop large, au-delà elle défile), « Se lit : « … » » (=
+  `aria-label` de la formule) et « Écouter ».
+- *Voix* : `src/lib/voixLecture.ts` — module MINIMAL : `dire(texte)` émet `lecture:dire` (`detail.texte`),
+  écouté par défaut par `speechSynthesis` (`fr-BE`, sinon `fr-FR`, sinon `fr-*`) ; `seTaire()` (`lecture:taire`),
+  `voixDisponible()`, `texteParleDe(element)` (texte visible, formules remplacées par leur `aria-label`). Le lot
+  « lecture à voix haute » le reprend : un lecteur complet prend la main par `preventDefault()` dans un écouteur
+  en capture.
+- Panneau, onglet « Aides » : Suivre la ligne (Rien / Règle / Masque + hauteur 1–3 lignes), Lire pas à pas
+  (Un bloc à la fois ; Exemples résolus guidés « activé d'office »), Formules (Agrandir au toucher ; Plus d'air
+  autour des signes ; Couleurs et soulignés qui se correspondent, avec un échantillon). Interrupteurs
+  `role="switch"` décrits (`aria-describedby`). La voix (lecteur, vitesse) n'y est pas encore (lot suivant).
+- Vérifications : dossier de travail `eleve-A2/` (`cap.mjs`, `contraste.mjs`, `debord.mjs`, `identite.mjs`,
+  `verif.mjs`).
 
 ## Vérifications (dossier de travail `eleve-A1/` : `verif.mjs`, `cap.mjs`, `montage.mjs`)
 
@@ -314,12 +388,8 @@ personnel), grille `44px 1fr auto auto` (écart 8 px sous 400 px) : la barre res
   n sur N », « Ligne suivante » (focus donné à l'ouverture), « Tout montrer » (focus à la dernière ligne ;
   retour au corrigé complet), « Écouter ». Ligne ramenée dans la vue, annoncée dans une région `aria-live`
   (formules lues en mots).
-- **Point d'accroche de la voix** (`src/lib/direLecture.ts`) : `dire({ texte, source, element })` émet
-  `lecture:dire` (`CustomEvent<DetailDire>`, annulable, qui bouillonne depuis `element`) ; le module de voix
-  l'écoute sur `document` et appelle `preventDefault()` pour prendre la main. Sinon, repli minimal
-  `speechSynthesis` (voix `fr-BE`, puis `fr-*`). `texteLisible(el)` : texte de l'élément, formules remplacées
-  par leur `aria-label` en mots, rien de ce qui est `aria-hidden`. « Écouter » n'est affiché que si
-  `speechSynthesis` existe.
+- **Écouter** : point d'accroche commun `lib/voixLecture.ts` (lot A2) — `dire(texteParleDe(ligne))`, événement
+  `lecture:dire` (formules lues en mots) ; « Écouter » n'est affiché que si `voixDisponible()`.
 - Les boutons ne sont jamais `.btn-primary` (sinon `CadreActions` les prendrait pour le bouton principal).
 
 ### « Je bloque » (`JeBloque.tsx`, `PanneauJeBloque.tsx`, `lib/exempleJeBloque.ts`)

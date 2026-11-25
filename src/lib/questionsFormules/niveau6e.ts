@@ -1262,23 +1262,23 @@ export const FORMULES_6E: BanqueFormules = {
     identifier: [
       {
         id: r`$y^2=2px$`,
-        enonce: r`Une parabole a pour foyer $F$ et pour directrice $d$. Qu'appelle-t-on son paramètre $p$ ? Donne l'équation réduite de la parabole d'axe focal $Ox$ et de sommet l'origine, ainsi que son foyer et sa directrice.`,
-        corrige: r`$p = \text{dist}(F;d)$ ; $y^2=2px$, de foyer $F\left(\dfrac{p}{2}\,;0\right)$ et de directrice $d \equiv x=-\dfrac{p}{2}$.`,
+        enonce: r`Une parabole a pour foyer $F$ et pour directrice $d$. Qu'appelle-t-on son paramètre $p$ ? Donne l'équation réduite de la parabole d'axe focal $Ox$, de sommet l'origine et ouverte vers les $x$ positifs, ainsi que son foyer et sa directrice.`,
+        corrige: r`$p = \text{dist}(F\,;d)$ ; $y^2=2px$, de foyer $F\left(\dfrac{p}{2}\,;0\right)$ et de directrice $d \equiv x=-\dfrac{p}{2}$.`,
       },
       {
         id: r`$y^2=\pm2px \qquad x^2=\pm2py$`,
-        enonce: r`Dans les équations de parabole $y^2=\pm2px$ et $x^2=\pm2py$, qu'est-ce qui indique l'axe focal ? Et le sens d'ouverture ?`,
-        corrige: r`La variable au carré donne l'axe focal ($y^2$ : axe $Ox$ ; $x^2$ : axe $Oy$) ; le signe donne le sens d'ouverture.`,
+        enonce: r`Donne le foyer et la directrice de la parabole $x^2=-2py$ ($p>0$). Qu'est-ce qui, dans les équations $y^2=\pm2px$ et $x^2=\pm2py$, indique l'axe focal et le sens d'ouverture ?`,
+        corrige: r`$x^2=-2py$ : foyer $F\left(0\,;-\dfrac{p}{2}\right)$, directrice $y=\dfrac{p}{2}$. La variable au carré donne l'axe focal ($y^2$ : axe $Ox$ ; $x^2$ : axe $Oy$) ; le signe donne le sens d'ouverture.`,
       },
       {
         id: r`$|PF|+|PF'|=2a$`,
-        enonce: r`Donne la définition d'une ellipse de foyers $F$ et $F'$, avec $|FF'| = 2c$. À quelle condition sur $a$ et $c$ existe-t-elle ?`,
-        corrige: r`C'est l'ensemble des points $P$ tels que $|PF|+|PF'|=2a$ ; elle existe si et seulement si $a > c$.`,
+        enonce: r`Donne la définition d'une ellipse de foyers $F$ et $F'$, avec $|FF'| = 2c$. À quelle condition sur $a$ et $c$ existe-t-elle ? Que décrit la même condition si $a=c$ ?`,
+        corrige: r`C'est l'ensemble des points $P$ tels que $|PF|+|PF'|=2a$ ; elle existe si et seulement si $a > c$. Si $a=c$, on obtient le segment $[FF']$.`,
       },
       {
         id: r`$\dfrac{x^2}{a^2}+\dfrac{y^2}{b^2}=1$`,
-        enonce: r`Donne l'équation réduite d'une ellipse de foyers $(\pm c\,;0)$, la relation entre $a$, $b$ et $c$, et ses quatre sommets.`,
-        corrige: r`$\dfrac{x^2}{a^2}+\dfrac{y^2}{b^2}=1$ avec $b^2=a^2-c^2$ ; sommets $(\pm a\,;0)$ et $(0\,;\pm b)$.`,
+        enonce: r`Donne l'équation réduite d'une ellipse de foyers $(\pm c\,;0)$, la relation entre $a$, $b$ et $c$, et ses quatre sommets. Que devient l'équation si les foyers sont $(0\,;\pm c)$ ?`,
+        corrige: r`$\dfrac{x^2}{a^2}+\dfrac{y^2}{b^2}=1$ avec $b^2=a^2-c^2$ ; sommets $(\pm a\,;0)$ et $(0\,;\pm b)$. Foyers $(0\,;\pm c)$ : $\dfrac{y^2}{a^2}+\dfrac{x^2}{b^2}=1$ ($a^2$ reste le plus grand dénominateur).`,
       },
       {
         id: r`$\big||PF|-|PF'|\big|=2a$`,
@@ -1287,32 +1287,67 @@ export const FORMULES_6E: BanqueFormules = {
       },
       {
         id: r`$\dfrac{x^2}{a^2}-\dfrac{y^2}{b^2}=1$`,
-        enonce: r`Donne l'équation réduite d'une hyperbole de foyers $(\pm c\,;0)$, la relation entre $a$, $b$ et $c$, et ses asymptotes.`,
-        corrige: r`$\dfrac{x^2}{a^2}-\dfrac{y^2}{b^2}=1$ avec $b^2=c^2-a^2$ ; asymptotes $y=\pm\dfrac{b}{a}x$.`,
+        enonce: r`Donne l'équation réduite d'une hyperbole de foyers $(\pm c\,;0)$, la relation entre $a$, $b$ et $c$, ses sommets et ses asymptotes.`,
+        corrige: r`$\dfrac{x^2}{a^2}-\dfrac{y^2}{b^2}=1$ avec $b^2=c^2-a^2$ ; sommets $(\pm a\,;0)$ ; asymptotes $y=\pm\dfrac{b}{a}x$.`,
+      },
+      {
+        id: r`hyperbole d'axe focal vertical`,
+        enonce: r`Donne l'équation réduite, les sommets et les asymptotes d'une hyperbole de foyers $(0\,;\pm c)$.`,
+        corrige: r`$\dfrac{y^2}{a^2}-\dfrac{x^2}{b^2}=1$ avec $b^2=c^2-a^2$ ; sommets $(0\,;\pm a)$ ; asymptotes $y=\pm\dfrac{a}{b}x$.`,
       },
       {
         id: r`$c=a\sqrt{2} \implies x^2-y^2=a^2$`,
-        enonce: r`Qu'appelle-t-on hyperbole équilatère ? Donne son équation réduite et ses asymptotes.`,
-        corrige: r`Une hyperbole à asymptotes perpendiculaires : $c = a\sqrt{2}$ ($b = a$), d'équation $x^2-y^2=a^2$, d'asymptotes $y=\pm x$ (rapportée à ses asymptotes : $xy=k$).`,
+        enonce: r`Qu'appelle-t-on hyperbole équilatère ? Donne son équation réduite, ses asymptotes, et son équation dans le repère de ses asymptotes.`,
+        corrige: r`Une hyperbole à asymptotes perpendiculaires : $c = a\sqrt{2}$ ($b = a$), d'équation $x^2-y^2=a^2$, d'asymptotes $y=\pm x$ ; dans le repère de ses asymptotes : $XY=\dfrac{a^2}{2}$.`,
+      },
+      {
+        id: r`$xy=k$`,
+        enonce: r`L'hyperbole $xy=k$ ($k>0$) a pour asymptotes les axes du repère. Donne son demi-axe $a$, ses sommets et ses foyers.`,
+        corrige: r`$a^2=2k$, donc $a=\sqrt{2k}$ ; sommets $(\sqrt{k}\,;\sqrt{k})$ et $(-\sqrt{k}\,;-\sqrt{k})$ ; foyers $(\sqrt{2k}\,;\sqrt{2k})$ et $(-\sqrt{2k}\,;-\sqrt{2k})$, à la distance $c=2\sqrt{k}$ du centre.`,
       },
     ],
     excentricite: [
       {
         id: r`$e = c/a$`,
         enonce: r`Donne l'excentricité $e$ d'une ellipse ou d'une hyperbole en fonction de $a$ et $c$, et la propriété foyer–directrice qui la fait apparaître. Comment la valeur de $e$ distingue-t-elle les coniques ?`,
-        corrige: r`$e = \dfrac{c}{a}$ ; pour tout point $P$, $\dfrac{\text{dist}(P;F)}{\text{dist}(P;d)} = e$. $e<1$ : ellipse ; $e=1$ : parabole ; $e>1$ : hyperbole ; cercle : $e = 0$, sans directrice.`,
+        corrige: r`$e = \dfrac{c}{a}$ ; pour tout point $P$, $\dfrac{\text{dist}(P\,;F)}{\text{dist}(P\,;d)} = e$. $e<1$ : ellipse ; $e=1$ : parabole ; $e>1$ : hyperbole ; cercle : $e = 0$, sans directrice.`,
       },
       {
         id: r`$x=\pm a^2/c$`,
-        enonce: r`Donne les équations des directrices d'une ellipse ou d'une hyperbole centrée à l'origine, de foyers $(\pm c\,;0)$.`,
-        corrige: r`$x=\pm\dfrac{a^2}{c}$.`,
+        enonce: r`Donne les équations des directrices d'une ellipse ou d'une hyperbole centrée à l'origine, de foyers $(\pm c\,;0)$. Pour laquelle des deux les directrices passent-elles entre les sommets ?`,
+        corrige: r`$x=\pm\dfrac{a^2}{c}$. Pour l'hyperbole ($c>a$, donc $\dfrac{a^2}{c}<a$) ; pour l'ellipse, elles sont à l'extérieur.`,
+      },
+      {
+        id: r`équation depuis foyer, directrice et excentricité`,
+        enonce: r`On donne le foyer $F(x_F\,;y_F)$, la directrice $d\equiv ux+vy+w=0$ et l'excentricité $e$ d'une conique. Quelle égalité, sans racine ni valeur absolue, donne son équation ?`,
+        corrige: r`$(x-x_F)^2+(y-y_F)^2=e^2\cdot\dfrac{(ux+vy+w)^2}{u^2+v^2}$ (ne pas oublier le carré de $e$).`,
+      },
+      {
+        id: r`$(y-k)^2=2p(x-h)$`,
+        enonce: r`Donne le sommet, le foyer et la directrice de la parabole $(y-k)^2=2p(x-h)$, avec $p>0$.`,
+        corrige: r`Sommet $(h\,;k)$, foyer $\left(h+\dfrac{p}{2}\,;k\right)$, directrice $x=h-\dfrac{p}{2}$.`,
+      },
+      {
+        id: r`cas dégénérés`,
+        enonce: r`Après complétion des carrés, une équation s'écrit $\alpha X^2+\beta Y^2=\gamma$ avec $\alpha>0$ et $\beta>0$. Selon le signe de $\gamma$, que décrit-elle ? Et $\alpha X^2-\beta Y^2=0$ ?`,
+        corrige: r`$\gamma>0$ : une ellipse ; $\gamma=0$ : un seul point (le centre) ; $\gamma<0$ : l'ensemble vide. $\alpha X^2-\beta Y^2=0$ : deux droites sécantes $Y=\pm\sqrt{\dfrac{\alpha}{\beta}}\,X$.`,
       },
     ],
     airefocale: [
       {
+        id: r`$|PF|=a-ex$`,
+        enonce: r`$P(x\,;y)$ est un point de l'ellipse $\dfrac{x^2}{a^2}+\dfrac{y^2}{b^2}=1$, de foyers $F(c\,;0)$ et $F'(-c\,;0)$. Exprime ses rayons focaux en fonction de $x$, et donne l'intervalle dans lequel varie $|PF|$.`,
+        corrige: r`$|PF|=a-ex$ et $|PF'|=a+ex$, avec $e=\dfrac{c}{a}$ ; $a-c\leq|PF|\leq a+c$.`,
+      },
+      {
+        id: r`périhélie et aphélie`,
+        enonce: r`Une orbite elliptique a le Soleil pour foyer. Exprime le demi-grand axe $a$ et l'excentricité $e$ en fonction de la distance au périhélie $d_p$ et de la distance à l'aphélie $d_a$.`,
+        corrige: r`$d_p=a-c$ et $d_a=a+c$, donc $a=\dfrac{d_p+d_a}{2}$, $c=\dfrac{d_a-d_p}{2}$ et $e=\dfrac{d_a-d_p}{d_a+d_p}$.`,
+      },
+      {
         id: r`$|PF'| = \dfrac{2a}{k+1} \qquad |PF| = \dfrac{2ak}{k+1}$`,
-        enonce: r`$P$ est un point d'une ellipse de foyers $F$ et $F'$, et $k = \dfrac{|PF|}{|PF'|}$. Exprime les rayons focaux $|PF|$ et $|PF'|$ en fonction de $a$ et de $k$.`,
-        corrige: r`$|PF| = \dfrac{2ak}{k+1}$ et $|PF'| = \dfrac{2a}{k+1}$ (système $|PF|+|PF'|=2a$, $|PF|=k|PF'|$).`,
+        enonce: r`$P$ est un point d'une ellipse de foyers $F$ et $F'$, et $k = \dfrac{|PF|}{|PF'|}\geq1$. Exprime les rayons focaux $|PF|$ et $|PF'|$ en fonction de $a$ et de $k$. Jusqu'à quelle valeur de $k$ un tel point existe-t-il ?`,
+        corrige: r`$|PF| = \dfrac{2ak}{k+1}$ et $|PF'| = \dfrac{2a}{k+1}$ ; il existe si $|PF|\leq a+c$, c'est-à-dire $k\leq\dfrac{a+c}{a-c}$.`,
       },
       {
         id: r`$\text{aire} = \dfrac{1}{2}|PF||PF'|\sin(\widehat{FPF'})$`,
@@ -1322,12 +1357,17 @@ export const FORMULES_6E: BanqueFormules = {
           r`avec $\cos(\widehat{FPF'}) = \dfrac{|PF|^2+|PF'|^2-4c^2}{2|PF|\,|PF'|}$ (loi des cosinus).`,
         ],
       },
+      {
+        id: r`$b^2\tan\dfrac{\theta}{2}$`,
+        enonce: r`Exprime l'aire du triangle focal $FPF'$ d'une ellipse de demi-petit axe $b$ en fonction de l'angle $\theta=\widehat{FPF'}$.`,
+        corrige: r`$\text{aire}=b^2\tan\dfrac{\theta}{2}$.`,
+      },
     ],
     intersection: [
       {
         id: r`substituer la droite dans la conique → équation du 2e degré`,
-        enonce: r`Comment détermine-t-on la position d'une droite par rapport à une conique ? Que dit le signe du discriminant $\Delta$ ?`,
-        corrige: r`On substitue l'équation de la droite dans celle de la conique : équation du second degré. $\Delta > 0$ : sécante (deux points) ; $\Delta = 0$ : tangente ; $\Delta < 0$ : extérieure.`,
+        enonce: r`Comment détermine-t-on la position d'une droite par rapport à une conique ? Que dit le signe du discriminant $\Delta$ ? Que se passe-t-il si le coefficient de $x^2$ s'annule ?`,
+        corrige: r`On substitue l'équation de la droite dans celle de la conique. Équation du second degré : $\Delta > 0$ sécante (deux points), $\Delta = 0$ tangente, $\Delta < 0$ extérieure. Coefficient de $x^2$ nul (droite parallèle à une asymptote ou à l'axe d'une parabole) : un seul point, sans tangence.`,
       },
     ],
     tangentes: [
@@ -1338,20 +1378,30 @@ export const FORMULES_6E: BanqueFormules = {
       },
       {
         id: r`$yy_P=p(x+x_P)$`,
-        enonce: r`Donne l'équation de la tangente au point $P(x_P\,;y_P)$ de la parabole $y^2=2px$.`,
-        corrige: r`$y\,y_P=p(x+x_P)$.`,
+        enonce: r`Donne l'équation de la tangente au point $P(x_P\,;y_P)$ de la parabole $y^2=2px$, et le point où elle coupe l'axe focal.`,
+        corrige: r`$y\,y_P=p(x+x_P)$ ; elle coupe l'axe en $T(-x_P\,;0)$.`,
       },
       {
         id: r`$f'(x_P) = -\dfrac{b^2x_P}{a^2y_P}$`,
-        enonce: r`Donne la pente de la tangente au point $P(x_P\,;y_P)$, avec $y_P \neq 0$, de l'ellipse $\dfrac{x^2}{a^2}+\dfrac{y^2}{b^2}=1$.`,
-        corrige: r`$f'(x_P) = -\dfrac{b^2x_P}{a^2y_P}$ (pour l'hyperbole, le signe est opposé).`,
+        enonce: r`Donne la pente de la tangente au point $P(x_P\,;y_P)$, avec $y_P \neq 0$, de l'ellipse $\dfrac{x^2}{a^2}+\dfrac{y^2}{b^2}=1$, puis de l'hyperbole $\dfrac{x^2}{a^2}-\dfrac{y^2}{b^2}=1$.`,
+        corrige: r`Ellipse : $-\dfrac{b^2x_P}{a^2y_P}$ ; hyperbole : $\dfrac{b^2x_P}{a^2y_P}$.`,
+      },
+      {
+        id: r`$k^2=a^2m^2\pm b^2$`,
+        enonce: r`À quelle condition la droite $y=mx+k$ est-elle tangente à l'ellipse $\dfrac{x^2}{a^2}+\dfrac{y^2}{b^2}=1$ ? À l'hyperbole $\dfrac{x^2}{a^2}-\dfrac{y^2}{b^2}=1$ ? À la parabole $y^2=2px$ ?`,
+        corrige: r`Ellipse : $k^2=a^2m^2+b^2$ ; hyperbole : $k^2=a^2m^2-b^2$ (il faut $|m|>\dfrac{b}{a}$) ; parabole : $k=\dfrac{p}{2m}$ ($m\neq0$).`,
       },
     ],
     optique: [
       {
         id: r`$PF$ et $PF'$ font des angles égaux avec la tangente en $P$`,
-        enonce: r`Énonce la propriété optique de l'ellipse (ou de l'hyperbole) de foyers $F$ et $F'$ : que peut-on dire des droites $PF$, $PF'$ et de la tangente en un point $P$ ? Que devient un rayon issu d'un foyer ?`,
-        corrige: r`$PF$ et $PF'$ font des angles égaux avec la tangente en $P$ : pour l'ellipse, un rayon issu d'un foyer se réfléchit en passant par l'autre foyer.`,
+        enonce: r`Énonce la propriété optique de l'ellipse et de l'hyperbole de foyers $F$ et $F'$ : que peut-on dire des droites $PF$, $PF'$ et de la tangente en un point $P$ ? Que devient un rayon issu d'un foyer, pour chacune des deux ?`,
+        corrige: r`$PF$ et $PF'$ font des angles égaux avec la tangente en $P$. Ellipse : un rayon issu d'un foyer est réfléchi vers l'autre foyer ; hyperbole : il repart comme s'il venait de l'autre foyer.`,
+      },
+      {
+        id: r`$\dfrac{D^2}{16h}$`,
+        enonce: r`Une antenne parabolique a un diamètre $D$ et une profondeur $h$. À quelle distance de son sommet se trouve son foyer ?`,
+        corrige: r`À $\dfrac{D^2}{16h}$ (la coupe est $x^2=2py$ avec $\left(\dfrac{D}{2}\right)^2=2ph$, et le foyer est à $\dfrac{p}{2}$ du sommet).`,
       },
     ],
   },

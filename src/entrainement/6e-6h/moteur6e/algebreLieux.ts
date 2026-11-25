@@ -800,3 +800,51 @@ export function apercuSaisieLatex(texte: string, variables: readonly string[] = 
     return null;
   }
 }
+
+// ============================================================================
+// 6e ch. 10 (ajout facultatif, ch. 9 inchangé) : arbre de lecture et valeur numérique
+// ============================================================================
+
+/** Arbre de lecture d'une saisie (6e ch. 10 : forme « deux carrés », relation en a, b, c, e). */
+export type NoeudLecture = Noeud;
+
+/** Lit « … = … » (ou une expression) sans la développer : membres gauche et droit. Lève `ErreurLecture`. */
+export function lireMembres(texte: string, variables: readonly string[]): { gauche: NoeudLecture; droite: NoeudLecture | null } {
+  return lire(texte, variables);
+}
+
+/** Polynôme d'un sous-arbre (division par un nombre seulement). Lève `ErreurLecture`. */
+export function noeudVersPoly(n: NoeudLecture): Poly {
+  return versPoly(n);
+}
+
+/** Valeur numérique d'un sous-arbre, variables remplacées par `valeurs` (division par une variable admise). */
+export function evaluerNoeud(n: NoeudLecture, valeurs: Record<string, number>): number {
+  switch (n.k) {
+    case "nb":
+      return qNum(n.v);
+    case "var":
+      return valeurs[n.v] ?? NaN;
+    case "rac":
+      return Math.sqrt(evaluerNoeud(n.a, valeurs));
+    case "neg":
+      return -evaluerNoeud(n.a, valeurs);
+    case "par":
+      return evaluerNoeud(n.a, valeurs);
+    case "add":
+      return evaluerNoeud(n.a, valeurs) + evaluerNoeud(n.b, valeurs);
+    case "sub":
+      return evaluerNoeud(n.a, valeurs) - evaluerNoeud(n.b, valeurs);
+    case "mul":
+      return evaluerNoeud(n.a, valeurs) * evaluerNoeud(n.b, valeurs);
+    case "div":
+      return evaluerNoeud(n.a, valeurs) / evaluerNoeud(n.b, valeurs);
+    case "pow":
+      return Math.pow(evaluerNoeud(n.a, valeurs), n.e);
+  }
+}
+
+/** La saisie contient-elle une écriture décimale ? */
+export function noeudDecimal(n: NoeudLecture): boolean {
+  return contientDecimal(n);
+}

@@ -1,39 +1,22 @@
 import type { ExerciceTangentesConique } from "../../core6e/tangentesConique.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
-import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatTangentesConique";
+import type { PhaseTangentesConique } from "../../moteur6e/typesTangentesConique";
 import { phasesPourExercice } from "../../moteur6e/typesTangentesConique";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTangentesConique } from "./index";
+import { FORMAT_6GEN62 } from "../../ui6e/formatTangentesConique";
+import { construireAdaptateurConiques } from "../adaptateurConiques";
+import { CATALOGUE_VARIANTES, GROUPES_VERDICT_6GEN62, construireAvecVarianteId, genererExerciceTangentesConique } from "./index";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceTangentesConique>` pour `6gen62` (Tangentes à une conique) — NOUVEAU,
- * même principe que les autres adaptateurs du chapitre « Les coniques ».
+ * Adaptateur papier de `6gen62` — PROVISOIRE (lots B et C du 6e ch. 10 ; lot E à venir). Réponses de
+ * chaque écran rédigées (plus de « voir bloc de travail », P1), hyperbole verticale juste (P2), données
+ * en fractions (P3). Groupes à verdict B (existence) et C (position). Aucun `calcul`.
  */
-
-function entete(exercice: ExerciceTangentesConique) {
-  return [...consigneGenerale(exercice), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
-}
-
-function construireEnonce(exercice: ExerciceTangentesConique): SectionExercice {
-  const phases = phasesPourExercice(exercice);
-  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
-}
-
-function construireCorrection(exercice: ExerciceTangentesConique): BlocCorrection[] {
-  const phases = phasesPourExercice(exercice);
-  const lettres = "abcdefghijklmnopqrstuvwxyz";
-  return phases.map((phase, i) => ({
-    type: "paragraphe",
-    fragments: [texte(`${lettres[i] ?? String(i + 1)}) `), latex(formatReponseAttenduePhaseLatex(exercice, phase).join(",\\ "))],
-  }));
-}
-
-export const adaptateurEvaluationTangentesConique: AdaptateurFeuilleExercices<ExerciceTangentesConique> = {
+export const adaptateurEvaluationTangentesConique = construireAdaptateurConiques<ExerciceTangentesConique, PhaseTangentesConique>({
   titreDocument: "Tangentes à une conique — Évaluation",
   nomFichierBase: "tangentes-conique",
   genererInstance: genererExerciceTangentesConique,
   catalogueVariantes: CATALOGUE_VARIANTES,
-  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
-  construireEnonce,
-  construireCorrection,
-};
+  genererInstanceAvecVariante: construireAvecVarianteId,
+  format: FORMAT_6GEN62,
+  phases: phasesPourExercice,
+  groupesVerdict: GROUPES_VERDICT_6GEN62,
+});

@@ -1,4 +1,4 @@
-import { Fragment, useId, useState } from 'react'
+import { Fragment, useEffect, useId, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { Block } from '../../content/types'
@@ -8,6 +8,8 @@ import { BlockList, BlockRenderer } from './BlockRenderer'
 import { Icone } from './Icones'
 import type { NomIcone } from './Icones'
 import { estGenerateurMigre, generatorLink } from '../../lib/generatorLink'
+import { useReglagesLecture } from '../../lib/reglagesLecture'
+import { dire, texteParleDe, voixDisponible } from '../../lib/voixLecture'
 
 type BlocDe<K extends Block['kind']> = Extract<Block, { kind: K }>
 export type BlocAtelier = BlocDe<'atelier'>
@@ -265,20 +267,34 @@ export function LecteurVideo({ bloc }: { bloc: BlocVideo }) {
 }
 
 /** Exemple résolu révélé pas à pas : l'énoncé, puis une étape à la fois (« Montrer l'étape
- * suivante », « Tout montrer »), enfin le résultat encadré. */
+ * suivante », « Tout montrer »), enfin le résultat encadré.
+ *
+ * Exemples guidés (onglet « Aides », activé d'office, planche 07) : l'étape en cours entourée et les
+ * précédentes plus discrètes (CSS seul, `lecture.css` § 6 : `pas-fin` = le résultat est l'étape en
+ * cours, `pas-tout` = « Tout montrer » touché, plus rien n'est mis en avant), et « Écouter l'étape n »
+ * (`lib/voixLecture.ts`), seulement à l'écran et si le navigateur a une synthèse vocale. Option
+ * « Correspondances » : la légende des paires annotées (`correspondances`), sous l'énoncé. */
 export function ExemplePasAPas({ bloc }: { bloc: BlocDe<'exemple'> }) {
   const aUnResultat = bloc.result.tag.trim() !== '' || bloc.result.text.trim() !== ''
   const total = bloc.steps.length + (aUnResultat ? 1 : 0)
   const [vus, setVus] = useState(Math.min(1, total))
+  const [toutDemande, setToutDemande] = useState(false)
   const tout = vus >= total
+  const r = useReglagesLecture()
+  const liste = useRef<HTMLOListElement>(null)
+  const resultat = useRef<HTMLDivElement>(null)
+  const finAvecResultat = tout && aUnResultat
+  const classe = `pas-a-pas${toutDemande ? ' pas-tout' : finAvecResultat ? ' pas-fin' : ''}`
+  const paires = r.correspondances === 'oui' ? bloc.correspondances : undefined
   return (
-    <div className="pas-a-pas">
+    <div className={classe}>
       {bloc.formula && (
         <p className="pas-enonce">
           <RichText text={bloc.formula} />
         </p>
       )}
-      <ol className="pas-liste" aria-live="polite">
+      {paires && paires.length > 0 && <LegendeCorrespondances paires={paires} />}
+      <ol className="pas-liste" aria-live="polite" ref={liste}>
         {bloc.steps.slice(0, vus).map((s, i) => (
           <li key={i}>
             <span className="pas-num" aria-hidden="true">
@@ -292,14 +308,51 @@ export function ExemplePasAPas({ bloc }: { bloc: BlocDe<'exemple'> }) {
         ))}
       </ol>
       {tout && aUnResultat && (
-        <div className={`exemple-result${bloc.result.isEmpty ? ' is-empty' : ''}`}>
+        <div ref={resultat} className={`exemple-result${bloc.result.isEmpty ? ' is-empty' : ''}`}>
           <span className="tag">{bloc.result.tag}</span>
           <RichText text={bloc.result.text} />
         </div>
       )}
       {tout && bloc.illustration && <Illustration spec={bloc.illustration} />}
-      <BoutonsPas vus={vus} total={total} setVus={setVus} />
+      <BoutonsPas
+        vus={vus}
+        total={total}
+        setVus={setVus}
+        toutMontrer={() => {
+          setToutDemande(true)
+          setVus(total)
+        }}
+        ecouter={
+          r.exemples === 'guides' && !toutDemande
+            ? {
+                numero: Math.min(vus, bloc.steps.length),
+                cible: () => (finAvecResultat ? resultat.current : (liste.current?.lastElementChild ?? null)),
+                estResultat: finAvecResultat,
+              }
+            : undefined
+        }
+      />
     </div>
+  )
+}
+
+/** Légende des correspondances : « u₆ → 22 (trait plein) · u₁ → 7 (tirets) · (6 − 1) → 5 (double trait) »,
+ * avec les mêmes couleurs ET les mêmes traits que dans l'exemple (jamais la couleur seule). */
+function LegendeCorrespondances({ paires }: { paires: [string, string][] }) {
+  const traits = ['trait plein', 'tirets', 'double trait']
+  return (
+    <p className="corresp-legende no-export">
+      Ce qui se correspond&nbsp;:{' '}
+      {paires.slice(0, 3).map(([de, vers], i) => (
+        <Fragment key={i}>
+          {i > 0 && ' · '}
+          <span className="corresp-paire">
+            <RichText text={`$\\htmlClass{m${i + 1}}{${de}} \\to \\htmlClass{m${i + 1}}{${vers}}$`} />
+          </span>{' '}
+          ({traits[i]})
+        </Fragment>
+      ))}
+    </p>
   )
 }
 
@@ -307,26 +360,87 @@ export function ExemplePasAPas({ bloc }: { bloc: BlocDe<'exemple'> }) {
 export function ExempleLibrePasAPas({ bloc }: { bloc: BlocDe<'exempleLibre'> }) {
   const total = bloc.blocks.length
   const [vus, setVus] = useState(Math.min(1, total))
+  const [toutDemande, setToutDemande] = useState(false)
+  const r = useReglagesLecture()
+  const blocs = useRef<HTMLDivElement>(null)
   return (
-    <div className="pas-a-pas pas-libre">
-      <div aria-live="polite">
+    <div className={`pas-a-pas pas-libre${toutDemande ? ' pas-tout' : ''}`}>
+      <div className="pas-blocs" aria-live="polite" ref={blocs}>
         <BlockList blocks={bloc.blocks.slice(0, vus)} />
       </div>
-      <BoutonsPas vus={vus} total={total} setVus={setVus} />
+      <BoutonsPas
+        vus={vus}
+        total={total}
+        setVus={setVus}
+        toutMontrer={() => {
+          setToutDemande(true)
+          setVus(total)
+        }}
+        ecouter={
+          r.exemples === 'guides' && !toutDemande && total > 1
+            ? { numero: vus, cible: () => blocs.current?.lastElementChild ?? null, estResultat: false }
+            : undefined
+        }
+      />
     </div>
   )
 }
 
-function BoutonsPas({ vus, total, setVus }: { vus: number; total: number; setVus: (n: number) => void }) {
-  if (vus >= total) return null
+/** Le bouton « Écouter » n'existe qu'après le montage, à l'écran (jamais au pré-rendu), et seulement si
+ * le navigateur a une synthèse vocale. */
+function useVoixPossible(): boolean {
+  const [possible, setPossible] = useState(false)
+  useEffect(() => {
+    setPossible(voixDisponible() && !(window as { __prerendu?: boolean }).__prerendu)
+  }, [])
+  return possible
+}
+
+function BoutonsPas({
+  vus,
+  total,
+  setVus,
+  toutMontrer,
+  ecouter,
+}: {
+  vus: number
+  total: number
+  setVus: (n: number) => void
+  toutMontrer: () => void
+  ecouter?: { numero: number; cible: () => Element | null; estResultat: boolean }
+}) {
+  const voix = useVoixPossible()
+  const montrerEcouter = voix && !!ecouter
+  if (vus >= total && !montrerEcouter) return null
   return (
     <div className="pas-boutons">
-      <button type="button" className="btn-parcours" onClick={() => setVus(vus + 1)}>
-        Montrer l’étape suivante
-      </button>
-      <button type="button" className="btn-parcours btn-discret" onClick={() => setVus(total)}>
-        Tout montrer
-      </button>
+      {vus < total && (
+        <>
+          <button type="button" className="btn-parcours" onClick={() => setVus(vus + 1)}>
+            Montrer l’étape suivante
+          </button>
+          <button type="button" className="btn-parcours btn-discret" onClick={toutMontrer}>
+            Tout montrer
+          </button>
+        </>
+      )}
+      {montrerEcouter && (
+        <button
+          type="button"
+          className="pas-ecouter no-export"
+          onClick={() => {
+            const el = ecouter.cible()
+            if (el) dire(`${ecouter.estResultat ? 'Résultat' : `Étape ${ecouter.numero}`}. ${texteParleDe(el)}`)
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M11 5 6 9H2v6h4l5 4V5z" />
+            <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+            <path d="M19 5a10 10 0 0 1 0 14" />
+          </svg>
+          {ecouter.estResultat ? 'Écouter le résultat' : `Écouter l’étape ${ecouter.numero}`}
+        </button>
+      )}
     </div>
   )
 }

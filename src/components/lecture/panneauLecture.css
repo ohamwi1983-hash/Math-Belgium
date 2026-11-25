@@ -151,3 +151,9 @@
   html.lecture-panneau-ouvert .parcours[data-vue="etape"] { grid-template-columns: minmax(0, 760px); }
   html.lecture-panneau-ouvert :is(.parcours-cote, .parcours-droite) { display: none; }
 }
+
+/* Onglet « Aides » (lot A2). */
+.confort-sous { margin: 12px 0 6px; font: 600 14px/1.3 var(--sans); color: var(--ink); }
+.confort-vue .interrupteur + .interrupteur { margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--line-soft); }
+.it-etiquette { display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 6px; background: var(--good-soft); color: var(--good); font: 600 12.5px/1.5 var(--sans); vertical-align: 1px; }
+.confort-corresp { margin: 10px 0 0; }

@@ -4,12 +4,22 @@ import katex from 'katex'
 import { normaliserLogDecimal } from '../lib/notationLog'
 import { lireFormule } from '../lib/lectureFormules'
 
+/** Correspondances (option « Couleurs et soulignés qui se correspondent », planche 09) : SEULE commande
+ * de confiance admise, `\htmlClass{m1}{…}` / `m2` / `m3` (une simple classe sur un `<span>` ; KaTeX
+ * garde exactement le même placement et les mêmes espaces). Sans l'option, aucun style : rendu
+ * identique. Voir `.claude/rules/content-authoring.md`, « Correspondances ». */
+const confiance = (ctx: { command: string; class?: string }) => ctx.command === '\\htmlClass' && /^m[1-3]$/.test(ctx.class ?? '')
+
 /** Renders a single LaTeX expression inline via KaTeX. */
 export const MathInline = memo(function MathInline({ tex }: { tex: string }) {
   const source = normaliserLogDecimal(tex)
   const html = katex.renderToString(source, {
     throwOnError: false,
     output: 'html',
+    trust: confiance,
+    // `\htmlClass` est une extension HTML : sans ceci, le mode strict par défaut (« warn ») l'écrirait
+    // dans la console à chaque rendu. Tout le reste garde l'avertissement d'avant.
+    strict: (code: string) => (code === 'htmlExtension' ? 'ignore' : 'warn'),
   })
   // Formule accessible : la sortie HTML de KaTeX est `aria-hidden` ; le conteneur porte la lecture
   // en mots (`lib/lectureFormules.ts`), présente dès le HTML pré-rendu.

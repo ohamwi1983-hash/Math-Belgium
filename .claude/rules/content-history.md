@@ -269,6 +269,30 @@ paths:
   « 6e ch. 9, lots A, F, D »). Les cartes 6gen54 (renommée par le lot C), 6gen123–131 et les ateliers sont ajoutés par
   d'autres agents.
 
+- **6e (6h), Chapitre 10 — Les coniques** (`coniques`) : **audit appliqué, lots A, F, D et parcours (25/11, agent
+  AFD)** — lot A : erreurs C1–C12 corrigées, hyperbole d'axe focal VERTICAL (équation, foyers, asymptotes), convention
+  unique $y^2=2px$ avec $p=\mathrm{dist}(F\,;d)$ partout (cours, formulaire, « Formule », quiz), tangente $16x+15y=100$,
+  Cassegrain et LORAN refaits, lithotritie avec $2a$, formulaire et récapitulatif complétés, typographie (`\mathrm{dist}`,
+  pas de majuscules d'insistance). **Figures** : toutes isotropes (domaine 16/15), aucune courbe hors cadre (bornes
+  `yMin`/`yMax`, branches d'hyperbole par `curvesOfY`), aucune étiquette sur un tracé (contrôle `check.mjs` du dossier
+  `afd-6e10`), miroirs elliptique et hyperbolique en deux figures pleine largeur. Lot F : 18 démonstrations
+  (`exempleLibre` « Démonstration — … », les 5 anciennes recodées) : parabole foyer–directrice, ellipse et hyperbole
+  (équations réduites), ellipse = cercle « écrasé » de $\frac{b}{a}$, asymptotes, hyperbole équilatère $XY=\frac{a^2}{2}$
+  (repère $X=\frac{x+y}{\sqrt2}$, $Y=\frac{x-y}{\sqrt2}$), foyer–directrice de l'ellipse et de l'hyperbole, Dandelin-Quételet
+  (cas de l'ellipse), rayons focaux $a\mp ex$, aire du triangle focal $b^2\tan\frac{\theta}{2}$, sommets $(0\,;\pm b)$ à
+  distance $a$ des foyers, pente et forme dédoublée des tangentes, condition de tangence $k^2=a^2m^2+b^2$, propriétés
+  optiques (parabole : triangle $FPT$ isocèle ; ellipse : symétrique d'un foyer). Cours ajouté : « Ce que tu sais déjà
+  (4e) », **cas dégénérés** (point, vide, deux droites ; sous-titre au § 2, réciproque fausse de l'équation générale),
+  parabole décentrée $y^2-4y-8x+28=0$, méthode F / d / e (exemple F(0 ; 1), d ≡ y = 4, e = 1/2), périhélie / aphélie,
+  tangentes de pente donnée et issues de P(0 ; 2) à $\frac{x^2}{8}+\frac{y^2}{2}=1$, intersection de deux coniques
+  ($x^2+2y^2=41$ et $y^2-x^2=7$), miroir hyperbolique (P(15/4 ; 3), tangente $20x-9y=48$), antenne $\frac{D^2}{16h}$.
+  Énoncés par clé des 35 blocs, banque « Formule » (26 questions). Parcours : 3 parties (« Trois courbes, un seul
+  nombre e » § 1–2, « Distances, droites et tangentes » § 3–5, « Miroirs et applications » § 6), 6 `titreCourt`,
+  18 phrases d'`essentiel`, 23 cartes ; descriptions des cartes 6gen58, 59, 61, 62, 63 alignées sur le cours. Formules
+  longues coupées en plusieurs `$…$` (aucune ne défile à 390 px, tiroirs ouverts). Lot D : quiz 6gen73 (voir
+  `.claude/rules/feuilles-evaluations.md`, « 6e ch. 10, lots A, F, D »). Les cartes 6gen132–143, les générateurs
+  6gen58–63 et les ateliers sont ajoutés par d'autres agents.
+
 - **6e (6h), Chapitre 6 — corrigé « comme au tableau » et niveaux (6gen30–33, 6gen74–76)** : corrigés détaillés
   typés partagés écran / papier (`generateurs6e/*/corrigeDetaille.ts`, brique `ui6e/corrigeProbabilites.ts`),
   `criteresDifficulte` à la place des étoiles, profils `calcul` relus (aucun changement : rien n'est donné
@@ -728,6 +752,14 @@ paths:
   intersection droite-conique, tangentes, propriétés optiques) + une synthèse purement tabulaire
   (`recap.table`, 26 lignes Notion/Point clé, sur le modèle de `lieux-geometriques`) ; 6 liens
   générateur par section (`6gen58`-`6gen63`) + un quiz de synthèse (`6gen73`).
+  **Lot H, première moitié (6gen132–6gen137, nouveaux générateurs, agent H1)** : cartes 6gen132 « Lire une conique sur sa
+  figure ou son équation réduite », 6gen133 « Représenter une conique » et 6gen137 « Hyperbole équilatère et xy = k » en fin de
+  § 1 (après 6gen58), 6gen134 « Réduire par translation et donner tous les éléments » et 6gen135 « Équation depuis foyer,
+  directrice et excentricité » en fin de § 2 (après 6gen59), 6gen136 « Rayons focaux et triangle focal » en fin de § 3 (après
+  6gen60). Aucun bloc de cours ajouté (lot F : rayons focaux a ∓ ex, aire b²·tan(θ/2), k = a²/2 sont écrits par l'agent AFD).
+  Registres (`registry.ts`, `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts`, processus 1 / 1 / 2 /
+  2 / 2 / 2, sections `identifier`, `identifier`, `excentricite`, `excentricite`, `airefocale`, `identifier`). Descriptions de
+  carte en texte brut. Détail : `.claude/rules/feuilles-evaluations.md`, « 6e ch. 10, lot H1 — 6gen132–6gen137 ».
   **Aucune extension de schéma nécessaire** : les ~17 diagrammes du chapitre (parabole avec
   foyer/directrice, 4 orientations, ellipse et hyperbole avec foyers/sommets/asymptotes, comparaison
   cercle/ellipse, hyperbole équilatère et sa forme `xy=k`, 3 coniques de même foyer superposées, coupe
@@ -778,6 +810,12 @@ paths:
   table des matières, et le tableau de synthèse ; sitewide `regress_all.mjs` sur les 23 chapitres :
   `0` erreur console, `0` `NaN`/`undefined`, `0` signe `$` isolé restant, partout. `npm run
   build`/`npm run lint` propres (aucun avertissement nouveau au-delà des préexistants).
+  **Lots B et C de l'audit (6gen58–6gen63, 25/11)** : générateurs refaits sur le socle du 6e ch. 7 / ch. 9 (algèbre
+  exacte, convention y² = 2px partout — décision 1 —, figures avec la réponse tracée après l'écran, verdicts équilibrés,
+  `?code=`, corrigé consultable après chaque réponse) ; cartes de 6gen58, 6gen59 (titre « Équation d'une conique depuis
+  ses caractéristiques », `whereLabel`), 6gen62 et 6gen63 réécrites en une ligne pour dire ce que fait le générateur ;
+  libellés pilotes remplis (processus 2, 2, 3, 2, 2, 3). Le reste du cours n'est pas touché (agent AFD). Détail :
+  `.claude/rules/feuilles-evaluations.md`, « Textes : écran vs papier », paragraphe « 6e ch. 10 (lots B et C) ».
 
 - **5e (4h), Chapitre 2 — Trigonométrie** (`trigonometrie`) : remplacement intégral du contenu à
   partir d'un nouvel artifact fourni par l'utilisateur (pas un patch — la demande était "remplace
@@ -5832,6 +5870,22 @@ pilotes avec processus, `regroupementsPapier.ts` : 6gen111, 6gen114). Aucun bloc
 encore E(aX + b) = aE(X) + b et V(aX + b) = a²V(X) (6gen111, démonstration D2 du lot F), ni P(a < X ≤ b) = F(b) − F(a) pour
 une variable discrète (6gen112 escalier), ni « trouver k » (6gen113) ni le sens inverse de la loi uniforme (6gen115).
 
+## 6e (6h), Chapitre 10 — lot H2 de l'audit (nouveaux générateurs 6gen138–6gen143, 25/11/2026)
+
+Six générateurs nouveaux sur le socle `AppEcransTrigo` (détail, profils et mesures : `.claude/rules/feuilles-evaluations.md`,
+section « 6e ch. 10, lot H2 ») : 6gen138 tangente par la dérivée et forme dédoublée (§ 5 `tangentes`, Appliquer), 6gen139
+position d'une droite et d'une conique selon un paramètre (§ 4–5, carte au § 5, Transférer), 6gen140 miroirs en contexte
+(§ 6 `optique`, Transférer), 6gen141 orbites et ellipses : Kepler (§ 1 et § 3, carte au § 3 `airefocale`, Transférer),
+6gen142 hyperbole de navigation : LORAN (§ 6, Transférer), 6gen143 détective d'erreurs : coniques (fin, carte en fin de § 6,
+Transférer). Convention y² = 2px partout. Cartes « S'entraîner » ajoutées en fin de section (après 6gen60 : 141 ; après
+6gen62 : 138, 139 ; après 6gen63 : 140, 142, 143) ; registres par ajout (`registry.ts` après 6gen73,
+`evaluationAdapterRegistry.ts` avec `versionPapier` après 6gen63, `evaluationPayload.ts` : union et entrées pilotes,
+processus 2 / 3 / 3 / 3 / 3 / 3, `regroupementsPapier.ts` : 6gen138, 6gen139). Aucun bloc de cours ajouté ; le cours doit
+porter (lot F) : la condition de tangence k² = a²m² ± b² et le cas « droite parallèle à une asymptote / à l'axe : un
+seul point, pas une tangente » (6gen139), FT = FP pour la parabole (6gen140 `ftfp`), la distance focale D²/(16h) d'une
+antenne et les trajets 2a du lithotriteur (6gen140), le LORAN avec ses deux intersections possibles (6gen142). Module de
+figures propre au lot (`ui6e/outilsConiquesLotH2.ts`) : la figure de coniques des lots BC / H1 n'était pas fusionnée.
+
 ## 6e (6h), Chapitre 9 — lot H2 de l'audit (nouveaux générateurs 6gen128–6gen131, 25/11/2026)
 
 Quatre générateurs nouveaux sur le socle `AppEcransTrigo` (détail, profils et mesures : `.claude/rules/feuilles-evaluations.md`,
@@ -6130,3 +6184,118 @@ PT), 759 positions de faisceaux + 26 588 positions libres de P (✓ jamais à pl
 le panneau : A, B, P glissés, P promené sur l'arc (41 points de trace), « Lancer » / « Pause », M glissé ; aucun
 défilement du panneau pendant un glisser. Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667 (14 ateliers du
 chapitre). Scripts et captures : `scratchpad/g2-6e9/`.
+
+## 6e (6h), Chapitre 10 — lot G de l'audit, première moitié (5 ateliers + 3 réemplois, agent G1, 25/11/2026)
+
+Le chapitre n'avait aucun atelier. Huit blocs `atelier` ajoutés, seuls (aucun autre bloc touché ; la figure fausse du
+miroir hyperbolique reste au lot A), placés par ancre solide (le cours est réécrit en parallèle). Même style que le
+ch. 9 : repères `geo-analytique-commun.js` à fenêtre FIXE et ORTHONORMÉS (cercles ronds), axes fléchés,
+`katex-shadow.js`, curseurs − / +, `placeurEtiquettes` (étiquettes jamais rognées), figure dans une `<svg>` sans bouton
+dans son conteneur. Nouveau module `src/interactive/coniques-commun.js` : rationnels exacts (`Q`, `texQ`,
+`texRacineQ`), échantillonnage ellipse / hyperbole / parabole (centre ou sommet + axe quelconque, parabole Y² = 2pX),
+chemins découpés au cadre, réflexion d'un rayon sur une tangente, arcs d'angle. Convention de la parabole y² = 2px,
+p = dist(F ; d), partout.
+- **`jardinier-coniques-widget`** (§ 1 B, après le piège « L'ellipse n'existe que si a > c », juste avant « Équation
+  cartésienne de l'ellipse ») : F et F′ entiers glissés, 2a de 0 à 14 (pas 0,5), bascule somme / différence ;
+  « Faire le tour » (un tour complet pour une courbe fermée), P glissé ou curseur, trace rose (gardée quand on change de
+  branche) ; ficelles [PF] et [PF′] et leurs longueurs ; régimes : ellipse, cercle (F = F′), segment [FF′] (2a = 2c),
+  vide, hyperbole (une branche à la fois), deux demi-droites (2a = 2c), médiatrice (différence, 2a = 0), tout le plan ;
+  a, c = |FF′|/2 et b en racines simplifiées, triangle orange rectangle (a² = b² + c², ou c² = a² + b² avec le
+  rectangle 2a × 2b et les asymptotes). Préréglages : ellipse et hyperbole du cours, F = F′, foyers obliques.
+- **`excentricite-curseur-widget`** (§ 2, juste après la figure des trois coniques de même foyer) : F(1 ; 0) et
+  d ≡ x = 0 fixes (ceux de la figure), e de 0 à 2,5 (pas 0,05) ; courbe par la forme polaire depuis F ; e = 0 : le seul
+  point F (« le cercle n'a pas de directrice » ; b/a = √(1 − e²) → 1 affiché pour les ellipses) ; e = 1 :
+  y² = 2(x − 1/2) ; centre, a, b, c, F′, d′, asymptotes ; P glissé sur la courbe (branche la plus proche du doigt) ou
+  curseur + « Autre branche » ; |PF|, dist(P ; d) et e·dist(P ; d) en direct.
+- **`dandelin-cone-widget`** (§ 2, juste après la figure de Dandelin « vue en coupe ») : cône de demi-angle 30°, plan qui
+  tourne autour de la droite (x = 0,6 ; z = 1,8) — il ne passe jamais par le sommet —, θ de 0° à 90° ; perspective
+  orthogonale (parties cachées en pointillés : bord inférieur, section, cercles de contact), sphères calculées
+  exactement (centres z = k/(cos θ ± sin α)), foyers, génératrice par P avec M et M′ ; vraie forme dans le plan
+  (foyers, directrices = traces des plans des cercles de contact) ; |PF| = |PM|, |PF′| = |PM′|, somme ou différence
+  = |MM′|, |PF| / dist(P ; d) = e = sin θ / cos 30°. Sur téléphone (< 560 px), une vue à la fois (boutons « Vue en
+  perspective » / « Vraie forme ») : les deux vues empilées étaient réduites par l'épinglage jusqu'à l'illisible.
+- **`reduire-translation-widget`** (§ 2, juste après la figure de la conique de l'exemple résolu dans R₁) : m, n
+  (−40 à 40), r, s (−300 à 300), t (−500 à 500) entiers, bouton « Choisir t pour un second membre nul » (t rationnel
+  exact) ; méthode du cours en valeurs EXACTES (1) regroupement, 2) carrés complétés et second membre K,
+  3) translation et nouvelle origine, 4) division par K — signalée quand K < 0 —, 5) nature et éléments dans R₁) ; tous
+  les cas : ellipse, cercle, hyperbole (axe selon le signe), point, vide, deux droites sécantes, parabole (m ou n nul :
+  sommet, 2p, foyer à p/2, directrice), deux droites parallèles, droite double, « pas une conique » (m = n = 0). Chaque
+  membre d'égalité dans son propre KaTeX (sinon la ligne débordait à 390 px). Préréglages dont l'exemple résolu du cours.
+- **`trois-miroirs-widget`** (§ 6, juste après les figures des miroirs elliptique et hyperbolique, qu'il complète) :
+  parabole y² = 4x, ellipse x²/25 + y²/16 = 1, hyperbole x²/9 − y²/16 = 1 (seule la branche de droite est un miroir) ;
+  sources : faisceau parallèle à l'axe, source au foyer, rayons qui visent F (Cassegrain) ; P glissé ; rayon réfléchi
+  calculé par la loi de la réflexion, angle avec la droite vers le foyer mesuré À PART ; hyperbole source en F :
+  prolongement en pointillés jusqu'à F′ (« semble venir de F′ ») ; faisceau parallèle sur l'ellipse ou l'hyperbole :
+  croix rouges aux passages sur l'axe et leur étendue (aucun point commun).
+- **Réemplois** (légendes réécrites pour le ch. 10) : `trace-lieu-widget` (§ 1, juste avant « A. La parabole » : une
+  conique est un lieu défini par des distances), `parabole-foyer-widget` (§ 1 A, juste après la figure de la parabole
+  de foyer F(1 ; 0), avant « Équation cartésienne de la parabole » : mode compas = la construction du cours, r < p/2),
+  `repere-affine-widget` (§ 1 B, juste après les figures « cercle aplati »). Non repris : `droite-cercle` (base de
+  l'atelier 6 « Droite et conique » du lot G2), `completer-le-carre` (méthode d'al-Khwārizmī pour x² + bx = c : la
+  réduction pas à pas le remplace), `lieux-complexes` (conditions sur z, aucune conique ; le jardinier et le curseur
+  d'excentricité en reprennent l'idée de trace).
+Vérifié (Vite, page réelle, panneau, iPhone 13 clair / sombre et 1 280 px) : 0 erreur console, scrollWidth 390,
+0 `.katex-error`, 0 KaTeX qui déborde, Shadow DOM sans `^ $ \ NaN undefined Infinity`, 0 étiquette SVG rognée ;
+balayages contre un recalcul indépendant, à partir de ce qui est DESSINÉ (SVG ramené au repère) et AFFICHÉ :
+1 701 réglages e / P (44 735 points de courbe avec |PF| = e·|x|, mesures affichées), 300 configurations du jardinier
+(39 597 points du lieu, verdicts, b, ficelles), 707 positions de miroir (P sur le miroir, tangente ⟂ gradient, angles
+égaux, rayon vers F / parallèle à l'axe / prolongement par F′ / vers F′ selon le cas), 1 500 équations aléatoires
+(365 051 points tracés sur la conique, nature par un classement indépendant, foyers : somme / différence constante,
+parabole |PF| = dist(P ; d)), 1 911 réglages θ / P de Dandelin (foyers par dichotomie sur la tangence, |PF| = |PM|,
+somme ou différence = |MM′|, rapport = sin θ / cos 30°) : 0 faux. Gestes au doigt (CDP) et à la souris dans le
+panneau : P glissé (ellipse, puis seconde branche), F glissé, P promené (trace), point d'impact glissé, P dans la vraie
+forme, boutons ; aucun défilement du panneau pendant un glisser. Épinglage dans le panneau : 0 KO à 390 × 664 et
+375 × 667 (8 ateliers du chapitre). Scripts et captures : `scratchpad/g1-6e10/`.
+
+## 6e (6h), Chapitre 10 — lot G de l'audit, seconde moitié (4 ateliers, agent G2, 25/11/2026)
+
+Quatre blocs `atelier` ajoutés, seuls (aucun autre bloc touché), placés par ancre solide (le cours est réécrit en
+parallèle). Même style que G1 : `geo-analytique-commun.js` à fenêtre FIXE et ORTHONORMÉ, `katex-shadow.js`, curseurs
+− / +, `placeurEtiquettes`, figure dans une `<svg>` sans bouton dans son conteneur ; `coniques-commun.js` réutilisé tel
+quel (rationnels exacts, tracés, chemins découpés, arcs d'angle), rien n'y est modifié. Convention y² = 2px partout.
+- **`triangle-focal-widget`** (§ 3 A, juste après la figure du triangle FPF′ de l'exemple |PF| = 2|PF′|) : a et b
+  entiers (b < a), P glissé sur l'ellipse ; |PF| = a − e·x_P et |PF′| = a + e·x_P comparés aux longueurs MESURÉES,
+  somme 2a, encadrement a − c ≤ |PF| ≤ a + c (exact) ; θ = F′PF mesuré, θ_max aux sommets (0 ; ±b) avec
+  sin(θ_max/2) = e ; aire de trois façons (½·|PF|·|PF′|·sin θ, c·|y_P|, b²·tan(θ/2)). Mode « Angle imposé » : θ au
+  degré, les quatre points construits (rayons racines de t² − 2at + 2b²/(1 + cos θ)) ou « aucun point » au-delà de
+  θ_max (le produit 2b²/(1 + cos θ) dépasserait a²). Préréglage « Exemple du cours » avec ses valeurs exactes (10/3,
+  20/3, cos θ = 11/25, aire 8√14/3).
+- **`droite-conique-widget`** (§ 4, juste après la figure de la droite qui coupe l'hyperbole de l'exemple résolu ;
+  base `droite-cercle-widget` du 4e, réécrite) : ellipse x² + 4y² = 8 et parabole y² = 2x (exemples du cours),
+  hyperbole 4x² − y² = 4 et hyperbole d'axe vertical y² − 4x² = 4 ; droite y = mx + k (m, k au pas de 1/4, deux
+  poignées : ordonnée à l'origine, pente) ou x = h. Substitution écrite en valeurs EXACTES (nombres p + q√r), équation
+  à coefficients entiers premiers entre eux (premier positif), Δ = B² − 4AC, points en fractions ou racines
+  simplifiées ; « Δ a le signe de 8m² + 2 − k² » (selon la conique). Verdicts : sécante, tangente (point double),
+  extérieure, et le cas C8 de l'audit — coefficient de x² nul (parallèle à une asymptote ou à l'axe) : premier degré,
+  UN point SANS tangence (y = 2x + 1 → (−5/4 ; −3/2), y = 3 → (9/2 ; 3)) — ou aucun point (l'asymptote elle-même).
+  « Garder la droite tangente » : k par Δ = 0 (racine exacte, « Autre tangente » pour le signe), la droite roule quand
+  m change ; tangentes verticales x = ±2√2, x = ±1, x = 0, aucune pour l'hyperbole verticale. **Bug évité, à retenir**
+  : pour l'hyperbole, k² = a²m² − b² = 0 (m = ±b/a) donne l'ASYMPTOTE, pas une tangente — condition stricte k² > 0
+  (le panneau le dit) ; trouvé par le balayage.
+- **`tangente-dedoublee-widget`** (§ 5, juste après la figure de la tangente à l'ellipse en P(3 ; 3,2)) : ellipse
+  x²/25 + y²/16 = 1, hyperbole x²/9 − y²/16 = 1 (deux branches), parabole y² = 4x (p = 2) ; P glissé, AIMANTÉ aux
+  points à coordonnées rationnelles simples (énumérés : x = n/d, d ≤ 6, y² carré rationnel ; parabole y = n/2) :
+  valeurs exactes là (vérification « P est sur la conique », forme dédoublée avec les nombres, forme entière ax + by = c,
+  y = mx + q ; pente −b²x_P/(a²y_P), b²x_P/(a²y_P) ou p/y_P, et y − y_P = m(x − x_P)), valeurs approchées ailleurs ;
+  demi-courbe de la fonction dérivée surlignée ; sommets : pas de pente, tangente verticale donnée par la forme
+  dédoublée (x = ±5, x = ±3, x = 0).
+- **`loran-widget`** (§ 6, juste après l'application « Trouver sa position en mer », avant la carte 6gen63) : deux
+  paires de stations glissées sur les nœuds (1 carreau = 100 km), différence d = |MA| − |MB| au curseur (pas 0,1,
+  |d| < |AB|) ou lue sur le navire N glissé ; Δt = d·100 km / 300 000 km/s en µs ; UNE branche (côté de la station la
+  plus proche), médiatrice pour d = 0 ; points communs par dichotomie le long de la première branche (jusqu'à 40
+  carreaux, hors cadre signalés) : aucun, un, ou deux (« Deux positions possibles » : A₂(−3 ; −3), B₂(2 ; −2), N(1,5 ; 3)
+  et N′(1,74 ; −4,47)) ; bouton « Seconde paire » (une seule mesure = toute une branche). Préréglages : figure du cours
+  (N(12/√7 ; 12/√7)), deux positions, Δt = 0.
+Vérifié (Vite, page réelle, panneau, iPhone 13 clair / sombre et 1 280 px) : 0 erreur console, scrollWidth 390,
+0 `.katex-error`, 0 KaTeX qui déborde, Shadow DOM sans `^ $ \ NaN undefined Infinity`, 0 étiquette SVG rognée ;
+balayages contre un recalcul INDÉPENDANT en flottants, à partir de ce qui est DESSINÉ (SVG ramené au repère) et
+AFFICHÉ (sources LaTeX lues par un espion sur `katex.renderToString`) : 4 718 réglages droite / conique (toute la grille
+m, k, h des 4 coniques + mode tangent : verdict, nombre et valeur exacte des points, points sur la conique, signe de Δ,
+points et droite dessinés), 1 604 positions de P (P sur la conique, tangente ⟂ gradient et par P, 376 positions
+exactes : équation entière proportionnelle, pente exacte, 54 sommets), 3 015 positions + 2 700 angles imposés du
+triangle focal (rayons formule = mesurés, θ, trois aires, point construit = point trouvé à part par dichotomie,
+existence ⟺ cos θ ≥ 1 − 2e²), 600 configurations LORAN aléatoires (branches dessinées, 747 positions affichées vérifiant
+les deux différences, positions dans le cadre = celles d'une recherche indépendante en polaire depuis B₂) : 0 faux.
+Gestes au doigt (CDP) et à la souris dans le panneau : poignées k et pente, P aimanté, P promené, navire et station
+glissés ; aucun défilement du panneau pendant un glisser. Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667
+(12 ateliers du chapitre). Scripts et captures : `scratchpad/g2-6e10/`.

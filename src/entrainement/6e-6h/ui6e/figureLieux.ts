@@ -27,7 +27,9 @@ export interface ObjetsLieux {
   /** Demi-droite d'origine `o`, de direction `u`. */
   demiDroites?: { o: P2; u: P2; couleur?: CouleurLieux; epais?: boolean }[];
   cercles?: { c: P2; r: number; couleur?: CouleurLieux; pointilles?: boolean; epais?: boolean }[];
-  courbes?: { pts: P2[]; couleur?: CouleurLieux; epais?: boolean; pointilles?: boolean }[];
+  /** `coupe` (6e ch. 10, facultatif) : la courbe est coupée au bord du quadrillage, jamais tracée dans la
+   * marge ni hors du cadre (branches d'hyperbole, parabole, demi-droite d'un rayon). */
+  courbes?: { pts: P2[]; couleur?: CouleurLieux; epais?: boolean; pointilles?: boolean; coupe?: boolean }[];
   polygones?: { pts: P2[]; couleur?: CouleurLieux; rempli?: boolean; trait?: boolean }[];
   /** Bande verticale x₁ ≤ x ≤ x₂ (ou horizontale) remplie. */
   bandes?: { sens: "verticale" | "horizontale"; min: number; max: number; couleur?: CouleurLieux }[];
@@ -152,6 +154,10 @@ export function figureLieux(o: ObjetsLieux): string {
   for (const c of o.courbes ?? []) {
     const visibles = c.pts.filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
     if (visibles.length < 2) continue;
+    if (c.coupe) {
+      for (const morceau of couperAuCadre(visibles, x0, x1, y0, y1)) parts.push(`<polyline points="${morceau.map((p) => `${f1(X(p.x))},${f1(Y(p.y))}`).join(" ")}" ${trait(c.couleur, "vert", c.pointilles, c.epais)} stroke-linejoin="round"/>`);
+      continue;
+    }
     parts.push(`<polyline points="${visibles.map((p) => `${f1(X(p.x))},${f1(Y(Math.max(y0 - cote, Math.min(y1 + cote, p.y))))}`).join(" ")}" ${trait(c.couleur, "vert", c.pointilles, c.epais)} stroke-linejoin="round"/>`);
   }
   for (const s of o.segments ?? []) parts.push(`<line x1="${f1(X(s.a.x))}" y1="${f1(Y(s.a.y))}" x2="${f1(X(s.b.x))}" y2="${f1(Y(s.b.y))}" ${trait(s.couleur, "encre", s.pointilles, s.epais)}/>`);
@@ -218,6 +224,54 @@ export function figureLieux(o: ObjetsLieux): string {
   parts.push(`<g font-family="sans-serif">${graduationsSansChevauchement(grads, obstacles, { taille: 9, couleur: "#495057" })}</g>`);
   parts.push(...nomsDroites, ...etiquettes);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${TAILLE}" height="${TAILLE}" viewBox="0 0 ${TAILLE} ${TAILLE}" role="img" style="max-width:100%;height:auto">${parts.join("")}</svg>`;
+}
+
+/** Morceaux d'une ligne brisée contenus dans le rectangle (Liang–Barsky segment par segment). */
+function couperAuCadre(pts: P2[], x0: number, x1: number, y0: number, y1: number): P2[][] {
+  const morceaux: P2[][] = [];
+  let courant: P2[] = [];
+  const egal = (a: P2, b: P2) => Math.abs(a.x - b.x) < 1e-9 && Math.abs(a.y - b.y) < 1e-9;
+  for (let i = 0; i + 1 < pts.length; i++) {
+    const a = pts[i];
+    const b = pts[i + 1];
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    let t0 = 0;
+    let t1 = 1;
+    let dedans = true;
+    for (const [p, qq] of [
+      [-dx, a.x - x0],
+      [dx, x1 - a.x],
+      [-dy, a.y - y0],
+      [dy, y1 - a.y],
+    ] as [number, number][]) {
+      if (Math.abs(p) < 1e-12) {
+        if (qq < 0) dedans = false;
+      } else {
+        const r = qq / p;
+        if (p < 0) t0 = Math.max(t0, r);
+        else t1 = Math.min(t1, r);
+      }
+    }
+    if (!dedans || t0 > t1) {
+      if (courant.length > 1) morceaux.push(courant);
+      courant = [];
+      continue;
+    }
+    const pa = { x: a.x + t0 * dx, y: a.y + t0 * dy };
+    const pb = { x: a.x + t1 * dx, y: a.y + t1 * dy };
+    if (courant.length === 0 || !egal(courant[courant.length - 1], pa)) {
+      if (courant.length > 1) morceaux.push(courant);
+      courant = [pa];
+    }
+    courant.push(pb);
+    if (t1 < 1) {
+      morceaux.push(courant);
+      courant = [];
+    }
+  }
+  if (courant.length > 1) morceaux.push(courant);
+  return morceaux;
 }
 
 /** Échantillonne une courbe y = f(x) (ou paramétrée) entre deux bornes. */

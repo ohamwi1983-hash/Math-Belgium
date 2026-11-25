@@ -16,11 +16,23 @@ import { BANQUE_QUIZ_CONIQUES } from "./banque";
 export const CATALOGUE_VARIANTES: { id: VarianteQuizConiques; label: string }[] = [
   { id: "identificationConiques", label: "Identification d'une conique et de ses éléments caractéristiques" },
   { id: "equationDepuisCaracteristiques", label: "Équation d'une conique depuis ses caractéristiques" },
-  { id: "aireExcentriciteConique", label: "Aire via rayons focaux et excentricité" },
+  { id: "aireExcentriciteConique", label: "Rayons focaux, aire du triangle focal et excentricité" },
   { id: "intersectionsConiques", label: "Intersections droite-conique et conique-conique" },
   { id: "tangentesConique", label: "Tangentes à une conique" },
   { id: "proprietesOptiquesConiques", label: "Propriétés optiques des coniques" },
+  { id: "excentriciteReduction", label: "Excentricité, directrices et réduction d'équation" },
 ];
+
+/** Taille RÉELLE de la banque d'un thème (jamais une constante : `.claude/rules/quiz-generators.md`). */
+export function nombreQuestions(varianteId: VarianteQuizConiques): number {
+  return BANQUE_QUIZ_CONIQUES[varianteId].length;
+}
+
+/** Bornes min/max des tailles de thèmes, pour un texte d'accueil toujours exact. */
+export function etendueNombreQuestions(): { min: number; max: number } {
+  const tailles = CATALOGUE_VARIANTES.map((v) => nombreQuestions(v.id));
+  return { min: Math.min(...tailles), max: Math.max(...tailles) };
+}
 
 function tirerQuestion(varianteId: VarianteQuizConiques): QuestionVraiFaux {
   const banque = BANQUE_QUIZ_CONIQUES[varianteId];
@@ -53,9 +65,9 @@ function melanger<T>(items: readonly T[]): T[] {
 
 /**
  * Générateur SANS RÉPÉTITION pour un thème donné — chaque session étudiant porte sur un thème
- * unique et compte autant d'exercices que de questions dans la banque de ce thème (35) : sans
+ * unique et compte autant d'exercices que de questions dans la banque de ce thème (`nombreQuestions`) : sans
  * cette précaution, le tirage indépendant habituel (`genererExerciceQuizConiques`) pourrait répéter
- * une question avant d'avoir couvert les 34 autres. État interne (file mélangée, ré-mélangée à
+ * une question avant d'avoir couvert les autres. État interne (file mélangée, ré-mélangée à
  * chaque épuisement) enfermé dans la fermeture, jamais partagé entre deux appels de cette fonction —
  * voir `App6gen73.tsx`, qui en crée une par session démarrée.
  */

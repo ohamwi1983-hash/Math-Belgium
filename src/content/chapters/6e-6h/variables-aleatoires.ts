@@ -1707,9 +1707,10 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'exemple',
           badge: "effectif attendu dans une population",
           formula:
-            "La taille $X$ (en cm) des 1 200 élèves d'une école suit la loi $\\mathcal{N}(170\\,;8)$. Combien d'élèves mesurent plus de 180 cm, environ ?",
+            "La taille $X$ (en cm) des 1 200 élèves d'une école suit la loi $\\mathcal{N}(\\htmlClass{m1}{170}\\,;\\htmlClass{m2}{8})$. Combien d'élèves mesurent plus de 180 cm, environ ?",
+          correspondances: [['\\mu', '170'], ['\\sigma', '8']],
           steps: [
-            { tag: 'standardiser', text: '$z=\\dfrac{180-170}{8}=1{,}25$' },
+            { tag: 'standardiser', text: '$z=\\dfrac{180-\\htmlClass{m1}{170}}{\\htmlClass{m2}{8}}=1{,}25$' },
             { tag: 'lire la table', text: '$P(X>180)=1-\\Phi(1{,}25)$ $=1-0{,}8944$ $=0{,}1056$' },
             { tag: 'effectif', text: '$1\\,200\\times0{,}1056=126{,}72$, arrondi à l\'unité : $127$' },
           ],

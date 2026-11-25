@@ -5,7 +5,7 @@ import { normaliserLogDecimal } from "../../lib/notationLog";
 import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../export/genererFeuilleExercices";
 import { decouperLigneCalcul, estLignePiege } from "../export/corrigeTableau";
 import { TexteInsistance } from "./TexteInsistance";
-import { dire, texteLisible, voixDisponible } from "../../lib/direLecture";
+import { dire, texteParleDe, voixDisponible } from "../../lib/voixLecture";
 import { animationsReduites } from "../../lib/reglagesLecture";
 
 /**
@@ -129,7 +129,7 @@ function lignesDeLEtapeCorrigee(e: EtapeCorrection): number {
  * une à une : la ligne en cours entourée, les précédentes plus discrètes, les suivantes masquées SANS
  * changer la mise en page (`visibility: hidden` : rien ne saute sous le doigt). « Ligne suivante »,
  * « Tout montrer » (retour au corrigé complet) et « Écouter » (point d'accroche de la voix,
- * `lib/direLecture.ts`), dans une barre collée en bas de l'écran (au-dessus de la barre fixe) tant que le
+ * `lib/voixLecture.ts` : événement `lecture:dire`), dans une barre collée en bas de l'écran (au-dessus de la barre fixe) tant que le
  * corrigé est à l'écran : les lignes masquées gardent leur place, les boutons restent sous le pouce.
  * Une ligne = le texte d'une étape, une ligne de calcul, ou un piège. Le choix n'est pas mémorisé :
  * chaque corrigé s'ouvre complet.
@@ -150,7 +150,7 @@ export function CorrigeDetailleEcran({ etapes, titre = "Corrigé détaillé de l
     const courante = racineRef.current?.querySelectorAll<HTMLElement>(`[data-ligne="${pas - 1}"]`);
     if (!courante || courante.length === 0) return;
     courante[courante.length - 1].scrollIntoView({ block: "nearest", behavior: animationsReduites() ? "auto" : "smooth" });
-    setAnnonce(`Ligne ${pas} sur ${total} : ${[...courante].map(texteLisible).join(" ")}`);
+    setAnnonce(`Ligne ${pas} sur ${total} : ${[...courante].map(texteParleDe).join(" ")}`);
   }, [pas, total]);
 
   if (etapes.length === 0) return null;
@@ -161,7 +161,7 @@ export function CorrigeDetailleEcran({ etapes, titre = "Corrigé détaillé de l
     if (pas === null) return;
     const courante = racineRef.current?.querySelectorAll(`[data-ligne="${pas - 1}"]`);
     if (!courante || courante.length === 0) return;
-    dire({ texte: [...courante].map(texteLisible).join(". "), source: "corrige-ligne", element: courante[0] });
+    dire([...courante].map(texteParleDe).join(". "));
   };
   const suivante = () => {
     if (pas === null) return;

@@ -3,28 +3,30 @@ import type { VarianteQuizConiques } from "./core6e/quizConiques.types";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { demarrerSessionQuizConiques, soumettreReponseQuizConiques } from "./moteur6e/sessionQuizConiques";
 import type { EtatSessionQuizConiques, ResultatExerciceQuizConiques } from "./moteur6e/typesQuizConiques";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs6e/quizConiques";
+import {
+  CATALOGUE_VARIANTES,
+  construireAvecVarianteId,
+  creerGenerateurSansRepetition,
+  etendueNombreQuestions,
+  nombreQuestions,
+} from "./generateurs6e/quizConiques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { EtapeQuestionQuizConiques } from "./components6e/EtapeQuestionQuizConiques";
 import { ResultatPanelQuizConiques } from "./components6e/ResultatPanelQuizConiques";
 import { ResumeSessionQuizConiques } from "./components6e/ResumeSessionQuizConiques";
 import { useNoterEssai } from "../../lib/suiviContexte";
 
-/** `nombreExercices: 35` correspond exactement à la taille de la banque par thème (voir
- * `generateurs6e/quizConiques/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une session
- * parcourt donc les 35 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession6e = {
-  nombreExercices: 35,
-  tentativesMax: 1,
-};
+/** Une session = toutes les questions du thème choisi (`nombreQuestions`, taille réelle de la banque,
+ * jamais une constante en dur), couplé à `creerGenerateurSansRepetition` : aucune question n'est
+ * répétée. */
+function reglagesPourTheme(theme: VarianteQuizConiques): ReglagesSession6e {
+  return { nombreExercices: nombreQuestions(theme), tentativesMax: 1 };
+}
 
-/** Le chapitre "Les coniques" n'a JAMAIS porté de numéro dans ce dépôt (contrairement aux chapitres
- * 1/2/3/4/7/8/9/10, révisés par 6gen64-71) — même situation que "Lieux géométriques" (6gen72). Il
- * est désigné par son seul nom partout, y compris dans `docs/historique-6e.md` et
- * `.claude/rules/6e-chapitres.md`. Le sous-titre le nomme donc plutôt que d'inventer un numéro. */
+const ETENDUE_QUESTIONS = etendueNombreQuestions();
 
 function nouvelleSession(theme: VarianteQuizConiques): EtatSessionQuizConiques {
-  return demarrerSessionQuizConiques(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizConiques(reglagesPourTheme(theme), creerGenerateurSansRepetition(theme));
 }
 
 /** Contrairement à la plupart des générateurs, le thème (variante) n'est pas tiré au hasard : c'est
@@ -57,7 +59,7 @@ export function App6gen73() {
     const theme = varianteId as VarianteQuizConiques;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizConiques(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizConiques(reglagesPourTheme(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
@@ -87,7 +89,11 @@ export function App6gen73() {
         {!etat ? (
           <div>
             <h2 className="result-title">Choisis un thème</h2>
-            <p className="result-subtitle">6 thèmes, 35 affirmations vrai/faux chacun — révision complète du chapitre « Les coniques ».</p>
+            <p className="result-subtitle">
+              {CATALOGUE_VARIANTES.length} thèmes,{" "}
+              {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max ? ETENDUE_QUESTIONS.min : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max}`} affirmations vrai/faux
+              chacun — révision complète du chapitre « Les coniques ».
+            </p>
             <div className="accueil-choix">
               {CATALOGUE_VARIANTES.map((variante, index) => (
                 <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

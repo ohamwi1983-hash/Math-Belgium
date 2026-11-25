@@ -1,115 +1,24 @@
 import type { ExerciceTangentesConique } from "../core6e/tangentesConique.types";
-import type { ReglagesSession6e } from "../core6e/session6e.types";
-import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 
-/**
- * Couche B (6e) — types de session pour `6gen62`. Longueur de chaîne VARIABLE pour les familles B/C
- * (l'écran final "donner les équations complètes" n'a de sens que si des tangentes réelles existent
- * — `aSolution`) — `phaseApres` prend donc un 2e paramètre `exercice`, même patron que
- * `typesIdentificationConiques.ts` (6gen58).
- *
- * - A : aEcran1 → aEcran2 → aEcran3 (TOUJOURS les 3, quel que soit le type de conique).
- * - B : bEcran1 → bEcran2 → bEcran3 → [bEcran4 si `aSolution`].
- * - C : cEcran1 → cEcran2 → cEcran3 → [cEcran4 si `aSolution`].
- * - D : dEcran1 → dEcran2 → dEcran3 → dEcran4 (TOUJOURS les 4 — jamais de cas dégénéré, voir
- *   `familleD.ts`).
- * - E : eEcran1 → eEcran2 → eEcran3 (TOUJOURS les 3 — `base.aSolution` toujours forcé `true`, voir
- *   `familleE.ts`).
- */
+/** Écrans de `6gen62` (audit du 6e ch. 10, lots B et C). */
+export type PhaseTangentesConique = "aPente" | "aTangente" | "bEquationK" | "bNombre" | "bTangentes" | "cEquationM" | "cNombre" | "cTangentes" | "dValeurs" | "dEquation" | "eContacts" | "eProche";
 
-export type PhaseTangentesConique = "aEcran1" | "aEcran2" | "aEcran3" | "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4" | "cEcran1" | "cEcran2" | "cEcran3" | "cEcran4" | "dEcran1" | "dEcran2" | "dEcran3" | "dEcran4" | "eEcran1" | "eEcran2" | "eEcran3";
-
-export function phaseInitiale(exercice: ExerciceTangentesConique): PhaseTangentesConique {
-  switch (exercice.famille) {
+export function phasesPourExercice(e: ExerciceTangentesConique): PhaseTangentesConique[] {
+  switch (e.famille) {
     case "A":
-      return "aEcran1";
+      return ["aPente", "aTangente"];
     case "B":
-      return "bEcran1";
+      return e.verdict === 2 ? ["bEquationK", "bNombre", "bTangentes"] : ["bEquationK", "bNombre"];
     case "C":
-      return "cEcran1";
+      return e.verdict === 2 ? ["cEquationM", "cNombre", "cTangentes"] : ["cEquationM", "cNombre"];
     case "D":
-      return "dEcran1";
+      return ["dValeurs", "dEquation"];
     case "E":
-      return "eEcran1";
+      return ["eContacts", "eProche"];
   }
 }
 
-export function phaseApres(phase: PhaseTangentesConique, exercice: ExerciceTangentesConique): PhaseTangentesConique | "termine" {
-  switch (phase) {
-    case "aEcran1":
-      return "aEcran2";
-    case "aEcran2":
-      return "aEcran3";
-    case "aEcran3":
-      return "termine";
-    case "bEcran1":
-      return "bEcran2";
-    case "bEcran2":
-      return "bEcran3";
-    case "bEcran3":
-      return exercice.famille === "B" && exercice.aSolution ? "bEcran4" : "termine";
-    case "bEcran4":
-      return "termine";
-    case "cEcran1":
-      return "cEcran2";
-    case "cEcran2":
-      return "cEcran3";
-    case "cEcran3":
-      return exercice.famille === "C" && exercice.aSolution ? "cEcran4" : "termine";
-    case "cEcran4":
-      return "termine";
-    case "dEcran1":
-      return "dEcran2";
-    case "dEcran2":
-      return "dEcran3";
-    case "dEcran3":
-      return "dEcran4";
-    case "dEcran4":
-      return "termine";
-    case "eEcran1":
-      return "eEcran2";
-    case "eEcran2":
-      return "eEcran3";
-    case "eEcran3":
-      return "termine";
-  }
-}
-
-/** Liste ORDONNÉE des phases réellement traversées par CET exercice précis — parcourt la chaîne
- * `phaseInitiale → phaseApres`, jamais une table statique (mirroir 6gen58/6gen26/6gen29). */
-export function phasesPourExercice(exercice: ExerciceTangentesConique): PhaseTangentesConique[] {
-  const phases: PhaseTangentesConique[] = [];
-  let phase: PhaseTangentesConique | "termine" = phaseInitiale(exercice);
-  while (phase !== "termine") {
-    phases.push(phase);
-    phase = phaseApres(phase, exercice);
-  }
-  return phases;
-}
-
-export interface ResultatExerciceTangentesConique {
-  exercice: ExerciceTangentesConique;
-  scores: Partial<Record<PhaseTangentesConique, number>>;
-}
-
-export interface EtatSessionTangentesConique {
-  reglages: ReglagesSession6e;
-  generateur: () => ExerciceTangentesConique;
-  exerciceCourant: ExerciceTangentesConique;
-  phase: PhaseTangentesConique;
-  etapeCourante: EtatEtapeTentatives;
-  niveauAide: number;
-  scoresPartiels: Partial<Record<PhaseTangentesConique, number>>;
-  /** Un booléen "révélé" par écran déjà clos, même principe que `scoresPartiels` — jusqu'au 2025-10,
-   * déduit de `scoresPartiels[phase] === 0`, heuristique fausse ici : l'ancienne pénalité d'aide (supprimée)
-   * (`Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE)`) pouvait faire tomber une RÉUSSITE
-   * fortement aidée à exactement 0, affichée alors à tort comme "révélée". Champ explicite ajouté
-   * pendant le balayage générique (point A). */
-  revelesPartiels: Partial<Record<PhaseTangentesConique, boolean>>;
-  indexExercice: number;
-  resultats: ResultatExerciceTangentesConique[];
-  terminee: boolean;
-  /** Vrai UNIQUEMENT juste après l'appel qui a clos un écran par épuisement des tentatives — piège
-   * "revele stale" documenté CLAUDE.md. */
-  derniereTransitionRevelee: boolean;
+/** Trois puces tant que le nombre de tangentes n'est pas jugé (B, C). */
+export function pucesMasquees6gen62(e: ExerciceTangentesConique): { nombre: number; jusqua: number } | null {
+  return e.famille === "B" || e.famille === "C" ? { nombre: 3, jusqua: 1 } : null;
 }

@@ -157,7 +157,7 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
   3 moyen · 4 difficile · 5 à 7 très difficile. Il monte avec… » (numéros dans leurs cases teintées).
   Rien sur la copie d'évaluation, son corrigé, sa grille, l'examen ni en Word (les étoiles n'y
   étaient pas) : ces documents n'impriment pas de niveau.
-- **Chapitres notés** : 6e ch. 5, 6e ch. 4, 4e ch. 3, 6e ch. 3, 5e ch. 3, 4e ch. 4, 4e ch. 2, 4e ch. 5, 5e ch. 2, 6e ch. 2 (6gen6–12), 4e ch. 1 (gen7–9, gen55), 6e ch. 1 (6gen1–5), 5e ch. 1 (5gen1–5), 5e ch. 4 (5gen20–24), 4e ch. 6 (gen20–29, gen82–91), 4e ch. 7 (gen42–54), 4e ch. 8 (gen39–41, gen100–107), 5e ch. 5 (5gen25–35), 6e ch. 6 (6gen30–33, 6gen74–76), 6e ch. 7 (6gen43–48, lot E ; 6gen100–104), 6e ch. 8 (6gen110–115, lot H1 ; 6gen116–122, lot H2 ; 6gen49–53, lot E), 6e ch. 9 (6gen123–127, lot H1 ; 6gen128–131, lot H2 ; 6gen54–57, lot E) (ni `difficulte` ni
+- **Chapitres notés** : 6e ch. 5, 6e ch. 4, 4e ch. 3, 6e ch. 3, 5e ch. 3, 4e ch. 4, 4e ch. 2, 4e ch. 5, 5e ch. 2, 6e ch. 2 (6gen6–12), 4e ch. 1 (gen7–9, gen55), 6e ch. 1 (6gen1–5), 5e ch. 1 (5gen1–5), 5e ch. 4 (5gen20–24), 4e ch. 6 (gen20–29, gen82–91), 4e ch. 7 (gen42–54), 4e ch. 8 (gen39–41, gen100–107), 5e ch. 5 (5gen25–35), 6e ch. 6 (6gen30–33, 6gen74–76), 6e ch. 7 (6gen43–48, lot E ; 6gen100–104), 6e ch. 8 (6gen110–115, lot H1 ; 6gen116–122, lot H2 ; 6gen49–53, lot E), 6e ch. 9 (6gen123–127, lot H1 ; 6gen128–131, lot H2 ; 6gen54–57, lot E), 6e ch. 10 (6gen132–137, lot H1 ; 6gen138–143, lot H2) (ni `difficulte` ni
   `dureeMinutes` : `criteresDifficulte` seul). **Conversion PROVISOIRE** pour les autres adaptateurs
   (non encore notés) : leurs étoiles → niveau ★ 2, ★★ 3, ★★★ 5, durée = leur
   constante `dureeMinutes` ; sans étoiles → rien d'affiché. Vrai/faux : niveau 2 (facile), provisoire.
@@ -1085,6 +1085,22 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   lecture de table `core6e/tablePhi.ts` sur les valeurs `lib/tablePhi.ts` (case la plus proche, unique ; extrait 3 × 3
   pour le CORRIGÉ seulement). Figures de cloche `ui6e/figureCloche.ts` (chaînes SVG écran = papier = corrigé, sans
   identifiant, étiquettes écartées et tenues dans le cadre). Détail : section « 6e ch. 8, lot H2 — 6gen116–6gen122 » plus bas.
+- **6e ch. 10, lot H2 (6gen138–6gen143, nouveaux, notés)** : socle d'écrans du 5e (`AppEcransTrigo`, sans
+  modification ; choix jugés ✗ / ✓ par `bonneOption`, `piegeChoixRevele`, `aidesChoixDeuxNiveaux` en 6gen143,
+  `approchee` = décimal arrondi refusé SANS tentative, `figureToujoursVisible` sauf 6gen143). Outils communs
+  `ui6e/outilsConiquesLotH2.ts` (module propre au lot : la figure de coniques des lots BC / H1 n'était pas fusionnée) :
+  coniques réduites du cours, convention de la 4e **y² = 2px, p = dist(F ; d)** ; `equationConiqueL` (« y^2 » quand
+  b² = 1, jamais « \dfrac{y^2}{1} »), `tangenteDedoublee`, `branchesConique` ; `normaliserDroite` PROPRE (multiplicateur =
+  ppcm des dénominateurs — celle d'`outilsLieuxLotH2` s'arrête à 60 et donnait une FAUSSE tangente dédoublée dès que
+  x_P/a² a un dénominateur > 60, ex. 12x/169 − 5y/26 = 1 normalisée en 4x − 12y − 61 = 0) ; `milliersL` « 10\,000 »,
+  `termeL`, `carreSurL`, `pL` (base de puissance entre parenthèses si fraction ou négative) ; `figureSchema` (schéma
+  sans quadrillage, même échelle, hauteur bornée à 380 px) pour les situations concrètes, `figureConiqueRepere` sinon ;
+  lecture `lireMesure` (préfixe « f′(x_P) = », « FP = », unité cm / km / UA / millions de km), `lireValeurs` (« ± »,
+  « ou », « ; », « aucune »), `estApprochee`. Équations jugées par PROPORTIONNALITÉ (`lectureLieuxLotH2`), y compris en
+  (x ; k) pour 6gen139. Énoncé papier : situation + consigne globale sans méthode (6gen140 : trois VRAIES questions
+  — conique et équation, grandeur, distance —, étapes a–b, c, d) ; la nature de la conique (6gen140), la position du
+  corps central (6gen141), la branche et la position (6gen139, 6gen142) n'apparaissent jamais dans l'énoncé. Détail :
+  section « 6e ch. 10, lot H2 — 6gen138–6gen143 » plus bas.
 - **6e ch. 9, lot H2 (6gen128–6gen131, nouveaux, notés)** : socle d'écrans du 5e (`AppEcransTrigo`, sans
   modification ; choix jugés ✗ / ✓ par `bonneOption`, `piegeChoixRevele`, `aidesChoixDeuxNiveaux` ; `nombrePuces` 4 en
   6gen128 et 6gen129 pour que le nombre d'écrans ne trahisse pas le verdict ; `figureToujoursVisible` partout sauf
@@ -1112,6 +1128,19 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   = 0, développée, coefficients entiers ; milieu ; vecteur en colonne ; `figureCorrigeLot` : figure du corrigé bornée à 9 cm).
   Messages ciblés jamais sur une réponse juste (garde en tête de chaque `piege…`). Détail : section « 6e ch. 9, lot H1 —
   6gen123–6gen127 » plus bas.
+- **6e ch. 10, lot H1 (6gen132–6gen137, nouveaux, notés)** : socle d'écrans du 5e (`AppEcransTrigo`, sans
+  modification ; choix jugés ✗ / ✓ par `bonneOption`, `piegeChoixRevele`, `aidesChoixDeuxNiveaux`, `approchee` = décimal proche
+  d'une valeur exacte refusé SANS tentative, `nombrePuces` 3 en 6gen136, `figureToujoursVisible`) ; 6gen133 (réponse
+  GRAPHIQUE) : appli propre `App6gen133.tsx` = moteur `sessionEcransTrigo` (contrat `DefinitionEcrans`, points encodés « x;y »)
+  + surface de placement de 5gen52 `EtapePlacerPointsTrig5e` réutilisée telle quelle sur une géométrie construite (un nœud =
+  une unité). Modèle commun `core6e/coniquesLotH1.ts` (conique d'axes parallèles aux axes : nature, centre / sommet, axe focal,
+  a², b² ou p et sens ; convention y² = 2px ; nombres EXACTS q + r√n `Ex` — sommets, foyers, directrices, excentricité écrits
+  sans arrondi ; polynôme à dénominateurs chassés `poly`, `polyEntier`) ; figure `ui6e/figureConiquesLotH1.ts` (module propre :
+  la figure du lot BC n'était pas fusionnée ; sur `figureRepere` du 4e : courbe par branches, centre, sommets, foyers,
+  directrices, asymptotes, rectangle (±a ; ±b), droites et points en plus) ; lecture `moteur6e/saisieConiquesLotH1.ts` (points
+  en ordre libre « (2 + √13 ; 3) », équation PROPORTIONNELLE au polynôme attendu avec x′ / y′ / X / Y lus x, y, aperçu KaTeX
+  léger `apercuLibre`). Messages ciblés jamais sur une réponse juste. Détail : section « 6e ch. 10, lot H1 — 6gen132–6gen137 »
+  plus bas.
 - **6e ch. 6, lot G2 (6gen162–6gen163, nouveaux)** : socle d'écrans du 5e (`AppEcransTrigo`, sans
   modification ; `bonneOption` = choix jugés ✗ / ✓ pour la ligne et l'erreur de 6gen163, `approchee` =
   valeur décimale proche d'une valeur exacte refusée SANS tentative). Lecture commune
@@ -1195,6 +1224,36 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   `generateurs6e/adaptateurLieux.ts` (mêmes textes que l'écran, données en prose — plus de question coupée —, une
   question par écran, réponses au corrigé) en attendant le lot E ; aucun `calcul` (règle du 24/11 : établir une
   équation, éliminer un paramètre, décider une nature).
+- **6e ch. 10 (lots B et C, 6gen58–6gen63)** : les six générateurs passent sur le socle du ch. 7 / ch. 9
+  (`AppCombinatoire` + `algebreLieux.ts` / `saisieLieux.ts`, choisi plutôt qu'`AppEcransTrigo` : réponses = équations
+  comparées par PROPORTIONNALITÉ exacte, points et droites comme des ENSEMBLES, `complement` pour tracer la réponse
+  APRÈS l'écran, `pucesMasquees`, `?code=` et corrigé consultable après chaque réponse déjà en place ; aucun changement
+  pour les ch. 7 à 9). Ajouts facultatifs : `algebreLieux.ts` exporte l'arbre de lecture (`lireMembres`,
+  `noeudVersPoly`, `evaluerNoeud`, `noeudDecimal`) ; `figureLieux.ts` : courbes `coupe: true` coupées au bord du
+  quadrillage (jamais dans la marge). Briques du chapitre : `moteur6e/algebreConiques.ts` (conique décrite par nature,
+  centre ou sommet, axe focal ; conventions du cours — a demi-grand axe / demi-axe focal, hyperbole d'axe Oy
+  y²/a² − x²/b² = 1, **parabole y² = 2px, p = dist(F ; d)**, décision 1 ; foyers et sommets h ± √R simplifiés,
+  asymptotes, directrices), `moteur6e/saisieConiques.ts` (équation sous une FORME imposée — « deux carrés » après
+  complétion, coefficients fractionnaires et forme réduite acceptés ; « v² = k·w » — juste mais d'une autre forme =
+  refus SANS tentative ; relation en a, b, c, e jugée par la valeur de e qu'elle impose : « 2a²/c = k·2c », « b = c »,
+  « e² = 1/2 »… ; relation toujours vraie signalée ; couple (λ ; μ) à un facteur près), `ui6e/traceConiques.ts`
+  (ellipse, hyperbole, parabole, cercle sur la figure commune, isotrope, foyers, asymptotes, directrices ;
+  `fenetreConique`), `ui6e/textesConiques.ts`. Verdicts tirés AVANT les paramètres, à parts égales : 6gen58 nature
+  (cas dégénérés gardés, décision 4), 6gen59 nature (A même axe, C), 6gen61 nombre de points communs (0 aussi pour
+  l'hyperbole), 6gen62 B (deux tangentes / aucune) et C (P extérieur / intérieur, tiré près de l'ellipse des deux
+  côtés) ; puces masquées tant que le verdict n'est pas jugé (6gen58, 6gen61, 6gen62 B / C). Figures : rien ne
+  trahit la réponse (6gen58 : la conique après la nature ; 6gen61 : la droite après le nombre de points ; 6gen62 C :
+  P après le verdict ; 6gen63 : foyers et rayon après l'écran des foyers, rayon réfléchi en demi-droite, prolongement
+  pointillé vers F′ pour l'hyperbole). Codes : indices gardés partout (libellés neutres), ajouts EN FIN : 6gen61
+  `A_hyperbole_0solution`, 6gen63 `parabole_depuisFoyer`, `parabole_parallele` ; tous les exercices tirés diffèrent
+  d'avant (générateurs refaits) ; 6gen60 `B_angleDroitSommetSecondaire` tire maintenant un angle FBF′ quelconque.
+  Groupes à verdict (décision 3) : 6gen58 A1 / A2 / B / C, 6gen59 « même axe » et les cinq paires de C, 6gen61 ellipse
+  et hyperbole (nombre de points), 6gen62 B et C. Adaptateurs PROVISOIRES `generateurs6e/adaptateurConiques.ts`
+  (mêmes textes que l'écran ; énoncé IMPRIMÉ = consigne + données en prose, SANS les étapes — leur nombre trahirait le
+  verdict — ; une question par écran pour les titres « Étape n » du corrigé, réponses rédigées avec les nombres) en
+  attendant le lot E ; aucun `calcul` (décider une nature, établir une équation, une tangente). 6gen63 : R et la pente
+  à dénominateur ≤ 12, l'autre racine de l'équation ≤ 40 (une corde focale à deux extrémités de petit dénominateur
+  n'existe presque pas pour ces ellipses).
 - **6e ch. 7 (lot E, papier de 6gen43–6gen48, notés, corrigé « comme au tableau »)** : adaptateur COMMUN
   `generateurs6e/adaptateurCombinatoire.ts::construireAdaptateurCombinatoire` (le générateur ne décrit que
   sa situation papier, ses questions, sa brève, son corrigé, son barème, ses critères et son profil ;
@@ -1388,6 +1447,22 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   chaque fragment devenait une colonne — était déjà corrigée sur les 8 panneaux de quiz du 6e (un seul `<span>`,
   `dcda4bd`, 20/11) ; les panneaux 4e / 5e passent un `<p>` ou une chaîne unique. Vérifié : 5 thèmes joués en entier
   (iPhone 13), un seul enfant dans le conteneur, 0 colonne.
+- **6e ch. 10, lots A, F, D (cours, démonstrations, quiz 6gen73 ; générateurs : autres agents)** : énoncés de
+  démonstration PAR CLÉ pour les 35 blocs `exemple` / `exempleLibre` (chapitre ajouté à `CHAPITRES_ENONCES_VERIFIES`),
+  dont 18 démonstrations ; énoncés autosuffisants (foyers, $a$, $b$, $c$ et conditions de signe rappelés : « Démontre que
+  l'ellipse de foyers F(c ; 0) et F'(−c ; 0), ensemble des points dont la somme des distances aux foyers vaut 2a
+  (a > c > 0), a pour équation… »), convention unique $y^2=2px$, $p=\mathrm{dist}(F\,;d)$. Corrigés de compréhension :
+  `\text{dist}`, intersection droite–conique de degré 1 ou équation dégénérée, démonstrations optiques. Banque
+  « Formule » (`questionsFormules/niveau6e.ts`) : ids gardés, 26 questions, plus aucune question « recopie » (hyperbole
+  d'axe focal vertical, $xy=k$, équation depuis foyer + directrice + $e$, $(y-k)^2=2p(x-h)$, cas dégénérés, $a-ex$,
+  périhélie / aphélie, $b^2\tan\frac{\theta}{2}$, $k^2=a^2m^2\pm b^2$, $\frac{D^2}{16h}$). Quiz 6gen73 : 2 points
+  (plus de « codes »), Q3 (une justification = un seul bloc), majuscules d'insistance et grands calculs retirés,
+  7ᵉ thème `excentriciteReduction` (§ 2 : excentricité, directrices, réduction, cas dégénérés) ajouté au pilote sur la
+  section `excentricite` à côté de `equationDepuisCaracteristiques` (libellés distincts), 18 V / 17 F dans chacun des
+  7 thèmes (245 affirmations), `nombreExercices` = `nombreQuestions(theme)` (accueil de `App6gen73` calculé). Vérifié
+  dans le vrai pipeline (`evaluationLocal`, dossier `afd-6e10/docs.cjs`) : 18 démonstrations, 26 « Formule », 245
+  vrai/faux en évaluation (2 séries, aménagée, corrigé, grille) et feuille, Word copie / corrigé / grille : 0
+  `katex-error`, 0 `$`, 0 `**`, 0 `undefined` / `NaN`.
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 
@@ -2012,7 +2087,7 @@ codes, aménagée si cochée) intitulée « Remédiation — <titre sans « Éva
 Décision de l'utilisateur (maquette validée) : le corrigé détaillé des feuilles d'exercices et des
 évaluations ne saute plus d'étape. **Chapitres migrés** : 6e ch. 5 (pilote, 6gen34–42, 6gen93–99) ;
 4e ch. 3 (gen10–13, gen68–72 — voir « Lectures graphiques et décisions » plus bas) ; 6e ch. 4
-(6gen23–29, 6gen77–84) ; 5e ch. 3 (5gen14–19, 5gen44–49) ; 6e ch. 3 (6gen13–22, 6gen85–92) ; 4e ch. 4 (gen30–38, gen108–112) ; 4e ch. 2 (gen1–6, gen57, gen67) ; 4e ch. 5 (gen14–19, gen58, gen73–81, gen122) ; 5e ch. 2 (5gen6–13) ; 6e ch. 2 (6gen6–12) ; 4e ch. 1 (gen7–9, gen55) ; 6e ch. 1 (6gen1–5) ; 5e ch. 1 (5gen1–5) ; 5e ch. 4 (5gen20–24) ; 4e ch. 6 (gen20–29, gen82–91) ; 4e ch. 7 (gen42–48, gen49–54) ; 4e ch. 8 (gen39–41, gen100–107) ; 5e ch. 5 (5gen25–35) ; 6e ch. 6 (6gen30–33, 6gen74–76) ; 6e ch. 7 (6gen43–48, lot E ; 6gen100–104), 6e ch. 8 (6gen110–115, lot H1 ; 6gen116–122, lot H2 ; 6gen49–53, lot E), 6e ch. 9 (6gen123–127, lot H1 ; 6gen128–131, lot H2 ; 6gen54–57, lot E). Les autres adaptateurs s'affichent comme avant (contrat rétrocompatible).
+(6gen23–29, 6gen77–84) ; 5e ch. 3 (5gen14–19, 5gen44–49) ; 6e ch. 3 (6gen13–22, 6gen85–92) ; 4e ch. 4 (gen30–38, gen108–112) ; 4e ch. 2 (gen1–6, gen57, gen67) ; 4e ch. 5 (gen14–19, gen58, gen73–81, gen122) ; 5e ch. 2 (5gen6–13) ; 6e ch. 2 (6gen6–12) ; 4e ch. 1 (gen7–9, gen55) ; 6e ch. 1 (6gen1–5) ; 5e ch. 1 (5gen1–5) ; 5e ch. 4 (5gen20–24) ; 4e ch. 6 (gen20–29, gen82–91) ; 4e ch. 7 (gen42–48, gen49–54) ; 4e ch. 8 (gen39–41, gen100–107) ; 5e ch. 5 (5gen25–35) ; 6e ch. 6 (6gen30–33, 6gen74–76) ; 6e ch. 7 (6gen43–48, lot E ; 6gen100–104), 6e ch. 8 (6gen110–115, lot H1 ; 6gen116–122, lot H2 ; 6gen49–53, lot E), 6e ch. 9 (6gen123–127, lot H1 ; 6gen128–131, lot H2 ; 6gen54–57, lot E), 6e ch. 10 (6gen132–137, lot H1 ; 6gen138–143, lot H2). Les autres adaptateurs s'affichent comme avant (contrat rétrocompatible).
 - 6e ch. 6 (6gen30–33, 6gen74–76 ; 6gen69 = quiz, hors périmètre ; notés, `criteresDifficulte`) : brique `6e-6h/ui6e/corrigeProbabilites.ts` (`COURS_*` § 1–4 ; `frac` / `brute` ; `lignesFraction` « = n/d » brute → simplifiée « on simplifie par g » → « = » décimal exact ou « ≈ » au centième / millième sous 0,1 ; `lignesFraction4` et `egal4` pour 6gen32, dont l'écran arrondit à 10⁻⁴ ; `lignesProduit` (règle du produit, fractions brutes de l'urne), `lignesSommeFractions` (même dénominateur), `lignesComplement` ; figures HTML `tableauDoubleHtml`, `vennDeuxHtml`, `vennTroisHtml`). Corrigés `generateurs6e/{probabilitesEnsembles,tiragesArbres,independanceBayes,probabilitesProblemes,arbreTableauEffectifs,frequenceProbabilite,paradoxesProbabilites}/corrigeDetaille.ts`, une lettre par écran (`lettreEcran…`), branchés dans les 7 applis ; exceptions : 6gen32 « tableau donné » (trois vraies questions papier, l'écran en pose une : `lettreEcranIndependanceBayes`), 6gen76 (prédiction sans étape : modéliser / calculer / conclure = a, b, c). Probabilité : formule du cours, valeurs substituées (dénominateur commun N), calcul, fraction réduite, décimal ; test d'indépendance comparé EN NOMBRES (`n(A∩B)·N` contre `n(A)·n(B)`, ou fractions sur N²), jamais sur des arrondis ; 6gen75 : écart relatif calculé avec les fractions exactes (jamais la fréquence arrondie), comparaison au seuil selon `verdictAttendu`. Données de 6gen30 B : `EvenementFamilleB.issues` / `explication` et `issuesAetB` (issues listées si ≤ 8, sinon comptage expliqué ; aucun tirage aléatoire ajouté : `?code=` inchangés). **Lectures** : 6gen30 A étape b « case lue » (P(A∩B̄), P(Ā∩B)), 6gen75 C écran 1, 6gen76 conclure. **Verdict sans charge** (niveau et durée constants dans un verdict) : 6gen30 dernière étape, 6gen32 B test, 6gen74 indépendance, 6gen75 règle de décision. Méthode 1 partout sauf 6gen33 (2, problème) et 6gen76 Monty Hall (2) ; piège : 6gen31 B (exactement n − 1 impossible), 6gen33 E et F « vérifier », 6gen75 B (modèle des 11 sommes), 6gen76 (tous) ; nombres = calculatrice (6gen32 C, 6gen33 profil, 6gen75, Méré). Collecteur `corrige-6e6` (algèbre d'événements : `P(…)`, `P(X|Y)`, `P(X\mid Y)`, `n(…)`, `\cap`, `\cup`, `\overline{}`, `\bar{}` remplacés par leur valeur depuis l'univers de l'instance ; `\div` ; milliers `\,`).
 - 5e ch. 5, moitié 2 (5gen31 étudier une fonction, 5gen32 optimisation, 5gen33 contexte économique, 5gen34 extrema bornés, 5gen35 vitesse et position ; notés, `criteresDifficulte`) : brique `5e-4h/ui5e/corrigeDerivees2.ts` (`COURS_*` § 3–11 ; `lignesDeriveePoly` « 3·2x² − 2·3x + 5 » puis réduite ; `lignesValeurPoly` / `lignesValeurQ` (substitution entière ou fractionnaire) ; `lignesTrinome` (Δ, radical simplifié √8 = 2√2, racines croissantes, ≈ au centième) ; `pointsTest` : une valeur test entière par intervalle). Corrigés `generateurs5e/{etudierFonction,optimisationGeometrique,contexteEconomique,extremaBornes,vitessePosition}/corrigeDetaille.ts`, une lettre par écran (5gen31 sans l'écran « recap »), branchés dans les 5 applis ; figures de 5gen31 sorties dans `etudierFonction/figures.ts` (sans `docx`). Relations de l'optimum réutilisées pour les valeurs exactes (x³ = V/2 ⇒ h = 2x, aire 6πx² ; P = r(4 + π) ⇒ h = r ; c/q = aq ⇒ C_M = 2aq + b ; c = a·r ⇒ c/(x − e) = ±a√r) ; f(e ± √r) d'un polynôme : puissances développées dans ℤ[√r], le conjugué par changement de signe de √r ; f″ d'une rationnelle avec D(x) nommé (u, v, v′ = 2D·D′, simplification par D) ; Horner coefficient par coefficient (5gen34 degré 4) ; valeurs approchées calculées avec les valeurs NON arrondies (B du trapèze, t₂ et temps total, dichotomie en décimaux exacts). **Lectures** : 5gen31 graphique, 5gen34 comparaison, 5gen35 rejet. **Niveaux** : méthode 1 (5gen31, 5gen33 A/B, 5gen34, 5gen35 B, 5gen32 cubique), 2 (5gen32 géométrique), 0 (5gen33 dichotomie, 5gen35 A) ; piège 1 : valeur exclue / polynôme (constant dans la famille), solution négative à rejeter (5gen32 trapèze, marges, fenêtre B ; 5gen33 B ; 5gen35), 5gen34 constant (la borne est le verdict) ; nombres = profil `calcul` pour 5gen31 et 5gen32. Mesuré (200 libres + 30 par variante) : 5gen31 niv. 5–6, 17–25 min (constante 25) ; 5gen32 5–7, 16–21 (cubique 3, 10 ; constante 15) ; 5gen33 4–5, 14–18 (15) ; 5gen34 5–6, 15–18 (12) ; 5gen35 3–6, 13–18 (12). Collecteur `corrige-5e5-m2` (outils de `corrige-5e4`, primes f′ f″ C′_T R′_T B′ D′ u′ → fonctions de l'instance, variable t / q / r / α renommée x, équations sans solution non testables) : 1 810 tirages, ≈ 51 900 relations, 0 fausse ; documents réels (2 graines × 2 plans × avec / sans regroupement : évaluation 2 séries, aménagée, corrigé, grille, feuille, Word du corrigé) : 0 `.katex-error`, 0 formule coupée et 0 débordement à 680 / 820 / 1 280 px ; iPhone 13 : corrigé sous la réponse attendue, scrollWidth 390, 0 erreur console.
 - 5e ch. 5, moitié 1 (5gen25 association, 5gen26 définition, 5gen27 fonction dérivée, 5gen28 tangentes, 5gen29 étude locale, 5gen30 lecture graphique ; notés, `criteresDifficulte`) : brique `5e-4h/ui5e/corrigeDerivees1.ts` (`COURS_*` § 1–6, `lignesValeurPoly` entier ou fractionnaire, `lignesDeriveePoly` « n·c·xⁿ⁻¹ » puis réduit, `lignesTrinomeUnitaireNul` après division par 3a — mise en évidence, identité, Δ, racines e ± √r simplifiées —, `lignesTangenteEntiere` remplie / distribuée / réduite, `tableauSignesEtudeLatex` sorti de l'adaptateur de 5gen29 (réexporté), `zonesTableau` / `phraseSens` / `lignesSignesZones` tirés du MÊME tableau attendu que l'écran). Corrigés `generateurs5e/{association,definitionDerivee,fonctionDerivee,tangentes,etudeLocale,lectureGraphiqueDerivees}/corrigeDetaille.ts`, une lettre par ÉCRAN, branchés dans les 6 applis (5gen25 : sauf la famille « A avancée », hors export ; 5gen28 : lettre de l'écran = `lettreEtapeTangente`, l'étape papier « dérivée » vient avant) ; figure 5gen30 sortie dans `lectureGraphiqueDerivees/figure.ts`. 5gen25 : lecture par élément (signe de f′ zone par zone, sommets, f(0)) puis la lettre, figure f et f′ superposées (A) ou sommets et (0 ; f(0)) marqués (B) ; C : chaque dérivée écrite puis réduite jusqu'à l'expression lettrée. 5gen26 : f(a + h) − f(a) au même dénominateur avec f(a) réduit (d·A − n·B), h mis en évidence, × 1/h, h remplacé par 0, vérification par les règles du § 3. 5gen27 : u′, v′, g′(u) écrits avant simplification, formule posée puis remplie (termes calculés à part au-delà de 32 caractères), quotient ambigu par v = sin²/cos² et simplification. 5gen28 : radicale avec dénominateur rendu rationnel ; double tangence : f − t = (x − p)²·Q, identités, pente en q. 5gen29 : domaine (carré isolé), signe d'un trinôme / du numérateur, nature par changement de signe, valeur en e ± √r par x², x³ puis chaque terme (exacte puis ≈). 5gen30 : une relation par chose lue, justification = où on lit. **Lectures** : 5gen25 A et B (association, comme 6gen85) ; 5gen27 b (décomposition) ; 5gen30 tangentes horizontales, valeurs, inflexions, asymptotes sauf oblique. **Niveaux** : méthode 0 pour 5gen25 A, 5gen26, 5gen27 somme, 5gen29 (f′ donnée, démarche imposée), 5gen30 ; 1 sinon. Pièges dans les données : 5gen25 B deux graphiques de mêmes variations, C puissance de ax + b avec a ≠ 1 ; 5gen26 a < 0 (non affine) ; 5gen27 facteur trigonométrique d'argument ax + b dans un produit / quotient, quotient ambigu ; 5gen28 double tangence seulement (racine double de f′ = verdict : non notée) ; 5gen29 rationnelle avec CE (la racine double, verdict, n'est pas notée) ; 5gen30 point plein, branches de même signe, deux AH, aucune asymptote. Nombres 0 imposés pour 5gen25 et 5gen30 (« ≈ » = lecture sur quadrillage). Durées (constante → mesurée, 200 tirages libres + 30 par variante) : 5gen25 6 → 3–6 (niv. 1–3) ; 5gen26 8 → 6–8 (niv. 1–3) ; 5gen27 5 → 6–7 (niv. 1–3) ; 5gen28 7 → 8–10 (niv. 3–4) ; 5gen29 12 → 6–21 (niv. 1–4 ; irrationnelle avancée 21, charge 3 sur les valeurs) ; 5gen30 12 → 9–12 (niv. 1–3). Collecteur `corrige-5e5-m1` (outils de `corrige-5e4` + dérivée numérique d'un `(…)'`, fonctions f, f′, f″, u, v, u′, v′, g, g′, t de l'instance, variable h, chaînes « ⟺ » rouvertes, équations sans solution réelle comptées à part, lectures de 5gen30 et correspondance de 5gen25 comparées à l'instance) : 2 520 tirages, ≈ 22 800 relations, 0 fausse. Documents (2 graines, avec / sans regroupement, évaluation 2 séries + aménagée + feuille + Word) : 0 `.katex-error`, 0 formule coupée, 0 débordement à 680 / 820 / 1 280 px ; iPhone 13 : corrigé de l'étape ratée, scrollWidth 390, 0 erreur console.
@@ -2711,6 +2786,68 @@ cercles exinscrits, tangente verticale, octogone ne sont pas encore écrits dans
   (évaluation 2 séries + aménagée + corrigé + grille + feuille + aménagée + Word copie / corrigé, interdite / autorisée) : 0
   débordement, 0 formule coupée, 0 `.katex-error` à 680 / 820 / 1 280 px.
 
+## 6e ch. 10, lot H1 — 6gen132–6gen137 (nouveaux, notés)
+
+Corrigés `generateurs6e/{lireConique,representerConique,reduireConique,foyerDirectrice,rayonsFocaux,hyperboleEquilatere}/corrigeDetaille.ts`,
+une lettre par écran, partagés par l'appli (corrigé consultable après chaque réponse : validation ET fiche de puce) et
+l'adaptateur ; figure complète sous le dernier résultat. Textes `ui6e/format….ts`, vérifications `moteur6e/verification….ts`,
+modèles `core6e/….ts`, définitions `ui6e/definition….ts`. Cartes : 6gen132, 6gen133, 6gen137 en fin de § 1 (après 6gen58),
+6gen134, 6gen135 en fin de § 2 (après 6gen59), 6gen136 en fin de § 3 (après 6gen60) ; AUCUN bloc de cours ajouté — notions
+utilisées et pas encore écrites dans la base de ce lot (lot F, agent AFD) : rayons focaux |PF| = a − ex (D12), aire du triangle
+focal b²·tan(θ/2) (redémontrée dans le corrigé de 6gen136), k = a²/2 (C4), formes verticales de l'hyperbole.
+- **6gen132 « Lire une conique sur sa figure ou son équation réduite »** (§ 1–2, § 6, Connaître) : `equation` (équation réduite
+  centrée, axe Ox ou Oy → nature, axe / sens, sommets, foyers, puis e (ellipse), asymptotes (hyperbole) ou directrice
+  (parabole) : cinq écrans pour les trois natures), `figure` (courbe sur quadrillage, rectangle et asymptotes pour l'hyperbole,
+  F et d pour la parabole, p pair → nature, axe, sommets lus, équation réduite), `optique` (sept situations : antenne, phare, four
+  solaire, lithotriteur, galerie à écho, Cassegrain, miroir convexe → conique, puis propriété parmi quatre dont le piège « un
+  faisceau parallèle concentré en un foyer »). Nature tirée au tiers AVANT les nombres ; options en ordre fixe (« cercle » comme
+  leurre). Lectures a, b, c (tout `optique`), `sansCharge` : equation 1 · 9 min, figure 1 · 7, optique 1 · 4 pour toutes les
+  natures. Messages : a² sous la mauvaise variable, c² = a² ± b² inversé, foyer / directrice à p au lieu de p/2, e = a/c, pente
+  inversée, 4p au lieu de 2p.
+- **6gen133 « Représenter une conique »** (§ 1–2, Connaître) : équation translatée → quatre écrans de PLACEMENT (ellipse : centre,
+  sommets du grand axe, du petit axe, foyers ; hyperbole : centre, sommets, foyers, sommets du rectangle des asymptotes ;
+  parabole : sommet, foyer, pied K de la directrice sur l'axe, deux points de la parabole au niveau du foyer). Tous les points sur
+  des nœuds : triplets (5, 4, 3) / (3, 4, 5), p pair, fenêtre ≤ 16 unités, centre jamais à l'origine. Repère VIDE à l'écran
+  (jamais la courbe), points déjà confirmés nommés en noir, points attendus entourés une fois l'écran clos ; corrigé : courbe,
+  asymptotes ou directrice. Messages : signes du centre, a sur le mauvais axe, foyers aux sommets / sur l'axe non focal, p au
+  lieu de p/2, rectangle a × b échangé, points du foyer à p/2. Placer = lecture (centre, sommets ; rectangle) : 1 · 7 min
+  (ellipse, hyperbole), 2 · 9 (parabole). Papier : « Représente-la… » ; la réponse graphique est au corrigé.
+- **6gen134 « Réduire par translation et donner tous les éléments »** (§ 2, Appliquer) : équation développée à coefficients
+  entiers premiers entre eux, x² positif (hyperbole d'axe vertical : second membre NÉGATIF après complétion) ; ellipses à c
+  entier (a² ∈ {8, 9, 12, 13, 18, 20, 25}), hyperboles a, b ∈ 1–4 (pentes rationnelles), paraboles p ∈ 1–5 avec facteur commun
+  1–3 ; six écrans : Ω, équation réduite en x′, y′ (proportionnelle au polynôme centré), nature + axe (choix à six options),
+  puis sommets, foyers, directrices / asymptotes, ou p (piège p contre 2p), foyer, directrice, dans le repère initial. Variantes
+  ellipse / hyperbole / parabole = groupe à verdict `groupe_nature` ; critères fixes (lecture de la nature, méthode 1, piège 1,
+  `sansCharge`) : 4 · 13 min pour les trois natures. Corrigé : complétion une transformation par ligne (regroupement,
+  coefficient en évidence, carrés, constantes), division par le second membre, retour x = x′ + h.
+- **6gen135 « Équation depuis foyer, directrice et excentricité »** (§ 2, Appliquer) : F entier hors des axes, d ≡ x = k ou y = k
+  (variante = direction, visible), e ∈ {1/2, 1/3, 2/3, 3/4, 1, 2, 3/2, 3, 4/3} ; nature tirée au tiers avant ; écrans nature,
+  équation (den²·|PF|² − num²·dist² : toute forme proportionnelle), sommet entre F et d (S = (F + e·H)/(1 + e)). Écran : F et d
+  seuls (fenêtre indépendante de la conique). Messages : e² oublié, distance à la mauvaise coordonnée, milieu de [FH] pour
+  e ≠ 1, rapport inverse. 2 · 7 min pour toutes les natures (piège 1 partout).
+- **6gen136 « Rayons focaux et triangle focal »** (§ 3, Appliquer) : ellipses à c entier (dix triplets) ; `rayons` (P d'abscisse
+  entière, ordonnée exacte : e, |PF| = a − ex, |PF′| = a + ex ; « |PF| = » recopié toléré), `aire` (θ ∈ {60°, 90°, 120°} ;
+  EXISTENCE tirée à parts égales avant l'ellipse : P existe ⟺ cos θ ≥ cos FBF′ = (b² − c²)/a², cas limite exclu ; écrans
+  cos FBF′, existence, aire b²·tan(θ/2) si P existe — trois puces, la troisième « sans objet »). Critères FIXES pour `aire`
+  (2 étapes + 1 lecture, méthode 1, piège 1) : 3 · 7 min dans les deux verdicts ; rayons 1 · 7.
+- **6gen137 « Hyperbole équilatère et xy = k »** (§ 1, Appliquer) : `versXY` (x² − y² = a², a² ∈ {2, 4, 8, 9, 16, 18, 25, 32, 36,
+  50} → c = a√2, k = a²/2, sommets (a/√2 ; a/√2) et opposé dans le repère des asymptotes, orienté pour k > 0) ; `versX2Y2`
+  (xy = k, k ∈ {1, 2, 4, 8, 9, 18} → a² = 2k, sommets (√k ; √k), foyers (√(2k) ; √(2k)) et opposés). Messages : k = a², a² = k,
+  c = a, sommets du repère de départ, (k ; k), foyers aux sommets. 3 · 8 min.
+- **Papier** : énoncé = données + consigne globale (identique pour les trois natures là où la nature est un verdict) ; aucun cas
+  particulier, aucun `calcul` (lire, réduire, établir : la Casio Graph Math+ ne donne pas la réponse). Regroupement a), b), c)
+  (`REGROUPEMENTS`) : 6gen132 `equation`, 6gen133, 6gen134, 6gen135, 6gen136 `rayons`, 6gen137 (une consigne par variante) ;
+  écartés 6gen132 `figure` (phrase de description propre à la nature) et `optique`, 6gen136 `aire` (angle dans la consigne).
+- **Mesures** : collecteur (`…/scratchpad/h1-6e10/collecteur.ts` + `attendus.ts` : réponses recalculées indépendamment,
+  écritures justes variées — ordre inversé, « Ω = », « |PF| = », √, fractions, « − » typographique, formes développées —,
+  fausses, illisibles, pièges) 250 tirages par variante : 0 réponse juste refusée, 0 fausse acceptée, 0 KaTeX invalide, 3 735
+  égalités du corrigé évaluées, 0 fausse ; verdicts ≈ équilibrés (nature 75–93 / 250, existence 123 / 127) ; plans réels
+  (`construirePlan`) 20 × 2 séries « interdite » et 10 × 2 « autorisée » : structure B = A, 0 instance identique ; iPhone 13
+  (6 parcours par générateur : justes, fausses, illisibles, aides, tentatives épuisées, « Voir comment on y arrive », nouvel
+  exercice à champs vides ; 6gen133 par toucher des nœuds) : scrollWidth 390, 0 erreur console, 0 `.katex-error` ; documents réels
+  (évaluation 2 séries + aménagée + corrigé + grille + feuille + aménagée + Word copie / corrigé, interdite / autorisée) : 0
+  débordement, 0 `.katex-error` à 680 / 820 / 1 280 px.
+
 ## 6e ch. 8, lot H2 — 6gen116–6gen122 (nouveaux, notés)
 
 Corrigés `generateurs6e/{lectureTablePhi,courbeGauss,approximationNormale,choisirModele,normaleParametres,poissonInverse,detectiveVariablesAleatoires}/corrigeDetaille.ts`,
@@ -2762,6 +2899,59 @@ faux ✗ / ✓ par générateur, « Nouvel exercice » à champs vides, table de
 et du message de retour) 347 contrôles, scrollWidth 390, 0 erreur console ; étiquettes des cloches (1 350 figures, boîtes
 réelles) : 0 chevauchement, 0 sortie du cadre ; documents réels (évaluation 2 séries + aménagée + corrigé + grille +
 feuille + Word du corrigé, interdite et autorisée) 0 débordement à 680 / 820 / 1 280 px, 0 `.katex-error`.
+
+## 6e ch. 10, lot H2 — 6gen138–6gen143 (nouveaux, notés)
+
+Corrigés `generateurs6e/{tangenteDeriveeDedoublee,positionDroiteParametre,miroirsContexte,orbitesKepler,hyperboleLoran,detectiveConiques}/corrigeDetaille.ts`,
+une lettre par écran, partagés par l'appli (`AppEcransTrigo`, corrigé consultable après chaque réponse) et l'adaptateur ;
+textes, figures et définitions `ui6e/format….ts`, vérifications `moteur6e/verification….ts`, modèles `core6e/….ts`
+(détective : `moteur6e/modeleDetectiveConiques.ts`). Cartes : 6gen141 en fin de § 3 (après 6gen60), 6gen138 et 6gen139 en
+fin de § 5 (après 6gen62), 6gen140, 6gen142, 6gen143 en fin de § 6 (après 6gen63, avant la vidéo de synthèse) ; AUCUN bloc
+de cours ajouté. **6gen138 — Tangente par la dérivée et forme dédoublée** (§ 5, Appliquer) : variantes = conique
+(ellipse, hyperbole, parabole y² = 2px) ; VERDICT = branche de P (y_P > 0 ou < 0) tiré en premier à parts égales ; points
+rationnels (cos / sin pythagoriciens, (u ; v) avec u² − v² = 1, y_P entier) ; écrans : fonction dont le graphique
+contient P (choix jugé, 4 formules : ± la bonne, ± une fausse — b/a et a/b échangés, √(a² − x²) pour l'hyperbole,
+√(px) pour la parabole), pente f′(x_P), tangente en P, tangente en Q par la forme dédoublée (Q sommet de l'axe focal une
+fois sur deux : tangente verticale). Messages : autre branche, 2 du dénominateur oublié, a² et b² échangés, ne passe pas
+par P, « 2p » ou « x·x_Q » dans la dédoublée de la parabole, tangente horizontale au sommet. **6gen139 — Position d'une
+droite et d'une conique selon un paramètre** (§ 4–5, carte au § 5, Transférer) : variantes = conique ; d_k : y = mx + k ;
+VERDICT = position de d_{k₀} tirée en premier à parts égales (ellipse : sécante / tangente / extérieure ; hyperbole et
+parabole : + « un seul point sans être tangente », pente d'une asymptote ou pente nulle) ; m choisi pour que
+a²m² ± b² soit un carré (hyperbole |m| > b/a), k₀ : ±K, Δ carré parfait (points rationnels), Δ < 0, entier non nul ;
+écrans : équation en x et k (comparée par proportionnalité en (x ; k), forme substituée non développée acceptée), valeurs
+de tangence (« aucune » si le degré chute), position (choix jugé, quatre options fixes), points communs ; la droite
+d_{k₀} n'est dessinée qu'au dernier écran (elle trahirait la position). **6gen140 — Miroirs en contexte** (§ 6,
+Transférer) : `antenne` (D, h → y² = 2px, p = D²/(8h), récepteur à D²/(16h), support FP = h + p/2), `phare` (lampe à f
+du fond, profondeur D²/(16f), FP), `ftfp` (réflecteur y² = 2px : tangente dédoublée, T(−x_P ; 0), FT = FP = x_P + p/2,
+rayon réfléchi (PF)), `lithotriteur` (ellipse : 2c, a − c → b ; rayon d'ouverture b, trajet 2a), `cassegrain` (hyperbole :
+FF′ = 2c, SF = c − a ; SF′ = a + c, PF′ − PF = 2a) ; triplets pythagoriciens, 16h | D², 16f | D² ; écran 1 (conique,
+choix jugé) SANS figure. **6gen141 — Orbites et ellipses : Kepler** (§ 1 et § 3, carte au § 3, Transférer) : `planete`
+(millions de km, e ≈ 0,1–0,3), `comete` (UA, e ≥ 0,9), `satellite` (altitudes + rayon terrestre 6 400 km) ; triplets
+(a ; c ; b) ; écrans a et c, corps central S(c ; 0) (un foyer, jamais le centre ; dessiné après l'écran 2), e = c/a, b.
+**6gen142 — Hyperbole de navigation : LORAN** (§ 6, Transférer) : A(−c ; 0), B(c ; 0), retard Δt (µs, v = 0,3 km/µs,
+a multiple de 3) ; VERDICT = émetteur reçu en premier (branche) tiré en premier ; `parallele` (route y = h : deux points
+de l'hyperbole, un seul sur la branche) et `perpendiculaire` (route x = k du côté de la branche : deux positions
+possibles) = `groupe_route` ; écrans |PA − PB| = 2a, branche (choix jugé), équation, position(s). **6gen143 —
+Détective d'erreurs : coniques** (fin, Transférer, mécanique de 6gen131) : huit erreurs = variantes, `groupe_erreur` —
+c² = a² − b² pour une hyperbole, second membre négatif (signes non changés), foyer de y² = 2px en (p ; 0), Δ = 0 lu
+« aucun point », demi-ellipse prise pour l'ellipse, mauvaise branche (pente), miroir elliptique traité comme une
+parabole, e = a/c > 1 ; ligne fausse précédée de 0 à 3 lignes justes (`av` tiré en dernier). **Profils** : `forme` =
+variante partout ; aucun cas particulier (branche, position, ligne fausse : verdicts) ; aucun `calcul` (dériver,
+discuter, modéliser, détective : règle du 24/11, tiré « interdite » ET « autorisée »). **Regroupement a), b), c)**
+(`REGROUPEMENTS`, consigne « Dans chaque cas, … ») : 6gen138 (ligne = la conique et ses points P, Q), 6gen139 (ligne = la
+conique, la famille d_k et k₀) ; écartés 6gen140, 6gen141, 6gen142 (situation propre à l'instance), 6gen143 (copie).
+**Niveaux** (`criteresDifficulte`, constants : le verdict ne change ni le niveau ni la durée ; `sansCharge`) : 6gen138
+4 · 9 min (lecture a, méthode 1, piège 1), 6gen139 4 · 10, 6gen140 5 · 12 (méthode 2 ; `ftfp` 4 · 10), 6gen141 4 · 9,
+6gen142 5 · 12, 6gen143 3 · 8. **Mesures** : collecteur (`…/scratchpad/h2-6e10/collecteur.ts`, `evalLatex.ts` recopié,
+milliers neutralisés) 200 tirages par variante × 24 variantes : écran, papier, barème (= 4), corrigé ; 0 NaN / notation
+clavier / KaTeX invalide / majuscule d'insistance ; ≈ 16 000 relations numériques et ≈ 5 800 équations du corrigé
+évaluées, 0 fausse ; réponses justes (plusieurs écritures) acceptées, aucun piège sur une réponse juste ; verdicts ≈
+équilibrés (branche ≈ 1/2, position ≈ 1/3 ou 1/4, ligne fausse ≈ 1/4) ; plans réels `construirePlan` (2 séries,
+interdite × 6, autorisée × 3, 18 questions) : même structure, instances toutes différentes, verdicts tirés indépendamment,
+`?code=` 36 / 36 ; iPhone 13 (toutes les variantes × 2 : illisible sans tentative, réponse fausse, juste, choix fermé
+faux ✗ / ✓, « Nouvel exercice » à champs vides) 284 contrôles, scrollWidth 390, 0 erreur console ; documents réels
+(évaluation 2 séries + aménagée + corrigé + grille + feuille + aménagée + Word du corrigé, interdite et autorisée) 0
+débordement à 680 / 820 / 1 280 px, 0 `.katex-error`.
 
 ## 6e ch. 9, lot H2 — 6gen128–6gen131 (nouveaux, notés)
 
