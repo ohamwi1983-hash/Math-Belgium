@@ -222,6 +222,10 @@ export type InteractiveWidgetTag =
   | 'densite-repartition-widget'
   | 'balance-esperance-widget'
   | 'deux-echelles-standardisation-widget'
+  | 'poisson-ou-binomiale-widget'
+  | 'simulateur-jeu-esperance-widget'
+  | 'regle-empirique-widget'
+  | 'bayes-trois-categories-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

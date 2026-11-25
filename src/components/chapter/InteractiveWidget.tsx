@@ -222,6 +222,10 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'densite-repartition-widget': () => import('../../interactive/register-densite-repartition-widget.js'),
   'balance-esperance-widget': () => import('../../interactive/register-balance-esperance-widget.js'),
   'deux-echelles-standardisation-widget': () => import('../../interactive/register-deux-echelles-standardisation-widget.js'),
+  'poisson-ou-binomiale-widget': () => import('../../interactive/register-poisson-ou-binomiale-widget.js'),
+  'simulateur-jeu-esperance-widget': () => import('../../interactive/register-simulateur-jeu-esperance-widget.js'),
+  'regle-empirique-widget': () => import('../../interactive/register-regle-empirique-widget.js'),
+  'bayes-trois-categories-widget': () => import('../../interactive/register-bayes-trois-categories-widget.js'),
 }
 
 /**
