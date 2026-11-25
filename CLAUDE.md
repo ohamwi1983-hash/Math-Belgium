@@ -46,7 +46,7 @@ cherchant le chapitre correspondant dans `chaptersIndex.ts`.
   « Reprendre » (dernière étape ouverte DE CETTE ANNÉE, clé `parcours:derniere-etape`), « Préparer mon
   interro » (`/{niveau}/{chapitre}/exercices` du chapitre en cours, sinon `/exercice`), chapitres de
   l'année avec leur progression (celle des pages de chapitre, jamais envoyée). Les trois années restent
-  dans le DOM (23 liens dans la page pré-rendue) : ce qui est montré dépend de `<html
+  dans le DOM (24 liens dans la page pré-rendue) : ce qui est montré dépend de `<html
   data-annee-accueil>`, posé avant le JS par le script en ligne d'`index.html` (même logique que
   `anneeDeDepart`, à garder en accord). Recherche dans l'en-tête (`components/RechercheSite.tsx`, toutes
   les pages à `SiteHeader`) : titres de chapitres, d'étapes (`title`, `titreCourt`, `kicker`) et

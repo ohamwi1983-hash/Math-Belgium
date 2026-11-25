@@ -1463,6 +1463,20 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   dans le vrai pipeline (`evaluationLocal`, dossier `afd-6e10/docs.cjs`) : 18 démonstrations, 26 « Formule », 245
   vrai/faux en évaluation (2 séries, aménagée, corrigé, grille) et feuille, Word copie / corrigé / grille : 0
   `katex-error`, 0 `$`, 0 `**`, 0 `undefined` / `NaN`.
+- **5e ch. 6, lot AF (cours, démonstrations, compréhension, « Formule », quiz 5gen82 ; générateurs : agents H1 / H2)** :
+  énoncés PAR CLÉ pour les 23 blocs `exemple` / `exempleLibre` (chapitre ajouté à `CHAPITRES_ENONCES_VERIFIES`), dont
+  7 démonstrations ; les figures n'existent pas sur papier, les énoncés donnent donc les données en couples ou en
+  listes (quatre nuages, cinq nuages décrits en mots). 12 questions de compréhension (2 par section), banque
+  « Formule » de 20 questions (`questionsFormules/niveau5e.ts`, dont seuils de r, |r| = √R², a = Cov/V(x), x′ = kx + c).
+  Quiz 5gen82 (`generateurs5e/quizStatDeuxVariables5e/`, patron de 5gen43) : 6 thèmes × 35, 18 V / 17 F, aucun grand
+  calcul (au plus une moyenne de trois nombres ou une évaluation de y = ax + b), pas de majuscules d'insistance,
+  `nombreExercices` = `nombreQuestions(theme)`, banque branchée dans `lib/banquesVraiFaux.ts`, thèmes dans
+  `QUIZ_THEMES_EVALUATION_PILOTE` (`quizChapitre: 6`), carte dans `recap.entrainement`. Vérifié : contrôle de la banque
+  (`scratchpad/af-5e6/checkq.mjs` : KaTeX strict, $ pairs, notation clavier, majuscules, doublons, « Vrai : » / « Faux : »
+  cohérents) ; les 6 thèmes joués en entier sur iPhone 13 (35 questions, 0 répétition, dénominateur 35, 0 débordement,
+  0 erreur) ; documents réels (`evaluationLocal`, `scratchpad/af-5e6/docs.cjs`) : 7 démonstrations, 20 « Formule »,
+  12 compréhension, 210 vrai/faux en évaluation (2 séries, aménagée, corrigé, grille) et feuille, Word copie / corrigé /
+  grille : 0 `katex-error`, 0 `$`, 0 `**`, 0 `undefined` / `NaN`, 0 débordement à 820 et 1 280 px.
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 

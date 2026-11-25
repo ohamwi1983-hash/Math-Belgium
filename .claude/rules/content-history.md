@@ -6371,3 +6371,66 @@ ajout, glisser, retrait (Mayer), poignées (moindres carrés), point glissé (qu
 aucun ajout en mode devine), P glissé, ligne de prévision glissée ; défilement de la page pendant les 10 glissés au
 doigt : 0. Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667 (7 ateliers). Scripts et captures :
 `scratchpad/g-5e6/`.
+
+## 5e (4h), Chapitre 6 — Statistique à deux variables : cours, démonstrations, parcours, quiz 5gen82 (lot AF, 25/11/2026)
+
+Nouveau chapitre (squelette du coordinateur, ids fixes `nuage-point-moyen`, `ajustement`, `mayer`, `moindres-carres`,
+`correlation`, `interpreter`), rédigé d'après la proposition validée par le professeur (toutes les recommandations
+suivies) et son manuel scanné (contextes et progression repris ; nombres recalculés ou nouveaux ; seules les données
+publiques de l'espérance de vie en Belgique 2000–2014, Banque mondiale, reprises telles quelles ; « Down Jones »
+et « degrés C° » corrigés ; « Sine Qua Non » remplacé par tableur + GeoGebra).
+
+**Décisions appliquées** : seuils de r du document avec « très forte » pour 0,98 ≤ |r| < 1 et « parfaite » réservé à
+|r| = 1 (tableau `featureTable` au § 5, tableau |r| de la synthèse, formulaire) ; moindres carrés à la main sur 5
+points (G(3 ; 4), ΣXY = 6, ΣX² = 10, y = 0,6x + 2,2), sinon TI-30XB ; droite de x en y en remarque ; ajustements non
+affines en reconnaissance seulement (+ courbe de tendance du tableur en astuce) ; tableur (MOYENNE, PENTE,
+ORDONNEE.ORIGINE, COEFFICIENT.CORRELATION, courbe de tendance, R²) et GeoGebra (outil d'analyse de régression à deux
+variables). Convention Mayer pour n impair : premier groupe de k données, second de k + 1 (comme 5gen36). σ divise
+par n. Touches TI-30XB écrites prudemment (data, 2nd + data, 2-Var Stats, L1 / L2, ONE, CALC ; liste n, x̄, Sx, σx,
+ȳ, Sy, σy, Σx, Σx², Σy, Σy², Σxy, a, b, r) avec la consigne de vérifier une fois sur la série à la main.
+
+**Contenu** : « Ce que tu sais déjà (4e) » (moyenne / variance / σ, y − y₁ = a(x − x₁), sommet −B/(2A)) ; 4 intuitions
+(billes en équilibre sur G, pourquoi deux points moyens, ressorts verticaux, quatre quadrants autour de G, troisième
+variable cachée) ; « Le sais-tu ? » vérifiés : Quetelet (Gand 1796, Observatoire de Bruxelles, 1835, IMC), Tobias
+Mayer (vers 1750, 27 observations d'un cratère, 3 inconnues, groupes de 9, tables de la Lune et longitude, récompense
+britannique à sa veuve), Piazzi / Gauss / Legendre (Cérès 1er janvier 1801, retrouvée fin 1801 ; Legendre publie en
+1805, Gauss en 1809 — l'usage des moindres carrés par Gauss dès 1795 est écrit comme SA déclaration), Galton 1886,
+Bravais 1846 / Pearson vers 1896, Anscombe 1973 (données originales, r ≈ 0,816, y ≈ 0,5x + 3, recalculés) ;
+« À quoi ça sert ? » : courbes de croissance, prévision de la consommation électrique, droite d'étalonnage, chocolat et
+Nobel (Messerli 2012, r ≈ 0,79). 16 exemples résolus (la liste de la proposition en compte 16, son résumé disait 14),
+tous recalculés par script (`scratchpad/af-5e6/calc*.py`) : G(3,5 ; 11,5) ; valeurs effacées 6 et 17 ; quatre
+nuages (sel r ≈ 1, recette en arc r ≈ 0,03, bactéries r ≈ 0,95, aucune) ; y = −6x + 210 construite EXACTE (données
+dont la droite des moindres carrés est exactement celle-là) avec 5 °C / −8 °C / 35 °C → 0 GWh ; espérance de vie
+(G₁(3 ; 78,515), G₂(11 ; 80,21), a = 0,211875, b = 77,879375, G(7 ; 79,3625) vérifié, 2018 → 81,69) ; n = 7 (y =
+0,4x + 0,3, G(4 ; 1,9) qui n'est pas le milieu (3,75 ; 1,8), seuil 5 % en semaine 12) ; données en désordre (y = 1,8x +
+1,4 contre y = 3x − 4 sans tri, les deux passent par G : le contrôle par G ne détecte pas l'oubli du tri) ; 0,6x + 2,2 ;
+Mayer 2⁄3 x + 2 : 22/9 ≈ 2,44 contre 2,4 ; TI : consommation selon la puissance (a ≈ 0,0267, b ≈ 2,79, 110 ch →
+5,73 L, 6,8 L → 150 ch) ; Cov = 1,2, σx = √2, σy = √1,2, r ≈ 0,77 ; boissons (Cov = 81, r ≈ 0,96) et abonnements
+(Cov = −656,25, r ≈ −0,998) ; cinq nuages r = 0,70 / 0,99 / 0,05 / −0,93 / −0,45 (données générées, r recalculé) ;
+mortalité (a ≈ −7,57, b = 63, r ≈ −0,97, période 12 → −28) ; point aberrant (r 0,13 → 0,99) ; trois corrélations.
+7 démonstrations (`exempleLibre` « Démonstration — … ») : Mayer passe par G (moyenne pondérée, milieu si effectifs
+égaux) ; b = ȳ − a·x̄ pour a fixé (trinôme en b) ; a = ΣXY/ΣX² (trinôme en a) ; deux formules de Cov ; a = Cov/V(x),
+même signe que r ; S_min = n·σy²(1 − r²) ⟹ −1 ≤ r ≤ 1 ; x′ = kx + c (k > 0) ne change pas r. Vidéos « à venir » (une
+par section). Parcours : 3 parties (« Décrire et ajuster un nuage » § 1–2, « Deux droites d'ajustement » § 3–4,
+« Mesurer et interpréter la liaison » § 5–6), 6 `titreCourt`, 18 phrases d'`essentiel`, 23 cartes ; synthèse en KaTeX
+(6 items, tableau |r|, 7 points de checklist, forward vers la 6e), formulaire (4 groupes), carte du quiz 5gen82.
+Formules longues coupées (la covariance de l'essentiel § 5 débordait de la fiche à 390 px).
+
+**Nouveau kind `scatterPlot`** (`components/illustrations/ScatterPlot.tsx`, voir `illustration-components.md`) : axes
+au bord du cadre avec brisure, droites dont l'étiquette se place du côté libre (ancre selon le signe de la pente),
+cibles G / G₁ / G₂ (8 positions d'étiquette), écarts verticaux et VRAIS carrés (côté en pixels), quadrants par G avec
+rectangles verts / rouges, bandes interpolation / extrapolation (étiquette en bas). 20 figures, captures relues en
+clair et sombre (`scratchpad/af-5e6/figs/`, `figs-dark/`) ; chevauchements corrigés (étiquettes de droites, G₁ / G₂,
+« 35 °C » contre le nom d'axe, signes des quadrants contre la brisure et le nom d'axe).
+
+**Ateliers du lot G** (fusionnés depuis la branche commune) placés après la notion illustrée : jusqu'où prévoir
+(après l'exemple des trois prévisions, § 2), nuage et Mayer (après la démonstration « Mayer passe par G », § 3),
+ta droite contre les moindres carrés (après la comparaison Mayer / moindres carrés, § 4), quadrants (avant la
+définition de la covariance, juste après la figure des quadrants), changer d'unités (après la démonstration
+correspondante), devine r (après « associer cinq nuages »), point aberrant (après l'exemple du point aberrant, avant
+le quartet d'Anscombe, § 6) ; « (démonstration 7) » de la légende remplacé par « (démonstration ci-dessus) » (les
+démonstrations ne sont pas numérotées dans le cours).
+
+**Vérifié** : `tsc` ; `verifier-enonces-evaluation` (chapitre strict) ; page à 390 / 1 280 px, clair / sombre, carte,
+6 étapes (tiroirs ouverts, « Tout montrer ») et Réviser : 0 `$`, 0 astérisque, 0 notation clavier, 0 `NaN`, 0
+`.katex-error`, 0 débordement, 0 erreur console ; aucune formule plus large que son bloc à 390 px.

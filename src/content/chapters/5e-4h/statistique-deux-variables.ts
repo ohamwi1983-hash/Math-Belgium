@@ -347,7 +347,7 @@ export const statistiqueDeuxVariables: ChapterContent = {
             kind: 'scatterPlot',
             points: pts([-4, -2, 0, 2, 4, 6, 8, 10, 12, 14], [240, 219, 213, 194, 180, 171, 168, 148, 139, 128]),
             xMin: -10,
-            xMax: 36,
+            xMax: 40,
             yMin: 0,
             yMax: 280,
             xTicks: [-10, 0, 10, 20, 30],
@@ -357,7 +357,7 @@ export const statistiqueDeuxVariables: ChapterContent = {
             yAxisLabel: 'GWh',
             bands: [
               { from: -4, to: 14, tone: 'good', label: 'on interpole' },
-              { from: 14, to: 36, tone: 'bad', label: 'on extrapole' },
+              { from: 14, to: 40, tone: 'bad', label: 'on extrapole' },
             ],
             lines: [{ a: -6, b: 210, tone: 'accent', label: 'y = −6x + 210', labelX: 22, labelPos: 'below' }],
             marks: [
@@ -905,9 +905,9 @@ export const statistiqueDeuxVariables: ChapterContent = {
           label: 'Démonstration — r est compris entre −1 et 1',
           blocks: [
             { kind: 'para', text: R`Reprenons la somme des carrés des écarts verticaux de la droite des moindres carrés : $S = a^2\sum X_i^2 - 2a\sum X_iY_i + \sum Y_i^2$, avec $a\sum X_i^2 = \sum X_iY_i$.` },
-            { kind: 'para', text: R`**Étape 1 — la plus petite somme.** $a^2\sum X_i^2 = a\sum X_iY_i$, donc $S_{\min} = \sum Y_i^2 - a\sum X_iY_i$.` },
-            { kind: 'para', text: R`**Étape 2 — avec σ et Cov.** $\sum Y_i^2 = n\,\sigma_y^2$, $\sum X_iY_i = n\operatorname{Cov}(x,y)$ et $a = \dfrac{\operatorname{Cov}(x,y)}{\sigma_x^2}$ : $S_{\min} = n\,\sigma_y^2 - n\dfrac{\operatorname{Cov}(x,y)^2}{\sigma_x^2} = n\,\sigma_y^2\left(1 - \dfrac{\operatorname{Cov}(x,y)^2}{\sigma_x^2\,\sigma_y^2}\right) = n\,\sigma_y^2\,(1 - r^2)$.` },
-            { kind: 'para', text: R`**Étape 3 — conclure.** Une somme de carrés est positive ou nulle, et $n\,\sigma_y^2 > 0$ : donc $1 - r^2 \ge 0$, c'est-à-dire $-1 \le r \le 1$. De plus $r = \pm 1$ exactement quand $S_{\min} = 0$, c'est-à-dire quand tous les points sont **sur** la droite. Plus $|r|$ est proche de $1$, plus la somme des carrés des écarts est petite : c'est pourquoi $r$ mesure la qualité de l'ajustement affine.` },
+            { kind: 'para', text: R`**Étape 1 — la plus petite somme.** $a^2\sum X_i^2 = a\sum X_iY_i$, donc la plus petite somme vaut $S_m = \sum Y_i^2 - a\sum X_iY_i$.` },
+            { kind: 'para', text: R`**Étape 2 — avec σ et Cov.** $\sum Y_i^2 = n\,\sigma_y^2$, $\sum X_iY_i = n\operatorname{Cov}(x,y)$ et $a = \dfrac{\operatorname{Cov}(x,y)}{\sigma_x^2}$ : $S_m = n\,\sigma_y^2 - n\dfrac{\operatorname{Cov}(x,y)^2}{\sigma_x^2} = n\,\sigma_y^2\left(1 - \dfrac{\operatorname{Cov}(x,y)^2}{\sigma_x^2\,\sigma_y^2}\right) = n\,\sigma_y^2\,(1 - r^2)$.` },
+            { kind: 'para', text: R`**Étape 3 — conclure.** Une somme de carrés est positive ou nulle, et $n\,\sigma_y^2 > 0$ : donc $1 - r^2 \ge 0$, c'est-à-dire $-1 \le r \le 1$. De plus $r = \pm 1$ exactement quand $S_m = 0$, c'est-à-dire quand tous les points sont **sur** la droite. Plus $|r|$ est proche de $1$, plus la somme des carrés des écarts est petite : c'est pourquoi $r$ mesure la qualité de l'ajustement affine.` },
           ],
         },
         {
@@ -1197,14 +1197,14 @@ export const statistiqueDeuxVariables: ChapterContent = {
       R`**Interpréter** — un modèle est fiable si $|r|$ est proche de $1$, en interpolation, dans le même contexte ; un point aberrant peut tout changer ; corrélation ne signifie pas causalité (cause commune, coïncidence, causalité inverse, effet décalé).`,
     ],
     table: {
-      headers: ['Corrélation', R`$r$ positif`, R`$r$ négatif`],
+      headers: ['Corrélation (le signe de $r$ donne le sens)', R`$|r|$`],
       rows: [
-        ['parfaite', '$r = 1$', '$r = -1$'],
-        ['très forte', R`$0{,}98 \le r < 1$`, R`$-1 < r \le -0{,}98$`],
-        ['forte', R`$0{,}80 \le r < 0{,}98$`, R`$-0{,}98 < r \le -0{,}80$`],
-        ['moyenne', R`$0{,}60 \le r < 0{,}80$`, R`$-0{,}80 < r \le -0{,}60$`],
-        ['faible', R`$0{,}35 \le r < 0{,}60$`, R`$-0{,}60 < r \le -0{,}35$`],
-        ['nulle', R`$-0{,}35 < r < 0{,}35$`, R`$-0{,}35 < r < 0{,}35$`],
+        ['parfaite', '$|r| = 1$'],
+        ['très forte', R`$0{,}98 \le |r| < 1$`],
+        ['forte', R`$0{,}80 \le |r| < 0{,}98$`],
+        ['moyenne', R`$0{,}60 \le |r| < 0{,}80$`],
+        ['faible', R`$0{,}35 \le |r| < 0{,}60$`],
+        ['nulle', R`$|r| < 0{,}35$`],
       ],
     },
     checklist: {
