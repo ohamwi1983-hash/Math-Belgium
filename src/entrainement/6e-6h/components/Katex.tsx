@@ -1,4 +1,4 @@
-import { InlineMath, BlockMath } from "react-katex";
+import { InlineMath, BlockMath } from "../../components/KatexAccessible";
 import "katex/dist/katex.min.css";
 import { normaliserLogDecimal } from "../../../lib/notationLog";
 

@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && node scripts/verifier-enonces-evaluation.mjs && vite build && node scripts/prerender.mjs && node scripts/generate-sitemap.mjs",
     "lint": "oxlint",
+    "test:lecture": "node scripts/tester-lecture-formules.mjs",
+    "controle:lecture": "node scripts/controle-lecture-formules.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

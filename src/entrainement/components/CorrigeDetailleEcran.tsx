@@ -1,5 +1,5 @@
 import { Fragment, useLayoutEffect, useRef } from "react";
-import { InlineMath } from "react-katex";
+import { InlineMath } from "./KatexAccessible";
 import "katex/dist/katex.min.css";
 import { normaliserLogDecimal } from "../../lib/notationLog";
 import type { EtapeCorrection, FragmentConsigne, LigneCalcul } from "../export/genererFeuilleExercices";

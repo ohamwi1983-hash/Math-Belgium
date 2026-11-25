@@ -1,4 +1,5 @@
 import katex from "katex";
+import { htmlKatexAccessible } from "../../../../lib/katexAccessible";
 import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, ligne, piege, resultat, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExerciceDomaineDefinition, ExerciceFractionSousRacine, SlotCE } from "../../core5e/domaineDefinition.types";
@@ -112,7 +113,7 @@ function etapeConditions(e: ExerciceDomaineDefinition, l: string): EtapeCorrecti
 // ============================================================================
 
 const CELLULE = "border:1px solid #555;padding:4px 10px;text-align:center;";
-const k = (s: string) => katex.renderToString(normaliserLimites(s), { throwOnError: false });
+const k = (s: string) => htmlKatexAccessible(katex.renderToString(normaliserLimites(s), { throwOnError: false }), normaliserLimites(s));
 
 /** Tableau de signes de N, D et N/D (figure du corrigé, `figureHtml`) — la grille de l'écran. */
 export function tableauSignesHtml(e: ExerciceFractionSousRacine): string {
