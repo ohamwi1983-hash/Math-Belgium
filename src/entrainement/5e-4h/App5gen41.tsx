@@ -8,6 +8,7 @@ import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import { EtapeQuestionQuizSuites5e } from "./components5e/EtapeQuestionQuizSuites5e";
 import { ResultatPanelQuizSuites5e } from "./components5e/ResultatPanelQuizSuites5e";
 import { ResumeSessionQuizSuites5e } from "./components5e/ResumeSessionQuizSuites5e";
+import { useNoterEssai } from "../../lib/suiviContexte";
 
 /** `nombreExercices: 20` correspond exactement à la taille de la banque par thème (voir
  * `generateurs5e/quizSuites5e/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une
@@ -29,6 +30,7 @@ function nouvelleSession(theme: VarianteQuizSuites5e): EtatSessionQuizSuites5e {
  * dev (`SelecteurVarianteDev`, 5e) reste réservé au développement, jamais visible sur l'écran normal
  * donné aux élèves. */
 export function App5gen41() {
+  const noterEssai = useNoterEssai();
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizSuites5e | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizSuites5e | null>(null);
   const [dernierResultat, setDernierResultat] = useState<ResultatExerciceQuizSuites5e | null>(null);
@@ -42,7 +44,10 @@ export function App5gen41() {
   function onValider(reponse: boolean) {
     if (!etat) return;
     const nouvelEtat = soumettreReponseQuizSuites5e(etat, reponse);
-    setDernierResultat(nouvelEtat.resultats[nouvelEtat.resultats.length - 1]);
+    const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+    // « Mon suivi » (`lib/suiviEssais.ts`) : chaque affirmation répondue = un essai d'un écran, gardé sur l'appareil.
+    if (resultat && nouvelEtat.resultats.length > etat.resultats.length) noterEssai([resultat.revele ? "revele" : "correcte"], resultat.variante);
+    setDernierResultat(resultat);
     setEtat(nouvelEtat);
   }
 

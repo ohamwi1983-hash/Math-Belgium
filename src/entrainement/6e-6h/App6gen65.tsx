@@ -20,6 +20,7 @@ import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { EtapeQuestionQuizFonctionsExponentielles } from "./components6e/EtapeQuestionQuizFonctionsExponentielles";
 import { ResultatPanelQuizFonctionsExponentielles } from "./components6e/ResultatPanelQuizFonctionsExponentielles";
 import { ResumeSessionQuizFonctionsExponentielles } from "./components6e/ResumeSessionQuizFonctionsExponentielles";
+import { useNoterEssai } from "../../lib/suiviContexte";
 
 /** `nombreExercices` = taille RÉELLE de la banque du thème choisi (`nombreQuestions`, jamais une
  * constante : convention `.claude/rules/quiz-generators.md`) : couplé à
@@ -41,6 +42,7 @@ const TEXTE_NOMBRE = ETENDUE.min === ETENDUE.max ? `${ETENDUE.min}` : `${ETENDUE
  * vrai/faux du chantier 4e (gen59-62). Le panneau dev (`SelecteurVarianteDev`) reste réservé au
  * développement, jamais visible sur l'écran normal donné aux élèves. */
 export function App6gen65() {
+  const noterEssai = useNoterEssai();
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizFonctionsExponentielles | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizFonctionsExponentielles | null>(null);
   const [dernierResultat, setDernierResultat] = useState<ResultatExerciceQuizFonctionsExponentielles | null>(null);
@@ -54,7 +56,10 @@ export function App6gen65() {
   function onValider(reponse: boolean) {
     if (!etat) return;
     const nouvelEtat = soumettreReponseQuizFonctionsExponentielles(etat, reponse);
-    setDernierResultat(nouvelEtat.resultats[nouvelEtat.resultats.length - 1]);
+    const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+    // « Mon suivi » (`lib/suiviEssais.ts`) : chaque affirmation répondue = un essai d'un écran, gardé sur l'appareil.
+    if (resultat && nouvelEtat.resultats.length > etat.resultats.length) noterEssai([resultat.revele ? "revele" : "correcte"], resultat.variante);
+    setDernierResultat(resultat);
     setEtat(nouvelEtat);
   }
 

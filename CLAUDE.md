@@ -62,6 +62,8 @@ cherchant le chapitre correspondant dans `chaptersIndex.ts`.
 - `/classe` — page de classe à code des élèves, SANS compte (`routes/ClassePage.tsx`, publique, `noindex`, non
   pré-rendue ; `?code=` du QR retiré de l'adresse) : ce que le professeur publie depuis le carnet
   (`/carnet/classe/:id/eleves`, migration `0010_page_classe.sql`) — voir `.claude/rules/comptes.md`, « Page de classe ».
+- Côté élève sans compte (`.claude/rules/cote-eleve.md`) : `/suivi` (« Mon suivi », carte de l'accueil) et
+  `/suivi/plan` (plan de révision) — publics, non indexés, non pré-rendus, tout reste dans le navigateur.
 
 ## Règles détaillées (chargées seulement quand pertinentes)
 
@@ -80,6 +82,7 @@ tâches :
 | `.claude/rules/quiz-generators.md` | `src/entrainement/**/generateurs/quiz*/**` | Convention des bancs d'affirmations vrai/faux : jamais de « grand calcul » (seulement vérification rapide), critère de tri, et le piège `nombreExercices` fixe si le compte varie par thème. |
 | `.claude/rules/comptes.md` | `src/lib/supabase.ts`, `src/lib/compte*`, `src/components/compte/**`, `src/routes/{Connexion,Inscription,Profil,Coffre,Admin,MotDePasse,Evaluation,Partage}*`, `src/lib/partage*`, `src/routes/ClassePage.tsx`, `src/lib/pageClasse*`, `supabase/**`, `.env*` | Comptes professeurs (Supabase) : schéma, RLS, inscription par code d'invitation (déclencheur sur `auth.users`), RPC admin, coffre des plans, partage entre collègues par lien (0009), page de classe à code des élèves sans compte publiée depuis le carnet (0010 : ce qui est publié / jamais publié, limite d'essais), cartouche école/professeur, garde des routes réservées, configuration (`.env.production` versionné, clé publique seulement), mise en service, limites de l'offre gratuite. |
 | `.claude/rules/feuilles-evaluations.md` | `src/entrainement/export/**`, `**/exportEvaluation.ts`, `src/lib/evaluation*.ts`, `src/lib/banquesVraiFaux.ts` | Méthode des feuilles d'exercices et évaluations (pilote 6e ch. 3) : décisions de l'utilisateur (pas de place de réponse, énoncé papier sans sous-questions, version aménagée, sélecteurs intacts), champs d'adaptateur à remplir, niveau de difficulté 1–7 et durée par exercice (`criteresDifficulte`, `niveauDifficulte.ts`), `versionPapier`, `?code=`, vrai/faux, mise en page A4 (points à droite, minuscules d'insistance, pied de page, consignes), options du document (annexe formulaire, deux colonnes, Word corrigé/grille), document « Examen » (parties, total fixé, horaire, `examen.ts`), vérifications. À relire avant d'étendre la refonte à un chapitre. |
+| `.claude/rules/cote-eleve.md` | `src/lib/suivi*`, `src/lib/planRevision*`, `src/routes/{Suivi,PlanRevision}*`, `src/components/suivi/**`, `src/routes/EntrainementPage.tsx` | Côté élève sans compte : rien ne quitte l'appareil. « Mon suivi » (`/suivi`) et plan de révision (`/suivi/plan`) : enregistrement local des essais des générateurs (point commun : magasin du cadre où `ProgressionPuces` publie ; quiz et gen40 via `useNoterEssai`), rattachement aux étapes, « À retravailler », algorithme du plan (report d'un jour raté ≤ +10 min, essentiel), point d'accroche `?date=` pour la page de classe. |
 
 ## Champs de saisie libre : jamais de blocage
 

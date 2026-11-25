@@ -137,7 +137,7 @@ export function useEtatCartes(chapter: ChapterContent) {
   return { etats, noter, effacer }
 }
 
-function lireEtatsCartes(c: ChapterContent): Record<string, EtatCarte> {
+export function lireEtatsCartes(c: ChapterContent): Record<string, EtatCarte> {
   const v = lireJson(cleCartes(c))
   const res: Record<string, EtatCarte> = {}
   if (v && typeof v === 'object') {

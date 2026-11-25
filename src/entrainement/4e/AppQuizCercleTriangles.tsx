@@ -8,6 +8,7 @@ import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeQuestionQuizCercleTriangles } from "./components/EtapeQuestionQuizCercleTriangles";
 import { ResultatPanelQuizCercleTriangles } from "./components/ResultatPanelQuizCercleTriangles";
 import { ResumeSessionQuizCercleTriangles } from "./components/ResumeSessionQuizCercleTriangles";
+import { useNoterEssai } from "../../lib/suiviContexte";
 
 /** `nombreExercices` = taille réelle de la banque du thème choisi (`nombreQuestions`,
  * `generateurs/quizCercleTriangles/index.ts`) — jamais une constante fixe : couplé à
@@ -35,6 +36,7 @@ function nouvelleSession(theme: VarianteQuizCercleTriangles): EtatSessionQuizCer
  * panneau dev (`SelecteurVarianteDev`) reste réservé au développement, jamais visible sur l'écran
  * normal donné aux élèves. */
 export function AppQuizCercleTriangles() {
+  const noterEssai = useNoterEssai();
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizCercleTriangles | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizCercleTriangles | null>(null);
   const [dernierResultat, setDernierResultat] = useState<ResultatExerciceQuizCercleTriangles | null>(null);
@@ -48,7 +50,10 @@ export function AppQuizCercleTriangles() {
   function onValider(reponse: boolean) {
     if (!etat) return;
     const nouvelEtat = soumettreReponseQuizCercleTriangles(etat, reponse);
-    setDernierResultat(nouvelEtat.resultats[nouvelEtat.resultats.length - 1]);
+    const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+    // « Mon suivi » (`lib/suiviEssais.ts`) : chaque affirmation répondue = un essai d'un écran, gardé sur l'appareil.
+    if (resultat && nouvelEtat.resultats.length > etat.resultats.length) noterEssai([resultat.revele ? "revele" : "correcte"], resultat.variante);
+    setDernierResultat(resultat);
     setEtat(nouvelEtat);
   }
 

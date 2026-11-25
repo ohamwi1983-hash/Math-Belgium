@@ -8,6 +8,7 @@ import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { EtapeQuestionQuizConiques } from "./components6e/EtapeQuestionQuizConiques";
 import { ResultatPanelQuizConiques } from "./components6e/ResultatPanelQuizConiques";
 import { ResumeSessionQuizConiques } from "./components6e/ResumeSessionQuizConiques";
+import { useNoterEssai } from "../../lib/suiviContexte";
 
 /** `nombreExercices: 35` correspond exactement à la taille de la banque par thème (voir
  * `generateurs6e/quizConiques/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une session
@@ -31,6 +32,7 @@ function nouvelleSession(theme: VarianteQuizConiques): EtatSessionQuizConiques {
  * 71/72. Le panneau dev (`SelecteurVarianteDev`) reste réservé au développement, jamais visible sur
  * l'écran normal donné aux élèves. */
 export function App6gen73() {
+  const noterEssai = useNoterEssai();
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizConiques | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizConiques | null>(null);
   const [dernierResultat, setDernierResultat] = useState<ResultatExerciceQuizConiques | null>(null);
@@ -44,7 +46,10 @@ export function App6gen73() {
   function onValider(reponse: boolean) {
     if (!etat) return;
     const nouvelEtat = soumettreReponseQuizConiques(etat, reponse);
-    setDernierResultat(nouvelEtat.resultats[nouvelEtat.resultats.length - 1]);
+    const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+    // « Mon suivi » (`lib/suiviEssais.ts`) : chaque affirmation répondue = un essai d'un écran, gardé sur l'appareil.
+    if (resultat && nouvelEtat.resultats.length > etat.resultats.length) noterEssai([resultat.revele ? "revele" : "correcte"], resultat.variante);
+    setDernierResultat(resultat);
     setEtat(nouvelEtat);
   }
 

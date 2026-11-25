@@ -14,6 +14,7 @@ import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { EtapeQuestionQuizCombinatoire } from "./components6e/EtapeQuestionQuizCombinatoire";
 import { ResultatPanelQuizCombinatoire } from "./components6e/ResultatPanelQuizCombinatoire";
 import { ResumeSessionQuizCombinatoire } from "./components6e/ResumeSessionQuizCombinatoire";
+import { useNoterEssai } from "../../lib/suiviContexte";
 
 /** Une session = toutes les questions du thème choisi (`nombreQuestions`, taille réelle de la banque,
  * jamais une constante en dur), couplé à `creerGenerateurSansRepetition` : aucune question n'est
@@ -33,6 +34,7 @@ function nouvelleSession(theme: VarianteQuizCombinatoire): EtatSessionQuizCombin
  * panneau dev (`SelecteurVarianteDev`) reste réservé au développement, jamais visible sur l'écran
  * normal donné aux élèves. */
 export function App6gen70() {
+  const noterEssai = useNoterEssai();
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizCombinatoire | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizCombinatoire | null>(null);
   const [dernierResultat, setDernierResultat] = useState<ResultatExerciceQuizCombinatoire | null>(null);
@@ -46,7 +48,10 @@ export function App6gen70() {
   function onValider(reponse: boolean) {
     if (!etat) return;
     const nouvelEtat = soumettreReponseQuizCombinatoire(etat, reponse);
-    setDernierResultat(nouvelEtat.resultats[nouvelEtat.resultats.length - 1]);
+    const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+    // « Mon suivi » (`lib/suiviEssais.ts`) : chaque affirmation répondue = un essai d'un écran, gardé sur l'appareil.
+    if (resultat && nouvelEtat.resultats.length > etat.resultats.length) noterEssai([resultat.revele ? "revele" : "correcte"], resultat.variante);
+    setDernierResultat(resultat);
     setEtat(nouvelEtat);
   }
 

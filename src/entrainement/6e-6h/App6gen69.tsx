@@ -8,6 +8,7 @@ import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { EtapeQuestionQuizProbabilites } from "./components6e/EtapeQuestionQuizProbabilites";
 import { ResultatPanelQuizProbabilites } from "./components6e/ResultatPanelQuizProbabilites";
 import { ResumeSessionQuizProbabilites } from "./components6e/ResumeSessionQuizProbabilites";
+import { useNoterEssai } from "../../lib/suiviContexte";
 
 /** `nombreExercices: 35` correspond exactement à la taille de la banque par thème (voir
  * `generateurs6e/quizProbabilites/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une
@@ -26,6 +27,7 @@ function nouvelleSession(theme: VarianteQuizProbabilites): EtatSessionQuizProbab
  * 6gen67/6gen68. Le panneau dev (`SelecteurVarianteDev`) reste réservé au développement, jamais
  * visible sur l'écran normal donné aux élèves. */
 export function App6gen69() {
+  const noterEssai = useNoterEssai();
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizProbabilites | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizProbabilites | null>(null);
   const [dernierResultat, setDernierResultat] = useState<ResultatExerciceQuizProbabilites | null>(null);
@@ -39,7 +41,10 @@ export function App6gen69() {
   function onValider(reponse: boolean) {
     if (!etat) return;
     const nouvelEtat = soumettreReponseQuizProbabilites(etat, reponse);
-    setDernierResultat(nouvelEtat.resultats[nouvelEtat.resultats.length - 1]);
+    const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+    // « Mon suivi » (`lib/suiviEssais.ts`) : chaque affirmation répondue = un essai d'un écran, gardé sur l'appareil.
+    if (resultat && nouvelEtat.resultats.length > etat.resultats.length) noterEssai([resultat.revele ? "revele" : "correcte"], resultat.variante);
+    setDernierResultat(resultat);
     setEtat(nouvelEtat);
   }
 

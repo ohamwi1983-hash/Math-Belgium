@@ -244,15 +244,18 @@ export function lienEtape(niveau: string, chapitre: string, sectionId: string): 
  * Point d'accroche du **plan de révision** (lot S, « Mon suivi » + « Plan de révision ») : tant que
  * cette constante vaut `null`, la page de classe n'affiche pas le bouton « Mon plan de révision ».
  * Quand la route du plan existe, y mettre son chemin (ex. `'/suivi/plan'`) : le bouton ouvre alors
- * `<route>?date=AAAA-MM-JJ&chapitre=<niveau>/<chapitre>&etapes=<id>,<id>` — la date de l'interro,
- * son chapitre et ses étapes, à lire par le plan pour se pré-remplir (rien d'autre n'est transmis).
+ * `<route>?date=AAAA-MM-JJ&niveau=<niveau>&chapitre=<chapitre>&etapes=<id>,<id>` — la date de l'interro,
+ * son chapitre et ses étapes, lus par `PlanRevisionPage` pour se pré-remplir (rien d'autre n'est transmis).
  */
-export const ROUTE_PLAN_REVISION: string | null = null
+export const ROUTE_PLAN_REVISION: string | null = '/suivi/plan'
 
 export function lienPlanRevision(i: Pick<InterroPubliee, 'date' | 'niveau' | 'chapitre' | 'etapes'>, route: string | null = ROUTE_PLAN_REVISION): string | null {
   if (!route) return null
   const p = new URLSearchParams({ date: i.date })
-  if (i.niveau && i.chapitre) p.set('chapitre', `${i.niveau}/${i.chapitre}`)
+  if (i.niveau && i.chapitre) {
+    p.set('niveau', i.niveau)
+    p.set('chapitre', i.chapitre)
+  }
   if (i.etapes.length > 0) p.set('etapes', i.etapes.map((e) => e.id).join(','))
   return `${route}?${p.toString().replace(/%2F/g, '/').replace(/%2C/g, ',')}`
 }

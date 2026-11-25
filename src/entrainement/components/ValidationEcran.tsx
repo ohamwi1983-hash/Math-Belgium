@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { useSignalerVerdict } from "../../lib/suiviContexte";
 import { CorrigeDepliable } from "./CorrigeDepliable";
 
 /**
@@ -41,6 +42,14 @@ type Props = ValidationEtapeProps;
  * suivant"). Partagé par 4e/5e-4h/6e-6h (comme `BoutonExportWord.tsx`), jamais dupliqué par niveau.
  */
 export function ValidationEcran({ revele, reponseAttendue, labelSuivant, onSuivant, messageRevele, corrigeDetaille, figureApres }: Props) {
+  // « Mon suivi » (`lib/suiviEssais.ts`) : signale l'écran clos à la page du générateur (résultat du
+  // dernier écran d'un exercice) ; rien n'est affiché ni envoyé, sans effet hors de cette page.
+  const signalerVerdict = useSignalerVerdict();
+  useEffect(() => {
+    signalerVerdict?.(revele);
+    // Une fois par apparition du bloc (écran clos), jamais à chaque rendu.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // Refonte du 22/11/2026 (maquette D) : verdict et réponse attendue dans UN SEUL encadré ; le bouton
   // (`validation-suivant`) devient, sur téléphone, la barre fixe du bas (voir `CadreActions.tsx`).
   // Textes, ordre et libellé du bouton (`labelSuivant`) inchangés.

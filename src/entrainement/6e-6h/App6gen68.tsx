@@ -14,6 +14,7 @@ import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { EtapeQuestionQuizNombresComplexes } from "./components6e/EtapeQuestionQuizNombresComplexes";
 import { ResultatPanelQuizNombresComplexes } from "./components6e/ResultatPanelQuizNombresComplexes";
 import { ResumeSessionQuizNombresComplexes } from "./components6e/ResumeSessionQuizNombresComplexes";
+import { useNoterEssai } from "../../lib/suiviContexte";
 
 /** Une session = toutes les questions du thème choisi (`nombreQuestions`, jamais une constante en
  * dur), couplé à `creerGenerateurSansRepetition` : aucune question n'est répétée. */
@@ -32,6 +33,7 @@ function nouvelleSession(theme: VarianteQuizNombresComplexes): EtatSessionQuizNo
  * 6gen67. Le panneau dev (`SelecteurVarianteDev`) reste réservé au développement, jamais visible
  * sur l'écran normal donné aux élèves. */
 export function App6gen68() {
+  const noterEssai = useNoterEssai();
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizNombresComplexes | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizNombresComplexes | null>(null);
   const [dernierResultat, setDernierResultat] = useState<ResultatExerciceQuizNombresComplexes | null>(null);
@@ -45,7 +47,10 @@ export function App6gen68() {
   function onValider(reponse: boolean) {
     if (!etat) return;
     const nouvelEtat = soumettreReponseQuizNombresComplexes(etat, reponse);
-    setDernierResultat(nouvelEtat.resultats[nouvelEtat.resultats.length - 1]);
+    const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+    // « Mon suivi » (`lib/suiviEssais.ts`) : chaque affirmation répondue = un essai d'un écran, gardé sur l'appareil.
+    if (resultat && nouvelEtat.resultats.length > etat.resultats.length) noterEssai([resultat.revele ? "revele" : "correcte"], resultat.variante);
+    setDernierResultat(resultat);
     setEtat(nouvelEtat);
   }
 

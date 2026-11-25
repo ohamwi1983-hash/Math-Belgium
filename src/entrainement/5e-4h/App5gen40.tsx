@@ -8,6 +8,7 @@ import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import { EtapeQuestionQuizTrigonometrie5e } from "./components5e/EtapeQuestionQuizTrigonometrie5e";
 import { ResultatPanelQuizTrigonometrie5e } from "./components5e/ResultatPanelQuizTrigonometrie5e";
 import { ResumeSessionQuizTrigonometrie5e } from "./components5e/ResumeSessionQuizTrigonometrie5e";
+import { useNoterEssai } from "../../lib/suiviContexte";
 
 /** `nombreExercices` = taille réelle de la banque du thème choisi (`nombreQuestions`,
  * `generateurs5e/quizTrigonometrie5e/index.ts`) — jamais une constante fixe : couplé à
@@ -34,6 +35,7 @@ function nouvelleSession(theme: VarianteQuizTrigonometrie5e): EtatSessionQuizTri
  * "← Accueil"). Le panneau dev (`SelecteurVarianteDev`, 5e) reste réservé au développement, jamais
  * visible sur l'écran normal donné aux élèves. */
 export function App5gen40() {
+  const noterEssai = useNoterEssai();
   const [themeChoisi, setThemeChoisi] = useState<VarianteQuizTrigonometrie5e | null>(null);
   const [etat, setEtat] = useState<EtatSessionQuizTrigonometrie5e | null>(null);
   const [dernierResultat, setDernierResultat] = useState<ResultatExerciceQuizTrigonometrie5e | null>(null);
@@ -47,7 +49,10 @@ export function App5gen40() {
   function onValider(reponse: boolean) {
     if (!etat) return;
     const nouvelEtat = soumettreReponseQuizTrigonometrie5e(etat, reponse);
-    setDernierResultat(nouvelEtat.resultats[nouvelEtat.resultats.length - 1]);
+    const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+    // « Mon suivi » (`lib/suiviEssais.ts`) : chaque affirmation répondue = un essai d'un écran, gardé sur l'appareil.
+    if (resultat && nouvelEtat.resultats.length > etat.resultats.length) noterEssai([resultat.revele ? "revele" : "correcte"], resultat.variante);
+    setDernierResultat(resultat);
     setEtat(nouvelEtat);
   }
 
