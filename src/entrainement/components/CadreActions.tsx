@@ -69,6 +69,22 @@ function choisirPrincipal(carte: Element): HTMLElement | null {
 }
 
 const MEDIA_APERCU = "svg, img, canvas, table, figure, video, iframe";
+/** Enfants de l'énoncé qui ne font pas partie du bloc de données (bandeau compact). */
+const HORS_DONNEES = ".entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie";
+
+/** Le bloc de données a-t-il du texte hors figures, tableaux et images ? Sinon (figure seule : 6gen106,
+ * 6gen162…) l'aperçu replié serait vide : la consigne prend sa place (`data-apercu-consigne`). */
+function donneesSansTexte(enonce: HTMLElement): boolean {
+  const donnees = [...enonce.children].filter((c) => !c.matches(`${HORS_DONNEES}, :empty`));
+  if (donnees.length === 0) return false;
+  const texte = (n: Node): boolean => {
+    if (n.nodeType === Node.TEXT_NODE) return /\S/.test(n.textContent ?? "");
+    if (!(n instanceof Element)) return false;
+    if (n.matches(`${MEDIA_APERCU}, [hidden], .sr-only`)) return false;
+    return [...n.childNodes].some(texte);
+  };
+  return !donnees.some(texte);
+}
 /** Place réservée aux « … » au bout de la ligne d'aperçu (px). */
 const LARGEUR_POINTS = 20;
 
@@ -86,9 +102,17 @@ function pointDeCoupe(enonce: HTMLElement): number | null {
   const morceaux: { g: number; d: number }[] = [];
   let media = false;
   const enfants = [...enonce.children];
-  let donnees = enfants.filter((c) => !c.matches(".entete-exercice-label, .entete-exercice-bascule, .prompt-text, :empty"));
-  // Pas de bloc de données : l'aperçu montre la consigne (même règle que `cadre.css`).
-  if (donnees.length === 0) donnees = enfants.filter((c) => c.matches(".prompt-text"));
+  const resume = enfants.find((c) => c.matches(".entete-exercice-apercu") && visible(c));
+  let donnees = enfants.filter((c) => !c.matches(`${HORS_DONNEES}, :empty`));
+  if (resume) {
+    // Résumé explicite du générateur : seul aperçu ; l'énoncé complet est masqué, d'où « … ».
+    donnees = [resume];
+    media = true;
+  } else if (donnees.length === 0 || enonce.hasAttribute("data-apercu-consigne")) {
+    // Pas de bloc de données, ou bloc sans texte (une figure seule) : l'aperçu montre la consigne
+    // (même règle que `cadre.css`), puis les médias éventuels du bloc ferment la ligne par « … ».
+    donnees = [...enfants.filter((c) => c.matches(".prompt-text")), ...donnees];
+  }
   const parcourir = (noeud: Node) => {
     if (noeud.nodeType === Node.TEXT_NODE) {
       const texte = noeud.textContent ?? "";
@@ -133,6 +157,11 @@ function apercuEnonce(racine: HTMLElement) {
   const saisie = racine.dataset.saisie !== undefined;
   racine.querySelectorAll<HTMLElement>(".entete-exercice").forEach((enonce) => {
     const actif = compact && (saisie || enonce.classList.contains("est-replie")) && visible(enonce);
+    const consigne = actif && donneesSansTexte(enonce);
+    if (consigne !== enonce.hasAttribute("data-apercu-consigne")) {
+      if (consigne) enonce.setAttribute("data-apercu-consigne", "");
+      else enonce.removeAttribute("data-apercu-consigne");
+    }
     const coupe = actif ? pointDeCoupe(enonce) : null;
     if (coupe === null) {
       if (enonce.hasAttribute("data-apercu-coupe")) enonce.removeAttribute("data-apercu-coupe");

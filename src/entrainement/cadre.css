@@ -557,6 +557,11 @@
   }
 }
 
+/* Résumé du bandeau replié (`EnTeteExercice.apercu`) : jamais dans l'énoncé déplié. */
+.entrainement .entete-exercice-apercu {
+  display: none;
+}
+
 /* ---------- A — clavier ouvert : énoncé épinglé en bandeau compact ---------- */
 /* ---------- B — énoncé replié en une ligne (touche pour déplier) ---------- */
 
@@ -641,18 +646,18 @@
     margin: 0 10px 0 0;
   }
 
-  .entrainement .entete-exercice.est-replie > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text),
-  .entrainement[data-saisie] .entete-exercice > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text) {
+  .entrainement .entete-exercice.est-replie > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie),
+  .entrainement[data-saisie] .entete-exercice > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie) {
     font-size: 0.82em;
   }
 
   /* Aplatissement : tout descendant du bloc de données passe en ligne, sauf KaTeX (structure
    * interne intacte) et ce qui est déjà masqué (`hidden`, `.sr-only`, `display: none` en ligne).
    * `!important` sur `display` : certains blocs de données posent `style="display: flex"` en ligne. */
-  .entrainement .entete-exercice.est-replie > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]),
-  .entrainement[data-saisie] .entete-exercice > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]),
-  .entrainement .entete-exercice.est-replie > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text) :not(.katex, .katex *, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]),
-  .entrainement[data-saisie] .entete-exercice > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text) :not(.katex, .katex *, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]) {
+  .entrainement .entete-exercice.est-replie > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]),
+  .entrainement[data-saisie] .entete-exercice > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]),
+  .entrainement .entete-exercice.est-replie > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie) :not(.katex, .katex *, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]),
+  .entrainement[data-saisie] .entete-exercice > :not(.entete-exercice-label, .entete-exercice-bascule, .prompt-text, .entete-exercice-apercu, .entete-figure-replie) :not(.katex, .katex *, [hidden], .sr-only, [style*="display: none"], [style*="display:none"]) {
     display: inline !important;
     position: static;
     width: auto;
@@ -687,8 +692,8 @@
   }
 
   /* Figures, tableaux, images (et champs) : pas d'aperçu ; `apercuEnonce` pose alors le « … » final. */
-  .entrainement .entete-exercice.est-replie :is(svg, img, canvas, table, figure, video, iframe, input, select, button:not(.entete-exercice-bascule)):not(.katex *),
-  .entrainement[data-saisie] .entete-exercice :is(svg, img, canvas, table, figure, video, iframe, input, select, button:not(.entete-exercice-bascule)):not(.katex *) {
+  .entrainement .entete-exercice.est-replie :is(svg, img, canvas, table, figure, video, iframe, input, select, button:not(.entete-exercice-bascule)):not(.katex *, .entete-figure-replie *),
+  .entrainement[data-saisie] .entete-exercice :is(svg, img, canvas, table, figure, video, iframe, input, select, button:not(.entete-exercice-bascule)):not(.katex *, .entete-figure-replie *) {
     /* `!important` : certaines figures portent un `style="display: block"` en ligne. */
     display: none !important;
   }
@@ -696,6 +701,75 @@
   .entrainement .entete-exercice.est-replie .equation-box .katex,
   .entrainement[data-saisie] .entete-exercice .equation-box .katex {
     font-size: 1.15em;
+  }
+
+  /* Bloc de données sans texte (figure seule, ex. 6gen106, 6gen162) : `apercuEnonce` pose
+   * `data-apercu-consigne` et l'aperçu montre la consigne, comme pour un énoncé sans bloc de données
+   * (avant : un bandeau vide, « … » seul). */
+  .entrainement .entete-exercice.est-replie[data-apercu-consigne] > .prompt-text,
+  .entrainement[data-saisie] .entete-exercice[data-apercu-consigne] > .prompt-text {
+    display: inline;
+    margin: 0 0.9em 0 0;
+    padding: 0;
+    border: 0;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+
+  /* Résumé explicite du générateur (`EnTeteExercice.apercu`) : seul aperçu du bandeau compact. */
+  .entrainement .entete-exercice.est-replie > .entete-exercice-apercu,
+  .entrainement[data-saisie] .entete-exercice > .entete-exercice-apercu {
+    display: inline;
+    margin: 0 0.9em 0 0;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+
+  .entrainement .entete-exercice.est-replie.avec-apercu > :not(.entete-exercice-label, .entete-exercice-bascule, .entete-exercice-apercu, .entete-figure-replie),
+  .entrainement[data-saisie] .entete-exercice.avec-apercu > :not(.entete-exercice-label, .entete-exercice-bascule, .entete-exercice-apercu, .entete-figure-replie) {
+    display: none !important;
+  }
+
+  /* Figure gardée sous le bandeau replié (`EnTeteExercice.figureToujoursVisible`, opt-in : 6gen106) :
+   * la ligne d'aperçu reste en haut, la figure (copie rendue seulement quand l'énoncé est replié)
+   * vient dessous, réduite (130 px de haut au plus, 100 px clavier ouvert) et centrée ; « … » ne
+   * recouvre que la ligne d'aperçu. */
+  .entrainement .entete-exercice.est-replie.entete-figure-visible {
+    max-height: none;
+  }
+
+  .entrainement .entete-exercice.est-replie.entete-figure-visible[data-apercu-coupe]::after {
+    bottom: auto;
+    height: 52px;
+  }
+
+  .entrainement .entete-exercice.est-replie > .entete-figure-replie {
+    display: block;
+    margin: 2px 0 4px;
+    white-space: normal;
+    line-height: normal;
+    text-align: center;
+  }
+
+  .entrainement .entete-exercice.est-replie > .entete-figure-replie > div {
+    margin: 0 !important;
+  }
+
+  .entrainement .entete-exercice.est-replie > .entete-figure-replie svg {
+    display: block;
+    width: auto !important;
+    max-width: 100%;
+    height: auto !important;
+    max-height: 130px;
+    margin: 0 auto;
+  }
+
+  .entrainement .entete-exercice.est-replie.entete-figure-visible .entete-exercice-chevron {
+    top: 26px;
+  }
+
+  .entrainement[data-saisie] .entete-exercice.est-replie > .entete-figure-replie svg {
+    max-height: 100px;
   }
 
   .entrainement .entete-exercice.est-replie .entete-exercice-chevron,

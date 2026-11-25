@@ -117,6 +117,9 @@ export interface DefinitionEcrans<E, P extends string> {
    * ancien rendu, autres générateurs inchangés). */
   bonneOption?(e: E, phase: P): string;
   correction(e: E): EtapeCorrection[];
+  /** Résumé court de l'énoncé pour le bandeau replié (une ligne, ex. 6gen106 « Quadrillage 7 × 4, de A
+   * à B, en évitant P ») ; absent : aperçu automatique (`CadreActions::apercuEnonce`). */
+  apercuEnonce?(e: E): Frag[];
 }
 
 /** Valeur unique transmise au moteur quand l'élève choisit « ∅ » (écran « intervalles » avec `vide`). */

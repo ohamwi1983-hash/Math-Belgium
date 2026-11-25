@@ -19,6 +19,7 @@ const CONFIG: ConfigAppEcrans<ExerciceChemins, PhaseChemins> = {
   genererLibre: genererExerciceChemins,
   genererVariante: construireAvecVariante,
   largeurFigure: 340,
+  figureToujoursVisible: true,
 };
 
 export function App6gen106() {

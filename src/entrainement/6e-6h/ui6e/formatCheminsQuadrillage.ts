@@ -147,6 +147,12 @@ export function aide2(e: E, p: P): AideEcran | null {
   }
 }
 
+/** Résumé du bandeau replié, assez court pour tenir sur une ligne à 390 px : « 7 × 4 : A → B, sans P ». */
+export function apercuEnonce(e: E): Frag[] {
+  const fin: Frag[] = e.variante === "passage" ? [t(", par "), l("P")] : e.variante === "eviter" ? [t(", sans "), l("P")] : [];
+  return [l(`${e.m}\\times ${e.n}`), t(" : "), l("A\\to B"), ...fin];
+}
+
 /** `6gen106` sur le socle d'écrans partagé : deux ou trois écrans à champs (trois tentatives) ; la
  * figure reste sous l'énoncé à chaque écran. */
 export const DEFINITION_CHEMINS: DefinitionEcrans<E, P> = {
@@ -156,6 +162,7 @@ export const DEFINITION_CHEMINS: DefinitionEcrans<E, P> = {
   libelle,
   consigneGenerale,
   figure: (e) => figureChemins(e),
+  apercuEnonce,
   consigne,
   approchee,
   aide1,
