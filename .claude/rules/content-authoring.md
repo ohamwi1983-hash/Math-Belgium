@@ -189,6 +189,37 @@ formules des chapitres + adaptateurs papier ; échoue sur une commande inconnue,
 les réécrit, à RELIRE : une lecture doit se comprendre à l'oreille sans voir la formule). Une commande
 inconnue n'est jamais lue (ni « backslash », ni son nom) : seul son contenu l'est.
 
+## Correspondances (`\htmlClass{m1}{…}`) — option élève « Couleurs et soulignés qui se correspondent »
+
+Planche 09 (lot A2, `.claude/rules/cote-eleve.md`) : dans QUELQUES exemples clés seulement — ceux où l'œil
+doit relier deux lignes (ce qu'on remplace par sa valeur) —, les morceaux qui se correspondent portent la
+même classe : `\htmlClass{m1}{…}` (trait plein), `m2` (tirets), `m3` (double trait). Avec l'option, chaque
+paire a la même couleur ET le même trait (jamais la couleur seule) ; sans l'option, le rendu est
+**strictement identique** (KaTeX ne fait qu'entourer le groupe d'un `<span class="enclosing m1">`, transparent
+pour ses espacements). `MathInline` n'admet que ces trois classes (`trust` limité, `strict` muet pour
+`htmlExtension`) ; ailleurs (générateurs, papier) `\htmlClass` n'est jamais écrit. La lecture en mots les
+ignore ; `evaluationPayload.ts::parseRichText` les retire (exemples repris en questions ouvertes).
+
+Exemple (5e Suites, étape 1) :
+
+```ts
+formula: 'Le premier terme … vaut $\\htmlClass{m2}{u_1} = \\htmlClass{m2}{7}$. Son sixième terme vaut $\\htmlClass{m1}{u_6} = \\htmlClass{m1}{22}$. …',
+correspondances: [['u_6', '22'], ['u_1', '7'], ['(6-1)', '5']],   // légende m1, m2, m3 (LaTeX sans $)
+steps: [{ tag: '…', text: '$\\htmlClass{m1}{u_6} = \\htmlClass{m2}{u_1} + \\htmlClass{m3}{(6-1)}r \\implies \\htmlClass{m1}{22} = \\htmlClass{m2}{7} + \\htmlClass{m3}{5}r$' }],
+```
+
+Règles :
+- Champ `correspondances` du bloc `exemple` = légende « u₆ → 22 (trait plein) · … », montrée sous l'énoncé
+  du pas à pas SEULEMENT avec l'option (au plus 3 paires, dans l'ordre m1, m2, m3).
+- **Jamais un signe au début du groupe** : `(-\htmlClass{m2}{10})^2`, pas `(\htmlClass{m2}{-10})^2` — le « − »
+  changerait de nature (binaire → signe) et le rendu sans option ne serait plus identique (mesuré : 9 px
+  d'écart). De même `2x^2 - \htmlClass{m2}{10}x`, jamais `\htmlClass{m2}{-10}x`.
+- Contrôle : `scratchpad/eleve-A2/identite.mjs` (rend chaque formule annotée et sa version d'origine, compare
+  la position de chaque glyphe) — à relancer après une annotation nouvelle.
+- Exemples annotés (4) : 5e Suites « retrouver la raison » (arithmétique, 3 paires ; géométrique, 2 paires),
+  4e Second degré « cas général » (a → 2, b → −10, c → 8), 6e Variables aléatoires « effectif attendu »
+  (μ → 170, σ → 8). Ne pas en annoter davantage sans raison : 3 à 6 dans tout le site (décision du lot).
+
 ## Callout `intuition` — apports pédagogiques (image concrète, analogie, "pourquoi")
 
 `{ kind: 'intuition', label?, text }` — callout teinté violet (réutilise `--plan`/`--plan-soft`,
