@@ -1271,6 +1271,25 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   correction de continuité, récurrence et λ de Poisson). Quiz : « chapitre 8 », Q1–Q3, 15,87 %, cumuls de
   Poisson, plus de grand calcul (« sachant que… »), 6ᵉ thème `densiteUniformeContinue` (§ 3 à § 5, ajouté au
   pilote sur la section `variablecontinue`), 18 V / 17 F par thème, `nombreExercices` = `nombreQuestions(theme)`.
+- **6e ch. 9, lots A, F, D (cours, démonstrations, quiz 6gen72 ; générateurs : autres agents)** : énoncés de
+  démonstration PAR CLÉ pour les 48 blocs `exemple` / `exempleLibre` (chapitre ajouté à `CHAPITRES_ENONCES_VERIFIES`),
+  dont 19 démonstrations ; énoncés sans méthode ni repère imposé (« Démontre que les diagonales d'un parallélogramme se
+  coupent en leur milieu. », « … et précise la partie réellement décrite »), segments OUVERTS ]AD[ / ]BC[. Corrigés de
+  compréhension : aire variable (symétrie par rapport au point d ∩ (AB)), seuil $\frac{AB^2}{2}$ contre 0 pour PA = k (trois
+  régimes dans les deux cas). Banque « Formule » réécrite (ids gardés ; angle, G, hauteur / médiatrice, Euler, aire,
+  cercle / point / vide, 2 / 1 / 0 centres, corde, tangent à un axe, exinscrit, position, tangente en T,
+  PA² − PB² = k, Apollonius centre et rayon, bissectrices, angle droit, carré / octogone, statuts des morceaux,
+  tan 2α, identités). Quiz 6gen72 : verdicts faux corrigés (thème 4 : cercle α / 2α privé de points, (2k ; 0) exclu,
+  centre de gravité privé du point du triangle aplati ; thème 3 : droite privée de (0 ; 1), demi-parabole, « lorsque
+  c'est un cercle », 4c atteint sur tout le carré ; thème 1 : symétrie par rapport au point), grands calculs remplacés
+  par une seule vérification, majuscules d'insistance retirées (aussi « ET », « DU »…), 5ᵉ thème
+  `methodeDemonstrationLieuParametrique` (§ 3, « démontrer un lieu », § 6), ajouté au pilote sur DEUX sections
+  (`methode-generale-demonstration` et `lieu-parametrique` ; `piocherIndices` évite les doublons entre lignes du même
+  thème), 18 V / 17 F dans chacun des 5 thèmes, `nombreExercices` = `nombreQuestions(theme)`. **Affichage des
+  justifications** (audit Q3) : la cause commune — `.triangle-quelconque-aide` / `.aide-5e` sont des conteneurs flex,
+  chaque fragment devenait une colonne — était déjà corrigée sur les 8 panneaux de quiz du 6e (un seul `<span>`,
+  `dcda4bd`, 20/11) ; les panneaux 4e / 5e passent un `<p>` ou une chaîne unique. Vérifié : 5 thèmes joués en entier
+  (iPhone 13), un seul enfant dans le conteneur, 0 colonne.
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 

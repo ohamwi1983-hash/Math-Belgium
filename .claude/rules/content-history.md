@@ -236,6 +236,39 @@ paths:
   `.claude/rules/feuilles-evaluations.md`, « 6e ch. 8, lots A, F, D »). Les cartes 6gen110–122 et les ateliers
   sont ajoutés par d'autres agents.
 
+- **6e (6h), Chapitre 9 — Lieux géométriques** (`lieux-geometriques`) : **audit appliqué, lots A, F, D et parcours
+  (25/11, agent AFD)** — lot A : natures d'un lieu en liste OUVERTE (demi-droites, segment, cercle privé de points,
+  polygone ; astroïde et coniques aussi), aire variable ($K$, $M$ définis en produits en croix — pas de « det » —,
+  deux solutions symétriques par rapport au POINT $d\cap(AB)$, $d\parallel(AB)$ : toutes ou aucune), angle aigu
+  $\tan\theta=\left|\frac{m_2-m_1}{1+m_1m_2}\right|$, cercle par 2 points (2 / 1 / 0 centres selon $2r$ et $AB$),
+  historiques (Euclide : bissectrice, médiatrice, cercles inscrit / circonscrit ; Archimède pour le centre de gravité ;
+  Fermat avec Descartes ; « Apollonius de Perga » comme au ch. 10 ; portrait « d'après Frans Hals »), GPS (4e satellite
+  = horloge), § 4 renommé « Lieux par traduction directe », `\mathrm{dist}`, $|x|^{2/3}+|y|^{2/3}=1$. **Figures** :
+  TOUTES isotropes (domaine au rapport exact 320/300 = 16/15 : un cercle reste rond, un angle droit reste droit,
+  marqueurs d'angle droit ajoutés), recadrées (aucune étiquette rognée, aucun cercle hors cadre ; contrôle `check.mjs` du
+  dossier `afd-6e9`), radar = ARC CAPABLE (cercle par A, B et P, angle 45°), parasite avec les vraies perpendiculaires,
+  points CREUX pour les extrémités exclues (`vectorPlane.points[].open`, ajout optionnel), bande et carré plein teintés
+  (`regions`), demi-droites jusqu'au bord. Lot F : sous-section « Les points remarquables du triangle : G, O, H et la
+  droite d'Euler » au § 1 (exemple A(0 ; 0), B(8 ; 0), C(1 ; 7) : O(4 ; 3), R = 5, H(1 ; 1), G(3 ; 7/3) ; cas rectangle et
+  obtusangle ; cercle des neuf points N(2,5 ; 2), rayon R/2 ; historique Euler 1765 / Brianchon et Poncelet 1821 /
+  Feuerbach 1822 / Terquem 1842) — tout le reste du § 1 GARDÉ (décision 2). 19 démonstrations (`exempleLibre`
+  « Démonstration — … ») : distance point–droite, médianes, médiatrice = lieu, médiatrices, hauteurs (repère A(a ; 0),
+  B(b ; 0), C(0 ; c), H(0 ; −ab/c)), droite d'Euler, neuf points, bissectrice (aires), incentre, PT, parallélogramme,
+  Varignon, médiane du triangle rectangle, Thalès (sens direct, § 3), théorème de la médiane, PA² − PB² = k,
+  Apollonius, bissectrices de deux droites, angle droit = cercle privé de A et B (§ 4). Cours écrit pour 6gen54–57 et
+  6gen123–131 : repère qui ne perd pas la généralité (+ piège B(a ; 0), C(a ; c)), méthode « démontrer un lieu » (deux
+  inclusions, équivalences, points exclus, lieu complet ou partie) aux § 4 et § 6, droites équidistantes de deux
+  points, carré par rotation de 90°, rayon réfléchi, m(x² + y²) cercle / point / vide, corde, cercle tangent à un axe,
+  centre sur une droite, exinscrits (J_A, aire/(p − a)), position droite–cercle, tangente en un point, tangentes par
+  a(x − x_P) + b(y − y_P) = 0 (exemple P(5 ; 3) : tangente verticale x = 5), seuil 4c / carré plein / octogone, α et 2α
+  (substitution, demi-cercle privé de ses extrémités), échelle qui glisse, centre de gravité mobile, arc de parabole,
+  droite privée d'un point, demi-parabole. Énoncés par clé des 48 blocs, banque « Formule » (32 questions). Parcours :
+  3 parties (« Le triangle et le cercle en coordonnées » § 1–2, « Démontrer et traduire » § 3–4, « Lieux en mouvement :
+  un paramètre à éliminer » § 5–6), 6 `titreCourt`, 15 phrases d'`essentiel`, 21 cartes. Formules longues coupées en
+  plusieurs `$…$` (aucune ne sort de son bloc à 390 px). Lot D : quiz 6gen72 (voir `.claude/rules/feuilles-evaluations.md`,
+  « 6e ch. 9, lots A, F, D »). Les cartes 6gen54 (renommée par le lot C), 6gen123–131 et les ateliers sont ajoutés par
+  d'autres agents.
+
 - **6e (6h), Chapitre 6 — corrigé « comme au tableau » et niveaux (6gen30–33, 6gen74–76)** : corrigés détaillés
   typés partagés écran / papier (`generateurs6e/*/corrigeDetaille.ts`, brique `ui6e/corrigeProbabilites.ts`),
   `criteresDifficulte` à la place des étoiles, profils `calcul` relus (aucun changement : rien n'est donné
