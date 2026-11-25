@@ -8,6 +8,7 @@ import {
   candidatsFaces,
   elementsConstructionAuxiliaire,
   libelleFace,
+  decorDonnees,
   pointsExtraConnus,
   segmentsExtraTraces,
   texteAideFaceNiveau2,
@@ -70,12 +71,12 @@ export function EtapeAuxiliaireFace({
   return (
     <div>
       <p className="prompt-text">{CONSIGNE_AUXILIAIRE_FACE}</p>
-      <p className="prompt-fact">{texteProgression(connus, segmentsTraces)}</p>
+      <p className="prompt-fact">{texteProgression(connus, segmentsTraces, exercice)}</p>
 
       <Solide3DSketch
         solide={exercice.solide}
-        pointsExtra={[...pointsExtraConnus(exercice, connus), ...dessin.points]}
-        segmentsExtra={[...segmentsExtraTraces(exercice, segmentsTraces), ...dessin.segments]}
+        pointsExtra={[...decorDonnees(exercice).points, ...pointsExtraConnus(exercice, connus), ...dessin.points]}
+        segmentsExtra={[...decorDonnees(exercice).segments, ...segmentsExtraTraces(exercice, segmentsTraces), ...dessin.segments]}
       />
 
       <div className="options-grid-compact" role="radiogroup">

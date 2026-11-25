@@ -69,7 +69,11 @@ export const CAS_SECTION_TRIANGLE = "triangle";
 
 export const LIBELLE_CAS_SECTION_PLANE_SOLIDE = "Inclure un cas direct : section triangulaire (P, Q, R autour d'un sommet, aucun point auxiliaire)";
 
+/** Variantes du manuel (point dans une face, prolongement d'une arête, plan parallèle) : une section
+ * triangulaire n'y est PAS un raccourci (point donné à exploiter, parallèles à tracer) — jamais le cas
+ * particulier « triangle » ; `forme` préfixée par la variante (même charge dans toutes les séries). */
 export function profilSectionPlaneSolide(e: ExerciceSectionPlaneSolide): ProfilInstance {
+  if (e.variante) return { casParticulier: null, forme: `${e.variante}-${e.points.length}-cotes` };
   return { casParticulier: e.points.length === 3 ? CAS_SECTION_TRIANGLE : null, forme: `${e.points.length}-cotes` };
 }
 

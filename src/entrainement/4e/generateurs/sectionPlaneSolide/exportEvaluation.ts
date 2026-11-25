@@ -3,9 +3,11 @@ import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, Criter
 import { correctionDetailleeSectionPlaneSolide, ecransSection } from "./corrigeDetaille";
 import { texte } from "../../../export/fragmentsDocx";
 import {
+  descriptionPointConnu,
   libelleFace,
   libelleLigne,
   libellePoint,
+  nomCoteKLM,
   nomPolygoneSection,
 } from "../../ui/formatSectionPlaneSolide";
 import { construireSvgSectionPlaneSolide, nomPointAuxiliaire, ordreCycliqueDepuisP, ordreLabelsDepuisExercice } from "./figure";
@@ -96,7 +98,11 @@ function consignesEtapes(exercice: ExerciceSectionPlaneSolide): string[] {
   return ecransSection(exercice).map((ecran) =>
     ecran.type === "segment"
       ? "Trace un côté de la section dans une face où 2 points de section sont déjà connus."
-      : ecran.type === "lignes"
+      : ecran.type === "appui"
+        ? "Dans une face dont le plan contient deux points connus, trace la droite qui les joint : elle donne un côté de la section et un nouveau point."
+        : ecran.type === "parallele"
+          ? "Trace le côté suivant de la section, parallèle à un côté du triangle KLM, et place le nouveau point."
+          : ecran.type === "lignes"
         ? "Plus aucune face n'a 2 points connus : construis un point auxiliaire en prolongeant deux droites d'une même face."
         : ecran.type === "face"
           ? "Dans la face que ce point auxiliaire débloque, construis le nouveau point de section."
@@ -110,9 +116,26 @@ function leSolide(exercice: ExerciceSectionPlaneSolide): string {
   return `le ${label.charAt(0).toLowerCase()}${label.slice(1)}`;
 }
 
+/** Données de l'énoncé, selon la variante (variantes du manuel : où est chaque point donné ; plan
+ * parallèle : K, L, M et P). */
+function texteDonnees(exercice: ExerciceSectionPlaneSolide): string {
+  const plan = exercice.planParallele;
+  if (plan) {
+    const aretes = plan.points.map((k) => `[${k.arete[0] === plan.sommet ? k.arete.join("") : [...k.arete].reverse().join("")}]`);
+    const p = exercice.points.find((x) => x.id === exercice.idsDepart[0])!;
+    return `Sur ${leSolide(exercice)}, les points K, L et M sont sur les arêtes ${aretes[0]}, ${aretes[1]} et ${aretes[2]}, et P est un point de l'arête [${p.arete.join("")}]. On coupe le solide par le plan π parallèle au plan (KLM) et passant par P.`;
+  }
+  if (exercice.variante) {
+    const ordre = ordreLabelsDepuisExercice(exercice);
+    const morceaux = exercice.idsDepart.map((id) => `${libellePoint(ordre, id)} est ${descriptionPointConnu(exercice, id)}`);
+    return `On coupe ${leSolide(exercice)} par le plan (PQR) : ${morceaux[0]}, ${morceaux[1]} et ${morceaux[2]}.`;
+  }
+  return `On coupe ${leSolide(exercice)} par le plan passant par les points P, Q et R marqués sur ses arêtes.`;
+}
+
 function construireEnonceSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide): SectionExercice {
   return {
-    enteteFragments: [texte(`On coupe ${leSolide(exercice)} par le plan passant par les points P, Q et R marqués sur ses arêtes.`)],
+    enteteFragments: [texte(texteDonnees(exercice))],
     enteteHtml: construireSvgSectionPlaneSolide(exercice, false),
     questions: consignesEtapes(exercice).map((c) => ({ consigne: [texte(c)] })),
   };
@@ -143,6 +166,16 @@ function textesEtapes(exercice: ExerciceSectionPlaneSolide): string[] {
       textes.push(`Dans la face ${libelleFace(exercice, etape.face)}, ${lettre(a)} et ${lettre(b)} sont connus : on trace le segment [${lettre(a)}${lettre(b)}].`);
       continue;
     }
+    if (etape.type === "appui") {
+      const x = lettre(etape.appui);
+      const z = lettre(etape.pointConnu);
+      textes.push(`Le plan de la face ${libelleFace(exercice, etape.face)} contient ${x} et ${z} : la droite (${x}${z}), prolongée, coupe l'arête ${arete(etape.pointCible)} en ${lettre(etape.pointCible)} ; on trace le côté [${z}${lettre(etape.pointCible)}].`);
+      continue;
+    }
+    if (etape.type === "parallele") {
+      textes.push(`Dans la face ${libelleFace(exercice, etape.face)}, le côté de la section est parallèle à ${nomCoteKLM(exercice, etape.cote)} : la parallèle menée par ${lettre(etape.pointConnu)} coupe l'arête ${arete(etape.pointCible)} en ${lettre(etape.pointCible)}.`);
+      continue;
+    }
     const connusAvant = ordreLabels.slice(0, ordreLabels.indexOf(etape.pointCible));
     const nomI = nomPointAuxiliaire(rang++);
     const l1 = libelleLigne(exercice, connusAvant, etape.ligne1);
@@ -169,7 +202,7 @@ function construireCorrectionSectionPlaneSolide(exercice: ExerciceSectionPlaneSo
       type: "paragraphe",
       fragments: [
         texte(
-          `Le plan (PQR) traverse ${exercice.facesCroisees.length} faces du solide : ${facesListe}. Chacune de ces faces fournit un côté de la section (le segment qui relie ses 2 points de section) : la section a donc ${k} côtés.`,
+          `Le plan ${exercice.planParallele ? "π" : "(PQR)"} traverse ${exercice.facesCroisees.length} faces du solide : ${facesListe}. Chacune de ces faces fournit un côté de la section (le segment qui relie ses 2 points de section) : la section a donc ${k} côtés.`,
         ),
       ],
     },
@@ -214,6 +247,11 @@ function nombreAuxiliaires(exercice: ExerciceSectionPlaneSolide): number {
  * écran de lecture (repérer les faces et les points connus) ; méthode 1 (côté direct ou point
  * auxiliaire, à choisir à chaque étape), aucun piège dans les données, aucun nombre. */
 function criteresDifficulteSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide): CriteresDifficulte {
+  // Variantes du manuel, niveau CONSTANT dans la variante (la forme de la section est la réponse) :
+  // point dans une face / hors du solide = piège des données (il n'est pas un sommet de la section) ;
+  // plan parallèle : une parallèle par côté, puis la fermeture.
+  if (exercice.variante === "parallele") return { etapesTransformation: 3, etapesLecture: 1, sansCharge: true, methode: 1, piege: 0, nombres: 0 };
+  if (exercice.variante) return { etapesTransformation: 3, etapesLecture: 1, sansCharge: true, methode: 1, piege: 1, nombres: 0 };
   // Section triangulaire (cas particulier, déjà visible sur l'énoncé) : côtés directs puis
   // fermeture, aucun point auxiliaire — méthode imposée (relier deux points d'une même face).
   if (exercice.points.length === 3) return { etapesTransformation: 2, etapesLecture: 1, sansCharge: true, methode: 0, piege: 0, nombres: 0 };
@@ -232,6 +270,8 @@ function baremeSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide): BaremeE
   const premiereFace = ecrans.findIndex((e) => e.type === "face");
   const n = nombreAuxiliaires(exercice);
   const k = exercice.points.length;
+  if (exercice.variante === "parallele") return baremeParallele(exercice, fin);
+  if (exercice.variante) return baremeAppui(exercice, fin);
   if (k === 3) return baremeTriangle(exercice, fin);
   const criteres: CritereBareme[] = [
     { sousQuestion: premierSegment >= 0 ? lettreEtape(premierSegment) : fin, critere: [texte("Côtés tracés directement dans les faces où 2 points de section sont connus")], points: 1 },
@@ -255,6 +295,54 @@ function baremeSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide): BaremeE
   };
 }
 
+/** Barème des variantes « point dans une face » et « prolongement d'une arête ». */
+function baremeAppui(exercice: ExerciceSectionPlaneSolide, fin: string): BaremeExercice {
+  const ecrans = ecransSection(exercice);
+  const lettreDe = (type: string) => {
+    const i = ecrans.findIndex((e) => e.type === type);
+    return i >= 0 ? lettreEtape(i) : fin;
+  };
+  const n = nombreAuxiliaires(exercice);
+  const k = exercice.points.length;
+  const hors = exercice.variante === "prolongement";
+  return {
+    reponseFinale: reponseBreveSectionPlaneSolide(exercice),
+    criteres: [
+      { sousQuestion: lettreDe("appui"), critere: [texte(`Droite tracée dans une face dont le plan contient un point donné ${hors ? "hors du solide" : "intérieur à la face"} et un point de section, prolongée jusqu'aux arêtes`)], points: 1 },
+      n > 0
+        ? { sousQuestion: lettreDe("lignes"), critere: [texte(`${n > 1 ? `${n} points auxiliaires construits` : "Point auxiliaire construit"} en prolongeant deux droites d'une même face`)], points: 1 }
+        : { sousQuestion: lettreDe("segment"), critere: [texte("Autres côtés tracés dans les faces dont le plan contient deux points connus")], points: 1 },
+      { sousQuestion: lettreDe("appui"), critere: [texte("Nouveaux points de section placés sur la bonne arête")], points: 1 },
+      { sousQuestion: fin, critere: [texte(`Polygone fermé à ${k} côtés (${nomPolygoneSection(k)}), côtés cachés en pointillés`)], points: 1 },
+    ],
+    erreursFrequentes: [
+      { description: [texte(hors ? "Point donné hors du solide pris pour un sommet de la section" : "Point donné dans une face pris pour un sommet de la section")], cout: "−1" },
+      { description: [texte("Deux points reliés alors qu'ils ne sont pas dans le plan d'une même face")], cout: "−1" },
+      { description: [texte("Côté situé sur une face cachée tracé en trait plein")], cout: "−0,5" },
+    ],
+    reponsesAcceptees: [[texte("Autres noms pour les nouveaux points de section ou les points auxiliaires, si la construction est juste")]],
+  };
+}
+
+/** Barème de la variante « plan parallèle à (KLM) passant par P ». */
+function baremeParallele(exercice: ExerciceSectionPlaneSolide, fin: string): BaremeExercice {
+  const k = exercice.points.length;
+  return {
+    reponseFinale: reponseBreveSectionPlaneSolide(exercice),
+    criteres: [
+      { sousQuestion: "a", critere: [texte("Côté issu de P parallèle au côté de KLM situé dans la même face ou dans la face parallèle")], points: 1 },
+      { sousQuestion: lettreEtape(Math.min(1, ecransSection(exercice).length - 2)), critere: [texte("Côtés suivants parallèles au bon côté de KLM, nouveaux points sur la bonne arête")], points: 2 },
+      { sousQuestion: fin, critere: [texte(`Polygone fermé à ${k} côtés (${nomPolygoneSection(k)}), côtés cachés en pointillés`)], points: 1 },
+    ],
+    erreursFrequentes: [
+      { description: [texte("Côté tracé parallèle à un côté de KLM situé dans une face sécante")], cout: "−1" },
+      { description: [texte("Section du plan (KLM) construite au lieu de celle de π")], cout: "0 pt sur les côtés" },
+      { description: [texte("Côté situé sur une face cachée tracé en trait plein")], cout: "−0,5" },
+    ],
+    reponsesAcceptees: [[texte("Autres noms pour les nouveaux points de section, si la construction est juste ; côtés tracés dans un autre ordre")]],
+  };
+}
+
 /** Barème de la section triangulaire : trois côtés directs, aucun point auxiliaire. */
 function baremeTriangle(exercice: ExerciceSectionPlaneSolide, fin: string): BaremeExercice {
   return {
@@ -272,20 +360,20 @@ function baremeTriangle(exercice: ExerciceSectionPlaneSolide, fin: string): Bare
   };
 }
 
+function consignePapier(exercice: ExerciceSectionPlaneSolide): string {
+  if (exercice.planParallele)
+    return "Construis la section du solide par le plan π : nomme Q, R… les nouveaux points de section dans l'ordre où tu les trouves, trace le polygone de section (côtés situés sur une face cachée en pointillés) et donne sa nature. Trace ta construction sur la figure de l'énoncé, que tu joins à ta feuille.";
+  if (exercice.variante)
+    return "Construis la section du solide par le plan (PQR) : nomme S, T… les nouveaux points de section dans l'ordre où tu les trouves, trace le polygone de section (côtés situés sur une face cachée en pointillés) et donne sa nature. Trace ta construction sur la figure de l'énoncé, que tu joins à ta feuille.";
+  return "Construis la section du solide par le plan (PQR) : nomme S, T… les nouveaux points de section dans l'ordre où tu les trouves, trace le polygone de section (côtés situés sur une face cachée en pointillés) et donne sa nature.";
+}
+
 function enoncePapierSectionPlaneSolide(exercice: ExerciceSectionPlaneSolide): EnoncePapier {
   return {
     section: {
-      enteteFragments: [texte(`On coupe ${leSolide(exercice)} par le plan passant par les points P, Q et R marqués sur ses arêtes.`)],
+      enteteFragments: [texte(texteDonnees(exercice))],
       enteteHtml: construireSvgSectionPlaneSolide(exercice, false),
-      questions: [
-        {
-          consigne: [
-            texte(
-              "Construis la section du solide par le plan (PQR) : nomme S, T… les nouveaux points de section dans l'ordre où tu les trouves, trace le polygone de section (côtés situés sur une face cachée en pointillés) et donne sa nature.",
-            ),
-          ],
-        },
-      ],
+      questions: [{ consigne: [texte(consignePapier(exercice))] }],
     },
     etapesParQuestion: [consignesEtapes(exercice).map((_, i) => lettreEtape(i))],
   };

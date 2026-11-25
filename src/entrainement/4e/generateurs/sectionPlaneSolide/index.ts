@@ -1,5 +1,6 @@
 import type { NomSolide3D, Point3D, Solide3D } from "../../core/geometrieEspace.types";
-import type { ExerciceSectionPlaneSolide, LigneCandidateExercice, PointSectionExercice } from "../../core/sectionPlaneSolide.types";
+import type { ExerciceSectionPlaneSolide, LigneCandidateExercice, PointSectionExercice, VarianteManuelSection } from "../../core/sectionPlaneSolide.types";
+import { construireVarianteManuel } from "./variantesManuel";
 import { distance3D, EPSILON_3D } from "../solide3D/geometrieEspace";
 import { GABARITS_SOLIDE3D, GABARITS_TOUS, tirerNomGabarit } from "../solide3D/gabarits";
 import { faceEstVisible } from "../../ui/solide3DSketch";
@@ -194,19 +195,24 @@ export function construireTriangle(): ExerciceSectionPlaneSolide {
   throw new Error(`construireTriangle : aucune section triangulaire trouvée après ${MAX_TENTATIVES} tentatives`);
 }
 
-export type VarianteSectionPlaneSolide = NomSolide3D | "triangle";
+export type VarianteSectionPlaneSolide = NomSolide3D | "triangle" | VarianteManuelSection;
 
 /** Convention CLAUDE.md — catalogue `{id,label}` + `construireAvecVarianteId` : un gabarit par
  * variante (la section n'a pas de « catégorie » comparable aux autres exercices — sa variété vient
- * des points de départ tirés), puis la variante « triangle » AJOUTÉE EN FIN (audit 4e ch. 8, G9) :
- * les indices des quatre gabarits, donc les `?code=` déjà imprimés, ne changent pas. */
+ * des points de départ tirés), puis la variante « triangle » AJOUTÉE EN FIN (audit 4e ch. 8, G9),
+ * puis les trois variantes du manuel (25/11/2026, `variantesManuel.ts`), elles aussi EN FIN : les
+ * indices des variantes précédentes, donc les `?code=` déjà imprimés, ne changent pas. */
 export const CATALOGUE_VARIANTES: { id: VarianteSectionPlaneSolide; label: string }[] = [
   ...GABARITS_TOUS.map((id) => ({ id, label: GABARITS_SOLIDE3D[id].label })),
   { id: "triangle", label: "Section triangulaire (P, Q, R autour d'un sommet visible)" },
+  { id: "faceInterieure", label: "Un point donné dans une face" },
+  { id: "prolongement", label: "Points donnés sur le prolongement d'une arête" },
+  { id: "parallele", label: "Plan parallèle à un plan donné passant par un point" },
 ];
 
 export function construireAvecVarianteId(varianteId: VarianteSectionPlaneSolide): ExerciceSectionPlaneSolide {
   if (varianteId === "triangle") return construireTriangle();
+  if (varianteId === "faceInterieure" || varianteId === "prolongement" || varianteId === "parallele") return construireVarianteManuel(varianteId);
   for (let tentative = 0; tentative < MAX_TENTATIVES; tentative++) {
     const resultat = tenterGenererPourGabarit(varianteId);
     if (resultat) return resultat;
@@ -223,9 +229,15 @@ export function genererExerciceSectionPlaneSolide(): ExerciceSectionPlaneSolide 
   throw new Error(`genererExerciceSectionPlaneSolide : aucune instance résoluble trouvée après ${MAX_TENTATIVES} tentatives`);
 }
 
-/** Tirage libre de l'APPLI : la section triangulaire une fois sur six, sinon le tirage libre
- * historique. Le tirage libre de l'adaptateur et des `?code=` reste `genererExerciceSectionPlaneSolide`
- * (codes libres déjà imprimés inchangés). */
+/** Tirage libre de l'APPLI : la section triangulaire une fois sur six (inchangé), chacune des trois
+ * variantes du manuel une fois sur neuf, sinon (une fois sur deux) le tirage libre historique. Le
+ * tirage libre de l'adaptateur et des `?code=` reste `genererExerciceSectionPlaneSolide` (codes
+ * libres déjà imprimés inchangés). */
 export function genererExerciceSectionPlaneSolideLibre(): ExerciceSectionPlaneSolide {
-  return Math.random() < 1 / 6 ? construireTriangle() : genererExerciceSectionPlaneSolide();
+  const u = Math.random();
+  if (u < 1 / 6) return construireTriangle();
+  if (u < 1 / 6 + 1 / 9) return construireVarianteManuel("faceInterieure");
+  if (u < 1 / 6 + 2 / 9) return construireVarianteManuel("prolongement");
+  if (u < 1 / 2) return construireVarianteManuel("parallele");
+  return genererExerciceSectionPlaneSolide();
 }

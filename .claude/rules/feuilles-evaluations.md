@@ -4023,7 +4023,81 @@ différents ; documents (2 plans, interdite / autorisée en deux colonnes ; éva
 corrigé + grille + feuille + aménagée + Word copie / corrigé / grille) : 0 `.katex-error`, 0 débordement à
 680 / 820 / 1 280 px ; page du chapitre 390 px : cartes présentes, 0 « $ » ni « ** ».
 
+## 4e ch. 8, manuel — gen40 « Section plane d'un solide » (chantier B, 25/11/2026)
+
+D'après le manuel (ex. 4 a, 6 b 3–4, 7 b 2–3, exemples résolus 6 a / 7 a). **Trois variantes AJOUTÉES EN FIN de
+`CATALOGUE_VARIANTES`** (indices 5, 6, 7 : `faceInterieure`, `prolongement`, `parallele`) ; tirage libre de
+l'adaptateur et des codes INCHANGÉ (`genererExerciceSectionPlaneSolide`) ; l'appli les tire par
+`genererExerciceSectionPlaneSolideLibre` : triangle 1 fois sur 6 (inchangé), chaque variante du manuel 1 fois sur 9,
+historique 1 fois sur 2. Générateur `generateurs/sectionPlaneSolide/variantesManuel.ts` (petits outils recopiés
+d'`index.ts` : pas d'import circulaire).
+- **Contrat** (`core/sectionPlaneSolide.types.ts`, champs facultatifs : absents des anciennes variantes, exercices et
+  `?code=` identiques) : `variante`, `pointsAppui` (point donné qui n'est PAS un sommet de la section : id
+  `ID_APPUI_BASE + i` = 100 + i, nature `face` / `prolongement`, `face`, `arete`, `auDelaDe`, `facesPlan`), `planParallele`
+  (sommet, K, L, M et leurs arêtes, côtés [KL], [LM], [KM] avec leur face) ; `idsDepart: number[]` (P, Q, R — sommet ou point
+  d'appui ; un seul, P, pour « parallele ») : les lettres P, Q, R, S… restent l'indice dans `connus`, qui contient les ids
+  d'appui. Étapes de référence nouvelles : `appui` (face, point d'appui, point connu, point trouvé) et `parallele` (face, côté
+  de KLM, point connu, point trouvé). `resolutionReference(…, appuis = [])` : sans appui, comportement identique (codes).
+- **« faceInterieure »** : point intérieur à une face VISIBLE (rectangle u, v ∈ [0,25 ; 0,75], triangle barycentres ≥ 0,2),
+  un point sur une arête de cette face, le troisième sur une arête hors de la face, lettres mélangées ; exigés : à ≥ 9 % (taille
+  du croquis) des arêtes dessinées, ≥ 12 % des sommets, ≥ 13 % des points de section (les faces fuyantes — dessus, côté, base
+  du prisme — sont minces sur le dessin : première version à 6 / 10 / 8 %, étiquettes P / Q collées et point presque sur [DE]
+  du prisme, vus sur capture), à ≥ 25 % du côté de chaque extrémité du côté qui le porte. Tous les gabarits (tétraèdre ≈ 50 %,
+  prisme ≈ 30 %) ; k = 3 (48 %), 4 (40 %), 5, 6.
+- **« prolongement »** : 2 points hors du solide 4 fois sur 5 tirés (1 sinon ; acceptés : ≈ 22 % à deux), t ∈ [−0,55 ; −0,2] ∪
+  [1,2 ; 1,55] sur la droite d'une arête ; exigés : dans le cadre du croquis (marge 7 %), HORS de la silhouette du solide
+  (enveloppe convexe projetée, ≥ 6 %), droite prolongée dessinée hors du solide (sinon elle passerait sur les faces), ≥ 9 % des
+  sommets, ≥ 5 % des arêtes, ≥ 10 % des points de section, deux points hors du solide à ≥ 15 % l'un de l'autre ; aucune face
+  TRAVERSÉE dont le plan contient deux points d'appui ; chaque point d'appui sert dans la résolution de référence. Une face non
+  traversée dont le plan contient les deux (manuel 6 b 4 : (BCD)) reste un distracteur (« la droite (PQ) ne traverse pas cette
+  face »). Tétraèdre rare (≈ 1 % : la droite prolongée passe presque toujours sur le dessin du solide).
+- **Écran « tracer dans une face » généralisé** (variantes à points d'appui seulement) : `facesPretesPourSegment` (Couche B)
+  ajoute les faces à UN point de section connu dont le plan contient un point d'appui connu, aligné (recalculé) avec ce point et
+  l'autre point de section de la face → `appui`, `nouveau` ; le moteur trace le côté ET ajoute le nouveau point. Consigne « …
+  dont le plan contient 2 points connus (points de section ou points donnés)… », aides (méthode ; où est chaque point, « dans le
+  plan de chaque face qui contient l'arête [GH] »), messages (face non traversée dont le plan contient deux points connus, un
+  seul point connu dans le plan, aucun), aperçu orange entre les deux points du plan ; écran clos : droite prolongée en violet,
+  côté et nouveau point. Récapitulatif « Points donnés : P sur l'arête [GH], Q dans la face (EFGH), R sur la droite (CD),
+  au-delà de D » ; compteur de points de section sans les points d'appui.
+- **« parallele »** (cube ou pavé) : K, L, M sur les trois arêtes du sommet VISIBLE (t ∈ [0,3 ; 0,7]), triangle KLM dessiné en vert
+  (donnée), P sur une arête qui ne part PAS de ce sommet (sur la même arête que K, étiquettes serrées : vu sur le papier) ; π à
+  ≥ 0,6 de (KLM), sommets de section à ≥ 12 % de K, L, M ; k = 3 (≈ 38 %), 4 (≈ 1,4 %), 5 (≈ 9 %), 6 (≈ 52 %). Écran propre `EtapeParalleleSection` (phase `parallele`) : on fait le tour depuis P (face et point de départ
+  donnés), l'élève choisit le côté de KLM parallèle (une tentative, ✗ / ✓ figés, message « [LM] est dans la face (BCGF), qui
+  n'est ni la face (ABFE) ni parallèle à elle ») ; aides : propriété « deux plans parallèles coupés par un troisième » + faces
+  opposées ; niveau 2 : « la face (ABFE) est parallèle à la face (DCGH) : cherche le côté de KLM tracé dans cette face-là » ;
+  écran clos : côté tracé, côté de KLM repassé en orange. Dernier côté automatique. **Adaptation** : « tracer une parallèle » à
+  l'écran = choisir le côté de KLM (la construction est dessinée à la validation) ; sur papier, l'élève trace réellement.
+- **Tableau d'appartenance** (TOUTES les variantes, anciennes comprises) : `ui/tableauAppartenanceSection.ts`, chaîne SVG
+  autonome (rasterisée par le Word, qui ne garde que les `<svg>` d'un `figureHtml`) — une colonne par face (cube / pavé :
+  Haut, Bas, Gauche, Droite, Avant, Arrière + nom de la face ; prisme / tétraèdre : sommets), une ligne par point, lettre dans
+  chaque face dont le PLAN le contient. Papier : DERNIÈRE ligne du corrigé (étape de fermeture, « Tableau »), points donnés puis,
+  dans l'ordre de la résolution de référence, points auxiliaires I₁… (violet) et points trouvés. Appli : écran de conclusion,
+  points dans l'ordre de l'élève.
+- **Papier** : énoncé selon la variante (« P est sur l'arête [GH], Q est dans la face (EFGH) et R est sur la droite (CD),
+  au-delà de D » ; « les points K, L et M sont sur les arêtes [FE], [FB] et [FG], et P est un point de l'arête [CG]. On coupe le
+  solide par le plan π parallèle au plan (KLM) et passant par P. »), consigne globale + « Trace ta construction sur la figure de
+  l'énoncé, que tu joins à ta feuille » (nouvelles variantes seulement : énoncés anciens inchangés) ; corrigé `etapesAppuiSection`
+  (X ∈ face, ou X ∈ (uv) et (uv) ⊂ face ; Z ∈ face ; plan de coupe ∩ face = (XZ) ; S = (XZ) ∩ (uv) ; piège « le point donné
+  n'est pas un sommet ») et `etapesParalleleSection` ((KLM) ∩ face de KLM = (KL) ; faces parallèles ; π ∥ (KLM) ; π ∩ face ∥ (KL) ;
+  piège « jamais parallèle à un côté d'une face sécante »), `COURS_DEUX_PLANS` ; barèmes propres (4 points) ; figure : droite
+  prolongée (gris), triangle KLM (vert), constructions d'appui (violet). « l'hexagone » (était « le hexagone », écran et corrigé).
+- **Niveaux** (constants dans la variante, la forme de la section est la réponse) : `faceInterieure` et `prolongement` 4 · 9 min
+  (3 étapes `sansCharge`, lecture 1, méthode 1, piège 1 : point donné hors section), `parallele` 3 · 9 min (piège 0). Profil :
+  jamais le cas « triangle » pour ces variantes, `forme` = `<variante>-<k>-cotes`.
+- **Mesuré** : collecteur (dossier de travail `4e-ch8-B/codes/collecteur.ts` : 300 tirages par nouvelle variante, 100 par
+  ancienne ; corrigé papier, énoncés, brève, barème, ancien corrigé ; chaque ligne `\in` / `\subset` / `\parallel` / `\cap` / `=`
+  évaluée sur les positions 3D ; sessions jouées juste ET faux avec textes d'écran, aides, messages et corrigés d'écran ; côté
+  de KLM attendu recalculé par les directions) : 40 684 relations, 0 fausse, 0 NaN / undefined / notation clavier / KaTeX
+  invalide, barèmes = 4, tableau complet sans doublon, toutes les sessions closes ; niveaux constants (ci-dessus, anciennes
+  variantes inchangées : 3 · 9, triangle 1 · 7). `?code=` : 60 graines × (libre + 5 anciennes variantes) = 360 / 360 identiques.
+  Playwright (iPhone 13 et 1 280 px, 12 codes, réponses justes et fausses, aides des deux niveaux) : 39 parcours, 0 erreur
+  console, scrollWidth = largeur, 0 `.katex-error`, tableau présent à la conclusion. Documents réels (2 plans : 2 et 1 question
+  par variante, interdite / autorisée, deux colonnes ; évaluation 2 séries + aménagée + corrigé + grille + feuille + aménagée +
+  Word copie / corrigé / grille) : 0 `.katex-error`, 0 débordement à 680 / 820 / 1 280 px, structure (variante + `forme`)
+  B = A. `npm run build` : 25 pages pré-rendues.
+
 ## 5e ch. 6, lot H1 — 5gen76, 5gen77, 5gen36–5gen38 (nouveaux, notés)
+
 
 Socle d'écrans `AppEcransTrigo` sans modification (choix jugés ✗ / ✓ en une tentative, champs en trois, `approchee` et
 `parse_error` refusés SANS tentative, aides à deux niveaux, corrigé après chaque réponse). Corrigés

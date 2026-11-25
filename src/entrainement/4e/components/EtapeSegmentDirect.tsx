@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { ExerciceSectionPlaneSolide } from "../core/sectionPlaneSolide.types";
 import { NIVEAU_AIDE_MAX_SEGMENT } from "../moteur/sessionSectionPlaneSolide";
-import { CONSIGNE_SEGMENT_DIRECT, TEXTE_AIDE_SEGMENT_NIVEAU1, apercuSegmentFace, candidatsFaces, libelleFace, pointsExtraConnus, segmentsExtraTraces, texteAideSegmentNiveau2, texteProgression } from "../ui/formatSectionPlaneSolide";
+import { apercuSegmentFace, candidatsFaces, consigneSegmentDirect, decorDonnees, elementsConstructionAppui, libelleFace, pointsExtraConnus, segmentsExtraTraces, texteAideSegmentNiveau1, texteAideSegmentNiveau2, texteProgression } from "../ui/formatSectionPlaneSolide";
+import { facesPretesPourSegment } from "../moteur/verificationSectionPlaneSolide";
 import { ariaOptionChoixFerme, classeOptionChoixFerme } from "../ui/choixFige";
 import { Solide3DSketch } from "./Solide3DSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -40,16 +41,21 @@ export function EtapeSegmentDirect({ exercice, connus, segmentsTraces, niveauAid
 
   const candidats = candidatsFaces(exercice, new Set(segmentsTraces));
   const apercu = validation ? null : apercuSegmentFace(exercice, connus, faceChoisie);
+  const decor = decorDonnees(exercice);
+  // Variantes du manuel : une fois l'écran clos sur une face « point donné », la droite prolongée et
+  // le nouveau point sont dessinés.
+  const prete = validation && faceJuste !== null && faceJuste !== undefined ? facesPretesPourSegment(exercice, new Set(connus), new Set(segmentsTraces)).find((f) => f.face === faceJuste) : null;
+  const construction = elementsConstructionAppui(exercice, connus, prete);
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_SEGMENT_DIRECT}</p>
-      <p className="prompt-fact">{texteProgression(connus, segmentsTraces)}</p>
+      <p className="prompt-text">{consigneSegmentDirect(exercice)}</p>
+      <p className="prompt-fact">{texteProgression(connus, segmentsTraces, exercice)}</p>
 
       <Solide3DSketch
         solide={exercice.solide}
-        pointsExtra={pointsExtraConnus(exercice, connus)}
-        segmentsExtra={apercu ? [...segmentsExtraTraces(exercice, segmentsTraces), apercu] : segmentsExtraTraces(exercice, segmentsTraces)}
+        pointsExtra={[...decor.points, ...pointsExtraConnus(exercice, connus), ...construction.points]}
+        segmentsExtra={[...decor.segments, ...segmentsExtraTraces(exercice, segmentsTraces), ...construction.segments, ...(apercu ? [apercu] : [])]}
       />
 
       <div className="options-grid-compact" role="radiogroup">
@@ -74,7 +80,7 @@ export function EtapeSegmentDirect({ exercice, connus, segmentsTraces, niveauAid
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{TEXTE_AIDE_SEGMENT_NIVEAU1}</p>
+          <p>{texteAideSegmentNiveau1(exercice)}</p>
           {niveauAide >= 2 && <p><TexteInsistance texte={texteAideSegmentNiveau2(exercice, connus)} /></p>}
         </div>
       )}
