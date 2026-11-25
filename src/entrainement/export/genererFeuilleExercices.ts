@@ -328,6 +328,12 @@ export interface AdaptateurFeuilleExercices<T> {
    * s'imprime plus sous « Additionner deux vecteurs »). `null` / absent = titre de la section, rien
    * ne change. Voir `TitrePapier` ; appliqué par `lib/evaluationLocal.ts::itemExercice`. */
   titrePapier?: (instance: T) => TitrePapier | null;
+  /** La question a besoin de la table de la loi normale Φ (décision de l'utilisateur du 18/11/2026,
+   * 6e ch. 8) : sur papier, UNE table complète est jointe EN ANNEXE du document (feuille, évaluation)
+   * dès qu'une question la demande — jamais d'extrait dans l'énoncé. `true` : toutes les instances ;
+   * fonction : selon l'instance. Absent : pas de table. L'annexe est assemblée par
+   * `evaluationLocal.ts::annexesDuDocument` (`annexesPapier.ts`). */
+  besoinTablePhi?: boolean | ((instance: T) => boolean);
 }
 
 /** Surcharge du titre d'une instance : remplace le titre de section imprimé (`titreSection`), la

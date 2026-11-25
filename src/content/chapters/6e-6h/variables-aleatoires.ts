@@ -996,6 +996,36 @@ export const variablesAleatoires: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 51. Loi normale »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Lire la table de Φ',
+          generatorId: '6gen116',
+          description: [
+            'Lis la vraie table de Φ : lecture directe, complément, symétrie pour un z négatif, aire entre deux bornes, et sens inverse avec la case la plus proche.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 116. Lire la table de Φ »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Courbe de Gauss : aires et règle empirique',
+          generatorId: '6gen117',
+          description: [
+            "Associe une aire colorée sous la cloche à sa probabilité et à son écriture avec Φ, puis applique la règle empirique (68,3 %, 95,4 %, 99,7 %), y compris d'un seul côté.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 117. Courbe de Gauss : aires et règle empirique »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Loi normale : retrouver μ ou σ',
+          generatorId: '6gen120',
+          description: [
+            "À partir d'une ou de deux proportions connues, lis z dans la table à l'envers (attention au signe) et retrouve l'écart-type, la moyenne, ou les deux par un système.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 120. Loi normale : retrouver μ ou σ »',
+        },
       ],
     },
     {
@@ -1179,6 +1209,16 @@ export const variablesAleatoires: ChapterContent = {
           description: ["Épreuves composées et « trouver n », théorème de Bayes à trois catégories, loi reconstruite et espérance appliquée."],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 52. Extensions binomiale, normale et Bayes »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Approximation normale avec correction de continuité',
+          generatorId: '6gen118',
+          description: [
+            "Vérifie d'abord si les conditions du cours permettent l'approximation ; si oui, calcule μ et σ, corrige les bornes d'une demi-unité, standardise et lis la table ; sinon, calcule avec la loi binomiale.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 118. Approximation normale avec correction de continuité »',
         },
       ],
     },
@@ -1379,6 +1419,36 @@ export const variablesAleatoires: ChapterContent = {
           description: ["Juge si l'approximation binomiale→Poisson est permise, ajuste λ à l'échelle de la question et calcule des probabilités de Poisson."],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 53. Loi de Poisson »',
+        },
+        {
+          kind: 'entrainement',
+          title: "Poisson : λ inconnu, valeur la plus probable, seuil d'alerte",
+          generatorId: '6gen121',
+          description: [
+            "Retrouve λ à partir de P(X = 0) ou d'une relation entre deux probabilités, ajuste-le à l'échelle de la question, trouve la valeur la plus probable et un seuil d'alerte.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: "6e (6h) → « 121. Poisson : λ inconnu, valeur la plus probable, seuil d'alerte »",
+        },
+        {
+          kind: 'entrainement',
+          title: 'Choisir le modèle',
+          generatorId: '6gen119',
+          description: [
+            'Lis la situation et choisis la loi : binomiale, hypergéométrique, Poisson, normale, uniforme continue, ou aucune ; donne ses paramètres et calcule une probabilité.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 119. Choisir le modèle »',
+        },
+        {
+          kind: 'entrainement',
+          title: "Détective d'erreurs : variables aléatoires",
+          generatorId: '6gen122',
+          description: [
+            "Trouve la ligne fausse dans la copie d'un élève (moyenne non pondérée, σ = V², Φ(−z) = Φ(z), règle empirique d'un seul côté, λ non ajusté, mauvais contraire, variance uniforme, Cₙᵏ oublié, correction de continuité), explique l'erreur et corrige.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: "6e (6h) → « 122. Détective d'erreurs : variables aléatoires »",
         },
       ],
     },
