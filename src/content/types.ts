@@ -235,6 +235,11 @@ export type InteractiveWidgetTag =
   | 'tangentes-point-widget'
   | 'arc-capable-widget'
   | 'repere-affine-widget'
+  | 'excentricite-curseur-widget'
+  | 'jardinier-coniques-widget'
+  | 'trois-miroirs-widget'
+  | 'dandelin-cone-widget'
+  | 'reduire-translation-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

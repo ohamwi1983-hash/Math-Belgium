@@ -6130,3 +6130,65 @@ PT), 759 positions de faisceaux + 26 588 positions libres de P (✓ jamais à pl
 le panneau : A, B, P glissés, P promené sur l'arc (41 points de trace), « Lancer » / « Pause », M glissé ; aucun
 défilement du panneau pendant un glisser. Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667 (14 ateliers du
 chapitre). Scripts et captures : `scratchpad/g2-6e9/`.
+
+## 6e (6h), Chapitre 10 — lot G de l'audit, première moitié (5 ateliers + 3 réemplois, agent G1, 25/11/2026)
+
+Le chapitre n'avait aucun atelier. Huit blocs `atelier` ajoutés, seuls (aucun autre bloc touché ; la figure fausse du
+miroir hyperbolique reste au lot A), placés par ancre solide (le cours est réécrit en parallèle). Même style que le
+ch. 9 : repères `geo-analytique-commun.js` à fenêtre FIXE et ORTHONORMÉS (cercles ronds), axes fléchés,
+`katex-shadow.js`, curseurs − / +, `placeurEtiquettes` (étiquettes jamais rognées), figure dans une `<svg>` sans bouton
+dans son conteneur. Nouveau module `src/interactive/coniques-commun.js` : rationnels exacts (`Q`, `texQ`,
+`texRacineQ`), échantillonnage ellipse / hyperbole / parabole (centre ou sommet + axe quelconque, parabole Y² = 2pX),
+chemins découpés au cadre, réflexion d'un rayon sur une tangente, arcs d'angle. Convention de la parabole y² = 2px,
+p = dist(F ; d), partout.
+- **`jardinier-coniques-widget`** (§ 1 B, après le piège « L'ellipse n'existe que si a > c », juste avant « Équation
+  cartésienne de l'ellipse ») : F et F′ entiers glissés, 2a de 0 à 14 (pas 0,5), bascule somme / différence ;
+  « Faire le tour » (un tour complet pour une courbe fermée), P glissé ou curseur, trace rose (gardée quand on change de
+  branche) ; ficelles [PF] et [PF′] et leurs longueurs ; régimes : ellipse, cercle (F = F′), segment [FF′] (2a = 2c),
+  vide, hyperbole (une branche à la fois), deux demi-droites (2a = 2c), médiatrice (différence, 2a = 0), tout le plan ;
+  a, c = |FF′|/2 et b en racines simplifiées, triangle orange rectangle (a² = b² + c², ou c² = a² + b² avec le
+  rectangle 2a × 2b et les asymptotes). Préréglages : ellipse et hyperbole du cours, F = F′, foyers obliques.
+- **`excentricite-curseur-widget`** (§ 2, juste après la figure des trois coniques de même foyer) : F(1 ; 0) et
+  d ≡ x = 0 fixes (ceux de la figure), e de 0 à 2,5 (pas 0,05) ; courbe par la forme polaire depuis F ; e = 0 : le seul
+  point F (« le cercle n'a pas de directrice » ; b/a = √(1 − e²) → 1 affiché pour les ellipses) ; e = 1 :
+  y² = 2(x − 1/2) ; centre, a, b, c, F′, d′, asymptotes ; P glissé sur la courbe (branche la plus proche du doigt) ou
+  curseur + « Autre branche » ; |PF|, dist(P ; d) et e·dist(P ; d) en direct.
+- **`dandelin-cone-widget`** (§ 2, juste après la figure de Dandelin « vue en coupe ») : cône de demi-angle 30°, plan qui
+  tourne autour de la droite (x = 0,6 ; z = 1,8) — il ne passe jamais par le sommet —, θ de 0° à 90° ; perspective
+  orthogonale (parties cachées en pointillés : bord inférieur, section, cercles de contact), sphères calculées
+  exactement (centres z = k/(cos θ ± sin α)), foyers, génératrice par P avec M et M′ ; vraie forme dans le plan
+  (foyers, directrices = traces des plans des cercles de contact) ; |PF| = |PM|, |PF′| = |PM′|, somme ou différence
+  = |MM′|, |PF| / dist(P ; d) = e = sin θ / cos 30°. Sur téléphone (< 560 px), une vue à la fois (boutons « Vue en
+  perspective » / « Vraie forme ») : les deux vues empilées étaient réduites par l'épinglage jusqu'à l'illisible.
+- **`reduire-translation-widget`** (§ 2, juste après la figure de la conique de l'exemple résolu dans R₁) : m, n
+  (−40 à 40), r, s (−300 à 300), t (−500 à 500) entiers, bouton « Choisir t pour un second membre nul » (t rationnel
+  exact) ; méthode du cours en valeurs EXACTES (1) regroupement, 2) carrés complétés et second membre K,
+  3) translation et nouvelle origine, 4) division par K — signalée quand K < 0 —, 5) nature et éléments dans R₁) ; tous
+  les cas : ellipse, cercle, hyperbole (axe selon le signe), point, vide, deux droites sécantes, parabole (m ou n nul :
+  sommet, 2p, foyer à p/2, directrice), deux droites parallèles, droite double, « pas une conique » (m = n = 0). Chaque
+  membre d'égalité dans son propre KaTeX (sinon la ligne débordait à 390 px). Préréglages dont l'exemple résolu du cours.
+- **`trois-miroirs-widget`** (§ 6, juste après les figures des miroirs elliptique et hyperbolique, qu'il complète) :
+  parabole y² = 4x, ellipse x²/25 + y²/16 = 1, hyperbole x²/9 − y²/16 = 1 (seule la branche de droite est un miroir) ;
+  sources : faisceau parallèle à l'axe, source au foyer, rayons qui visent F (Cassegrain) ; P glissé ; rayon réfléchi
+  calculé par la loi de la réflexion, angle avec la droite vers le foyer mesuré À PART ; hyperbole source en F :
+  prolongement en pointillés jusqu'à F′ (« semble venir de F′ ») ; faisceau parallèle sur l'ellipse ou l'hyperbole :
+  croix rouges aux passages sur l'axe et leur étendue (aucun point commun).
+- **Réemplois** (légendes réécrites pour le ch. 10) : `trace-lieu-widget` (§ 1, juste avant « A. La parabole » : une
+  conique est un lieu défini par des distances), `parabole-foyer-widget` (§ 1 A, juste après la figure de la parabole
+  de foyer F(1 ; 0), avant « Équation cartésienne de la parabole » : mode compas = la construction du cours, r < p/2),
+  `repere-affine-widget` (§ 1 B, juste après les figures « cercle aplati »). Non repris : `droite-cercle` (base de
+  l'atelier 6 « Droite et conique » du lot G2), `completer-le-carre` (méthode d'al-Khwārizmī pour x² + bx = c : la
+  réduction pas à pas le remplace), `lieux-complexes` (conditions sur z, aucune conique ; le jardinier et le curseur
+  d'excentricité en reprennent l'idée de trace).
+Vérifié (Vite, page réelle, panneau, iPhone 13 clair / sombre et 1 280 px) : 0 erreur console, scrollWidth 390,
+0 `.katex-error`, 0 KaTeX qui déborde, Shadow DOM sans `^ $ \ NaN undefined Infinity`, 0 étiquette SVG rognée ;
+balayages contre un recalcul indépendant, à partir de ce qui est DESSINÉ (SVG ramené au repère) et AFFICHÉ :
+1 701 réglages e / P (44 735 points de courbe avec |PF| = e·|x|, mesures affichées), 300 configurations du jardinier
+(39 597 points du lieu, verdicts, b, ficelles), 707 positions de miroir (P sur le miroir, tangente ⟂ gradient, angles
+égaux, rayon vers F / parallèle à l'axe / prolongement par F′ / vers F′ selon le cas), 1 500 équations aléatoires
+(365 051 points tracés sur la conique, nature par un classement indépendant, foyers : somme / différence constante,
+parabole |PF| = dist(P ; d)), 1 911 réglages θ / P de Dandelin (foyers par dichotomie sur la tangence, |PF| = |PM|,
+somme ou différence = |MM′|, rapport = sin θ / cos 30°) : 0 faux. Gestes au doigt (CDP) et à la souris dans le
+panneau : P glissé (ellipse, puis seconde branche), F glissé, P promené (trace), point d'impact glissé, P dans la vraie
+forme, boutons ; aucun défilement du panneau pendant un glisser. Épinglage dans le panneau : 0 KO à 390 × 664 et
+375 × 667 (8 ateliers du chapitre). Scripts et captures : `scratchpad/g1-6e10/`.

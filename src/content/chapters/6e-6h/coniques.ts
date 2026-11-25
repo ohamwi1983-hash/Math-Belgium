@@ -62,6 +62,13 @@ export const coniques: ChapterContent = {
               "son œuvre — aucun portrait contemporain d'Apollonius n'existe.",
           },
         },
+        {
+          kind: 'atelier',
+          tag: 'trace-lieu-widget',
+          label: 'Manipule toi-même : trace un lieu (rappel)',
+          caption:
+            'Rappel du chapitre 9. Choisis une condition et promène M : il devient vert quand il la vérifie, et le lieu se dessine point par point. Les coniques de ce chapitre sont, elles aussi, des lieux définis par des distances : à un point et à une droite (la parabole), à deux points (l’ellipse et l’hyperbole, que l’atelier « Le jardinier » trace plus bas).',
+        },
         { kind: 'subheading', text: 'A. La parabole' },
         {
           kind: 'definition',
@@ -111,6 +118,13 @@ export const coniques: ChapterContent = {
             caption:
               'Parabole de foyer F(1;0) et de directrice d ≡ x=−1 (donc p=2, équation y²=4x). Pour tout point P de la courbe, |PF| = dist(P;d) — ici 3,25 dans les deux cas.',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'parabole-foyer-widget',
+          label: 'Manipule toi-même : la parabole, foyer et directrice (rappel)',
+          caption:
+            'Rappel de 4e. Déplace le foyer F et la directrice d : P parcourt la parabole et |PF| reste égal à la distance de P à d. Le mode « compas » refait la construction ci-dessus (cercle de centre F et parallèle à d, au même rayon r) : essaie r < p/2. Même convention que ce chapitre : p = dist(F ; d), x² = 2py, ou y² = 2px quand l’axe est horizontal.',
         },
         { kind: 'subheading', text: 'Équation cartésienne de la parabole' },
         {
@@ -248,6 +262,13 @@ export const coniques: ChapterContent = {
           text:
             "Tout ça n'a de sens que si $a > c$ ! Si $a < c$, le lieu est **vide** : la somme des distances aux deux foyers vaut toujours au moins $|FF'| = 2c$. Si $a = c$, tu obtiens le **segment** $[FF']$, pas une ellipse. Vérifie toujours $a > c$ avant de te lancer dans un calcul.",
         },
+        {
+          kind: 'atelier',
+          tag: 'jardinier-coniques-widget',
+          label: 'Manipule toi-même : le jardinier, somme ou différence',
+          caption:
+            'Fais glisser les piquets F et F′, règle la longueur 2a de la ficelle, puis lance le tour : P trace l’ellipse (|PF| + |PF′| = 2a). Bascule sur « Différence » pour l’hyperbole (section C). Regarde les cas limites : 2a = 2c (un segment, ou deux demi-droites), 2a < 2c pour la somme (vide), 2a = 0 pour la différence (la médiatrice). a, b et c s’affichent avec le triangle rectangle qui donne a² = b² + c² (ellipse) ou c² = a² + b² (hyperbole).',
+        },
         { kind: 'subheading', text: "Équation cartésienne de l'ellipse" },
         {
           kind: 'para',
@@ -363,6 +384,13 @@ export const coniques: ChapterContent = {
                 "Toute ellipse est un cercle « aplati » : le graphique de $f(x)=\\dfrac{b}{a}\\sqrt{a^2-x^2}$ s'obtient en multipliant par $\\dfrac{b}{a}$ l'ordonnée de chaque point du cercle $g(x)=\\sqrt{a^2-x^2}$.",
             },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'repere-affine-widget',
+          label: 'Manipule toi-même : un cercle aplati par les unités (rappel)',
+          caption:
+            'Rappel du chapitre 9. Avec des unités différentes sur les deux axes (préréglage « Unités différentes »), l’ensemble des points dont les coordonnées vérifient x² + y² = 4 n’est plus un cercle : c’est une ellipse, le « cercle aplati » ci-dessus vu autrement. Règle aussi l’angle entre les axes.',
         },
         {
           kind: 'astuce',
@@ -627,6 +655,13 @@ export const coniques: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'excentricite-curseur-widget',
+          label: 'Manipule toi-même : le curseur d’excentricité',
+          caption:
+            'F(1 ; 0) et d (x = 0) sont ceux de la figure ci-dessus. Fais glisser e de 0 à 2,5 : ellipse, parabole pour e = 1, hyperbole au-delà. Le point P garde toujours |PF| = e · dist(P ; d). Pour une ellipse ou une hyperbole, le second foyer F′ et la seconde directrice d′ apparaissent. Pour e = 0, il ne reste que F : le cercle n’a pas de directrice.',
+        },
+        {
           kind: 'astuce',
           label: 'Conique centrée ou non centrée',
           text:
@@ -698,6 +733,13 @@ export const coniques: ChapterContent = {
             caption:
               "Vue en coupe du cône : les 2 sphères inscrites touchent le plan de section en F et F′, et la génératrice en M et M′. |PF|+|PF′| = |PM|+|PM′| = |MM′|, constante.",
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'dandelin-cone-widget',
+          label: 'Manipule toi-même : section du cône et sphères de Dandelin',
+          caption:
+            'Le cône a un demi-angle de 30°. Incline le plan de 0° à 90° : cercle, ellipse, parabole à 60° (plan parallèle à une génératrice), hyperbole au-delà. Les sphères de Dandelin touchent le plan aux foyers F et F′. Déplace P : |PF| = |PM| et |PF′| = |PM′|, donc |PF| + |PF′| = |MM′| reste constant. À droite, la vraie forme de la section, avec ses directrices.',
         },
         {
           kind: 'historique',
@@ -796,6 +838,13 @@ export const coniques: ChapterContent = {
             caption:
               "La conique $16x^2-36y^2+80x+252y-197=0$ dans le repère donné $R_1$ : hyperbole de centre $O\'\\left(-\\frac{5}{2};\\frac{7}{2}\\right)$, sommets $S\\left(-\\frac{5}{2};\\frac{11}{2}\\right)$ et $S\'\\left(-\\frac{5}{2};\\frac{3}{2}\\right)$. Les axes translatés $x\'$ et $y\'$ sont en pointillé.",
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'reduire-translation-widget',
+          label: 'Manipule toi-même : réduire par translation',
+          caption:
+            'Règle m, n, r, s et t : la méthode ci-dessus s’affiche pas à pas, en valeurs exactes, et la conique est tracée avec les axes translatés x′ et y′. Pars de l’exemple du cours, puis fais varier t : un point, le vide ou deux droites apparaissent (le bouton choisit t pour que le second membre soit nul). Mets m ou n à 0 : une parabole.',
         },
         {
           kind: 'piege',
@@ -1428,6 +1477,13 @@ export const coniques: ChapterContent = {
                 'Miroir hyperbolique : en P, la tangente 5x−3y=9 fait des angles égaux avec PF et PF′ — un rayon dirigé vers un foyer repart comme s\'il venait de l\'autre.',
             },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'trois-miroirs-widget',
+          label: 'Manipule toi-même : trois miroirs',
+          caption:
+            'Choisis un miroir et une source, puis fais glisser le point d’impact P. Le rayon réfléchi suit la loi de la réflexion ; l’angle entre la tangente et la droite qui va au foyer, mesuré à part, est le même. Hyperbole, source en F : c’est le prolongement du rayon réfléchi (pointillés) qui passe par F′. Faisceau parallèle sur l’ellipse : aucun point de convergence.',
         },
         {
           kind: 'astuce',

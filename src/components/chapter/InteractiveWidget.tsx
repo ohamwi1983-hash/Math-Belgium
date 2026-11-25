@@ -235,6 +235,11 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'tangentes-point-widget': () => import('../../interactive/register-tangentes-point-widget.js'),
   'arc-capable-widget': () => import('../../interactive/register-arc-capable-widget.js'),
   'repere-affine-widget': () => import('../../interactive/register-repere-affine-widget.js'),
+  'excentricite-curseur-widget': () => import('../../interactive/register-excentricite-curseur-widget.js'),
+  'jardinier-coniques-widget': () => import('../../interactive/register-jardinier-coniques-widget.js'),
+  'trois-miroirs-widget': () => import('../../interactive/register-trois-miroirs-widget.js'),
+  'dandelin-cone-widget': () => import('../../interactive/register-dandelin-cone-widget.js'),
+  'reduire-translation-widget': () => import('../../interactive/register-reduire-translation-widget.js'),
 }
 
 /**
