@@ -1031,6 +1031,18 @@ export const geometrieDansEspace: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 101. Positions de deux plans et de trois plans »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Réalité ou illusion ?',
+          generatorId: 'gen135',
+          description: [
+            'Un solide dessiné en perspective cavalière, faces supposées planes : peut-il exister ? ' +
+              'Repère les trois plans en jeu, prolonge ses arêtes latérales sur le dessin, puis conclus ' +
+              'avec le théorème des trois plans : leurs droites d\'intersection doivent être concourantes ou parallèles.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 135. Réalité ou illusion ? »',
+        },
       ],
     },
 
