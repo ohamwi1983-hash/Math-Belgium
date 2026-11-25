@@ -5692,3 +5692,49 @@ Vérifié (Vite, page réelle, panneau, iPhone 13 clair / sombre et 1 280 px) : 
 mots), 240 réglages N, K, n (valeurs recalculées, axes identiques), 54 réglages étoiles (liste = formule),
 glisser au doigt (CDP) et à la souris, 300 mains classées, 30 000 mains simulées (écart < 4σ) ; épinglage
 dans le panneau 0 KO à 390 × 664 et 375 × 667. Scripts et captures : `scratchpad/g1-6e7/`.
+
+## 6e (6h), Chapitre 7 — lot G de l'audit, seconde moitié (4 ateliers, agent G2, 25/11/2026)
+
+Quatre blocs `atelier` ajoutés (aucun autre bloc touché), même style que G1 (`katex-shadow.js`, palette
+accent / sky / good / plan / rose / tip, tuiles et cadres, boutons ≥ 44 px) :
+- **`table-ronde-collier-widget`** (§ 1, après le piège « oublier la division par 2 ») : n de 2 à 6,
+  modes table / collier ; « Tourner » (animation de rotation), « Retourner » (miroir autour de l'axe
+  vertical, place du haut fixe ; la disposition retournée remplace l'ancienne à mi-course, jamais de
+  lettres en miroir), échange de deux perles au toucher, « Au hasard ». Après chaque geste : « même table
+  / autre table » (classes comparées par forme canonique). Files de la classe (n rotations, + n
+  retournées pour un collier, pâles quand déjà vues : n = 2). Classes ÉNUMÉRÉES (n ≤ 5) en petits
+  cercles cliquables : 1, 2, 6, 24 tables ; 1, 1, 3, 12 colliers ; n = 2 → 1 collier, « et non 1⁄2 ».
+  Géométrie fixe (même cercle pour tout n), sens de lecture fléché à droite de l'axe (jamais dessus).
+- **`anagrammes-fusion-widget`** (§ 2, après l'astuce « sans lettre répétée, on retrouve n! ») : champ
+  texte JAMAIS filtré (ni `maxlength`, ni transformation à la frappe : la saisie est seulement lue —
+  accents retirés, majuscules, non-lettres ignorées et SIGNALÉES) ; limites affichées (calcul jusqu'à
+  20 lettres en BigInt, liste ≤ 360 mots, lettres discernables ≤ 5 lettres) ; effectifs en pastilles,
+  n! ÷ (n₁! × …) (1! compris, comme l'exemple du cours) en `texEgalites`, anagrammes = résultat − 1
+  (« aucune » pour AAA). Liste : lettres identiques indicées (P₁, P₂), cadres de n₁! × n₂! × …
+  permutations ; « indiscernables » → FUSION animée (fantômes, comme `ordre-repetition`) en tuiles
+  « ×k » ; « Retirer le mot de départ » le barre et recompte. Exemples PAPA, RADAR, ANANAS, MATHS,
+  MISSISSIPPI (34 650 ; 34 649).
+- **`mots-binome-widget`** (§ 3, après la démonstration du binôme par dénombrement) : n de 1 à 6, les 2ⁿ
+  mots (a pâle, b gras, bord coloré selon le nombre de b) en grille puis « Regrouper par nombre de b »
+  (transition CSS des `<g>`) en colonnes de hauteurs Cₙᵏ, étiquettes Cₙᵏ et monômes ; dans chaque
+  colonne, trait pointillé entre les mots finissant par a et par b (relation de Pascal, expliquée) ;
+  mini-triangle de Pascal, ligne n encadrée aux couleurs des colonnes ; mot touché → facteurs qui
+  fournissent b et terme encadré du développement. viewBox fixe pour un n (grille et colonnes dans le
+  même cadre ; grille d'autant de rangées que la plus haute colonne, centrée).
+- **`approximation-binome-widget`** (§ 3, après l'avertissement « quand nε n'est plus petit ») : n de 1 à
+  100, ε de −0,1 à 0,1 au millième ; exemples 1,01⁴ / 1,01¹⁰⁰ / 0,99¹⁰ / 1,05²⁰. Valeur exacte,
+  1 + nε et erreur calculées en BigInt ((1000 + 1000ε)ⁿ ÷ 1000ⁿ : exactes si ≤ 10 décimales, sinon ≈ à
+  6 décimales : 1,01¹⁰⁰ ≈ 2,704814) ; verdict par l'erreur relative (< 1 %, < 10 %, échec) avec nε ;
+  tableau des termes Cₙᵏεᵏ (k ≤ 4, valeurs exactes) et somme des suivants. Graphique à fenêtre FIXE en
+  abscisse nε (−2 à 3, y de −1 à 5) : points (nε ; (1 + ε)ⁿ) pour n = 0 à 100, droite y = 1 + nε, bande
+  « nε petit », segment d'erreur rouge ; hors cadre, un message le dit. Lignes de valeurs empilées (une
+  grille dt / dd laissait déborder la chaîne d'égalités à 390 px).
+Vérifié (Vite, page réelle, panneau, iPhone 13 clair / sombre et 1 280 px) : 0 erreur console, scrollWidth
+390, 0 `.katex-error`, Shadow DOM sans `^ $ \ * NaN undefined Infinity`, 0 étiquette SVG rognée ;
+balayages : table / collier n = 2 à 6 × 2 modes × 6 dispositions au hasard (rotation exacte, « même » après
+tourner, « autre table » / « même collier » après retourner, nombre de classes et de files), échange au
+doigt ; 80 mots tirés au hasard (tuiles = n! ou formule, cadres = formule, mots distincts), MISSISSIPPI,
+accents, caractères ignorés, 25 lettres (champ intact), mot vide ; 2ⁿ mots n = 1 à 6 × 2 vues (2ⁿ tuiles
+distinctes dans le cadre, 0 chevauchement, colonnes = Cₙᵏ) ; 160 réglages (n, ε) comparés à `Math.pow`
+(valeur, approximation, erreur). Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667 (9 ateliers du
+chapitre). Scripts et captures : `scratchpad/g2-6e7/`.
