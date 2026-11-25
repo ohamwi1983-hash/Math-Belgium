@@ -1,39 +1,21 @@
 import type { ExerciceMethodeGeneratrices } from "../../core6e/methodeGeneratrices.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
-import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatMethodeGeneratrices";
+import type { PhaseMethodeGeneratrices } from "../../moteur6e/typesMethodeGeneratrices";
 import { phasesPourExercice } from "../../moteur6e/typesMethodeGeneratrices";
+import { FORMAT_6GEN57 } from "../../ui6e/formatMethodeGeneratrices";
+import { construireAdaptateurLieux } from "../adaptateurLieux";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceMethodeGeneratrices } from "./index";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceMethodeGeneratrices>` pour `6gen57` (Lieux géométriques — méthode des génératrices) — NOUVEAU,
- * même principe que les autres adaptateurs du chapitre « Lieux géométriques ».
+ * Adaptateur papier de `6gen57` — PROVISOIRE (lots B et C du 6e ch. 9 ; lot E à venir : énoncé en
+ * prose, corrigé « comme au tableau » avec la figure du lieu). Les données sont désormais en prose
+ * (plus de question coupée à l'impression, audit P1). Aucun `calcul`, aucun cas particulier.
  */
-
-function entete(exercice: ExerciceMethodeGeneratrices) {
-  return [...consigneGenerale(), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
-}
-
-function construireEnonce(exercice: ExerciceMethodeGeneratrices): SectionExercice {
-  const phases = phasesPourExercice(exercice);
-  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
-}
-
-function construireCorrection(exercice: ExerciceMethodeGeneratrices): BlocCorrection[] {
-  const phases = phasesPourExercice(exercice);
-  const lettres = "abcdefghijklmnopqrstuvwxyz";
-  return phases.map((phase, i) => ({
-    type: "paragraphe",
-    fragments: [texte(`${lettres[i] ?? String(i + 1)}) `), latex(formatReponseAttenduePhaseLatex(exercice, phase).join(",\\ "))],
-  }));
-}
-
-export const adaptateurEvaluationMethodeGeneratrices: AdaptateurFeuilleExercices<ExerciceMethodeGeneratrices> = {
-  titreDocument: "Lieux géométriques — méthode des génératrices — Évaluation",
-  nomFichierBase: "lieux-methode-generatrices",
+export const adaptateurEvaluationMethodeGeneratrices = construireAdaptateurLieux<ExerciceMethodeGeneratrices, PhaseMethodeGeneratrices>({
+  titreDocument: "Méthode des génératrices — Évaluation",
+  nomFichierBase: "methode-generatrices",
   genererInstance: genererExerciceMethodeGeneratrices,
   catalogueVariantes: CATALOGUE_VARIANTES,
-  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
-  construireEnonce,
-  construireCorrection,
-};
+  genererInstanceAvecVariante: construireAvecVarianteId,
+  format: FORMAT_6GEN57,
+  phases: phasesPourExercice,
+});

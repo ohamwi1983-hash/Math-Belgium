@@ -29,13 +29,21 @@ export interface ConfigAppCombinatoire<E, P extends string> {
   /** Figure de l'énoncé (facultative). */
   illustration?: (e: E, p: P) => ReactNode;
   /** Outil propre à l'écran, rendu sous sa consigne (6e ch. 8 : tableau de la loi, courbe de Gauss,
-   * table de Φ consultable) — reste visible quand l'énoncé se replie. Facultatif. */
-  complement?: (e: E, p: P) => ReactNode;
+   * table de Φ consultable) — reste visible quand l'énoncé se replie. Facultatif. `closes` : écrans
+   * déjà jugés, l'écran courant compris dès qu'il est clos (6e ch. 9 : le lieu n'est tracé qu'APRÈS
+   * la réponse qu'il trahirait). */
+  complement?: (e: E, p: P, closes: readonly P[]) => ReactNode;
   /** Sous-titre de l'en-tête (défaut : « Chapitre 7 — Analyse combinatoire »). */
   sousTitre?: string;
   /** Nombre de puces montré tant que le PREMIER écran n'est pas clos, quand le nombre réel d'écrans
    * trahirait la réponse de cet écran (6gen48 : la stratégie). */
   pucesAvantPremierEcran?: (e: E) => number | null;
+  /** Même chose pour un écran plus loin (6e ch. 9) : `nombre` puces tant que l'écran d'indice
+   * `jusqua` n'est pas clos (le nombre d'écrans suivants trahirait sa réponse). */
+  pucesMasquees?: (e: E) => { nombre: number; jusqua: number } | null;
+  /** Rappels « Ce qu'on sait déjà » : valeurs d'un écran séparées par « ; » (6e ch. 9 : « A(…) ; B(…) »,
+   * « a = 5 ; b = 3 »). Absent : rendu d'avant (ch. 7 et 8 inchangés). */
+  recapSepare?: boolean;
   /** Corrigé détaillé de l'écran (lot E) ; à défaut, l'explication du format. */
   corrigeDetaille?: (e: E, p: P) => ReactNode;
 }
@@ -138,6 +146,11 @@ export function AppCombinatoire<E, P extends string>({ config }: { config: Confi
   });
   const pucesAvant = config.pucesAvantPremierEcran?.(exercice);
   if (pucesAvant && etat.index === 0 && !enAttente) segments = Array.from({ length: pucesAvant }, (_, i) => (i === 0 ? "courante" : "a-venir"));
+  const masque = config.pucesMasquees?.(exercice);
+  if (masque && (etat.index < masque.jusqua || (etat.index === masque.jusqua && !enAttente))) {
+    const reels = segments;
+    segments = Array.from({ length: masque.nombre }, (_, i) => (i < etat.index ? reels[i] : i === etat.index ? "courante" : "a-venir"));
+  }
 
   const estChoix = def.estChoix(exercice, phase);
   /** Corrigé de l'écran courant : UNE seule source pour la validation (révélé : visible ; juste :
@@ -172,7 +185,7 @@ export function AppCombinatoire<E, P extends string>({ config }: { config: Confi
     libelle: fmt.libellePhase(exercice, p),
     valeur: "",
     estLatex: true,
-    valeurs: fmt.reponseAttendue(exercice, p),
+    valeurs: config.recapSepare ? fmt.reponseAttendue(exercice, p).map((v, i, t) => (i < t.length - 1 ? `${v}\\,;` : v)) : fmt.reponseAttendue(exercice, p),
     revele: etat.clos[p]?.revele ?? false,
   }));
 
@@ -192,7 +205,7 @@ export function AppCombinatoire<E, P extends string>({ config }: { config: Confi
           consigneGenerale={fmt.consigneGenerale(exercice)}
           donnees={fmt.donnees(exercice)}
           illustration={config.illustration?.(exercice, phase)}
-          complement={config.complement?.(exercice, phase)}
+          complement={config.complement?.(exercice, phase, etat.phases.filter((p) => !!close(p)))}
           consigneEcran={fmt.consigneEcran(exercice, phase)}
           champs={fmt.champs(exercice, phase)}
           attentes={config.attentes(exercice, phase)}

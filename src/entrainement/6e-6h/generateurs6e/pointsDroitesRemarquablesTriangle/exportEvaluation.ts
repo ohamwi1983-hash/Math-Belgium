@@ -1,39 +1,22 @@
 import type { ExercicePointsDroitesRemarquablesTriangle } from "../../core6e/pointsDroitesRemarquablesTriangle.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
-import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatPointsDroitesRemarquablesTriangle";
+import type { PhasePointsDroitesRemarquablesTriangle } from "../../moteur6e/typesPointsDroitesRemarquablesTriangle";
 import { phasesPourExercice } from "../../moteur6e/typesPointsDroitesRemarquablesTriangle";
+import { FORMAT_6GEN54 } from "../../ui6e/formatPointsDroitesRemarquablesTriangle";
+import { construireAdaptateurLieux } from "../adaptateurLieux";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePointsDroitesRemarquablesTriangle } from "./index";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExercicePointsDroitesRemarquablesTriangle>` pour `6gen54` (Points et droites remarquables du triangle) — NOUVEAU,
- * même principe que les autres adaptateurs du chapitre « Lieux géométriques ».
+ * Adaptateur papier de `6gen54` — PROVISOIRE (lots B et C du 6e ch. 9 ; lot E à venir). Profil : aucun
+ * cas particulier ; famille E : le nombre de droites est un VERDICT tiré dans chaque série (jamais
+ * dans `forme`). Pas de `calcul` (règle du 24/11 : construire, établir une équation, ce n'est pas la
+ * calculatrice qui le donne).
  */
-
-function entete(exercice: ExercicePointsDroitesRemarquablesTriangle) {
-  return [...consigneGenerale(exercice), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
-}
-
-function construireEnonce(exercice: ExercicePointsDroitesRemarquablesTriangle): SectionExercice {
-  const phases = phasesPourExercice(exercice);
-  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
-}
-
-function construireCorrection(exercice: ExercicePointsDroitesRemarquablesTriangle): BlocCorrection[] {
-  const phases = phasesPourExercice(exercice);
-  const lettres = "abcdefghijklmnopqrstuvwxyz";
-  return phases.map((phase, i) => ({
-    type: "paragraphe",
-    fragments: [texte(`${lettres[i] ?? String(i + 1)}) `), latex(formatReponseAttenduePhaseLatex(exercice, phase).join(",\\ "))],
-  }));
-}
-
-export const adaptateurEvaluationPointsDroitesRemarquablesTriangle: AdaptateurFeuilleExercices<ExercicePointsDroitesRemarquablesTriangle> = {
-  titreDocument: "Points et droites remarquables du triangle — Évaluation",
-  nomFichierBase: "points-droites-remarquables",
+export const adaptateurEvaluationPointsDroitesRemarquablesTriangle = construireAdaptateurLieux<ExercicePointsDroitesRemarquablesTriangle, PhasePointsDroitesRemarquablesTriangle>({
+  titreDocument: "Constructions analytiques dans le triangle — Évaluation",
+  nomFichierBase: "constructions-analytiques-triangle",
   genererInstance: genererExercicePointsDroitesRemarquablesTriangle,
   catalogueVariantes: CATALOGUE_VARIANTES,
-  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
-  construireEnonce,
-  construireCorrection,
-};
+  genererInstanceAvecVariante: construireAvecVarianteId,
+  format: FORMAT_6GEN54,
+  phases: phasesPourExercice,
+});

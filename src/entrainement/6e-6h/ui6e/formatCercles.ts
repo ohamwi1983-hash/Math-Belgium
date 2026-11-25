@@ -1,744 +1,581 @@
-import type { DonneesTriangleInscrit, DroiteAffine, ExerciceCercles, Point } from "../core6e/cercles.types";
+import type { ExerciceCercles, ExerciceCerclesG } from "../core6e/cercles.types";
 import type { PhaseCercles } from "../moteur6e/typesCercles";
-
-/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
- * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md : un type aussi
- * petit ne justifie pas un module partagé) ; rendu via `components/RenduFragments.tsx`. */
-export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
-
-function texte(valeur: string): FragmentConsigne {
-  return { type: "texte", valeur };
-}
-function latex(valeur: string): FragmentConsigne {
-  return { type: "latex", valeur };
-}
+import { latexCercle, latexDroite, latexPoly, latexQ, latexRacine, lireEquation, lireNombre, lirePoint, milieu, polyCercle, proportionnels, pt, ptNum, q, qMul, qNum } from "../moteur6e/algebreLieux";
+import type { Pt } from "../moteur6e/algebreLieux";
+import { polyEquationK, polySysteme } from "../moteur6e/verificationCercles";
+import { f } from "./fragmentsCombinatoire";
+import type { AideCombi, ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
+import { champDroiteUI, champEquationUI, champListePointsUI, champNombreUI, champPointUI, d3, ld, lp, nomPoint, p2 } from "./textesLieux";
+import { figureLieux } from "./figureLieux";
+import type { ObjetsLieux } from "./figureLieux";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen55`. Dispatch sur
- * `exercice.famille` PUIS `phase` (pas de sous-type ici, contrairement à `6gen43`) — mirroir
- * `formatDenombrementFondamental.ts`, jamais importé par un autre générateur.
- *
- * **Aucun écran de choix** dans ce générateur (contrairement à `6gen43`, familles C/E) — tous les
- * écrans sont des champs texte libre (équation, coordonnée, valeur numérique, ou réponse littérale
- * "r") : `ChampDef` n'a donc PAS de variante `"choix"` ici, volontairement plus simple que le
- * patron `denombrementFondamental` (documenté dans `docs/historique-6e.md`).
- *
- * **PIÈGE TRANSVERSAL explicitement demandé par la mission (familles B et C)** : les 2 familles
- * partagent la MÊME première étape (médiatrice de [AB]) mais divergent ensuite — leurs textes
- * d'aide, ci-dessous, ne mentionnent JAMAIS l'autre famille ni sa méthode (jamais "contrairement à
- * la famille B/C", jamais "on ne procède pas comme pour un rayon donné/une droite donnée") : chaque
- * aide reste formulée de façon 100% autonome, uniquement en termes de la propriété géométrique de
- * la médiatrice elle-même (équidistance à A et B). Vérifié une dernière fois dans
- * `formatCercles.test.ts` (recherche textuelle explicite des mots "famille"/"écran C"/"famille B"
- * dans les 2 textes concernés).
+ * Textes de `6gen55` — Cercles (6e ch. 9, § 2 ; audit, lots B et C) : droites en ax + by + c = 0,
+ * valeurs exactes (fractions, racines simplifiées) annoncées et acceptées en chaîne, réponses de
+ * chaque écran rédigées (plus de « (voir aide/développement) »), « un des quatre cercles tangents »
+ * aux trois droites, aides à deux niveaux qui ne donnent jamais le résultat, figure (cercle tracé
+ * APRÈS la réponse).
  */
 
-// ============================================================================
-// Formatage numérique/géométrique partagé.
-// ============================================================================
+type E = ExerciceCercles;
+type P = PhaseCercles;
 
-const TOLERANCE_ENTIER = 1e-6;
-const TOLERANCE_FRACTION = 1e-7;
-const DENOMINATEUR_MAX = 12;
+const par = (r: { n: bigint; d: bigint }) => (r.n < 0n ? `(${latexQ(r)})` : latexQ(r));
+const lq = latexQ;
+const L = (...l: string[]): FragmentConsigne[][] => l.map((x) => f(x));
+const EXACT = " Donne des valeurs exactes (fractions ou racines), jamais arrondies.";
 
-function estEntierProche(v: number): boolean {
-  return Math.abs(v - Math.round(v)) < TOLERANCE_ENTIER;
+function rayon(r2: { n: bigint; d: bigint }): string {
+  return latexRacine(r2);
 }
 
-function meilleureFraction(valeur: number): { p: number; q: number } | null {
-  for (let q = 1; q <= DENOMINATEUR_MAX; q++) {
-    const p = Math.round(valeur * q);
-    if (Math.abs(valeur - p / q) < TOLERANCE_FRACTION) return { p, q };
+const SOMMET_ANGLE = { A: "\\widehat{A}", B: "\\widehat{B}", C: "\\widehat{C}" };
+function poidsLatex(e: ExerciceCerclesG): string {
+  if (e.mode === "inscrit") return "\\dfrac{a\\,A+b\\,B+c\\,C}{a+b+c}";
+  if (e.sommet === "A") return "\\dfrac{-a\\,A+b\\,B+c\\,C}{-a+b+c}";
+  if (e.sommet === "B") return "\\dfrac{a\\,A-b\\,B+c\\,C}{a-b+c}";
+  return "\\dfrac{a\\,A+b\\,B-c\\,C}{a+b-c}";
+}
+function rayonGLatex(e: ExerciceCerclesG): string {
+  if (e.mode === "inscrit") return "r=\\dfrac{\\text{Aire}}{s}";
+  const cote = e.sommet === "A" ? "a" : e.sommet === "B" ? "b" : "c";
+  return `r=\\dfrac{\\text{Aire}}{s-${cote}}`;
+}
+
+export const FORMAT_6GEN55: FormatCombinatoire<E, P> = {
+  consigneGenerale(e) {
+    switch (e.famille) {
+      case "A":
+        return f("Détermine le cercle qui passe par les trois points $A$, $B$ et $C$. Son équation s'écrit $x^2+y^2+Dx+Ey+F=0$." + EXACT);
+      case "B":
+        return f("On cherche les cercles de rayon $r$ qui passent par les points $A$ et $B$." + EXACT);
+      case "C":
+        return f("On cherche le cercle qui passe par $A$ et $B$ et dont le centre est sur la droite $d$." + EXACT);
+      case "D":
+        return f(`On cherche le cercle tangent à l'axe des ${e.axe === "abscisses" ? "abscisses" : "ordonnées"} au point $T$ et qui passe par $A$.` + EXACT);
+      case "E":
+        return f("Détermine le cercle inscrit dans le triangle $ABC$ (tangent à ses trois côtés, à l'intérieur du triangle)." + EXACT);
+      case "F":
+        return f("On cherche le cercle de centre $\\Omega$ qui découpe sur la droite $d$ une corde de longueur $L$." + EXACT);
+      case "G":
+        return e.mode === "inscrit"
+          ? f("Trois droites deux à deux sécantes forment le triangle $ABC$. Elles sont tangentes à quatre cercles : le cercle inscrit et trois cercles exinscrits. On cherche le cercle inscrit, à l'intérieur du triangle." + EXACT)
+          : f(`Trois droites deux à deux sécantes forment le triangle $ABC$. Elles sont tangentes à quatre cercles : le cercle inscrit et trois cercles exinscrits. On cherche le cercle exinscrit situé dans l'angle $${SOMMET_ANGLE[e.sommet]}$ (hors du triangle).` + EXACT);
+    }
+  },
+  donnees(e) {
+    switch (e.famille) {
+      case "A":
+        return [f(`$${nomPoint("A", e.A)}$, $${nomPoint("B", e.B)}$, $${nomPoint("C", e.C)}$`)];
+      case "B":
+        return [f(`$${nomPoint("A", e.A)}$, $${nomPoint("B", e.B)}$, rayon $r=${rayon(e.r2)}$`)];
+      case "C":
+        return [f(`$${nomPoint("A", e.A)}$, $${nomPoint("B", e.B)}$`), f(`$d\\,:\\ ${ld(e.d)}$`)];
+      case "D":
+        return [f(`$${nomPoint("A", e.A)}$, point de tangence $${nomPoint("T", e.T)}$`)];
+      case "E":
+        return [f(`$${nomPoint("A", e.triangle.A)}$, $${nomPoint("B", e.triangle.B)}$, $${nomPoint("C", e.triangle.C)}$`)];
+      case "F":
+        return [f(`centre $${nomPoint("\\Omega", e.centre)}$, longueur de la corde $L=${e.L}$`), f(`$d\\,:\\ ${ld(e.d)}$`)];
+      case "G":
+        return [f(`$(AB)\\,:\\ ${ld(e.AB)}$`), f(`$(BC)\\,:\\ ${ld(e.BC)}$`), f(`$(CA)\\,:\\ ${ld(e.CA)}$`)];
+    }
+  },
+  consigneEcran(e, p) {
+    switch (p) {
+      case "aSysteme":
+        return f("Écris les trois équations en $D$, $E$, $F$ obtenues en remplaçant $x$ et $y$ par les coordonnées de $A$, puis de $B$, puis de $C$.");
+      case "aCoefficients":
+        return f("Résous ce système : calcule $D$, $E$ et $F$.");
+      case "aCentreRayon":
+        return f("Déduis-en le centre $\\Omega$ et le rayon $r$ du cercle.");
+      case "bNombre":
+        return f("Combien de cercles de rayon $r$ passent par $A$ et $B$ ?");
+      case "bMediatrice":
+      case "cMediatrice":
+        return f("Le centre est à égale distance de $A$ et de $B$. Écris une équation de la médiatrice de $[AB]$.");
+      case "bCentres":
+        return f("Calcule les coordonnées de chaque centre (un par ligne).");
+      case "cCentre":
+        return f("Calcule les coordonnées du centre $\\Omega$.");
+      case "cEquation":
+      case "dEquation":
+      case "fEquation":
+        return f("Écris une équation du cercle.");
+      case "dEquationK":
+        return e.famille === "D" && e.axe === "ordonnees"
+          ? f("Le centre est sur la perpendiculaire à l'axe en $T$ : on le note $\\Omega(k\\,;y_T)$, et le rayon vaut $|k|$. Écris l'équation en $k$ qui traduit $\\Omega A=\\Omega T$.")
+          : f("Le centre est sur la perpendiculaire à l'axe en $T$ : on le note $\\Omega(x_T\\,;k)$, et le rayon vaut $|k|$. Écris l'équation en $k$ qui traduit $\\Omega A=\\Omega T$.");
+      case "dCentreRayon":
+        return f("Résous cette équation : donne le centre $\\Omega$ et le rayon $r$.");
+      case "eCotes":
+      case "gCotes":
+        return f("Calcule les longueurs des côtés $a=BC$, $b=CA$ et $c=AB$.");
+      case "eCentre":
+        return f("Calcule les coordonnées du centre $I$ du cercle inscrit.");
+      case "eRayon":
+        return f("Calcule le rayon $r$ du cercle inscrit.");
+      case "fDistance":
+        return f("Calcule la distance du centre $\\Omega$ à la droite $d$.");
+      case "fRayon2":
+        return f("Calcule le carré $r^2$ du rayon du cercle.");
+      case "gSommets":
+        return f("Calcule les coordonnées des sommets $A$, $B$ et $C$.");
+      case "gCentre":
+        return e.famille === "G" && e.mode === "exinscrit" ? f("Calcule les coordonnées du centre $J$ du cercle exinscrit cherché.") : f("Calcule les coordonnées du centre $I$ du cercle inscrit.");
+      case "gRayon":
+        return f("Calcule le rayon $r$ de ce cercle.");
+    }
+  },
+  champs(e, p): ChampCombi[] {
+    switch (p) {
+      case "aSysteme":
+        return ["A", "B", "C"].map((n) => champEquationUI(`Pour $${n}$`, ["D", "E", "F"]));
+      case "aCoefficients":
+        return [champNombreUI("$D$"), champNombreUI("$E$"), champNombreUI("$F$")];
+      case "aCentreRayon":
+      case "dCentreRayon":
+        return [champPointUI("Centre $\\Omega$"), champNombreUI("Rayon $r$")];
+      case "bNombre":
+        return [
+          {
+            type: "choix",
+            label: "",
+            options: [
+              { valeur: "0", label: "Aucun" },
+              { valeur: "1", label: "Un seul" },
+              { valeur: "2", label: "Deux" },
+            ],
+          },
+        ];
+      case "bMediatrice":
+      case "cMediatrice":
+        return [champDroiteUI("Médiatrice")];
+      case "bCentres":
+        return [champListePointsUI("Centres")];
+      case "cCentre":
+        return [champPointUI("Centre $\\Omega$")];
+      case "cEquation":
+      case "dEquation":
+      case "fEquation":
+        return [champEquationUI("Équation du cercle")];
+      case "dEquationK":
+        return [champEquationUI("Équation en $k$", ["k"])];
+      case "eCotes":
+      case "gCotes":
+        return [champNombreUI("$a=BC$"), champNombreUI("$b=CA$"), champNombreUI("$c=AB$")];
+      case "eCentre":
+        return [champPointUI("$I$")];
+      case "eRayon":
+      case "gRayon":
+        return [champNombreUI("Rayon $r$")];
+      case "fDistance":
+        return [champNombreUI("Distance")];
+      case "fRayon2":
+        return [champNombreUI("$r^2$")];
+      case "gSommets":
+        return [champPointUI("$A$"), champPointUI("$B$"), champPointUI("$C$")];
+      case "gCentre":
+        return [champPointUI(e.famille === "G" && e.mode === "exinscrit" ? "$J$" : "$I$")];
+    }
+  },
+  aides: aides55,
+  reponseAttendue: reponse55,
+  explication: explication55,
+  libellePhase: (_e, p) => LIBELLES[p],
+  messageCible: cible55,
+};
+
+const LIBELLES: Record<P, string> = {
+  aSysteme: "Système en D, E, F",
+  aCoefficients: "D, E et F",
+  aCentreRayon: "Centre et rayon",
+  bNombre: "Nombre de cercles",
+  bMediatrice: "Médiatrice de [AB]",
+  bCentres: "Centres",
+  cMediatrice: "Médiatrice de [AB]",
+  cCentre: "Centre",
+  cEquation: "Équation du cercle",
+  dEquationK: "Équation en k",
+  dCentreRayon: "Centre et rayon",
+  dEquation: "Équation du cercle",
+  eCotes: "Côtés",
+  eCentre: "Centre du cercle inscrit",
+  eRayon: "Rayon inscrit",
+  fDistance: "Distance du centre à d",
+  fRayon2: "Carré du rayon",
+  fEquation: "Équation du cercle",
+  gSommets: "Sommets",
+  gCotes: "Côtés",
+  gCentre: "Centre",
+  gRayon: "Rayon",
+};
+
+function eqSysteme(p: Pt): string {
+  return `${latexPoly(polySysteme(p), ["D", "E", "F"])}=0`;
+}
+
+function aires(t: { A: Pt; B: Pt; C: Pt }): string {
+  return `\\text{Aire}=\\frac{1}{2}\\left|(${lq(t.B.x)}-${par(t.A.x)})(${lq(t.C.y)}-${par(t.A.y)})-(${lq(t.B.y)}-${par(t.A.y)})(${lq(t.C.x)}-${par(t.A.x)})\\right|`;
+}
+
+function aides55(e: E, p: P): AideCombi[] {
+  switch (e.famille) {
+    case "A":
+      if (p === "aSysteme")
+        return [
+          { texte: "Un point est sur le cercle si ses coordonnées vérifient l'équation :", latex: "x_A^2+y_A^2+D\\,x_A+E\\,y_A+F=0" },
+          { texte: "Pour $A$ :", latex: `${par(e.A.x)}^2+${par(e.A.y)}^2+${par(e.A.x)}\\,D+${par(e.A.y)}\\,E+F=0` },
+        ];
+      if (p === "aCoefficients")
+        return [
+          { texte: "Soustrais les équations deux à deux : $F$ disparaît, et il reste deux équations en $D$ et $E$." },
+          { texte: "Le système :", latex: `\\begin{cases}${eqSysteme(e.A)}\\\\ ${eqSysteme(e.B)}\\\\ ${eqSysteme(e.C)}\\end{cases}` },
+        ];
+      return [
+        { texte: "Complète les carrés : le centre et le rayon se lisent sur $D$, $E$, $F$ :", latex: "\\Omega\\left(-\\frac{D}{2}\\,;-\\frac{E}{2}\\right),\\qquad r^2=\\frac{D^2}{4}+\\frac{E^2}{4}-F" },
+        { texte: "Ici :", latex: `r^2=\\frac{${par(q(e.D))}^2}{4}+\\frac{${par(q(e.E))}^2}{4}-${par(q(e.F))}` },
+      ];
+    case "B": {
+      const M = milieu(e.A, e.B);
+      if (p === "bNombre")
+        return [
+          { texte: "Le centre est sur la médiatrice de $[AB]$, à la distance $r$ de $A$ : compare $r$ à la moitié de $AB$." },
+          { texte: "Ici :", latex: `AB=\\sqrt{(${lq(e.B.x)}-${par(e.A.x)})^2+(${lq(e.B.y)}-${par(e.A.y)})^2},\\qquad r=${rayon(e.r2)}` },
+        ];
+      if (p === "bMediatrice")
+        return [
+          { texte: "La médiatrice de $[AB]$ passe par le milieu $M$ de $[AB]$, et $\\overrightarrow{AB}$ en est un vecteur normal." },
+          { texte: "Ici :", latex: `M${lp(M)},\\qquad\\overrightarrow{AB}\\begin{pmatrix}${qNum(e.B.x) - qNum(e.A.x)}\\\\ ${qNum(e.B.y) - qNum(e.A.y)}\\end{pmatrix}` },
+        ];
+      return [
+        { texte: "Un centre $\\Omega(x\\,;y)$ est sur la médiatrice et vérifie $\\Omega A=r$ : résous le système." },
+        { texte: "Le système :", latex: `\\begin{cases}${latexDroite(e.mediatrice)}\\\\ (x-${par(e.A.x)})^2+(y-${par(e.A.y)})^2=${lq(e.r2)}\\end{cases}` },
+      ];
+    }
+    case "C":
+      if (p === "cMediatrice") {
+        const M = milieu(e.A, e.B);
+        return [
+          { texte: "La médiatrice de $[AB]$ passe par le milieu $M$ de $[AB]$, et $\\overrightarrow{AB}$ en est un vecteur normal." },
+          { texte: "Ici :", latex: `M${lp(M)},\\qquad\\overrightarrow{AB}\\begin{pmatrix}${qNum(e.B.x) - qNum(e.A.x)}\\\\ ${qNum(e.B.y) - qNum(e.A.y)}\\end{pmatrix}` },
+        ];
+      }
+      if (p === "cCentre")
+        return [
+          { texte: "$\\Omega$ est à la fois sur la médiatrice de $[AB]$ et sur $d$ : résous le système des deux équations." },
+          { texte: "Le système :", latex: `\\begin{cases}${latexDroite(e.mediatrice)}\\\\ ${latexDroite(e.d)}\\end{cases}` },
+        ];
+      return [
+        { texte: "Cercle de centre $\\Omega$ et de rayon $r$ :", latex: "(x-x_\\Omega)^2+(y-y_\\Omega)^2=r^2" },
+        { texte: "Le carré du rayon :", latex: `r^2=\\Omega A^2=(${lq(e.A.x)}-${par(e.centre.x)})^2+(${lq(e.A.y)}-${par(e.centre.y)})^2` },
+      ];
+    case "D":
+      if (p === "dEquationK")
+        return [
+          { texte: "Le rayon d'un cercle tangent à un axe en $T$ est la distance $\\Omega T=|k|$ ; écris l'égalité des carrés :", latex: "\\Omega A^2=k^2" },
+          { texte: e.axe === "abscisses" ? `Ici $\\Omega(${lq(e.T.x)}\\,;k)$ : écris $\\Omega A^2$ avec la formule de la distance.` : `Ici $\\Omega(k\\,;${lq(e.T.y)})$ : écris $\\Omega A^2$ avec la formule de la distance.` },
+        ];
+      if (p === "dCentreRayon")
+        return [
+          { texte: "Développe : les termes en $k^2$ s'annulent, l'équation est du premier degré en $k$. Le rayon est $|k|$." },
+          { texte: "Après développement :", latex: `${latexPoly(polyEquationK(e), ["k"])}=0` },
+        ];
+      return [
+        { texte: "Cercle de centre $\\Omega$ et de rayon $r$ :", latex: "(x-x_\\Omega)^2+(y-y_\\Omega)^2=r^2" },
+        { texte: "Ici $r^2=k^2$." },
+      ];
+    case "E":
+    case "G": {
+      const t = e.triangle;
+      if (p === "gSommets" && e.famille === "G")
+        return [
+          { texte: "Chaque sommet est l'intersection de deux côtés : $A$ est sur $(AB)$ et sur $(CA)$." },
+          { texte: "Pour $A$ :", latex: `\\begin{cases}${latexDroite(e.AB)}\\\\ ${latexDroite(e.CA)}\\end{cases}` },
+        ];
+      if (p === "eCotes" || p === "gCotes")
+        return [
+          { texte: "Distance entre deux points :", latex: "BC=\\sqrt{(x_C-x_B)^2+(y_C-y_B)^2}" },
+          { texte: "Pour $a$ :", latex: `a=\\sqrt{(${lq(t.C.x)}-${par(t.B.x)})^2+(${lq(t.C.y)}-${par(t.B.y)})^2}` },
+        ];
+      if (p === "eCentre" || p === "gCentre") {
+        const g = e.famille === "G" ? e : null;
+        return [
+          {
+            texte: g && g.mode === "exinscrit" ? "Le centre d'un cercle exinscrit est le point de concours d'une bissectrice intérieure et de deux bissectrices extérieures ; ses coordonnées sont des moyennes pondérées des sommets, avec le côté opposé au sommet de l'angle compté négativement :" : "Le centre du cercle inscrit est le point de concours des bissectrices ; ses coordonnées sont les moyennes des sommets pondérées par les longueurs des côtés opposés :",
+            latex: g ? `${g.mode === "exinscrit" ? "J" : "I"}=${poidsLatex(g)}` : "I=\\dfrac{a\\,A+b\\,B+c\\,C}{a+b+c}",
+          },
+          { texte: "Ici :", latex: `a=${t.a},\\quad b=${t.b},\\quad c=${t.c}` },
+        ];
+      }
+      return [
+        { texte: "L'aire du triangle s'écrit aussi avec le rayon et le demi-périmètre $s$ :", latex: e.famille === "G" ? rayonGLatex(e) : "r=\\dfrac{\\text{Aire}}{s}" },
+        { texte: "Ici :", latex: aires(t) },
+      ];
+    }
+    case "F":
+      if (p === "fDistance")
+        return [
+          { texte: "Distance d'un point à la droite $ax+by+c=0$ :", latex: "\\text{dist}(\\Omega\\,;d)=\\dfrac{|a\\,x_\\Omega+b\\,y_\\Omega+c|}{\\sqrt{a^2+b^2}}" },
+          { texte: "Ici :", latex: `\\dfrac{|${e.d.a}\\cdot${par(e.centre.x)}${e.d.b < 0n ? "" : "+"}${e.d.b}\\cdot${par(e.centre.y)}${e.d.c < 0n ? "" : "+"}${e.d.c}|}{\\sqrt{${e.d.a}^2+${par(q(e.d.b))}^2}}` },
+        ];
+      if (p === "fRayon2")
+        return [
+          { texte: "Le pied $H$ de la perpendiculaire issue de $\\Omega$ est le milieu de la corde : Pythagore dans le triangle rectangle $\\Omega HM$ ($M$, extrémité de la corde) :", latex: "r^2=\\Omega H^2+\\left(\\frac{L}{2}\\right)^2" },
+          { texte: "Ici :", latex: `\\Omega H^2=${lq(e.dist2)},\\qquad \\frac{L}{2}=${e.L / 2}` },
+        ];
+      return [{ texte: "Cercle de centre $\\Omega$ et de rayon $r$ :", latex: "(x-x_\\Omega)^2+(y-y_\\Omega)^2=r^2" }];
   }
-  return null;
 }
 
-/** Fraction irréductible, jamais de décimal, pour toute valeur RATIONNELLE affichée par la
- * plateforme (CLAUDE.md) — bascule sur `\sqrt{n}` pour une valeur irrationnelle "ronde" (ex. un
- * rayon √50), puis sur un arrondi à 2 décimales en dernier recours (valeur non ronde du tout, ne
- * devrait normalement pas se produire pour les quantités de ce générateur). */
-export function formatValeurAffichage(valeur: number): string {
-  if (estEntierProche(valeur)) return String(Math.round(valeur));
-  const frac = meilleureFraction(valeur);
-  if (frac) {
-    const signe = frac.p < 0 ? "-" : "";
-    return `${signe}\\frac{${Math.abs(frac.p)}}{${frac.q}}`;
+function reponse55(e: E, p: P): string[] {
+  switch (e.famille) {
+    case "A":
+      if (p === "aSysteme") return [e.A, e.B, e.C].map(eqSysteme);
+      if (p === "aCoefficients") return [`D=${e.D}`, `E=${e.E}`, `F=${e.F}`];
+      return [nomPoint("\\Omega", e.centre), `r=${rayon(e.r2)}`];
+    case "B":
+      if (p === "bNombre") return [e.verdict === 0 ? "\\text{aucun}" : e.verdict === 1 ? "\\text{un seul}" : "\\text{deux}"];
+      if (p === "bMediatrice") return [ld(e.mediatrice)];
+      return e.centres.map(lp);
+    case "C":
+      if (p === "cMediatrice") return [ld(e.mediatrice)];
+      if (p === "cCentre") return [nomPoint("\\Omega", e.centre)];
+      return [latexCercle(e.centre, e.r2)];
+    case "D":
+      if (p === "dEquationK") return [`${latexPoly(polyEquationK(e), ["k"])}=0`];
+      if (p === "dCentreRayon") return [nomPoint("\\Omega", e.centre), `r=${lq(q(Math.abs(Number(e.k.n)), e.k.d))}`];
+      return [latexCercle(e.centre, e.r2)];
+    case "E":
+      if (p === "eCotes") return [`a=${e.triangle.a}`, `b=${e.triangle.b}`, `c=${e.triangle.c}`];
+      if (p === "eCentre") return [nomPoint("I", e.centre)];
+      return [`r=${lq(e.r)}`];
+    case "F":
+      if (p === "fDistance") return [`\\text{dist}(\\Omega\\,;d)=${rayon(e.dist2)}`];
+      if (p === "fRayon2") return [`r^2=${lq(e.r2)}`];
+      return [latexCercle(e.centre, e.r2)];
+    case "G":
+      if (p === "gSommets") return [nomPoint("A", e.triangle.A), nomPoint("B", e.triangle.B), nomPoint("C", e.triangle.C)];
+      if (p === "gCotes") return [`a=${e.triangle.a}`, `b=${e.triangle.b}`, `c=${e.triangle.c}`];
+      if (p === "gCentre") return [nomPoint(e.mode === "exinscrit" ? "J" : "I", e.centre)];
+      return [`r=${lq(e.r)}`];
   }
-  if (valeur > 0) {
-    const carre = valeur * valeur;
-    if (estEntierProche(carre)) return `\\sqrt{${Math.round(carre)}}`;
+}
+
+function explication55(e: E, p: P): FragmentConsigne[][] {
+  switch (e.famille) {
+    case "A":
+      if (p === "aSysteme") return L("On remplace $x$ et $y$ par les coordonnées de chaque point :", ...[e.A, e.B, e.C].map((x) => `$${eqSysteme(x)}$`));
+      if (p === "aCoefficients") return L("En soustrayant les équations deux à deux, $F$ disparaît ; on résout le système en $D$, $E$, puis on remonte à $F$.", `Résultat : $D=${e.D}$, $E=${e.E}$, $F=${e.F}$.`);
+      return L(`$\\Omega\\left(-\\frac{D}{2}\\,;-\\frac{E}{2}\\right)=${lp(e.centre)}$ et $r^2=\\frac{D^2}{4}+\\frac{E^2}{4}-F=${lq(e.r2)}$, donc $r=${rayon(e.r2)}$.`, "Piège : $r^2$ n'est pas le rayon ; et le centre a les coordonnées $-\\frac{D}{2}$ et $-\\frac{E}{2}$ (signes opposés).");
+    case "B": {
+      const M = milieu(e.A, e.B);
+      if (p === "bNombre") {
+        const ab2 = (qNum(e.B.x) - qNum(e.A.x)) ** 2 + (qNum(e.B.y) - qNum(e.A.y)) ** 2;
+        const comp = e.verdict === 2 ? ">" : e.verdict === 1 ? "=" : "<";
+        return L(`$\\frac{AB}{2}=\\frac{${latexRacine(q(ab2))}}{2}=${latexRacine(q(ab2, 4))}$ et $r=${rayon(e.r2)}$ : $r${comp}\\frac{AB}{2}$.`, e.verdict === 2 ? "Le cercle de centre $A$ et de rayon $r$ coupe la médiatrice en deux points : deux cercles." : e.verdict === 1 ? "Le seul centre possible est le milieu de $[AB]$ : un seul cercle, de diamètre $[AB]$." : "Aucun point de la médiatrice n'est à la distance $r$ de $A$ : aucun cercle.");
+      }
+      if (p === "bMediatrice") return L(`Milieu $M${lp(M)}$, vecteur normal $\\overrightarrow{AB}$ : $${ld(e.mediatrice)}$.`);
+      return L("On remplace une coordonnée par l'autre (équation de la médiatrice) dans $(x-x_A)^2+(y-y_A)^2=r^2$, puis on résout l'équation du second degré.", `Résultat : ${e.centres.map((c) => `$${lp(c)}$`).join(" et ")}.`, "Vérification : chaque centre est à la distance $r$ de $A$ et de $B$.");
+    }
+    case "C":
+      if (p === "cMediatrice") return L(`Milieu $M${lp(milieu(e.A, e.B))}$, vecteur normal $\\overrightarrow{AB}$ : $${ld(e.mediatrice)}$.`);
+      if (p === "cCentre") return L(`On résout $\\begin{cases}${latexDroite(e.mediatrice)}\\\\ ${latexDroite(e.d)}\\end{cases}$ : $${nomPoint("\\Omega", e.centre)}$.`);
+      return L(`$r^2=\\Omega A^2=${lq(e.r2)}$, d'où $${latexCercle(e.centre, e.r2)}$.`);
+    case "D":
+      if (p === "dEquationK") return L(`$\\Omega A^2=k^2$ s'écrit : $${latexPoly(polyEquationK(e), ["k"])}=0$ une fois développée (les $k^2$ s'annulent).`);
+      if (p === "dCentreRayon") return L(`$k=${lq(e.k)}$, donc $${nomPoint("\\Omega", e.centre)}$ et $r=|k|=${lq(q(Math.abs(Number(e.k.n)), e.k.d))}$.`, "Piège : un rayon est toujours positif.");
+      return L(`$${latexCercle(e.centre, e.r2)}$`, "Vérification : $T$ et $A$ vérifient l'équation.");
+    case "E":
+    case "G": {
+      const t = e.triangle;
+      if (p === "gSommets") return L(`On résout trois systèmes de deux équations : $${nomPoint("A", t.A)}$, $${nomPoint("B", t.B)}$, $${nomPoint("C", t.C)}$.`);
+      if (p === "eCotes" || p === "gCotes") return L(`$a=BC=${t.a}$, $b=CA=${t.b}$, $c=AB=${t.c}$.`);
+      if (p === "eCentre" || p === "gCentre") {
+        const nom = e.famille === "G" && e.mode === "exinscrit" ? "J" : "I";
+        return L(`$${nom}=${e.famille === "G" ? poidsLatex(e) : "\\dfrac{a\\,A+b\\,B+c\\,C}{a+b+c}"}$ avec $a=${t.a}$, $b=${t.b}$, $c=${t.c}$.`, `Résultat : $${nomPoint(nom, e.centre)}$.`, "Piège : ce n'est pas le centre de gravité (moyenne simple des sommets).");
+      }
+      return L(`$\\text{Aire}=${lq(t.aire)}$, $s=${lq(q(t.a + t.b + t.c, 2))}$.`, `${e.famille === "G" ? `$${rayonGLatex(e)}$` : "$r=\\dfrac{\\text{Aire}}{s}$"}, d'où $r=${lq(e.r)}$.`, "Vérification : la distance du centre à chaque côté vaut $r$.");
+    }
+    case "F":
+      if (p === "fDistance") return L(`$\\text{dist}(\\Omega\\,;d)=${rayon(e.dist2)}$, soit $\\Omega H^2=${lq(e.dist2)}$.`);
+      if (p === "fRayon2") return L(`$r^2=${lq(e.dist2)}+${e.L / 2}^2=${lq(e.r2)}$.`, "Piège : c'est la moitié de la corde qui entre dans Pythagore.");
+      return L(`$${latexCercle(e.centre, e.r2)}$`);
   }
-  return valeur.toFixed(2);
 }
 
-export function formatPoint(P: Point): string {
-  return `(${formatValeurAffichage(P.x)};${formatValeurAffichage(P.y)})`;
-}
-
-function labelPoint(nom: string, P: Point): string {
-  return `\\text{${nom}}${formatPoint(P)}`;
-}
-
-function coeffFois(valeur: number, variable: string): string {
-  if (valeur === 0) return "";
-  const abs = Math.abs(valeur);
-  const corps = abs === 1 ? variable : `${formatValeurAffichage(abs)}${variable}`;
-  return valeur < 0 ? `-${corps}` : `+${corps}`;
-}
-
-function constanteSignee(valeur: number): string {
-  if (valeur === 0) return "";
-  return valeur < 0 ? `-${formatValeurAffichage(Math.abs(valeur))}` : `+${formatValeurAffichage(valeur)}`;
-}
-
-/** `a - b`, jamais un signe orphelin `--` quand `b` est négatif (ex. `2-(-1)`, jamais `2--1`) —
- * piège de régression documenté par CLAUDE.md. */
-function formatMoins(aTexte: string, bValeur: number): string {
-  const bTexte = formatValeurAffichage(bValeur);
-  return bValeur < 0 ? `${aTexte}-(${bTexte})` : `${aTexte}-${bTexte}`;
-}
-
-function joindreTermes(termes: string[]): string {
-  const filtres = termes.filter((t) => t !== "");
-  if (filtres.length === 0) return "0";
-  const [premier, ...reste] = filtres;
-  const premierNettoye = premier.startsWith("+") ? premier.slice(1) : premier;
-  return premierNettoye + reste.join("");
-}
-
-/** Droite `y=mx+p` — forme d'affichage uniquement (jamais utilisée pour la vérification, qui
- * compare toujours des valeurs numériques réelles). */
-export function formatDroiteLatex(d: DroiteAffine): string {
-  return `y=${joindreTermes([coeffFois(d.m, "x"), constanteSignee(d.p)])}`;
-}
-
-/** Équation "Px·D+Py·E+F+(Px²+Py²)=0" — famille A, obtenue en substituant le point P dans la forme
- * générale x²+y²+Dx+Ey+F=0 (D,E,F restent SYMBOLIQUES ici, seul P est numérique). */
-export function formatEquationCerclePourPoint(P: Point): string {
-  const gauche = joindreTermes([coeffFois(P.x, "D"), coeffFois(P.y, "E"), coeffFois(1, "F"), constanteSignee(P.x * P.x + P.y * P.y)]);
-  return `${gauche}=0`;
-}
-
-// ============================================================================
-// Champs de saisie — pas de variante "choix" dans ce générateur (voir en-tête de fichier).
-// ============================================================================
-
-export interface ChampDef {
-  label: string;
-  placeholder: string;
-}
-
-function champ(label: string, placeholder: string): ChampDef {
-  return { label, placeholder };
-}
-
-// ============================================================================
-// Famille A — Cercle par 3 points.
-// ============================================================================
-
-function consigneGeneraleA(): FragmentConsigne[] {
-  return [texte("On cherche l'équation d'un cercle passant par 3 points A, B et C non alignés, sous la forme générale "), latex("x^2+y^2+Dx+Ey+F=0"), texte(", puis son centre et son rayon.")];
-}
-function blocDonneesA(e: Extract<ExerciceCercles, { famille: "A" }>): string[] {
-  return [labelPoint("A", e.A), labelPoint("B", e.B), labelPoint("C", e.C)];
-}
-function consigneEcranA(phase: PhaseCercles): FragmentConsigne[] {
-  if (phase === "aEcran1") return [texte("Substitue A, B puis C dans "), latex("x^2+y^2+Dx+Ey+F=0"), texte(" : écris les 3 équations en D, E, F ainsi obtenues (une par point).")];
-  if (phase === "aEcran2") return [texte("Résous ce système de 3 équations à 3 inconnues (D, E, F).")];
-  return [texte("À partir de D, E, F CONFIRMÉS, donne les coordonnées du centre "), latex("\\left(-\\dfrac{D}{2};-\\dfrac{E}{2}\\right)"), texte(" et le rayon "), latex("\\sqrt{\\dfrac{D^2}{4}+\\dfrac{E^2}{4}-F}"), texte(".")];
-}
-// Accumulation (correctif transversal — le bloc "état actuel" doit lister TOUTES les réponses
-// validées des écrans précédents, du plus ancien au plus récent, jamais seulement celle de l'écran
-// immédiatement précédent, voir CLAUDE.md/`docs/historique-6e.md`) : `aEcran3` ne montrait
-// auparavant QUE D, E, F confirmés à `aEcran2`, sans le système en D, E, F confirmé à `aEcran1`.
-function etatActuelA(e: Extract<ExerciceCercles, { famille: "A" }>, phase: PhaseCercles): string[] | null {
-  if (phase === "aEcran3") {
-    const systeme = `\\text{Système confirmé : }${formatEquationCerclePourPoint(e.A)}\\text{, }${formatEquationCerclePourPoint(e.B)}\\text{, }${formatEquationCerclePourPoint(e.C)}`;
-    const def = `D=${formatValeurAffichage(e.D)},\\;E=${formatValeurAffichage(e.E)},\\;F=${formatValeurAffichage(e.F)}\\text{ (confirmés)}`;
-    return [systeme, def];
+function pointLu(v: string): { x: number; y: number } | null {
+  try {
+    const p = lirePoint(v);
+    return { x: p.x.valeur, y: p.y.valeur };
+  } catch {
+    return null;
   }
-  return null;
 }
-function champsA(phase: PhaseCercles): ChampDef[] {
-  if (phase === "aEcran1") return [champ("Équation pour A =", "ex : 2D+3E+F+13=0"), champ("Équation pour B =", "ex : -D+4E+F+17=0"), champ("Équation pour C =", "ex : D-2E+F+5=0")];
-  if (phase === "aEcran2") return [champ("D =", "ex : -4"), champ("E =", "ex : 2"), champ("F =", "ex : -20")];
-  return [champ("Abscisse du centre =", "ex : 2"), champ("Ordonnée du centre =", "ex : -1"), champ("Rayon =", "ex : 5")];
-}
-function niveauAideMaxA(phase: PhaseCercles): number {
-  return phase === "aEcran1" ? 2 : 0;
-}
-function aideNiveau1A(): AideAvecLatex {
-  return { texte: "Remplace, dans x²+y²+Dx+Ey+F=0, x et y par les coordonnées de chaque point tour à tour : tu obtiens une équation en D, E, F par point.", latex: "x^2+y^2+Dx+Ey+F=0" };
-}
-function aideNiveau2A(e: Extract<ExerciceCercles, { famille: "A" }>): AideAvecLatex {
-  return { texte: "Équation obtenue pour le point A (les 2 autres équations, pour B et C, restent à poser) :", latex: formatEquationCerclePourPoint(e.A) };
-}
+const pres = (a: number, b: number) => Math.abs(a - b) < 1e-9;
 
-// ============================================================================
-// Familles B et C — médiatrice partagée. AIDES ÉCRITES INDÉPENDAMMENT (voir en-tête de fichier —
-// piège transversal explicitement demandé par la mission).
-// ============================================================================
-
-function blocDonneesAB(A: Point, B: Point): string[] {
-  return [labelPoint("A", A), labelPoint("B", B)];
-}
-
-// ============================================================================
-// Famille B — Cercle par 2 points, rayon donné.
-// ============================================================================
-
-function consigneGeneraleB(): FragmentConsigne[] {
-  return [texte("On cherche les cercles de rayon r donné passant par 2 points A et B distincts.")];
-}
-function blocDonneesB(e: Extract<ExerciceCercles, { famille: "B" }>): string[] {
-  return [...blocDonneesAB(e.A, e.B), `r=${formatValeurAffichage(e.r)}`];
-}
-function consigneEcranB(phase: PhaseCercles): FragmentConsigne[] {
-  if (phase === "bEcran1") return [texte("Le centre d'un cercle passant par A et B est nécessairement équidistant des deux points. Écris l'équation de la médiatrice de "), latex("[AB]"), texte(", le lieu de tous les points équidistants de A et B.")];
-  if (phase === "bEcran2") return [texte("Le centre appartient à la médiatrice CONFIRMÉE : en le paramétrant par son abscisse x, écris l'équation traduisant "), latex("\\text{distance}(\\text{centre},A)=r"), texte(".")];
-  return [texte("Résous l'équation CONFIRMÉE : elle admet en général 2 solutions pour x, donc 2 centres possibles. Donne les 2 centres (ajoute une ligne par centre trouvé) ainsi que le rayon commun.")];
-}
-// Accumulation (correctif transversal, voir `etatActuelA` ci-dessus) : `bEcran3` ne montrait
-// auparavant QUE l'équation en x confirmée à `bEcran2`, sans la médiatrice confirmée à `bEcran1`.
-function etatActuelB(e: Extract<ExerciceCercles, { famille: "B" }>, phase: PhaseCercles): string[] | null {
-  const mediatriceConfirmee = `${formatDroiteLatex(e.mediatrice)}\\text{ (médiatrice confirmée)}`;
-  if (phase === "bEcran2") return [mediatriceConfirmee];
-  if (phase === "bEcran3") {
-    const { m, p } = e.mediatrice;
-    const a = 1 + m * m;
-    const b = -2 * e.A.x + 2 * m * (p - e.A.y);
-    const c = e.A.x * e.A.x + (p - e.A.y) * (p - e.A.y) - e.r * e.r;
-    const equation = joindreTermes([coeffFois(a, "x^2"), coeffFois(b, "x"), constanteSignee(c)]);
-    return [mediatriceConfirmee, `${equation}=0\\text{ (confirmée)}`];
+function cibleCercle(v: string, c: Pt, r2: { n: bigint; d: bigint }): FragmentConsigne[] | null {
+  let poly;
+  try {
+    poly = lireEquation(v, ["x", "y"]).poly;
+  } catch {
+    return null;
   }
-  return null;
-}
-function champsB(): ChampDef[] {
-  return [champ("Équation de la médiatrice de [AB] =", "ex : y=-2x+5")];
-}
-function champsB2(): ChampDef[] {
-  return [champ("Équation en x =", "ex : 5x^2-20x+9=0")];
-}
-function niveauAideMaxB(phase: PhaseCercles): number {
-  return phase === "bEcran1" ? 2 : 0;
-}
-function aideNiveau1B(): AideAvecLatex {
-  return { texte: "Le centre d'un cercle passant par 2 points est équidistant de ces 2 points — il appartient donc à leur médiatrice.", latex: null };
-}
-function aideNiveau2B(e: Extract<ExerciceCercles, { famille: "B" }>): AideAvecLatex {
-  const M = { x: (e.A.x + e.B.x) / 2, y: (e.A.y + e.B.y) / 2 };
-  const penteAB = (e.B.y - e.A.y) / (e.B.x - e.A.x);
-  return { texte: "Milieu de [AB] et pente de (AB) (l'équation de la médiatrice n'est pas encore assemblée) :", latex: `M=${formatPoint(M)},\\;\\text{pente}(AB)=${formatValeurAffichage(penteAB)}` };
-}
-
-// ============================================================================
-// Famille C — Cercle par 2 points, centre sur une droite donnée.
-// ============================================================================
-
-function consigneGeneraleC(): FragmentConsigne[] {
-  return [texte("On cherche le cercle passant par 2 points A et B, dont le centre appartient de plus à une droite d donnée.")];
-}
-function blocDonneesC(e: Extract<ExerciceCercles, { famille: "C" }>): string[] {
-  return [...blocDonneesAB(e.A, e.B), `d:\\;${formatDroiteLatex(e.d)}`];
-}
-function consigneEcranC(phase: PhaseCercles): FragmentConsigne[] {
-  if (phase === "cEcran1") return [texte("Le centre d'un cercle passant par A et B est nécessairement équidistant des deux points. Écris l'équation de la médiatrice de "), latex("[AB]"), texte(", le lieu de tous les points équidistants de A et B.")];
-  if (phase === "cEcran2") return [texte("Le centre doit appartenir À LA FOIS à la médiatrice CONFIRMÉE et à la droite d donnée. Résous le système formé par ces 2 équations pour trouver ses coordonnées.")];
-  return [texte("Calcule le rayon, distance du centre CONFIRMÉ au point A.")];
-}
-// Accumulation (correctif transversal, voir `etatActuelA` ci-dessus) : `cEcran3` ne montrait
-// auparavant QUE le centre confirmé à `cEcran2`, sans la médiatrice confirmée à `cEcran1`.
-function etatActuelC(e: Extract<ExerciceCercles, { famille: "C" }>, phase: PhaseCercles): string[] | null {
-  const mediatriceConfirmee = `${formatDroiteLatex(e.mediatrice)}\\text{ (médiatrice confirmée)}`;
-  if (phase === "cEcran2") return [mediatriceConfirmee];
-  if (phase === "cEcran3") return [mediatriceConfirmee, `\\text{Centre}${formatPoint(e.centre)}\\text{ (confirmé)}`];
-  return null;
-}
-function champsC1(): ChampDef[] {
-  return [champ("Équation de la médiatrice de [AB] =", "ex : y=-2x+5")];
-}
-function champsC2(): ChampDef[] {
-  return [champ("Abscisse du centre =", "ex : 3"), champ("Ordonnée du centre =", "ex : -1")];
-}
-function champsC3(): ChampDef[] {
-  return [champ("Rayon =", "ex : 5")];
-}
-function niveauAideMaxC(phase: PhaseCercles): number {
-  return phase === "cEcran2" ? 2 : 0;
-}
-function aideNiveau1C(): AideAvecLatex {
-  return { texte: "Le centre doit satisfaire simultanément 2 conditions : être sur la médiatrice ET sur d. Pose le système formé par les 2 équations, puis résous-le (par substitution ou combinaison).", latex: null };
-}
-function aideNiveau2C(e: Extract<ExerciceCercles, { famille: "C" }>): AideAvecLatex {
-  return { texte: "Les 2 équations à résoudre simultanément (la résolution reste à faire) :", latex: `\\begin{cases}${formatDroiteLatex(e.mediatrice)}\\\\${formatDroiteLatex(e.d)}\\end{cases}` };
-}
-
-// ============================================================================
-// Famille D — Cercle tangent à un axe en un point donné.
-// ============================================================================
-
-function consigneGeneraleD(): FragmentConsigne[] {
-  return [texte("On cherche le cercle passant par un point A, tangent à l'axe des abscisses au point B donné sur cet axe.")];
-}
-function blocDonneesD(e: Extract<ExerciceCercles, { famille: "D" }>): string[] {
-  return [labelPoint("A", e.A), `\\text{B}(${formatValeurAffichage(e.Bx)};0)\\text{ (point de tangence)}`];
-}
-function consigneEcranD(phase: PhaseCercles): FragmentConsigne[] {
-  if (phase === "dEcran1") return [texte("Le centre est sur la perpendiculaire à l'axe des abscisses passant par B (la droite verticale "), latex("x=B_x"), texte("), à une distance r (le rayon) du point de tangence. Pose le centre sous la forme "), latex("(B_x;r)"), texte(".")];
-  if (phase === "dEcran2") return [texte("En partant du centre "), latex("(B_x;r)"), texte(" CONFIRMÉ, écris l'équation traduisant "), latex("\\text{distance}(\\text{centre},A)=r"), texte(".")];
-  return [texte("Développe l'équation CONFIRMÉE : le terme "), latex("r^2"), texte(" s'annule des deux côtés, l'équation résultante est LINÉAIRE en r — résous-la, puis donne le centre et l'équation complète du cercle.")];
-}
-// Accumulation (correctif transversal, voir `etatActuelA` ci-dessus) : `dEcran3` ne montrait
-// auparavant QUE l'équation confirmée à `dEcran2`, sans le centre (Bx;r) confirmé à `dEcran1`.
-function etatActuelD(e: Extract<ExerciceCercles, { famille: "D" }>, phase: PhaseCercles): string[] | null {
-  const centreConfirme = `\\text{Centre}(${formatValeurAffichage(e.Bx)};r)\\text{ (confirmé)}`;
-  if (phase === "dEcran2") return [centreConfirme];
-  if (phase === "dEcran3") return [centreConfirme, `(${formatMoins(formatValeurAffichage(e.Bx), e.A.x)})^2+(${formatMoins("r", e.A.y)})^2=r^2\\text{ (confirmée)}`];
-  return null;
-}
-function champsD1(): ChampDef[] {
-  // Libellé volontairement COURT ("Ordonnée (=r) =", jamais "... en fonction de r ...") — bug
-  // rencontré : un libellé long combiné à `.field-inline` (`white-space:nowrap` sur le label,
-  // `App.css`) déborde à 375px (mobile), détecté par `document.body.scrollWidth > innerWidth`
-  // (vérification Playwright). La consigne de l'écran explique déjà "(Bx;r)" en toutes lettres —
-  // le libellé du champ n'a pas besoin de le répéter en entier.
-  return [champ("Abscisse du centre =", "ex : 3"), champ("Ordonnée (=r) =", "ex : r")];
-}
-function champsD2(): ChampDef[] {
-  return [champ("Équation en r =", "ex : -8r+20=0")];
-}
-function champsD3(): ChampDef[] {
-  return [champ("r =", "ex : 2.5"), champ("Abscisse du centre =", "ex : 3"), champ("Ordonnée du centre =", "ex : 2.5"), champ("Équation du cercle =", "ex : (x-3)^2+(y-2.5)^2=6.25")];
-}
-function niveauAideMaxD(phase: PhaseCercles): number {
-  return phase === "dEcran3" ? 2 : 0;
-}
-function aideNiveau1D(): AideAvecLatex {
-  return { texte: "En développant l'équation confirmée, un terme r² apparaît des deux côtés du signe = : il s'annule. L'équation qui reste est LINÉAIRE en r, pas quadratique — pas besoin de formule du second degré.", latex: null };
-}
-function aideNiveau2D(e: Extract<ExerciceCercles, { famille: "D" }>): AideAvecLatex {
-  return { texte: "Développement effectué (la simplification finale, où r² disparaît des 2 côtés, reste à faire) :", latex: `(${formatMoins(formatValeurAffichage(e.Bx), e.A.x)})^2+r^2-${formatValeurAffichage(2 * e.A.y)}r+${formatValeurAffichage(e.A.y * e.A.y)}=r^2` };
-}
-
-// ============================================================================
-// Famille E — Cercle inscrit à un triangle. RÉUTILISÉE par la famille G (voir plus bas).
-// ============================================================================
-
-function consigneGeneraleE(): FragmentConsigne[] {
-  return [texte("On cherche le cercle inscrit à un triangle ABC (tangent intérieurement aux 3 côtés).")];
-}
-function blocDonneesTriangle(t: DonneesTriangleInscrit): string[] {
-  return [labelPoint("A", t.A), labelPoint("B", t.B), labelPoint("C", t.C)];
-}
-function consigneEcranTriangle(phase: "cotes" | "incentre" | "rayon"): FragmentConsigne[] {
-  if (phase === "cotes") return [texte("Calcule les longueurs des 3 côtés "), latex("a=BC"), texte(", "), latex("b=CA"), texte(" et "), latex("c=AB"), texte(".")];
-  if (phase === "incentre")
-    return [
-      texte("Le centre I du cercle inscrit est la moyenne des sommets pondérée par le côté OPPOSÉ à chacun : "),
-      latex("I=\\dfrac{a\\cdot A+b\\cdot B+c\\cdot C}{a+b+c}"),
-      texte(". Calcule ses coordonnées à partir de a, b, c CONFIRMÉS."),
-    ];
-  return [texte("Calcule le rayon du cercle inscrit (distance de I CONFIRMÉ à l'un des côtés, ou via aire/demi-périmètre).")];
-}
-// Accumulation (correctif transversal, voir `etatActuelA` ci-dessus) : l'écran "rayon" ne montrait
-// auparavant QUE I confirmé à l'écran "incentre", sans a, b, c confirmés à l'écran "cotes" — ajouté
-// via le paramètre optionnel `prefixe`, qui permet en plus à la famille G (`etatActuelG` ci-dessous)
-// de reprendre les 3 sommets confirmés à `gEcran1`, en amont même des côtés.
-function etatActuelTriangle(t: DonneesTriangleInscrit, phase: "incentre" | "rayon", prefixe: string[] = []): string[] {
-  const cotesConfirmes = `a=${formatValeurAffichage(t.a)},\\;b=${formatValeurAffichage(t.b)},\\;c=${formatValeurAffichage(t.c)}\\text{ (confirmés)}`;
-  if (phase === "incentre") return [...prefixe, cotesConfirmes];
-  const incentreConfirme = `\\text{I}${formatPoint({ x: t.incentreX, y: t.incentreY })}\\text{ (confirmé)}`;
-  return [...prefixe, cotesConfirmes, incentreConfirme];
-}
-function champsCotes(): ChampDef[] {
-  return [champ("a = BC =", "ex : 10"), champ("b = CA =", "ex : 8"), champ("c = AB =", "ex : 6")];
-}
-function champsIncentre(): ChampDef[] {
-  return [champ("Abscisse de I =", "ex : 2"), champ("Ordonnée de I =", "ex : 2")];
-}
-function champsRayonTriangle(): ChampDef[] {
-  return [champ("Rayon =", "ex : 2")];
-}
-function aideNiveau1Incentre(): AideAvecLatex {
-  return { texte: "Chaque sommet est pondéré par la longueur du côté OPPOSÉ (pas le côté adjacent !) : a (côté BC) pour le sommet A, b (côté CA) pour B, c (côté AB) pour C.", latex: null };
-}
-function aideNiveau2Incentre(): AideAvecLatex {
-  return { texte: "Pondérations à utiliser (la combinaison finale reste à faire) :", latex: "a\\leftrightarrow A,\\;b\\leftrightarrow B,\\;c\\leftrightarrow C" };
-}
-
-// ============================================================================
-// Famille F — Cercle avec corde de longueur donnée.
-// ============================================================================
-
-function consigneGeneraleF(): FragmentConsigne[] {
-  return [texte("On connaît le centre C d'un cercle et une droite d qui le coupe selon une corde de longueur L donnée — on cherche le rayon puis l'équation du cercle.")];
-}
-function blocDonneesF(e: Extract<ExerciceCercles, { famille: "F" }>): string[] {
-  return [labelPoint("C", e.centre), `d:\\;${formatDroiteLatex(e.d)}`, `L=${formatValeurAffichage(e.L)}`];
-}
-function consigneEcranF(phase: PhaseCercles): FragmentConsigne[] {
-  if (phase === "fEcran1") return [texte("Calcule la distance du centre C à la droite d.")];
-  if (phase === "fEcran2")
-    return [texte("Le rayon, la distance CONFIRMÉE et la demi-longueur de la corde forment un triangle rectangle : applique la relation de Pythagore "), latex("r^2=\\text{distance}^2+(L/2)^2"), texte(". Donne "), latex("r^2"), texte(" puis r.")];
-  return [texte("Donne le rayon (déjà trouvé) et l'équation complète du cercle, à partir du rayon CONFIRMÉ.")];
-}
-// Accumulation (correctif transversal, voir `etatActuelA` ci-dessus) : `fEcran3` ne montrait
-// auparavant QUE r² et r confirmés à `fEcran2`, sans la distance confirmée à `fEcran1`.
-function etatActuelF(e: Extract<ExerciceCercles, { famille: "F" }>, phase: PhaseCercles): string[] | null {
-  const distanceConfirmee = `\\text{distance}=${formatValeurAffichage(e.distanceCentreDroite)}\\text{ (confirmée)}`;
-  if (phase === "fEcran2") return [distanceConfirmee];
-  if (phase === "fEcran3") return [distanceConfirmee, `r^2=${formatValeurAffichage(e.rCarre)},\\;r=${formatValeurAffichage(e.rayon)}\\text{ (confirmés)}`];
-  return null;
-}
-function champsF1(): ChampDef[] {
-  return [champ("Distance du centre à d =", "ex : 5")];
-}
-function champsF2(): ChampDef[] {
-  return [champ("r² =", "ex : 34"), champ("r =", "ex : sqrt(34)")];
-}
-function champsF3(): ChampDef[] {
-  return [champ("Rayon =", "ex : sqrt(34)"), champ("Équation du cercle =", "ex : x^2+y^2=34")];
-}
-function niveauAideMaxF(phase: PhaseCercles): number {
-  return phase === "fEcran2" ? 2 : 0;
-}
-function aideNiveau1F(): AideAvecLatex {
-  return { texte: "Le rayon, la distance du centre à la corde, et la demi-longueur de la corde forment un triangle rectangle (le rayon est l'hypoténuse).", latex: null };
-}
-function aideNiveau2F(e: Extract<ExerciceCercles, { famille: "F" }>): AideAvecLatex {
-  return { texte: "Relation posée avec les valeurs déjà connues (le calcul final de r² reste à faire) :", latex: `r^2=${formatValeurAffichage(e.distanceCentreDroite)}^2+${formatValeurAffichage(e.L / 2)}^2` };
-}
-
-// ============================================================================
-// Famille G — Cercles tangents à 3 droites. RÉUTILISE la famille E (écrans 2-4).
-// ============================================================================
-
-function consigneGeneraleG(): FragmentConsigne[] {
-  return [texte("3 droites "), latex("d_1"), texte(", "), latex("d_2"), texte(" et "), latex("d_3"), texte(", sécantes deux à deux et non concourantes, forment un triangle. On cherche le cercle tangent aux 3 droites — le cercle INSCRIT à ce triangle.")];
-}
-function blocDonneesG(e: Extract<ExerciceCercles, { famille: "G" }>): string[] {
-  return [`d_1:\\;${formatDroiteLatex(e.d1)}`, `d_2:\\;${formatDroiteLatex(e.d2)}`, `d_3:\\;${formatDroiteLatex(e.d3)}`];
-}
-function consigneEcranG1(): FragmentConsigne[] {
-  return [texte("Chaque sommet du triangle formé est l'intersection de 2 des 3 droites, prises deux à deux. Trouve les 3 sommets : "), latex("d_1\\cap d_2"), texte(", "), latex("d_2\\cap d_3"), texte(" et "), latex("d_3\\cap d_1"), texte(".")];
-}
-function champsG1(): ChampDef[] {
-  return [
-    champ("Abscisse de d1∩d2 =", "ex : 0"),
-    champ("Ordonnée de d1∩d2 =", "ex : 0"),
-    champ("Abscisse de d2∩d3 =", "ex : 4"),
-    champ("Ordonnée de d2∩d3 =", "ex : 4"),
-    champ("Abscisse de d3∩d1 =", "ex : 8"),
-    champ("Ordonnée de d3∩d1 =", "ex : 0"),
+  const r = Math.sqrt(qNum(r2));
+  const essais: [Pt, number, string][] = [
+    [pt(-qNum(c.x), -qNum(c.y)), qNum(r2), "Attention aux signes : dans $(x-x_\\Omega)^2$, on soustrait l'abscisse du centre."],
+    [pt(-qNum(c.x), qNum(c.y)), qNum(r2), "Attention aux signes : dans $(x-x_\\Omega)^2$, on soustrait l'abscisse du centre."],
+    [pt(qNum(c.x), -qNum(c.y)), qNum(r2), "Attention aux signes : dans $(y-y_\\Omega)^2$, on soustrait l'ordonnée du centre."],
   ];
-}
-function aideNiveau1G(): AideAvecLatex {
-  return { texte: "Chaque sommet du triangle est l'intersection de 2 des 3 droites, prises deux à deux — résous le système formé par leurs 2 équations.", latex: null };
-}
-function aideNiveau2G(e: Extract<ExerciceCercles, { famille: "G" }>): AideAvecLatex {
-  return { texte: "Un des 3 sommets déjà trouvé (les 2 autres restent à déterminer) :", latex: `d_1\\cap d_2=${formatPoint(e.sommet12)}` };
-}
-function fmtSommetsConfirmesG(e: Extract<ExerciceCercles, { famille: "G" }>): string {
-  return `d_1\\cap d_2=${formatPoint(e.sommet12)},\\;d_2\\cap d_3=${formatPoint(e.sommet23)},\\;d_3\\cap d_1=${formatPoint(e.sommet31)}\\text{ (confirmés)}`;
-}
-
-// Accumulation (correctif transversal, voir `etatActuelA` ci-dessus) : `gEcran3` ne montrait
-// auparavant QUE a, b, c confirmés à `gEcran2` (via `etatActuelTriangle`), sans les 3 sommets
-// confirmés à `gEcran1` ; `gEcran4` ne montrait QUE I confirmé à `gEcran3`, sans les sommets
-// (`gEcran1`) NI a, b, c (`gEcran2`) — les 2 corrigés en passant les sommets en `prefixe` à
-// `etatActuelTriangle`, qui accumule déjà a, b, c puis I en interne (voir ci-dessus).
-function etatActuelG(e: Extract<ExerciceCercles, { famille: "G" }>, phase: PhaseCercles): string[] | null {
-  if (phase === "gEcran2") return [fmtSommetsConfirmesG(e)];
-  if (phase === "gEcran3") return etatActuelTriangle(e.triangle, "incentre", [fmtSommetsConfirmesG(e)]);
-  if (phase === "gEcran4") return etatActuelTriangle(e.triangle, "rayon", [fmtSommetsConfirmesG(e)]);
+  for (const [cc, rr, m] of essais) {
+    if (ptNum(cc).x === ptNum(c).x && ptNum(cc).y === ptNum(c).y) continue;
+    if (proportionnels(poly, polyCercle(cc, q(rr)))) return f(m);
+  }
+  if (Number.isInteger(r) && r !== qNum(r2) && proportionnels(poly, polyCercle(c, q(r)))) return f("Le second membre est $r^2$, le carré du rayon, pas $r$.");
+  if (Number.isInteger(qNum(qMul(r2, r2))) && proportionnels(poly, polyCercle(c, qMul(r2, r2)))) return f("Le second membre est $r^2$ : tu as élevé au carré deux fois.");
   return null;
 }
 
-// ============================================================================
-// Aide — type partagé.
-// ============================================================================
-
-export interface AideAvecLatex {
-  texte: string;
-  latex: string | null;
-}
-const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
-
-// ============================================================================
-// Dispatch commun.
-// ============================================================================
-
-export function consigneGenerale(exercice: ExerciceCercles): FragmentConsigne[] {
-  switch (exercice.famille) {
-    case "A":
-      return consigneGeneraleA();
-    case "B":
-      return consigneGeneraleB();
-    case "C":
-      return consigneGeneraleC();
-    case "D":
-      return consigneGeneraleD();
-    case "E":
-      return consigneGeneraleE();
-    case "F":
-      return consigneGeneraleF();
-    case "G":
-      return consigneGeneraleG();
-  }
-}
-
-export function blocDonnees(exercice: ExerciceCercles): string[] {
-  switch (exercice.famille) {
-    case "A":
-      return blocDonneesA(exercice);
-    case "B":
-      return blocDonneesB(exercice);
-    case "C":
-      return blocDonneesC(exercice);
-    case "D":
-      return blocDonneesD(exercice);
-    case "E":
-      return blocDonneesTriangle(exercice);
-    case "F":
-      return blocDonneesF(exercice);
-    case "G":
-      return blocDonneesG(exercice);
-  }
-}
-
-export function consigneEcran(exercice: ExerciceCercles, phase: PhaseCercles): FragmentConsigne[] {
-  switch (exercice.famille) {
-    case "A":
-      return consigneEcranA(phase);
-    case "B":
-      return consigneEcranB(phase);
-    case "C":
-      return consigneEcranC(phase);
-    case "D":
-      return consigneEcranD(phase);
-    case "E":
-      if (phase === "eEcran1") return consigneEcranTriangle("cotes");
-      if (phase === "eEcran2") return consigneEcranTriangle("incentre");
-      return consigneEcranTriangle("rayon");
-    case "F":
-      return consigneEcranF(phase);
-    case "G":
-      if (phase === "gEcran1") return consigneEcranG1();
-      if (phase === "gEcran2") return consigneEcranTriangle("cotes");
-      if (phase === "gEcran3") return consigneEcranTriangle("incentre");
-      return consigneEcranTriangle("rayon");
-  }
-}
-
-export function etatActuel(exercice: ExerciceCercles, phase: PhaseCercles): string[] | null {
-  switch (exercice.famille) {
-    case "A":
-      return etatActuelA(exercice, phase);
-    case "B":
-      return etatActuelB(exercice, phase);
-    case "C":
-      return etatActuelC(exercice, phase);
-    case "D":
-      return etatActuelD(exercice, phase);
-    case "E":
-      if (phase === "eEcran2") return etatActuelTriangle(exercice, "incentre");
-      if (phase === "eEcran3") return etatActuelTriangle(exercice, "rayon");
+function cible55(e: E, p: P, valeurs: string[]): FragmentConsigne[] | null {
+  switch (e.famille) {
+    case "A": {
+      if (p !== "aCentreRayon") return null;
+      const c = pointLu(valeurs[0]);
+      if (c && pres(c.x, e.D / 2) && pres(c.y, e.E / 2) && (e.D !== 0 || e.E !== 0)) return f("Le centre est $\\left(-\\frac{D}{2}\\,;-\\frac{E}{2}\\right)$ : les signes sont opposés à ceux de $D$ et $E$.");
+      try {
+        if (pres(lireNombre(valeurs[1]).valeur, qNum(e.r2)) && qNum(e.r2) !== 1) return f("C'est $r^2$ : le rayon en est la racine carrée.");
+      } catch {
+        return null;
+      }
       return null;
-    case "F":
-      return etatActuelF(exercice, phase);
-    case "G":
-      return etatActuelG(exercice, phase);
-  }
-}
-
-export function champsEcran(exercice: ExerciceCercles, phase: PhaseCercles): ChampDef[] {
-  switch (exercice.famille) {
-    case "A":
-      return champsA(phase);
+    }
     case "B":
-      return phase === "bEcran1" ? champsB() : champsB2();
+      if (p === "bCentres" && e.verdict === 2 && valeurs[0].split("\n").filter((l) => l.trim()).length === 1) return f("Il manque un centre : l'équation du second degré a deux solutions.");
+      return null;
     case "C":
-      if (phase === "cEcran1") return champsC1();
-      if (phase === "cEcran2") return champsC2();
-      return champsC3();
     case "D":
-      if (phase === "dEcran1") return champsD1();
-      if (phase === "dEcran2") return champsD2();
-      return champsD3();
-    case "E":
-      if (phase === "eEcran1") return champsCotes();
-      if (phase === "eEcran2") return champsIncentre();
-      return champsRayonTriangle();
     case "F":
-      if (phase === "fEcran1") return champsF1();
-      if (phase === "fEcran2") return champsF2();
-      return champsF3();
-    case "G":
-      if (phase === "gEcran1") return champsG1();
-      if (phase === "gEcran2") return champsCotes();
-      if (phase === "gEcran3") return champsIncentre();
-      return champsRayonTriangle();
+      if (p === "cEquation" || p === "dEquation" || p === "fEquation") return cibleCercle(valeurs[0], e.centre, e.r2);
+      if (p === "dCentreRayon" && e.famille === "D") {
+        try {
+          if (pres(lireNombre(valeurs[1]).valeur, qNum(e.k)) && qNum(e.k) < 0) return f("Un rayon est positif : $r=|k|$.");
+        } catch {
+          return null;
+        }
+      }
+      if (p === "fRayon2" && e.famille === "F") {
+        try {
+          if (pres(lireNombre(valeurs[0]).valeur, qNum(e.dist2) + e.L * e.L)) return f("Dans Pythagore, c'est la moitié de la corde, $\\frac{L}{2}$, qui intervient.");
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    case "E":
+    case "G": {
+      if (p !== "eCentre" && p !== "gCentre") return null;
+      const c = pointLu(valeurs[0]);
+      const t = e.triangle;
+      const G = { x: (qNum(t.A.x) + qNum(t.B.x) + qNum(t.C.x)) / 3, y: (qNum(t.A.y) + qNum(t.B.y) + qNum(t.C.y)) / 3 };
+      if (c && pres(c.x, G.x) && pres(c.y, G.y)) return f("C'est le centre de gravité : ici, chaque sommet est pondéré par la longueur du côté opposé.");
+      return null;
+    }
   }
 }
 
-export function niveauAideMaxEcran(exercice: ExerciceCercles, phase: PhaseCercles): number {
-  switch (exercice.famille) {
+// ============================================================================
+// Figure
+// ============================================================================
+
+export function figure6gen55(e: E, closes: readonly P[]): string {
+  const c = (ph: P) => closes.includes(ph);
+  const o: ObjetsLieux = { points: [], droites: [], segments: [], cercles: [], polygones: [] };
+  const pts = o.points!;
+  switch (e.famille) {
     case "A":
-      return niveauAideMaxA(phase);
-    case "B":
-      return niveauAideMaxB(phase);
-    case "C":
-      return niveauAideMaxC(phase);
-    case "D":
-      return niveauAideMaxD(phase);
-    case "E":
-      return phase === "eEcran2" ? 2 : 0;
-    case "F":
-      return niveauAideMaxF(phase);
-    case "G":
-      return phase === "gEcran1" ? 2 : 0;
+      pts.push({ p: p2(e.A), nom: "A" }, { p: p2(e.B), nom: "B" }, { p: p2(e.C), nom: "C" });
+      if (c("aCentreRayon")) {
+        o.cercles!.push({ c: p2(e.centre), r: Math.sqrt(qNum(e.r2)), couleur: "vert", epais: true });
+        pts.push({ p: p2(e.centre), nom: "Ω", couleur: "vert" });
+      }
+      o.inclure = [{ x: qNum(e.centre.x) - Math.sqrt(qNum(e.r2)), y: qNum(e.centre.y) - Math.sqrt(qNum(e.r2)) }, { x: qNum(e.centre.x) + Math.sqrt(qNum(e.r2)), y: qNum(e.centre.y) + Math.sqrt(qNum(e.r2)) }];
+      break;
+    case "B": {
+      o.segments!.push({ a: p2(e.A), b: p2(e.B), couleur: "bleu" });
+      pts.push({ p: p2(e.A), nom: "A" }, { p: p2(e.B), nom: "B" });
+      if (c("bMediatrice")) o.droites!.push({ ...d3(e.mediatrice), couleur: "gris", pointilles: true });
+      const r = Math.sqrt(qNum(e.r2));
+      if (c("bCentres") || (c("bNombre") && e.verdict === 0)) {
+        e.centres.forEach((cc, i) => {
+          o.cercles!.push({ c: p2(cc), r, couleur: "vert", epais: true });
+          pts.push({ p: p2(cc), nom: e.centres.length > 1 ? `Ω${i ? "₂" : "₁"}` : "Ω", couleur: "vert" });
+        });
+        if (e.verdict === 0) o.cercles!.push({ c: p2(e.A), r, couleur: "gris", pointilles: true });
+      }
+      const M = ptNum(milieu(e.A, e.B));
+      o.inclure = [
+        { x: M.x - r - 1, y: M.y - r - 1 },
+        { x: M.x + r + 1, y: M.y + r + 1 },
+      ];
+      break;
+    }
+    case "C": {
+      o.droites!.push({ ...d3(e.d), nom: "d" });
+      pts.push({ p: p2(e.A), nom: "A" }, { p: p2(e.B), nom: "B" });
+      if (c("cMediatrice")) o.droites!.push({ ...d3(e.mediatrice), couleur: "gris", pointilles: true });
+      if (c("cCentre")) pts.push({ p: p2(e.centre), nom: "Ω", couleur: "vert" });
+      const r = Math.sqrt(qNum(e.r2));
+      if (c("cEquation")) o.cercles!.push({ c: p2(e.centre), r, couleur: "vert", epais: true });
+      o.inclure = [
+        { x: qNum(e.centre.x) - r, y: qNum(e.centre.y) - r },
+        { x: qNum(e.centre.x) + r, y: qNum(e.centre.y) + r },
+      ];
+      break;
+    }
+    case "D": {
+      pts.push({ p: p2(e.A), nom: "A" }, { p: p2(e.T), nom: "T", couleur: "accent" });
+      o.droites!.push(e.axe === "abscisses" ? { a: 1, b: 0, c: -qNum(e.T.x), couleur: "gris", pointilles: true } : { a: 0, b: 1, c: -qNum(e.T.y), couleur: "gris", pointilles: true });
+      if (c("dCentreRayon")) pts.push({ p: p2(e.centre), nom: "Ω", couleur: "vert" });
+      const r = Math.abs(qNum(e.k));
+      if (c("dEquation")) o.cercles!.push({ c: p2(e.centre), r, couleur: "vert", epais: true });
+      o.inclure = [
+        { x: qNum(e.centre.x) - r, y: qNum(e.centre.y) - r },
+        { x: qNum(e.centre.x) + r, y: qNum(e.centre.y) + r },
+      ];
+      break;
+    }
+    case "E": {
+      const t = e.triangle;
+      o.polygones!.push({ pts: [p2(t.A), p2(t.B), p2(t.C)], couleur: "bleu" });
+      pts.push({ p: p2(t.A), nom: "A" }, { p: p2(t.B), nom: "B" }, { p: p2(t.C), nom: "C" });
+      if (c("eCentre")) pts.push({ p: p2(e.centre), nom: "I", couleur: "vert" });
+      if (c("eRayon")) o.cercles!.push({ c: p2(e.centre), r: qNum(e.r), couleur: "vert", epais: true });
+      break;
+    }
+    case "F": {
+      o.droites!.push({ ...d3(e.d), nom: "d" });
+      pts.push({ p: p2(e.centre), nom: "Ω" });
+      const r = Math.sqrt(qNum(e.r2));
+      if (c("fEquation")) {
+        o.cercles!.push({ c: p2(e.centre), r, couleur: "vert", epais: true });
+        o.segments!.push({ a: e.corde[0], b: e.corde[1], couleur: "accent", epais: true });
+      }
+      o.inclure = [
+        { x: qNum(e.centre.x) - r, y: qNum(e.centre.y) - r },
+        { x: qNum(e.centre.x) + r, y: qNum(e.centre.y) + r },
+      ];
+      break;
+    }
+    case "G": {
+      const t = e.triangle;
+      o.droites!.push({ ...d3(e.AB), couleur: "bleu" }, { ...d3(e.BC), couleur: "bleu" }, { ...d3(e.CA), couleur: "bleu" });
+      if (c("gSommets")) pts.push({ p: p2(t.A), nom: "A" }, { p: p2(t.B), nom: "B" }, { p: p2(t.C), nom: "C" });
+      if (c("gCentre")) pts.push({ p: p2(e.centre), nom: e.mode === "exinscrit" ? "J" : "I", couleur: "vert" });
+      if (c("gRayon")) o.cercles!.push({ c: p2(e.centre), r: qNum(e.r), couleur: "vert", epais: true });
+      const r = qNum(e.r);
+      o.inclure = [p2(t.A), p2(t.B), p2(t.C), { x: qNum(e.centre.x) - r, y: qNum(e.centre.y) - r }, { x: qNum(e.centre.x) + r, y: qNum(e.centre.y) + r }];
+      break;
+    }
   }
+  return figureLieux(o);
 }
-
-export function aideNiveau1(exercice: ExerciceCercles, phase: PhaseCercles): AideAvecLatex {
-  if (niveauAideMaxEcran(exercice, phase) === 0) return AUCUNE_AIDE;
-  switch (exercice.famille) {
-    case "A":
-      return aideNiveau1A();
-    case "B":
-      return aideNiveau1B();
-    case "C":
-      return aideNiveau1C();
-    case "D":
-      return aideNiveau1D();
-    case "E":
-      return aideNiveau1Incentre();
-    case "F":
-      return aideNiveau1F();
-    case "G":
-      return aideNiveau1G();
-  }
-}
-
-export function aideNiveau2(exercice: ExerciceCercles, phase: PhaseCercles): AideAvecLatex {
-  if (niveauAideMaxEcran(exercice, phase) === 0) return AUCUNE_AIDE;
-  switch (exercice.famille) {
-    case "A":
-      return aideNiveau2A(exercice);
-    case "B":
-      return aideNiveau2B(exercice);
-    case "C":
-      return aideNiveau2C(exercice);
-    case "D":
-      return aideNiveau2D(exercice);
-    case "E":
-      return aideNiveau2Incentre();
-    case "F":
-      return aideNiveau2F(exercice);
-    case "G":
-      return aideNiveau2G(exercice);
-  }
-}
-
-// ============================================================================
-// Famille B écran 3 — labels du composant dédié "add-as-needed" (2 centres).
-// ============================================================================
-
-export function labelListeCentresB(): string {
-  return "Centres possibles (ajoute une ligne par centre trouvé) :";
-}
-export function labelAjoutCentreB(): string {
-  return "+ Ajouter un centre";
-}
-export function placeholderCentreB(): string {
-  return "ex : (1;3)";
-}
-export function labelRayonB(): string {
-  return "Rayon =";
-}
-
-// ============================================================================
-// Libellés.
-// ============================================================================
-
-export const LIBELLE_PHASE: Record<PhaseCercles, string> = {
-  aEcran1: "Étape 1 (système en D, E, F)",
-  aEcran2: "Étape 2 (résolution du système)",
-  aEcran3: "Étape 3 (centre et rayon)",
-  bEcran1: "Étape 1 (médiatrice de [AB])",
-  bEcran2: "Étape 2 (équation en x)",
-  bEcran3: "Étape 3 (les 2 centres + rayon)",
-  cEcran1: "Étape 1 (médiatrice de [AB])",
-  cEcran2: "Étape 2 (centre par intersection)",
-  cEcran3: "Étape 3 (rayon)",
-  dEcran1: "Étape 1 (centre paramétré (Bx;r))",
-  dEcran2: "Étape 2 (équation en r)",
-  dEcran3: "Étape 3 (r, centre, équation)",
-  eEcran1: "Étape 1 (côtés a, b, c)",
-  eEcran2: "Étape 2 (centre inscrit I)",
-  eEcran3: "Étape 3 (rayon inscrit)",
-  fEcran1: "Étape 1 (distance centre-droite)",
-  fEcran2: "Étape 2 (r² puis r)",
-  fEcran3: "Étape 3 (rayon et équation)",
-  gEcran1: "Étape 1 (3 sommets)",
-  gEcran2: "Étape 2 (côtés a, b, c)",
-  gEcran3: "Étape 3 (centre inscrit I)",
-  gEcran4: "Étape 4 (rayon inscrit)",
-};
-
-export const LIBELLE_FAMILLE: Record<ExerciceCercles["famille"], string> = {
-  A: "A — Cercle par 3 points",
-  B: "B — Cercle par 2 points, rayon donné",
-  C: "C — Cercle par 2 points, centre sur une droite",
-  D: "D — Cercle tangent à un axe",
-  E: "E — Cercle inscrit à un triangle",
-  F: "F — Cercle avec corde de longueur donnée",
-  G: "G — Cercles tangents à 3 droites",
-};
-
-// ============================================================================
-// Récapitulatif final.
-// ============================================================================
-
-function formatTriangleReponse(t: DonneesTriangleInscrit, phase: "cotes" | "incentre" | "rayon"): string[] {
-  if (phase === "cotes") return [`a=${formatValeurAffichage(t.a)},\\;b=${formatValeurAffichage(t.b)},\\;c=${formatValeurAffichage(t.c)}`];
-  if (phase === "incentre") return [formatPoint({ x: t.incentreX, y: t.incentreY })];
-  return [`${formatValeurAffichage(t.rayon)}`];
-}
-
-/** Récapitulatif final : affiche toujours la réponse CORRECTE connue de l'exercice — jamais
- * recalculée depuis la saisie élève. */
-export function formatReponseAttenduePhaseLatex(exercice: ExerciceCercles, phase: PhaseCercles): string[] {
-  switch (exercice.famille) {
-    case "A":
-      if (phase === "aEcran1") return [formatEquationCerclePourPoint(exercice.A), formatEquationCerclePourPoint(exercice.B), formatEquationCerclePourPoint(exercice.C)];
-      if (phase === "aEcran2") return [`D=${formatValeurAffichage(exercice.D)},\\;E=${formatValeurAffichage(exercice.E)},\\;F=${formatValeurAffichage(exercice.F)}`];
-      return [`\\text{centre}${formatPoint({ x: exercice.centreX, y: exercice.centreY })},\\;r=${formatValeurAffichage(exercice.rayon)}`];
-    case "B":
-      if (phase === "bEcran1") return [formatDroiteLatex(exercice.mediatrice)];
-      if (phase === "bEcran2") return ["\\text{(voir aide/développement)}"];
-      return [`${formatPoint(exercice.centre1)}\\text{ et }${formatPoint(exercice.centre2)},\\;r=${formatValeurAffichage(exercice.r)}`];
-    case "C":
-      if (phase === "cEcran1") return [formatDroiteLatex(exercice.mediatrice)];
-      if (phase === "cEcran2") return [formatPoint(exercice.centre)];
-      return [`${formatValeurAffichage(exercice.rayon)}`];
-    case "D":
-      if (phase === "dEcran1") return [`(${formatValeurAffichage(exercice.Bx)};r)`];
-      if (phase === "dEcran2") return ["\\text{(voir aide/développement)}"];
-      return [`r=${formatValeurAffichage(exercice.r)},\\;\\text{centre}(${formatValeurAffichage(exercice.Bx)};${formatValeurAffichage(exercice.r)})`];
-    case "E":
-      if (phase === "eEcran1") return formatTriangleReponse(exercice, "cotes");
-      if (phase === "eEcran2") return formatTriangleReponse(exercice, "incentre");
-      return formatTriangleReponse(exercice, "rayon");
-    case "F":
-      if (phase === "fEcran1") return [`${formatValeurAffichage(exercice.distanceCentreDroite)}`];
-      if (phase === "fEcran2") return [`r^2=${formatValeurAffichage(exercice.rCarre)},\\;r=${formatValeurAffichage(exercice.rayon)}`];
-      return [`r=${formatValeurAffichage(exercice.rayon)}`];
-    case "G":
-      if (phase === "gEcran1") return [formatPoint(exercice.sommet12), formatPoint(exercice.sommet23), formatPoint(exercice.sommet31)];
-      if (phase === "gEcran2") return formatTriangleReponse(exercice.triangle, "cotes");
-      if (phase === "gEcran3") return formatTriangleReponse(exercice.triangle, "incentre");
-      return formatTriangleReponse(exercice.triangle, "rayon");
-  }
-}
-

@@ -388,6 +388,12 @@ paths:
   `https://plateforme-maths.vercel.app/6e-6h/6genNN`, et re-rendu sans régression de
   `geometrie-analytique-plane` et `calcul-vectoriel` (seul changement observé : les 3 figures
   ci-dessus, auparavant silencieusement cassées, s'affichent enfin correctement).
+  **Lots B et C de l'audit (6gen54–6gen57, 25/11)** : générateurs refaits sur le socle du 6e ch. 7 (algèbre
+  exacte, figures avec le lieu révélé après la réponse, verdicts équilibrés, `?code=`, corrigé consultable après
+  chaque réponse) ; 6gen54 RENOMMÉ « Constructions analytiques dans le triangle » (décision 1 : titre, carte du § 1
+  en une ligne, `whereLabel`, libellé pilote) ; libellés pilotes de 6gen55–57 remplis (processus 2, 2, 2, 3). Les
+  autres cartes et le cours ne sont pas touchés (agent AFD). Détail : `.claude/rules/feuilles-evaluations.md`,
+  « Textes : écran vs papier », paragraphe « 6e ch. 9 (lots B et C) ».
 
 - **5e (4h), Chapitre 5 — Dérivées et applications** (`derivees-applications`) : réenrichi et
   réordonné depuis une version plus ancienne du même artifact `plateforme-maths` (5e/4h). L'ordre

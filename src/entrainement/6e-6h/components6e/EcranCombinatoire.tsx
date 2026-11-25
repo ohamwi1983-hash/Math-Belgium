@@ -186,7 +186,7 @@ export function EcranCombinatoire({
               </div>
             );
           }
-          const apercu = champ.apercu && valeurs[i].trim() !== "" ? apercuLatex(valeurs[i], champ.nature === "polynome") : null;
+          const apercu = valeurs[i].trim() === "" ? null : champ.apercuFn ? champ.apercuFn(valeurs[i]) : champ.apercu ? apercuLatex(valeurs[i], champ.nature === "polynome") : null;
           return (
             <div className="field" key={i} style={{ minWidth: 0 }}>
               <label className="field-label field-label-minuscule" htmlFor={`champ-combi-${i}`}>

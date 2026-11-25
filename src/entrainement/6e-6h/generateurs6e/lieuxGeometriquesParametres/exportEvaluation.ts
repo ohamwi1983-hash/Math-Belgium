@@ -1,39 +1,22 @@
-import type { ExerciceLieuxGeometriquesParametres } from "../../core6e/lieuxGeometriquesParametres.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
-import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatLieuxGeometriquesParametres";
+import type { ExerciceLieuxGeometriquesParametres, PhaseLieuxGeometriquesParametres } from "../../core6e/lieuxGeometriquesParametres.types";
 import { phasesPourExercice } from "../../moteur6e/typesLieuxGeometriquesParametres";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLieuxGeometriquesParametres } from "./index";
+import { FORMAT_6GEN56 } from "../../ui6e/formatLieuxGeometriquesParametres";
+import { construireAdaptateurLieux } from "../adaptateurLieux";
+import { CATALOGUE_VARIANTES, GROUPES_VERDICT_6GEN56, construireAvecVarianteId, genererExerciceLieuxGeometriquesParametres } from "./index";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceLieuxGeometriquesParametres>` pour `6gen56` (Lieux géométriques par élimination du paramètre) — NOUVEAU,
- * même principe que les autres adaptateurs du chapitre « Lieux géométriques ».
+ * Adaptateur papier de `6gen56` — PROVISOIRE (lots B et C du 6e ch. 9 ; lot E à venir). Les variantes
+ * dont le NOM dit le régime (PA² + PB² = k « cercle », Apollonius « k = 1 », parallèles « vide »…)
+ * forment des groupes à verdict (panneau d'évaluation) ; C et D tirent leur verdict dans la variante
+ * (jamais dans `forme`). Aucun `calcul`, aucun cas particulier.
  */
-
-function entete(exercice: ExerciceLieuxGeometriquesParametres) {
-  return [...consigneGenerale(exercice), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
-}
-
-function construireEnonce(exercice: ExerciceLieuxGeometriquesParametres): SectionExercice {
-  const phases = phasesPourExercice(exercice);
-  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
-}
-
-function construireCorrection(exercice: ExerciceLieuxGeometriquesParametres): BlocCorrection[] {
-  const phases = phasesPourExercice(exercice);
-  const lettres = "abcdefghijklmnopqrstuvwxyz";
-  return phases.map((phase, i) => ({
-    type: "paragraphe",
-    fragments: [texte(`${lettres[i] ?? String(i + 1)}) `), latex(formatReponseAttenduePhaseLatex(exercice, phase).join(",\\ "))],
-  }));
-}
-
-export const adaptateurEvaluationLieuxGeometriquesParametres: AdaptateurFeuilleExercices<ExerciceLieuxGeometriquesParametres> = {
-  titreDocument: "Lieux géométriques par élimination du paramètre — Évaluation",
-  nomFichierBase: "lieux-elimination-parametre",
+export const adaptateurEvaluationLieuxGeometriquesParametres = construireAdaptateurLieux<ExerciceLieuxGeometriquesParametres, PhaseLieuxGeometriquesParametres>({
+  titreDocument: "Lieux géométriques et élimination de paramètre — Évaluation",
+  nomFichierBase: "lieux-geometriques",
   genererInstance: genererExerciceLieuxGeometriquesParametres,
   catalogueVariantes: CATALOGUE_VARIANTES,
-  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
-  construireEnonce,
-  construireCorrection,
-};
+  genererInstanceAvecVariante: construireAvecVarianteId,
+  format: FORMAT_6GEN56,
+  phases: phasesPourExercice,
+  groupesVerdict: GROUPES_VERDICT_6GEN56,
+});

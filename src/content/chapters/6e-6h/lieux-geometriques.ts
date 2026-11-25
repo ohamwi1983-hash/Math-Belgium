@@ -528,15 +528,11 @@ export const lieuxGeometriques: ChapterContent = {
         },
         {
           kind: 'entrainement',
-          title: 'Points et droites remarquables du triangle',
+          title: 'Constructions analytiques dans le triangle',
           generatorId: '6gen54',
-          description: [
-            "Retrouve un sommet à partir des milieux des côtés, place un point de bissectrice, " +
-              "fais varier l'aire d'un triangle ou construis le symétrique d'un point par rapport " +
-              'à une droite — toujours avec une droite en forme implicite ax+by+c=0.',
-          ],
+          description: ['Milieux, bissectrice, aire imposée, symétrique, carré et rayon réfléchi, par le calcul.'],
           chantier: '6e-6h',
-          whereLabel: '6e (6h) → « 54. Points et droites remarquables du triangle »',
+          whereLabel: '6e (6h) → « 54. Constructions analytiques dans le triangle »',
         },
       ],
     },

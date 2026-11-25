@@ -1,740 +1,589 @@
-import type { Droite, ExercicePDRT_A, ExercicePDRT_B, ExercicePDRT_C, ExercicePDRT_D, ExercicePDRT_E, ExercicePDRT_F, ExercicePDRT_G, ExercicePDRT_H, ExercicePointsDroitesRemarquablesTriangle, Fraction, Point } from "../core6e/pointsDroitesRemarquablesTriangle.types";
-import { formatFractionLatex } from "../generateurs6e/pointsDroitesRemarquablesTriangle/fraction";
+import type { ExercicePointsDroitesRemarquablesTriangle } from "../core6e/pointsDroitesRemarquablesTriangle.types";
 import type { PhasePointsDroitesRemarquablesTriangle } from "../moteur6e/typesPointsDroitesRemarquablesTriangle";
+import { droiteParDeuxPoints, latexDroite, latexQ, lireEquation, lirePoint, milieu, perpendiculaire, polyDroite, proportionnels, pt, q, qNum } from "../moteur6e/algebreLieux";
+import type { Droite, Pt } from "../moteur6e/algebreLieux";
+import { f } from "./fragmentsCombinatoire";
+import type { AideCombi, ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
+import { champDroiteUI, champListeDroitesUI, champListeNombresUI, champListePointsUI, champNombreUI, champPointUI, d3, ld, lp, nomPoint, p2 } from "./textesLieux";
+import { figureLieux } from "./figureLieux";
+import type { ObjetsLieux } from "./figureLieux";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen54`. Dispatch sur
- * `exercice.famille` PUIS `phase` (et `sousType` pour la famille G), mirroir
- * `formatDenombrementFondamental.ts` (6gen43), jamais importé par un autre générateur.
- *
- * **Vigilance signe orphelin / groupe LaTeX vide / texte français en mode maths** — toute clause en
- * français mêlée à du LaTeX passe TOUJOURS par `\text{...}`, jamais du texte brut en mode maths ;
- * couverture de régression : `formatPointsDroitesRemarquablesTriangle.test.ts`.
- *
- * **`DefinitionEcran`** — extension du patron `ChampDef[]` de `6gen43` avec 2 besoins propres à ce
- * générateur : un champ `"choixMultiple"` (famille E, écran 1 — plusieurs boutons `.btn.toggle-
- * active` activables simultanément, valeur = liste d'ids triée séparée par des virgules) et un mode
- * `"liste"` dédié (famille C, écrans 2-3 — nombre de lignes VARIABLE, add-as-needed, jamais un
- * `ChampDef[]` à cardinalité fixe) — un écran est SOIT un jeu de champs fixes, SOIT une liste,
- * jamais les deux mélangés dans ce générateur.
+ * Textes de `6gen54` — Constructions analytiques dans le triangle (6e ch. 9, § 1 ; audit, lots B et
+ * C). Aucune notation clavier, aucun exemple de champ qui soit une valeur possible, aides à deux
+ * niveaux (propriété du cours, puis posée pour l'instance) qui ne donnent jamais le résultat,
+ * explication après chaque écran (corrigé consultable), figure de la configuration avec le lieu ou
+ * le point cherché tracé APRÈS la réponse.
  */
 
-export type TypeChamp = "texte" | "choix" | "choixMultiple";
+type E = ExercicePointsDroitesRemarquablesTriangle;
+type P = PhasePointsDroitesRemarquablesTriangle;
 
-export interface OptionChoix {
-  valeur: string;
-  label: string;
-}
-
-export interface ChampDef {
-  type: TypeChamp;
-  label: string;
-  placeholder?: string;
-  options?: OptionChoix[];
-}
-
-export type DefinitionEcran = { kind: "champs"; champs: ChampDef[] } | { kind: "liste"; forme: "valeur" | "point"; label: string };
-
-export interface AideAvecLatex {
-  texte: string;
-  latex: string | null;
+const X = (p: Pt) => latexQ(p.x);
+const Y = (p: Pt) => latexQ(p.y);
+/** « (−3) » entre parenthèses si négatif, pour un calcul posé. */
+const par = (r: { n: bigint; d: bigint }) => (r.n < 0n ? `(${latexQ(r)})` : latexQ(r));
+const sous = (a: Pt, b: Pt) => ({ x: qNum(a.x) - qNum(b.x), y: qNum(a.y) - qNum(b.y) });
+const vec = (v: { x: number; y: number }) => `\\begin{pmatrix}${latexQ(qd(v.x))}\\\\ ${latexQ(qd(v.y))}\\end{pmatrix}`;
+function qd(x: number) {
+  for (let d = 1; d <= 1000; d++) if (Math.abs(Math.round(x * d) - x * d) < 1e-9) return q(Math.round(x * d), d);
+  return q(Math.round(x));
 }
 
-/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts` /
- * `ui6e/formatProprietesLogarithme.ts`, rendu via `components/RenduFragments.tsx`. Les noms de
- * points/droites/segments isolés (A, B, I, [BC], (AB)...) utilisés comme NOMS PROPRES dans une
- * phrase en français restent `texte()` — seules les VRAIES formules (I=(BC·A+AB·C)/(AB+BC),
- * Aire(t)=½|K+M·t|...) deviennent `latex()`. */
-export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
-
-function texte(valeur: string): FragmentConsigne {
-  return { type: "texte", valeur };
-}
-function latexFrag(valeur: string): FragmentConsigne {
-  return { type: "latex", valeur };
+function lignes(...l: string[]): FragmentConsigne[][] {
+  return l.map((x) => f(x));
 }
 
-const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
-
-function champTexte(label: string, placeholder: string): ChampDef {
-  return { type: "texte", label, placeholder };
-}
-
-// ============================================================================
-// Formatage géométrique partagé.
-// ============================================================================
-
-/** Nettoie un résidu de virgule flottante négligeable (ex. `6.000000000000001`) — toutes les
- * valeurs générées par ce générateur sont mathématiquement entières ou des fractions exactes
- * connues, jamais approchées ; ce nettoyage protège uniquement l'AFFICHAGE d'un résidu binaire. */
-function net(x: number): number {
-  return Math.abs(x - Math.round(x)) < 1e-9 ? Math.round(x) : x;
-}
-
-export function fmtPoint(P: Point): string {
-  return `(${net(P.x)};${net(P.y)})`;
-}
-
-export function fmtPointFrac(x: Fraction, y: Fraction): string {
-  return `(${formatFractionLatex(x)};${formatFractionLatex(y)})`;
-}
-
-function fmtTerme(coef: number, variable: string, premier: boolean): string {
-  const c = net(coef);
-  if (c === 0) return "";
-  const abs = Math.abs(c);
-  const signe = c < 0 ? "-" : premier ? "" : "+";
-  const valeur = abs === 1 ? "" : `${abs}`;
-  return `${signe}${valeur}${variable}`;
-}
-
-/** `ax+by+c=0`, coefficients nettoyés, jamais de terme nul affiché superflu. */
-export function fmtEquationDroite(d: Droite): string {
-  const termes: string[] = [];
-  let premier = true;
-  const ta = fmtTerme(d.a, "x", premier);
-  if (ta !== "") {
-    termes.push(ta);
-    premier = false;
-  }
-  const tb = fmtTerme(d.b, "y", premier);
-  if (tb !== "") {
-    termes.push(tb);
-    premier = false;
-  }
-  const c = net(d.c);
-  if (c !== 0 || termes.length === 0) {
-    const signe = c < 0 ? "-" : premier ? "" : "+";
-    termes.push(`${signe}${Math.abs(c)}`);
-  }
-  return `${termes.join("")}=0`;
-}
-
-/** `K+M·t` (à l'intérieur de la valeur absolue, famille C) — même logique de signe que
- * `fmtEquationDroite`, sans le `=0` final. */
-function fmtExpressionAffine(K: number, M: number): string {
-  const termes: string[] = [];
-  const tk = net(K) !== 0 ? `${net(K) < 0 ? "-" : ""}${Math.abs(net(K))}` : "";
-  if (tk !== "") termes.push(tk);
-  const tm = fmtTerme(M, "t", termes.length === 0);
-  if (tm !== "") termes.push(tm);
-  if (termes.length === 0) return "0";
-  return termes.join("");
-}
-
-// ============================================================================
-// Famille A — Sommets depuis les milieux des côtés.
-// ============================================================================
-
-const OPTIONS_RELATION_A: OptionChoix[] = [
-  { valeur: "subA", label: "B'+C'−A'" },
-  { valeur: "subB", label: "A'+C'−B'" },
-  { valeur: "subC", label: "A'+B'−C'" },
-];
-
-function consigneGeneraleA(): FragmentConsigne[] {
-  return [texte("A', B' et C' sont respectivement les milieux de [BC], [CA] et [AB]. Retrouve les sommets A, B et C du triangle.")];
-}
-function blocDonneesA(e: ExercicePDRT_A): string[] {
-  return [`A'=${fmtPoint(e.Ap)}`, `B'=${fmtPoint(e.Bp)}`, `C'=${fmtPoint(e.Cp)}`];
-}
-function consigneEcranA(phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
-  if (phase === "aEcran1") return [texte("Pour chacun des sommets A, B et C, identifie la relation vectorielle qui permet de le retrouver à partir des 3 milieux.")];
-  return [texte("Calcule les coordonnées de A, B et C à partir des 3 relations CONFIRMÉES.")];
-}
-function etatActuelA(phase: PhasePointsDroitesRemarquablesTriangle): string[] | null {
-  if (phase === "aEcran2") return ["\\text{Relations confirmées : }A=B'+C'-A'\\text{, }B=A'+C'-B'\\text{, }C=A'+B'-C'"];
-  return null;
-}
-function definitionEcranA(phase: PhasePointsDroitesRemarquablesTriangle): DefinitionEcran {
-  if (phase === "aEcran1") {
-    return {
-      kind: "champs",
-      champs: [
-        { type: "choix", label: "Relation pour A", options: OPTIONS_RELATION_A },
-        { type: "choix", label: "Relation pour B", options: OPTIONS_RELATION_A },
-        { type: "choix", label: "Relation pour C", options: OPTIONS_RELATION_A },
-      ],
-    };
-  }
-  return { kind: "champs", champs: [champTexte("x_A =", "ex : 1"), champTexte("y_A =", "ex : 2"), champTexte("x_B =", "ex : 3"), champTexte("y_B =", "ex : 4"), champTexte("x_C =", "ex : -1"), champTexte("y_C =", "ex : 0")] };
-}
-function niveauAideMaxA(phase: PhasePointsDroitesRemarquablesTriangle): number {
-  return phase === "aEcran1" ? 2 : 0;
-}
-function aideNiveau1A(): AideAvecLatex {
-  return { texte: "Dans le parallélogramme formé par les 3 milieux, chaque sommet du triangle s'obtient en additionnant les 2 milieux ADJACENTS à ce sommet, puis en soustrayant le milieu OPPOSÉ.", latex: null };
-}
-function aideNiveau2A(): AideAvecLatex {
-  return { texte: "Une des 3 relations, à titre d'exemple :", latex: "A=B'+C'-A'" };
-}
-
-// ============================================================================
-// Famille B — Point d'une bissectrice sur le côté opposé.
-// ============================================================================
-
-function consigneGeneraleB(): FragmentConsigne[] {
-  return [texte("Le triangle ABC est donné. La bissectrice issue de B coupe [AC] en un point I. Retrouve les coordonnées de I.")];
-}
-function blocDonneesB(e: ExercicePDRT_B): string[] {
-  return [`A=${fmtPoint(e.A)}`, `B=${fmtPoint(e.B)}`, `C=${fmtPoint(e.C)}`];
-}
-function consigneEcranB(phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
-  if (phase === "bEcran1") return [texte("Calcule les longueurs AB et BC.")];
-  if (phase === "bEcran2") return [texte("D'après le théorème de la bissectrice, quel est le rapport AI:IC, à partir des longueurs CONFIRMÉES ?")];
-  return [texte("Calcule les coordonnées de I via "), latexFrag("I=\\dfrac{BC\\cdot A+AB\\cdot C}{AB+BC}"), texte(", à partir du rapport CONFIRMÉ.")];
-}
-// Accumulation (correctif transversal — le bloc "état actuel" doit lister TOUTES les réponses
-// validées des écrans précédents, du plus ancien au plus récent, jamais seulement celle de l'écran
-// immédiatement précédent) : `bEcran3` ne montrait auparavant QUE le rapport confirmé à `bEcran2`,
-// sans les longueurs confirmées à `bEcran1`.
-function etatActuelB(e: ExercicePDRT_B, phase: PhasePointsDroitesRemarquablesTriangle): string[] | null {
-  const longueurs = `\\text{Longueurs confirmées : }AB=${e.AB}\\text{, }BC=${e.BC}`;
-  if (phase === "bEcran2") return [longueurs];
-  if (phase === "bEcran3") return [longueurs, `\\text{Rapport confirmé : }AI:IC=${e.AB}:${e.BC}`];
-  return null;
-}
-function definitionEcranB(phase: PhasePointsDroitesRemarquablesTriangle): DefinitionEcran {
-  if (phase === "bEcran1") return { kind: "champs", champs: [champTexte("AB =", "ex : 5"), champTexte("BC =", "ex : 12")] };
-  if (phase === "bEcran2") return { kind: "champs", champs: [champTexte("AI (1ᵉʳ terme du rapport) =", "ex : 5"), champTexte("IC (2ᵉ terme du rapport) =", "ex : 12")] };
-  return { kind: "champs", champs: [champTexte("x_I =", "ex : 1"), champTexte("y_I =", "ex : 2")] };
-}
-function niveauAideMaxB(phase: PhasePointsDroitesRemarquablesTriangle): number {
-  return phase === "bEcran2" ? 2 : 0;
-}
-function aideNiveau1B(): AideAvecLatex {
-  return { texte: "Théorème de la bissectrice : le rapport de partage sur le côté opposé égale le rapport des 2 côtés adjacents au sommet d'où part la bissectrice.", latex: null };
-}
-function aideNiveau2B(e: ExercicePDRT_B): AideAvecLatex {
-  return { texte: "Rapport (non simplifié) :", latex: `${e.AB}:${e.BC}` };
-}
-
-// ============================================================================
-// Famille C — Point à aire imposée sur une droite.
-// ============================================================================
-
-function consigneGeneraleC(): FragmentConsigne[] {
-  return [texte("A, B et une droite d sont donnés, ainsi qu'une aire cible k. Trouve le(s) point(s) C sur d tel(s) que l'aire du triangle ABC vaille k.")];
-}
-function blocDonneesC(e: ExercicePDRT_C): string[] {
-  return [`A=${fmtPoint(e.A)}`, `B=${fmtPoint(e.B)}`, `(d):${fmtEquationDroite(e.d)}`, `k=${e.k}`];
-}
-function consigneEcranC(phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
-  if (phase === "cEcran1") return [texte("Un point C(t) parcourt d. Exprime l'aire du triangle ABC en fonction du paramètre t, sous la forme "), latexFrag("\\text{Aire}(t)=\\tfrac12|K+M\\cdot t|"), texte(" : donne K et M.")];
-  if (phase === "cEcran2") return [texte("Résous "), latexFrag("|K+M\\cdot t|=2k"), texte(" pour le paramètre t, à partir de K et M CONFIRMÉS — attention, cette équation admet en général 2 solutions.")];
-  return [texte("Donne les coordonnées de C pour CHAQUE solution CONFIRMÉE de l'étape précédente.")];
-}
-// Accumulation (correctif transversal, voir `etatActuelB` ci-dessus) : `cEcran3` ne montrait
-// auparavant QUE les solutions confirmées à `cEcran2`, sans l'expression Aire(t) confirmée à
-// `cEcran1`.
-function etatActuelC(e: ExercicePDRT_C, phase: PhasePointsDroitesRemarquablesTriangle): string[] | null {
-  const aire = `\\text{Confirmé : Aire}(t)=\\tfrac12\\left\\vert ${fmtExpressionAffine(e.K, e.M)}\\right\\vert`;
-  if (phase === "cEcran2") return [aire];
-  if (phase === "cEcran3") return [aire, `\\text{Solutions confirmées : }t\\in\\{${e.solutionsTFrac.map(formatFractionLatex).join(",\\,")}\\}`];
-  return null;
-}
-function definitionEcranC(phase: PhasePointsDroitesRemarquablesTriangle): DefinitionEcran {
-  if (phase === "cEcran1") return { kind: "champs", champs: [champTexte("K =", "ex : 3"), champTexte("M =", "ex : 2")] };
-  if (phase === "cEcran2") return { kind: "liste", forme: "valeur", label: "Valeur(s) du paramètre t" };
-  return { kind: "liste", forme: "point", label: "Coordonnées de C" };
-}
-function niveauAideMaxC(phase: PhasePointsDroitesRemarquablesTriangle): number {
-  return phase === "cEcran2" ? 2 : 0;
-}
-function aideNiveau1C(): AideAvecLatex {
-  return { texte: "Une équation de la forme |expression|=k (k>0) a 2 solutions :", latex: "|\\text{expression}|=k\\ \\Rightarrow\\ \\text{expression}=k\\ \\text{ou}\\ \\text{expression}=-k" };
-}
-function aideNiveau2C(e: ExercicePDRT_C): AideAvecLatex {
-  return { texte: "Une des 2 équations, l'autre reste à poser :", latex: `${fmtExpressionAffine(e.K, e.M)}=${2 * e.k}` };
-}
-
-// ============================================================================
-// Famille D — Côtés depuis un sommet et 2 médianes.
-// ============================================================================
-
-function consigneGeneraleD(): FragmentConsigne[] {
-  return [texte("A est donné, ainsi que les 2 droites (BB') et (CC'), médianes issues respectivement de B et de C. Retrouve les équations des 3 côtés du triangle.")];
-}
-function blocDonneesD(e: ExercicePDRT_D): string[] {
-  return [`A=${fmtPoint(e.A)}`, `(BB'):${fmtEquationDroite(e.droiteBBp)}`, `(CC'):${fmtEquationDroite(e.droiteCCp)}`];
-}
-function consigneEcranD(phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
-  if (phase === "dEcran1") return [texte("Pose les 2 équations qui déterminent B : B appartient à sa propre médiane (BB') ; le milieu de [A,B] appartient à (CC').")];
-  if (phase === "dEcran2") return [texte("Résous le système CONFIRMÉ pour trouver les coordonnées de B.")];
-  if (phase === "dEcran3") return [texte("De façon analogue (C appartient à (CC') ; le milieu de [A,C] appartient à (BB')), donne directement les coordonnées de C.")];
-  return [texte("Donne les équations des 3 côtés (AB), (AC) et (BC), à partir de A (donné), B et C CONFIRMÉS.")];
-}
-// Accumulation (correctif transversal, voir `etatActuelB` ci-dessus) : `dEcran3` et `dEcran4` ne
-// montraient auparavant QUE la (les) coordonnée(s) confirmée(s) à l'écran immédiatement précédent,
-// sans le système confirmé à `dEcran1`.
-function etatActuelD(e: ExercicePDRT_D, phase: PhasePointsDroitesRemarquablesTriangle): string[] | null {
-  const systeme = `\\text{Système confirmé : }${fmtEquationDroite(e.eqPourB_1)}\\text{ et }${fmtEquationDroite(e.eqPourB_2)}`;
-  if (phase === "dEcran2") return [systeme];
-  if (phase === "dEcran3") return [systeme, `\\text{B confirmé : }B=${fmtPoint(e.B)}`];
-  if (phase === "dEcran4") return [systeme, `\\text{B confirmé : }B=${fmtPoint(e.B)}\\text{, C confirmé : }C=${fmtPoint(e.C)}`];
-  return null;
-}
-function definitionEcranD(phase: PhasePointsDroitesRemarquablesTriangle): DefinitionEcran {
-  if (phase === "dEcran1") {
-    return { kind: "champs", champs: [champTexte("a (éq.1, B∈(BB')) =", "ex : 1"), champTexte("b (éq.1) =", "ex : 2"), champTexte("c (éq.1) =", "ex : -3"), champTexte("a (éq.2, mil.[A,B]∈(CC')) =", "ex : 1"), champTexte("b (éq.2) =", "ex : 0"), champTexte("c (éq.2) =", "ex : -4")] };
-  }
-  if (phase === "dEcran2") return { kind: "champs", champs: [champTexte("x_B =", "ex : 4"), champTexte("y_B =", "ex : 0")] };
-  if (phase === "dEcran3") return { kind: "champs", champs: [champTexte("x_C =", "ex : 0"), champTexte("y_C =", "ex : 6")] };
-  return {
-    kind: "champs",
-    champs: [
-      champTexte("a (AB) =", "ex : 0"),
-      champTexte("b (AB) =", "ex : 1"),
-      champTexte("c (AB) =", "ex : 0"),
-      champTexte("a (AC) =", "ex : 1"),
-      champTexte("b (AC) =", "ex : 0"),
-      champTexte("c (AC) =", "ex : 0"),
-      champTexte("a (BC) =", "ex : 3"),
-      champTexte("b (BC) =", "ex : 2"),
-      champTexte("c (BC) =", "ex : -12"),
-    ],
-  };
-}
-function niveauAideMaxD(phase: PhasePointsDroitesRemarquablesTriangle): number {
-  return phase === "dEcran1" ? 2 : 0;
-}
-function aideNiveau1D(): AideAvecLatex {
-  return { texte: "B appartient à sa propre médiane (BB'). Le milieu de [A,B] est le point B' de la médiane issue de C : il appartient donc à (CC').", latex: null };
-}
-function aideNiveau2D(e: ExercicePDRT_D): AideAvecLatex {
-  return { texte: "1ʳᵉ équation déjà posée (B∈(BB')) — la seconde reste à trouver :", latex: fmtEquationDroite(e.eqPourB_1) };
-}
-
-// ============================================================================
-// Famille E — Droite équidistante de deux points.
-// ============================================================================
-
-const OPTIONS_CONSTRUCTION_E: OptionChoix[] = [
-  { valeur: "parallele", label: "Parallèle à (AB), passant par P" },
-  { valeur: "perpendiculaire", label: "Perpendiculaire à (AB), passant par P" },
-  { valeur: "milieu", label: "Passant par P et le milieu de [A,B]" },
-  { valeur: "passeParAB", label: "La droite (AB) elle-même" },
-];
-
-function consigneGeneraleE(): FragmentConsigne[] {
-  return [texte("P, A et B sont donnés. Trouve la ou les droite(s) passant par P et équidistantes de A et de B.")];
-}
-function blocDonneesE(e: ExercicePDRT_E): string[] {
-  return [`P=${fmtPoint(e.P)}`, `A=${fmtPoint(e.A)}`, `B=${fmtPoint(e.B)}`];
-}
-function consigneEcranE(phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
-  if (phase === "eEcran1") return [texte("Identifie LA (ou LES) construction(s) possible(s) parmi les propositions suivantes — il peut y en avoir plusieurs.")];
-  return [texte("Calcule les équations des droites correspondant aux constructions CONFIRMÉES.")];
-}
-function etatActuelE(phase: PhasePointsDroitesRemarquablesTriangle): string[] | null {
-  if (phase === "eEcran2") return ["\\text{Constructions confirmées : parallèle à (AB) ; passant par le milieu de [A,B]}"];
-  return null;
-}
-function definitionEcranE(phase: PhasePointsDroitesRemarquablesTriangle): DefinitionEcran {
-  if (phase === "eEcran1") return { kind: "champs", champs: [{ type: "choixMultiple", label: "Construction(s) possible(s)", options: OPTIONS_CONSTRUCTION_E }] };
-  return { kind: "champs", champs: [champTexte("a (parallèle) =", "ex : 1"), champTexte("b (parallèle) =", "ex: -1"), champTexte("c (parallèle) =", "ex : 0"), champTexte("a (milieu) =", "ex : 1"), champTexte("b (milieu) =", "ex : 1"), champTexte("c (milieu) =", "ex : 0")] };
-}
-function niveauAideMaxE(phase: PhasePointsDroitesRemarquablesTriangle): number {
-  return phase === "eEcran1" ? 2 : 0;
-}
-function aideNiveau1E(): AideAvecLatex {
-  return { texte: "Une droite équidistante de 2 points est soit parallèle à la droite qui les joint, soit passe par leur milieu.", latex: null };
-}
-function aideNiveau2E(): AideAvecLatex {
-  return { texte: "Une des 2 constructions correctes, à titre d'exemple :", latex: "\\text{parallèle à (AB) passant par P}" };
-}
-
-// ============================================================================
-// Famille F — Symétrique d'un point par rapport à une droite.
-// ============================================================================
-
-function consigneGeneraleF(): FragmentConsigne[] {
-  return [texte("P est donné, ainsi qu'une droite définie par 2 points A et B. Trouve Q, symétrique de P par rapport à (AB).")];
-}
-function blocDonneesF(e: ExercicePDRT_F): string[] {
-  return [`P=${fmtPoint(e.P)}`, `A=${fmtPoint(e.A)}`, `B=${fmtPoint(e.B)}`];
-}
-function consigneEcranF(phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
-  if (phase === "fEcran1") return [texte("Trouve l'équation de (AB), puis l'équation de la perpendiculaire à (AB) passant par P.")];
-  if (phase === "fEcran2") return [texte("Trouve le pied de la perpendiculaire H, intersection des 2 droites CONFIRMÉES.")];
-  return [texte("Calcule Q, symétrique de P par rapport à H, à partir de H CONFIRMÉ.")];
-}
-// Accumulation (correctif transversal, voir `etatActuelB` ci-dessus) : `fEcran3` ne montrait
-// auparavant QUE H confirmé à `fEcran2`, sans (AB) et la perpendiculaire confirmées à `fEcran1`.
-function etatActuelF(e: ExercicePDRT_F, phase: PhasePointsDroitesRemarquablesTriangle): string[] | null {
-  const equations = `\\text{Confirmé : }(AB):${fmtEquationDroite(e.droiteAB)}\\text{, perpendiculaire : }${fmtEquationDroite(e.perpendiculaire)}`;
-  if (phase === "fEcran2") return [equations];
-  if (phase === "fEcran3") return [equations, `\\text{H confirmé : }H=${fmtPointFrac(e.HFrac.x, e.HFrac.y)}`];
-  return null;
-}
-function definitionEcranF(phase: PhasePointsDroitesRemarquablesTriangle): DefinitionEcran {
-  if (phase === "fEcran1") return { kind: "champs", champs: [champTexte("a (AB) =", "ex : 0"), champTexte("b (AB) =", "ex : 1"), champTexte("c (AB) =", "ex : 0"), champTexte("a (perp.) =", "ex : 1"), champTexte("b (perp.) =", "ex : 0"), champTexte("c (perp.) =", "ex : -5")] };
-  if (phase === "fEcran2") return { kind: "champs", champs: [champTexte("x_H =", "ex : 5"), champTexte("y_H =", "ex : 0")] };
-  return { kind: "champs", champs: [champTexte("x_Q =", "ex : 5"), champTexte("y_Q =", "ex : -5")] };
-}
-function niveauAideMaxF(phase: PhasePointsDroitesRemarquablesTriangle): number {
-  return phase === "fEcran3" ? 2 : 0;
-}
-function aideNiveau1F(): AideAvecLatex {
-  return { texte: "H est le milieu de [P,Q], donc :", latex: "Q=2H-P" };
-}
-function aideNiveau2F(e: ExercicePDRT_F): AideAvecLatex {
-  return { texte: "Relation posée (calcul non fait) :", latex: `Q=2\\times ${fmtPointFrac(e.HFrac.x, e.HFrac.y)}-${fmtPoint(e.P)}` };
-}
-
-// ============================================================================
-// Famille G — Sommets d'un carré (2 sous-types).
-// ============================================================================
-
-function pointIntermediaireG(e: ExercicePDRT_G): Point {
-  return e.sousType === "sommetDiagonale" ? e.O : e.M;
-}
-function secondSommetG(e: ExercicePDRT_G): Point {
-  return e.sousType === "sommetDiagonale" ? e.C : e.A;
-}
-function labelPointIntermediaireG(e: ExercicePDRT_G): string {
-  return e.sousType === "sommetDiagonale" ? "O" : "M";
-}
-function labelSecondSommetG(e: ExercicePDRT_G): string {
-  return e.sousType === "sommetDiagonale" ? "C" : "A";
-}
-
-function consigneGeneraleG(e: ExercicePDRT_G): FragmentConsigne[] {
-  if (e.sousType === "sommetDiagonale") return [texte("ABCD est un carré. Le sommet A et la droite (BD) [l'autre diagonale] sont donnés. Retrouve B, C et D.")];
-  return [texte("ABCD est un carré de centre P. Le centre P et la droite (AB) [un côté] sont donnés. Retrouve les 4 sommets.")];
-}
-function blocDonneesG(e: ExercicePDRT_G): string[] {
-  if (e.sousType === "sommetDiagonale") return [`A=${fmtPoint(e.A)}`, `(BD):${fmtEquationDroite(e.droiteBD)}`];
-  return [`P=${fmtPoint(e.P)}`, `(AB):${fmtEquationDroite(e.droiteAB)}`];
-}
-function consigneEcranG(e: ExercicePDRT_G, phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
-  if (phase === "gEcran1") {
-    if (e.sousType === "sommetDiagonale") return [texte("Trouve l'équation de la perpendiculaire à (BD) passant par A, puis le pied de cette perpendiculaire — c'est le centre O du carré.")];
-    return [texte("Trouve l'équation de la perpendiculaire à (AB) passant par P, puis le pied de cette perpendiculaire — c'est le milieu M du côté [A,B].")];
-  }
-  if (phase === "gEcran2") {
-    if (e.sousType === "sommetDiagonale") return [texte("En utilisant les propriétés du carré (diagonales de même longueur, se coupant en leur milieu), trouve les coordonnées de C, sommet opposé à A.")];
-    return [texte("En utilisant les propriétés du carré (côtés opposés parallèles et équidistants du centre), trouve les coordonnées de A, l'un des 2 sommets du côté donné.")];
-  }
-  if (e.sousType === "sommetDiagonale") return [texte("Assemble les coordonnées complètes de B, C et D.")];
-  return [texte("Assemble les coordonnées complètes de A, B, C et D.")];
-}
-// Accumulation (correctif transversal, voir `etatActuelB` ci-dessus) : `gEcran3` ne montrait
-// auparavant QUE le second sommet confirmé à `gEcran2`, sans le point intermédiaire (O ou M)
-// confirmé à `gEcran1` — la perpendiculaire, également confirmée à `gEcran1`, est reprise aussi
-// (même bundle complet d'écran que la famille F, `etatActuelF` ci-dessus).
-function etatActuelG(e: ExercicePDRT_G, phase: PhasePointsDroitesRemarquablesTriangle): string[] | null {
-  const perpEtPoint = `\\text{Confirmé : perpendiculaire }${fmtEquationDroite(e.perpendiculaire)}\\text{, }${labelPointIntermediaireG(e)}=${fmtPoint(pointIntermediaireG(e))}`;
-  if (phase === "gEcran2") return [perpEtPoint];
-  if (phase === "gEcran3") return [perpEtPoint, `\\text{${labelSecondSommetG(e)} confirmé : }${labelSecondSommetG(e)}=${fmtPoint(secondSommetG(e))}`];
-  return null;
-}
-function definitionEcranG(e: ExercicePDRT_G, phase: PhasePointsDroitesRemarquablesTriangle): DefinitionEcran {
-  if (phase === "gEcran1") {
-    const label = labelPointIntermediaireG(e);
-    return { kind: "champs", champs: [champTexte("a (perp.) =", "ex : 1"), champTexte("b (perp.) =", "ex : -1"), champTexte("c (perp.) =", "ex : 0"), champTexte(`x_${label} =`, "ex : 0"), champTexte(`y_${label} =`, "ex : 0")] };
-  }
-  if (phase === "gEcran2") {
-    const label = labelSecondSommetG(e);
-    return { kind: "champs", champs: [champTexte(`x_${label} =`, "ex : 0"), champTexte(`y_${label} =`, "ex : 0")] };
-  }
-  if (e.sousType === "sommetDiagonale") {
-    return { kind: "champs", champs: [champTexte("x_B =", "ex : 3"), champTexte("y_B =", "ex : 0"), champTexte("x_C =", "ex : 0"), champTexte("y_C =", "ex : -3"), champTexte("x_D =", "ex : -3"), champTexte("y_D =", "ex : 0")] };
-  }
-  return { kind: "champs", champs: [champTexte("x_A =", "ex : -1"), champTexte("y_A =", "ex : 1"), champTexte("x_B =", "ex : 1"), champTexte("y_B =", "ex : 1"), champTexte("x_C =", "ex : 1"), champTexte("y_C =", "ex : -1"), champTexte("x_D =", "ex : -1"), champTexte("y_D =", "ex : -1")] };
-}
-function niveauAideMaxG(phase: PhasePointsDroitesRemarquablesTriangle): number {
-  return phase === "gEcran1" ? 2 : 0;
-}
-function aideNiveau1G(): AideAvecLatex {
-  return { texte: "Dans un carré, les diagonales sont perpendiculaires, de même longueur, et se coupent en leur milieu (le centre).", latex: null };
-}
-function aideNiveau2G(e: ExercicePDRT_G): AideAvecLatex {
-  return { texte: "Perpendiculaire déjà posée — le point d'intersection reste à calculer :", latex: fmtEquationDroite(e.perpendiculaire) };
-}
-
-// ============================================================================
-// Famille H — Rayon réfléchi (réutilise F).
-// ============================================================================
-
-function consigneGeneraleH(): FragmentConsigne[] {
-  return [texte("Un miroir d (défini par 2 points Ad et Bd), une source P et un point d'incidence M (sur d) sont donnés. Trouve l'équation du rayon réfléchi.")];
-}
-function blocDonneesH(e: ExercicePDRT_H): string[] {
-  return [`(d):${fmtEquationDroite(e.droiteD)}`, `P=${fmtPoint(e.P)}`, `M=${fmtPoint(e.M)}`];
-}
-function consigneEcranH(phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
-  if (phase === "hEcran1") return [texte("Trouve le symétrique P' de la source P par rapport au miroir d.")];
-  return [texte("Le rayon réfléchi passe par P' et par M. Calcule son équation à partir de P' CONFIRMÉ.")];
-}
-function etatActuelH(e: ExercicePDRT_H, phase: PhasePointsDroitesRemarquablesTriangle): string[] | null {
-  if (phase === "hEcran2") return [`\\text{P' confirmé : }P'=${fmtPointFrac(e.PpFrac.x, e.PpFrac.y)}`];
-  return null;
-}
-function definitionEcranH(phase: PhasePointsDroitesRemarquablesTriangle): DefinitionEcran {
-  // Labels PLAIN TEXT (jamais rendus en KaTeX, comme tout `ChampDef.label`) : "x_P' =" plutôt que
-  // "x_{P'} =" — la syntaxe LaTeX à accolades affichée telle quelle ressemblerait à une erreur de
-  // frappe pour l'élève (piège trouvé par vérification Playwright manuelle sur le build de
-  // production).
-  if (phase === "hEcran1") return { kind: "champs", champs: [champTexte("x_P' =", "ex : 2"), champTexte("y_P' =", "ex : -3")] };
-  return { kind: "champs", champs: [champTexte("a =", "ex : 1"), champTexte("b =", "ex : 1"), champTexte("c =", "ex : -5")] };
-}
-function niveauAideMaxH(phase: PhasePointsDroitesRemarquablesTriangle): number {
-  return phase === "hEcran2" ? 2 : 0;
-}
-function aideNiveau1H(): AideAvecLatex {
-  return { texte: "Le rayon réfléchi semble provenir du symétrique de la source par rapport au miroir.", latex: null };
-}
-function aideNiveau2H(e: ExercicePDRT_H): AideAvecLatex {
-  return { texte: "Les 2 points par lesquels passe le rayon réfléchi sont rappelés (équation non calculée) :", latex: `P'=${fmtPointFrac(e.PpFrac.x, e.PpFrac.y)}\\text{, }M=${fmtPoint(e.M)}` };
-}
-
-// ============================================================================
-// Dispatch commun.
-// ============================================================================
-
-export function consigneGenerale(exercice: ExercicePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
-  switch (exercice.famille) {
-    case "A":
-      return consigneGeneraleA();
-    case "B":
-      return consigneGeneraleB();
-    case "C":
-      return consigneGeneraleC();
-    case "D":
-      return consigneGeneraleD();
-    case "E":
-      return consigneGeneraleE();
-    case "F":
-      return consigneGeneraleF();
-    case "G":
-      return consigneGeneraleG(exercice);
-    case "H":
-      return consigneGeneraleH();
-  }
-}
-
-export function blocDonnees(exercice: ExercicePointsDroitesRemarquablesTriangle): string[] {
-  switch (exercice.famille) {
-    case "A":
-      return blocDonneesA(exercice);
-    case "B":
-      return blocDonneesB(exercice);
-    case "C":
-      return blocDonneesC(exercice);
-    case "D":
-      return blocDonneesD(exercice);
-    case "E":
-      return blocDonneesE(exercice);
-    case "F":
-      return blocDonneesF(exercice);
-    case "G":
-      return blocDonneesG(exercice);
-    case "H":
-      return blocDonneesH(exercice);
-  }
-}
-
-export function consigneEcran(exercice: ExercicePointsDroitesRemarquablesTriangle, phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
-  switch (exercice.famille) {
-    case "A":
-      return consigneEcranA(phase);
-    case "B":
-      return consigneEcranB(phase);
-    case "C":
-      return consigneEcranC(phase);
-    case "D":
-      return consigneEcranD(phase);
-    case "E":
-      return consigneEcranE(phase);
-    case "F":
-      return consigneEcranF(phase);
-    case "G":
-      return consigneEcranG(exercice, phase);
-    case "H":
-      return consigneEcranH(phase);
-  }
-}
-
-export function etatActuel(exercice: ExercicePointsDroitesRemarquablesTriangle, phase: PhasePointsDroitesRemarquablesTriangle): string[] | null {
-  switch (exercice.famille) {
-    case "A":
-      return etatActuelA(phase);
-    case "B":
-      return etatActuelB(exercice, phase);
-    case "C":
-      return etatActuelC(exercice, phase);
-    case "D":
-      return etatActuelD(exercice, phase);
-    case "E":
-      return etatActuelE(phase);
-    case "F":
-      return etatActuelF(exercice, phase);
-    case "G":
-      return etatActuelG(exercice, phase);
-    case "H":
-      return etatActuelH(exercice, phase);
-  }
-}
-
-export function definitionEcran(exercice: ExercicePointsDroitesRemarquablesTriangle, phase: PhasePointsDroitesRemarquablesTriangle): DefinitionEcran {
-  switch (exercice.famille) {
-    case "A":
-      return definitionEcranA(phase);
-    case "B":
-      return definitionEcranB(phase);
-    case "C":
-      return definitionEcranC(phase);
-    case "D":
-      return definitionEcranD(phase);
-    case "E":
-      return definitionEcranE(phase);
-    case "F":
-      return definitionEcranF(phase);
-    case "G":
-      return definitionEcranG(exercice, phase);
-    case "H":
-      return definitionEcranH(phase);
-  }
-}
-
-export function niveauAideMaxEcran(exercice: ExercicePointsDroitesRemarquablesTriangle, phase: PhasePointsDroitesRemarquablesTriangle): number {
-  switch (exercice.famille) {
-    case "A":
-      return niveauAideMaxA(phase);
-    case "B":
-      return niveauAideMaxB(phase);
-    case "C":
-      return niveauAideMaxC(phase);
-    case "D":
-      return niveauAideMaxD(phase);
-    case "E":
-      return niveauAideMaxE(phase);
-    case "F":
-      return niveauAideMaxF(phase);
-    case "G":
-      return niveauAideMaxG(phase);
-    case "H":
-      return niveauAideMaxH(phase);
-  }
-}
-
-export function aideNiveau1(exercice: ExercicePointsDroitesRemarquablesTriangle, phase: PhasePointsDroitesRemarquablesTriangle): AideAvecLatex {
-  if (niveauAideMaxEcran(exercice, phase) === 0) return AUCUNE_AIDE;
-  switch (exercice.famille) {
-    case "A":
-      return aideNiveau1A();
-    case "B":
-      return aideNiveau1B();
-    case "C":
-      return aideNiveau1C();
-    case "D":
-      return aideNiveau1D();
-    case "E":
-      return aideNiveau1E();
-    case "F":
-      return aideNiveau1F();
-    case "G":
-      return aideNiveau1G();
-    case "H":
-      return aideNiveau1H();
-  }
-}
-
-export function aideNiveau2(exercice: ExercicePointsDroitesRemarquablesTriangle, phase: PhasePointsDroitesRemarquablesTriangle): AideAvecLatex {
-  if (niveauAideMaxEcran(exercice, phase) === 0) return AUCUNE_AIDE;
-  switch (exercice.famille) {
-    case "A":
-      return aideNiveau2A();
-    case "B":
-      return aideNiveau2B(exercice);
-    case "C":
-      return aideNiveau2C(exercice);
-    case "D":
-      return aideNiveau2D(exercice);
-    case "E":
-      return aideNiveau2E();
-    case "F":
-      return aideNiveau2F(exercice);
-    case "G":
-      return aideNiveau2G(exercice);
-    case "H":
-      return aideNiveau2H(exercice);
-  }
-}
-
-export const LIBELLE_PHASE: Record<PhasePointsDroitesRemarquablesTriangle, string> = {
-  aEcran1: "Étape 1 (relations vectorielles)",
-  aEcran2: "Étape 2 (coordonnées des sommets)",
-  bEcran1: "Étape 1 (longueurs AB, BC)",
-  bEcran2: "Étape 2 (rapport de la bissectrice)",
-  bEcran3: "Étape 3 (coordonnées de I)",
-  cEcran1: "Étape 1 (aire en fonction du paramètre)",
-  cEcran2: "Étape 2 (résolution en t)",
-  cEcran3: "Étape 3 (coordonnées de C)",
-  dEcran1: "Étape 1 (système déterminant B)",
-  dEcran2: "Étape 2 (coordonnées de B)",
-  dEcran3: "Étape 3 (coordonnées de C)",
-  dEcran4: "Étape 4 (équations des 3 côtés)",
-  eEcran1: "Étape 1 (constructions identifiées)",
-  eEcran2: "Étape 2 (équations des droites)",
-  fEcran1: "Étape 1 ((AB) et perpendiculaire)",
-  fEcran2: "Étape 2 (pied H)",
-  fEcran3: "Étape 3 (symétrique Q)",
-  gEcran1: "Étape 1 (perpendiculaire + point intermédiaire)",
-  gEcran2: "Étape 2 (second sommet)",
-  gEcran3: "Étape 3 (sommets restants)",
-  hEcran1: "Étape 1 (symétrique P')",
-  hEcran2: "Étape 2 (rayon réfléchi)",
-};
-
-export const LIBELLE_FAMILLE: Record<ExercicePointsDroitesRemarquablesTriangle["famille"], string> = {
-  A: "A — Sommets depuis les milieux des côtés",
-  B: "B — Point d'une bissectrice sur le côté opposé",
-  C: "C — Point à aire imposée sur une droite",
-  D: "D — Côtés depuis un sommet et 2 médianes",
-  E: "E — Droite équidistante de deux points",
-  F: "F — Symétrique d'un point par rapport à une droite",
-  G: "G — Sommets d'un carré",
-  H: "H — Rayon réfléchi",
-};
-
-/** Récapitulatif final : affiche toujours la réponse CORRECTE connue de l'exercice — jamais
- * recalculée depuis la saisie élève. */
-export function formatReponseAttenduePhaseLatex(exercice: ExercicePointsDroitesRemarquablesTriangle, phase: PhasePointsDroitesRemarquablesTriangle): string[] {
-  switch (exercice.famille) {
-    case "A":
-      if (phase === "aEcran1") return ["A=B'+C'-A'", "B=A'+C'-B'", "C=A'+B'-C'"];
-      return [`A=${fmtPoint(exercice.A)}`, `B=${fmtPoint(exercice.B)}`, `C=${fmtPoint(exercice.C)}`];
-    case "B":
-      if (phase === "bEcran1") return [`AB=${exercice.AB}`, `BC=${exercice.BC}`];
-      if (phase === "bEcran2") return [`AI:IC=${exercice.AB}:${exercice.BC}`];
-      return [`I=${fmtPointFrac(exercice.IFrac.x, exercice.IFrac.y)}`];
-    case "C":
-      if (phase === "cEcran1") return [`K=${exercice.K}`, `M=${exercice.M}`];
-      if (phase === "cEcran2") return [`t\\in\\{${exercice.solutionsTFrac.map(formatFractionLatex).join(",\\,")}\\}`];
-      return exercice.solutionsCFrac.map((p) => `C=${fmtPointFrac(p.x, p.y)}`);
-    case "D":
-      if (phase === "dEcran1") return [fmtEquationDroite(exercice.eqPourB_1), fmtEquationDroite(exercice.eqPourB_2)];
-      if (phase === "dEcran2") return [`B=${fmtPoint(exercice.B)}`];
-      if (phase === "dEcran3") return [`C=${fmtPoint(exercice.C)}`];
-      return [fmtEquationDroite(exercice.droiteAB), fmtEquationDroite(exercice.droiteAC), fmtEquationDroite(exercice.droiteBC)];
-    case "E":
-      if (phase === "eEcran1") return ["\\text{parallèle à (AB), passant par P}", "\\text{passant par P et le milieu de [A,B]}"];
-      return [fmtEquationDroite(exercice.droiteParallele), fmtEquationDroite(exercice.droiteMilieu)];
-    case "F":
-      if (phase === "fEcran1") return [fmtEquationDroite(exercice.droiteAB), fmtEquationDroite(exercice.perpendiculaire)];
-      if (phase === "fEcran2") return [`H=${fmtPointFrac(exercice.HFrac.x, exercice.HFrac.y)}`];
-      return [`Q=${fmtPointFrac(exercice.QFrac.x, exercice.QFrac.y)}`];
-    case "G": {
-      if (phase === "gEcran1") return [fmtEquationDroite(exercice.perpendiculaire), `${labelPointIntermediaireG(exercice)}=${fmtPoint(pointIntermediaireG(exercice))}`];
-      if (phase === "gEcran2") return [`${labelSecondSommetG(exercice)}=${fmtPoint(secondSommetG(exercice))}`];
-      if (exercice.sousType === "sommetDiagonale") return [`B=${fmtPoint(exercice.B)}`, `C=${fmtPoint(exercice.C)}`, `D=${fmtPoint(exercice.D)}`];
-      return [`A=${fmtPoint(exercice.A)}`, `B=${fmtPoint(exercice.B)}`, `C=${fmtPoint(exercice.C)}`, `D=${fmtPoint(exercice.D)}`];
+export const FORMAT_6GEN54: FormatCombinatoire<E, P> = {
+  consigneGenerale(e) {
+    switch (e.famille) {
+      case "A":
+        return f("Dans un triangle $ABC$, $A'$ est le milieu de $[BC]$, $B'$ celui de $[CA]$ et $C'$ celui de $[AB]$. Retrouve les sommets du triangle.");
+      case "B":
+        return f("Dans le triangle $ABC$, la bissectrice de l'angle $\\widehat{ABC}$ coupe le côté $[AC]$ en $I$. Calcule les coordonnées de $I$.");
+      case "C":
+        return f("On cherche les points $C$ de la droite $d$ tels que l'aire du triangle $ABC$ soit égale à $k$. Un point de $d$ s'écrit $C(t)$.");
+      case "D":
+        return f("Dans le triangle $ABC$, on connaît le sommet $A$, la médiane issue de $B$ et la médiane issue de $C$. Retrouve $B$, $C$ puis les équations des trois côtés.");
+      case "E":
+        return f("On cherche les droites qui passent par $P$ et qui sont à égale distance des points $A$ et $B$.");
+      case "F":
+        return f("Construis par le calcul le symétrique $Q$ du point $P$ par rapport à la droite $(AB)$.");
+      case "G":
+        return e.sousType === "sommetDiagonale"
+          ? f("Un paysagiste dessine sur un plan (unité : 1 m) un massif carré $ABCD$. Il a déjà placé le sommet $A$ et tracé la diagonale $(BD)$. Retrouve les autres sommets.")
+          : f("Une dalle carrée $ABCD$ est dessinée sur un plan (unité : 1 dm). On connaît son centre $P$ et la droite $(AB)$ qui porte un de ses côtés. Retrouve les quatre sommets.");
+      case "H":
+        return e.contexte === "miroir"
+          ? f("Un rayon lumineux part de la source $P$ et frappe un miroir plan, représenté par la droite $d$, au point $M$. On cherche la droite que suit le rayon réfléchi.")
+          : f("Une boule de billard part de $P$ et rebondit sur la bande $d$ au point $M$ ; sans effet, elle rebondit comme un rayon sur un miroir. On cherche la droite qu'elle suit après le rebond.");
     }
+  },
+
+  donnees(e) {
+    switch (e.famille) {
+      case "A":
+        return [f(`$${nomPoint("A'", e.Ap)}$, $${nomPoint("B'", e.Bp)}$, $${nomPoint("C'", e.Cp)}$`)];
+      case "B":
+        return [f(`$${nomPoint("A", e.A)}$, $${nomPoint("B", e.B)}$, $${nomPoint("C", e.C)}$`)];
+      case "C":
+        return [
+          f(`$${nomPoint("A", e.A)}$, $${nomPoint("B", e.B)}$, aire voulue $k=${e.k}$`),
+          f(`$d\\,:\\ ${ld(e.d)}$, paramétrée par $C(t)=\\left(${paramLatex(e.P0.x, e.u.x)}\\,;\\,${paramLatex(e.P0.y, e.u.y)}\\right)$`),
+        ];
+      case "D":
+        return [f(`$${nomPoint("A", e.A)}$`), f(`médiane issue de $B$ : $${ld(e.medianeB)}$`), f(`médiane issue de $C$ : $${ld(e.medianeC)}$`)];
+      case "E":
+        return [f(`$${nomPoint("P", e.P)}$, $${nomPoint("A", e.A)}$, $${nomPoint("B", e.B)}$`)];
+      case "F":
+        return [f(`$${nomPoint("A", e.A)}$, $${nomPoint("B", e.B)}$, $${nomPoint("P", e.P)}$`)];
+      case "G":
+        return e.sousType === "sommetDiagonale" ? [f(`$${nomPoint("A", e.A)}$, diagonale $(BD)\\,:\\ ${ld(e.droiteBD)}$`)] : [f(`centre $${nomPoint("P", e.P)}$, côté porté par $(AB)\\,:\\ ${ld(e.droiteAB)}$`)];
+      case "H":
+        return [f(`$${nomPoint("P", e.P)}$, $${nomPoint("M", e.M)}$`), f(`${e.contexte === "miroir" ? "miroir" : "bande"} $d\\,:\\ ${ld(e.d)}$`)];
+    }
+  },
+
+  consigneEcran(e, p) {
+    switch (p) {
+      case "aSommetA":
+        return f("Calcule les coordonnées du sommet $A$.");
+      case "aSommetsBC":
+        return f("Calcule de même les coordonnées des sommets $B$ et $C$.");
+      case "bLongueurs":
+        return f("Calcule les longueurs $AB$ et $BC$ (valeurs exactes).");
+      case "bPointI":
+        return f("Calcule les coordonnées du point $I$.");
+      case "cExpression":
+        return f("L'aire du triangle $ABC(t)$ s'écrit $\\text{Aire}(t)=\\frac{1}{2}\\left|K+Mt\\right|$. Écris l'expression $K+Mt$ (ce qui est entre les barres).");
+      case "cValeursT":
+        return f("Trouve toutes les valeurs de $t$ pour lesquelles l'aire vaut $k$ (une par ligne).");
+      case "cPointsC":
+        return f("Donne les coordonnées de chaque point $C$ qui convient (un par ligne).");
+      case "dPointB":
+        return f("Calcule les coordonnées du sommet $B$.");
+      case "dPointC":
+        return f("Calcule les coordonnées du sommet $C$.");
+      case "dCotes":
+        return f("Écris une équation de chacun des trois côtés, sous la forme $ax+by+c=0$.");
+      case "eNombre":
+        return f("Combien de droites passent par $P$ et sont à égale distance de $A$ et de $B$ ?");
+      case "eDroites":
+        return f("Écris une équation de chaque droite qui convient (une par ligne).");
+      case "fPerpendiculaire":
+        return f("Écris une équation de la perpendiculaire à $(AB)$ passant par $P$.");
+      case "fPied":
+        return f("Calcule les coordonnées du point $H$ où cette perpendiculaire coupe $(AB)$.");
+      case "fSymetrique":
+        return f("Calcule les coordonnées du symétrique $Q$ de $P$.");
+      case "gPremier":
+        return e.famille === "G" && e.sousType === "sommetDiagonale" ? f("Calcule les coordonnées du centre $O$ du carré.") : f("Calcule les coordonnées du milieu $M$ du côté $[AB]$.");
+      case "gDeuxieme":
+        return e.famille === "G" && e.sousType === "sommetDiagonale" ? f("Calcule les coordonnées du sommet $C$.") : f("Calcule les coordonnées des sommets $A$ et $B$ (un par ligne, dans l'ordre que tu veux).");
+      case "gTroisieme":
+        return e.famille === "G" && e.sousType === "sommetDiagonale" ? f("Calcule les coordonnées des sommets $B$ et $D$ (un par ligne, dans l'ordre que tu veux).") : f("Calcule les coordonnées des deux autres sommets (un par ligne).");
+      case "hSymetrique":
+        return f("Calcule les coordonnées du symétrique $P'$ de $P$ par rapport à $d$.");
+      case "hRayon":
+        return e.famille === "H" && e.contexte === "billard" ? f("Écris une équation de la droite suivie par la boule après le rebond en $M$.") : f("Écris une équation de la droite qui porte le rayon réfléchi.");
+    }
+  },
+
+  champs(_e, p): ChampCombi[] {
+    switch (p) {
+      case "aSommetA":
+        return [champPointUI("$A$")];
+      case "aSommetsBC":
+        return [champPointUI("$B$"), champPointUI("$C$")];
+      case "bLongueurs":
+        return [champNombreUI("$AB$"), champNombreUI("$BC$")];
+      case "bPointI":
+        return [champPointUI("$I$")];
+      case "cExpression":
+        return [{ type: "texte", label: "$K+Mt=$", placeholder: "expression en t" }];
+      case "cValeursT":
+        return [champListeNombresUI("Valeurs de $t$")];
+      case "cPointsC":
+        return [champListePointsUI("Points $C$")];
+      case "dPointB":
+        return [champPointUI("$B$")];
+      case "dPointC":
+        return [champPointUI("$C$")];
+      case "dCotes":
+        return [champDroiteUI("$(AB)$"), champDroiteUI("$(BC)$"), champDroiteUI("$(CA)$")];
+      case "eNombre":
+        return [
+          {
+            type: "choix",
+            label: "",
+            options: [
+              { valeur: "aucune", label: "Aucune" },
+              { valeur: "une", label: "Une seule" },
+              { valeur: "deux", label: "Deux" },
+              { valeur: "infinite", label: "Une infinité" },
+            ],
+          },
+        ];
+      case "eDroites":
+        return [champListeDroitesUI("Droites")];
+      case "fPerpendiculaire":
+        return [champDroiteUI("Perpendiculaire")];
+      case "fPied":
+        return [champPointUI("$H$")];
+      case "fSymetrique":
+        return [champPointUI("$Q$")];
+      case "gPremier":
+        return [champPointUI(_e.famille === "G" && _e.sousType === "sommetDiagonale" ? "$O$" : "$M$")];
+      case "gDeuxieme":
+        return _e.famille === "G" && _e.sousType === "sommetDiagonale" ? [champPointUI("$C$")] : [champListePointsUI("Sommets $A$ et $B$")];
+      case "gTroisieme":
+        return [champListePointsUI(_e.famille === "G" && _e.sousType === "sommetDiagonale" ? "Sommets $B$ et $D$" : "Deux autres sommets")];
+      case "hSymetrique":
+        return [champPointUI("$P'$")];
+      case "hRayon":
+        return [champDroiteUI("Droite")];
+    }
+  },
+
+  aides: aides54,
+  reponseAttendue: reponse54,
+  explication: explication54,
+  libellePhase: (_e, p) => LIBELLES[p],
+  messageCible: cible54,
+};
+
+const LIBELLES: Record<P, string> = {
+  aSommetA: "Sommet A",
+  aSommetsBC: "Sommets B et C",
+  bLongueurs: "Longueurs AB et BC",
+  bPointI: "Pied I de la bissectrice",
+  cExpression: "Aire en fonction de t",
+  cValeursT: "Valeurs de t",
+  cPointsC: "Points C",
+  dPointB: "Sommet B",
+  dPointC: "Sommet C",
+  dCotes: "Équations des côtés",
+  eNombre: "Nombre de droites",
+  eDroites: "Équations des droites",
+  fPerpendiculaire: "Perpendiculaire",
+  fPied: "Pied H",
+  fSymetrique: "Symétrique Q",
+  gPremier: "Premier point",
+  gDeuxieme: "Deuxième étape",
+  gTroisieme: "Derniers sommets",
+  hSymetrique: "Symétrique P′",
+  hRayon: "Rayon réfléchi",
+};
+
+/** « 2 + 3t », « −1 − t », « 4 » (coordonnée de C(t)). */
+function paramLatex(x0: { n: bigint; d: bigint }, u: number): string {
+  const base = latexQ(x0);
+  if (u === 0) return base;
+  const terme = u === 1 ? "t" : u === -1 ? "-t" : `${u}t`;
+  if (x0.n === 0n) return terme;
+  return `${base}${u > 0 ? "+" : ""}${terme}`;
+}
+
+function equationPoseeSysteme(d: Droite, A: Pt): string {
+  // milieu de [A ; (x ; y)] sur d : a(x_A + x)/2 + b(y_A + y)/2 + c = 0
+  return `${d.a}\\cdot\\dfrac{${X(A)}+x}{2}${d.b < 0n ? "" : "+"}${d.b}\\cdot\\dfrac{${Y(A)}+y}{2}${d.c < 0n ? "" : "+"}${d.c}=0`;
+}
+
+function aides54(e: E, p: P): AideCombi[] {
+  switch (e.famille) {
+    case "A": {
+      if (p === "aSommetA")
+        return [
+          { texte: "Théorème des milieux : $AC'A'B'$ est un parallélogramme, donc on obtient un sommet sans résoudre de système :", latex: "A=B'+C'-A'" },
+          { texte: "Coordonnée par coordonnée :", latex: `x_A=${X(e.Bp)}+${par(e.Cp.x)}-${par(e.Ap.x)},\\quad y_A=${Y(e.Bp)}+${par(e.Cp.y)}-${par(e.Ap.y)}` },
+        ];
+      return [
+        { texte: "Même raisonnement pour chaque sommet : on additionne les milieux des deux côtés qui partent du sommet et on retranche le troisième :", latex: "B=A'+C'-B',\\qquad C=A'+B'-C'" },
+        { texte: "Par exemple pour $B$ :", latex: `x_B=${X(e.Ap)}+${par(e.Cp.x)}-${par(e.Bp.x)}` },
+      ];
+    }
+    case "B":
+      if (p === "bLongueurs")
+        return [
+          { texte: "Distance entre deux points :", latex: "AB=\\sqrt{(x_B-x_A)^2+(y_B-y_A)^2}" },
+          { texte: "Ici :", latex: `AB=\\sqrt{(${X(e.B)}-${par(e.A.x)})^2+(${Y(e.B)}-${par(e.A.y)})^2}` },
+        ];
+      return [
+        { texte: "Théorème de la bissectrice : $I$ partage $[AC]$ dans le rapport des côtés adjacents à l'angle :", latex: "\\dfrac{AI}{IC}=\\dfrac{AB}{BC}" },
+        { texte: `Ici $\\dfrac{AI}{IC}=\\dfrac{${e.AB}}{${e.BC}}$ : $I$ est situé aux $\\dfrac{${e.AB}}{${e.AB + e.BC}}$ de $[AC]$ en partant de $A$ :`, latex: `I=A+\\dfrac{${e.AB}}{${e.AB + e.BC}}\\,\\overrightarrow{AC}` },
+      ];
+    case "C": {
+      const ab = sous(e.B, e.A);
+      if (p === "cExpression")
+        return [
+          { texte: "Aire d'un triangle $ABC$ dans un repère orthonormé :", latex: "\\text{Aire}=\\frac{1}{2}\\left|(x_B-x_A)(y_C-y_A)-(y_B-y_A)(x_C-x_A)\\right|" },
+          { texte: "Remplace $C$ par $C(t)$ :", latex: `\\frac{1}{2}\\left|${par(qd(ab.x))}\\left(${paramLatex(e.P0.y, e.u.y)}-${par(e.A.y)}\\right)-${par(qd(ab.y))}\\left(${paramLatex(e.P0.x, e.u.x)}-${par(e.A.x)}\\right)\\right|` },
+        ];
+      if (p === "cValeursT")
+        return [
+          { texte: "Une valeur absolue donne deux équations :", latex: "|u|=2k\\iff u=2k\\ \\text{ou}\\ u=-2k" },
+          { texte: "Ici :", latex: `${e.K}${e.M < 0 ? "" : "+"}${e.M}t=${2 * e.k}\\quad\\text{ou}\\quad ${e.K}${e.M < 0 ? "" : "+"}${e.M}t=-${2 * e.k}` },
+        ];
+      return [
+        { texte: "Remplace chaque valeur de $t$ dans $C(t)$.", latex: `C(t)=\\left(${paramLatex(e.P0.x, e.u.x)}\\,;\\,${paramLatex(e.P0.y, e.u.y)}\\right)` },
+        { texte: "Vérifie : les deux points sont de part et d'autre de $(AB)$, à la même distance de cette droite." },
+      ];
+    }
+    case "D": {
+      if (p === "dPointB")
+        return [
+          { texte: "Pose $B(x\\,;y)$ : $B$ est sur sa médiane, et le milieu $C'$ de $[AB]$ est sur la médiane issue de $C$. Deux conditions, deux équations." },
+          { texte: "Le système à résoudre :", latex: `\\begin{cases}${latexDroite(e.medianeB)}\\\\ ${equationPoseeSysteme(e.medianeC, e.A)}\\end{cases}` },
+        ];
+      if (p === "dPointC")
+        return [
+          { texte: "Même méthode : $C$ est sur sa médiane, et le milieu $B'$ de $[AC]$ est sur la médiane issue de $B$." },
+          { texte: "Le système à résoudre :", latex: `\\begin{cases}${latexDroite(e.medianeC)}\\\\ ${equationPoseeSysteme(e.medianeB, e.A)}\\end{cases}` },
+        ];
+      return [
+        { texte: "Droite par deux points $A$ et $B$ : si $\\overrightarrow{AB}=\\begin{pmatrix}u\\\\ v\\end{pmatrix}$, alors $\\begin{pmatrix}v\\\\ -u\\end{pmatrix}$ est normal à la droite :", latex: "v(x-x_A)-u(y-y_A)=0" },
+        { texte: "Pour $(AB)$ :", latex: `\\overrightarrow{AB}=${vec(sous(e.B, e.A))}` },
+      ];
+    }
+    case "E":
+      if (p === "eNombre")
+        return [
+          { texte: "Une droite est à égale distance de $A$ et de $B$ si et seulement si elle est parallèle à $(AB)$ ou passe par le milieu de $[AB]$." },
+          { texte: "Regarde où se trouve $P$ : sur la droite $(AB)$ ? au milieu de $[AB]$ ? ailleurs ? Combien de droites des deux sortes passent alors par $P$ ?" },
+        ];
+      return [
+        { texte: "Les droites cherchées passent par $P$ et sont parallèles à $(AB)$ ou passent par le milieu $I$ de $[AB]$." },
+        { texte: "Ici :", latex: `I=${lp(milieu(e.A, e.B))},\\quad\\overrightarrow{AB}=${vec(sous(e.B, e.A))}` },
+      ];
+    case "F":
+      if (p === "fPerpendiculaire")
+        return [
+          { texte: "$\\overrightarrow{AB}$ est un vecteur normal de toute perpendiculaire à $(AB)$ :", latex: "x_{\\overrightarrow{AB}}\\,(x-x_P)+y_{\\overrightarrow{AB}}\\,(y-y_P)=0" },
+          { texte: "Ici :", latex: `\\overrightarrow{AB}=${vec(sous(e.B, e.A))}` },
+        ];
+      if (p === "fPied")
+        return [
+          { texte: "$H$ est sur les deux droites : résous le système formé par $(AB)$ et la perpendiculaire." },
+          { texte: "Le système :", latex: `\\begin{cases}${latexDroite(e.droiteAB)}\\\\ ${latexDroite(e.perpendiculaire)}\\end{cases}` },
+        ];
+      return [
+        { texte: "$H$ est le milieu de $[PQ]$ :", latex: "Q=2H-P" },
+        { texte: "Ici :", latex: `x_Q=2\\cdot${par(e.H.x)}-${par(e.P.x)},\\quad y_Q=2\\cdot${par(e.H.y)}-${par(e.P.y)}` },
+      ];
+    case "G":
+      if (e.sousType === "sommetDiagonale") {
+        if (p === "gPremier")
+          return [
+            { texte: "Les diagonales d'un carré sont perpendiculaires et se coupent en leur milieu : $O$ est le pied de la perpendiculaire à $(BD)$ passant par $A$." },
+            { texte: "La perpendiculaire à $(BD)$ par $A$ :", latex: latexDroite(perpendiculaire(e.droiteBD, e.A)) },
+          ];
+        if (p === "gDeuxieme")
+          return [
+            { texte: "$O$ est le milieu de la diagonale $[AC]$ :", latex: "C=2O-A" },
+            { texte: "Ici :", latex: `x_C=2\\cdot${par(e.O.x)}-${par(e.A.x)}` },
+          ];
+        return [
+          { texte: "Les diagonales ont la même longueur et sont perpendiculaires : $\\overrightarrow{OB}$ s'obtient en faisant tourner $\\overrightarrow{OA}$ d'un quart de tour, et $D$ est le symétrique de $B$ par rapport à $O$ :", latex: "\\begin{pmatrix}u\\\\ v\\end{pmatrix}\\longmapsto\\begin{pmatrix}-v\\\\ u\\end{pmatrix}" },
+          { texte: "Ici :", latex: `\\overrightarrow{OA}=${vec(sous(e.A, e.O))}` },
+        ];
+      }
+      if (p === "gPremier")
+        return [
+          { texte: "Le centre est à égale distance des côtés : le milieu $M$ de $[AB]$ est le pied de la perpendiculaire à $(AB)$ passant par $P$." },
+          { texte: "La perpendiculaire à $(AB)$ par $P$ :", latex: latexDroite(perpendiculaire(e.droiteAB, e.P)) },
+        ];
+      if (p === "gDeuxieme")
+        return [
+          { texte: "Dans un carré, $MA=MB=MP$ (la moitié du côté) et $(AB)\\perp(MP)$ : $\\overrightarrow{MA}$ et $\\overrightarrow{MB}$ s'obtiennent en faisant tourner $\\overrightarrow{MP}$ d'un quart de tour, dans un sens puis dans l'autre :", latex: "\\begin{pmatrix}u\\\\ v\\end{pmatrix}\\longmapsto\\begin{pmatrix}-v\\\\ u\\end{pmatrix}\\ \\text{ou}\\ \\begin{pmatrix}v\\\\ -u\\end{pmatrix}" },
+          { texte: "Ici :", latex: `\\overrightarrow{MP}=${vec(sous(e.P, e.M))}` },
+        ];
+      return [
+        { texte: "$P$ est le milieu des deux diagonales : chaque sommet a son opposé symétrique par rapport à $P$." },
+        { texte: "Pour le sommet opposé à $A$ :", latex: `2P-A=\\left(2\\cdot${par(e.P.x)}-${par(e.A.x)}\\,;\\,2\\cdot${par(e.P.y)}-${par(e.A.y)}\\right)` },
+      ];
     case "H":
-      if (phase === "hEcran1") return [`P'=${fmtPointFrac(exercice.PpFrac.x, exercice.PpFrac.y)}`];
-      return [fmtEquationDroite(exercice.rayonReflechi)];
+      if (p === "hSymetrique")
+        return [
+          { texte: "Symétrique par rapport à une droite : perpendiculaire à $d$ passant par $P$, pied $H$ (intersection avec $d$), puis $P'=2H-P$." },
+          { texte: "La perpendiculaire à $d$ par $P$ :", latex: latexDroite(perpendiculaire(e.d, e.P)) },
+        ];
+      return [
+        { texte: "Loi de la réflexion : le rayon réfléchi semble venir de $P'$, le symétrique de la source. Il est porté par la droite $(P'M)$." },
+        { texte: "Un vecteur directeur :", latex: `\\overrightarrow{P'M}=${vec(sous(e.M, e.Pp))}` },
+      ];
   }
+}
+
+function reponse54(e: E, p: P): string[] {
+  switch (e.famille) {
+    case "A":
+      return p === "aSommetA" ? [nomPoint("A", e.A)] : [nomPoint("B", e.B), nomPoint("C", e.C)];
+    case "B":
+      return p === "bLongueurs" ? [`AB=${e.AB}`, `BC=${e.BC}`] : [nomPoint("I", e.I)];
+    case "C":
+      if (p === "cExpression") return [`K+Mt=${e.K}${e.M < 0 ? "" : "+"}${e.M}t\\ \\text{(ou son opposé)}`];
+      if (p === "cValeursT") return e.t.map((x) => `t=${latexQ(qd(x))}`);
+      return e.C.map((c) => nomPoint("C", c));
+    case "D":
+      if (p === "dPointB") return [nomPoint("B", e.B)];
+      if (p === "dPointC") return [nomPoint("C", e.C)];
+      return [`(AB)\\,:\\ ${ld(e.AB)}`, `(BC)\\,:\\ ${ld(e.BC)}`, `(CA)\\,:\\ ${ld(e.CA)}`];
+    case "E":
+      if (p === "eNombre") return [e.position === "milieu" ? "\\text{une infinité}" : e.position === "surAB" ? "\\text{une seule}" : "\\text{deux}"];
+      return e.droites.map(ld);
+    case "F":
+      if (p === "fPerpendiculaire") return [ld(e.perpendiculaire)];
+      if (p === "fPied") return [nomPoint("H", e.H)];
+      return [nomPoint("Q", e.Q)];
+    case "G":
+      if (e.sousType === "sommetDiagonale") {
+        if (p === "gPremier") return [nomPoint("O", e.O)];
+        if (p === "gDeuxieme") return [nomPoint("C", e.C)];
+        return [nomPoint("B", e.B), nomPoint("D", e.D)];
+      }
+      if (p === "gPremier") return [nomPoint("M", e.M)];
+      if (p === "gDeuxieme") return [lp(e.A), lp(e.B)];
+      return [lp(e.C), lp(e.D)];
+    case "H":
+      return p === "hSymetrique" ? [nomPoint("P'", e.Pp)] : [ld(e.rayonReflechi)];
+  }
+}
+
+function explication54(e: E, p: P): FragmentConsigne[][] {
+  switch (e.famille) {
+    case "A":
+      if (p === "aSommetA") return lignes("Théorème des milieux : $AC'A'B'$ est un parallélogramme, donc $A=B'+C'-A'$.", `$x_A=${X(e.Bp)}+${par(e.Cp.x)}-${par(e.Ap.x)}=${X(e.A)}$ et $y_A=${Y(e.Bp)}+${par(e.Cp.y)}-${par(e.Ap.y)}=${Y(e.A)}$.`, `Résultat : $${nomPoint("A", e.A)}$.`);
+      return lignes("De même $B=A'+C'-B'$ et $C=A'+B'-C'$.", `Résultat : $${nomPoint("B", e.B)}$ et $${nomPoint("C", e.C)}$.`, "Vérification : le milieu de $[BC]$ est bien $A'$.");
+    case "B":
+      if (p === "bLongueurs") return lignes(`$AB=\\sqrt{${par(qd(sous(e.B, e.A).x))}^2+${par(qd(sous(e.B, e.A).y))}^2}=${e.AB}$ et $BC=\\sqrt{${par(qd(sous(e.C, e.B).x))}^2+${par(qd(sous(e.C, e.B).y))}^2}=${e.BC}$.`);
+      return lignes(`Théorème de la bissectrice : $\\dfrac{AI}{IC}=\\dfrac{AB}{BC}=\\dfrac{${e.AB}}{${e.BC}}$.`, `Donc $I=A+\\dfrac{${e.AB}}{${e.AB + e.BC}}\\,\\overrightarrow{AC}$, avec $\\overrightarrow{AC}=${vec(sous(e.C, e.A))}$.`, `Résultat : $${nomPoint("I", e.I)}$.`, "Piège : $I$ n'est pas le milieu de $[AC]$ (le triangle n'est pas isocèle en $B$).");
+    case "C":
+      if (p === "cExpression") return lignes(`On remplace $C$ par $C(t)$ dans la formule de l'aire, puis on développe : $\\text{Aire}(t)=\\frac{1}{2}\\left|${e.K}${e.M < 0 ? "" : "+"}${e.M}t\\right|$.`, "L'opposé de cette expression convient aussi (même valeur absolue).");
+      if (p === "cValeursT") return lignes(`$\\frac{1}{2}|${e.K}${e.M < 0 ? "" : "+"}${e.M}t|=${e.k}\\iff ${e.K}${e.M < 0 ? "" : "+"}${e.M}t=${2 * e.k}$ ou $${e.K}${e.M < 0 ? "" : "+"}${e.M}t=-${2 * e.k}$.`, `Résultat : $t=${latexQ(qd(e.t[0]))}$ ou $t=${latexQ(qd(e.t[1]))}$.`, "Piège : une seule valeur, c'est oublier une des deux équations de la valeur absolue.");
+      return lignes(`$C(${latexQ(qd(e.t[0]))})=${lp(e.C[0])}$ et $C(${latexQ(qd(e.t[1]))})=${lp(e.C[1])}$.`, "Vérification : ces deux points sont symétriques par rapport au point où $d$ coupe $(AB)$.");
+    case "D": {
+      if (p === "dPointB") return lignes("$B$ est sur sa médiane ; le milieu $C'$ de $[AB]$ est sur la médiane issue de $C$.", `On résout le système $\\begin{cases}${latexDroite(e.medianeB)}\\\\ ${equationPoseeSysteme(e.medianeC, e.A)}\\end{cases}$.`, `Résultat : $${nomPoint("B", e.B)}$.`);
+      if (p === "dPointC") return lignes("$C$ est sur sa médiane ; le milieu $B'$ de $[AC]$ est sur la médiane issue de $B$.", `Résultat : $${nomPoint("C", e.C)}$.`);
+      return lignes(`$(AB)\\,:\\ ${ld(e.AB)}$`, `$(BC)\\,:\\ ${ld(e.BC)}$`, `$(CA)\\,:\\ ${ld(e.CA)}$`, "Vérification : chaque sommet vérifie les équations des deux côtés qui y passent.");
+    }
+    case "E":
+      if (p === "eNombre") {
+        if (e.position === "milieu") return lignes("$P$ est le milieu de $[AB]$ : toute droite passant par $P$ passe par le milieu de $[AB]$, donc est à égale distance de $A$ et de $B$.", "Il y a donc une infinité de droites.");
+        if (e.position === "surAB") return lignes("$P$ est sur $(AB)$ sans en être le milieu : la parallèle à $(AB)$ par $P$ est $(AB)$ elle-même, et la droite par $P$ et le milieu de $[AB]$ est encore $(AB)$.", "Une seule droite convient : $(AB)$.");
+        return lignes("$P$ n'est pas sur $(AB)$ : la parallèle à $(AB)$ par $P$ et la droite par $P$ et le milieu de $[AB]$ sont deux droites différentes.", "Deux droites conviennent.");
+      }
+      return lignes(...e.droites.map((d) => `$${ld(d)}$`), "Vérification : chaque droite passe par $P$.");
+    case "F":
+      if (p === "fPerpendiculaire") return lignes(`$\\overrightarrow{AB}=${vec(sous(e.B, e.A))}$ est normal à la perpendiculaire, qui passe par $P$ : $${ld(e.perpendiculaire)}$.`);
+      if (p === "fPied") return lignes(`Système $\\begin{cases}${latexDroite(e.droiteAB)}\\\\ ${latexDroite(e.perpendiculaire)}\\end{cases}$ : $${nomPoint("H", e.H)}$.`);
+      return lignes(`$Q=2H-P=${lp(e.Q)}$.`, "Piège : $Q=2P-H$ est faux, c'est $H$ le milieu de $[PQ]$.");
+    case "G":
+      if (e.sousType === "sommetDiagonale") {
+        if (p === "gPremier") return lignes(`Perpendiculaire à $(BD)$ par $A$ : $${latexDroite(perpendiculaire(e.droiteBD, e.A))}$, puis intersection avec $(BD)$.`, `Résultat : $${nomPoint("O", e.O)}$.`);
+        if (p === "gDeuxieme") return lignes(`$C=2O-A=${lp(e.C)}$.`);
+        return lignes(`$\\overrightarrow{OA}=${vec(sous(e.A, e.O))}$ tourné d'un quart de tour donne $${vec(sous(e.B, e.O))}$ ou son opposé.`, `Résultat : $${lp(e.B)}$ et $${lp(e.D)}$ (l'un ou l'autre peut s'appeler $B$).`);
+      }
+      if (p === "gPremier") return lignes(`Perpendiculaire à $(AB)$ par $P$ : $${latexDroite(perpendiculaire(e.droiteAB, e.P))}$, puis intersection avec $(AB)$.`, `Résultat : $${nomPoint("M", e.M)}$.`);
+      if (p === "gDeuxieme") return lignes(`$\\overrightarrow{MP}=${vec(sous(e.P, e.M))}$ tourné d'un quart de tour dans chaque sens donne $\\overrightarrow{MA}$ et $\\overrightarrow{MB}$.`, `Résultat : $${lp(e.A)}$ et $${lp(e.B)}$.`);
+      return lignes(`Symétriques par rapport à $P$ : $${lp(e.C)}$ et $${lp(e.D)}$.`, "Vérification : les quatre côtés ont la même longueur et les diagonales aussi.");
+    case "H":
+      if (p === "hSymetrique") return lignes(`Perpendiculaire à $d$ par $P$ : $${latexDroite(perpendiculaire(e.d, e.P))}$ ; elle coupe $d$ au milieu de $[PP']$.`, `Résultat : $${nomPoint("P'", e.Pp)}$.`);
+      return lignes(`Le rayon réfléchi est porté par $(P'M)$ : $${ld(e.rayonReflechi)}$.`, "Piège : ce n'est ni le miroir $d$, ni la droite $(PM)$ du rayon incident.");
+  }
+}
+
+function egalPoint(v: string, cible: Pt): boolean {
+  try {
+    const p = lirePoint(v);
+    return Math.abs(p.x.valeur - qNum(cible.x)) < 1e-9 && Math.abs(p.y.valeur - qNum(cible.y)) < 1e-9;
+  } catch {
+    return false;
+  }
+}
+function egalDroite(v: string, d: Droite): boolean {
+  try {
+    return proportionnels(lireEquation(v, ["x", "y"]).poly, polyDroite(d));
+  } catch {
+    return false;
+  }
+}
+
+function cible54(e: E, p: P, valeurs: string[]): FragmentConsigne[] | null {
+  const v = valeurs[0] ?? "";
+  switch (e.famille) {
+    case "A": {
+      if (p === "aSommetA" && egalPoint(v, e.B)) return f("C'est le sommet $B$ : pour $A$, on additionne les milieux des deux côtés qui partent de $A$ ($B'$ et $C'$) et on retranche $A'$.");
+      if (p === "aSommetA" && egalPoint(v, e.C)) return f("C'est le sommet $C$ : pour $A$, on additionne $B'$ et $C'$ et on retranche $A'$.");
+      return null;
+    }
+    case "B":
+      if (p === "bPointI" && egalPoint(v, milieu(e.A, e.C))) return f("C'est le milieu de $[AC]$ : la bissectrice coupe $[AC]$ dans le rapport $\\dfrac{AB}{BC}$, pas en son milieu.");
+      if (p === "bPointI") {
+        const s = e.AB + e.BC;
+        const inverse = { x: q(Math.round(e.AB * qNum(e.A.x) + e.BC * qNum(e.C.x)), s), y: q(Math.round(e.AB * qNum(e.A.y) + e.BC * qNum(e.C.y)), s) };
+        if (egalPoint(v, inverse)) return f("Ton point est trop près du mauvais sommet : $AI$ est proportionnel à $AB$, donc $I$ est plus près de $A$ si $AB$ est le plus petit côté.");
+      }
+      return null;
+    case "C":
+      if (p === "cValeursT" && v.split("\n").filter((l) => l.trim()).length === 1) return f("Il en manque une : $|u|=2k$ donne deux équations, $u=2k$ et $u=-2k$.");
+      if (p === "cPointsC" && v.split("\n").filter((l) => l.trim()).length === 1) return f("Il manque un point : il y a deux valeurs de $t$, donc deux points $C$.");
+      return null;
+    case "E":
+      if (p === "eDroites" && e.position === "hors" && v.split("\n").filter((l) => l.trim()).length === 1) return f("Il en manque une : pense à la parallèle à $(AB)$ ET à la droite qui passe par le milieu de $[AB]$.");
+      return null;
+    case "F":
+      if (p === "fSymetrique" && egalPoint(v, pt(2 * qNum(e.P.x) - qNum(e.H.x), 2 * qNum(e.P.y) - qNum(e.H.y)))) return f("C'est $H$ le milieu de $[PQ]$ : $Q=2H-P$, pas $2P-H$.");
+      if (p === "fPerpendiculaire" && egalDroite(v, droiteParDeuxPoints(e.A, e.B))) return f("C'est la droite $(AB)$ elle-même : on demande la perpendiculaire à $(AB)$ qui passe par $P$.");
+      return null;
+    case "H":
+      if (p === "hRayon" && egalDroite(v, e.d)) return f("C'est le miroir lui-même : le rayon réfléchi part de $M$ et s'éloigne de $d$.");
+      if (p === "hRayon" && egalDroite(v, e.rayonIncident)) return f("C'est la droite $(PM)$ du rayon incident : le rayon réfléchi est porté par $(P'M)$.");
+      if (p === "hSymetrique" && egalPoint(v, e.P)) return f("C'est $P$ lui-même : son symétrique est de l'autre côté de $d$.");
+      return null;
+    default:
+      return null;
+  }
+}
+
+// ============================================================================
+// Figure (configuration, puis points cherchés APRÈS la réponse)
+// ============================================================================
+
+export function figure6gen54(e: E, closes: readonly P[]): string {
+  const c = (ph: P) => closes.includes(ph);
+  const o: ObjetsLieux = { points: [], droites: [], segments: [], polygones: [] };
+  const pts = o.points!;
+  switch (e.famille) {
+    case "A": {
+      o.segments!.push({ a: p2(e.Ap), b: p2(e.Bp), couleur: "gris", pointilles: true }, { a: p2(e.Bp), b: p2(e.Cp), couleur: "gris", pointilles: true }, { a: p2(e.Cp), b: p2(e.Ap), couleur: "gris", pointilles: true });
+      pts.push({ p: p2(e.Ap), nom: "A'", couleur: "gris" }, { p: p2(e.Bp), nom: "B'", couleur: "gris" }, { p: p2(e.Cp), nom: "C'", couleur: "gris" });
+      if (c("aSommetA")) pts.push({ p: p2(e.A), nom: "A", couleur: "vert" });
+      if (c("aSommetsBC")) {
+        o.polygones!.push({ pts: [p2(e.A), p2(e.B), p2(e.C)], couleur: "vert" });
+        pts.push({ p: p2(e.B), nom: "B", couleur: "vert" }, { p: p2(e.C), nom: "C", couleur: "vert" });
+      }
+      o.inclure = [p2(e.A), p2(e.B), p2(e.C)];
+      break;
+    }
+    case "B":
+      o.polygones!.push({ pts: [p2(e.A), p2(e.B), p2(e.C)], couleur: "bleu" });
+      pts.push({ p: p2(e.A), nom: "A" }, { p: p2(e.B), nom: "B" }, { p: p2(e.C), nom: "C" });
+      if (c("bPointI")) {
+        o.segments!.push({ a: p2(e.B), b: p2(e.I), couleur: "vert", epais: true });
+        pts.push({ p: p2(e.I), nom: "I", couleur: "vert" });
+      }
+      break;
+    case "C":
+      o.droites!.push({ ...d3(e.d), nom: "d" });
+      o.segments!.push({ a: p2(e.A), b: p2(e.B), couleur: "bleu" });
+      pts.push({ p: p2(e.A), nom: "A" }, { p: p2(e.B), nom: "B" });
+      if (c("cPointsC")) {
+        e.C.forEach((pc, i) => {
+          o.polygones!.push({ pts: [p2(e.A), p2(e.B), p2(pc)], couleur: "vert", rempli: true, trait: false });
+          pts.push({ p: p2(pc), nom: i === 0 ? "C₁" : "C₂", couleur: "vert" });
+        });
+      }
+      o.inclure = e.C.map(p2);
+      break;
+    case "D":
+      o.droites!.push({ ...d3(e.medianeB), couleur: "gris", pointilles: true }, { ...d3(e.medianeC), couleur: "gris", pointilles: true });
+      pts.push({ p: p2(e.A), nom: "A" });
+      if (c("dPointB")) pts.push({ p: p2(e.B), nom: "B", couleur: "vert" });
+      if (c("dPointC")) pts.push({ p: p2(e.C), nom: "C", couleur: "vert" });
+      if (c("dCotes")) o.polygones!.push({ pts: [p2(e.A), p2(e.B), p2(e.C)], couleur: "vert" });
+      o.inclure = [p2(e.B), p2(e.C)];
+      break;
+    case "E":
+      o.segments!.push({ a: p2(e.A), b: p2(e.B), couleur: "bleu" });
+      pts.push({ p: p2(e.A), nom: "A" }, { p: p2(e.B), nom: "B" }, { p: p2(e.P), nom: "P", couleur: "accent" });
+      if (c("eDroites")) e.droites.forEach((d) => o.droites!.push({ ...d3(d), couleur: "vert", epais: true }));
+      break;
+    case "F":
+      o.droites!.push({ ...d3(e.droiteAB), couleur: "bleu", nom: "(AB)" });
+      pts.push({ p: p2(e.A), nom: "A" }, { p: p2(e.B), nom: "B" }, { p: p2(e.P), nom: "P", couleur: "accent" });
+      if (c("fPerpendiculaire")) o.droites!.push({ ...d3(e.perpendiculaire), couleur: "gris", pointilles: true });
+      if (c("fPied")) pts.push({ p: p2(e.H), nom: "H", couleur: "vert" });
+      if (c("fSymetrique")) pts.push({ p: p2(e.Q), nom: "Q", couleur: "vert" });
+      o.inclure = [p2(e.Q)];
+      break;
+    case "G":
+      if (e.sousType === "sommetDiagonale") {
+        o.droites!.push({ ...d3(e.droiteBD), couleur: "gris", pointilles: true, nom: "(BD)" });
+        pts.push({ p: p2(e.A), nom: "A" });
+        if (c("gPremier")) pts.push({ p: p2(e.O), nom: "O", couleur: "vert" });
+        if (c("gDeuxieme")) pts.push({ p: p2(e.C), nom: "C", couleur: "vert" });
+        if (c("gTroisieme")) {
+          o.polygones!.push({ pts: [p2(e.A), p2(e.B), p2(e.C), p2(e.D)], couleur: "vert", rempli: true });
+          pts.push({ p: p2(e.B), nom: "B", couleur: "vert" }, { p: p2(e.D), nom: "D", couleur: "vert" });
+        }
+      } else {
+        o.droites!.push({ ...d3(e.droiteAB), couleur: "gris", pointilles: true, nom: "(AB)" });
+        pts.push({ p: p2(e.P), nom: "P" });
+        if (c("gPremier")) pts.push({ p: p2(e.M), nom: "M", couleur: "vert" });
+        if (c("gDeuxieme")) pts.push({ p: p2(e.A), couleur: "vert" }, { p: p2(e.B), couleur: "vert" });
+        if (c("gTroisieme")) {
+          o.polygones!.push({ pts: [p2(e.A), p2(e.B), p2(e.C), p2(e.D)], couleur: "vert", rempli: true });
+          pts.push({ p: p2(e.C), couleur: "vert" }, { p: p2(e.D), couleur: "vert" });
+        }
+      }
+      o.inclure = [p2(e.A), p2(e.B), p2(e.C), p2(e.D)];
+      break;
+    case "H": {
+      o.droites!.push({ ...d3(e.d), couleur: "bleu", epais: true, nom: "d" });
+      o.segments!.push({ a: p2(e.P), b: p2(e.M), couleur: "accent" });
+      pts.push({ p: p2(e.P), nom: "P", couleur: "accent" }, { p: p2(e.M), nom: "M" });
+      if (c("hSymetrique")) {
+        pts.push({ p: p2(e.Pp), nom: "P'", couleur: "gris" });
+        o.segments!.push({ a: p2(e.Pp), b: p2(e.M), couleur: "gris", pointilles: true });
+      }
+      if (c("hRayon")) {
+        const u = { x: qNum(e.M.x) - qNum(e.Pp.x), y: qNum(e.M.y) - qNum(e.Pp.y) };
+        o.demiDroites = [{ o: p2(e.M), u, couleur: "vert", epais: true }];
+      }
+      o.inclure = [p2(e.Pp)];
+      break;
+    }
+  }
+  return figureLieux(o);
 }
 

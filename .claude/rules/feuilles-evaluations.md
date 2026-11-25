@@ -1144,6 +1144,30 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   libre), 6gen50 `B_loi` EN FIN ; tous les exercices tirés diffèrent d'avant (générateurs refaits).
   Profils provisoires : 6gen51 `exacte` pour A, B et C/D « ≤, ≥, centrée » (NormCD / InvNormCD), rien pour
   « depuis 0 » et E ; `calculatriceIndispensable` 6gen50 `C_trouverN`, 6gen52 A, 6gen53 B.
+- **6e ch. 9 (lots B et C, 6gen54–6gen57)** : les quatre générateurs passent sur le socle du ch. 7
+  (`AppCombinatoire` / `EcranCombinatoire` / `sessionCombinatoire`, choisi plutôt qu'`AppEcransTrigo` : il porte
+  déjà les attentes `{ verif }` propres au générateur, les listes à lignes — centres, sommets, droites comme des
+  ENSEMBLES —, `complement`, `?code=`, le corrigé consultable après chaque réponse). Ajouts facultatifs, ch. 7 et 8
+  inchangés : `complement(e, p, closes)` (écrans déjà jugés : le lieu n'est tracé qu'après la réponse),
+  `pucesMasquees` (nombre de puces fixe jusqu'à un écran donné, 6gen57), `recapSepare` (rappels « A(…) ; B(…) »),
+  `ChampCombi.apercuFn` (aperçu KaTeX propre au champ). Algèbre EXACTE commune `moteur6e/algebreLieux.ts` (rationnels
+  BigInt, polynômes en x, y, α, t, D, E, F, k ; lecture « − – — », « × · * », « ² », multiplication implicite, « α » ou
+  « alpha », √ dans les nombres ; « < > ≤ ≥ » refusés ; équations comparées par PROPORTIONNALITÉ exacte — fini le
+  miroir accepté comme rayon réfléchi ; nombre de facteurs pour exiger une forme factorisée), champs
+  `moteur6e/saisieLieux.ts` (nombre / point / ensemble de points / équation / ensemble d'équations / expression au
+  signe près ; illisible, inéquation, valeur arrondie quand l'exact est demandé, forme juste mais non factorisée :
+  refus SANS tentative), écritures `ui6e/textesLieux.ts` (ax + by + c = 0 simplifiée, verticale comprise ;
+  indications de FORMAT dans les champs, jamais une valeur possible), figure `ui6e/figureLieux.ts` (chaîne SVG
+  sans identifiant, repère orthonormé, graduations « − » jamais sous un point, étiquettes rentrées dans le cadre,
+  point exclu en creux ; configuration + « ? », lieu révélé après la réponse — à réutiliser pour le `figureHtml` du
+  lot E). 6gen54 RENOMMÉ « Constructions analytiques dans le triangle » (décision 1). Verdicts tirés AVANT les
+  paramètres : 6gen54 E (nombre de droites : 2 / 1 / une infinité), 6gen55 B (0 / 1 / 2 cercles), 6gen56 C (cercle /
+  point / vide), D (partie décrite), régimes B / E, 6gen57 (« parasite » juste en E_produitCroise). Codes : indices
+  gardés, ajouts EN FIN (6gen55 `G_exinscrit`, 6gen57 `E_produitCroise`) ; tous les exercices tirés diffèrent d'avant.
+  Groupes à verdict 6gen56 (PA² + PB², Apollonius, carré des distances, parallèles, carré). Adaptateurs PROVISOIRES
+  `generateurs6e/adaptateurLieux.ts` (mêmes textes que l'écran, données en prose — plus de question coupée —, une
+  question par écran, réponses au corrigé) en attendant le lot E ; aucun `calcul` (règle du 24/11 : établir une
+  équation, éliminer un paramètre, décider une nature).
 - **6e ch. 7 (lot E, papier de 6gen43–6gen48, notés, corrigé « comme au tableau »)** : adaptateur COMMUN
   `generateurs6e/adaptateurCombinatoire.ts::construireAdaptateurCombinatoire` (le générateur ne décrit que
   sa situation papier, ses questions, sa brève, son corrigé, son barème, ses critères et son profil ;

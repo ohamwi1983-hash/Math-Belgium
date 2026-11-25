@@ -88,6 +88,8 @@ export interface ChampCombi {
   nature?: NatureSaisie;
   /** Indication de format (jamais une valeur possible). */
   placeholder?: string;
+  /** Aperçu KaTeX propre au champ (6e ch. 9 : équations en x, y, α…), prioritaire sur `apercu`. */
+  apercuFn?: (valeur: string) => string | null;
 }
 
 /** Une aide : une phrase (formules courtes entre `$…$`), puis, facultativement, une formule. */
