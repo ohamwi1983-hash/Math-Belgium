@@ -561,6 +561,8 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'lieux-geometriques', sectionId: 'cercles', quizTheme: 'cercles', label: '' },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'lieux-elimination', quizTheme: 'lieuxGeometriquesParametres', label: '' },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'methode-generatrices', quizTheme: 'methodeGeneratrices', label: '' },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'methode-generale-demonstration', quizTheme: 'methodeDemonstrationLieuParametrique', label: '' },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'lieu-parametrique', quizTheme: 'methodeDemonstrationLieuParametrique', label: '' },
   { chapitreSlug: 'coniques', sectionId: 'identifier', quizTheme: 'identificationConiques', label: '' },
   { chapitreSlug: 'coniques', sectionId: 'excentricite', quizTheme: 'equationDepuisCaracteristiques', label: '' },
   { chapitreSlug: 'coniques', sectionId: 'airefocale', quizTheme: 'aireExcentriciteConique', label: '' },
