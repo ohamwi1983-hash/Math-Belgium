@@ -5755,3 +5755,15 @@ accents, caractères ignorés, 25 lettres (champ intact), mot vide ; 2ⁿ mots n
 distinctes dans le cadre, 0 chevauchement, colonnes = Cₙᵏ) ; 160 réglages (n, ε) comparés à `Math.pow`
 (valeur, approximation, erreur). Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667 (9 ateliers du
 chapitre). Scripts et captures : `scratchpad/g2-6e7/`.
+
+## 6e (6h), Chapitre 8 — lot H1 de l'audit (nouveaux générateurs 6gen110–6gen115, 25/11/2026)
+
+Six générateurs nouveaux sur le socle `AppEcransTrigo` (détail, profils et mesures : `.claude/rules/feuilles-evaluations.md`,
+section « 6e ch. 8, lot H1 ») : 6gen110 variance et écart-type (§ 1), 6gen111 Y = aX + b (§ 1), 6gen112 fonction de
+répartition (§ 3), 6gen113 densité de probabilité (§ 3), 6gen114 discrète ou continue ? (§ 4, Connaître), 6gen115 loi
+uniforme continue (§ 5). Cartes « S'entraîner » ajoutées en fin de section (6gen110 et 6gen111 après 6gen49) ; registres
+par ajout (`registry.ts`, `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts` : union et entrées
+pilotes avec processus, `regroupementsPapier.ts` : 6gen111, 6gen114). Aucun bloc de cours ajouté : le cours ne contient pas
+encore E(aX + b) = aE(X) + b et V(aX + b) = a²V(X) (6gen111, démonstration D2 du lot F), ni P(a < X ≤ b) = F(b) − F(a) pour
+une variable discrète (6gen112 escalier), ni « trouver k » (6gen113) ni le sens inverse de la loi uniforme (6gen115).
+
