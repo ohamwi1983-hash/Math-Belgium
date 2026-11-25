@@ -513,6 +513,9 @@ Maquette `signes.html` + planche 09 et démo validée `lecture-guidee.html` (ong
   et résumé relus), `banc.mjs` + `harness.tsx` (récapitulatifs des générateurs montés hors
   générateur, 3 tirages de chaque variante : 120 tableaux, ~3 050 cases cliquées, phrase = région
   live), `verif-ui.mjs` (6 tableaux du cours + 2 de générateurs, iPhone 13 et 1 280 px, clair et
-  sombre, cibles ≥ 44 px, pas de défilement horizontal, parcours clavier complet, événement voix),
-  `contrastes.py`.
+  sombre, cibles ≥ 44 px, pas de défilement horizontal, parcours clavier complet, une seule annonce par
+  clic, événement voix), `contrastes.py`, `comparer_prerendu.py` (pré-rendu des 9 chapitres : texte et
+  balisage des tableaux identiques à avant, aux attributs de grille près ; seul ajout visible : « Lire
+  case par case ») et `impression.mjs` (média print : hauteurs et écarts des tableaux identiques, rien
+  du panneau ni du bouton).
 
