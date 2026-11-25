@@ -493,4 +493,120 @@ export const FORMULES_5E: BanqueFormules = {
       },
     ],
   },
+
+  // ── Ch. 6 — Statistique à deux variables ───────────────────────────────────────────────────────
+  'statistique-deux-variables': {
+    'nuage-point-moyen': [
+      {
+        id: r`$G(\bar{x}\,;\bar{y})$`,
+        enonce: r`Donne les coordonnées du point moyen $G$ d'un nuage de $n$ points $(x_i\,;y_i)$.`,
+        corrige: r`$G(\bar{x}\,;\bar{y})$, avec $\bar{x} = \dfrac{1}{n}\sum x_i$ et $\bar{y} = \dfrac{1}{n}\sum y_i$ (des moyennes, jamais des médianes).`,
+      },
+      {
+        id: r`$\sum x_i = n\,\bar{x}$`,
+        enonce: r`On connaît le point moyen $G(\bar{x}\,;\bar{y})$ d'une série de $n$ couples dont une abscisse est effacée. Quelle relation permet de la retrouver ?`,
+        corrige: r`$\sum x_i = n\,\bar{x}$ : la valeur manquante vaut $n\,\bar{x}$ moins la somme des abscisses connues (de même pour les ordonnées).`,
+      },
+    ],
+    ajustement: [
+      {
+        id: r`interpolation : $x$ dans l'intervalle des données ; extrapolation : en dehors`,
+        enonce: r`Quand parle-t-on d'interpolation, et quand d'extrapolation ? Laquelle demande de la prudence ?`,
+        corrige: r`Interpolation : on estime pour une valeur de $x$ dans l'intervalle des données ; extrapolation : en dehors. L'extrapolation demande de la prudence, d'autant plus qu'on s'éloigne des données.`,
+      },
+      {
+        id: r`nuage aligné : affine ; en arc : second degré ; qui décolle : exponentielle`,
+        enonce: r`Quel type d'ajustement envisage-t-on pour un nuage à peu près aligné ? En arc ? Qui « décolle » de plus en plus vite ?`,
+        corrige: r`Aligné : ajustement affine (une droite $y = ax + b$) ; en arc : fonction du second degré ; qui décolle : fonction exponentielle.`,
+      },
+    ],
+    mayer: [
+      {
+        id: r`droite de Mayer : $(G_1G_2)$`,
+        enonce: r`Décris la méthode de Mayer pour obtenir une droite d'ajustement.`,
+        corrige: r`Trier les données selon les $x_i$, les partager en deux groupes d'effectifs égaux (à une unité près), calculer les points moyens $G_1$ et $G_2$ des groupes : la droite de Mayer est $(G_1G_2)$.`,
+      },
+      {
+        id: r`$a = \dfrac{\bar{y}_2 - \bar{y}_1}{\bar{x}_2 - \bar{x}_1}$`,
+        enonce: r`Donne la pente de la droite de Mayer à partir de $G_1(\bar{x}_1\,;\bar{y}_1)$ et $G_2(\bar{x}_2\,;\bar{y}_2)$. Comment obtient-on ensuite $b$ ?`,
+        corrige: r`$a = \dfrac{\bar{y}_2 - \bar{y}_1}{\bar{x}_2 - \bar{x}_1}$ ; puis $\bar{y}_1 = a\bar{x}_1 + b$ donne $b$ (avec la pente non arrondie).`,
+      },
+      {
+        id: r`la droite de Mayer passe par $G$`,
+        enonce: r`Par quel point remarquable passe toujours la droite de Mayer ? Est-ce le milieu de $[G_1G_2]$ ?`,
+        corrige: r`Par le point moyen $G(\bar{x}\,;\bar{y})$ du nuage ; c'est le milieu de $[G_1G_2]$ seulement si les deux groupes ont le même effectif.`,
+      },
+    ],
+    'moindres-carres': [
+      {
+        id: r`$S = \sum \big(y_i - (ax_i + b)\big)^2$ minimale`,
+        enonce: r`Quelle quantité la droite des moindres carrés rend-elle minimale ?`,
+        corrige: r`La somme des carrés des écarts verticaux $S = \sum \big(y_i - (ax_i + b)\big)^2$.`,
+      },
+      {
+        id: r`$a = \dfrac{\sum (x_i-\bar{x})(y_i-\bar{y})}{\sum (x_i-\bar{x})^2}$`,
+        enonce: r`Donne la formule de la pente $a$ de la droite des moindres carrés (coefficient de régression).`,
+        corrige: r`$a = \dfrac{\sum (x_i-\bar{x})(y_i-\bar{y})}{\sum (x_i-\bar{x})^2}$.`,
+      },
+      {
+        id: r`$y - \bar{y} = a(x - \bar{x})$, $b = \bar{y} - a\bar{x}$`,
+        enonce: r`Donne l'équation de la droite des moindres carrés à l'aide de sa pente $a$ et du point moyen. Que vaut $b$ ?`,
+        corrige: r`$y - \bar{y} = a(x - \bar{x})$ : elle passe par $G$, donc $b = \bar{y} - a\bar{x}$.`,
+      },
+      {
+        id: r`$\sigma_x$ divise par $n$, $S_x$ par $n - 1$`,
+        enonce: r`La calculatrice affiche $S_x$ et $\sigma_x$. Lequel utilise-t-on dans ce cours, et pourquoi ?`,
+        corrige: r`$\sigma_x$, qui divise par $n$ (comme en 4e) ; $S_x$ divise par $n - 1$.`,
+      },
+    ],
+    correlation: [
+      {
+        id: r`$V(x) = \dfrac{1}{n}\sum (x_i-\bar{x})^2 = \dfrac{1}{n}\sum x_i^2 - \bar{x}^2$`,
+        enonce: r`Donne les deux formules de la variance $V(x)$ et le lien avec l'écart-type $\sigma_x$.`,
+        corrige: r`$V(x) = \dfrac{1}{n}\sum (x_i-\bar{x})^2 = \dfrac{1}{n}\sum x_i^2 - \bar{x}^2$ et $\sigma_x = \sqrt{V(x)}$.`,
+      },
+      {
+        id: r`$\operatorname{Cov}(x,y) = \dfrac{1}{n}\sum x_iy_i - \bar{x}\,\bar{y}$`,
+        enonce: r`Donne les deux formules de la covariance $\operatorname{Cov}(x,y)$. Que dit son signe ?`,
+        corrige: r`$\operatorname{Cov}(x,y) = \dfrac{1}{n}\sum (x_i-\bar{x})(y_i-\bar{y}) = \dfrac{1}{n}\sum x_iy_i - \bar{x}\,\bar{y}$ ; positive : $x$ et $y$ varient dans le même sens ; négative : en sens contraire.`,
+      },
+      {
+        id: r`$r = \dfrac{\operatorname{Cov}(x,y)}{\sigma_x\,\sigma_y}$`,
+        enonce: r`Donne la formule du coefficient de corrélation linéaire $r$. Entre quelles valeurs est-il compris ? Quand vaut-il $\pm 1$ ?`,
+        corrige: r`$r = \dfrac{\operatorname{Cov}(x,y)}{\sigma_x\,\sigma_y}$, compris entre $-1$ et $1$ ; $r = \pm 1$ exactement quand les points sont alignés.`,
+      },
+      {
+        id: r`$a = \dfrac{\operatorname{Cov}(x,y)}{V(x)}$`,
+        enonce: r`Exprime la pente $a$ de la droite des moindres carrés à l'aide de la covariance. Qu'en déduit-on pour le signe de $a$, de $\operatorname{Cov}(x,y)$ et de $r$ ?`,
+        corrige: r`$a = \dfrac{\operatorname{Cov}(x,y)}{V(x)}$ : $a$, la covariance et $r$ ont toujours le même signe.`,
+      },
+      {
+        id: r`$|r| = \sqrt{R^2}$`,
+        enonce: r`Un tableur affiche le coefficient de détermination $R^2$ d'un ajustement affine. Comment retrouve-t-on $r$ ?`,
+        corrige: r`$|r| = \sqrt{R^2}$ ; le signe de $r$ est celui de la pente (nuage qui monte ou qui descend).`,
+      },
+      {
+        id: r`seuils : $0{,}35$ ; $0{,}60$ ; $0{,}80$ ; $0{,}98$`,
+        enonce: r`Donne le tableau d'interprétation de $|r|$ : corrélation nulle, faible, moyenne, forte, très forte, parfaite.`,
+        corrige: r`Nulle : $|r| < 0{,}35$ ; faible : $0{,}35 \le |r| < 0{,}60$ ; moyenne : $0{,}60 \le |r| < 0{,}80$ ; forte : $0{,}80 \le |r| < 0{,}98$ ; très forte : $0{,}98 \le |r| < 1$ ; parfaite : $|r| = 1$.`,
+      },
+      {
+        id: r`$x' = kx + c$ ($k > 0$) : $r$ inchangé`,
+        enonce: r`On change d'unité ou d'origine : $x'_i = kx_i + c$ avec $k > 0$. Que deviennent le coefficient de corrélation et la pente de la droite ?`,
+        corrige: r`$r$ ne change pas ; la pente, elle, change (elle est divisée par $k$). Si $k < 0$, $r$ change de signe.`,
+      },
+    ],
+    interpreter: [
+      {
+        id: r`prévision fiable : $|r|$ proche de $1$, interpolation, même contexte`,
+        enonce: r`À quelles trois conditions une prévision faite avec une droite d'ajustement est-elle raisonnable ?`,
+        corrige: r`$|r|$ proche de $1$ (nuage à peu près aligné) ; interpolation plutôt qu'extrapolation ; un contexte qui reste celui des données.`,
+      },
+      {
+        id: r`corrélation ≠ causalité : cause commune, coïncidence, causalité inverse, effet décalé`,
+        enonce: r`Une forte corrélation ne prouve pas une causalité. Cite les quatre explications possibles d'une corrélation sans causalité directe.`,
+        corrige: r`Une cause commune (troisième variable), une coïncidence, une causalité dans l'autre sens, ou un effet décalé dans le temps.`,
+      },
+    ],
+  },
 }
