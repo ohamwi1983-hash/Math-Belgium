@@ -1,9 +1,9 @@
 /**
- * Contrat — "Variables aléatoires et lois de probabilités" (quiz vrai/faux), 6gen71, ajout
- * ultérieur au chapitre 10 du chantier 6e (6h) déjà complet (6gen49-53). Même principe que 6gen64
+ * Contrat — "Variables aléatoires et lois de probabilités" (quiz vrai/faux), 6gen71, chapitre 8
+ * du chantier 6e (6h) (6gen49-53). Même principe que 6gen64
  * (chapitre 1), 6gen65 (chapitre 2), 6gen66 (chapitre 3), 6gen67 (chapitre 4), 6gen68 (chapitre 7),
- * 6gen69 (chapitre 8) et 6gen70 (chapitre 9) — banque de 175 affirmations vrai/faux PRÉ-ÉCRITES
- * (jamais générées procéduralement), 5 thèmes de 35 questions chacun — mais contrat entièrement
+ * 6gen69 (chapitre 8) et 6gen70 (chapitre 9) — banque de 210 affirmations vrai/faux PRÉ-ÉCRITES
+ * (jamais générées procéduralement), 6 thèmes de 35 questions chacun — mais contrat entièrement
  * indépendant, jamais partagé entre chantiers ni avec 6gen64/65/66/67/68/69/70 (voir CLAUDE.md, "3
  * chantiers indépendants").
  *
@@ -26,7 +26,8 @@ export type VarianteQuizVariablesAleatoires =
   | "loiBinomiale"
   | "loiNormale"
   | "extensionsBinomialeNormaleBayes"
-  | "loiPoisson";
+  | "loiPoisson"
+  | "densiteUniformeContinue";
 
 /** Une affirmation pré-écrite, sa réponse correcte et sa justification pédagogique — jamais
  * générée à partir de valeurs numériques tirées (même contrat que 6gen64-70), mais énoncé/

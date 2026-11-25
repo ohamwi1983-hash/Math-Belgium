@@ -541,6 +541,7 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'variables-aleatoires', sectionId: 'loinormale', quizTheme: 'loiNormale', label: '', quizChapitre: 8 },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'extensionsbayes', quizTheme: 'extensionsBinomialeNormaleBayes', label: '', quizChapitre: 8 },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'loipoisson', quizTheme: 'loiPoisson', label: '', quizChapitre: 8 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'variablecontinue', quizTheme: 'densiteUniformeContinue', label: '', quizChapitre: 8 },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'points-droites-remarquables', quizTheme: 'pointsDroitesRemarquablesTriangle', label: '' },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'cercles', quizTheme: 'cercles', label: '' },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'lieux-elimination', quizTheme: 'lieuxGeometriquesParametres', label: '' },

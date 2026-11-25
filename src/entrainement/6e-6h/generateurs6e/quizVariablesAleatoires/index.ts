@@ -1,6 +1,6 @@
 /**
- * Couche A — "Variables aléatoires et lois de probabilités" (quiz vrai/faux), 6gen71, ajout
- * ultérieur au chapitre 10. Tire une question dans la banque pré-écrite (`banque.ts`) du thème
+ * Couche A — "Variables aléatoires et lois de probabilités" (quiz vrai/faux), 6gen71, chapitre 8
+ * de 6e (6h). Tire une question dans la banque pré-écrite (`banque.ts`) du thème
  * (variante) actif — jamais de génération procédurale, voir `core6e/quizVariablesAleatoires.types.ts`.
  * Structure identique à 6gen70 (`quizCombinatoire`) et 6gen69/68/67/66/65.
  */
@@ -19,7 +19,19 @@ export const CATALOGUE_VARIANTES: { id: VarianteQuizVariablesAleatoires; label: 
   { id: "loiNormale", label: "Loi normale" },
   { id: "extensionsBinomialeNormaleBayes", label: "Extensions binomiale, normale et Bayes" },
   { id: "loiPoisson", label: "Loi de Poisson" },
+  { id: "densiteUniformeContinue", label: "Densité, discrète ou continue, loi uniforme continue" },
 ];
+
+/** Taille RÉELLE de la banque d'un thème (jamais une constante : `.claude/rules/quiz-generators.md`). */
+export function nombreQuestions(varianteId: VarianteQuizVariablesAleatoires): number {
+  return BANQUE_QUIZ_VARIABLES_ALEATOIRES[varianteId].length;
+}
+
+/** Bornes min/max des tailles de thèmes, pour un texte d'accueil toujours exact. */
+export function etendueNombreQuestions(): { min: number; max: number } {
+  const tailles = CATALOGUE_VARIANTES.map((v) => nombreQuestions(v.id));
+  return { min: Math.min(...tailles), max: Math.max(...tailles) };
+}
 
 function tirerQuestion(varianteId: VarianteQuizVariablesAleatoires): QuestionVraiFaux {
   const banque = BANQUE_QUIZ_VARIABLES_ALEATOIRES[varianteId];
@@ -52,9 +64,9 @@ function melanger<T>(items: readonly T[]): T[] {
 
 /**
  * Générateur SANS RÉPÉTITION pour un thème donné — chaque session étudiant porte sur un thème
- * unique et compte autant d'exercices que de questions dans la banque de ce thème (35) : sans
+ * unique et compte autant d'exercices que de questions dans la banque de ce thème (`nombreQuestions`) : sans
  * cette précaution, le tirage indépendant habituel (`genererExerciceQuizVariablesAleatoires`)
- * pourrait répéter une question avant d'avoir couvert les 34 autres. État interne (file mélangée,
+ * pourrait répéter une question avant d'avoir couvert les autres. État interne (file mélangée,
  * ré-mélangée à chaque épuisement) enfermé dans la fermeture, jamais partagé entre deux appels de
  * cette fonction — voir `App6gen71.tsx`, qui en crée une par session démarrée.
  */
