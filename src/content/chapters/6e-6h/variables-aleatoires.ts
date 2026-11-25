@@ -105,6 +105,15 @@ export const variablesAleatoires: ChapterContent = {
           text: "La hauteur de chaque saut de $F$ en $x=x_i$ vaut exactement $P(X=x_i)$. Exemple : le saut en $x=4$ fait $0{,}70-0{,}40=0{,}30$ — c'est $P(X=4)$. Lire un escalier, c'est donc lire toute la loi de probabilité d'un coup !",
         },
         {
+          kind: 'methode',
+          label: 'Calculer une probabilité avec F',
+          items: [
+            '$P(X\\leq a)=F(a)$ et $P(X>a)=1-F(a)$.',
+            '$P(a<X\\leq b)=F(b)-F(a)$ : on retire tout ce qui est inférieur ou égal à $a$. Avec la loi ci-dessus, $P(2<X\\leq5)=F(5)-F(2)$ $=0{,}90-0{,}15$ $=0{,}75$ (valeurs 3, 4 et 5).',
+            "En discret, **strict ou large compte** : $P(X<4)=F(3)=0{,}40$, alors que $P(X\\leq4)=F(4)=0{,}70$.",
+          ],
+        },
+        {
           kind: 'definition',
           label: 'Espérance E(X)',
           items: [
@@ -160,7 +169,11 @@ export const variablesAleatoires: ChapterContent = {
           blocks: [
             {
               kind: 'para',
-              text: "$X$ prend les valeurs $2$, $3$, $4$, $5$, $6$ avec les probabilités $0{,}15$ ; $0{,}25$ ; $0{,}30$ ; $0{,}20$ ; $0{,}10$. D'abord, un réflexe : $0{,}15+0{,}25+0{,}30+0{,}20+0{,}10=1$ — la loi est bien valide.",
+              text: "**Énoncé.** Une variable aléatoire $X$ prend les valeurs $2$, $3$, $4$, $5$, $6$ avec les probabilités $0{,}15$ ; $0{,}25$ ; $0{,}30$ ; $0{,}20$ ; $0{,}10$. Vérifie que cette loi est valide, puis calcule $E(X)$, $V(X)$ et $\\sigma(X)$.",
+            },
+            {
+              kind: 'para',
+              text: "D'abord, un réflexe : $0{,}15+0{,}25+0{,}30+0{,}20+0{,}10=1$ — la loi est bien valide.",
             },
             {
               kind: 'featureTable',
@@ -217,6 +230,32 @@ export const variablesAleatoires: ChapterContent = {
           label: 'Oublier de pondérer par la probabilité',
           text: "Calculer une moyenne simple des 5 écarts au carré, $(3{,}4225+0{,}7225+0{,}0225$ $+\\,1{,}3225+4{,}6225)\\div5$ $=2{,}0225$, oublie que les probabilités ne sont pas égales — exactement le même piège que pour l'espérance ! La variance pondère chaque écart au carré par $P(X=x_i)$ : ça donne $1{,}4275$, jamais une moyenne arithmétique simple.",
         },
+        {
+          kind: 'piege',
+          text: "Deux confusions fréquentes : $\\sigma(X)=V(X)^2$ (c'est la **racine** : $\\sigma(X)=\\sqrt{V(X)}$) et $E(X^2)=[E(X)]^2$. Dans l'exemple, $E(X^2)=16{,}25$ alors que $[E(X)]^2=14{,}8225$ : leur différence est justement la variance, qui n'est jamais négative.",
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — formule de König : V(X) = E(X²) − [E(X)]²',
+          blocks: [
+            {
+              kind: 'para',
+              text: "Note $\\mu=E(X)$ et $p_i=P(X=x_i)$. Par définition, $V(X)=\\sum_i p_i\\,(x_i-\\mu)^2$ — **définition de la variance**.",
+            },
+            {
+              kind: 'para',
+              text: '$(x_i-\\mu)^2=x_i^2-2\\mu x_i+\\mu^2$, donc $V(X)=\\sum_i p_i x_i^2-2\\mu\\sum_i p_i x_i+\\mu^2\\sum_i p_i$ — **carré d\'une différence, puis on distribue la somme** ($\\mu$ ne dépend pas de $i$).',
+            },
+            {
+              kind: 'para',
+              text: '$\\sum_i p_i x_i^2=E(X^2)$, $\\sum_i p_i x_i=\\mu$ et $\\sum_i p_i=1$ — **définitions de l\'espérance, et somme des probabilités égale à 1**.',
+            },
+            {
+              kind: 'para',
+              text: "Donc $V(X)=E(X^2)-2\\mu^2+\\mu^2$ $=E(X^2)-\\mu^2$ $=E(X^2)-[E(X)]^2$.",
+            },
+          ],
+        },
         { kind: 'subheading', text: 'Le piège des événements « au moins » / « au plus »' },
         {
           kind: 'para',
@@ -261,8 +300,12 @@ export const variablesAleatoires: ChapterContent = {
         { kind: 'subheading', text: 'Jeux et gains — jeu favorable, défavorable ou équitable' },
         {
           kind: 'exempleLibre',
-          label: 'Vérifier un jeu — gain net −2 € (0,4) / +3 € (0,35) / +5 € (0,25)',
+          label: 'Exemple résolu — ce jeu est-il favorable ?',
           blocks: [
+            {
+              kind: 'para',
+              text: "**Énoncé.** À un jeu, le gain net du joueur vaut $-2$ € avec la probabilité $0{,}4$, $3$ € avec la probabilité $0{,}35$ et $5$ € avec la probabilité $0{,}25$. Ce jeu est-il favorable, équitable ou défavorable au joueur ?",
+            },
             { kind: 'para', text: '$E = -2\\times0{,}4 + 3\\times0{,}35 + 5\\times0{,}25$ $= -0{,}8+1{,}05+1{,}25$ $= 1{,}5$ €' },
             {
               kind: 'para',
@@ -272,11 +315,15 @@ export const variablesAleatoires: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Imposer une mise — trouver m pour rendre le jeu équitable',
+          label: 'Exemple résolu — trouver la mise m qui rend le jeu équitable',
           blocks: [
             {
               kind: 'para',
-              text: "Gain brut 10 € (0,2) / 4 € (0,3) / −6 € (0,5) : $E(\\text{gain brut})=10\\times0{,}2+4\\times0{,}3$ $+\\,(-6)\\times0{,}5$ $=2+1{,}2-3=0{,}2$ €. Le gain net vaut désormais $\\text{gain brut}-m$. Comme $\\sum p_i=1$, l'espérance du gain net est simplement $E(\\text{gain brut})-m$ — linéaire en $m$. Pour un jeu équitable ($E=0$) :",
+              text: "**Énoncé.** Un jeu offre un gain brut de $10$ € (probabilité $0{,}2$), de $4$ € (probabilité $0{,}3$) ou de $-6$ € (probabilité $0{,}5$). L'organisateur demande une mise $m$, retirée du gain brut. Quelle mise rend le jeu équitable ?",
+            },
+            {
+              kind: 'para',
+              text: "$E(\\text{gain brut})=10\\times0{,}2+4\\times0{,}3$ $+\\,(-6)\\times0{,}5$ $=2+1{,}2-3=0{,}2$ €. Le gain net vaut désormais $\\text{gain brut}-m$. Comme $\\sum p_i=1$, l'espérance du gain net est simplement $E(\\text{gain brut})-m$ — linéaire en $m$. Pour un jeu équitable ($E=0$) :",
             },
             { kind: 'para', text: '$m = E(\\text{gain brut}) = 0{,}20$ €' },
           ],
@@ -299,8 +346,12 @@ export const variablesAleatoires: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — N = 10, K = 4, n = 3',
+          label: 'Exemple résolu — loi et espérance d\'un tirage sans remise (10 boules, dont 4 rouges)',
           blocks: [
+            {
+              kind: 'para',
+              text: "**Énoncé.** Une urne contient 10 boules, dont 4 rouges. On tire 3 boules sans remise, et $X$ compte les boules rouges obtenues ($N=10$, $K=4$, $n=3$). Détermine la loi de $X$, puis $E(X)$.",
+            },
             { kind: 'para', text: '$P(X=k) = \\dfrac{C_4^k\\times C_6^{3-k}}{C_{10}^3}$' },
             {
               kind: 'para',
@@ -330,8 +381,12 @@ export const variablesAleatoires: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — dé équilibré à 6 faces',
+          label: 'Exemple résolu — espérance et variance du résultat d\'un dé équilibré',
           blocks: [
+            {
+              kind: 'para',
+              text: "**Énoncé.** On lance un dé équilibré à 6 faces ; $X$ est le résultat obtenu. Calcule $E(X)$ et $V(X)$.",
+            },
             {
               kind: 'para',
               text: "Les valeurs sont 1, 2, …, 6, chacune de probabilité $\\dfrac{1}{6}$ : $E(X)=\\dfrac{6+1}{2}=3{,}5$ — une valeur qu'aucune face ne porte, exactement comme dans l'exemple précédent où $E(X)=3{,}85$ ne tombait sur aucune valeur de $X$. $V(X)=\\dfrac{6^2-1}{12}=\\dfrac{35}{12}\\approx2{,}917$.",
@@ -342,6 +397,81 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'attention',
           label: 'Ces 2 formules ne valent que pour les valeurs 1, 2, …, n',
           text: "Les raccourcis $E(X)=\\dfrac{n+1}{2}$ et $V(X)=\\dfrac{n^2-1}{12}$ supposent des probabilités toutes égales à $\\dfrac{1}{n}$ **et** des valeurs $1, 2, \\ldots, n$. Sur les valeurs $2$, $4$, $6$ (équiprobables), $E(X)=4$, alors que la formule donnerait $2$. Pour une loi non uniforme (comme l'exemple hypergéométrique ci-dessus, où $P(X=1)=\\dfrac{1}{2}$ diffère nettement des autres probabilités), reviens toujours à la formule générale pondérée !",
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — espérance et variance de la loi uniforme sur 1, 2, …, n',
+          blocks: [
+            {
+              kind: 'para',
+              text: "On utilise deux sommes : $1+2+\\ldots+n=\\dfrac{n(n+1)}{2}$ (suite arithmétique) et $1^2+2^2+\\ldots+n^2=\\dfrac{n(n+1)(2n+1)}{6}$ (admise ici, elle se démontre par récurrence).",
+            },
+            {
+              kind: 'para',
+              text: '$E(X)=\\displaystyle\\sum_{k=1}^{n}k\\times\\dfrac{1}{n}$ $=\\dfrac{1}{n}\\times\\dfrac{n(n+1)}{2}$ $=\\dfrac{n+1}{2}$ — **chaque valeur a la probabilité** $\\frac{1}{n}$.',
+            },
+            {
+              kind: 'para',
+              text: '$E(X^2)=\\dfrac{1}{n}\\displaystyle\\sum_{k=1}^{n}k^2=\\dfrac{(n+1)(2n+1)}{6}$ — **même calcul avec les carrés**.',
+            },
+            {
+              kind: 'para',
+              text: '$V(X)=E(X^2)-[E(X)]^2$ $=\\dfrac{(n+1)(2n+1)}{6}-\\dfrac{(n+1)^2}{4}$ $=\\dfrac{(n+1)\\,[2(2n+1)-3(n+1)]}{12}$ $=\\dfrac{(n+1)(n-1)}{12}$ $=\\dfrac{n^2-1}{12}$ — **formule de König, puis mise au même dénominateur**.',
+            },
+          ],
+        },
+        { kind: 'subheading', text: 'Transformer une variable : Y = aX + b' },
+        {
+          kind: 'intuition',
+          label: 'Changer d\'unité ne change pas la loi',
+          text: "Convertir des points en euros, retirer une mise, passer des degrés Celsius aux degrés Fahrenheit : à chaque fois, on applique la même transformation $y=ax+b$ à **toutes** les valeurs de $X$, sans toucher aux probabilités. Inutile de reconstruire la loi de $Y$ : son espérance et sa variance se déduisent directement de celles de $X$.",
+        },
+        {
+          kind: 'definition',
+          label: 'Espérance, variance et écart-type de aX + b',
+          items: [
+            'Pour tous réels $a$ et $b$ : $E(aX+b)=a\\,E(X)+b$.',
+            '$V(aX+b)=a^2\\,V(X)$ et $\\sigma(aX+b)=|a|\\,\\sigma(X)$ : ajouter une constante $b$ décale toutes les valeurs sans changer leur dispersion ; multiplier par $a$ multiplie les écarts par $|a|$.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — E(aX + b) = aE(X) + b et V(aX + b) = a²V(X)',
+          blocks: [
+            {
+              kind: 'para',
+              text: "$Y=aX+b$ prend la valeur $ax_i+b$ avec la probabilité $p_i=P(X=x_i)$ — **la transformation ne change pas les probabilités**.",
+            },
+            {
+              kind: 'para',
+              text: '$E(Y)=\\sum_i p_i\\,(ax_i+b)$ $=a\\sum_i p_i x_i+b\\sum_i p_i$ $=a\\,E(X)+b$ — **on distribue la somme, et** $\\sum p_i=1$.',
+            },
+            {
+              kind: 'para',
+              text: "Chaque écart à la moyenne devient $(ax_i+b)-(a\\,E(X)+b)=a\\,[x_i-E(X)]$ : la constante $b$ disparaît — **résultat précédent**.",
+            },
+            {
+              kind: 'para',
+              text: '$V(Y)=\\sum_i p_i\\,a^2[x_i-E(X)]^2=a^2\\,V(X)$, et $\\sigma(Y)=\\sqrt{a^2V(X)}=|a|\\,\\sigma(X)$ — **définition de la variance, et** $\\sqrt{a^2}=|a|$.',
+            },
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'des points aux euros, sans reconstruire la loi',
+          formula:
+            "À un jeu, le nombre de points $X$ gagnés a pour espérance $E(X)=3$ et pour écart-type $\\sigma(X)=2$. Chaque point rapporte $0{,}50$ €, et la partie coûte $1$ €. Calcule l'espérance, la variance et l'écart-type du gain net $Y$, en euros.",
+          steps: [
+            { tag: 'modèle', text: '$Y=0{,}5X-1$ ($a=0{,}5$, $b=-1$)' },
+            { tag: 'espérance', text: '$E(Y)=0{,}5\\times3-1=0{,}5$ €' },
+            { tag: 'variance', text: '$V(Y)=0{,}5^2\\times V(X)$ $=0{,}25\\times2^2$ $=1$' },
+            { tag: 'écart-type', text: '$\\sigma(Y)=|0{,}5|\\times2=1$ €' },
+          ],
+          result: { tag: 'conclusion', text: '$E(Y)=0{,}50$ €, $V(Y)=1$, $\\sigma(Y)=1$ €.' },
+        },
+        {
+          kind: 'piege',
+          text: "La constante $b$ **ne s'ajoute pas** à la variance : $V(aX+b)=a^2V(X)$, jamais $aV(X)+b$. Et un écart-type n'est jamais négatif : $\\sigma(-2X)=2\\,\\sigma(X)$, pas $-2\\,\\sigma(X)$.",
         },
         {
           kind: 'application',
@@ -475,8 +605,16 @@ export const variablesAleatoires: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — n = 5, p = 0,4 (loi complète)',
+          label: 'Exemple résolu — loi complète, espérance et écart-type de 5 tirs (p = 0,4)',
           blocks: [
+            {
+              kind: 'para',
+              text: "**Énoncé.** Une joueuse réussit un tir avec la probabilité $0{,}4$ ; elle tire 5 fois, ses tirs étant indépendants, et $X$ compte ses tirs réussis. Établis la loi de probabilité complète de $X$, puis calcule $E(X)$, $V(X)$ et $\\sigma(X)$.",
+            },
+            {
+              kind: 'para',
+              text: "$X$ suit la loi $\\mathcal{B}(5\\,;0{,}4)$ (5 épreuves indépendantes, 2 issues, $p=0{,}4$ constant). La formule donne chaque $P(X=k)$ ; la dernière colonne cumule :",
+            },
             {
               kind: 'featureTable',
               headers: ['k', 'C₅ᵏ', 'P(X = k)', 'P(X ≤ k)'],
@@ -513,7 +651,65 @@ export const variablesAleatoires: ChapterContent = {
               kind: 'para',
               text: "Détail du calcul pour $k=2$ : $P(X=2)=C_5^2\\times0{,}4^2\\times0{,}6^3$ $=10\\times0{,}16\\times0{,}216=0{,}3456$. Oublie $C_5^2=10$ et tu obtiens $0{,}4^2\\times0{,}6^3=0{,}03456$ — dix fois trop petit !",
             },
-            { kind: 'para', text: '$V(X) = 5\\times0{,}4\\times0{,}6 = 1{,}2$ et $\\sigma(X) = \\sqrt{1{,}2} \\approx 1{,}095$' },
+            { kind: 'para', text: '$E(X)=5\\times0{,}4=2$ ; $V(X) = 5\\times0{,}4\\times0{,}6 = 1{,}2$ et $\\sigma(X) = \\sqrt{1{,}2} \\approx 1{,}095$' },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la somme des probabilités binomiales vaut 1',
+          blocks: [
+            {
+              kind: 'para',
+              text: '$\\displaystyle\\sum_{k=0}^{n}P(X=k)=\\sum_{k=0}^{n}C_n^k\\,p^k(1-p)^{n-k}$ — **formule de la loi binomiale**.',
+            },
+            {
+              kind: 'para',
+              text: "C'est le développement de $(a+b)^n=\\displaystyle\\sum_{k=0}^{n}C_n^k\\,a^{n-k}b^k$ avec $a=1-p$ et $b=p$ — **binôme de Newton (chapitre 7)**.",
+            },
+            {
+              kind: 'para',
+              text: 'La somme vaut donc $\\big((1-p)+p\\big)^n=1^n=1$, pour toute valeur de $p$ : la loi binomiale est bien une loi de probabilité.',
+            },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — E(X) = 3p et V(X) = 3p(1 − p) pour 3 épreuves',
+          blocks: [
+            {
+              kind: 'para',
+              text: "Note $q=1-p$. Pour $X\\sim\\mathcal{B}(3\\,;p)$ : $P(X=0)=q^3$, $P(X=1)=3pq^2$, $P(X=2)=3p^2q$, $P(X=3)=p^3$ — **formule binomiale**, $C_3^1=C_3^2=3$.",
+            },
+            {
+              kind: 'para',
+              text: '$E(X)=0\\times q^3+1\\times3pq^2$ $+\\,2\\times3p^2q+3\\times p^3$ $=3p\\,(q^2+2pq+p^2)=3p\\,(q+p)^2=3p$ — **mise en évidence de** $3p$**, puis carré parfait avec** $p+q=1$.',
+            },
+            {
+              kind: 'para',
+              text: '$E(X^2)=1\\times3pq^2+4\\times3p^2q+9\\times p^3$ $=3p\\,(q^2+4pq+3p^2)$ $=3p\\,(q+p)(q+3p)$ $=3p\\,(1+2p)$ — **factorisation**, puisque $q+3p=1+2p$.',
+            },
+            {
+              kind: 'para',
+              text: '$V(X)=E(X^2)-[E(X)]^2$ $=3p+6p^2-9p^2$ $=3p-3p^2$ $=3p\\,(1-p)$ — **formule de König**.',
+            },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — E(X) = np pour toute loi binomiale',
+          blocks: [
+            {
+              kind: 'para',
+              text: "Pour $1\\leq k\\leq n$ : $k\\,C_n^k=k\\times\\dfrac{n!}{k!\\,(n-k)!}$ $=n\\times\\dfrac{(n-1)!}{(k-1)!\\,(n-k)!}$ $=n\\,C_{n-1}^{k-1}$ — **définition de** $C_n^k$ **(chapitre 7)**.",
+            },
+            {
+              kind: 'para',
+              text: '$E(X)=\\displaystyle\\sum_{k=1}^{n}k\\,C_n^k\\,p^k q^{n-k}$ $=np\\sum_{k=1}^{n}C_{n-1}^{k-1}\\,p^{k-1}q^{n-k}$ — **le terme** $k=0$ **est nul ; on sort** $n$ **et un facteur** $p$.',
+            },
+            {
+              kind: 'para',
+              text: "Avec $j=k-1$, la somme devient $\\displaystyle\\sum_{j=0}^{n-1}C_{n-1}^{j}\\,p^{j}q^{(n-1)-j}=(p+q)^{n-1}=1$ — **binôme de Newton**. Donc $E(X)=np$. (La formule $V(X)=np(1-p)$ se démontre de la même façon ; on l'admet ici.)",
+            },
           ],
         },
         {
@@ -552,8 +748,12 @@ export const variablesAleatoires: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — p = 0,1, seuil 0,9',
+          label: 'Exemple résolu — combien de tickets pour dépasser 90 % de chances de gagner ?',
           blocks: [
+            {
+              kind: 'para',
+              text: "**Énoncé.** Un ticket à gratter est gagnant avec la probabilité $p=0{,}1$, indépendamment des autres. Combien de tickets faut-il acheter, au minimum, pour que la probabilité d'avoir au moins un ticket gagnant dépasse $0{,}9$ ?",
+            },
             { kind: 'para', text: '$n > \\dfrac{\\ln(0{,}1)}{\\ln(0{,}9)} \\approx 21{,}85 \\implies n=22$' },
             {
               kind: 'para',
@@ -587,6 +787,28 @@ export const variablesAleatoires: ChapterContent = {
                 caption:
                   'Probabilité d\'au moins un succès en fonction de $n$, pour $p=0{,}1$ : les points franchissent le seuil $0{,}9$ (pointillés) entre $n=21$ ($0{,}891$, encore en dessous) et $n=22$ ($0{,}9015$, déjà au-dessus).',
               },
+            },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — le plus petit n tel que 1 − (1 − p)ⁿ > s',
+          blocks: [
+            {
+              kind: 'para',
+              text: "Soit $0<p<1$ et $0<s<1$. $1-(1-p)^n>s\\iff(1-p)^n<1-s$ — **on isole la puissance** (les deux membres sont positifs).",
+            },
+            {
+              kind: 'para',
+              text: '$\\iff n\\ln(1-p)<\\ln(1-s)$ — **ln est strictement croissante sur** $]0\\,;+\\infty[$**, et** $\\ln(a^n)=n\\ln a$.',
+            },
+            {
+              kind: 'para',
+              text: '$\\iff n>\\dfrac{\\ln(1-s)}{\\ln(1-p)}$ — **on divise par** $\\ln(1-p)<0$ **(car** $0<1-p<1$**) : le sens de l\'inégalité change**.',
+            },
+            {
+              kind: 'para',
+              text: "Comme $(1-p)^n$ diminue quand $n$ augmente, la condition reste vraie pour tout $n$ plus grand : le plus petit entier qui convient est le plus petit entier **strictement** supérieur à $\\dfrac{\\ln(1-s)}{\\ln(1-p)}$.",
             },
           ],
         },
@@ -727,6 +949,94 @@ export const variablesAleatoires: ChapterContent = {
           text: "Puisque $P(X=a)=0$ pour toute valeur isolée, ajouter ou retirer une borne ne change **jamais** la probabilité d'un intervalle : $P(a<X<b)$ et $P(a\\leq X\\leq b)$ valent toujours pareil, $F(b)-F(a)$. C'est l'inverse exact du cas discret, où la valeur frontière $X=k$ pèse un vrai $P(X=k)$ et fait se recouvrir « au moins $k$ » et « au plus $k$ » (§ 1).",
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — P(a < X ≤ b) = F(b) − F(a) et P(X = a) = 0',
+          blocks: [
+            {
+              kind: 'para',
+              text: "Soit $u\\leq a<b\\leq v$. L'événement « $X\\leq b$ » est la réunion des événements incompatibles « $X\\leq a$ » et « $a<X\\leq b$ », donc $F(b)=F(a)+P(a<X\\leq b)$ — **probabilité d'une réunion d'événements incompatibles**.",
+            },
+            {
+              kind: 'para',
+              text: "D'où $P(a<X\\leq b)=F(b)-F(a)$. Avec la densité : $F(b)-F(a)=\\displaystyle\\int_u^b f(t)\\,dt-\\int_u^a f(t)\\,dt$ $=\\int_a^b f(t)\\,dt$ — **relation de Chasles**.",
+            },
+            {
+              kind: 'para',
+              text: "Pour tout $h>0$ : « $X=a$ » est inclus dans « $a-h<X\\leq a$ », donc $0\\leq P(X=a)\\leq F(a)-F(a-h)$ — **une probabilité est croissante pour l'inclusion**.",
+            },
+            {
+              kind: 'para',
+              text: "$F$ est continue, donc $F(a)-F(a-h)$ tend vers 0 quand $h$ tend vers 0 : $P(X=a)=0$ — **passage à la limite**.",
+            },
+          ],
+        },
+        { kind: 'subheading', text: 'Trouver une densité, puis calculer avec elle' },
+        {
+          kind: 'methode',
+          label: 'Une densité inconnue à une constante près',
+          items: [
+            "Une densité doit être **positive** sur $[u\\,;v]$ et d'aire totale **1** : si $f(t)=k\\,g(t)$, on calcule $\\displaystyle\\int_u^v k\\,g(t)\\,dt$ par une primitive et on résout « $=1$ » pour trouver $k$.",
+            "Ensuite, $P(a\\leq X\\leq b)=\\displaystyle\\int_a^b f(t)\\,dt$ (en coupant aux bornes $u$ et $v$ si l'intervalle déborde), $E(X)=\\displaystyle\\int_u^v t\\,f(t)\\,dt$, et $F(x)=\\displaystyle\\int_u^x f(t)\\,dt$ pour $x$ dans $[u\\,;v]$.",
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — densité f(t) = kt sur [0 ; 2] : trouver k, puis une probabilité et E(X)',
+          blocks: [
+            {
+              kind: 'para',
+              text: "**Énoncé.** Une variable aléatoire $X$ a pour densité $f(t)=kt$ sur $[0\\,;2]$ ($f$ est nulle ailleurs). Détermine $k$, puis calcule $P(0{,}5\\leq X\\leq1)$, $E(X)$, $V(X)$ et la fonction de répartition $F$ sur $[0\\,;2]$.",
+            },
+            {
+              kind: 'para',
+              text: "Aire totale : $\\displaystyle\\int_0^2 kt\\,dt=\\left[\\dfrac{kt^2}{2}\\right]_0^2=2k=1$, donc $k=\\dfrac{1}{2}$ et $f(t)=\\dfrac{t}{2}$, bien positive sur $[0\\,;2]$.",
+            },
+            {
+              kind: 'para',
+              text: '$P(0{,}5\\leq X\\leq1)=\\displaystyle\\int_{0{,}5}^{1}\\dfrac{t}{2}\\,dt=\\left[\\dfrac{t^2}{4}\\right]_{0{,}5}^{1}$ $=\\dfrac{1}{4}-\\dfrac{1}{16}=\\dfrac{3}{16}=0{,}1875$',
+            },
+            {
+              kind: 'para',
+              text: '$E(X)=\\displaystyle\\int_0^2 t\\times\\dfrac{t}{2}\\,dt=\\left[\\dfrac{t^3}{6}\\right]_0^2=\\dfrac{4}{3}$ et $V(X)=\\displaystyle\\int_0^2 \\dfrac{t^3}{2}\\,dt-\\left(\\dfrac{4}{3}\\right)^2$ $=2-\\dfrac{16}{9}=\\dfrac{2}{9}$',
+            },
+            {
+              kind: 'para',
+              text: "$F(x)=\\displaystyle\\int_0^x \\dfrac{t}{2}\\,dt=\\dfrac{x^2}{4}$ sur $[0\\,;2]$ : on retrouve $P(0{,}5\\leq X\\leq1)=F(1)-F(0{,}5)$ $=\\dfrac{1}{4}-\\dfrac{1}{16}$, et $F(2)=1$.",
+            },
+            {
+              kind: 'illustration',
+              illustration: {
+                kind: 'curvePlot',
+                curves: [{ fn: (t: number) => t / 2, tone: 'accent', xMin: 0, xMax: 2 }],
+                shadedRegions: [{ from: 0.5, to: 1, upper: (t: number) => t / 2, tone: 'accent' }],
+                xMin: 0,
+                xMax: 2.4,
+                xTicks: [0.5, 1, 1.5, 2],
+                xTickLabels: { 0.5: '0,5', 1: '1', 1.5: '1,5', 2: '2' },
+                yTicks: [0.5, 1],
+                yTickLabels: { 0.5: '0,5', 1: '1' },
+                fixedYRange: { min: 0, max: 1.2 },
+                xAxisLabel: 't',
+                yAxisLabel: 'f(t)',
+                caption: "Densité $f(t)=\\dfrac{t}{2}$ sur $[0\\,;2]$ : le triangle sous la courbe a pour aire $\\dfrac{2\\times1}{2}=1$ ; la zone teintée vaut $P(0{,}5\\leq X\\leq1)=0{,}1875$.",
+              },
+            },
+          ],
+        },
+        {
+          kind: 'piege',
+          text: "$f(1)=0{,}5$ n'est **pas** la probabilité que $X$ vaille 1 (elle est nulle) : une densité peut même dépasser 1 sur un petit intervalle. Seule une **aire** sous la courbe est une probabilité.",
+        },
+        {
+          kind: 'methode',
+          label: 'Reconnaître la fonction de répartition d\'une variable continue',
+          items: [
+            "$F$ est continue, **croissante**, vaut 0 avant $u$ et 1 après $v$ (donc $F(u)=0$ et $F(v)=1$).",
+            "Si une seule de ces propriétés manque, ce n'est pas une fonction de répartition. Exemple : $G(x)=\\dfrac{x(3-x)}{2}$ sur $[0\\,;2]$ vérifie $G(0)=0$ et $G(2)=1$, mais $G'(x)=\\dfrac{3-2x}{2}<0$ pour $x>1{,}5$ : $G$ décroît, ce n'est pas une fonction de répartition.",
+            "Si c'en est une, la densité s'obtient en dérivant : $f=F'$ sur $]u\\,;v[$ (avec $F(x)=\\dfrac{x^2}{4}$ : $f(x)=\\dfrac{x}{2}$).",
+          ],
+        },
+        {
           kind: 'definition',
           label: "Espérance, variance et écart-type d'une variable aléatoire continue",
           items: [
@@ -778,6 +1088,37 @@ export const variablesAleatoires: ChapterContent = {
           label: "Passer d'une colonne à l'autre : deux substitutions",
           text: "Chaque formule continue se lit comme sa jumelle discrète, en remplaçant $\\sum$ par $\\int$ et la probabilité ponctuelle $p_i=P(X=x_i)$ par $f(t)\\,dt$. L'espérance reste toujours une moyenne pondérée par le poids de probabilité — jamais une moyenne simple des valeurs possibles ! Seul l'écart-type s'écrit à l'identique dans les 2 colonnes : $\\sigma(X)=\\sqrt{V(X)}$, quelle que soit la nature de la variable.",
         },
+        {
+          kind: 'methode',
+          label: 'Discrète ou continue ? La question à se poser',
+          items: [
+            "**Compte-t-on** quelque chose (des personnes, des pannes, des succès, des points) ? Les valeurs sont des nombres qu'on peut numéroter : la variable est **discrète**. On calcule avec des **sommes**, et $P(X=a)$ peut être non nulle.",
+            "**Mesure-t-on** une grandeur (un temps, une longueur, une masse, un angle) qui peut prendre toutes les valeurs d'un intervalle ? La variable est **continue**. On calcule avec des **intégrales**, et $P(X=a)=0$.",
+            "Un comptage **sans maximum** (le nombre d'appels en une heure : 0, 1, 2, …, sans borne) reste discret : ses valeurs se numérotent. Une mesure **arrondie** (une taille notée au centimètre près) donne une variable discrète si l'on travaille sur les valeurs arrondies, alors que la grandeur mesurée elle-même est continue.",
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — classer six variables aléatoires',
+          blocks: [
+            {
+              kind: 'para',
+              text: "**Énoncé.** Pour chacune des variables suivantes, dis si elle est discrète ou continue, et précise l'outil de calcul d'une probabilité (somme ou intégrale) : le nombre d'appels reçus par un standard en une heure ; le temps d'attente à un guichet ; le nombre de « pile » en 10 lancers d'une pièce ; la masse d'une pomme prise au hasard ; la note entière (sur 20) d'un élève ; l'angle où s'arrête une roue de loterie.",
+            },
+            {
+              kind: 'featureTable',
+              headers: ['Variable', 'Nature, outil', 'Remarque'],
+              rows: [
+                ['Appels en une heure', 'discrète, somme', 'valeurs 0, 1, 2, … sans maximum (Poisson, § 8)'],
+                ["Temps d'attente", 'continue, intégrale', '$P(X=3)=0$'],
+                ['« Pile » en 10 lancers', 'discrète, somme', 'valeurs 0 à 10 (binomiale, § 2)'],
+                ["Masse d'une pomme", 'continue, intégrale', 'souvent une loi normale (§ 6)'],
+                ['Note entière sur 20', 'discrète, somme', '21 valeurs possibles'],
+                ["Angle d'arrêt de la roue", 'continue, intégrale', 'uniforme sur $[0\\,;360]$ (§ 5)'],
+              ],
+            },
+          ],
+        },
       ],
     },
     {
@@ -817,6 +1158,10 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'exempleLibre',
           label: 'Exemple résolu — E(X), V(X) et σ(X) pour X uniforme sur [0 ; 60]',
           blocks: [
+            {
+              kind: 'para',
+              text: "**Énoncé.** La trotteuse d'une horloge arrêtée au hasard indique un nombre de secondes $X$, uniforme sur $[0\\,;60]$. Calcule $E(X)$, $V(X)$ et $\\sigma(X)$.",
+            },
             { kind: 'para', text: '$E(X) = \\dfrac{0+60}{2} = 30$, $V(X) = \\dfrac{60^2}{12} = 300$ et $\\sigma(X) = \\sqrt{300} \\approx 17{,}32$' },
             {
               kind: 'para',
@@ -828,6 +1173,67 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'astuce',
           label: 'Seule la longueur compte, jamais la position',
           text: '$P(10\\leq X\\leq25)=\\dfrac{15}{60}=0{,}25$ et $P(35\\leq X\\leq50)=\\dfrac{15}{60}=0{,}25$ sont identiques ! Deux intervalles de même longueur, contenus dans $[a\\,;b]$, ont toujours la même probabilité, peu importe où ils se trouvent.',
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — densité, espérance et variance de la loi uniforme sur [a ; b]',
+          blocks: [
+            {
+              kind: 'para',
+              text: "La densité est une constante $c$ sur $[a\\,;b]$ et son aire vaut 1 : $\\displaystyle\\int_a^b c\\,dt=c\\,(b-a)=1$, donc $c=\\dfrac{1}{b-a}$ — **aire totale sous une densité**.",
+            },
+            {
+              kind: 'para',
+              text: '$E(X)=\\displaystyle\\int_a^b \\dfrac{t}{b-a}\\,dt$ $=\\dfrac{1}{b-a}\\left[\\dfrac{t^2}{2}\\right]_a^b$ $=\\dfrac{b^2-a^2}{2(b-a)}$ $=\\dfrac{a+b}{2}$ — **primitive de** $t$**, puis** $b^2-a^2=(b-a)(b+a)$.',
+            },
+            {
+              kind: 'para',
+              text: '$E(X^2)=\\displaystyle\\int_a^b \\dfrac{t^2}{b-a}\\,dt$ $=\\dfrac{b^3-a^3}{3(b-a)}$ $=\\dfrac{a^2+ab+b^2}{3}$ — **même calcul**, avec $b^3-a^3=(b-a)(a^2+ab+b^2)$.',
+            },
+            {
+              kind: 'para',
+              text: '$V(X)=\\dfrac{a^2+ab+b^2}{3}-\\dfrac{(a+b)^2}{4}$ $=\\dfrac{4a^2+4ab+4b^2-3a^2-6ab-3b^2}{12}$ $=\\dfrac{a^2-2ab+b^2}{12}=\\dfrac{(b-a)^2}{12}$ — **formule de König**.',
+            },
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: "temps d'attente d'un bus toutes les 20 minutes",
+          formula:
+            "Un bus passe toutes les 20 minutes. Tu arrives à l'arrêt au hasard : ton temps d'attente $X$ (en minutes) suit la loi uniforme sur $[0\\,;20]$. Calcule la probabilité d'attendre au plus 5 minutes, puis plus de 12 minutes, ainsi que $E(X)$ et $\\sigma(X)$.",
+          steps: [
+            { tag: 'au plus 5 min', text: '$P(X\\leq5)=\\dfrac{5-0}{20-0}=0{,}25$' },
+            { tag: 'plus de 12 min', text: '$P(X>12)=\\dfrac{20-12}{20}=0{,}4$' },
+            { tag: 'espérance', text: '$E(X)=\\dfrac{0+20}{2}=10$ min' },
+            { tag: 'écart-type', text: '$V(X)=\\dfrac{20^2}{12}=\\dfrac{100}{3}$, donc $\\sigma(X)=\\sqrt{\\dfrac{100}{3}}\\approx5{,}77$ min' },
+          ],
+          result: { tag: 'conclusion', text: '$0{,}25$ ; $0{,}4$ ; $E(X)=10$ min ; $\\sigma(X)\\approx5{,}77$ min.' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'un intervalle qui déborde de [a ; b]',
+          formula:
+            "Un train arrive au hasard entre 7 h 10 et 7 h 30 : le nombre de minutes $X$ après 7 h suit la loi uniforme sur $[10\\,;30]$. Calcule $P(X\\leq15)$, puis la probabilité que le train arrive entre 7 h 20 et 7 h 40. Donne aussi $E(X)$.",
+          steps: [
+            { tag: 'longueur de [a ; b]', text: '$b-a=30-10=20$' },
+            { tag: 'P(X ≤ 15)', text: '$P(10\\leq X\\leq15)=\\dfrac{15-10}{20}=0{,}25$ (rien avant 10)' },
+            { tag: 'intervalle coupé', text: '$P(20\\leq X\\leq40)=P(20\\leq X\\leq30)$ $=\\dfrac{10}{20}$ $=0{,}5$ — au-delà de 30, la densité est nulle' },
+            { tag: 'espérance', text: '$E(X)=\\dfrac{10+30}{2}=20$ (7 h 20)' },
+          ],
+          result: { tag: 'conclusion', text: '$0{,}25$ ; $0{,}5$ ; $E(X)=20$.' },
+        },
+        {
+          kind: 'methode',
+          label: 'Retrouver a et b à partir de E(X) et V(X)',
+          items: [
+            '$E(X)=\\dfrac{a+b}{2}$ donne $a+b=2E(X)$.',
+            '$V(X)=\\dfrac{(b-a)^2}{12}$ donne $b-a=\\sqrt{12\\,V(X)}$ (positif, car $b>a$).',
+            "On résout ce système. Exemple : $E(X)=8$ et $V(X)=3$ donnent $a+b=16$ et $b-a=\\sqrt{36}=6$, donc $a=5$ et $b=11$.",
+          ],
+        },
+        {
+          kind: 'piege',
+          text: "La variance de la loi uniforme est $\\dfrac{(b-a)^2}{12}$, avec le **carré** : $\\dfrac{b-a}{12}$ n'a même pas la bonne unité (des minutes au lieu de minutes au carré). Et pour un intervalle qui déborde de $[a\\,;b]$, on coupe d'abord aux bornes : une probabilité ne dépasse jamais 1.",
         },
       ],
     },
@@ -851,6 +1257,47 @@ export const variablesAleatoires: ChapterContent = {
             "Une variable $X$ suit la **loi normale** $\\mathcal{N}(\\mu\\,;\\sigma)$ de moyenne $\\mu$ et d'**écart-type** $\\sigma$ (le second paramètre est bien l'écart-type $\\sigma$, pas la variance $\\sigma^2$ que certains manuels et calculatrices notent à sa place). C'est une variable aléatoire continue, dont la densité dessine la courbe « en cloche » de Gauss. $P(X=x)$ vaut donc toujours 0 pour un réel $x$ précis — seule une probabilité sur un intervalle a un sens.",
             "La **loi normale centrée réduite** est $\\mathcal{N}(0\\,;1)$ ; on note $Z$ une variable qui la suit, $\\varphi$ sa densité (la courbe en cloche centrée en 0) et $\\Phi$ sa fonction de répartition : $\\Phi(z)=P(Z\\leq z)$, l'aire sous la cloche à gauche de $z$.",
           ],
+        },
+        {
+          kind: 'para',
+          text: "Pour information (on ne calcule jamais d'intégrale de cette fonction à la main : c'est le rôle de la table), la densité de $\\mathcal{N}(\\mu\\,;\\sigma)$ est $f(x)=\\dfrac{1}{\\sigma\\sqrt{2\\pi}}\\,e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}}$. Elle est maximale en $x=\\mu$, symétrique par rapport à la droite $x=\\mu$, et plus $\\sigma$ est grand, plus la cloche est basse et étalée (l'aire totale reste 1).",
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: densiteNormale(0, 1), tone: 'accent' },
+              { fn: densiteNormale(0, 2), tone: 'good' },
+            ],
+            xMin: -6,
+            xMax: 6,
+            xTicks: [-4, -2, 0, 2, 4],
+            textLabels: [
+              { x: 0.9, y: 0.36, text: 'σ = 1', tone: 'accent' },
+              { x: 2.6, y: 0.14, text: 'σ = 2', tone: 'good' },
+            ],
+            fixedYRange: { min: 0, max: 0.45 },
+            xAxisLabel: 'x',
+            yAxisLabel: 'densité',
+            caption:
+              "Deux lois normales de même moyenne $\\mu=0$ : $\\mathcal{N}(0\\,;1)$ (orange) et $\\mathcal{N}(0\\,;2)$ (vert). Doubler $\\sigma$ étale la cloche deux fois plus et divise sa hauteur par 2 : l'aire sous chaque courbe vaut toujours 1.",
+          },
+        },
+        {
+          kind: 'historique',
+          titre: 'Une courbe, trois savants',
+          text:
+            "La courbe en cloche apparaît d'abord chez **Abraham de Moivre**, en 1733 : il cherche à " +
+            "calculer des probabilités binomiales pour un très grand nombre de lancers de pièce, et " +
+            "découvre qu'elles suivent de près une courbe en cloche — la première approximation " +
+            "normale de la binomiale, celle du § 7. **Carl Friedrich Gauss** la retrouve en 1809 en " +
+            "étudiant les erreurs de mesure des astronomes : les erreurs se répartissent " +
+            "symétriquement autour de la vraie valeur, les petites étant bien plus fréquentes que les " +
+            "grandes — d'où le nom de « courbe de Gauss ». **Pierre-Simon de Laplace** montre ensuite, " +
+            "dans sa Théorie analytique des probabilités (1812), qu'une somme de très nombreux " +
+            "petits effets indépendants suit presque toujours cette loi : c'est ce qui explique " +
+            "qu'on la rencontre partout, des tailles aux masses de sachets.",
         },
         { kind: 'subheading', text: 'La règle empirique : 68,3 % – 95,4 % – 99,7 %' },
         {
@@ -891,6 +1338,10 @@ export const variablesAleatoires: ChapterContent = {
           blocks: [
             {
               kind: 'para',
+              text: "**Énoncé.** Les résultats à un test suivent la loi $\\mathcal{N}(50\\,;10)$. À l'aide de la règle empirique, estime la proportion des candidats dont le score est en dehors de l'intervalle $[30\\,;70]$, puis celle des candidats qui dépassent 70.",
+            },
+            {
+              kind: 'para',
               text: '$50-2\\times10=30$ et $50+2\\times10=70$ : environ $95{,}4\\,\\%$ des valeurs tombent dans $[30\\,;70]$. Donc $1-0{,}954=0{,}046$ (environ $4{,}6\\,\\%$) tombent en dehors, tous côtés confondus.',
             },
           ],
@@ -909,6 +1360,28 @@ export const variablesAleatoires: ChapterContent = {
           ],
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — Z = (X − μ) ÷ σ a une espérance nulle et un écart-type 1',
+          blocks: [
+            {
+              kind: 'para',
+              text: "Soit $X$ d'espérance $\\mu$ et d'écart-type $\\sigma>0$. $Z=\\dfrac{X-\\mu}{\\sigma}=aX+b$ avec $a=\\dfrac{1}{\\sigma}$ et $b=-\\dfrac{\\mu}{\\sigma}$ — **une transformation affine de** $X$.",
+            },
+            {
+              kind: 'para',
+              text: '$E(Z)=a\\,E(X)+b=\\dfrac{\\mu}{\\sigma}-\\dfrac{\\mu}{\\sigma}=0$ — **espérance de** $aX+b$ **(§ 1)**.',
+            },
+            {
+              kind: 'para',
+              text: '$V(Z)=a^2\\,V(X)=\\dfrac{\\sigma^2}{\\sigma^2}=1$, donc $\\sigma(Z)=1$ — **variance de** $aX+b$ **(§ 1)**.',
+            },
+            {
+              kind: 'para',
+              text: "On admet qu'une transformation affine d'une variable normale est encore normale : si $X\\sim\\mathcal{N}(\\mu\\,;\\sigma)$, alors $Z\\sim\\mathcal{N}(0\\,;1)$, et une seule table suffit pour toutes les lois normales.",
+            },
+          ],
+        },
+        {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
@@ -924,13 +1397,34 @@ export const variablesAleatoires: ChapterContent = {
             caption: 'Courbe de $\\mathcal{N}(0\\,;1)$ : l\'aire teintée à gauche de $z=1{,}5$ vaut $\\Phi(1{,}5)\\approx0{,}9332$ — $\\Phi(z)$ donne toujours l\'aire à **gauche** de $z$, jamais à droite.',
           },
         },
+        { kind: 'subheading', text: 'Lire la table de Φ' },
+        {
+          kind: 'methode',
+          label: 'Lire la table de Φ',
+          items: [
+            "La table donne $\\Phi(z)=P(Z\\leq z)$ pour $z$ **positif**, de $0{,}00$ à $3{,}49$ : la **ligne** donne les unités et le dixième de $z$, la **colonne** son centième. Pour $\\Phi(1{,}23)$ : ligne $1{,}2$, colonne $0{,}03$, on lit $0{,}8907$.",
+            "**Convention d'arrondi** : on arrondit d'abord $z$ au centième le plus proche ($z=1{,}234\\to1{,}23$) ; la table donne $\\Phi(z)$ à 4 décimales. Au-delà de $3{,}49$, $\\Phi(z)\\approx1$.",
+            "$z$ **négatif** : la table ne le contient pas ; on utilise $\\Phi(-z)=1-\\Phi(z)$. Exemple : $\\Phi(-1{,}23)=1-0{,}8907=0{,}1093$.",
+            "**À droite** et **entre deux bornes** : $P(Z\\geq z)=1-\\Phi(z)$ et $P(a\\leq Z\\leq b)=\\Phi(b)-\\Phi(a)$.",
+            "**À l'envers** (on connaît $p=\\Phi(z)$, on cherche $z$) : on cherche dans le corps de la table la valeur **la plus proche** de $p$, et on lit $z$ en marge. Si $p$ tombe exactement entre deux cases ($0{,}95$ est à égale distance de $0{,}9495$ et $0{,}9505$), les deux valeurs $1{,}64$ et $1{,}65$ conviennent, et on prend souvent leur milieu, $1{,}645$. Si $p<0{,}5$, on cherche $1-p$, puis on change le signe de $z$.",
+          ],
+        },
+        {
+          kind: 'tablePhi',
+          caption:
+            "Table complète de la loi normale centrée réduite : $\\Phi(z)=P(Z\\leq z)$ pour $z$ de $0{,}00$ à $3{,}49$. Sur téléphone, elle défile de côté ; la colonne des $z$ reste visible.",
+        },
         {
           kind: 'exempleLibre',
           label: 'Exemple résolu — X ∼ 𝒩(50 ; 10) : P(X ≤ 65), P(X ≥ 65), P(X ≤ 35)',
           blocks: [
             {
               kind: 'para',
-              text: 'Standardisation : $z=\\dfrac{65-50}{10}=1{,}5$. Lecture dans la table : $\\Phi(1{,}5)\\approx0{,}9332$, donc $P(X\\leq65)\\approx0{,}9332$.',
+              text: "**Énoncé.** Les résultats à un test suivent la loi normale $\\mathcal{N}(50\\,;10)$. Calcule la probabilité qu'un candidat obtienne au plus 65 points, au moins 65 points, puis au plus 35 points.",
+            },
+            {
+              kind: 'para',
+              text: 'Standardisation : $z=\\dfrac{65-50}{10}=1{,}5$. Lecture dans la table (ligne $1{,}5$, colonne $0{,}00$) : $\\Phi(1{,}5)\\approx0{,}9332$, donc $P(X\\leq65)\\approx0{,}9332$.',
             },
             { kind: 'para', text: '« Au moins » est le complément de « au plus » : $P(X\\geq65)=1-\\Phi(1{,}5)$ $\\approx1-0{,}9332=0{,}0668$.' },
             {
@@ -940,21 +1434,53 @@ export const variablesAleatoires: ChapterContent = {
           ],
         },
         {
-          kind: 'featureTable',
-          caption: 'Extrait de la table de Φ pour quelques valeurs de z usuelles',
-          headers: ['z', '1,0', '1,5', '2,0', '2,5', '3,0'],
-          rows: [['Φ(z)', '0,8413', '0,9332', '0,9772', '0,9938', '0,9987']],
-        },
-        {
           kind: 'attention',
           label: "Φ n'est jamais paire",
           text: "$\\Phi(-1{,}5)$ n'est **pas** égal à $\\Phi(1{,}5)$ — $\\Phi$ n'est pas une fonction paire ! La vraie relation, c'est $\\Phi(-z)=1-\\Phi(z)$ (symétrie par rapport au point $(0\\,;0{,}5)$, pas par rapport à l'axe des ordonnées) : $\\Phi(-1{,}5)\\approx0{,}0668$, très différent de $\\Phi(1{,}5)\\approx0{,}9332$.",
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — Φ(−z) = 1 − Φ(z) et P(−k ≤ Z ≤ k) = 2Φ(k) − 1',
+          blocks: [
+            {
+              kind: 'para',
+              text: "La densité $\\varphi$ de $\\mathcal{N}(0\\,;1)$ est symétrique par rapport à l'axe des ordonnées : $\\varphi(-t)=\\varphi(t)$. L'aire à gauche de $-z$ est donc égale à l'aire à droite de $z$ : $P(Z\\leq-z)=P(Z\\geq z)$ — **symétrie de la courbe en cloche**.",
+            },
+            {
+              kind: 'para',
+              text: '$P(Z\\geq z)=1-P(Z<z)=1-\\Phi(z)$, donc $\\Phi(-z)=1-\\Phi(z)$ — **événement contraire, et** $P(Z=z)=0$.',
+            },
+            {
+              kind: 'para',
+              text: '$P(-k\\leq Z\\leq k)=\\Phi(k)-\\Phi(-k)$ $=\\Phi(k)-[1-\\Phi(k)]$ $=2\\Phi(k)-1$ — **probabilité d\'un intervalle, puis résultat précédent**.',
+            },
+            {
+              kind: 'para',
+              text: "Avec la table : $2\\Phi(1)-1=0{,}6826$, $2\\Phi(2)-1=0{,}9544$, $2\\Phi(3)-1=0{,}9974$ — la règle empirique, aux arrondis de la table près.",
+            },
+          ],
         },
         {
           kind: 'para',
           text: "Pour un intervalle de la loi centrée réduite, on soustrait toujours deux valeurs de $\\Phi$ — jamais on ne les additionne (le résultat pourrait même dépasser 1, signal d'alerte immédiat !) :",
         },
         { kind: 'para', text: '$P(1\\leq Z\\leq2) = \\Phi(2)-\\Phi(1)$ $\\approx 0{,}9772-0{,}8413$ $= 0{,}1359$' },
+        {
+          kind: 'para',
+          text: "Cas particulier à partir de 0 : pour $t>0$, $P(0\\leq Z\\leq t)=\\Phi(t)-\\Phi(0)=\\Phi(t)-0{,}5$, puisque la moitié de l'aire est à gauche de 0.",
+        },
+        {
+          kind: 'exemple',
+          badge: "effectif attendu dans une population",
+          formula:
+            "La taille $X$ (en cm) des 1 200 élèves d'une école suit la loi $\\mathcal{N}(170\\,;8)$. Combien d'élèves mesurent plus de 180 cm, environ ?",
+          steps: [
+            { tag: 'standardiser', text: '$z=\\dfrac{180-170}{8}=1{,}25$' },
+            { tag: 'lire la table', text: '$P(X>180)=1-\\Phi(1{,}25)$ $=1-0{,}8944$ $=0{,}1056$' },
+            { tag: 'effectif', text: '$1\\,200\\times0{,}1056=126{,}72$, arrondi à l\'unité : $127$' },
+          ],
+          result: { tag: 'conclusion', text: 'Environ 127 élèves (effectif attendu = effectif total × probabilité).' },
+        },
         { kind: 'subheading', text: 'Sens inverse — retrouver z (ou x) depuis une probabilité' },
         {
           kind: 'methode',
@@ -966,13 +1492,85 @@ export const variablesAleatoires: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — z tel que Φ(z) = 0,95',
+          label: 'Exemple résolu — z tel que Φ(z) = 0,95, puis le seuil des 5 % meilleurs',
           blocks: [
             {
               kind: 'para',
-              text: "$z\\approx1{,}645$ (le quantile à 95 %, une valeur très utilisée). Attention : $1-0{,}95=0{,}05$ est une **probabilité**, pas une valeur de $z$ — il faut absolument lire la table à l'envers pour convertir une probabilité en valeur de $z$ !",
+              text: "**Énoncé.** Détermine $z$ tel que $\\Phi(z)=0{,}95$. Les résultats d'un test suivent la loi $\\mathcal{N}(50\\,;10)$ : à partir de quel score un candidat fait-il partie des 5 % meilleurs ?",
+            },
+            {
+              kind: 'para',
+              text: "Dans le corps de la table, $0{,}95$ se trouve entre $0{,}9495$ ($z=1{,}64$) et $0{,}9505$ ($z=1{,}65$), à égale distance : $z\\approx1{,}645$ (le quantile à 95 %, une valeur très utilisée).",
+            },
+            {
+              kind: 'para',
+              text: "Les 5 % meilleurs ont un score $x$ tel que $P(X\\leq x)=0{,}95$ : $x=\\mu+z\\times\\sigma=50+1{,}645\\times10\\approx66{,}5$ points.",
+            },
+            {
+              kind: 'para',
+              text: "Attention : $1-0{,}95=0{,}05$ est une **probabilité**, pas une valeur de $z$ — il faut absolument lire la table à l'envers pour convertir une probabilité en valeur de $z$ !",
             },
           ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'P(0 ≤ Z ≤ t) = 0,4 : trouver t',
+          formula: "Détermine le réel $t>0$ tel que $P(0\\leq Z\\leq t)=0{,}4$, pour $Z\\sim\\mathcal{N}(0\\,;1)$.",
+          steps: [
+            { tag: 'se ramener à Φ', text: '$\\Phi(t)-0{,}5=0{,}4$, donc $\\Phi(t)=0{,}9$' },
+            { tag: 'table à l\'envers', text: '$0{,}8997$ ($t=1{,}28$) est plus proche de $0{,}9$ que $0{,}9015$ ($t=1{,}29$)' },
+          ],
+          result: { tag: 'conclusion', text: '$t\\approx1{,}28$.' },
+        },
+        { kind: 'subheading', text: 'Retrouver μ ou σ à partir d\'une proportion' },
+        {
+          kind: 'methode',
+          label: 'Une proportion connue donne une équation',
+          items: [
+            "Traduis la proportion par $\\Phi(z)=p$ (passe au complément si la proportion porte sur « plus de »), lis $z$ dans la table, puis écris $x=\\mu+z\\,\\sigma$ : une équation à une inconnue, $\\mu$ ou $\\sigma$.",
+            "Avec **deux** proportions connues, on obtient deux équations $x_1=\\mu+z_1\\sigma$ et $x_2=\\mu+z_2\\sigma$ : un système, qui donne $\\mu$ **et** $\\sigma$.",
+            "Une valeur **sous** la moyenne correspond à un $z$ **négatif** : $x=\\mu+z\\sigma$ avec $z<0$, c'est-à-dire $x=\\mu-|z|\\,\\sigma$.",
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'retrouver la moyenne μ',
+          formula:
+            "La taille d'adultes suit une loi normale d'écart-type $\\sigma=6$ cm, et 10 % d'entre eux mesurent plus de 185 cm. Détermine la moyenne $\\mu$.",
+          steps: [
+            { tag: 'traduire', text: '$P(X>185)=0{,}1$, donc $P(X\\leq185)=0{,}9$' },
+            { tag: 'lire z', text: '$\\Phi(z)=0{,}9$ donne $z\\approx1{,}28$' },
+            { tag: 'équation', text: '$185=\\mu+1{,}28\\times6$, donc $\\mu=185-7{,}68=177{,}32$' },
+          ],
+          result: { tag: 'conclusion', text: '$\\mu\\approx177{,}3$ cm.' },
+        },
+        {
+          kind: 'exemple',
+          badge: "retrouver l'écart-type σ",
+          formula:
+            "Une machine remplit des paquets de masse moyenne $\\mu=500$ g, selon une loi normale ; 2 % des paquets pèsent moins de 490 g. Détermine l'écart-type $\\sigma$.",
+          steps: [
+            { tag: 'traduire', text: '$P(X<490)=0{,}02$ : sous la moyenne, donc $z<0$' },
+            { tag: 'lire z', text: '$\\Phi(-z)=0{,}98$ : $0{,}9798$ ($2{,}05$) est le plus proche, donc $z\\approx-2{,}05$' },
+            { tag: 'équation', text: '$490=500-2{,}05\\,\\sigma$, donc $\\sigma=\\dfrac{10}{2{,}05}\\approx4{,}88$' },
+          ],
+          result: { tag: 'conclusion', text: '$\\sigma\\approx4{,}88$ g.' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'deux proportions : retrouver μ et σ',
+          formula:
+            "Une variable $X$ suit une loi normale ; $P(X\\leq40)=0{,}1587$ et $P(X\\geq80)=0{,}0228$. Détermine $\\mu$ et $\\sigma$.",
+          steps: [
+            { tag: 'première proportion', text: '$\\Phi(z_1)=0{,}1587$ : $1-0{,}1587=0{,}8413=\\Phi(1)$, donc $z_1=-1$' },
+            { tag: 'seconde proportion', text: '$\\Phi(z_2)=1-0{,}0228=0{,}9772=\\Phi(2)$, donc $z_2=2$' },
+            { tag: 'système', text: '$40=\\mu-\\sigma$ et $80=\\mu+2\\sigma$ ; en soustrayant : $3\\sigma=40$' },
+          ],
+          result: { tag: 'conclusion', text: '$\\sigma=\\dfrac{40}{3}\\approx13{,}33$ et $\\mu=40+\\sigma\\approx53{,}33$.' },
+        },
+        {
+          kind: 'piege',
+          text: "Oublier le signe de $z$ sous la moyenne : avec $z=+2{,}05$, on obtiendrait $\\sigma=\\dfrac{490-500}{2{,}05}<0$, impossible pour un écart-type. Un $\\sigma$ négatif est le signal d'un $z$ pris du mauvais côté.",
         },
         { kind: 'subheading', text: "S'assurer qu'une distribution statistique suit une loi normale" },
         {
@@ -987,6 +1585,38 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'attention',
           label: 'Un critère pratique, jamais une démonstration',
           text: "Quand ces deux vérifications sont satisfaites, on **accepte** en pratique le modèle normal, sans l'avoir démontré : d'autres distributions peuvent les satisfaire aussi. Elles ne prouvent donc jamais que la distribution est exactement normale ; en revanche, si l'une d'elles échoue nettement, le modèle normal est à rejeter.",
+        },
+        {
+          kind: 'application',
+          titre: 'Régler une machine-outil : la tolérance et la règle empirique',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (u: number) => densiteNormale(0, 1)(u - 3.5), tone: 'accent' }],
+              shadedRegions: [{ from: 1.5, to: 5.5, upper: (u: number) => densiteNormale(0, 1)(u - 3.5), tone: 'good' }],
+              xMin: 0,
+              xMax: 7,
+              xTicks: [1.5, 3.5, 5.5],
+              xTickLabels: { 1.5: '19,9', 3.5: '20', 5.5: '20,1' },
+              textLabels: [{ x: 3.5, y: 0.13, text: '95,4 %', tone: 'good', anchor: 'middle' }],
+              fixedYRange: { min: 0, max: 0.46 },
+              xAxisLabel: 'mm',
+              yAxisLabel: 'densité',
+              caption:
+                "Diamètre $X\\sim\\mathcal{N}(20\\,;0{,}05)$ en mm : la tolérance $[19{,}9\\,;20{,}1]$ vaut $[\\mu-2\\sigma\\,;\\mu+2\\sigma]$ et retient environ $95{,}4\\,\\%$ des pièces (zone verte).",
+            },
+          ],
+          text:
+            "Une machine tourne des axes de diamètre visé $20$ mm. Le diamètre réellement obtenu $X$ " +
+            "varie d'une pièce à l'autre selon une loi normale, de moyenne $\\mu=20$ mm (la machine " +
+            "est bien réglée) et d'écart-type $\\sigma=0{,}05$ mm (sa précision). Le client accepte " +
+            "les pièces dont le diamètre est dans $[19{,}9\\,;20{,}1]$, soit $\\mu\\pm2\\sigma$ : la règle " +
+            "empirique prévoit environ $95{,}4\\,\\%$ de pièces conformes, donc environ $4{,}6\\,\\%$ de " +
+            "rebut. Pour descendre sous $0{,}3\\,\\%$ de rebut, il faudrait que la tolérance couvre " +
+            "$\\mu\\pm3\\sigma$, c'est-à-dire une machine deux fois et demie plus précise (avec " +
+            "$\\sigma\\approx0{,}033$ mm, $3\\sigma\\approx0{,}1$ mm). C'est tout le principe du contrôle " +
+            "statistique de la production : on surveille $\\mu$ et $\\sigma$, pas chaque pièce.",
+          domaines: ['Industrie', 'Contrôle qualité'],
         },
         {
           kind: 'entrainement',
@@ -1013,8 +1643,12 @@ export const variablesAleatoires: ChapterContent = {
         { kind: 'subheading', text: 'Épreuves composées — indépendance « ET »' },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — 2 épreuves indépendantes, p₁ = 0,5 et p₂ = 0,3',
+          label: 'Exemple résolu — un badge à deux épreuves indépendantes (p₁ = 0,5 et p₂ = 0,3)',
           blocks: [
+            {
+              kind: 'para',
+              text: "**Énoncé.** Pour obtenir un badge, il faut réussir deux épreuves indépendantes, de probabilités de réussite $p_1=0{,}5$ et $p_2=0{,}3$. Calcule la probabilité d'obtenir le badge en une tentative, puis le nombre minimal $n$ de tentatives (indépendantes) pour que la probabilité de l'obtenir au moins une fois dépasse $0{,}8$.",
+            },
             { kind: 'para', text: 'Réussir les deux épreuves indépendantes (« ET » logique) :' },
             { kind: 'para', text: '$p = p_1\\times p_2 = 0{,}5\\times0{,}3 = 0{,}15$' },
             {
@@ -1054,6 +1688,18 @@ export const variablesAleatoires: ChapterContent = {
           ],
         },
         {
+          kind: 'historique',
+          titre: 'Un théorème publié par un ami',
+          text:
+            "Le pasteur anglais **Thomas Bayes** (vers 1701–1761) n'a jamais publié son théorème. " +
+            "Après sa mort, son ami **Richard Price** retrouve le manuscrit, le complète et le présente " +
+            "à la Royal Society de Londres en 1763, sous le titre An Essay towards solving a Problem " +
+            "in the Doctrine of Chances. La question de Bayes était de remonter des effets observés " +
+            "vers leurs causes probables — exactement ce que fait $P(C_j\\mid S)$. Laplace " +
+            "redécouvre la formule de façon indépendante en 1774 et lui donne sa forme générale. Le " +
+            "chapitre 6 l'a utilisée avec deux causes (un test médical) ; ici, elle en compte trois.",
+        },
+        {
           kind: 'illustration',
           illustration: {
             kind: 'weightedTree',
@@ -1079,6 +1725,10 @@ export const variablesAleatoires: ChapterContent = {
           label: 'Exemple résolu — assurance, 3 profils de risque',
           blocks: [
             {
+              kind: 'para',
+              text: "**Énoncé.** Une compagnie d'assurance classe ses clients en 3 catégories : $30\\,\\%$ à faible risque (probabilité de sinistre $0{,}10$), $45\\,\\%$ à risque moyen ($0{,}20$) et $25\\,\\%$ à haut risque ($0{,}40$). Calcule la probabilité qu'un client ait un sinistre, puis la probabilité qu'un client sinistré soit à haut risque.",
+            },
+            {
               kind: 'featureTable',
               headers: ['Catégorie', 'P(Cᵢ)', 'P(S | Cᵢ)', 'P(Cᵢ) × P(S | Cᵢ)'],
               rows: [
@@ -1097,6 +1747,24 @@ export const variablesAleatoires: ChapterContent = {
           text: "Répondre $P(C_3)=0{,}25$ à la question « probabilité d'appartenir à la catégorie 3 sachant le sinistre » ignore complètement l'information du critère observé — tu confonds une probabilité **a priori** ($P(C_3)$, avant observation) avec une probabilité **a posteriori** ($P(C_3\\mid S)\\approx0{,}4545$, après observation).",
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — formule de Bayes à 3 catégories',
+          blocks: [
+            {
+              kind: 'para',
+              text: "$C_1$, $C_2$, $C_3$ forment une partition de la population : ils sont incompatibles deux à deux et leur réunion est la population entière, donc $S=(S\\cap C_1)\\cup(S\\cap C_2)\\cup(S\\cap C_3)$, réunion d'événements incompatibles — **partition**.",
+            },
+            {
+              kind: 'para',
+              text: '$P(S)=P(S\\cap C_1)+P(S\\cap C_2)$ $+\\,P(S\\cap C_3)$ et $P(S\\cap C_i)=P(C_i)\\,P(S\\mid C_i)$ — **probabilité d\'une réunion d\'événements incompatibles, puis définition d\'une probabilité conditionnelle (chapitre 6)**.',
+            },
+            {
+              kind: 'para',
+              text: 'Par définition, $P(C_j\\mid S)=\\dfrac{P(C_j\\cap S)}{P(S)}$ $=\\dfrac{P(C_j)\\,P(S\\mid C_j)}{\\sum_{i=1}^{3}P(C_i)\\,P(S\\mid C_i)}$ — **probabilité conditionnelle, avec le numérateur et le dénominateur ci-dessus**.',
+            },
+          ],
+        },
+        {
           kind: 'astuce',
           label: 'Toujours pondérer par le poids de chaque catégorie',
           text: "Faire la moyenne simple des 3 conditionnelles, $(0{,}1+0{,}2+0{,}4)\\div3\\approx0{,}233$, ignore que les catégories n'ont pas le même poids — exactement le même piège que pour l'espérance au § 1 ! La formule des probabilités totales pondère chaque $P(S\\mid C_i)$ par $P(C_i)$ : ça donne $0{,}22$, pas $0{,}233$.",
@@ -1113,8 +1781,12 @@ export const variablesAleatoires: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — n = 100, p = 0,5',
+          label: 'Exemple résolu — 100 lancers d\'une pièce : approcher P(X ≤ 55)',
           blocks: [
+            {
+              kind: 'para',
+              text: "**Énoncé.** On lance 100 fois une pièce équilibrée ; $X$ compte les « pile », donc $X\\sim\\mathcal{B}(100\\,;0{,}5)$. Vérifie que l'on peut approcher $X$ par une loi normale, détermine ses paramètres, puis estime $P(X\\leq55)$.",
+            },
             {
               kind: 'para',
               text: '$n=100>30$ ✓ ; $p=0{,}5$, bien dans $]0{,}3\\,;0{,}7[$ ✓ — les 2 conditions sont réunies, donc $\\mu=100\\times0{,}5=50$ et $\\sigma=\\sqrt{100\\times0{,}5\\times0{,}5}=5$.',
@@ -1134,14 +1806,51 @@ export const variablesAleatoires: ChapterContent = {
           label: 'Deux approximations de la binomiale, deux régimes',
           text: "L'approximation par une loi de Poisson (§ 8 : $n\\geq30$, $p\\leq0{,}1$, $np\\leq15$) sert pour un $p$ proche de 0 (événement rare) ; l'approximation par une loi normale ($n>30$, $0{,}3<p<0{,}7$) sert pour un $p$ plus central. Avec les conventions de ce cours, un $p$ intermédiaire comme $p=0{,}2$ ne rentre dans aucune des deux : on calcule alors avec la binomiale exacte (calculatrice). En pratique, pour un très grand $n$ (par exemple $n=1000$, $p=0{,}2$), l'approximation normale reste excellente : les conditions du cours sont prudentes, pas des lois de la nature.",
         },
+        { kind: 'subheading', text: 'La correction de continuité' },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi ± 0,5 ?',
+          text: "Dans le diagramme en barres d'une loi binomiale, la barre de $k$ occupe l'intervalle $[k-0{,}5\\,;k+0{,}5]$ : sa largeur vaut 1 et son aire vaut $P(X=k)$. La courbe normale, elle, donne des **aires** sur un axe continu. Pour que les deux parlent de la même chose, on remplace chaque valeur entière $k$ par sa barre entière : « $X\\leq55$ » devient « jusqu'à $55{,}5$ », « $X\\geq60$ » devient « à partir de $59{,}5$ ».",
+        },
+        {
+          kind: 'featureTable',
+          caption: 'Correction de continuité : X ∼ 𝓑(n ; p) approchée par 𝒩(μ ; σ), μ = np, σ = √(np(1 − p))',
+          headers: ['Événement (binomiale)', 'Intervalle corrigé', 'Approximation'],
+          rows: [
+            ['$X\\leq k$', '$x\\leq k+0{,}5$', '$\\Phi\\!\\left(\\dfrac{k+0{,}5-\\mu}{\\sigma}\\right)$'],
+            ['$X\\geq k$', '$x\\geq k-0{,}5$', '$1-\\Phi\\!\\left(\\dfrac{k-0{,}5-\\mu}{\\sigma}\\right)$'],
+            ['$X=k$', '$k-0{,}5\\leq x\\leq k+0{,}5$', '$\\Phi\\!\\left(\\dfrac{k+0{,}5-\\mu}{\\sigma}\\right)-\\Phi\\!\\left(\\dfrac{k-0{,}5-\\mu}{\\sigma}\\right)$'],
+            ['$a\\leq X\\leq b$', '$a-0{,}5\\leq x\\leq b+0{,}5$', '$\\Phi\\!\\left(\\dfrac{b+0{,}5-\\mu}{\\sigma}\\right)-\\Phi\\!\\left(\\dfrac{a-0{,}5-\\mu}{\\sigma}\\right)$'],
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'au moins 60 « pile », puis exactement 50, sur 100 lancers',
+          formula:
+            "Avec la même pièce ($X\\sim\\mathcal{B}(100\\,;0{,}5)$, $\\mu=50$, $\\sigma=5$), estime $P(X\\geq60)$ et $P(X=50)$ par l'approximation normale avec correction de continuité.",
+          steps: [
+            { tag: 'au moins 60', text: '$P(X\\geq60)\\approx1-\\Phi\\!\\left(\\dfrac{59{,}5-50}{5}\\right)$ $=1-\\Phi(1{,}9)$ $=1-0{,}9713=0{,}0287$' },
+            { tag: 'exactement 50', text: '$P(X=50)\\approx\\Phi(0{,}1)-\\Phi(-0{,}1)$ $=2\\Phi(0{,}1)-1$ $=2\\times0{,}5398-1=0{,}0796$' },
+            { tag: 'contrôle', text: 'Valeurs exactes (calculatrice) : $0{,}0284$ et $0{,}0796$' },
+          ],
+          result: { tag: 'conclusion', text: '$P(X\\geq60)\\approx0{,}0287$ et $P(X=50)\\approx0{,}0796$.' },
+        },
+        {
+          kind: 'piege',
+          text: "Sans correction, $P(X=50)$ serait estimée par l'aire sous la courbe **au point** 50, c'est-à-dire 0 — absurde. Et attention au sens : pour « au moins $k$ », on **retire** $0{,}5$ ($k-0{,}5$) ; pour « au plus $k$ », on **ajoute** $0{,}5$ ($k+0{,}5$). Pour « strictement plus de $k$ », c'est « au moins $k+1$ » : on part de $k+0{,}5$.",
+        },
         { kind: 'subheading', text: "Reconstruire une loi et appliquer l'espérance à une population" },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — offre à 3 formules',
+          label: 'Exemple résolu — offre à 3 formules : prix moyen et recette sur 500 clients',
           blocks: [
             {
               kind: 'para',
-              text: '$20\\,\\%$ des clients choisissent la formule Basique (15 €), $30\\,\\%$ la Standard (35 €). Le 3ᵉ pourcentage se déduit par différence : $100-20-30=50\\,\\%$ pour la Premium (60 €).',
+              text: "**Énoncé.** Une entreprise propose 3 formules d'abonnement : Basique à 15 € ($20\\,\\%$ des clients), Standard à 35 € ($30\\,\\%$) et Premium à 60 € (les autres clients). Calcule le prix moyen payé par un client, puis la recette attendue pour 500 clients.",
+            },
+            {
+              kind: 'para',
+              text: 'Le 3ᵉ pourcentage se déduit par différence : $100-20-30=50\\,\\%$ pour la Premium.',
             },
             {
               kind: 'featureTable',
@@ -1181,6 +1890,22 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'attention',
           label: 'Piège classique',
           text: "$43{,}5+500=543{,}5$ n'a aucun sens — c'est un prix moyen additionné à un nombre de clients ! Multiplie toujours l'espérance par l'effectif pour obtenir un total attendu sur une population, jamais une addition.",
+        },
+        {
+          kind: 'application',
+          titre: "La marge d'erreur d'un sondage",
+          text:
+            "Avant une élection, un institut interroge $n=400$ personnes tirées au hasard. Si, dans " +
+            "toute la population, exactement la moitié des électeurs soutient un candidat ($p=0{,}5$), " +
+            "le nombre $X$ de soutiens dans l'échantillon suit la loi $\\mathcal{B}(400\\,;0{,}5)$, que " +
+            "l'on approche par $\\mathcal{N}(200\\,;10)$ ($\\mu=np=200$, $\\sigma=\\sqrt{400\\times0{,}25}=10$). " +
+            "Le sondage pourrait-il annoncer 55 % de soutiens, ou plus, par simple hasard ? " +
+            "$P(X\\geq220)\\approx1-\\Phi\\!\\left(\\dfrac{219{,}5-200}{10}\\right)$ $=1-\\Phi(1{,}95)$ $=0{,}0256$ : " +
+            "environ une chance sur 40. Par la règle empirique, le pourcentage observé tombe dans " +
+            "$[50-5\\,;50+5]$ (soit $\\mu\\pm2\\sigma$, en pour cent de 400) environ 95 fois sur 100 : c'est la " +
+            "« marge d'erreur de 5 points » annoncée pour un sondage de 400 personnes. Pour la diviser " +
+            "par 2, il faut interroger 4 fois plus de monde, car la marge, en pour cent, varie comme $\\dfrac{1}{\\sqrt{n}}$.",
+          domaines: ['Sondages', 'Sciences politiques'],
         },
         {
           kind: 'entrainement',
@@ -1247,6 +1972,28 @@ export const variablesAleatoires: ChapterContent = {
           nodes: ['$0{,}0183$', '$0{,}0733$', '$0{,}1465$', '$0{,}1954$', '$0{,}1954$'],
           operations: ['× 4/1', '× 4/2', '× 4/3', '× 4/4'],
         },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — P(X = k) = P(X = k − 1) × λ/k, et la valeur la plus probable',
+          blocks: [
+            {
+              kind: 'para',
+              text: 'Pour $k\\geq1$ : $\\dfrac{P(X=k)}{P(X=k-1)}=\\dfrac{e^{-\\lambda}\\lambda^k/k!}{e^{-\\lambda}\\lambda^{k-1}/(k-1)!}$ $=\\lambda\\times\\dfrac{(k-1)!}{k!}=\\dfrac{\\lambda}{k}$ — **formule de Poisson, puis** $k!=k\\times(k-1)!$.',
+            },
+            {
+              kind: 'para',
+              text: "Donc $P(X=k)=P(X=k-1)\\times\\dfrac{\\lambda}{k}$ : c'est la méthode de proche en proche ci-dessus.",
+            },
+            {
+              kind: 'para',
+              text: '$P(X=k)\\geq P(X=k-1)\\iff\\dfrac{\\lambda}{k}\\geq1$ $\\iff k\\leq\\lambda$ — **les probabilités sont strictement positives**.',
+            },
+            {
+              kind: 'para',
+              text: "Les probabilités augmentent tant que $k\\leq\\lambda$, puis diminuent : la valeur la plus probable est le plus grand entier $k\\leq\\lambda$. Si $\\lambda$ est entier, $P(X=\\lambda)=P(X=\\lambda-1)$ : deux valeurs sont les plus probables (pour $\\lambda=4$ : $k=3$ et $k=4$, les deux barres égales de la figure plus bas).",
+            },
+          ],
+        },
         { kind: 'subheading', text: "Approximation d'une loi binomiale par une loi de Poisson" },
         {
           kind: 'methode',
@@ -1259,11 +2006,19 @@ export const variablesAleatoires: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — n = 50, p = 0,08',
+          label: 'Exemple résolu — approcher 𝓑(50 ; 0,08) par une loi de Poisson',
           blocks: [
             {
               kind: 'para',
+              text: "**Énoncé.** Dans une production, $8\\,\\%$ des pièces sont défectueuses. On prélève 50 pièces (assez peu pour considérer les tirages indépendants) ; $X$ compte les pièces défectueuses. Vérifie que l'on peut approcher la loi de $X$ par une loi de Poisson, et donne son paramètre.",
+            },
+            {
+              kind: 'para',
               text: '$n=50\\geq30$ ✓ ; $p=0{,}08\\leq0{,}1$ ✓ ; $n\\times p=4\\leq15$ ✓ — les 3 conditions sont réunies, donc $\\lambda=n\\times p=4$.',
+            },
+            {
+              kind: 'para',
+              text: "Contrôle : $P(X\\leq1)$ vaut exactement $0{,}0827$ avec la loi binomiale, et environ $0{,}0916$ avec la loi de Poisson (tableau ci-dessous) — un écart de moins d'un point.",
             },
           ],
         },
@@ -1302,8 +2057,12 @@ export const variablesAleatoires: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — complément',
+          label: 'Exemple résolu — au plus 1 appel, au moins 2 appels (λ = 4)',
           blocks: [
+            {
+              kind: 'para',
+              text: "**Énoncé.** Un standard reçoit en moyenne 4 appels par minute ; le nombre $X$ d'appels en une minute suit la loi de Poisson de paramètre $\\lambda=4$. Calcule $P(X\\leq1)$, puis $P(X\\geq2)$.",
+            },
             {
               kind: 'para',
               text: '$P(X\\leq1)=P(X=0)+P(X=1)$ $\\approx0{,}018316+0{,}073263$ $\\approx0{,}091578$. « Au moins 2 » est le complément exact de « au plus 1 » :',
@@ -1324,8 +2083,12 @@ export const variablesAleatoires: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Les 2 types d\'ajustement',
+          label: 'Exemple résolu — ajuster λ au temps, puis à l\'effectif',
           blocks: [
+            {
+              kind: 'para',
+              text: "**Énoncé.** Un péage voit passer en moyenne 5 voitures par minute : quel est le paramètre $\\lambda$ du nombre de voitures en 15 minutes ? Une usine compte en moyenne 3 pièces défectueuses pour 1 000 produites : quel est le paramètre $\\lambda$ du nombre de pièces défectueuses dans un lot de 500 pièces ?",
+            },
             {
               kind: 'para',
               text: '**Temporel :** un péage voit passer en moyenne 5 voitures par minute — sur 15 minutes, $\\lambda=5\\times15=75$ (multiplicatif direct).',
@@ -1340,6 +2103,73 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'astuce',
           label: 'E(X) = V(X) = λ — une propriété caractéristique',
           text: "Pour une loi de Poisson, l'espérance et la variance sont toutes les deux égales à $\\lambda$ (donc $\\sigma(X)=\\sqrt{\\lambda}$) — une propriété assez rare : dans la plupart des lois, espérance et variance sont différentes !",
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — (1 − λ/n)ⁿ tend vers exp(−λ) : l\'origine du facteur exponentiel',
+          blocks: [
+            {
+              kind: 'para',
+              text: "Pour $X\\sim\\mathcal{B}(n\\,;p)$ avec $np=\\lambda$, $P(X=0)=(1-p)^n=\\left(1-\\dfrac{\\lambda}{n}\\right)^n$. On montre que cette quantité tend vers $e^{-\\lambda}=P(X=0)$ pour la loi de Poisson quand $n\\to+\\infty$.",
+            },
+            {
+              kind: 'para',
+              text: "Pour $n>\\lambda$ : $\\ln\\left(1-\\dfrac{\\lambda}{n}\\right)^n=n\\ln\\left(1-\\dfrac{\\lambda}{n}\\right)$. On pose $h=-\\dfrac{\\lambda}{n}$, qui tend vers 0 : $n\\ln(1+h)=-\\lambda\\times\\dfrac{\\ln(1+h)}{h}$ — **car** $n=-\\dfrac{\\lambda}{h}$.",
+            },
+            {
+              kind: 'para',
+              text: '$\\dfrac{\\ln(1+h)-\\ln 1}{h}$ tend vers $\\ln^{\\prime}(1)=1$ quand $h\\to0$ — **définition du nombre dérivé de** $\\ln$ **en 1**.',
+            },
+            {
+              kind: 'para',
+              text: "Donc $n\\ln\\left(1-\\dfrac{\\lambda}{n}\\right)\\to-\\lambda$, et, la fonction exponentielle étant continue, $\\left(1-\\dfrac{\\lambda}{n}\\right)^n=e^{\\,n\\ln(1-\\lambda/n)}\\to e^{-\\lambda}$.",
+            },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — E(X) = λ pour une loi de Poisson',
+          blocks: [
+            {
+              kind: 'para',
+              text: "On admet que $\\displaystyle\\sum_{j=0}^{+\\infty}\\dfrac{\\lambda^j}{j!}=e^{\\lambda}$ (c'est ce qui garantit que les probabilités de Poisson ont une somme égale à 1).",
+            },
+            {
+              kind: 'para',
+              text: '$E(X)=\\displaystyle\\sum_{k=0}^{+\\infty}k\\,e^{-\\lambda}\\dfrac{\\lambda^k}{k!}=e^{-\\lambda}\\sum_{k=1}^{+\\infty}\\dfrac{\\lambda^k}{(k-1)!}$ — **le terme** $k=0$ **est nul, et** $\\dfrac{k}{k!}=\\dfrac{1}{(k-1)!}$.',
+            },
+            {
+              kind: 'para',
+              text: '$=\\lambda\\,e^{-\\lambda}\\displaystyle\\sum_{j=0}^{+\\infty}\\dfrac{\\lambda^j}{j!}=\\lambda\\,e^{-\\lambda}\\,e^{\\lambda}=\\lambda$ — **on sort un facteur** $\\lambda$ **et on pose** $j=k-1$.',
+            },
+          ],
+        },
+        { kind: 'subheading', text: 'Retrouver λ, la valeur la plus probable et un seuil d\'alerte' },
+        {
+          kind: 'methode',
+          label: 'Trois questions classiques sur une loi de Poisson',
+          items: [
+            "**λ inconnu** : une donnée sur $P(X=0)$ donne $e^{-\\lambda}=P(X=0)$, donc $\\lambda=-\\ln P(X=0)$. Une égalité comme $P(X=1)=P(X=2)$ donne $\\lambda e^{-\\lambda}=\\dfrac{\\lambda^2}{2}e^{-\\lambda}$, donc $\\lambda=2$. Et si l'on connaît la variance ou l'écart-type : $\\lambda=V(X)=\\sigma(X)^2$.",
+            "**Valeur la plus probable** : le plus grand entier $k\\leq\\lambda$ (deux valeurs, $\\lambda-1$ et $\\lambda$, si $\\lambda$ est entier).",
+            "**Seuil d'alerte** : le plus petit $k$ tel que $P(X\\geq k)$ soit inférieure au risque choisi (souvent 5 %) ; on calcule $P(X\\geq k)=1-P(X\\leq k-1)$ en cumulant de proche en proche.",
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: "λ inconnu, puis le seuil d'alerte (λ = 2)",
+          formula:
+            "Dans une région, la probabilité qu'aucun cas d'une maladie rare ne soit signalé un mois donné vaut $0{,}135$. Le nombre $X$ de cas par mois suit une loi de Poisson. Détermine $\\lambda$, la valeur la plus probable de $X$, puis le plus petit nombre de cas $k$ tel que $P(X\\geq k)<0{,}05$ (seuil d'alerte).",
+          steps: [
+            { tag: 'λ', text: '$e^{-\\lambda}=0{,}135$, donc $\\lambda=-\\ln(0{,}135)\\approx2{,}00$ : $\\lambda=2$' },
+            { tag: 'valeur la plus probable', text: '$\\lambda=2$ est entier : $k=1$ et $k=2$ ($P(X=1)=P(X=2)\\approx0{,}2707$)' },
+            { tag: 'cumuls', text: '$P(X\\leq4)\\approx0{,}9473$ et $P(X\\leq5)\\approx0{,}9834$' },
+            { tag: 'seuil', text: '$P(X\\geq5)\\approx1-0{,}9473$ $=0{,}0527\\geq0{,}05$, mais $P(X\\geq6)\\approx1-0{,}9834$ $=0{,}0166<0{,}05$' },
+          ],
+          result: { tag: 'conclusion', text: '$\\lambda=2$ ; valeurs les plus probables 1 et 2 ; alerte à partir de 6 cas dans le mois.' },
+        },
+        {
+          kind: 'piege',
+          text: "Le paramètre trouvé vaut pour l'intervalle de la donnée : un $\\lambda$ calculé par mois doit encore être ajusté (× 12) pour une question qui porte sur une année. Et l'écart-type d'une loi de Poisson est $\\sqrt{\\lambda}$, pas $\\lambda$.",
         },
         {
           kind: 'application',
@@ -1382,6 +2212,35 @@ export const variablesAleatoires: ChapterContent = {
             'par les autorités sanitaires.',
           domaines: ['Santé publique', 'Épidémiologie'],
         },
+        { kind: 'subheading', text: 'Choisir le bon modèle' },
+        {
+          kind: 'para',
+          text: "Tu connais maintenant cinq lois. Devant un énoncé, la première question n'est pas « quelle formule ? » mais « **quelle situation ?** » : ce que compte ou mesure la variable, et comment l'expérience se déroule.",
+        },
+        {
+          kind: 'featureTable',
+          headers: ['Loi', 'Situation typique', 'Paramètres', 'Indices dans l\'énoncé'],
+          rows: [
+            ['Binomiale $\\mathcal{B}(n\\,;p)$', '$n$ épreuves identiques et indépendantes ; $X$ compte les succès', '$n$, $p$', '« avec remise », « chaque … indépendamment », $n$ fixé'],
+            ['Hypergéométrique', '$n$ tirages **sans remise** dans une population de $N$ éléments dont $K$ succès', '$N$, $K$, $n$', '« sans remise », population petite et connue'],
+            ['Poisson', 'nombre d\'événements sur un intervalle (temps, longueur, effectif), à taux moyen constant', '$\\lambda$', '« en moyenne … par minute / par lot », pas de maximum'],
+            ['Uniforme continue', 'une valeur **au hasard** dans un intervalle, aucune zone privilégiée', '$a$, $b$', '« au hasard entre … et … »'],
+            ['Normale $\\mathcal{N}(\\mu\\,;\\sigma)$', 'une mesure qui se répartit en cloche autour d\'une moyenne', '$\\mu$, $\\sigma$', 'moyenne et écart-type donnés, tailles, masses, erreurs'],
+          ],
+        },
+        {
+          kind: 'methode',
+          label: 'Trois questions pour choisir',
+          items: [
+            "La variable **compte**-t-elle (discrète) ou **mesure**-t-elle (continue) ? (§ 4)",
+            "Si elle compte des succès sur des épreuves : le nombre d'épreuves est-il fixé, et la probabilité reste-t-elle la même d'une épreuve à l'autre (binomiale) ou change-t-elle parce qu'on tire sans remise (hypergéométrique) ? Si elle compte des événements sur un intervalle, sans nombre d'épreuves : Poisson.",
+            "Si elle mesure : toutes les valeurs d'un intervalle également probables (uniforme), ou concentration autour d'une moyenne (normale) ?",
+          ],
+        },
+        {
+          kind: 'piege',
+          text: "Aucune loi du chapitre ne convient toujours : si la probabilité change d'une épreuve à l'autre sans que ce soit un tirage sans remise (un joueur qui progresse à chaque essai, par exemple), ce n'est ni binomial ni hypergéométrique. On construit alors la loi « à la main », avec un arbre (chapitre 6) et le § 1. Et une approximation (normale ou Poisson) remplace une binomiale **seulement** quand ses conditions sont vérifiées.",
+        },
         {
           kind: 'entrainement',
           title: 'Loi de Poisson',
@@ -1404,6 +2263,7 @@ export const variablesAleatoires: ChapterContent = {
           { text: '$E(X) = \\displaystyle\\sum_i x_i \\times P(X=x_i)$' },
           { text: '$V(X) = E(X^2)-[E(X)]^2$', condition: '$E(X^2)=\\sum_i x_i^2 \\times P(X=x_i)$' },
           { text: '$\\sigma(X) = \\sqrt{V(X)}$' },
+          { text: '$E(aX+b)=a\\,E(X)+b$ ; $V(aX+b)=a^2\\,V(X)$', condition: '$\\sigma(aX+b)=|a|\\,\\sigma(X)$' },
         ],
       },
       {
@@ -1441,6 +2301,7 @@ export const variablesAleatoires: ChapterContent = {
         formulas: [
           { text: '$P(c \\le X \\le d) = \\dfrac{d-c}{b-a}$', condition: '$X$ uniforme sur $[a\\,;b]$, $[c\\,;d]$ contenu dans $[a\\,;b]$' },
           { text: '$E(X) = \\dfrac{a+b}{2} \\quad V(X) = \\dfrac{(b-a)^2}{12}$' },
+          { text: '$a+b=2E(X)$ ; $b-a=\\sqrt{12\\,V(X)}$', condition: 'retrouver $a$ et $b$' },
         ],
       },
       {
@@ -1452,6 +2313,7 @@ export const variablesAleatoires: ChapterContent = {
           { text: '$\\Phi(-z) = 1-\\Phi(z)$' },
           { text: '$P(a \\le Z \\le b) = \\Phi(b)-\\Phi(a)$' },
           { text: '$P(0 \\le Z \\le t) = \\Phi(t)-0{,}5$', condition: '$t>0$' },
+          { text: '$P(-k \\le Z \\le k) = 2\\Phi(k)-1$' },
           { text: '$x = \\mu + z \\times \\sigma$', condition: 'retour de $z$ vers $x$' },
           { text: '$68{,}3\\,\\%$ ; $95{,}4\\,\\%$ ; $99{,}7\\,\\%$', condition: 'dans $[\\mu-k\\sigma\\,;\\mu+k\\sigma]$ pour $k=1$, $2$, $3$' },
         ],
@@ -1475,6 +2337,10 @@ export const variablesAleatoires: ChapterContent = {
             condition: 'correction de continuité',
           },
           {
+            text: '$P(X\\ge k) \\approx 1-\\Phi\\!\\left(\\dfrac{k-0{,}5-\\mu}{\\sigma}\\right)$',
+            condition: 'correction de continuité',
+          },
+          {
             text: '$\\lambda=np$',
             condition: 'loi de Poisson — $n\\ge30$, $p\\le0{,}1$, $np\\le15$',
           },
@@ -1486,6 +2352,8 @@ export const variablesAleatoires: ChapterContent = {
           { text: '$P(X=k) = e^{-\\lambda}\\dfrac{\\lambda^k}{k!}$', condition: 'tout entier $k\\ge0$' },
           { text: '$E(X)=V(X)=\\lambda$' },
           { text: '$P(X=k) = P(X=k-1)\\times\\dfrac{\\lambda}{k}$', condition: 'calcul de proche en proche, $k\\ge1$' },
+          { text: '$\\lambda=-\\ln P(X=0)$', condition: '$\\lambda$ inconnu' },
+          { text: 'valeur la plus probable : le plus grand entier $k\\le\\lambda$' },
         ],
       },
     ],
@@ -1498,6 +2366,7 @@ export const variablesAleatoires: ChapterContent = {
         ['Fonction de répartition', '$F(x)=P(X\\leq x)$ — graphique en escalier'],
         ['Espérance discrète', '$E(X)=\\sum x_iP(X=x_i)$ — moyenne pondérée, jamais une moyenne simple'],
         ['Variance et écart-type', '$V(X)=E(X^2)-[E(X)]^2$ ; $\\sigma(X)=\\sqrt{V(X)}$'],
+        ['Transformer : $Y=aX+b$', '$E(Y)=aE(X)+b$ ; $V(Y)=a^2V(X)$ ; $\\sigma(Y)=|a|\\,\\sigma(X)$'],
         ['Événements contraires', 'intersection vide et union complète — jamais juste « somme $=1$ »'],
         ['Loi hypergéométrique', '$E(X)=\\dfrac{nK}{N}$ — cas particulier d\'une loi discrète'],
         ['Loi uniforme discrète sur $1, \\ldots, n$', '$E(X)=\\dfrac{n+1}{2}$, $V(X)=\\dfrac{n^2-1}{12}$ — pour ces valeurs seulement'],
@@ -1508,12 +2377,14 @@ export const variablesAleatoires: ChapterContent = {
         ['Discrète ou continue', '$\\sum p_ix_i$ devient $\\int t\\,f(t)\\,dt$ — mêmes notions, deux outils ; $\\sigma(X)=\\sqrt{V(X)}$ dans les 2 cas'],
         ['Loi uniforme continue', '$P(c\\leq X\\leq d)=\\dfrac{d-c}{b-a}$ ; $E(X)=\\dfrac{a+b}{2}$, $V(X)=\\dfrac{(b-a)^2}{12}$'],
         ['Loi normale $\\mathcal{N}(\\mu\\,;\\sigma)$', 'loi continue ; $Z=\\dfrac{X-\\mu}{\\sigma}$ ; $\\Phi(z)=P(Z\\leq z)$ ; $\\Phi(-z)=1-\\Phi(z)$'],
+        ['Table de $\\Phi$', '$z$ arrondi au centième ; à l\'envers : la case la plus proche ; $x=\\mu+z\\sigma$'],
         ['Règle empirique', '$68{,}3\\,\\%$ / $95{,}4\\,\\%$ / $99{,}7\\,\\%$ pour $k=1$, $2$, $3$ écarts-types'],
         ['Vérifier la normalité', '$\\text{moyenne} \\approx \\text{mode} \\approx \\text{médiane}$, et répartition $68{,}3$ / $95{,}4$ / $99{,}7\\,\\%$ — critère pratique, jamais une preuve'],
         ['Bayes à 3 catégories', '$P(C_j\\mid S)=\\dfrac{P(C_j)\\,P(S\\mid C_j)}{P(S)}$'],
         ['Approximation binomiale → normale', '$n>30$, $0{,}3<p<0{,}7$ : $\\mu=np$, $\\sigma=\\sqrt{np(1-p)}$, avec correction de continuité $k\\pm0{,}5$'],
         ['Loi de Poisson', '$P(X=k)=\\dfrac{e^{-\\lambda}\\lambda^k}{k!}$ ; $E(X)=V(X)=\\lambda$'],
         ['Approximation binomiale → Poisson', '$n\\geq30$, $p\\leq0{,}1$, $np\\leq15$ : $\\lambda=np$'],
+        ['Choisir le modèle', 'compter ou mesurer ; avec ou sans remise ; épreuves ou intervalle ; uniforme ou en cloche'],
       ],
     },
     entrainement: {

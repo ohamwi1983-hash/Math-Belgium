@@ -1949,36 +1949,70 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
   },
   'variables-aleatoires': {
-  variablesdiscretes: [
-    'Une variable aléatoire $X$ prend les valeurs $\\{2,3,4,5,6\\}$ avec les probabilités $P=(0,15\\,;\\,0,25\\,;\\,0,30\\,;\\,0,20\\,;\\,0,10)$. Vérifie que cette loi est valide, puis calcule $E(X)$, $V(X)$ et $\\sigma(X)$.',
-    "Un jeu propose un gain net de $-2$ € avec une probabilité $0,4$, de $+3$ € avec une probabilité $0,35$, et de $+5$ € avec une probabilité $0,25$. Calcule l'espérance de ce jeu et précise s'il est favorable, défavorable ou équitable au joueur.",
-    "Un jeu offre un gain brut de $10$ € (probabilité $0,2$), $4$ € (probabilité $0,3$) ou $-6$ € (probabilité $0,5$). On impose une mise $m$ au joueur, si bien que son gain net devient le gain brut diminué de $m$. Détermine la valeur de $m$ qui rend ce jeu équitable.",
-    "On tire sans remise $3$ éléments dans une population de $10$ éléments dont $4$ sont des succès ($N=10$, $K=4$, $n=3$). Détermine la loi de probabilité de $X$, le nombre de succès obtenus, puis calcule $E(X)$.",
-    "Un dé équilibré à $6$ faces est lancé une fois ; $X$ désigne le résultat obtenu. Calcule $E(X)$ et $V(X)$.",
-  ],
-  loibinomiale: [
-    "Une variable aléatoire $X$ suit la loi binomiale $B(5\\,;\\,0,4)$. Détermine la loi de probabilité complète de $X$ (pour $k=0$ à $5$), puis calcule $V(X)$ et $\\sigma(X)$.",
-    "On répète une épreuve de Bernoulli de probabilité de succès $p=0,1$. Détermine le plus petit nombre d'épreuves $n$ tel que la probabilité d'obtenir au moins un succès dépasse $0,9$.",
-  ],
-  loiuniformecontinue: [
-    'Une variable aléatoire $X$ suit la loi uniforme continue sur $[0\\,;\\,60]$. Calcule $E(X)$, $V(X)$ et $\\sigma(X)$.',
-  ],
-  loinormale: [
-    "Soit $X$ une variable aléatoire suivant la loi normale $N(50\\,;\\,10)$. En utilisant la règle empirique, calcule la probabilité que $X$ soit hors de l'intervalle $[30\\,;\\,70]$.",
-    'Soit $X$ une variable aléatoire suivant la loi normale $N(50\\,;\\,10)$. Calcule $P(X\\leq65)$, $P(X\\geq65)$ et $P(X\\leq35)$.',
-    'Détermine la valeur de $z$ telle que $\\Phi(z)=0,95$.',
-  ],
-  extensionsbayes: [
-    "Deux épreuves indépendantes ont respectivement une probabilité de succès $p_1=0,5$ et $p_2=0,3$. Calcule la probabilité de réussir les deux épreuves, puis détermine le nombre minimal de répétitions $n$ de cette expérience composée pour que la probabilité d'obtenir au moins un succès dépasse $0,8$.",
-    "Une compagnie d'assurance classe ses clients en 3 catégories de risque : $30\\%$ de risque faible (probabilité de sinistre $0,10$), $45\\%$ de risque moyen (probabilité de sinistre $0,20$) et $25\\%$ de risque élevé (probabilité de sinistre $0,40$). Calcule la probabilité totale qu'un client ait un sinistre, puis la probabilité qu'un client ayant eu un sinistre appartienne à la catégorie à haut risque.",
-    "Une variable aléatoire $X$ suit la loi binomiale $B(100\\,;\\,0,5)$. Vérifie que l'on peut approximer $X$ par une loi normale, détermine les paramètres $\\mu$ et $\\sigma$ de cette approximation, puis estime $P(X\\leq55)$.",
-    "Une entreprise propose 3 formules d'abonnement : Basique à $15$ € ($20\\%$ des clients), Standard à $35$ € ($30\\%$ des clients) et Premium à $60$ € (le reste des clients). Calcule l'espérance du prix payé par un client, puis la recette totale attendue sur une population de $500$ clients.",
-  ],
-  loipoisson: [
-    "Une variable aléatoire $X$ suit la loi binomiale $B(50\\,;\\,0,08)$. Vérifie que l'on peut approximer $X$ par une loi de Poisson, et détermine le paramètre $\\lambda$ de cette approximation.",
-    'Pour une variable aléatoire $X$ suivant la loi de Poisson de paramètre $\\lambda=4$, calcule $P(X\\leq1)$, puis $P(X\\geq2)$.',
-    "Un péage voit passer en moyenne $5$ voitures par minute. Détermine le paramètre $\\lambda$ du nombre de voitures passant en $15$ minutes. Une usine compte en moyenne $3$ pièces défectueuses pour $1000$ pièces produites : détermine le paramètre $\\lambda$ du nombre de pièces défectueuses dans un lot de $500$ pièces.",
-  ],
+    // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`, audit 6e ch. 8, lot F) — la
+    // clé est le badge (`exemple`) ou le label (`exempleLibre`) du bloc ; chaque énoncé reprend les
+    // nombres du cours ; une démonstration dit QUOI démontrer, jamais la méthode.
+    variablesdiscretes: [
+      { cle: 'construire la loi, calculer E(X), V(X) et σ(X)', enonce: "Une variable aléatoire $X$ prend les valeurs $2$, $3$, $4$, $5$, $6$ avec les probabilités $0{,}15$ ; $0{,}25$ ; $0{,}30$ ; $0{,}20$ ; $0{,}10$. Vérifie que cette loi est valide, puis calcule $E(X)$, $V(X)$ et $\\sigma(X)$." },
+      { cle: 'formule de König', enonce: "Démontre que, pour toute variable aléatoire discrète $X$, $V(X)=E(X^2)-[E(X)]^2$." },
+      { cle: 'ce jeu est-il favorable', enonce: "À un jeu, le gain net du joueur vaut $-2$ € avec la probabilité $0{,}4$, $3$ € avec la probabilité $0{,}35$ et $5$ € avec la probabilité $0{,}25$. Ce jeu est-il favorable, équitable ou défavorable au joueur ? Justifie." },
+      { cle: 'trouver la mise m qui rend le jeu équitable', enonce: "Un jeu offre un gain brut de $10$ € (probabilité $0{,}2$), de $4$ € (probabilité $0{,}3$) ou de $-6$ € (probabilité $0{,}5$). L'organisateur demande une mise $m$, retirée du gain brut. Détermine la mise qui rend le jeu équitable." },
+      { cle: 'tirage sans remise (10 boules, dont 4 rouges)', enonce: "Une urne contient 10 boules, dont 4 rouges. On tire 3 boules sans remise, et $X$ compte les boules rouges obtenues. Détermine la loi de probabilité de $X$, puis $E(X)$." },
+      { cle: "résultat d'un dé équilibré", enonce: "On lance un dé équilibré à 6 faces ; $X$ est le résultat obtenu. Calcule $E(X)$ et $V(X)$." },
+      { cle: 'loi uniforme sur 1, 2, …, n', enonce: "Soit $X$ une variable aléatoire uniforme sur les entiers $1, 2, \\ldots, n$. Démontre que $E(X)=\\dfrac{n+1}{2}$ et que $V(X)=\\dfrac{n^2-1}{12}$ (tu peux utiliser $\\sum_{k=1}^{n}k^2=\\dfrac{n(n+1)(2n+1)}{6}$)." },
+      { cle: 'E(aX + b) = aE(X) + b', enonce: "Soit $X$ une variable aléatoire discrète et $a$, $b$ deux réels. Démontre que $E(aX+b)=a\\,E(X)+b$, que $V(aX+b)=a^2\\,V(X)$ et que $\\sigma(aX+b)=|a|\\,\\sigma(X)$." },
+      { cle: 'des points aux euros', enonce: "À un jeu, le nombre de points $X$ gagnés a pour espérance $3$ et pour écart-type $2$. Chaque point rapporte $0{,}50$ €, et la partie coûte $1$ €. Calcule l'espérance, la variance et l'écart-type du gain net en euros, sans reconstruire sa loi." },
+    ],
+    loibinomiale: [
+      { cle: 'loi complète, espérance et écart-type de 5 tirs', enonce: "Une joueuse réussit un tir avec la probabilité $0{,}4$ ; elle tire 5 fois, ses tirs étant indépendants, et $X$ compte ses tirs réussis. Établis la loi de probabilité complète de $X$, puis calcule $E(X)$, $V(X)$ et $\\sigma(X)$." },
+      { cle: 'la somme des probabilités binomiales vaut 1', enonce: "Soit $X\\sim\\mathcal{B}(n\\,;p)$. Démontre que $\\displaystyle\\sum_{k=0}^{n}P(X=k)=1$." },
+      { cle: 'E(X) = 3p et V(X) = 3p(1 − p)', enonce: "Soit $X\\sim\\mathcal{B}(3\\,;p)$. Démontre que $E(X)=3p$ et que $V(X)=3p(1-p)$." },
+      { cle: 'E(X) = np pour toute loi binomiale', enonce: "Soit $X\\sim\\mathcal{B}(n\\,;p)$. Démontre que $E(X)=np$." },
+      { cle: 'combien de tickets pour dépasser 90 %', enonce: "Un ticket à gratter est gagnant avec la probabilité $0{,}1$, indépendamment des autres. Combien de tickets faut-il acheter, au minimum, pour que la probabilité d'avoir au moins un ticket gagnant dépasse $0{,}9$ ?" },
+      { cle: 'le plus petit n tel que', enonce: "Soit $0<p<1$ et $0<s<1$. Démontre que le plus petit entier $n$ tel que $1-(1-p)^n>s$ est le plus petit entier strictement supérieur à $\\dfrac{\\ln(1-s)}{\\ln(1-p)}$." },
+    ],
+    variablecontinue: [
+      { cle: 'P(a < X ≤ b) = F(b) − F(a) et P(X = a) = 0', enonce: "Soit $X$ une variable aléatoire continue de densité $f$ et de fonction de répartition $F$. Démontre que $P(a<X\\leq b)=F(b)-F(a)=\\displaystyle\\int_a^b f(t)\\,dt$, puis que $P(X=a)=0$." },
+      { cle: 'densité f(t) = kt sur [0 ; 2]', enonce: "Une variable aléatoire $X$ a pour densité $f(t)=kt$ sur $[0\\,;2]$. Détermine $k$, puis calcule $P(0{,}5\\leq X\\leq1)$, $E(X)$, $V(X)$ et la fonction de répartition de $X$ sur $[0\\,;2]$." },
+    ],
+    discreteoucontinue: [
+      { cle: 'classer six variables aléatoires', enonce: "Pour chacune des variables suivantes, dis si elle est discrète ou continue, et précise l'outil de calcul d'une probabilité (somme ou intégrale) : le nombre d'appels reçus par un standard en une heure ; le temps d'attente à un guichet ; le nombre de « pile » en 10 lancers d'une pièce ; la masse d'une pomme ; la note entière (sur 20) d'un élève ; l'angle où s'arrête une roue de loterie." },
+    ],
+    loiuniformecontinue: [
+      { cle: 'X uniforme sur [0 ; 60]', enonce: "La trotteuse d'une horloge arrêtée au hasard indique un nombre de secondes $X$, uniforme sur $[0\\,;60]$. Calcule $E(X)$, $V(X)$ et $\\sigma(X)$." },
+      { cle: 'loi uniforme sur [a ; b]', enonce: "Soit $X$ une variable aléatoire uniforme sur $[a\\,;b]$. Démontre que sa densité vaut $\\dfrac{1}{b-a}$, puis que $E(X)=\\dfrac{a+b}{2}$ et $V(X)=\\dfrac{(b-a)^2}{12}$." },
+      { cle: "temps d'attente d'un bus", enonce: "Un bus passe toutes les 20 minutes ; ton temps d'attente $X$ (en minutes) suit la loi uniforme sur $[0\\,;20]$. Calcule la probabilité d'attendre au plus 5 minutes, puis plus de 12 minutes, ainsi que $E(X)$ et $\\sigma(X)$." },
+      { cle: 'un intervalle qui déborde', enonce: "Un train arrive au hasard entre 7 h 10 et 7 h 30 : le nombre de minutes $X$ après 7 h suit la loi uniforme sur $[10\\,;30]$. Calcule $P(X\\leq15)$, la probabilité que le train arrive entre 7 h 20 et 7 h 40, et $E(X)$." },
+    ],
+    loinormale: [
+      { cle: 'hors de [30 ; 70]', enonce: "Les résultats à un test suivent la loi $\\mathcal{N}(50\\,;10)$. À l'aide de la règle empirique, estime la proportion des candidats dont le score est en dehors de $[30\\,;70]$, puis celle des candidats qui dépassent 70." },
+      { cle: 'Z = (X − μ) ÷ σ', enonce: "Soit $X$ une variable aléatoire d'espérance $\\mu$ et d'écart-type $\\sigma>0$. Démontre que $Z=\\dfrac{X-\\mu}{\\sigma}$ a une espérance nulle et un écart-type égal à 1." },
+      { cle: 'P(X ≤ 65), P(X ≥ 65), P(X ≤ 35)', enonce: "Les résultats à un test suivent la loi $\\mathcal{N}(50\\,;10)$. À l'aide de la table de $\\Phi$, calcule $P(X\\leq65)$, $P(X\\geq65)$ et $P(X\\leq35)$." },
+      { cle: 'Φ(−z) = 1 − Φ(z)', enonce: "Soit $Z\\sim\\mathcal{N}(0\\,;1)$ et $\\Phi$ sa fonction de répartition. Démontre que $\\Phi(-z)=1-\\Phi(z)$ pour tout réel $z$, puis que $P(-k\\leq Z\\leq k)=2\\Phi(k)-1$ pour tout $k>0$." },
+      { cle: 'effectif attendu dans une population', enonce: "La taille $X$ (en cm) des 1 200 élèves d'une école suit la loi $\\mathcal{N}(170\\,;8)$. Combien d'élèves mesurent plus de 180 cm, environ ?" },
+      { cle: 'z tel que Φ(z) = 0,95', enonce: "Détermine $z$ tel que $\\Phi(z)=0{,}95$. Les résultats d'un test suivent la loi $\\mathcal{N}(50\\,;10)$ : à partir de quel score un candidat fait-il partie des 5 % meilleurs ?" },
+      { cle: 'P(0 ≤ Z ≤ t) = 0,4', enonce: "Soit $Z\\sim\\mathcal{N}(0\\,;1)$. Détermine le réel $t>0$ tel que $P(0\\leq Z\\leq t)=0{,}4$." },
+      { cle: 'retrouver la moyenne μ', enonce: "La taille d'adultes suit une loi normale d'écart-type $6$ cm, et 10 % d'entre eux mesurent plus de 185 cm. Détermine la taille moyenne $\\mu$." },
+      { cle: "retrouver l'écart-type σ", enonce: "Une machine remplit des paquets de masse moyenne 500 g, selon une loi normale ; 2 % des paquets pèsent moins de 490 g. Détermine l'écart-type $\\sigma$ de la masse." },
+      { cle: 'deux proportions : retrouver μ et σ', enonce: "Une variable $X$ suit une loi normale, avec $P(X\\leq40)=0{,}1587$ et $P(X\\geq80)=0{,}0228$. Détermine $\\mu$ et $\\sigma$." },
+    ],
+    extensionsbayes: [
+      { cle: 'un badge à deux épreuves indépendantes', enonce: "Pour obtenir un badge, il faut réussir deux épreuves indépendantes, de probabilités de réussite $0{,}5$ et $0{,}3$. Calcule la probabilité d'obtenir le badge en une tentative, puis le nombre minimal de tentatives indépendantes pour que la probabilité de l'obtenir au moins une fois dépasse $0{,}8$." },
+      { cle: 'assurance, 3 profils de risque', enonce: "Une compagnie d'assurance classe ses clients en 3 catégories : $30\\,\\%$ à faible risque (probabilité de sinistre $0{,}10$), $45\\,\\%$ à risque moyen ($0{,}20$) et $25\\,\\%$ à haut risque ($0{,}40$). Calcule la probabilité qu'un client ait un sinistre, puis la probabilité qu'un client sinistré soit à haut risque." },
+      { cle: 'formule de Bayes à 3 catégories', enonce: "Une population est partagée en trois catégories $C_1$, $C_2$, $C_3$, et $S$ est un événement de probabilité non nulle. Démontre que $P(C_j\\mid S)=\\dfrac{P(C_j)\\,P(S\\mid C_j)}{P(C_1)\\,P(S\\mid C_1)+P(C_2)\\,P(S\\mid C_2)+P(C_3)\\,P(S\\mid C_3)}$." },
+      { cle: "100 lancers d'une pièce : approcher P(X ≤ 55)", enonce: "On lance 100 fois une pièce équilibrée ; $X$ compte les « pile ». Vérifie que l'on peut approcher la loi de $X$ par une loi normale, détermine ses paramètres, puis estime $P(X\\leq55)$." },
+      { cle: 'au moins 60 « pile », puis exactement 50', enonce: "On lance 100 fois une pièce équilibrée ; $X$ compte les « pile ». Estime $P(X\\geq60)$ et $P(X=50)$ par une loi normale, avec la correction de continuité." },
+      { cle: 'offre à 3 formules', enonce: "Une entreprise propose 3 formules d'abonnement : Basique à 15 € ($20\\,\\%$ des clients), Standard à 35 € ($30\\,\\%$) et Premium à 60 € (les autres clients). Calcule le prix moyen payé par un client, puis la recette attendue pour 500 clients." },
+    ],
+    loipoisson: [
+      { cle: 'P(X = k) = P(X = k − 1) × λ/k', enonce: "Soit $X$ une variable aléatoire de Poisson de paramètre $\\lambda$. Démontre que $P(X=k)=P(X=k-1)\\times\\dfrac{\\lambda}{k}$ pour tout entier $k\\geq1$, puis que $P(X=k)\\geq P(X=k-1)$ si et seulement si $k\\leq\\lambda$." },
+      { cle: 'approcher 𝓑(50 ; 0,08)', enonce: "Dans une production, $8\\,\\%$ des pièces sont défectueuses. On prélève 50 pièces ; $X$ compte les pièces défectueuses. Vérifie que l'on peut approcher la loi de $X$ par une loi de Poisson, et donne son paramètre." },
+      { cle: 'au plus 1 appel, au moins 2 appels', enonce: "Un standard reçoit en moyenne 4 appels par minute ; le nombre $X$ d'appels en une minute suit la loi de Poisson de paramètre $4$. Calcule $P(X\\leq1)$, puis $P(X\\geq2)$." },
+      { cle: 'ajuster λ au temps', enonce: "Un péage voit passer en moyenne 5 voitures par minute : détermine le paramètre $\\lambda$ du nombre de voitures en 15 minutes. Une usine compte en moyenne 3 pièces défectueuses pour 1 000 produites : détermine le paramètre $\\lambda$ du nombre de pièces défectueuses dans un lot de 500 pièces." },
+      { cle: 'tend vers exp(−λ)', enonce: "Soit $\\lambda>0$. Démontre que $\\left(1-\\dfrac{\\lambda}{n}\\right)^n$ tend vers $e^{-\\lambda}$ quand $n$ tend vers $+\\infty$." },
+      { cle: 'E(X) = λ pour une loi de Poisson', enonce: "Soit $X$ une variable aléatoire de Poisson de paramètre $\\lambda$. En admettant que $\\displaystyle\\sum_{j=0}^{+\\infty}\\dfrac{\\lambda^j}{j!}=e^{\\lambda}$, démontre que $E(X)=\\lambda$." },
+      { cle: "λ inconnu, puis le seuil d'alerte", enonce: "Dans une région, la probabilité qu'aucun cas d'une maladie rare ne soit signalé un mois donné vaut $0{,}135$ ; le nombre de cas par mois suit une loi de Poisson. Détermine son paramètre, la valeur la plus probable, puis le plus petit nombre de cas $k$ tel que $P(X\\geq k)<0{,}05$." },
+    ],
   },
 }
 
@@ -2049,7 +2083,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-reciproques-cyclometriques', 'fonctions-logarithmes', 'fonctions-exponentielles', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees', 'probabilites', 'analyse-combinatoire']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-reciproques-cyclometriques', 'fonctions-logarithmes', 'fonctions-exponentielles', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees', 'probabilites', 'analyse-combinatoire', 'variables-aleatoires']
 
 /** Bloc de DÉMONSTRATION (« Démonstration — … », « Démonstration alternative — … ») : seuls ces
  * blocs alimentent le type « Formule + démonstration ». Les exemples résolus (calculs) ne sont plus
