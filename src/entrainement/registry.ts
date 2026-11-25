@@ -293,6 +293,8 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '5gen74': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen74').then((m) => ({ default: m.App5gen74 }))),
   '5gen75': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen75').then((m) => ({ default: m.App5gen75 }))),
   '5gen43': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen43').then((m) => ({ default: m.App5gen43 }))),
+  // --- 5e, chapitre 6 : Statistique à deux variables ---
+  '5gen82': entree(CH_5E_STATISTIQUE_DEUX_VARIABLES, () => import('./5e-4h/App5gen82').then((m) => ({ default: m.App5gen82 }))),
   '5gen68': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen68').then((m) => ({ default: m.App5gen68 }))),
   '5gen69': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen69').then((m) => ({ default: m.App5gen69 }))),
   '5gen70': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen70').then((m) => ({ default: m.App5gen70 }))),
@@ -470,4 +472,10 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '6gen136': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen136').then((m) => ({ default: m.App6gen136 }))),
   '6gen137': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen137').then((m) => ({ default: m.App6gen137 }))),
   '6gen73': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen73').then((m) => ({ default: m.App6gen73 }))),
+  '6gen138': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen138').then((m) => ({ default: m.App6gen138 }))),
+  '6gen139': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen139').then((m) => ({ default: m.App6gen139 }))),
+  '6gen140': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen140').then((m) => ({ default: m.App6gen140 }))),
+  '6gen141': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen141').then((m) => ({ default: m.App6gen141 }))),
+  '6gen142': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen142').then((m) => ({ default: m.App6gen142 }))),
+  '6gen143': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen143').then((m) => ({ default: m.App6gen143 }))),
 }

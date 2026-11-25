@@ -43,6 +43,7 @@ import { PlaneSketch } from './PlaneSketch'
 import { StepFunction } from './StepFunction'
 import { ProductAreaSquare } from './ProductAreaSquare'
 import { IntervalComparison } from './IntervalComparison'
+import { ScatterPlot } from './ScatterPlot'
 
 const DEFAULT_CAPTIONS: Partial<Record<IllustrationSpec['kind'], string>> = {
   machine: 'x entre dans la machine f, il en ressort f(x)',
@@ -138,6 +139,8 @@ function renderSvg(spec: IllustrationSpec) {
       return <ProductAreaSquare {...spec} />
     case 'intervalComparison':
       return <IntervalComparison {...spec} />
+    case 'scatterPlot':
+      return <ScatterPlot {...spec} />
   }
 }
 

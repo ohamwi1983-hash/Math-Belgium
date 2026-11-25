@@ -269,3 +269,58 @@
   .site-header .menu-compte-lien { width: 44px; padding: 0; justify-content: center; font-size: 0; gap: 0; }
   .site-header .menu-compte-lien svg { width: 20px; height: 20px; }
 }
+
+/* ---------- 6. Onglet « Aides » (planches 07 et 09, lot A2) ----------
+   Règle / masque, un bloc à la fois et loupe : `components/lecture/aidesLecture.css` (chargé avec leur
+   code, seulement quand l'élève les active). Ici, ce qui doit être juste DÈS l'affichage (attributs posés
+   par le script en ligne d'`index.html`) : air autour des signes, correspondances, exemples guidés. */
+
+/* Couleurs des correspondances (texte ≥ 4,5:1 sur la surface ET sur le fond d'un tiroir d'exemple, dans
+   les 4 thèmes) ; jamais la couleur seule : chaque couleur a son trait (plein, tirets, double). */
+:root { --corresp-1: #1f5f9e; --corresp-2: #5b4ea3; --corresp-3: #9a4a12; }
+@media (prefers-color-scheme: dark) { :root { --corresp-1: #7fb6f0; --corresp-2: #b3a6f0; --corresp-3: #f0a262; } }
+:root:is([data-theme="clair"], [data-theme="creme"]) { --corresp-1: #1f5f9e; --corresp-2: #5b4ea3; --corresp-3: #8f4410; }
+:root[data-theme="sombre"] { --corresp-1: #7fb6f0; --corresp-2: #b3a6f0; --corresp-3: #f0a262; }
+:root[data-theme="contraste"] { --corresp-1: #0b3d75; --corresp-2: #3d2f8f; --corresp-3: #6b2c00; }
+
+@media screen {
+  /* Plus d'air autour de =, +, −, × (KaTeX : `.mrel`, `.mbin` — un « − » de signe est un `.mord`, il
+     reste collé à son nombre). Jamais dans un indice, un exposant, les bornes d'une somme ou l'indice
+     d'une racine ; aucun espacement des lettres. */
+  :root[data-signes="oui"]:not(:has(.projection)) .katex :is(.mbin, .mrel) { margin-left: 0.13em; margin-right: 0.13em; }
+  :root[data-signes="oui"]:not(:has(.projection)) .katex :is(.msupsub, .op-limits, .root) :is(.mbin, .mrel) { margin-left: 0; margin-right: 0; }
+
+  /* Correspondances (`\htmlClass{m1}{…}` dans quelques exemples clés) : même couleur ET même trait. */
+  :root[data-correspondances="oui"]:not(:has(.projection)) .katex .enclosing:is(.m1, .m2, .m3) {
+    display: inline-block; padding-bottom: 0.1em; border-bottom: 0.11em solid currentColor;
+  }
+  :root[data-correspondances="oui"]:not(:has(.projection)) .katex .enclosing.m1 { color: var(--corresp-1); }
+  :root[data-correspondances="oui"]:not(:has(.projection)) .katex .enclosing.m2 { color: var(--corresp-2); border-bottom-style: dashed; }
+  :root[data-correspondances="oui"]:not(:has(.projection)) .katex .enclosing.m3 { color: var(--corresp-3); border-bottom: 0.25em double currentColor; padding-bottom: 0.04em; }
+  .corresp-legende { margin: 0 0 12px; font: 400 14px/1.6 var(--sans); color: var(--ink-soft); }
+  .corresp-legende .corresp-paire { white-space: nowrap; color: var(--ink); }
+
+  /* Exemples résolus guidés (activé d'office ; « libres » = rendu d'avant) : l'étape en cours (la
+     dernière montrée) entourée, les précédentes plus discrètes (texte `--ink-soft`, ≥ 6:1 : toujours
+     lisibles). Quand le résultat est montré (`pas-fin`), c'est lui l'étape en cours ; après « Tout
+     montrer » (`pas-tout`), plus rien n'est mis en avant. Pure règle CSS : aucun DOM ajouté. */
+  :root:not([data-exemples="libres"]) .pas-a-pas:not(.pas-tout, .pas-fin) > .pas-liste > li:last-child {
+    margin: -8px -10px; padding: 8px 10px; border: 2px solid var(--sky); border-radius: 10px; background: var(--surface);
+  }
+  :root:not([data-exemples="libres"]) .pas-a-pas:not(.pas-tout) > .pas-liste > li:is(:not(:last-child), .pas-fin *) { color: var(--ink-soft); }
+  :root:not([data-exemples="libres"]) .pas-a-pas:not(.pas-tout) > .pas-liste > li:not(:last-child) .pas-num,
+  :root:not([data-exemples="libres"]) .pas-a-pas.pas-fin > .pas-liste > li .pas-num {
+    background: var(--surface); color: var(--sky-ink); box-shadow: inset 0 0 0 2px var(--sky);
+  }
+  :root:not([data-exemples="libres"]) .pas-libre:not(.pas-tout, .pas-fin) > .pas-blocs > :last-child:not(:first-child) {
+    margin-left: -10px; margin-right: -10px; padding: 8px 10px; border: 2px solid var(--sky); border-radius: 10px; background: var(--surface);
+  }
+  .pas-ecouter {
+    display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 14px; margin-left: auto;
+    border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink);
+    font: 500 14.5px/1.2 var(--sans); cursor: pointer;
+  }
+  .pas-ecouter:hover { border-color: var(--sky); color: var(--sky-ink); }
+  .pas-ecouter:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+}
+@media print { .pas-ecouter, .corresp-legende { display: none !important; } }

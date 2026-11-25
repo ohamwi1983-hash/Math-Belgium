@@ -70,6 +70,7 @@ const TITRES_COURTS: Record<string, string> = {
   suites: "Suites",
   "limites-asymptotes": "Limites",
   "derivees-applications": "Dérivées",
+  "statistique-deux-variables": "Statistique à deux variables",
   "fonctions-reciproques-cyclometriques": "Fonctions réciproques",
   "fonctions-exponentielles": "Exponentielles",
   "fonctions-logarithmes": "Logarithmes",

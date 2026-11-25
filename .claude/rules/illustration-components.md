@@ -109,6 +109,20 @@ figure/diagram-frame/figcaption pour toute illustration ; bascule sur `Illustrat
   contre-exemple barré optionnel. Distinct de `categoricalBarChart`, qui dessinerait deux barres
   séparées : ici c'est le partage d'UNE MÊME barre qui porte le sens.
 
+- `scatterPlot` (5e ch. 6) — nuage de points d'une série à deux variables. Axes au bord gauche et au bord bas du cadre
+  (un nuage statistique contient rarement l'origine), brisure d'axe dessinée quand `xMin > 0` ou `yMin > 0`. Options :
+  `lines` (droites y = ax + b coupées au cadre ; l'étiquette se place du côté libre du trait — ancre « end » au-dessus
+  d'une droite qui monte, « start » au-dessus d'une droite qui descend, l'inverse avec `labelPos: 'below'` — jamais
+  centrée sur le trait), `marks` (cibles G, G₁, G₂ : anneau + point ; `labelPos` parmi 8 positions dont
+  `'below-right'`… pour un point posé sur une droite), `residuals` (écarts verticaux ; `squares` : de VRAIS carrés à
+  l'écran, côté = longueur en pixels de l'écart, à droite du segment sauf au bord droit), `quadrants` (axes pointillés
+  par G, signes + / − dans les coins, `rectangles` verts / rouges selon le signe du produit des écarts), `bands`
+  (bandes verticales, étiquette en bas de la bande), `compact` (petits nuages en `illustrationGroup`). Id du marqueur
+  de flèche par `useId` (plusieurs nuages par page), `markerUnits="userSpaceOnUse"` compensé (strokeWidth 1,5).
+  Graduations en « − » et virgule décimale ; étiquettes par `mathLabelTspans` (`G_1`). Seules classes du thème
+  (`svg-accent`, `svg-band-good`…), aucun ajout à `index.css`. Piège relevé : un point remarquable au bord droit avec
+  `labelPos: 'right'` sort du cadre — élargir `xMax` ou placer l'étiquette au-dessus.
+
 Toutes les illustrations utilisent les classes CSS `svg-ink` / `svg-line` / `svg-accent` /
 `svg-good` / `svg-bad` / `svg-faint` définies dans `src/index.css`, qui pointent vers les variables
 de thème — elles s'adaptent donc automatiquement au thème sombre.
