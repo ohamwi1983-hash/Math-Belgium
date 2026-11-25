@@ -240,6 +240,10 @@ export type InteractiveWidgetTag =
   | 'trois-miroirs-widget'
   | 'dandelin-cone-widget'
   | 'reduire-translation-widget'
+  | 'droite-conique-widget'
+  | 'tangente-dedoublee-widget'
+  | 'triangle-focal-widget'
+  | 'loran-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

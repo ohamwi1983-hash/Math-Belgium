@@ -1012,6 +1012,13 @@ export const coniques: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'triangle-focal-widget',
+          label: 'Manipule toi-même : le triangle focal',
+          caption:
+            'Fais glisser P sur l’ellipse : les rayons focaux donnés par la formule, $|PF|=a-ex_P$ et $|PF\'|=a+ex_P$, sont ceux qu’on mesure, et leur somme reste 2a. L’angle θ = F′PF et l’aire du triangle s’affichent, l’aire calculée de trois façons (½ · |PF| · |PF′| · sin θ, base × hauteur ÷ 2 et $b^2\\tan\\frac{\\theta}{2}$). En mode « Angle imposé », choisis θ : au-delà de l’angle maximal, atteint aux sommets (0 ; ±b), aucun point P ne convient.',
+        },
+        {
           kind: 'piege',
           label: 'Croire que |PF| = |PF′| = a',
           text:
@@ -1210,6 +1217,13 @@ export const coniques: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'droite-conique-widget',
+          label: 'Manipule toi-même : droite et conique',
+          caption:
+            'Choisis une conique et règle la droite y = mx + k (ou une verticale) : la substitution, l’équation obtenue et son discriminant Δ s’écrivent en valeurs exactes. Δ > 0 : sécante ; Δ = 0 : tangente ; Δ < 0 : extérieure. Rends la droite parallèle à une asymptote (y = 2x + 1 pour l’hyperbole) ou à l’axe de la parabole (y = 3) : le terme en x² disparaît et il reste un seul point — pourtant, la droite n’est pas tangente. « Garder la droite tangente » calcule k par Δ = 0.',
+        },
+        {
           kind: 'astuce',
           label: "Réduire l'équation de la conique pour se contrôler",
           text:
@@ -1338,6 +1352,13 @@ export const coniques: ChapterContent = {
             caption:
               "Tangente à l'ellipse $\\dfrac{x^2}{25}+\\dfrac{y^2}{16}=1$ au point $P(3;3{,}2)$ : droite $3x+5y=25$, de pente $-\\dfrac{3}{5}$. Elle touche l'ellipse en $P$ et ne la recoupe nulle part.",
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'tangente-dedoublee-widget',
+          label: 'Manipule toi-même : tangente et forme dédoublée',
+          caption:
+            'Fais glisser P sur l’ellipse, l’hyperbole ou la parabole y² = 4x : la tangente en P est tracée et son équation dédoublée s’écrit en direct ($x^2$ devient $x\\cdot x_P$, $y^2$ devient $y\\cdot y_P$, $x$ devient $\\frac{x+x_P}{2}$). La même droite est retrouvée par la dérivée de la fonction dont le graphique contient P (moitié surlignée). Amène P sur un sommet de l’axe focal : la dérivée n’existe plus, la tangente est verticale, et la forme dédoublée la donne quand même.',
         },
         {
           kind: 'piege',
@@ -1687,6 +1708,13 @@ export const coniques: ChapterContent = {
             'temps de signal (cette fois depuis des satellites), repose sur exactement le ' +
             'même principe mathématique.',
           domaines: ['Navigation', 'Géolocalisation'],
+        },
+        {
+          kind: 'atelier',
+          tag: 'loran-widget',
+          label: 'Manipule toi-même : le LORAN',
+          caption:
+            'Chaque paire de stations mesure une différence de distances d = |MA| − |MB| (la vitesse des ondes multipliée par le décalage Δt) : le navire est sur une seule branche d’hyperbole de foyers A et B, celle du côté de la station la plus proche. Fais glisser le navire N ou les stations, ou règle d₁ et d₂. La seconde paire donne une seconde branche : leurs points communs sont les positions possibles — parfois deux (préréglage « Deux positions possibles »), et il faut alors une autre information pour choisir.',
         },
         {
           kind: 'entrainement',

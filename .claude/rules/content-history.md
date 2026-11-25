@@ -6200,3 +6200,56 @@ somme ou différence = |MM′|, rapport = sin θ / cos 30°) : 0 faux. Gestes au
 panneau : P glissé (ellipse, puis seconde branche), F glissé, P promené (trace), point d'impact glissé, P dans la vraie
 forme, boutons ; aucun défilement du panneau pendant un glisser. Épinglage dans le panneau : 0 KO à 390 × 664 et
 375 × 667 (8 ateliers du chapitre). Scripts et captures : `scratchpad/g1-6e10/`.
+
+## 6e (6h), Chapitre 10 — lot G de l'audit, seconde moitié (4 ateliers, agent G2, 25/11/2026)
+
+Quatre blocs `atelier` ajoutés, seuls (aucun autre bloc touché), placés par ancre solide (le cours est réécrit en
+parallèle). Même style que G1 : `geo-analytique-commun.js` à fenêtre FIXE et ORTHONORMÉ, `katex-shadow.js`, curseurs
+− / +, `placeurEtiquettes`, figure dans une `<svg>` sans bouton dans son conteneur ; `coniques-commun.js` réutilisé tel
+quel (rationnels exacts, tracés, chemins découpés, arcs d'angle), rien n'y est modifié. Convention y² = 2px partout.
+- **`triangle-focal-widget`** (§ 3 A, juste après la figure du triangle FPF′ de l'exemple |PF| = 2|PF′|) : a et b
+  entiers (b < a), P glissé sur l'ellipse ; |PF| = a − e·x_P et |PF′| = a + e·x_P comparés aux longueurs MESURÉES,
+  somme 2a, encadrement a − c ≤ |PF| ≤ a + c (exact) ; θ = F′PF mesuré, θ_max aux sommets (0 ; ±b) avec
+  sin(θ_max/2) = e ; aire de trois façons (½·|PF|·|PF′|·sin θ, c·|y_P|, b²·tan(θ/2)). Mode « Angle imposé » : θ au
+  degré, les quatre points construits (rayons racines de t² − 2at + 2b²/(1 + cos θ)) ou « aucun point » au-delà de
+  θ_max (le produit 2b²/(1 + cos θ) dépasserait a²). Préréglage « Exemple du cours » avec ses valeurs exactes (10/3,
+  20/3, cos θ = 11/25, aire 8√14/3).
+- **`droite-conique-widget`** (§ 4, juste après la figure de la droite qui coupe l'hyperbole de l'exemple résolu ;
+  base `droite-cercle-widget` du 4e, réécrite) : ellipse x² + 4y² = 8 et parabole y² = 2x (exemples du cours),
+  hyperbole 4x² − y² = 4 et hyperbole d'axe vertical y² − 4x² = 4 ; droite y = mx + k (m, k au pas de 1/4, deux
+  poignées : ordonnée à l'origine, pente) ou x = h. Substitution écrite en valeurs EXACTES (nombres p + q√r), équation
+  à coefficients entiers premiers entre eux (premier positif), Δ = B² − 4AC, points en fractions ou racines
+  simplifiées ; « Δ a le signe de 8m² + 2 − k² » (selon la conique). Verdicts : sécante, tangente (point double),
+  extérieure, et le cas C8 de l'audit — coefficient de x² nul (parallèle à une asymptote ou à l'axe) : premier degré,
+  UN point SANS tangence (y = 2x + 1 → (−5/4 ; −3/2), y = 3 → (9/2 ; 3)) — ou aucun point (l'asymptote elle-même).
+  « Garder la droite tangente » : k par Δ = 0 (racine exacte, « Autre tangente » pour le signe), la droite roule quand
+  m change ; tangentes verticales x = ±2√2, x = ±1, x = 0, aucune pour l'hyperbole verticale. **Bug évité, à retenir**
+  : pour l'hyperbole, k² = a²m² − b² = 0 (m = ±b/a) donne l'ASYMPTOTE, pas une tangente — condition stricte k² > 0
+  (le panneau le dit) ; trouvé par le balayage.
+- **`tangente-dedoublee-widget`** (§ 5, juste après la figure de la tangente à l'ellipse en P(3 ; 3,2)) : ellipse
+  x²/25 + y²/16 = 1, hyperbole x²/9 − y²/16 = 1 (deux branches), parabole y² = 4x (p = 2) ; P glissé, AIMANTÉ aux
+  points à coordonnées rationnelles simples (énumérés : x = n/d, d ≤ 6, y² carré rationnel ; parabole y = n/2) :
+  valeurs exactes là (vérification « P est sur la conique », forme dédoublée avec les nombres, forme entière ax + by = c,
+  y = mx + q ; pente −b²x_P/(a²y_P), b²x_P/(a²y_P) ou p/y_P, et y − y_P = m(x − x_P)), valeurs approchées ailleurs ;
+  demi-courbe de la fonction dérivée surlignée ; sommets : pas de pente, tangente verticale donnée par la forme
+  dédoublée (x = ±5, x = ±3, x = 0).
+- **`loran-widget`** (§ 6, juste après l'application « Trouver sa position en mer », avant la carte 6gen63) : deux
+  paires de stations glissées sur les nœuds (1 carreau = 100 km), différence d = |MA| − |MB| au curseur (pas 0,1,
+  |d| < |AB|) ou lue sur le navire N glissé ; Δt = d·100 km / 300 000 km/s en µs ; UNE branche (côté de la station la
+  plus proche), médiatrice pour d = 0 ; points communs par dichotomie le long de la première branche (jusqu'à 40
+  carreaux, hors cadre signalés) : aucun, un, ou deux (« Deux positions possibles » : A₂(−3 ; −3), B₂(2 ; −2), N(1,5 ; 3)
+  et N′(1,74 ; −4,47)) ; bouton « Seconde paire » (une seule mesure = toute une branche). Préréglages : figure du cours
+  (N(12/√7 ; 12/√7)), deux positions, Δt = 0.
+Vérifié (Vite, page réelle, panneau, iPhone 13 clair / sombre et 1 280 px) : 0 erreur console, scrollWidth 390,
+0 `.katex-error`, 0 KaTeX qui déborde, Shadow DOM sans `^ $ \ NaN undefined Infinity`, 0 étiquette SVG rognée ;
+balayages contre un recalcul INDÉPENDANT en flottants, à partir de ce qui est DESSINÉ (SVG ramené au repère) et
+AFFICHÉ (sources LaTeX lues par un espion sur `katex.renderToString`) : 4 718 réglages droite / conique (toute la grille
+m, k, h des 4 coniques + mode tangent : verdict, nombre et valeur exacte des points, points sur la conique, signe de Δ,
+points et droite dessinés), 1 604 positions de P (P sur la conique, tangente ⟂ gradient et par P, 376 positions
+exactes : équation entière proportionnelle, pente exacte, 54 sommets), 3 015 positions + 2 700 angles imposés du
+triangle focal (rayons formule = mesurés, θ, trois aires, point construit = point trouvé à part par dichotomie,
+existence ⟺ cos θ ≥ 1 − 2e²), 600 configurations LORAN aléatoires (branches dessinées, 747 positions affichées vérifiant
+les deux différences, positions dans le cadre = celles d'une recherche indépendante en polaire depuis B₂) : 0 faux.
+Gestes au doigt (CDP) et à la souris dans le panneau : poignées k et pente, P aimanté, P promené, navire et station
+glissés ; aucun défilement du panneau pendant un glisser. Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667
+(12 ateliers du chapitre). Scripts et captures : `scratchpad/g2-6e10/`.
