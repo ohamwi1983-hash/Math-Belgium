@@ -1096,6 +1096,31 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   `generateurs6e/adaptateurCombinatoire.ts`, en attendant le lot E). Codes : catalogues gardés dans leur
   ordre, ajouts EN FIN (6gen43 `C_arrangement`, 6gen44 `E_anagrammes`, 6gen45 `D_pascal`) ; tous les
   `?code=` des six générateurs rouvrent un exercice différent d'avant (générateurs refaits).
+- **6e ch. 8 (lots B et C, 6gen49–6gen53)** : les cinq générateurs passent sur le socle du ch. 7
+  (`AppCombinatoire` / `EcranCombinatoire` / `sessionCombinatoire`, sans changer le ch. 7 : ajouts
+  facultatifs `sousTitre`, `complement` — outil rendu sous la consigne de l'écran, visible quand l'énoncé
+  se replie —, entrées `retiree` filtrées du sélecteur ; attente `{ verif }` dans `attentesCombinatoire.ts`
+  = vérification propre au générateur, `refus` sans tentative + `statut`). Lecture des valeurs réelles
+  `moteur6e/saisieVariablesAleatoires.ts` (exacte d'abord par `saisieCombinatoire`, sinon e, ln, √, « 19! »,
+  « % », milliers) : `valeurArrondie` (consigne « arrondie à 10⁻ᵈ », plusieurs cibles — table OU
+  calculatrice —, tolérance d'une demi-unité par terme pour une somme de termes arrondis ; un décimal trop
+  court refusé sans tentative SEULEMENT s'il est l'arrondi juste à sa précision), `valeurExacte` (arrondi
+  juste refusé sans tentative), `valeurExacteOuArrondie`, `valeurParmi` (lecture inverse : deux cases
+  voisines), `entier`, `inequationEnN` (jugée par son ensemble de solutions sur une grille de n, loin de la
+  frontière : « 1 − 0,9ⁿ > 0,9 », « 0,9ⁿ < 0,1 », « ≥ » équivalents ; `isolee` exige n seul). Probabilités
+  exactes par la nature `probabilite` du socle. Table de Φ : valeurs `lib/tablePhi.ts` (z 0,00–3,49, série
+  de erf), composant PARTAGÉ `entrainement/components/TablePhi.tsx` (repliable, défilement interne,
+  colonne des z collée) — à réutiliser pour l'annexe papier (lot E) et par le cours. Figures
+  `components6e/CourbeGauss.tsx` (aires hachurées, borne inconnue nommée), `TableauLoi.tsx` (vrai tableau,
+  défile dans son bloc), `DiagrammeBarres.tsx`. Adaptateurs PROVISOIRES `generateurs6e/adaptateurVariablesAleatoires.ts`
+  (mêmes textes que l'écran, situation en prose, une question par écran, réponses au corrigé ;
+  `phasesPapier`, `donneesPapier`) en attendant le lot E (corrigé « comme au tableau » : emplacement
+  `config.corrigeDetaille` de `AppCombinatoire`, aujourd'hui l'explication du format). Codes : 6gen49,
+  6gen51 (14 identifiants gardés, `C_superieure`, `D_superieure` EN FIN), 6gen53 inchangés en indices ;
+  6gen50 et 6gen52 : variantes retirées gardées en place (`retiree: true`, un ancien code rouvre un tirage
+  libre), 6gen50 `B_loi` EN FIN ; tous les exercices tirés diffèrent d'avant (générateurs refaits).
+  Profils provisoires : 6gen51 `exacte` pour A, B et C/D « ≤, ≥, centrée » (NormCD / InvNormCD), rien pour
+  « depuis 0 » et E ; `calculatriceIndispensable` 6gen50 `C_trouverN`, 6gen52 A, 6gen53 B.
 - **6e ch. 7 (lot E, papier de 6gen43–6gen48, notés, corrigé « comme au tableau »)** : adaptateur COMMUN
   `generateurs6e/adaptateurCombinatoire.ts::construireAdaptateurCombinatoire` (le générateur ne décrit que
   sa situation papier, ses questions, sa brève, son corrigé, son barème, ses critères et son profil ;

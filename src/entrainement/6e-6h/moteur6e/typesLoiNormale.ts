@@ -1,110 +1,28 @@
 import type { ExerciceLoiNormale } from "../core6e/loiNormale.types";
-import type { ReglagesSession6e } from "../core6e/session6e.types";
-import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
-import type { ValeursReferenceLoiNormale } from "./verificationLoiNormale";
 
 /**
- * Couche B (6e) — types de session pour `6gen51`. 5 familles, longueur de chaîne D'ÉCRANS variable
- * — mirroir du patron `phaseInitiale`/`phaseApres` de `typesCalculAires.ts` (6gen26) : `phaseApres`
- * prend ICI un 2e paramètre `exercice` (familles B et E ont un écran 3 OPTIONNEL, présent
- * uniquement si `exercice.population !== undefined` — voir `core6e/loiNormale.types.ts`).
- *
- * **`calculerReference` — injecté depuis l'EXTÉRIEUR, exactement comme `generateur`** : ce
- * générateur est le premier du chantier où la vérification a besoin d'une valeur DÉRIVÉE (`Phi`/
- * `PhiInverse`, Couche A) plutôt que d'un simple champ de `exercice`. Comme `moteur6e/` n'importe
- * JAMAIS `generateurs6e/` (règle non négociable CLAUDE.md), cette fonction est fournie par
- * l'appelant (`ui6e/formatLoiNormale.ts`, `calculerReferenceLoiNormale`, qui LUI a le droit
- * d'importer les 2 couches) et stockée dans l'état de session comme une boîte noire — mirroir
- * exact du champ `generateur: () => ExerciceLoiNormale` déjà présent sur tous les moteurs 6e.
+ * Écrans de `6gen51` (socle commun `sessionCombinatoire.ts`) — un choix fermé est toujours SEUL sur son
+ * écran (audit, G17 : le champ voisin recouvrait « Symétrie nécessaire », l'exercice ne pouvait pas
+ * être terminé).
+ * - A : écriture avec Φ (choix), probabilité.
+ * - B : z, écriture avec Φ (choix), probabilité, effectif (si une population est donnée).
+ * - C : équation de table (choix), t.
+ * - D : équation de table (choix), z, borne a.
+ * - E : nombre d'écarts-types, proportion, effectif (si une population est donnée).
  */
+export type PhaseLoiNormale = "aForme" | "aProba" | "bZ" | "bForme" | "bProba" | "bEffectif" | "cEquation" | "cT" | "dEquation" | "dZ" | "dA" | "eK" | "eProportion" | "eEffectif";
 
-export type PhaseLoiNormale = "aEcran1" | "aEcran2" | "bEcran1" | "bEcran2" | "bEcran3" | "cEcran1" | "cEcran2" | "dEcran1" | "dEcran2" | "dEcran3" | "eEcran1" | "eEcran2" | "eEcran3";
-
-export type CalculerReferenceLoiNormale = (exercice: ExerciceLoiNormale, phase: PhaseLoiNormale) => ValeursReferenceLoiNormale;
-
-export function phaseInitiale(exercice: ExerciceLoiNormale): PhaseLoiNormale {
-  switch (exercice.famille) {
+export function phasesPourExercice(e: ExerciceLoiNormale): PhaseLoiNormale[] {
+  switch (e.famille) {
     case "A":
-      return "aEcran1";
+      return ["aForme", "aProba"];
     case "B":
-      return "bEcran1";
+      return e.population === null ? ["bZ", "bForme", "bProba"] : ["bZ", "bForme", "bProba", "bEffectif"];
     case "C":
-      return "cEcran1";
+      return ["cEquation", "cT"];
     case "D":
-      return "dEcran1";
+      return ["dEquation", "dZ", "dA"];
     case "E":
-      return "eEcran1";
+      return e.population === null ? ["eK", "eProportion"] : ["eK", "eProportion", "eEffectif"];
   }
-}
-
-export function phaseApres(phase: PhaseLoiNormale, exercice: ExerciceLoiNormale): PhaseLoiNormale | "termine" {
-  switch (phase) {
-    case "aEcran1":
-      return "aEcran2";
-    case "aEcran2":
-      return "termine";
-    case "bEcran1":
-      return "bEcran2";
-    case "bEcran2":
-      return exercice.famille === "B" && exercice.population !== undefined ? "bEcran3" : "termine";
-    case "bEcran3":
-      return "termine";
-    case "cEcran1":
-      return "cEcran2";
-    case "cEcran2":
-      return "termine";
-    case "dEcran1":
-      return "dEcran2";
-    case "dEcran2":
-      return "dEcran3";
-    case "dEcran3":
-      return "termine";
-    case "eEcran1":
-      return "eEcran2";
-    case "eEcran2":
-      return exercice.famille === "E" && exercice.population !== undefined ? "eEcran3" : "termine";
-    case "eEcran3":
-      return "termine";
-  }
-}
-
-/** Liste ORDONNÉE des phases réellement traversées par CET exercice précis — mirroir 6gen26. */
-export function phasesPourExercice(exercice: ExerciceLoiNormale): PhaseLoiNormale[] {
-  const phases: PhaseLoiNormale[] = [];
-  let phase: PhaseLoiNormale | "termine" = phaseInitiale(exercice);
-  while (phase !== "termine") {
-    phases.push(phase);
-    phase = phaseApres(phase, exercice);
-  }
-  return phases;
-}
-
-export interface ResultatExerciceLoiNormale {
-  exercice: ExerciceLoiNormale;
-  scores: Partial<Record<PhaseLoiNormale, number>>;
-}
-
-export interface EtatSessionLoiNormale {
-  reglages: ReglagesSession6e;
-  generateur: () => ExerciceLoiNormale;
-  calculerReference: CalculerReferenceLoiNormale;
-  exerciceCourant: ExerciceLoiNormale;
-  phase: PhaseLoiNormale;
-  etapeCourante: EtatEtapeTentatives;
-  niveauAide: number;
-  scoresPartiels: Partial<Record<PhaseLoiNormale, number>>;
-  /** Vrai signal "révélé" par phase, peuplé depuis `etapeCourante.revelee` à la clôture — jusqu'au
-   * 2025-10, le récapitulatif le déduisait de `scoresPartiels[phase] === 0`, heuristique non
-   * fiable ici : l'ancienne pénalité d'aide (supprimée), soustraite APRÈS le score de tentatives, pouvait amener une
-   * RÉUSSITE fortement aidée à exactement 0 (faux "révélé") — corrigé pendant le balayage
-   * générique (point A). */
-  revelesPartiels: Partial<Record<PhaseLoiNormale, boolean>>;
-  /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans
-   * `soumettreReponseEcran`, jamais recalculé depuis le score. Pilote la puce jaune "correcte avec
-   * aide" de `ProgressionPuces` — mirroir `aidePartiels` de `typesLogarithmesProblemes.ts`. */
-  aidePartiels: Partial<Record<PhaseLoiNormale, boolean>>;
-  indexExercice: number;
-  resultats: ResultatExerciceLoiNormale[];
-  terminee: boolean;
-  derniereTransitionRevelee: boolean;
 }

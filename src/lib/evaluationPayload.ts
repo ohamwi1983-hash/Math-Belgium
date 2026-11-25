@@ -225,7 +225,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'variables-aleatoires', sectionId: 'variablesdiscretes', generatorId: '6gen49', label: '' },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'loibinomiale', generatorId: '6gen50', label: '' },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'loinormale', generatorId: '6gen51', label: '' },
-  { chapitreSlug: 'variables-aleatoires', sectionId: 'extensionsbayes', generatorId: '6gen52', label: '' },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'extensionsbayes', generatorId: '6gen52', label: '', processus: 3 },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'loipoisson', generatorId: '6gen53', label: '' },
   { chapitreSlug: 'primitives-integrales', sectionId: 'primitives', generatorId: '6gen23', label: '' },
   { chapitreSlug: 'primitives-integrales', sectionId: 'conditioninitiale', generatorId: '6gen24', label: '' },

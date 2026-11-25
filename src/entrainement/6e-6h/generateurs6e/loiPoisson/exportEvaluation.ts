@@ -1,39 +1,23 @@
 import type { ExerciceLoiPoisson } from "../../core6e/loiPoisson.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
-import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatLoiPoisson";
+import { FORMAT_6GEN53 } from "../../ui6e/formatLoiPoisson";
 import { phasesPourExercice } from "../../moteur6e/typesLoiPoisson";
+import type { PhaseLoiPoisson } from "../../moteur6e/typesLoiPoisson";
+import { construireAdaptateurProvisoire } from "../adaptateurVariablesAleatoires";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLoiPoisson } from "./index";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceLoiPoisson>` pour `6gen53` (Loi de Poisson) —
- * NOUVEAU, même principe que `variablesDiscretesEsperance/exportEvaluation.ts` (6gen49).
+ * Adaptateur papier de `6gen53` — PROVISOIRE (lots B et C ; lot E à venir). Profil : pas de `calcul`
+ * (λ à ajuster, conditions à juger : la démarche est évaluée, décision du 24/11) ; B exige e^(−λ) →
+ * `calculatriceIndispensable` sur ses variantes (A non : un verdict « non » se décide sans calcul).
  */
-
-function entete(exercice: ExerciceLoiPoisson) {
-  return [...consigneGenerale(exercice), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
-}
-
-function construireEnonce(exercice: ExerciceLoiPoisson): SectionExercice {
-  const phases = phasesPourExercice(exercice);
-  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
-}
-
-function construireCorrection(exercice: ExerciceLoiPoisson): BlocCorrection[] {
-  const phases = phasesPourExercice(exercice);
-  const lettres = "abcdefghijklmnopqrstuvwxyz";
-  return phases.map((phase, i) => ({
-    type: "paragraphe",
-    fragments: [texte(`${lettres[i] ?? String(i + 1)}) `), latex(formatReponseAttenduePhaseLatex(exercice, phase).join(",\\ "))],
-  }));
-}
-
-export const adaptateurEvaluationLoiPoisson: AdaptateurFeuilleExercices<ExerciceLoiPoisson> = {
+export const adaptateurEvaluationLoiPoisson = construireAdaptateurProvisoire<ExerciceLoiPoisson, PhaseLoiPoisson>({
   titreDocument: "Loi de Poisson — Évaluation",
   nomFichierBase: "loi-poisson",
   genererInstance: genererExerciceLoiPoisson,
   catalogueVariantes: CATALOGUE_VARIANTES,
-  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
-  construireEnonce,
-  construireCorrection,
-};
+  genererInstanceAvecVariante: construireAvecVarianteId,
+  format: FORMAT_6GEN53,
+  phases: phasesPourExercice,
+  profilInstance: () => ({ casParticulier: null }),
+  calculatriceIndispensable: ["B_exactement", "B_entreAetB", "B_auPlus", "B_auMoins"],
+});
