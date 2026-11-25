@@ -1280,6 +1280,13 @@ export const coniques: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'triangle-focal-widget',
+          label: 'Manipule toi-même : le triangle focal',
+          caption:
+            'Fais glisser P sur l’ellipse : les rayons focaux donnés par la formule, $|PF|=a-ex_P$ et $|PF\'|=a+ex_P$, sont ceux qu’on mesure, et leur somme reste 2a. L’angle θ = F′PF et l’aire du triangle s’affichent, l’aire calculée de trois façons (½ · |PF| · |PF′| · sin θ, base × hauteur ÷ 2 et $b^2\\tan\\frac{\\theta}{2}$). En mode « Angle imposé », choisis θ : au-delà de l’angle maximal, atteint aux sommets (0 ; ±b), aucun point P ne convient.',
+        },
+        {
           kind: 'piege',
           label: 'Croire que |PF| = |PF′| = a',
           text:
@@ -1413,6 +1420,16 @@ export const coniques: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 136. Rayons focaux et triangle focal »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Orbites et ellipses : Kepler',
+          generatorId: '6gen141',
+          description: [
+            'Du périhélie et de l\'aphélie d\'un astéroïde, d\'une comète ou d\'un satellite, déduis a et c, place le corps central au bon endroit (un foyer, pas le centre), puis calcule l\'excentricité et le demi-petit axe.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 141. Orbites et ellipses : Kepler »',
         },
       ],
     },
@@ -1555,6 +1572,13 @@ export const coniques: ChapterContent = {
           label: 'Coefficient de x² nul : un seul point, mais pas de tangence',
           text:
             R`Coupe l'hyperbole $x^2-\frac{y^2}{4}=1$ par la droite $y=2x+1$, parallèle à l'asymptote $y=2x$ : $x^2-\frac{(2x+1)^2}{4}=1$, soit $x^2-x^2-x-\frac{1}{4}=1$, d'où $x=-\frac{5}{4}$, puis $y=-\frac{3}{2}$. Les termes en $x^2$ se sont **annulés** : l'équation est du premier degré, il n'y a pas de discriminant, et l'unique point $\left(-\frac{5}{4}\,;-\frac{3}{2}\right)$ n'est **pas** un point de tangence — la droite traverse la courbe. Même phénomène pour une droite parallèle à l'axe d'une parabole ($y=3$ coupe $y^2=2x$ en un seul point, $\left(\frac{9}{2}\,;3\right)$). La règle « $\Delta=0 \iff$ tangente » ne vaut **que** si l'équation reste du second degré.`,
+        },
+        {
+          kind: 'atelier',
+          tag: 'droite-conique-widget',
+          label: 'Manipule toi-même : droite et conique',
+          caption:
+            'Choisis une conique et règle la droite y = mx + k (ou une verticale) : la substitution, l’équation obtenue et son discriminant Δ s’écrivent en valeurs exactes. Δ > 0 : sécante ; Δ = 0 : tangente ; Δ < 0 : extérieure. Rends la droite parallèle à une asymptote (y = 2x + 1 pour l’hyperbole) ou à l’axe de la parabole (y = 3) : le terme en x² disparaît et il reste un seul point — pourtant, la droite n’est pas tangente. « Garder la droite tangente » calcule k par Δ = 0.',
         },
         {
           kind: 'piege',
@@ -1756,6 +1780,13 @@ export const coniques: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'tangente-dedoublee-widget',
+          label: 'Manipule toi-même : tangente et forme dédoublée',
+          caption:
+            'Fais glisser P sur l’ellipse, l’hyperbole ou la parabole y² = 4x : la tangente en P est tracée et son équation dédoublée s’écrit en direct ($x^2$ devient $x\\cdot x_P$, $y^2$ devient $y\\cdot y_P$, $x$ devient $\\frac{x+x_P}{2}$). La même droite est retrouvée par la dérivée de la fonction dont le graphique contient P (moitié surlignée). Amène P sur un sommet de l’axe focal : la dérivée n’existe plus, la tangente est verticale, et la forme dédoublée la donne quand même.',
+        },
+        {
           kind: 'piege',
           label: "Les sommets de l'axe focal n'ont pas de pente",
           text:
@@ -1834,6 +1865,26 @@ export const coniques: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 62. Tangentes à une conique »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Tangente par la dérivée et forme dédoublée',
+          generatorId: '6gen138',
+          description: [
+            'Choisis la fonction dont le graphique contient P, dérive-la pour obtenir la pente et l\'équation de la tangente, puis utilise la forme dédoublée en un autre point, sommet compris (tangente verticale).',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 138. Tangente par la dérivée et forme dédoublée »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Position d\'une droite et d\'une conique selon un paramètre',
+          generatorId: '6gen139',
+          description: [
+            'Pour les droites y = mx + k, trouve les valeurs de k qui donnent une tangente, puis décide si une droite de la famille est sécante, tangente, extérieure, ou n\'a qu\'un point commun sans être tangente (parallèle à une asymptote ou à l\'axe).',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 139. Position d\'une droite et d\'une conique selon un paramètre »',
         },
       ],
     },
@@ -2246,6 +2297,13 @@ export const coniques: ChapterContent = {
           domaines: ['Navigation', 'Géolocalisation'],
         },
         {
+          kind: 'atelier',
+          tag: 'loran-widget',
+          label: 'Manipule toi-même : le LORAN',
+          caption:
+            'Chaque paire de stations mesure une différence de distances d = |MA| − |MB| (la vitesse des ondes multipliée par le décalage Δt) : le navire est sur une seule branche d’hyperbole de foyers A et B, celle du côté de la station la plus proche. Fais glisser le navire N ou les stations, ou règle d₁ et d₂. La seconde paire donne une seconde branche : leurs points communs sont les positions possibles — parfois deux (préréglage « Deux positions possibles »), et il faut alors une autre information pour choisir.',
+        },
+        {
           kind: 'entrainement',
           title: 'Propriétés optiques des coniques',
           generatorId: '6gen63',
@@ -2254,6 +2312,36 @@ export const coniques: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 63. Propriétés optiques des coniques »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Miroirs en contexte',
+          generatorId: '6gen140',
+          description: [
+            'Antenne satellite, phare, lithotriteur, télescope Cassegrain : reconnais la conique qui convient, écris son équation et calcule les distances utiles ; ou montre que FT = FP pour expliquer la réflexion vers le foyer.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 140. Miroirs en contexte »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Hyperbole de navigation : LORAN',
+          generatorId: '6gen142',
+          description: [
+            'Du retard entre deux signaux, déduis la différence des distances aux émetteurs, la branche d\'hyperbole sur laquelle se trouve le navire, son équation, puis la ou les positions possibles sur sa route.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 142. Hyperbole de navigation : LORAN »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Détective d\'erreurs : coniques',
+          generatorId: '6gen143',
+          description: [
+            'Trouve la ligne fausse dans la copie d\'un élève (c² = a² − b² pour une hyperbole, second membre négatif, foyer à p au lieu de p/2, Δ = 0, demi-ellipse, mauvaise branche, miroir elliptique, excentricité), explique l\'erreur et corrige.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 143. Détective d\'erreurs : coniques »',
         },
         { kind: 'video', title: 'Synthèse du chapitre', youtubeId: 'nebYPmMQg38' },
       ],

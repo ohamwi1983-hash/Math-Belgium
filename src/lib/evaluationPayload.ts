@@ -107,6 +107,7 @@ export type IdGenerateurPilote =
   | '6gen123' | '6gen124' | '6gen125' | '6gen126' | '6gen127'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
   | '6gen132' | '6gen133' | '6gen134' | '6gen135' | '6gen136' | '6gen137'
+  | '6gen138' | '6gen139' | '6gen140' | '6gen141' | '6gen142' | '6gen143'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
   | 'gen113' | 'gen114' | 'gen115' | 'gen116' | 'gen117' | 'gen118' | 'gen119' | 'gen120' | 'gen121' | 'gen122'
   | 'gen123' | 'gen124' | 'gen125'
@@ -315,6 +316,12 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'coniques', sectionId: 'excentricite', generatorId: '6gen135', label: 'Équation depuis foyer, directrice et excentricité (6gen135)', processus: 2 },
   { chapitreSlug: 'coniques', sectionId: 'airefocale', generatorId: '6gen136', label: 'Rayons focaux et triangle focal (6gen136)', processus: 2 },
   { chapitreSlug: 'coniques', sectionId: 'identifier', generatorId: '6gen137', label: 'Hyperbole équilatère et xy = k (6gen137)', processus: 2 },
+  { chapitreSlug: 'coniques', sectionId: 'tangentes', generatorId: '6gen138', label: 'Tangente par la dérivée et forme dédoublée (6gen138)', processus: 2 },
+  { chapitreSlug: 'coniques', sectionId: 'tangentes', generatorId: '6gen139', label: 'Position d\'une droite et d\'une conique selon un paramètre (6gen139)', processus: 3 },
+  { chapitreSlug: 'coniques', sectionId: 'optique', generatorId: '6gen140', label: 'Miroirs en contexte (6gen140)', processus: 3 },
+  { chapitreSlug: 'coniques', sectionId: 'airefocale', generatorId: '6gen141', label: 'Orbites et ellipses : Kepler (6gen141)', processus: 3 },
+  { chapitreSlug: 'coniques', sectionId: 'optique', generatorId: '6gen142', label: 'Hyperbole de navigation : LORAN (6gen142)', processus: 3 },
+  { chapitreSlug: 'coniques', sectionId: 'optique', generatorId: '6gen143', label: 'Détective d\'erreurs : coniques (6gen143)', processus: 3 },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', generatorId: 'gen7', label: "Analyse d'une fonction (gen7)" },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', generatorId: 'gen123', label: 'Lire une parabole sur un graphique (gen123)', processus: 1 },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', generatorId: 'gen124', label: 'Premier ou second degré ? Différences secondes (gen124)', processus: 2 },
@@ -721,6 +728,12 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'derivees-applications', sectionId: 'contexte-economique', quizTheme: 'economie', label: '', quizChapitre: 5 },
   { chapitreSlug: 'derivees-applications', sectionId: 'extrema-bornes', quizTheme: 'extremaBornes', label: '', quizChapitre: 5 },
   { chapitreSlug: 'derivees-applications', sectionId: 'vitesse-position', quizTheme: 'mouvement', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'statistique-deux-variables', sectionId: 'nuage-point-moyen', quizTheme: 'nuagePointMoyen', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'statistique-deux-variables', sectionId: 'ajustement', quizTheme: 'ajustement', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'statistique-deux-variables', sectionId: 'mayer', quizTheme: 'mayer', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'statistique-deux-variables', sectionId: 'moindres-carres', quizTheme: 'moindresCarres', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'statistique-deux-variables', sectionId: 'correlation', quizTheme: 'correlation', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'statistique-deux-variables', sectionId: 'interpreter', quizTheme: 'interpreter', label: '', quizChapitre: 6 },
 ]
 
 export function generateursPourSection(chapitreSlug: string, sectionId: string): GeneratorConfig[] {
@@ -866,7 +879,9 @@ export interface QuestionOuverte {
  * LaTeX brut s'afficher littéralement sur la copie imprimée. Le gras n'a pas d'équivalent dans
  * `FragmentTexte` et est donc aplati (délimiteurs retirés, texte conservé). */
 function parseRichText(texte: string): FragmentTexte[] {
-  const sansGras = texte.replace(/\*\*(.*?)\*\*/g, '$1')
+  // Correspondances des exemples clés (`\htmlClass{m1}{…}`, option élève à l'écran seulement) : retirées
+  // ici, le papier et le Word ne les connaissent pas (KaTeX sans `trust` les écrirait en rouge).
+  const sansGras = texte.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\\htmlClass\{m[1-3]\}/g, '')
   const morceaux = sansGras.split(/\$([^$]+)\$/g)
   const fragments: FragmentTexte[] = []
   morceaux.forEach((valeur, i) => {
@@ -1517,6 +1532,46 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     { cle: 'un point vide et une asymptote verticale', enonce: "Soit $f(x) = \\dfrac{x^2-1}{x^2-3x+2}$. Mène l'étude complète de $f$ : domaine, nature de chaque valeur exclue (asymptote verticale ou point vide), limites à gauche et à droite, asymptote horizontale ou oblique, et recoupement éventuel de cette asymptote." },
     { cle: 'recoupement', enonce: "Soit $f(x) = \\dfrac{x^2+x}{x^2+1}$. Détermine son asymptote horizontale, puis le point où la courbe la recoupe, et la position de la courbe par rapport à cette asymptote." },
     { cle: 'construction inverse', enonce: "Trouve une fonction rationnelle dont le graphique admet l'asymptote verticale $x = 2$ et l'asymptote horizontale $y = 3$, puis une autre qui admet l'asymptote verticale $x = -1$ et l'asymptote oblique $y = 2x + 1$. Vérifie chaque réponse." },
+  ],
+  },
+  'statistique-deux-variables': {
+  // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`) — la clé est un morceau du badge du
+  // bloc `exemple` ou du label de l'`exempleLibre` (`src/content/chapters/5e-4h/statistique-deux-variables.ts`).
+  // Les figures n'existent pas sur papier : les énoncés donnent les données en tableau ou en couples.
+  'nuage-point-moyen': [
+    { cle: 'nuage et point moyen de six élèves', enonce: "Six élèves notent leurs heures de révision $x_i$ et leur note sur 20 $y_i$ : $(1\\,;8)$, $(2\\,;9)$, $(3\\,;11)$, $(4\\,;12)$, $(5\\,;14)$, $(6\\,;15)$. Représente le nuage de points dans un repère bien choisi, calcule les coordonnées du point moyen $G$ et décris le sens de la relation." },
+    { cle: 'retrouver deux valeurs effacées', enonce: "Dans une série de cinq couples, on connaît les abscisses $4$, $8$, $9$ et $5$ (la troisième est effacée) et les ordonnées $12$, $15$, $18$ et $13$ (la quatrième est effacée). Le point moyen du nuage est $G(6{,}4\\,;15)$. Retrouve les deux valeurs manquantes." },
+  ],
+  ajustement: [
+    { cle: 'quatre nuages', enonce: "Pour chacune des séries suivantes, indique l'ajustement à envisager (affine, du second degré, exponentiel ou aucun) et justifie : A. température $10$ ; $20$ ; $30$ ; $40$ ; $50$ ; $60$ °C et masse de sel dissous $31$ ; $34$ ; $36$ ; $39$ ; $41$ ; $44$ g ; B. prix $40$ ; $60$ ; $80$ ; $100$ ; $120$ ; $140$ ; $160$ € et recette $70$ ; $98$ ; $115$ ; $121$ ; $116$ ; $99$ ; $72$ ; C. temps $0$ à $6$ h et bactéries $2$ ; $3$ ; $4{,}5$ ; $6{,}8$ ; $10{,}1$ ; $15{,}2$ ; $22{,}8$ milliers ; D. durée du trajet $5$ ; $8$ ; $10$ ; $12$ ; $15$ ; $18$ ; $20$ ; $25$ ; $30$ min et note $12$ ; $9$ ; $15$ ; $11$ ; $14$ ; $8$ ; $13$ ; $10$ ; $12$." },
+    { cle: 'trois prévisions', enonce: "Sur dix jours d'hiver, pour des températures moyennes de $-4$ °C à $14$ °C, une droite d'ajustement du nuage (température $x$ ; consommation d'électricité $y$ en GWh) est $y = -6x + 210$. Estime la consommation pour $5$ °C, $-8$ °C et $35$ °C. Dis pour chacune s'il s'agit d'une interpolation ou d'une extrapolation, et commente sa fiabilité." },
+  ],
+  mayer: [
+    { cle: 'espérance de vie en Belgique', enonce: "L'espérance de vie à la naissance en Belgique vaut $77{,}72$ ; $78{,}08$ ; $78{,}88$ ; $79{,}38$ ; $79{,}68$ ; $80{,}18$ ; $80{,}39$ et $80{,}59$ ans en 2000, 2002, …, 2014. En comptant les années à partir de 2000 ($x = 0$, $2$, …, $14$), détermine la droite de Mayer et vérifie qu'elle passe par le point moyen. Estime ensuite l'espérance de vie d'un enfant né en 2001 et en 2018, puis l'année où elle atteignait $79$ ans." },
+    { cle: 'Démonstration — la droite de Mayer passe par le point moyen G', enonce: "Démontre que la droite de Mayer d'un nuage passe par son point moyen $G$. Montre aussi que $G$ est le milieu de $[G_1G_2]$ quand les deux groupes ont le même effectif." },
+    { cle: 'n impair', enonce: "Le pourcentage de pièces défectueuses produites par une machine, les semaines $1$ à $7$, vaut $0{,}8$ ; $1{,}1$ ; $1{,}4$ ; $2{,}0$ ; $2{,}3$ ; $2{,}7$ ; $3{,}0$. Détermine la droite de Mayer (groupes de $3$ et de $4$ données) et vérifie qu'elle passe par $G$. Un entretien s'impose à $5\\,\\%$ de pièces défectueuses : quand faut-il le prévoir ?" },
+    { cle: 'données en désordre', enonce: "On relève la distance domicile–école $x$ (en km) et la durée du trajet à vélo $y$ (en min) de six élèves, dans l'ordre des réponses : $(1\\,;3)$, $(9\\,;17)$, $(3\\,;7)$, $(2\\,;5)$, $(7\\,;14)$, $(5\\,;11)$. Détermine la droite de Mayer. Quelle droite obtiendrait-on en partageant les données sans les trier ? Le contrôle par le point moyen détecte-t-il cette erreur ?" },
+  ],
+  'moindres-carres': [
+    { cle: 'la droite des moindres carrés à la main', enonce: "Détermine, à l'aide d'un tableau des écarts à la moyenne, la droite des moindres carrés du nuage $(1\\,;2)$, $(2\\,;4)$, $(3\\,;5)$, $(4\\,;4)$, $(5\\,;5)$." },
+    { cle: 'pour une pente fixée', enonce: "On fixe la pente $a$ d'une droite $y = ax + b$. Démontre que la somme des carrés des écarts verticaux $\\sum \\big(y_i - (ax_i + b)\\big)^2$ est minimale pour $b = \\bar{y} - a\\bar{x}$, et déduis-en que la droite des moindres carrés passe par le point moyen." },
+    { cle: 'la formule de la pente a', enonce: "Démontre que la pente de la droite des moindres carrés vaut $a = \\dfrac{\\sum (x_i-\\bar{x})(y_i-\\bar{y})}{\\sum (x_i-\\bar{x})^2}$, sachant que cette droite passe par le point moyen." },
+    { cle: 'comparer Mayer et moindres carrés', enonce: "Pour le nuage $(1\\,;2)$, $(2\\,;4)$, $(3\\,;5)$, $(4\\,;4)$, $(5\\,;5)$, dont la droite des moindres carrés est $y = 0{,}6x + 2{,}2$, détermine la droite de Mayer (groupes de $2$ et de $3$ données), puis compare les sommes des carrés des écarts verticaux des deux droites. Laquelle ajuste le mieux le nuage ?" },
+    { cle: 'consommation selon la puissance', enonce: "La puissance $x$ (en chevaux) et la consommation $y$ (en litres aux 100 km) de huit voitures neuves sont : $(75\\,;4{,}8)$, $(90\\,;5{,}2)$, $(105\\,;5{,}6)$, $(120\\,;6{,}0)$, $(140\\,;6{,}5)$, $(160\\,;7{,}1)$, $(180\\,;7{,}5)$, $(200\\,;8{,}2)$. À la calculatrice, détermine la droite des moindres carrés, puis estime la consommation d'une voiture de $110$ chevaux et la puissance d'une voiture qui consomme $6{,}8$ litres aux 100 km." },
+  ],
+  correlation: [
+    { cle: 'les deux formules de la covariance', enonce: "Démontre que $\\operatorname{Cov}(x,y) = \\dfrac{1}{n}\\sum (x_i-\\bar{x})(y_i-\\bar{y}) = \\dfrac{1}{n}\\sum x_iy_i - \\bar{x}\\,\\bar{y}$." },
+    { cle: 'covariance et r à la main', enonce: "Pour le nuage $(1\\,;2)$, $(2\\,;4)$, $(3\\,;5)$, $(4\\,;4)$, $(5\\,;5)$, calcule la covariance par les deux formules, les écarts-types $\\sigma_x$ et $\\sigma_y$, puis le coefficient de corrélation $r$. Interprète le résultat." },
+    { cle: 'ont le même signe', enonce: "Démontre que la pente $a$ de la droite des moindres carrés, la covariance $\\operatorname{Cov}(x,y)$ et le coefficient de corrélation $r$ ont toujours le même signe." },
+    { cle: 'r est compris entre', enonce: "Démontre que la plus petite somme des carrés des écarts verticaux vaut $n\\,\\sigma_y^2\\,(1 - r^2)$, et déduis-en que $-1 \\le r \\le 1$, avec $r = \\pm 1$ si et seulement si les points sont alignés." },
+    { cle: 'changer d’unité', enonce: "On remplace chaque $x_i$ par $x'_i = kx_i + c$, avec $k > 0$. Démontre que le coefficient de corrélation $r$ ne change pas. Que devient $r$ si $k < 0$ ?" },
+    { cle: 'boissons et abonnements', enonce: "1. Sur huit jours, la température moyenne $x$ (en °C) et le nombre de boissons vendues $y$ sont : $(8\\,;21)$, $(12\\,;29)$, $(15\\,;27)$, $(19\\,;38)$, $(22\\,;36)$, $(25\\,;47)$, $(28\\,;45)$, $(31\\,;58)$. 2. Selon le prix annuel $x$ (en euros) d'un abonnement, le nombre de jeunes $y$ prêts à s'abonner est : $(160\\,;52)$, $(180\\,;47)$, $(200\\,;41)$, $(220\\,;36)$, $(240\\,;29)$, $(260\\,;22)$, $(280\\,;15)$, $(300\\,;9)$. Pour chaque série, calcule la covariance et le coefficient de corrélation (à la calculatrice), puis interprète le sens et l'intensité de la liaison." },
+    { cle: 'associer cinq nuages', enonce: "Cinq nuages de douze points sont décrits ainsi : le nuage 1 monte mais il est dispersé ; le nuage 2 est presque aligné et monte ; le nuage 3 ne montre aucune tendance ; le nuage 4 est serré autour d'une droite qui descend ; le nuage 5 descend à peine et il est très dispersé. Associe chaque nuage à son coefficient de corrélation parmi $-0{,}93$ ; $-0{,}45$ ; $0{,}05$ ; $0{,}70$ ; $0{,}99$, et justifie." },
+  ],
+  interpreter: [
+    { cle: 'mortalité infantile', enonce: "Le taux de mortalité infantile d'un pays (décès pour 1 000 naissances), par périodes de cinq ans de 1946–1950 ($x = 1$) à 1971–1975 ($x = 6$), vaut $60$ ; $46$ ; $37$ ; $30$ ; $25$ ; $21$. Détermine la droite des moindres carrés et le coefficient de corrélation, puis estime le taux pour 2001–2005. Que penser de cette prévision ?" },
+    { cle: 'retirer un point aberrant', enonce: "Six élèves donnent leur temps de révision $x$ (en heures) et leur note sur 20 $y$ : $(1\\,;6)$, $(2\\,;8)$, $(3\\,;10)$, $(4\\,;11)$, $(5\\,;14)$, $(6\\,;4)$ ; le sixième était malade le jour de l'interrogation. Calcule la droite des moindres carrés et le coefficient de corrélation avec ce point, puis sans lui, et commente." },
+    { cle: 'trois corrélations', enonce: "On constate une forte corrélation entre : 1. la vente des crèmes glacées et celle des lunettes de soleil en été ; 2. le nombre de lapins d'une région et un indice boursier sur une décennie ; 3. l'alcoolémie des conducteurs et le nombre d'accidents de la route. Pour chaque situation, dis s'il y a causalité et, sinon, quelle est l'explication (cause commune, coïncidence…)." },
   ],
   },
   'derivees-applications': {
@@ -2213,7 +2268,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-reciproques-cyclometriques', 'fonctions-logarithmes', 'fonctions-exponentielles', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees', 'probabilites', 'analyse-combinatoire', 'variables-aleatoires', 'lieux-geometriques', 'coniques']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-reciproques-cyclometriques', 'fonctions-logarithmes', 'fonctions-exponentielles', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees', 'probabilites', 'analyse-combinatoire', 'variables-aleatoires', 'lieux-geometriques', 'coniques', 'statistique-deux-variables']
 
 /** Bloc de DÉMONSTRATION (« Démonstration — … », « Démonstration alternative — … ») : seuls ces
  * blocs alimentent le type « Formule + démonstration ». Les exemples résolus (calculs) ne sont plus
@@ -3718,6 +3773,80 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce: "Pourquoi une suite récurrente affine converge-t-elle vers un point fixe de sa propre récurrence, plutôt que vers une valeur quelconque ?",
         corrige:
           "Si la suite converge vers une limite L, alors $u_{n+1}$ et $u_n$ tendent tous deux vers cette même limite (ce n'est que la même suite décalée d'un rang). En passant à la limite dans $u_{n+1}=a\\times u_n+b$, on obtient $L=a\\times L+b$ — exactement la condition qui fait de L un point fixe de la récurrence. La limite ne peut donc être qu'une valeur que la récurrence laisse inchangée.",
+      },
+    ],
+  },
+  'statistique-deux-variables': {
+    'nuage-point-moyen': [
+      {
+        enonce: "Pourquoi un nuage de points n'est-il pas, en général, le graphique d'une fonction ?",
+        corrige:
+          "Deux individus peuvent avoir la même valeur de $x$ et des valeurs de $y$ différentes (deux adolescents de même taille et de poids différents) : une même abscisse porte alors plusieurs points, ce qu'interdit le graphique d'une fonction, où chaque $x$ n'a qu'une image.",
+      },
+      {
+        enonce: "Pourquoi le point moyen $G$ est-il appelé le point d'équilibre du nuage, et pourquoi un seul point très éloigné peut-il le déplacer nettement ?",
+        corrige:
+          "Ses coordonnées sont les moyennes des $x_i$ et des $y_i$ : c'est le centre de gravité des points, chacun ayant le même poids. Comme une moyenne tient compte de toutes les valeurs, avec leur grandeur, un point très éloigné tire la moyenne vers lui — contrairement à une médiane, qui ne regarde que le rang des valeurs.",
+      },
+    ],
+    ajustement: [
+      {
+        enonce: "Pourquoi faut-il regarder la forme du nuage avant de calculer une droite d'ajustement ?",
+        corrige:
+          "Un calcul (Mayer, moindres carrés, tableur) donne une droite pour n'importe quel nuage, même en arc ou sans forme. Seul le nuage dit si une droite est le bon modèle : pour un nuage en arc, la droite passe loin des points et ses prévisions sont fausses, même si le calcul est juste.",
+      },
+      {
+        enonce: "Pourquoi une extrapolation est-elle moins fiable qu'une interpolation, même avec une très bonne droite d'ajustement ?",
+        corrige:
+          "Une interpolation s'appuie sur des points mesurés tout autour de la valeur cherchée. Une extrapolation suppose que la relation continue de la même façon hors des données, ce que rien ne garantit : la relation peut changer (le chauffage s'arrête en été), et une petite erreur sur la pente se multiplie par la distance aux données.",
+      },
+    ],
+    mayer: [
+      {
+        enonce: "Pourquoi faut-il trier les données selon les $x_i$ avant de les partager en deux groupes ?",
+        corrige:
+          "La méthode résume la partie gauche et la partie droite du nuage par leurs points moyens, pour obtenir une droite qui suit la tendance. Sans tri, les groupes mélangent des points de partout : $G_1$ et $G_2$ peuvent être proches l'un de l'autre et la droite obtenue dépend de l'ordre de l'énoncé, ce qui n'a aucun sens.",
+      },
+      {
+        enonce: "La droite obtenue passe par le point moyen $G$. Cela prouve-t-il que la droite de Mayer a été bien calculée ?",
+        corrige:
+          "Non. N'importe quel partage du nuage en deux groupes donne une droite qui passe par $G$, puisque $G$ est toujours une moyenne pondérée des deux points moyens. Le contrôle par $G$ détecte une erreur de calcul sur les points moyens ou sur $b$, mais pas un oubli du tri.",
+      },
+    ],
+    'moindres-carres': [
+      {
+        enonce: "Pourquoi la méthode des moindres carrés additionne-t-elle les carrés des écarts verticaux, plutôt que les écarts eux-mêmes ?",
+        corrige:
+          "Pour toute droite qui passe par $G$, la somme des écarts $y_i - (ax_i + b)$ vaut $0$ : les écarts positifs et négatifs se compensent, cette somme ne départage donc aucune droite. Les carrés sont tous positifs, pénalisent fortement les grands écarts, et leur somme est un trinôme dont on sait trouver le minimum.",
+      },
+      {
+        enonce: "Pourquoi les écarts de la méthode des moindres carrés sont-ils verticaux, et pas mesurés perpendiculairement à la droite ?",
+        corrige:
+          "La droite sert à prévoir $y$ à partir de $x$ : pour une abscisse donnée, l'erreur de prévision est la différence entre le $y_i$ observé et la valeur $ax_i + b$ de la droite, mesurée verticalement. Pour prévoir $x$ à partir de $y$, on mesurerait des écarts horizontaux (droite de régression de $x$ en $y$).",
+      },
+    ],
+    correlation: [
+      {
+        enonce: "Pourquoi le signe de la covariance donne-t-il le sens de la liaison entre $x$ et $y$ ?",
+        corrige:
+          "Chaque produit $(x_i-\\bar{x})(y_i-\\bar{y})$ est positif quand le point est en haut à droite ou en bas à gauche de $G$, négatif dans les deux autres quadrants. Si les points se trouvent surtout dans les quadrants « positifs », $x$ et $y$ sont ensemble au-dessus ou ensemble en dessous de leurs moyennes : ils varient dans le même sens, et la covariance est positive.",
+      },
+      {
+        enonce: "Pourquoi un coefficient de corrélation proche de $0$ ne prouve-t-il pas l'absence de lien entre deux variables ?",
+        corrige:
+          "$r$ mesure seulement la proximité des points avec une droite. Deux variables peuvent être très fortement liées par une relation non linéaire : pour un nuage en arc symétrique (la recette selon le prix), $r$ est proche de $0$ alors que la recette dépend très nettement du prix.",
+      },
+    ],
+    interpreter: [
+      {
+        enonce: "Pourquoi une forte corrélation entre deux variables ne prouve-t-elle pas que l'une est la cause de l'autre ?",
+        corrige:
+          "Une corrélation dit seulement que les deux variables varient ensemble. Cela peut venir d'une troisième variable qui agit sur les deux (cause commune), d'une coïncidence, d'une causalité dans l'autre sens ou d'un effet décalé. Pour conclure à une causalité, il faut une explication et, si possible, une expérience où l'on fait varier une seule chose à la fois.",
+      },
+      {
+        enonce: "Pourquoi un seul point aberrant peut-il changer fortement la droite des moindres carrés et le coefficient de corrélation ?",
+        corrige:
+          "La méthode minimise la somme des carrés des écarts : un point très éloigné produit un écart énorme, dont le carré pèse plus que tous les autres réunis. La droite pivote pour s'en rapprocher, et le nuage, vu par $r$, paraît beaucoup moins aligné.",
       },
     ],
   },

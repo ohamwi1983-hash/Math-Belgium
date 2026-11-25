@@ -19,7 +19,7 @@ const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? 's' : ''}`
  * Ce que l'accueil montre selon l'année, en CSS seulement (règles générées depuis `LEVELS`, donc
  * présentes dans la page pré-rendue) : sans année (`<html>` sans `data-annee-accueil`), les cartes
  * « Tu es en… » ; avec une année, ses onglets, son titre et SES chapitres. Les trois années restent
- * dans le DOM (liens des 23 chapitres dans le HTML pré-rendu, pour les moteurs de recherche).
+ * dans le DOM (liens des 24 chapitres dans le HTML pré-rendu, pour les moteurs de recherche).
  */
 const REGLES_ANNEES = [
   `html:not([${ATTRIBUT_ANNEE}]) .accueil-avec-annee{display:none}`,

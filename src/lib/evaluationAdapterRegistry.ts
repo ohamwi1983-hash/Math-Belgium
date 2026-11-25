@@ -555,6 +555,12 @@ import { adaptateurEvaluation125 } from '../entrainement/6e-6h/generateurs6e/rec
 import { adaptateurEvaluation126 } from '../entrainement/6e-6h/generateurs6e/tangentesPositionCercle/exportEvaluation'
 import { adaptateurEvaluation127 } from '../entrainement/6e-6h/generateurs6e/natureLieu/exportEvaluation'
 import { adaptateurEvaluationIdentificationConiques } from '../entrainement/6e-6h/generateurs6e/identificationConiques/exportEvaluation'
+import { adaptateurEvaluationTD } from '../entrainement/6e-6h/generateurs6e/tangenteDeriveeDedoublee/exportEvaluation'
+import { adaptateurEvaluationPD } from '../entrainement/6e-6h/generateurs6e/positionDroiteParametre/exportEvaluation'
+import { adaptateurEvaluationMC } from '../entrainement/6e-6h/generateurs6e/miroirsContexte/exportEvaluation'
+import { adaptateurEvaluationKE } from '../entrainement/6e-6h/generateurs6e/orbitesKepler/exportEvaluation'
+import { adaptateurEvaluationLO } from '../entrainement/6e-6h/generateurs6e/hyperboleLoran/exportEvaluation'
+import { adaptateurEvaluationDC } from '../entrainement/6e-6h/generateurs6e/detectiveConiques/exportEvaluation'
 import { adaptateurEvaluationEquationConiqueCaracteristiques } from '../entrainement/6e-6h/generateurs6e/equationConiqueCaracteristiques/exportEvaluation'
 import { adaptateurEvaluationAireExcentriciteConique } from '../entrainement/6e-6h/generateurs6e/aireExcentriciteConique/exportEvaluation'
 import { adaptateurEvaluationIntersectionsConiques } from '../entrainement/6e-6h/generateurs6e/intersectionsConiques/exportEvaluation'
@@ -720,6 +726,12 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen135': versionPapier(adaptateurEvaluation135) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen136': versionPapier(adaptateurEvaluation136) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen137': versionPapier(adaptateurEvaluation137) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen138': versionPapier(adaptateurEvaluationTD) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen139': versionPapier(adaptateurEvaluationPD) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen140': versionPapier(adaptateurEvaluationMC) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen141': versionPapier(adaptateurEvaluationKE) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen142': versionPapier(adaptateurEvaluationLO) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen143': versionPapier(adaptateurEvaluationDC) as unknown as AdaptateurFeuilleExercices<never>,
 }
 
 /** Lookup unique par `generatorId`, tous chantiers portés confondus — `evaluationLocal.ts` n'a pas

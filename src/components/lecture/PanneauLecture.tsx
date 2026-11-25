@@ -313,8 +313,80 @@ export default function PanneauLecture() {
         </div>
 
         <div className="confort-vue" role="tabpanel" id="confort-vue-aides" aria-labelledby="confort-onglet-aides" hidden={onglet !== 'aides'}>
-          <Bloc titre="Bientôt">
-            <p className="confort-aide">Ici arriveront des aides pour suivre la lecture&nbsp;: une règle qui suit la ligne, un bloc à la fois, une loupe sur les formules et la lecture à voix haute.</p>
+          <Bloc titre="Suivre la ligne" aide="La bande suit ton doigt ou la souris ; au clavier, flèches ↑ ↓.">
+            <Segments
+              valeur={r.ligne}
+              choisir={(v) => choisir('ligne', v)}
+              options={[
+                { v: 'aucune', contenu: <>Rien<small>&nbsp;</small></> },
+                { v: 'regle', contenu: <>Règle<small>bande claire</small></> },
+                { v: 'masque', contenu: <>Masque<small>le reste assombri</small></> },
+              ]}
+            />
+            {r.ligne !== 'aucune' && (
+              <>
+                <p className="confort-sous" id="confort-hauteur-bande">
+                  Hauteur de la bande
+                </p>
+                <Segments
+                  valeur={r.bande}
+                  choisir={(v) => choisir('bande', v)}
+                  options={[
+                    { v: '1', contenu: <>1 ligne</> },
+                    { v: '2', contenu: <>2 lignes</> },
+                    { v: '3', contenu: <>3 lignes</> },
+                  ]}
+                />
+                {r.ligne === 'masque' && <p className="confort-aide confort-aide-apres">Le reste de l’écran est assombri&nbsp;: moins de choses attirent l’œil (utile pour un élève avec un TDA/H).</p>}
+              </>
+            )}
+          </Bloc>
+          <Bloc titre="Lire pas à pas">
+            <Interrupteur
+              nom="Un bloc à la fois"
+              desc="Le paragraphe ou l’encadré en cours reste net et entouré ; les autres s’effacent sans disparaître. Bouton « Bloc suivant » en bas de l’écran, ou touche un bloc."
+              actif={r.unbloc === 'oui'}
+              basculer={() => choisir('unbloc', r.unbloc === 'oui' ? 'non' : 'oui')}
+            />
+            <Interrupteur
+              nom="Exemples résolus guidés"
+              etiquette="activé d’office"
+              desc="Les exemples se montrent déjà une étape à la fois ; en plus, l’étape en cours est entourée, les précédentes deviennent plus discrètes, et « Écouter l’étape » la lit."
+              actif={r.exemples === 'guides'}
+              basculer={() => choisir('exemples', r.exemples === 'guides' ? 'libres' : 'guides')}
+            />
+          </Bloc>
+          <Bloc titre="Formules">
+            <Interrupteur
+              nom="Agrandir les formules au toucher"
+              desc="Touche une formule : elle s’ouvre en grand, avec sa lecture en mots et « Écouter ». Au clavier : Tab jusqu’à la formule, puis Entrée."
+              actif={r.loupe === 'oui'}
+              basculer={() => choisir('loupe', r.loupe === 'oui' ? 'non' : 'oui')}
+            />
+            <Interrupteur
+              nom="Plus d’air autour des signes"
+              desc="Un peu plus d’espace autour de =, +, − et × : les termes se détachent mieux."
+              actif={r.signes === 'oui'}
+              basculer={() => choisir('signes', r.signes === 'oui' ? 'non' : 'oui')}
+            />
+            <Interrupteur
+              nom="Couleurs et soulignés qui se correspondent"
+              desc="Dans quelques exemples clés, ce qu’on remplace garde la même couleur ET le même trait : jamais la couleur seule."
+              actif={r.correspondances === 'oui'}
+              basculer={() => choisir('correspondances', r.correspondances === 'oui' ? 'non' : 'oui')}
+            />
+            {r.correspondances === 'oui' && (
+              <p className="corresp-legende confort-corresp">
+                <span className="corresp-paire">
+                  <RichText text="$\htmlClass{m1}{u_6} \to \htmlClass{m1}{22}$" />
+                </span>{' '}
+                trait plein · <span className="corresp-paire"><RichText text="$\htmlClass{m2}{u_1} \to \htmlClass{m2}{7}$" /></span> tirets ·{' '}
+                <span className="corresp-paire">
+                  <RichText text="$\htmlClass{m3}{(6-1)} \to \htmlClass{m3}{5}$" />
+                </span>{' '}
+                double trait
+              </p>
+            )}
           </Bloc>
         </div>
       </div>
@@ -343,6 +415,24 @@ function Bloc({ titre, aide, children }: { titre: string; aide?: string; childre
       {aide && <p className="confort-aide">{aide}</p>}
       {children}
     </section>
+  )
+}
+
+function Interrupteur({ nom, desc, etiquette, actif, basculer }: { nom: string; desc: string; etiquette?: string; actif: boolean; basculer: () => void }) {
+  const id = useId()
+  return (
+    <div className="interrupteur">
+      <span className="it-texte">
+        <span className="it-nom" id={id}>
+          {nom}
+          {etiquette && <span className="it-etiquette">{etiquette}</span>}
+        </span>
+        <span className="it-desc" id={`${id}-d`}>
+          {desc}
+        </span>
+      </span>
+      <button type="button" role="switch" className="it-bouton" aria-labelledby={id} aria-describedby={`${id}-d`} aria-checked={actif} onClick={basculer} />
+    </div>
   )
 }
 
