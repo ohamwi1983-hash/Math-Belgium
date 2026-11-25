@@ -26,11 +26,28 @@ export function richTextVersHtml(texte: string): string {
   let curseur = 0;
   for (const m of texte.matchAll(motif)) {
     html += echapperHtml(texte.slice(curseur, m.index));
-    if (m[1] !== undefined) html += katex.renderToString(normaliserLogDecimal(m[1]), { throwOnError: false, output: "html" });
+    if (m[1] !== undefined) html += formulesVersHtml(m[1]);
     else html += `<strong>${echapperHtml(m[2])}</strong>`;
     curseur = m.index! + m[0].length;
   }
   return html + echapperHtml(texte.slice(curseur));
+}
+
+/**
+ * Une formule du formulaire peut en réunir plusieurs séparées par `\qquad` (« V(x) = … \qquad σx = √V(x) ») :
+ * chacune est rendue À PART, séparées par un blanc, pour que la colonne étroite du formulaire coupe
+ * ENTRE elles et non au milieu de l'une (« σx = » en fin de ligne, « √V(x) » à la suivante). Une formule
+ * courte (≤ 32 signes de source) ne se coupe jamais ; une longue garde les coupures de KaTeX.
+ */
+function formulesVersHtml(latex: string): string {
+  const parties = latex.split(/\\qquad/).map((p) => p.trim()).filter((p) => p !== "");
+  return parties
+    .map((p, i) => {
+      const k = katex.renderToString(normaliserLogDecimal(p), { throwOnError: false, output: "html" });
+      const style = (p.length <= 32 ? "white-space:nowrap;" : "") + (i < parties.length - 1 ? "margin-right:1.6em;" : "");
+      return style ? `<span style="${style}">${k}</span>` : k;
+    })
+    .join(" ");
 }
 
 export function annexeFormulaire(chapitre: { slug: string; title: string; level: string; chapterNumber: number; formulaire?: FormulaireData }): AnnexeDocument | null {

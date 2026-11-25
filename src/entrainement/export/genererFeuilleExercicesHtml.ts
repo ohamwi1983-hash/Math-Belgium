@@ -56,12 +56,73 @@ export function echapperHtml(texte: string): string {
 
 export function fragmentsVersHtml(fragments: FragmentConsigne[], options?: { bloc?: boolean }): string {
   // Papier : plus de MAJUSCULES d'insistance venues des écrans (règle globale, `majusculesPapier.ts`).
-  return fragmentsSansMajusculesDInsistance(fragments)
-    .map((fragment) =>
-      // Espace insécable avant « ? ! : ; » (typographie française : jamais un signe seul à la ligne).
-      fragment.type === "texte" ? echapperHtml(fragment.valeur.replace(/ ([?!:;»])/g, "\u00a0$1").replace(/« /g, "«\u00a0")) : katex.renderToString(normaliserLogDecimal(fragment.valeur), { throwOnError: false, displayMode: options?.bloc ?? false }),
-    )
-    .join("");
+  const morceaux = fragmentsSansMajusculesDInsistance(fragments).map((fragment) =>
+    // Espace insécable avant « ? ! : ; » (typographie française : jamais un signe seul à la ligne).
+    fragment.type === "texte"
+      ? { texte: true, s: fragment.valeur.replace(/ ([?!:;»])/g, "\u00a0$1").replace(/« /g, "«\u00a0"), avant: "", apres: "" }
+      : { texte: false, s: katex.renderToString(normaliserLogDecimal(fragment.valeur), { throwOnError: false, displayMode: options?.bloc ?? false }), avant: "", apres: "" },
+  );
+  if (!options?.bloc) {
+    // Ponctuation et ouvrant COLLÉS à la formule voisine (le navigateur coupait entre la formule et
+    // « , » ou entre « ( » et la formule : virgule ou parenthèse seule en début / fin de ligne).
+    morceaux.forEach((m, i) => {
+      if (m.texte) return;
+      const prec = morceaux[i - 1];
+      const suiv = morceaux[i + 1];
+      if (prec?.texte) {
+        const o = /(\(|\[|«\u00a0)$/.exec(prec.s);
+        if (o) {
+          m.avant = o[1];
+          prec.s = prec.s.slice(0, -o[1].length);
+        }
+      }
+      if (suiv?.texte) {
+        const q = /^\u00a0?[,.;:!?…)\]»]+/.exec(suiv.s);
+        if (q) {
+          m.apres = q[0];
+          suiv.s = suiv.s.slice(q[0].length);
+        }
+      }
+    });
+  }
+  return morceaux.map((m) => (m.texte ? echapperHtml(m.s) : collerAFormule(m.s, echapperHtml(m.avant), echapperHtml(m.apres)))).join("");
+}
+
+const KATEX_HTML = '<span class="katex-html" aria-hidden="true">';
+const KATEX_BASE = '<span class="katex-base">';
+const KATEX_FIN = "</span></span>";
+const INSECABLE = '<span style="white-space:nowrap">';
+
+/**
+ * Colle `avant` (« ( », « [ », « « ») au PREMIER morceau de la formule et `apres` (« , », « . »,
+ * « ) »…) à son DERNIER : la formule est scindée entre ses morceaux KaTeX (`.katex-base`, déjà
+ * insécables) en deux ou trois `.katex` côte à côte — rendu identique, les coupures permises À
+ * L'INTÉRIEUR d'une longue formule restent (tout mettre en `nowrap` la ferait déborder). Le MathML
+ * reste dans le premier morceau seulement. Mesuré (Chromium, KaTeX 0.18) : virgule seule à la ligne
+ * 8 largeurs sur 260 → 0, ouvrant seul 87 → 0, largeur sur une ligne inchangée.
+ */
+export function collerAFormule(html: string, avant: string, apres: string): string {
+  if (!avant && !apres) return html;
+  const iHtml = html.indexOf(KATEX_HTML);
+  const premier = iHtml < 0 ? -1 : html.indexOf(KATEX_BASE, iHtml);
+  const dernier = html.lastIndexOf(KATEX_BASE);
+  if (premier < 0 || !html.endsWith(KATEX_FIN) || html.includes("katex-newline") || html.includes('class="tag"')) {
+    return avant + html + apres;
+  }
+  if (premier === dernier) return INSECABLE + avant + html + apres + "</span>";
+  const tete = html.slice(0, iHtml);
+  const contenu = html.slice(iHtml + KATEX_HTML.length, html.length - KATEX_FIN.length);
+  const d = dernier - (iHtml + KATEX_HTML.length);
+  const second = contenu.indexOf(KATEX_BASE, KATEX_BASE.length);
+  const morceau = (s: string, avecMathml: boolean) => (avecMathml ? tete : '<span class="katex">') + KATEX_HTML + s + KATEX_FIN;
+  const debut = avant ? contenu.slice(0, second) : "";
+  const milieu = contenu.slice(avant ? second : 0, apres ? d : contenu.length);
+  const fin = apres ? contenu.slice(d) : "";
+  let sortie = "";
+  if (avant) sortie += INSECABLE + avant + morceau(debut, true) + "</span>";
+  if (milieu) sortie += morceau(milieu, !avant);
+  if (apres) sortie += INSECABLE + morceau(fin, !avant && !milieu) + apres + "</span>";
+  return sortie;
 }
 
 /**

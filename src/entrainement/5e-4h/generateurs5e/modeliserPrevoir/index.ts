@@ -4,7 +4,7 @@ import { arrondi, entier, gauss, melanger, parmi, resume } from "../../core5e/st
 
 /**
  * Couche A — générateur de `5gen78` « Modéliser et prévoir en contexte ». `Math.random()` seul (le
- * `?code=` rejoue le tirage). Ordre du tirage : verdicts (fiable, interpolation) à parts égales, PUIS
+ * `?code=` rejoue le tirage). Ordre du tirage : verdicts (fiable — voir `CONTEXTES_PEU_FIABLES` —, interpolation), PUIS
  * la série : une loi affine plausible (ordres de grandeur réels, nombres nouveaux), un bruit gaussien
  * dont l'écart-type est une fraction de l'étendue des y (faible si fiable, fort sinon), valeurs
  * arrondies à la précision du tableau, puis r recalculé sur la série ARRONDIE et accepté seulement
@@ -165,15 +165,30 @@ export const CATALOGUE_VARIANTES: { id: ContexteModeliser; label: string }[] = [
   { id: "consommation", label: "Consommation selon la puissance" },
 ];
 
+/**
+ * Décision du professeur : le verdict « peu fiable » est réservé aux contextes économiques et sociaux
+ * (prix et acheteurs, population). Une loi physique ou technique (dilatation, grue, machine qui se
+ * dérègle, consommation selon la puissance) donne une corrélation forte : un nuage très dispersé y
+ * serait invraisemblable. Tirage : un contexte économique ou social une fois sur deux, et là le verdict à
+ * pile ou face (le contexte ne trahit jamais le verdict d'un exercice qui le demande vraiment) ; sinon un
+ * contexte physique ou technique, toujours fiable. Mesuré : « peu fiable » ≈ 25 % des exercices, 50 % dans
+ * chaque contexte économique ou social.
+ */
+export const CONTEXTES_PEU_FIABLES: readonly ContexteModeliser[] = ["ventes", "population"];
+
 export function construireAvecVarianteId(id: string): ExerciceModeliserPrevoir {
-  const fiable = Math.random() < 0.5;
   const interpolation = Math.random() < 0.5;
   const v = CATALOGUE_VARIANTES.find((c) => c.id === id)?.id ?? parmi(CATALOGUE_VARIANTES).id;
+  const fiable = CONTEXTES_PEU_FIABLES.includes(v) ? Math.random() < 0.5 : true;
   return construire(v, fiable, interpolation);
 }
 
 export function genererExerciceModeliserPrevoir(): ExerciceModeliserPrevoir {
-  const fiable = Math.random() < 0.5;
+  const economique = Math.random() < 0.5;
+  const fiable = economique ? Math.random() < 0.5 : true;
   const interpolation = Math.random() < 0.5;
-  return construire(parmi(CATALOGUE_VARIANTES).id, fiable, interpolation);
+  const v = economique
+    ? parmi([...CONTEXTES_PEU_FIABLES])
+    : parmi(CATALOGUE_VARIANTES.filter((c) => !CONTEXTES_PEU_FIABLES.includes(c.id))).id;
+  return construire(v, fiable, interpolation);
 }

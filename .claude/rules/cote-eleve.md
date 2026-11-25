@@ -258,7 +258,7 @@ automatique) et « Dire chaque case » (`cases`). « Revenir au réglage du site
 - Symboles en TEXTE brut (titres de tiroirs, sous-titres, étiquettes « (n−1) », « uₙ ») dits en mots
   (`enMots`) : indices / exposants Unicode, « − + × ÷ = ≤ ≥ ≠ ≈ ∞ √ ∈ ⟹ », « n° » → « numéro », « Ex. » →
   « Exemple : », « · » → virgule, « ✓ ✗ » muets, notation clavier « _ » / « ^ » → « indice » / « exposant »
-  (trouvée : « log_a » dans un sous-titre et un titre d'exemple de 6e ch. 3 — à réécrire dans le contenu). Deux
+  (« log_a » trouvé dans 6e ch. 3, réécrit « logₐ » dans le contenu ; indices Unicode ₐ ₑ ₓ dits aussi). Deux
   formules qui se suivent sans texte (données côte à côte) : une virgule entre elles.
 - Découpage (`coupures`, PUR) : fin de phrase après « . ! ? … » (et « » ) " ») suivis d'une espace PUIS d'une
   majuscule, d'un chiffre, de « « ( [ − » ou du début d'une formule ; jamais avant une minuscule, ni dans « 3,5 » /

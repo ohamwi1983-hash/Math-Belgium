@@ -27,7 +27,7 @@ type Morceau =
 /* Texte brut du site qui contient des symboles (« uₙ », « (n−1) », « x² », « n° 1 », « × », « Ex. ») :
    dits en mots, comme les formules KaTeX (une voix lirait « u n », « n tiret 1 », « n degré 1 »…).
    Chaque morceau garde la position du caractère d'origine (surlignage exact). */
-const INDICES_TXT: Record<string, string> = { '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9', 'ₙ': 'n', 'ₚ': 'p', 'ₖ': 'k', 'ᵢ': 'i' }
+const INDICES_TXT: Record<string, string> = { '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9', 'ₙ': 'n', 'ₚ': 'p', 'ₖ': 'k', 'ᵢ': 'i', 'ₐ': 'a', 'ₑ': 'e', 'ₓ': 'x' }
 const EXPOSANTS_TXT: Record<string, string> = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9', 'ⁿ': 'n', '⁻': 'moins ' }
 const SYMBOLES_TXT: Record<string, string> = {
   '−': ' moins ', '×': ' fois ', '÷': ' divisé par ', '≤': ' inférieur ou égal à ', '≥': ' supérieur ou égal à ', '≠': ' différent de ',

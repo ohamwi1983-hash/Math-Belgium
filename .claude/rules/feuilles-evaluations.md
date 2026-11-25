@@ -3523,7 +3523,10 @@ document du professeur, nombres nouveaux (variantes) : dilatation d'une barre de
 → allongement en mm), charge maximale d'une grue (longueur de flèche maximale), pièces défectueuses (seuil 5 %), prix et
 nombre d'entreprises acheteuses (sur 300), population d'une commune (x = années depuis 2010), consommation selon la
 puissance. VERDICTS tirés à parts égales AVANT les nombres : fiable (|r| ∈ [0,86 ; 0,995]) / peu fiable ([0,45 ; 0,74], loin
-du seuil 0,80), interpolation (x₀ dans ]min ; max[, hors tableau) / extrapolation ; série = loi affine + bruit gaussien
+du seuil 0,80 ; **« peu fiable » réservé aux contextes économiques et sociaux** — prix et acheteurs, population —, décision du
+professeur : `CONTEXTES_PEU_FIABLES` ; tirage libre = contexte économique ou social une fois sur deux, verdict à pile ou face
+dans ce contexte (le contexte ne trahit pas le verdict), sinon contexte physique ou technique toujours « fiable » — « peu
+fiable » ≈ 25 % des exercices ; variante choisie au sélecteur : même règle), interpolation (x₀ dans ]min ; max[, hors tableau) / extrapolation ; série = loi affine + bruit gaussien
 (écart-type proportionnel à l'étendue), arrondie à la précision du tableau, r recalculé sur la série ARRONDIE et accepté dans
 la bande. Écrans : a, b (précision par contexte), r au millième, fiabilité (choix : |r| ≥ 0,80 / < 0,80 / « il faudrait
 r = ±1 » / « r ≠ 0 suffit » ou « r négatif = pas de lien »), prévision (tolérance PROPAGÉE : a et b arrondis ou non + demi-unité),
@@ -4224,3 +4227,21 @@ mesurée avec l'ancienne répartition ; 25 / 50 / 25 : de 42 à 59 min, médiane
   dossier de travail `conception-prof/` (`nonreg.cjs`, `uifeuille.cjs`, `facons.cjs`,
   `captures.cjs`, `connecte.cjs`).
 
+
+## Coupures autour des formules (papier, 25/11/2026)
+
+- **Ponctuation collée** (`genererFeuilleExercicesHtml.ts::fragmentsVersHtml` → `collerAFormule`) : Chromium coupait
+  entre une formule KaTeX (morceaux `.katex-base` en inline-block) et la ponctuation qui la suit (« , . ; : ! ? … ) ] » »)
+  ou entre « ( », « [ », « « » et la formule — ni le `nowrap` sur un parent, ni U+2060 n'y font rien. La formule est
+  scindée entre ses `.katex-base` en deux ou trois `.katex` côte à côte (MathML dans le premier seulement) : le PREMIER
+  morceau est collé à l'ouvrant, le DERNIER à la ponctuation, dans un `<span style="white-space:nowrap">` ; les coupures
+  À L'INTÉRIEUR d'une longue formule restent permises (tout en `nowrap` déborderait). Pas en mode bloc (formule
+  affichée), pas pour une formule à `\\` ou `\tag`. Mesuré (KaTeX 0.18, 30 à 300 px) : virgule seule 8 largeurs → 0,
+  ouvrant seul 87 → 0, largeur sur une ligne identique. Vaut pour tout ce qui passe par `fragmentsVersHtml` (énoncés,
+  corrigés, brèves, barèmes, feuilles, évaluations, examen, aménagée). Les documents changent donc (seulement des
+  coupures en mieux) : la comparaison « octet pour octet » des lots précédents ne vaut plus pour les formules suivies
+  d'une ponctuation.
+- **Formulaire en annexe** (`annexesPapier.ts::formulesVersHtml`) : une formule du formulaire qui en réunit plusieurs
+  par `\qquad` est rendue partie par partie (un blanc de 1,6 em entre elles), une partie courte (≤ 32 signes de
+  source) en `nowrap` : « σx = √V(x) » ne se coupe plus après « = » dans la colonne étroite. 26 formules à `\qquad`
+  dans les formulaires, toutes à accolades équilibrées une fois découpées (contrôlé).

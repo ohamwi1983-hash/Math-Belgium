@@ -19,7 +19,7 @@ export const fonctionsLogarithmes: ChapterContent = {
       id: 'proprietes',
       number: 1,
       title: 'Propriétés du logarithme',
-      kicker: 'réciproque de exp_a, propriétés algébriques, changement de base',
+      kicker: 'réciproque de expₐ, propriétés algébriques, changement de base',
       titreCourt: 'Propriétés du logarithme',
       partie: 'Propriétés, équations, inéquations',
       essentiel: [
@@ -773,7 +773,7 @@ export const fonctionsLogarithmes: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration — pourquoi ln est exactement log_e',
+          label: 'Démonstration — pourquoi ln est exactement logₑ',
           blocks: [
             {
               kind: 'para',
@@ -1103,7 +1103,7 @@ export const fonctionsLogarithmes: ChapterContent = {
       id: 'equations',
       number: 2,
       title: 'Résoudre une équation exponentielle ou logarithmique',
-      kicker: 'appliquer log_a ou exp_a aux deux membres',
+      kicker: 'appliquer logₐ ou expₐ aux deux membres',
       titreCourt: 'Résoudre une équation',
       partie: 'Propriétés, équations, inéquations',
       essentiel: [
@@ -1344,7 +1344,7 @@ export const fonctionsLogarithmes: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — substitution t = log_a(x)',
+          label: 'Exemple résolu — substitution t = logₐ(x)',
           blocks: [
             {
               kind: 'para',
@@ -1398,7 +1398,7 @@ export const fonctionsLogarithmes: ChapterContent = {
           title: 'Résoudre une équation exponentielle ou logarithmique',
           generatorId: '6gen14',
           description: [
-            'Résous une équation exponentielle ou logarithmique en appliquant log_a ou exp_a ' +
+            'Résous une équation exponentielle ou logarithmique en appliquant logₐ ou expₐ ' +
               'aux deux membres, puis confronte le résultat à la condition d\'existence : ' +
               'solution rejetée, aucune solution, ou identité vraie sur toute la CE.',
           ],
