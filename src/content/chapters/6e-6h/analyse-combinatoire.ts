@@ -844,6 +844,16 @@ export const analyseCombinatoire: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 44. Dénombrement combiné et sélections contraintes »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Au moins un : le complément',
+          generatorId: '6gen105',
+          description: [
+            "Choisis d'abord la stratégie la plus directe (le contraire pour « au moins un », deux cas pour « au plus un », un produit pour « exactement »), puis compte avec des combinaisons, sans compter un groupe deux fois.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 105. Au moins un : le complément »',
+        },
       ],
     },
 
@@ -1191,6 +1201,26 @@ export const analyseCombinatoire: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 45. Binôme de Newton »',
         },
+        {
+          kind: 'methode',
+          label: 'Méthode — terme indépendant de x',
+          items: [
+            'Écris le terme général $T_{k+1}=C_n^k\\,a^{n-k}\\,b^{k}$ du développement, avec $a$ et $b$ les deux termes du binôme.',
+            "Calcule l'exposant de $x$ dans $T_{k+1}$ (une expression en $k$) avec les règles des puissances : $\\dfrac{1}{x^q}=x^{-q}$ et $x^r\\cdot x^s=x^{r+s}$.",
+            "Résous « exposant $=0$ ». Si la solution $k$ est un **entier** de $0$ à $n$, le terme indépendant est $T_{k+1}$ ; sinon, **aucun** terme n'est constant (le terme indépendant vaut $0$).",
+            'Exemple : dans $\\left(x^{2}-\\dfrac{2}{x}\\right)^{9}$, l\'exposant de $x$ est $18-3k$, nul pour $k=6$ : $T_7=C_9^6\\cdot(-2)^6=84\\cdot 64=5376$.',
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Terme indépendant',
+          generatorId: '6gen107',
+          description: [
+            "Écris l'exposant de x dans le terme général, trouve le rang k qui l'annule (ou conclus qu'il n'y en a pas), puis calcule le terme indépendant.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 107. Terme indépendant »',
+        },
       ],
     },
 
@@ -1425,6 +1455,26 @@ export const analyseCombinatoire: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 46. Dénombrement combinatoire pur — problèmes »',
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode — chemins dans un quadrillage',
+          items: [
+            'Un chemin le plus court de $A$ à $B$ qui va $m$ fois vers la droite et $n$ fois vers le haut est un mot de $m+n$ flèches ($\\rightarrow$ ou $\\uparrow$).',
+            'Ce mot est fixé par les places des $n$ flèches vers le haut, choisies sans ordre parmi les $m+n$ déplacements : il y a $C_{m+n}^{n}$ chemins.',
+            'Passer par un point $P$ : (chemins de $A$ à $P$) $\\times$ (chemins de $P$ à $B$), par le principe de multiplication.',
+            'Éviter un point $P$ : tous les chemins de $A$ à $B$, moins ceux qui passent par $P$ (complément).',
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Chemins dans un quadrillage',
+          generatorId: '6gen106',
+          description: [
+            'Compte les chemins les plus courts sur un quadrillage : de A à B, en passant par un point, ou en évitant un point fermé.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 106. Chemins dans un quadrillage »',
         },
       ],
     },
@@ -1823,6 +1873,26 @@ export const analyseCombinatoire: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 48. Probabilité binomiale et séquence exacte »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Avec ou sans remise ? Choisir le modèle',
+          generatorId: '6gen108',
+          description: [
+            'Lis comment se font les tirages pour choisir la loi (binomiale avec remise, hypergéométrique sans remise), puis calcule une probabilité, y compris « au moins un » et « au plus un ».',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 108. Avec ou sans remise ? Choisir le modèle »',
+        },
+        {
+          kind: 'entrainement',
+          title: "Détective d'erreurs : analyse combinatoire",
+          generatorId: '6gen109',
+          description: [
+            "Trouve la ligne fausse dans la copie d'un élève (ordre compté à tort, collier, dénominateur, exposants inversés, « − 1 » oublié, lettres répétées), explique l'erreur et corrige le résultat.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: "6e (6h) → « 109. Détective d'erreurs : analyse combinatoire »",
         },
         { kind: 'video', title: 'Synthèse du chapitre', youtubeId: 'CZGQSI3TBZ4' },
       ],

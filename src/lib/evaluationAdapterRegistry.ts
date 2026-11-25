@@ -510,6 +510,11 @@ import { adaptateurEvaluationArbreTableauEffectifs } from '../entrainement/6e-6h
 import { adaptateurEvaluationParadoxesProbabilites } from '../entrainement/6e-6h/generateurs6e/paradoxesProbabilites/exportEvaluation'
 import { adaptateurEvaluationProbaGeo } from '../entrainement/6e-6h/generateurs6e/probabilitesGeometriques/exportEvaluation'
 import { adaptateurEvaluationDetectiveProba } from '../entrainement/6e-6h/generateurs6e/detectiveProbabilites/exportEvaluation'
+import { adaptateurEvaluationAMU } from '../entrainement/6e-6h/generateurs6e/auMoinsUnComplement/exportEvaluation'
+import { adaptateurEvaluationChemins } from '../entrainement/6e-6h/generateurs6e/cheminsQuadrillage/exportEvaluation'
+import { adaptateurEvaluationTI } from '../entrainement/6e-6h/generateurs6e/termeIndependant/exportEvaluation'
+import { adaptateurEvaluationASR } from '../entrainement/6e-6h/generateurs6e/avecSansRemise/exportEvaluation'
+import { adaptateurEvaluationDetectiveCombi } from '../entrainement/6e-6h/generateurs6e/detectiveCombinatoire/exportEvaluation'
 import { adaptateurEvaluationPointsDroitesRemarquablesTriangle } from '../entrainement/6e-6h/generateurs6e/pointsDroitesRemarquablesTriangle/exportEvaluation'
 import { adaptateurEvaluationCercles } from '../entrainement/6e-6h/generateurs6e/cercles/exportEvaluation'
 import { adaptateurEvaluationLieuxGeometriquesParametres } from '../entrainement/6e-6h/generateurs6e/lieuxGeometriquesParametres/exportEvaluation'
@@ -579,6 +584,11 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen46': adaptateurEvaluationDenombrementCombinatoirePur as unknown as AdaptateurFeuilleExercices<never>,
   '6gen47': adaptateurEvaluationProbabiliteHypergeometrique as unknown as AdaptateurFeuilleExercices<never>,
   '6gen48': adaptateurEvaluationBinomialeSequenceOrdonnee as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen105': versionPapier(adaptateurEvaluationAMU) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen106': versionPapier(adaptateurEvaluationChemins) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen107': versionPapier(adaptateurEvaluationTI) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen108': versionPapier(adaptateurEvaluationASR) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen109': versionPapier(adaptateurEvaluationDetectiveCombi) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen49': adaptateurEvaluationVariablesDiscretesEsperance as unknown as AdaptateurFeuilleExercices<never>,
   '6gen50': adaptateurEvaluationLoiBinomiale as unknown as AdaptateurFeuilleExercices<never>,
   '6gen51': adaptateurEvaluationLoiNormale as unknown as AdaptateurFeuilleExercices<never>,

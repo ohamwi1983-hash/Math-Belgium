@@ -500,7 +500,7 @@ seulement), 5gen8, 5gen10, 5gen11, 5gen16, 5gen20, 5gen21, 5gen24 (pas « bonus 
 pas « double tangence »), 5gen46, 5gen55, 5gen60, 5gen62. 6e : 6gen1–4, 6gen6, 6gen7, 6gen9, 6gen10,
 6gen13–17, 6gen19, 6gen23–28 (6gen25 : pas « valeur moyenne », 6gen27 : pas D — vraies questions),
 6gen34–38, 6gen40 (A et D ; B et C ont de vraies questions), 6gen87, 6gen93 (pas « application »),
-6gen98, 6gen145, 6gen149 (pas « en zéro »), 6gen157. Mesuré (`verifReg.cjs`, 6 graines par variante) :
+6gen98, 6gen145, 6gen149 (pas « en zéro »), 6gen157, 6gen107. Mesuré (`verifReg.cjs`, 6 graines par variante) :
 toutes les variantes visées reconnues ; seules les variantes à vraies questions ou à énoncé propre
 restent `null`. Une valeur propre à l'instance va dans la LIGNE quand c'est possible (5gen11
 « dans [0 ; 16[ », 5gen26 « f′(4) », gen26 « norme visée ») ; sinon seules les instances de même
@@ -1041,6 +1041,16 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   5gen29 `repartirSurQuatre` : 9 critères → total 4,5 (la boucle ne s'arrêtait jamais). Contrôle des textes rendus
   (énoncé, brève, corrigé, barème, aides, messages ciblés) : outil `textes.ts` du dossier de travail
   `finitions-5e5` (caractères de contrôle, LaTeX brut en texte, KaTeX invalide).
+- **6e ch. 7, lot H2 (6gen105–6gen109, nouveaux)** : socle d'écrans du 5e (`AppEcransTrigo`, sans modification ;
+  choix jugés ✗ / ✓ par `bonneOption`, `piegeChoixRevele`, `aidesChoixDeuxNiveaux`). Lecture EXACTE commune
+  `moteur6e/lectureCombinatoireLotH2.ts` (rationnels `bigint` : espaces de milliers « 34 650 », « × · * », « x » entre
+  deux nombres, « ÷ : », exposants « ² ³ », n!, « C(10,3) », « C(10;3) », « C_10^3 », « C10^3 », « 10C3 », « 10nCr3 »,
+  « binom », « \binom », « A(10,3) », « 10P3 », « P_5 », préfixe « N = » / « P(X ≥ 1) = », « % » ; « 3 4 » illisible,
+  jamais un produit deviné ; variable « k » sur demande — expression affine comparée en cinq valeurs), écritures
+  `ui6e/nombresCombinatoireLotH2.ts` (Cₙᵏ `C_{n}^{k}`, entiers à espace fine dès 10 000, fractions au plus petit
+  dénominateur commun). Dénombrement : décimal non entier = message SANS tentative ; probabilité de 6gen108 : exacte
+  ou décimale d'au moins quatre décimales à 0,00005 près, décimal plus court proche = « trop arrondi » sans tentative.
+  Détail : section « 6e ch. 7, lot H2 — 6gen105–6gen109 » plus bas.
 - **6e ch. 6, lot G2 (6gen162–6gen163, nouveaux)** : socle d'écrans du 5e (`AppEcransTrigo`, sans
   modification ; `bonneOption` = choix jugés ✗ / ✓ pour la ligne et l'erreur de 6gen163, `approchee` =
   valeur décimale proche d'une valeur exacte refusée SANS tentative). Lecture commune
@@ -2199,6 +2209,57 @@ position. Plans réels `construirePlan` (2 séries, interdite + cas coché ×6, 
 vides) 94 contrôles, scrollWidth 390, 0 erreur console ; documents réels (évaluation 2 séries + aménagée +
 corrigé + grille + feuille + aménagée + Word du corrigé, interdite / autorisée) : 0 débordement à 680, 820 et
 1 280 px, 0 `.katex-error`.
+
+## 6e ch. 7, lot H2 — 6gen105–6gen109 (nouveaux, notés)
+
+Corrigés `generateurs6e/{auMoinsUnComplement,cheminsQuadrillage,termeIndependant,avecSansRemise,detectiveCombinatoire}/corrigeDetaille.ts`,
+une lettre par écran, partagés par l'appli et l'adaptateur ; textes et définitions d'écrans dans `ui6e/format….ts`,
+vérifications `moteur6e/verification….ts`. **6gen105 — Au moins un : le complément** (§ 2, Transférer) : comité
+(femmes / hommes), main de 32 cartes (as), échantillon d'ampoules (défectueuses), délégation (6e / 5e) ; question « au
+moins un », « au plus un » ou « exactement j » = VERDICT de l'écran 1 (stratégie : contraire / deux cas disjoints / un
+seul produit, + leurre permanent « imposer un élément puis compléter librement »), tiré au tiers AVANT les nombres ;
+a ≥ 3 et k ≥ 3 pour que la stratégie juste soit la SEULE à deux termes ; écran 2 = les deux nombres de la stratégie
+(deux champs, libellés propres à la stratégie, montrés après l'écran 1), écran 3 = résultat ; piège « imposer » (a ·
+Cₙ₋₁ᵏ⁻¹) en message ciblé aux écrans 1 et 3 et en ligne « Piège » ; vérification du corrigé = somme des cas
+« exactement i » (au moins un) ou comparaison au total. **6gen106 — Chemins dans un quadrillage** (§ 4, Transférer) :
+`total` (déplacements puis C₍ₘ₊ₙ₎ⁿ ; écran a = lecture), `passage` (A → P, P → B, produit), `eviter` (total, par P,
+complément) ; quadrillage 3–7 × 2–5 (≤ C₁₂⁵ = 792), P intérieur ; figure SVG sans identifiant
+(`ui6e/figureCheminsQuadrillage.ts`, nœuds marqués, A / B / P à halo, P fermé barré), écran ET papier ; chemin d'exemple
+orange dans la figure du corrigé (`figureHtml`, dernière étape). **6gen107 — Terme indépendant** (§ 3, Appliquer) :
+(a·xᵖ + b/x^q)ⁿ, familles (1, 1), (2, 1), (1, 2), (3, 1) ; verdict « le terme existe / aucun » tiré 50/50 AVANT n
+(n ∈ 4–12 compatible), |terme| ≤ 2·10⁶ ; écrans : exposant de x dans T₍ₖ₊₁₎ (expression en k, « x^(…) » toléré),
+k (entier, ou « aucun » — bouton raccourci), terme (0 ou « aucun » s'il n'existe pas : aucun terme n'a x⁰) ; messages
+ciblés : exposant négatif oublié, second facteur oublié, puissances échangées, k non entier ou arrondi, n − k,
+coefficient du binôme seul, signe de bᵏ, rang k au lieu de k + 1. **6gen108 — Avec ou sans remise ?** (§§ 5–6, carte
+au § 6, Transférer) : urne, 32 cartes (as / cœurs), contrôle d'un lot, élèves interrogés ; MODÈLE (binomiale /
+hypergéométrique) = verdict de l'écran 1, tiré 50/50 AVANT les nombres ; écart entre les deux modèles ≥ 0,001 (le
+message « c'est la probabilité avec / sans remise » se déclenche toujours) ; écran 2 paramètres (n, p ou N, K, n :
+lecture), écran 3 P(X = j), P(X ≥ 1) ou P(X ≤ 1) (`forme`) ; corrigé : formule, complément ou deux cas, fraction puis
+arrondi, piège = valeur de l'autre modèle. **6gen109 — Détective d'erreurs : analyse combinatoire** (fin § 6,
+Transférer, mécanique de 6gen163) : six types d'erreur = variantes, `groupe_erreur` — ordre compté / oublié (délégation
+sans rôles écrite A, bureau à postes écrit C), collier sans « / 2 », dénominateur Cₙʲ au lieu de C_Nⁿ (copie gardée
+≤ 1), exposants inversés (kⁿ pour nᵏ, nᵏ ≠ kⁿ exigé ; ou p et 1 − p échangés dans la binomiale, j ≠ n/2), « − 1 »
+oublié (anagrammes autres que le mot, pizza sans garniture), lettres répétées non divisées (mots réels : ANANAS,
+BANANE, CERISE, POMME, KIWI, RADAR, PAPAYE, TOMATE, COCOTTE, ELLIPSE) ; ligne fausse précédée de 0 à 3 lignes justes,
+`av` tiré EN DERNIER, hors `forme`.
+Profils : `forme` = contexte (6gen105), variante (6gen106, 6gen107 famille, 6gen109), événement (6gen108) ; aucun cas
+particulier ; aucun `calcul` (modéliser, décider : tirés « interdite » ET « autorisée », décision du 24/11 — la
+Casio Graph Math+ donne Cₙᵏ et les deux lois, pas le choix). Regroupement a), b), c) : **6gen107 activé** (entrée de
+`REGROUPEMENTS`, ligne = l'expression ; 4 / 4 reconnus dans un plan réel) ; écartés 6gen105, 6gen106, 6gen108
+(situation propre à l'instance, figure pour 6gen106) et 6gen109 (copie d'élève). Niveaux (`niveauEtDuree`, 250 tirages
+par variante ; `sansCharge` sauf 6gen106) : 6gen105 4 · 8 min constant (méthode 1, piège 1 constant, quel que soit le
+verdict) ; 6gen106 total 2 · 5, passage 3 · 8, éviter 4 · 8 ; 6gen107 3 · 8 (b > 0) / 4 · 8 (b < 0, tiré
+indépendamment du verdict) ; 6gen108 3 · 8 (exactement) / 4 · 8 (au moins / au plus), identique pour les deux modèles ;
+6gen109 3 · 8 constant. Mesures : collecteur (`…/scratchpad/h2-6e7/collecteur.ts`, `evalLatex.ts` recopié + Cₙᵏ / Aₙᵏ
+numériques) 250 tirages par variante × 21 variantes : écran, papier, barème (= 4), corrigé, 0 NaN / notation clavier /
+KaTeX invalide / majuscule d'insistance, ≈ 30 000 relations évaluées, 0 fausse ; moteur : réponses justes (deux
+écritures) acceptées, illisible et « 3 4 » = `parse_error`, pièges absents sur une réponse juste, résultat de la copie
+et valeur de l'autre modèle jamais justes, verdicts ≈ 1/3 ou 1/2, ligne fausse ≈ 25 % par position. Plans réels
+`construirePlan` (2 séries, interdite ×6, autorisée ×2) : même multiset (générateur, variante, forme, cas), nombres
+tous différents, verdicts tirés indépendamment d'une série à l'autre ; `?code=` 30 / 30 ; iPhone 13 (toutes les
+variantes ×2 : illisible sans tentative, faux, juste, choix faux ✗ / ✓, nouvel exercice à champs vides) 208 contrôles,
+scrollWidth 390, 0 erreur console ; documents réels (évaluation 2 séries + aménagée + corrigé + grille + feuille +
+aménagée + Word du corrigé, interdite / autorisée) : 0 débordement à 680, 820 et 1 280 px, 0 `.katex-error`.
 
 ## 4e ch. 1, lot H — gen123–gen125 (nouveaux, notés)
 

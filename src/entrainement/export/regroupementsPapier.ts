@@ -570,6 +570,8 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
   "6gen7": simple(String.raw`Détermine le domaine puis calcule la dérivée de la fonction suivante : (?<ligne>${M})\.?`, "Détermine le domaine puis calcule la dérivée de chaque fonction."),
   "6gen9": simple(String.raw`Résous l'équation suivante : (?<ligne>${M})\s*Justifie chaque étape\.`, "Résous chaque équation. Justifie chaque étape."),
   "6gen10": simple(String.raw`Résous l'inéquation suivante : (?<ligne>${M})\.`, "Résous chaque inéquation."),
+  // 6gen107 : consigne commune, ligne = l'expression à développer.
+  "6gen107": simple(String.raw`Détermine le terme indépendant de \$x\$ dans le développement de (?<ligne>${M}), s'il existe\.\nJustifie chaque étape\.`, "Détermine, s'il existe, le terme indépendant de $x$ dans le développement de chaque expression. Justifie chaque étape."),
   "6gen145": { formes: [{ motif: re(String.raw`Calcule (?<ligne>${M}) sans calculatrice\. (?<s>Justifie .+)`), consigne: (g) => `Calcule chaque limite sans calculatrice. ${g.s}` }] },
   "6gen13": {
     formes: [

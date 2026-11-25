@@ -93,6 +93,7 @@ export type IdGenerateurPilote =
   | '6gen146'
   | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22' | '6gen90' | '6gen85' | '6gen91' | '6gen88' | '6gen86' | '6gen92' | '6gen89' | '6gen87'
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
+  | '6gen105' | '6gen106' | '6gen107' | '6gen108' | '6gen109'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
   | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84' | '6gen82' | '6gen78' | '6gen80' | '6gen83' | '6gen79' | '6gen81'
   | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42' | '6gen93' | '6gen95' | '6gen94' | '6gen97' | '6gen96' | '6gen98' | '6gen99'
@@ -210,6 +211,11 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementproblemes', generatorId: '6gen46', label: '' },
   { chapitreSlug: 'analyse-combinatoire', sectionId: 'probabilitehypergeometrique', generatorId: '6gen47', label: '' },
   { chapitreSlug: 'analyse-combinatoire', sectionId: 'binomialesequence', generatorId: '6gen48', label: '' },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementcombine', generatorId: '6gen105', label: 'Au moins un : le complément (6gen105)', processus: 3 },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementproblemes', generatorId: '6gen106', label: 'Chemins dans un quadrillage (6gen106)', processus: 3 },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'binomenewton', generatorId: '6gen107', label: 'Terme indépendant (6gen107)', processus: 2 },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'binomialesequence', generatorId: '6gen108', label: 'Avec ou sans remise ? Choisir le modèle (6gen108)', processus: 3 },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'binomialesequence', generatorId: '6gen109', label: 'Détective d\'erreurs : analyse combinatoire (6gen109)', processus: 3 },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'variablesdiscretes', generatorId: '6gen49', label: '' },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'loibinomiale', generatorId: '6gen50', label: '' },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'loinormale', generatorId: '6gen51', label: '' },
