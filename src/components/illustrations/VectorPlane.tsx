@@ -244,7 +244,12 @@ export function VectorPlane({ xMin, xMax, yMin, yMax, showAxes = true, grid = fa
         const offset = LABEL_OFFSET[p.labelPos ?? 'above']
         return (
           <g key={i}>
-            {p.node !== false && <circle cx={cx} cy={cy} r="3.6" className={POINT_TONE_CLASS[p.tone]} />}
+            {p.node !== false &&
+              (p.open ? (
+                <circle cx={cx} cy={cy} r="3.8" className={POINT_TONE_CLASS[p.tone]} style={{ fill: 'var(--surface)', stroke: p.tone === 'ink' ? 'var(--ink)' : undefined }} strokeWidth="2" />
+              ) : (
+                <circle cx={cx} cy={cy} r="3.6" className={POINT_TONE_CLASS[p.tone]} />
+              ))}
             {p.vectorLabel ? (
               <text x={cx + offset.dx} y={cy + offset.dy} textAnchor={offset.anchor} className={POINT_TONE_CLASS[p.tone]} fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15.5">
                 {p.vectorLabel.map((run, j) =>

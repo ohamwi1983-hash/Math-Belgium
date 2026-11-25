@@ -3,27 +3,29 @@ import type { VarianteQuizLieuxGeometriques } from "./core6e/quizLieuxGeometriqu
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { demarrerSessionQuizLieuxGeometriques, soumettreReponseQuizLieuxGeometriques } from "./moteur6e/sessionQuizLieuxGeometriques";
 import type { EtatSessionQuizLieuxGeometriques, ResultatExerciceQuizLieuxGeometriques } from "./moteur6e/typesQuizLieuxGeometriques";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs6e/quizLieuxGeometriques";
+import {
+  CATALOGUE_VARIANTES,
+  construireAvecVarianteId,
+  creerGenerateurSansRepetition,
+  etendueNombreQuestions,
+  nombreQuestions,
+} from "./generateurs6e/quizLieuxGeometriques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { EtapeQuestionQuizLieuxGeometriques } from "./components6e/EtapeQuestionQuizLieuxGeometriques";
 import { ResultatPanelQuizLieuxGeometriques } from "./components6e/ResultatPanelQuizLieuxGeometriques";
 import { ResumeSessionQuizLieuxGeometriques } from "./components6e/ResumeSessionQuizLieuxGeometriques";
 
-/** `nombreExercices: 35` correspond exactement à la taille de la banque par thème (voir
- * `generateurs6e/quizLieuxGeometriques/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une
- * session parcourt donc les 35 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession6e = {
-  nombreExercices: 35,
-  tentativesMax: 1,
-};
+/** Une session = toutes les questions du thème choisi (`nombreQuestions`, taille réelle de la banque,
+ * jamais une constante en dur), couplé à `creerGenerateurSansRepetition` : aucune question n'est
+ * répétée. */
+function reglagesPourTheme(theme: VarianteQuizLieuxGeometriques): ReglagesSession6e {
+  return { nombreExercices: nombreQuestions(theme), tentativesMax: 1 };
+}
 
-/** Le chapitre "Lieux géométriques" n'a JAMAIS porté de numéro dans ce dépôt (contrairement aux
- * chapitres 1/2/3/4/7/8/9/10, révisés par 6gen64-71) — il est désigné par son seul nom partout,
- * y compris dans `docs/historique-6e.md`. Le sous-titre le nomme donc plutôt que d'inventer un
- * numéro. */
+const ETENDUE_QUESTIONS = etendueNombreQuestions();
 
 function nouvelleSession(theme: VarianteQuizLieuxGeometriques): EtatSessionQuizLieuxGeometriques {
-  return demarrerSessionQuizLieuxGeometriques(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizLieuxGeometriques(reglagesPourTheme(theme), creerGenerateurSansRepetition(theme));
 }
 
 /** Contrairement à la plupart des générateurs, le thème (variante) n'est pas tiré au hasard : c'est
@@ -52,7 +54,7 @@ export function App6gen72() {
     const theme = varianteId as VarianteQuizLieuxGeometriques;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizLieuxGeometriques(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizLieuxGeometriques(reglagesPourTheme(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
@@ -82,7 +84,11 @@ export function App6gen72() {
         {!etat ? (
           <div>
             <h2 className="result-title">Choisis un thème</h2>
-            <p className="result-subtitle">4 thèmes, 35 affirmations vrai/faux chacun — révision complète du chapitre « Lieux géométriques ».</p>
+            <p className="result-subtitle">
+              {CATALOGUE_VARIANTES.length} thèmes,{" "}
+              {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max ? ETENDUE_QUESTIONS.min : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max}`} affirmations vrai/faux
+              chacun — révision complète du chapitre 9.
+            </p>
             <div className="accueil-choix">
               {CATALOGUE_VARIANTES.map((variante, index) => (
                 <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

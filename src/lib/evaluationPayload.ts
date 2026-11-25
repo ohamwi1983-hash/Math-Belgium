@@ -103,6 +103,7 @@ export type IdGenerateurPilote =
   | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
   | '6gen160' | '6gen161' | '6gen162' | '6gen163'
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
+  | '6gen128' | '6gen129' | '6gen130' | '6gen131'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
   | 'gen113' | 'gen114' | 'gen115' | 'gen116' | 'gen117' | 'gen118' | 'gen119' | 'gen120' | 'gen121' | 'gen122'
@@ -290,6 +291,10 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'lieux-geometriques', sectionId: 'cercles', generatorId: '6gen55', label: 'Cercles (6gen55)', processus: 2 },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'lieux-elimination', generatorId: '6gen56', label: 'Lieux géométriques et élimination de paramètre (6gen56)', processus: 2 },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'methode-generatrices', generatorId: '6gen57', label: 'Méthode des génératrices (6gen57)', processus: 3 },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'lieux-elimination', generatorId: '6gen128', label: 'Traduire un lieu : réciproque et points exclus (6gen128)', processus: 3 },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'lieu-parametrique', generatorId: '6gen129', label: 'Courbe paramétrée : élimination et restriction (6gen129)', processus: 2 },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'methode-generatrices', generatorId: '6gen130', label: 'Lieux en contexte : un point qui bouge (6gen130)', processus: 3 },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'lieu-parametrique', generatorId: '6gen131', label: 'Détective d\'erreurs : lieux, droites et cercles (6gen131)', processus: 3 },
   { chapitreSlug: 'coniques', sectionId: 'identifier', generatorId: '6gen58', label: '' },
   { chapitreSlug: 'coniques', sectionId: 'excentricite', generatorId: '6gen59', label: '' },
   { chapitreSlug: 'coniques', sectionId: 'airefocale', generatorId: '6gen60', label: '' },
@@ -561,6 +566,8 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'lieux-geometriques', sectionId: 'cercles', quizTheme: 'cercles', label: '' },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'lieux-elimination', quizTheme: 'lieuxGeometriquesParametres', label: '' },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'methode-generatrices', quizTheme: 'methodeGeneratrices', label: '' },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'methode-generale-demonstration', quizTheme: 'methodeDemonstrationLieuParametrique', label: '' },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'lieu-parametrique', quizTheme: 'methodeDemonstrationLieuParametrique', label: '' },
   { chapitreSlug: 'coniques', sectionId: 'identifier', quizTheme: 'identificationConiques', label: '' },
   { chapitreSlug: 'coniques', sectionId: 'excentricite', quizTheme: 'equationDepuisCaracteristiques', label: '' },
   { chapitreSlug: 'coniques', sectionId: 'airefocale', quizTheme: 'aireExcentriciteConique', label: '' },
@@ -1935,13 +1942,68 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
     ],
   },
   'lieux-geometriques': {
+    // Appariement PAR CLÉ (build strict : `CHAPITRES_ENONCES_VERIFIES`, audit 6e ch. 9, lot F) — la
+    // clé est le badge (`exemple`) ou le label (`exempleLibre`) du bloc ; chaque énoncé reprend les
+    // nombres du cours ; une démonstration dit QUOI démontrer, jamais la méthode (ni le repère).
+    'points-droites-remarquables': [
+      { cle: 'distance point-droite', enonce: "Calcule la distance du point $P(2\\,;-1)$ à la droite $d \\equiv 3x-4y+12=0$, puis les coordonnées du pied $H$ de la perpendiculaire menée de $P$ à $d$." },
+      { cle: "Démonstration — distance d'un point à une droite", enonce: "Dans un repère orthonormé, démontre que la distance du point $P(x_P\\,;y_P)$ à la droite $d \\equiv ax+by+c=0$ vaut $\\dfrac{|ax_P+by_P+c|}{\\sqrt{a^2+b^2}}$." },
+      { cle: 'G, O, H du triangle', enonce: "Pour le triangle $A(0\\,;0)$, $B(8\\,;0)$, $C(1\\,;7)$, détermine le centre de gravité $G$, le centre $O$ du cercle circonscrit et l'orthocentre $H$, puis montre que $O$, $G$ et $H$ sont alignés." },
+      { cle: 'les trois médianes sont concourantes', enonce: "Démontre que les trois médianes d'un triangle $ABC$ sont concourantes, et que leur point commun $G$ a pour coordonnées la moyenne des coordonnées des sommets." },
+      { cle: 'la médiatrice de [AB] est exactement', enonce: "Démontre que l'ensemble des points équidistants de deux points distincts $A$ et $B$ est exactement la médiatrice de $[AB]$." },
+      { cle: 'les trois médiatrices sont concourantes', enonce: "Démontre que les trois médiatrices d'un triangle sont concourantes en un point équidistant des trois sommets." },
+      { cle: 'les trois hauteurs sont concourantes', enonce: "Démontre que les trois hauteurs d'un triangle sont concourantes." },
+      { cle: "la droite d'Euler", enonce: "Démontre que le centre de gravité $G$, l'orthocentre $H$ et le centre $O$ du cercle circonscrit d'un triangle sont alignés, et que $\\overrightarrow{OH}=3\\,\\overrightarrow{OG}$." },
+      { cle: 'le cercle des neuf points', enonce: "Démontre que les milieux des côtés d'un triangle, les pieds de ses hauteurs et les milieux de $[AH]$, $[BH]$, $[CH]$ ($H$ orthocentre) sont sur un même cercle, centré au milieu de $[OH]$ et de rayon la moitié de celui du cercle circonscrit." },
+      { cle: 'milieux → sommets', enonce: "Les milieux des côtés $[BC]$, $[CA]$ et $[AB]$ d'un triangle $ABC$ sont $A'(1\\,;-1)$, $B'(4\\,;1)$ et $C'(-1\\,;2)$. Détermine les sommets $A$, $B$ et $C$." },
+      { cle: 'pied de la bissectrice', enonce: "Dans le triangle $B(0\\,;0)$, $A(3\\,;4)$, $C(0\\,;4)$, la bissectrice issue de $B$ coupe $[AC]$ en $I$. Calcule les coordonnées de $I$." },
+      { cle: 'théorème de la bissectrice', enonce: "Dans un triangle $ABC$, la bissectrice issue de $B$ coupe $[AC]$ en $I$. Démontre que $\\dfrac{AI}{IC}=\\dfrac{AB}{BC}$." },
+      { cle: 'aire variable', enonce: "On donne $A(1\\,;1)$ et $B(5\\,;1)$. Le point $C$ parcourt la droite $d \\equiv x=3$. Détermine les positions de $C$ pour lesquelles le triangle $ABC$ a une aire égale à $6$." },
+      { cle: 'symétrique', enonce: "Détermine le symétrique $Q$ du point $P(1\\,;5)$ par rapport à la droite $(AB)$, avec $A(0\\,;0)$ et $B(2\\,;1)$." },
+    ],
+    cercles: [
+      { cle: 'cercle, point ou vide ?', enonce: "Détermine la nature de l'ensemble des points $(x\\,;y)$ tels que $2x^2+2y^2-8x+4y+10=0$." },
+      { cle: 'cercle par 3 points', enonce: "Détermine le centre et le rayon du cercle qui passe par $A(5\\,;3)$, $B(-3\\,;-1)$ et $C(2\\,;-6)$." },
+      { cle: '2 points, rayon donné', enonce: "Détermine les centres des cercles de rayon $5$ qui passent par $A(0\\,;0)$ et $B(6\\,;0)$." },
+      { cle: 'tangent à un axe', enonce: "Détermine le cercle tangent à l'axe des abscisses au point $(3\\,;0)$ et qui passe par $A(1\\,;2)$." },
+      { cle: 'corde de longueur donnée', enonce: "Le cercle de centre $\\Omega(1\\,;2)$ découpe sur la droite $d \\equiv 3x-4y+15=0$ une corde de longueur $8$. Détermine une équation de ce cercle." },
+      { cle: 'cercle inscrit', enonce: "Détermine le centre et le rayon du cercle inscrit au triangle $A(0\\,;0)$, $B(3\\,;0)$, $C(0\\,;4)$, puis le centre et le rayon de son cercle exinscrit opposé à $A$." },
+      { cle: 'est équidistant des trois côtés', enonce: "Dans un triangle $ABC$, on note $a=BC$, $b=CA$ et $c=AB$. Démontre que le point $\\dfrac{aA+bB+cC}{a+b+c}$ est équidistant des trois côtés du triangle." },
+      { cle: 'tangentes depuis un point', enonce: "Détermine les équations des tangentes au cercle $x^2+y^2=25$ menées par le point $P(0\\,;13)$, leurs points de contact et la longueur $PT$." },
+      { cle: 'une tangente verticale', enonce: "Détermine les équations des tangentes au cercle $x^2+y^2=25$ menées par le point $P(5\\,;3)$." },
+      { cle: 'longueur d’une tangente', enonce: "Depuis un point $P$ extérieur à un cercle de centre $O$ et de rayon $r$, on mène les deux tangentes, de points de contact $T_1$ et $T_2$. Démontre que $PT_1=PT_2=\\sqrt{OP^2-r^2}$." },
+    ],
     'methode-generale-demonstration': [
-      "Démontre, en choisissant un repère avec $A(0;0)$, $B(2a;0)$ et $D(2b;2c)$ ($a,b,c$ quelconques), que les diagonales $[AC]$ et $[BD]$ d'un parallélogramme $ABCD$ se coupent toujours en leur milieu commun.",
+      { cle: "les diagonales d'un parallélogramme", enonce: "Démontre que les diagonales d'un parallélogramme se coupent en leur milieu." },
+      { cle: '(Varignon)', enonce: "Démontre que les milieux des côtés d'un quadrilatère quelconque forment un parallélogramme." },
+      { cle: "la médiane issue de l'angle droit", enonce: "Démontre que, dans un triangle rectangle, la médiane issue du sommet de l'angle droit mesure la moitié de l'hypoténuse." },
+      { cle: 'un angle inscrit dans un demi-cercle', enonce: "Soit $P$ un point d'un cercle de diamètre $[AB]$, distinct de $A$ et de $B$. Démontre que le triangle $APB$ est rectangle en $P$." },
+    ],
+    'lieux-elimination': [
+      { cle: 'somme de carrés : PA² + PB² = 54', enonce: "On donne $A(2\\,;-2)$ et $B(-4\\,;4)$. Détermine le lieu des points $P$ tels que $PA^2+PB^2=54$." },
+      { cle: 'Démonstration — théorème de la médiane', enonce: "Soit $M$ le milieu d'un segment $[AB]$. Démontre que, pour tout point $P$, $PA^2+PB^2=2\\,PM^2+\\dfrac{AB^2}{2}$." },
+      { cle: 'le lieu PA² − PB² = k', enonce: "Soit $A$ et $B$ deux points distincts et $k$ un réel. Démontre que l'ensemble des points $P$ tels que $PA^2-PB^2=k$ est une droite perpendiculaire à $(AB)$." },
+      { cle: 'différence de carrés', enonce: "On donne $A(-2\\,;0)$ et $B(4\\,;0)$. Détermine le lieu des points $P$ tels que $PA^2-PB^2=12$." },
+      { cle: 'Apollonius : PA² = 4 PB²', enonce: "On donne $A(-3\\,;0)$ et $B(3\\,;0)$. Détermine le lieu des points $P$ tels que $PA^2=4\\,PB^2$." },
+      { cle: "le cercle d'Apollonius : centre et rayon", enonce: "Soit $A(-a\\,;0)$ et $B(a\\,;0)$ avec $a>0$, et $k>0$, $k\\neq1$. Démontre que l'ensemble des points $P$ tels que $PA^2=k\\cdot PB^2$ est un cercle centré sur $(AB)$, et détermine son centre et son rayon." },
+      { cle: 'bissectrices de deux droites', enonce: "Détermine le lieu des points équidistants des droites $d_1 \\equiv y=0$ et $d_2 \\equiv 3x-4y=0$." },
+      { cle: 'deux droites sécantes forment deux droites perpendiculaires', enonce: "Démontre que l'ensemble des points équidistants de deux droites sécantes est formé de deux droites perpendiculaires." },
+      { cle: "l'angle APB est droit", enonce: "Soit $A$ et $B$ deux points distincts. Démontre que l'ensemble des points $P$ tels que l'angle $\\widehat{APB}$ est droit est le cercle de diamètre $[AB]$, privé de $A$ et de $B$." },
+      { cle: 'carré plein ou octogone', enonce: "Pour le carré $[-2\\,;2]^2$, détermine le lieu des points dont la somme des distances aux quatre droites qui portent les côtés vaut $8$, puis $12$." },
+      { cle: 'bande pleine ou deux droites', enonce: "Détermine le lieu des points dont la somme des distances aux droites parallèles $x=0$ et $x=5$ vaut $5$, puis $8$." },
     ],
     'methode-generatrices': [
-      "Pour le rectangle $A(0;0)$, $B(4;0)$, $C(4;6)$, $D(0;6)$, les points $Z(0;\\alpha)\\in[AD]$ et $Y(4;\\alpha)\\in[BC]$ définissent les droites $(AY)$ et $(BZ)$. En éliminant le paramètre $\\alpha$, détermine le lieu géométrique du point d'intersection $(AY)\\cap(BZ)$ lorsque $\\alpha$ parcourt $]0;6[$, en précisant la restriction.",
-      "Pour le triangle $A(0;4)$, $B(0;0)$, $C(6;0)$, on trace, pour chaque hauteur $\\alpha$, la droite parallèle à $(BC)$ qui coupe $[AB]$ en D et $[AC]$ en E. Détermine, en éliminant $\\alpha$, le lieu géométrique du point d'intersection $(BE)\\cap(CD)$, et identifie la droite remarquable qu'il représente.",
-      "Pour $A(3;0)$, $B(-2;0)$ et $C(0;\\alpha)$ variable sur l'axe des ordonnées, on trace la perpendiculaire à $(AC)$ passant par A et la perpendiculaire à $(BC)$ passant par B. Détermine, en éliminant $\\alpha$, le lieu géométrique de leur point d'intersection, et précise si ce lieu contient réellement le point $(1;0)$.",
+      { cle: 'Un rectangle et deux droites qui pivotent', enonce: "Pour le rectangle $A(0\\,;0)$, $B(4\\,;0)$, $C(4\\,;6)$, $D(0\\,;6)$, les points $Z(0\\,;\\alpha)\\in\\,]AD[$ et $Y(4\\,;\\alpha)\\in\\,]BC[$ définissent les droites $(AY)$ et $(BZ)$. Détermine le lieu du point d'intersection de $(AY)$ et $(BZ)$ lorsque $\\alpha$ parcourt $]0\\,;6[$, et précise la partie réellement décrite." },
+      { cle: 'Deux céviennes mobiles', enonce: "Pour le triangle $A(0\\,;4)$, $B(0\\,;0)$, $C(6\\,;0)$ et $\\alpha\\in\\,]0\\,;4[$, la droite d'équation $y=\\alpha$ coupe $[AB]$ en $D$ et $[AC]$ en $E$. Détermine le lieu du point d'intersection de $(BE)$ et $(CD)$, précise la partie réellement décrite, et identifie la droite remarquable du triangle qui le porte." },
+      { cle: 'Deux perpendiculaires mobiles', enonce: "On donne $A(3\\,;0)$, $B(-2\\,;0)$ et $C(0\\,;\\alpha)$, avec $\\alpha\\neq0$. Détermine le lieu du point d'intersection de la perpendiculaire à $(AC)$ passant par $A$ et de la perpendiculaire à $(BC)$ passant par $B$, et précise la partie réellement décrite." },
+      { cle: 'Des angles α et 2α', enonce: "On donne $A(0\\,;0)$, $B(4\\,;0)$ et $\\alpha\\in\\,]0^\\circ\\,;90^\\circ[$. La droite $a$ passe par $A$ et fait l'angle $\\alpha$ avec $(AB)$ ; la droite $b$ passe par $B$ et fait l'angle $2\\alpha$ avec $(AB)$ (angles mesurés à partir du sens des $x$ croissants). Détermine le lieu du point d'intersection de $a$ et $b$, et précise la partie réellement décrite." },
+      { cle: 'Une échelle qui glisse', enonce: "Une échelle de 6 m glisse : son pied reste sur le sol (axe des abscisses) et son sommet contre le mur (axe des ordonnées). Détermine le lieu du milieu de l'échelle." },
+      { cle: "Le centre de gravité d'un triangle dont un sommet glisse", enonce: "On donne $B(0\\,;0)$ et $C(6\\,;0)$. Le point $A(3\\,;\\alpha)$ parcourt la droite $x=3$, avec $\\alpha\\neq0$. Détermine le lieu du centre de gravité du triangle $ABC$." },
+    ],
+    'lieu-parametrique': [
+      { cle: "l'astroïde", enonce: "Détermine une équation cartésienne du lieu des points $\\left(\\cos^3\\lambda\\,;\\sin^3\\lambda\\right)$ quand $\\lambda$ parcourt $[0\\,;2\\pi[$, et précise la partie décrite." },
+      { cle: 'un arc de parabole', enonce: "Détermine le lieu des points $(\\cos t\\,;\\cos 2t)$ quand $t$ parcourt $\\mathbb{R}$ : équation cartésienne et partie décrite." },
+      { cle: "une droite privée d'un point", enonce: "Détermine le lieu des points $\\left(\\dfrac{1}{t+1}\\,;\\dfrac{t+3}{t+1}\\right)$ quand $t$ parcourt $\\mathbb{R}\\setminus\\{-1\\}$." },
     ],
   },
   coniques: {
@@ -2099,7 +2161,7 @@ export function apparierEnoncesDemonstration(chapitreSlug: string, section: Chap
 
 /** Chapitres dont l'appariement énoncé ↔ exemple est EXIGÉ complet au build (aucun énoncé orphelin,
  * aucun bloc sans énoncé). */
-export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-reciproques-cyclometriques', 'fonctions-logarithmes', 'fonctions-exponentielles', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees', 'probabilites', 'analyse-combinatoire', 'variables-aleatoires']
+export const CHAPITRES_ENONCES_VERIFIES = ['fonctions-reciproques-cyclometriques', 'fonctions-logarithmes', 'fonctions-exponentielles', 'primitives-integrales', 'caracteristiques-fonctions-reference', 'trigonometrie', 'equations-inequations-second-degre', 'statistique-descriptive', 'suites', 'limites-asymptotes', 'fonction-second-degre', 'cercle-trigonometrique-triangles', 'geometrie-dans-espace', 'calcul-vectoriel', 'geometrie-analytique-plane', 'derivees-applications', 'nombres-complexes', 'fonctions-composees', 'probabilites', 'analyse-combinatoire', 'variables-aleatoires', 'lieux-geometriques']
 
 /** Bloc de DÉMONSTRATION (« Démonstration — … », « Démonstration alternative — … ») : seuls ces
  * blocs alimentent le type « Formule + démonstration ». Les exemples résolus (calculs) ne sont plus
@@ -4558,7 +4620,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce:
           "Pourquoi une condition d'aire sur un triangle dont un sommet parcourt une droite donne-t-elle presque toujours deux solutions plutôt qu'une seule ?",
         corrige:
-          "L'aire s'exprime via une valeur absolue $|K+Mt|=2k$, car la hauteur réelle (une distance) ne peut jamais être négative, alors que l'expression algébrique $K+Mt$ peut l'être. Résoudre cette égalité revient à résoudre deux équations ($K+Mt=2k$ et $K+Mt=-2k$), correspondant aux deux positions symétriques par rapport à (AB) où l'aire cible est atteinte.",
+          "L'aire s'exprime via une valeur absolue $|K+Mt|=2k$, car la hauteur réelle (une distance) ne peut jamais être négative, alors que l'expression algébrique $K+Mt$ peut l'être. Résoudre cette égalité revient à résoudre deux équations ($K+Mt=2k$ et $K+Mt=-2k$) : deux positions, de part et d'autre de $(AB)$, symétriques par rapport au point où la droite parcourue coupe $(AB)$ (là où l'aire est nulle). Si cette droite est parallèle à $(AB)$, l'aire est constante : tous ses points conviennent, ou aucun.",
       },
     ],
     cercles: [
@@ -4604,9 +4666,9 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       },
       {
         enonce:
-          "Pourquoi le lieu $PA^2+PB^2=k$ présente-t-il trois régimes (cercle, un seul point, lieu vide) selon la valeur de k, alors qu'un simple cercle $PA=k$ n'en a que deux ?",
+          "Le lieu $PA^2+PB^2=k$ a trois régimes (cercle, un seul point, vide), comme le lieu $PA=k$ (cercle si $k>0$, le point $A$ si $k=0$, vide si $k<0$). Pourquoi son seuil n'est-il pas 0, comme pour $PA=k$ ?",
         corrige:
-          "Le théorème de la médiane donne $PA^2+PB^2 = 2\\cdot PM^2+AB^2/2$, où le second terme est un minimum incompressible, atteint pile en $P=M$. Pour k égal à ce minimum, un seul point convient ; au-dessus, un cercle de rayon croissant ; en dessous, aucun point ne peut satisfaire l'équation. Une distance simple $PA=k$ n'a, elle, pas ce seuil incompressible à franchir.",
+          "Le théorème de la médiane donne $PA^2+PB^2 = 2\\,PM^2+\\dfrac{AB^2}{2}$ : comme $PM^2\\geq0$, la somme vaut au moins $\\dfrac{AB^2}{2}$, et n'atteint cette valeur qu'en $P=M$. Le minimum n'est donc pas 0 mais $\\dfrac{AB^2}{2}$ : c'est lui qui sépare les régimes. Pour $PA=k$, la plus petite valeur de $PA$ est 0, atteinte en $P=A$ — d'où un seuil égal à 0.",
       },
     ],
     'methode-generatrices': [

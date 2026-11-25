@@ -79,6 +79,9 @@ figure/diagram-frame/figcaption pour toute illustration ; bascule sur `Illustrat
   (permutation avec répétitions / anagrammes).
 - `pascalTriangle` — triangle de Pascal, coefficients CALCULÉS par le composant ; `pascalRelation`
   met en évidence un coefficient et ses deux parents, reliés par les traits de la relation.
+- `vectorPlane.points[].open` (optionnel, 6e ch. 9) — point CREUX (contour de la teinte, intérieur `--surface`) pour une
+  extrémité exclue ou un point exclu d'un lieu ; absent : point plein, rendu inchangé. Rappel : un `vectorPlane` où un
+  cercle ou un angle compte doit avoir un domaine au rapport 16/15 (viewBox 320 × 300).
 - `stepFunction.pointsAuxSauts` (optionnel, 6e ch. 8) — point plein en haut de chaque saut (valeur de F en xᵢ) et
   point vide en bas (valeur juste avant) ; absent : rendu inchangé.
 - `categoricalBarChart` — barres à catégories NOMMÉES (étiquettes textuelles), verticales ou

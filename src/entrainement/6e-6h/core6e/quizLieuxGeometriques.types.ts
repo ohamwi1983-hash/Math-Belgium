@@ -25,7 +25,8 @@ export type VarianteQuizLieuxGeometriques =
   | "pointsDroitesRemarquablesTriangle"
   | "cercles"
   | "lieuxGeometriquesParametres"
-  | "methodeGeneratrices";
+  | "methodeGeneratrices"
+  | "methodeDemonstrationLieuParametrique";
 
 /** Une affirmation pré-écrite, sa réponse correcte et sa justification pédagogique — jamais
  * générée à partir de valeurs numériques tirées (même contrat que 6gen64-71), mais énoncé/

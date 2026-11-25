@@ -226,6 +226,11 @@ export type InteractiveWidgetTag =
   | 'simulateur-jeu-esperance-widget'
   | 'regle-empirique-widget'
   | 'bayes-trois-categories-widget'
+  | 'trace-lieu-widget'
+  | 'points-remarquables-widget'
+  | 'generatrices-animees-widget'
+  | 'courbe-parametree-widget'
+  | 'aire-variable-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }
@@ -635,6 +640,9 @@ export type IllustrationSpec =
         tone: 'accent' | 'good' | 'bad' | 'attn' | 'tip' | 'ink'
         labelPos?: 'above' | 'below' | 'left' | 'right'
         node?: boolean
+        /** Point CREUX (contour de la teinte, intérieur couleur de fond) — extrémité exclue d'un
+         * segment ouvert, point exclu d'un lieu (6e ch. 9). Absent : point plein, rendu inchangé. */
+        open?: boolean
       }[]
       angleArcs?: { cx: number; cy: number; fromDeg: number; toDeg: number; radiusPx: number; label?: string; tone?: 'accent' | 'good' | 'bad' | 'attn' | 'tip' }[]
       /** Petit repère d'angle droit à un sommet, orienté librement selon les deux côtés qui le
