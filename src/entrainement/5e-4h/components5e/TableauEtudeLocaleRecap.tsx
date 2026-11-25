@@ -4,6 +4,7 @@ import { libelleSigneTableau } from "../ui5e/formatEtudeLocale";
 import { EtiquetteLigne2Tableau, classeDensite } from "./EtiquetteLigne2Tableau";
 import { Katex } from "../components/Katex";
 import { calculerPositionsRunAide } from "../ui/positionRunAide";
+import { LectureTableau } from "../../../components/chapter/LectureTableau";
 
 interface Props {
   colonnes: ColonneTableauEtudeLocale[];
@@ -41,47 +42,49 @@ export function TableauEtudeLocaleRecap({ colonnes, enteteColonnes, mode, attend
   }
 
   return (
-    <div className="grille-signes-scroll">
-      <table className={`grille-signes grille-signes-recap${classeDensite(colonnes.length)}`}>
-        <thead>
-          <tr>
-            <th className="grille-signes-label">{variable}</th>
-            <th className="grille-signes-borne">
-              <Katex expression={bornes.gauche} />
-            </th>
-            {colonnes.map((_, j) => (
-              <th key={j} className={classeColonne(j)}>
-                {enteteColonnes[j] !== "" && <Katex expression={enteteColonnes[j]} />}
+    <LectureTableau generateur titre={mode === "fprime" ? "Tableau de signes de f′ et variations de f" : "Tableau de signes de f″ et concavité de f"} etiquettes={[undefined, mode === "fprime" ? "Signe de f′(x)" : "Signe de f″(x)"]}>
+      <div className="grille-signes-scroll">
+        <table className={`grille-signes grille-signes-recap${classeDensite(colonnes.length)}`}>
+          <thead>
+            <tr>
+              <th className="grille-signes-label">{variable}</th>
+              <th className="grille-signes-borne">
+                <Katex expression={bornes.gauche} />
               </th>
-            ))}
-            <th className="grille-signes-borne">
-              <Katex expression={bornes.droite} />
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td className="grille-signes-label">Signe</td>
-            <td className="grille-signes-borne" />
-            {attendu.signes.map((s, j) => (
-              <td key={j} className={classeColonne(j)}>
-                {libelleSigneTableau(s)}
-              </td>
-            ))}
-            <td className="grille-signes-borne" />
-          </tr>
-          <tr>
-            <td className="grille-signes-label">{libelleLigne2}</td>
-            <td className="grille-signes-borne" />
-            {attendu.ligne2.map((v, j) => (
-              <td key={j} className={classeColonne(j)}>
-                {v !== null && <EtiquetteLigne2Tableau valeur={v} />}
-              </td>
-            ))}
-            <td className="grille-signes-borne" />
-          </tr>
-        </tbody>
-      </table>
-    </div>
+              {colonnes.map((_, j) => (
+                <th key={j} className={classeColonne(j)}>
+                  {enteteColonnes[j] !== "" && <Katex expression={enteteColonnes[j]} />}
+                </th>
+              ))}
+              <th className="grille-signes-borne">
+                <Katex expression={bornes.droite} />
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="grille-signes-label">Signe</td>
+              <td className="grille-signes-borne" />
+              {attendu.signes.map((s, j) => (
+                <td key={j} className={classeColonne(j)}>
+                  {libelleSigneTableau(s)}
+                </td>
+              ))}
+              <td className="grille-signes-borne" />
+            </tr>
+            <tr>
+              <td className="grille-signes-label">{libelleLigne2}</td>
+              <td className="grille-signes-borne" />
+              {attendu.ligne2.map((v, j) => (
+                <td key={j} className={classeColonne(j)}>
+                  {v !== null && <EtiquetteLigne2Tableau valeur={v} />}
+                </td>
+              ))}
+              <td className="grille-signes-borne" />
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </LectureTableau>
   );
 }

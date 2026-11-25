@@ -3,6 +3,7 @@ import { Katex } from "./Katex";
 import { formatEnTeteInterieur } from "../ui/formatSignesProduit";
 import { formatLigneDenominateurLabel, formatLigneNumerateurLabel } from "../ui/formatInequationRationnelle";
 import { calculerPositionsRunAide } from "../ui/positionRunAide";
+import { LectureTableau } from "../../../components/chapter/LectureTableau";
 
 interface Props {
   exercice: ExerciceInequationRationnelleFacteurCommun;
@@ -51,39 +52,41 @@ export function TableauSignesQuotientFacteurCommunRecap({ exercice, highlight }:
   }
 
   return (
-    <div className="grille-signes-scroll">
-      <table className="grille-signes grille-signes-recap">
-        <thead>
-          <tr>
-            <th className="grille-signes-label">x</th>
-            <th className="grille-signes-borne">
-              <Katex expression="-\infty" />
-            </th>
-            {entete.map((valeur, j) => (
-              <th key={j} className={classeColonne(j)}>
-                {valeur !== "" && <Katex expression={valeur} />}
+    <LectureTableau generateur titre="Tableau de signes du quotient">
+      <div className="grille-signes-scroll">
+        <table className="grille-signes grille-signes-recap">
+          <thead>
+            <tr>
+              <th className="grille-signes-label">x</th>
+              <th className="grille-signes-borne">
+                <Katex expression="-\infty" />
               </th>
-            ))}
-            <th className="grille-signes-borne">
-              <Katex expression="+\infty" />
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {ligne(formatLigneNumerateurLabel(exercice.numerateurSimplifie), exercice.grille.ligneNumerateur)}
-          {ligne(formatLigneDenominateurLabel(exercice.denominateurSimplifie), exercice.grille.ligneDenominateur)}
-          <tr>
-            <td className="grille-signes-label">Signe du quotient</td>
-            <td className="grille-signes-borne" />
-            {exercice.grille.ligneQuotient.map((valeur, j) => (
-              <td key={j} className={classeColonne(j)}>
-                {valeur}
-              </td>
-            ))}
-            <td className="grille-signes-borne" />
-          </tr>
-        </tbody>
-      </table>
-    </div>
+              {entete.map((valeur, j) => (
+                <th key={j} className={classeColonne(j)}>
+                  {valeur !== "" && <Katex expression={valeur} />}
+                </th>
+              ))}
+              <th className="grille-signes-borne">
+                <Katex expression="+\infty" />
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {ligne(formatLigneNumerateurLabel(exercice.numerateurSimplifie), exercice.grille.ligneNumerateur)}
+            {ligne(formatLigneDenominateurLabel(exercice.denominateurSimplifie), exercice.grille.ligneDenominateur)}
+            <tr>
+              <td className="grille-signes-label">Signe du quotient</td>
+              <td className="grille-signes-borne" />
+              {exercice.grille.ligneQuotient.map((valeur, j) => (
+                <td key={j} className={classeColonne(j)}>
+                  {valeur}
+                </td>
+              ))}
+              <td className="grille-signes-borne" />
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </LectureTableau>
   );
 }

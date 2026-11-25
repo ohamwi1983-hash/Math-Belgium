@@ -1,6 +1,7 @@
 import type { ExerciceFractionSousRacine } from "../core5e/domaineDefinition.types";
 import { Katex } from "../components/Katex";
 import { calculerPositionsRunAide } from "../ui/positionRunAide";
+import { LectureTableau } from "../../../components/chapter/LectureTableau";
 
 interface Props {
   exercice: ExerciceFractionSousRacine;
@@ -35,61 +36,63 @@ export function GrilleQuotientDomfRecap({ exercice, highlight }: Props) {
   }
 
   return (
-    <div className="grille-signes-scroll">
-      <table className="grille-signes grille-signes-recap">
-        <thead>
-          <tr>
-            <th className="grille-signes-label">x</th>
-            <th className="grille-signes-borne">
-              <Katex expression="-\infty" />
-            </th>
-            {entete.map((valeur, j) => (
-              <th key={j} className={classeColonne(j)}>
-                {valeur !== "" && <Katex expression={valeur} />}
+    <LectureTableau generateur titre="Tableau de signes du quotient">
+      <div className="grille-signes-scroll">
+        <table className="grille-signes grille-signes-recap">
+          <thead>
+            <tr>
+              <th className="grille-signes-label">x</th>
+              <th className="grille-signes-borne">
+                <Katex expression="-\infty" />
               </th>
-            ))}
-            <th className="grille-signes-borne">
-              <Katex expression="+\infty" />
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td className="grille-signes-label">
-              <Katex expression={exercice.numerateurLatex} />
-            </td>
-            <td className="grille-signes-borne" />
-            {exercice.grille.ligneNumerateur.map((valeur, j) => (
-              <td key={j} className={classeColonne(j)}>
-                {valeur}
+              {entete.map((valeur, j) => (
+                <th key={j} className={classeColonne(j)}>
+                  {valeur !== "" && <Katex expression={valeur} />}
+                </th>
+              ))}
+              <th className="grille-signes-borne">
+                <Katex expression="+\infty" />
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="grille-signes-label">
+                <Katex expression={exercice.numerateurLatex} />
               </td>
-            ))}
-            <td className="grille-signes-borne" />
-          </tr>
-          <tr>
-            <td className="grille-signes-label">
-              <Katex expression={exercice.denominateurLatex} />
-            </td>
-            <td className="grille-signes-borne" />
-            {exercice.grille.ligneDenominateur.map((valeur, j) => (
-              <td key={j} className={classeColonne(j)}>
-                {valeur}
+              <td className="grille-signes-borne" />
+              {exercice.grille.ligneNumerateur.map((valeur, j) => (
+                <td key={j} className={classeColonne(j)}>
+                  {valeur}
+                </td>
+              ))}
+              <td className="grille-signes-borne" />
+            </tr>
+            <tr>
+              <td className="grille-signes-label">
+                <Katex expression={exercice.denominateurLatex} />
               </td>
-            ))}
-            <td className="grille-signes-borne" />
-          </tr>
-          <tr>
-            <td className="grille-signes-label">Signe du quotient</td>
-            <td className="grille-signes-borne" />
-            {exercice.grille.ligneQuotient.map((valeur, j) => (
-              <td key={j} className={classeColonne(j)}>
-                {valeur}
-              </td>
-            ))}
-            <td className="grille-signes-borne" />
-          </tr>
-        </tbody>
-      </table>
-    </div>
+              <td className="grille-signes-borne" />
+              {exercice.grille.ligneDenominateur.map((valeur, j) => (
+                <td key={j} className={classeColonne(j)}>
+                  {valeur}
+                </td>
+              ))}
+              <td className="grille-signes-borne" />
+            </tr>
+            <tr>
+              <td className="grille-signes-label">Signe du quotient</td>
+              <td className="grille-signes-borne" />
+              {exercice.grille.ligneQuotient.map((valeur, j) => (
+                <td key={j} className={classeColonne(j)}>
+                  {valeur}
+                </td>
+              ))}
+              <td className="grille-signes-borne" />
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </LectureTableau>
   );
 }

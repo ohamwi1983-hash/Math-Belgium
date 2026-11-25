@@ -3,6 +3,7 @@ import { Katex } from "./Katex";
 import { formatEnTeteInterieur, formatLigneLabel } from "../ui/formatSignesProduit";
 import { ordreLignesGrille } from "../generateurs/signesProduit/grille";
 import { calculerPositionsRunAide } from "../ui/positionRunAide";
+import { LectureTableau } from "../../../components/chapter/LectureTableau";
 
 interface Props {
   exercice: ExerciceSignesProduit;
@@ -35,51 +36,53 @@ export function TableauSignesRecap({ exercice, highlight }: Props) {
   }
 
   return (
-    <div className="grille-signes-scroll">
-      <table className="grille-signes grille-signes-recap">
-        <thead>
-          <tr>
-            <th className="grille-signes-label">x</th>
-            <th className="grille-signes-borne">
-              <Katex expression="-\infty" />
-            </th>
-            {entete.map((valeur, j) => (
-              <th key={j} className={classeColonne(j)}>
-                {valeur !== "" && <Katex expression={valeur} />}
+    <LectureTableau generateur titre="Tableau de signes du produit">
+      <div className="grille-signes-scroll">
+        <table className="grille-signes grille-signes-recap">
+          <thead>
+            <tr>
+              <th className="grille-signes-label">x</th>
+              <th className="grille-signes-borne">
+                <Katex expression="-\infty" />
               </th>
+              {entete.map((valeur, j) => (
+                <th key={j} className={classeColonne(j)}>
+                  {valeur !== "" && <Katex expression={valeur} />}
+                </th>
+              ))}
+              <th className="grille-signes-borne">
+                <Katex expression="+\infty" />
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {refs.map((ref, i) => (
+              <tr key={i}>
+                <td className="grille-signes-label">
+                  <Katex expression={formatLigneLabel(exercice.facteurs, ref)} />
+                </td>
+                <td className="grille-signes-borne" />
+                {exercice.grille.lignes[i].map((valeur, j) => (
+                  <td key={j} className={classeColonne(j)}>
+                    {valeur}
+                  </td>
+                ))}
+                <td className="grille-signes-borne" />
+              </tr>
             ))}
-            <th className="grille-signes-borne">
-              <Katex expression="+\infty" />
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {refs.map((ref, i) => (
-            <tr key={i}>
-              <td className="grille-signes-label">
-                <Katex expression={formatLigneLabel(exercice.facteurs, ref)} />
-              </td>
+            <tr>
+              <td className="grille-signes-label">Signe du produit</td>
               <td className="grille-signes-borne" />
-              {exercice.grille.lignes[i].map((valeur, j) => (
+              {exercice.grille.produit.map((valeur, j) => (
                 <td key={j} className={classeColonne(j)}>
                   {valeur}
                 </td>
               ))}
               <td className="grille-signes-borne" />
             </tr>
-          ))}
-          <tr>
-            <td className="grille-signes-label">Signe du produit</td>
-            <td className="grille-signes-borne" />
-            {exercice.grille.produit.map((valeur, j) => (
-              <td key={j} className={classeColonne(j)}>
-                {valeur}
-              </td>
-            ))}
-            <td className="grille-signes-borne" />
-          </tr>
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+        </table>
+      </div>
+    </LectureTableau>
   );
 }

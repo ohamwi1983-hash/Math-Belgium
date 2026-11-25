@@ -21,7 +21,8 @@ paths:
   liste de vérifications de méthode à se poser avant de rendre sa copie. `RecapFinal` l'utilise en
   composition quand `recap.checklist` est fourni.
 - `SignTable` (`components/chapter/SignTable.tsx`) — tableau de signes/variation, lignes alignées
-  colonne par colonne (`tone: 'zero' | 'pos' | 'neg' | 'plain'` par cellule).
+  colonne par colonne (`tone: 'zero' | 'pos' | 'neg' | 'plain'` par cellule). Lu case par case par
+  `LectureTableau` (voir « Tableau de signes lu case par case » en fin de fichier).
 - `FeatureTable` (`components/chapter/FeatureTable.tsx`) — tableau à en-tête fixe (colonnes
   nommées, ex. "Fonction | Domaine | Image"), réutilisé tel quel pour `recap.table`.
 - `OperationChain` (`components/chapter/OperationChain.tsx`) — chaîne HTML/flexbox (pas SVG) de
@@ -443,3 +444,75 @@ partagé ; contenu, aides, tentatives et vérification inchangés, `SelecteurVar
   Échelle 12 (capitales) / 14 / 16 / 18 px ; Andika (`--lecture`) pour énoncé et consignes. Piège
   trouvé : `.btn:hover:not(:disabled)` (plus spécifique que `.btn-primary:hover`) rendait « Valider »
   pâle sous texte blanc au survol / après un toucher — corrigé dans `cadre.css`.
+
+## Tableau de signes lu case par case (planche 09, côté élève — 25/11/2026)
+
+Maquette `signes.html` + planche 09 et démo validée `lecture-guidee.html` (onglet 9). Deux morceaux :
+- `src/lib/lectureTableauSignes.ts` (PUR, sans DOM) : `grilleLecture(modele)` → une phrase par case
+  (`grille[r][c]`, `c = 0` = libellé, `null` = case non navigable : borne vide, intervalle vide de la
+  ligne des x) et un repère visuel court (« Ligne « x² − x − 6 » · entre −2 et 3 ») ; `resumeTableau`
+  → conclusion (dernière ligne de signes, ou lignes de variations / concavité / texte s'il y en a).
+  Modèle = forme du bloc `signTable` (`rows[0]` = ligne des x, cellules alternées point / intervalle).
+  Lignes reconnues : signes (`+`, `−`/`-`, `0`, `‖`/`||`/`∄` = valeur interdite, signe sur un point = le
+  signe continue), variations (`↗`/`↘`, extrémités `max (2)`, `min`, `maximum`, `PI (−4)`, `M (0;1)`,
+  `AH y=0`, valeur simple → extrémum déduit des flèches voisines), concavité (`∪`/`∩`), texte libre
+  (« en dessous »). Le « pourquoi » n'est donné que s'il se DÉDUIT des données et qu'il est cohérent
+  avec elles (sinon rien) : règle des signes pour la ligne « produit » / « quotient » ou pour une
+  dernière ligne égale au produit des signes d'au moins deux lignes au-dessus (« moins divisé par
+  plus donne moins », compte des lignes négatives au-delà de deux) ; trinôme (libellé avec `²`, deux
+  facteurs `(x…)(x…)`, `f(x)` dont la légende dit `a > 0` ou donne `f(x) = …`, ou `f′(x) = 3(x−1)(x+1)`)
+  → signe de a à l'extérieur des racines / contraire entre / partout ; ligne à une seule racine →
+  « s'annule en … : négatif avant, positif après » ; zéro d'un produit / quotient → quel facteur
+  s'annule ; valeur interdite d'un quotient → quel facteur s'annule au dénominateur ; variations /
+  concavité ↔ ligne « signe de f′(x) » / « signe de f″(x) » (« car f prime de x est positive »,
+  « passe de plus à moins », « change de signe »). Rôles : `x − 2 (N)` (cours) ou `N : x − 2`
+  (générateurs ; plusieurs lignes N → « facteur du numérateur »). Les phrases ne commencent JAMAIS par
+  une formule à majuscule forcée (« En effet, x plus 3… », « C'est la racine… »).
+  **Lecture des nombres en mots** : `lireTexteMath` (symboles Unicode du site) et `latexVersTexte`
+  (LaTeX des en-têtes KaTeX des générateurs) — petit lecteur LOCAL, marqué « à remplacer par
+  `lireFormule` (lot V, `src/lib/lectureFormules.ts`) » : nombres à virgule, x², x₁, f′(x), √2⁄2, 1⁄e,
+  ±∞, parenthèses (« parenthèse, x plus 1, fin de parenthèse »).
+- `components/chapter/LectureTableau.tsx` : enveloppe un `<table>` DÉJÀ rendu, sans changer son
+  balisage ni son aspect au repos ; modèle passé (`SignTable`) ou lu dans le DOM (`modeleDepuisTable` :
+  texte des cellules, LaTeX lu dans l'annotation KaTeX, éléments `aria-hidden` ignorés ; `etiquettes`
+  remplace un libellé — 5e : « Signe » → « Signe de f′(x) »). Grille refusée (rien n'est ajouté) si
+  le modèle n'a pas la forme d'un tableau de signes ou ne correspond pas au DOM case pour case.
+  - **Choix « actif au repos ? »** : non. Le tableau reste identique ; seule une ligne discrète
+    « Lire case par case » (14 px, `--ink-soft`, 44 px de haut) apparaît dessous — sans elle, au doigt,
+    personne ne devinerait qu'une case se touche. L'enveloppe `.lecture-tableau` n'a ni marge ni
+    bordure : la marge du cadre (`.table-scroll`, `.grille-signes-scroll`) la traverse comme avant, et
+    le bouton / le panneau remontent dans cette marge (marges négatives) — impression et export HTML
+    (bouton retiré) gardent exactement l'espacement d'avant. La lecture s'active aussi au focus clavier (Tab) et au
+    clic sur une case ; elle se referme par « Fermer » (focus rendu au bouton), Échap, ou quand le focus
+    part ailleurs (Tab, clic sur un autre élément focalisable ; un toucher iOS ne donne pas de
+    `relatedTarget` : on ne referme pas).
+  - Grille : `role="grid"` / `row` / `gridcell` posés après chaque rendu (effet idempotent, sans
+    dépendances), une seule case `tabindex="0"` (tabulation mobile), flèches (cases `null` sautées),
+    Début / Fin, Entrée / Espace relit (région live vidée puis remplie 120 ms après), Échap. Case active
+    `.lt-case` (cadre 3 px `--accent`, fond accent-soft à 60 % : les « + » verts y gardent 4,5:1) et sa
+    colonne `.lt-colonne` (30 % + filets), sous `@media screen` seulement.
+  - Panneau `no-export` : ← ↑ ↓ → (48 × 44 px, `tabIndex = -1` : au clavier, les flèches suffisent),
+    « Résumé du tableau », « Fermer », puis la bulle (`--ink` / `--surface`, Andika 16 px, repère 13 px
+    en casse normale — pas les capitales mono de la maquette). Boutons AVANT la bulle : une phrase plus
+    longue ne déplace pas les boutons sous le doigt. Bulle ramenée à l'écran si elle passe sous le bas
+    (`scroll-margin-bottom` : barre fixe de l'étape). Bulle `aria-hidden` : l'annonce passe par un
+    `<p class="sr-only" aria-live="polite">` TOUJOURS présent (une région créée en même temps que son
+    texte n'est pas toujours lue).
+  - **Point d'accroche pour la voix** (lot suivant, aucun appel vocal ici) : chaque phrase émet
+    `EVENEMENT_PHRASE_TABLEAU` (`'lecture-tableau:phrase'`, `CustomEvent<DetailPhraseTableau>` qui
+    bouillonne depuis l'enveloppe : `{ phrase, source: 'case' | 'relire' | 'resume', ligne?, colonne? }`)
+    et appelle `onPhrase` s'il est fourni.
+  - Inerte dans une diapo de projection (`.diapo`) ; impression et export inchangés (panneau et bouton
+    `no-export`, surlignage sous `@media screen`). À l'écran seulement, légende et `zero-cell` de
+    `table.tableau` passent de `--ink-faint` (2,8–3,9:1) à `--ink-soft` (6–7,7:1).
+- Tableaux AFFICHÉS des générateurs, même lecture (saisie jamais touchée : `TableauEtudeLocaleBuilder`,
+  `EtapeGrilleSignes`… inchangés) : `LectureTableau generateur` autour du `.grille-signes-scroll` des
+  récapitulatifs `TableauSignes*Recap` (8, 4e), `GrilleQuotientDomfRecap` et `TableauEtudeLocaleRecap`
+  (5e).
+- Vérifications (dossier de travail `eleve-T/`) : `verif.ts` (les 19 tableaux du cours, chaque phrase
+  et résumé relus), `banc.mjs` + `harness.tsx` (récapitulatifs des générateurs montés hors
+  générateur, 3 tirages de chaque variante : 120 tableaux, ~3 050 cases cliquées, phrase = région
+  live), `verif-ui.mjs` (6 tableaux du cours + 2 de générateurs, iPhone 13 et 1 280 px, clair et
+  sombre, cibles ≥ 44 px, pas de défilement horizontal, parcours clavier complet, événement voix),
+  `contrastes.py`.
+

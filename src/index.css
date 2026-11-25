@@ -1090,6 +1090,64 @@ table.tableau tr:last-child td { border-bottom: none; }
 @media (max-width: 480px) {
   table.tableau td { padding: 8px 6px; }
 }
+/* Lecture « case par case » (`LectureTableau`, planche 09 des maquettes côté élève). Au repos, le
+   tableau garde son aspect : seule une ligne « Lire case par case » s'ajoute dessous. La légende et
+   les zéros / valeurs de x (`zero-cell`) passent de --ink-faint (2,99:1, 3,92:1 en sombre) à
+   --ink-soft (≥ 6:1) à l'écran ; l'impression ne change pas. */
+/* L'enveloppe n'a ni marge ni bordure : la marge du cadre (.table-scroll, .grille-signes-scroll)
+   traverse comme avant (impression, export HTML où le bouton est retiré). Le bouton et le panneau
+   remontent dans cette marge. */
+@media screen {
+  table.tableau caption { color: var(--ink-soft); }
+  table.tableau td.zero-cell { color: var(--ink-soft); }
+  .lecture-tableau [role="gridcell"][tabindex] { cursor: pointer; }
+  .lecture-tableau [role="gridcell"]:focus { outline: none; }
+  .lecture-tableau [role="gridcell"]:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+  .lecture-tableau table .lt-colonne {
+    background-color: color-mix(in srgb, var(--accent-soft) 30%, var(--surface));
+    box-shadow: inset 1px 0 0 var(--accent-soft-line), inset -1px 0 0 var(--accent-soft-line);
+  }
+  .lecture-tableau table .lt-case,
+  .lecture-tableau table .lt-case:focus-visible {
+    /* 60 % : les « + » verts y gardent 4,5:1 en clair (4,2:1 sur --accent-soft plein). */
+    background-color: color-mix(in srgb, var(--accent-soft) 60%, var(--surface));
+    outline: 3px solid var(--accent);
+    outline-offset: -3px;
+  }
+}
+.lt-lancer {
+  display: flex; align-items: center; gap: 6px; margin: -18px 0 8px auto; min-height: 44px; padding: 0 6px;
+  background: none; border: 0; border-radius: 6px; color: var(--ink-soft); cursor: pointer;
+  font: 500 14px/1.2 var(--sans); text-decoration: underline; text-decoration-color: var(--line);
+  text-underline-offset: 4px;
+}
+@media (hover: hover) {
+  .lt-lancer:hover { color: var(--ink); text-decoration-color: currentColor; }
+  .lt-btn:hover { border-color: var(--accent); }
+}
+.lt-lancer:focus-visible, .lt-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.lt-panneau { margin: -12px 0 22px; }
+.lt-boutons { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.lt-fleches { display: flex; gap: 6px; }
+.lt-btn {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px;
+  padding: 0 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+  color: var(--ink); cursor: pointer; font: 500 15px/1.2 var(--sans);
+}
+.lt-fleche { padding: 0; width: 48px; }
+.lt-fermer { margin-left: auto; }
+.lt-bulle {
+  display: block; margin-top: 10px; padding: 12px 14px; border-radius: 8px;
+  background: var(--ink); color: var(--surface);
+  font: 400 16px/1.55 var(--lecture, var(--sans));
+  /* Barre fixe de l'étape (téléphone) et barre d'actions des générateurs : la phrase ramenée à
+     l'écran s'arrête au-dessus. */
+  scroll-margin-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+}
+.lt-pos { display: block; margin-bottom: 4px; font: 500 13px/1.35 var(--sans); opacity: 0.85; }
+.lt-phrase { display: block; }
+/* Diapos de projection : le tableau reste un simple tableau. */
+.diapo .lt-lancer, .diapo .lt-panneau { display: none; }
 /* `FeatureTable` (colonnes nommées, souvent de la prose ou une description verbale — contrairement
    à `SignTable`, qui aligne des symboles courts colonne par colonne et a besoin du nowrap hérité
    ci-dessus) repasse en retour à la ligne normal : constaté à répétition (récapitulatifs finaux

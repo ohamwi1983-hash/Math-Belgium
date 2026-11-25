@@ -4,6 +4,7 @@ import { Katex } from "./Katex";
 import { formatEnTeteInterieur } from "../ui/formatSignesProduit";
 import { formatLigneDenominateurLabel, libellesLignesNumerateurNiveau3 } from "../ui/formatInequationRationnelle";
 import { calculerPositionsRunAide } from "../ui/positionRunAide";
+import { LectureTableau } from "../../../components/chapter/LectureTableau";
 
 interface Props {
   exercice: ExerciceInequationRationnelleNiveau3;
@@ -51,41 +52,43 @@ export function TableauSignesQuotientNiveau3Recap({ exercice, highlight }: Props
   }
 
   return (
-    <div className="grille-signes-scroll">
-      <table className="grille-signes grille-signes-recap">
-        <thead>
-          <tr>
-            <th className="grille-signes-label">x</th>
-            <th className="grille-signes-borne">
-              <Katex expression="-\infty" />
-            </th>
-            {entete.map((valeur, j) => (
-              <th key={j} className={classeColonne(j)}>
-                {valeur !== "" && <Katex expression={valeur} />}
+    <LectureTableau generateur titre="Tableau de signes du quotient">
+      <div className="grille-signes-scroll">
+        <table className="grille-signes grille-signes-recap">
+          <thead>
+            <tr>
+              <th className="grille-signes-label">x</th>
+              <th className="grille-signes-borne">
+                <Katex expression="-\infty" />
               </th>
+              {entete.map((valeur, j) => (
+                <th key={j} className={classeColonne(j)}>
+                  {valeur !== "" && <Katex expression={valeur} />}
+                </th>
+              ))}
+              <th className="grille-signes-borne">
+                <Katex expression="+\infty" />
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {libellesN.map((libelle, i) => (
+              <Fragment key={libelle}>{ligne(libelle, exercice.grille.lignesNumerateur[i])}</Fragment>
             ))}
-            <th className="grille-signes-borne">
-              <Katex expression="+\infty" />
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {libellesN.map((libelle, i) => (
-            <Fragment key={libelle}>{ligne(libelle, exercice.grille.lignesNumerateur[i])}</Fragment>
-          ))}
-          {ligne(formatLigneDenominateurLabel(exercice.denominateur), exercice.grille.ligneDenominateur)}
-          <tr>
-            <td className="grille-signes-label">Signe du quotient</td>
-            <td className="grille-signes-borne" />
-            {exercice.grille.ligneQuotient.map((valeur, j) => (
-              <td key={j} className={classeColonne(j)}>
-                {valeur}
-              </td>
-            ))}
-            <td className="grille-signes-borne" />
-          </tr>
-        </tbody>
-      </table>
-    </div>
+            {ligne(formatLigneDenominateurLabel(exercice.denominateur), exercice.grille.ligneDenominateur)}
+            <tr>
+              <td className="grille-signes-label">Signe du quotient</td>
+              <td className="grille-signes-borne" />
+              {exercice.grille.ligneQuotient.map((valeur, j) => (
+                <td key={j} className={classeColonne(j)}>
+                  {valeur}
+                </td>
+              ))}
+              <td className="grille-signes-borne" />
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </LectureTableau>
   );
 }
