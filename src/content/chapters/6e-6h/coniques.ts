@@ -1280,6 +1280,13 @@ export const coniques: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'triangle-focal-widget',
+          label: 'Manipule toi-même : le triangle focal',
+          caption:
+            'Fais glisser P sur l’ellipse : les rayons focaux donnés par la formule, $|PF|=a-ex_P$ et $|PF\'|=a+ex_P$, sont ceux qu’on mesure, et leur somme reste 2a. L’angle θ = F′PF et l’aire du triangle s’affichent, l’aire calculée de trois façons (½ · |PF| · |PF′| · sin θ, base × hauteur ÷ 2 et $b^2\\tan\\frac{\\theta}{2}$). En mode « Angle imposé », choisis θ : au-delà de l’angle maximal, atteint aux sommets (0 ; ±b), aucun point P ne convient.',
+        },
+        {
           kind: 'piege',
           label: 'Croire que |PF| = |PF′| = a',
           text:
@@ -1557,6 +1564,13 @@ export const coniques: ChapterContent = {
             R`Coupe l'hyperbole $x^2-\frac{y^2}{4}=1$ par la droite $y=2x+1$, parallèle à l'asymptote $y=2x$ : $x^2-\frac{(2x+1)^2}{4}=1$, soit $x^2-x^2-x-\frac{1}{4}=1$, d'où $x=-\frac{5}{4}$, puis $y=-\frac{3}{2}$. Les termes en $x^2$ se sont **annulés** : l'équation est du premier degré, il n'y a pas de discriminant, et l'unique point $\left(-\frac{5}{4}\,;-\frac{3}{2}\right)$ n'est **pas** un point de tangence — la droite traverse la courbe. Même phénomène pour une droite parallèle à l'axe d'une parabole ($y=3$ coupe $y^2=2x$ en un seul point, $\left(\frac{9}{2}\,;3\right)$). La règle « $\Delta=0 \iff$ tangente » ne vaut **que** si l'équation reste du second degré.`,
         },
         {
+          kind: 'atelier',
+          tag: 'droite-conique-widget',
+          label: 'Manipule toi-même : droite et conique',
+          caption:
+            'Choisis une conique et règle la droite y = mx + k (ou une verticale) : la substitution, l’équation obtenue et son discriminant Δ s’écrivent en valeurs exactes. Δ > 0 : sécante ; Δ = 0 : tangente ; Δ < 0 : extérieure. Rends la droite parallèle à une asymptote (y = 2x + 1 pour l’hyperbole) ou à l’axe de la parabole (y = 3) : le terme en x² disparaît et il reste un seul point — pourtant, la droite n’est pas tangente. « Garder la droite tangente » calcule k par Δ = 0.',
+        },
+        {
           kind: 'piege',
           label: "La droite verticale n'entre pas dans y = mx + p",
           text:
@@ -1754,6 +1768,13 @@ export const coniques: ChapterContent = {
             { kind: 'para', text: R`Contrôle par la pente : $\dfrac{b^2x_P}{a^2y_P}=\dfrac{16\cdot5}{9\cdot\frac{16}{3}}=\dfrac{5}{3}$, et la droite $5x-3y=9$ a bien pour pente $\frac{5}{3}$ ✓.` },
             { kind: 'para', text: R`**Parabole** $y^2=4x$ ($2p=4$, $p=2$) **au point** $P(4\,;4)$. Forme dédoublée : $4y=2(x+4) \iff y=\dfrac{1}{2}x+2$. Pente $\frac{p}{y_P}=\frac{2}{4}=\frac{1}{2}$ ✓. Cette tangente coupe l'axe focal en $T(-4\,;0)$ : l'abscisse de $T$ est l'opposée de celle de $P$ (on s'en servira en section 6).` },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'tangente-dedoublee-widget',
+          label: 'Manipule toi-même : tangente et forme dédoublée',
+          caption:
+            'Fais glisser P sur l’ellipse, l’hyperbole ou la parabole y² = 4x : la tangente en P est tracée et son équation dédoublée s’écrit en direct ($x^2$ devient $x\\cdot x_P$, $y^2$ devient $y\\cdot y_P$, $x$ devient $\\frac{x+x_P}{2}$). La même droite est retrouvée par la dérivée de la fonction dont le graphique contient P (moitié surlignée). Amène P sur un sommet de l’axe focal : la dérivée n’existe plus, la tangente est verticale, et la forme dédoublée la donne quand même.',
         },
         {
           kind: 'piege',
@@ -2244,6 +2265,13 @@ export const coniques: ChapterContent = {
             'satellites, et la position est à l\'intersection de sphères (le quatrième ' +
             "satellite sert à corriger l'horloge du récepteur).",
           domaines: ['Navigation', 'Géolocalisation'],
+        },
+        {
+          kind: 'atelier',
+          tag: 'loran-widget',
+          label: 'Manipule toi-même : le LORAN',
+          caption:
+            'Chaque paire de stations mesure une différence de distances d = |MA| − |MB| (la vitesse des ondes multipliée par le décalage Δt) : le navire est sur une seule branche d’hyperbole de foyers A et B, celle du côté de la station la plus proche. Fais glisser le navire N ou les stations, ou règle d₁ et d₂. La seconde paire donne une seconde branche : leurs points communs sont les positions possibles — parfois deux (préréglage « Deux positions possibles »), et il faut alors une autre information pour choisir.',
         },
         {
           kind: 'entrainement',

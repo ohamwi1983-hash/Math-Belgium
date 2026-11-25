@@ -240,6 +240,10 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'trois-miroirs-widget': () => import('../../interactive/register-trois-miroirs-widget.js'),
   'dandelin-cone-widget': () => import('../../interactive/register-dandelin-cone-widget.js'),
   'reduire-translation-widget': () => import('../../interactive/register-reduire-translation-widget.js'),
+  'droite-conique-widget': () => import('../../interactive/register-droite-conique-widget.js'),
+  'tangente-dedoublee-widget': () => import('../../interactive/register-tangente-dedoublee-widget.js'),
+  'triangle-focal-widget': () => import('../../interactive/register-triangle-focal-widget.js'),
+  'loran-widget': () => import('../../interactive/register-loran-widget.js'),
 }
 
 /**
