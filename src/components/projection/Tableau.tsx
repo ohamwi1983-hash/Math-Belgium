@@ -15,8 +15,15 @@ import type { Arc, ElementAnnotation, Epingle, FondBlanc, MessageProjection, Pro
 export const CARREAU = 40
 /** Demi-hypoténuse de l'équerre (6,5 carreaux) : l'équerre fait 13 carreaux de long, 6,5 de haut. */
 const DEMI = 260
-/** Distance (px logiques) sous laquelle un trait commencé près d'un bord de l'équerre s'aimante sur ce bord. */
+/** Distance (px logiques) sous laquelle un glisser commencé près d'un bord de l'équerre trace le long de ce bord
+ * (souris, stylet) ; au doigt : `AIMANT_DOIGT`. Jamais moins de 10 px (souris) / 22 px (doigt) RÉELS à l'écran (vue
+ * réduite du professeur), sans dépasser `AIMANT_MAX`. */
 const AIMANT = 12
+const AIMANT_DOIGT = 20
+const AIMANT_MAX = 30
+/** Graduations de l'hypoténuse : demi-carreaux ; une extrémité de segment s'y accroche à moins de 4 px. */
+const DEMI_CARREAU = 20
+const CRAN_GRADUATION = 4
 const POIGNEE: P = [0, -DEMI + 52]
 const DEG = Math.PI / 180
 /** Clé des annotations de l'écran blanc (les diapos sont numérotées à partir de 0). */
@@ -51,6 +58,44 @@ function projeter(p: P, a: P, b: P): { q: P; d: number } {
   return { q, d: Math.hypot(p[0] - q[0], p[1] - q[1]) }
 }
 const dansEquerre = ([u, v]: P) => v <= 0 && v >= -DEMI && Math.abs(u) <= DEMI + v
+/** Bord le plus proche (indice dans `BORDS` : 0 = hypoténuse, 1 et 2 = côtés de l'angle droit) et sa distance. */
+function bordLePlusProche(l: P): { i: number; d: number } {
+  let meilleur = { i: 0, d: Infinity }
+  BORDS.forEach(([a, b], i) => {
+    const { d } = projeter(l, a, b)
+    if (d < meilleur.d) meilleur = { i, d }
+  })
+  return meilleur
+}
+/** Seuil « près d'un bord » en px logiques, selon le pointeur et l'échelle d'affichage. */
+function seuilBord(pointeur: string, echelle: number): number {
+  const k = echelle > 0 ? echelle : 1
+  return pointeur === 'touch' ? Math.min(AIMANT_MAX, Math.max(AIMANT_DOIGT, 22 / k)) : Math.min(AIMANT_MAX, Math.max(AIMANT, 10 / k))
+}
+/** Droite passant par p et q, coupée aux bords de la diapo (Liang–Barsky sur une droite infinie). */
+function droiteDansDiapo(p: P, q: P): P[] {
+  const [dx, dy] = [q[0] - p[0], q[1] - p[1]]
+  let t0 = -Infinity
+  let t1 = Infinity
+  for (const [d, v, max] of [
+    [dx, p[0], LARGEUR],
+    [dy, p[1], HAUTEUR],
+  ] as const) {
+    if (Math.abs(d) < 1e-9) continue
+    const [a, b] = [-v / d, (max - v) / d]
+    t0 = Math.max(t0, Math.min(a, b))
+    t1 = Math.min(t1, Math.max(a, b))
+  }
+  return [
+    [arrondi(p[0] + t0 * dx), arrondi(p[1] + t0 * dy)],
+    [arrondi(p[0] + t1 * dx), arrondi(p[1] + t1 * dy)],
+  ]
+}
+/** Abscisse sur l'hypoténuse, accrochée à la graduation (demi-carreau) la plus proche à moins de 4 px. */
+function surGraduation(u: number): number {
+  const g = Math.round(u / DEMI_CARREAU) * DEMI_CARREAU
+  return Math.abs(u - g) <= CRAN_GRADUATION ? g : u
+}
 
 /** Angle affiché (sens mathématique, ]−180 ; 180]) avec cran sur 0°, 30°, 45°, 60°, 90° et leurs multiples. */
 function angleAffiche(rotation: number): number {
@@ -67,14 +112,17 @@ function cranRotation(rotation: number): number {
 }
 const texteNombre = (v: number) => String(Math.round(v * 10) / 10).replace('.', ',').replace('-', '−')
 
-function texteRayon(r: number, grille: boolean) {
-  const u = r / CARREAU
-  return `r = ${texteNombre(u)} ${grille ? (Math.round(u * 10) / 10 <= 1 ? 'carreau' : 'carreaux') : 'u'}`
+/** Longueur dans l'unité commune (compas, graduation de l'équerre) : « 6 carreaux » sur quadrillage / repère, sinon « 6 u ». */
+function texteLongueur(px: number, grille: boolean) {
+  const u = px / CARREAU
+  return `${texteNombre(u)} ${grille ? (Math.round(u * 10) / 10 <= 1 ? 'carreau' : 'carreaux') : 'u'}`
 }
+const texteRayon = (r: number, grille: boolean) => `r = ${texteLongueur(r, grille)}`
 
 type Geste =
   | { g: 'trait'; trait: Trait }
-  | { g: 'aimante'; trait: Trait; a: P; b: P; depart: P }
+  /** Tracé le long d'un bord de l'équerre (repère de l'équerre figé au départ ; `ajoute` après 4 px réels de mouvement). */
+  | { g: 'regle'; trait: Trait; eq: EtatEquerre; a: P; b: P; depart: P; p0: P; hyp: boolean; droite: boolean; ajoute: boolean }
   | { g: 'rayon' }
   | { g: 'arc'; arc: Arc; dernier: number; ajoute: boolean }
   | { g: 'deplacer'; dx: number; dy: number }
@@ -88,8 +136,9 @@ type Geste =
  * - annotations GARDÉES PAR DIAPO (en mémoire de la page seulement : rien n'est enregistré ni envoyé hors
  *   du navigateur), retrouvées en revenant sur la diapo ; l'écran blanc a sa propre page ; annuler (bouton, Ctrl/Cmd+Z) retire le dernier
  *   élément de la diapo courante ; « Tout effacer » vaut pour la diapo courante ;
- * - équerre Aristo (déplacer, tourner avec cran, trait aimanté sur un bord), compas, calculatrice,
- *   résultats épinglés ;
+ * - équerre Aristo : glisser près d'un bord = tracer le long de ce bord (segment ou droite, couleur et épaisseur
+ *   du stylo, sans l'activer ; repère et longueur sur l'hypoténuse graduée), ailleurs = déplacer ; poignée =
+ *   tourner (cran), sauf rotation verrouillée ; compas, calculatrice, résultats épinglés ;
  * - tout est envoyé à l'autre fenêtre (deux écrans) : ce qui est fait d'un côté apparaît de l'autre.
  */
 export function Annotations({
@@ -121,6 +170,8 @@ export function Annotations({
   outilsRef.current = outils
   const grilleRef = useRef(grille)
   grilleRef.current = grille
+  const echelleRef = useRef(echelle)
+  echelleRef.current = echelle
   const geste = useRef<Geste | null>(null)
   const [tourne, setTourne] = useState(false)
   const equerre = useInstrument(magasin, (e) => e.equerre)
@@ -350,10 +401,19 @@ export function Annotations({
         envoyer({ type: 'point', de: id, index: indexRef.current, id: g.trait.id, x: p[0], y: p[1] })
         dessiner()
         return
-      case 'aimante': {
-        const { q } = projeter(p, g.a, g.b)
-        g.trait = { ...g.trait, points: [g.depart, [arrondi(q[0]), arrondi(q[1])]] }
-        remplacer(g.trait)
+      case 'regle': {
+        if (!g.ajoute && Math.hypot(p[0] - g.p0[0], p[1] - g.p0[1]) * Math.max(echelleRef.current, 0.01) < 4) return
+        let { q } = projeter(versEquerre(g.eq, p), g.a, g.b)
+        if (g.hyp && !g.droite) q = [surGraduation(q[0]), 0]
+        const points: P[] = g.droite
+          ? droiteDansDiapo(depuisEquerre(g.eq, g.a), depuisEquerre(g.eq, g.b))
+          : [depuisEquerre(g.eq, g.depart), depuisEquerre(g.eq, q)]
+        g.trait = { ...g.trait, points }
+        if (!g.ajoute) {
+          g.ajoute = true
+          ajouter(g.trait)
+        } else remplacer(g.trait)
+        if (g.hyp && !g.droite) magasin.equerre({ mesure: { u0: g.depart[0], u1: q[0], couleur: g.trait.couleur } })
         return
       }
       case 'rayon': {
@@ -409,6 +469,12 @@ export function Annotations({
       if (c) magasin.compas(c.r < 8 ? null : { ...c, phase: 'arc' })
     }
     if (g.g === 'tourner') setTourne(false)
+    if (g.g === 'regle' && g.ajoute) {
+      if (g.hyp && !g.droite) magasin.equerre({ mesure: null })
+      const [[x0, y0], [x1, y1]] = g.trait.points
+      // Glisser perpendiculaire au bord : point isolé, retiré (un simple appui ne laisse rien non plus).
+      if (Math.hypot(x1 - x0, y1 - y0) < 1) retirer(g.trait.id)
+    }
   }
 
   const commencer = (e: React.PointerEvent, g: Geste) => {
@@ -427,36 +493,18 @@ export function Annotations({
       window.removeEventListener('pointerup', fin)
       window.removeEventListener('pointercancel', fin)
       terminer()
+      // Le clic qui suit le relâchement (souvent hors de l'instrument : sur la diapo) n'est pas « diapo suivante ».
+      const avaler = (c: MouseEvent) => c.stopPropagation()
+      window.addEventListener('click', avaler, { capture: true, once: true })
+      window.setTimeout(() => window.removeEventListener('click', avaler, true), 0)
     }
     window.addEventListener('pointermove', bouger, { passive: false })
     window.addEventListener('pointerup', fin)
     window.addEventListener('pointercancel', fin)
   }
 
-  /** Bord de l'équerre à moins de AIMANT px du point (s'il y en a un), en coordonnées de la diapo. */
-  const bordProche = (p: P): [P, P] | null => {
-    const eq = magasin.lire().equerre
-    if (!eq.visible) return null
-    const l = versEquerre(eq, p)
-    let meilleur: { d: number; bord: [P, P] } | null = null
-    for (const [a, b] of BORDS) {
-      const { d } = projeter(l, a, b)
-      if (d <= AIMANT && (!meilleur || d < meilleur.d)) meilleur = { d, bord: [a, b] }
-    }
-    return meilleur ? [depuisEquerre(eq, meilleur.bord[0]), depuisEquerre(eq, meilleur.bord[1])] : null
-  }
-
   const couleurTrait = (o: OutilsLocaux) => (o.outil === 'fluo' ? o.fluo : o.couleur)
   const epaisseur = (o: OutilsLocaux) => (o.outil === 'fluo' ? 22 : o.outil === 'gomme' ? 44 : EPAISSEURS[o.epaisseur])
-
-  const debutAimante = (e: React.PointerEvent, p: P, [a, b]: [P, P]) => {
-    const o = outilsRef.current
-    const { q } = projeter(p, a, b)
-    const depart: P = [arrondi(q[0]), arrondi(q[1])]
-    const trait: Trait = { id: nouvelId(id), couleur: couleurTrait(o), gomme: false, fluo: o.outil === 'fluo', epaisseur: epaisseur(o), points: [depart, depart] }
-    commencer(e, { g: 'aimante', trait, a, b, depart })
-    ajouter(trait)
-  }
 
   const debutCompas = (e: React.PointerEvent, p: P) => {
     const o = outilsRef.current
@@ -478,15 +526,10 @@ export function Annotations({
     commencer(e, { g: 'rayon' })
   }
 
-  const surCanvas = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!actif) return
-    const p = versDiapo(e.clientX, e.clientY)
+  /** Outil actif (stylo, fluo, gomme, compas) au point p : trait libre, gomme ou compas. */
+  const debutOutil = (e: React.PointerEvent, p: P) => {
     const o = outilsRef.current
     if (o.outil === 'compas') return debutCompas(e, p)
-    if (o.outil === 'stylo' || o.outil === 'fluo') {
-      const bord = bordProche(p)
-      if (bord) return debutAimante(e, p, bord)
-    }
     const trait: Trait = { id: nouvelId(id), couleur: couleurTrait(o), gomme: o.outil === 'gomme', fluo: o.outil === 'fluo', epaisseur: epaisseur(o), points: [p] }
     commencer(e, { g: 'trait', trait })
     liste().push(trait)
@@ -494,16 +537,49 @@ export function Annotations({
     dessiner()
   }
 
+  const surCanvas = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!actif) return
+    debutOutil(e, versDiapo(e.clientX, e.clientY))
+  }
+
+  /**
+   * Appui sur l'équerre (ou juste autour). Règle : près d'un bord (`seuilBord`) = tracer le long de ce bord avec
+   * le stylo courant, même stylo rangé (gomme / compas actifs : ils gardent la main) ; ailleurs dans l'équerre =
+   * la déplacer ; juste autour mais pas assez près = l'outil actif s'il y en a un, sinon rien.
+   */
   const surEquerre = (e: React.PointerEvent) => {
     const p = versDiapo(e.clientX, e.clientY)
     const o = outilsRef.current
-    if (o.stylo && (o.outil === 'stylo' || o.outil === 'fluo')) {
-      const bord = bordProche(p)
-      if (bord) return debutAimante(e, p, bord)
-    }
     const eq = magasin.lire().equerre
-    if (!dansEquerre(versEquerre(eq, p))) return
-    commencer(e, { g: 'deplacer', dx: p[0] - eq.x, dy: p[1] - eq.y })
+    const l = versEquerre(eq, p)
+    const { i, d } = bordLePlusProche(l)
+    const outilPropre = o.stylo && (o.outil === 'gomme' || o.outil === 'compas')
+    if (d <= seuilBord(e.pointerType, echelleRef.current) && !outilPropre) {
+      const [a, b] = BORDS[i]
+      const hyp = i === 0
+      const droite = eq.trace === 'droite'
+      let depart = projeter(l, a, b).q
+      if (hyp && !droite) depart = [surGraduation(depart[0]), 0]
+      const fluo = o.stylo && o.outil === 'fluo'
+      const trait: Trait = { id: nouvelId(id), couleur: fluo ? o.fluo : o.couleur, gomme: false, fluo, epaisseur: fluo ? 22 : EPAISSEURS[o.epaisseur], points: [] }
+      commencer(e, { g: 'regle', trait, eq, a, b, depart, p0: p, hyp, droite, ajoute: false })
+      return
+    }
+    if (dansEquerre(l)) return commencer(e, { g: 'deplacer', dx: p[0] - eq.x, dy: p[1] - eq.y })
+    if (o.stylo) return debutOutil(e, p)
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  /** Survol à la souris : curseur « tracer » près d'un bord, « déplacer » ailleurs dans l'équerre. */
+  const survolEquerre = (e: React.PointerEvent<SVGElement>) => {
+    if (geste.current || e.pointerType === 'touch') return
+    const o = outilsRef.current
+    const l = versEquerre(magasin.lire().equerre, versDiapo(e.clientX, e.clientY))
+    const pres = bordLePlusProche(l).d <= seuilBord(e.pointerType, echelleRef.current) && !(o.stylo && (o.outil === 'gomme' || o.outil === 'compas'))
+    const curseur = pres ? 'crosshair' : dansEquerre(l) ? 'move' : o.stylo ? (o.outil === 'gomme' ? 'cell' : 'crosshair') : 'default'
+    if (e.currentTarget.style.cursor !== curseur) e.currentTarget.style.cursor = curseur
+    e.currentTarget.dataset.bord = pres ? 'oui' : 'non'
   }
 
   const epingles = (parDiapo.current.get(index) ?? []).filter((el): el is Epingle => el.genre === 'epingle')
@@ -540,10 +616,21 @@ export function Annotations({
         </div>
       ))}
       {compas && <DessinCompas compas={compas} grille={grille} />}
-      {equerre.visible && <DessinEquerre equerre={equerre} tourne={tourne} surCorps={surEquerre} surPoignee={(e) => {
-        setTourne(true)
-        commencer(e, { g: 'tourner' })
-      }} />}
+      {equerre.visible && (
+        <DessinEquerre
+          equerre={equerre}
+          tourne={tourne}
+          grille={grille}
+          zone={seuilBord('touch', echelle)}
+          surCorps={surEquerre}
+          survol={survolEquerre}
+          surPoignee={(e) => {
+            if (magasin.lire().equerre.verrou) return surEquerre(e)
+            setTourne(true)
+            commencer(e, { g: 'tourner' })
+          }}
+        />
+      )}
       <Calculatrice
         magasin={magasin}
         role={role}
@@ -559,8 +646,29 @@ export function Annotations({
   )
 }
 
-/** Équerre Aristo transparente : hypoténuse graduée (0 au milieu), rapporteur, axe médian, poignée de rotation. */
-function DessinEquerre({ equerre, tourne, surCorps, surPoignee }: { equerre: EtatEquerre; tourne: boolean; surCorps: (e: React.PointerEvent) => void; surPoignee: (e: React.PointerEvent) => void }) {
+/**
+ * Équerre Aristo transparente : hypoténuse graduée (0 au milieu), rapporteur, axe médian,
+ * poignée de rotation (cadenas si la rotation est verrouillée). Une zone invisible déborde du triangle de `zone`
+ * px logiques : elle reçoit les appuis (tracer près d'un bord, déplacer ailleurs). Pendant un tracé le long de
+ * l'hypoténuse : petits traits aux extrémités et longueur (même unité que le compas).
+ */
+function DessinEquerre({
+  equerre,
+  tourne,
+  grille,
+  zone,
+  surCorps,
+  survol,
+  surPoignee,
+}: {
+  equerre: EtatEquerre
+  tourne: boolean
+  grille: boolean
+  zone: number
+  surCorps: (e: React.PointerEvent) => void
+  survol: (e: React.PointerEvent<SVGElement>) => void
+  surPoignee: (e: React.PointerEvent) => void
+}) {
   const graduations = []
   for (let n = -13; n <= 13; n++) {
     const x = (n * CARREAU) / 2
@@ -593,10 +701,15 @@ function DessinEquerre({ equerre, tourne, surCorps, surPoignee }: { equerre: Eta
   const t = equerre.angle * DEG
   // Étiquette de l'angle, à l'endroit, au-dessus de la poignée.
   const [px, py] = [equerre.x + POIGNEE[0] * Math.cos(t) - (POIGNEE[1] - 44) * Math.sin(t), equerre.y + POIGNEE[0] * Math.sin(t) + (POIGNEE[1] - 44) * Math.cos(t)]
+  const { mesure, verrou } = equerre
+  // Longueur mesurée : sous l'hypoténuse (hors de l'équerre), toujours à l'endroit.
+  const [mx, my] = mesure ? depuisEquerre(equerre, [(mesure.u0 + mesure.u1) / 2, 42]) : [0, 0]
+  const longueur = mesure ? texteLongueur(Math.abs(mesure.u1 - mesure.u0), grille) : ''
+  const largeurEtiquette = longueur.length * 11 + 28
   return (
     <svg className="projection-instrument projection-equerre" width={LARGEUR} height={HAUTEUR} viewBox={`0 0 ${LARGEUR} ${HAUTEUR}`} aria-label={`Équerre, angle ${texteNombre(angle)}°`} role="img">
       <g transform={`translate(${equerre.x} ${equerre.y}) rotate(${equerre.angle})`}>
-        <polygon className="eq-corps projection-interactif" points={`${-DEMI},0 ${DEMI},0 0,${-DEMI}`} onPointerDown={surCorps} onClick={(e) => e.stopPropagation()} />
+        <polygon className="eq-corps" points={`${-DEMI},0 ${DEMI},0 0,${-DEMI}`} />
         <path className="eq-rapporteur" d={`M ${-R} 0 A ${R} ${R} 0 0 1 ${R} 0`} />
         <g className="eq-traits">{rapporteur}</g>
         {etiquettes}
@@ -605,11 +718,42 @@ function DessinEquerre({ equerre, tourne, surCorps, surPoignee }: { equerre: Eta
         <text x={0} y={-22} className="eq-nombre eq-zero">
           0
         </text>
-        <circle className="eq-poignee projection-interactif" cx={POIGNEE[0]} cy={POIGNEE[1]} r={16} onPointerDown={surPoignee} onClick={(e) => e.stopPropagation()}>
-          <title>Tourner l'équerre</title>
+        {mesure && (
+          <g className="eq-mesure" style={{ stroke: mesure.couleur }}>
+            <line x1={mesure.u0} y1={-14} x2={mesure.u0} y2={14} />
+            <line x1={mesure.u1} y1={-14} x2={mesure.u1} y2={14} />
+          </g>
+        )}
+        <polygon
+          className="eq-zone projection-interactif"
+          points={`${-DEMI},0 ${DEMI},0 0,${-DEMI}`}
+          style={{ strokeWidth: 2 * zone }}
+          onPointerDown={surCorps}
+          onPointerMove={survol}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <title>{`Glisser le long d'un bord : tracer (${equerre.trace === 'droite' ? 'droite' : 'segment'}) · ailleurs : déplacer`}</title>
+        </polygon>
+        <circle className={`eq-poignee projection-interactif${verrou ? ' verrou' : ''}`} cx={POIGNEE[0]} cy={POIGNEE[1]} r={16} onPointerDown={surPoignee} onClick={(e) => e.stopPropagation()}>
+          <title>{verrou ? 'Rotation verrouillée (glisser : déplacer)' : "Tourner l'équerre"}</title>
         </circle>
-        <path className="eq-poignee-fleche" d={`M ${POIGNEE[0] - 7} ${POIGNEE[1] + 3} a 7.5 7.5 0 1 1 7 4.5 M ${POIGNEE[0] - 7} ${POIGNEE[1] + 3} l -1 -5 M ${POIGNEE[0] - 7} ${POIGNEE[1] + 3} l 5 -1`} />
+        {verrou ? (
+          <g className="eq-poignee-fleche" transform={`translate(${POIGNEE[0]} ${POIGNEE[1]}) rotate(${-equerre.angle})`}>
+            <rect x={-6} y={-1} width={12} height={9} rx={1.5} />
+            <path d="M -3.5 -1 v -3 a 3.5 3.5 0 0 1 7 0 v 3" />
+          </g>
+        ) : (
+          <path className="eq-poignee-fleche" d={`M ${POIGNEE[0] - 7} ${POIGNEE[1] + 3} a 7.5 7.5 0 1 1 7 4.5 M ${POIGNEE[0] - 7} ${POIGNEE[1] + 3} l -1 -5 M ${POIGNEE[0] - 7} ${POIGNEE[1] + 3} l 5 -1`} />
+        )}
       </g>
+      {mesure && Math.abs(mesure.u1 - mesure.u0) > 0.5 && (
+        <g className="eq-longueur" transform={`translate(${mx} ${my})`}>
+          <rect x={-largeurEtiquette / 2} y={-17} width={largeurEtiquette} height={34} rx={6} style={{ stroke: mesure.couleur }} />
+          <text x={0} y={7}>
+            {longueur}
+          </text>
+        </g>
+      )}
       <g className={`eq-angle${tourne ? ' tourne' : ''}`} transform={`translate(${px} ${py})`}>
         <rect x={tourne ? -46 : -34} y={tourne ? -22 : -16} width={tourne ? 92 : 68} height={tourne ? 44 : 32} rx={8} />
         <text x={0} y={tourne ? 9 : 6}>
