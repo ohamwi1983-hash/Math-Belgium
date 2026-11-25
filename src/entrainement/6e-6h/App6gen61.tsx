@@ -1,3 +1,7 @@
+import { correctionDetailleeIntersectionsConiques } from "./generateurs6e/intersectionsConiques/corrigeDetaille";
+import { phasesPourExercice as phasesCorrige61 } from "./moteur6e/typesIntersectionsConiques";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import type { ExerciceIntersectionsConiques } from "./core6e/intersectionsConiques.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIntersectionsConiques } from "./generateurs6e/intersectionsConiques";
 import type { PhaseIntersectionsConiques } from "./moteur6e/typesIntersectionsConiques";
@@ -27,6 +31,8 @@ const CONFIG: ConfigAppCombinatoire<ExerciceIntersectionsConiques, PhaseIntersec
   format: FORMAT_6GEN61,
   complement: (e, _p, closes) => <FigureLieux svg={figure6gen61(e, closes)} />,
   pucesMasquees: pucesMasquees6gen61,
+  // Corrigé « comme au tableau » de l'écran (lot E) : même source que le papier, une lettre par écran.
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleeIntersectionsConiques(e), phasesCorrige61(e), p)} />,
 };
 
 export function App6gen61() {

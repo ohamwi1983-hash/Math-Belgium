@@ -1,3 +1,7 @@
+import { correctionDetailleeAireExcentriciteConique } from "./generateurs6e/aireExcentriciteConique/corrigeDetaille";
+import { phasesPourExercice as phasesCorrige60 } from "./moteur6e/typesAireExcentriciteConique";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import type { ExerciceAireExcentriciteConique } from "./core6e/aireExcentriciteConique.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceAireExcentriciteConique } from "./generateurs6e/aireExcentriciteConique";
 import type { PhaseAireExcentriciteConique } from "./moteur6e/typesAireExcentriciteConique";
@@ -28,6 +32,8 @@ const CONFIG: ConfigAppCombinatoire<ExerciceAireExcentriciteConique, PhaseAireEx
     const svg = figure6gen60(e, closes);
     return svg ? <FigureLieux svg={svg} /> : null;
   },
+  // Corrigé « comme au tableau » de l'écran (lot E) : même source que le papier, une lettre par écran.
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleeAireExcentriciteConique(e), phasesCorrige60(e), p)} />,
 };
 
 export function App6gen60() {

@@ -1,3 +1,7 @@
+import { correctionDetailleeIdentificationConiques } from "./generateurs6e/identificationConiques/corrigeDetaille";
+import { phasesPourExercice as phasesCorrige58 } from "./moteur6e/typesIdentificationConiques";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import type { ExerciceIdentificationConiques } from "./core6e/identificationConiques.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIdentificationConiques } from "./generateurs6e/identificationConiques";
 import type { PhaseIdentificationConiques } from "./moteur6e/typesIdentificationConiques";
@@ -13,8 +17,8 @@ import { FigureLieux } from "./components6e/FigureLieux";
  * chapitre, lots B et C). Socle commun du 6e ch. 7 (`AppCombinatoire`, comme le ch. 9) : la nature est
  * un choix fermé à une tentative, tiré à parts égales ; le nombre d'écrans qui suivent est masqué tant
  * qu'elle n'est pas jugée. Figure : la conique (ou le point, les droites) APRÈS la nature, puis foyers,
- * asymptotes ou directrice après les éléments. Le corrigé détaillé (lot E) se branchera sur
- * `corrigeDetaille` ; d'ici là, l'explication du format sert de corrigé après chaque réponse.
+ * asymptotes ou directrice après les éléments. Corrigé détaillé « comme au tableau » (lot E) consultable
+ * après chaque réponse (`corrigeDetaille`, même source que le papier).
  */
 const CONFIG: ConfigAppCombinatoire<ExerciceIdentificationConiques, PhaseIdentificationConiques> = {
   id: "6gen58",
@@ -32,6 +36,8 @@ const CONFIG: ConfigAppCombinatoire<ExerciceIdentificationConiques, PhaseIdentif
     return svg ? <FigureLieux svg={svg} /> : null;
   },
   pucesMasquees: pucesMasquees6gen58,
+  // Corrigé « comme au tableau » de l'écran (lot E) : même source que le papier, une lettre par écran.
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleeIdentificationConiques(e), phasesCorrige58(e), p)} />,
 };
 
 export function App6gen58() {

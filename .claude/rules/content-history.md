@@ -292,6 +292,11 @@ paths:
   longues coupées en plusieurs `$…$` (aucune ne défile à 390 px, tiroirs ouverts). Lot D : quiz 6gen73 (voir
   `.claude/rules/feuilles-evaluations.md`, « 6e ch. 10, lots A, F, D »). Les cartes 6gen132–143, les générateurs
   6gen58–63 et les ateliers sont ajoutés par d'autres agents.
+  **Lot E (25/11)** : feuilles et évaluations définitives de 6gen58–6gen63 — corrigés « comme au tableau » partagés
+  écran / papier (`generateurs6e/*/corrigeDetaille.ts`, brique `ui6e/corrigeConiques.ts`, renvois « cours, § n »,
+  notations du cours réécrit), figure de la conique (tangentes, rayon réfléchi, points communs) sous le dernier
+  résultat, énoncés papier sans méthode ni verdict, barèmes, niveaux, profils, regroupements ; adaptateur provisoire
+  `adaptateurConiques.ts` supprimé. Détails : `.claude/rules/feuilles-evaluations.md`, « 6e ch. 10 (lot E… ».
 
 - **6e (6h), Chapitre 6 — corrigé « comme au tableau » et niveaux (6gen30–33, 6gen74–76)** : corrigés détaillés
   typés partagés écran / papier (`generateurs6e/*/corrigeDetaille.ts`, brique `ui6e/corrigeProbabilites.ts`),
