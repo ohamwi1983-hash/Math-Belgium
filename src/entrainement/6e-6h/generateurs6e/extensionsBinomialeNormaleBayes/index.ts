@@ -1,18 +1,13 @@
-import type { ExerciceExtensionsBinomialeNormaleBayes, FamilleExtensionsBinomialeNormaleBayes } from "../../core6e/extensionsBinomialeNormaleBayes.types";
-import { construireCompose, construireDirect, construireFamilleA } from "./familleA";
-import { construireFamilleB, construireFamilleBAvecTypeQuestion } from "./familleB";
-import { construireAvecSousType, construireFamilleC } from "./familleC";
-import { construireAvecValeurs as construireFamilleDAvecValeurs, construireFamilleD } from "./familleD";
-import { construireFamilleE, construireAvecValeurs as construireFamilleEAvecValeurs } from "./familleE";
-import { construireFamilleF, construireAvecValeurs as construireFamilleFAvecValeurs } from "./familleF";
+import type { ExerciceExtensionsBinomialeNormaleBayes } from "../../core6e/extensionsBinomialeNormaleBayes.types";
+import { construireFamilleA, construireFamilleD, construireFamilleF } from "./familles";
 
-export { construireCompose, construireDirect, construireFamilleA, construireFamilleB, construireFamilleBAvecTypeQuestion, construireFamilleC, construireAvecSousType, construireFamilleD, construireFamilleDAvecValeurs, construireFamilleE, construireFamilleEAvecValeurs, construireFamilleF, construireFamilleFAvecValeurs };
+export { construireFamilleA, construireFamilleD, construireFamilleF } from "./familles";
 
 /**
- * Couche A (6e) — point d'entrée `6gen52` ("Extensions binomiale, normale et Bayes (problèmes)"),
- * générateur DE CLÔTURE du chapitre "Variables aléatoires et lois de probabilités". Tirage
- * ÉQUIPROBABLE de la famille (A à F) — voir en-tête `core6e/extensionsBinomialeNormaleBayes.types.ts`
- * pour le détail des 5 points de réutilisation exigés par la mission.
+ * `6gen52` (6e ch. 8, § 7, Transférer). Les variantes B (binomiale), C (loi normale inverse) et E (loi
+ * uniforme) sont RETIRÉES (décision 3 de l'utilisateur) mais gardées à leur place (`retiree: true`,
+ * jamais montrées ni tirées) : les codes `?code=` de A, D et F gardent leur variante ; un ancien code
+ * d'une variante retirée rouvre un tirage libre.
  */
 
 export type IdVarianteExtensionsBinomialeNormaleBayes =
@@ -30,65 +25,39 @@ export type IdVarianteExtensionsBinomialeNormaleBayes =
   | "E_uniforme"
   | "F_reconstruire";
 
-export const CATALOGUE_VARIANTES: { id: IdVarianteExtensionsBinomialeNormaleBayes; label: string }[] = [
-  { id: "A_compose", label: "A — Indépendance composée (p1×p2) + trouver n" },
-  { id: "A_direct", label: "A — Probabilité directe + trouver n" },
-  { id: "B_exactement", label: "B — Binomial : exactement k (terme unique)" },
-  { id: "B_auMoins", label: "B — Binomial : au moins k" },
-  { id: "B_auPlus", label: "B — Binomial : au plus k" },
-  { id: "B_aucun", label: "B — Binomial : aucun succès" },
-  { id: "B_tous", label: "B — Binomial : tous succès" },
-  { id: "C_cumulee", label: "C — Loi normale inverse : cumulée" },
-  { id: "C_symetrique", label: "C — Loi normale inverse : symétrique" },
-  { id: "C_encadree", label: "C — Loi normale inverse : encadrée" },
-  { id: "D_bayes3", label: "D — Bayes à 3 catégories" },
-  { id: "E_uniforme", label: "E — Loi uniforme continue" },
-  { id: "F_reconstruire", label: "F — Reconstruire une loi + espérance appliquée" },
+export const CATALOGUE_VARIANTES: { id: IdVarianteExtensionsBinomialeNormaleBayes; label: string; retiree?: boolean }[] = [
+  { id: "A_compose", label: "A — Épreuve composée, puis trouver n" },
+  { id: "A_direct", label: "A — Épreuve simple, puis trouver n" },
+  { id: "B_exactement", label: "B — (retirée : voir 6gen50)", retiree: true },
+  { id: "B_auMoins", label: "B — (retirée : voir 6gen50)", retiree: true },
+  { id: "B_auPlus", label: "B — (retirée : voir 6gen50)", retiree: true },
+  { id: "B_aucun", label: "B — (retirée : voir 6gen50)", retiree: true },
+  { id: "B_tous", label: "B — (retirée : voir 6gen50)", retiree: true },
+  { id: "C_cumulee", label: "C — (retirée : voir 6gen51)", retiree: true },
+  { id: "C_symetrique", label: "C — (retirée : voir 6gen51)", retiree: true },
+  { id: "C_encadree", label: "C — (retirée : voir 6gen51)", retiree: true },
+  { id: "D_bayes3", label: "D — Théorème de Bayes à trois catégories" },
+  { id: "E_uniforme", label: "E — (retirée : voir 6gen115)", retiree: true },
+  { id: "F_reconstruire", label: "F — Loi reconstruite, espérance et total attendu" },
 ];
 
-export function construireAvecVarianteId(id: IdVarianteExtensionsBinomialeNormaleBayes): ExerciceExtensionsBinomialeNormaleBayes {
+export function construireAvecVarianteId(id: IdVarianteExtensionsBinomialeNormaleBayes | string): ExerciceExtensionsBinomialeNormaleBayes {
   switch (id) {
     case "A_compose":
-      return construireCompose();
+      return construireFamilleA("compose");
     case "A_direct":
-      return construireDirect();
-    case "B_exactement":
-      return construireFamilleBAvecTypeQuestion(8, 0.3, "exactement");
-    case "B_auMoins":
-      return construireFamilleBAvecTypeQuestion(6, 0.5, "auMoins");
-    case "B_auPlus":
-      return construireFamilleBAvecTypeQuestion(6, 0.5, "auPlus");
-    case "B_aucun":
-      return construireFamilleBAvecTypeQuestion(7, 0.4, "aucun");
-    case "B_tous":
-      return construireFamilleBAvecTypeQuestion(7, 0.4, "tous");
-    case "C_cumulee":
-      return construireAvecSousType("cumulee");
-    case "C_symetrique":
-      return construireAvecSousType("symetrique");
-    case "C_encadree":
-      return construireAvecSousType("encadree");
+      return construireFamilleA("direct");
     case "D_bayes3":
       return construireFamilleD();
-    case "E_uniforme":
-      return construireFamilleE();
     case "F_reconstruire":
       return construireFamilleF();
+    default:
+      return genererExerciceExtensionsBinomialeNormaleBayes();
   }
 }
 
-const FAMILLES: FamilleExtensionsBinomialeNormaleBayes[] = ["A", "B", "C", "D", "E", "F"];
-
-const CONSTRUCTEURS_PAR_FAMILLE: Record<FamilleExtensionsBinomialeNormaleBayes, () => ExerciceExtensionsBinomialeNormaleBayes> = {
-  A: construireFamilleA,
-  B: construireFamilleB,
-  C: construireFamilleC,
-  D: construireFamilleD,
-  E: construireFamilleE,
-  F: construireFamilleF,
-};
-
+/** Tirage libre : une variante non retirée au hasard, à parts égales. */
 export function genererExerciceExtensionsBinomialeNormaleBayes(): ExerciceExtensionsBinomialeNormaleBayes {
-  const famille = FAMILLES[Math.floor(Math.random() * FAMILLES.length)];
-  return CONSTRUCTEURS_PAR_FAMILLE[famille]();
+  const actives = CATALOGUE_VARIANTES.filter((v) => !v.retiree);
+  return construireAvecVarianteId(actives[Math.floor(Math.random() * actives.length)].id);
 }

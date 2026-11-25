@@ -1,208 +1,98 @@
-import type { ExerciceLoiNormale, ExerciceLoiNormaleA, ExerciceLoiNormaleB, ExerciceLoiNormaleC, ExerciceLoiNormaleD, ExerciceLoiNormaleE } from "../core6e/loiNormale.types";
-import { diagnostiquerValeur } from "./equivalenceExponentielle";
-import type { StatutVerification } from "../moteur/statutVerification";
+import type { EquationTable, ExerciceLoiNormale, ExerciceLoiNormaleC, ExerciceLoiNormaleD, ExerciceLoiNormaleE } from "../core6e/loiNormale.types";
+import { arrondir, bornesZ, formeAttendue, probabilitesDirectes, proportionsRegle, tAcceptes } from "../generateurs6e/loiNormale/calculs";
+import { diagnostiquerAttentes } from "./attentesCombinatoire";
+import type { Attente } from "./attentesCombinatoire";
+import type { DefinitionSession } from "./sessionCombinatoire";
+import { entier, valeurArrondie, valeurParmi } from "./saisieVariablesAleatoires";
+import { phasesPourExercice } from "./typesLoiNormale";
 import type { PhaseLoiNormale } from "./typesLoiNormale";
 
 /**
- * Couche B (6e) — vérification propre à `6gen51` (dispatch par famille/écran). N'importe JAMAIS
- * rien de `src/generateurs6e/` (règle non négociable, CLAUDE.md) — voir
- * `generateurs6e/loiNormale/session.integration.test.ts` pour le seul fichier autorisé Couche A +
- * Couche B ensemble.
- *
- * Toute la logique mathématique (`Phi`/`PhiInverse`, standardisation, `probabiliteFinaleX`...) est
- * de la Couche A (`generateurs6e/loiNormale/`) — ce module ne fait QUE comparer le texte saisi à la
- * valeur numérique attendue, PASSÉE EN PARAMÈTRE par l'appelant du dispatcher générique
- * `moteur6e/sessionLoiNormale.ts` (qui, lui non plus, n'importe jamais `generateurs6e/` —
- * `verifierEcran`/`diagnostiquerEcran` prennent l'exercice ET REFONT eux-mêmes les quelques
- * calculs élémentaires strictement nécessaires — standardisation `(x-μ)/σ`, sommes/soustractions de
- * pourcentages fixes — jamais `Phi`/`PhiInverse` recalculés côté moteur : les 3 fonctions
- * `probabiliteFinaleX`/`valeurCibleTableX`/`valeurZD`/`valeurTC` etc. restent 100% Couche A ; voir
- * `session.integration.test.ts` pour la preuve que le VRAI Phi/PhiInverse de la Couche A produit
- * bien des réponses acceptées par ce module, tolérance comprise).
- *
- * ============================================================================
- * **Tolérances — cohérentes avec la précision d'une table statistique PAPIER (spec "Vérification"),
- * jamais plus strictes ni plus larges que ce qu'annoncent les consignes (`ui6e/formatLoiNormale.ts`)**
- * ============================================================================
- * - `TOLERANCE_PROBABILITE = 0,00005` — une probabilité annoncée "à 4 décimales" : demi-unité du
- *   dernier chiffre annoncé (convention standard d'arrondi), donc toute valeur dont l'arrondi à 4
- *   décimales coïncide avec la référence est acceptée.
- * - `TOLERANCE_Z = 0,005` — un z (ou un t de table) annoncé "à 2 décimales" : même convention,
- *   demi-unité du 2e chiffre après la virgule.
- * - `TOLERANCE_A` — la valeur dé-standardisée `a=μ+z·σ` (famille D, écran 3) : PAS une tolérance
- *   arbitraire supplémentaire, mais la propagation DIRECTE de `TOLERANCE_Z` à travers `σ`
- *   (`a=μ+z·σ` ⟹ une imprécision de `TOLERANCE_Z` sur `z` donne une imprécision de
- *   `TOLERANCE_Z·σ` sur `a`) — voir `tolerancePourA`.
- * - `TOLERANCE_EFFECTIF = 1` — un effectif estimé (population × probabilité, arrondi à l'entier) :
- *   ±1 personne autour de l'entier le plus proche de la référence, tolère un arrondi intermédiaire
- *   légèrement différent de la probabilité côté élève (spec : "tolérance sur l'arrondi").
+ * Vérification de `6gen51` (audit, G13, G16) — calée sur la TABLE : probabilité = lecture de table
+ * (z au centième, Φ à 4 décimales) OU valeur de la calculatrice, arrondie à 10⁻⁴ (consigne) ; lecture
+ * inverse : les valeurs de t voisines dans la table (deux si la cible tombe entre deux cases, toutes
+ * celles de même case en queue de table) ; effectif : arrondi de N × p pour l'une ou l'autre p, ou
+ * l'entier voisin ; règle empirique : pourcentages du cours (68,3 / 95,4 / 99,7 %) ou valeur exacte.
  */
-export const TOLERANCE_PROBABILITE = 0.00005;
-export const TOLERANCE_Z = 0.005;
-export const TOLERANCE_EFFECTIF = 1;
 
-export function tolerancePourA(sigma: number): number {
-  return TOLERANCE_Z * sigma;
+export function equationJusteDe(e: ExerciceLoiNormaleC | ExerciceLoiNormaleD): EquationTable {
+  return e.equations.find((q) => q.id === e.bonne)!;
 }
 
-function combinerStatuts(...statuts: StatutVerification[]): StatutVerification {
-  if (statuts.some((s) => s === "parse_error")) return "parse_error";
-  if (statuts.some((s) => s === "not_equivalent")) return "not_equivalent";
-  return "correct";
+/** z acceptés (C : t ; D : z) et valeur de la calculatrice. */
+export function zAcceptes(e: ExerciceLoiNormaleC | ExerciceLoiNormaleD): { exactes: number[]; calculatrice: number } {
+  return tAcceptes(equationJusteDe(e));
 }
 
-/** Compare un champ `choix` (bouton, jamais de saisie libre) — jamais `parse_error`, mirroir
- * `diagnostiquerDEcran2` de `6gen37`. */
-function diagnostiquerChoix(valeur: string, attendu: string): StatutVerification {
-  return valeur === attendu ? "correct" : "not_equivalent";
+export function aAcceptes(e: ExerciceLoiNormaleD): { exactes: number[]; calculatrice: number } {
+  const { exactes, calculatrice } = zAcceptes(e);
+  const as = exactes.flatMap((z) => {
+    const a = arrondir(e.mu + z * e.sigma, 4);
+    return [a, arrondir(a, 1)];
+  });
+  return { exactes: [...new Set(as)], calculatrice: e.mu + calculatrice * e.sigma };
 }
 
-/** Effectif estimé — arrondi à l'entier le plus proche de la référence, tolérance `±1` (voir
- * en-tête de fichier). */
-export function diagnostiquerEffectif(texte: string, referenceReelle: number): StatutVerification {
-  const cible = Math.round(referenceReelle);
-  return diagnostiquerValeur(texte, cible, TOLERANCE_EFFECTIF + 1e-9);
-}
-
-// ============================================================================
-// Famille A.
-// ============================================================================
-
-function symetrieNecessaireLocale(z: number): boolean {
-  return z < 0;
-}
-
-export function diagnostiquerAEcran1(exercice: ExerciceLoiNormaleA, valeurs: string[]): StatutVerification {
-  if (exercice.sousType === "intervalle") {
-    const attenduChoix1 = symetrieNecessaireLocale(exercice.z1) ? "symetrie" : "directe";
-    const attenduChoix2 = symetrieNecessaireLocale(exercice.z2) ? "symetrie" : "directe";
-    return combinerStatuts(
-      diagnostiquerChoix(valeurs[0], attenduChoix1),
-      diagnostiquerValeur(valeurs[1], Math.abs(exercice.z1), TOLERANCE_Z),
-      diagnostiquerChoix(valeurs[2], attenduChoix2),
-      diagnostiquerValeur(valeurs[3], Math.abs(exercice.z2), TOLERANCE_Z),
-    );
+export function probabilitesAcceptees(e: ExerciceLoiNormale): number[] {
+  if (e.famille === "A") return probabilitesDirectes(e.sousType, e.z1, e.z2);
+  if (e.famille === "B") {
+    const { z1, z2 } = bornesZ(e);
+    return probabilitesDirectes(e.sousType, z1, z2);
   }
-  const attenduChoix = symetrieNecessaireLocale(exercice.z) ? "symetrie" : "directe";
-  return combinerStatuts(diagnostiquerChoix(valeurs[0], attenduChoix), diagnostiquerValeur(valeurs[1], Math.abs(exercice.z), TOLERANCE_Z));
+  if (e.famille === "E") return proportionsRegle(e.k, e.unCote);
+  return [];
 }
 
-export function diagnostiquerAEcran2(_exercice: ExerciceLoiNormaleA, valeurs: string[], probabiliteFinale: number): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], probabiliteFinale, TOLERANCE_PROBABILITE);
-}
-
-// ============================================================================
-// Famille B.
-// ============================================================================
-
-export function diagnostiquerBEcran1(exercice: ExerciceLoiNormaleB, valeurs: string[]): StatutVerification {
-  if (exercice.sousType === "intervalle") {
-    return combinerStatuts(diagnostiquerValeur(valeurs[0], (exercice.x1 - exercice.mu) / exercice.sigma, TOLERANCE_Z), diagnostiquerValeur(valeurs[1], (exercice.x2 - exercice.mu) / exercice.sigma, TOLERANCE_Z));
+function effectifsAcceptes(population: number, ps: number[]): number[] {
+  const r = new Set<number>();
+  for (const p of ps) {
+    const x = population * p;
+    r.add(Math.floor(x));
+    r.add(Math.ceil(x));
   }
-  return diagnostiquerValeur(valeurs[0], (exercice.x - exercice.mu) / exercice.sigma, TOLERANCE_Z);
+  return [...r];
 }
 
-export function diagnostiquerBEcran2(_exercice: ExerciceLoiNormaleB, valeurs: string[], probabiliteFinale: number): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], probabiliteFinale, TOLERANCE_PROBABILITE);
+export function effectifReference(e: ExerciceLoiNormale): number {
+  const ps = probabilitesAcceptees(e);
+  const pop = e.famille === "B" || e.famille === "E" ? (e.population ?? 0) : 0;
+  return Math.round(pop * ps[0]);
 }
 
-export function diagnostiquerBEcran3(_exercice: ExerciceLoiNormaleB, valeurs: string[], effectifReference: number): StatutVerification {
-  return diagnostiquerEffectif(valeurs[0], effectifReference);
+export function kE(e: ExerciceLoiNormaleE): number {
+  return e.k;
 }
 
-// ============================================================================
-// Famille C.
-// ============================================================================
-
-export function diagnostiquerCEcran1(exercice: ExerciceLoiNormaleC, valeurs: string[], cibleTable: number): StatutVerification {
-  return combinerStatuts(diagnostiquerChoix(valeurs[0], exercice.sousType), diagnostiquerValeur(valeurs[1], cibleTable, TOLERANCE_PROBABILITE));
-}
-
-export function diagnostiquerCEcran2(_exercice: ExerciceLoiNormaleC, valeurs: string[], tReference: number): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], tReference, TOLERANCE_Z);
-}
-
-// ============================================================================
-// Famille D.
-// ============================================================================
-
-export function diagnostiquerDEcran1(exercice: ExerciceLoiNormaleD, valeurs: string[], cibleTable: number): StatutVerification {
-  return combinerStatuts(diagnostiquerChoix(valeurs[0], exercice.sousType), diagnostiquerValeur(valeurs[1], cibleTable, TOLERANCE_PROBABILITE));
-}
-
-export function diagnostiquerDEcran2(_exercice: ExerciceLoiNormaleD, valeurs: string[], zReference: number): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], zReference, TOLERANCE_Z);
-}
-
-export function diagnostiquerDEcran3(exercice: ExerciceLoiNormaleD, valeurs: string[], aReference: number): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], aReference, tolerancePourA(exercice.sigma));
-}
-
-// ============================================================================
-// Famille E.
-// ============================================================================
-
-export function diagnostiquerEEcran1(exercice: ExerciceLoiNormaleE, valeurs: string[]): StatutVerification {
-  return combinerStatuts(diagnostiquerValeur(valeurs[0], exercice.mu, TOLERANCE_Z), diagnostiquerValeur(valeurs[1], exercice.sigma, TOLERANCE_Z));
-}
-
-export function diagnostiquerEEcran2(_exercice: ExerciceLoiNormaleE, valeurs: string[], probabiliteFinale: number): StatutVerification {
-  return diagnostiquerValeur(valeurs[0], probabiliteFinale, TOLERANCE_PROBABILITE);
-}
-
-export function diagnostiquerEEcran3(_exercice: ExerciceLoiNormaleE, valeurs: string[], effectifReference: number): StatutVerification {
-  return diagnostiquerEffectif(valeurs[0], effectifReference);
-}
-
-// ============================================================================
-// Dispatcher générique — reçoit les valeurs de référence CALCULÉES CÔTÉ APPELANT (Couche A,
-// `generateurs6e/loiNormale/`) via `ValeursReferenceLoiNormale`, jamais recalculées ici (ce module
-// n'importe jamais `generateurs6e/`) — voir en-tête de fichier.
-// ============================================================================
-
-/** Toutes les valeurs de référence dérivées (Φ/Φ⁻¹...) nécessaires à la vérification d'UN écran
- * donné — calculées par l'appelant (Couche A) et transmises telles quelles. `undefined` pour les
- * écrans qui n'en ont pas besoin (calculables directement depuis `exercice`). */
-export interface ValeursReferenceLoiNormale {
-  probabiliteFinale?: number;
-  cibleTable?: number;
-  tReference?: number;
-  zReference?: number;
-  aReference?: number;
-  effectifReference?: number;
-}
-
-export function diagnostiquerEcran(exercice: ExerciceLoiNormale, phase: PhaseLoiNormale, valeurs: string[], ref: ValeursReferenceLoiNormale): StatutVerification {
-  switch (phase) {
-    case "aEcran1":
-      return diagnostiquerAEcran1(exercice as ExerciceLoiNormaleA, valeurs);
-    case "aEcran2":
-      return diagnostiquerAEcran2(exercice as ExerciceLoiNormaleA, valeurs, ref.probabiliteFinale as number);
-    case "bEcran1":
-      return diagnostiquerBEcran1(exercice as ExerciceLoiNormaleB, valeurs);
-    case "bEcran2":
-      return diagnostiquerBEcran2(exercice as ExerciceLoiNormaleB, valeurs, ref.probabiliteFinale as number);
-    case "bEcran3":
-      return diagnostiquerBEcran3(exercice as ExerciceLoiNormaleB, valeurs, ref.effectifReference as number);
-    case "cEcran1":
-      return diagnostiquerCEcran1(exercice as ExerciceLoiNormaleC, valeurs, ref.cibleTable as number);
-    case "cEcran2":
-      return diagnostiquerCEcran2(exercice as ExerciceLoiNormaleC, valeurs, ref.tReference as number);
-    case "dEcran1":
-      return diagnostiquerDEcran1(exercice as ExerciceLoiNormaleD, valeurs, ref.cibleTable as number);
-    case "dEcran2":
-      return diagnostiquerDEcran2(exercice as ExerciceLoiNormaleD, valeurs, ref.zReference as number);
-    case "dEcran3":
-      return diagnostiquerDEcran3(exercice as ExerciceLoiNormaleD, valeurs, ref.aReference as number);
-    case "eEcran1":
-      return diagnostiquerEEcran1(exercice as ExerciceLoiNormaleE, valeurs);
-    case "eEcran2":
-      return diagnostiquerEEcran2(exercice as ExerciceLoiNormaleE, valeurs, ref.probabiliteFinale as number);
-    case "eEcran3":
-      return diagnostiquerEEcran3(exercice as ExerciceLoiNormaleE, valeurs, ref.effectifReference as number);
+export function attentesLoiNormale(e: ExerciceLoiNormale, p: PhaseLoiNormale): Attente[] {
+  switch (e.famille) {
+    case "A":
+      return p === "aForme" ? [{ choix: formeAttendue(e.sousType, e.z1, e.z2) }] : [valeurArrondie(probabilitesAcceptees(e), { decimales: 4 })];
+    case "B": {
+      const { z1, z2 } = bornesZ(e);
+      if (p === "bZ") return z2 === null ? [valeurArrondie(z1, { decimales: 2 })] : [valeurArrondie(z1, { decimales: 2 }), valeurArrondie(z2, { decimales: 2 })];
+      if (p === "bForme") return [{ choix: formeAttendue(e.sousType, z1, z2) }];
+      if (p === "bProba") return [valeurArrondie(probabilitesAcceptees(e), { decimales: 4 })];
+      return [entier(effectifsAcceptes(e.population ?? 0, probabilitesAcceptees(e)))];
+    }
+    case "C":
+    case "D": {
+      if (p === "cEquation" || p === "dEquation") return [{ choix: e.bonne }];
+      if (p === "cT" || p === "dZ") {
+        const { exactes, calculatrice } = zAcceptes(e);
+        return [valeurParmi(exactes, 2, [calculatrice])];
+      }
+      const { exactes, calculatrice } = aAcceptes(e as ExerciceLoiNormaleD);
+      return [valeurParmi(exactes, 1, [calculatrice])];
+    }
+    case "E":
+      if (p === "eK") return [entier(e.k)];
+      if (p === "eProportion") return [valeurArrondie(probabilitesAcceptees(e), { decimales: 3 })];
+      return [entier(effectifsAcceptes(e.population ?? 0, probabilitesAcceptees(e)))];
   }
 }
 
-export function verifierEcran(exercice: ExerciceLoiNormale, phase: PhaseLoiNormale, valeurs: string[], ref: ValeursReferenceLoiNormale): boolean {
-  return diagnostiquerEcran(exercice, phase, valeurs, ref) === "correct";
-}
+export const DEFINITION_6GEN51: DefinitionSession<ExerciceLoiNormale, PhaseLoiNormale> = {
+  phases: phasesPourExercice,
+  estChoix: (_e, p) => p === "aForme" || p === "bForme" || p === "cEquation" || p === "dEquation",
+  diagnostiquer: (e, p, valeurs) => diagnostiquerAttentes(attentesLoiNormale(e, p), valeurs),
+};

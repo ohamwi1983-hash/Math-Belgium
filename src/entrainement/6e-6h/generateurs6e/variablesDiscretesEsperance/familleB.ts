@@ -1,131 +1,113 @@
-import { calculerHypergeo } from "../probabiliteHypergeometrique/familleA";
-import type { ExerciceEsperanceB, ExerciceEsperanceB_ContexteDirect, ExerciceEsperanceB_Hypergeometrique, IssueContexteEsperanceB, LigneLoiB } from "../../core6e/variablesDiscretesEsperance.types";
-import { genererPoids, pgcd, tirerEntier, tirerParmi } from "./aleatoire";
+import type { ExerciceEsperanceB, ExerciceEsperanceB_ContexteDirect, ExerciceEsperanceB_Hypergeometrique, IssueB } from "../../core6e/variablesDiscretesEsperance.types";
+import { combinaisonBig, rationnel } from "../../moteur6e/saisieCombinatoire";
+import type { Rationnel } from "../../moteur6e/saisieCombinatoire";
+import { genererPoids, tirerBooleen, tirerEntier, tirerParmi } from "./aleatoire";
 
 /**
- * Couche A (6e) — génération, famille B ("Construire une loi de probabilité et calculer
- * l'espérance") de `6gen49`. 2 sous-types équiprobables.
- *
- * ============================================================================
- * **Sous-type "hypergéométrique" — RÉUTILISE `calculerHypergeo` de `6gen47`, jamais réimplémenté**
- * ============================================================================
- * `calculerHypergeo(N,K,n,k)` (`generateurs6e/probabiliteHypergeometrique/familleA.ts`) calcule
- * DÉJÀ `C(K,k)·C(N-K,n-k)/C(N,n)` en s'appuyant sur `coefficientBinomial`
- * (`generateurs6e/combinatoire.ts`) — importé ici TEL QUEL (Couche A ↔ Couche A libre entre
- * générateurs 6e, CLAUDE.md). X = nombre de succès parmi `n` tirages sans remise dans une
- * population `N` dont `K` succès ; `loi` couvre le support COMPLET
- * `k∈[kMin,kMax]=[max(0,n-(N-K)),min(K,n)]` (mêmes bornes que le sous-type "exactement" de
- * `6gen47`) — les probabilités somment donc à 1 EXACTEMENT, jamais approximativement (vérifié par
- * test, `familleB.test.ts`).
- *
- * `N`/`K`/`n` tirés dans des plages modestes (population ≤16, tirage ≤4) choisies pour que le
- * support `[kMin,kMax]` compte TOUJOURS au moins 3 valeurs (retirage sinon) — une loi à 2 valeurs
- * rendrait le calcul d'espérance trivial (à peine plus qu'une moyenne pondérée à 2 termes).
- *
- * ============================================================================
- * **Sous-type "contexte direct"**
- * ============================================================================
- * Une petite banque de 3 contextes (urne de boules numérotées, dé à faces gagnantes/perdantes,
- * loterie à billets) — chaque résultat porte un gain (`valeur`, DÉJÀ CONNU du contexte, affiché en
- * données) et un effectif (`ps` = effectif/total, à calculer par l'élève). Effectifs tirés via
- * `genererPoids` (mêmes "décimales propres" que famille A).
+ * 6gen49, famille B : construire la loi de X, puis E(X). Audit : X toujours défini (« X est le gain
+ * algébrique… ») ; contextes dont les probabilités viennent des effectifs (plus de « pièce truquée à
+ * 3 issues » à poids arbitraires) ; plusieurs issues peuvent donner la même valeur de X (il faut les
+ * regrouper : c'est l'étape de construction) ; hypergéométrique avec des objets nommés.
  */
 
-interface GabaritIssueB {
-  label: string;
-  valeur: number;
+function euros(n: number): string {
+  return `${n} €`;
 }
 
-interface GabaritContexteB {
-  phraseContexte: string[];
-  issues: GabaritIssueB[];
+function listeFaces(faces: number[]): string {
+  if (faces.length === 1) return `${faces[0]}`;
+  const consecutif = faces.every((f, i) => i === 0 || f === faces[i - 1] + 1);
+  if (consecutif && faces.length >= 3) return `de ${faces[0]} à ${faces[faces.length - 1]}`;
+  return faces.slice(0, -1).join(", ") + " ou " + faces[faces.length - 1];
 }
 
-function gabaritsContexteB(): GabaritContexteB[] {
-  const gainA = tirerEntier(3, 8);
-  const gainB = tirerEntier(1, 4);
-  const perteC = tirerEntier(1, 3);
-  const gainLoto = tirerEntier(10, 25);
-  const perteBillet = tirerEntier(1, 3);
-  return [
-    {
-      phraseContexte: ["\\text{Une urne contient des boules de 3 couleurs.}", "\\text{Chaque couleur rapporte un gain fixe.}"],
-      issues: [
-        { label: "Boule rouge", valeur: gainA },
-        { label: "Boule bleue", valeur: gainB },
-        { label: "Boule verte", valeur: -perteC },
-      ],
-    },
-    {
-      phraseContexte: ["\\text{Un dé truqué à 4 faces possibles.}", "\\text{Chaque face rapporte un gain fixe.}"],
-      issues: [
-        { label: "Face 1", valeur: gainA },
-        { label: "Face 2", valeur: gainB },
-        { label: "Face 3", valeur: 0 },
-        { label: "Face 4", valeur: -perteC },
-      ],
-    },
-    {
-      phraseContexte: ["\\text{Une loterie propose 3 types de billets.}", "\\text{Chaque type rapporte un gain fixe.}"],
-      issues: [
-        { label: "Billet gagnant", valeur: gainLoto },
-        { label: "Billet remboursé", valeur: 0 },
-        { label: "Billet perdant", valeur: -perteBillet },
-      ],
-    },
-  ];
+function construireDe(): ExerciceEsperanceB_ContexteDirect {
+  const f = tirerParmi([6, 8, 10, 12]);
+  // Trois groupes de faces consécutives, de gains distincts (une perte possible).
+  for (;;) {
+    const tailles = genererPoids(3, f);
+    if (tailles.some((t) => t > f - 2)) continue;
+    const gains = [tirerEntier(-4, -1), tirerEntier(0, 2), tirerEntier(3, 8)];
+    if (tirerBooleen(0.5)) gains.reverse();
+    let debut = 1;
+    const issues: IssueB[] = tailles.map((t, i) => {
+      const faces = Array.from({ length: t }, (_, j) => debut + j);
+      debut += t;
+      const g = gains[i];
+      const regle = g > 0 ? `on gagne ${euros(g)}` : g < 0 ? `on perd ${euros(-g)}` : "on ne gagne rien";
+      return { label: `${listeFaces(faces)} : ${regle}`, valeur: g, effectif: t };
+    });
+    const texte = `On lance un dé équilibré à ${f} faces numérotées de 1 à ${f}. Résultat ${issues.map((i) => i.label).join(" ; ")}.`;
+    return { famille: "B", sousType: "contexteDirect", texte, definitionX: "le gain algébrique du joueur, en euros (une perte est un gain négatif)", issues, total: f, unite: "€" };
+  }
 }
 
-const DENOMINATEUR_POIDS_B = 20;
+function construireRoue(): ExerciceEsperanceB_ContexteDirect {
+  const total = tirerParmi([10, 12, 16, 20]);
+  const couleurs = ["rouges", "bleus", "verts", "jaunes"];
+  const k = tirerParmi([3, 4]);
+  const effectifs = genererPoids(k, total);
+  const gainsPossibles = [0, 1, 2, 3, 5, 10, 20];
+  // Deux couleurs peuvent rapporter le même montant : la loi les regroupe.
+  const gains = effectifs.map(() => tirerParmi(gainsPossibles));
+  if (new Set(gains).size < 2) gains[0] = gains[0] === 0 ? 5 : 0;
+  const issues: IssueB[] = effectifs.map((e, i) => ({ label: `${couleurs[i]}`, valeur: gains[i], effectif: e }));
+  const description = issues.map((i) => `${i.effectif} ${i.effectif > 1 ? i.label : i.label.slice(0, -1)}`).join(", ");
+  const regles = issues.map((i) => `un secteur ${i.label.slice(0, -1)} rapporte ${euros(i.valeur)}`).join(", ");
+  const texte = `Une roue de loterie est partagée en ${total} secteurs égaux : ${description}. On fait tourner la roue une fois : ${regles}.`;
+  return { famille: "B", sousType: "contexteDirect", texte, definitionX: "le montant gagné, en euros", issues, total, unite: "€" };
+}
+
+function construireEnquete(): ExerciceEsperanceB_ContexteDirect {
+  const total = tirerParmi([20, 25, 40, 50]);
+  const k = tirerParmi([4, 5]);
+  const effectifs = genererPoids(k, total);
+  const objet = tirerParmi([
+    { groupe: "familles d'un quartier", quoi: "enfants", x: "le nombre d'enfants d'une famille choisie au hasard" },
+    { groupe: "élèves d'une école", quoi: "frères et sœurs", x: "le nombre de frères et sœurs d'un élève choisi au hasard" },
+    { groupe: "ménages d'un immeuble", quoi: "voitures", x: "le nombre de voitures d'un ménage choisi au hasard" },
+  ]);
+  const issues: IssueB[] = effectifs.map((e, i) => ({ label: `${i} ${objet.quoi}`, valeur: i, effectif: e }));
+  const texte = `Une enquête auprès de ${total} ${objet.groupe} donne : ${issues.map((i) => (i.valeur === 0 ? `${i.effectif} n'en ont aucun` : `${i.effectif} en ont ${i.valeur}`)).join(", ")}.`;
+  return { famille: "B", sousType: "contexteDirect", texte, definitionX: objet.x, issues, total, unite: "" };
+}
 
 export function construireContexteDirect(): ExerciceEsperanceB_ContexteDirect {
-  const gabarit = tirerParmi(gabaritsContexteB());
-  const m = gabarit.issues.length;
-  const effectifs = genererPoids(m, DENOMINATEUR_POIDS_B);
-  const totalEffectifs = DENOMINATEUR_POIDS_B;
-
-  const issues: IssueContexteEsperanceB[] = gabarit.issues.map((g, i) => ({ label: g.label, valeur: g.valeur, effectif: effectifs[i] }));
-  const loi: LigneLoiB[] = issues.map((issue) => {
-    const d = pgcd(issue.effectif, totalEffectifs);
-    return { valeur: issue.valeur, probabiliteNumerateur: issue.effectif / d, probabiliteDenominateur: totalEffectifs / d, probabilite: issue.effectif / totalEffectifs };
-  });
-  const esperance = loi.reduce((acc, ligne) => acc + ligne.valeur * ligne.probabilite, 0);
-
-  return { famille: "B", sousType: "contexteDirect", phraseContexte: gabarit.phraseContexte, issues, totalEffectifs, loi, esperance };
+  return tirerParmi([construireDe, construireRoue, construireEnquete])();
 }
 
-const ESSAIS_MAX = 40;
-
-function construireHypergeoUneFois(): ExerciceEsperanceB_Hypergeometrique {
-  const N = tirerEntier(9, 16);
-  const K = tirerEntier(3, Math.min(7, N - 2));
-  const n = tirerEntier(2, Math.min(4, N - 1));
-  const kMin = Math.max(0, n - (N - K));
-  const kMax = Math.min(K, n);
-
-  const loi: LigneLoiB[] = [];
-  for (let k = kMin; k <= kMax; k++) {
-    const { numerateurFacteur1, numerateurFacteur2, denominateur, probabilite } = calculerHypergeo(N, K, n, k);
-    const numerateur = numerateurFacteur1 * numerateurFacteur2;
-    const d = pgcd(numerateur, denominateur);
-    loi.push({ valeur: k, probabiliteNumerateur: numerateur === 0 ? 0 : numerateur / d, probabiliteDenominateur: numerateur === 0 ? denominateur : denominateur / d, probabilite });
-  }
-  const esperance = loi.reduce((acc, ligne) => acc + ligne.valeur * ligne.probabilite, 0);
-
-  return { famille: "B", sousType: "hypergeometrique", N, K, n, loi, esperance };
-}
+const CONTEXTES_HYPER = [
+  { quoi: (N: number, K: number) => `Une urne contient ${N} boules : ${K} rouges et ${N - K} blanches.`, tirage: (n: number) => `On tire ${n} boules simultanément.`, x: "le nombre de boules rouges tirées" },
+  { quoi: (N: number, K: number) => `Un lot de ${N} pièces contient ${K} pièces défectueuses.`, tirage: (n: number) => `On prélève ${n} pièces au hasard, sans remise.`, x: "le nombre de pièces défectueuses prélevées" },
+  { quoi: (N: number, K: number) => `Une classe compte ${N} élèves, dont ${K} filles.`, tirage: (n: number) => `On tire au sort un groupe de ${n} élèves.`, x: "le nombre de filles du groupe" },
+];
 
 export function construireHypergeometrique(): ExerciceEsperanceB_Hypergeometrique {
-  let dernier: ExerciceEsperanceB_Hypergeometrique | null = null;
-  for (let essai = 0; essai < ESSAIS_MAX; essai++) {
-    const exercice = construireHypergeoUneFois();
-    dernier = exercice;
-    if (exercice.loi.length >= 3) return exercice;
-  }
-  /* c8 ignore next */
-  return dernier as ExerciceEsperanceB_Hypergeometrique;
+  const N = tirerEntier(6, 10);
+  const K = tirerEntier(2, N - 2);
+  const n = tirerEntier(2, Math.min(4, N - 2));
+  const c = tirerParmi(CONTEXTES_HYPER);
+  return { famille: "B", sousType: "hypergeometrique", texte: `${c.quoi(N, K)} ${c.tirage(n)}`, definitionX: c.x, N, K, n };
 }
 
 export function construireFamilleB(): ExerciceEsperanceB {
-  return tirerEntier(0, 1) === 0 ? construireContexteDirect() : construireHypergeometrique();
+  return tirerBooleen(0.5) ? construireContexteDirect() : construireHypergeometrique();
+}
+
+/** Loi de X (valeurs croissantes, probabilités exactes réduites). */
+export function loiB(e: ExerciceEsperanceB): { valeur: number; p: Rationnel }[] {
+  if (e.sousType === "hypergeometrique") {
+    const r: { valeur: number; p: Rationnel }[] = [];
+    const total = combinaisonBig(e.N, e.n);
+    for (let k = Math.max(0, e.n - (e.N - e.K)); k <= Math.min(e.n, e.K); k++) r.push({ valeur: k, p: rationnel(combinaisonBig(e.K, k) * combinaisonBig(e.N - e.K, e.n - k), total) });
+    return r;
+  }
+  const parValeur = new Map<number, number>();
+  for (const i of e.issues) parValeur.set(i.valeur, (parValeur.get(i.valeur) ?? 0) + i.effectif);
+  return [...parValeur.entries()].sort((a, b) => a[0] - b[0]).map(([valeur, eff]) => ({ valeur, p: rationnel(eff, e.total) }));
+}
+
+export function esperanceB(e: ExerciceEsperanceB): Rationnel {
+  if (e.sousType === "hypergeometrique") return rationnel(e.n * e.K, e.N);
+  return rationnel(e.issues.reduce((s, i) => s + i.valeur * i.effectif, 0), e.total);
 }

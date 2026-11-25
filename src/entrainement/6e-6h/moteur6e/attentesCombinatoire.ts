@@ -14,7 +14,17 @@ export type Attente =
   /** Choix fermé : identifiant de la bonne option. */
   | { choix: string }
   /** Liste de lignes (une par ligne du champ « liste ») : ensemble de multiensembles d'entiers. */
-  | { lignes: number[][] };
+  | { lignes: number[][] }
+  /** Vérification propre à un générateur (6e ch. 8 : valeurs réelles, table de Φ, inéquations en n) :
+   * `refus` = message de refus SANS tentative (illisible, arrondi trop grossier) ou null. */
+  | { verif: VerificationChamp };
+
+export interface VerificationChamp {
+  refus: (valeur: string) => string | null;
+  statut: (valeur: string) => StatutVerification;
+  /** Une saisie juste (contrôles automatiques), jamais affichée. */
+  reference?: string;
+}
 
 const SEPARATEUR_LIGNES = "\n";
 
@@ -41,6 +51,7 @@ export function statutsAttentes(attentes: Attente[], valeurs: string[]): StatutV
     const v = valeurs[i] ?? "";
     if ("choix" in a) return v === a.choix ? "correct" : "not_equivalent";
     if ("lignes" in a) return statutLignes(v, a.lignes);
+    if ("verif" in a) return a.verif.refus(v) !== null ? "parse_error" : a.verif.statut(v);
     return diagnostiquerSaisie(v, a.nature, a.cible as never);
   });
 }
@@ -61,6 +72,11 @@ export function refusAttentes(attentes: Attente[], valeurs: string[]): string | 
     const a = attentes[i];
     const v = valeurs[i] ?? "";
     if ("choix" in a) continue;
+    if ("verif" in a) {
+      const msg = a.verif.refus(v);
+      if (msg) return msg;
+      continue;
+    }
     if ("lignes" in a) {
       if (statutLignes(v, a.lignes) === "parse_error") return MESSAGES_ILLISIBLE.liste;
       continue;

@@ -226,7 +226,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'variables-aleatoires', sectionId: 'variablesdiscretes', generatorId: '6gen49', label: '' },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'loibinomiale', generatorId: '6gen50', label: '' },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'loinormale', generatorId: '6gen51', label: '' },
-  { chapitreSlug: 'variables-aleatoires', sectionId: 'extensionsbayes', generatorId: '6gen52', label: '' },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'extensionsbayes', generatorId: '6gen52', label: '', processus: 3 },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'loipoisson', generatorId: '6gen53', label: '' },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'variablesdiscretes', generatorId: '6gen110', label: 'Variance et écart-type d\'une loi discrète (6gen110)', processus: 2 },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'variablesdiscretes', generatorId: '6gen111', label: 'Transformation affine Y = aX + b (6gen111)', processus: 2 },

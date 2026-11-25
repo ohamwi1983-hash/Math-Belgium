@@ -1,636 +1,443 @@
-import type { CoteDemandeE, ExerciceLoiNormale, ExerciceLoiNormaleA, ExerciceLoiNormaleB, ExerciceLoiNormaleC, ExerciceLoiNormaleD, ExerciceLoiNormaleE, SousTypeLoiNormaleC } from "../core6e/loiNormale.types";
-import { probabiliteFinaleA, symetrieNecessaire, valeurATableA } from "../generateurs6e/loiNormale/familleA";
-import { effectifEstimeB, probabiliteFinaleB, standardiserB } from "../generateurs6e/loiNormale/familleB";
-import { valeurCibleTableC, valeurTC } from "../generateurs6e/loiNormale/familleC";
-import { destandardiserD, valeurCibleTableD, valeurZD } from "../generateurs6e/loiNormale/familleD";
-import { bornesE, effectifEstimeE, muDepuisBornes, POURCENTAGE_PAR_K, probabiliteFinaleE, sigmaDepuisBornes } from "../generateurs6e/loiNormale/familleE";
-import { Phi } from "../generateurs6e/loiNormale/tableNormale";
-import type { CalculerReferenceLoiNormale, PhaseLoiNormale } from "../moteur6e/typesLoiNormale";
+import type { EquationTable, ExerciceLoiNormale, ExerciceLoiNormaleA, ExerciceLoiNormaleB, ExerciceLoiNormaleC, ExerciceLoiNormaleD, FormePhi } from "../core6e/loiNormale.types";
+import { arrondir, bornesZ, formeAttendue, POURCENTAGE_REGLE, valeurForme } from "../generateurs6e/loiNormale/calculs";
+import { valeurTablePhi } from "../../../lib/tablePhi";
+import { equationJusteDe, probabilitesAcceptees, zAcceptes } from "../moteur6e/verificationLoiNormale";
+import type { PhaseLoiNormale } from "../moteur6e/typesLoiNormale";
+import { vautEnviron } from "../moteur6e/saisieVariablesAleatoires";
+import { decimalLatex, f, m, milliersTexte, t } from "./fragmentsCombinatoire";
+import type { AideCombi, ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen51`. Dispatch sur
- * `exercice.famille` PUIS `phase`, mirroir `formatFormeTrigonometrique.ts` (6gen37), jamais importé
- * par un autre générateur (chaque générateur reste indépendant — CLAUDE.md).
- *
- * **`calculerReferenceLoiNormale`** — LA fonction qui relie Couche A (`Phi`/`PhiInverse`, ce
- * fichier a le droit d'importer `generateurs6e/loiNormale/`) et Couche B (`moteur6e/
- * verificationLoiNormale.ts`, qui ne le peut jamais) : injectée dans `sessionLoiNormale.ts` comme
- * `calculerReference` (voir en-tête `moteur6e/typesLoiNormale.ts`), et réutilisée ICI pour les
- * mêmes calculs côté "état actuel"/récapitulatif — UNE SEULE implémentation, jamais dupliquée entre
- * la vérification et l'affichage.
- *
- * **Vigilance signe orphelin / groupe LaTeX vide** (bug déjà rencontré et corrigé sur plusieurs
- * générateurs 6e, documenté CLAUDE.md) — `formatDecimal` ci-dessous est la SEULE fonction qui
- * convertit un nombre en LaTeX décimal français dans ce module, elle inclut TOUJOURS le signe dans
- * le même appel `toFixed` (jamais un signe assemblé séparément). Couverture de régression :
- * `formatLoiNormale.test.ts`, scan de nombreux tirages des 5 familles à la recherche de `++`/`+-`/
- * `--`/groupe vide.
+ * Textes de `6gen51` (6e ch. 8, § 6) — audit, lot C : notation 𝒩(μ ; σ) (point-virgule, second
+ * paramètre = écart-type), virgule décimale, consigne d'arrondi explicite (« à 10⁻⁴ », comme la table),
+ * plus aucun exemple de champ (avant : « ex : 0.1587 », refusé par la règle utilisée), aides qui ne
+ * posent plus le calcul (avant : « a = 38,82 + (−2,27) × 9,52 »), contextes réalistes (μ > 0).
  */
 
-export type TypeChamp = "texte" | "choix";
+type E = ExerciceLoiNormale;
+type P = PhaseLoiNormale;
 
-export interface OptionChoix {
-  valeur: string;
-  label: string;
+export const NORMALE = (mu: string | number, sigma: string | number) => `\\mathcal{N}(${mu}\\,;\\,${sigma})`;
+
+export function zL(z: number): string {
+  return z.toFixed(2).replace(".", "{,}");
+}
+export function zTexte(z: number): string {
+  return z.toFixed(2).replace(".", ",").replace("-", "−");
+}
+export function xL(x: number): string {
+  return decimalLatex(x);
+}
+export function xTexte(x: number): string {
+  return String(x).replace(".", ",").replace("-", "−");
+}
+function p4(x: number): string {
+  return decimalLatex(arrondir(x, 4));
 }
 
-export interface ChampDef {
-  type: TypeChamp;
-  label: string;
-  placeholder?: string;
-  options?: OptionChoix[];
-}
-
-export interface AideAvecLatex {
-  texte: string;
-  latex: string | null;
-}
-
-const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
-
-/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`,
- * rendu via `components/RenduFragments.tsx`. */
-export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
-
-function texte(valeur: string): FragmentConsigne {
-  return { type: "texte", valeur };
-}
-function latex(valeur: string): FragmentConsigne {
-  return { type: "latex", valeur };
-}
-
-// ============================================================================
-// Formatage décimal français — voir en-tête de fichier.
-// ============================================================================
-
-/** Décimal FRANÇAIS (virgule, `{,}` LaTeX), signe TOUJOURS inclus dans le même appel `toFixed`
- * (jamais de signe orphelin — voir en-tête de fichier). */
-export function formatDecimal(v: number, decimales: number): string {
-  return v.toFixed(decimales).replace(".", "{,}");
-}
-
-// ============================================================================
-// Champs "choix" partagés.
-// ============================================================================
-
-// Libellés COURTS (jamais de formule entière en suffixe, ex. "(1−Φ(t))") — voir en-tête de
-// fichier "signe orphelin / groupe LaTeX vide" pour la convention de fragments COURTS ; même
-// raison ici pour du texte de BOUTON pur (jamais du LaTeX) : `.field-inline` place le label du
-// champ ET le groupe de boutons sur la MÊME ligne flex (jamais empilés) — un libellé de bouton
-// trop long (formule complète en annexe) pousse la largeur combinée au-delà de 375px, débordement
-// horizontal trouvé en vérification Playwright (voir `docs/historique-6e.md`). Le détail exact de
-// chaque transformation reste disponible via `aideNiveau1`/`aideNiveau2` (jamais perdu, seulement
-// déplacé hors du bouton lui-même).
-const OPTIONS_SYMETRIE: OptionChoix[] = [
-  { valeur: "directe", label: "Lecture directe" },
-  { valeur: "symetrie", label: "Symétrie nécessaire" },
-];
-
-const OPTIONS_TRANSFORMATION: OptionChoix[] = [
-  { valeur: "cumulee", label: "Directe" },
-  { valeur: "symetrique", label: "Symétrique" },
-  { valeur: "encadree", label: "Encadrée" },
-];
-
-// ============================================================================
-// calculerReferenceLoiNormale — pont Couche A ↔ Couche B (voir en-tête de fichier).
-// ============================================================================
-
-export const calculerReferenceLoiNormale: CalculerReferenceLoiNormale = (exercice, phase) => {
-  if (exercice.famille === "A") {
-    if (phase === "aEcran2") return { probabiliteFinale: probabiliteFinaleA(exercice) };
-    return {};
+/** Événement du sens direct, en KaTeX. */
+export function evenementDirect(e: ExerciceLoiNormaleA | ExerciceLoiNormaleB): string {
+  if (e.famille === "A") {
+    if (e.sousType === "inferieur") return `P(Z\\leq ${zL(e.z1)})`;
+    if (e.sousType === "superieur") return `P(Z\\geq ${zL(e.z1)})`;
+    return `P(${zL(e.z1)}\\leq Z\\leq ${zL(e.z2 as number)})`;
   }
-  if (exercice.famille === "B") {
-    if (phase === "bEcran2") return { probabiliteFinale: probabiliteFinaleB(exercice) };
-    if (phase === "bEcran3") return { effectifReference: effectifEstimeB(probabiliteFinaleB(exercice), exercice.population as number) };
-    return {};
+  if (e.sousType === "inferieur") return `P(X\\leq ${xL(e.x1)})`;
+  if (e.sousType === "superieur") return `P(X\\geq ${xL(e.x1)})`;
+  return `P(${xL(e.x1)}\\leq X\\leq ${xL(e.x2 as number)})`;
+}
+
+export function latexForme(forme: FormePhi, z1: number, z2: number | null): string {
+  const t1 = zL(Math.abs(z1));
+  const t2 = z2 === null ? "" : zL(Math.abs(z2));
+  switch (forme) {
+    case "phi":
+      return `\\Phi(${t1})`;
+    case "unMoinsPhi":
+      return `1-\\Phi(${t1})`;
+    case "phiMoinsDemi":
+      return `\\Phi(${t1})-0{,}5`;
+    case "diff":
+      return `\\Phi(${t2})-\\Phi(${t1})`;
+    case "sommeMoinsUn":
+      return `\\Phi(${t2})+\\Phi(${t1})-1`;
+    case "diffInverse":
+      return `\\Phi(${t1})-\\Phi(${t2})`;
   }
-  if (exercice.famille === "C") {
-    if (phase === "cEcran1") return { cibleTable: valeurCibleTableC(exercice) };
-    if (phase === "cEcran2") return { tReference: valeurTC(exercice) };
-    return {};
+}
+
+/** Calcul de la probabilité avec les valeurs de table, en KaTeX. */
+function calculTable(forme: FormePhi, z1: number, z2: number | null): string {
+  const v1 = p4(valeurTablePhi(Math.abs(z1)));
+  const v2 = z2 === null ? "" : p4(valeurTablePhi(Math.abs(z2)));
+  switch (forme) {
+    case "phi":
+      return v1;
+    case "unMoinsPhi":
+      return `1-${v1}`;
+    case "phiMoinsDemi":
+      return `${v1}-0{,}5`;
+    case "diff":
+      return `${v2}-${v1}`;
+    case "sommeMoinsUn":
+      return `${v2}+${v1}-1`;
+    case "diffInverse":
+      return `${v1}-${v2}`;
   }
-  if (exercice.famille === "D") {
-    if (phase === "dEcran1") return { cibleTable: valeurCibleTableD(exercice) };
-    if (phase === "dEcran2") return { zReference: valeurZD(exercice) };
-    if (phase === "dEcran3") return { aReference: destandardiserD(exercice, valeurZD(exercice)) };
-    return {};
+}
+
+function lettre(e: ExerciceLoiNormaleC | ExerciceLoiNormaleD): string {
+  return e.famille === "C" ? "t" : "z";
+}
+
+export function equationLatex(q: EquationTable, l: string): string {
+  return `\\Phi(${q.oppose ? `-${l}` : l})=${p4(q.valeur)}`;
+}
+
+/** Donnée du sens inverse, en KaTeX. */
+export function donneeInverse(e: ExerciceLoiNormaleC | ExerciceLoiNormaleD): string {
+  const v = e.famille === "C" ? "Z" : "X";
+  const b = e.famille === "C" ? "t" : "a";
+  const p = p4(e.p);
+  switch (e.sousType) {
+    case "inferieur":
+      return `P(${v}\\leq ${b})=${p}`;
+    case "superieur":
+      return `P(${v}\\geq ${b})=${p}`;
+    case "centre":
+      return e.famille === "C" ? `P(-t\\leq Z\\leq t)=${p}` : `P(${xL(e.mu)}-d\\leq X\\leq ${xL(e.mu)}+d)=${p}`;
+    case "depuisZero":
+      return e.famille === "C" ? `P(0\\leq Z\\leq t)=${p}` : `P(${xL(e.mu)}\\leq X\\leq a)=${p}`;
   }
-  // Famille E.
-  if (phase === "eEcran2") return { probabiliteFinale: probabiliteFinaleE(exercice) };
-  if (phase === "eEcran3") return { effectifReference: effectifEstimeE(probabiliteFinaleE(exercice), exercice.population as number) };
-  return {};
+}
+
+const RELATIONS = "Relations du cours : $P(Z\\geq t)=1-\\Phi(t)$, $\\Phi(-t)=1-\\Phi(t)$, $P(-t\\leq Z\\leq t)=2\\Phi(t)-1$ et $P(0\\leq Z\\leq t)=\\Phi(t)-0{,}5$.";
+
+function populationTexte(n: number): string {
+  return milliersTexte(n);
+}
+
+function lignesContexte(e: E & { famille: "B" | "D" | "E" }): FragmentConsigne[] {
+  return [t(`On note `), m("X"), t(` ${e.contexte.sujet}. On admet que `), m(`X\\sim${NORMALE(xL(e.mu), xL(e.sigma))}`), t(" : moyenne "), m(xL(e.mu)), t(", écart-type "), m(xL(e.sigma)), t(` (en ${e.contexte.unite}).`)];
+}
+
+export const FORMAT_6GEN51: FormatCombinatoire<E, P> = {
+  consigneGenerale(e) {
+    switch (e.famille) {
+      case "A":
+        return [m("Z"), t(" suit la loi normale centrée réduite "), m(NORMALE(0, 1)), t(". La table donne "), m("\\Phi(t)=P(Z\\leq t)"), t(" pour "), m("t\\geq 0"), t(" ; donne les probabilités arrondies à "), m("10^{-4}"), t(".")];
+      case "B":
+        return [t("Standardise, puis utilise la table de "), m("\\Phi"), t(" (entrées positives). Probabilités arrondies à "), m("10^{-4}"), t(".")];
+      case "C":
+        return [m(`Z\\sim${NORMALE(0, 1)}`), t(". On connaît une probabilité ; on cherche la borne "), m("t"), t(" par une lecture inverse de la table.")];
+      case "D":
+        return [t("On connaît une proportion ; on cherche la valeur correspondante par une lecture inverse de la table.")];
+      case "E":
+        return [t("Règle empirique du cours : environ 68,3 % des valeurs sont à moins d'un écart-type de la moyenne, 95,4 % à moins de deux, 99,7 % à moins de trois. Utilise ces pourcentages.")];
+    }
+  },
+  donnees(e): FragmentConsigne[][] {
+    switch (e.famille) {
+      case "A":
+        return [[t("On cherche "), m(evenementDirect(e)), t(".")]];
+      case "B": {
+        const lignes = [lignesContexte(e), [t("On cherche la probabilité "), m(evenementDirect(e)), t(".")]];
+        if (e.population !== null) lignes.push([t(`On étudie un groupe de ${populationTexte(e.population)} ${e.contexte.individus}.`)]);
+        return lignes;
+      }
+      case "C":
+        return [[t("On sait que "), m(donneeInverse(e)), t(".")]];
+      case "D": {
+        const quoi =
+          e.sousType === "inferieur"
+            ? `On cherche la valeur $a$ sous laquelle se trouvent ${pourcent(e.p)} des ${e.contexte.individus} :`
+            : e.sousType === "superieur"
+              ? `On cherche la valeur $a$ dépassée par ${pourcent(e.p)} des ${e.contexte.individus} :`
+              : e.sousType === "centre"
+                ? `On cherche l'intervalle centré sur la moyenne qui contient ${pourcent(e.p)} des ${e.contexte.individus}, et $a$, sa borne supérieure :`
+                : `On cherche la valeur $a$ telle que ${pourcent(e.p)} des ${e.contexte.individus} soient entre la moyenne et $a$ :`;
+        return [lignesContexte(e), [...f(quoi + " "), m(donneeInverse(e)), t(e.sousType === "centre" ? " et " : "."), ...(e.sousType === "centre" ? [m(`a=${xL(e.mu)}+d`), t(".")] : [])]];
+      }
+      case "E": {
+        const bas = xL(arrondir(e.mu - e.k * e.sigma, 2));
+        const haut = xL(arrondir(e.mu + e.k * e.sigma, 2));
+        const quoi = !e.unCote
+          ? [t("On s'intéresse à l'événement « "), m(`X<${bas}`), t(" ou "), m(`X>${haut}`), t(" ».")]
+          : e.coteDemande === "superieur"
+            ? [t("On s'intéresse à l'événement « "), m(`X>${haut}`), t(" ».")]
+            : [t("On s'intéresse à l'événement « "), m(`X<${bas}`), t(" ».")];
+        const lignes = [lignesContexte(e), quoi];
+        if (e.population !== null) lignes.push([t(`On étudie un groupe de ${populationTexte(e.population)} ${e.contexte.individus}.`)]);
+        return lignes;
+      }
+    }
+  },
+  consigneEcran(e, p) {
+    switch (p) {
+      case "aForme":
+      case "bForme":
+        return [t("Comment s'écrit cette probabilité avec des valeurs de la table (entrées positives) ?")];
+      case "aProba":
+      case "bProba":
+        return [t("Calcule cette probabilité avec la table, arrondie à "), m("10^{-4}"), t(".")];
+      case "bZ":
+        return e.famille === "B" && e.x2 !== null
+          ? [t("Standardise chaque borne : "), m("z=\\dfrac{x-\\mu}{\\sigma}"), t(" (au centième).")]
+          : [t("Standardise la borne : "), m("z=\\dfrac{x-\\mu}{\\sigma}"), t(" (au centième).")];
+      case "bEffectif":
+        return e.famille === "B" ? [t(`Combien ${de(e.contexte.individus)} du groupe peut-on s'attendre à trouver ? (arrondi à l'unité)`)] : [];
+      case "cEquation":
+      case "dEquation":
+        return e.famille === "D" ? [t("En posant "), m("z=\\dfrac{a-\\mu}{\\sigma}"), t(", à quelle égalité de la table cela revient-il ?")] : [t("À quelle égalité de la table cela revient-il ?")];
+      case "cT":
+        return [t("Lis "), m("t"), t(" dans la table (au centième).")];
+      case "dZ":
+        return [t("Lis "), m("z"), t(" dans la table (au centième).")];
+      case "dA":
+        return [t("Déduis-en "), m("a"), t(" (au dixième).")];
+      case "eK":
+        return e.famille === "E" ? [t(`À combien d'écarts-types de la moyenne se trouve${e.unCote ? " la borne" : "nt les bornes"} ?`)] : [];
+      case "eProportion":
+        return e.famille === "E" ? [t(`Quelle proportion des ${e.contexte.individus} est concernée ?`)] : [];
+      case "eEffectif":
+        return e.famille === "E" ? [t(`Combien ${de(e.contexte.individus)} du groupe environ ? (arrondi à l'unité)`)] : [];
+    }
+  },
+  champs(e, p): ChampCombi[] {
+    switch (p) {
+      case "aForme":
+      case "bForme": {
+        if (e.famille !== "A" && e.famille !== "B") return [];
+        const { z1, z2 } = bornesZ(e);
+        return [{ type: "choix", label: "", options: e.options.map((o) => ({ valeur: o, label: `$${latexForme(o, z1, z2)}$` })) }];
+      }
+      case "aProba":
+      case "bProba":
+        return e.famille === "A" || e.famille === "B" ? [{ type: "texte", label: `$${evenementDirect(e)}$` }] : [];
+      case "bZ":
+        return e.famille === "B" && e.x2 !== null
+          ? [
+              { type: "texte", label: "$z_1$" },
+              { type: "texte", label: "$z_2$" },
+            ]
+          : [{ type: "texte", label: "$z$" }];
+      case "bEffectif":
+      case "eEffectif":
+        return [{ type: "texte", label: "Effectif" }];
+      case "cEquation":
+      case "dEquation":
+        return e.famille === "C" || e.famille === "D" ? [{ type: "choix", label: "", options: e.equations.map((q) => ({ valeur: q.id, label: `$${equationLatex(q, lettre(e))}$` })) }] : [];
+      case "cT":
+        return [{ type: "texte", label: "$t$" }];
+      case "dZ":
+        return [{ type: "texte", label: "$z$" }];
+      case "dA":
+        return [{ type: "texte", label: "$a$" }];
+      case "eK":
+        return [{ type: "texte", label: "Nombre d'écarts-types" }];
+      case "eProportion":
+        return [{ type: "texte", label: "Proportion" }];
+    }
+  },
+  aides(e, p): AideCombi[] {
+    switch (p) {
+      case "aForme":
+      case "bForme":
+        return [
+          { texte: "La courbe est symétrique par rapport à 0 et l'aire totale vaut 1 :", latex: "P(Z\\geq t)=1-\\Phi(t)\\qquad \\Phi(-t)=1-\\Phi(t)" },
+          { texte: "Regarde la partie hachurée : est-elle à gauche ou à droite de la borne ? La borne est-elle positive ou négative ?" },
+        ];
+      case "aProba":
+      case "bProba":
+        return [
+          { texte: "Lis $\\Phi(t)$ dans la table : ligne du dixième, colonne du centième (par exemple $\\Phi(1{,}23)$ : ligne $1{,}2$, colonne $0{,}03$)." },
+          { texte: "Remplace chaque $\\Phi$ de l'écriture choisie à l'écran précédent par la valeur lue, puis calcule." },
+        ];
+      case "bZ":
+        return e.famille === "B" ? [{ texte: "On centre puis on réduit :", latex: "z=\\dfrac{x-\\mu}{\\sigma}" }, { texte: `Ici $\\mu=${xL(e.mu)}$ et $\\sigma=${xL(e.sigma)}$ ; une valeur sous la moyenne donne un $z$ négatif.` }] : [];
+      case "bEffectif":
+      case "eEffectif":
+        return [{ texte: "Effectif attendu = taille du groupe × proportion." }, { texte: "Utilise la proportion de l'écran précédent, puis arrondis à l'unité." }];
+      case "cEquation":
+      case "dEquation":
+        return [{ texte: RELATIONS }, { texte: "La table ne lit que des valeurs positives : une probabilité « à gauche » plus petite que 0,5 correspond à une borne négative (on passe par $\\Phi(-t)$)." }];
+      case "cT":
+      case "dZ":
+        return [
+          { texte: "Cherche dans la table la case égale (ou la plus proche) de la valeur ; la borne vaut ligne + colonne." },
+          { texte: `Si l'égalité porte sur $\\Phi(-${p === "cT" ? "t" : "z"})$, la table donne $-${p === "cT" ? "t" : "z"}$ : change ensuite le signe.` },
+        ];
+      case "dA":
+        return e.famille === "D" ? [{ texte: "On revient à la variable de départ :", latex: "a=\\mu+z\\,\\sigma" }, { texte: `Ici $\\mu=${xL(e.mu)}$ et $\\sigma=${xL(e.sigma)}$ ; utilise $z$ de l'écran précédent.` }] : [];
+      case "eK":
+        return e.famille === "E" ? [{ texte: "Nombre d'écarts-types = écart à la moyenne divisé par $\\sigma$." }, { texte: `Ici $\\mu=${xL(e.mu)}$ et $\\sigma=${xL(e.sigma)}$.` }] : [];
+      case "eProportion":
+        return [
+          { texte: "Hors de l'intervalle de $k$ écarts-types : 100 % moins le pourcentage de la règle." },
+          { texte: "La courbe est symétrique : d'un seul côté, c'est la moitié de ce qui est hors de l'intervalle." },
+        ];
+    }
+  },
+  reponseAttendue(e, p) {
+    switch (e.famille) {
+      case "A":
+      case "B": {
+        const { z1, z2 } = bornesZ(e);
+        if (p === "bZ") return z2 === null ? [`z=${zL(z1)}`] : [`z_1=${zL(z1)}`, `z_2=${zL(z2)}`];
+        if (p === "aForme" || p === "bForme") return [`${evenementDirect(e)}=${latexForme(formeAttendue(e.sousType, z1, z2), z1, z2)}`];
+        const pt = probabilitesAcceptees(e)[0];
+        if (p === "aProba" || p === "bProba") return [`${evenementDirect(e)}\\approx ${p4(pt)}`];
+        return [`\\approx ${Math.round((e.famille === "B" ? (e.population ?? 0) : 0) * pt)}`];
+      }
+      case "C":
+      case "D": {
+        const q = equationJusteDe(e);
+        if (p === "cEquation" || p === "dEquation") return [equationLatex(q, lettre(e))];
+        const z = zAcceptes(e).exactes;
+        if (p === "cT" || p === "dZ") return [`${lettre(e)}\\approx ${z.map(zL).join("\\ \\text{ou}\\ ")}`];
+        return [`a\\approx ${aArrondis(e as ExerciceLoiNormaleD).map(xL).join("\\ \\text{ou}\\ ")}`];
+      }
+      case "E": {
+        if (p === "eK") return [`k=${e.k}`];
+        const prop = probabilitesAcceptees(e)[0];
+        if (p === "eProportion") return [`${decimalLatex(prop)}`];
+        return [`\\approx ${Math.round((e.population ?? 0) * prop)}`];
+      }
+    }
+  },
+  explication(e, p) {
+    switch (e.famille) {
+      case "A":
+      case "B": {
+        const { z1, z2 } = bornesZ(e);
+        const forme = formeAttendue(e.sousType, z1, z2);
+        if (p === "bZ") {
+          const ligne = (x: number, z: number) => `\\dfrac{${xL(x)}-${xL(e.famille === "B" ? e.mu : 0)}}{${xL(e.famille === "B" ? e.sigma : 1)}}=${zL(z)}`;
+          return e.famille === "B" ? [f(z2 === null ? `$z=${ligne(e.x1, z1)}$` : `$z_1=${ligne(e.x1, z1)}$ ; $z_2=${ligne(e.x2 as number, z2)}$`)] : [];
+        }
+        if (p === "aForme" || p === "bForme") {
+          const raison =
+            forme === "phi"
+              ? z1 >= 0
+                ? "aire à gauche d'une borne positive : lecture directe."
+                : "aire à droite d'une borne négative : par symétrie, c'est l'aire à gauche de son opposé."
+              : forme === "unMoinsPhi"
+                ? z1 >= 0
+                  ? "aire à droite d'une borne positive : complément à 1."
+                  : "aire à gauche d'une borne négative : par symétrie, c'est l'aire à droite de son opposé, donc un complément."
+                : forme === "diff"
+                  ? "deux bornes positives : aire à gauche de la plus grande moins aire à gauche de la plus petite."
+                  : forme === "sommeMoinsUn"
+                    ? "une borne négative et une positive : $\\Phi(t_2)-(1-\\Phi(t_1))$."
+                    : "deux bornes négatives : par symétrie, c'est l'intervalle entre leurs opposés.";
+          return [f(`$${evenementDirect(e)}=${latexForme(forme, z1, z2)}$ : ${raison}`)];
+        }
+        const pt = probabilitesAcceptees(e)[0];
+        if (p === "aProba" || p === "bProba") {
+          const calc = calculTable(forme, z1, z2);
+          const exacte = p4(probabilitesAcceptees(e)[1]);
+          return [f(`$${latexForme(forme, z1, z2)}=${calc === p4(pt) ? "" : `${calc}=`}${p4(pt)}$${exacte === p4(pt) ? "." : ` (la calculatrice donne $${exacte}$, accepté aussi).`}`)];
+        }
+        const pop = e.famille === "B" ? (e.population ?? 0) : 0;
+        return [f(`$${pop}\\times ${p4(pt)}\\approx ${decimalLatex(arrondir(pop * pt, 1))}$, soit environ $${Math.round(pop * pt)}$.`)];
+      }
+      case "C":
+      case "D": {
+        const q = equationJusteDe(e);
+        const l = lettre(e);
+        if (p === "cEquation" || p === "dEquation") {
+          const raison =
+            q.id === "phiP"
+              ? "probabilité à gauche, au moins 0,5 : lecture directe."
+              : q.id === "phiOpposeUnMoinsP"
+                ? `probabilité à gauche plus petite que 0,5 : la borne est négative et $\\Phi(-${l})=1-p$.`
+                : q.id === "phiUnMoinsP"
+                  ? `probabilité à droite : $\\Phi(${l})=1-p$, borne positive puisque $p\\leq 0{,}5$.`
+                  : q.id === "phiOpposeP"
+                    ? `probabilité à droite plus grande que 0,5 : la borne est négative et $\\Phi(-${l})=p$.`
+                    : q.id === "phiCentre"
+                      ? `$2\\Phi(${l})-1=p$, donc $\\Phi(${l})=\\dfrac{1+p}{2}$.`
+                      : `$\\Phi(${l})-0{,}5=p$, donc $\\Phi(${l})=0{,}5+p$.`;
+          return [f(`$${donneeInverse(e)}$ : ${raison} Ici $${equationLatex(q, l)}$.`)];
+        }
+        const zs = zAcceptes(e).exactes;
+        const lu = zs.map((z) => zL(Math.abs(z))).join("\\ \\text{ou}\\ ");
+        if (p === "cT" || p === "dZ") return [f(`La case $${p4(q.valeur)}$ se lit pour $${lu}$${q.oppose ? ` : c'est $-${l}$, donc $${l}\\approx ${zs.map(zL).join("\\ \\text{ou}\\ ")}$` : ""}.`)];
+        const d = e as ExerciceLoiNormaleD;
+        return [f(`$a=\\mu+z\\,\\sigma=${xL(d.mu)}+(${zL(zs[0])})\\times ${xL(d.sigma)}=${xL(arrondir(d.mu + zs[0] * d.sigma, 2))}$.`)];
+      }
+      case "E": {
+        const prop = probabilitesAcceptees(e)[0];
+        if (p === "eK") return [f(`$\\dfrac{${xL(arrondir(e.k * e.sigma, 2))}}{${xL(e.sigma)}}=${e.k}$ : la borne est à $${e.k}$ écart${e.k > 1 ? "s" : ""}-type${e.k > 1 ? "s" : ""} de la moyenne.`)];
+        if (p === "eProportion") {
+          const hors = decimalLatex(arrondir(1 - POURCENTAGE_REGLE[e.k], 3));
+          return [f(e.unCote ? `Hors de l'intervalle : $1-${decimalLatex(POURCENTAGE_REGLE[e.k])}=${hors}$ ; d'un seul côté (symétrie) : $${hors}\\div 2=${decimalLatex(prop)}$.` : `Hors de l'intervalle : $1-${decimalLatex(POURCENTAGE_REGLE[e.k])}=${hors}$.`)];
+        }
+        const pop = e.population ?? 0;
+        return [f(`$${pop}\\times ${decimalLatex(prop)}\\approx ${decimalLatex(arrondir(pop * prop, 1))}$, soit environ $${Math.round(pop * prop)}$.`)];
+      }
+    }
+  },
+  libellePhase(_e, p) {
+    const l: Record<P, string> = {
+      aForme: "Écriture avec Φ",
+      aProba: "Probabilité",
+      bZ: "Standardisation",
+      bForme: "Écriture avec Φ",
+      bProba: "Probabilité",
+      bEffectif: "Effectif",
+      cEquation: "Égalité de table",
+      cT: "Valeur de t",
+      dEquation: "Égalité de table",
+      dZ: "Valeur de z",
+      dA: "Valeur de a",
+      eK: "Écarts-types",
+      eProportion: "Proportion",
+      eEffectif: "Effectif",
+    };
+    return l[p];
+  },
+  messageCible(e, p, valeurs) {
+    const v = valeurs[0] ?? "";
+    if ((e.famille === "A" || e.famille === "B") && (p === "aProba" || p === "bProba")) {
+      const { z1, z2 } = bornesZ(e);
+      const juste = formeAttendue(e.sousType, z1, z2);
+      for (const autre of ["phi", "unMoinsPhi", "diff", "sommeMoinsUn", "diffInverse"] as FormePhi[]) {
+        if (autre === juste || (z2 === null) !== (autre === "phi" || autre === "unMoinsPhi")) continue;
+        if (vautEnviron(v, valeurForme(autre, z1, z2), 1e-4)) return f(`Ce calcul correspond à $${latexForme(autre, z1, z2)}$ : reprends l'écriture de l'écran précédent.`);
+      }
+      return null;
+    }
+    if (e.famille === "B" && p === "bZ") {
+      const z = bornesZ(e).z1;
+      if (vautEnviron(v, -z)) return [t("Le signe est inversé : z est négatif quand x est sous la moyenne.")];
+      return null;
+    }
+    if ((e.famille === "C" || e.famille === "D") && (p === "cT" || p === "dZ")) {
+      const zs = zAcceptes(e).exactes;
+      if (zs.some((z) => vautEnviron(v, -z))) return [t("Le signe est inversé : relis l'égalité choisie, Φ(t) ou Φ(−t).")];
+      return null;
+    }
+    if (e.famille === "E" && p === "eProportion") {
+      const autre = probabilitesAcceptees({ ...e, unCote: !e.unCote })[0];
+      if (vautEnviron(v, autre, 1e-4)) return [t(e.unCote ? "C'est la proportion des deux côtés : on n'en veut qu'un, divise par 2." : "C'est un seul côté : on veut les deux côtés de l'intervalle.")];
+      if (vautEnviron(v, POURCENTAGE_REGLE[e.k], 1e-4)) return [t("C'est la proportion dans l'intervalle ; on veut celle qui est en dehors.")];
+    }
+    return null;
+  },
 };
 
-// ============================================================================
-// Famille A — Centrée réduite, sens direct.
-// ============================================================================
-
-function equationCibleA(e: ExerciceLoiNormaleA): string {
-  if (e.sousType === "intervalle") return `P(${formatDecimal(e.z1, 2)}\\le Z\\le ${formatDecimal(e.z2, 2)})=\\,?`;
-  return e.sousType === "inferieur" ? `P(Z\\le ${formatDecimal(e.z, 2)})=\\,?` : `P(Z\\ge ${formatDecimal(e.z, 2)})=\\,?`;
+/** Valeurs de a (au dixième) issues des lectures de table acceptées. */
+export function aArrondis(e: ExerciceLoiNormaleD): number[] {
+  return [...new Set(zAcceptes(e).exactes.map((z) => arrondir(e.mu + z * e.sigma, 1)))];
 }
 
-export function consigneGeneraleA(): FragmentConsigne[] {
-  return [
-    texte("Z suit la loi normale centrée réduite "),
-    latex("\\mathcal{N}(0,1)"),
-    texte(". Calcule la probabilité demandée à l'aide de la table Φ (fonction de répartition, "),
-    latex("\\Phi(t)=P(Z\\leq t)"),
-    texte(")."),
-  ];
-}
-export function blocDonneesA(e: ExerciceLoiNormaleA): string[] {
-  return ["Z\\sim\\mathcal{N}(0,1)", equationCibleA(e)];
-}
-export function consigneEcranA(phase: PhaseLoiNormale): FragmentConsigne[] {
-  if (phase === "aEcran1") {
-    return [
-      texte(
-        "La table Φ ne donne QUE des lectures directes pour une entrée positive. Identifie la transformation nécessaire (directe si la valeur est déjà positive, symétrie sinon) et la valeur positive t à chercher.",
-      ),
-    ];
-  }
-  return [texte("Calcule la probabilité finale demandée, à partir de la ou des lecture(s) CONFIRMÉE(s) de l'étape précédente.")];
-}
-export function etatActuelA(e: ExerciceLoiNormaleA, phase: PhaseLoiNormale): string[] | null {
-  if (phase !== "aEcran2") return null;
-  if (e.sousType === "intervalle") {
-    return [`t_1=${formatDecimal(valeurATableA(e.z1), 2)}\\text{, }t_2=${formatDecimal(valeurATableA(e.z2), 2)}\\text{ (confirmés)}`];
-  }
-  return [`t=${formatDecimal(valeurATableA(e.z), 2)}\\text{ (confirmé)}`];
-}
-export function champsA(e: ExerciceLoiNormaleA, phase: PhaseLoiNormale): ChampDef[] {
-  if (phase === "aEcran2") return [{ type: "texte", label: "Probabilité =", placeholder: "ex : 0.8413" }];
-  if (e.sousType === "intervalle") {
-    return [
-      { type: "choix", label: "z₁ :", options: OPTIONS_SYMETRIE },
-      { type: "texte", label: "t₁ =", placeholder: "ex : 1.23" },
-      { type: "choix", label: "z₂ :", options: OPTIONS_SYMETRIE },
-      { type: "texte", label: "t₂ =", placeholder: "ex : 0.56" },
-    ];
-  }
-  return [
-    { type: "choix", label: "Transformation :", options: OPTIONS_SYMETRIE },
-    { type: "texte", label: "t =", placeholder: "ex : 1.23" },
-  ];
-}
-export function niveauAideMaxA(phase: PhaseLoiNormale): number {
-  return phase === "aEcran1" ? 2 : 0;
-}
-export function aideNiveau1A(phase: PhaseLoiNormale): AideAvecLatex {
-  if (phase !== "aEcran1") return AUCUNE_AIDE;
-  return { texte: "Rappels : Φ(−t)=1−Φ(t) (symétrie) et P(Z≥t)=1−Φ(t). La table ne donne directement que Φ(t) pour t≥0.", latex: "\\Phi(-t)=1-\\Phi(t)\\qquad P(Z\\geq t)=1-\\Phi(t)" };
-}
-export function aideNiveau2A(e: ExerciceLoiNormaleA, phase: PhaseLoiNormale): AideAvecLatex {
-  if (phase !== "aEcran1") return AUCUNE_AIDE;
-  const z = e.sousType === "intervalle" ? e.z1 : e.z;
-  const transfo = symetrieNecessaire(z) ? "symétrie nécessaire (valeur de départ négative)" : "lecture directe (valeur de départ déjà positive)";
-  return { texte: `Transformation identifiée (valeur finale non isolée) : ${transfo}.`, latex: null };
+/** « d'ampoules », « de pommes ». */
+function de(mot: string): string {
+  return /^[aeiouéèêh]/i.test(mot) ? `d'${mot}` : `de ${mot}`;
 }
 
-// ============================================================================
-// Famille B — Générale N(μ,σ), sens direct + estimation d'effectif.
-// ============================================================================
-
-function donneesPopulationB(population: number | undefined): string[] {
-  return population === undefined ? [] : [`N=${population}\\text{ (population totale)}`];
-}
-
-function equationCibleB(e: ExerciceLoiNormaleB): string {
-  if (e.sousType === "intervalle") return `P(${formatDecimal(e.x1, 2)}\\le X\\le ${formatDecimal(e.x2, 2)})=\\,?`;
-  return e.sousType === "inferieur" ? `P(X\\le ${formatDecimal(e.x, 2)})=\\,?` : `P(X\\ge ${formatDecimal(e.x, 2)})=\\,?`;
-}
-
-export function consigneGeneraleB(): FragmentConsigne[] {
-  return [texte("X suit la loi normale "), latex("\\mathcal{N}(\\mu,\\sigma)"), texte(". Standardise puis calcule la probabilité demandée à l'aide de la table Φ.")];
-}
-export function blocDonneesB(e: ExerciceLoiNormaleB): string[] {
-  return [`X\\sim\\mathcal{N}(${formatDecimal(e.mu, 2)}\\text{ ; }${formatDecimal(e.sigma, 2)})`, equationCibleB(e), ...donneesPopulationB(e.population)];
-}
-export function consigneEcranB(phase: PhaseLoiNormale): FragmentConsigne[] {
-  if (phase === "bEcran1") return [texte("Standardise chaque borne : "), latex("z=\\dfrac{x-\\mu}{\\sigma}"), texte(".")];
-  if (phase === "bEcran2") return [texte("Calcule la probabilité demandée à partir du/des z CONFIRMÉ(s) (même logique que pour Z centrée réduite).")];
-  return [texte("Multiplie la probabilité CONFIRMÉE par la taille de la population, puis arrondis à l'entier le plus proche.")];
-}
-/** Ligne(s) confirmée(s) à l'écran 1 (standardisation) — réutilisée(s) par tout écran ultérieur
- * (correctif transversal accumulation, voir CLAUDE.md/`docs/historique-6e.md`). */
-function lignesEcran1B(e: ExerciceLoiNormaleB): string[] {
-  if (e.sousType === "intervalle") {
-    return [`z_1=${formatDecimal(standardiserB(e.x1, e.mu, e.sigma), 2)}\\text{, }z_2=${formatDecimal(standardiserB(e.x2, e.mu, e.sigma), 2)}\\text{ (confirmés, étape 1)}`];
-  }
-  return [`z=${formatDecimal(standardiserB(e.x, e.mu, e.sigma), 2)}\\text{ (confirmé, étape 1)}`];
-}
-
-/** ACCUMULE les écrans déjà confirmés (correctif transversal — voir CLAUDE.md/`docs/historique-
- * 6e.md`, même bug que sur `6gen1`/`6gen58`) : `bEcran3` ne montrait QUE la probabilité de `bEcran2`,
- * jamais le(s) z de `bEcran1`. Plus ancien en premier. */
-export function etatActuelB(e: ExerciceLoiNormaleB, phase: PhaseLoiNormale): string[] | null {
-  if (phase === "bEcran2") return lignesEcran1B(e);
-  if (phase === "bEcran3") return [...lignesEcran1B(e), `P=${formatDecimal(probabiliteFinaleB(e), 4)}\\text{ (confirmée, étape 2)}`];
-  return null;
-}
-export function champsB(e: ExerciceLoiNormaleB, phase: PhaseLoiNormale): ChampDef[] {
-  if (phase === "bEcran1") {
-    if (e.sousType === "intervalle") return [{ type: "texte", label: "z₁ =", placeholder: "ex : -1.2" }, { type: "texte", label: "z₂ =", placeholder: "ex : 1.2" }];
-    return [{ type: "texte", label: "z =", placeholder: "ex : 1.23" }];
-  }
-  if (phase === "bEcran2") return [{ type: "texte", label: "Probabilité =", placeholder: "ex : 0.8413" }];
-  return [{ type: "texte", label: "Effectif estimé =", placeholder: "ex : 683" }];
-}
-export function niveauAideMaxB(phase: PhaseLoiNormale): number {
-  return phase === "bEcran1" ? 2 : 0;
-}
-export function aideNiveau1B(phase: PhaseLoiNormale): AideAvecLatex {
-  if (phase !== "bEcran1") return AUCUNE_AIDE;
-  return { texte: "Rappel de la formule de standardisation :", latex: "z=\\frac{x-\\mu}{\\sigma}" };
-}
-export function aideNiveau2B(e: ExerciceLoiNormaleB, phase: PhaseLoiNormale): AideAvecLatex {
-  if (phase !== "bEcran1") return AUCUNE_AIDE;
-  return { texte: "μ et σ substitués (division non faite) :", latex: `z=\\frac{x-\\left(${formatDecimal(e.mu, 2)}\\right)}{${formatDecimal(e.sigma, 2)}}` };
-}
-
-// ============================================================================
-// Famille C — Centrée réduite, sens inverse.
-// ============================================================================
-
-function equationCibleDepartC(sousType: SousTypeLoiNormaleC, p: number, k?: number): string {
-  if (sousType === "cumulee") return `P(Z\\le t)=${formatDecimal(p, 4)}`;
-  if (sousType === "symetrique") return `P(0\\le Z\\le t)=${formatDecimal(p, 4)}`;
-  return `P(t\\le Z\\le ${formatDecimal(k as number, 2)})=${formatDecimal(p, 4)}`;
-}
-
-export function consigneGeneraleC(): FragmentConsigne[] {
-  return [texte("Z suit la loi normale centrée réduite "), latex("\\mathcal{N}(0,1)"), texte(". Détermine t à partir de la probabilité donnée, en utilisant la table Φ À L'ENVERS.")];
-}
-export function blocDonneesC(e: ExerciceLoiNormaleC): string[] {
-  const donnees = ["Z\\sim\\mathcal{N}(0,1)", equationCibleDepartC(e.sousType, e.p, e.sousType === "encadree" ? e.k : undefined)];
-  if (e.sousType === "encadree") donnees.push(`\\Phi(${formatDecimal(e.k, 2)})\\approx ${formatDecimal(Phi(e.k), 4)}\\text{ (donnée)}`);
-  return donnees;
-}
-export function consigneEcranC(phase: PhaseLoiNormale): FragmentConsigne[] {
-  if (phase === "cEcran1") {
-    return [
-      texte("La table Φ ne donne DIRECTEMENT que "),
-      latex("\\Phi(t)=P(Z\\leq t)"),
-      texte(". Identifie la transformation nécessaire pour adapter la probabilité donnée à cette forme, et calcule la valeur cible."),
-    ];
-  }
-  return [texte("Lis la table À L'ENVERS : trouve t tel que "), latex("\\Phi(t)"), texte(" égale la valeur cible CONFIRMÉE à l'étape précédente.")];
-}
-export function etatActuelC(e: ExerciceLoiNormaleC, phase: PhaseLoiNormale): string[] | null {
-  if (phase !== "cEcran2") return null;
-  return [`\\Phi(t)=${formatDecimal(valeurCibleTableC(e), 4)}\\text{ (confirmé)}`];
-}
-export function champsC(phase: PhaseLoiNormale): ChampDef[] {
-  if (phase === "cEcran1") return [{ type: "choix", label: "Transformation :", options: OPTIONS_TRANSFORMATION }, { type: "texte", label: "Φ(t) =", placeholder: "ex : 0.9750" }];
-  return [{ type: "texte", label: "t =", placeholder: "ex : 1.96" }];
-}
-export function niveauAideMaxC(phase: PhaseLoiNormale): number {
-  return phase === "cEcran1" ? 2 : 0;
-}
-export function aideNiveau1C(phase: PhaseLoiNormale): AideAvecLatex {
-  if (phase !== "cEcran1") return AUCUNE_AIDE;
-  return { texte: "La table ne donne QUE Φ(t)=P(Z≤t) directement — toute autre probabilité doit être reformulée sous cette forme avant lecture.", latex: "\\Phi(t)=P(Z\\leq t)" };
-}
-export function aideNiveau2C(e: ExerciceLoiNormaleC, phase: PhaseLoiNormale): AideAvecLatex {
-  if (phase !== "cEcran1") return AUCUNE_AIDE;
-  if (e.sousType === "cumulee") return { texte: "Relation de conversion (déjà sous la bonne forme) :", latex: `\\Phi(t)=p=${formatDecimal(e.p, 4)}` };
-  if (e.sousType === "symetrique") return { texte: "Relation de conversion appliquée en partie (valeur finale non isolée) :", latex: "\\Phi(t)=p+0{,}5" };
-  return { texte: "Relation de conversion appliquée en partie (valeur finale non isolée) :", latex: `\\Phi(t)=\\Phi(${formatDecimal(e.k, 2)})-p` };
-}
-
-// ============================================================================
-// Famille D — Générale, sens inverse.
-// ============================================================================
-
-function equationCibleDepartD(e: ExerciceLoiNormaleD): string {
-  if (e.sousType === "cumulee") return `P(X\\le a)=${formatDecimal(e.p, 4)}`;
-  if (e.sousType === "symetrique") return `P(\\mu\\le X\\le a)=${formatDecimal(e.p, 4)}`;
-  return `P(a\\le X\\le ${formatDecimal(e.b, 2)})=${formatDecimal(e.p, 4)}`;
-}
-
-export function consigneGeneraleD(): FragmentConsigne[] {
-  return [texte("X suit la loi normale "), latex("\\mathcal{N}(\\mu,\\sigma)"), texte(". Détermine a à partir de la probabilité donnée : reformule pour la table, lis à l'envers, puis dé-standardise.")];
-}
-export function blocDonneesD(e: ExerciceLoiNormaleD): string[] {
-  const donnees = [`X\\sim\\mathcal{N}(${formatDecimal(e.mu, 2)}\\text{ ; }${formatDecimal(e.sigma, 2)})`, equationCibleDepartD(e)];
-  if (e.sousType === "encadree") {
-    const zB = standardiserB(e.b, e.mu, e.sigma);
-    // Parenthèses OBLIGATOIRES autour de μ : μ peut être négatif, une simple concaténation
-    // "b-μ" produirait alors un double signe orphelin "b--μ" (bug de régression déjà rencontré
-    // ailleurs sur la plateforme — voir en-tête de fichier, "signe orphelin").
-    donnees.push(`\\Phi\\!\\left(\\frac{${formatDecimal(e.b, 2)}-\\left(${formatDecimal(e.mu, 2)}\\right)}{${formatDecimal(e.sigma, 2)}}\\right)\\approx ${formatDecimal(Phi(zB), 4)}\\text{ (donnée)}`);
-  }
-  return donnees;
-}
-export function consigneEcranD(phase: PhaseLoiNormale): FragmentConsigne[] {
-  if (phase === "dEcran1") {
-    return [texte("Comme pour Z centrée réduite : identifie la transformation nécessaire pour adapter la probabilité donnée à une lecture directe de la table, et calcule la valeur cible.")];
-  }
-  if (phase === "dEcran2") return [texte("Lis la table À L'ENVERS : trouve z tel que "), latex("\\Phi(z)"), texte(" égale la valeur cible CONFIRMÉE.")];
-  return [texte("Dé-standardise à partir du z CONFIRMÉ : "), latex("a=\\mu+z\\cdot\\sigma"), texte(".")];
-}
-/** ACCUMULE les écrans déjà confirmés (correctif transversal, voir CLAUDE.md/`docs/historique-
- * 6e.md`) : `dEcran3` omettait Φ(z) confirmé à `dEcran1`, ne montrant que z de `dEcran2`. Plus
- * ancien en premier. */
-export function etatActuelD(e: ExerciceLoiNormaleD, phase: PhaseLoiNormale): string[] | null {
-  if (phase === "dEcran2") return [`\\Phi(z)=${formatDecimal(valeurCibleTableD(e), 4)}\\text{ (confirmé, étape 1)}`];
-  if (phase === "dEcran3") return [`\\Phi(z)=${formatDecimal(valeurCibleTableD(e), 4)}\\text{ (confirmé, étape 1)}`, `z=${formatDecimal(valeurZD(e), 2)}\\text{ (confirmé, étape 2)}`];
-  return null;
-}
-export function champsD(phase: PhaseLoiNormale): ChampDef[] {
-  if (phase === "dEcran1") return [{ type: "choix", label: "Transformation :", options: OPTIONS_TRANSFORMATION }, { type: "texte", label: "Φ(z) =", placeholder: "ex : 0.9750" }];
-  if (phase === "dEcran2") return [{ type: "texte", label: "z =", placeholder: "ex : 1.96" }];
-  return [{ type: "texte", label: "a =", placeholder: "ex : 129.4" }];
-}
-export function niveauAideMaxD(phase: PhaseLoiNormale): number {
-  if (phase === "dEcran1") return 2;
-  if (phase === "dEcran3") return 2;
-  return 0;
-}
-export function aideNiveau1D(phase: PhaseLoiNormale): AideAvecLatex {
-  if (phase === "dEcran1") return { texte: "La table ne donne QUE Φ(z)=P(Z≤z) directement — toute autre probabilité doit être reformulée sous cette forme avant lecture.", latex: "\\Phi(z)=P(Z\\leq z)" };
-  if (phase === "dEcran3") return { texte: "Rappel de la formule inverse (à partir de z=(a−μ)/σ) :", latex: "a=\\mu+z\\cdot\\sigma" };
-  return AUCUNE_AIDE;
-}
-export function aideNiveau2D(e: ExerciceLoiNormaleD, phase: PhaseLoiNormale): AideAvecLatex {
-  if (phase === "dEcran1") {
-    if (e.sousType === "cumulee") return { texte: "Relation de conversion (déjà sous la bonne forme) :", latex: `\\Phi(z)=p=${formatDecimal(e.p, 4)}` };
-    if (e.sousType === "symetrique") return { texte: "Relation de conversion appliquée en partie (valeur finale non isolée) :", latex: "\\Phi(z)=p+0{,}5" };
-    return { texte: "Relation de conversion appliquée en partie (valeur finale non isolée) :", latex: `\\Phi(z)=\\Phi(z_b)-p` };
-  }
-  if (phase === "dEcran3") return { texte: "μ, σ et z substitués (calcul final non fait) :", latex: `a=${formatDecimal(e.mu, 2)}+(${formatDecimal(valeurZD(e), 2)})\\times ${formatDecimal(e.sigma, 2)}` };
-  return AUCUNE_AIDE;
-}
-
-// ============================================================================
-// Famille E — Règle empirique 68-95-99,7.
-// ============================================================================
-
-/** Texte PUR (jamais du LaTeX — cette phrase narrative appartient à la consigne d'écran, pas au
- * bloc données KaTeX, voir en-tête de fichier "raw French text inside KaTeX math mode"). */
-function libelleQuestionE(unCote: boolean, coteDemande: CoteDemandeE | undefined, basse: number, haute: number): string {
-  const basseTexte = formatDecimal(basse, 2).replace("{,}", ",");
-  const hauteTexte = formatDecimal(haute, 2).replace("{,}", ",");
-  if (!unCote) return `Quelle est la probabilité qu'une valeur soit en dehors de l'intervalle [${basseTexte} ; ${hauteTexte}] (les 2 côtés) ?`;
-  if (coteDemande === "superieur") return `Quelle est la probabilité qu'une valeur soit supérieure à ${hauteTexte} (un seul côté) ?`;
-  return `Quelle est la probabilité qu'une valeur soit inférieure à ${basseTexte} (un seul côté) ?`;
-}
-
-function donneesPopulationE(population: number | undefined): string[] {
-  return population === undefined ? [] : [`N=${population}\\text{ (population totale)}`];
-}
-
-/** Phrase dynamique (dépend de `e.k`) — TEXTE PUR, jamais du LaTeX (voir en-tête de fichier) : une
- * phrase française complète comme fragment KaTeX unique déborderait horizontalement dès que
- * l'écran est étroit (`white-space:nowrap` interne à KaTeX, aucun retour à la ligne possible —
- * bug trouvé et corrigé en vérification Playwright, voir `docs/historique-6e.md` : le texte
- * apparaissait tronqué des deux côtés, `.equation-box` scrollant vers son centre par défaut).
- * `blocDonneesE` ci-dessous reste à des fragments COURTS uniquement (pourcentage, intervalle),
- * jamais une phrase entière dans un seul bloc KaTeX. */
-export function consigneGeneraleE(e: ExerciceLoiNormaleE): FragmentConsigne[] {
-  const pourcentageTexte = formatDecimal(POURCENTAGE_PAR_K[e.k] * 100, 1).replace("{,}", ",");
-  return [
-    texte(
-      `La règle empirique (68-95-99,7) donne le pourcentage de valeurs situées dans un intervalle centré sur μ — environ ${pourcentageTexte}% dans l'intervalle affiché ci-dessous. Retrouve μ et σ, puis calcule la probabilité demandée.`,
-    ),
-  ];
-}
-export function blocDonneesE(e: ExerciceLoiNormaleE): string[] {
-  const { basse, haute } = bornesE(e.mu, e.sigma, e.k);
-  const basseL = formatDecimal(basse, 2);
-  const hauteL = formatDecimal(haute, 2);
-  const pourcentageL = formatDecimal(POURCENTAGE_PAR_K[e.k] * 100, 1);
-  // 2 fragments COURTS distincts (jamais une phrase complète en un seul bloc — voir en-tête
-  // `consigneGeneraleE`) : le pourcentage, puis l'intervalle.
-  return [`${pourcentageL}\\%`, `[${basseL}\\text{ ; }${hauteL}]`, ...donneesPopulationE(e.population)];
-}
-export function consigneEcranE(e: ExerciceLoiNormaleE, phase: PhaseLoiNormale): FragmentConsigne[] {
-  if (phase === "eEcran1") {
-    return [texte("Identifie μ (milieu de l'intervalle) et σ (demi-largeur divisée par le nombre d'écarts-types correspondant au pourcentage donné).")];
-  }
-  if (phase === "eEcran2") {
-    const { basse, haute } = bornesE(e.mu, e.sigma, e.k);
-    return [texte(`Calcule la probabilité COMPLÉMENTAIRE (hors intervalle), en tenant compte du nombre de côtés concernés par la question. ${libelleQuestionE(e.unCote, e.coteDemande, basse, haute)}`)];
-  }
-  return [texte("Multiplie la probabilité CONFIRMÉE par la taille de la population, puis arrondis à l'entier le plus proche.")];
-}
-/** ACCUMULE les écrans déjà confirmés (correctif transversal, voir CLAUDE.md/`docs/historique-
- * 6e.md`) : `eEcran3` omettait μ/σ confirmés à `eEcran1`, ne montrant que la probabilité de
- * `eEcran2`. Plus ancien en premier. */
-export function etatActuelE(e: ExerciceLoiNormaleE, phase: PhaseLoiNormale): string[] | null {
-  if (phase === "eEcran2") return [`\\mu=${formatDecimal(e.mu, 2)}\\text{, }\\sigma=${formatDecimal(e.sigma, 2)}\\text{ (confirmés, étape 1)}`];
-  if (phase === "eEcran3") return [`\\mu=${formatDecimal(e.mu, 2)}\\text{, }\\sigma=${formatDecimal(e.sigma, 2)}\\text{ (confirmés, étape 1)}`, `P=${formatDecimal(probabiliteFinaleE(e), 4)}\\text{ (confirmée, étape 2)}`];
-  return null;
-}
-export function champsE(phase: PhaseLoiNormale): ChampDef[] {
-  if (phase === "eEcran1") return [{ type: "texte", label: "μ =", placeholder: "ex : 100" }, { type: "texte", label: "σ =", placeholder: "ex : 15" }];
-  if (phase === "eEcran2") return [{ type: "texte", label: "Probabilité =", placeholder: "ex : 0.1587" }];
-  return [{ type: "texte", label: "Effectif estimé =", placeholder: "ex : 159" }];
-}
-export function niveauAideMaxE(phase: PhaseLoiNormale): number {
-  return phase === "eEcran1" ? 2 : 0;
-}
-export function aideNiveau1E(phase: PhaseLoiNormale): AideAvecLatex {
-  if (phase !== "eEcran1") return AUCUNE_AIDE;
-  return { texte: "Le pourcentage encadré correspond respectivement à μ±σ (68,3%), μ±2σ (95,4%) ou μ±3σ (99,7%).", latex: "\\mu\\pm\\sigma\\ (68{,}3\\%)\\qquad \\mu\\pm2\\sigma\\ (95{,}4\\%)\\qquad \\mu\\pm3\\sigma\\ (99{,}7\\%)" };
-}
-export function aideNiveau2E(e: ExerciceLoiNormaleE, phase: PhaseLoiNormale): AideAvecLatex {
-  if (phase !== "eEcran1") return AUCUNE_AIDE;
-  return { texte: `Nombre d'écarts-types identifié depuis le pourcentage donné (μ et σ non encore isolés) : k=${e.k}.`, latex: null };
-}
-
-// ============================================================================
-// Dispatch commun (mirroir 6gen37).
-// ============================================================================
-
-export function consigneGenerale(exercice: ExerciceLoiNormale): FragmentConsigne[] {
-  switch (exercice.famille) {
-    case "A":
-      return consigneGeneraleA();
-    case "B":
-      return consigneGeneraleB();
-    case "C":
-      return consigneGeneraleC();
-    case "D":
-      return consigneGeneraleD();
-    case "E":
-      return consigneGeneraleE(exercice);
-  }
-}
-
-export function blocDonnees(exercice: ExerciceLoiNormale): string[] {
-  switch (exercice.famille) {
-    case "A":
-      return blocDonneesA(exercice);
-    case "B":
-      return blocDonneesB(exercice);
-    case "C":
-      return blocDonneesC(exercice);
-    case "D":
-      return blocDonneesD(exercice);
-    case "E":
-      return blocDonneesE(exercice);
-  }
-}
-
-export function consigneEcran(exercice: ExerciceLoiNormale, phase: PhaseLoiNormale): FragmentConsigne[] {
-  switch (exercice.famille) {
-    case "A":
-      return consigneEcranA(phase);
-    case "B":
-      return consigneEcranB(phase);
-    case "C":
-      return consigneEcranC(phase);
-    case "D":
-      return consigneEcranD(phase);
-    case "E":
-      return consigneEcranE(exercice, phase);
-  }
-}
-
-export function etatActuel(exercice: ExerciceLoiNormale, phase: PhaseLoiNormale): string[] | null {
-  switch (exercice.famille) {
-    case "A":
-      return etatActuelA(exercice, phase);
-    case "B":
-      return etatActuelB(exercice, phase);
-    case "C":
-      return etatActuelC(exercice, phase);
-    case "D":
-      return etatActuelD(exercice, phase);
-    case "E":
-      return etatActuelE(exercice, phase);
-  }
-}
-
-export function champsEcran(exercice: ExerciceLoiNormale, phase: PhaseLoiNormale): ChampDef[] {
-  switch (exercice.famille) {
-    case "A":
-      return champsA(exercice, phase);
-    case "B":
-      return champsB(exercice, phase);
-    case "C":
-      return champsC(phase);
-    case "D":
-      return champsD(phase);
-    case "E":
-      return champsE(phase);
-  }
-}
-
-export function niveauAideMaxEcran(exercice: ExerciceLoiNormale, phase: PhaseLoiNormale): number {
-  switch (exercice.famille) {
-    case "A":
-      return niveauAideMaxA(phase);
-    case "B":
-      return niveauAideMaxB(phase);
-    case "C":
-      return niveauAideMaxC(phase);
-    case "D":
-      return niveauAideMaxD(phase);
-    case "E":
-      return niveauAideMaxE(phase);
-  }
-}
-
-export function aideNiveau1(exercice: ExerciceLoiNormale, phase: PhaseLoiNormale): AideAvecLatex {
-  switch (exercice.famille) {
-    case "A":
-      return aideNiveau1A(phase);
-    case "B":
-      return aideNiveau1B(phase);
-    case "C":
-      return aideNiveau1C(phase);
-    case "D":
-      return aideNiveau1D(phase);
-    case "E":
-      return aideNiveau1E(phase);
-  }
-}
-
-export function aideNiveau2(exercice: ExerciceLoiNormale, phase: PhaseLoiNormale): AideAvecLatex {
-  switch (exercice.famille) {
-    case "A":
-      return aideNiveau2A(exercice, phase);
-    case "B":
-      return aideNiveau2B(exercice, phase);
-    case "C":
-      return aideNiveau2C(exercice, phase);
-    case "D":
-      return aideNiveau2D(exercice, phase);
-    case "E":
-      return aideNiveau2E(exercice, phase);
-  }
-}
-
-export const LIBELLE_PHASE: Record<PhaseLoiNormale, string> = {
-  aEcran1: "Étape 1 (lecture nécessaire)",
-  aEcran2: "Étape 2 (probabilité finale)",
-  bEcran1: "Étape 1 (standardisation)",
-  bEcran2: "Étape 2 (probabilité)",
-  bEcran3: "Étape 3 (effectif estimé)",
-  cEcran1: "Étape 1 (reformulation)",
-  cEcran2: "Étape 2 (lecture inversée)",
-  dEcran1: "Étape 1 (reformulation)",
-  dEcran2: "Étape 2 (lecture inversée)",
-  dEcran3: "Étape 3 (dé-standardisation)",
-  eEcran1: "Étape 1 (μ et σ)",
-  eEcran2: "Étape 2 (probabilité)",
-  eEcran3: "Étape 3 (effectif estimé)",
-};
-
-export const LIBELLE_FAMILLE: Record<ExerciceLoiNormale["famille"], string> = {
-  A: "A — Centrée réduite, sens direct",
-  B: "B — Générale N(μ,σ), sens direct",
-  C: "C — Centrée réduite, sens inverse",
-  D: "D — Générale, sens inverse",
-  E: "E — Règle empirique 68-95-99,7",
-};
-
-/** Récapitulatif final : affiche toujours la réponse CORRECTE connue de l'exercice — jamais
- * recalculée depuis la saisie élève. */
-export function formatReponseAttenduePhaseLatex(exercice: ExerciceLoiNormale, phase: PhaseLoiNormale): string[] {
-  const ref = calculerReferenceLoiNormale(exercice, phase);
-  switch (phase) {
-    case "aEcran1": {
-      // Écran spécifique à la famille A : le champ élève demande "t" (valeur positive à chercher
-      // dans la table), JAMAIS "Φ(t)" (ça, c'est le champ des familles C/D, cas différent
-      // ci-dessous) — `calculerReferenceLoiNormale` ne peuple pas `cibleTable` pour cette phase
-      // (voir sa définition), donc le récapitulatif doit utiliser `valeurATableA` directement,
-      // comme `etatActuelA` le fait déjà pour cette même famille/écran.
-      const e = exercice as ExerciceLoiNormaleA;
-      if (e.sousType === "intervalle") return [`t_1=${formatDecimal(valeurATableA(e.z1), 2)}\\text{, }t_2=${formatDecimal(valeurATableA(e.z2), 2)}`];
-      return [`t=${formatDecimal(valeurATableA(e.z), 2)}`];
-    }
-    case "cEcran1":
-    case "dEcran1":
-      return [`\\Phi(t)=${formatDecimal(ref.cibleTable ?? 0, 4)}`];
-    case "aEcran2":
-    case "bEcran2":
-    case "eEcran2":
-      return [`P=${formatDecimal(ref.probabiliteFinale ?? 0, 4)}`];
-    case "bEcran1": {
-      const e = exercice as ExerciceLoiNormaleB;
-      if (e.sousType === "intervalle") return [`z_1=${formatDecimal(standardiserB(e.x1, e.mu, e.sigma), 2)}\\text{, }z_2=${formatDecimal(standardiserB(e.x2, e.mu, e.sigma), 2)}`];
-      return [`z=${formatDecimal(standardiserB(e.x, e.mu, e.sigma), 2)}`];
-    }
-    case "bEcran3":
-    case "eEcran3":
-      return [`\\text{Effectif}\\approx ${Math.round(ref.effectifReference ?? 0)}`];
-    case "cEcran2":
-      return [`t=${formatDecimal(ref.tReference ?? 0, 2)}`];
-    case "dEcran2":
-      return [`z=${formatDecimal(ref.zReference ?? 0, 2)}`];
-    case "dEcran3":
-      return [`a=${formatDecimal(ref.aReference ?? 0, 2)}`];
-    case "eEcran1": {
-      const e = exercice as ExerciceLoiNormaleE;
-      const { basse, haute } = bornesE(e.mu, e.sigma, e.k);
-      return [`\\mu=${formatDecimal(muDepuisBornes(basse, haute), 2)}\\text{, }\\sigma=${formatDecimal(sigmaDepuisBornes(basse, haute, e.k), 2)}`];
-    }
-  }
+function pourcent(p: number): string {
+  return `${String(arrondir(p * 100, 2)).replace(".", ",")} %`;
 }
 

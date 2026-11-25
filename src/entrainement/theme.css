@@ -4458,3 +4458,17 @@
 .entrainement .association-juge { display: inline-block; margin-left: 0.5rem; font-weight: 600; }
 .entrainement .association-juge--juste { color: var(--good, #2b8a3e); }
 .entrainement .association-juge--faux { color: var(--bad, #c92a2a); }
+
+/* 6e ch. 8 (lots B et C) : table de Φ consultable, tableau de loi. */
+.entrainement .table-phi { margin: 10px 0; border: 1px solid var(--color-border); border-radius: var(--radius-md, 8px); background: var(--color-surface); }
+.entrainement .table-phi > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; padding: 0 12px; font-weight: 600; color: var(--color-primary); }
+.entrainement .table-phi-mode { margin: 0 12px 6px; font-size: 13px; color: var(--color-text-muted); }
+.entrainement .table-phi-defilement { overflow: auto; max-height: 60vh; margin: 0 6px 8px; }
+.entrainement .table-phi table { border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+.entrainement .table-phi th, .entrainement .table-phi td { padding: 2px 5px; border: 1px solid var(--color-border); text-align: right; white-space: nowrap; color: var(--color-text); }
+.entrainement .table-phi thead th { position: sticky; top: 0; background: var(--color-primary-bg); z-index: 1; }
+.entrainement .table-phi tbody th { position: sticky; left: 0; background: var(--color-primary-bg); }
+.entrainement .tableau-loi { overflow-x: auto; margin: 8px 0; max-width: 100%; }
+.entrainement .tableau-loi table { border-collapse: collapse; margin: 0 auto; }
+.entrainement .tableau-loi th, .entrainement .tableau-loi td { border: 1px solid var(--color-border); padding: 4px 8px; text-align: center; white-space: nowrap; }
+.entrainement .tableau-loi th { background: var(--color-primary-bg); }

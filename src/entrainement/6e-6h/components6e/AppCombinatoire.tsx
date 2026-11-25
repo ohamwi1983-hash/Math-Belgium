@@ -19,7 +19,8 @@ import { genererAvecCode, lireCodeDepuisUrl } from "../../export/codeExercice";
 export interface ConfigAppCombinatoire<E, P extends string> {
   id: string;
   titre: string;
-  catalogue: { id: string; label: string }[];
+  /** Catalogue complet (`retiree` : entrée gardée pour les indices des `?code=`, jamais montrée). */
+  catalogue: { id: string; label: string; retiree?: boolean }[];
   genererLibre: () => E;
   genererVariante: (id: string) => E;
   definition: DefinitionSession<E, P>;
@@ -27,6 +28,11 @@ export interface ConfigAppCombinatoire<E, P extends string> {
   format: FormatCombinatoire<E, P>;
   /** Figure de l'énoncé (facultative). */
   illustration?: (e: E, p: P) => ReactNode;
+  /** Outil propre à l'écran, rendu sous sa consigne (6e ch. 8 : tableau de la loi, courbe de Gauss,
+   * table de Φ consultable) — reste visible quand l'énoncé se replie. Facultatif. */
+  complement?: (e: E, p: P) => ReactNode;
+  /** Sous-titre de l'en-tête (défaut : « Chapitre 7 — Analyse combinatoire »). */
+  sousTitre?: string;
   /** Nombre de puces montré tant que le PREMIER écran n'est pas clos, quand le nombre réel d'écrans
    * trahirait la réponse de cet écran (6gen48 : la stratégie). */
   pucesAvantPremierEcran?: (e: E) => number | null;
@@ -172,8 +178,8 @@ export function AppCombinatoire<E, P extends string>({ config }: { config: Confi
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">{config.titre}</h1>
-        <p className="app-subtitle">Chapitre 7 — Analyse combinatoire</p>
-        <SelecteurVarianteDev options={config.catalogue} onGenerer={(id) => nouvelExercice(config.genererVariante(id))} />
+        <p className="app-subtitle">{config.sousTitre ?? "Chapitre 7 — Analyse combinatoire"}</p>
+        <SelecteurVarianteDev options={config.catalogue.filter((v) => !v.retiree)} onGenerer={(id) => nouvelExercice(config.genererVariante(id))} />
         <ProgressionPuces segments={segments} onSegmentClick={(i) => setFiche(i)} />
       </header>
       <main className="card">
@@ -183,6 +189,7 @@ export function AppCombinatoire<E, P extends string>({ config }: { config: Confi
           consigneGenerale={fmt.consigneGenerale(exercice)}
           donnees={fmt.donnees(exercice)}
           illustration={config.illustration?.(exercice, phase)}
+          complement={config.complement?.(exercice, phase)}
           consigneEcran={fmt.consigneEcran(exercice, phase)}
           champs={fmt.champs(exercice, phase)}
           attentes={config.attentes(exercice, phase)}

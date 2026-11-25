@@ -19,6 +19,8 @@ interface Props {
   consigneGenerale: FragmentConsigne[];
   donnees: FragmentConsigne[][];
   illustration?: ReactNode;
+  /** Outil de l'écran (tableau, courbe, table consultable), sous la consigne. */
+  complement?: ReactNode;
   consigneEcran: FragmentConsigne[];
   champs: ChampCombi[];
   attentes: Attente[];
@@ -52,6 +54,7 @@ export function EcranCombinatoire({
   consigneGenerale,
   donnees,
   illustration,
+  complement,
   consigneEcran,
   champs,
   attentes,
@@ -116,6 +119,7 @@ export function EcranCombinatoire({
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
+      {complement}
       <div style={textes > 1 ? { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "0 12px" } : undefined}>
         {champs.map((champ, i) => {
           if (champ.type === "choix") {
