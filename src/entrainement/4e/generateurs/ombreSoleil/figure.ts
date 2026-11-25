@@ -1,6 +1,18 @@
 import type { ExerciceOmbreSoleil, Piquet } from "../../core/ombreSoleil.types";
 import type { Point3D } from "../../core/geometrieEspace.types";
-import { COULEURS_OMBRE, elementsConclusion, elementsScene, fusionner, meilleurDecalageEtiquette, solidePourAffichage, type ElementsCroquis } from "../../ui/formatOmbreSoleil";
+import {
+  appliquerEtiquettes,
+  COULEURS_OMBRE,
+  elementsConclusion,
+  elementsPiedApex,
+  elementsScene,
+  fusionner,
+  meilleurDecalageEtiquette,
+  placerEtiquettesSolidePose,
+  solidePourAffichage,
+  type ElementsCroquis,
+} from "../../ui/formatOmbreSoleil";
+import type { ExerciceOmbreSoleilSolidePose } from "../../core/ombreSoleil.types";
 import { calculerEchelleProjection, calculerGeometrieSolide3D, HAUTEUR_SVG, LARGEUR_SVG, projeter3DVersPixel } from "../../ui/solide3DSketch";
 
 /**
@@ -74,7 +86,25 @@ function placerEtiquettesPieds(exercice: ExerciceOmbreSoleil, elements: Elements
 /** Énoncé : la scène (sol, obstacles, exemple ou paire connue, bâton à résoudre) sans aucune ombre
  * à trouver ; correction : l'image de l'écran de conclusion (`elementsConclusion`). Les sommets à
  * projeter de la variante `directionInconnue` sont repérés par leur nom. */
+/** Variante `solidePose` — corrigé : traces au sol d′ issues des pieds (coins de la base ; centre O de
+ * la base et ses diagonales pour l'apex), en pointillés, sous l'image de conclusion. Étiquettes de
+ * toute la figure placées en pixels (`placerEtiquettesSolidePose`). */
+function figureSolidePose(e: ExerciceOmbreSoleilSolidePose, avecOmbre: boolean): ElementsCroquis {
+  if (!avecOmbre) {
+    const scene = elementsScene(e);
+    return appliquerEtiquettes(scene, placerEtiquettesSolidePose(e, scene));
+  }
+  const couleur = COULEURS_OMBRE.aide;
+  const traces: ElementsCroquis = {
+    points: [],
+    segments: [...e.piquets.map((p) => ({ a: p.piquet.base, b: p.ombre, couleur, pointille: true })), ...e.ombresAutres.map((o) => ({ a: { x: o.sommet.x, y: o.sommet.y, z: 0 }, b: o.ombre, couleur, pointille: true }))],
+  };
+  const tout = fusionner(elementsConclusion(e), traces, e.forme === "pyramide" ? elementsPiedApex(e) : { points: [], segments: [] });
+  return appliquerEtiquettes(tout, placerEtiquettesSolidePose(e, tout));
+}
+
 function elementsFigure(exercice: ExerciceOmbreSoleil, avecOmbre: boolean): ElementsCroquis {
+  if (exercice.variante === "solidePose") return figureSolidePose(exercice, avecOmbre);
   if (avecOmbre) return placerEtiquettesPieds(exercice, fusionner(elementsConclusion(exercice), constructionCorrige(exercice)));
   if (exercice.variante !== "directionInconnue") return elementsScene(exercice);
   const reperes: ElementsCroquis = {

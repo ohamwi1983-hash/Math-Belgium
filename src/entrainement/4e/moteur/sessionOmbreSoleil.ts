@@ -8,17 +8,22 @@ import type { ExerciceOmbreSoleil, GenerateurExerciceOmbreSoleil } from "../core
 import type { ReglagesSession } from "../core/session.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentatives";
 import type { EtatEtapeTentatives, ReglagesEtape } from "./etapeTentatives";
-import { verifierDirection, verifierPoint } from "./verificationOmbreSoleil";
+import { verifierContour, verifierDirection, verifierPoint } from "./verificationOmbreSoleil";
 import type { EtatSessionOmbreSoleil, PhaseOmbreSoleil, ResultatExerciceOmbreSoleil } from "./typesOmbreSoleil";
 
 const POINTS_DE_BASE = 100;
 export const NIVEAU_AIDE_MAX_POINT_SIMPLE = 2;
 export const NIVEAU_AIDE_MAX_DIRECTION_INCONNUE = 2;
 export const NIVEAU_AIDE_MAX_LOOP = 2;
+export const NIVEAU_AIDE_MAX_CONTOUR = 2;
+/** Écran « contour » (variante `solidePose`) : sélection MULTIPLE à 3 tentatives (2ⁿ sélections
+ * possibles, elle vaut un champ) ; tous les autres écrans sont des choix fermés à 1 tentative. */
+export const TENTATIVES_CONTOUR = 3;
 
 function phaseInitiale(exercice: ExerciceOmbreSoleil): PhaseOmbreSoleil {
   if (exercice.variante === "simple") return "pointSimple";
   if (exercice.variante === "directionInconnue") return "directionInconnue";
+  if (exercice.variante === "solidePose") return "point";
   return "direction";
 }
 
@@ -27,6 +32,7 @@ function phaseInitiale(exercice: ExerciceOmbreSoleil): PhaseOmbreSoleil {
 export function sequencePourExercice(exercice: ExerciceOmbreSoleil): PhaseOmbreSoleil[] {
   if (exercice.variante === "simple") return ["pointSimple"];
   if (exercice.variante === "obstacle") return ["direction", "point"];
+  if (exercice.variante === "solidePose") return [...exercice.piquets.map(() => "point" as const), "contour"];
   return ["directionInconnue", ...exercice.piquets.map(() => "point" as const)];
 }
 
@@ -49,14 +55,20 @@ export function demarrerSessionOmbreSoleil(reglages: ReglagesSession, generateur
   };
 }
 
+/** Nombre de tentatives de l'écran courant : 3 pour la sélection du contour, sinon le réglage. */
+export function tentativesMaxEcran(etat: EtatSessionOmbreSoleil): number {
+  return etat.phase === "contour" ? TENTATIVES_CONTOUR : etat.reglages.tentativesMax;
+}
+
 function reglagesEtape(etat: EtatSessionOmbreSoleil): ReglagesEtape {
-  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: etat.reglages.tentativesMax };
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxEcran(etat) };
 }
 
 export function niveauAideMaxPhase(phase: PhaseOmbreSoleil): number {
   if (phase === "conclusion") return 0;
   if (phase === "pointSimple") return NIVEAU_AIDE_MAX_POINT_SIMPLE;
   if (phase === "directionInconnue") return NIVEAU_AIDE_MAX_DIRECTION_INCONNUE;
+  if (phase === "contour") return NIVEAU_AIDE_MAX_CONTOUR;
   return NIVEAU_AIDE_MAX_LOOP;
 }
 
@@ -94,13 +106,13 @@ function cloturerExerciceOuSuivant(etat: EtatSessionOmbreSoleil, resultat: Resul
 
 /** Soumission commune : tant que l'écran n'est pas clos, seule l'étape change ; à sa clôture, on
  * accumule score/révélation/aide et on passe à `phaseSuivante`. */
-function soumettre(
+function soumettre<T = string>(
   etat: EtatSessionOmbreSoleil,
-  id: string,
-  verifier: (id: string) => boolean,
+  id: T,
+  verifier: (id: T) => boolean,
   phaseSuivante: (etat: EtatSessionOmbreSoleil) => { phase: PhaseOmbreSoleil; resolus?: number[] },
 ): EtatSessionOmbreSoleil {
-  const etapeCourante: EtatEtapeTentatives = soumettreEtapeTentatives<string>(etat.etapeCourante, id, {
+  const etapeCourante: EtatEtapeTentatives = soumettreEtapeTentatives<T>(etat.etapeCourante, id, {
     ...reglagesEtape(etat),
     verifier,
     revelerReponse: () => {},
@@ -147,8 +159,9 @@ export function soumettreReponseDirection(etat: EtatSessionOmbreSoleil, id: stri
   return soumettre(etat, id, (r) => verifierDirection(exercice, r), () => ({ phase: "point" }));
 }
 
-/** Écran "point" : premier impact réel (variante obstacle), ou ombre du sommet courant (variante
- * directionInconnue, un écran par sommet). */
+/** Écran "point" : premier impact réel (variante obstacle), ou ombre du sommet courant (variantes
+ * directionInconnue et solidePose, un écran par sommet ; après le dernier, `solidePose` passe à
+ * l'écran « contour »). */
 export function soumettreReponsePoint(etat: EtatSessionOmbreSoleil, id: string): EtatSessionOmbreSoleil {
   const exercice = etat.exerciceCourant;
   if (etat.terminee || etat.phase !== "point" || exercice.variante === "simple") {
@@ -165,9 +178,19 @@ export function soumettreReponsePoint(etat: EtatSessionOmbreSoleil, id: string):
     (r) => verifierPoint(piquet.pointsCandidats, piquet.ombre, r),
     () => {
       const resolus = [...etat.resolus, index];
-      return { phase: resolus.length >= exercice.piquets.length ? "conclusion" : "point", resolus };
+      const apresDernier = exercice.variante === "solidePose" ? "contour" : "conclusion";
+      return { phase: resolus.length >= exercice.piquets.length ? apresDernier : "point", resolus };
     },
   );
+}
+
+/** Variante "solidePose", dernier écran noté : les côtés du contour de l'ombre (sélection multiple). */
+export function soumettreContour(etat: EtatSessionOmbreSoleil, ids: string[]): EtatSessionOmbreSoleil {
+  const exercice = etat.exerciceCourant;
+  if (etat.terminee || etat.phase !== "contour" || exercice.variante !== "solidePose") {
+    throw new Error("soumettreContour : la session n'est pas à l'étape contour");
+  }
+  return soumettre<string[]>(etat, ids, (r) => verifierContour(exercice, r), () => ({ phase: "conclusion" }));
 }
 
 /** Écran de conclusion : aucune vérification, clôture l'exercice. */

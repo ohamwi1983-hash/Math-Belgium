@@ -2394,7 +2394,9 @@ export const geometrieDansEspace: ChapterContent = {
           description: [
             'Retrouve la direction de la lumière à partir d\'un exemple déjà résolu. Projette ' +
               'ensuite un ou plusieurs points pour reconstituer une ombre — au sol, ou sur le ' +
-              'premier solide-obstacle que le rayon rencontre.',
+              'premier solide-obstacle que le rayon rencontre. Construis enfin l\'ombre d\'un ' +
+              'solide posé au sol (cube, caisse ou pyramide) à partir de l\'ombre d\'une arête ' +
+              'ou d\'un piquet, puis trace son contour.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 41. Ombre au soleil »',

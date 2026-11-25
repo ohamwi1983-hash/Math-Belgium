@@ -12,9 +12,11 @@ import type { EtatEtapeTentatives } from "./etapeTentatives";
  * - `directionInconnue` : `directionInconnue` (déduire la direction) → `point` (un écran par sommet
  *   à projeter ; plus d'écran "direction" répété par sommet, la direction étant déjà connue) →
  *   `conclusion` (contour de l'ombre).
+ * - `solidePose` : `point` (un écran par sommet du haut à projeter) → `contour` (choisir les côtés du
+ *   contour parmi les ombres des arêtes, sélection multiple à 3 tentatives) → `conclusion`.
  */
 
-export type PhaseOmbreSoleil = "pointSimple" | "directionInconnue" | "direction" | "point" | "conclusion";
+export type PhaseOmbreSoleil = "pointSimple" | "directionInconnue" | "direction" | "point" | "contour" | "conclusion";
 
 /** `revelees`/`niveauxAide` sont parallèles à `scores` (même index = même écran noté). */
 export interface ResultatExerciceOmbreSoleil {
