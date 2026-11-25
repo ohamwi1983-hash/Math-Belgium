@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && node scripts/verifier-enonces-evaluation.mjs && vite build && node scripts/prerender.mjs && node scripts/generate-sitemap.mjs",
+    "build": "tsc -b && node scripts/verifier-enonces-evaluation.mjs && node scripts/verifier-liens-chapitres.mjs && vite build && node scripts/prerender.mjs && node scripts/generate-sitemap.mjs",
     "lint": "oxlint",
     "test:lecture": "node scripts/tester-lecture-formules.mjs",
     "controle:lecture": "node scripts/controle-lecture-formules.mjs",

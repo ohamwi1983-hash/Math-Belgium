@@ -1418,6 +1418,26 @@ export interface ChapterSection {
   /** Cartes « Teste-toi » de l'onglet Réviser (question → réponse courte, RichText), 2 à 4 par
    * section. Aucune carte dans le chapitre : le bloc « Teste-toi » n'apparaît pas. */
   cartes?: { question: string; reponse: string }[]
+  /** Étapes d'AUTRES chapitres dont cette étape se sert (chapitres autonomes : le professeur choisit
+   * son ordre). Encadré replié « Ce chapitre utilise… » sur la carte du chapitre (toutes les entrées) ;
+   * en tête de l'étape, ligne « Cette étape utilise : … » qui déplie le rappel sur place (entrées
+   * `indispensable` seulement) ; bloc « Tu as besoin de… » de « Je bloque » (mêmes entrées, plus
+   * celles dont `jeBloque` cite le générateur). Jamais imprimé ni exporté. Voir
+   * `.claude/rules/content-authoring.md`, « Chapitres autonomes ». */
+  utilise?: UtiliseEntree[]
+}
+
+/** Une étape d'un autre chapitre utilisée par une section (champ `utilise`). */
+export interface UtiliseEntree {
+  /** `niveau/slug#section` — même référence que le lien nommé `[[…]]` ; contrôlée au build. */
+  cible: string
+  /** `indispensable` : l'étape ne se comprend pas sans ; `utile` : un rappel aide, sans plus. */
+  poids: 'indispensable' | 'utile'
+  /** Rappel (RichText, 1 à 3 phrases) montré sur place ; absent : « L'essentiel » de l'étape citée. */
+  rappel?: string
+  /** Générateurs de l'étape pour lesquels « Je bloque » montre ce prérequis même s'il n'est
+   * qu'`utile` (ex. gen24 : seules certaines variantes demandent une équation du second degré). */
+  jeBloque?: string[]
 }
 
 export interface ChapterContent {
