@@ -5793,6 +5793,21 @@ pilotes avec processus, `regroupementsPapier.ts` : 6gen111, 6gen114). Aucun bloc
 encore E(aX + b) = aE(X) + b et V(aX + b) = a²V(X) (6gen111, démonstration D2 du lot F), ni P(a < X ≤ b) = F(b) − F(a) pour
 une variable discrète (6gen112 escalier), ni « trouver k » (6gen113) ni le sens inverse de la loi uniforme (6gen115).
 
+## 6e (6h), Chapitre 8 — lot H2 de l'audit (nouveaux générateurs 6gen116–6gen122, 25/11/2026)
+
+Sept générateurs nouveaux sur le socle `AppEcransTrigo` (détail, profils et mesures : `.claude/rules/feuilles-evaluations.md`,
+section « 6e ch. 8, lot H2 ») : 6gen116 lire la table de Φ (§ 6, Connaître), 6gen117 courbe de Gauss : aires et règle
+empirique (§ 6, Connaître), 6gen118 approximation normale avec correction de continuité (§ 7, Appliquer), 6gen119 choisir le
+modèle (fin, Transférer), 6gen120 loi normale : retrouver μ ou σ (§ 6, Transférer), 6gen121 Poisson : λ inconnu, valeur la
+plus probable, seuil d'alerte (§ 8, Transférer), 6gen122 détective d'erreurs : variables aléatoires (fin, Transférer).
+Cartes « S'entraîner » ajoutées en fin de section (après 6gen51 : 116, 117, 120 ; après 6gen52 : 118 ; après 6gen53 : 121,
+119, 122) ; registres par ajout (`registry.ts`, `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts` :
+union et entrées pilotes avec processus, `regroupementsPapier.ts` : 6gen116). Table de Φ : valeurs de la source unique
+`lib/tablePhi.ts` et composant partagé `components/TablePhi.tsx` (créés par l'agent de 6gen49–53, fusionnés ici), ouverts
+par un bouton flottant `components/BoutonTablePhi.tsx` ; contrat papier `besoinTablePhi` (annexe : lot E). Aucun bloc de
+cours ajouté : le cours doit enseigner la correction de continuité (6gen118, 6gen122 « continuité »), la convention de
+lecture inverse « case la plus proche » (6gen116, 6gen120) et la règle empirique 68,3 / 95,4 / 99,7 (6gen117).
+
 ## 6e (6h), Chapitre 8 — lots B et C de l'audit (générateurs 6gen49–6gen53, 25/11/2026)
 
 Lot B (socle du ch. 7 réutilisé, détail dans `feuilles-evaluations.md`, « 6e ch. 8 (lots B et C) ») : les

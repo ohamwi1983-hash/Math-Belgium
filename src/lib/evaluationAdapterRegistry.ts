@@ -526,6 +526,13 @@ import { adaptateurEvaluation112 } from '../entrainement/6e-6h/generateurs6e/fon
 import { adaptateurEvaluation113 } from '../entrainement/6e-6h/generateurs6e/densiteProbabilite/exportEvaluation'
 import { adaptateurEvaluation114 } from '../entrainement/6e-6h/generateurs6e/discreteOuContinue/exportEvaluation'
 import { adaptateurEvaluation115 } from '../entrainement/6e-6h/generateurs6e/loiUniformeContinue/exportEvaluation'
+import { adaptateurEvaluationLTP } from '../entrainement/6e-6h/generateurs6e/lectureTablePhi/exportEvaluation'
+import { adaptateurEvaluationCG } from '../entrainement/6e-6h/generateurs6e/courbeGauss/exportEvaluation'
+import { adaptateurEvaluationAN } from '../entrainement/6e-6h/generateurs6e/approximationNormale/exportEvaluation'
+import { adaptateurEvaluationCM } from '../entrainement/6e-6h/generateurs6e/choisirModele/exportEvaluation'
+import { adaptateurEvaluationNP } from '../entrainement/6e-6h/generateurs6e/normaleParametres/exportEvaluation'
+import { adaptateurEvaluationPL } from '../entrainement/6e-6h/generateurs6e/poissonInverse/exportEvaluation'
+import { adaptateurEvaluationDVA } from '../entrainement/6e-6h/generateurs6e/detectiveVariablesAleatoires/exportEvaluation'
 import { adaptateurEvaluationPointsDroitesRemarquablesTriangle } from '../entrainement/6e-6h/generateurs6e/pointsDroitesRemarquablesTriangle/exportEvaluation'
 import { adaptateurEvaluationCercles } from '../entrainement/6e-6h/generateurs6e/cercles/exportEvaluation'
 import { adaptateurEvaluationLieuxGeometriquesParametres } from '../entrainement/6e-6h/generateurs6e/lieuxGeometriquesParametres/exportEvaluation'
@@ -616,6 +623,13 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen113': versionPapier(adaptateurEvaluation113) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen114': versionPapier(adaptateurEvaluation114) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen115': versionPapier(adaptateurEvaluation115) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen116': versionPapier(adaptateurEvaluationLTP) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen117': versionPapier(adaptateurEvaluationCG) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen118': versionPapier(adaptateurEvaluationAN) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen119': versionPapier(adaptateurEvaluationCM) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen120': versionPapier(adaptateurEvaluationNP) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen121': versionPapier(adaptateurEvaluationPL) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen122': versionPapier(adaptateurEvaluationDVA) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen23': versionPapier(adaptateurEvaluationCalculPrimitives) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen24': versionPapier(adaptateurEvaluationQuellePrimitive) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen25': versionPapier(adaptateurEvaluationIntegralesDefinies) as unknown as AdaptateurFeuilleExercices<never>,
