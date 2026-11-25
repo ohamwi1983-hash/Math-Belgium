@@ -79,7 +79,7 @@ export const FORMAT_6GEN52: FormatCombinatoire<E, P> = {
       case "dIntersection":
         return e.famille === "D" ? [t("Calcule "), m(`P(${C(e.j)}\\cap S)`), t(".")] : [];
       case "dBayes":
-        return e.famille === "D" ? [t("Déduis-en "), m(`P(${C(e.j)}|S)`), t(".")] : [];
+        return e.famille === "D" ? [t("Déduis-en "), m(`P(${C(e.j)}\\mid S)`), t(".")] : [];
       case "fLoi":
         return [t("Donne la loi de "), m("X"), t(" : la probabilité de chaque montant.")];
       case "fEsperance":
@@ -103,7 +103,7 @@ export const FORMAT_6GEN52: FormatCombinatoire<E, P> = {
       case "dIntersection":
         return e.famille === "D" ? [{ type: "texte", label: `$P(${C(e.j)}\\cap S)$` }] : [];
       case "dBayes":
-        return e.famille === "D" ? [{ type: "texte", label: `$P(${C(e.j)}|S)$` }] : [];
+        return e.famille === "D" ? [{ type: "texte", label: `$P(${C(e.j)}\\mid S)$` }] : [];
       case "fLoi":
         return e.famille === "F" ? e.valeurs.map((v) => ({ type: "texte" as const, label: `$P(X=${v})$` })) : [];
       case "fEsperance":
@@ -133,14 +133,14 @@ export const FORMAT_6GEN52: FormatCombinatoire<E, P> = {
       case "dTotale":
         return e.famille === "D"
           ? [
-              { texte: "Probabilités totales : les trois catégories se partagent la population, donc :", latex: "P(S)=\\sum_{i=1}^{3}P(C_i)\\times P(S|C_i)" },
-              { texte: `Traduis les pourcentages : $P(C_1)=${decimalLatex(e.q[0] / 100)}$, $P(S|C_1)=${decimalLatex(e.r[0] / 100)}$, et de même pour $C_2$ et $C_3$ (la part de $C_3$ est le reste).` },
+              { texte: "Probabilités totales : les trois catégories se partagent la population, donc :", latex: "P(S)=\\sum_{i=1}^{3}P(C_i)\\times P(S\\mid C_i)" },
+              { texte: `Traduis les pourcentages : $P(C_1)=${decimalLatex(e.q[0] / 100)}$, $P(S\\mid C_1)=${decimalLatex(e.r[0] / 100)}$, et de même pour $C_2$ et $C_3$ (la part de $C_3$ est le reste).` },
             ]
           : [];
       case "dIntersection":
-        return e.famille === "D" ? [{ texte: "Probabilité d'un « et » le long d'une branche de l'arbre :", latex: `P(${C(e.j)}\\cap S)=P(${C(e.j)})\\times P(S|${C(e.j)})` }, { texte: `Utilise les données de la catégorie $${C(e.j)}$.` }] : [];
+        return e.famille === "D" ? [{ texte: "Probabilité d'un « et » le long d'une branche de l'arbre :", latex: `P(${C(e.j)}\\cap S)=P(${C(e.j)})\\times P(S\\mid ${C(e.j)})` }, { texte: `Utilise les données de la catégorie $${C(e.j)}$.` }] : [];
       case "dBayes":
-        return e.famille === "D" ? [{ texte: "Formule de Bayes : on sait que $S$ est réalisé, on remonte à la catégorie :", latex: `P(${C(e.j)}|S)=\\dfrac{P(${C(e.j)}\\cap S)}{P(S)}` }, { texte: "Divise le résultat de l'écran précédent par $P(S)$ du premier écran." }] : [];
+        return e.famille === "D" ? [{ texte: "Formule de Bayes : on sait que $S$ est réalisé, on remonte à la catégorie :", latex: `P(${C(e.j)}\\mid S)=\\dfrac{P(${C(e.j)}\\cap S)}{P(S)}` }, { texte: "Divise le résultat de l'écran précédent par $P(S)$ du premier écran." }] : [];
       case "fLoi":
         return [{ texte: "La probabilité d'un montant est la proportion des personnes qui l'ont choisi ; les trois probabilités ont pour somme 1." }, { texte: "La troisième option rassemble « les autres » : retrouve sa part par différence." }];
       case "fEsperance":
@@ -160,11 +160,11 @@ export const FORMAT_6GEN52: FormatCombinatoire<E, P> = {
     if (e.famille === "D") {
       if (p === "dTotale") return [`P(S)=${probaLatex(totaleD(e))}`];
       if (p === "dIntersection") return [`P(${C(e.j)}\\cap S)=${probaLatex(intersectionD(e))}`];
-      return [`P(${C(e.j)}|S)=${probaLatex(bayesD(e))}`];
+      return [`P(${C(e.j)}\\mid S)=${probaLatex(bayesD(e))}`];
     }
     if (p === "fLoi") return probabilitesF(e).map((x, i) => `P(X=${e.valeurs[i]})=${decimalLatex(x)}`);
     if (p === "fEsperance") return [`E(X)=${decimalLatex(esperanceF(e))}`];
-    return [`${decimalLatex(totalF(e))}\\ \\text{€}`];
+    return [`${decimalLatex(totalF(e))}\\text{ euros}`];
   },
   explication(e, p) {
     if (e.famille === "A") {
@@ -181,7 +181,7 @@ export const FORMAT_6GEN52: FormatCombinatoire<E, P> = {
       const termes = [0, 1, 2].map((i) => `${decimalLatex(e.q[i] / 100)}\\times ${decimalLatex(e.r[i] / 100)}`);
       if (p === "dTotale") return [f(`$P(S)=${termes.join("+")}=${probaLatex(totaleD(e))}$.`)];
       if (p === "dIntersection") return [f(`$P(${C(e.j)}\\cap S)=${termes[e.j]}=${probaLatex(intersectionD(e))}$.`)];
-      return [f(`$P(${C(e.j)}|S)=\\dfrac{${decimalLatex(versNombre(intersectionD(e)))}}{${decimalLatex(versNombre(totaleD(e)))}}=${probaLatex(bayesD(e))}$ : sachant S, la part de $${C(e.j)}$ passe de $${decimalLatex(e.q[e.j] / 100)}$ à environ $${arrondiLatex(versNombre(bayesD(e)), 3)}$.`)];
+      return [f(`$P(${C(e.j)}\\mid S)=\\dfrac{${decimalLatex(versNombre(intersectionD(e)))}}{${decimalLatex(versNombre(totaleD(e)))}}=${probaLatex(bayesD(e))}$ : sachant S, la part de $${C(e.j)}$ passe de $${decimalLatex(e.q[e.j] / 100)}$ à environ $${arrondiLatex(versNombre(bayesD(e)), 3)}$.`)];
     }
     const pr = probabilitesF(e);
     if (p === "fLoi") return [f(`$P(X=${e.valeurs[0]})=${decimalLatex(pr[0])}$, $P(X=${e.valeurs[1]})=${decimalLatex(pr[1])}$ et, par différence, $P(X=${e.valeurs[2]})=1-${decimalLatex(pr[0])}-${decimalLatex(pr[1])}=${decimalLatex(pr[2])}$.`)];

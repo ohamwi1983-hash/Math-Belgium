@@ -8,6 +8,10 @@ import { FORMAT_6GEN50 } from "./ui6e/formatLoiBinomiale";
 import { AppCombinatoire } from "./components6e/AppCombinatoire";
 import type { ConfigAppCombinatoire } from "./components6e/AppCombinatoire";
 import { DiagrammeBarres } from "./components6e/DiagrammeBarres";
+import { phasesPourExercice } from "./moteur6e/typesLoiBinomiale";
+import { correctionEcranLoiBinomiale } from "./generateurs6e/loiBinomiale/corrigeDetaille";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 
 /**
  * `6gen50` — Loi binomiale (6e ch. 8, § 2, processus 2 APPLIQUER). Socle commun du ch. 7
@@ -37,6 +41,8 @@ const CONFIG: ConfigAppCombinatoire<ExerciceLoiBinomiale, PhaseLoiBinomiale> = {
   attentes: attentesLoiBinomiale,
   format: FORMAT_6GEN50,
   complement: (e, p) => (e.famille === "B" && p === "bDiagramme" ? <Diagrammes e={e} /> : null),
+  // Corrigé « comme au tableau » de l'écran (lot E) : même source que le papier, une lettre par écran.
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionEcranLoiBinomiale(e), phasesPourExercice(e), p)} />,
 };
 
 export function App6gen50() {

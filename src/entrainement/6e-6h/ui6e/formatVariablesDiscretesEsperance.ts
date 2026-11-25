@@ -68,7 +68,7 @@ function valeurLatex(r: Rationnel, d = 2): string {
 }
 
 function euros(x: number): string {
-  return `${decimalLatex(x)}\\ \\text{€}`;
+  return `${decimalLatex(x)}\\text{ euros}`;
 }
 
 function eurosTexte(x: number): string {
@@ -314,23 +314,3 @@ export const FORMAT_6GEN49: FormatCombinatoire<E, P> = {
     return null;
   },
 };
-
-// ============================================================================
-// Papier (provisoire, lot E à venir) : loi en prose, rien n'est coupé à l'impression
-// ============================================================================
-
-export function loiEnProseA(e: ExerciceEsperanceA): FragmentConsigne[] {
-  const r: FragmentConsigne[] = [t("Loi de "), m("X"), t(" : ")];
-  e.xs.forEach((x, i) => {
-    if (i > 0) r.push(t(" ; "));
-    r.push(m(`P(X=${x})=${decimalLatex(e.poids[i] / 20)}`));
-  });
-  r.push(t("."));
-  return r;
-}
-
-export function donneesPapier49(e: E): FragmentConsigne[][] {
-  const d = FORMAT_6GEN49.donnees(e);
-  return e.famille === "A" ? [loiEnProseA(e), ...d] : d;
-}
-

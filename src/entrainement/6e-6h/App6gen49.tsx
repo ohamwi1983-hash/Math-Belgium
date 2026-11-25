@@ -5,6 +5,10 @@ import { DEFINITION_6GEN49, attentesVariablesDiscretesEsperance } from "./moteur
 import { FORMAT_6GEN49 } from "./ui6e/formatVariablesDiscretesEsperance";
 import { decimalLatex } from "./ui6e/fragmentsCombinatoire";
 import { AppCombinatoire } from "./components6e/AppCombinatoire";
+import { phasesPourExercice } from "./moteur6e/typesVariablesDiscretesEsperance";
+import { correctionDetailleeVariablesDiscretes } from "./generateurs6e/variablesDiscretesEsperance/corrigeDetaille";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import type { ConfigAppCombinatoire } from "./components6e/AppCombinatoire";
 import { TableauLoi } from "./components6e/TableauLoi";
 
@@ -27,6 +31,8 @@ const CONFIG: ConfigAppCombinatoire<ExerciceVariablesDiscretesEsperance, PhaseVa
   format: FORMAT_6GEN49,
   complement: (e) =>
     e.famille === "A" ? <TableauLoi valeurs={e.xs.map(String)} probabilites={e.poids.map((p) => decimalLatex(p / 20))} description={`Loi de X : ${e.xs.length} valeurs`} /> : null,
+  // Corrigé « comme au tableau » de l'écran (lot E) : même source que le papier, une lettre par écran.
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleeVariablesDiscretes(e), phasesPourExercice(e), p)} />,
 };
 
 export function App6gen49() {

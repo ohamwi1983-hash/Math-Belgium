@@ -5843,6 +5843,16 @@ avant les nombres ; variantes du sélecteur qui varient. Lot C :
   résultat entre 0,005 et 0,995 ; écran « stratégie » supprimé (le type de question le donnait).
 Cartes du chapitre (descriptions de 6gen49–53) réécrites. Hors périmètre : le cours (agent AFD), 6gen110–122,
 le papier définitif (lot E : corrigé « comme au tableau », niveaux, profils d'équilibre, annexe Φ).
+## 6e (6h), Chapitre 8 — lot E de l'audit (papier et évaluations de 6gen49–6gen53, 25/11/2026)
+
+Adaptateurs papier définitifs des cinq générateurs (détail : `feuilles-evaluations.md`, « 6e ch. 8 (lot E… ») :
+énoncé en prose + consigne globale sans méthode, conditions justifiées dans le corrigé, corrigé « comme au tableau »
+partagé écran / papier (`corrigeDetaille.ts` par générateur, `ui6e/corrigeVariablesAleatoires.ts`), barème sur 4,
+réponse brève, niveaux mesurés, `versionPapier`, regroupements, libellés pilotes remplis (6gen52 processus 3).
+**Table de Φ en annexe** (décision du 18/11) : `besoinTablePhi` lu par le pipeline (une table par document, après
+les formulaires, copie Word comprise — `export/tablePhiDocx.ts`). Écrans : 𝓑 en `\mathcal`, `P(C_j\mid S)`.
+Adaptateur provisoire `adaptateurVariablesAleatoires.ts` supprimé. Aucun `?code=` changé (générateurs intacts).
+
 ## 6e (6h), Chapitre 8 — lot G de l'audit, première moitié (5 ateliers + 6 réemplois, agent G1, 25/11/2026)
 
 Le chapitre n'avait aucun atelier. Onze blocs `atelier` ajoutés, seuls (aucun autre bloc touché), placés par

@@ -6,6 +6,10 @@ import type { PhaseLoiNormale } from "./moteur6e/typesLoiNormale";
 import { DEFINITION_6GEN51, attentesLoiNormale } from "./moteur6e/verificationLoiNormale";
 import { FORMAT_6GEN51, xTexte, zTexte } from "./ui6e/formatLoiNormale";
 import { AppCombinatoire } from "./components6e/AppCombinatoire";
+import { phasesPourExercice } from "./moteur6e/typesLoiNormale";
+import { correctionDetailleeLoiNormale } from "./generateurs6e/loiNormale/corrigeDetaille";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import type { ConfigAppCombinatoire } from "./components6e/AppCombinatoire";
 import { CourbeGauss } from "./components6e/CourbeGauss";
 import type { EtiquetteGauss } from "./components6e/CourbeGauss";
@@ -67,6 +71,8 @@ const CONFIG: ConfigAppCombinatoire<ExerciceLoiNormale, PhaseLoiNormale> = {
       {e.famille !== "E" && <TablePhi />}
     </>
   ),
+  // Corrigé « comme au tableau » de l'écran (lot E) : même source que le papier, une lettre par écran.
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleeLoiNormale(e), phasesPourExercice(e), p)} />,
 };
 
 export function App6gen51() {

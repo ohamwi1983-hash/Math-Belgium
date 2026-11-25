@@ -26,6 +26,15 @@ import { frontiereC, uniteC } from "./familleC";
 
 type E = ExerciceLoiBinomiale;
 
+/** σ = √V : « = 0,6 » quand la racine est un décimal exact (V = 0,36), sinon « ≈ » au centième. */
+export function sigmaExact(V: number): boolean {
+  const s = Math.sqrt(V);
+  return Math.abs(s * 100 - Math.round(s * 100)) < 1e-9;
+}
+export function suiteSigma(V: number): string {
+  return sigmaExact(V) ? `=${dl(Math.sqrt(V))}` : `\\approx ${ar(Math.sqrt(V), 2)}`;
+}
+
 export function pLatexA(e: ExerciceLoiBinomialeA): string {
   return e.pDen === 10 || e.pDen === 100 ? dl(e.pNum / e.pDen) : `\\dfrac{${e.pNum}}{${e.pDen}}`;
 }
@@ -59,7 +68,7 @@ function corrigeA(e: ExerciceLoiBinomialeA): EtapeCorrection[] {
     out.push(resultat("a", fx(`${raison} $X$ ne suit donc pas une loi binomiale.`)));
     out.push(
       utiliseCours("b", fx("Il suffit qu'une seule condition échoue pour que la loi ne soit pas binomiale"), COURS_BINOMIALE_8),
-      resultat("b", fx(`Condition non respectée : ${LIBELLES_CONDITION[e.condition ?? "nombre"].replace(/^X /, "$X$ ")}`)),
+      resultat("b", fx(`Condition non respectée : ${((c) => (c.startsWith("X ") ? c.replace(/^X /, "$X$ ") : c[0].toLowerCase() + c.slice(1)))(LIBELLES_CONDITION[e.condition ?? "nombre"])}`)),
       piege("b", fx("Conclure « binomiale » parce qu'il y a des répétitions : le nombre d'épreuves doit être fixé, les épreuves indépendantes, et $X$ doit compter des succès.")),
     );
   }
@@ -81,22 +90,20 @@ function corrigeB(e: ExerciceLoiBinomialeB): EtapeCorrection[] {
   const loi = loiBinomialeExacte(e.n, e.p);
   const { E: esp, V } = esperanceEtVariance(e.n, e.p);
   const mode = loi.map((r) => Number(r.n) / Number(r.d)).reduce((m, x, i, t) => (x > t[m] ? i : m), 0);
-  const tableau = `\\begin{array}{c|${"c".repeat(e.n + 1)}}k&${loi.map((_, k) => k).join("&")}\\\\\\hline P(X=k)&${loi.map(dec).join("&")}\\end{array}`;
   return [
     utiliseCours("a", fx(`$X\\sim${BIN(e.n, dl(e.p))}$ : pour $k=0,\\ldots,${e.n}$, $P(X=k)=C_n^k\\,p^k\\,(1-p)^{n-k}$`), COURS_BINOMIALE_8),
     calcul("a", Array.from({ length: e.n + 1 }, (_, k) => terme(e, k)).flat()),
-    resultat("a", [...fx("Loi de $X$ : "), { type: "latex", valeur: tableau }]),
-    verification("a", fx(`Somme des probabilités : $${loi.map(dec).join("+")}=1$.`)),
+    resultat("a", fx(`Loi de $X$ : ${loi.map((r, k) => `$P(X=${k})=${dec(r)}$`).join(" ; ")}.`)),
+    verification("a", fx(`Les ${e.n + 1} probabilités ont pour somme 1.`)),
     piege("a", fx("Oublier $C_n^k$ : $p^k(1-p)^{n-k}$ n'est la probabilité que d'un seul ordre des succès et des échecs.")),
     utiliseCours("b", fx("Le sommet du diagramme en barres est la valeur la plus probable, proche de $n\\times p$"), COURS_BINOMIALE_8),
-    resultat("b", fx(`Valeur la plus probable : $k=${mode}$ ($n\\times p=${dl(e.n * e.p)}$) ; ${e.p < 0.5 ? "le sommet est à gauche, les barres s'étirent vers la droite" : "le sommet est à droite, les barres s'étirent vers la gauche"}.`)),
+    resultat("b", fx(`Valeur la plus probable : $k=${mode}$, proche de $n\\times p=${dl(e.n * e.p)}$ ; ${e.p < 0.5 ? "le sommet est à gauche, les barres s'étirent vers la droite" : "le sommet est à droite, les barres s'étirent vers la gauche"}.`)),
     utiliseCours("c", fx("Pour une loi binomiale : $E(X)=n\\,p$ et $V(X)=n\\,p\\,(1-p)$"), COURS_BINOMIALE_8),
     calcul("c", [ligne(`E(X)=${e.n}\\times ${dl(e.p)}=${dl(esp)}`, "n p"), ligne(`V(X)=${e.n}\\times ${dl(e.p)}\\times ${dl(1 - e.p)}=${dl(V)}`, "n p (1 − p)")]),
     resultat("c", fx(`$E(X)=${dl(esp)}$ et $V(X)=${dl(V)}$.`)),
-    piege("c", fx("Écrire $V(X)=n\\,p$ : la variance contient aussi le facteur $1-p$.")),
     utiliseCours("d", fx("L'écart-type est la racine carrée de la variance : $\\sigma(X)=\\sqrt{V(X)}$"), COURS_BINOMIALE_8),
-    calcul("d", [ligne(`\\sigma(X)=\\sqrt{${dl(V)}}`, "racine de la variance"), ligne(`\\approx ${ar(Math.sqrt(V), 2)}`, "arrondi au centième")]),
-    resultat("d", fx(`$\\sigma(X)\\approx ${ar(Math.sqrt(V), 2)}$.`)),
+    calcul("d", [ligne(`\\sigma(X)=\\sqrt{${dl(V)}}`, "racine de la variance"), ligne(suiteSigma(V), sigmaExact(V) ? "racine exacte" : "arrondi au centième")]),
+    resultat("d", fx(`$\\sigma(X)${suiteSigma(V)}$.`)),
   ];
 }
 

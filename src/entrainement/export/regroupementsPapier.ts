@@ -1028,6 +1028,36 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
   // 6gen113, 6gen115 écartés (tableau, figure ou événements propres à l'instance dans la consigne).
   "6gen111": simple(String.raw`(?<ligne>[^\n]+)\nÉcris Y sous la forme \$Y=aX\+b\$, puis calcule \$E\(Y\)\$, \$V\(Y\)\$ et \$\\sigma\(Y\)\$ sans chercher la loi de Y\.`, "Dans chaque situation, écris Y sous la forme $Y=aX+b$, puis calcule $E(Y)$, $V(Y)$ et $\\sigma(Y)$ sans chercher la loi de Y."),
   "6gen114": simple(String.raw`(?<ligne>[^\n]+)\nLa variable X est-elle discrète ou continue \? Donne l'ensemble de ses valeurs possibles, puis dis comment on calcule une probabilité \$P\(a\\leq X\\leq b\)\$ et si \$P\(X=c\)\$ peut être non nulle\. Justifie\.`, "Dans chaque situation, la variable X est-elle discrète ou continue ? Donne l'ensemble de ses valeurs possibles, puis dis comment on calcule une probabilité $P(a\\leq X\\leq b)$ et si $P(X=c)$ peut être non nulle. Justifie."),
+  // 6e ch. 8, lot E (6gen49–6gen53) : la situation (avec sa question) est la ligne ; la consigne commune
+  // est la consigne globale de l'énoncé papier. 6gen51 A et C : « Z suit 𝒩(0 ; 1) » passe dans la
+  // consigne, la probabilité (ou l'égalité donnée) est la ligne. Écartés : 6gen49 A (tableau propre à
+  // l'instance dans l'en-tête), 6gen49 C « imposer », 6gen51 B et E avec un groupe (vraies questions),
+  // 6gen51 B, D, E (contexte et consigne propres) et 6gen52 (Transférer : contextes longs, à plusieurs lignes).
+  "6gen49": {
+    formes: [
+      { motif: re(String.raw`(?<ligne>[^\n]+)\nDétermine la loi de [^\n]*`), consigne: "Dans chaque situation, détermine la loi de $X$, puis calcule son espérance $E(X)$. Probabilités en valeur exacte ; espérance exacte ou arrondie au centième." },
+      { motif: re(String.raw`(?<ligne>[^\n]+)\nOn note \$\{?X\}?\$ le gain net[^\n]*`), consigne: "Dans chaque situation, on note $X$ le gain net du joueur (montant reçu moins la mise). Le jeu est-il favorable au joueur, défavorable ou équitable ? Justifie par un calcul." },
+    ],
+  },
+  "6gen50": {
+    formes: [
+      { motif: re(String.raw`(?<ligne>[^\n]+)\nLa variable \$\{?X\}?\$ suit-elle une loi binomiale \?[^\n]*`), consigne: "Dans chaque situation, la variable $X$ suit-elle une loi binomiale ? Justifie. Si oui, donne ses paramètres $n$ et $p$ ; sinon, indique la condition qui n'est pas respectée." },
+      { motif: re(String.raw`(?<ligne>[^\n]+)\nDétermine la loi de [^\n]*`), consigne: "Dans chaque situation, détermine la loi de $X$ (probabilités en valeur exacte), puis calcule $E(X)$, $V(X)$ et l'écart-type $\\sigma(X)$ (valeur exacte ou arrondie au centième)." },
+      { motif: re(String.raw`(?<ligne>[^\n]+)\nRéponds en justifiant par un calcul\.`), consigne: "Dans chaque situation, réponds en justifiant par un calcul." },
+    ],
+  },
+  "6gen51": {
+    formes: [
+      { motif: re(String.raw`\$\{?Z\}?\$ suit la loi normale centrée réduite ${M}\. On cherche (?<ligne>${M})\.\nCalcule cette probabilité, [^\n]*`), consigne: "$Z$ suit la loi normale centrée réduite $\\mathcal{N}(0\\,;\\,1)$. Calcule chaque probabilité, arrondie à $10^{-4}$ (table de $\\Phi$ en annexe)." },
+      { motif: re(String.raw`\$\{?Z\}?\$ suit la loi normale centrée réduite ${M}\. On sait que (?<ligne>${M})\.\nDétermine \$\{?t\}?\$ au centième[^\n]*`), consigne: "$Z$ suit la loi normale centrée réduite $\\mathcal{N}(0\\,;\\,1)$. Dans chaque cas, détermine $t$ au centième (table de $\\Phi$ en annexe)." },
+    ],
+  },
+  "6gen53": {
+    formes: [
+      { motif: re(String.raw`(?<ligne>[^\n]+)\nPeut-on approcher la loi de [^\n]*`), consigne: "Dans chaque situation, peut-on approcher la loi de $X$ par une loi de Poisson ? Justifie à l'aide des conditions du cours. Si oui, donne son paramètre $\\lambda$ et calcule la probabilité cherchée, arrondie à $10^{-4}$." },
+      { motif: re(String.raw`(?<ligne>[^\n]+)\nCalcule cette probabilité, arrondie à [^\n]*`), consigne: "Dans chaque situation, calcule la probabilité cherchée, arrondie à $10^{-4}$." },
+    ],
+  },
   // 6e ch. 7, lot E (6gen43–6gen48) : la situation (avec sa question) est la ligne ; la consigne commune
   // est la consigne globale de l'énoncé papier. Énoncés à vraies questions (6gen45 C, D ; 6gen47 B) : jamais.
   "6gen43": simple(String.raw`(?<ligne>[^\n]+)\nRéponds en justifiant ta démarche\.`, "Dans chaque situation, réponds à la question en justifiant ta démarche."),

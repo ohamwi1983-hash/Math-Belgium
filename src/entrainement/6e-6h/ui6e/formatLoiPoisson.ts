@@ -98,7 +98,7 @@ export const FORMAT_6GEN53: FormatCombinatoire<E, P> = {
       case "aVerdict":
       case "aCondition":
         return [
-          { texte: "On peut approcher une loi binomiale $\\mathscr{B}(n\\,;\\,p)$ par une loi de Poisson si les trois conditions sont vérifiées : $n\\geq 30$, $p\\leq 0{,}1$ et $n\\times p\\leq 15$." },
+          { texte: "On peut approcher une loi binomiale $\\mathcal{B}(n\\,;\\,p)$ par une loi de Poisson si les trois conditions sont vérifiées : $n\\geq 30$, $p\\leq 0{,}1$ et $n\\times p\\leq 15$." },
           { texte: "Repère $n$ (nombre d'épreuves) et $p$ dans le texte, puis teste chaque condition, $n\\times p$ compris." },
         ];
       case "aLambda":
