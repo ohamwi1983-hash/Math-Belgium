@@ -1053,4 +1053,17 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     String.raw`(?<ligne>[^\n]+)\nDonne la valeur exacte \(une fraction\) ou un arrondi au millième \(davantage de décimales pour une très petite probabilité\)\.`,
     "Dans chaque situation, calcule la probabilité demandée. Donne chaque fois la valeur exacte (une fraction) ou un arrondi au millième (davantage de décimales pour une très petite probabilité).",
   ),
+  // 6gen116 : deux consignes (calculer une probabilité / retrouver z), ligne = l'événement.
+  "6gen116": {
+    formes: [
+      {
+        motif: re(String.raw`La variable \$Z\$ suit la loi normale centrée réduite ${M}\.\nÀ l'aide de la table de \$\\Phi\$, calcule (?<ligne>${M})\. Donne le résultat à quatre décimales\.`),
+        consigne: "La variable $Z$ suit la loi normale centrée réduite $\\mathcal{N}(0\\,;1)$. À l'aide de la table de $\\Phi$, calcule chaque probabilité. Donne les résultats à quatre décimales.",
+      },
+      {
+        motif: re(String.raw`La variable \$Z\$ suit la loi normale centrée réduite ${M}\.\nÀ l'aide de la table de \$\\Phi\$, détermine le réel \$z\$ tel que (?<ligne>${M})\. Donne \$z\$ au centième \(case de la table la plus proche\)\.`),
+        consigne: "La variable $Z$ suit la loi normale centrée réduite $\\mathcal{N}(0\\,;1)$. À l'aide de la table de $\\Phi$, détermine le réel $z$ dans chaque cas. Donne $z$ au centième (case de la table la plus proche).",
+      },
+    ],
+  },
 };

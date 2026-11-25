@@ -97,6 +97,7 @@ export type IdGenerateurPilote =
   | '6gen105' | '6gen106' | '6gen107' | '6gen108' | '6gen109'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
   | '6gen110' | '6gen111' | '6gen112' | '6gen113' | '6gen114' | '6gen115'
+  | '6gen116' | '6gen117' | '6gen118' | '6gen119' | '6gen120' | '6gen121' | '6gen122'
   | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84' | '6gen82' | '6gen78' | '6gen80' | '6gen83' | '6gen79' | '6gen81'
   | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42' | '6gen93' | '6gen95' | '6gen94' | '6gen97' | '6gen96' | '6gen98' | '6gen99'
   | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
@@ -234,6 +235,13 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'variables-aleatoires', sectionId: 'variablecontinue', generatorId: '6gen113', label: 'Densité de probabilité (6gen113)', processus: 2 },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'discreteoucontinue', generatorId: '6gen114', label: 'Discrète ou continue ? (6gen114)', processus: 1 },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'loiuniformecontinue', generatorId: '6gen115', label: 'Loi uniforme continue (6gen115)', processus: 2 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'loinormale', generatorId: '6gen116', label: 'Lire la table de Φ (6gen116)', processus: 1 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'loinormale', generatorId: '6gen117', label: 'Courbe de Gauss : aires et règle empirique (6gen117)', processus: 1 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'extensionsbayes', generatorId: '6gen118', label: 'Approximation normale avec correction de continuité (6gen118)', processus: 2 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'loipoisson', generatorId: '6gen119', label: 'Choisir le modèle (6gen119)', processus: 3 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'loinormale', generatorId: '6gen120', label: 'Loi normale : retrouver μ ou σ (6gen120)', processus: 3 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'loipoisson', generatorId: '6gen121', label: 'Poisson : λ inconnu, valeur la plus probable, seuil d\'alerte (6gen121)', processus: 3 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'loipoisson', generatorId: '6gen122', label: 'Détective d\'erreurs : variables aléatoires (6gen122)', processus: 3 },
   { chapitreSlug: 'primitives-integrales', sectionId: 'primitives', generatorId: '6gen23', label: '' },
   { chapitreSlug: 'primitives-integrales', sectionId: 'conditioninitiale', generatorId: '6gen24', label: '' },
   { chapitreSlug: 'primitives-integrales', sectionId: 'integralesdefinies', generatorId: '6gen77', label: 'L\'intégrale lue sur un graphique (6gen77)' },
