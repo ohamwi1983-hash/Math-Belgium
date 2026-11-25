@@ -48,6 +48,20 @@ function enMots(brut: string): [string, number][] {
       o += ex[0].length
       continue
     }
+    // « f(x) », « |a| » écrits en texte brut : « f de x », « valeur absolue de a » (jamais « le(s) »).
+    const apresLettre = o > 0 && /\p{L}/u.test(brut[o - 1])
+    const fx = /^([a-zA-Z])\(([a-zA-Z])\)(?!\p{L})/u.exec(reste)
+    if (fx && !apresLettre) {
+      out.push([`${fx[1]} de ${fx[2]}`, o])
+      o += fx[0].length
+      continue
+    }
+    const va = /^\|([a-zA-Z])\|/.exec(reste)
+    if (va) {
+      out.push([`valeur absolue de ${va[1]}`, o])
+      o += va[0].length
+      continue
+    }
     if (reste.startsWith('n°') && (o === 0 || !/\p{L}/u.test(brut[o - 1]))) {
       out.push(['numéro ', o])
       o += 2
