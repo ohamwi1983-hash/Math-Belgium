@@ -4146,7 +4146,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       {
         enonce: "Pourquoi la formule (ln(x))'=1/x ne fait-elle apparaître aucune constante multiplicative, alors que (logₐ(x))' en fait apparaître une pour toute autre base ?",
         corrige:
-          "La formule générale fait intervenir le facteur 1/ln(a), qui vaut exactement 1 lorsque ln(a)=1 — ce qui n'arrive que pour a=e, par définition même du logarithme népérien. C'est le miroir exact du résultat du chapitre précédent, où (aˣ)'=ln(a)·aˣ devient (eˣ)'=eˣ sans facteur : dans les deux cas, e est la seule base pour laquelle le facteur multiplicatif disparaît, parce que ln et exp sont construites comme réciproques l'une de l'autre.",
+          "La formule générale fait intervenir le facteur 1/ln(a), qui vaut exactement 1 lorsque ln(a)=1 — ce qui n'arrive que pour a=e, par définition même du logarithme népérien. C'est le miroir exact du résultat des fonctions exponentielles, où (aˣ)'=ln(a)·aˣ devient (eˣ)'=eˣ sans facteur : dans les deux cas, e est la seule base pour laquelle le facteur multiplicatif disparaît, parce que ln et exp sont construites comme réciproques l'une de l'autre.",
       },
       {
         enonce: "Pourquoi le domaine de x↦ln(u(x)) n'est-il jamais simplement le domaine de u, mais toujours restreint à la condition u(x)>0 ?",
@@ -4649,7 +4649,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       {
         enonce: "Pourquoi le nombre de chemins de l'arbre qui comptent exactement $k$ succès en $n$ épreuves vaut-il $C_n^k$ ?",
         corrige:
-          "Un chemin est une suite de $n$ résultats, succès ou échec. Un chemin à $k$ succès est entièrement déterminé par les $k$ rangs, parmi les $n$ épreuves, où se trouvent les succès : choisir ces rangs, c'est choisir $k$ éléments parmi $n$ sans ordre (l'ordre dans lequel on énumère les rangs ne change pas le chemin). Il y a donc $C_n^k$ tels chemins — c'est le nombre $N_k$ que le chapitre 6 comptait un par un sur l'arbre.",
+          "Un chemin est une suite de $n$ résultats, succès ou échec. Un chemin à $k$ succès est entièrement déterminé par les $k$ rangs, parmi les $n$ épreuves, où se trouvent les succès : choisir ces rangs, c'est choisir $k$ éléments parmi $n$ sans ordre (l'ordre dans lequel on énumère les rangs ne change pas le chemin). Il y a donc $C_n^k$ tels chemins — c'est le nombre $N_k$ que l'on compte un par un sur l'arbre, en probabilités.",
       },
     ],
   },

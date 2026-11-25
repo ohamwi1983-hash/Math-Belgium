@@ -70,7 +70,7 @@ export const suites: ChapterContent = {
           kind: 'intuition',
           label: 'Ça te rappelle quelque chose ?',
           text:
-            'Tu connais déjà les fonctions $f(x)$ depuis le chapitre 1 : tu entres un nombre, il ' +
+            'Tu connais déjà les fonctions $f(x)$ : tu entres un nombre, il ' +
             'en ressort un autre. Une suite, c\'est une fonction très particulière — elle ' +
             'n\'accepte que des indices entiers ($1, 2, 3, ...$), jamais de virgule. $u_n$, ' +
             'c\'est un peu comme $f(n)$, sauf qu\'on écrit l\'indice n en bas plutôt qu\'entre ' +
@@ -1984,7 +1984,7 @@ export const suites: ChapterContent = {
       ],
     },
     forward:
-      'Le prochain chapitre relie les suites aux limites de fonctions. La notion de convergence vue ' +
+      'Les limites de fonctions ([[5e-4h/limites-asymptotes]]) prolongent cette idée de convergence. La notion de convergence vue ' +
       'ici, pour un indice entier $n$ qui tend vers l\'infini, se généralise à une variable réelle $x$ ' +
       '— qui tend vers l\'infini, ou vers une valeur précise.',
     entrainement: {

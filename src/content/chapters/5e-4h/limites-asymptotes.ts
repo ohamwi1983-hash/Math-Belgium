@@ -46,7 +46,7 @@ export const limitesAsymptotes: ChapterContent = {
           kind: 'intuition',
           label: 'Tu connais déjà ça',
           text:
-            "Tu as déjà rencontré le **domaine de définition** au chapitre 1 (fonctions) : les " +
+            "Tu as déjà rencontré le **domaine de définition** dans [[5e-4h/fonctions-composees#domaine]] : les " +
             "valeurs de x qu'une fonction refuse. Ce chapitre part de là. Que devient f(x) quand " +
             "x s'approche d'une valeur interdite, sans jamais l'atteindre ? Et que devient f(x) " +
             "quand x part très loin, vers $+\\infty$ ou $-\\infty$ ? C'est exactement ce que " +
@@ -2342,7 +2342,7 @@ export const limitesAsymptotes: ChapterContent = {
     },
     forward:
       'Ces mêmes techniques de limite — factorisation, terme dominant, comparaison de degrés ' +
-      '— reviennent comme fondement du chapitre suivant. Tu y étudieras cette fois le taux de ' +
+      '— reviennent comme fondement des dérivées ([[5e-4h/derivees-applications#definition-derivee]]). Tu y étudieras cette fois le taux de ' +
       'variation instantané d\'une fonction : la dérivée.',
     entrainement: {
       kind: 'entrainement',

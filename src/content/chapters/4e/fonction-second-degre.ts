@@ -359,8 +359,8 @@ export const fonctionSecondDegre: ChapterContent = {
             "Un ballon lancé en l'air, un jet d'eau, une balle de basket qui file vers le " +
             'panier : leur trajectoire dessine cette même forme, avec un point culminant, le ' +
             "plus haut atteint. Ce point, c'est exactement le **sommet** de la parabole — un " +
-            'vrai ballon lancé revient d\'ailleurs à la fin de ce chapitre (section 3), puis au ' +
-            'chapitre 2.',
+            'vrai ballon lancé revient d\'ailleurs à la fin de ce chapitre (section 3), puis dans ' +
+            '[[4e/equations-inequations-second-degre#contexte]].',
         },
         {
           kind: 'para',
@@ -1534,7 +1534,7 @@ export const fonctionSecondDegre: ChapterContent = {
             { tag: 'abscisse du sommet', text: '$t_S = -\\dfrac{20}{2\\cdot(-5)} = 2$, qui appartient au domaine' },
             { tag: 'ordonnée du sommet', text: '$h(2) = -20 + 40 + 25 = 45$' },
           ],
-          result: { tag: 'résultat', text: '45 m, au bout de 2 s. Quand touche-t-il le sol ? Il faut résoudre $h(t) = 0$ : ce sera au chapitre 2.' },
+          result: { tag: 'résultat', text: '45 m, au bout de 2 s. Quand touche-t-il le sol ? Il faut résoudre $h(t) = 0$ : c\'est l\'objet de [[4e/equations-inequations-second-degre#resoudre]].' },
           illustration: {
             // h(t) = −5t² + 20t + 25 sur [0 ; 5] : départ (0 ; 25), sommet (2 ; 45), sol en t = 5.
             kind: 'curvePlot',
@@ -1615,9 +1615,9 @@ export const fonctionSecondDegre: ChapterContent = {
           kind: 'para',
           text:
             'Une situation concrète peut aussi demander **quand** une grandeur atteint ou dépasse ' +
-            'un seuil : on résout alors une équation ou une inéquation du second degré. Ce sera ' +
-            'le cas au chapitre 2, une fois les méthodes de résolution vues (section « Équations ' +
-            'et inéquations en contexte »).',
+            'un seuil : on résout alors une équation ou une inéquation du second degré. C\'est ' +
+            'l\'objet de [[4e/equations-inequations-second-degre#contexte]], une fois les méthodes ' +
+            'de résolution vues.',
         },
       ],
     },
@@ -1645,7 +1645,7 @@ export const fonctionSecondDegre: ChapterContent = {
             'différences secondes, zéros par factorisation, domaine, image et tableaux (section 1) ; ' +
             'transformations, forme canonique et sommet, compléter le carré, trois écritures et ' +
             'retrouver l\'équation (section 2) ; optimisation (section 3). Les équations et ' +
-            'inéquations en contexte sont révisées au chapitre 2. Un seul essai par question. La ' +
+            'inéquations en contexte sont révisées dans le quiz de [[4e/equations-inequations-second-degre#revision]]. Un seul essai par question. La ' +
             'justification est toujours donnée.',
         },
         {

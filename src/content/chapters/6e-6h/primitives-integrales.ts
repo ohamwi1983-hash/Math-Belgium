@@ -328,7 +328,7 @@ export const primitivesIntegrales: ChapterContent = {
           result: {
             tag: 'résultat',
             text:
-              '$\\int \\ln(x)dx = x\\ln(x) - x + C$ — tu retrouves la fonction $x\\ln(x) - x$ du chapitre 3, ' +
+              '$\\int \\ln(x)dx = x\\ln(x) - x + C$ — tu retrouves la fonction $x\\ln(x) - x$ ([[6e-6h/fonctions-logarithmes#derivee]]), ' +
               'dont la dérivée était justement $\\ln(x)$.',
           },
         },
@@ -2042,7 +2042,7 @@ export const primitivesIntegrales: ChapterContent = {
               kind: 'para',
               text:
                 'f(x) = ch(x) sur [0;a] : f\'(x) = sh(x), et l\'identité $\\text{ch}^2-\\text{sh}^2=1$ ' +
-                '(chapitre 3) donne $1+\\text{sh}^2(x) = \\text{ch}^2(x)$ — un carré parfait. ' +
+                '([[6e-6h/fonctions-logarithmes#hyperboliques]]) donne $1+\\text{sh}^2(x) = \\text{ch}^2(x)$ — un carré parfait. ' +
                 'Comme ch(x) > 0 toujours, la racine se simplifie directement :',
             },
             { kind: 'para', text: '$L = \\int_0^a \\text{ch}(x) dx = [\\text{sh}(x)]_0^a = \\text{sh}(a)$' },
@@ -2050,7 +2050,7 @@ export const primitivesIntegrales: ChapterContent = {
               kind: 'para',
               text:
                 'C\'est la longueur d\'une chaîne suspendue : la courbe de ch est une chaînette ' +
-                '(chapitre 3).',
+                '([[6e-6h/fonctions-logarithmes#hyperboliques]]).',
             },
           ],
         },
@@ -2573,7 +2573,7 @@ export const primitivesIntegrales: ChapterContent = {
     forward:
       'Un seul théorème — $\\int_a^b f(x)\\,dx = F(b)-F(a)$, démontré grâce à la fonction aire — porte ' +
       'toutes les applications de ce chapitre : aires, volumes, longueurs, valeur moyenne, ' +
-      'cinématique. Tu le retrouveras au chapitre 8 : une probabilité y devient une aire sous une ' +
+      'cinématique. Tu le retrouveras avec les variables continues ([[6e-6h/variables-aleatoires#variablecontinue]]) : une probabilité y devient une aire sous une ' +
       'courbe de densité.',
     entrainement: {
       kind: 'entrainement',

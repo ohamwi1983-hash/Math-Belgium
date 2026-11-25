@@ -8,7 +8,7 @@ export const deriveesApplications: ChapterContent = {
   slug: 'derivees-applications',
   lede:
     "La **dérivée** d'une fonction en un point, c'est sa pente exacte à cet instant précis — la " +
-    "suite directe des limites du chapitre précédent (la dérivée EST une limite !). Dans ce " +
+    "suite directe des limites (la dérivée EST une limite !). Dans ce " +
     "chapitre, tu pars de sa définition, tu t'en sers pour tracer une tangente, puis tu " +
     "apprends à calculer n'importe quelle dérivée avec des règles simples. Ensuite, tu étudies " +
     "les variations et les extremums d'une fonction, tu mènes une étude complète, et tu lis " +
@@ -52,7 +52,7 @@ export const deriveesApplications: ChapterContent = {
           items: [
             'Le **taux d\'accroissement** de f entre a et a+h, c\'est $\\dfrac{f(a+h)-f(a)}{h}$. ' +
               'C\'est la pente de la **sécante** — la droite qui relie les points (a;f(a)) et ' +
-              '(a+h;f(a+h)). Fais tendre h vers 0, comme au chapitre précédent : la limite de ce ' +
+              '(a+h;f(a+h)). Fais tendre h vers 0, comme pour une limite ([[5e-4h/limites-asymptotes#limites-calcul]]) : la limite de ce ' +
               'taux, c\'est le **nombre dérivé** f′(a). $f\'(a) = \\displaystyle\\lim_{h \\to 0} \\dfrac{f(a+h)-f(a)}{h}$.',
           ],
         },
@@ -147,7 +147,7 @@ export const deriveesApplications: ChapterContent = {
           label: 'Ne jamais remplacer h par 0 AVANT d\'avoir simplifié',
           text:
             'Le taux d\'accroissement brut $\\dfrac{f(a+h)-f(a)}{h}$ vaut toujours $\\frac{0}{0}$ en $h=0$ — ' +
-            'une forme indéterminée, comme au chapitre précédent. C\'est exactement pourquoi il ' +
+            'une forme indéterminée ([[5e-4h/limites-asymptotes#limites-calcul]]). C\'est exactement pourquoi il ' +
             'faut d\'abord SIMPLIFIER par h (factorisation, ou technique du conjugué pour une ' +
             'racine) avant de faire tendre h vers 0. Jamais l\'inverse !',
         },
@@ -156,7 +156,7 @@ export const deriveesApplications: ChapterContent = {
           label: 'La même méthode, même avec une racine',
           text:
             'Pour $f(x)=\\sqrt{x}$, le taux d\'accroissement brut donne lui aussi la forme $\\frac{0}{0}$ ; ' +
-            'il se simplifie avec l\'expression conjuguée — comme au chapitre précédent. La ' +
+            'il se simplifie avec l\'expression conjuguée ([[5e-4h/limites-asymptotes#limites-calcul]]). La ' +
             'méthode générale ne change jamais. Seule la technique de simplification s\'adapte ' +
             'à la forme de f.',
         },
@@ -1857,15 +1857,15 @@ export const deriveesApplications: ChapterContent = {
           kind: 'para',
           text:
             'L\'étude complète d\'une fonction réunit TOUT ce qui précède, dans un ordre fixe. ' +
-            'Elle reconvoque directement les techniques du chapitre précédent pour les limites ' +
-            'et les asymptotes.',
+            'Elle reconvoque directement les techniques de [[5e-4h/limites-asymptotes#etude-complete]] ' +
+            'pour les limites et les asymptotes.',
         },
         {
           kind: 'methode',
           label: 'La démarche complète, dans l\'ordre',
           items: [
             '**Domaine** — exclus les valeurs interdites (dénominateur nul, etc.).',
-            '**Limites aux bornes du domaine et asymptotes** — techniques du chapitre précédent.',
+            '**Limites aux bornes du domaine et asymptotes** — techniques de [[5e-4h/limites-asymptotes#etude-complete]].',
             '**Dérivée** f′(x) et son **signe** — tableau de signes complet, y compris les colonnes ∄.',
             '**Variations et extremums** — lus directement sur le tableau de signes de f′.',
             '**Dérivée seconde** f″(x) et son signe — concavité (∪ convexe, ∩ concave) et points ' +
@@ -1940,11 +1940,11 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'astuce',
-          label: 'Réutilise le chapitre précédent sans le refaire',
+          label: 'Réutilise l\'étude des limites sans la refaire',
           text:
             'Le domaine, la nature de l\'asymptote verticale (vraie asymptote ou point vide, ' +
             'test du numérateur), et l\'asymptote oblique (division euclidienne ou méthode des ' +
-            'limites) : tout ça suit EXACTEMENT les techniques du chapitre 4. L\'étude complète ' +
+            'limites) : tout ça suit EXACTEMENT les techniques de [[5e-4h/limites-asymptotes#etude-complete]] (asymptote oblique : [[5e-4h/limites-asymptotes#asymptote-oblique]]). L\'étude complète ' +
             'n\'ajoute que f′, f″ et leurs tableaux de signes, par-dessus ce que tu sais déjà.',
         },
         {
@@ -2932,7 +2932,7 @@ export const deriveesApplications: ChapterContent = {
   recap: {
     items: [
       '**Définition de** $\\boldsymbol{f\'(a)}$ — la limite du taux d\'accroissement ' +
-        '$\\dfrac{f(a+h)-f(a)}{h}$ quand $h \\to 0$ (chapitre précédent). C\'est la pente de la tangente ' +
+        '$\\dfrac{f(a+h)-f(a)}{h}$ quand $h \\to 0$ ([[5e-4h/limites-asymptotes#limites-calcul]]). C\'est la pente de la tangente ' +
         'en $a$.',
       '**Tangente** — $y=f(a)+f\'(a)(x-a)$. Horizontale ⟺ $f\'(a)=0$. Localement, elle ne touche la ' +
         'courbe qu\'au point de contact, mais elle peut la recouper plus loin — et une même droite ' +
@@ -2949,7 +2949,7 @@ export const deriveesApplications: ChapterContent = {
       '**Étude locale** — le tableau de signes de $f\'$ (avec les colonnes $\\nexists$ des valeurs ' +
         'exclues) donne les variations et les extremums, en valeurs exactes. Un point critique ' +
         '($f\'(a)=0$) n\'est un extremum QUE si $f\'$ change réellement de signe.',
-      '**Étude complète** — domaine → limites et asymptotes (chapitre précédent) → $f\'$ et ' +
+      '**Étude complète** — domaine → limites et asymptotes ([[5e-4h/limites-asymptotes#etude-complete]]) → $f\'$ et ' +
         'variations → $f\'\'$ et concavité → coordonnées des points remarquables → graphique.',
       '**Applications en contexte** — optimisation géométrique (dérivée nulle, nature par le ' +
         'tableau de signes), coût marginal $C\'(q)$ et écart en %, bénéfice maximal ⟺ $\\text{Rm} = ' +

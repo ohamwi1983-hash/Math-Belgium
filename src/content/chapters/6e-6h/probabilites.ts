@@ -1786,7 +1786,7 @@ export const probabilites: ChapterContent = {
             tag: 'résultat',
             text:
               'Il faut au moins 17 lancers. En général, $1-(1-p)^n \\geq 0{,}95 \\iff ' +
-              'n \\geq \\dfrac{\\ln 0{,}05}{\\ln(1-p)}$ — les logarithmes du chapitre 3 au service des probabilités.',
+              'n \\geq \\dfrac{\\ln 0{,}05}{\\ln(1-p)}$ — les logarithmes ([[6e-6h/fonctions-logarithmes#inequations]]) au service des probabilités.',
           },
         },
         {

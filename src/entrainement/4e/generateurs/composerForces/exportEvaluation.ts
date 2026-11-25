@@ -127,7 +127,7 @@ function bareme(e: ExerciceComposerForces): BaremeExercice {
       ...(e.question === "direction" ? [{ description: [texte("Angle pris avec l'autre vecteur")], cout: "moitié des points de l'étape d" }] : []),
       ...erreurs,
     ],
-    reponsesAcceptees: [[texte("Écart d'environ 1 % dû aux arrondis intermédiaires")], [texte("Formule de la résultante du chapitre 6 avec un « + » et l'angle entre les vecteurs (équivalente)")]],
+    reponsesAcceptees: [[texte("Écart d'environ 1 % dû aux arrondis intermédiaires")], [texte("Formule de la résultante du calcul vectoriel avec un « + » et l'angle entre les vecteurs (équivalente)")]],
   };
 }
 

@@ -1413,7 +1413,7 @@ export const nombresComplexes: ChapterContent = {
                 '\\dfrac{3\\cos x+\\cos(3x)}{4}$',
             },
             {
-              tag: 'intégrer cos²x (chapitre 4)',
+              tag: 'intégrer cos²x',
               text: '$\\displaystyle\\int\\cos^2x\\,dx=\\int\\dfrac{1+\\cos(2x)}{2}\\,dx=\\dfrac{x}{2}+\\dfrac{\\sin(2x)}{4}+C$',
             },
           ],

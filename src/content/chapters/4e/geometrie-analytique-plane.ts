@@ -2290,7 +2290,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration — le foyer de la parabole y = ax², lien avec le chapitre 1',
+          label: 'Démonstration — le foyer de la parabole y = ax², lien avec la fonction du second degré',
           blocks: [
             {
               kind: 'para',
@@ -2317,7 +2317,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
               text:
                 'Pour $y = \\dfrac{x^2}{4}$ (la figure du début de section), $a = \\dfrac{1}{4}$ donne $p = 2$ et ' +
                 '$F(0\\,;\\,1)$ : c\'est bien le foyer dessiné. Et si $a < 0$, p est négatif : la parabole ' +
-                's\'ouvre vers le bas, comme au chapitre 1.',
+                's\'ouvre vers le bas, comme pour la fonction du second degré ([[4e/fonction-second-degre#etudier]]).',
             },
           ],
         },
@@ -3025,7 +3025,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       ],
     },
     forward:
-      'La parabole de ce chapitre est aussi celle de la fonction du second degré (chapitre 1). En ' +
+      'La parabole de ce chapitre est aussi celle de la fonction du second degré ([[4e/fonction-second-degre]]). En ' +
       '6e, les lieux géométriques reviennent avec des paramètres, et la parabole retrouve deux ' +
       'cousines définies elles aussi par des distances : l\'ellipse et l\'hyperbole (chapitre ' +
       'sur les coniques).',

@@ -107,7 +107,7 @@ export const statistiqueDeuxVariables: ChapterContent = {
         {
           kind: 'intuition',
           label: 'Ce que tu sais déjà (4e)',
-          text: R`Trois outils de 4e servent dans tout ce chapitre. La **moyenne**, la **variance** et l'**écart-type** d'une série à une variable (4e, chapitre 4) : $\bar{x} = \dfrac{1}{n}\sum x_i$, $V(x) = \dfrac{1}{n}\sum (x_i-\bar{x})^2$ et $\sigma_x = \sqrt{V(x)}$, en divisant par $n$. La **pente** et l'**équation d'une droite** passant par un point (4e, chapitre 7) : $y - y_1 = a(x - x_1)$. Le **sommet d'une parabole** $y = Ax^2 + Bx + C$ avec $A > 0$, atteint en $x = -\dfrac{B}{2A}$ (4e, chapitre 1) : c'est lui qui démontrera, au § 4, les formules de la meilleure droite.`,
+          text: R`Trois outils de 4e servent dans tout ce chapitre. La **moyenne**, la **variance** et l'**écart-type** d'une série à une variable (4e, [[4e/statistique-descriptive#dispersion]]) : $\bar{x} = \dfrac{1}{n}\sum x_i$, $V(x) = \dfrac{1}{n}\sum (x_i-\bar{x})^2$ et $\sigma_x = \sqrt{V(x)}$, en divisant par $n$. La **pente** et l'**équation d'une droite** passant par un point (4e, [[4e/geometrie-analytique-plane#reperer]]) : $y - y_1 = a(x - x_1)$. Le **sommet d'une parabole** $y = Ax^2 + Bx + C$ avec $A > 0$, atteint en $x = -\dfrac{B}{2A}$ (4e, [[4e/fonction-second-degre#etudier]]) : c'est lui qui démontrera, au § 4, les formules de la meilleure droite.`,
         },
         {
           kind: 'para',

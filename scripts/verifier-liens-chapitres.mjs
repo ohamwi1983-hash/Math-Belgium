@@ -40,7 +40,7 @@ try {
     const refs = referencesDe(texte)
     if (refs.length === 0 || (texte.match(/\[\[/g) ?? []).length !== refs.length) erreur(`${lieu} ${chemin} — « [[ » mal formé : ${texte.slice(0, 80)}`)
     if (CHAMPS_BRUTS.has(champ)) erreur(`${lieu} ${chemin} — lien nommé dans un champ en texte brut (« ${champ} ») : nommer le chapitre en clair, sans lien`)
-    if (/\*\*[^*]*\[\[[^*]*\*\*/.test(texte)) erreur(`${lieu} ${chemin} — lien nommé à l'intérieur d'un **gras** (jamais reparsé)`)
+    if ([...texte.matchAll(/\$[^$]+\$|\*\*([^*]+)\*\*/g)].some((m) => m[1]?.includes('[['))) erreur(`${lieu} ${chemin} — lien nommé à l'intérieur d'un **gras** (jamais reparsé)`)
     for (const ref of refs) {
       liens++
       if (!resoudreReference(ref)) erreur(`${lieu} ${chemin} — lien cassé [[${ref}]]`)

@@ -2039,7 +2039,7 @@ export const lieuxGeometriques: ChapterContent = {
               'privé de quelques points ; une bande (la région entre deux parallèles, bords compris) ; un ' +
               'polygone plein (carré) ou un contour de polygone (losange, octogone).',
             "Ce n'est pas une liste fermée : une astroïde (§ 6), une parabole, une ellipse ou une hyperbole " +
-              '(chapitre 10) sont aussi des lieux. Identifier la nature demande souvent de distinguer des cas ' +
+              '([[6e-6h/coniques]]) sont aussi des lieux. Identifier la nature demande souvent de distinguer des cas ' +
               'qui se ressemblent beaucoup en apparence — un seuil, une somme ou une différence.',
           ],
         },
@@ -2389,7 +2389,7 @@ export const lieuxGeometriques: ChapterContent = {
             'Le « cercle d\'Apollonius » que tu viens de retrouver porte le nom du ' +
             'mathématicien grec **Apollonius de Perga** (environ 262–190 avant J.-C.), surnommé ' +
             '« le Grand Géomètre » par ses contemporains. Son traité Coniques (tu le retrouveras ' +
-            'au chapitre suivant) reste l\'un des sommets des mathématiques grecques — mais il a ' +
+            'avec [[6e-6h/coniques]]) reste l\'un des sommets des mathématiques grecques — mais il a ' +
             'aussi écrit un ouvrage aujourd\'hui perdu, Lieux plans, entièrement consacré à ce ' +
             'type de problème : retrouver quelle courbe trace un point soumis à une condition de ' +
             'distance. Le texte original a disparu, mais son contenu nous est connu grâce à ' +
@@ -3538,7 +3538,7 @@ export const lieuxGeometriques: ChapterContent = {
       ],
     },
     forward:
-      "Au chapitre 10, tu retrouveras ces méthodes pour les coniques : la parabole, l'ellipse et " +
+      "Dans [[6e-6h/coniques]], tu retrouveras ces méthodes pour les coniques : la parabole, l'ellipse et " +
       "l'hyperbole sont elles aussi des lieux géométriques, définis par une condition de distance à un " +
       'foyer et à une directrice.',
     entrainement: {

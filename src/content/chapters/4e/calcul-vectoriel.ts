@@ -1957,7 +1957,7 @@ export const calculVectoriel: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Pour aller plus loin : compare avec Al-Kashi (chapitre 5), ' +
+                'Pour aller plus loin : compare avec Al-Kashi ([[4e/cercle-trigonometrique-triangles#triangle]]), ' +
                 '$BC^2 = AB^2 + AC^2 - 2 \\cdot AB \\cdot AC \\cdot \\cos\\hat{A}$. Le produit scalaire ' +
                 'vaut donc $AB \\cdot AC \\cdot \\cos\\hat{A}$ : il est nul exactement quand ' +
                 '$\\cos\\hat{A} = 0$, c\'est-à-dire quand $\\hat{A} = 90°$.',
@@ -2291,10 +2291,10 @@ export const calculVectoriel: ChapterContent = {
         },
         {
           kind: 'rappel',
-          label: 'Rappel — vers le chapitre 7',
+          label: 'Pour la suite — la géométrie analytique',
           items: [
             'Le vecteur directeur sert à décrire une droite par une équation paramétrique ou ' +
-              'cartésienne. Tu le retrouveras au centre du chapitre 7, Géométrie analytique plane.',
+              'cartésienne. Tu le retrouveras au centre de [[4e/geometrie-analytique-plane#reperer]].',
           ],
         },
       ],
@@ -2390,7 +2390,7 @@ export const calculVectoriel: ChapterContent = {
       id: 'applications',
       number: 17,
       title: 'Applications physiques : la résultante',
-      kicker: 'R² = F₁² + F₂² + 2·F₁·F₂·cos θ (Al-Kashi, loi des cosinus, chapitre 5)',
+      kicker: 'R² = F₁² + F₂² + 2·F₁·F₂·cos θ (Al-Kashi, loi des cosinus)',
       titreCourt: 'La résultante (physique)',
       partie: 'Comparer, appliquer, réviser',
       essentiel: [
@@ -2418,7 +2418,7 @@ export const calculVectoriel: ChapterContent = {
           kind: 'para',
           text:
             'Deux forces ou deux vitesses s\'additionnent comme des vecteurs. Leur ' +
-            '**résultante** se calcule avec Al-Kashi (loi des cosinus), vu au chapitre précédent. Le ' +
+            '**résultante** se calcule avec Al-Kashi (loi des cosinus), vue dans [[4e/cercle-trigonometrique-triangles#triangle]]. Le ' +
             'triangle formé par les deux vecteurs et leur somme n\'est presque jamais rectangle !',
         },
         {
@@ -2474,7 +2474,7 @@ export const calculVectoriel: ChapterContent = {
               kind: 'para',
               text:
                 'Al-Kashi donne donc $R^2 = F_1^2 + F_2^2 - 2F_1F_2\\cos(180° - \\theta)$. Or ' +
-                '$\\cos(180° - \\theta) = -\\cos\\theta$ (angles associés, chapitre 5). D\'où ' +
+                '$\\cos(180° - \\theta) = -\\cos\\theta$ (angles associés, [[4e/cercle-trigonometrique-triangles#associes]]). D\'où ' +
                 '$R^2 = F_1^2 + F_2^2 + 2F_1F_2\\cos\\theta$.',
             },
           ],
@@ -2496,7 +2496,7 @@ export const calculVectoriel: ChapterContent = {
           text:
             'La calculatrice (arcsin) renvoie toujours un angle **aigu** α₀, alors que ' +
             '$\\sin(180° - \\alpha_0) = \\sin\\alpha_0$ : c\'est l\'ambiguïté de la loi des sinus ' +
-            'vue au chapitre 5 (sections 4 et 6). Vérifie donc le signe de ' +
+            'vue dans [[4e/cercle-trigonometrique-triangles#associes]] et [[4e/cercle-trigonometrique-triangles#triangle]]. Vérifie donc le signe de ' +
             '$F_1 + F_2 \\cos\\theta$, la composante de la résultante le long de $\\vec{F_1}$ : ' +
             's\'il est **négatif**, la résultante penche vers l\'arrière, la déviation est ' +
             'obtuse et vaut $180° - \\alpha_0$ (et non α₀). ' +
@@ -2953,7 +2953,7 @@ export const calculVectoriel: ChapterContent = {
       ],
     },
     forward:
-      'Dès le chapitre 7, Géométrie analytique plane, le vecteur directeur sert à écrire les ' +
+      'En géométrie analytique ([[4e/geometrie-analytique-plane]]), le vecteur directeur sert à écrire les ' +
       'équations d\'une droite, et colinéarité et orthogonalité deviennent des tests de ' +
       'parallélisme et de perpendicularité. Composantes, norme et produit scalaire reviendront ' +
       'aussi plus tard.',

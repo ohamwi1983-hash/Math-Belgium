@@ -27,10 +27,10 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       },
       {
         kind: 'intuition',
-        label: 'Tu connais déjà ça',
+        label: 'La parabole, point de départ',
         text:
-          'Au chapitre 1, tu as déjà appris à connaître $x^2$ à fond : domaine, sommet, ' +
-          'transformations. Ici, tu vas faire exactement la même chose, mais avec cinq ' +
+          'La fonction $x^2$ — domaine, sommet, transformations — est étudiée à fond dans ' +
+          '[[4e/fonction-second-degre#transformer]]. Ici, tu vas faire exactement la même chose, mais avec cinq ' +
           'nouvelles courbes en plus de la parabole. Une fois que tu sais « lire » une famille ' +
           'de référence, tu sais les lire toutes — c\'est la même grille de lecture à chaque fois.',
       },
@@ -886,7 +886,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Comme au chapitre 1 pour la parabole, tu peux translater, étirer, comprimer et ' +
+            'Comme pour la parabole ([[4e/fonction-second-degre#transformer]]), tu peux translater, étirer, comprimer et ' +
             'réfléchir n\'importe laquelle des 6 fonctions de référence. Cette fois, il y a deux ' +
             'transformations en plus (horizontales). Pour une parabole seule, elles n\'avaient ' +
             'pas besoin d\'être distinguées.',
@@ -956,7 +956,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         },
         {
           kind: 'attention',
-          label: 'Le piège du signe — toujours le même qu\'au chapitre 1',
+          label: 'Le piège du signe — le même que pour la parabole',
           text:
             '$f(x) = (x+3)^3$ se lit $g(x-TH)$ avec $x-TH = x+3$, donc $TH = -3$. C\'est une ' +
             'translation de 3 vers la **gauche**, pas vers la droite ! Le signe à l\'intérieur ' +

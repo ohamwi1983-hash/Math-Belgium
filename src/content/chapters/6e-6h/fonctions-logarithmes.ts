@@ -52,7 +52,7 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Au chapitre 2, tu as vu que $\\exp_a$ ($a>0$, $a \\neq 1$) est strictement ' +
+            'On sait ([[6e-6h/fonctions-exponentielles#derivee]]) que $\\exp_a$ ($a>0$, $a \\neq 1$) est strictement ' +
             'croissante si $a>1$, et strictement décroissante si $0<a<1$. Dans les deux cas, ' +
             'elle est strictement monotone, donc **injective** : elle admet une fonction ' +
             'réciproque. On l\'appelle **logarithme de base a**, notée $\\log_a$ — et elle ' +
@@ -313,7 +313,7 @@ export const fonctionsLogarithmes: ChapterContent = {
               text:
                 'Prends $a>0$, $a \\neq 1$, et $x,y>0$. Toute la démonstration tient en une ' +
                 'seule idée : réécris $x$ et $y$ comme des **puissances de la base** $a$, puis ' +
-                'réutilise les règles de calcul sur les exposants du chapitre 2.',
+                'réutilise les règles de calcul sur les exposants ([[6e-6h/fonctions-exponentielles#limites]]).',
             },
             {
               kind: 'para',
@@ -329,7 +329,7 @@ export const fonctionsLogarithmes: ChapterContent = {
               kind: 'para',
               text:
                 '**Étape 2.** L\'argument est maintenant un produit de deux puissances de même ' +
-                'base $a$. La propriété des puissances $a^p \\cdot a^q = a^{p+q}$ (chapitre 2) ' +
+                'base $a$. La propriété des puissances $a^p \\cdot a^q = a^{p+q}$ ' +
                 'permet de n\'en garder qu\'une seule, en **additionnant** les exposants :',
             },
             {
@@ -378,7 +378,7 @@ export const fonctionsLogarithmes: ChapterContent = {
               kind: 'para',
               text:
                 '**Étape 2.** L\'argument est une puissance de puissance : par ' +
-                '$(a^p)^r = a^{p \\cdot r}$ (chapitre 2), les deux exposants se **multiplient** :',
+                '$(a^p)^r = a^{p \\cdot r}$, les deux exposants se **multiplient** :',
             },
             {
               kind: 'para',
@@ -426,7 +426,7 @@ export const fonctionsLogarithmes: ChapterContent = {
               kind: 'para',
               text:
                 '**Étape 2.** L\'argument est un quotient de deux puissances de même base $a$ : ' +
-                'par $a^p / a^q = a^{p-q}$ (chapitre 2), les exposants se **soustraient** :',
+                'par $a^p / a^q = a^{p-q}$, les exposants se **soustraient** :',
             },
             {
               kind: 'para',
@@ -529,7 +529,7 @@ export const fonctionsLogarithmes: ChapterContent = {
               kind: 'para',
               text:
                 '**Étape 2.** Le membre de droite est une puissance de puissance : par ' +
-                '$(b^p)^x = b^{p \\cdot x}$ (chapitre 2), les exposants se multiplient :',
+                '$(b^p)^x = b^{p \\cdot x}$, les exposants se multiplient :',
             },
             { kind: 'para', text: '$= b^{\\,x \\cdot \\log_b(a)} \\qquad \\blacksquare$' },
             {
@@ -753,10 +753,10 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'astuce',
           label: 'Le logarithme népérien : le cas particulier a = e',
           text:
-            'Le nombre $e$ (introduit au chapitre 2 comme l\'unique base pour laquelle ' +
+            'Le nombre $e$ (introduit dans [[6e-6h/fonctions-exponentielles#derivee]] comme l\'unique base pour laquelle ' +
             '$\\exp_a\' = \\exp_a$) donne un logarithme particulièrement important : $\\log_e$, ' +
             'la fonction réciproque de $\\exp$. Le **logarithme népérien** $\\ln$, lui, a été ' +
-            'introduit au chapitre 2 par une tout autre voie — comme le coefficient qui apparaît ' +
+            'introduit par une tout autre voie ([[6e-6h/fonctions-exponentielles#derivee]]) — comme le coefficient qui apparaît ' +
             'dans la dérivée $(a^x)\' = a^x \\cdot \\ln(a)$. Ces deux fonctions, définies ' +
             'indépendamment l\'une de l\'autre, sont en fait **la même** : c\'est l\'objet du ' +
             'théorème démontré juste après. Tu notes donc $\\ln$ plutôt que $\\log_e$. Le ' +
@@ -796,7 +796,7 @@ export const fonctionsLogarithmes: ChapterContent = {
               kind: 'para',
               text:
                 '$= e^{\\,x \\cdot \\log_e(a)} \\cdot \\left(x \\cdot \\log_e(a)\\right)\'$ — ' +
-                'règle de la chaîne, et $\\exp\' = \\exp$ (chapitre 2)',
+                'règle de la chaîne, et $\\exp\' = \\exp$ ([[6e-6h/fonctions-exponentielles#derivee]])',
             },
             {
               kind: 'para',
@@ -814,8 +814,8 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                '**Deuxième calcul** — la formule déjà connue. Le chapitre 2 avait établi ' +
-                'directement, pour toute base $a>0$ : $(a^x)\' = a^x \\cdot \\ln(a)$.',
+                '**Deuxième calcul** — la formule déjà connue. Les exponentielles ' +
+                '([[6e-6h/fonctions-exponentielles#derivee]]) donnent directement, pour toute base $a>0$ : $(a^x)\' = a^x \\cdot \\ln(a)$.',
             },
             {
               kind: 'para',
@@ -881,7 +881,7 @@ export const fonctionsLogarithmes: ChapterContent = {
               kind: 'para',
               text:
                 '$= \\left(r \\cdot a^{t}\\right) \\cdot a^{sx}$ — on **sépare l\'exposant** : ' +
-                'par $a^{p+q} = a^p \\cdot a^q$ (chapitre 2), $a^{sx+t} = a^{sx} \\cdot a^{t}$, ' +
+                'par $a^{p+q} = a^p \\cdot a^q$, $a^{sx+t} = a^{sx} \\cdot a^{t}$, ' +
                 'et $a^{t}$ est une constante que l\'on regroupe avec $r$',
             },
             {
@@ -1122,8 +1122,8 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Deux nouvelles techniques s\'ajoutent à l\'identification de bases vue au ' +
-            'chapitre 2 : applique $\\log_a$ aux deux membres d\'une équation exponentielle de ' +
+            'Deux nouvelles techniques s\'ajoutent à l\'identification de bases ' +
+            '([[6e-6h/fonctions-exponentielles#equations]]) : applique $\\log_a$ aux deux membres d\'une équation exponentielle de ' +
             'base $a$, ou $\\exp_a$ aux deux membres d\'une équation logarithmique de base $a$ ' +
             '— puisque les deux fonctions sont réciproques l\'une de l\'autre, pour **toute** ' +
             'base $a>0$, $a \\neq 1$.',
@@ -1362,8 +1362,8 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                '$x = e^2$ ou $x = e^{-1}$. Contrairement à la substitution $t=e^x$ du ' +
-                'chapitre 2, ici **aucune racine t n\'est à rejeter** : $\\log_a(x)$ peut ' +
+                '$x = e^2$ ou $x = e^{-1}$. Contrairement à la substitution $t=e^x$ ' +
+                '([[6e-6h/fonctions-exponentielles#equations]]), ici **aucune racine t n\'est à rejeter** : $\\log_a(x)$ peut ' +
                 'prendre n\'importe quelle valeur réelle, et $x=a^t$ reste positif quel que ' +
                 'soit t et quelle que soit la base a.',
             },
@@ -1373,7 +1373,7 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'astuce',
           label: 'Combiner les deux chapitres',
           text:
-            '$e^{2x} - 3e^x + 2 = 0$ (vu au chapitre 2, $t=e^x$) donnait $x=0$ ou $x=\\ln(2)$ ' +
+            '$e^{2x} - 3e^x + 2 = 0$ ([[6e-6h/fonctions-exponentielles#equations]], $t=e^x$) donnait $x=0$ ou $x=\\ln(2)$ ' +
             '— la solution non nulle s\'exprime ici naturellement avec $\\ln$, exactement le ' +
             'genre de sortie que ce chapitre permet enfin d\'écrire simplement.',
         },
@@ -1431,8 +1431,8 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'intuition',
           label: 'Le même réflexe qu\'avec les exponentielles',
           text:
-            "Tu as déjà rencontré cette bascule au chapitre 2, pour comparer deux " +
-            "exponentielles de même base : une fonction croissante conserve le sens d'une " +
+            "Cette bascule sert déjà à comparer deux exponentielles de même base " +
+            "([[6e-6h/fonctions-exponentielles#inequations]]) : une fonction croissante conserve le sens d'une " +
             "inégalité, une fonction décroissante l'inverse. $\\log_a$ obéit à la même " +
             "logique — rien de nouveau à apprendre, juste à réappliquer ce réflexe une fois " +
             "de plus, cette fois côté logarithmes.",
@@ -1443,7 +1443,7 @@ export const fonctionsLogarithmes: ChapterContent = {
           items: [
             'Pour toute base $a>0$, $a \\neq 1$, $\\log_a$ est strictement **croissante** si ' +
               '$a>1$, et strictement **décroissante** si $0<a<1$ — exactement comme pour ' +
-              'l\'exponentielle de base a vue au chapitre 2. Comparer deux logarithmes de même ' +
+              'l\'exponentielle de base a ([[6e-6h/fonctions-exponentielles#inequations]]). Comparer deux logarithmes de même ' +
               'base **conserve** donc le sens de l\'inégalité si $a>1$, et l\'**inverse** si $0<a<1$ :',
             'Si $a>1$ : $\\log_a(u) \\le \\log_a(v) \\iff u \\le v$. Si $0<a<1$ : ' +
               '$\\log_a(u) \\le \\log_a(v) \\iff u \\ge v$.',
@@ -1467,7 +1467,7 @@ export const fonctionsLogarithmes: ChapterContent = {
               kind: 'para',
               text:
                 '**1) Sens** $\\implies$, en s\'appuyant sur $\\exp_a$. Puisque $0<a<1$, la ' +
-                'fonction $\\exp_a$ est strictement **décroissante** (chapitre 2) : appliquée ' +
+                'fonction $\\exp_a$ est strictement **décroissante** : appliquée ' +
                 'aux deux membres d\'une inégalité stricte, elle en **inverse** le sens.',
             },
             {
@@ -1517,7 +1517,7 @@ export const fonctionsLogarithmes: ChapterContent = {
               kind: 'para',
               text:
                 '**1) Sens** $\\implies$. Puisque $a>1$, la fonction $\\exp_a$ est strictement ' +
-                '**croissante** (chapitre 2) : appliquée aux deux membres, elle **conserve** le ' +
+                '**croissante** : appliquée aux deux membres, elle **conserve** le ' +
                 'sens de l\'inégalité.',
             },
             {
@@ -1828,7 +1828,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                '**Étape 2.** Le chapitre 2 a établi que $\\exp$ est **sa propre dérivée** : ' +
+                '**Étape 2.** On sait ([[6e-6h/fonctions-exponentielles#derivee]]) que $\\exp$ est **sa propre dérivée** : ' +
                 '$\\exp\' = \\exp$. Tu peux donc remplacer $\\exp\'$ par $\\exp$ au ' +
                 'dénominateur, sans rien changer d\'autre :',
             },
@@ -1978,7 +1978,7 @@ export const fonctionsLogarithmes: ChapterContent = {
               '$]-\\infty;0[$, $\\ln|x| = \\ln(-x)$, de dérivée $\\dfrac{-1}{-x} = \\dfrac{1}{x}$ (règle de la chaîne).',
             'Plus généralement, $(\\ln|u(x)|)\' = \\dfrac{u\'(x)}{u(x)}$ là où $u(x) \\neq 0$ — et le domaine ' +
               'de $\\ln|u|$ est l\'ensemble des x tels que $u(x) \\neq 0$.',
-            'Pont vers le chapitre 4 : lue à l\'envers, $(\\ln|x|)\' = \\dfrac{1}{x}$ dit qu\'une primitive de ' +
+            'Pont vers les primitives ([[6e-6h/primitives-integrales#primitives]]) : lue à l\'envers, $(\\ln|x|)\' = \\dfrac{1}{x}$ dit qu\'une primitive de ' +
               '$\\dfrac{1}{x}$ est $\\ln|x|$.',
           ],
         },
@@ -2202,8 +2202,8 @@ export const fonctionsLogarithmes: ChapterContent = {
                 '$n$, alors $h\'=0$ et il reste $\\dfrac{n \\cdot g\'}{g} \\cdot g^{n} = n \\cdot ' +
                 'g^{n-1} \\cdot g\'$ : la dérivée d\'une puissance usuelle. Si $g$ est ' +
                 '**constante** égale à $a>0$, alors $g\'=0$ et il reste ' +
-                '$h\' \\cdot \\ln(a) \\cdot a^{h}$ : la dérivée d\'une exponentielle composée du ' +
-                'chapitre 2. La formule générale contient bien les deux règles connues comme ' +
+                '$h\' \\cdot \\ln(a) \\cdot a^{h}$ : la dérivée d\'une exponentielle composée ' +
+                '([[6e-6h/fonctions-exponentielles#derivee]]). La formule générale contient bien les deux règles connues comme ' +
                 'cas particuliers.',
             },
           ],
@@ -2412,7 +2412,7 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'methode',
           label: 'Classement complet des croissances',
           items: [
-            'Le chapitre 2 avait établi que $e^x$ finit toujours par dominer tout polynôme. Ce ' +
+            'On sait ([[6e-6h/fonctions-exponentielles#limites]]) que $e^x$ finit toujours par dominer tout polynôme. Ce ' +
               'chapitre ajoute le troisième étage de la hiérarchie : les fonctions logarithmes ' +
               'sont, à leur tour, dominées par **toute** fonction puissance de degré strictement ' +
               'positif. Plus précisément, pour a>1, n>0, b>1, et x suffisamment grand : ' +
@@ -2550,7 +2550,7 @@ export const fonctionsLogarithmes: ChapterContent = {
               'base e si commode :',
             '$\\displaystyle\\lim_{u \\to 0} \\dfrac{\\ln(1+u)}{u} = 1$',
             'C\'est le nombre dérivé de $\\ln$ en 1 — analogue exact de la limite fondamentale ' +
-              '$(e^x-1)/x \\to 1$ du chapitre 2 (elle aussi spécifique à la base e).',
+              '$(e^x-1)/x \\to 1$ ([[6e-6h/fonctions-exponentielles#limites]], elle aussi spécifique à la base e).',
           ],
         },
         {
@@ -2681,7 +2681,7 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Comme au chapitre 2, tu peux retrouver des paramètres inconnus d\'une fonction à ' +
+            'Comme pour les exponentielles ([[6e-6h/fonctions-exponentielles#problemes]]), tu peux retrouver des paramètres inconnus d\'une fonction à ' +
             'partir d\'informations lues sur son graphique — un point, une tangente, une ' +
             'asymptote. Pour une fonction du type $f(x) = a + b \\cdot \\ln(x)$, le fait que ' +
             '$\\ln(1)=0$ rend la lecture particulièrement directe.',
@@ -3036,7 +3036,7 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Même principe qu\'au chapitre 2 : le signe de f\' donne le sens de variation de ' +
+            'Même principe que pour les exponentielles ([[6e-6h/fonctions-exponentielles#graphique]]) : le signe de f\' donne le sens de variation de ' +
             'f, et un changement de signe de f\' repère un extremum.',
         },
         {
@@ -3548,7 +3548,8 @@ export const fonctionsLogarithmes: ChapterContent = {
           text:
             'Pour répondre à « à partir de quel instant une quantité dépasse-t-elle un seuil ' +
             'donné ? », isole le terme exponentiel puis applique ln — exactement la même ' +
-            'démarche qu\'au chapitre 2, désormais menée jusqu\'au bout.',
+            'démarche que pour les exponentielles ([[6e-6h/fonctions-exponentielles#problemes]]), ' +
+            'désormais menée jusqu\'au bout.',
         },
         {
           kind: 'exemple',
@@ -3779,7 +3780,7 @@ export const fonctionsLogarithmes: ChapterContent = {
     },
     forward:
       '$\\ln$ et $\\exp$ se défont mutuellement, et $\\ln$ est dominée par toute puissance de $x$ en ' +
-      '$+\\infty$. Au chapitre 4, la dérivée $(\\ln|x|)\' = \\dfrac{1}{x}$ se lira à l\'envers : une ' +
+      '$+\\infty$. Dans [[6e-6h/primitives-integrales#primitives]], la dérivée $(\\ln|x|)\' = \\dfrac{1}{x}$ se lira à l\'envers : une ' +
       'primitive de $\\dfrac{1}{x}$ est $\\ln|x|$ — le logarithme reviendra dans toutes les intégrales ' +
       'de la forme $\\dfrac{u\'}{u}$.',
     entrainement: {

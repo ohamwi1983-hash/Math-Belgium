@@ -7,7 +7,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
   title: 'Équations et inéquations du second degré',
   slug: 'equations-inequations-second-degre',
   lede:
-    'Au chapitre 1, tu as appris à lire une parabole. Dans ce chapitre-ci, tu vas apprendre à ' +
+    'Lire une parabole ne suffit pas toujours. Dans ce chapitre, tu vas apprendre à ' +
     'résoudre — vite et sans te tromper. Tu vas reconnaître la bonne technique pour une ' +
     'équation $ax^2+bx+c=0$, en déduire le signe d\'un trinôme ou d\'un produit de facteurs, ' +
     'puis utiliser ces outils avec des fractions et des inéquations.',
@@ -20,8 +20,8 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         kind: 'para',
         text:
           'Résoudre $ax^2+bx+c=0$, c\'est trouver les valeurs de x qui donnent 0 quand on les ' +
-          'remplace dans l\'expression. Au chapitre 1, tu trouvais ces valeurs en lisant un ' +
-          'graphique — on les appelait les **zéros**. Ici, tu vas les calculer directement, ' +
+          'remplace dans l\'expression. Sur un graphique, ces valeurs se lisent là où la parabole ' +
+          'coupe l\'axe des x : ce sont ses **zéros** ([[4e/fonction-second-degre#etudier]]). Ici, tu vas les calculer directement, ' +
           'sans dessiner.',
       },
       {
@@ -162,9 +162,9 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         { kind: 'subheading', text: 'Le cas général — la formule du discriminant' },
         {
           kind: 'intuition',
-          label: 'Tu as déjà vu ça, au chapitre 1',
+          label: 'Lien avec la parabole',
           text:
-            'Au chapitre 1, tu lisais le nombre de zéros d\'une parabole sur son graphique : ' +
+            'Sur le graphique d\'une parabole ([[4e/fonction-second-degre#etudier]]), on lit son nombre de zéros : ' +
             'deux fois où elle coupe l\'axe des x, une seule (elle le touche du bout, au ' +
             'sommet), ou jamais. Le signe de $\\Delta$ te donne exactement cette information, ' +
             'mais par le calcul, sans dessiner : $\\Delta>0$ donne deux solutions, $\\Delta=0$ ' +
@@ -378,7 +378,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           kind: 'historique',
           titre: 'Un carré, dix racines, trente-neuf : la démonstration en dessin',
           text:
-            'Tu as rencontré **al-Khwārizmī** au chapitre 1. Voici comment il résolvait, vers 820, ' +
+            '**Al-Khwārizmī** apparaît aussi dans [[4e/fonction-second-degre#transformer]]. Voici comment il résolvait, vers 820, ' +
             '« un carré et dix racines égalent trente-neuf » ($x^2 + 10x = 39$), sans aucune lettre : ' +
             'il dessine un carré de côté x, lui accole deux rectangles de largeur 5, puis ajoute le ' +
             'petit carré manquant, d\'aire 25. Le grand carré obtenu a pour aire 39 + 25 = 64, donc ' +
@@ -1179,7 +1179,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Au chapitre 1, tu lisais des valeurs sur une parabole. On peut aussi y lire la ' +
+                'Sur une parabole, on lit des valeurs ([[4e/fonction-second-degre#etudier]]). On peut aussi y lire la ' +
                 'solution d\'une inéquation. Soit $f(x) = -x^2+4x+1$ : pour quelles valeurs de x ' +
                 'a-t-on $f(x) \\geq 4$ ?',
             },
@@ -2039,8 +2039,8 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Au chapitre 1, tu as modélisé une situation concrète par une fonction du second ' +
-            'degré pour en trouver l\'optimum. Avec les méthodes de ce chapitre, tu peux ' +
+            'Une situation concrète se modélise par une fonction du second degré pour en trouver ' +
+            'l\'optimum ([[4e/fonction-second-degre#utiliser]]). Avec les méthodes de ce chapitre, tu peux ' +
             'maintenant répondre à une autre question : **quand** la grandeur atteint-elle, ou ' +
             'dépasse-t-elle, une valeur donnée ?',
         },
@@ -2208,12 +2208,12 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         },
         {
           kind: 'astuce',
-          label: 'Astuce — nouveau depuis le chapitre 1',
+          label: 'Astuce — nouveau dans ce quiz',
           text:
             'Ce quiz utilise beaucoup le discriminant $\\Delta = b^2-4ac$, sa formule ' +
             '$x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$, et les relations de Viète ' +
-            '($S = -b/a$, $P = c/a$). Le quiz du chapitre 1 ne les utilisait pas : c\'est le ' +
-            'premier quiz qui les utilise.',
+            '($S = -b/a$, $P = c/a$). Le quiz de la fonction ' +
+            'du second degré ([[4e/fonction-second-degre#revision]]) ne les utilise pas ; celui-ci, oui.',
         },
         {
           kind: 'entrainement',
@@ -2357,7 +2357,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       ],
     },
     forward:
-      'Au chapitre 3 (fonctions de référence), tu résoudras des équations comme ' +
+      'Avec les fonctions de référence ([[4e/caracteristiques-fonctions-reference#algebrique]]), tu résoudras des équations comme ' +
       '$\\sqrt{x+2} = x$ : en élevant au carré, une équation du second degré apparaît, avec ses ' +
       'solutions étrangères — la même vigilance que pour l\'inconnue au dénominateur.',
   },

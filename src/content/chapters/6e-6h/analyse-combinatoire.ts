@@ -2230,7 +2230,7 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'intuition',
           label: 'Ce que tu sais déjà',
           text:
-            'Au chapitre 6, tu as déjà rencontré ce problème en probabilités : avec 3 dés ' +
+            'Ce problème se pose aussi en probabilités ([[6e-6h/probabilites#probabilitesensembles]]) : avec 3 dés ' +
             'équilibrés, les 216 triplets ordonnés sont équiprobables, et $P(\\text{somme}=9) = ' +
             '\\frac{25}{216}$ contre $P(\\text{somme}=10) = \\frac{27}{216}$. Ici, on refait le ' +
             'comptage avec les outils du chapitre : combien d\'ordres pour chaque décomposition ?',
@@ -2447,7 +2447,7 @@ export const analyseCombinatoire: ChapterContent = {
               text:
                 'Les cas étant équiprobables, $P(k) = \\dfrac{\\text{cas favorables}}{\\text{cas possibles}} ' +
                 '= \\dfrac{C_K^k \\times C_{N-K}^{n-k}}{C_N^n}$ — **définition de la probabilité ' +
-                'd\'un événement (chapitre 6)**.',
+                'd\'un événement** ([[6e-6h/probabilites#probabilitesensembles]]).',
             },
           ],
         },
@@ -2787,7 +2787,7 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'intuition',
           label: 'Ce que tu sais déjà',
           text:
-            'Au chapitre 6, tu as justifié les épreuves répétées par l\'arbre : ' +
+            'En probabilités ([[6e-6h/probabilites#probabilitesproblemes]]), les épreuves répétées se justifient par l\'arbre : ' +
             '$P(X=k) = N_k \\times p^k(1-p)^{n-k}$, où $N_k$ est le nombre de chemins qui comptent ' +
             'exactement $k$ succès — et tu les comptais un par un. Ce chapitre donne enfin ce ' +
             'nombre directement : $N_k = C_n^k$.',
@@ -2973,8 +2973,8 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'para',
           text:
-            'La loi binomiale revient au chapitre 8 (« Variables aléatoires et lois de ' +
-            'probabilités ») : tu y calculeras aussi le nombre moyen de succès, l\'espérance ' +
+            'La loi binomiale revient dans [[6e-6h/variables-aleatoires#loibinomiale]] : ' +
+            'tu y calculeras aussi le nombre moyen de succès, l\'espérance ' +
             '$E(X) = np$.',
         },
         {

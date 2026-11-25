@@ -373,7 +373,7 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'intuition',
           label: 'Ce que tu sais déjà',
           text:
-            "Au chapitre 7 (§ 5), tu as calculé la probabilité d'obtenir exactement $k$ succès en tirant $n$ éléments **sans remise** dans une population de $N$ éléments dont $K$ sont des succès : $P(X=k)=\\dfrac{C_K^k\\times C_{N-K}^{n-k}}{C_N^n}$. Rien de neuf pour cette formule : ce qui est nouveau ici, c'est de voir $X$ comme une variable aléatoire, d'écrire **toute** sa loi et de calculer son **espérance**.",
+            "Dans [[6e-6h/analyse-combinatoire#probabilitehypergeometrique]], on calcule la probabilité d'obtenir exactement $k$ succès en tirant $n$ éléments **sans remise** dans une population de $N$ éléments dont $K$ sont des succès : $P(X=k)=\\dfrac{C_K^k\\times C_{N-K}^{n-k}}{C_N^n}$. Rien de neuf pour cette formule : ce qui est nouveau ici, c'est de voir $X$ comme une variable aléatoire, d'écrire **toute** sa loi et de calculer son **espérance**.",
         },
         {
           kind: 'para',
@@ -629,7 +629,7 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'intuition',
           label: 'Ce que tu sais déjà',
           text:
-            "La loi binomiale n'est pas nouvelle : au chapitre 6 (§ 4), tu as justifié les épreuves répétées en comptant les chemins de l'arbre ; au chapitre 7 (§ 6), tu as écrit $P(X=k)=C_n^k\\times p^k\\times(1-p)^{n-k}$ et choisi entre un terme unique, une somme ou le complément pour « exactement », « au moins » et « au plus ». Ce qui est **nouveau** ici : la loi **complète** de $X$, son **espérance**, sa **variance** et son **écart-type**, et la recherche du nombre d'épreuves $n$.",
+            "La loi binomiale n'est pas nouvelle : en probabilités ([[6e-6h/probabilites#probabilitesproblemes]]), on justifie les épreuves répétées en comptant les chemins de l'arbre ; en analyse combinatoire ([[6e-6h/analyse-combinatoire#binomialesequence]]), on écrit $P(X=k)=C_n^k\\times p^k\\times(1-p)^{n-k}$ et choisi entre un terme unique, une somme ou le complément pour « exactement », « au moins » et « au plus ». Ce qui est **nouveau** ici : la loi **complète** de $X$, son **espérance**, sa **variance** et son **écart-type**, et la recherche du nombre d'épreuves $n$.",
         },
         {
           kind: 'definition',
@@ -735,7 +735,7 @@ export const variablesAleatoires: ChapterContent = {
           tag: 'binomiale-positions-widget',
           label: 'Manipule toi-même : la loi binomiale complète',
           caption:
-            'Rappel du chapitre 6 : fais glisser n et p, choisis k, et compare le calcul juste aux ' +
+            'Rappel de [[6e-6h/probabilites#probabilitesproblemes]] : fais glisser n et p, choisis k, et compare le calcul juste aux ' +
             'deux pièges (oublier les positions, additionner les p). Règle n = 5 et p = 0,4 pour ' +
             'retrouver la loi de l’exemple ci-dessus, avec P(X = 2) = 0,3456.',
         },
@@ -749,7 +749,7 @@ export const variablesAleatoires: ChapterContent = {
             },
             {
               kind: 'para',
-              text: "C'est le développement de $(a+b)^n=\\displaystyle\\sum_{k=0}^{n}C_n^k\\,a^{n-k}b^k$ avec $a=1-p$ et $b=p$ — **binôme de Newton (chapitre 7)**.",
+              text: "C'est le développement de $(a+b)^n=\\displaystyle\\sum_{k=0}^{n}C_n^k\\,a^{n-k}b^k$ avec $a=1-p$ et $b=p$ — **binôme de Newton** ([[6e-6h/analyse-combinatoire#binomenewton]]).",
             },
             {
               kind: 'para',
@@ -785,7 +785,7 @@ export const variablesAleatoires: ChapterContent = {
           blocks: [
             {
               kind: 'para',
-              text: "Pour $1\\leq k\\leq n$ : $k\\,C_n^k=k\\times\\dfrac{n!}{k!\\,(n-k)!}$ $=n\\times\\dfrac{(n-1)!}{(k-1)!\\,(n-k)!}$ $=n\\,C_{n-1}^{k-1}$ — **définition de** $C_n^k$ **(chapitre 7)**.",
+              text: "Pour $1\\leq k\\leq n$ : $k\\,C_n^k=k\\times\\dfrac{n!}{k!\\,(n-k)!}$ $=n\\times\\dfrac{(n-1)!}{(k-1)!\\,(n-k)!}$ $=n\\,C_{n-1}^{k-1}$ — **définition de** $C_n^k$ ([[6e-6h/analyse-combinatoire#denombrementfondamental]]).",
             },
             {
               kind: 'para',
@@ -900,7 +900,7 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'astuce',
           label: 'Toujours vérifier n − 1 juste en dessous',
-          text: "Le calcul par logarithme donne une valeur décimale (ici $21{,}85$). Le bon réflexe : recalcule $P$ pour $n=22$ (doit dépasser le seuil) et pour $n=21$ (doit encore être en dessous), pour confirmer que 22 est vraiment le plus petit entier qui convient. Ce chapitre demande « **dépasse** le seuil » ($>$) ; au chapitre 6, on cherchait « **au moins** $0{,}95$ » ($\\geq$) : les deux donnent le même $n$, sauf si $\\dfrac{\\ln(1-s)}{\\ln(1-p)}$ tombe pile sur un entier.",
+          text: "Le calcul par logarithme donne une valeur décimale (ici $21{,}85$). Le bon réflexe : recalcule $P$ pour $n=22$ (doit dépasser le seuil) et pour $n=21$ (doit encore être en dessous), pour confirmer que 22 est vraiment le plus petit entier qui convient. Ce chapitre demande « **dépasse** le seuil » ($>$) ; en probabilités ([[6e-6h/probabilites#probabilitesproblemes]]), on cherche « **au moins** $0{,}95$ » ($\\geq$) : les deux donnent le même $n$, sauf si $\\dfrac{\\ln(1-s)}{\\ln(1-p)}$ tombe pile sur un entier.",
         },
         {
           kind: 'application',
@@ -1967,7 +1967,7 @@ export const variablesAleatoires: ChapterContent = {
           tag: 'bayes-test-medical-widget',
           label: 'Manipule toi-même : Bayes à deux catégories (rappel)',
           caption:
-            'Rappel du chapitre 6 avant de passer à trois catégories : règle la proportion de malades ' +
+            'Rappel de [[6e-6h/probabilites#independancebayes]] avant de passer à trois catégories : règle la proportion de malades ' +
             'et les deux taux de tests positifs, puis compare « malade sachant que le test est ' +
             'positif » à « test positif sachant que la personne est malade ». Les fréquences ' +
             'naturelles sur 1 000 personnes suivent la formule des probabilités totales.',
@@ -1976,7 +1976,7 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'definition',
           label: 'Probabilités totales et formule de Bayes',
           items: [
-            'Une population se partage en 3 catégories $C_1$, $C_2$, $C_3$, de probabilités $P(C_1)$, $P(C_2)$, $P(C_3)$ (somme 1). Un critère $S$ survient avec la probabilité $P(S\\mid C_i)$ dans chaque catégorie — la notation $P(A\\mid B)$ du chapitre 6. **Formule des probabilités totales** (3 termes) :',
+            'Une population se partage en 3 catégories $C_1$, $C_2$, $C_3$, de probabilités $P(C_1)$, $P(C_2)$, $P(C_3)$ (somme 1). Un critère $S$ survient avec la probabilité $P(S\\mid C_i)$ dans chaque catégorie — la notation $P(A\\mid B)$ ([[6e-6h/probabilites#probabilitesensembles]]). **Formule des probabilités totales** (3 termes) :',
             '$P(S) = P(C_1)\\,P(S\\mid C_1)$ $+\\,P(C_2)\\,P(S\\mid C_2)$ $+\\,P(C_3)\\,P(S\\mid C_3)$',
             "Probabilité « inverse » — appartenir à la catégorie $C_j$ sachant que le critère est survenu (**théorème de Bayes**) :",
             '$P(C_j\\mid S) = \\dfrac{P(C_j)\\,P(S\\mid C_j)}{P(S)}$',
@@ -1991,8 +1991,8 @@ export const variablesAleatoires: ChapterContent = {
             "à la Royal Society de Londres en 1763, sous le titre An Essay towards solving a Problem " +
             "in the Doctrine of Chances. La question de Bayes était de remonter des effets observés " +
             "vers leurs causes probables — exactement ce que fait $P(C_j\\mid S)$. Laplace " +
-            "redécouvre la formule de façon indépendante en 1774 et lui donne sa forme générale. Le " +
-            "chapitre 6 l'a utilisée avec deux causes (un test médical) ; ici, elle en compte trois.",
+            "redécouvre la formule de façon indépendante en 1774 et lui donne sa forme générale. " +
+            "En probabilités ([[6e-6h/probabilites#independancebayes]]), elle sert avec deux causes (un test médical) ; ici, elle en compte trois.",
         },
         {
           kind: 'illustration',
@@ -2061,7 +2061,7 @@ export const variablesAleatoires: ChapterContent = {
             },
             {
               kind: 'para',
-              text: '$P(S)=P(S\\cap C_1)+P(S\\cap C_2)$ $+\\,P(S\\cap C_3)$ et $P(S\\cap C_i)=P(C_i)\\,P(S\\mid C_i)$ — **probabilité d\'une réunion d\'événements incompatibles, puis définition d\'une probabilité conditionnelle (chapitre 6)**.',
+              text: '$P(S)=P(S\\cap C_1)+P(S\\cap C_2)$ $+\\,P(S\\cap C_3)$ et $P(S\\cap C_i)=P(C_i)\\,P(S\\mid C_i)$ — **probabilité d\'une réunion d\'événements incompatibles, puis définition d\'une probabilité conditionnelle** ([[6e-6h/probabilites#probabilitesensembles]]).',
             },
             {
               kind: 'para',
@@ -2587,7 +2587,7 @@ export const variablesAleatoires: ChapterContent = {
         },
         {
           kind: 'piege',
-          text: "Aucune loi du chapitre ne convient toujours : si la probabilité change d'une épreuve à l'autre sans que ce soit un tirage sans remise (un joueur qui progresse à chaque essai, par exemple), ce n'est ni binomial ni hypergéométrique. On construit alors la loi « à la main », avec un arbre (chapitre 6) et le § 1. Et une approximation (normale ou Poisson) remplace une binomiale **seulement** quand ses conditions sont vérifiées.",
+          text: "Aucune loi du chapitre ne convient toujours : si la probabilité change d'une épreuve à l'autre sans que ce soit un tirage sans remise (un joueur qui progresse à chaque essai, par exemple), ce n'est ni binomial ni hypergéométrique. On construit alors la loi « à la main », avec un arbre ([[6e-6h/probabilites#tiragesarbres]]) et le § 1. Et une approximation (normale ou Poisson) remplace une binomiale **seulement** quand ses conditions sont vérifiées.",
         },
         {
           kind: 'entrainement',

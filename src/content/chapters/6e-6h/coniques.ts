@@ -89,14 +89,14 @@ export const coniques: ChapterContent = {
           tag: 'trace-lieu-widget',
           label: 'Manipule toi-même : trace un lieu (rappel)',
           caption:
-            'Rappel du chapitre 9. Choisis une condition et promène M : il devient vert quand il la vérifie, et le lieu se dessine point par point. Les coniques de ce chapitre sont, elles aussi, des lieux définis par des distances : à un point et à une droite (la parabole), à deux points (l’ellipse et l’hyperbole, que l’atelier « Le jardinier » trace plus bas).',
+            'Rappel de [[6e-6h/lieux-geometriques#lieux-elimination]]. Choisis une condition et promène M : il devient vert quand il la vérifie, et le lieu se dessine point par point. Les coniques de ce chapitre sont, elles aussi, des lieux définis par des distances : à un point et à une droite (la parabole), à deux points (l’ellipse et l’hyperbole, que l’atelier « Le jardinier » trace plus bas).',
         },
         { kind: 'subheading', text: 'A. La parabole' },
         {
           kind: 'intuition',
           label: 'Ce que tu sais déjà (4e)',
           text:
-            R`Au chapitre 7 de 4e (géométrie analytique plane), tu as déjà rencontré la parabole comme lieu des points équidistants d'un foyer $F$ et d'une directrice $d$ : construction au compas, équation $x^2=2py$ quand le sommet est l'origine et l'axe vertical, puis $(x-x_S)^2=2p(y-y_S)$ après translation. Ici, on garde la même lettre et le même sens : $p=\text{dist}(F\,;d)$ — avec une seule différence d'écriture : $p$ est toujours **positif**, et c'est un signe dans l'équation ($y^2=-2px$, $x^2=-2py$) qui dit de quel côté la parabole s'ouvre. Cette partie va donc vite ; la nouveauté du chapitre, ce sont l'ellipse, l'hyperbole et ce qui réunit les trois.`,
+            R`En 4e ([[4e/geometrie-analytique-plane#parabole]]), tu as déjà rencontré la parabole comme lieu des points équidistants d'un foyer $F$ et d'une directrice $d$ : construction au compas, équation $x^2=2py$ quand le sommet est l'origine et l'axe vertical, puis $(x-x_S)^2=2p(y-y_S)$ après translation. Ici, on garde la même lettre et le même sens : $p=\text{dist}(F\,;d)$ — avec une seule différence d'écriture : $p$ est toujours **positif**, et c'est un signe dans l'équation ($y^2=-2px$, $x^2=-2py$) qui dit de quel côté la parabole s'ouvre. Cette partie va donc vite ; la nouveauté du chapitre, ce sont l'ellipse, l'hyperbole et ce qui réunit les trois.`,
         },
         {
           kind: 'definition',
@@ -433,7 +433,7 @@ export const coniques: ChapterContent = {
           tag: 'repere-affine-widget',
           label: 'Manipule toi-même : un cercle aplati par les unités (rappel)',
           caption:
-            'Rappel du chapitre 9. Avec des unités différentes sur les deux axes (préréglage « Unités différentes »), l’ensemble des points dont les coordonnées vérifient x² + y² = 4 n’est plus un cercle : c’est une ellipse, le « cercle aplati » ci-dessus vu autrement. Règle aussi l’angle entre les axes.',
+            'Rappel de [[6e-6h/lieux-geometriques#points-droites-remarquables]]. Avec des unités différentes sur les deux axes (préréglage « Unités différentes »), l’ensemble des points dont les coordonnées vérifient x² + y² = 4 n’est plus un cercle : c’est une ellipse, le « cercle aplati » ci-dessus vu autrement. Règle aussi l’angle entre les axes.',
         },
         {
           kind: 'exempleLibre',

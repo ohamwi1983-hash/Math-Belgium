@@ -2000,7 +2000,7 @@ export const statistiqueDescriptive: ChapterContent = {
     },
     forward:
       'Moyenne, médiane et écart-type reviennent tels quels dans le chapitre sur les ' +
-      'statistiques à deux variables et la corrélation (chapitre 6 de 5e). Ce sont les briques de base : tout le ' +
+      'statistiques à deux variables et la corrélation (en 5e, [[5e-4h/statistique-deux-variables]]). Ce sont les briques de base : tout le ' +
       'reste s\'appuie dessus.',
   },
 }
