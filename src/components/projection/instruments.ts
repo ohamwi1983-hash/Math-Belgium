@@ -40,6 +40,9 @@ export interface EtatCalculatrice {
   y: number
   /** Deux écrans : cachée sur l'écran de la classe (le professeur cherche un calcul). */
   masque: boolean
+  /** Punaise : la calculatrice reste ouverte, à sa place, d'une diapo à l'autre (sinon elle se ferme en
+   * changeant de diapo) jusqu'à ce qu'on la ferme. */
+  garde: boolean
   saisie: string
   mode: ModeAngle
   exact: boolean
@@ -60,7 +63,7 @@ export const LARGEUR_CALC = 336
 const DEPART: EtatInstruments = {
   equerre: { visible: false, x: 640, y: 470, angle: 0, trace: 'segment', verrou: false, mesure: null },
   compas: null,
-  calc: { visible: false, x: 1280 - LARGEUR_CALC - 24, y: 24, masque: false, saisie: '', mode: 'deg', exact: true, inverse: false, resultat: null, ans: 0 },
+  calc: { visible: false, x: 1280 - LARGEUR_CALC - 24, y: 24, masque: false, garde: false, saisie: '', mode: 'deg', exact: true, inverse: false, resultat: null, ans: 0 },
 }
 
 export class MagasinInstruments {
@@ -103,7 +106,8 @@ export class MagasinInstruments {
     this.maj((e) => ({ ...e, equerre: { ...e.equerre, ...p } }))
   }
   calc(p: Partial<EtatCalculatrice>) {
-    this.maj((e) => ({ ...e, calc: { ...e.calc, ...p } }))
+    // Rien ne change : rien n'est diffusé (les deux fenêtres ferment la calculatrice au changement de diapo).
+    this.maj((e) => ((Object.keys(p) as (keyof EtatCalculatrice)[]).every((k) => e.calc[k] === p[k]) ? e : { ...e, calc: { ...e.calc, ...p } }))
   }
   compas(c: EtatCompas | null) {
     this.maj((e) => (c === null && e.compas === null ? e : { ...e, compas: c }))

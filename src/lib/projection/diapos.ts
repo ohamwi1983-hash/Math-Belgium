@@ -1,5 +1,6 @@
 import type { Block, ChapterContent, ChapterSection, ExempleStep, IllustrationSpec, InteractiveWidgetTag } from '../../content/types'
 import { textesBloc, titreCourt } from '../parcoursChapitre'
+import { generatorLink } from '../generatorLink'
 
 /**
  * Mode « Projeter en classe » : diapos 16:9 construites AUTOMATIQUEMENT à partir des données du
@@ -8,10 +9,11 @@ import { textesBloc, titreCourt } from '../parcoursChapitre'
  * par étape), à la page de projection et à l'export PowerPoint.
  *
  * Ordre des diapos d'une étape : titre de l'étape → « L'essentiel » (+ première figure) → dans l'ordre
- * écrit : figures, exemples résolus, démonstrations, ateliers → cartes « Teste-toi ».
+ * écrit : figures, exemples résolus, démonstrations, ateliers → vidéos puis cartes « S'entraîner » (même
+ * place que dans le cours : la fin de l'étape) → cartes « Teste-toi ».
  */
 
-export type Inclusion = 'essentiel' | 'figures' | 'exemples' | 'teste' | 'ateliers' | 'demonstrations'
+export type Inclusion = 'essentiel' | 'figures' | 'exemples' | 'teste' | 'ateliers' | 'demonstrations' | 'entrainement' | 'videos'
 
 export const INCLUSIONS: { id: Inclusion; label: string }[] = [
   { id: 'essentiel', label: 'L’essentiel' },
@@ -19,10 +21,26 @@ export const INCLUSIONS: { id: Inclusion; label: string }[] = [
   { id: 'exemples', label: 'Exemples résolus (une étape par clic)' },
   { id: 'teste', label: 'Cartes « Teste-toi » avec minuteur' },
   { id: 'ateliers', label: 'Ateliers (manipulés en direct)' },
+  { id: 'entrainement', label: 'Cartes « S’entraîner » (QR code vers le générateur)' },
+  { id: 'videos', label: 'Vidéos' },
   { id: 'demonstrations', label: 'Démonstrations' },
 ]
 
-export const INCLUSIONS_DEFAUT: Inclusion[] = ['essentiel', 'figures', 'exemples', 'teste', 'ateliers']
+export const INCLUSIONS_DEFAUT: Inclusion[] = ['essentiel', 'figures', 'exemples', 'teste', 'ateliers', 'entrainement', 'videos']
+
+/** Inclusions ajoutées après coup (25/11/2026) : cochées une fois pour un choix mémorisé avant elles. */
+const INCLUSIONS_NOUVELLES: Inclusion[] = ['entrainement', 'videos']
+const VERSION_CHOIX = 2
+
+/** Site public : le QR code d'une carte « S'entraîner » doit marcher sur le téléphone des élèves (jamais
+ * `localhost`). Le bouton « Ouvrir le générateur » (écran du professeur) reste sur l'origine courante. */
+export const SITE_PUBLIC = 'https://math-belgium.vercel.app'
+
+/** Lien d'un générateur : relatif (générateur rapatrié, `/entrainement/…`) ou absolu (plateforme-maths). */
+export function lienGenerateur(chantier: string, generatorId: string): { relatif: string; public: string } {
+  const lien = generatorLink(chantier, generatorId)
+  return { relatif: lien, public: lien.startsWith('/') ? SITE_PUBLIC + lien : lien }
+}
 
 export type Ecran = 'un' | 'deux'
 
@@ -68,6 +86,8 @@ export type Diapo =
   | (Base & { type: 'libre'; label: string; demo: boolean; blocs: Block[]; debut: number; total: number })
   | (Base & { type: 'teste'; question: string; reponse: string; numero: number; nombre: number })
   | (Base & { type: 'atelier'; tag: InteractiveWidgetTag; label: string; caption?: string })
+  | (Base & { type: 'entrainement'; titre: string; generatorId: string; description: string[]; where: string; lien: string; lienPublic: string })
+  | (Base & { type: 'video'; titre: string; youtubeId?: string })
 
 export type TypeDiapo = Diapo['type']
 
@@ -120,6 +140,10 @@ export function diaposEtape(section: ChapterSection, inclure: Inclusion[]): Diap
   }
 
   let intertitre = titreCourt(section)
+  // Vidéos et cartes « S'entraîner » : à la fin de l'étape, comme dans le cours (`ContenuEtape` : vidéos
+  // puis cartes « À toi »), dans leur ordre d'écriture.
+  const videos: Diapo[] = []
+  const entrainements: Diapo[] = []
   section.blocks.forEach((b, i) => {
     const cle = `${id}:${i}`
     switch (b.kind) {
@@ -174,10 +198,41 @@ export function diaposEtape(section: ChapterSection, inclure: Inclusion[]): Diap
       case 'atelier':
         if (avec('ateliers')) res.push({ type: 'atelier', cle, section, pas: 0, tag: b.tag, label: b.label, caption: b.caption, notes: b.caption ? [b.caption] : [] })
         break
+      case 'video':
+        if (avec('videos'))
+          videos.push({
+            type: 'video',
+            cle,
+            section,
+            pas: 0,
+            titre: b.title,
+            youtubeId: b.youtubeId,
+            notes: [b.youtubeId ? `Vidéo : ${b.title} — https://www.youtube.com/watch?v=${b.youtubeId}` : `Vidéo à venir : ${b.title}`],
+          })
+        break
+      case 'entrainement': {
+        if (!avec('entrainement')) break
+        const l = lienGenerateur(b.chantier, b.generatorId)
+        entrainements.push({
+          type: 'entrainement',
+          cle,
+          section,
+          pas: 0,
+          titre: b.title,
+          generatorId: b.generatorId,
+          description: b.description,
+          where: b.whereLabel,
+          lien: l.relatif,
+          lienPublic: l.public,
+          notes: [`S'entraîner : ${b.title} (${b.generatorId})`, ...b.description, l.public],
+        })
+        break
+      }
       default:
         break
     }
   })
+  res.push(...videos, ...entrainements)
 
   if (avec('teste') && section.cartes) {
     const n = section.cartes.length
@@ -218,7 +273,9 @@ export function lireChoix(chapter: ChapterContent, defaut: ChoixProjection): Cho
     if (!brut) return defaut
     const ids = new Set(chapter.sections.map((s) => s.id))
     const etapes = Array.isArray(brut.etapes) ? brut.etapes.filter((e) => ids.has(e)) : defaut.etapes
-    const inclure = Array.isArray(brut.inclure) ? brut.inclure.filter((i): i is Inclusion => INCLUSIONS.some((x) => x.id === i)) : defaut.inclure
+    let inclure = Array.isArray(brut.inclure) ? brut.inclure.filter((i): i is Inclusion => INCLUSIONS.some((x) => x.id === i)) : defaut.inclure
+    // Choix mémorisé avant l'ajout des vidéos / cartes « S'entraîner » : elles sont cochées une fois.
+    if ((brut as { v?: number }).v !== VERSION_CHOIX) inclure = [...inclure, ...INCLUSIONS_NOUVELLES.filter((i) => defaut.inclure.includes(i) && !inclure.includes(i))]
     return { etapes: etapes.length ? etapes : defaut.etapes, inclure, ecran: brut.ecran === 'deux' ? 'deux' : 'un' }
   } catch {
     return defaut
@@ -227,7 +284,7 @@ export function lireChoix(chapter: ChapterContent, defaut: ChoixProjection): Cho
 
 export function enregistrerChoix(chapter: ChapterContent, choix: ChoixProjection): void {
   try {
-    localStorage.setItem(cleChoix(chapter), JSON.stringify(choix))
+    localStorage.setItem(cleChoix(chapter), JSON.stringify({ ...choix, v: VERSION_CHOIX }))
   } catch {
     // Stockage refusé (navigation privée…) : le choix vaut pour cette visite.
   }

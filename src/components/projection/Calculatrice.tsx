@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { MathInline } from '../Math'
 import { calculer, latexValeur } from '../../lib/projection/calculatrice'
 import type { Role } from '../../lib/projection/diapos'
@@ -22,9 +22,17 @@ const T = (label: string, insere: string, genre: Genre, classe?: string, aria?: 
 /**
  * Calculatrice flottante du mode projection, générique (aucune apparence de marque). Saisie au clavier
  * LIBRE (jamais bloquée, seul `normaliserSigneMoins`), touches à l'écran, modes DEG / RAD, valeur
- * exacte ou ≈, Ans ; « Épingler » pose le résultat sur la diapo. Évaluation par le parseur maison
- * `lib/projection/calculatrice.ts` (jamais `eval`). Position en px logiques de la diapo, partagée avec
- * l'autre écran ; sur la vue réduite du professeur, agrandie pour rester utilisable au doigt.
+ * exacte ou ≈, Ans ; « Épingler le résultat » pose le résultat sur la diapo. Évaluation par le parseur
+ * maison `lib/projection/calculatrice.ts` (jamais `eval`). Position en px logiques de la diapo, partagée
+ * avec l'autre écran ; sur la vue réduite du professeur, agrandie pour rester utilisable au doigt.
+ *
+ * Correctif du 25/11/2026 (« Épingler reste grisé ») — causes réelles reproduites : (1) taper « 3*4= »
+ * au clavier donnait « Caractère « = » non reconnu » (l'aide disait même « puis « = » ») : le « = » final
+ * calcule désormais ; (2) à l'ouverture le champ n'avait pas le focus : ce qu'on tapait au clavier était
+ * perdu et Entrée passait à la diapo suivante — focus donné à l'ouverture (pas au doigt : clavier virtuel)
+ * et chiffres / opérateurs frappés ailleurs renvoyés dans le champ ; (3) le bouton exigeait un « = »
+ * préalable : il calcule maintenant lui-même la saisie en cours avant d'épingler. Punaise de la barre de
+ * titre : la calculatrice reste ouverte d'une diapo à l'autre (sinon elle se ferme au changement de diapo).
  */
 export function Calculatrice({
   magasin,
@@ -32,22 +40,86 @@ export function Calculatrice({
   echelle,
   versDiapo,
   epingler,
+  diapo,
 }: {
   magasin: MagasinInstruments
   role: Role
   echelle: number
   versDiapo: (x: number, y: number) => [number, number]
   epingler: (latex: string) => void
+  /** Page courante (diapo, ou −1 pour l'écran blanc) : sans punaise, la calculatrice se ferme quand elle change. */
+  diapo: number
 }) {
   const calc = useInstrument(magasin, (e) => e.calc)
   const champ = useRef<HTMLInputElement>(null)
   const apresEgal = useRef(false)
   const racine = useRef<HTMLDivElement>(null)
   const [hauteur, setHauteur] = useState(500)
+  const [message, setMessage] = useState<string | null>(null)
   useLayoutEffect(() => {
     if (racine.current) setHauteur(racine.current.offsetHeight)
   })
-  if (!calc.visible || (role === 'diapos' && calc.masque)) return null
+  const visibleIci = calc.visible && !(role === 'diapos' && calc.masque)
+
+  // Changement de diapo (pas l'écran blanc) : sans punaise, la calculatrice se ferme.
+  const diapoAvant = useRef(diapo)
+  useEffect(() => {
+    const avant = diapoAvant.current
+    diapoAvant.current = diapo
+    if (avant === diapo || avant < 0 || diapo < 0) return
+    const c = magasin.lire().calc
+    if (c.visible && !c.garde) magasin.calc({ visible: false })
+  }, [diapo, magasin])
+
+  // Ouverture ici (K, bouton) : le champ reçoit le focus pour taper au clavier tout de suite — sauf au
+  // doigt (le clavier virtuel couvrirait la diapo) et dans la fenêtre qui n'a pas le focus.
+  const dernierPointeur = useRef('mouse')
+  useEffect(() => {
+    const noter = (e: PointerEvent) => {
+      dernierPointeur.current = e.pointerType
+    }
+    window.addEventListener('pointerdown', noter, true)
+    return () => window.removeEventListener('pointerdown', noter, true)
+  }, [])
+  const ouverteAvant = useRef(visibleIci)
+  useEffect(() => {
+    const avant = ouverteAvant.current
+    ouverteAvant.current = visibleIci
+    if (!avant && visibleIci && dernierPointeur.current !== 'touch' && document.hasFocus()) {
+      requestAnimationFrame(() => champ.current?.focus({ preventScroll: true }))
+    }
+    if (!visibleIci) setMessage(null)
+  }, [visibleIci])
+
+  // Chiffres et opérateurs frappés hors du champ (après un clic sur une touche, sur la diapo…) : renvoyés
+  // dans le champ plutôt que perdus (« . » n'éteint plus l'écran tant que la calculatrice est ouverte).
+  useEffect(() => {
+    if (!visibleIci) return
+    const surTouche = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1 || !/[0-9+\-*/×÷^().,=²π]/.test(e.key)) return
+      const chemin = e.composedPath() as HTMLElement[]
+      if (chemin.some((n) => n instanceof HTMLElement && (n.matches?.('input, textarea, select, [contenteditable="true"]') || n.classList?.contains('diapo-atelier')))) return
+      const el = champ.current
+      if (!el) return
+      e.preventDefault()
+      e.stopPropagation()
+      const c = magasin.lire().calc
+      const base = apresEgal.current ? (/[+\-*/×÷^²]/.test(e.key) ? 'Ans' : '') : c.saisie
+      apresEgal.current = false
+      const saisie = normaliserSigneMoins(base + e.key)
+      magasin.calc({ saisie })
+      // Valeur et curseur posés tout de suite (pas au prochain rendu) : les touches suivantes, frappées
+      // directement dans le champ, arrivent à la fin et dans l'ordre.
+      el.value = saisie
+      el.focus({ preventScroll: true })
+      el.setSelectionRange(saisie.length, saisie.length)
+      if (e.key === '=') egalSur(saisie)
+    }
+    window.addEventListener('keydown', surTouche, true)
+    return () => window.removeEventListener('keydown', surTouche, true)
+  })
+
+  if (!visibleIci) return null
   // Vue réduite (professeur, deux écrans) : agrandie (vers 80 % de la taille réelle), sans jamais
   // dépasser la hauteur de la diapo ; toujours entière dans la diapo (position bornée à l'affichage).
   const k = echelle > 0 ? Math.min(Math.max(1, 0.8 / echelle), (HAUTEUR - 8) / hauteur) : 1
@@ -79,11 +151,35 @@ export function Calculatrice({
     }
   }
 
-  const egal = () => {
-    if (!calc.saisie.trim()) return
-    const res = calculer(calc.saisie, calc.mode, calc.ans)
-    magasin.calc({ resultat: res, ans: res.ok ? res.valeur : calc.ans })
+  /** Calcule `saisie` (par défaut la saisie en cours) ; renvoie le résultat. */
+  function egalSur(saisie: string) {
+    const c = magasin.lire().calc
+    if (!saisie.replace(/[=\s]+$/, '').trim()) return null
+    const res = calculer(saisie, c.mode, c.ans)
+    magasin.calc({ resultat: res, ans: res.ok ? res.valeur : c.ans })
     apresEgal.current = res.ok
+    setMessage(null)
+    return res
+  }
+  const egal = () => egalSur(calc.saisie)
+
+  // « Épingler le résultat » : utilisable dès qu'il y a un calcul. Saisie modifiée depuis le dernier « = »
+  // (ou jamais calculée) : on la calcule d'abord ; une erreur s'affiche à la place du résultat.
+  const aCalculer = calc.saisie.replace(/[=\s]+$/, '').trim() !== ''
+  const peutEpingler = (!!r?.ok && !perime) || aCalculer
+  const titreEpingler = !peutEpingler
+    ? 'Rien à épingler pour l’instant : tape un calcul (clavier ou touches), puis « = » ou Entrée'
+    : r?.ok && !perime
+      ? 'Poser le résultat sur la diapo (étiquette déplaçable, × pour la retirer)'
+      : 'Calculer la saisie puis poser le résultat sur la diapo'
+  const epinglerResultat = () => {
+    if (!peutEpingler) {
+      setMessage('Rien à épingler : tape d’abord un calcul.')
+      champ.current?.focus({ preventScroll: true })
+      return
+    }
+    const res = r?.ok && !perime ? r : egalSur(calc.saisie)
+    if (res?.ok) epingler(`${res.latexExpression} ${latexValeur(res, calc.exact)}`)
   }
 
   const retour = () => {
@@ -178,6 +274,16 @@ export function Calculatrice({
     >
       <div className="calc-tete" onPointerDown={deplacer}>
         <span className="calc-titre">Calculatrice{role === 'prof' && calc.masque ? <em> · cachée à la classe</em> : ''}</span>
+        <button
+          type="button"
+          className={`calc-tete-bouton calc-punaise${calc.garde ? ' actif' : ''}`}
+          aria-pressed={!!calc.garde}
+          aria-label="Garder la calculatrice d’une diapo à l’autre"
+          title={calc.garde ? 'Gardée d’une diapo à l’autre (cliquer pour qu’elle se ferme en changeant de diapo)' : 'Garder la calculatrice ouverte, à sa place, d’une diapo à l’autre'}
+          onClick={() => magasin.calc({ garde: !calc.garde })}
+        >
+          <Pictogramme nom="punaise" taille={18} />
+        </button>
         {role === 'prof' && (
           <button
             type="button"
@@ -209,7 +315,10 @@ export function Calculatrice({
             value={calc.saisie}
             onChange={(e) => {
               apresEgal.current = false
-              magasin.calc({ saisie: normaliserSigneMoins(e.target.value) })
+              const saisie = normaliserSigneMoins(e.target.value)
+              magasin.calc({ saisie })
+              // « = » tapé en fin de saisie : calcule (comme Entrée), le « = » reste affiché.
+              if (/=\s*$/.test(saisie) && !/=\s*$/.test(calc.saisie)) egalSur(saisie)
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
@@ -248,7 +357,7 @@ export function Calculatrice({
           ) : r ? (
             <span className="calc-erreur">{r.erreur}</span>
           ) : (
-            <span className="calc-vide">Tape un calcul, puis « = » ou Entrée.</span>
+            <span className="calc-vide">{message ?? 'Tape un calcul, puis « = » ou Entrée.'}</span>
           )}
         </div>
       </div>
@@ -272,13 +381,12 @@ export function Calculatrice({
         <button
           type="button"
           className="calc-epingler"
-          disabled={!r?.ok}
-          title="Poser le résultat sur la diapo"
-          onClick={() => {
-            if (r?.ok) epingler(`${r.latexExpression} ${latexValeur(r, calc.exact)}`)
-          }}
+          aria-disabled={!peutEpingler}
+          title={titreEpingler}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={epinglerResultat}
         >
-          <Pictogramme nom="epingle" taille={16} /> Épingler
+          <Pictogramme nom="epingle" taille={16} /> Épingler le résultat
         </button>
       </div>
       <div className="calc-touches">

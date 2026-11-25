@@ -27,6 +27,9 @@ export type NomPictogramme =
   | 'cadenas-ouvert'
   | 'segment'
   | 'droite'
+  | 'punaise'
+  | 'lecture'
+  | 'qr'
 
 export function Pictogramme({ nom, taille = 20 }: { nom: NomPictogramme; taille?: number }) {
   return (
@@ -175,6 +178,24 @@ function trace(nom: NomPictogramme) {
         <>
           <rect x="5" y="11" width="14" height="10" rx="2" />
           <path d="M8 11V7a4 4 0 0 1 7.5-2" />
+        </>
+      )
+    case 'punaise':
+      // Punaise penchée : « garder la calculatrice d'une diapo à l'autre ».
+      return (
+        <>
+          <path d="M14.5 3.5l6 6-2.2.6-3.4 3.4.3 3.6-1.6 1.6-3.3-3.3L5 20.5 3.5 19l5.1-5.3-3.3-3.3 1.6-1.6 3.6.3 3.4-3.4z" />
+        </>
+      )
+    case 'lecture':
+      return <path d="M8 5.5v13l11-6.5z" fill="currentColor" />
+    case 'qr':
+      return (
+        <>
+          <rect x="4" y="4" width="6" height="6" rx="1" />
+          <rect x="14" y="4" width="6" height="6" rx="1" />
+          <rect x="4" y="14" width="6" height="6" rx="1" />
+          <path d="M14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2" />
         </>
       )
     case 'segment':

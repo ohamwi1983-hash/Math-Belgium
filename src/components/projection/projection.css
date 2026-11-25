@@ -103,6 +103,8 @@
 .diapo--titre .diapo-surtitre { font-size: calc(18px * var(--echelle)); }
 .diapo-surtitre--teste { color: var(--d-sarcelle); }
 .diapo-surtitre--atelier { color: var(--d-violet); }
+.diapo-surtitre--entrainement { color: var(--d-violet); }
+.diapo-surtitre--video { color: var(--d-sarcelle); }
 .diapo-etape { margin: calc(-8px * var(--echelle)) 0 0; font: 500 calc(17px * var(--echelle)) / 1.3 var(--mono); letter-spacing: 0.06em; color: var(--d-doux); }
 .diapo-grand-titre {
   margin: 0; font: 600 calc(76px * var(--echelle)) / 1.05 var(--serif); color: var(--d-encre); text-wrap: balance; letter-spacing: -0.01em;
@@ -223,12 +225,78 @@
 .diapo-chrono.fini { background: #b23a3a; }
 .diapo-chrono-aide { font: 400 calc(22px * var(--echelle)) / 1.3 var(--sans); color: var(--d-doux); }
 
-/* Atelier */
-.diapo-atelier { flex: 1; min-height: 0; display: flex; justify-content: center; align-items: flex-start; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; background: #fff; border: 1px solid #e4eaee; border-radius: 6px; padding: 4px; }
-.diapo-atelier-hote { width: 760px; flex: none; }
-.diapo[data-mode="export"] .diapo-atelier { overflow: hidden; }
+/* Atelier : toute la surface de la diapo (titre réduit à une ligne), disposition et zoom choisis par
+   `dispositionAtelier.ts` (l'enveloppe `.diapo-atelier-place` est posée en absolu, l'hôte porte le zoom). */
+.diapo--atelier .diapo-contenu { left: 36px; right: 36px; top: 16px; bottom: 60px; }
+.diapo--atelier .diapo-pile { gap: 8px; }
+.diapo-atelier-tete { flex: none; display: flex; align-items: center; gap: 14px; min-width: 0; height: 40px; }
+.diapo-atelier-titre {
+  flex: 1; min-width: 0; margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  font: 600 calc(24px * var(--echelle)) / 1.2 var(--serif); color: var(--d-encre);
+}
+.diapo-atelier-plein {
+  flex: none; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border: 1.5px solid var(--d-violet);
+  border-radius: 999px; background: #fff; color: #443a80; font: 600 15px var(--sans); cursor: pointer;
+}
+.diapo-atelier-plein:hover { background: #ece9f8; }
+.diapo-atelier { position: relative; flex: 1; min-height: 0; overflow: hidden; overscroll-behavior: contain; background: #fff; border: 1px solid #e4eaee; border-radius: 6px; }
+.diapo-atelier.defile { overflow-y: auto; scroll-behavior: smooth; }
+.diapo-atelier-place { position: absolute; left: 0; top: 0; }
+/* Disposition `defile` (atelier très haut) : figure et premier réglage en grand, la suite défile ; une pastille le dit. */
+.diapo-atelier-suite {
+  display: none; position: absolute; right: 18px; bottom: 12px; z-index: 2; align-items: center; gap: 8px; height: 40px; padding: 0 16px;
+  border: 0; border-radius: 999px; background: rgb(24 36 48 / 0.82); color: #fff; font: 600 15px var(--sans); cursor: pointer;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.18);
+}
+.diapo-atelier.defile:not([data-fin]) + .diapo-atelier-suite { display: inline-flex; }
+.diapo[data-mode="export"] .diapo-atelier-suite { display: none !important; }
+.diapo-atelier-hote { width: 760px; }
 .diapo-atelier-hote .widget-host { margin: 0; }
-.diapo-atelier-vide { align-self: center; display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--d-violet); font: 600 28px var(--sans); }
+.diapo-atelier:not(:has(.diapo-atelier-place)) { display: flex; align-items: center; justify-content: center; }
+.diapo-atelier-vide { display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--d-violet); font: 600 28px var(--sans); }
+/* Plein écran de l'atelier : l'atelier seul, sur toute la diapo. */
+.diapo--atelier[data-plein] .diapo-filet,
+.diapo--atelier[data-plein] .diapo-atelier-tete { display: none; }
+.diapo--atelier[data-plein] .diapo-contenu { inset: 6px; }
+.diapo--atelier[data-plein] .diapo-atelier { border-color: transparent; border-radius: 0; }
+
+/* S'entraîner : description + bouton (écran du professeur) à gauche, grand QR code à droite. */
+.diapo-entrainement { align-items: center; gap: 56px; }
+.diapo-entrainement-texte { flex: 1; display: flex; flex-direction: column; gap: calc(14px * var(--echelle)); font: 400 calc(26px * var(--echelle)) / 1.4 var(--sans); color: var(--d-encre); }
+.diapo-entrainement-texte p { margin: 0; }
+.diapo-entrainement-ou { font: 500 calc(19px * var(--echelle)) / 1.35 var(--mono); color: var(--d-doux); }
+.diapo-entrainement-ouvrir {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; margin-top: 6px; min-height: 48px; padding: 0 22px; border-radius: 999px;
+  background: var(--d-violet); color: #fff; font: 600 20px var(--sans); text-decoration: none;
+}
+.diapo-entrainement-ouvrir:hover { background: #443a80; }
+.diapo-entrainement-ouvrir:focus-visible { outline: 3px solid #b65c1f; outline-offset: 2px; }
+.diapo-qr { flex: none; margin: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.diapo-qr-code { display: block; line-height: 0; padding: 10px; background: #fff; border: 1px solid var(--d-filet); border-radius: 8px; }
+.diapo-qr-code svg { display: block; width: 350px; height: 350px; }
+.diapo-qr figcaption { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; }
+.diapo-qr-aide { font: 600 22px var(--sans); color: #443a80; }
+.diapo-qr-adresse { font: 500 14px / 1.3 var(--mono); color: var(--d-doux); white-space: nowrap; }
+
+/* Vidéo : grand lecteur 16:9 centré, lancé au clic seulement. */
+.diapo-video {
+  flex: 1; min-height: 0; align-self: center; aspect-ratio: 16 / 9; max-width: 100%; position: relative; border-radius: 8px; overflow: hidden; background: #182430;
+}
+.diapo-video-cadre { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.diapo-video-facade { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: #182430; cursor: pointer; }
+.diapo-video-facade img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0.9; }
+.diapo-video-facade:hover img { opacity: 1; }
+.diapo-video-jouer {
+  position: absolute; left: 50%; top: 50%; width: 112px; height: 112px; margin: -56px 0 0 -56px; border-radius: 50%; background: rgb(178 58 58 / 0.92);
+  color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgb(0 0 0 / 0.3);
+}
+.diapo-video--avenir, .diapo-video--lien {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #f2f5f7; border: 2px dashed #ccd8e0;
+  color: var(--d-doux); font: 500 calc(26px * var(--echelle)) / 1.35 var(--sans); text-align: center; padding: 24px;
+}
+.diapo-video-icone { font-size: 64px; line-height: 1; }
+.diapo-video--lien .diapo-video-jouer { position: static; margin: 0; }
+.diapo-video-adresse { font: 500 22px var(--mono); color: #1d52a8; }
 .diapo-legende { margin: 0; font: 400 calc(20px * var(--echelle)) / 1.35 var(--sans); color: var(--d-doux); }
 
 /* KaTeX dans les diapos : jamais de défilement interne (`.math-inline` du parcours). */
@@ -275,10 +343,21 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
 }
 .projection-epingle:active { cursor: grabbing; }
 .projection-epingle .math-inline { overflow: visible; }
+/* × de retrait : cible de 44 px RÉELS au moins (`--cible`, posé par Tableau.tsx selon l'échelle d'affichage),
+   pastille discrète ; à la souris visible au survol de l'étiquette, au doigt toujours visible. */
 .projection-epingle-retirer {
-  display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; margin-right: -8px; border: 0; border-radius: 50%;
-  background: #b23a3a; color: #fff; cursor: pointer;
+  flex: none; display: inline-flex; align-items: center; justify-content: center; width: var(--cible, 44px); height: var(--cible, 44px);
+  margin: calc((var(--cible, 44px) - 26px) / -2) -14px calc((var(--cible, 44px) - 26px) / -2) -6px; padding: 0; border: 0; border-radius: 50%;
+  background: transparent; cursor: pointer; opacity: 0; transition: opacity 0.12s;
 }
+.projection-epingle-croix {
+  display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #e9d6c4; color: #7a3c11;
+}
+.projection-epingle-retirer:hover .projection-epingle-croix, .projection-epingle-retirer.gomme .projection-epingle-croix { background: #b23a3a; color: #fff; }
+.projection-epingle:hover .projection-epingle-retirer, .projection-epingle-retirer:focus-visible, .projection-epingle-retirer.gomme { opacity: 1; }
+.projection-epingle-retirer:focus-visible { outline: 3px solid #b65c1f; outline-offset: -6px; }
+@media (hover: none), (pointer: coarse) { .projection-epingle-retirer { opacity: 1; } }
+.projection-tableau[data-tactile] .projection-epingle-retirer { opacity: 1; }
 
 /* Instruments : SVG plein cadre, seuls le corps et la poignée de l'équerre captent le pointeur */
 .projection-instrument { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; touch-action: none; }
@@ -337,15 +416,17 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
 .calc-resultat .math-inline { overflow: visible; }
 .calc-erreur { font: 500 15px/1.35 var(--sans); color: #b23a3a; }
 .calc-vide { font: 400 14px/1.35 var(--sans); color: #8a97a1; }
-.calc-modes { display: flex; align-items: center; gap: 6px; padding: 8px 12px; }
+.calc-modes { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 12px; }
 .calc-groupe { display: inline-flex; gap: 2px; }
 .calc-mode { min-width: 44px; height: 34px; padding: 0 8px; border: 1px solid #ccd8e0; border-radius: 999px; background: #fff; color: #33434f; font: 600 13px var(--mono); cursor: pointer; }
 .calc-mode.actif { background: #182430; border-color: #182430; color: #fff; }
 .calc-epingler {
-  margin-left: auto; display: inline-flex; align-items: center; gap: 4px; height: 34px; padding: 0 10px; border: 1.5px solid #b65c1f; border-radius: 999px;
+  flex: 1 0 100%; justify-content: center; display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 10px; border: 1.5px solid #b65c1f; border-radius: 999px;
   background: #fff8f0; color: #7a3c11; font: 600 13px var(--mono); cursor: pointer;
 }
-.calc-epingler:disabled { opacity: 0.4; cursor: default; }
+.calc-epingler[aria-disabled="true"] { opacity: 0.45; cursor: help; }
+.calc-punaise.actif { background: #b65c1f; color: #fff; }
+.calc-punaise.actif:hover { background: #9e4f19; }
 .calc-touches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; padding: 0 12px 12px; }
 .calc-touche { height: 42px; border: 0; border-radius: 6px; background: #f2f5f7; color: #182430; font: 500 19px var(--sans); cursor: pointer; }
 .calc-touche:hover { background: #e4eaee; }
@@ -478,3 +559,15 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
   .prof-corps { grid-template-columns: 1fr; }
   .prof-scene { min-height: 200px; aspect-ratio: 16 / 9; flex: none; }
 }
+
+/* Atelier en plein écran : bouton de sortie flottant (en haut à gauche ; le minuteur occupe la droite),
+   visible tant que la souris bouge ; la barre ne revient qu'à l'approche du bas de l'écran. */
+.projection-sortir-plein {
+  position: absolute; top: 14px; left: 18px; z-index: 6; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px;
+  border: 0; border-radius: 999px; background: rgb(24 36 48 / 0.85); color: #fff; font: 600 15px var(--sans); cursor: pointer;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.2); transition: opacity 0.2s;
+}
+.projection-sortir-plein.masque { opacity: 0; pointer-events: none; }
+.projection-sortir-plein:focus-visible { opacity: 1; outline: 3px solid #b65c1f; outline-offset: 2px; }
+.prof-atelier-plein { text-transform: none; letter-spacing: 0; min-height: 36px; }
+.prof-atelier-plein.actif { background: #ece9f8; border-color: #5b4ea3; color: #443a80; }

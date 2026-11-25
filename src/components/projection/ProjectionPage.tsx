@@ -131,6 +131,76 @@ function usePleinEcran(signaler: (m: string) => void) {
   return { plein, basculer }
 }
 
+/**
+ * Plein écran d'une diapo d'atelier (état PARTAGÉ `atelierPlein` : l'écran de la classe suit). Dans la
+ * fenêtre où l'on clique, l'API Fullscreen est demandée si la page n'est pas déjà en plein écran (sinon le
+ * calque plein cadre de la projection suffit) et quittée en sortant ; sortir du plein écran du navigateur
+ * (Échap, F11) fait aussi sortir l'atelier.
+ */
+function useAtelierPlein(projection: Projection) {
+  const { etat, basculerAtelierPlein } = projection
+  const parNous = useRef(false)
+  const plein = etat.atelierPlein
+  const basculer = useCallback(() => {
+    if (!plein && !document.fullscreenElement && document.fullscreenEnabled && document.documentElement.requestFullscreen) {
+      parNous.current = true
+      document.documentElement.requestFullscreen().catch(() => {
+        parNous.current = false
+      })
+    }
+    basculerAtelierPlein(!plein)
+  }, [plein, basculerAtelierPlein])
+  // Sortie (bouton, Échap, diapo suivante, autre fenêtre) : on rend le plein écran du navigateur si c'est nous qui l'avions pris.
+  useEffect(() => {
+    if (!plein && parNous.current) {
+      parNous.current = false
+      if (document.fullscreenElement) void document.exitFullscreen?.().catch(() => undefined)
+    }
+  }, [plein])
+  useEffect(() => {
+    const surChangement = () => {
+      if (!document.fullscreenElement && parNous.current) {
+        parNous.current = false
+        basculerAtelierPlein(false)
+      }
+    }
+    document.addEventListener('fullscreenchange', surChangement)
+    return () => document.removeEventListener('fullscreenchange', surChangement)
+  }, [basculerAtelierPlein])
+  return { plein, basculer, sortir: () => basculerAtelierPlein(false) }
+}
+
+/** Atelier en plein écran : la barre ne revient que si le pointeur approche du bas de l'écran (on manipule
+ * l'atelier à la souris : la barre ne doit pas couvrir ses réglages à chaque mouvement). */
+function usePresDuBas(actif: boolean): boolean {
+  const [pres, setPres] = useState(false)
+  useEffect(() => {
+    if (!actif) {
+      setPres(false)
+      return
+    }
+    let t: number | undefined
+    const surPointeur = (e: PointerEvent) => {
+      const bas = e.clientY > window.innerHeight - 96
+      if (bas) {
+        window.clearTimeout(t)
+        setPres(true)
+      } else {
+        window.clearTimeout(t)
+        t = window.setTimeout(() => setPres(false), 1200)
+      }
+    }
+    window.addEventListener('pointermove', surPointeur)
+    window.addEventListener('pointerdown', surPointeur)
+    return () => {
+      window.clearTimeout(t)
+      window.removeEventListener('pointermove', surPointeur)
+      window.removeEventListener('pointerdown', surPointeur)
+    }
+  }, [actif])
+  return pres
+}
+
 /** Raccourcis clavier — UNIQUEMENT pendant la projection (écouteur posé par cette page). Une touche
  * frappée dans un champ, un curseur ou un bouton d'atelier (Shadow DOM compris) lui revient ; sur un
  * bouton (palette, calculatrice), seules les lettres restent des raccourcis (elles n'y font rien d'autre). */
@@ -294,6 +364,10 @@ function etiquette(d: DonneesDiapo): string {
       return 'Teste-toi'
     case 'atelier':
       return 'Atelier'
+    case 'entrainement':
+      return 'S’entraîner'
+    case 'video':
+      return 'Vidéo'
   }
 }
 
@@ -313,7 +387,11 @@ function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; 
   const { plein, basculer } = usePleinEcran(signaler)
   const [outils, setOutils] = useState<OutilsLocaux>(OUTILS_DEPART)
   const [accueil, setAccueil] = useState(role === 'diapos')
-  const [barreVisible] = useInactivite(outils.stylo || outils.menuMinuteur || outils.ensemble)
+  const [barreActive] = useInactivite(outils.stylo || outils.menuMinuteur || outils.ensemble)
+  const atelierPlein = useAtelierPlein(projection)
+  const pleinIci = atelierPlein.plein && diapos[etat.index]?.type === 'atelier'
+  const presDuBas = usePresDuBas(pleinIci)
+  const barreVisible = pleinIci ? presDuBas || outils.stylo || outils.menuMinuteur || outils.ensemble : barreActive
   const glisse = useRef<{ x: number; y: number } | null>(null)
   const d = diapos[etat.index]
 
@@ -345,6 +423,7 @@ function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; 
     pleinEcran: basculer,
     echap: () => {
       if (accueil) setAccueil(false)
+      else if (pleinIci) atelierPlein.sortir()
       else if (outils.ensemble) setOutils((o) => ({ ...o, ensemble: false }))
       else if (outils.stylo || outils.menuMinuteur) setOutils((o) => ({ ...o, stylo: false, menuMinuteur: false }))
       else setOutils((o) => ({ ...o, ensemble: true }))
@@ -353,7 +432,7 @@ function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; 
 
   return (
     <div
-      className={`projection projection--diapos${barreVisible ? '' : ' inactive'}`}
+      className={`projection projection--diapos${barreActive ? '' : ' inactive'}${pleinIci ? ' atelier-plein' : ''}`}
       onClick={(e) => {
         if (outils.stylo || outils.menuMinuteur) {
           if (outils.menuMinuteur) setOutils((o) => ({ ...o, menuMinuteur: false }))
@@ -377,13 +456,26 @@ function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; 
       <Scene className="projection-scene--principale">
         {(echelle) => (
           <>
-            {d && <Diapo key={d.cle} diapo={d} chapter={chapter} pas={etat.pas} mode="direct" debut={etat.debut} />}
+            {d && <Diapo key={d.cle} diapo={d} chapter={chapter} pas={etat.pas} mode="direct" debut={etat.debut} atelier={{ plein: atelierPlein.plein, basculerPlein: atelierPlein.basculer }} />}
             {etat.blanc && <FondBlancTableau fond={etat.fond} />}
             <Annotations projection={projection} magasin={magasin} outils={outils} echelle={echelle} role={role} grille={etat.blanc && etat.fond !== 'uni'} />
           </>
         )}
       </Scene>
       <MinuteurAffiche projection={projection} />
+      {pleinIci && (
+        <button
+          type="button"
+          className={`projection-sortir-plein${barreActive ? '' : ' masque'}`}
+          onClick={(e) => {
+            e.stopPropagation()
+            atelierPlein.sortir()
+          }}
+          title="Quitter le plein écran de l'atelier (Échap)"
+        >
+          <Pictogramme nom="quitter-plein-ecran" /> Quitter le plein écran
+        </button>
+      )}
       <BarreOutils
         projection={projection}
         total={diapos.length}
@@ -438,7 +530,7 @@ function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos:
   const projection = useProjection(chapter, diapos, 'prof')
   const magasin = useMagasinInstruments(projection)
   const equerreVisible = useInstrument(magasin, (e) => e.equerre.visible)
-  const { etat, suivant, precedent, aller, basculerBlanc, lancerMinuteur, arreterMinuteur } = projection
+  const { etat, suivant, precedent, aller, basculerBlanc, lancerMinuteur, arreterMinuteur, basculerAtelierPlein } = projection
   const [message, signaler] = useMessage()
   const { plein, basculer } = usePleinEcran(signaler)
   const [outils, setOutils] = useState<OutilsLocaux>(OUTILS_DEPART)
@@ -491,7 +583,10 @@ function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos:
     equerre: () => magasin.equerre({ visible: !magasin.lire().equerre.visible }),
     calc: () => magasin.calc({ visible: !magasin.lire().calc.visible }),
     pleinEcran: basculer,
-    echap: () => setOutils((o) => (o.ensemble ? { ...o, ensemble: false } : o.stylo ? { ...o, stylo: false } : { ...o, ensemble: true })),
+    echap: () => {
+      if (etat.atelierPlein) basculerAtelierPlein(false)
+      else setOutils((o) => (o.ensemble ? { ...o, ensemble: false } : o.stylo ? { ...o, stylo: false } : { ...o, ensemble: true }))
+    },
   })
 
   return (
@@ -542,6 +637,17 @@ function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos:
               <span className="prof-pas">
                 étape {Math.min(etat.pas, d.pas)} / {d.pas}
               </span>
+            )}
+            {d?.type === 'atelier' && (
+              <button
+                type="button"
+                className={`projection-bouton prof-atelier-plein${etat.atelierPlein ? ' actif' : ''}`}
+                aria-pressed={etat.atelierPlein}
+                title="L'atelier seul sur tout l'écran de la classe (Échap pour revenir)"
+                onClick={() => basculerAtelierPlein()}
+              >
+                <Pictogramme nom={etat.atelierPlein ? 'quitter-plein-ecran' : 'plein-ecran'} /> {etat.atelierPlein ? 'Atelier : quitter le plein écran' : 'Atelier en plein écran'}
+              </button>
             )}
             <span className="prof-stylo" role="toolbar" aria-label="Outils (écrivent aussi au tableau)">
               <button
