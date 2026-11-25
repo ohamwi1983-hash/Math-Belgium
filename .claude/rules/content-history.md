@@ -210,6 +210,32 @@ paths:
   3 / 3 / 2 / 3 / 3, sections `denombrementcombine`, `denombrementproblemes`, `binomenewton`, `binomialesequence` ×2).
   Descriptions de carte en texte brut. Détail : `.claude/rules/feuilles-evaluations.md`, « 6e ch. 7, lot H2 ».
 
+- **6e (6h), Chapitre 8 — Variables aléatoires et lois de probabilités** (`variables-aleatoires`) :
+  **audit appliqué, lots A, F, D et parcours (25/11, agent AFD)** — lot A : loi uniforme discrète réservée aux
+  valeurs 1, …, n (cas général à pas h), figure « contrôle qualité » refaite avec les vraies valeurs de
+  𝓑(200 ; 0,02) ($P(X\leq5)\approx0{,}787$, pont vers Poisson $0{,}785$), règle empirique 68,27 / 95,45 / 99,73 %
+  (un côté 15,87 / 2,28 / 0,13 %), approximation normale avec correction de continuité, Bortkiewicz économiste
+  (de Moivre 1711), cumuls de Poisson recalculés sur les valeurs non arrondies, légende de 𝓑(5 ; 0,4) (sommet à
+  gauche, queue à droite), « fini ou dénombrable », cartes des générateurs alignées sur les lots B / C, Poisson
+  défini par l'indépendance et le taux constant (la rareté ne sert qu'à l'approximation), normalité
+  « acceptée » et non démontrée, conditions d'approximation = conventions, ponts « Ce que tu sais déjà » vers les
+  ch. 6 et 7, ≈ 200 virgules `{,}`, formulaire regroupé (9 groupes) et complété, synthèse alignée ; figures :
+  escalier à points pleins / vides (`stepFunction.pointsAuxSauts`, ajout optionnel), « trouver n » et
+  𝒩(50 ; 10) à abscisse décalée (l'axe vertical sortait du cadre), Poisson λ = 4 au centième, Φ(1,5) dégagé,
+  arbre complet S / non S, `ProductAreaSquare` (nom d'axe vertical remonté de 6 px, seul usage), espérance de
+  vie réaliste. Lot F : 15 démonstrations, tous les exemples avec énoncé et titre parlant (45 énoncés par clé),
+  cours écrit pour 6gen110–122 (Y = aX + b, répartition discrète et continue, densité à une constante près,
+  discrète ou continue, loi uniforme : bus, intervalle qui déborde, retrouver a et b ; lecture de la table,
+  effectif attendu, P(0 ≤ Z ≤ t), retrouver μ ou σ ; correction de continuité ; Poisson : λ inconnu, valeur la
+  plus probable, seuil d'alerte ; choix du modèle), **table de Φ complète** (bloc `tablePhi`, voir
+  `.claude/rules/feuilles-evaluations.md`), effet de σ, historiques de Moivre / Gauss / Laplace et Bayes / Price,
+  applications « tolérance d'usinage » (§ 6) et « marge d'erreur d'un sondage » (§ 7), banque « Formule ».
+  Parcours : 3 parties (« Lois discrètes : compter et pondérer » § 1–2, « Lois continues : des aires sous une
+  courbe » § 3–6, « Combiner, approcher, choisir » § 7–8), 8 kickers et `titreCourt`, 21 phrases d'`essentiel`,
+  27 cartes. Formules longues coupées en plusieurs `$…$` (aucune ne défile à 390 px). Lot D : quiz 6gen71 (voir
+  `.claude/rules/feuilles-evaluations.md`, « 6e ch. 8, lots A, F, D »). Les cartes 6gen110–122 et les ateliers
+  sont ajoutés par d'autres agents.
+
 - **6e (6h), Chapitre 6 — corrigé « comme au tableau » et niveaux (6gen30–33, 6gen74–76)** : corrigés détaillés
   typés partagés écran / papier (`generateurs6e/*/corrigeDetaille.ts`, brique `ui6e/corrigeProbabilites.ts`),
   `criteresDifficulte` à la place des étoiles, profils `calcul` relus (aucun changement : rien n'est donné

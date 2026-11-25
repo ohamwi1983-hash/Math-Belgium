@@ -47,6 +47,7 @@ de `Block` — le même bloc peut apparaître dans n'importe quel ordre selon le
 | `signTable`      | Tableau de signes / de variation (lignes alignées colonne par colonne) |
 | `featureTable`   | Tableau à en-tête fixe (colonnes nommées, lignes de données) — forme différente de `signTable` |
 | `operationChain` | Chaîne de valeurs reliées par des opérations nommées sur les flèches (HTML/flexbox, pas SVG — les nœuds contiennent du texte riche/KaTeX) |
+| `tablePhi`       | Table COMPLÈTE de la loi normale centrée réduite Φ (z de 0,00 à 3,49), `caption?` en RichText — composant partagé `components/TablePhi.tsx`, valeurs de `lib/tablePhi.ts` (même source que les générateurs et l'annexe papier ; voir l'en-tête de `lib/tablePhi.ts`) |
 | `video`          | Placeholder "vidéo à venir" (exclu de l'export)                        |
 | `entrainement`   | Carte "S'entraîner" en fin de section, avec lien vers le générateur (voir `widgetTag` ci-dessous) |
 | `atelier`        | Atelier interactif libre "Manipule toi-même" (widget porté, voir ci-dessous) |
