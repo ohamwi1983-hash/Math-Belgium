@@ -1645,7 +1645,7 @@ export const BANQUE_QUIZ_COMBINATOIRE: Record<VarianteQuizCombinatoire, Question
     {
       enonce: [texte("Avec 9 lettres toutes différentes tirées sans remise, devoir deviner l'ordre exact de 5 lettres au lieu de 4 diminue la probabilité de succès.")],
       reponse: true,
-      justification: [texte("Il faut deviner un choix exact de plus : la probabilité est encore multipliée par "), latex("\\dfrac{1}{5}"), texte(" ("), latex("\\dfrac{1}{15\\,120}"), texte(" au lieu de "), latex("\\dfrac{1}{3024}"), texte(").")],
+      justification: [texte("Il faut deviner un choix exact de plus : la probabilité est encore multipliée par "), latex("\\dfrac{1}{5}"), texte(", et passe de "), latex("\\dfrac{1}{3024}"), texte(" à "), latex("\\dfrac{1}{15\\,120}"), texte(".")],
     },
     {
       enonce: [texte("En tirant sans remise des lettres parmi 9 lettres toutes différentes, passer de 4 à 5 lettres à deviner dans l'ordre augmente la probabilité de succès, car un tirage de plus peut « compenser » une erreur.")],
