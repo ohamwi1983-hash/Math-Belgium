@@ -1097,9 +1097,29 @@ export const FORMULES_6E: BanqueFormules = {
         corrige: r`Parallèles : $a_1b_2-a_2b_1=0$ (ou $m_1=m_2$). Perpendiculaires : $a_1a_2+b_1b_2=0$ (ou $m_1 \cdot m_2=-1$).`,
       },
       {
+        id: 'angle-deux-droites',
+        enonce: r`Deux droites sécantes ont pour pentes $m_1$ et $m_2$, avec $1+m_1m_2\neq0$. Donne la tangente de l'angle aigu $\theta$ qu'elles forment. Que se passe-t-il si $1+m_1m_2=0$ ?`,
+        corrige: r`$\tan\theta=\left|\dfrac{m_2-m_1}{1+m_1m_2}\right|$ ; si $1+m_1m_2=0$, les droites sont perpendiculaires ($\theta=90^\circ$).`,
+      },
+      {
         id: r`$dist(P;d) = \dfrac{|ax_P+by_P+c|}{\sqrt{a^2+b^2}}$`,
-        enonce: r`Donne la distance du point $P(x_P\,;y_P)$ à la droite $d \equiv ax+by+c=0$.`,
-        corrige: r`$dist(P;d) = \dfrac{|ax_P+by_P+c|}{\sqrt{a^2+b^2}}$.`,
+        enonce: r`Dans un repère orthonormé, donne la distance du point $P(x_P\,;y_P)$ à la droite $d \equiv ax+by+c=0$.`,
+        corrige: r`$\mathrm{dist}(P\,;d) = \dfrac{|ax_P+by_P+c|}{\sqrt{a^2+b^2}}$.`,
+      },
+      {
+        id: 'centre-gravite',
+        enonce: r`Donne les coordonnées du centre de gravité $G$ d'un triangle $ABC$ en fonction de celles des sommets. Où se trouve $G$ sur chaque médiane ?`,
+        corrige: r`$G=\dfrac{A+B+C}{3}$ (moyenne des coordonnées) ; il est aux deux tiers de chaque médiane en partant du sommet.`,
+      },
+      {
+        id: 'hauteur-mediatrice',
+        enonce: r`Dans un triangle $ABC$, quelle normale et quel point utilise-t-on pour écrire l'équation de la hauteur issue de $A$ ? Et celle de la médiatrice de $[BC]$ ?`,
+        corrige: r`Les deux ont pour normale $\overrightarrow{BC}$ ; la hauteur passe par $A$, la médiatrice par le milieu de $[BC]$.`,
+      },
+      {
+        id: 'droite-euler',
+        enonce: r`$O$ est le centre du cercle circonscrit, $G$ le centre de gravité et $H$ l'orthocentre d'un triangle $ABC$. Quelle relation vectorielle lie $\overrightarrow{OH}$ et $\overrightarrow{OG}$ ? Exprime $H$ à l'aide de $A$, $B$, $C$ et $O$.`,
+        corrige: r`$\overrightarrow{OH}=3\,\overrightarrow{OG}$ (droite d'Euler), donc $H=A+B+C-2O$.`,
       },
       {
         id: r`$A = B'+C'-A'$`,
@@ -1108,8 +1128,13 @@ export const FORMULES_6E: BanqueFormules = {
       },
       {
         id: r`$\dfrac{AI}{IC} = \dfrac{AB}{BC}$`,
-        enonce: r`Dans le triangle $ABC$, la bissectrice issue de $B$ coupe $[AC]$ en $I$. À quel rapport de longueurs est égal $\dfrac{AI}{IC}$ ?`,
-        corrige: r`$\dfrac{AI}{IC} = \dfrac{AB}{BC}$.`,
+        enonce: r`Dans le triangle $ABC$, la bissectrice issue de $B$ coupe $[AC]$ en $I$. À quel rapport de longueurs est égal $\dfrac{AI}{IC}$ ? Donne les coordonnées de $I$.`,
+        corrige: r`$\dfrac{AI}{IC} = \dfrac{AB}{BC}$, et $I=\dfrac{BC\times A+AB\times C}{AB+BC}$.`,
+      },
+      {
+        id: 'aire-triangle',
+        enonce: r`Donne l'aire du triangle $ABC$ à l'aide des composantes des vecteurs $\overrightarrow{AB}$ et $\overrightarrow{AC}$.`,
+        corrige: r`$\text{aire}(ABC)=\dfrac{1}{2}\,|x_{AB}\,y_{AC}-y_{AB}\,x_{AC}|$.`,
       },
       {
         id: r`$Q = 2H-P$`,
@@ -1124,9 +1149,44 @@ export const FORMULES_6E: BanqueFormules = {
         corrige: r`$x^2+y^2+Dx+Ey+F=0$ ; centre $\left(-\dfrac{D}{2}\,;-\dfrac{E}{2}\right)$, rayon $\sqrt{\dfrac{D^2}{4}+\dfrac{E^2}{4}-F}$.`,
       },
       {
+        id: 'cercle-point-vide',
+        enonce: r`On met $m(x^2+y^2)+Dx+Ey+F=0$ ($m\neq0$) sous la forme $\left(x+\dfrac{D}{2m}\right)^2+\left(y+\dfrac{E}{2m}\right)^2=\rho$. Que vaut $\rho$ ? Selon le signe de $\rho$, quelle est la nature de l'ensemble ?`,
+        corrige: [r`$\rho=\dfrac{D^2+E^2}{4m^2}-\dfrac{F}{m}$.`, r`$\rho>0$ : un cercle de rayon $\sqrt{\rho}$ ; $\rho=0$ : un seul point ; $\rho<0$ : l'ensemble vide.`],
+      },
+      {
+        id: 'deux-points-rayon',
+        enonce: r`Combien existe-t-il de cercles de rayon $r$ passant par deux points distincts $A$ et $B$ ? Distingue les cas selon $2r$ et $AB$.`,
+        corrige: r`Deux si $2r>AB$ (centres symétriques par rapport à $(AB)$, sur la médiatrice), un si $2r=AB$ (centre au milieu de $[AB]$), aucun si $2r<AB$.`,
+      },
+      {
+        id: 'corde',
+        enonce: r`Un cercle de centre $\Omega$ et de rayon $r$ découpe sur une droite $d$ une corde de longueur $L$. Quelle relation lie $r$, $L$ et la distance $\delta$ de $\Omega$ à $d$ ?`,
+        corrige: r`$r^2=\delta^2+\left(\dfrac{L}{2}\right)^2$.`,
+      },
+      {
+        id: 'tangent-axe',
+        enonce: r`Un cercle est tangent à l'axe des abscisses au point $(b\,;0)$ et passe par $A(x_A\,;y_A)$, avec $y_A>0$. Donne son centre en fonction de son rayon $r$, puis $r$.`,
+        corrige: r`Centre $(b\,;r)$ et $r=\dfrac{(b-x_A)^2+y_A^2}{2y_A}$.`,
+      },
+      {
         id: r`incentre $= \dfrac{aA+bB+cC}{a+b+c}$`,
-        enonce: r`Dans le triangle $ABC$, on note $a = BC$, $b = CA$ et $c = AB$. Donne le centre du cercle inscrit (l'incentre) en fonction des sommets et de ces longueurs.`,
-        corrige: r`Incentre $= \dfrac{aA+bB+cC}{a+b+c}$ (chaque sommet pondéré par le côté opposé).`,
+        enonce: r`Dans le triangle $ABC$, on note $a = BC$, $b = CA$ et $c = AB$. Donne le centre du cercle inscrit (l'incentre) en fonction des sommets et de ces longueurs, ainsi que son rayon.`,
+        corrige: r`Incentre $= \dfrac{aA+bB+cC}{a+b+c}$ (chaque sommet pondéré par le côté opposé) ; rayon $=\dfrac{\text{aire}}{\text{demi-périmètre}}$.`,
+      },
+      {
+        id: 'exinscrit',
+        enonce: r`Combien de cercles sont tangents aux trois droites qui portent les côtés d'un triangle $ABC$ ? Donne le centre et le rayon du cercle exinscrit opposé à $A$ ($a=BC$, $b=CA$, $c=AB$, $p$ demi-périmètre).`,
+        corrige: r`Quatre : le cercle inscrit et trois exinscrits. $J_A=\dfrac{-aA+bB+cC}{-a+b+c}$, rayon $\dfrac{\text{aire}}{p-a}$.`,
+      },
+      {
+        id: 'position-droite-cercle',
+        enonce: r`Un cercle a pour centre $\Omega$ et pour rayon $r$ ; $\delta$ est la distance de $\Omega$ à une droite $d$. Combien la droite et le cercle ont-ils de points communs, selon $\delta$ et $r$ ?`,
+        corrige: r`Aucun si $\delta>r$, un seul (tangente) si $\delta=r$, deux (sécante) si $\delta<r$.`,
+      },
+      {
+        id: 'tangente-en-T',
+        enonce: r`Donne une équation de la tangente au cercle de centre $\Omega(x_\Omega\,;y_\Omega)$ en son point $T(x_T\,;y_T)$.`,
+        corrige: r`$(x_T-x_\Omega)(x-x_T)+(y_T-y_\Omega)(y-y_T)=0$ (normale $\overrightarrow{\Omega T}$).`,
       },
       {
         id: r`$PT = \sqrt{OP^2-r^2}$`,
@@ -1142,25 +1202,57 @@ export const FORMULES_6E: BanqueFormules = {
       },
       {
         id: r`$PA^2+PB^2 = 2\,PM^2+\dfrac{AB^2}{2}$`,
-        enonce: r`$M$ est le milieu de $[AB]$. Énonce le théorème de la médiane : pour tout point $P$, $PA^2+PB^2 = \ldots$`,
-        corrige: r`$PA^2+PB^2 = 2\,PM^2+\dfrac{AB^2}{2}$.`,
+        enonce: r`$M$ est le milieu de $[AB]$. Énonce le théorème de la médiane : pour tout point $P$, $PA^2+PB^2 = \ldots$ Quel est alors le seuil du lieu $PA^2+PB^2=k$ ?`,
+        corrige: r`$PA^2+PB^2 = 2\,PM^2+\dfrac{AB^2}{2}$ ; seuil $\dfrac{AB^2}{2}$ (cercle de centre $M$ au-dessus, le point $M$ au seuil, vide en dessous).`,
+      },
+      {
+        id: 'difference-carres',
+        enonce: r`Quel est le lieu des points $P$ tels que $PA^2-PB^2=k$ ($A\neq B$, $k$ réel) ?`,
+        corrige: r`Une droite perpendiculaire à $(AB)$ ; pour $A(-a\,;0)$ et $B(a\,;0)$, c'est $x=\dfrac{k}{4a}$ (la médiatrice si $k=0$).`,
       },
       {
         id: r`$PA^2 = k\cdot PB^2$`,
-        enonce: r`Quel est le lieu des points $P$ tels que $PA^2 = k\cdot PB^2$, avec $k > 0$ ? Distingue $k = 1$ et $k \neq 1$.`,
-        corrige: r`Si $k = 1$ : la médiatrice de $[AB]$. Si $k \neq 1$ : un cercle (cercle d'Apollonius).`,
+        enonce: r`Pour $A(-a\,;0)$ et $B(a\,;0)$, quel est le lieu des points $P$ tels que $PA^2 = k\cdot PB^2$, avec $k > 0$ ? Distingue $k = 1$ et $k \neq 1$, et donne le centre et le rayon dans le second cas.`,
+        corrige: [r`Si $k = 1$ : la médiatrice de $[AB]$.`, r`Si $k \neq 1$ : le cercle d'Apollonius, de centre $\left(\dfrac{a(k+1)}{k-1}\,;0\right)$ et de rayon $\dfrac{2a\sqrt{k}}{|k-1|}$.`],
+      },
+      {
+        id: 'bissectrices-lieu',
+        enonce: r`Écris l'équation qui caractérise les points équidistants des droites sécantes $a_1x+b_1y+c_1=0$ et $a_2x+b_2y+c_2=0$. Quelle est la nature de ce lieu ?`,
+        corrige: r`$\dfrac{a_1x+b_1y+c_1}{\sqrt{a_1^2+b_1^2}}=\pm\dfrac{a_2x+b_2y+c_2}{\sqrt{a_2^2+b_2^2}}$ : deux droites perpendiculaires (les bissectrices).`,
+      },
+      {
+        id: 'angle-droit-lieu',
+        enonce: r`Quel est le lieu des points $P$ tels que l'angle $\widehat{APB}$ est droit ($A\neq B$) ?`,
+        corrige: r`Le cercle de diamètre $[AB]$, privé de $A$ et de $B$.`,
+      },
+      {
+        id: 'carre-octogone',
+        enonce: r`Pour le carré $[-c\,;c]^2$, on cherche le lieu des points dont la somme des distances aux quatre droites qui portent les côtés vaut $k$. Quel est le seuil, et quelle est la nature du lieu selon $k$ ?`,
+        corrige: r`Seuil $4c$ : vide si $k<4c$, tout le carré plein si $k=4c$, un octogone si $k>4c$.`,
+      },
+    ],
+    'methode-generatrices': [
+      {
+        id: 'statuts-morceaux',
+        enonce: r`Dans la méthode des génératrices, que signifie qu'un morceau de l'équation factorisée est singulier ? parasite ? propre ?`,
+        corrige: r`Singulier : les deux génératrices coïncident pour une valeur précise de $\alpha$. Parasite : aucune valeur de $\alpha$ ne l'atteint. Propre : il fait réellement partie du lieu (à restreindre ensuite).`,
+      },
+      {
+        id: 'tan-angle-double',
+        enonce: r`Exprime $\tan 2\alpha$ à l'aide de $t=\tan\alpha$ (formule utilisée quand une génératrice fait un angle $2\alpha$).`,
+        corrige: r`$\tan 2\alpha=\dfrac{2t}{1-t^2}$, pour $t^2\neq1$.`,
       },
     ],
     'lieu-parametrique': [
       {
         id: r`$x=f(t), \ y=g(t)$`,
-        enonce: r`Un lieu est donné par une représentation paramétrique $x = f(t)$, $y = g(t)$. Comment en obtient-on une équation cartésienne ? Quelle identité utilise-t-on quand $f$ et $g$ font intervenir $\cos t$ et $\sin t$ ?`,
-        corrige: r`On élimine $t$ grâce à une identité entre $f(t)$ et $g(t)$, par exemple $\cos^2 t+\sin^2 t=1$.`,
+        enonce: r`Un lieu est donné par une représentation paramétrique $x = f(t)$, $y = g(t)$. Comment en obtient-on une équation cartésienne ? Quelles identités utilise-t-on quand $f$ et $g$ font intervenir $\cos t$, $\sin t$ ou $\cos 2t$ ?`,
+        corrige: r`On élimine $t$ grâce à une identité entre $f(t)$ et $g(t)$ : $\cos^2 t+\sin^2 t=1$, ou $\cos 2t=2\cos^2t-1$ ; puis on décrit la partie réellement balayée.`,
       },
       {
         id: r`$x^{2/3}+y^{2/3}=1$`,
-        enonce: r`Donne une équation cartésienne de l'astroïde définie par $x = \cos^3\lambda$, $y = \sin^3\lambda$.`,
-        corrige: r`$x^{2/3}+y^{2/3}=1$ (car $x^{2/3} = \cos^2\lambda$ et $y^{2/3} = \sin^2\lambda$).`,
+        enonce: r`Donne une équation cartésienne de l'astroïde définie par $x = \cos^3\lambda$, $y = \sin^3\lambda$, valable dans les quatre quadrants.`,
+        corrige: r`$|x|^{2/3}+|y|^{2/3}=1$, ou $\left(\sqrt[3]{x}\right)^2+\left(\sqrt[3]{y}\right)^2=1$ (car $\sqrt[3]{x} = \cos\lambda$ et $\sqrt[3]{y} = \sin\lambda$).`,
       },
     ],
   },
