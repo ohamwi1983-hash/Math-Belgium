@@ -1,6 +1,7 @@
 import type { Block, ChapterContent, ChapterSection, ExempleStep, IllustrationSpec, InteractiveWidgetTag } from '../../content/types'
 import { textesBloc, titreCourt } from '../parcoursChapitre'
 import { generatorLink } from '../generatorLink'
+import { texteSansLiens } from '../lienChapitre'
 
 /**
  * Mode « Projeter en classe » : diapos 16:9 construites AUTOMATIQUEMENT à partir des données du
@@ -353,7 +354,7 @@ export function latexEnTexte(tex: string): string {
 }
 
 export function texteBrut(rich: string): string {
-  return rich
+  return texteSansLiens(rich)
     .replace(/\$([^$]+)\$/g, (_, tex: string) => latexEnTexte(tex))
     .replace(/\*\*([^*]+)\*\*/g, '$1')
     .replace(/\s+/g, ' ')

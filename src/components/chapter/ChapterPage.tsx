@@ -12,6 +12,7 @@ import type { BlocEntrainement, Panneau } from './ContenuEtape'
 import { BarreProgression, BlocReprendre, LienVue, ListeEtapes, OngletsChapitre } from './CarteChapitre'
 import type { Aller, Vue } from './CarteChapitre'
 import { ReviserVue } from './ReviserVue'
+import { CeChapitreUtilise, EtapeUtilise } from './Prerequis'
 import { PanneauModal } from './PanneauModal'
 import { Icone } from './Icones'
 import { dureeEtape, insecables, minusculeInitiale, titreCourt, useParcours } from '../../lib/parcoursChapitre'
@@ -135,6 +136,7 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
 
         <BlocReprendre chapter={chapter} etat={etat} aller={aller} />
         <OngletsChapitre vue={vue} aller={aller} prefixe="page" className="onglets-page" />
+        <CeChapitreUtilise chapter={chapter} />
 
         {chapter.intro && (
           <section className={`chapter-section intro-section${introOuverte ? ' intro-ouverte' : ''}`}>
@@ -255,6 +257,7 @@ function EtapeSection({
       <div className="section-body">
         {section.kicker && <p className="section-kicker">{section.kicker}</p>}
         {section.essentiel && section.essentiel.length > 0 && <Essentiel phrases={section.essentiel} />}
+        <EtapeUtilise section={section} />
         <ContenuEtape blocks={section.blocks} actif={actif} colonneDroite={colonneDroite && actif} ouvrirPanneau={ouvrirPanneau} />
       </div>
       {actif && <NavEtape section={section} precedente={precedente} suivante={suivante} lue={lue} marquer={marquer} aller={aller} />}

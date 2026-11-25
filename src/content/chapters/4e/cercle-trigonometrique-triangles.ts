@@ -2072,6 +2072,9 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         { question: 'Un sommet est vu sous l\'élévation α depuis A (loin), puis β depuis B (près) : quel angle au sommet ?', reponse: '$\\beta - \\alpha$.' },
         { question: 'Cap 40° de A à B, puis cap 120° de B à C : quel angle intérieur en B ?', reponse: 'L\'écart des caps vaut 80°, donc l\'angle en B vaut 180° − 80° = 100°.' },
       ],
+      utilise: [
+        { cible: '4e/calcul-vectoriel#additionGeometrique', poids: 'utile', rappel: '**Même origine** (méthode du parallélogramme) : $\\vec{u} + \\vec{v}$ est la diagonale du parallélogramme construit sur $\\vec{u}$ et $\\vec{v}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Triangulation — mesurer une hauteur inaccessible avec deux triangles liés', youtubeId: 'fGwjUxVHL5s' },
         {

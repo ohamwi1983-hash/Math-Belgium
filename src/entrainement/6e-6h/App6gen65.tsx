@@ -99,7 +99,7 @@ export function App6gen65() {
             <div>
               <h2 className="result-title">Choisis un thème</h2>
               <p className="result-subtitle">
-                {CATALOGUE_VARIANTES.length} thèmes, {TEXTE_NOMBRE} affirmations vrai/faux chacun — révision complète du chapitre 2.
+                {CATALOGUE_VARIANTES.length} thèmes, {TEXTE_NOMBRE} affirmations vrai/faux chacun — révision complète du chapitre « Fonctions exponentielles ».
               </p>
               <div className="accueil-choix">
                 {CATALOGUE_VARIANTES.map((variante, index) => (

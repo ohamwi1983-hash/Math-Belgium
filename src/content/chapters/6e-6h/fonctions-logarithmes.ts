@@ -33,6 +33,11 @@ export const fonctionsLogarithmes: ChapterContent = {
         { question: '$\\ln\\left(x^2\\right) = 2\\ln(x)$ : est-ce toujours vrai ?', reponse: 'Seulement si $x > 0$ ; pour tout $x \\neq 0$, $\\ln\\left(x^2\\right) = 2\\ln|x|$.' },
         { question: 'Combien de chiffres compte $2^{1000}$ ?', reponse: '$1000\\log(2) \\approx 301{,}03$ : $301 + 1 = 302$ chiffres.' },
       ],
+      utilise: [
+        { cible: '6e-6h/fonctions-exponentielles#limites', poids: 'indispensable', rappel: 'Pour $a>0$ : $a^p \\cdot a^q = a^{p+q}$, $\\dfrac{a^p}{a^q} = a^{p-q}$, $(a^p)^r = a^{pr}$, pour tous exposants réels ; $a^x$ est toujours strictement positif.' },
+        { cible: '6e-6h/fonctions-exponentielles#derivee', poids: 'indispensable', rappel: '$(a^x)\' = \\ln(a) \\cdot a^x$ ; comme $\\ln(e) = 1$, $(e^x)\' = e^x$. Exposant composé : $\\left(a^{f(x)}\\right)\' = f\'(x) \\cdot a^{f(x)} \\cdot \\ln(a)$. $\\ln(a)$ est, par définition, la pente de la tangente à la courbe de $a^x$ en $(0\\,;1)$ : positif si $a > 1$ (croissante), négatif si $0 < a < 1$ (décroissante).' },
+        { cible: '6e-6h/fonctions-reciproques-cyclometriques#reciproques', poids: 'utile', rappel: 'f est **injective** si deux entrées différentes ne donnent jamais la même image : toute droite horizontale coupe son graphe en au plus un point. Seule une fonction bijective a une réciproque $f^{-1}$, qui « défait » f : $f^{-1}(f(x)) = x$. dom($f^{-1}$) = Image($f$) et Image($f^{-1}$) = dom($f$) ; les deux graphes sont symétriques par rapport à $y = x$. Pour trouver $f^{-1}$ : permute x et y dans $y = f(x)$, puis isole y.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Définition du logarithme et premières propriétés (1/4)', youtubeId: 'Xg5LQ6_GBRg' },
         { kind: 'video', title: 'Propriétés algébriques : produit, quotient, puissance (2/4)', youtubeId: 'nei3-hTjJl4' },
@@ -1117,6 +1122,9 @@ export const fonctionsLogarithmes: ChapterContent = {
         { question: 'Résous $\\log_2(x) + \\log_2(x-2) = 3$.', reponse: 'CE : $x > 2$. $x(x-2) = 8$ donne 4 ou −2, et −2 est rejetée : $S = \\{4\\}$.' },
         { question: 'Résous $(\\ln(x))^2 - \\ln(x) - 2 = 0$.', reponse: 'Avec $t = \\ln(x)$ : $t = 2$ ou $t = -1$, donc $x = e^2$ ou $x = e^{-1}$.' },
       ],
+      utilise: [
+        { cible: '6e-6h/fonctions-exponentielles#equations', poids: 'utile', rappel: 'Même base : $a^x = a^y \\iff x = y$ (pour $a > 0$, $a \\neq 1$), car une exponentielle est injective. Substitution : si $a^x$ et son carré apparaissent, pose $t = a^x$ ; rejette toute racine $t \\le 0$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Résoudre une équation exponentielle ou logarithmique', youtubeId: 'X26gAVNimiU' },
         {
@@ -1424,6 +1432,9 @@ export const fonctionsLogarithmes: ChapterContent = {
         { question: 'Résous $\\ln(x-1) > 0$.', reponse: 'Domaine $x > 1$ ; $x - 1 > 1$, donc $S = ]2\\,;\\,+\\infty[$.' },
         { question: 'Résous $\\log_{0,5}(x) \\le 2$.', reponse: 'Base < 1, sens inversé : $x \\ge 0{,}5^2 = 0{,}25$, soit $S = [0{,}25\\,;+\\infty[$.' },
         { question: 'À partir de quel entier n a-t-on $0{,}8^n < 0{,}05$ ?', reponse: '$n > \\dfrac{\\ln(0{,}05)}{\\ln(0{,}8)} \\approx 13{,}4$ (sens inversé), donc $n \\ge 14$.' },
+      ],
+      utilise: [
+        { cible: '6e-6h/fonctions-exponentielles#inequations', poids: 'indispensable', rappel: 'Si $a > 1$, l\'inégalité sur les exposants garde le même sens ; si $0 < a < 1$, il faut **inverser** le comparateur.' },
       ],
       blocks: [
         { kind: 'video', title: 'Résoudre une inéquation logarithmique', youtubeId: 'te3WQrHiU1c' },
@@ -1786,6 +1797,10 @@ export const fonctionsLogarithmes: ChapterContent = {
         { question: 'Domaine et dérivée de $\\ln\\left|x^2-4\\right|$ ?', reponse: '$\\mathbb{R} \\setminus \\{-2;2\\}$ et $\\dfrac{2x}{x^2-4}$.' },
         { question: '$f(x) = x\\ln(x) - x$ : où est son minimum ?', reponse: '$f\'(x) = \\ln(x)$ s\'annule en 1 : minimum $f(1) = -1$.' },
         { question: 'Quelle tangente à la courbe de ln passe par l\'origine ?', reponse: '$y = \\dfrac{x}{e}$, la tangente au point $(e\\,;1)$.' },
+      ],
+      utilise: [
+        { cible: '6e-6h/fonctions-reciproques-cyclometriques#reciproques', poids: 'indispensable', rappel: 'Dérivée d\'une réciproque : $(f^{-1})\'(x) = \\dfrac{1}{f\'(f^{-1}(x))}$, si $f\'(f^{-1}(x)) \\neq 0$ — la pente s\'inverse.' },
+        { cible: '6e-6h/fonctions-exponentielles#derivee', poids: 'indispensable', rappel: '$(a^x)\' = \\ln(a) \\cdot a^x$ ; comme $\\ln(e) = 1$, $(e^x)\' = e^x$. Exposant composé : $\\left(a^{f(x)}\\right)\' = f\'(x) \\cdot a^{f(x)} \\cdot \\ln(a)$.' },
       ],
       blocks: [
         { kind: 'video', title: 'Domaine, dérivée et dérivation logarithmique', youtubeId: 'Pnu9FWGFghw' },
@@ -2279,6 +2294,9 @@ export const fonctionsLogarithmes: ChapterContent = {
         { question: '$\\lim\\limits_{x \\to +\\infty} x\\ln(x)$ : est-ce une forme indéterminée ?', reponse: 'Non : les deux facteurs tendent vers +∞, le produit aussi.' },
         { question: '$\\lim\\limits_{x \\to +\\infty} \\left(x - \\ln(x)\\right)$ ?', reponse: '$x\\left(1 - \\dfrac{\\ln(x)}{x}\\right) \\to +\\infty$.' },
       ],
+      utilise: [
+        { cible: '6e-6h/fonctions-exponentielles#limites', poids: 'indispensable', rappel: 'Dominance ($a > 1$) : $\\lim\\limits_{x \\to +\\infty} \\dfrac{x^n}{a^x} = 0$. Limite fondamentale : $\\lim\\limits_{x \\to 0} \\dfrac{e^x - 1}{x} = 1$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Calculer des limites', youtubeId: '7sw4Ch5blnY' },
         {
@@ -2676,6 +2694,9 @@ export const fonctionsLogarithmes: ChapterContent = {
         { question: 'La courbe passe par $(e;5)$ et $\\left(e^3;11\\right)$ : a et b ?', reponse: '$a + b = 5$ et $a + 3b = 11$ : $b = 3$ et $a = 2$.' },
         { question: '$f(x) = a + b\\ln(x - c)$ a pour asymptote $x = 2$ : que vaut c ?', reponse: '$c = 2$ : l\'argument $x - c$ s\'annule en $x = c$.' },
       ],
+      utilise: [
+        { cible: '6e-6h/fonctions-exponentielles#problemes', poids: 'utile', rappel: 'Modèle $Q(t) = Q_0 \\cdot r^t$ : $r > 1$ pour une croissance, $0 < r < 1$ pour une décroissance. $T(t) = L + C \\cdot q^t$, avec $0 < q < 1$, tend vers L : asymptote $y = L$. Le maximum de $t^n \\cdot e^{-at}$ est atteint en $t = \\dfrac{n}{a}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Retrouver des paramètres depuis des conditions graphiques', youtubeId: 'U54C7GsoHs4' },
         {
@@ -2851,6 +2872,10 @@ export const fonctionsLogarithmes: ChapterContent = {
         { question: 'Quelle est la dérivée de ch ?', reponse: 'sh : les deux fonctions échangent leurs rôles par dérivation.' },
         { question: 'ch peut-elle être négative ?', reponse: 'Non : $\\text{ch}(x) \\ge 1$, avec un minimum en x = 0.' },
         { question: 'Quelle courbe parcourt le point $(\\text{ch}\\,t;\\text{sh}\\,t)$ ?', reponse: 'La branche droite de l\'hyperbole $x^2 - y^2 = 1$.' },
+      ],
+      utilise: [
+        { cible: '6e-6h/fonctions-exponentielles#derivee', poids: 'indispensable', rappel: '$(a^x)\' = \\ln(a) \\cdot a^x$ ; comme $\\ln(e) = 1$, $(e^x)\' = e^x$. Exposant composé : $\\left(a^{f(x)}\\right)\' = f\'(x) \\cdot a^{f(x)} \\cdot \\ln(a)$.' },
+        { cible: '6e-6h/fonctions-reciproques-cyclometriques#reciproques', poids: 'utile', rappel: 'dom($f^{-1}$) = Image($f$) et Image($f^{-1}$) = dom($f$) ; les deux graphes sont symétriques par rapport à $y = x$. Pour trouver $f^{-1}$ : permute x et y dans $y = f(x)$, puis isole y.' },
       ],
       blocks: [
         { kind: 'video', title: 'Sinus et cosinus hyperboliques', youtubeId: 'g_DEAA_S8vA' },
@@ -3031,6 +3056,9 @@ export const fonctionsLogarithmes: ChapterContent = {
         { question: 'Que fait $|f\'|$ près d\'une asymptote verticale de f ?', reponse: 'Il devient très grand : la courbe y devient presque verticale.' },
         { question: 'f′ est décroissante sur un intervalle : que dire de f ?', reponse: 'f y est concave.' },
       ],
+      utilise: [
+        { cible: '6e-6h/fonctions-exponentielles#graphique', poids: 'utile', rappel: 'Courbe de f′ au-dessus de l\'axe : f croissante ; en dessous : f décroissante. Un zéro de f′ avec changement de signe donne un extremum de f. f′ croissante : f convexe ; f′ décroissante : f concave ; un extremum de f′ donne un point d\'inflexion de f. Le graphique de f′ ne dit ni le signe ni la hauteur de f.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Graphique de la fonction dérivée', youtubeId: 'zCtu1A2BCy0' },
         {
@@ -3150,6 +3178,9 @@ export const fonctionsLogarithmes: ChapterContent = {
         { question: 'Même f : quelles asymptotes ?', reponse: 'Verticale $x = 0$ ; horizontale $y = 0$ en $+\\infty$, par croissance comparée.' },
         { question: '$f(x) = x\\ln(x)$ : minimum ?', reponse: '$f\'(x) = \\ln(x) + 1$ : minimum en $x = e^{-1}$, de valeur $-\\dfrac{1}{e}$.' },
         { question: '$D(v) = 5v - 2v\\ln(v)$ : où le débit est-il maximal ?', reponse: '$D\'(v) = 3 - 2\\ln(v)$ s\'annule en $v = e^{3/2} \\approx 4{,}48$.' },
+      ],
+      utilise: [
+        { cible: '6e-6h/fonctions-exponentielles#etude', poids: 'utile', rappel: 'Dans l\'ordre : domaine, limites, asymptotes, sens de variation (signe de f′), concavité (signe de f″). Un changement de signe de f′ donne un extremum ; de f″, un point d\'inflexion. Comme $e^{u} > 0$, le signe d\'un produit par $e^{u}$ est celui de l\'autre facteur.' },
       ],
       blocks: [
         { kind: 'video', title: 'Étudier une fonction : f(x) = ln(x) / x', youtubeId: 'uZjWAZVXFTA' },
@@ -3358,6 +3389,9 @@ export const fonctionsLogarithmes: ChapterContent = {
         { question: 'Séisme de magnitude 7 contre 5 : combien de fois plus d\'énergie ?', reponse: '$10^{1{,}5\\times 2} = 10^3$ fois plus.' },
         { question: 'Deux machines de 60 dB fonctionnent ensemble : quel niveau ?', reponse: '$60 + 10\\log(2) \\approx 63$ dB, jamais 120.' },
         { question: 'Capital $C_0\\,e^{0{,}035t}$ : en combien de temps double-t-il ?', reponse: '$t = \\dfrac{\\ln(2)}{0{,}035} \\approx 19{,}8$ ans.' },
+      ],
+      utilise: [
+        { cible: '6e-6h/fonctions-exponentielles#problemes', poids: 'utile', rappel: 'Modèle $Q(t) = Q_0 \\cdot r^t$ : $r > 1$ pour une croissance, $0 < r < 1$ pour une décroissance. $T(t) = L + C \\cdot q^t$, avec $0 < q < 1$, tend vers L : asymptote $y = L$. Le maximum de $t^n \\cdot e^{-at}$ est atteint en $t = \\dfrac{n}{a}$.' },
       ],
       blocks: [
         { kind: 'video', title: 'Problèmes : pH, demi-vie et croissance logistique', youtubeId: 'HLIc56bYNr0' },

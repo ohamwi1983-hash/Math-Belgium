@@ -2066,6 +2066,9 @@ export const analyseCombinatoire: ChapterContent = {
         { question: 'Avec trois dés, combien de triplets ordonnés donnent la somme 9 ? Et 10 ?', reponse: '25 et 27, sur $6^3 = 216$.' },
         { question: 'Combien de réglages pour 3 curseurs à 4 positions chacun ?', reponse: '$4^3 = 64$ (base : les positions ; exposant : les curseurs).' },
       ],
+      utilise: [
+        { cible: '6e-6h/probabilites#probabilitesensembles', poids: 'utile', rappel: '$P(A)$ mesure la chance que $A$ se réalise : $0 \\leq P(A) \\leq 1$ et $P(\\bar{A})=1-P(A)$. En situation d\'**équiprobabilité** : $P(A) = \\dfrac{\\text{nombre de cas favorables}}{\\text{nombre de cas possibles}}$ — toujours à vérifier avant de compter.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Dénombrement combinatoire pur : problèmes — mains de poker, sommes de trois dés, réemplois', youtubeId: 'OZA48JH9GUM' },
         {
@@ -2404,6 +2407,9 @@ export const analyseCombinatoire: ChapterContent = {
         { question: 'Lot de 20 pièces dont 6 défectueuses ; on en prélève 5 sans remise. $P$(exactement 2 défectueuses) ?', reponse: '$\\dfrac{C_6^2 \\times C_{14}^3}{C_{20}^5} = \\dfrac{5460}{15\\,504} \\approx 0{,}352$.' },
         { question: 'Urne à 5 rouges et 5 bleues, 3 tirages sans remise : $P$(R, R, B dans cet ordre) ? Et $P$(2 R et 1 B) ?', reponse: '$\\dfrac{5}{36}$, puis $3 \\times \\dfrac{5}{36} = \\dfrac{5}{12}$.' },
         { question: 'Probabilité de deviner l\'ordre exact de 4 lettres tirées sans remise parmi 9 ?', reponse: '$\\dfrac{1}{A_9^4} = \\dfrac{1}{3\\,024}$.' },
+      ],
+      utilise: [
+        { cible: '6e-6h/probabilites#probabilitesensembles', poids: 'indispensable', rappel: '$P(A)$ mesure la chance que $A$ se réalise : $0 \\leq P(A) \\leq 1$ et $P(\\bar{A})=1-P(A)$. En situation d\'**équiprobabilité** : $P(A) = \\dfrac{\\text{nombre de cas favorables}}{\\text{nombre de cas possibles}}$ — toujours à vérifier avant de compter.' },
       ],
       blocks: [
         { kind: 'video', title: 'Probabilité hypergéométrique (tirage sans remise)', youtubeId: 'Kd667QJndTc' },
@@ -2768,6 +2774,10 @@ export const analyseCombinatoire: ChapterContent = {
         { question: '$n = 6$, $p = 0{,}4$ : que vaut $P(X=2)$ ?', reponse: '$C_6^2 \\times 0{,}4^2 \\times 0{,}6^4 = 0{,}31104$.' },
         { question: 'Comment calcule-t-on $P(X \\geq 1)$ le plus vite ?', reponse: '$1 - P(X=0) = 1 - (1-p)^n$.' },
         { question: 'Combien de chemins de l\'arbre comptent exactement $k$ succès en $n$ épreuves ?', reponse: '$N_k = C_n^k$.' },
+      ],
+      utilise: [
+        { cible: '6e-6h/probabilites#tiragesarbres', poids: 'indispensable', rappel: 'La probabilité d\'un **chemin**, c\'est le produit des probabilités des branches traversées ; la probabilité d\'un **événement**, c\'est la somme des probabilités des chemins qui y mènent. Avec remise, les tirages successifs sont **indépendants** ; sans remise, la composition change après chaque tirage : le résultat du 1er tirage modifie les probabilités du 2e.' },
+        { cible: '6e-6h/probabilites#probabilitesproblemes', poids: 'utile', rappel: 'Pour trouver $P(X=k)$, il suffit de **compter** combien de chemins de l\'arbre contiennent $k$ succès, puis de multiplier ce nombre par la probabilité commune à chacun d\'eux : $P(X=k) = N_k \\times p^k(1-p)^{n-k}$. « Au moins un succès » se calcule par le complément de « aucun succès », **jamais** en additionnant des probabilités individuelles : $P(\\text{au moins 1}) = 1 - P(X=0) = 1-(1-p)^n$.' },
       ],
       blocks: [
         { kind: 'video', title: 'Probabilité binomiale et séquence exacte', youtubeId: '1sdKwvmrzlE' },

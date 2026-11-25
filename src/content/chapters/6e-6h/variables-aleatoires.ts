@@ -64,6 +64,10 @@ export const variablesAleatoires: ChapterContent = {
         { question: '« $X\\geq4$ » et « $X\\leq4$ » sont-ils contraires ?', reponse: 'Non : ils partagent la valeur $X=4$. Le contraire de « $X\\geq4$ » est « $X\\leq3$ ».' },
         { question: '$E(X)=3$ et $\\sigma(X)=2$. Que valent $E(0{,}5X-1)$ et $\\sigma(0{,}5X-1)$ ?', reponse: '$E=0{,}5\\times3-1=0{,}5$ et $\\sigma=0{,}5\\times2=1$.' },
       ],
+      utilise: [
+        { cible: '6e-6h/analyse-combinatoire#probabilitehypergeometrique', poids: 'indispensable', rappel: '$P(k) = \\dfrac{C_K^k \\times C_{N-K}^{n-k}}{C_N^n}$ pour un tirage **sans remise** ; le dénominateur est toujours $C_N^n$.' },
+        { cible: '6e-6h/probabilites#probabilitesensembles', poids: 'utile', rappel: '$P(A)$ mesure la chance que $A$ se réalise : $0 \\leq P(A) \\leq 1$ et $P(\\bar{A})=1-P(A)$. En situation d\'**équiprobabilité** : $P(A) = \\dfrac{\\text{nombre de cas favorables}}{\\text{nombre de cas possibles}}$ — toujours à vérifier avant de compter.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Variable aléatoire, loi de probabilité et espérance', youtubeId: '7i_g1bBza6g' },
         { kind: 'video', title: 'Variance, écart-type et événements contraires', youtubeId: '3qi0zTgRcdA' },
@@ -623,6 +627,13 @@ export const variablesAleatoires: ChapterContent = {
         { question: '$X\\sim\\mathcal{B}(5\\,;0{,}4)$ : que valent $E(X)$ et $V(X)$ ?', reponse: '$E(X)=2$ et $V(X)=5\\times0{,}4\\times0{,}6=1{,}2$.' },
         { question: "$p=0{,}1$ : combien d'épreuves au minimum pour que $P(\\text{au moins 1 succès})>0{,}9$ ?", reponse: '$n>\\dfrac{\\ln(0{,}1)}{\\ln(0{,}9)}\\approx21{,}85$, donc $n=22$.' },
       ],
+      utilise: [
+        { cible: '6e-6h/analyse-combinatoire#binomialesequence', poids: 'indispensable', rappel: '$P(X=k) = C_n^k \\times p^k \\times (1-p)^{n-k}$ pour $n$ épreuves **indépendantes** de même probabilité de succès $p$. « Exactement $k$ », « aucun » ou « tous » : un seul terme ; « au moins » ou « au plus » : une somme ou le complément, selon le nombre de termes.' },
+        { cible: '6e-6h/fonctions-logarithmes#inequations', poids: 'indispensable', rappel: '$\\ln(u) > 0 \\iff u > 1$ et $\\ln(u) < 0 \\iff 0 < u < 1$. Diviser par un logarithme négatif, comme $\\ln(0{,}8)$, inverse le sens.' },
+        { cible: '6e-6h/analyse-combinatoire#binomenewton', poids: 'utile', rappel: '$(a+b)^n = \\displaystyle\\sum_{k=0}^{n} C_n^k \\times a^{n-k} \\times b^k$, de terme général $T_{k+1} = C_n^k \\times a^{n-k} \\times b^k$.' },
+        { cible: '6e-6h/analyse-combinatoire#denombrementfondamental', poids: 'utile', rappel: 'Combinaisons : $C_n^k = \\dfrac{n!}{k!\\,(n-k)!}$, le nombre de façons de choisir k éléments parmi n sans ordre.' },
+        { cible: '6e-6h/probabilites#probabilitesproblemes', poids: 'utile', rappel: 'Pour trouver $P(X=k)$, il suffit de **compter** combien de chemins de l\'arbre contiennent $k$ succès, puis de multiplier ce nombre par la probabilité commune à chacun d\'eux : $P(X=k) = N_k \\times p^k(1-p)^{n-k}$. « Au moins un succès » se calcule par le complément de « aucun succès », **jamais** en additionnant des probabilités individuelles : $P(\\text{au moins 1}) = 1 - P(X=0) = 1-(1-p)^n$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'La loi binomiale', youtubeId: 'v5fGVg2Hco4' },
         {
@@ -973,6 +984,10 @@ export const variablesAleatoires: ChapterContent = {
         { question: 'Que vaut $P(X=3)$ pour une variable continue ?', reponse: '$0$ : seule une probabilité sur un intervalle a un sens.' },
         { question: 'Quel lien entre la fonction de répartition $F$ et la densité $f$ ?', reponse: "$F'=f$, et $P(a<X\\leq b)=F(b)-F(a)$." },
       ],
+      utilise: [
+        { cible: '6e-6h/primitives-integrales#integralesdefinies', poids: 'indispensable', rappel: 'Théorème fondamental : $\\int_a^b f(x)dx = [F(x)]_a^b = F(b) - F(a)$, quelle que soit la primitive F. La fonction aire $A(x) = \\int_a^x f(t)dt$ est la primitive de f qui s\'annule en a. L\'intégrale est une somme **signée** : les aires sous l\'axe comptent négativement. Échanger les bornes change le signe : $\\int_b^a f(x)dx = -\\int_a^b f(x)dx$.' },
+        { cible: '6e-6h/primitives-integrales#primitives', poids: 'indispensable', rappel: '$\\int x^n dx = \\dfrac{x^{n+1}}{n+1} + C$ si $n \\neq -1$, et $\\int \\dfrac{1}{x}dx = \\ln|x| + C$. Une primitive de $f(ax+b)$ est $\\dfrac{1}{a}F(ax+b)$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Variable aléatoire continue et densité de probabilité', youtubeId: '8GrFoKV_Y_0' },
         {
@@ -1215,6 +1230,9 @@ export const variablesAleatoires: ChapterContent = {
         { question: "Le nombre d'appels en une heure (sans maximum) est-il discret ?", reponse: 'Oui : ses valeurs 0, 1, 2, … se numérotent.' },
         { question: 'Quelle formule continue correspond à $E(X)=\\sum p_i x_i$ ?', reponse: '$E(X)=\\displaystyle\\int_u^v t\\,f(t)\\,dt$.' },
       ],
+      utilise: [
+        { cible: '6e-6h/primitives-integrales#integralesdefinies', poids: 'utile', rappel: 'Théorème fondamental : $\\int_a^b f(x)dx = [F(x)]_a^b = F(b) - F(a)$, quelle que soit la primitive F. La fonction aire $A(x) = \\int_a^x f(t)dt$ est la primitive de f qui s\'annule en a.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Discrète ou continue ? Loi uniforme continue', youtubeId: 'bmZ2Q-zl-F4' },
         {
@@ -1304,6 +1322,9 @@ export const variablesAleatoires: ChapterContent = {
         { question: "Un bus passe toutes les 20 minutes. Probabilité d'attendre au plus 5 minutes ?", reponse: '$\\dfrac{5}{20}=0{,}25$.' },
         { question: '$X$ uniforme sur $[0\\,;60]$ : que valent $E(X)$ et $V(X)$ ?', reponse: '$E(X)=30$ et $V(X)=\\dfrac{60^2}{12}=300$.' },
         { question: '$E(X)=8$ et $V(X)=3$ pour une loi uniforme : que valent $a$ et $b$ ?', reponse: '$a+b=16$ et $b-a=\\sqrt{36}=6$, donc $a=5$ et $b=11$.' },
+      ],
+      utilise: [
+        { cible: '6e-6h/primitives-integrales#integralesdefinies', poids: 'utile', rappel: 'Théorème fondamental : $\\int_a^b f(x)dx = [F(x)]_a^b = F(b) - F(a)$, quelle que soit la primitive F. La fonction aire $A(x) = \\int_a^x f(t)dt$ est la primitive de f qui s\'annule en a.' },
       ],
       blocks: [
         {
@@ -1444,6 +1465,9 @@ export const variablesAleatoires: ChapterContent = {
         { question: 'Que vaut $\\Phi(-1{,}5)$ ?', reponse: "$1-\\Phi(1{,}5)\\approx0{,}0668$ ($\\Phi$ n'est pas paire)." },
         { question: 'Quel $z$ vérifie $\\Phi(z)=0{,}95$ ?', reponse: 'Entre $1{,}64$ et $1{,}65$ (à égale distance) : $z\\approx1{,}645$.' },
         { question: "Quelle part d'une loi normale dépasse $\\mu+2\\sigma$ ?", reponse: 'Environ $2{,}3\\,\\%$ : la moitié des $4{,}6\\,\\%$ hors de $[\\mu-2\\sigma\\,;\\mu+2\\sigma]$.' },
+      ],
+      utilise: [
+        { cible: '6e-6h/primitives-integrales#integralesdefinies', poids: 'utile', rappel: 'L\'intégrale est une somme **signée** : les aires sous l\'axe comptent négativement. Échanger les bornes change le signe : $\\int_b^a f(x)dx = -\\int_a^b f(x)dx$.' },
       ],
       blocks: [
         { kind: 'video', title: 'Loi normale (1/2) : la cloche et la règle empirique', youtubeId: 'oRr2_t58-9A' },
@@ -1919,6 +1943,11 @@ export const variablesAleatoires: ChapterContent = {
         { question: 'Assurance : $P(S)=0{,}22$ et $P(C_3)\\,P(S\\mid C_3)=0{,}1$. Que vaut $P(C_3\\mid S)$ ?', reponse: '$\\dfrac{0{,}1}{0{,}22}\\approx0{,}4545$.' },
         { question: '$X\\sim\\mathcal{B}(100\\,;0{,}5)$ : quelle borne corrigée pour estimer $P(X\\leq55)$ ?', reponse: "$55{,}5$ : $z=\\dfrac{55{,}5-50}{5}=1{,}1$, d'où $\\Phi(1{,}1)\\approx0{,}8643$." },
       ],
+      utilise: [
+        { cible: '6e-6h/probabilites#independancebayes', poids: 'indispensable', rappel: 'Si $B_1,\\ldots,B_n$ forment une partition, la loi des probabilités totales donne, pour tout événement $A$ : $P(A) = \\displaystyle\\sum_{i=1}^{n} P(A|B_i) \\times P(B_i)$. Théorème de Bayes : $P(A|B) = \\dfrac{P(B|A) \\times P(A)}{P(B)}$. Bayes permet de **retourner** un conditionnement : tu connais $P(B|A)$, tu en déduis $P(A|B)$.' },
+        { cible: '6e-6h/probabilites#probabilitesensembles', poids: 'indispensable', rappel: 'La probabilité de $A$ **sachant** $B$ : $P(A|B) = \\dfrac{P(A \\cap B)}{P(B)}$, et $P(A|B) \\neq P(B|A)$ en général. $A$ et $B$ sont indépendants si $P(A \\cap B) = P(A) \\times P(B)$.' },
+        { cible: '6e-6h/fonctions-logarithmes#inequations', poids: 'utile', rappel: '$\\ln(u) > 0 \\iff u > 1$ et $\\ln(u) < 0 \\iff 0 < u < 1$. Diviser par un logarithme négatif, comme $\\ln(0{,}8)$, inverse le sens.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Extensions : épreuves composées, Bayes, approximation normale', youtubeId: 'EdM_I4B6wnA' },
         {
@@ -2260,6 +2289,11 @@ export const variablesAleatoires: ChapterContent = {
         { question: '$\\lambda=4$ : comment obtenir $P(X=1)$ à partir de $P(X=0)$ ?', reponse: '$P(X=1)=P(X=0)\\times\\dfrac{4}{1}$.' },
         { question: '$P(X=0)=0{,}135$ pour une loi de Poisson : que vaut $\\lambda$ ?', reponse: '$\\lambda=-\\ln(0{,}135)\\approx2$.' },
         { question: 'Tirages sans remise dans une petite population : quelle loi ?', reponse: 'La loi hypergéométrique (pas la binomiale).' },
+      ],
+      utilise: [
+        { cible: '6e-6h/fonctions-logarithmes#equations', poids: 'utile', rappel: '$a^x = b$ (avec $b>0$) donne $x = \\log_a(b) = \\dfrac{\\ln(b)}{\\ln(a)}$ ; $\\log_a(u) = b$ donne $u = a^b$.' },
+        { cible: '6e-6h/probabilites#tiragesarbres', poids: 'utile', rappel: 'La probabilité d\'un **chemin**, c\'est le produit des probabilités des branches traversées ; la probabilité d\'un **événement**, c\'est la somme des probabilités des chemins qui y mènent.' },
+        { cible: '6e-6h/analyse-combinatoire#probabilitehypergeometrique', poids: 'utile', rappel: '$P(k) = \\dfrac{C_K^k \\times C_{N-K}^{n-k}}{C_N^n}$ pour un tirage **sans remise** ; le dénominateur est toujours $C_N^n$.' },
       ],
       blocks: [
         { kind: 'video', title: 'La loi de Poisson', youtubeId: 'E6SK3Awv1fQ' },

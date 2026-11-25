@@ -43,6 +43,10 @@ export const coniques: ChapterContent = {
         { question: R`Hyperbole $\dfrac{x^2}{9}-\dfrac{y^2}{16}=1$ : foyers et asymptotes ?`, reponse: R`$c^2=9+16=25$ : foyers $(\pm5\,;0)$ ; asymptotes $y=\pm\dfrac{4}{3}x$.` },
         { question: R`Que devient $x^2-y^2=8$ dans le repère de ses asymptotes ?`, reponse: R`$XY=\dfrac{a^2}{2}=4$ (et non $8$).` },
       ],
+      utilise: [
+        { cible: '6e-6h/lieux-geometriques#lieux-elimination', poids: 'utile', rappel: 'Démontrer un lieu, c\'est prouver les deux inclusions (réciproque comprise) et exclure les points où la condition n\'a pas de sens.' },
+        { cible: '6e-6h/lieux-geometriques#points-droites-remarquables', poids: 'utile', rappel: 'Dans un repère dont les axes n\'ont pas la même unité, $x^2+y^2 = 4$ ne décrit plus un cercle : la formule de distance $\\sqrt{x^2+y^2}$ suppose un repère orthonormé.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Identifier une conique (1/5) : la parabole — lampe de poche, foyer-directrice, construction', youtubeId: 'rvNL1CDMuNE' },
         { kind: 'video', title: "Identifier une conique (2/5) : l'ellipse — définition, construction par deux cercles, équation", youtubeId: 'GnBXVzw0vKY' },
@@ -714,6 +718,9 @@ export const coniques: ChapterContent = {
         { question: R`Directrices de l'ellipse $\dfrac{x^2}{25}+\dfrac{y^2}{16}=1$ ?`, reponse: R`$c=3$ : $x=\pm\dfrac{a^2}{c}=\pm\dfrac{25}{3}$ ; excentricité $\dfrac{3}{5}$.` },
         { question: R`Que décrit $(x-1)^2+4(y+2)^2=0$ ?`, reponse: R`Le seul point $(1\,;-2)$ : une somme de carrés positifs n'est nulle que si chaque carré l'est.` },
         { question: R`Sommet, foyer et directrice de $(y-2)^2=8(x-3)$ ?`, reponse: R`$2p=8$, $p=4$ : sommet $(3\,;2)$, foyer $(5\,;2)$, directrice $x=1$.` },
+      ],
+      utilise: [
+        { cible: '6e-6h/lieux-geometriques#points-droites-remarquables', poids: 'utile', rappel: 'Distance d\'un point à une droite $ax+by+c=0$ : $\\mathrm{dist}(P\\,;d) = \\dfrac{|ax_P+by_P+c|}{\\sqrt{a^2+b^2}}$ ; pour une verticale $x = k$, c\'est $|x_P - k|$.' },
       ],
       blocks: [
         { kind: 'video', title: 'Excentricité (1/3) : un seul curseur e, trois courbes, caractérisation focale, équation générale', youtubeId: 'c1b3hbCqCl8' },

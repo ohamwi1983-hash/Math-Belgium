@@ -474,6 +474,9 @@ img, svg { max-width: 100%; }
   .recherche-popup { left: auto; right: 0; width: max(100%, 460px); }
 }
 @media print { .recherche-site, .menu-compte-lien, .menu-compte { display: none !important; } }
+/* Lien nommé vers un autre chapitre (`[[…]]`, `Math.tsx`) : à l'impression, son texte seul, comme le
+   reste de la phrase (chapitres autonomes, 25/11/2026). */
+@media print { .lien-chapitre { color: inherit; text-decoration: none; } }
 
 /* Lien "Retour à la section" en tête de page générateur (EntrainementPage) : hors du fil
    d'Ariane (trop discret pour l'action la plus probable en sortant d'un exercice), avant le
@@ -2347,10 +2350,10 @@ fieldset.eleve-demos { border: 0; margin: 0; padding: 0; }
   body:has(.chapter-layout.parcours) { background: var(--paper); }
 
   /* --- ce que chaque vue montre --- */
-  .parcours .page > :is(.parcours-tete, .onglets-page, .intro-section, .parcours-carte, .parcours-reviser,
+  .parcours .page > :is(.parcours-tete, .onglets-page, .intro-section, .ce-chapitre-utilise, .parcours-carte, .parcours-reviser,
     .synthese, .formulaire, .formulaire-actions, .export-section, .parcours-entrainer),
   .parcours .page > .chapter-section:not(.etape-active) { display: none; }
-  .parcours[data-vue="carte"] .page > :is(.parcours-tete, .intro-section, .parcours-carte) { display: block; }
+  .parcours[data-vue="carte"] .page > :is(.parcours-tete, .intro-section, .ce-chapitre-utilise, .parcours-carte) { display: block; }
   .parcours:not([data-vue="etape"]) .page > .onglets-page { display: flex; }
   .parcours[data-vue="reviser"] .page > :is(.parcours-reviser, .synthese, .formulaire, .export-section) { display: block; }
   .parcours[data-vue="reviser"] .page > .formulaire-actions { display: flex; }
@@ -2452,6 +2455,55 @@ fieldset.eleve-demos { border: 0; margin: 0; padding: 0; }
   .intro-nom { font-size: 16px; font-weight: 600; }
   .intro-ouverte .intro-bascule { margin-bottom: 8px; }
 
+  /* Chapitres autonomes (25/11/2026) : « Ce chapitre utilise… » (carte, replié) et « Cette étape
+     utilise » (en tête d'étape, rappels dépliables). Jetons du site seulement : clair, sombre et tous
+     les thèmes du panneau « Aa ». Cibles ≥ 44 px, une entrée par ligne. */
+  .ce-chapitre-utilise { margin: 0 0 14px; border: 1px solid var(--line-soft); border-radius: var(--radius); background: var(--surface-2); }
+  .utilise-bascule {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px;
+    padding: 10px 14px; border: 0; border-radius: var(--radius); background: none; color: var(--ink);
+    text-align: left; cursor: pointer; font-family: var(--sans);
+  }
+  .utilise-bascule > span:first-child { display: flex; flex-direction: column; }
+  .utilise-titre { font-size: 16px; font-weight: 600; }
+  .utilise-resume { font-size: 13.5px; color: var(--ink-soft); }
+  .utilise-corps { padding: 0 14px 14px; font-family: var(--sans); }
+  .utilise-intro { margin: 0 0 10px; font: 400 15px/1.45 var(--lecture); color: var(--ink-soft); }
+  .utilise-groupe + .utilise-groupe { margin-top: 12px; }
+  .utilise-chapitre { margin: 0; font: 600 15px/1.3 var(--sans); }
+  .utilise-chapitre a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); }
+  .utilise-annee { font-weight: 500; color: var(--ink-soft); }
+  .utilise-groupe ul { list-style: none; margin: 0; padding: 0; }
+  .utilise-groupe li { display: flex; flex-direction: column; padding: 2px 0 8px; border-top: 1px solid var(--line-soft); }
+  .utilise-lien { display: flex; align-items: center; gap: 10px; min-height: 44px; color: var(--ink); text-decoration: none; font: 500 15.5px/1.3 var(--sans); }
+  .utilise-lien:hover .utilise-nom { text-decoration: underline; }
+  .utilise-num { flex: none; font-weight: 600; color: var(--accent-ink); }
+  .utilise-detail { font-size: 13.5px; color: var(--ink-soft); }
+  .utilise-indispensable { color: var(--bad); font-weight: 700; }
+
+  .parcours .etape-utilise {
+    border: 1px solid var(--line-soft); border-left: 3px solid var(--accent); border-radius: var(--radius);
+    background: var(--surface); padding: 12px 14px 6px; margin: 0 0 22px;
+  }
+  .parcours .etape-utilise .etiquette { color: var(--accent-ink); }
+  .etape-utilise ul { list-style: none; margin: 0; padding: 0; }
+  .etape-utilise li + li { border-top: 1px solid var(--line-soft); }
+  .utilise-ligne {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px;
+    padding: 6px 0; border: 0; background: none; color: var(--ink); text-align: left; cursor: pointer; font-family: var(--sans);
+  }
+  .utilise-ligne-texte { display: flex; flex-direction: column; min-width: 0; }
+  .utilise-ligne .utilise-nom { font-size: 15.5px; font-weight: 600; }
+  .utilise-ou { font-size: 13.5px; color: var(--ink-soft); }
+  .utilise-action {
+    flex: none; display: inline-flex; align-items: center; min-height: 32px; padding: 4px 12px;
+    border: 1px solid var(--line); border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--accent-ink);
+  }
+  .utilise-rappel { padding: 2px 0 12px; }
+  .utilise-rappel p { margin: 0 0 8px; }
+  .utilise-revoir { display: inline-flex; align-items: center; min-height: 44px; font: 600 15px/1.3 var(--sans); color: var(--accent-ink); }
+  .utilise-onglet { font-weight: 400; color: var(--ink-soft); margin-left: 4px; }
+
   .liste-partie { font: 600 13.5px/1.3 var(--sans); color: var(--ink-soft); margin: 18px 0 4px; }
   .liste-groupe:first-child .liste-partie { margin-top: 4px; }
   .liste-etapes ol { list-style: none; margin: 0; padding: 0; }
@@ -2502,7 +2554,7 @@ fieldset.eleve-demos { border: 0; margin: 0; padding: 0; }
   /* Colonne de lecture plafonnée (fait d'office, planche 11) : 32em ≈ 68 signes en Andika sur grand
      écran (sans effet sur téléphone) ; figures, tableaux et ateliers gardent toute la largeur. La
      longueur choisie dans le panneau « Aa » remplace la valeur (`--l-largeur`, `lecture.css`). */
-  .parcours .section-body > :is(p, ul, ol, h3, .callout, .essentiel, .wrong-right, .etape-annexes, .section-kicker) { max-width: var(--l-largeur, 32em); }
+  .parcours .section-body > :is(p, ul, ol, h3, .callout, .essentiel, .etape-utilise, .wrong-right, .etape-annexes, .section-kicker) { max-width: var(--l-largeur, 32em); }
 
   .etape-annexes { display: flex; flex-direction: column; gap: 14px; margin: 24px 0; }
   .tiroirs { border: 1px solid var(--line-soft); border-radius: var(--radius); background: var(--surface); }

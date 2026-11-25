@@ -36,6 +36,9 @@ export const limitesAsymptotes: ChapterContent = {
         { question: '$\\lim\\limits_{x \\to -3^-} \\dfrac{2x-5}{x+3}$ ?', reponse: '$\\dfrac{-11}{0^-} = +\\infty$ : ce n\'est pas une forme indéterminée.' },
         { question: '$\\lim\\limits_{x \\to +\\infty} \\left[\\sqrt{x^2+4x} - x\\right]$ ?', reponse: 'Conjuguée : $\\dfrac{4x}{\\sqrt{x^2+4x}+x}$, puis terme dominant : la limite vaut 2, pas 0.' },
       ],
+      utilise: [
+        { cible: '5e-4h/fonctions-composees#domaine', poids: 'indispensable', rappel: 'dom f est l\'ensemble des x pour lesquels f(x) peut être calculé. Un dénominateur doit être $\\ne 0$, le radicande d\'une racine d\'indice pair doit être $\\ge 0$ ; une racine impaire ou une valeur absolue n\'impose aucune condition. On pose une condition par opération à risque, on résout chacune, puis on combine par **intersection**. Une racine au dénominateur impose $\\text{radicande} > 0$, une inégalité stricte.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Introduction : que devient f(x) ?', youtubeId: 'Ox4FLOO-Fus' },
         { kind: 'video', title: 'Notion de limite : bornes du domaine, limite à gauche/à droite, limites de référence', youtubeId: 'GXuoF1-6fLU' },
@@ -1818,6 +1821,9 @@ export const limitesAsymptotes: ChapterContent = {
         { question: '$f(x) = \\dfrac{x^2+x}{x^2+1}$ recoupe-t-elle son asymptote $y = 1$ ?', reponse: 'Oui : $f(x) = 1 + \\dfrac{x-1}{x^2+1}$, recoupement en $(1\\,;1)$.' },
         { question: 'Donne une fonction d\'asymptotes $x = 2$ et $y = 3$.', reponse: '$f(x) = 3+\\dfrac{1}{x-2}$, par exemple : la réponse n\'est pas unique.' },
         { question: '$f(x)=\\dfrac{ax+b}{x+d}$, asymptotes $x = 2$ et $y = 3$, passe par $A(0\\,;1)$ : f(x) ?', reponse: '$d = -2$, $a = 3$, puis $b = -2$ : $f(x) = \\dfrac{3x-2}{x-2}$.' },
+      ],
+      utilise: [
+        { cible: '5e-4h/fonctions-composees#domaine', poids: 'indispensable', rappel: 'dom f est l\'ensemble des x pour lesquels f(x) peut être calculé. Un dénominateur doit être $\\ne 0$, le radicande d\'une racine d\'indice pair doit être $\\ge 0$ ; une racine impaire ou une valeur absolue n\'impose aucune condition.' },
       ],
       blocks: [
         { kind: 'video', title: 'Étude complète d\'une fonction rationnelle : domaine, asymptotes, limites', youtubeId: 'j413TOzZQVM' },

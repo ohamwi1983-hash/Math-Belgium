@@ -33,6 +33,11 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         { question: 'Quelles écritures existent toujours, même pour une droite verticale ?', reponse: 'L\'implicite et la paramétrique.' },
         { question: 'Écris la paramétrique de la droite par A(1 ; 1), de vecteur directeur $\\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$.', reponse: '$\\begin{cases} x = 1+2t \\\\ y = 1+t \\end{cases}$' },
       ],
+      utilise: [
+        { cible: '4e/calcul-vectoriel#directeur', poids: 'indispensable', rappel: 'Un **vecteur directeur** de d est un vecteur défini par deux points distincts de d : une droite en a une infinité, tous colinéaires entre eux. La droite $y = mx + p$ a pour vecteur directeur $\\begin{pmatrix} 1 \\\\ m \\end{pmatrix}$ ; une droite horizontale $\\begin{pmatrix} k \\\\ 0 \\end{pmatrix}$, une droite verticale $\\begin{pmatrix} 0 \\\\ k \\end{pmatrix}$, avec $k \\neq 0$.' },
+        { cible: '4e/calcul-vectoriel#colinearite', poids: 'indispensable', rappel: 'Critère de colinéarité : $\\vec{u}$ et $\\vec{v}$ sont colinéaires ⟺ $x_u \\cdot y_v - y_u \\cdot x_v = 0$ : les produits en croix sont égaux.' },
+        { cible: '4e/cercle-trigonometrique-triangles#cercle', poids: 'utile', rappel: 'Sur le cercle trigonométrique, le point associé à θ a pour coordonnées $(\\cos\\theta\\,;\\sin\\theta)$ ; dans le quadrant II, seul le sinus est positif.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Décrire une droite : point, vecteur directeur et 4 formes d\'équation', youtubeId: 'OkLInSNqf-Q' },
         {
@@ -362,6 +367,9 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         { question: 'Comment lire la pente m sur un graphe ?', reponse: 'On avance de 1 vers la droite et on compte de combien la droite monte (m > 0) ou descend (m < 0).' },
         { question: 'Quels deux points pour tracer une droite donnée en paramétrique ?', reponse: 't = 0 donne le point de départ, t = 1 le point translaté du vecteur directeur.' },
       ],
+      utilise: [
+        { cible: '4e/calcul-vectoriel#composantes', poids: 'indispensable', rappel: 'Dans un repère, deux nombres suffisent à décrire un vecteur : ses **composantes**, « arrivée moins départ » : $\\vec{AB}\\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Lire, tracer une droite ; pente, angle et ordonnée à l\'origine', youtubeId: 'XhlMFkJ5XG4' },
         {
@@ -532,6 +540,9 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         { question: 'Pente et ordonnée à l\'origine de $2x + 2y - 3 = 0$ ?', reponse: '$y = -x + \\dfrac{3}{2}$ : $m = -1$ et $p = \\dfrac{3}{2}$.' },
         { question: 'Quelle droite n\'a pas de pente ?', reponse: 'Une verticale : son angle avec Ox vaut 90°, mais la pente n\'existe pas.' },
       ],
+      utilise: [
+        { cible: '4e/cercle-trigonometrique-triangles#cercle', poids: 'utile', rappel: 'Dans le quadrant II, la tangente est négative ; $\\tan(\\theta+180^{\\circ}) = \\tan\\theta$ : un angle et cet angle augmenté de $180^{\\circ}$ ont la même tangente.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -697,6 +708,11 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         { question: '$m_1 = 2$ et $m_2 = -\\dfrac{1}{2}$ : quelle relation entre les droites ?', reponse: 'Perpendiculaires : $m_1 \\cdot m_2 = -1$.' },
         { question: 'Parallèle à $3x - y + 2 = 0$ passant par A(1 ; 4) ?', reponse: '$3x - y + c = 0$ avec $3 - 4 + c = 0$ : $3x - y + 1 = 0$.' },
         { question: 'Une horizontale et une verticale : pourquoi $m \\cdot m\' = -1$ ne marche-t-il pas ?', reponse: 'La verticale n\'a pas de pente ; le produit scalaire, lui, marche toujours.' },
+      ],
+      utilise: [
+        { cible: '4e/calcul-vectoriel#colinearite', poids: 'indispensable', rappel: 'Critère de colinéarité : $\\vec{u}$ et $\\vec{v}$ sont colinéaires ⟺ $x_u \\cdot y_v - y_u \\cdot x_v = 0$ : les produits en croix sont égaux.' },
+        { cible: '4e/calcul-vectoriel#orthogonalite', poids: 'indispensable', rappel: 'Les vecteurs $\\vec{u}$ et $\\vec{v}$ sont **orthogonaux** si et seulement si $x_u x_v + y_u y_v = 0$.' },
+        { cible: '4e/equations-inequations-second-degre#resoudre', poids: 'utile', rappel: 'Pour $ax^2+bx+c=0$ : $\\Delta = b^2-4ac$ ; deux solutions $\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}$ si $\\Delta>0$, une si $\\Delta=0$, aucune si $\\Delta<0$.' },
       ],
       blocks: [
         { kind: 'video', title: 'Droites parallèles, perpendiculaires et intersection de deux droites', youtubeId: 'E0Uvj1gvBi0' },
@@ -984,6 +1000,9 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         { question: 'Point commun de $\\begin{cases} x = 1+2t \\\\ y = 3-t \\end{cases}$ et de $x + y - 6 = 0$ ?', reponse: '$(1+2t) + (3-t) - 6 = 0$ donne $t = 2$ : le point (5 ; 1).' },
         { question: 'Deux trajectoires se coupent : les mobiles se rencontrent-ils forcément ?', reponse: 'Non : il faut en plus le même instant, $t_1 = t_2$.' },
       ],
+      utilise: [
+        { cible: '4e/calcul-vectoriel#colinearite', poids: 'indispensable', rappel: 'Critère de colinéarité : $\\vec{u}$ et $\\vec{v}$ sont colinéaires ⟺ $x_u \\cdot y_v - y_u \\cdot x_v = 0$ : les produits en croix sont égaux.' },
+      ],
       blocks: [
         { kind: 'para', text: "Il y a trois issues possibles. Distingue-les **avant** de te lancer dans un calcul inutile." },
         {
@@ -1179,6 +1198,11 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         { question: 'Distance d\'un point P à la droite verticale $x = k$ ?', reponse: '$|x_P - k|$, un simple écart d\'abscisses.' },
         { question: 'Comment obtenir le symétrique A′ de A par rapport à d ?', reponse: 'Projeté orthogonal H, puis $x_{A\'} = 2x_H - x_A$ et $y_{A\'} = 2y_H - y_A$.' },
         { question: 'Coordonnées du centre de gravité G du triangle ABC ?', reponse: '$G\\left(\\dfrac{x_A+x_B+x_C}{3}\\,;\\,\\dfrac{y_A+y_B+y_C}{3}\\right)$' },
+      ],
+      utilise: [
+        { cible: '4e/calcul-vectoriel#norme', poids: 'indispensable', rappel: 'La **norme** est la longueur d\'un vecteur : $\\|\\vec{u}\\| = \\sqrt{x_u^2 + y_u^2}$ (Pythagore dans le repère). Elle est toujours positive ou nulle. La distance AB est la norme de $\\vec{AB}$. Après des déplacements successifs, on additionne les vecteurs puis on calcule la norme : jamais la somme des longueurs.' },
+        { cible: '4e/calcul-vectoriel#relation', poids: 'indispensable', rappel: 'Le milieu de [AB] a pour coordonnées la **moyenne** des coordonnées de A et de B, jamais leur différence. $\\vec{AM} = k \\cdot \\vec{AB}$ place M sur la droite (AB) ; $k = \\frac{1}{2}$ donne le milieu.' },
+        { cible: '4e/calcul-vectoriel#orthogonalite', poids: 'indispensable', rappel: 'Les vecteurs $\\vec{u}$ et $\\vec{v}$ sont **orthogonaux** si et seulement si $x_u x_v + y_u y_v = 0$.' },
       ],
       blocks: [
         { kind: 'video', title: 'Distance point-droite, droite-droite et notion de lieu géométrique', youtubeId: 'mkdqsJBJKNU' },
@@ -1553,6 +1577,9 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         { question: 'Quel est le lieu des points équidistants de deux droites parallèles ?', reponse: 'La parallèle située exactement à mi-chemin.' },
         { question: 'Comment traduire « M est équidistant de A et de B » en équation ?', reponse: '$MA^2 = MB^2$ : on obtient la médiatrice de [AB].' },
       ],
+      utilise: [
+        { cible: '4e/calcul-vectoriel#norme', poids: 'indispensable', rappel: 'La distance AB est la norme de $\\vec{AB}$ : $AB = \\sqrt{(x_B-x_A)^2+(y_B-y_A)^2}$.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -1773,6 +1800,11 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         { question: 'Centre C(1 ; 1) et point P(4 ; 5) du cercle : quelle équation ?', reponse: '$r = \\sqrt{3^2+4^2} = 5$ : $(x-1)^2+(y-1)^2=25$.' },
         { question: 'Après avoir complété les carrés, le second membre vaut −5. Conclusion ?', reponse: 'Aucun point : une somme de carrés n\'est jamais négative, ce n\'est pas un cercle.' },
         { question: 'Quand une droite est-elle tangente à un cercle ?', reponse: 'Quand la distance CH du centre à la droite est égale au rayon.' },
+      ],
+      utilise: [
+        { cible: '4e/calcul-vectoriel#norme', poids: 'indispensable', rappel: 'La distance AB est la norme de $\\vec{AB}$ : $AB = \\sqrt{(x_B-x_A)^2+(y_B-y_A)^2}$.' },
+        { cible: '4e/fonction-second-degre#transformer', poids: 'utile', rappel: 'Compléter le carré : $x^2+Dx = \\left(x+\\dfrac{D}{2}\\right)^2-\\dfrac{D^2}{4}$ (c\'est ainsi qu\'on obtient la forme canonique).' },
+        { cible: '4e/calcul-vectoriel#orthogonalite', poids: 'utile', rappel: 'Les vecteurs $\\vec{u}$ et $\\vec{v}$ sont **orthogonaux** si et seulement si $x_u x_v + y_u y_v = 0$.' },
       ],
       blocks: [
         { kind: 'video', title: 'Le cercle : équation, centre et rayon', youtubeId: 'tSgRL4q19Go' },
@@ -2171,6 +2203,9 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         { question: 'Axe vertical et p négatif : que se passe-t-il ?', reponse: 'Le foyer est sous le sommet : la parabole s\'ouvre vers le bas.' },
         { question: 'Sommet et p de $(y-3)^2 = 4(x+1)$ ?', reponse: 'S(−1 ; 3) et $2p = 4$, donc $p = 2$ (axe horizontal).' },
       ],
+      utilise: [
+        { cible: '4e/fonction-second-degre#etudier', poids: 'utile', rappel: 'Le signe de a donne l\'allure : si $a > 0$, la parabole est ouverte vers le haut et a un **minimum** ; si $a < 0$, elle est ouverte vers le bas et a un **maximum**. c est l\'ordonnée à l\'origine : $f(0) = c$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'La parabole : foyer, directrice, équation et construction au compas', youtubeId: 'C8pnTijgKro' },
         { kind: 'video', title: 'Construction d\'une parabole au compas et à l\'équerre', youtubeId: 'mmRHcf1ttrY' },
@@ -2542,6 +2577,9 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         { question: 'Points communs de $y = x$ et de $(x-1)^2+y^2=5$ ?', reponse: '$x^2 - x - 2 = 0$ : (2 ; 2) et (−1 ; −1).' },
         { question: 'Droite et parabole : la substitution donne $(x-2)^2 = 0$. Conclusion ?', reponse: 'Un seul point commun : la droite est tangente à la parabole.' },
         { question: 'Comment trouver les points communs de deux cercles ?', reponse: 'On soustrait leurs équations : les carrés disparaissent, il reste une droite ; puis on substitue.' },
+      ],
+      utilise: [
+        { cible: '4e/equations-inequations-second-degre#resoudre', poids: 'indispensable', rappel: 'Pour $ax^2+bx+c=0$ : $\\Delta = b^2-4ac$. Si $\\Delta>0$, deux solutions $\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}$ ; si $\\Delta=0$, une racine double ; si $\\Delta<0$, aucune solution réelle.' },
       ],
       blocks: [
         { kind: 'video', title: 'Lieux géométriques, intersection de deux courbes, révision du chapitre', youtubeId: 'WZbxEM82VOo' },

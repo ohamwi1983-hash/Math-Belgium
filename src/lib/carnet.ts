@@ -14,6 +14,7 @@ import type { ChapterContent } from '../content/types'
 import { findChapter, LEVELS } from '../content/chaptersIndex'
 import { heureTexte } from '../entrainement/export/examen'
 import type { MatiereVue } from './carnetMatiere'
+import { texteSansLiens } from './lienChapitre'
 
 export const SITE_URL = 'https://math-belgium.vercel.app'
 export const NOM_CLASSE_MAX = 40
@@ -157,7 +158,7 @@ function latexEnTexte(latex: string): string {
 
 /** Texte `RichText` (« $…$ » et « **gras** ») → texte brut pour Smartschool et la fiche. */
 export function texteBrut(riche: string): string {
-  return riche
+  return texteSansLiens(riche)
     .replace(/\$\$([^$]+)\$\$|\$([^$]+)\$/g, (_, a: string | undefined, b: string | undefined) => latexEnTexte(a ?? b ?? ''))
     .replace(/\*\*([^*]+)\*\*/g, '$1')
     .replace(/\s+/g, ' ')

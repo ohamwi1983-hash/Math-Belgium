@@ -65,6 +65,9 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         { question: 'Résous $3x^2 - 5x + 2 = 0$ sans calculer le discriminant.', reponse: '$3 - 5 + 2 = 0$, donc $x_1 = 1$ ; le produit donne $x_2 = \\dfrac{c}{a} = \\dfrac{2}{3}$.' },
         { question: 'Écris une équation de solutions 2 et 5 sous la forme $x^2 - Sx + P = 0$.', reponse: '$S = 7$ et $P = 10$ : $x^2 - 7x + 10 = 0$.' },
       ],
+      utilise: [
+        { cible: '4e/fonction-second-degre#etudier', poids: 'utile', rappel: 'Les **zéros** de $f(x) = ax^2+bx+c$ sont les abscisses des points où la parabole coupe l\'axe des x : il y en a 0, 1 (au sommet) ou 2.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Résoudre une équation du second degré (1/3) : les raccourcis avant le discriminant', youtubeId: '6WDdAWpUZW8' },
         { kind: 'video', title: 'Résoudre une équation du second degré (2/3) : le discriminant', youtubeId: 'Vv3ZyYvgF5A' },
@@ -870,6 +873,9 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         { question: 'Résous $x^2 - x - 6 \\geq 0$.', reponse: 'Racines −2 et 3, $a > 0$ : $S = ]-\\infty;-2] \\cup [3;+\\infty[$.' },
         { question: 'Résous $x^2 + x + 1 < 0$.', reponse: '$\\Delta = -3 < 0$ et $a > 0$ : le trinôme est toujours positif, donc $S = \\varnothing$.' },
         { question: 'Dans $]-2;3]$, quelles bornes sont incluses ?', reponse: 'Seulement 3 : −2 est exclu (crochet ouvert vers l\'intérieur).' },
+      ],
+      utilise: [
+        { cible: '4e/fonction-second-degre#etudier', poids: 'utile', rappel: 'Le signe de a donne l\'allure : si $a > 0$, la parabole est ouverte vers le haut et a un **minimum** ; si $a < 0$, elle est ouverte vers le bas et a un **maximum**. c est l\'ordonnée à l\'origine : $f(0) = c$. Tableau de signes : à l\'extérieur des zéros, f(x) a le signe de a ; entre les zéros, le signe opposé.' },
       ],
       blocks: [
         { kind: 'video', title: 'Étudier le signe d\'un trinôme', youtubeId: 'gZ82w5l4vWQ' },
@@ -2034,6 +2040,9 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       cartes: [
         { question: '$h(t) = -5(t-5)(t+1)$, avec $t \\geq 0$ : quand le ballon touche-t-il le sol ?', reponse: 'En $t = 5$ s ; $t = -1$ est rejeté, un temps négatif n\'existe pas.' },
         { question: 'Comment traduire « l\'aire $A(x) = x(20-x)$ vaut au moins 96 m² » ?', reponse: 'Par l\'inéquation $x(20-x) \\geq 96$ ; ici $x \\in [8;12]$.' },
+      ],
+      utilise: [
+        { cible: '4e/fonction-second-degre#utiliser', poids: 'utile', rappel: 'Modéliser, toujours en 3 étapes : choisir la variable x, exprimer la grandeur à étudier avec cette seule variable, définir le **domaine de validité**.' },
       ],
       blocks: [
         {

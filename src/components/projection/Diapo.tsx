@@ -2,7 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { ChapterContent, InteractiveWidgetTag } from '../../content/types'
 import type { Diapo as DonneesDiapo } from '../../lib/projection/diapos'
-import { RichText } from '../Math'
+import { ModeLiensChapitre, RichText } from '../Math'
+import { texteSansLiens } from '../../lib/lienChapitre'
 import { BlockRenderer } from '../chapter/BlockRenderer'
 import { Illustration } from '../illustrations/Illustration'
 import { InteractiveWidget } from '../chapter/InteractiveWidget'
@@ -44,7 +45,10 @@ export function Diapo({ diapo, chapter, pas, mode, debut, atelier }: { diapo: Do
     <div ref={racine} className={`diapo theme-clair diapo--${diapo.type}`} data-mode={mode} data-cle={diapo.cle} data-plein={plein ? '' : undefined}>
       <div className="diapo-filet" aria-hidden="true" />
       <div ref={contenu} className="diapo-contenu">
-        <div className="diapo-pile">{corps(diapo, chapter, p, mode, toutVisible, debut, atelier)}</div>
+        {/* Lien nommé vers un autre chapitre : texte seul (un clic sur la diapo = diapo suivante). */}
+        <ModeLiensChapitre.Provider value="texte">
+          <div className="diapo-pile">{corps(diapo, chapter, p, mode, toutVisible, debut, atelier)}</div>
+        </ModeLiensChapitre.Provider>
       </div>
     </div>
   )
@@ -56,7 +60,7 @@ function sansPrefixe(label: string): string {
 
 /** Longueur « visible » d'un texte RichText (une formule compte pour quelques caractères). */
 function longueur(t: string): number {
-  return t.replace(/\$[^$]+\$/g, 'xxxxxx').replace(/\*\*/g, '').length
+  return texteSansLiens(t).replace(/\$[^$]+\$/g, 'xxxxxx').replace(/\*\*/g, '').length
 }
 
 function majuscule(t: string): string {

@@ -75,6 +75,7 @@ import { LEVELSLUG_FONCTIONNEL_6E, LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONN
 import { catalogueAvecGroupes, variantesDe } from '../entrainement/export/groupesVerdict'
 import { QUESTIONS_FORMULES } from './questionsFormules'
 import { varianteToujoursExacte } from './tirageInstance'
+import { texteSansLiens } from './lienChapitre'
 
 const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
   [LEVELSLUG_FONCTIONNEL_6E]: EVALUATION_BASE_URL_6E_6H,
@@ -889,7 +890,7 @@ export interface QuestionOuverte {
 function parseRichText(texte: string): FragmentTexte[] {
   // Correspondances des exemples clés (`\htmlClass{m1}{…}`, option élève à l'écran seulement) : retirées
   // ici, le papier et le Word ne les connaissent pas (KaTeX sans `trust` les écrirait en rouge).
-  const sansGras = texte.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\\htmlClass\{m[1-3]\}/g, '')
+  const sansGras = texteSansLiens(texte).replace(/\*\*(.*?)\*\*/g, '$1').replace(/\\htmlClass\{m[1-3]\}/g, '')
   const morceaux = sansGras.split(/\$([^$]+)\$/g)
   const fragments: FragmentTexte[] = []
   morceaux.forEach((valeur, i) => {

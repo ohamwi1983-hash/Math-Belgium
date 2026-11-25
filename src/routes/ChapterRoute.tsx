@@ -56,7 +56,8 @@ export function ChapterRoute() {
           { label: chapter.title },
         ]}
       />
-      <ChapterPage chapter={chapter} />
+      {/* `key` : un lien nommé vers un autre chapitre remonte la page (état de la carte, haut de page). */}
+      <ChapterPage key={path} chapter={chapter} />
     </>
   )
 }

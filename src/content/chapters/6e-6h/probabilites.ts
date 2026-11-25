@@ -689,6 +689,9 @@ export const probabilites: ChapterContent = {
         { question: 'Avec deux dés, que vaut $P(\\text{somme}=5)$ ?', reponse: '4 couples sur 36 : (1;4), (2;3), (3;2), (4;1), donc $\\frac{4}{36} = \\frac{1}{9}$.' },
         { question: '4 lettres dans 4 enveloppes au hasard : probabilité qu\'aucune ne soit bien placée ?', reponse: '$\\dfrac{D(4)}{4!} = \\dfrac{9}{24} = \\dfrac{3}{8}$.' },
       ],
+      utilise: [
+        { cible: '6e-6h/fonctions-exponentielles#limites', poids: 'utile', rappel: 'Le nombre $e \\approx 2{,}718$ est la base de l\'exponentielle $e^x$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Tirages, arbres et dénombrement — arbres pondérés, permutations, dérangements', youtubeId: 'XHiFlN4Onjc' },
         {
@@ -1544,6 +1547,9 @@ export const probabilites: ChapterContent = {
         { question: 'Même tireur : probabilité d\'au moins un succès ?', reponse: '$1 - 0{,}7^5 = 1 - 0{,}16807 = 0{,}83193$.' },
         { question: 'Pourquoi « $5 \\times 0{,}3 = 1{,}5$ » ne peut-il pas être la probabilité d\'au moins un succès ?', reponse: 'Une probabilité ne dépasse jamais 1 : seul le complément est fiable.' },
         { question: 'Composants indépendants fonctionnant avec les probabilités 0,9 et 0,8, montés en parallèle : $P$(fonctionne) ?', reponse: '$1 - 0{,}1 \\times 0{,}2 = 1 - 0{,}02 = 0{,}98$.' },
+      ],
+      utilise: [
+        { cible: '6e-6h/fonctions-logarithmes#inequations', poids: 'utile', rappel: '$\\ln(u) > 0 \\iff u > 1$ et $\\ln(u) < 0 \\iff 0 < u < 1$. Diviser par un logarithme négatif, comme $\\ln(0{,}8)$, inverse le sens.' },
       ],
       blocks: [
         { kind: 'video', title: 'Probabilités : problèmes — épreuves répétées et synthèse du chapitre', youtubeId: '8nv_851l7IY' },

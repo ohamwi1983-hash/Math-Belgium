@@ -1175,6 +1175,9 @@ export const calculVectoriel: ChapterContent = {
         { question: 'Que vaut $\\|k \\cdot \\vec{u}\\|$ ?', reponse: '$|k| \\cdot \\|\\vec{u}\\|$.' },
         { question: '3 km vers l\'est puis 4 km vers le nord : à quelle distance du départ, à vol d\'oiseau ?', reponse: '5 km (alors qu\'on a parcouru 7 km).' },
       ],
+      utilise: [
+        { cible: '4e/equations-inequations-second-degre#resoudre', poids: 'utile', jeBloque: ['gen26'], rappel: 'Pour $ax^2+bx+c=0$ : $\\Delta = b^2-4ac$ ; deux solutions $\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}$ si $\\Delta>0$, une si $\\Delta=0$, aucune si $\\Delta<0$.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -1610,6 +1613,9 @@ export const calculVectoriel: ChapterContent = {
         { question: 'Le critère de colinéarité vaut 1 : les vecteurs sont-ils colinéaires ?', reponse: 'Non : le critère doit être exactement nul.' },
         { question: 'Deux vecteurs colinéaires n\'ont aucun point commun : que peut-on conclure ?', reponse: 'Leurs droites sont parallèles ; on ne peut pas conclure à un alignement.' },
       ],
+      utilise: [
+        { cible: '4e/equations-inequations-second-degre#resoudre', poids: 'utile', jeBloque: ['gen24'], rappel: 'Pour $ax^2+bx+c=0$ : $\\Delta = b^2-4ac$ ; deux solutions $\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}$ si $\\Delta>0$, une si $\\Delta=0$, aucune si $\\Delta<0$.' },
+      ],
       blocks: [
         {
           kind: 'para',
@@ -1806,6 +1812,10 @@ export const calculVectoriel: ChapterContent = {
         { question: '$\\vec{AB}\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$ et $\\vec{AC}\\begin{pmatrix} -4 \\\\ 3 \\end{pmatrix}$ : le triangle ABC est-il rectangle en A ?', reponse: 'Oui : $3 \\times (-4) + 4 \\times 3 = 0$.' },
         { question: 'Un parallélogramme qui a un angle droit est un…', reponse: 'rectangle.' },
         { question: 'Deux vecteurs non nuls colinéaires peuvent-ils être orthogonaux ?', reponse: 'Non, jamais.' },
+      ],
+      utilise: [
+        { cible: '4e/cercle-trigonometrique-triangles#triangle', poids: 'utile', rappel: 'Loi des cosinus (Al-Kashi) : $a^2 = b^2+c^2-2bc\\cos\\hat{A}$.' },
+        { cible: '4e/equations-inequations-second-degre#resoudre', poids: 'utile', jeBloque: ['gen25'], rappel: 'Pour $ax^2+bx+c=0$ : $\\Delta = b^2-4ac$ ; deux solutions si $\\Delta>0$, une si $\\Delta=0$, aucune si $\\Delta<0$.' },
       ],
       blocks: [
         { kind: 'video', title: 'Orthogonalité, Pythagore généralisé et vecteur directeur d\'une droite', youtubeId: 'ihkFhTzx3zI' },
@@ -2402,6 +2412,11 @@ export const calculVectoriel: ChapterContent = {
         { question: 'Pourquoi un « + » dans cette formule, alors qu\'Al-Kashi a un « − » ?', reponse: 'L\'angle du triangle opposé à R vaut $180° - \\theta$, et $\\cos(180° - \\theta) = -\\cos\\theta$.' },
         { question: 'Traversée d\'une rivière : par quoi divise-t-on la largeur pour obtenir la durée ?', reponse: 'Par la composante y de la vitesse réelle.' },
         { question: 'Trois forces en équilibre : que vaut $\\vec{F_3}$ ?', reponse: '$\\vec{F_3} = -(\\vec{F_1} + \\vec{F_2})$, l\'opposée de la résultante des deux autres.' },
+      ],
+      utilise: [
+        { cible: '4e/cercle-trigonometrique-triangles#triangle', poids: 'indispensable', rappel: 'Loi des sinus : $\\dfrac{a}{\\sin \\hat{A}} = \\dfrac{b}{\\sin \\hat{B}} = \\dfrac{c}{\\sin \\hat{C}}$, pour 2 angles et 1 côté (AAS) ou 2 côtés et un angle non compris (SSA, le cas ambigu : 0, 1 ou 2 triangles). Loi des cosinus (Al-Kashi) : $a^2 = b^2 + c^2 - 2bc\\cos \\hat{A}$, pour 2 côtés et l\'angle compris (SAS) ou les 3 côtés (SSS) ; elle distingue un angle aigu d\'un angle obtus.' },
+        { cible: '4e/cercle-trigonometrique-triangles#associes', poids: 'indispensable', rappel: 'Angles supplémentaires : $\\sin(180^{\\circ}-\\theta) = \\sin\\theta$ et $\\cos(180^{\\circ}-\\theta) = -\\cos\\theta$.' },
+        { cible: '4e/cercle-trigonometrique-triangles#triangulation', poids: 'utile', rappel: 'Résultante de deux forces qui font l\'angle θ : l\'angle intérieur du triangle vaut $180^{\\circ} - \\theta$, donc $F_R^2 = F_1^2 + F_2^2 - 2F_1F_2\\cos(180^{\\circ} - \\theta)$.' },
       ],
       blocks: [
         {

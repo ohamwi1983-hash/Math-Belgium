@@ -863,6 +863,9 @@ export const suites: ChapterContent = {
         { question: '$\\lim_{n\\to+\\infty} \\dfrac{3n-1}{2n+5}$ ?', reponse: '$\\dfrac{3}{2}$ : même degré, rapport des coefficients dominants.' },
         { question: 'Pourquoi $0{,}999\\ldots = 1$ ?', reponse: 'C\'est une somme infinie avec $u_1 = 0{,}9$ et $q = 0{,}1$ : $S_\\infty = \\dfrac{0{,}9}{1 - 0{,}1} = 1$.' },
       ],
+      utilise: [
+        { cible: '5e-4h/limites-asymptotes#limites-calcul', poids: 'utile', rappel: 'Trois formes indéterminées : $\\dfrac{0}{0}$, on factorise et on simplifie ; $\\dfrac{\\infty}{\\infty}$, on met en évidence le terme de plus haut degré ; $\\infty-\\infty$, terme dominant ou expression conjuguée s\'il y a des racines.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Convergence et divergence des suites : limites, q = −1 et comparaison des degrés', youtubeId: '52jNqfKWQ_8' },
         {

@@ -1,4 +1,6 @@
 import type { Block, ChapterContent, ChapterSection } from '../content/types'
+import { prerequisJeBloque } from './prerequisChapitre'
+import type { PrerequisResolu } from './prerequisChapitre'
 
 /**
  * « Je bloque » (côté élève, planche 10, version simple PAR SECTION) : l'exemple résolu à montrer quand
@@ -12,12 +14,17 @@ import type { Block, ChapterContent, ChapterSection } from '../content/types'
  * « Démonstration ») ne sont pas des exemples d'exercice : jamais choisies. Un exemple « Pour aller plus
  * loin » (badge ou libellé) ne l'est que s'il n'y en a pas d'autre. Aucun exemple : `bloc` vaut `null` (le
  * panneau montre alors « L'essentiel » de l'étape et le lien vers l'étape).
+ *
+ * Chapitres autonomes (25/11/2026) : `prerequis` = étapes d'AUTRES chapitres dont l'étape a besoin
+ * (champ `utilise` : les indispensables, plus les `utile` dont `jeBloque` cite ce générateur) — bloc
+ * « Tu as besoin de… » sous l'exemple (rappel + « Revoir l'étape », nouvel onglet).
  */
 export interface CibleJeBloque {
   section: ChapterSection
   /** Numéro de l'étape dans le parcours du chapitre (1 = première section). */
   numero: number
   bloc: Extract<Block, { kind: 'exemple' | 'exempleLibre' }> | null
+  prerequis: PrerequisResolu[]
 }
 
 function estExempleDExercice(b: Block): b is Extract<Block, { kind: 'exemple' | 'exempleLibre' }> {
@@ -44,5 +51,5 @@ export function cibleJeBloque(chapter: ChapterContent, generatorId: string): Cib
       bloc = b
     }
   })
-  return { section, numero: index + 1, bloc }
+  return { section, numero: index + 1, bloc, prerequis: prerequisJeBloque(section, generatorId) }
 }

@@ -1,6 +1,8 @@
 import { useEffect, useId, useRef } from "react";
 import type { Block, ChapterContent, ChapterSection } from "../../content/types";
-import { RichText } from "../../components/Math";
+import { ModeLiensChapitre, RichText } from "../../components/Math";
+import { phrasesRappel } from "../../lib/prerequisChapitre";
+import type { PrerequisResolu } from "../../lib/prerequisChapitre";
 import { Essentiel, ExempleLibrePasAPas, ExemplePasAPas } from "../../components/chapter/ContenuEtape";
 
 /**
@@ -18,6 +20,7 @@ export default function PanneauJeBloque({
   section,
   numero,
   bloc,
+  prerequis,
 }: {
   ouvert: boolean;
   fermer: () => void;
@@ -25,6 +28,7 @@ export default function PanneauJeBloque({
   section: ChapterSection;
   numero: number;
   bloc: Extract<Block, { kind: "exemple" | "exempleLibre" }> | null;
+  prerequis: PrerequisResolu[];
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titreId = useId();
@@ -62,6 +66,7 @@ export default function PanneauJeBloque({
               Fermer <span aria-hidden="true">✕</span>
             </button>
           </div>
+          <ModeLiensChapitre.Provider value="nouvel-onglet">
           <div className="je-bloque-corps">
             <p className="je-bloque-texte">
               Deux essais sans réussir : revois {bloc ? "l’exemple résolu" : "l’essentiel"} de l’étape du cours. Ton exercice t’attend ici, rien n’est perdu.
@@ -79,7 +84,31 @@ export default function PanneauJeBloque({
             ) : (
               <p className="je-bloque-texte">Cette étape n’a pas d’exemple résolu : relis-la dans le cours.</p>
             )}
+            {prerequis.length > 0 && (
+              <section className="je-bloque-besoin" aria-label="Tu as besoin de…">
+                <p className="je-bloque-besoin-titre">Tu as besoin de…</p>
+                <ul>
+                  {prerequis.map((p) => (
+                    <li key={p.entree.cible}>
+                      <p className="je-bloque-besoin-nom">
+                        {p.cible.titreEtape}
+                        <span className="je-bloque-besoin-ou">{`«\u00a0${p.cible.chapitre.title}\u00a0», étape\u00a0${p.cible.numero}`}</span>
+                      </p>
+                      {phrasesRappel(p).map((t, i) => (
+                        <p key={i} className="je-bloque-besoin-rappel">
+                          <RichText text={t} />
+                        </p>
+                      ))}
+                      <a className="je-bloque-besoin-revoir" href={p.cible.href} target="_blank" rel="noopener">
+                        Revoir l’étape <span className="je-bloque-onglet">(nouvel onglet)</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
           </div>
+          </ModeLiensChapitre.Provider>
           <div className="je-bloque-actions">
             <a className="btn je-bloque-revoir" href={lien} target="_blank" rel="noopener">
               Revoir l’étape {numero} <span className="je-bloque-onglet">(nouvel onglet)</span>
