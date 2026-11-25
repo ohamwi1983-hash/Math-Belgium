@@ -175,6 +175,30 @@ paths:
   sections `denombrementfondamental`, `denombrementfondamental`, `binomenewton`, `denombrementcombine`,
   `denombrementfondamental`). Descriptions de carte en Unicode (Aₙ², Γₙᵖ, x₁), jamais de `$…$`. Détail :
   `.claude/rules/feuilles-evaluations.md`, « 6e ch. 7, lot H — 6gen100–6gen104 ».
+  **Audit appliqué, lots A, F, D et parcours (25/11, agent AFD)** — lot A : trois dés attribués à **Galilée** (cours,
+  carte 6gen46, question de compréhension, quiz ; renvoi au ch. 6), P(0) = 0,1291 (la « somme 1,0001 » venait de
+  l'erreur), Newton (découverte vers 1665, lettres à Leibniz en 1676, imprimé par Wallis en 1685), Kramp sans
+  l'anecdote du « cri » (Arbogast, notation anglaise), image du triangle = **Zhu Shijie** 1303 (al-Karaji, Jia Xian,
+  Apianus, Stifel, Tartaglia ; traité de Pascal écrit en 1654, publié en 1665), foudre « au cours d'une vie », mot de
+  passe ≈ 1,6 milliard de fois plus grand, ADN ($4^L$ contre une composition fixée), piège du comité mixte,
+  **Mississippi** (11 lettres, 34 650 permutations, 34 649 anagrammes ; tuiles et quiz), notation n / p / k / r,
+  35 virgules `{,}`, champs bruts en Unicode, méthode « 3 questions » numérotée de 1 à 3, Pascal pour 1 ≤ k ≤ n − 1,
+  collier n ≥ 3, $n\varepsilon$ petit (attention : $1{,}01^{100} \approx 2{,}705$), « séparer les doubles » relié à
+  Γ + attention « issues non équiprobables », tableau binomial transposé, axes de la somme de ligne, légende des
+  séquences raccourcie ; composants : `PascalTriangle` (le 10 « fantôme » = trait CSS `.svg-good` sur le texte,
+  `style={{ stroke: 'none' }}`), `CircularPermutation` (axe du collier par les milieux de deux côtés, étiquette
+  « rotation » + pointe de flèche). Séquence exacte sans remise déplacée au § 5 (décision ; § 5 « … et séquence
+  exacte », § 6 « Probabilité binomiale (épreuves indépendantes) »). Lot F : 16 exemples sans énoncé réécrits (énoncé
+  en contexte, titre qui dit ce qu'on fait, plus de 2e cas dans le cadre résultat), démonstrations (a)–(l), § 1
+  séparation des cas, équations combinatoires, cornets et « au moins un de chaque » ; § 2 groupes non nommés, bloc,
+  complément (piège « une femme imposée »), inclusion-exclusion ; § 3 chemins dans un quadrillage (`vectorPlane`
+  quadrillé), terme indépendant ; § 4 partition complète du poker (full 1 344, sans répétition 57 344, total
+  201 376), historique Galilée, symétrie $s \leftrightarrow 21-s$ ; § 6 « Ce que tu sais déjà » ($N_k = C_n^k$),
+  Bernoulli, symétrie pour $p = 0{,}5$, renvoi au ch. 8 ; formulaire et synthèse complétés ; 57 énoncés par clé.
+  Parcours : 3 parties (« Compter : les outils » § 1–2, « Le binôme et les problèmes » § 3–4, « Des comptages aux
+  probabilités » § 5–6), 6 `titreCourt`, 15 phrases d'`essentiel`, 21 cartes. Formules longues coupées en plusieurs
+  `$…$` (aucune ne défile plus à 390 px, tiroirs ouverts). Les cartes des générateurs 6gen100–109 et les ateliers
+  sont ajoutés par d'autres agents. Détail : `.claude/rules/feuilles-evaluations.md`, « 6e ch. 7, lots A, F, D ».
 
 - **6e (6h), Chapitre 6 — corrigé « comme au tableau » et niveaux (6gen30–33, 6gen74–76)** : corrigés détaillés
   typés partagés écran / papier (`generateurs6e/*/corrigeDetaille.ts`, brique `ui6e/corrigeProbabilites.ts`),

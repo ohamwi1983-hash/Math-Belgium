@@ -1086,6 +1086,24 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   `generateurs6e/adaptateurCombinatoire.ts`, en attendant le lot E). Codes : catalogues gardés dans leur
   ordre, ajouts EN FIN (6gen43 `C_arrangement`, 6gen44 `E_anagrammes`, 6gen45 `D_pascal`) ; tous les
   `?code=` des six générateurs rouvrent un exercice différent d'avant (générateurs refaits).
+- **6e ch. 7, lots A, F, D (cours, démonstrations, quiz 6gen70 ; générateurs : autres agents)** : notation du
+  cours fixée — $n$ éléments disponibles, $p$ choisis ($A_n^p$, $C_n^p$, $B_n^p$, $\Gamma_n^p = C_{n+p-1}^p$, $P_n = n!$),
+  $k$ = rang d'un terme du binôme ou nombre de succès ($T_{k+1}$, $P(X=k)$, $C_n^k$ au § 3), $r$ = nombre de types
+  ($n_1, \ldots, n_r$) ; les champs bruts (labels, badges, kickers, en-têtes) en Unicode (Aₙᵖ, Cₙᵖ, Γₙᵖ). Énoncés de
+  démonstration PAR CLÉ pour les 57 blocs `exemple` / `exempleLibre` du chapitre (chapitre ajouté à
+  `CHAPITRES_ENONCES_VERIFIES`), dont 12 démonstrations nouvelles (a)–(l) de l'audit : une démonstration dit QUOI
+  démontrer, jamais la méthode (les deux preuves de la relation de Pascal ont le même énoncé). Banque « Formule »
+  (`questionsFormules/niveau6e.ts`) réécrite : ids gardés, multinomiale rattachée au § 2, ajouts « au moins un de
+  chaque type », simplification de factorielles, groupes non nommés, anagrammes, bloc, complément,
+  inclusion-exclusion, terme indépendant, chemins, séquence exacte ($\frac{1}{A_n^p}$, § 5). Questions de
+  compréhension : celle de la séquence exacte suit le cours au § 5 ; § 6 : « pourquoi $N_k = C_n^k$ ». **Séquence
+  exacte sans remise déplacée au § 5** (décision) : le générateur 6gen48 (famille B) et son entrée pilote restent au
+  § 6 (carte : « … la séquence exacte sans remise vue au § 5 ») ; le thème vrai/faux `probabiliteHypergeometrique`
+  reçoit les 10 affirmations de séquence exacte (libellé « Probabilité hypergéométrique et séquence exacte »),
+  `binomialeSequence` (« Probabilité binomiale ») 10 nouvelles ($N_k = C_n^k$, somme par le binôme, avec / sans
+  remise, symétrie pour $p = 0{,}5$). Quiz : verdict T1 n° 10 réécrit (« vaut 504, car 0 interdit partout »), plus
+  aucun grand calcul (formules sans valeur à recalculer, ou une seule opération), « chapitre 7 », 18 V / 17 F dans
+  chacun des 6 thèmes, `nombreExercices` = `nombreQuestions(theme)` (`etendueNombreQuestions` pour l'accueil).
 - Consigne globale autosuffisante : ajouter ce que l'écran donnait ailleurs (modèle y(t) = k/(1+a e^{−rt})
   pour la logistique, discussion « a > 1 / 0 < a < 1 », précision d'arrondi…).
 
