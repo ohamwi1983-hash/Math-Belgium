@@ -1,679 +1,413 @@
-import type { DonneeConiqueC, ExerciceEquationConiqueCaracteristiques, ExerciceFamilleA, ExerciceFamilleB, ExerciceFamilleC, ExerciceFamilleD, FractionExacte } from "../core6e/equationConiqueCaracteristiques.types";
+import type { DonneeC, ExerciceEqC, ExerciceEqD, ExerciceEqParabole, ExerciceEquationConiqueCaracteristiques } from "../core6e/equationConiqueCaracteristiques.types";
 import type { PhaseEquationConiqueCaracteristiques } from "../moteur6e/typesEquationConiqueCaracteristiques";
+import { latexCarreDecale, latexQ, latexRacine, lireEquation, lireNombre, proportionnels, ptNum, q, qMul, qNum } from "../moteur6e/algebreLieux";
+import type { Poly, Q } from "../moteur6e/algebreLieux";
+import { foyersConique, latexConique, polyConique } from "../moteur6e/algebreConiques";
+import type { Conique } from "../moteur6e/algebreConiques";
+import { codeOuverture } from "../moteur6e/verificationEquationConiqueCaracteristiques";
+import { f } from "./fragmentsCombinatoire";
+import type { AideCombi, ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
+import { champEquationUI, champNombreUI, lp, nomPoint } from "./textesLieux";
+import { EXACT, L, latexFrac } from "./textesConiques";
+import { figureLieux } from "./figureLieux";
+import type { P2 } from "./figureLieux";
+import { ajouterConique, d3, fenetreConique, objetsVides } from "./traceConiques";
+import { asymptotes } from "../moteur6e/algebreConiques";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen59`. Dispatch sur
- * `exercice.famille` PUIS `sousType` PUIS `phase`, mirroir `formatIdentificationConiques.ts`
- * (6gen58), jamais importé par un autre générateur (chaque générateur reste indépendant —
- * CLAUDE.md).
- *
- * **Écran 1 famille B, choix de forme générale plutôt que texte libre** : le "champ posé" de la
- * mission (`(y-k)²=4p(x-h)` avec `p` symbolique) contient une lettre `p` NON RÉSOLUE — un champ
- * texte libre exigerait un évaluateur symbolique (aucun installé sur ce projet, convention CLAUDE.md
- * "jamais de bibliothèque de calcul formel") ou accepterait `p` comme une simple variable
- * (`expressionQuadratiqueXY.ts` n'en connaît que `x`,`y`). Remplacé par un choix `.btn.toggle-active`
- * entre les 2 gabarits déjà remplis de `h`,`k` — teste EXACTEMENT la même reconnaissance (quelle
- * forme s'applique), sans jamais soumettre `p` à un parseur numérique.
- *
- * **Vigilance signe orphelin / texte français en mode maths** — toute clause en français mêlée à du
- * LaTeX passe TOUJOURS par `\text{...}`, jamais du texte brut en mode maths. Couverture de
- * régression : `formatEquationConiqueCaracteristiques.test.ts`.
+ * Textes de `6gen59` — Équation d'une conique depuis ses caractéristiques (6e ch. 10, § 1–2 ; audit,
+ * lots B et C). Libellés de choix neutres (plus de « ici 2 > 6 vérifié à confirmer », G15), mots hors
+ * du mode mathématique, « (y)² » supprimé, données nommées en toutes lettres (« distance entre les deux
+ * directrices »), parabole y² = 2px (décision 1). Figure : les données (sommets, foyers, asymptotes,
+ * point), puis la conique APRÈS l'équation.
  */
 
-export type TypeChamp = "texte" | "choix";
+type E = ExerciceEquationConiqueCaracteristiques;
+type P = PhaseEquationConiqueCaracteristiques;
 
-export interface OptionChoix {
-  valeur: string;
-  label: string;
-}
-
-export interface ChampDef {
-  type: TypeChamp;
-  label: string;
-  placeholder?: string;
-  options?: OptionChoix[];
-  /** `true` pour un label réduit à une lettre de variable (ex. "a =", "c ="), voir
-   * `.field-label-minuscule` (`App.css`). */
-  minuscule?: boolean;
-}
-
-export interface AideAvecLatex {
-  texte: string;
-  latex: string | null;
-}
-
-/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`, rendu
- * via `components/RenduFragments.tsx`. */
-export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
-
-function texte(valeur: string): FragmentConsigne {
-  return { type: "texte", valeur };
-}
-function latex(valeur: string): FragmentConsigne {
-  return { type: "latex", valeur };
-}
-
-const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
-
-function champTexte(label: string, placeholder: string, minuscule = false): ChampDef {
-  return { type: "texte", label, placeholder, minuscule };
-}
-
-function champChoix(label: string, options: OptionChoix[]): ChampDef {
-  return { type: "choix", label, options };
-}
-
-// ============================================================================
-// Petits formateurs numériques/LaTeX partagés.
-// ============================================================================
-
-function pgcd(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b) [a, b] = [b, a % b];
-  return a || 1;
-}
-
-function afficherFraction(num: number, den: number): string {
-  const g = pgcd(num, den);
-  const n = num / g;
-  const d = den / g;
-  if (d === 1) return `${n}`;
-  return n < 0 ? `-\\frac{${-n}}{${d}}` : `\\frac{${n}}{${d}}`;
-}
-
-function afficherFractionExacte(f: FractionExacte): string {
-  return afficherFraction(f.num, f.den);
-}
-
-/** Fraction en TEXTE BRUT ("4/3", jamais `\frac{4}{3}`) — pour un `champ.label`, qui n'est JAMAIS
- * passé par KaTeX (rendu tel quel dans un `<label>` par
- * `EtapeChampsEquationConiqueCaracteristiques.tsx`) : y injecter du LaTeX afficherait le code source
- * brut ("\frac{4}{3}") au lieu d'une fraction — piège trouvé et corrigé pendant le développement
- * (`docs/historique-6e.md`, capture Playwright 375px). `afficherFractionExacte` (LaTeX) reste
- * réservé aux fragments passés à `<Katex>` (`blocDonnees`/`etatActuel`). */
-function afficherFractionTexte(f: FractionExacte): string {
-  const g = pgcd(f.num, f.den);
-  const n = f.num / g;
-  const d = f.den / g;
-  return d === 1 ? `${n}` : `${n}/${d}`;
-}
-
-/** `gauche-valeur`, signe géré proprement — jamais `gauche-(-3)` (double signe "−−" non simplifié,
- * CLAUDE.md, point "simplification algébrique") : un sommet `h`/`k` négatif (famille B, tiré dans
- * [-4;4]) doit s'afficher `gauche+3`, jamais `gauche-(-3)`. `gauche` peut être une variable
- * symbolique ("x") ou une coordonnée numérique déjà connue (`pt.x`, aide niveau 2) — les 2 cas
- * partagent la même règle de signe. */
-function afficherDifference(gauche: string | number, valeur: number): string {
-  if (valeur === 0) return `${gauche}`;
-  return valeur > 0 ? `${gauche}-${valeur}` : `${gauche}+${-valeur}`;
-}
-
-const LIBELLE_NATURE_ELLIPSE_HYPERBOLE: Record<"ellipse" | "hyperbole", string> = { ellipse: "Ellipse", hyperbole: "Hyperbole" };
-
-const OPTIONS_NATURE_C: OptionChoix[] = [
-  { valeur: "ellipse", label: "Ellipse (e < 1)" },
-  { valeur: "hyperbole", label: "Hyperbole (e > 1)" },
+const axeTexte = (axe: "x" | "y") => (axe === "x" ? "l'axe des abscisses" : "l'axe des ordonnées");
+const NATURE_OPTIONS = [
+  { valeur: "ellipse", label: "Une ellipse" },
+  { valeur: "hyperbole", label: "Une hyperbole" },
 ];
 
-function optionsNatureMemeAxe(a: number, c: number): OptionChoix[] {
+/** Valeur exacte d'une donnée de la famille C. */
+function valeurC(e: ExerciceEqC, d: DonneeC): Q {
+  switch (d) {
+    case "deuxC":
+      return q(2 * e.c);
+    case "deuxA":
+      return q(2 * e.a);
+    case "excentricite":
+      return q(e.c, e.a);
+    case "distanceDirectrices":
+      return q(2 * e.a * e.a, e.c);
+  }
+}
+function ligneC(e: ExerciceEqC, d: DonneeC): string {
+  const v = latexQ(valeurC(e, d));
+  switch (d) {
+    case "deuxC":
+      return `distance focale : $2c=${v}$`;
+    case "deuxA":
+      return `distance entre les deux sommets de l'axe focal : $2a=${v}$`;
+    case "excentricite":
+      return `excentricité : $e=${v}$`;
+    case "distanceDirectrices":
+      return `distance entre les deux directrices : $${v}$`;
+  }
+}
+
+function formesParabole(e: ExerciceEqParabole) {
+  const h = e.S.x;
+  const k = e.S.y;
+  const lin = (l: string, c: Q) => (c.n === 0n ? l : `(${l}${c.n < 0n ? "+" : "-"}${latexQ(q(c.n < 0n ? -c.n : c.n, c.d))})`);
   return [
-    { valeur: "ellipse", label: `Ellipse (a > c, ici ${a} > ${c} vérifié à confirmer)` },
-    { valeur: "hyperbole", label: `Hyperbole (c > a)` },
+    { valeur: "x+", label: `$${latexCarreDecale("y", k)}=2p${lin("x", h)}$` },
+    { valeur: "x-", label: `$${latexCarreDecale("y", k)}=-2p${lin("x", h)}$` },
+    { valeur: "y+", label: `$${latexCarreDecale("x", h)}=2p${lin("y", k)}$` },
+    { valeur: "y-", label: `$${latexCarreDecale("x", h)}=-2p${lin("y", k)}$` },
   ];
 }
 
-const OPTIONS_AXE: OptionChoix[] = [
-  { valeur: "horizontal", label: "Axe horizontal" },
-  { valeur: "vertical", label: "Axe vertical" },
-];
-
-// ============================================================================
-// Famille A, sous-type "même axe".
-// ============================================================================
-
-type ExoMemeAxe = Extract<ExerciceFamilleA, { sousType: "memeAxe" }>;
-type ExoAxesPerp = Extract<ExerciceFamilleA, { sousType: "axesPerpendiculaires" }>;
-type ExoDeuxSommets = Extract<ExerciceFamilleA, { sousType: "deuxSommets" }>;
-
-function pointSommetFoyerMemeAxe(e: ExoMemeAxe): { s: { x: number; y: number }; f: { x: number; y: number } } {
-  if (e.axe === "horizontal") return { s: { x: e.signeS * e.a, y: 0 }, f: { x: e.signeF * e.c, y: 0 } };
-  return { s: { x: 0, y: e.signeS * e.a }, f: { x: 0, y: e.signeF * e.c } };
+function penteD(e: ExerciceEqD): string {
+  return e.conique.axe === "x" ? latexFrac(e.b, e.a) : latexFrac(e.a, e.b);
+}
+function donneeD(e: ExerciceEqD): string {
+  const F = foyersConique(e.conique)[0];
+  if (e.donnee === "sommet") return `sommet $${nomPoint("S", e.conique.axe === "x" ? { x: q(e.a), y: q(0) } : { x: q(0), y: q(e.a) })}$`;
+  if (e.donnee === "foyer") return `foyer $F${F.latex}$`;
+  return `distance focale $2c=${latexRacine(q(4 * (e.a * e.a + e.b * e.b)))}$ ; axe focal : ${axeTexte(e.conique.axe)}`;
 }
 
-export function consigneGeneraleAMemeAxe(): FragmentConsigne[] {
-  return [texte("On donne un sommet S et un foyer F d'une conique centrée à l'origine, tous les deux sur le MÊME axe. Détermine s'il s'agit d'une ellipse ou d'une hyperbole, puis construis son équation.")];
-}
+export const FORMAT_6GEN59: FormatCombinatoire<E, P> = {
+  consigneGenerale(e) {
+    switch (e.famille) {
+      case "A":
+        if (e.sousType === "memeAxe") return f("On donne un sommet $S$ et un foyer $F$ d'une conique de centre $O$ dont les axes de symétrie sont les axes du repère ; $S$ et $F$ sont sur l'axe focal. Détermine sa nature, puis son équation." + EXACT);
+        if (e.sousType === "axesPerpendiculaires") return f("On donne un sommet $S$ de l'axe non focal et un foyer $F$ d'une ellipse de centre $O$ dont les axes de symétrie sont les axes du repère. Détermine son équation." + EXACT);
+        return f("On donne deux sommets d'une ellipse de centre $O$, situés sur les deux axes du repère. Détermine son équation." + EXACT);
+      case "B":
+        return f("Détermine l'équation de la parabole décrite ci-dessous." + EXACT);
+      case "C":
+        return f(`Une conique a pour centre $O$ et pour axe focal ${axeTexte(e.conique.axe)}. On donne deux de ses caractéristiques. Détermine sa nature, puis son équation.` + EXACT);
+      case "D":
+        return f("Une hyperbole a pour centre $O$ et pour axes de symétrie les axes du repère. Détermine son équation à partir des données ci-dessous." + EXACT);
+    }
+  },
+  donnees(e) {
+    switch (e.famille) {
+      case "A":
+        if (e.sousType === "deuxSommets") return [f(`$${nomPoint("S", e.S)}$ et $${nomPoint("S'", e.Sp)}$`)];
+        return [f(`sommet $${nomPoint("S", e.S)}$, foyer $${nomPoint("F", e.F)}$`)];
+      case "B":
+        return e.donnee === "foyer"
+          ? [f(`sommet $${nomPoint("S", e.S)}$, foyer $${nomPoint("F", e.F)}$`)]
+          : [f(`sommet $${nomPoint("S", e.S)}$, point $${nomPoint("P", e.P!)}$ de la parabole`), f(`axe de symétrie parallèle à ${axeTexte(e.conique.axe)}`)];
+      case "C":
+        return e.donnees.map((d) => f(ligneC(e, d)));
+      case "D":
+        return [f(`asymptotes : $y=\\pm ${penteD(e) === "1" ? "" : penteD(e)}x$`), f(donneeD(e))];
+    }
+  },
+  consigneEcran(e, p) {
+    switch (p) {
+      case "mNature":
+      case "cNature":
+        return f("Cette conique est-elle une ellipse ou une hyperbole ?");
+      case "mValeurs":
+        return f("Donne $a$ (demi-axe focal), $c$ (distance du centre à un foyer) et $b^2$.");
+      case "pAxe":
+        return f("Quel est l'axe focal de cette ellipse ?");
+      case "pValeurs":
+        return f("Donne $b$ (demi-petit axe), $c$ (distance du centre à un foyer), puis $a^2$.");
+      case "sValeurs":
+        return f("Donne $a$ (demi-grand axe) et $b$ (demi-petit axe).");
+      case "bOuverture":
+        return f("Quelle forme d'équation convient, avec $p>0$ ?");
+      case "bP":
+        return e.famille === "B" && e.donnee === "point" ? f("Calcule le paramètre $p$ : le point $P$ vérifie l'équation.") : f("Calcule le paramètre $p$ (distance du foyer à la directrice).");
+      case "cValeurs":
+        return f("Calcule $a$ (demi-axe focal) et $c$ (distance du centre à un foyer).");
+      case "cEquation":
+        return f("Calcule $b^2$, puis écris l'équation de la conique.");
+      case "dValeurs":
+        return f("Calcule $a$ (demi-axe focal) et $b$.");
+      case "equation":
+        return e.famille === "B" ? f("Écris l'équation de la parabole.") : f("Écris l'équation de la conique.");
+    }
+  },
+  champs(e, p): ChampCombi[] {
+    switch (p) {
+      case "mNature":
+      case "cNature":
+        return [{ type: "choix", label: "", options: NATURE_OPTIONS }];
+      case "mValeurs":
+        return [champNombreUI("$a$"), champNombreUI("$c$"), champNombreUI("$b^2$")];
+      case "pAxe":
+        return [{ type: "choix", label: "", options: [{ valeur: "x", label: "L'axe des abscisses" }, { valeur: "y", label: "L'axe des ordonnées" }] }];
+      case "pValeurs":
+        return [champNombreUI("$b$"), champNombreUI("$c$"), champNombreUI("$a^2$")];
+      case "sValeurs":
+      case "dValeurs":
+        return [champNombreUI("$a$"), champNombreUI("$b$")];
+      case "bOuverture":
+        return [{ type: "choix", label: "", options: formesParabole(e as ExerciceEqParabole) }];
+      case "bP":
+        return [champNombreUI("$p$")];
+      case "cValeurs":
+        return [champNombreUI("$a$"), champNombreUI("$c$")];
+      case "cEquation":
+        return [champNombreUI("$b^2$"), champEquationUI("Équation")];
+      case "equation":
+        return [champEquationUI("Équation")];
+    }
+  },
+  aides: aides59,
+  reponseAttendue: reponse59,
+  explication: explication59,
+  libellePhase: (_e, p) => LIBELLES[p],
+  messageCible: cible59,
+};
 
-export function blocDonneesAMemeAxe(e: ExoMemeAxe): string[] {
-  const { s, f } = pointSommetFoyerMemeAxe(e);
-  return [`\\text{Sommet : }S(${s.x};${s.y})`, `\\text{Foyer : }F(${f.x};${f.y})`];
-}
+const LIBELLES: Record<P, string> = {
+  mNature: "Nature",
+  mValeurs: "a, c et b²",
+  pAxe: "Axe focal",
+  pValeurs: "b, c et a²",
+  sValeurs: "a et b",
+  bOuverture: "Forme de l'équation",
+  bP: "Paramètre p",
+  cValeurs: "a et c",
+  cNature: "Nature",
+  cEquation: "b² et équation",
+  dValeurs: "a et b",
+  equation: "Équation",
+};
 
-export function consigneEcranAMemeAxe(_e: ExoMemeAxe, phase: PhaseEquationConiqueCaracteristiques): FragmentConsigne[] {
-  if (phase === "aMemeAxeEcran1") return [texte("Extrais les distances "), latex("a=|S|"), texte(" et "), latex("c=|F|"), texte(" (par rapport au centre, à l'origine).")];
-  if (phase === "aMemeAxeEcran2") {
-    return [
-      texte("Compare a et c pour déterminer la nature exacte, puis calcule "),
-      latex("b^2"),
-      texte(" avec la formule appropriée ("),
-      latex("b^2=a^2-c^2"),
-      texte(" pour une ellipse, "),
-      latex("b^2=c^2-a^2"),
-      texte(" pour une hyperbole)."),
-    ];
+const RELATIONS_C = "Relations du cours : $2c$ est la distance focale, $2a$ la distance entre les sommets de l'axe focal, $e=\\frac{c}{a}$, et les directrices sont les droites $x=\\pm\\frac{a^2}{c}$, distantes de $\\frac{2a^2}{c}$ (axe focal horizontal).";
+
+function aides59(e: E, p: P): AideCombi[] {
+  switch (p) {
+    case "mNature":
+      return [{ texte: "Pour une ellipse, les foyers sont entre les sommets ($c<a$) ; pour une hyperbole, ils sont au-delà ($c>a$)." }, { texte: "Ici, compare les distances au centre :", latex: e.famille === "A" && e.sousType === "memeAxe" ? `OS=${e.a},\\qquad OF=${e.c}` : "" }];
+    case "mValeurs":
+      return [{ texte: "$a=OS$ et $c=OF$ ; puis :", latex: "\\text{ellipse : } b^2=a^2-c^2\\qquad\\text{hyperbole : } b^2=c^2-a^2" }, { texte: "Ici :", latex: e.famille === "A" && e.sousType === "memeAxe" ? `S${lp(e.S)},\\quad F${lp(e.F)}` : "" }];
+    case "pAxe":
+      return [{ texte: "Les foyers sont toujours sur l'axe focal ; le sommet donné est sur l'autre axe." }, { texte: "Ici :", latex: e.famille === "A" && e.sousType === "axesPerpendiculaires" ? `F${lp(e.F)}` : "" }];
+    case "pValeurs":
+      return [{ texte: "Le sommet de l'axe non focal donne $b$, le foyer donne $c$ ; pour une ellipse :", latex: "a^2=b^2+c^2" }, { texte: "Ici :", latex: e.famille === "A" && e.sousType === "axesPerpendiculaires" ? `S${lp(e.S)},\\quad F${lp(e.F)}` : "" }];
+    case "sValeurs":
+      return [{ texte: "$a$ est le plus grand demi-axe : l'axe focal est celui du sommet le plus éloigné du centre." }, { texte: "Ici :", latex: e.famille === "A" && e.sousType === "deuxSommets" ? `OS=${Math.abs(qNum(e.S.x))},\\qquad OS'=${Math.abs(qNum(e.Sp.y))}` : "" }];
+    case "bOuverture":
+      return [
+        { texte: "Le carré porte sur la variable perpendiculaire à l'axe ; le signe de $2p$ donne le sens d'ouverture (vers le foyer, ou vers le point)." },
+        { texte: e.famille === "B" && e.donnee === "point" ? `L'axe est parallèle à ${axeTexte(e.conique.axe)} ; compare $P$ et $S$ :` : "Compare $F$ et $S$ :", latex: e.famille === "B" ? (e.donnee === "point" ? `S${lp(e.S)},\\quad P${lp(e.P!)}` : `S${lp(e.S)},\\quad F${lp(e.F)}`) : "" },
+      ];
+    case "bP":
+      return e.famille === "B" && e.donnee === "point"
+        ? [{ texte: "Remplace les coordonnées de $P$ dans la forme choisie, puis isole $p$." }, { texte: "Avec la forme confirmée :", latex: `${latexCarreDecale(e.conique.axe === "x" ? "y" : "x", e.conique.axe === "x" ? e.S.y : e.S.x)}=${e.conique.sens > 0 ? "" : "-"}2p\\,(\\ldots)` }]
+        : [{ texte: "Le foyer est à la distance $\\frac{p}{2}$ du sommet :", latex: "p=2\\cdot SF" }, { texte: "Ici :", latex: e.famille === "B" ? `S${lp(e.S)},\\quad F${lp(e.F)}` : "" }];
+    case "cValeurs":
+      return [{ texte: RELATIONS_C }, { texte: "Ici :", latex: e.famille === "C" ? e.donnees.map((d) => (d === "deuxC" ? `2c=${latexQ(valeurC(e, d))}` : d === "deuxA" ? `2a=${latexQ(valeurC(e, d))}` : d === "excentricite" ? `\\frac{c}{a}=${latexQ(valeurC(e, d))}` : `\\frac{2a^2}{c}=${latexQ(valeurC(e, d))}`)).join(",\\qquad ") : "" }];
+    case "cNature":
+      return [{ texte: "Une ellipse a une excentricité $e<1$ ($c<a$) ; une hyperbole $e>1$ ($c>a$)." }, { texte: "Ici :", latex: e.famille === "C" ? `a=${e.a},\\quad c=${e.c}` : "" }];
+    case "cEquation":
+      return [{ texte: "Calcule $b^2$ selon la nature, puis place $a^2$ sous le carré de l'axe focal :", latex: "\\text{ellipse : } b^2=a^2-c^2\\qquad\\text{hyperbole : } b^2=c^2-a^2" }, { texte: "Axe focal :", latex: e.famille === "C" ? `\\text{${axeTexte(e.conique.axe)}}` : "" }];
+    case "dValeurs":
+      return [
+        { texte: "Asymptotes : $y=\\pm\\frac{b}{a}x$ si l'axe focal est horizontal, $y=\\pm\\frac{a}{b}x$ s'il est vertical ; et $c^2=a^2+b^2$." },
+        { texte: "Ici :", latex: e.famille === "D" ? `\\text{pente }${penteD(e)},\\quad\\text{axe focal : ${e.conique.axe === "x" ? "horizontal" : "vertical"}}` : "" },
+      ];
+    case "equation": {
+      const c = e.conique;
+      if (c.type === "parabole") return [{ texte: "Remplace $p$ dans la forme choisie." }, { texte: "Ici :", latex: `p=${latexQ(c.p)}` }];
+      return [{ texte: "Pour une ellipse ou une hyperbole, $a^2$ est sous le carré de l'axe focal :", latex: "\\frac{x^2}{a^2}\\pm\\frac{y^2}{b^2}=1\\qquad\\frac{y^2}{a^2}\\pm\\frac{x^2}{b^2}=1" }, { texte: "Ici :", latex: c.type === "ellipse" || c.type === "hyperbole" ? `a^2=${latexQ(c.a2)},\\quad b^2=${latexQ(c.b2)}` : "" }];
+    }
   }
-  return [texte("À partir de la nature et de "), latex("b^2"), texte(" CONFIRMÉS, donne l'équation finale de la conique.")];
 }
 
-/** ACCUMULE les écrans déjà confirmés (correctif transversal — voir CLAUDE.md/`docs/historique-
- * 6e.md`, même bug déjà corrigé sur `formatIdentificationConiques.ts`, 6gen58) : `aMemeAxeEcran3` ne
- * montrait QUE l'info de `aMemeAxeEcran2`, jamais celle de `aMemeAxeEcran1`. Plus ancien en premier. */
-export function etatActuelAMemeAxe(e: ExoMemeAxe, phase: PhaseEquationConiqueCaracteristiques): string[] | null {
-  const lignes: string[] = [];
-  if (phase === "aMemeAxeEcran2" || phase === "aMemeAxeEcran3") {
-    lignes.push(`a=${e.a}\\text{, }c=${e.c}\\text{ (confirmés, étape 1)}`);
+function reponse59(e: E, p: P): string[] {
+  const c = e.conique;
+  switch (p) {
+    case "mNature":
+    case "cNature":
+      return [`\\text{${e.famille === "A" && e.sousType === "memeAxe" ? (e.nature === "ellipse" ? "une ellipse" : "une hyperbole") : e.famille === "C" ? (e.nature === "ellipse" ? "une ellipse" : "une hyperbole") : ""}}`];
+    case "mValeurs":
+      return e.famille === "A" && e.sousType === "memeAxe" ? [`a=${e.a}`, `c=${e.c}`, `b^2=${Math.abs(e.a * e.a - e.c * e.c)}`] : [];
+    case "pAxe":
+      return e.famille === "A" && e.sousType === "axesPerpendiculaires" ? [`\\text{${axeTexte(e.axeFocal)}}`] : [];
+    case "pValeurs":
+      return e.famille === "A" && e.sousType === "axesPerpendiculaires" ? [`b=${e.b}`, `c=${e.c}`, `a^2=${e.b * e.b + e.c * e.c}`] : [];
+    case "sValeurs":
+      return e.famille === "A" && e.sousType === "deuxSommets" ? [`a=${e.a}`, `b=${e.b}`] : [];
+    case "bOuverture":
+      return e.famille === "B" ? [formesParabole(e).find((o) => o.valeur === codeOuverture(e))!.label.replace(/\$/g, "")] : [];
+    case "bP":
+      return e.famille === "B" ? [`p=${latexQ(e.conique.p)}`] : [];
+    case "cValeurs":
+      return e.famille === "C" ? [`a=${e.a}`, `c=${e.c}`] : [];
+    case "cEquation":
+      return e.famille === "C" ? [`b^2=${Math.abs(e.a * e.a - e.c * e.c)}`, latexConique(c)] : [];
+    case "dValeurs":
+      return e.famille === "D" ? [`a=${e.a}`, `b=${e.b}`] : [];
+    case "equation":
+      return [latexConique(c)];
   }
-  if (phase === "aMemeAxeEcran3") {
-    lignes.push(`\\text{Nature : }\\textbf{${LIBELLE_NATURE_ELLIPSE_HYPERBOLE[e.natureCible]}}\\text{, }b^2=${e.bCarre}\\text{ (confirmés, étape 2)}`);
+}
+
+function explication59(e: E, p: P): FragmentConsigne[][] {
+  const c = e.conique;
+  switch (p) {
+    case "mNature":
+      if (e.famille !== "A" || e.sousType !== "memeAxe") return [];
+      return L(`$OS=${e.a}$ et $OF=${e.c}$ : ${e.c < e.a ? "le foyer est entre le centre et le sommet, $c<a$ : c'est une ellipse" : "le foyer est au-delà du sommet, $c>a$ : c'est une hyperbole"}.`);
+    case "mValeurs":
+      if (e.famille !== "A" || e.sousType !== "memeAxe") return [];
+      return L(`$a=OS=${e.a}$, $c=OF=${e.c}$, puis $b^2=${e.nature === "ellipse" ? "a^2-c^2" : "c^2-a^2"}=${Math.abs(e.a * e.a - e.c * e.c)}$.`, "Piège : pour une hyperbole, $b^2=c^2-a^2$ (et non $a^2-c^2$, qui serait négatif).");
+    case "pAxe":
+      if (e.famille !== "A" || e.sousType !== "axesPerpendiculaires") return [];
+      return L(`Le foyer $F${lp(e.F)}$ est sur ${axeTexte(e.axeFocal)} : c'est l'axe focal. Le sommet $S$ est sur l'autre axe.`, "Piège : c'est le foyer, jamais le sommet donné, qui fixe l'axe focal.");
+    case "pValeurs":
+      if (e.famille !== "A" || e.sousType !== "axesPerpendiculaires") return [];
+      return L(`$b=OS=${e.b}$, $c=OF=${e.c}$, donc $a^2=b^2+c^2=${e.b * e.b + e.c * e.c}$.`);
+    case "sValeurs":
+      if (e.famille !== "A" || e.sousType !== "deuxSommets") return [];
+      return L(`Le plus grand des deux demi-axes est $a=${e.a}$, l'autre est $b=${e.b}$ : l'axe focal est ${axeTexte(c.type === "ellipse" ? c.axe : "x")}.`, "Piège : $a$ n'est pas forcément sur l'axe des abscisses.");
+    case "bOuverture":
+      if (e.famille !== "B") return [];
+      return L(`L'axe de symétrie est parallèle à ${axeTexte(e.conique.axe)} : le carré porte sur $${e.conique.axe === "x" ? "y" : "x"}$. La parabole s'ouvre vers ${e.donnee === "foyer" ? "le foyer" : "le point P"} : $${formesParabole(e).find((o) => o.valeur === codeOuverture(e))!.label.replace(/\$/g, "")}$.`);
+    case "bP":
+      if (e.famille !== "B") return [];
+      return e.donnee === "foyer"
+        ? L(`$SF=\\frac{p}{2}=${latexQ(qMul(q(1, 2), e.conique.p))}$, donc $p=${latexQ(e.conique.p)}$.`, "Piège : $p$ est la distance du foyer à la directrice, le double de $SF$.")
+        : L(`On remplace les coordonnées de $P$ dans la forme choisie, puis on isole $p$ : $p=${latexQ(e.conique.p)}$.`);
+    case "cValeurs":
+      if (e.famille !== "C") return [];
+      return L(RELATIONS_C, `Avec les données : $a=${e.a}$ et $c=${e.c}$.`);
+    case "cNature":
+      if (e.famille !== "C") return [];
+      return L(`$e=\\frac{c}{a}=${latexFrac(e.c, e.a)}$ ${e.c < e.a ? "$<1$ : ellipse" : "$>1$ : hyperbole"}.`, "Piège : on ne suppose jamais la nature, on la déduit de $e$.");
+    case "cEquation":
+      if (e.famille !== "C") return [];
+      return L(`$b^2=${e.nature === "ellipse" ? "a^2-c^2" : "c^2-a^2"}=${Math.abs(e.a * e.a - e.c * e.c)}$, d'où $${latexConique(c)}$.`);
+    case "dValeurs":
+      if (e.famille !== "D") return [];
+      return L(
+        `Pente des asymptotes : $${e.conique.axe === "x" ? "\\frac{b}{a}" : "\\frac{a}{b}"}=${penteD(e)}$.`,
+        e.donnee === "sommet" ? `Le sommet donne $a=${e.a}$, puis $b=${e.b}$.` : `Avec $c^2=a^2+b^2=${e.a * e.a + e.b * e.b}$ : $a=${e.a}$, $b=${e.b}$.`,
+        e.conique.axe === "y" ? "Piège : axe focal vertical, la pente vaut $\\frac{a}{b}$ et non $\\frac{b}{a}$." : "Piège : $c^2=a^2+b^2$ pour une hyperbole.",
+      );
+    case "equation":
+      return L(`$${latexConique(c)}$`, "Vérification : les données (sommet, foyer, point) vérifient l'équation.");
   }
-  return lignes.length > 0 ? lignes : null;
 }
 
-export function champsAMemeAxe(e: ExoMemeAxe, phase: PhaseEquationConiqueCaracteristiques): ChampDef[] {
-  if (phase === "aMemeAxeEcran1") return [champTexte("a =", "ex : 5", true), champTexte("c =", "ex : 3", true)];
-  if (phase === "aMemeAxeEcran2") return [champChoix("Nature =", optionsNatureMemeAxe(e.a, e.c)), champTexte("b² =", "ex : 16", true)];
-  return [champTexte("Équation finale =", "ex : x^2/25+y^2/16=1")];
-}
-
-// ============================================================================
-// Famille A, sous-type "axes perpendiculaires" — PIÈGE CENTRAL.
-// ============================================================================
-
-function pointSommetFoyerAxesPerp(e: ExoAxesPerp): { s: { x: number; y: number }; f: { x: number; y: number } } {
-  if (e.axePrincipal === "horizontal") return { s: { x: 0, y: e.signeS * e.b }, f: { x: e.signeF * e.c, y: 0 } };
-  return { s: { x: e.signeS * e.b, y: 0 }, f: { x: 0, y: e.signeF * e.c } };
-}
-
-export function consigneGeneraleAAxesPerp(): FragmentConsigne[] {
-  return [texte("On donne un sommet S d'une ellipse centrée à l'origine, sur un axe, ET un foyer F sur l'axe PERPENDICULAIRE. Attention : c'est la position du foyer, jamais celle de S, qui détermine l'axe principal.")];
-}
-
-export function blocDonneesAAxesPerp(e: ExoAxesPerp): string[] {
-  const { s, f } = pointSommetFoyerAxesPerp(e);
-  return [`\\text{Sommet : }S(${s.x};${s.y})`, `\\text{Foyer : }F(${f.x};${f.y})`];
-}
-
-export function consigneEcranAAxesPerp(_e: ExoAxesPerp, phase: PhaseEquationConiqueCaracteristiques): FragmentConsigne[] {
-  if (phase === "aAxesPerpEcran1") return [texte("Quel axe est l'axe PRINCIPAL (celui qui portera a) ? Et que vaut b (le sommet donné S, sur l'axe secondaire) ?")];
-  if (phase === "aAxesPerpEcran2") return [texte("À partir de b CONFIRMÉ, calcule "), latex("c=|F|"), texte(" puis "), latex("a^2=b^2+c^2"), texte(".")];
-  return [texte("À partir de c et "), latex("a^2"), texte(" CONFIRMÉS, donne l'équation finale.")];
-}
-
-/** ACCUMULE les écrans déjà confirmés — même correctif que `etatActuelAMemeAxe` (voir sa doc-string). */
-export function etatActuelAAxesPerp(e: ExoAxesPerp, phase: PhaseEquationConiqueCaracteristiques): string[] | null {
-  const lignes: string[] = [];
-  if (phase === "aAxesPerpEcran2" || phase === "aAxesPerpEcran3") {
-    lignes.push(`\\text{Axe principal : }\\textbf{${e.axePrincipal}}\\text{, }b=${e.b}\\text{ (confirmés, étape 1)}`);
+function lirePoly(v: string): Poly | null {
+  try {
+    return lireEquation(v, ["x", "y"]).poly;
+  } catch {
+    return null;
   }
-  if (phase === "aAxesPerpEcran3") {
-    lignes.push(`c=${e.c}\\text{, }a^2=${e.aCarre}\\text{ (confirmés, étape 2)}`);
+}
+function nombre(v: string): number | null {
+  try {
+    return lireNombre(v).valeur;
+  } catch {
+    return null;
   }
-  return lignes.length > 0 ? lignes : null;
 }
+const pres = (a: number, b: number) => Math.abs(a - b) < 1e-9 * Math.max(1, Math.abs(b));
 
-export function champsAAxesPerp(_e: ExoAxesPerp, phase: PhaseEquationConiqueCaracteristiques): ChampDef[] {
-  if (phase === "aAxesPerpEcran1") {
-    return [
-      champChoix("Axe principal =", [
-        { valeur: "axeS", label: "L'axe qui porte S" },
-        { valeur: "axeF", label: "L'axe qui porte F" },
-      ]),
-      champTexte("b =", "ex : 3", true),
-    ];
-  }
-  if (phase === "aAxesPerpEcran2") return [champTexte("c =", "ex : 4", true), champTexte("a² =", "ex : 25", true)];
-  return [champTexte("Équation finale =", "ex : x^2/25+y^2/9=1")];
-}
-
-export function niveauAideMaxAAxesPerp(phase: PhaseEquationConiqueCaracteristiques): number {
-  return phase === "aAxesPerpEcran1" ? 2 : 0;
-}
-
-export function aideNiveau1AAxesPerp(): AideAvecLatex {
-  return { texte: "Les foyers d'une ellipse se trouvent TOUJOURS sur l'axe principal (le plus long) — le sommet donné sur l'AUTRE axe est donc le sommet secondaire, jamais le sommet principal.", latex: null };
-}
-
-export function aideNiveau2AAxesPerp(e: ExoAxesPerp): AideAvecLatex {
-  return { texte: "Axe principal identifié (rôle de S non déduit) :", latex: `\\text{axe principal : }\\textbf{${e.axePrincipal}}` };
-}
-
-// ============================================================================
-// Famille A, sous-type "2 sommets".
-// ============================================================================
-
-export function consigneGeneraleADeuxSommets(): FragmentConsigne[] {
-  return [texte("On donne 2 sommets d'une ellipse centrée à l'origine, sur 2 axes perpendiculaires. Identifie quel sommet correspond à quel axe, puis donne l'équation.")];
-}
-
-export function blocDonneesADeuxSommets(e: ExoDeuxSommets): string[] {
-  return [`\\text{Sommet : }S(${e.signeSommetX * e.sommetX};0)`, `\\text{Sommet : }S'(0;${e.signeSommetY * e.sommetY})`];
-}
-
-export function consigneEcranADeuxSommets(_e: ExoDeuxSommets, phase: PhaseEquationConiqueCaracteristiques): FragmentConsigne[] {
-  if (phase === "aDeuxSommetsEcran1") return [texte("Identifie a (sommet sur l'axe des x) et b (sommet sur l'axe des y).")];
-  return [texte("À partir de a et b CONFIRMÉS, donne l'équation finale.")];
-}
-
-export function etatActuelADeuxSommets(e: ExoDeuxSommets, phase: PhaseEquationConiqueCaracteristiques): string[] | null {
-  if (phase === "aDeuxSommetsEcran2") return [`a=${e.sommetX}\\text{, }b=${e.sommetY}\\text{ (confirmés)}`];
+function echangee(c: Conique): Conique | null {
+  if (c.type === "ellipse" || c.type === "hyperbole") return { ...c, axe: c.axe === "x" ? "y" : "x" };
   return null;
 }
 
-export function champsADeuxSommets(_e: ExoDeuxSommets, phase: PhaseEquationConiqueCaracteristiques): ChampDef[] {
-  if (phase === "aDeuxSommetsEcran1") return [champTexte("a (sur l'axe des x) =", "ex : 5", true), champTexte("b (sur l'axe des y) =", "ex : 3", true)];
-  return [champTexte("Équation finale =", "ex : x^2/25+y^2/9=1")];
-}
-
-// ============================================================================
-// Famille B — parabole.
-// ============================================================================
-
-const OPTIONS_FORME_GENERALE = (e: ExerciceFamilleB): OptionChoix[] => [
-  { valeur: "horizontal", label: `Axe horizontal : (${afficherDifference("y", e.k)})² = 4p(${afficherDifference("x", e.h)})` },
-  { valeur: "vertical", label: `Axe vertical : (${afficherDifference("x", e.h)})² = 4p(${afficherDifference("y", e.k)})` },
-];
-
-export function consigneGeneraleB(): FragmentConsigne[] {
-  return [texte("On donne le sommet d'une parabole et, selon le cas, son foyer ou un point de passage. Détermine la forme générale adaptée, la valeur signée de p, puis l'équation finale.")];
-}
-
-export function blocDonneesB(e: ExerciceFamilleB): string[] {
-  const lignes = [`\\text{Sommet : }S(${e.h};${e.k})`];
-  if (e.donneeType === "foyer") lignes.push(`\\text{Foyer : }F(${e.foyer!.x};${e.foyer!.y})`);
-  else lignes.push(`\\text{Point de passage : }P(${e.point!.x};${e.point!.y})`);
-  return lignes;
-}
-
-export function consigneEcranB(e: ExerciceFamilleB, phase: PhaseEquationConiqueCaracteristiques): FragmentConsigne[] {
-  if (phase === "bEcran1") return [texte("Identifie l'axe de symétrie (donc la forme générale adaptée) depuis les données.")];
-  if (phase === "bEcran2") {
-    return e.donneeType === "foyer"
-      ? [texte("Calcule p = distance signée du sommet au foyer, dans la direction de l'axe (attention au signe : au-delà ou en-deçà du sommet).")]
-      : [texte("Substitue les coordonnées du point de passage dans la forme générale CONFIRMÉE à l'étape précédente, et résous pour p — attention au signe.")];
+function cible59(e: E, p: P, v: string[]): FragmentConsigne[] | null {
+  const c = e.conique;
+  if ((p === "mValeurs" || p === "cEquation") && (c.type === "ellipse" || c.type === "hyperbole")) {
+    const i = p === "mValeurs" ? 2 : 0;
+    const x = nombre(v[i]);
+    if (x !== null && pres(x, -qNum(c.b2))) return f("$b^2$ est positif : pour une hyperbole, $b^2=c^2-a^2$.");
   }
-  return [texte("Assemble l'équation finale, en vérifiant que l'orientation est cohérente avec le signe de p CONFIRMÉ.")];
-}
-
-/** ACCUMULE les écrans déjà confirmés — même correctif que `etatActuelAMemeAxe` (voir sa doc-string). */
-export function etatActuelB(e: ExerciceFamilleB, phase: PhaseEquationConiqueCaracteristiques): string[] | null {
-  const lignes: string[] = [];
-  if (phase === "bEcran2" || phase === "bEcran3") {
-    lignes.push(`\\text{Axe : }\\textbf{${e.axe}}\\text{ (confirmé, étape 1)}`);
+  if (p === "equation" || p === "cEquation") {
+    const poly = lirePoly(v[p === "cEquation" ? 1 : 0]);
+    if (!poly) return null;
+    const ech = echangee(c);
+    if (ech && proportionnels(poly, polyConique(ech))) return f("$a^2$ et $b^2$ sont échangés : $a^2$ va sous le carré de la variable de l'axe focal.");
+    if (c.type === "parabole") {
+      const deux: Conique = { ...c, p: qMul(q(2), c.p) };
+      const demi: Conique = { ...c, p: qMul(q(1, 2), c.p) };
+      if (proportionnels(poly, polyConique(deux)) || proportionnels(poly, polyConique(demi))) return f("Le coefficient vaut $2p$, avec $p$ la distance du foyer à la directrice.");
+      const autre: Conique = { ...c, sens: c.sens > 0 ? -1 : 1 };
+      if (proportionnels(poly, polyConique(autre))) return f("Le signe de $2p$ donne le sens d'ouverture : vers le foyer (ou le point donné).");
+    }
+    if (c.type === "ellipse" || c.type === "hyperbole") {
+      const autre: Conique = { ...c, type: c.type === "ellipse" ? "hyperbole" : "ellipse" };
+      if (proportionnels(poly, polyConique(autre))) return f(`C'est ${c.type === "ellipse" ? "une ellipse : les deux carrés s'ajoutent" : "une hyperbole : les deux carrés se soustraient"}.`);
+    }
+    return null;
   }
-  if (phase === "bEcran3") lignes.push(`p=${e.p}\\text{ (confirmé, étape 2)}`);
-  return lignes.length > 0 ? lignes : null;
-}
-
-export function champsB(e: ExerciceFamilleB, phase: PhaseEquationConiqueCaracteristiques): ChampDef[] {
-  if (phase === "bEcran1") return [champChoix("Forme générale adaptée =", OPTIONS_FORME_GENERALE(e))];
-  if (phase === "bEcran2") return [champTexte("p (signé) =", "ex : -3")];
-  return [champTexte("Équation finale =", "ex : (y-2)^2=12*(x-1)")];
-}
-
-export function niveauAideMaxB(e: ExerciceFamilleB, phase: PhaseEquationConiqueCaracteristiques): number {
-  return phase === "bEcran2" && e.donneeType === "point" ? 2 : 0;
-}
-
-export function aideNiveau1B(e: ExerciceFamilleB, phase: PhaseEquationConiqueCaracteristiques): AideAvecLatex {
-  if (phase === "bEcran2" && e.donneeType === "point") return { texte: "Substitue les coordonnées du point de passage dans la forme générale posée à l'étape précédente, pour isoler p.", latex: null };
-  return AUCUNE_AIDE;
-}
-
-export function aideNiveau2B(e: ExerciceFamilleB, phase: PhaseEquationConiqueCaracteristiques): AideAvecLatex {
-  if (phase === "bEcran2" && e.donneeType === "point") {
-    const pt = e.point!;
-    const latex = e.axe === "horizontal" ? `(${afficherDifference(pt.y, e.k)})^2=4p(${afficherDifference(pt.x, e.h)})` : `(${afficherDifference(pt.x, e.h)})^2=4p(${afficherDifference(pt.y, e.k)})`;
-    return { texte: "Substitution effectuée (résolution pour p non faite) :", latex };
+  if (p === "bP" && c.type === "parabole") {
+    const x = nombre(v[0]);
+    if (x !== null && pres(x, qNum(c.p) / 2)) return f("$p$ est la distance du foyer à la directrice : le double de la distance sommet–foyer.");
+    if (x !== null && pres(x, 2 * qNum(c.p))) return f("Le coefficient de l'équation vaut $2p$ : $p$ en est la moitié.");
   }
-  return AUCUNE_AIDE;
-}
-
-// ============================================================================
-// Famille C.
-// ============================================================================
-
-const LIBELLE_DONNEE_C: Record<DonneeConiqueC, string> = {
-  deuxC: "2c",
-  excentricite: "e",
-  distanceDirectrices: "d (distance entre les directrices)",
-  deuxA: "2a",
-};
-
-const OPTIONS_RELATION_C: OptionChoix[] = [
-  { valeur: "deuxC", label: "c = (distance focale)/2, soit 2c = |FF'|" },
-  { valeur: "excentricite", label: "e = c/a" },
-  { valeur: "distanceDirectrices", label: "distance entre les directrices = 2a²/c" },
-  { valeur: "deuxA", label: "2a = distance entre les sommets" },
-];
-
-export function consigneGeneraleC(): FragmentConsigne[] {
-  return [
-    texte("On donne 2 caractéristiques parmi {"),
-    latex("2c"),
-    texte(", "),
-    latex("e"),
-    texte(", distance entre les directrices, "),
-    latex("2a"),
-    texte("} d'une conique centrée à l'origine (l'axe des foyers est précisé). Identifie les relations, combine-les pour trouver a et c, détermine le type, puis donne l'équation."),
-  ];
-}
-
-export function blocDonneesC(e: ExerciceFamilleC): string[] {
-  // Phrase volontairement COURTE (jamais la formulation complète "Les foyers sont situés sur
-  // l'axe...") — un `\text{...}` KaTeX ne se scinde jamais sur plusieurs lignes : une phrase trop
-  // longue déborde silencieusement du cadre mobile (375px), un conteneur interne `overflow-x:auto`
-  // absorbant le débordement SANS jamais faire remonter `document.body.scrollWidth` (piège trouvé
-  // par inspection visuelle d'une capture 375px — voir `docs/historique-6e.md`).
-  const axeTexte = e.axeTransverse === "horizontal" ? "Ox" : "Oy";
-  return [`\\text{Foyers sur l'axe ${axeTexte}.}`, `${LIBELLE_DONNEE_C[e.donnee1].split(" ")[0]}=${afficherFractionExacte(e.valeurDonnee1)}`, `${LIBELLE_DONNEE_C[e.donnee2].split(" ")[0]}=${afficherFractionExacte(e.valeurDonnee2)}`];
-}
-
-export function consigneEcranC(_e: ExerciceFamilleC, phase: PhaseEquationConiqueCaracteristiques): FragmentConsigne[] {
-  if (phase === "cEcran1") return [texte("Pour chacune des 2 données ci-dessus, identifie la relation qui la relie à a, b, c ou e — SANS la résoudre encore.")];
-  if (phase === "cEcran2") return [texte("Combine les 2 relations CONFIRMÉES pour isoler a (et c).")];
-  if (phase === "cEcran3") {
-    return [
-      texte("Détermine le type de conique ("),
-      latex("e<1"),
-      texte(" : ellipse ; "),
-      latex("e>1"),
-      texte(" : hyperbole — ne le suppose JAMAIS par défaut), puis calcule "),
-      latex("b^2"),
-      texte(" avec la formule appropriée à ce type."),
-    ];
+  if (p === "sValeurs" && e.famille === "A" && e.sousType === "deuxSommets") {
+    const a = nombre(v[0]);
+    if (a !== null && pres(a, e.b)) return f("$a$ est le demi-grand axe : le plus grand des deux.");
   }
-  return [texte("À partir du type et de "), latex("b^2"), texte(" CONFIRMÉS, donne l'équation finale.")];
-}
-
-/** ACCUMULE les écrans déjà confirmés — même correctif que `etatActuelAMemeAxe` (voir sa doc-string) ;
- * famille C a 4 écrans, donc `cEcran4` doit montrer les 3 lignes de `cEcran1`/2/3, jamais seulement
- * celle de `cEcran3`. */
-export function etatActuelC(e: ExerciceFamilleC, phase: PhaseEquationConiqueCaracteristiques): string[] | null {
-  const lignes: string[] = [];
-  if (phase === "cEcran2" || phase === "cEcran3" || phase === "cEcran4") {
-    lignes.push(`\\text{Relations confirmées (étape 1) : ${LIBELLE_DONNEE_C[e.donnee1]} et ${LIBELLE_DONNEE_C[e.donnee2]}}`);
+  if (p === "dValeurs" && e.famille === "D") {
+    const a = nombre(v[0]);
+    const b = nombre(v[1]);
+    if (a !== null && b !== null && pres(a, e.b) && pres(b, e.a) && e.a !== e.b) return f(e.conique.axe === "y" ? "Axe focal vertical : les asymptotes ont pour pente $\\frac{a}{b}$." : "Axe focal horizontal : les asymptotes ont pour pente $\\frac{b}{a}$.");
   }
-  if (phase === "cEcran3" || phase === "cEcran4") lignes.push(`a=${e.a}\\text{, }c=${e.c}\\text{ (confirmés, étape 2)}`);
-  if (phase === "cEcran4") lignes.push(`\\text{Type : }\\textbf{${LIBELLE_NATURE_ELLIPSE_HYPERBOLE[e.natureCible]}}\\text{, }b^2=${e.bCarre}\\text{ (confirmés, étape 3)}`);
-  return lignes.length > 0 ? lignes : null;
+  return null;
 }
 
-export function champsC(e: ExerciceFamilleC, phase: PhaseEquationConiqueCaracteristiques): ChampDef[] {
-  if (phase === "cEcran1") {
-    return [champChoix(`Relation pour la donnée « ${LIBELLE_DONNEE_C[e.donnee1].split(" ")[0]}=${afficherFractionTexte(e.valeurDonnee1)} » =`, OPTIONS_RELATION_C), champChoix(`Relation pour la donnée « ${LIBELLE_DONNEE_C[e.donnee2].split(" ")[0]}=${afficherFractionTexte(e.valeurDonnee2)} » =`, OPTIONS_RELATION_C)];
-  }
-  if (phase === "cEcran2") return [champTexte("a =", "ex : 5", true), champTexte("c =", "ex : 3", true)];
-  if (phase === "cEcran3") return [champChoix("Type de conique =", OPTIONS_NATURE_C), champTexte("b² =", "ex : 16", true)];
-  return [champTexte("Équation finale =", "ex : x^2/25+y^2/16=1")];
-}
+// ---------------------------------------------------------------------------
+// Figure : les données, puis la conique après l'équation
+// ---------------------------------------------------------------------------
 
-export function niveauAideMaxC(phase: PhaseEquationConiqueCaracteristiques): number {
-  return phase === "cEcran1" ? 2 : 0;
-}
-
-export function aideNiveau1C(): AideAvecLatex {
-  return {
-    texte: "4 relations possibles : c=|FF'|/2 ; e=c/a ; distance entre les directrices=2a/e (=2a²/c) ; 2a=distance entre les sommets. Identifie lesquelles correspondent aux 2 données de l'énoncé.",
-    latex: "c=\\dfrac{|FF'|}{2}\\text{, }e=\\dfrac{c}{a}\\text{, }d=\\dfrac{2a}{e}=\\dfrac{2a^2}{c}\\text{, }2a=\\text{distance entre les sommets}",
+export function figure6gen59(e: E, closes: readonly P[]): string | null {
+  const c = e.conique;
+  const o = objetsVides();
+  const pts: P2[] = [];
+  const point = (p: { x: number; y: number }, nom: string, couleur: "encre" | "accent" | "violet" = "encre") => {
+    o.points.push({ p, nom, couleur });
+    pts.push(p);
   };
-}
-
-export function aideNiveau2C(e: ExerciceFamilleC): AideAvecLatex {
-  return { texte: "1ʳᵉ relation déjà posée (la 2ᵉ non déduite) :", latex: `\\text{${LIBELLE_DONNEE_C[e.donnee1]}}` };
-}
-
-// ============================================================================
-// Famille D — hyperbole depuis une asymptote.
-// ============================================================================
-
-function libelleDonneeD(e: ExerciceFamilleD): string {
-  if (e.sousType === "sommet") return `\\text{Sommet : }S(${e.sommet!.x};${e.sommet!.y})`;
-  if (e.sousType === "foyer") return `\\text{Foyer : }F(${e.foyer!.x};${e.foyer!.y})`;
-  return `2c=${e.distanceFocale}`;
-}
-
-export function consigneGeneraleD(): FragmentConsigne[] {
-  return [texte("On donne une asymptote d'une hyperbole centrée à l'origine et un autre élément (sommet, foyer, ou distance focale). Identifie l'axe transverse et le rapport donné par la pente, reconstruis a et b, puis l'équation.")];
-}
-
-export function blocDonneesD(e: ExerciceFamilleD): string[] {
-  const lignes = [`y=\\pm${afficherFractionExacte(e.pente)}x\\text{ (asymptotes)}`, libelleDonneeD(e)];
-  if (e.sousType === "distanceFocale") {
-    // Phrase COURTE — voir le commentaire équivalent dans `blocDonneesC` (même piège de
-    // débordement mobile évité).
-    const axeTexte = e.axeTransverse === "horizontal" ? "Ox" : "Oy";
-    lignes.push(`\\text{Axe transverse : ${axeTexte}.}`);
-  }
-  return lignes;
-}
-
-export function consigneEcranD(e: ExerciceFamilleD, phase: PhaseEquationConiqueCaracteristiques): FragmentConsigne[] {
-  if (phase === "dEcran1") {
-    return [
-      texte("Identifie l'axe transverse et le rapport ("),
-      latex("b/a"),
-      texte(" si horizontal, "),
-      latex("a/b"),
-      texte(" si vertical — jamais l'inverse) donné par la pente de l'asymptote."),
-    ];
-  }
-  if (phase === "dEcran2") {
-    return e.sousType === "sommet"
-      ? [texte("a est déjà connu directement : déduis b à partir du rapport CONFIRMÉ.")]
-      : [texte("Résous le système {rapport CONFIRMÉ, "), latex("c^2=a^2+b^2"), texte("} pour trouver a et b séparément.")];
-  }
-  return [texte("À partir de a et b CONFIRMÉS, donne l'équation finale.")];
-}
-
-/** ACCUMULE les écrans déjà confirmés — même correctif que `etatActuelAMemeAxe` (voir sa doc-string). */
-export function etatActuelD(e: ExerciceFamilleD, phase: PhaseEquationConiqueCaracteristiques): string[] | null {
-  const lignes: string[] = [];
-  if (phase === "dEcran2" || phase === "dEcran3") {
-    lignes.push(`\\text{Axe transverse : }\\textbf{${e.axeTransverse}}\\text{, rapport}=${afficherFractionExacte(e.pente)}\\text{ (confirmés, étape 1)}`);
-  }
-  if (phase === "dEcran3") lignes.push(`a=${e.a}\\text{, }b=${e.b}\\text{ (confirmés, étape 2)}`);
-  return lignes.length > 0 ? lignes : null;
-}
-
-export function champsD(e: ExerciceFamilleD, phase: PhaseEquationConiqueCaracteristiques): ChampDef[] {
-  if (phase === "dEcran1") return [champChoix("Axe transverse =", OPTIONS_AXE), champTexte("Rapport (valeur absolue) =", "ex : 3/4")];
-  if (phase === "dEcran2") {
-    if (e.sousType === "sommet") return [champTexte("b =", "ex : 4", true)];
-    return [champTexte("a =", "ex : 3", true), champTexte("b =", "ex : 4", true)];
-  }
-  return [champTexte("Équation finale =", "ex : x^2/9-y^2/16=1")];
-}
-
-export function niveauAideMaxD(phase: PhaseEquationConiqueCaracteristiques): number {
-  return phase === "dEcran1" ? 2 : 0;
-}
-
-export function aideNiveau1D(): AideAvecLatex {
-  return { texte: "Les asymptotes d'une hyperbole d'axe transverse HORIZONTAL ont pour pente ±b/a ; d'axe transverse VERTICAL, ±a/b — identifie d'abord l'axe, avant d'extraire le rapport.", latex: "\\pm\\dfrac{b}{a}\\text{ (horizontal)}\\text{, }\\pm\\dfrac{a}{b}\\text{ (vertical)}" };
-}
-
-export function aideNiveau2D(e: ExerciceFamilleD): AideAvecLatex {
-  return { texte: "Axe transverse identifié (rapport non extrait) :", latex: `\\text{axe transverse : }\\textbf{${e.axeTransverse}}` };
-}
-
-// ============================================================================
-// Dispatch commun.
-// ============================================================================
-
-export function consigneGenerale(exercice: ExerciceEquationConiqueCaracteristiques): FragmentConsigne[] {
-  if (exercice.famille === "A") {
-    if (exercice.sousType === "memeAxe") return consigneGeneraleAMemeAxe();
-    if (exercice.sousType === "axesPerpendiculaires") return consigneGeneraleAAxesPerp();
-    return consigneGeneraleADeuxSommets();
-  }
-  if (exercice.famille === "B") return consigneGeneraleB();
-  if (exercice.famille === "C") return consigneGeneraleC();
-  return consigneGeneraleD();
-}
-
-export function blocDonnees(exercice: ExerciceEquationConiqueCaracteristiques): string[] {
-  if (exercice.famille === "A") {
-    if (exercice.sousType === "memeAxe") return blocDonneesAMemeAxe(exercice);
-    if (exercice.sousType === "axesPerpendiculaires") return blocDonneesAAxesPerp(exercice);
-    return blocDonneesADeuxSommets(exercice);
-  }
-  if (exercice.famille === "B") return blocDonneesB(exercice);
-  if (exercice.famille === "C") return blocDonneesC(exercice);
-  return blocDonneesD(exercice);
-}
-
-export function consigneEcran(exercice: ExerciceEquationConiqueCaracteristiques, phase: PhaseEquationConiqueCaracteristiques): FragmentConsigne[] {
-  if (exercice.famille === "A") {
-    if (exercice.sousType === "memeAxe") return consigneEcranAMemeAxe(exercice, phase);
-    if (exercice.sousType === "axesPerpendiculaires") return consigneEcranAAxesPerp(exercice, phase);
-    return consigneEcranADeuxSommets(exercice, phase);
-  }
-  if (exercice.famille === "B") return consigneEcranB(exercice, phase);
-  if (exercice.famille === "C") return consigneEcranC(exercice, phase);
-  return consigneEcranD(exercice, phase);
-}
-
-export function etatActuel(exercice: ExerciceEquationConiqueCaracteristiques, phase: PhaseEquationConiqueCaracteristiques): string[] | null {
-  if (exercice.famille === "A") {
-    if (exercice.sousType === "memeAxe") return etatActuelAMemeAxe(exercice, phase);
-    if (exercice.sousType === "axesPerpendiculaires") return etatActuelAAxesPerp(exercice, phase);
-    return etatActuelADeuxSommets(exercice, phase);
-  }
-  if (exercice.famille === "B") return etatActuelB(exercice, phase);
-  if (exercice.famille === "C") return etatActuelC(exercice, phase);
-  return etatActuelD(exercice, phase);
-}
-
-export function champsEcran(exercice: ExerciceEquationConiqueCaracteristiques, phase: PhaseEquationConiqueCaracteristiques): ChampDef[] {
-  if (exercice.famille === "A") {
-    if (exercice.sousType === "memeAxe") return champsAMemeAxe(exercice, phase);
-    if (exercice.sousType === "axesPerpendiculaires") return champsAAxesPerp(exercice, phase);
-    return champsADeuxSommets(exercice, phase);
-  }
-  if (exercice.famille === "B") return champsB(exercice, phase);
-  if (exercice.famille === "C") return champsC(exercice, phase);
-  return champsD(exercice, phase);
-}
-
-export function niveauAideMaxEcran(exercice: ExerciceEquationConiqueCaracteristiques, phase: PhaseEquationConiqueCaracteristiques): number {
-  if (exercice.famille === "A") {
-    if (exercice.sousType === "axesPerpendiculaires") return niveauAideMaxAAxesPerp(phase);
-    return 0;
-  }
-  if (exercice.famille === "B") return niveauAideMaxB(exercice, phase);
-  if (exercice.famille === "C") return niveauAideMaxC(phase);
-  return niveauAideMaxD(phase);
-}
-
-export function aideNiveau1(exercice: ExerciceEquationConiqueCaracteristiques, phase: PhaseEquationConiqueCaracteristiques): AideAvecLatex {
-  if (niveauAideMaxEcran(exercice, phase) === 0) return AUCUNE_AIDE;
-  if (exercice.famille === "A") return aideNiveau1AAxesPerp();
-  if (exercice.famille === "B") return aideNiveau1B(exercice, phase);
-  if (exercice.famille === "C") return aideNiveau1C();
-  return aideNiveau1D();
-}
-
-export function aideNiveau2(exercice: ExerciceEquationConiqueCaracteristiques, phase: PhaseEquationConiqueCaracteristiques): AideAvecLatex {
-  if (niveauAideMaxEcran(exercice, phase) === 0) return AUCUNE_AIDE;
-  if (exercice.famille === "A" && exercice.sousType === "axesPerpendiculaires") return aideNiveau2AAxesPerp(exercice);
-  if (exercice.famille === "B") return aideNiveau2B(exercice, phase);
-  if (exercice.famille === "C") return aideNiveau2C(exercice);
-  if (exercice.famille === "D") return aideNiveau2D(exercice);
-  /* c8 ignore next */
-  return AUCUNE_AIDE;
-}
-
-export const LIBELLE_PHASE: Record<PhaseEquationConiqueCaracteristiques, string> = {
-  aMemeAxeEcran1: "Étape 1 (a et c)",
-  aMemeAxeEcran2: "Étape 2 (nature et b²)",
-  aMemeAxeEcran3: "Étape 3 (équation finale)",
-  aAxesPerpEcran1: "Étape 1 (axe principal et b)",
-  aAxesPerpEcran2: "Étape 2 (c et a²)",
-  aAxesPerpEcran3: "Étape 3 (équation finale)",
-  aDeuxSommetsEcran1: "Étape 1 (a et b)",
-  aDeuxSommetsEcran2: "Étape 2 (équation finale)",
-  bEcran1: "Étape 1 (forme générale)",
-  bEcran2: "Étape 2 (valeur de p)",
-  bEcran3: "Étape 3 (équation finale)",
-  cEcran1: "Étape 1 (relations identifiées)",
-  cEcran2: "Étape 2 (a et c)",
-  cEcran3: "Étape 3 (type et b²)",
-  cEcran4: "Étape 4 (équation finale)",
-  dEcran1: "Étape 1 (axe transverse et rapport)",
-  dEcran2: "Étape 2 (a et b)",
-  dEcran3: "Étape 3 (équation finale)",
-};
-
-export const LIBELLE_FAMILLE: Record<ExerciceEquationConiqueCaracteristiques["famille"], string> = {
-  A: "A — Sommet(s)/foyer(s)",
-  B: "B — Parabole",
-  C: "C — Distance/excentricité/directrices",
-  D: "D — Asymptote",
-};
-
-function formatEquationFinaleLatex(exercice: ExerciceEquationConiqueCaracteristiques): string {
-  if (exercice.famille === "A") {
-    if (exercice.sousType === "memeAxe") {
-      const signe = exercice.natureCible === "ellipse" ? "+" : "-";
-      return exercice.axe === "horizontal" ? `\\frac{x^2}{${exercice.a * exercice.a}}${signe}\\frac{y^2}{${exercice.bCarre}}=1` : `\\frac{y^2}{${exercice.a * exercice.a}}${signe}\\frac{x^2}{${exercice.bCarre}}=1`;
+  if (e.famille === "A") {
+    if (e.sousType === "deuxSommets") {
+      point(ptNum(e.S), "S");
+      point(ptNum(e.Sp), "S′");
+    } else {
+      point(ptNum(e.S), "S");
+      point(ptNum(e.F), "F", "accent");
     }
-    if (exercice.sousType === "axesPerpendiculaires") {
-      return exercice.axePrincipal === "horizontal" ? `\\frac{x^2}{${exercice.aCarre}}+\\frac{y^2}{${exercice.bCarre}}=1` : `\\frac{y^2}{${exercice.aCarre}}+\\frac{x^2}{${exercice.bCarre}}=1`;
+  } else if (e.famille === "B") {
+    point(ptNum(e.S), "S");
+    if (e.donnee === "foyer") point(ptNum(e.F), "F", "accent");
+    else {
+      point(ptNum(e.P!), "P");
+      const S = ptNum(e.S);
+      o.droites.push(e.conique.axe === "x" ? { a: 0, b: 1, c: -S.y, couleur: "gris", pointilles: true } : { a: 1, b: 0, c: -S.x, couleur: "gris", pointilles: true });
     }
-    return `\\frac{x^2}{${exercice.sommetX * exercice.sommetX}}+\\frac{y^2}{${exercice.sommetY * exercice.sommetY}}=1`;
+  } else if (e.famille === "C") {
+    if (!closes.includes("cValeurs")) return null;
+    foyersConique(c).forEach((F, i) => point({ x: F.x, y: F.y }, i ? "F′" : "F", "accent"));
+  } else {
+    for (const d of asymptotes(e.conique)) o.droites.push({ ...d3(d), couleur: "gris", pointilles: true });
+    if (e.donnee === "sommet") point(e.conique.axe === "x" ? { x: e.a, y: 0 } : { x: 0, y: e.a }, "S");
+    else if (e.donnee === "foyer") {
+      const F = foyersConique(e.conique)[0];
+      point({ x: F.x, y: F.y }, "F", "accent");
+    }
   }
-  if (exercice.famille === "B") {
-    return exercice.axe === "horizontal" ? `(${afficherDifference("y", exercice.k)})^2=${4 * exercice.p}(${afficherDifference("x", exercice.h)})` : `(${afficherDifference("x", exercice.h)})^2=${4 * exercice.p}(${afficherDifference("y", exercice.k)})`;
-  }
-  if (exercice.famille === "C") {
-    const signe = exercice.natureCible === "ellipse" ? "+" : "-";
-    return exercice.axeTransverse === "horizontal" ? `\\frac{x^2}{${exercice.a * exercice.a}}${signe}\\frac{y^2}{${exercice.bCarre}}=1` : `\\frac{y^2}{${exercice.a * exercice.a}}${signe}\\frac{x^2}{${exercice.bCarre}}=1`;
-  }
-  return exercice.axeTransverse === "horizontal" ? `\\frac{x^2}{${exercice.a * exercice.a}}-\\frac{y^2}{${exercice.b * exercice.b}}=1` : `\\frac{y^2}{${exercice.a * exercice.a}}-\\frac{x^2}{${exercice.b * exercice.b}}=1`;
+  const fini = closes.includes("equation") || closes.includes("cEquation");
+  const fen = fenetreConique(c, pts);
+  if (fini) ajouterConique(o, c, Math.max(fen.xmax - fen.xmin, fen.ymax - fen.ymin), { couleur: "vert", foyers: e.famille === "A" && e.sousType !== "memeAxe" ? true : false });
+  o.fenetre = fen;
+  return figureLieux(o);
 }
-
-/** Récapitulatif final : affiche toujours la réponse CORRECTE connue de l'exercice — jamais
- * recalculée depuis la saisie élève. */
-export function formatReponseAttenduePhaseLatex(exercice: ExerciceEquationConiqueCaracteristiques, phase: PhaseEquationConiqueCaracteristiques): string[] {
-  if (exercice.famille === "A" && exercice.sousType === "memeAxe") {
-    if (phase === "aMemeAxeEcran1") return [`a=${exercice.a}\\text{, }c=${exercice.c}`];
-    if (phase === "aMemeAxeEcran2") return [`\\text{${LIBELLE_NATURE_ELLIPSE_HYPERBOLE[exercice.natureCible]}}\\text{, }b^2=${exercice.bCarre}`];
-    return [formatEquationFinaleLatex(exercice)];
-  }
-  if (exercice.famille === "A" && exercice.sousType === "axesPerpendiculaires") {
-    if (phase === "aAxesPerpEcran1") return [`\\text{axe principal : }${exercice.axePrincipal}\\text{, }b=${exercice.b}`];
-    if (phase === "aAxesPerpEcran2") return [`c=${exercice.c}\\text{, }a^2=${exercice.aCarre}`];
-    return [formatEquationFinaleLatex(exercice)];
-  }
-  if (exercice.famille === "A" && exercice.sousType === "deuxSommets") {
-    if (phase === "aDeuxSommetsEcran1") return [`a=${exercice.sommetX}\\text{, }b=${exercice.sommetY}`];
-    return [formatEquationFinaleLatex(exercice)];
-  }
-  if (exercice.famille === "B") {
-    if (phase === "bEcran1") return [`\\text{axe : }${exercice.axe}`];
-    if (phase === "bEcran2") return [`p=${exercice.p}`];
-    return [formatEquationFinaleLatex(exercice)];
-  }
-  if (exercice.famille === "C") {
-    if (phase === "cEcran1") return [`\\text{${LIBELLE_DONNEE_C[exercice.donnee1]}}\\text{, }\\text{${LIBELLE_DONNEE_C[exercice.donnee2]}}`];
-    if (phase === "cEcran2") return [`a=${exercice.a}\\text{, }c=${exercice.c}`];
-    if (phase === "cEcran3") return [`\\text{${LIBELLE_NATURE_ELLIPSE_HYPERBOLE[exercice.natureCible]}}\\text{, }b^2=${exercice.bCarre}`];
-    return [formatEquationFinaleLatex(exercice)];
-  }
-  // famille D
-  if (phase === "dEcran1") return [`\\text{axe transverse : }${exercice.axeTransverse}\\text{, rapport}=${afficherFractionExacte(exercice.pente)}`];
-  if (phase === "dEcran2") return [`a=${exercice.a}\\text{, }b=${exercice.b}`];
-  return [formatEquationFinaleLatex(exercice)];
-}
-

@@ -1,42 +1,21 @@
 import type { ExerciceProprietesOptiquesConiques } from "../../core6e/proprietesOptiquesConiques.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
-import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatProprietesOptiquesConiques";
-import { TOUTES_LES_PHASES } from "../../moteur6e/typesProprietesOptiquesConiques";
+import type { PhaseProprietesOptiquesConiques } from "../../moteur6e/typesProprietesOptiquesConiques";
+import { phasesPourExercice } from "../../moteur6e/typesProprietesOptiquesConiques";
+import { FORMAT_6GEN63 } from "../../ui6e/formatProprietesOptiquesConiques";
+import { construireAdaptateurConiques } from "../adaptateurConiques";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProprietesOptiquesConiques } from "./index";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceProprietesOptiquesConiques>` pour `6gen63`
- * (Propriétés optiques des coniques) — NOUVEAU, même principe que les autres adaptateurs du
- * chapitre « Les coniques », sauf que ce générateur a TOUJOURS 4 écrans fixes (jamais de
- * branchement selon l'exercice) : `TOUTES_LES_PHASES` remplace `phasesPourExercice(exercice)`.
+ * Adaptateur papier de `6gen63` — PROVISOIRE (lots B et C du 6e ch. 10 ; lot E à venir : processus 3,
+ * figure du trajet au corrigé). Petits dénominateurs, parabole ajoutée (catalogue : ajouts EN FIN).
+ * Aucun `calcul`.
  */
-
-function entete(exercice: ExerciceProprietesOptiquesConiques) {
-  return [...consigneGenerale(exercice), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
-}
-
-function construireEnonce(exercice: ExerciceProprietesOptiquesConiques): SectionExercice {
-  return {
-    enteteFragments: entete(exercice),
-    questions: TOUTES_LES_PHASES.map((phase) => ({ consigne: consigneEcran(exercice, phase) })),
-  };
-}
-
-function construireCorrection(exercice: ExerciceProprietesOptiquesConiques): BlocCorrection[] {
-  const lettres = "abcdefghijklmnopqrstuvwxyz";
-  return TOUTES_LES_PHASES.map((phase, i) => ({
-    type: "paragraphe",
-    fragments: [texte(`${lettres[i] ?? String(i + 1)}) `), latex(formatReponseAttenduePhaseLatex(exercice, phase).join(",\\ "))],
-  }));
-}
-
-export const adaptateurEvaluationProprietesOptiquesConiques: AdaptateurFeuilleExercices<ExerciceProprietesOptiquesConiques> = {
+export const adaptateurEvaluationProprietesOptiquesConiques = construireAdaptateurConiques<ExerciceProprietesOptiquesConiques, PhaseProprietesOptiquesConiques>({
   titreDocument: "Propriétés optiques des coniques — Évaluation",
   nomFichierBase: "proprietes-optiques-coniques",
   genererInstance: genererExerciceProprietesOptiquesConiques,
   catalogueVariantes: CATALOGUE_VARIANTES,
-  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
-  construireEnonce,
-  construireCorrection,
-};
+  genererInstanceAvecVariante: construireAvecVarianteId,
+  format: FORMAT_6GEN63,
+  phases: phasesPourExercice,
+});

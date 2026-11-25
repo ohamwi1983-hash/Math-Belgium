@@ -1,223 +1,229 @@
-import type { Frac } from "../core6e/intersectionsConiques.types";
 import type { ExerciceProprietesOptiquesConiques } from "../core6e/proprietesOptiquesConiques.types";
 import type { PhaseProprietesOptiquesConiques } from "../moteur6e/typesProprietesOptiquesConiques";
+import { latexDroite, latexPoint, latexQ, latexSomme, lireEquation, lirePoint, polyDroite, proportionnels, ptNum, q, qMul, qNum, qSub } from "../moteur6e/algebreLieux";
+import { latexConique } from "../moteur6e/algebreConiques";
+import { droiteParDeuxPoints } from "../moteur6e/algebreLieux";
+import { f } from "./fragmentsCombinatoire";
+import type { AideCombi, ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
+import { champDroiteUI, champPointUI } from "./textesLieux";
+import { EXACT, L } from "./textesConiques";
+import { figureLieux } from "./figureLieux";
+import type { P2 } from "./figureLieux";
+import { ajouterConique, fenetreConique, objetsVides } from "./traceConiques";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen63`. Dispatch sur `phase`
- * SEUL (une seule famille, jamais de dispatch par `exercice.famille` contrairement à `6gen61`/
- * `6gen62`) — dispatcher générique piloté par `champs: ChampDef[]`, jamais de JSX par écran
- * (CLAUDE.md).
+ * Textes de `6gen63` — Propriétés optiques des coniques (6e ch. 10, § 6 ; audit, lots B et C). Valeurs
+ * exactes à petits dénominateurs, propriété optique en vrai choix (passe par F′ / semble venir de F′ /
+ * parallèle à l'axe / passe par F), consignes sans majuscules d'insistance, figure : rayon incident après
+ * les foyers, rayon réfléchi (demi-droite) après la réponse.
  */
 
-export type TypeChamp = "texte" | "choix";
+type E = ExerciceProprietesOptiquesConiques;
+type P = PhaseProprietesOptiquesConiques;
 
-export interface OptionChoix {
-  valeur: string;
-  label: string;
-}
+const lq = latexQ;
+const NOM = { ellipse: "l'ellipse", hyperbole: "l'hyperbole", parabole: "la parabole" } as const;
 
-export interface ChampDef {
-  type: TypeChamp;
-  label: string;
-  placeholder?: string;
-  options?: OptionChoix[];
-  minuscule?: boolean;
-}
+const OPTIONS_PROPRIETE = [
+  { valeur: "passeParFp", label: "Le rayon réfléchi passe par l'autre foyer $F'$." },
+  { valeur: "semblaVenirDeFp", label: "Le rayon réfléchi semble venir de l'autre foyer $F'$ : c'est son prolongement qui passe par $F'$." },
+  { valeur: "paralleleAxe", label: "Le rayon réfléchi est parallèle à l'axe focal." },
+  { valeur: "passeParF", label: "Le rayon réfléchi passe par le foyer $F$." },
+];
 
-/** `latex` : TABLEAU de fragments COURTS, jamais une seule chaîne longue — un bloc KaTeX (`\text{}`
- * ou non) qui combine plusieurs quantités côte à côte peut déborder du cadre à 375px sans jamais se
- * scinder tout seul (piège documenté CLAUDE.md, trouvé ici par inspection visuelle 375px sur
- * l'aide 2 de l'écran 3 : `x_{P_1}-x_F=...,x_{P_2}-x_F=...` en un seul fragment débordait) — chaque
- * élément du tableau est rendu par son propre appel `<Katex block>`, donc sur sa propre ligne. */
-export interface AideAvecLatex {
-  texte: string;
-  latex: string[];
-}
-
-const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: [] };
-
-export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
-
-function texte(valeur: string): FragmentConsigne {
-  return { type: "texte", valeur };
-}
-
-function latex(valeur: string): FragmentConsigne {
-  return { type: "latex", valeur };
-}
-
-function champTexte(label: string, placeholder: string, minuscule = false): ChampDef {
-  return { type: "texte", label, placeholder, minuscule };
-}
-
-function champChoix(label: string, options: OptionChoix[]): ChampDef {
-  return { type: "choix", label, options };
-}
-
-// ============================================================================
-// Petits formateurs numériques/LaTeX partagés.
-// ============================================================================
-
-function afficherFrac(f: Frac): string {
-  if (f.d === 1) return `${f.n}`;
-  return f.n < 0 ? `-\\frac{${-f.n}}{${f.d}}` : `\\frac{${f.n}}{${f.d}}`;
-}
-
-/** Version texte PLATE (jamais de LaTeX) — pour un label de bouton `.btn.toggle-active` (écran 3),
- * jamais rendu par KaTeX. */
-function texteFrac(f: Frac): string {
-  return f.d === 1 ? `${f.n}` : `${f.n}/${f.d}`;
-}
-
-function afficherPointEntier(p: { x: number; y: number }): string {
-  return `(${p.x};${p.y})`;
-}
-
-function afficherPointFrac(p: { x: Frac; y: Frac }): string {
-  return `(${afficherFrac(p.x)};${afficherFrac(p.y)})`;
-}
-
-function texteFracPoint(p: { x: Frac; y: Frac }): string {
-  return `(${texteFrac(p.x)} ; ${texteFrac(p.y)})`;
-}
-
-function afficherDroiteLatex(m: Frac, c: Frac): string {
-  const termeM = m.n === 0 ? "" : `${afficherFrac(m)}x`;
-  let termeC = "";
-  if (c.n !== 0) {
-    const abs = c.d === 1 ? `${Math.abs(c.n)}` : `\\frac{${Math.abs(c.n)}}{${c.d}}`;
-    termeC = termeM === "" ? (c.n < 0 ? `-${abs}` : abs) : `${c.n < 0 ? "-" : "+"}${abs}`;
-  }
-  const corps = termeM + termeC;
-  return `y=${corps === "" ? "0" : corps}`;
-}
-
-const LIBELLE_NATURE: Record<"ellipse" | "hyperbole", string> = { ellipse: "Ellipse", hyperbole: "Hyperbole" };
-
-function equationCanoniqueLatex(e: ExerciceProprietesOptiquesConiques): string {
-  const aCarre = e.a * e.a;
-  const signe = e.natureConique === "ellipse" ? "+" : "-";
-  return `\\frac{x^2}{${aCarre}}${signe}\\frac{y^2}{${e.bCarre}}=1`;
-}
-
-// ============================================================================
-// Consigne générale + bloc données — redondants sur CHAQUE écran (convention transversale).
-// ============================================================================
-
-export function consigneGenerale(e: ExerciceProprietesOptiquesConiques): FragmentConsigne[] {
-  return [texte(`Une ${LIBELLE_NATURE[e.natureConique].toLowerCase()} possède 2 foyers. Un rayon lumineux émis depuis le foyer F (abscisse négative), vers les abscisses croissantes, se réfléchit sur la courbe. Retrouve son trajet en utilisant la PROPRIÉTÉ FOCALE des coniques — jamais un calcul de tangente.`)];
-}
-
-export function blocDonnees(e: ExerciceProprietesOptiquesConiques): string[] {
-  return [`\\text{${LIBELLE_NATURE[e.natureConique]} : }${equationCanoniqueLatex(e)}`, `\\tan\\alpha=${afficherFrac(e.droiteIncidente.m)}`];
-}
-
-// ============================================================================
-// Par écran.
-// ============================================================================
-
-export function consigneEcran(_e: ExerciceProprietesOptiquesConiques, phase: PhaseProprietesOptiquesConiques): FragmentConsigne[] {
-  if (phase === "ecran1") return [texte("Calcule la distance focale c, puis donne les coordonnées des 2 foyers F (abscisse négative) et F'.")];
-  if (phase === "ecran2") return [texte("À partir de F CONFIRMÉ, pose l'équation du rayon incident (pente "), latex("\\tan\\alpha"), texte(" donnée). Substitue-la dans l'équation de la conique et donne les 2 points d'intersection trouvés.")];
-  if (phase === "ecran3") return [texte("Parmi les 2 points CONFIRMÉS, lequel correspond au trajet RÉEL du rayon (celui atteint en premier en s'éloignant de F vers les abscisses croissantes) ?")];
-  return [texte("Donne l'équation du rayon réfléchi, en utilisant la propriété focale (jamais un calcul de tangente).")];
-}
-
-/** ACCUMULE les écrans déjà confirmés (correctif transversal — voir CLAUDE.md/`docs/historique-
- * 6e.md`, même bug déjà corrigé sur `formatIdentificationConiques.ts`, 6gen58) : `ecran3`/`ecran4`
- * ne montraient QUE l'info de l'écran immédiatement précédent, jamais celles d'avant. Plus ancien en
- * premier. */
-export function etatActuel(e: ExerciceProprietesOptiquesConiques, phase: PhaseProprietesOptiquesConiques): string[] | null {
-  const lignes: string[] = [];
-  if (phase === "ecran2" || phase === "ecran3" || phase === "ecran4") {
-    lignes.push(`\\text{Foyer confirmé (étape 1) : }F${afficherPointEntier(e.foyerF)}`);
-  }
-  if (phase === "ecran3" || phase === "ecran4") {
-    lignes.push(`\\text{Rayon confirmé (étape 2) : }${afficherDroiteLatex(e.droiteIncidente.m, e.droiteIncidente.c)}`);
-  }
-  // Les 2 points candidats (`P_1`,`P_2`) ne sont rappelés QU'À `ecran3` — celui-là même qui demande
-  // de trancher entre eux (`ecran4` a déjà résolu ce choix, voir "Réflexion confirmée" ci-dessous ;
-  // réafficher les 2 candidats à `ecran4` réintroduirait une ambiguïté déjà levée).
-  if (phase === "ecran3") {
-    lignes.push(`P_1${afficherPointFrac(e.pointsIntersection[0])}\\text{, }P_2${afficherPointFrac(e.pointsIntersection[1])}`);
-  }
-  if (phase === "ecran4") {
-    const pointReflexion = e.pointsIntersection[e.indexReflexion];
-    lignes.push(`\\text{Réflexion confirmée (étape 3) : }${afficherPointFrac(pointReflexion)}`, `\\text{Autre foyer : }F'${afficherPointEntier(e.foyerFPrime)}`);
-  }
-  return lignes.length > 0 ? lignes : null;
-}
-
-export function champsEcran(e: ExerciceProprietesOptiquesConiques, phase: PhaseProprietesOptiquesConiques): ChampDef[] {
-  if (phase === "ecran1") return [champTexte("F (abscisse négative) =", "ex : (-3;0)"), champTexte("F' =", "ex : (3;0)")];
-  if (phase === "ecran2") {
-    return [champTexte("Équation du rayon incident =", "ex : y=1/2*x+3/2"), champTexte("Premier point d'intersection =", "ex : (1;2)"), champTexte("Second point d'intersection =", "ex : (-5;-1)")];
-  }
-  if (phase === "ecran3") {
-    return [
-      champChoix("Point de réflexion réel =", [
-        { valeur: "point0", label: texteFracPoint(e.pointsIntersection[0]) },
-        { valeur: "point1", label: texteFracPoint(e.pointsIntersection[1]) },
-      ]),
-    ];
-  }
-  return [champTexte("Équation du rayon réfléchi =", "ex : y=-x+3")];
-}
-
-export function niveauAideMaxEcran(_e: ExerciceProprietesOptiquesConiques, phase: PhaseProprietesOptiquesConiques): number {
-  return phase === "ecran3" || phase === "ecran4" ? 2 : 0;
-}
-
-export function aideNiveau1(_e: ExerciceProprietesOptiquesConiques, phase: PhaseProprietesOptiquesConiques): AideAvecLatex {
-  if (phase === "ecran3") {
-    return { texte: "Rappel : le point retenu est celui situé DANS LE SENS DE PROPAGATION du rayon depuis F (abscisses croissantes) — pas nécessairement le point le plus proche de F numériquement.", latex: [] };
-  }
-  if (phase === "ecran4") {
-    return { texte: "Rappel — propriété focale : le rayon réfléchi issu d'un foyer est TOUJOURS porté par la droite joignant le point de réflexion à l'AUTRE foyer. Aucun calcul de tangente n'est nécessaire.", latex: [] };
-  }
-  return AUCUNE_AIDE;
-}
-
-export function aideNiveau2(e: ExerciceProprietesOptiquesConiques, phase: PhaseProprietesOptiquesConiques): AideAvecLatex {
-  if (phase === "ecran3") {
-    const [p0, p1] = e.pointsIntersection;
-    const ecart0 = ecartAvecFoyer(p0.x, e.foyerF.x);
-    const ecart1 = ecartAvecFoyer(p1.x, e.foyerF.x);
-    // 2 fragments COURTS distincts (jamais un seul fragment combiné) — un bloc unique
-    // `x_{P_1}-x_F=...,x_{P_2}-x_F=...` déborde à 375px (aucun retour à la ligne automatique dans un
-    // bloc KaTeX), trouvé par inspection visuelle 375px, voir en-tête `AideAvecLatex`.
-    return { texte: "Écart d'abscisse par rapport à F pour chaque point (sélection non faite) :", latex: [`x_{P_1}-x_F=${ecart0}`, `x_{P_2}-x_F=${ecart1}`] };
-  }
-  if (phase === "ecran4") {
-    const pointReflexion = e.pointsIntersection[e.indexReflexion];
-    return { texte: "Les 2 points, équation non assemblée :", latex: [`${afficherPointFrac(pointReflexion)}\\text{, }F'${afficherPointEntier(e.foyerFPrime)}`] };
-  }
-  return AUCUNE_AIDE;
-}
-
-function ecartAvecFoyer(x: Frac, xFoyer: number): string {
-  // xFoyer est toujours entier (-c) — soustraction en fractions pour un affichage exact.
-  const diff: Frac = x.d === 1 ? { n: x.n - xFoyer, d: 1 } : { n: x.n - xFoyer * x.d, d: x.d };
-  return afficherFrac(diff);
-}
-
-// ============================================================================
-// Récapitulatif final.
-// ============================================================================
-
-export const LIBELLE_PHASE: Record<PhaseProprietesOptiquesConiques, string> = {
-  ecran1: "Étape 1 (les 2 foyers)",
-  ecran2: "Étape 2 (rayon incident et intersections)",
-  ecran3: "Étape 3 (point de réflexion réel)",
-  ecran4: "Étape 4 (rayon réfléchi)",
+/** Réponse courte (rappel « Ce qu'on sait déjà » : une formule KaTeX ne passe pas à la ligne). */
+const REPONSE_PROPRIETE: Record<string, string> = {
+  passeParFp: "\\text{passe par }F'",
+  semblaVenirDeFp: "\\text{semble venir de }F'",
+  paralleleAxe: "\\text{parallèle à l'axe focal}",
+  passeParF: "\\text{passe par }F",
 };
 
-export function formatReponseAttenduePhaseLatex(e: ExerciceProprietesOptiquesConiques, phase: PhaseProprietesOptiquesConiques): string[] {
-  if (phase === "ecran1") return [`F${afficherPointEntier(e.foyerF)}\\text{, }F'${afficherPointEntier(e.foyerFPrime)}`];
-  if (phase === "ecran2") {
-    return [afficherDroiteLatex(e.droiteIncidente.m, e.droiteIncidente.c), `${afficherPointFrac(e.pointsIntersection[0])}\\text{, }${afficherPointFrac(e.pointsIntersection[1])}`];
-  }
-  if (phase === "ecran3") return [afficherPointFrac(e.pointsIntersection[e.indexReflexion])];
-  return [afficherDroiteLatex(e.droiteReflechie.m, e.droiteReflechie.c)];
+const droiteIncidente = (e: E) => `y=${latexSomme([
+  [e.m, "x"],
+  [qSub(e.R.y, qMul(e.m, e.R.x)), ""],
+])}`;
+const sensTexte = (e: E) => (e.sens > 0 ? "vers la droite (abscisses croissantes)" : "vers la gauche (abscisses décroissantes)");
+
+function reflechiLatex(e: E): string {
+  const d = e.reflechi;
+  if (d.a === 0n) return `y=${lq(q(-d.c, d.b))}`;
+  if (d.b === 0n) return `x=${lq(q(-d.c, d.a))}`;
+  const m = q(-d.a, d.b);
+  const k = q(-d.c, d.b);
+  return `y=${latexSomme([
+    [m, "x"],
+    [k, ""],
+  ])}`;
 }
 
+export const FORMAT_6GEN63: FormatCombinatoire<E, P> = {
+  consigneGenerale(e) {
+    const debut = `Un miroir a la forme de ${NOM[e.famille]} $\\Gamma$ ci-dessous.`;
+    const rayon =
+      e.mode === "parallele"
+        ? ` Un rayon lumineux arrive parallèlement à l'axe focal, le long de la droite $y=${lq(e.R.y)}$, en venant de la droite.`
+        : e.famille === "parabole"
+          ? ` Un rayon lumineux part du foyer $F$ ${sensTexte(e)}, en suivant une droite de pente $${lq(e.m)}$.`
+          : ` Un rayon lumineux part du foyer $F$ d'abscisse négative, ${sensTexte(e)}, en suivant une droite de pente $${lq(e.m)}$.`;
+    return f(`${debut}${rayon} Il se réfléchit sur $\\Gamma$ au point $R$. Détermine le trajet du rayon après la réflexion.` + EXACT);
+  },
+  donnees: (e) => [f(`$\\Gamma\\,:\\ ${latexConique(e.conique)}$`)],
+  consigneEcran(e, p) {
+    switch (p) {
+      case "foyers":
+        return e.Fp ? f("Donne les coordonnées des foyers : $F$ (abscisse négative) et $F'$.") : f("Donne les coordonnées du foyer $F$ de la parabole.");
+      case "impact":
+        return f("Calcule les coordonnées du point $R$ où le rayon atteint le miroir.");
+      case "propriete":
+        return f("Que fait le rayon après la réflexion en $R$ ?");
+      case "reflechi":
+        return f("Écris une équation de la droite qui porte le rayon réfléchi.");
+    }
+  },
+  champs(e, p): ChampCombi[] {
+    switch (p) {
+      case "foyers":
+        return e.Fp ? [champPointUI("$F$"), champPointUI("$F'$")] : [champPointUI("$F$")];
+      case "impact":
+        return [champPointUI("$R$")];
+      case "propriete":
+        return [{ type: "choix", label: "", options: OPTIONS_PROPRIETE }];
+      case "reflechi":
+        return [champDroiteUI("Droite du rayon réfléchi")];
+    }
+  },
+  aides: aides63,
+  reponseAttendue: reponse63,
+  explication: explication63,
+  libellePhase: (_e, p) => LIBELLES[p],
+  messageCible: cible63,
+};
+
+const LIBELLES: Record<P, string> = {
+  foyers: "Foyers",
+  impact: "Point d'impact R",
+  propriete: "Propriété optique",
+  reflechi: "Rayon réfléchi",
+};
+
+function aides63(e: E, p: P): AideCombi[] {
+  const c = e.conique;
+  switch (p) {
+    case "foyers":
+      if (c.type === "parabole") return [{ texte: "Pour $y^2=2px$, le foyer est $F\\left(\\frac{p}{2}\\,;0\\right)$." }, { texte: "Ici :", latex: `2p=${lq(qMul(q(2), c.p))}` }];
+      return [{ texte: "Les foyers sont sur l'axe focal, à la distance $c$ du centre :", latex: c.type === "ellipse" ? "c^2=a^2-b^2" : "c^2=a^2+b^2" }, { texte: "Ici :", latex: c.type === "ellipse" || c.type === "hyperbole" ? `a^2=${lq(c.a2)},\\quad b^2=${lq(c.b2)}` : "" }];
+    case "impact":
+      if (e.mode === "parallele") return [{ texte: "Le point d'impact est sur la droite du rayon et sur $\\Gamma$." }, { texte: "Ici :", latex: `y=${lq(e.R.y)}` }];
+      return [{ texte: "Écris la droite du rayon (elle passe par $F$, pente donnée), remplace $y$ dans l'équation de $\\Gamma$ et résous : garde le point atteint dans le sens de propagation." }, { texte: "La droite du rayon :", latex: droiteIncidente(e) }];
+    case "propriete":
+      return [{ texte: "Propriétés optiques du cours (§ 6) : ellipse, un rayon issu d'un foyer ; hyperbole, un rayon issu d'un foyer ; parabole, un rayon issu du foyer ou parallèle à l'axe." }, { texte: e.famille === "parabole" ? (e.mode === "parallele" ? "Ici, le rayon arrive parallèlement à l'axe d'une parabole." : "Ici, le rayon part du foyer d'une parabole.") : `Ici, le rayon part d'un foyer de ${NOM[e.famille]}.` }];
+    case "reflechi":
+      return [{ texte: "Le rayon réfléchi est porté par la droite qui passe par $R$ et par le point de la propriété ($F'$ ou $F$), ou bien il est parallèle à l'axe." }, { texte: "Ici :", latex: `R${latexPoint(e.R)}${e.Fp ? `,\\quad F'${latexPoint(e.Fp)}` : `,\\quad F${latexPoint(e.F)}`}` }];
+  }
+}
+
+function reponse63(e: E, p: P): string[] {
+  switch (p) {
+    case "foyers":
+      return e.Fp ? [`F${latexPoint(e.F)}`, `F'${latexPoint(e.Fp)}`] : [`F${latexPoint(e.F)}`];
+    case "impact":
+      return [`R${latexPoint(e.R)}`];
+    case "propriete":
+      return [REPONSE_PROPRIETE[e.propriete]];
+    case "reflechi":
+      return [reflechiLatex(e)];
+  }
+}
+
+function explication63(e: E, p: P): FragmentConsigne[][] {
+  const c = e.conique;
+  switch (p) {
+    case "foyers":
+      if (c.type === "parabole") return L(`$2p=${lq(qMul(q(2), c.p))}$, donc $p=${lq(c.p)}$ et $F${latexPoint(e.F)}$.`, "Piège : le foyer est à la distance $\\frac{p}{2}$ du sommet.");
+      return L(`$c^2=${c.type === "ellipse" ? "a^2-b^2" : "a^2+b^2"}=${Math.round(qNum(e.Fp!.x) ** 2)}$, donc $F${latexPoint(e.F)}$ et $F'${latexPoint(e.Fp!)}$.`);
+    case "impact":
+      if (e.mode === "parallele") return L(`On remplace $y=${lq(e.R.y)}$ dans l'équation : $R${latexPoint(e.R)}$.`);
+      return L(`La droite du rayon, $${droiteIncidente(e)}$, coupe $\\Gamma$ en $R${latexPoint(e.R)}$ et en $${latexPoint(e.autre!)}$.`, `Le rayon part de $F$ ${sensTexte(e)} : il atteint d'abord $R$.`, "Piège : l'autre point est sur la même droite, mais pas sur le trajet du rayon.");
+    case "propriete":
+      if (e.propriete === "passeParFp") return L("Ellipse : tout rayon issu d'un foyer se réfléchit en passant par l'autre foyer.");
+      if (e.propriete === "semblaVenirDeFp") return L("Hyperbole : un rayon issu d'un foyer se réfléchit comme s'il venait de l'autre foyer $F'$ ; il s'éloigne de $F'$, et c'est son prolongement qui passe par $F'$.");
+      if (e.propriete === "paralleleAxe") return L("Parabole : un rayon issu du foyer se réfléchit parallèlement à l'axe focal (principe du phare).");
+      return L("Parabole : un rayon parallèle à l'axe se réfléchit en passant par le foyer (principe de l'antenne parabolique).");
+    case "reflechi":
+      return L(
+        `Le rayon réfléchi est porté par $${reflechiLatex(e)}$, soit $${latexDroite(e.reflechi)}$.`,
+        e.propriete === "semblaVenirDeFp" ? "C'est une demi-droite d'origine $R$, du côté opposé à $F'$." : e.propriete === "passeParFp" ? "C'est la demi-droite d'origine $R$ qui passe par $F'$." : "C'est une demi-droite d'origine $R$.",
+      );
+  }
+}
+
+function cible63(e: E, p: P, v: string[]): FragmentConsigne[] | null {
+  const pres = (a: number, b: number) => Math.abs(a - b) < 1e-9 * Math.max(1, Math.abs(b));
+  if (p === "impact" && e.autre) {
+    try {
+      const R = lirePoint(v[0]);
+      if (pres(R.x.valeur, qNum(e.autre.x)) && pres(R.y.valeur, qNum(e.autre.y))) return f(`Ce point est bien sur la droite du rayon, mais le rayon part de $F$ ${sensTexte(e)} : il ne l'atteint pas.`);
+    } catch {
+      return null;
+    }
+  }
+  if (p === "foyers" && e.conique.type === "parabole") {
+    try {
+      const F = lirePoint(v[0]);
+      if (pres(F.x.valeur, 2 * qNum(e.F.x))) return f("Le foyer est à la distance $\\frac{p}{2}$ du sommet, pas $p$.");
+    } catch {
+      return null;
+    }
+  }
+  if (p === "reflechi") {
+    try {
+      const poly = lireEquation(v[0], ["x", "y"]).poly;
+      const tangenteLike = e.Fp ? droiteParDeuxPoints(e.R, e.F) : null;
+      if (tangenteLike && proportionnels(poly, polyDroite(tangenteLike))) return f("C'est la droite du rayon incident : le rayon réfléchi passe par l'autre foyer (ou son prolongement).");
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Figure
+// ---------------------------------------------------------------------------
+
+export function figure6gen63(e: E, closes: readonly P[]): string {
+  const o = objetsVides();
+  const c = e.conique;
+  const F = ptNum(e.F);
+  const R = ptNum(e.R);
+  const pts: P2[] = [F, R, ...(e.Fp ? [ptNum(e.Fp)] : [])];
+  const fen = fenetreConique(c, pts);
+  const ext = Math.max(fen.xmax - fen.xmin, fen.ymax - fen.ymin);
+  ajouterConique(o, c, ext, { couleur: "bleu" });
+  const loin = (o2: P2, u: P2) => {
+    const n = Math.hypot(u.x, u.y) || 1;
+    return { x: o2.x + (u.x / n) * ext * 3, y: o2.y + (u.y / n) * ext * 3 };
+  };
+  if (closes.includes("foyers")) {
+    o.points.push({ p: F, nom: "F", couleur: "accent" });
+    if (e.Fp) o.points.push({ p: ptNum(e.Fp), nom: "F′", couleur: "accent" });
+    // Rayon incident : de F vers R (ou depuis la droite pour un rayon parallèle à l'axe).
+    if (e.mode === "parallele") o.courbes.push({ pts: [loin(R, { x: 1, y: 0 }), R], couleur: "accent", epais: true, coupe: true });
+    else if (closes.includes("impact")) o.segments.push({ a: F, b: R, couleur: "accent", epais: true });
+    else o.courbes.push({ pts: [F, loin(F, { x: e.sens, y: e.sens * qNum(e.m) })], couleur: "accent", epais: true, coupe: true });
+  }
+  if (closes.includes("impact")) o.points.push({ p: R, nom: "R" });
+  else if (closes.includes("foyers")) o.points.push({ p: R, nom: "?", couleur: "vert" });
+  if (closes.includes("reflechi")) {
+    if (e.propriete === "passeParFp") o.courbes.push({ pts: [R, loin(R, { x: qNum(e.Fp!.x) - R.x, y: qNum(e.Fp!.y) - R.y })], couleur: "vert", epais: true, coupe: true });
+    else if (e.propriete === "semblaVenirDeFp") {
+      const Fp = ptNum(e.Fp!);
+      o.courbes.push({ pts: [R, loin(R, { x: R.x - Fp.x, y: R.y - Fp.y })], couleur: "vert", epais: true, coupe: true });
+      o.segments.push({ a: R, b: Fp, couleur: "gris", pointilles: true });
+    } else if (e.propriete === "paralleleAxe") o.courbes.push({ pts: [R, loin(R, { x: 1, y: 0 })], couleur: "vert", epais: true, coupe: true });
+    else o.courbes.push({ pts: [R, loin(R, { x: F.x - R.x, y: F.y - R.y })], couleur: "vert", epais: true, coupe: true });
+  }
+  o.fenetre = fen;
+  return figureLieux(o);
+}

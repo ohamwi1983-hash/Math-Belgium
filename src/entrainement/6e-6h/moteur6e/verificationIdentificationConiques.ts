@@ -1,194 +1,128 @@
-import type { ElementsConiqueCentree, ExerciceConiqueA1, ExerciceConiqueA2, ExerciceConiqueB, ExerciceConiqueC, ExerciceIdentificationConiques, NatureConique } from "../core6e/identificationConiques.types";
-import { diagnostiquerEnsembleValeurs, diagnostiquerValeur } from "./equivalenceExponentielle";
-import { diagnostiquerEquivalenceQuadratiqueXY, uneStructureCarreParfaitExplicite, uneStructureDeuxCarresValide } from "./expressionQuadratiqueXY";
-import type { StatutVerification } from "../moteur/statutVerification";
+import type { ExerciceIdC, ExerciceIdentificationConiques } from "../core6e/identificationConiques.types";
+import type { Attente } from "./attentesCombinatoire";
+import { diagnostiquerAttentes } from "./attentesCombinatoire";
+import type { DefinitionSession } from "./sessionCombinatoire";
+import { phasesPourExercice } from "./typesIdentificationConiques";
 import type { PhaseIdentificationConiques } from "./typesIdentificationConiques";
+import { polyAdd, polyConst, polyDroite, polyMul, polyScal, polySub, polyVar, ptNum, q, qNum } from "./algebreLieux";
+import type { Poly } from "./algebreLieux";
+import { asymptotes, c2Conique, foyersConique } from "./algebreConiques";
+import type { Conique } from "./algebreConiques";
+import { champEquation, champEquations, champNombre, champPoint, champPoints, MESSAGES_LIEUX } from "./saisieLieux";
+import { champEquationForme, MESSAGES_CONIQUES } from "./saisieConiques";
+import { polyGeneral } from "../ui6e/textesConiques";
 
 /**
- * Couche B (6e) — vérification propre à `6gen58` (dispatch par famille/sous-type/écran). N'importe
- * JAMAIS rien de `src/generateurs6e/` (règle non négociable, CLAUDE.md) — voir
- * `generateurs6e/identificationConiques/session.integration.test.ts` pour le seul fichier autorisé
- * Couche A + Couche B ensemble.
- *
- * `idDeNature` DUPLIQUE délibérément `natureVersId` de
- * `generateurs6e/identificationConiques/classification.ts` (Couche A, jamais importable ici) — même
- * principe que `pgcd` dupliqué dans chaque `ui6e/formatXxx.ts` du projet : une petite fonction pure,
- * sans état, dont la duplication coûte moins cher que la violation de la séparation des couches.
- *
- * Toutes les valeurs attendues NUMÉRIQUES sont déjà PRÉ-CALCULÉES par la Couche A sur l'exercice
- * (voir en-tête `core6e/identificationConiques.types.ts`) — comparées via `diagnostiquerValeur`
- * (`moteur6e/equivalenceExponentielle.ts`, tolérance 0.01, réutilisée telle quelle — déjà éprouvée
- * par plusieurs chapitres 6e). Les champs de CHOIX (catégorie probable, statut structuré, même/autre
- * variable, orientation, signes) comparent directement l'identifiant choisi
- * (`correct`/`not_equivalent` uniquement, jamais `parse_error` — pas de saisie libre possible sur
- * ces champs). Les champs de TEXTE LIBRE algébrique (famille B écran 1, famille C écrans 1-3)
- * passent par `expressionQuadratiqueXY.ts` (échantillonnage numérique + garde structurelle).
+ * Attentes des écrans de `6gen58` (audit du 6e ch. 10, lots B et C) : équations comparées par
+ * PROPORTIONNALITÉ exacte (le « − » typographique est lu, audit G2) ; complétion acceptée sous toute
+ * forme « deux carrés », coefficients fractionnaires et forme réduite comprises (G10, G11) ; valeurs
+ * exactes (racines simplifiées ou non) ; foyers, droites et asymptotes comme des ENSEMBLES.
  */
 
-function combinerStatuts(...statuts: StatutVerification[]): StatutVerification {
-  if (statuts.some((s) => s === "parse_error")) return "parse_error";
-  if (statuts.some((s) => s === "not_equivalent")) return "not_equivalent";
-  return "correct";
+type E = ExerciceIdentificationConiques;
+type P = PhaseIdentificationConiques;
+
+export function polyEnonce(e: Exclude<E, ExerciceIdC>): Poly {
+  if (e.famille === "A1") return polyGeneral(e.A, e.B, 0, 0, e.F);
+  return polyGeneral(e.A, e.B, e.D, e.E, e.famille === "B" ? e.F : 0);
 }
 
-function diagnostiquerValeurs(valeurs: string[], attendues: number[]): StatutVerification {
-  return combinerStatuts(...attendues.map((v, i) => diagnostiquerValeur(valeurs[i] ?? "", v)));
+/** C : (v_isolée − k)² − m²(a₂v² + a₁v + a₀) = 0, multiplié par mDen². */
+export function polyCarreC(e: ExerciceIdC): Poly {
+  const vi = polySub(polyVar(e.variableIsolee), polyConst(q(e.k)));
+  const vr = polyVar(e.variableRacine);
+  const sous = polyAdd(polyAdd(polyScal(polyMul(vr, vr), q(e.a2)), polyScal(vr, q(e.a1))), polyConst(q(e.a0)));
+  return polySub(polyScal(polyMul(vi, vi), q(e.mDen * e.mDen)), polyScal(sous, q(e.mNum * e.mNum)));
 }
 
-function diagnostiquerChoix(valeur: string | undefined, attendu: string): StatutVerification {
-  return valeur === attendu ? "correct" : "not_equivalent";
+/** Code de la bonne réponse de l'écran « nature » de la famille C. */
+export function codeNatureC(e: ExerciceIdC): string {
+  return `${e.nature}${e.signeRacine > 0 ? "Plus" : "Moins"}`;
 }
 
-/** DUPLIQUÉE depuis `classification.ts` (`natureVersId`) — voir en-tête de fichier. */
-function idDeNature(nature: NatureConique): string {
-  switch (nature.type) {
-    case "ellipse":
-      return nature.axe === "horizontal" ? "ellipseHorizontal" : "ellipseVertical";
-    case "hyperbole":
-      return nature.axe === "horizontal" ? "hyperboleHorizontal" : "hyperboleVertical";
-    case "cercle":
-      return "cercle";
-    case "parabole":
-      return nature.orientation === "droite" ? "paraboleDroite" : nature.orientation === "gauche" ? "paraboleGauche" : nature.orientation === "haut" ? "paraboleHaut" : "paraboleBas";
-    case "vide":
-      return "vide";
-    case "point":
-      return "point";
-    case "droitesParalleles":
-      return "droitesParalleles";
-    case "droitesSecantes":
-      return "droitesSecantes";
+const nb = (x: number): Attente => ({ verif: champNombre(x) });
+const racine = (r: { n: bigint; d: bigint }) => Math.sqrt(qNum(r));
+
+function attentesElements(c: Conique, avecCentre: boolean): Attente[] {
+  if (c.type !== "ellipse" && c.type !== "hyperbole") return [];
+  const r: Attente[] = avecCentre ? [{ verif: champPoint(ptNum(c.centre)) }] : [];
+  return [...r, nb(racine(c.a2)), nb(racine(c.b2)), nb(racine(c2Conique(c)))];
+}
+
+function attentesFoyers(c: Conique): Attente[] {
+  const foyers: Attente = { verif: champPoints(foyersConique(c).map((F) => ({ x: F.x, y: F.y }))) };
+  if (c.type === "hyperbole") return [foyers, { verif: champEquations(asymptotes(c).map(polyDroite), { droite: true }) }];
+  return [foyers];
+}
+
+/** Équation sans racine : un « √ » saisi reçoit le message propre à la famille C. */
+function champSansRacine(attendu: Poly) {
+  const base = champEquation(attendu);
+  return { ...base, refus: (v: string) => {
+    const m = base.refus(v);
+    return m === MESSAGES_LIEUX.racine ? MESSAGES_CONIQUES.formeSansRacine : m;
+  } };
+}
+
+export function attentesIdentificationConiques(e: E, p: P): Attente[] {
+  switch (p) {
+    case "a1Nature":
+    case "bNature":
+      return [{ choix: e.nature }];
+    case "a2Nature":
+      return [{ choix: e.famille === "A2" && e.orientation ? e.orientation : "droitesParalleles" }];
+    case "cNature":
+      return [{ choix: codeNatureC(e as ExerciceIdC) }];
+    case "a1Rayon":
+      return e.conique?.type === "cercle" ? [nb(racine(e.conique.r2))] : [];
+    case "bCentreRayon":
+      return e.conique?.type === "cercle" ? [{ verif: champPoint(ptNum(e.conique.centre)) }, nb(racine(e.conique.r2))] : [];
+    case "a1Point":
+    case "bPoint":
+      return [{ verif: champPoint(ptNum(e.point!)) }];
+    case "a1Droites":
+    case "bDroites":
+    case "a2Droites":
+      return [{ verif: champEquations(e.droites.map(polyDroite), { droite: true }) }];
+    case "a1DemiAxes":
+      return attentesElements(e.conique!, false);
+    case "bCentreDemiAxes":
+      return attentesElements(e.conique!, true);
+    case "a1Foyers":
+    case "bFoyers":
+      return attentesFoyers(e.conique!);
+    case "a2P":
+      return e.conique?.type === "parabole" ? [nb(qNum(e.conique.p))] : [];
+    case "a2FoyerDirectrice": {
+      const c = e.conique!;
+      if (c.type !== "parabole") return [];
+      const F = foyersConique(c)[0];
+      const dir = c.axe === "x" ? polyAdd(polyVar("x"), polyConst(q(Math.round((c.sens * qNum(c.p) / 2) * 2), 2))) : polyAdd(polyVar("y"), polyConst(q(Math.round((c.sens * qNum(c.p) / 2) * 2), 2)));
+      return [{ verif: champPoint({ x: F.x, y: F.y }) }, { verif: champEquation(dir, { droite: true }) }];
+    }
+    case "bForme": {
+      const b = e as Extract<E, { famille: "B" }>;
+      return [{ verif: champEquationForme(polyEnonce(b), "deuxCarres", `${b.A}*(x-(${qNum(b.centre.x)}))^2+(${b.B})*(y-(${qNum(b.centre.y)}))^2=${b.M}`) }];
+    }
+    case "cCarre":
+      return [{ verif: champSansRacine(polyCarreC(e as ExerciceIdC)) }];
+    case "cForme": {
+      const c = e as ExerciceIdC;
+      const ci = (c.nature === "ellipse" ? 1 : -1) * c.mDen * c.mDen;
+      return [{ verif: champEquationForme(polyCarreC(c), "deuxCarres", `${c.mNum * c.mNum}*(${c.variableRacine}-(${c.h}))^2+(${ci})*(${c.variableIsolee}-(${c.k}))^2=${c.mNum * c.mNum * c.r * c.r}`) }];
+    }
+    case "cElements": {
+      const c = e.conique!;
+      if (c.type !== "ellipse" && c.type !== "hyperbole") return [];
+      return [{ verif: champPoint(ptNum(c.centre)) }, nb(racine(c.a2)), nb(racine(c.b2))];
+    }
   }
 }
 
-/** Écran "éléments caractéristiques", COMMUN aux familles A1/B/C (mêmes champs numériques selon
- * `nature.type` — voir `core6e/identificationConiques.types.ts`, `ElementsConiqueCentree`). Jamais
- * appelé sur une nature dégénérée (garanti par `phaseApres`, `typesIdentificationConiques.ts`, qui
- * ne fait jamais atteindre cet écran dans ce cas). */
-function diagnostiquerElements(nature: NatureConique, elements: ElementsConiqueCentree, valeurs: string[]): StatutVerification {
-  if (nature.type === "cercle") return diagnostiquerValeurs(valeurs, [elements.rayon as number]);
-  if (nature.type === "ellipse") return diagnostiquerValeurs(valeurs, [elements.a as number, elements.b as number, elements.c as number]);
-  if (nature.type === "hyperbole") return diagnostiquerValeurs(valeurs, [elements.a as number, elements.b as number, elements.c as number, elements.pente as number]);
-  /* c8 ignore next */
-  throw new Error("diagnostiquerElements : nature dégénérée n'a pas d'éléments caractéristiques");
-}
+const CHOIX: P[] = ["a1Nature", "a2Nature", "bNature", "cNature"];
 
-// ============================================================================
-// Famille A, sous-type 1 — centree2Carres.
-// ============================================================================
-
-function diagnostiquerA1(exercice: ExerciceConiqueA1, phase: PhaseIdentificationConiques, valeurs: string[]): StatutVerification {
-  if (phase === "a1Ecran1") return diagnostiquerChoix(valeurs[0], exercice.categorieProbable);
-  if (phase === "a1Ecran2") return diagnostiquerChoix(valeurs[0], idDeNature(exercice.nature));
-  return diagnostiquerElements(exercice.nature, exercice.elements, valeurs);
-}
-
-// ============================================================================
-// Famille A, sous-type 2 — unCarreUnLineaire.
-// ============================================================================
-
-function diagnostiquerA2(exercice: ExerciceConiqueA2, phase: PhaseIdentificationConiques, valeurs: string[]): StatutVerification {
-  if (phase === "a2Ecran1") return diagnostiquerChoix(valeurs[0], exercice.memeVariable ? "meme" : "autre");
-  if (phase === "a2Ecran2") {
-    if (exercice.memeVariable) return diagnostiquerEnsembleValeurs(valeurs, [0, exercice.autreRacine as number]);
-    return combinerStatuts(diagnostiquerValeur(valeurs[0] ?? "", exercice.quatrePSigne as number), diagnostiquerChoix(valeurs[1], idDeNature(exercice.nature)));
-  }
-  const foyer = exercice.foyer as { x: number; y: number };
-  return diagnostiquerValeurs(valeurs, [foyer.x, foyer.y, exercice.directrice as number]);
-}
-
-// ============================================================================
-// Famille B.
-// ============================================================================
-
-function cibleDeveloppeeB(exercice: ExerciceConiqueB): (x: number, y: number) => number {
-  return (x, y) => exercice.A * x * x + exercice.B * y * y + exercice.D * x + exercice.E * y + exercice.F;
-}
-
-/** Écran 1 famille B — garde structurelle EN PLUS de l'équivalence algébrique (voir en-tête
- * `expressionQuadratiqueXY.ts` : sans elle, une recopie de l'équation de départ serait acceptée à
- * tort, l'équation développée étant par construction algébriquement identique à sa propre forme
- * complétée). */
-export function diagnostiquerFormeIntermediaireB(exercice: ExerciceConiqueB, texte: string): StatutVerification {
-  const equivalence = diagnostiquerEquivalenceQuadratiqueXY(texte, exercice.centre.x, exercice.centre.y, cibleDeveloppeeB(exercice));
-  if (equivalence !== "correct") return equivalence;
-  return uneStructureDeuxCarresValide(texte) ? "correct" : "not_equivalent";
-}
-
-function signeMot(v: number): "positif" | "negatif" | "nul" {
-  if (v > 0) return "positif";
-  if (v < 0) return "negatif";
-  return "nul";
-}
-
-function diagnostiquerB(exercice: ExerciceConiqueB, phase: PhaseIdentificationConiques, valeurs: string[]): StatutVerification {
-  if (phase === "bEcran1") return diagnostiquerFormeIntermediaireB(exercice, valeurs[0] ?? "");
-  if (phase === "bEcran2") {
-    return combinerStatuts(diagnostiquerChoix(valeurs[0], signeMot(exercice.A)), diagnostiquerChoix(valeurs[1], signeMot(exercice.B)), diagnostiquerChoix(valeurs[2], signeMot(exercice.M)));
-  }
-  if (phase === "bEcran3") return diagnostiquerChoix(valeurs[0], idDeNature(exercice.nature));
-  return diagnostiquerElements(exercice.nature, exercice.elements, valeurs);
-}
-
-// ============================================================================
-// Famille C.
-// ============================================================================
-
-/** `(v_isolee-k)² - m²·(a2·v_racine²+a1·v_racine+a0)` — référence de vérité PARTAGÉE par les écrans
- * 1 ET 2 (les 2 formes intermédiaires sont, par construction, algébriquement identiques — voir
- * `generateurs6e/identificationConiques/familleC.ts`). */
-function cibleCarreC(exercice: ExerciceConiqueC): (x: number, y: number) => number {
-  return (x, y) => {
-    const v = exercice.variableRacine === "x" ? x : y;
-    const iso = exercice.variableIsolee === "x" ? x : y;
-    return (iso - exercice.k) * (iso - exercice.k) - exercice.m * exercice.m * (exercice.a2 * v * v + exercice.a1 * v + exercice.a0);
-  };
-}
-
-export function diagnostiquerEquationAuCarreC(exercice: ExerciceConiqueC, texte: string): StatutVerification {
-  return diagnostiquerEquivalenceQuadratiqueXY(texte, exercice.centre.x, exercice.centre.y, cibleCarreC(exercice));
-}
-
-/** Écran 2 famille C — garde structurelle PLUS LÉGÈRE que la famille B : exige seulement qu'un
- * carré parfait explicite en `variableRacine` (LA variable sous la racine dans l'énoncé, pas celle
- * isolée à gauche — piège central de l'écran, mission) apparaisse quelque part ; l'autre membre est
- * déjà un carré parfait TRIVIAL (`(v_isolee-k)²`, jamais "à compléter" une 2ᵉ fois). */
-export function diagnostiquerFormeCompleteeC(exercice: ExerciceConiqueC, texte: string): StatutVerification {
-  const equivalence = diagnostiquerEquivalenceQuadratiqueXY(texte, exercice.centre.x, exercice.centre.y, cibleCarreC(exercice));
-  if (equivalence !== "correct") return equivalence;
-  return uneStructureCarreParfaitExplicite(texte, exercice.variableRacine) ? "correct" : "not_equivalent";
-}
-
-/** `coeffX(x-h')²+coeffY(y-k')²-M` — jamais `coeffX·x²+coeffY·y²-M` (bare) : `centre` de la famille C
- * n'est généralement PAS l'origine (contrairement à la famille A sous-type 1), oubli source d'un
- * vrai bug trouvé et corrigé pendant le développement (`docs/historique-6e.md`). */
-function cibleStandardC(exercice: ExerciceConiqueC): (x: number, y: number) => number {
-  return (x, y) => exercice.coeffX * (x - exercice.centre.x) ** 2 + exercice.coeffY * (y - exercice.centre.y) ** 2 - exercice.M;
-}
-
-function diagnostiquerC(exercice: ExerciceConiqueC, phase: PhaseIdentificationConiques, valeurs: string[]): StatutVerification {
-  if (phase === "cEcran1") return diagnostiquerEquationAuCarreC(exercice, valeurs[0] ?? "");
-  if (phase === "cEcran2") return diagnostiquerFormeCompleteeC(exercice, valeurs[0] ?? "");
-  if (phase === "cEcran3") {
-    const statutChoix = diagnostiquerChoix(valeurs[0], idDeNature(exercice.nature));
-    const statutForme = diagnostiquerEquivalenceQuadratiqueXY(valeurs[1] ?? "", exercice.centre.x, exercice.centre.y, cibleStandardC(exercice));
-    return combinerStatuts(statutChoix, statutForme);
-  }
-  return diagnostiquerElements(exercice.nature, exercice.elements, valeurs);
-}
-
-// ============================================================================
-// Dispatcher générique.
-// ============================================================================
-
-export function diagnostiquerEcran(exercice: ExerciceIdentificationConiques, phase: PhaseIdentificationConiques, valeurs: string[]): StatutVerification {
-  if (exercice.famille === "A") {
-    return exercice.sousType === "centree2Carres" ? diagnostiquerA1(exercice, phase, valeurs) : diagnostiquerA2(exercice, phase, valeurs);
-  }
-  if (exercice.famille === "B") return diagnostiquerB(exercice, phase, valeurs);
-  return diagnostiquerC(exercice, phase, valeurs);
-}
-
-export function verifierEcran(exercice: ExerciceIdentificationConiques, phase: PhaseIdentificationConiques, valeurs: string[]): boolean {
-  return diagnostiquerEcran(exercice, phase, valeurs) === "correct";
-}
+export const DEFINITION_6GEN58: DefinitionSession<E, P> = {
+  phases: phasesPourExercice,
+  diagnostiquer: (e, p, v) => diagnostiquerAttentes(attentesIdentificationConiques(e, p), v),
+  estChoix: (_e, p) => CHOIX.includes(p),
+};

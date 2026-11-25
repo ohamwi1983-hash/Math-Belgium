@@ -778,6 +778,12 @@ paths:
   table des matières, et le tableau de synthèse ; sitewide `regress_all.mjs` sur les 23 chapitres :
   `0` erreur console, `0` `NaN`/`undefined`, `0` signe `$` isolé restant, partout. `npm run
   build`/`npm run lint` propres (aucun avertissement nouveau au-delà des préexistants).
+  **Lots B et C de l'audit (6gen58–6gen63, 25/11)** : générateurs refaits sur le socle du 6e ch. 7 / ch. 9 (algèbre
+  exacte, convention y² = 2px partout — décision 1 —, figures avec la réponse tracée après l'écran, verdicts équilibrés,
+  `?code=`, corrigé consultable après chaque réponse) ; cartes de 6gen58, 6gen59 (titre « Équation d'une conique depuis
+  ses caractéristiques », `whereLabel`), 6gen62 et 6gen63 réécrites en une ligne pour dire ce que fait le générateur ;
+  libellés pilotes remplis (processus 2, 2, 3, 2, 2, 3). Le reste du cours n'est pas touché (agent AFD). Détail :
+  `.claude/rules/feuilles-evaluations.md`, « Textes : écran vs papier », paragraphe « 6e ch. 10 (lots B et C) ».
 
 - **5e (4h), Chapitre 2 — Trigonométrie** (`trigonometrie`) : remplacement intégral du contenu à
   partir d'un nouvel artifact fourni par l'utilisateur (pas un patch — la demande était "remplace

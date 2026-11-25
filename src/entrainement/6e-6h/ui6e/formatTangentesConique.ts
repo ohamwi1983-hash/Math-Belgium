@@ -1,665 +1,330 @@
-import type { ConiqueCentree, ConiqueParabole, ExerciceTangenteA, ExerciceTangenteB, ExerciceTangenteC, ExerciceTangenteD, ExerciceTangenteE, ExerciceTangentesConique } from "../core6e/tangentesConique.types";
-import type { Point } from "../core6e/identificationConiques.types";
-import { coefficientsEquationEnM, discriminantParalleles } from "../generateurs6e/tangentesConique/algebreTangente";
+import type { DroiteMK, ExerciceTangenteD, ExerciceTangentesConique } from "../core6e/tangentesConique.types";
 import type { PhaseTangentesConique } from "../moteur6e/typesTangentesConique";
+import { latexDroite, latexPoint, latexQ, latexSomme, lireEquation, lireNombre, proportionnels, ptNum, q, qMul, qNum, qSub } from "../moteur6e/algebreLieux";
+import { latexConique, penteAsymptote } from "../moteur6e/algebreConiques";
+import type { Conique } from "../moteur6e/algebreConiques";
+import { droiteMK, polyDegre2 } from "../moteur6e/verificationTangentesConique";
+import { formeCentree } from "../generateurs6e/tangentesConique";
+import { f } from "./fragmentsCombinatoire";
+import type { AideCombi, ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
+import { champDroiteUI, champEquationUI, champListeEquationsUI, champListePointsUI, champNombreUI, d3, nomPoint } from "./textesLieux";
+import { EXACT, L, eqPoly } from "./textesConiques";
+import { figureLieux } from "./figureLieux";
+import { ajouterConique, fenetreConique, objetsVides } from "./traceConiques";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen62`. Dispatch sur
- * `exercice.famille` PUIS `phase`, mirroir `formatEquationConiqueCaracteristiques.ts` (6gen59) : un
- * SEUL composant écran générique (`EtapeChampsTangentesConique`), piloté entièrement par
- * `champs: ChampDef[]` — jamais de JSX par famille/écran.
- *
- * `ChampDef.type==="liste"` (nouveau par rapport à 6gen59) porte le pattern add-as-needed des
- * écrans `bEcran4`/`cEcran4` DANS le composant générique plutôt que dans un composant dédié
- * séparé — convention de nommage imposée à ce générateur (3 composants seulement, voir
- * `components6e/EtapeChampsTangentesConique.tsx`) : chaque ligne porte `sousChamps.length` valeurs
- * (ici toujours 3 : équation, x, y), encodées par le composant en un SEUL `string` JSON
- * (`valeurs[i]`) — décodé côté `moteur6e/verificationTangentesConique.ts`.
- *
- * **Vigilance signe orphelin / texte français en mode maths** — toute clause en français mêlée à du
- * LaTeX passe TOUJOURS par `\text{...}`, jamais du texte brut en mode maths.
+ * Textes de `6gen62` — Tangentes à une conique (6e ch. 10, § 5 ; audit, lots B et C). Réponses de chaque
+ * écran rédigées (plus de « voir bloc de travail », G5 / P1), données en fractions (G21), tangente de la
+ * parabole y·y_P = p(x + x_P) (décision 1), aides en KaTeX. Figure : la position de P (C) et la droite
+ * donnée (B) n'apparaissent qu'APRÈS le verdict.
  */
 
-export type TypeChamp = "texte" | "choix" | "liste";
+type E = ExerciceTangentesConique;
+type P = PhaseTangentesConique;
 
-export interface OptionChoix {
-  valeur: string;
-  label: string;
+const lq = latexQ;
+const yMK = (d: DroiteMK) => `y=${latexSomme([
+  [d.m, "x"],
+  [d.k, ""],
+])}`;
+const par = (r: { n: bigint; d: bigint }) => (r.n < 0n ? `\\left(${lq(r)}\\right)` : lq(r));
+
+function formeD(e: ExerciceTangenteD): string {
+  const c = e.conique;
+  if (c.type === "ellipse") return "\\dfrac{x^2}{\\alpha}+\\dfrac{y^2}{\\beta}=1";
+  return c.axe === "x" ? "\\dfrac{x^2}{\\alpha}-\\dfrac{y^2}{\\beta}=1" : "\\dfrac{y^2}{\\beta}-\\dfrac{x^2}{\\alpha}=1";
 }
 
-export interface SousChampListe {
-  label: string;
-  placeholder?: string;
+function natureTexte(c: Conique): string {
+  return c.type === "ellipse" ? "l'ellipse" : c.type === "hyperbole" ? "l'hyperbole" : c.type === "parabole" ? "la parabole" : "le cercle";
 }
 
-export interface ChampDef {
-  type: TypeChamp;
-  label: string;
-  placeholder?: string;
-  options?: OptionChoix[];
-  /** `true` pour un label réduit à une lettre de variable (ex. "a =", "k ="), voir
-   * `.field-label-minuscule` (`App.css`). */
-  minuscule?: boolean;
-  /** Présent ssi `type==="liste"` — décrit chaque colonne d'une ligne add-as-needed. */
-  sousChamps?: SousChampListe[];
-}
-
-export interface AideAvecLatex {
-  texte: string;
-  latex: string | null;
-}
-
-/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`,
- * rendu via `components/RenduFragments.tsx`. */
-export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
-
-function texte(valeur: string): FragmentConsigne {
-  return { type: "texte", valeur };
-}
-function latexFrag(valeur: string): FragmentConsigne {
-  return { type: "latex", valeur };
-}
-
-const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
-
-function champTexte(label: string, placeholder: string, minuscule = false): ChampDef {
-  return { type: "texte", label, placeholder, minuscule };
-}
-
-function champChoix(label: string, options: OptionChoix[]): ChampDef {
-  return { type: "choix", label, options };
-}
-
-function champListe(label: string, sousChamps: SousChampListe[]): ChampDef {
-  return { type: "liste", label, sousChamps };
-}
-
-// ============================================================================
-// Petits formateurs numériques/LaTeX partagés.
-// ============================================================================
-
-interface PartieSignee {
-  coeff: number;
-  texte: (abs: number) => string;
-}
-
-/** Assemble une somme signée à partir de termes `{coeff,texte}` — omet les termes de coefficient
- * nul, gère le signe du premier terme (jamais de "+" orphelin en tête). Mirroir
- * `formatIdentificationConiques.ts` (6gen58), dupliqué ici (chaque générateur reste indépendant). */
-function formatSommeSignee(parties: PartieSignee[]): string {
-  const nonNulles = parties.filter((p) => p.coeff !== 0);
-  if (nonNulles.length === 0) return "0";
-  return nonNulles
-    .map((p, i) => {
-      const abs = Math.abs(p.coeff);
-      const corps = p.texte(abs);
-      if (i === 0) return p.coeff < 0 ? `-${corps}` : corps;
-      return p.coeff < 0 ? ` - ${corps}` : ` + ${corps}`;
-    })
-    .join("");
-}
-
-function carreTexte(variable: string): (abs: number) => string {
-  return (abs) => (abs === 1 ? `${variable}^2` : `${abs}${variable}^2`);
-}
-
-/** Généralisation de `carreTexte` à un monôme arbitraire ("xk", "k^2", "m"...) — même convention
- * d'omission du coefficient "1" (CLAUDE.md, simplification algébrique). */
-function termeTexte(expr: string): (abs: number) => string {
-  return (abs) => (abs === 1 ? expr : `${abs}${expr}`);
-}
-
-/** Arrondi d'affichage pour une valeur potentiellement irrationnelle (racine carrée) — jamais une
- * valeur GÉNÉRÉE par la plateforme (celles-ci restent des entiers/fractions exacts partout ailleurs
- * dans ce générateur), utilisé UNIQUEMENT pour rappeler à l'élève une valeur déjà CONFIRMÉE
- * (`etatActuel`) qui peut être irrationnelle par nature (racine d'un discriminant). */
-function formaterDecimal(n: number): string {
-  if (Math.abs(n - Math.round(n)) < 1e-9) return `${Math.round(n)}`;
-  return `${Math.round(n * 1000) / 1000}`;
-}
-
-function afficherPoint(p: Point): string {
-  return `(${formaterDecimal(p.x)};${formaterDecimal(p.y)})`;
-}
-
-function pgcd(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b) [a, b] = [b, a % b];
-  return a || 1;
-}
-
-/** `numCarre/denCarre` (déjà les carrés d'un numérateur/dénominateur entiers, ex. `kNum²/kDen²`) —
- * fraction EXACTE réduite, jamais un décimal (CLAUDE.md) : contrairement à `formaterDecimal`
- * (réservé aux quantités réellement irrationnelles, ex. `k`/`m` eux-mêmes en famille B/C/E), `k²`
- * et `m²` de la famille D restent des RATIONNELS exacts (`k`,`m` étant des fractions connues,
- * `kNum`/`kDen`/`mNum`/`mDen`) — les afficher en fraction réduite plutôt qu'arrondis. */
-function afficherFractionCarree(numCarre: number, denCarre: number): string {
-  const g = pgcd(numCarre, denCarre);
-  const n = numCarre / g;
-  const d = denCarre / g;
-  return d === 1 ? `${n}` : `\\frac{${n}}{${d}}`;
-}
-
-/** `Ax²+By²=M` — signe de `B` géré par `formatSommeSignee` (hyperbole : `B<0`). */
-function afficherConiqueCentree(c: ConiqueCentree): string {
-  const gauche = formatSommeSignee([{ coeff: c.coeffX, texte: carreTexte("x") }, { coeff: c.coeffY, texte: carreTexte("y") }]);
-  return `${gauche}=${c.M}`;
-}
-
-/** `y²=4px` (horizontal) / `x²=4py` (vertical). */
-function afficherParabole(c: ConiqueParabole): string {
-  const variableCarre = c.axe === "horizontal" ? "y" : "x";
-  const variableLineaire = c.axe === "horizontal" ? "x" : "y";
-  return `${variableCarre}^2=${4 * c.p}${variableLineaire}`;
-}
-
-function afficherConique(exercice: ExerciceTangenteA): string {
-  return exercice.typeConique === "centree" ? afficherConiqueCentree(exercice.conique) : afficherParabole(exercice.conique);
-}
-
-/** Équation de la tangente CONFIRMÉE à `aEcran2` (dédoublement, non simplifiée) — recalculée depuis
- * les données de l'exercice (conique+P, jamais depuis la saisie élève), `x0,y0` TOUJOURS non nuls
- * par construction (voir `familleA.ts`). Bloc "état actuel", `aEcran3`. */
-function formatDedoublementConfirmeA(e: ExerciceTangenteA): string {
-  const { x: x0, y: y0 } = e.P;
-  if (e.typeConique === "centree") {
-    const { coeffX: A, coeffY: B, M } = e.conique;
-    const corps = formatSommeSignee([
-      { coeff: A * x0, texte: termeTexte("x") },
-      { coeff: B * y0, texte: termeTexte("y") },
-    ]);
-    return `${corps}=${M}`;
-  }
-  const deuxP = 2 * e.conique.p;
-  if (e.conique.axe === "horizontal") {
-    const gauche = formatSommeSignee([{ coeff: y0, texte: termeTexte("y") }]);
-    const droite = x0 > 0 ? `(x+${x0})` : `(x-${-x0})`;
-    return `${gauche}=${deuxP}${droite}`;
-  }
-  const gauche = formatSommeSignee([{ coeff: x0, texte: termeTexte("x") }]);
-  const droite = y0 > 0 ? `(y+${y0})` : `(y-${-y0})`;
-  return `${gauche}=${deuxP}${droite}`;
-}
-
-/** `y=mx+k` avec `m`,`k` déjà connus numériquement — arrondi d'affichage (voir `formaterDecimal`). */
-function afficherDroiteYmxk(m: number, k: number): string {
-  const partieK = k === 0 ? "" : k > 0 ? `+${formaterDecimal(k)}` : `${formaterDecimal(k)}`;
-  const mAbs = Math.abs(m);
-  const partieM = mAbs === 1 ? (m < 0 ? "-" : "") : formaterDecimal(m);
-  return `y=${partieM}x${partieK}`;
-}
-
-// ============================================================================
-// Famille A — tangente en un point donné (dédoublement).
-// ============================================================================
-
-function consigneGeneraleA(): FragmentConsigne[] {
-  return [texte("On donne une conique et un point P situé SUR cette conique. Détermine l'équation de la tangente à la conique en P, en appliquant la formule de dédoublement adaptée au type de conique.")];
-}
-
-function blocDonneesA(e: ExerciceTangenteA): string[] {
-  return [afficherConique(e), `\\text{Point } P${afficherPoint(e.P)}`];
-}
-
-function consigneEcranA(phase: PhaseTangentesConique): FragmentConsigne[] {
-  if (phase === "aEcran1") return [texte("Vérifie que P appartient bien à la conique : substitue ses coordonnées dans l'équation. Quelle valeur obtiens-tu pour le membre substitué (elle doit égaler la constante de l'équation) ?")];
-  if (phase === "aEcran2") return [texte("P étant confirmé sur la conique, applique la formule de dédoublement pour poser l'équation de la tangente en P.")];
-  return [texte("Simplifie l'équation de la tangente obtenue à l'étape précédente.")];
-}
-
-function champsEcranA(phase: PhaseTangentesConique): ChampDef[] {
-  if (phase === "aEcran1") return [champTexte("Valeur obtenue par substitution =", "ex. 36")];
-  if (phase === "aEcran2") return [champTexte("Équation de la tangente (dédoublement) :", "ex. 4x-3y=12")];
-  return [champTexte("Équation finale simplifiée de la tangente :", "ex. y=2x-3")];
-}
-
-function aideA(e: ExerciceTangenteA, phase: PhaseTangentesConique, niveau: 1 | 2): AideAvecLatex {
-  if (phase !== "aEcran2") return AUCUNE_AIDE;
-  if (niveau === 1) {
-    if (e.typeConique === "centree") return { texte: "Formule de dédoublement pour une conique à centre Ax²+By²=M : remplace x² par x·x₀ et y² par y·y₀.", latex: "A\\cdot x\\cdot x_0+B\\cdot y\\cdot y_0=M" };
-    const variableCarre = e.conique.axe === "horizontal" ? "y" : "x";
-    return { texte: `Formule de dédoublement pour une parabole ${variableCarre}²=4p${e.conique.axe === "horizontal" ? "x" : "y"} :`, latex: e.conique.axe === "horizontal" ? "y\\cdot y_0=2p(x+x_0)" : "x\\cdot x_0=2p(y+y_0)" };
-  }
-  // niveau 2 : coefficients de la conique substitués, coordonnées de P encore symboliques.
-  if (e.typeConique === "centree") return { texte: "Formule avec les coefficients de la conique déjà substitués (coordonnées de P restant symboliques) :", latex: `${e.conique.coeffX}\\cdot x\\cdot x_0${e.conique.coeffY < 0 ? "-" : "+"}${Math.abs(e.conique.coeffY)}\\cdot y\\cdot y_0=${e.conique.M}` };
-  const p = e.conique.p;
-  return { texte: "Formule avec p déjà substitué (coordonnées de P restant symboliques) :", latex: e.conique.axe === "horizontal" ? `y\\cdot y_0=${2 * p}(x+x_0)` : `x\\cdot x_0=${2 * p}(y+y_0)` };
-}
-
-// ============================================================================
-// Famille B — tangentes parallèles à une droite donnée (hyperbole).
-// ============================================================================
-
-function consigneGeneraleB(): FragmentConsigne[] {
-  return [texte("On donne une hyperbole et une direction (la pente m d'une droite d). Détermine s'il existe des tangentes à l'hyperbole de cette pente — et si oui, lesquelles.")];
-}
-
-function blocDonneesB(e: ExerciceTangenteB): string[] {
-  // Qualificatif "(seule la pente compte)" DÉLIBÉRÉMENT hors du fragment KaTeX (dans
-  // `consigneGeneraleB`, texte HTML normal qui s'enroule) — un `\text{}` KaTeX multi-mots ne se
-  // scinde JAMAIS sur plusieurs lignes et déborde silencieusement à 375px (piège documenté
-  // CLAUDE.md, trouvé ici par capture Playwright 375px : "seule la pente compte)" tronqué).
-  return [afficherConiqueCentree(e.conique), `\\text{Droite } d : ${afficherDroiteYmxk(e.m, e.c0)}`];
-}
-
-/** Équation en x confirmée à `bEcran1` (`k` reste symbolique) — dénominateurs de `m` EFFACÉS par
- * multiplication par `mDen²` (forme équivalente à `cibleBEcran1`, `verificationTangentesConique.ts`
- * : seule manière d'obtenir des coefficients ENTIERS quand `m` n'est pas entier, jamais de décimal
- * affiché, CLAUDE.md). Bloc "état actuel", `bEcran2`. */
-function formatEquationXConfirmeeB(e: ExerciceTangenteB): string {
-  const { coeffX: A, coeffY: B, M } = e.conique;
-  const { mNum, mDen } = e;
-  const coeffX2 = A * mDen * mDen + B * mNum * mNum;
-  const coeffXK = 2 * B * mNum * mDen;
-  const coeffK2 = B * mDen * mDen;
-  const constante = -M * mDen * mDen;
-  const corps = formatSommeSignee([
-    { coeff: coeffX2, texte: termeTexte("x^2") },
-    { coeff: coeffXK, texte: termeTexte("xk") },
-    { coeff: coeffK2, texte: termeTexte("k^2") },
-    { coeff: constante, texte: (abs) => `${abs}` },
-  ]);
-  return `${corps}=0`;
-}
-
-/** Équation en k confirmée à `bEcran2` — `cibleBEcran2`, mêmes dénominateurs de `m` effacés que
- * ci-dessus. Bloc "état actuel", `bEcran3`. */
-function formatEquationKConfirmeeB(e: ExerciceTangenteB): string {
-  const { coeffX: A, coeffY: B, M } = e.conique;
-  const { mNum, mDen } = e;
-  const coeffK2 = A * B * mDen * mDen;
-  const constante = -M * A * mDen * mDen - M * B * mNum * mNum;
-  const corps = formatSommeSignee([
-    { coeff: coeffK2, texte: termeTexte("k^2") },
-    { coeff: constante, texte: (abs) => `${abs}` },
-  ]);
-  return `${corps}=0`;
-}
-
-function consigneEcranB(phase: PhaseTangentesConique): FragmentConsigne[] {
-  if (phase === "bEcran1") return [texte("Pose "), latexFrag("y=mx+k"), texte(" (k inconnu, m étant la pente donnée) et substitue dans l'équation de l'hyperbole. Donne l'équation du second degré en x obtenue (ses coefficients dépendent de k).")];
-  if (phase === "bEcran2") return [texte("Pose la condition de tangence (discriminant nul) à partir de l'équation précédente. Donne l'équation résultante en k.")];
-  if (phase === "bEcran3") return [texte("Résous l'équation en k. ATTENTION : si elle n'a pas de solution réelle, ce n'est pas une erreur de calcul — conclus explicitement qu'aucune tangente de cette pente n'existe.")];
-  return [texte("Donne les équations complètes des tangentes trouvées et leurs points de tangence.")];
-}
-
-function champsEcranB(e: ExerciceTangenteB, phase: PhaseTangentesConique): ChampDef[] {
-  if (phase === "bEcran1") return [champTexte("Équation en x (k reste symbolique) :", "ex. -7x^2-16kx-4k^2-36=0")];
-  if (phase === "bEcran2") return [champTexte("Équation en k :", "ex. -36k^2+252=0")];
-  if (phase === "bEcran3") {
-    const base: ChampDef[] = [
-      champChoix("Conclusion :", [
-        { valeur: "existe", label: "Des tangentes existent" },
-        { valeur: "aucune", label: "Aucune tangente réelle" },
-      ]),
-    ];
-    if (!e.aSolution) return base;
-    return [...base, champTexte("Une valeur de k =", "ex. 3", true), champTexte("L'autre valeur de k =", "ex. -3", true)];
-  }
-  return [champListe("Tangentes trouvées (équation + point de tangence) :", [{ label: "Équation de la tangente", placeholder: "ex. y=2x+3" }, { label: "x du point de tangence", placeholder: "ex. 6" }, { label: "y du point de tangence", placeholder: "ex. 15" }])];
-}
-
-function aideB(e: ExerciceTangenteB, phase: PhaseTangentesConique, niveau: 1 | 2): AideAvecLatex {
-  if (phase !== "bEcran3") return AUCUNE_AIDE;
-  if (niveau === 1) return { texte: "Un discriminant négatif à cette étape signifie qu'AUCUNE tangente de la pente demandée n'existe pour cette conique — c'est une conclusion géométrique parfaitement légitime, pas un signe d'erreur.", latex: null };
-  const D = discriminantParalleles(e.conique, e.m);
-  return { texte: `Le discriminant (k²) vaut ${formaterDecimal(D)}, qui est ${D > 0 ? "strictement positif" : "négatif ou nul"}. À toi de formuler la conclusion.`, latex: `k^{2}=${formaterDecimal(D)}` };
-}
-
-// ============================================================================
-// Famille C — tangentes depuis un point donné (ellipse).
-// ============================================================================
-
-function consigneGeneraleC(): FragmentConsigne[] {
-  return [texte("On donne une ellipse et un point P (pas nécessairement sur l'ellipse). Détermine s'il existe des tangentes à l'ellipse passant par P — et si oui, lesquelles.")];
-}
-
-function blocDonneesC(e: ExerciceTangenteC): string[] {
-  return [afficherConiqueCentree(e.conique), `\\text{Point } P${afficherPoint(e.P)}`];
-}
-
-/** Équation en x confirmée à `cEcran1` (`m` reste symbolique) — `x0,y0` TOUJOURS entiers par
- * construction (`familleC.ts`), jamais de fraction/décimal à gérer ici. Forme partiellement
- * factorisée (jamais développée plus loin, `m` restant l'inconnue) — `k0=y0-x0·m` (affine en `m`,
- * signe de `x0` géré par `formatSommeSignee`, jamais `y0-m·(-3)` non simplifié, CLAUDE.md) —
- * mirroir `cibleCEcran1` (`verificationTangentesConique.ts`). Bloc "état actuel", `cEcran2`. */
-function formatEquationXConfirmeeC(e: ExerciceTangenteC): string {
-  const { coeffX: A, coeffY: B, M } = e.conique;
-  const { x: x0, y: y0 } = e.P;
-  const k0 = formatSommeSignee([
-    { coeff: y0, texte: (abs) => `${abs}` },
-    { coeff: -x0, texte: termeTexte("m") },
-  ]);
-  const coeffX2 = formatSommeSignee([
-    { coeff: A, texte: (abs) => `${abs}` },
-    { coeff: B, texte: termeTexte("m^2") },
-  ]);
-  return `(${coeffX2})x^2+${2 * B}m(${k0})x+${B}(${k0})^2-${M}=0`;
-}
-
-/** Équation en m confirmée à `cEcran2` — `coefficientsEquationEnM` (Couche A, déjà importée),
- * coefficients TOUJOURS entiers (`x0,y0,A,B,M` tous entiers, famille C). Bloc "état actuel",
- * `cEcran3`. */
-function formatEquationMConfirmeeC(e: ExerciceTangenteC): string {
-  const { a2, a1, a0 } = coefficientsEquationEnM(e.conique, e.P);
-  const corps = formatSommeSignee([
-    { coeff: a2, texte: termeTexte("m^2") },
-    { coeff: a1, texte: termeTexte("m") },
-    { coeff: a0, texte: (abs) => `${abs}` },
-  ]);
-  return `${corps}=0`;
-}
-
-function consigneEcranC(phase: PhaseTangentesConique): FragmentConsigne[] {
-  if (phase === "cEcran1") return [texte("Pose "), latexFrag("y-y_0=m(x-x_0)"), texte(" (m inconnu) et substitue dans l'équation de l'ellipse. Donne l'équation du second degré en x obtenue (ses coefficients dépendent de m).")];
-  if (phase === "cEcran2") return [texte("Pose la condition de tangence (discriminant nul) à partir de l'équation précédente. Donne l'équation résultante en m.")];
-  if (phase === "cEcran3") return [texte("Résous l'équation en m. ATTENTION : si elle n'a pas de solution réelle, ce n'est pas une erreur de calcul — conclus explicitement que P est situé à l'INTÉRIEUR de l'ellipse.")];
-  return [texte("Donne les équations complètes des 2 tangentes et leurs points de tangence.")];
-}
-
-function champsEcranC(e: ExerciceTangenteC, phase: PhaseTangentesConique): ChampDef[] {
-  if (phase === "cEcran1") return [champTexte("Équation en x (m reste symbolique) :", "ex. (A+Bm^2)x^2+...=0")];
-  if (phase === "cEcran2") return [champTexte("Équation en m :", "ex. a2*m^2+a1*m+a0=0")];
-  if (phase === "cEcran3") {
-    const base: ChampDef[] = [
-      champChoix("Conclusion :", [
-        { valeur: "exterieur", label: "P est extérieur — des tangentes existent" },
-        { valeur: "interieur", label: "P est intérieur — aucune tangente réelle" },
-      ]),
-    ];
-    if (!e.aSolution) return base;
-    return [...base, champTexte("Une valeur de m =", "ex. 1", true), champTexte("L'autre valeur de m =", "ex. 2", true)];
-  }
-  return [champListe("Tangentes trouvées (équation + point de tangence) :", [{ label: "Équation de la tangente", placeholder: "ex. y=x+2" }, { label: "x du point de tangence", placeholder: "ex. 1" }, { label: "y du point de tangence", placeholder: "ex. 2" }])];
-}
-
-function aideC(e: ExerciceTangenteC, phase: PhaseTangentesConique, niveau: 1 | 2): AideAvecLatex {
-  if (phase !== "cEcran3") return AUCUNE_AIDE;
-  if (niveau === 1) return { texte: "Un point situé à l'INTÉRIEUR d'une ellipse ne peut être l'origine d'aucune tangente réelle — un discriminant négatif à cette étape le confirme. C'est une conclusion légitime, pas une erreur.", latex: null };
-  const { a2, a1, a0 } = coefficientsEquationEnM(e.conique, e.P);
-  const discriminant = a1 * a1 - 4 * a2 * a0;
-  return { texte: `Le discriminant de l'équation en m vaut ${formaterDecimal(discriminant)}, qui est ${discriminant > 0 ? "strictement positif" : "négatif ou nul"}. À toi de formuler la conclusion.`, latex: null };
-}
-
-// ============================================================================
-// Famille D — construire une conique depuis un point de passage et une tangente.
-// ============================================================================
-
-function consigneGeneraleD(): FragmentConsigne[] {
-  return [texte("On cherche une conique (ellipse ou hyperbole) à axes de symétrie = axes de coordonnées, passant par un point P donné et tangente à une droite d donnée. Détermine son équation.")];
-}
-
-/** Fragments DÉLIBÉRÉMENT courts (jamais une phrase complète en français dans un `\text{}` — un
- * bloc KaTeX ne se scinde jamais sur plusieurs lignes et déborde silencieusement à 375px, piège
- * documenté CLAUDE.md et déjà rencontré/corrigé pour la famille B de ce même générateur, voir
- * `blocDonneesB` ci-dessus — même correction appliquée ici après capture Playwright 375px montrant
- * "Hyperbole (axe transverse Oy)"/"Droite tangente d : ..." tronqués des 2 côtés). */
-function blocDonneesD(e: ExerciceTangenteD): string[] {
-  const typeTexte = e.natureCible === "ellipse" ? "\\text{Ellipse}" : `\\text{Hyperbole, axe } ${e.axeTransverse === "horizontal" ? "Ox" : "Oy"}`;
-  return [typeTexte, `\\text{Point } P${afficherPoint(e.P)}`, `\\text{Droite } d : ${afficherDroiteYmxk(e.ligne.m, e.ligne.k)}`];
-}
-
-/** Équation « passe par P » confirmée à `dEcran1` (`a`,`b` restent symboliques) — `x0`,`y0` TOUJOURS
- * entiers par construction (voir en-tête de fichier, famille D). Bloc "état actuel", `dEcran2`. */
-function formatEquationPasseParPConfirmeeD(e: ExerciceTangenteD): string {
-  const { x: x0, y: y0 } = e.P;
-  const signe = e.natureCible === "ellipse" ? "+" : "-";
-  return `\\frac{${x0 * x0}}{a^2}${signe}\\frac{${y0 * y0}}{b^2}=1`;
-}
-
-/** Équation de tangence confirmée à `dEcran2` (`a`,`b` restent symboliques) — `k²`,`m²` des
- * RATIONNELS exacts (`k`,`m` fractions connues), affichés réduits plutôt qu'arrondis (même
- * technique que `aideD`, voir `afficherFractionCarree`). Bloc "état actuel", `dEcran3`. */
-function formatEquationTangenceConfirmeeD(e: ExerciceTangenteD): string {
-  const { kNum, kDen, mNum, mDen } = e.ligne;
-  const kCarre = afficherFractionCarree(kNum * kNum, kDen * kDen);
-  const mCarre = afficherFractionCarree(mNum * mNum, mDen * mDen);
-  const signe = e.natureCible === "ellipse" ? "+" : "-";
-  return `a^2\\cdot ${mCarre}${signe}b^2=${kCarre}`;
-}
-
-function consigneEcranD(phase: PhaseTangentesConique): FragmentConsigne[] {
-  if (phase === "dEcran1") return [texte("Pose la condition « la conique passe par P » (équation en "), latexFrag("a^2"), texte(" et "), latexFrag("b^2"), texte(", encore inconnus).")];
-  if (phase === "dEcran2") return [texte("Pose la condition de tangence à la droite d (équation en "), latexFrag("a^2"), texte(" et "), latexFrag("b^2"), texte(").")];
-  if (phase === "dEcran3") return [texte("Résous le système des 2 équations précédentes pour trouver "), latexFrag("a^2"), texte(" et "), latexFrag("b^2"), texte(".")];
-  return [texte("Donne l'équation finale de la conique.")];
-}
-
-function champsEcranD(phase: PhaseTangentesConique): ChampDef[] {
-  if (phase === "dEcran1") return [champTexte("Équation « passe par P » (en a et b) :", "ex. x0^2/a^2+y0^2/b^2=1")];
-  if (phase === "dEcran2") return [champTexte("Équation de tangence (en a et b) :", "ex. k^2=a^2*m^2+b^2")];
-  if (phase === "dEcran3") return [champTexte("a² =", "ex. 25", true), champTexte("b² =", "ex. 25", true)];
-  return [champTexte("Équation finale de la conique :", "ex. x^2/25+y^2/25=1")];
-}
-
-function aideD(e: ExerciceTangenteD, phase: PhaseTangentesConique, niveau: 1 | 2): AideAvecLatex {
-  if (phase !== "dEcran3") return AUCUNE_AIDE;
-  if (niveau === 1) return { texte: "Isole b² dans l'équation de tangence (étape 2), puis substitue cette expression dans l'équation « passe par P » (étape 1) — tu obtiens ainsi une équation à la seule inconnue a².", latex: null };
-  const { x: x0, y: y0 } = e.P;
-  const { kNum, kDen, mNum, mDen } = e.ligne;
-  // ellipse : b²=k²-a²m² ; hyperbole : b²=a²m²-k² — k²/m² sont des RATIONNELS exacts (k,m eux-mêmes
-  // des fractions connues), affichés en fraction réduite plutôt qu'arrondis (CLAUDE.md).
-  const kCarre = afficherFractionCarree(kNum * kNum, kDen * kDen);
-  const mCarre = afficherFractionCarree(mNum * mNum, mDen * mDen);
-  const bCarreExpr = e.natureCible === "ellipse" ? `${kCarre}-a^2\\cdot ${mCarre}` : `a^2\\cdot ${mCarre}-${kCarre}`;
-  const operateur = e.natureCible === "ellipse" ? "+" : "-";
-  return { texte: "Substitution déjà effectuée (résolution finale, pour a², non faite) :", latex: `\\frac{${x0 * x0}}{a^2}${operateur}\\frac{${y0 * y0}}{${bCarreExpr}}=1` };
-}
-
-// ============================================================================
-// Famille E — point d'une conique le plus proche d'une droite (réutilise famille B).
-// ============================================================================
-
-function consigneGeneraleE(): FragmentConsigne[] {
-  return [texte("On donne une hyperbole et une droite d. Détermine, parmi les points de l'hyperbole où la tangente est parallèle à d, celui qui est le plus proche de d.")];
-}
-
-function blocDonneesE(e: ExerciceTangenteE): string[] {
-  return [afficherConiqueCentree(e.base.conique), `\\text{Droite } d : ${afficherDroiteYmxk(e.base.m, e.c0)}`];
-}
-
-function consigneEcranE(phase: PhaseTangentesConique): FragmentConsigne[] {
-  if (phase === "eEcran1") return [texte("Trouve les tangentes à l'hyperbole parallèles à d et leurs points de tangence (comme à la famille B). Donne les 2 points de tangence, celui de plus petite abscisse d'abord.")];
-  if (phase === "eEcran2") return [texte("Calcule la distance de chacun des 2 points précédents à la droite d.")];
-  return [texte("Identifie lequel des 2 points est le plus proche de d (distance minimale).")];
-}
-
-function champsEcranE(phase: PhaseTangentesConique): ChampDef[] {
-  if (phase === "eEcran1") return [champTexte("x du 1er point", "ex. 6", true), champTexte("y du 1er point", "ex. 15", true), champTexte("x du 2e point", "ex. -6", true), champTexte("y du 2e point", "ex. -15", true)];
-  if (phase === "eEcran2") return [champTexte("Distance du 1er point à d =", "ex. 5", true), champTexte("Distance du 2e point à d =", "ex. 10", true)];
-  return [
-    champChoix("Point le plus proche :", [
-      { valeur: "point1", label: "Le 1er point" },
-      { valeur: "point2", label: "Le 2e point" },
-    ]),
-    champTexte("Distance minimale =", "ex. 5", true),
-  ];
-}
-
-function aideE(e: ExerciceTangenteE, phase: PhaseTangentesConique, niveau: 1 | 2): AideAvecLatex {
-  if (phase !== "eEcran3") return AUCUNE_AIDE;
-  if (niveau === 1) return { texte: "Le point le plus proche est celui dont la distance à la droite est la plus petite des deux — compare directement les 2 valeurs trouvées à l'étape précédente.", latex: null };
-  return { texte: `Rappel des 2 distances trouvées : ${formaterDecimal(e.distances[0])} et ${formaterDecimal(e.distances[1])}. La comparaison reste à faire.`, latex: `d_1=${formaterDecimal(e.distances[0])}\\quad d_2=${formaterDecimal(e.distances[1])}` };
-}
-
-// ============================================================================
-// Dispatcher générique.
-// ============================================================================
-
-export function consigneGenerale(exercice: ExerciceTangentesConique): FragmentConsigne[] {
-  if (exercice.famille === "A") return consigneGeneraleA();
-  if (exercice.famille === "B") return consigneGeneraleB();
-  if (exercice.famille === "C") return consigneGeneraleC();
-  if (exercice.famille === "D") return consigneGeneraleD();
-  return consigneGeneraleE();
-}
-
-export function blocDonnees(exercice: ExerciceTangentesConique): string[] {
-  if (exercice.famille === "A") return blocDonneesA(exercice);
-  if (exercice.famille === "B") return blocDonneesB(exercice);
-  if (exercice.famille === "C") return blocDonneesC(exercice);
-  if (exercice.famille === "D") return blocDonneesD(exercice);
-  return blocDonneesE(exercice);
-}
-
-/** État actuel — dérivé UNIQUEMENT des valeurs déjà CONFIRMÉES par un écran précédent (jamais de
- * la saisie brute), CLAUDE.md. `null` sur le tout premier écran de chaque famille (rien n'est
- * encore confirmé). ACCUMULE les écrans déjà confirmés (correctif transversal — voir CLAUDE.md/
- * `docs/historique-6e.md`, même bug déjà corrigé sur `formatIdentificationConiques.ts`, 6gen58) :
- * chaque écran ne montrait QUE l'info de l'écran immédiatement précédent, jamais celles d'avant.
- * Plus ancien en premier. */
-export function etatActuel(exercice: ExerciceTangentesConique, phase: PhaseTangentesConique): string[] | null {
-  if (exercice.famille === "A") {
-    const lignes: string[] = [];
-    if (phase === "aEcran2" || phase === "aEcran3") lignes.push(`\\text{Valeur confirmée (étape 1) : }${exercice.valeurConfirmation}`);
-    if (phase === "aEcran3") lignes.push(`\\text{Tangente confirmée (étape 2) : }${formatDedoublementConfirmeA(exercice)}`);
-    return lignes.length > 0 ? lignes : null;
-  }
-  if (exercice.famille === "B") {
-    const lignes: string[] = [];
-    if (phase === "bEcran2" || phase === "bEcran3" || phase === "bEcran4") lignes.push(`\\text{Équation en x confirmée (étape 1) : }${formatEquationXConfirmeeB(exercice)}`);
-    if (phase === "bEcran3" || phase === "bEcran4") lignes.push(`\\text{Équation en k confirmée (étape 2) : }${formatEquationKConfirmeeB(exercice)}`);
-    if (phase === "bEcran4") {
-      const [k1, k2] = exercice.tangentes.map((t) => t.k);
-      lignes.push(`\\text{Tangentes existent (étape 3), } k_1=${formaterDecimal(k1!)}\\text{, }k_2=${formaterDecimal(k2!)}`);
+export const FORMAT_6GEN62: FormatCombinatoire<E, P> = {
+  consigneGenerale(e) {
+    switch (e.famille) {
+      case "A":
+        return f(`Détermine la tangente à ${natureTexte(e.conique)} $\\Gamma$ au point $P$.` + EXACT);
+      case "B":
+        return f("Détermine les tangentes à l'hyperbole $\\Gamma$ qui sont parallèles à la droite $d$, s'il y en a." + EXACT);
+      case "C":
+        return f("Détermine les tangentes à l'ellipse $\\Gamma$ qui passent par le point $P$, s'il y en a." + EXACT);
+      case "D":
+        return f(`On cherche ${e.conique.type === "ellipse" ? "l'ellipse" : "l'hyperbole"} d'équation $${formeD(e)}$ ($\\alpha>0$, $\\beta>0$) qui passe par $P$ et qui est tangente à la droite $d$.` + EXACT);
+      case "E":
+        return f(`La droite $d$ ne coupe pas ${natureTexte(e.conique)} $\\Gamma$. Détermine le point de $\\Gamma$ le plus proche de $d$.` + EXACT);
     }
-    return lignes.length > 0 ? lignes : null;
-  }
-  if (exercice.famille === "C") {
-    const lignes: string[] = [];
-    if (phase === "cEcran2" || phase === "cEcran3" || phase === "cEcran4") lignes.push(`\\text{Équation en x confirmée (étape 1) : }${formatEquationXConfirmeeC(exercice)}`);
-    if (phase === "cEcran3" || phase === "cEcran4") lignes.push(`\\text{Équation en m confirmée (étape 2) : }${formatEquationMConfirmeeC(exercice)}`);
-    if (phase === "cEcran4") {
-      const [m1, m2] = exercice.tangentes.map((t) => t.m);
-      lignes.push(`\\text{P extérieur (étape 3), } m_1=${formaterDecimal(m1!)}\\text{, }m_2=${formaterDecimal(m2!)}`);
+  },
+  donnees(e) {
+    switch (e.famille) {
+      case "A":
+        return [f(`$\\Gamma\\,:\\ ${latexConique(e.conique)}$`), f(`$${nomPoint("P", e.P)}$`)];
+      case "B":
+      case "E":
+        return [f(`$\\Gamma\\,:\\ ${latexConique(e.conique)}$`), f(`$d\\,:\\ ${yMK(e.d)}$`)];
+      case "C":
+        return [f(`$\\Gamma\\,:\\ ${latexConique(e.conique)}$`), f(`$${nomPoint("P", e.P)}$`)];
+      case "D":
+        return [f(`$${nomPoint("P", e.P)}$`), f(`$d\\,:\\ ${yMK(e.d)}$`)];
     }
-    return lignes.length > 0 ? lignes : null;
-  }
-  if (exercice.famille === "D") {
-    const lignes: string[] = [];
-    if (phase === "dEcran2" || phase === "dEcran3" || phase === "dEcran4") lignes.push(`\\text{Équation confirmée (étape 1) : }${formatEquationPasseParPConfirmeeD(exercice)}`);
-    if (phase === "dEcran3" || phase === "dEcran4") lignes.push(`\\text{Équation de tangence confirmée (étape 2) : }${formatEquationTangenceConfirmeeD(exercice)}`);
-    if (phase === "dEcran4") lignes.push(`a^2=${exercice.a * exercice.a}\\text{, }b^2=${exercice.b * exercice.b}\\text{ (confirmés, étape 3)}`);
-    return lignes.length > 0 ? lignes : null;
-  }
-  // Famille E.
-  const lignes: string[] = [];
-  if (phase === "eEcran2" || phase === "eEcran3") {
-    const [pt1, pt2] = exercice.base.tangentes.map((t) => t.point);
-    lignes.push(`\\text{Point 1 (étape 1) : }${afficherPoint(pt1!)}`, `\\text{Point 2 (étape 1) : }${afficherPoint(pt2!)}`);
-  }
-  if (phase === "eEcran3") {
-    lignes.push(`\\text{Distance 1 (étape 2) : }${formaterDecimal(exercice.distances[0])}`, `\\text{Distance 2 (étape 2) : }${formaterDecimal(exercice.distances[1])}`);
-  }
-  return lignes.length > 0 ? lignes : null;
-}
-
-export function consigneEcran(exercice: ExerciceTangentesConique, phase: PhaseTangentesConique): FragmentConsigne[] {
-  if (exercice.famille === "A") return consigneEcranA(phase);
-  if (exercice.famille === "B") return consigneEcranB(phase);
-  if (exercice.famille === "C") return consigneEcranC(phase);
-  if (exercice.famille === "D") return consigneEcranD(phase);
-  return consigneEcranE(phase);
-}
-
-export function champsEcran(exercice: ExerciceTangentesConique, phase: PhaseTangentesConique): ChampDef[] {
-  if (exercice.famille === "A") return champsEcranA(phase);
-  if (exercice.famille === "B") return champsEcranB(exercice, phase);
-  if (exercice.famille === "C") return champsEcranC(exercice, phase);
-  if (exercice.famille === "D") return champsEcranD(phase);
-  return champsEcranE(phase);
-}
-
-export function aideNiveau1(exercice: ExerciceTangentesConique, phase: PhaseTangentesConique): AideAvecLatex {
-  if (exercice.famille === "A") return aideA(exercice, phase, 1);
-  if (exercice.famille === "B") return aideB(exercice, phase, 1);
-  if (exercice.famille === "C") return aideC(exercice, phase, 1);
-  if (exercice.famille === "D") return aideD(exercice, phase, 1);
-  return aideE(exercice, phase, 1);
-}
-
-export function aideNiveau2(exercice: ExerciceTangentesConique, phase: PhaseTangentesConique): AideAvecLatex {
-  if (exercice.famille === "A") return aideA(exercice, phase, 2);
-  if (exercice.famille === "B") return aideB(exercice, phase, 2);
-  if (exercice.famille === "C") return aideC(exercice, phase, 2);
-  if (exercice.famille === "D") return aideD(exercice, phase, 2);
-  return aideE(exercice, phase, 2);
-}
-
-/** 2 niveaux d'aide sur l'écran désigné par la mission pour chaque famille (A→écran2 ; B/C/D/E→
- * écran3), `0` partout ailleurs. */
-export function niveauAideMaxEcran(exercice: ExerciceTangentesConique, phase: PhaseTangentesConique): number {
-  const ecranAvecAide: Record<ExerciceTangentesConique["famille"], PhaseTangentesConique> = { A: "aEcran2", B: "bEcran3", C: "cEcran3", D: "dEcran3", E: "eEcran3" };
-  return phase === ecranAvecAide[exercice.famille] ? 2 : 0;
-}
-
-// ============================================================================
-// Récapitulatif final — libellés + réponse CORRECTE connue de l'exercice (jamais recalculée depuis
-// la saisie élève) + total à maximum VARIABLE (100 × nombre d'écrans réellement traversés).
-// ============================================================================
-
-export const LIBELLE_PHASE: Record<PhaseTangentesConique, string> = {
-  aEcran1: "Étape 1 (vérification de P)",
-  aEcran2: "Étape 2 (dédoublement)",
-  aEcran3: "Étape 3 (équation finale)",
-  bEcran1: "Étape 1 (équation en x)",
-  bEcran2: "Étape 2 (équation en k)",
-  bEcran3: "Étape 3 (conclusion)",
-  bEcran4: "Étape 4 (tangentes complètes)",
-  cEcran1: "Étape 1 (équation en x)",
-  cEcran2: "Étape 2 (équation en m)",
-  cEcran3: "Étape 3 (conclusion)",
-  cEcran4: "Étape 4 (tangentes complètes)",
-  dEcran1: "Étape 1 (passe par P)",
-  dEcran2: "Étape 2 (tangence)",
-  dEcran3: "Étape 3 (a² et b²)",
-  dEcran4: "Étape 4 (équation finale)",
-  eEcran1: "Étape 1 (points de tangence)",
-  eEcran2: "Étape 2 (distances)",
-  eEcran3: "Étape 3 (point le plus proche)",
+  },
+  consigneEcran(e, p) {
+    switch (p) {
+      case "aPente":
+        return f("Calcule la pente de la tangente en $P$ (par la dérivée ou par la forme dédoublée).");
+      case "aTangente":
+        return f("Écris une équation de la tangente en $P$.");
+      case "bEquationK":
+        return e.famille === "B" ? f(`Une droite parallèle à $d$ s'écrit $y=${latexSomme([[e.d.m, "x"]])}+k$. Écris la condition sur $k$ pour qu'elle soit tangente à $\\Gamma$.`) : [];
+      case "bNombre":
+        return f("Combien de tangentes à $\\Gamma$ sont parallèles à $d$ ?");
+      case "bTangentes":
+      case "cTangentes":
+        return f("Écris une équation de chaque tangente (une par ligne).");
+      case "cEquationM":
+        return e.famille === "C" ? f(`Une droite non verticale qui passe par $P$ s'écrit $y-${par(e.P.y)}=m\\left(x-${par(e.P.x)}\\right)$. Écris l'équation en $m$ qui exprime qu'elle est tangente à $\\Gamma$.`) : [];
+      case "cNombre":
+        return f("Combien de tangentes à $\\Gamma$ passent par $P$ ?");
+      case "dValeurs":
+        return f("Calcule $\\alpha$ et $\\beta$.");
+      case "dEquation":
+        return f("Écris l'équation de la conique.");
+      case "eContacts":
+        return f("Le point cherché est le point de contact d'une tangente parallèle à $d$. Donne les points de contact des deux tangentes à $\\Gamma$ parallèles à $d$ (un par ligne).");
+      case "eProche":
+        return f("Lequel de ces deux points est le plus proche de $d$ ?");
+    }
+  },
+  champs(e, p): ChampCombi[] {
+    const choixNombre = (lib: string): ChampCombi[] => [
+      {
+        type: "choix",
+        label: "",
+        options: [
+          { valeur: "0", label: `Aucune ${lib}` },
+          { valeur: "2", label: "Deux" },
+        ],
+      },
+    ];
+    switch (p) {
+      case "aPente":
+        return [champNombreUI("Pente")];
+      case "aTangente":
+        return [champDroiteUI("Tangente")];
+      case "bEquationK":
+        return [champEquationUI("Condition sur $k$", ["k"])];
+      case "bNombre":
+      case "cNombre":
+        return choixNombre("tangente");
+      case "bTangentes":
+      case "cTangentes":
+        return [champListeEquationsUI("Tangentes")];
+      case "cEquationM":
+        return [champEquationUI("Équation en $m$", ["m"])];
+      case "dValeurs":
+        return [champNombreUI("$\\alpha$"), champNombreUI("$\\beta$")];
+      case "dEquation":
+        return [champEquationUI("Équation")];
+      case "eContacts":
+        return [champListePointsUI("Points de contact")];
+      case "eProche":
+        return e.famille === "E" ? [{ type: "choix", label: "", options: e.points.map((P, i) => ({ valeur: String(i), label: `$${latexPoint(P)}$` })) }] : [];
+    }
+  },
+  aides: aides62,
+  reponseAttendue: reponse62,
+  explication: explication62,
+  libellePhase: (_e, p) => LIBELLES[p],
+  messageCible: cible62,
 };
 
-export const LIBELLE_FAMILLE: Record<ExerciceTangentesConique["famille"], string> = {
-  A: "A — Tangente en un point donné",
-  B: "B — Tangentes parallèles à une droite",
-  C: "C — Tangentes depuis un point",
-  D: "D — Construire une conique",
-  E: "E — Point le plus proche d'une droite",
+const LIBELLES: Record<P, string> = {
+  aPente: "Pente de la tangente",
+  aTangente: "Tangente",
+  bEquationK: "Condition sur k",
+  bNombre: "Nombre de tangentes",
+  bTangentes: "Tangentes",
+  cEquationM: "Équation en m",
+  cNombre: "Nombre de tangentes",
+  cTangentes: "Tangentes",
+  dValeurs: "α et β",
+  dEquation: "Équation",
+  eContacts: "Points de contact",
+  eProche: "Point le plus proche",
 };
 
-function afficherTangenteLatex(equation: string, point: Point): string {
-  return `${equation}\\text{, point }${afficherPoint(point)}`;
+const DEDOUBLEE = "Forme dédoublée en $P(x_P\\,;y_P)$ : on remplace $x^2$ par $x\\,x_P$ et $y^2$ par $y\\,y_P$ (pour la parabole $y^2=2px$ : $y\\,y_P=p(x+x_P)$) ; ou bien on dérive la branche qui contient $P$.";
+const CONDITION = "Condition du cours : $y=mx+k$ est tangente à $\\frac{x^2}{a^2}+\\frac{y^2}{b^2}=1$ si $k^2=a^2m^2+b^2$, à $\\frac{x^2}{a^2}-\\frac{y^2}{b^2}=1$ si $k^2=a^2m^2-b^2$, à $\\frac{y^2}{a^2}-\\frac{x^2}{b^2}=1$ si $k^2=a^2-b^2m^2$ (le discriminant de l'équation en $x$ est nul).";
+
+function k2Formule(c: Conique, m: { n: bigint; d: bigint }): string {
+  if (c.type !== "ellipse" && c.type !== "hyperbole") return "";
+  const f2 = formeCentree(c);
+  const sx = f2.sx < 0 ? "-" : "";
+  const sy = f2.sy < 0 ? "-" : "+";
+  return `k^2=${sx}${lq(f2.X)}\\cdot${par(m)}^2${sy}${lq(f2.Y)}`;
 }
 
-/** Récapitulatif final : affiche toujours la réponse CORRECTE connue de l'exercice — jamais
- * recalculée depuis la saisie élève. */
-export function formatReponseAttenduePhaseLatex(exercice: ExerciceTangentesConique, phase: PhaseTangentesConique): string[] {
-  if (exercice.famille === "A") {
-    if (phase === "aEcran1") return [`${exercice.valeurConfirmation}`];
-    // aEcran2/aEcran3 partagent la même cible algébrique (voir verificationTangentesConique.ts).
-    return ["\\text{équation de la tangente (voir bloc de travail)}"];
+function aides62(e: E, p: P): AideCombi[] {
+  switch (e.famille) {
+    case "A": {
+      if (p === "aTangente") return [{ texte: "Tangente de pente $m$ en $P$ :", latex: "y-y_P=m(x-x_P)" }, { texte: "Ici :", latex: `P${latexPoint(e.P)},\\quad m=${lq(e.pente)}` }];
+      const c = e.conique;
+      if (c.type === "parabole") return [{ texte: DEDOUBLEE }, { texte: "Ici :", latex: `p=${lq(c.p)},\\quad P${latexPoint(e.P)}` }];
+      const fc = formeCentree(c);
+      return [{ texte: DEDOUBLEE }, { texte: "En dérivant implicitement, la pente vaut :", latex: `m=-\\dfrac{${fc.sx < 0 ? "-" : ""}\\frac{x_P}{${lq(fc.X)}}}{${fc.sy < 0 ? "-" : ""}\\frac{y_P}{${lq(fc.Y)}}}` }];
+    }
+    case "B":
+      if (p === "bEquationK") return [{ texte: CONDITION }, { texte: "Ici :", latex: `m=${lq(e.d.m)}` }];
+      if (p === "bNombre") return [{ texte: "Un carré n'est jamais négatif." }, { texte: "La condition obtenue :", latex: `k^2=${lq(e.k2)}` }];
+      return [{ texte: "Chaque valeur de $k$ donne une tangente $y=mx+k$." }, { texte: "La condition obtenue :", latex: `k^2=${lq(e.k2)}` }];
+    case "C":
+      if (p === "cEquationM") return [{ texte: CONDITION }, { texte: "Ici, l'ordonnée à l'origine de la droite :", latex: `k=${lq(e.P.y)}${qNum(e.P.x) < 0 ? "+" : "-"}${lq(q(e.P.x.n < 0n ? -e.P.x.n : e.P.x.n, e.P.x.d))}\\,m` }];
+      if (p === "cNombre") return [{ texte: "Le nombre de tangentes est le nombre de solutions de l'équation en $m$ : regarde son discriminant." }, { texte: "L'équation :", latex: `${eqPoly(polyDegre2("m", e.eqM), ["m"])}` }];
+      return [{ texte: "Résous l'équation en $m$ ; chaque solution donne une tangente $y=m(x-x_P)+y_P$." }, { texte: "L'équation :", latex: `${eqPoly(polyDegre2("m", e.eqM), ["m"])}` }];
+    case "D": {
+      const fc = formeCentree(e.conique);
+      const sys = `\\begin{cases}${fc.sx < 0 ? "-" : ""}\\dfrac{${lq(qMul(e.P.x, e.P.x))}}{\\alpha}${fc.sy < 0 ? "-" : "+"}\\dfrac{${lq(qMul(e.P.y, e.P.y))}}{\\beta}=1\\\\ ${lq(qMul(e.d.k, e.d.k))}=${fc.sx < 0 ? "-" : ""}${lq(qMul(e.d.m, e.d.m))}\\,\\alpha${fc.sy < 0 ? "-" : "+"}\\beta\\end{cases}`;
+      if (p === "dValeurs") return [{ texte: "$P$ vérifie l'équation ; la droite $d\\,:\\ y=mx+k$ est tangente (condition du cours, ici avec $\\alpha$ sous $x^2$ et $\\beta$ sous $y^2$)." }, { texte: "Le système :", latex: sys }];
+      return [{ texte: "Remplace $\\alpha$ et $\\beta$ dans la forme donnée." }, { texte: "Ici :", latex: `\\alpha=${lq(e.alpha)},\\quad\\beta=${lq(e.beta)}` }];
+    }
+    case "E":
+      if (p === "eContacts") return [{ texte: CONDITION + " Le point de contact est l'unique solution de l'équation en $x$." }, { texte: "Ici :", latex: `m=${lq(e.d.m)}` }];
+      return [{ texte: "Distance d'un point à $d\\,:\\ mx-y+k=0$ :", latex: "\\dfrac{|m\\,x_0-y_0+k|}{\\sqrt{m^2+1}}" }, { texte: "Ici :", latex: `m=${lq(e.d.m)},\\quad k=${lq(e.d.k)}` }];
   }
-  if (exercice.famille === "B") {
-    if (phase === "bEcran1" || phase === "bEcran2") return ["\\text{(équation intermédiaire, voir bloc de travail)}"];
-    if (phase === "bEcran3") return exercice.aSolution ? [`\\text{Tangentes existent, }k=\\pm${formaterDecimal(exercice.tangentes[0]!.k)}`] : ["\\text{Aucune tangente réelle}"];
-    return exercice.tangentes.map((t) => afficherTangenteLatex(afficherDroiteYmxk(exercice.m, t.k), t.point));
-  }
-  if (exercice.famille === "C") {
-    if (phase === "cEcran1" || phase === "cEcran2") return ["\\text{(équation intermédiaire, voir bloc de travail)}"];
-    if (phase === "cEcran3") return exercice.aSolution ? [`\\text{P extérieur, }m_1=${formaterDecimal(exercice.tangentes[0]!.m)}\\text{, }m_2=${formaterDecimal(exercice.tangentes[1]!.m)}`] : ["\\text{P intérieur, aucune tangente réelle}"];
-    return exercice.tangentes.map((t) => afficherTangenteLatex(afficherDroiteYmxk(t.m, t.point.y - t.m * t.point.x), t.point));
-  }
-  if (exercice.famille === "D") {
-    if (phase === "dEcran1" || phase === "dEcran2") return ["\\text{(équation intermédiaire, voir bloc de travail)}"];
-    if (phase === "dEcran3") return [`a^2=${exercice.a * exercice.a}\\text{, }b^2=${exercice.b * exercice.b}`];
-    const signe = exercice.natureCible === "ellipse" ? "+" : "-";
-    return [`\\frac{x^2}{${exercice.a * exercice.a}}${signe}\\frac{y^2}{${exercice.b * exercice.b}}=1`];
-  }
-  // Famille E.
-  const [pt1, pt2] = exercice.base.tangentes.map((t) => t.point);
-  if (phase === "eEcran1") return [`\\text{Point 1 : }${afficherPoint(pt1!)}\\text{, Point 2 : }${afficherPoint(pt2!)}`];
-  if (phase === "eEcran2") return [`d_1=${formaterDecimal(exercice.distances[0])}\\text{, }d_2=${formaterDecimal(exercice.distances[1])}`];
-  return [`\\text{Point }${exercice.indexPlusProche + 1}\\text{, distance }=${formaterDecimal(exercice.distances[exercice.indexPlusProche])}`];
 }
 
+function reponse62(e: E, p: P): string[] {
+  switch (e.famille) {
+    case "A":
+      return p === "aPente" ? [`m=${lq(e.pente)}`] : [yMK({ m: e.pente, k: qSub(e.P.y, qMul(e.pente, e.P.x)) })];
+    case "B":
+      if (p === "bEquationK") return [`k^2=${lq(e.k2)}`];
+      if (p === "bNombre") return [`\\text{${e.verdict === 0 ? "aucune" : "deux"}}`];
+      return e.tangentes.map(yMK);
+    case "C":
+      if (p === "cEquationM") return [eqPoly(polyDegre2("m", e.eqM), ["m"])];
+      if (p === "cNombre") return [`\\text{${e.verdict === 0 ? "aucune" : "deux"}}`];
+      return e.tangentes.map(yMK);
+    case "D":
+      return p === "dValeurs" ? [`\\alpha=${lq(e.alpha)}`, `\\beta=${lq(e.beta)}`] : [latexConique(e.conique)];
+    case "E":
+      return p === "eContacts" ? e.points.map(latexPoint) : [latexPoint(e.points[e.proche])];
+  }
+}
+
+function explication62(e: E, p: P): FragmentConsigne[][] {
+  switch (e.famille) {
+    case "A": {
+      const t = yMK({ m: e.pente, k: qSub(e.P.y, qMul(e.pente, e.P.x)) });
+      if (p === "aPente") return L(`La pente en $P$ vaut $m=${lq(e.pente)}$.`, e.conique.type === "parabole" ? "Piège : pour $y^2=2px$, la tangente est $y\\,y_P=p(x+x_P)$ (et non $2p$)." : "Piège : on dérive la branche qui contient $P$ (signe de $y_P$).");
+      return L(`$y-${par(e.P.y)}=${lq(e.pente)}\\left(x-${par(e.P.x)}\\right)$, soit $${t}$.`, `Vérification : la forme dédoublée en $P$ donne la même droite, $${latexDroite(e.tangente)}$.`);
+    }
+    case "B": {
+      const a = penteAsymptote(e.conique);
+      if (p === "bEquationK") return L(`$${k2Formule(e.conique, e.d.m)}$, soit $k^2=${lq(e.k2)}$.`, e.conique.axe === "y" ? "Piège : axe focal vertical, la condition est $k^2=a^2-b^2m^2$." : "Piège : pour l'hyperbole, $k^2=a^2m^2-b^2$ (un « − »).");
+      if (p === "bNombre") return L(e.verdict === 0 ? `$k^2=${lq(e.k2)}<0$ : aucune valeur de $k$, aucune tangente parallèle à $d$.` : `$k^2=${lq(e.k2)}>0$ : deux valeurs opposées de $k$, deux tangentes.`, a ? `Pente des asymptotes : $\\pm${lq(a)}$ ; pente de $d$ : $${lq(e.d.m)}$.` : "");
+      return L(`$k=\\pm\\sqrt{${lq(e.k2)}}$ : ${e.tangentes.map((t) => `$${yMK(t)}$`).join(" et ")}.`);
+    }
+    case "C":
+      if (p === "cEquationM") return L(`$k=y_P-m\\,x_P$ dans la condition de tangence, puis on développe : $${eqPoly(polyDegre2("m", e.eqM), ["m"])}$.`);
+      if (p === "cNombre") {
+        const D = qSub(qMul(e.eqM[1], e.eqM[1]), qMul(q(4), qMul(e.eqM[0], e.eqM[2])));
+        return L(`Discriminant de l'équation en $m$ : $\\Delta=${lq(D)}$ ${e.verdict === 0 ? "$<0$ : aucune tangente ; $P$ est à l'intérieur de l'ellipse" : "$>0$ : deux tangentes ; $P$ est à l'extérieur de l'ellipse"}.`);
+      }
+      return L(`Les deux solutions en $m$ donnent ${e.tangentes.map((t) => `$${yMK(t)}$`).join(" et ")}.`, "Vérification : chaque droite passe par $P$.");
+    case "D":
+      if (p === "dValeurs") return L(`On résout le système : $\\alpha=${lq(e.alpha)}$ et $\\beta=${lq(e.beta)}$ (la seule solution avec $\\alpha>0$ et $\\beta>0$).`, "Piège : la condition de tangence d'une hyperbole porte un « − ».");
+      return L(`$${latexConique(e.conique)}$.`, "Vérification : $P$ vérifie l'équation et $d$ ne la coupe qu'en un point.");
+    case "E": {
+      if (p === "eContacts") return L(`Les tangentes parallèles à $d$ ont pour pente $${lq(e.d.m)}$ ; la condition de tangence donne deux valeurs de $k$, puis les points de contact ${e.points.map((P) => `$${latexPoint(P)}$`).join(" et ")}.`);
+      return L(`On compare les distances à $d$ (ou les ordonnées à l'origine des tangentes à celle de $d$) : le point le plus proche est $${latexPoint(e.points[e.proche])}$.`, "Piège : seuls les points de contact des tangentes parallèles à $d$ sont candidats.");
+    }
+  }
+}
+
+function cible62(e: E, p: P, v: string[]): FragmentConsigne[] | null {
+  const pres = (a: number, b: number) => Math.abs(a - b) < 1e-9 * Math.max(1, Math.abs(b));
+  if (e.famille === "A" && p === "aPente") {
+    try {
+      const x = lireNombre(v[0]).valeur;
+      if (pres(x, -qNum(e.pente))) return f("Attention au signe de la pente (dérive la branche qui contient $P$).");
+      if (e.conique.type === "parabole" && (pres(x, 2 * qNum(e.pente)) || pres(x, qNum(e.pente) / 2))) return f("Pour $y^2=2px$, la tangente en $P$ est $y\\,y_P=p(x+x_P)$ : sa pente est $\\frac{p}{y_P}$.");
+    } catch {
+      return null;
+    }
+  }
+  if (e.famille === "B" && p === "bEquationK") {
+    try {
+      const poly = lireEquation(v[0], ["k"]).poly;
+      const fc = formeCentree(e.conique);
+      const autre = qSub(qMul(q(-fc.sx), qMul(qMul(e.d.m, e.d.m), fc.X)), qMul(q(fc.sy), fc.Y));
+      if (proportionnels(poly, polyDegre2("k", [q(1), q(0), autre]))) return f("Le signe de la condition est inversé : vérifie l'axe focal de l'hyperbole.");
+    } catch {
+      return null;
+    }
+  }
+  if ((e.famille === "B" || e.famille === "C") && (p === "bTangentes" || p === "cTangentes") && v[0].split("\n").filter((l) => l.trim()).length === 1) return f("Il manque une tangente : il y en a deux.");
+  if (e.famille === "D" && p === "dValeurs") {
+    try {
+      const a = lireNombre(v[0]).valeur;
+      const b = lireNombre(v[1]).valeur;
+      if (pres(a, qNum(e.beta)) && pres(b, qNum(e.alpha))) return f("$\\alpha$ est sous $x^2$, $\\beta$ sous $y^2$.");
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Figure
+// ---------------------------------------------------------------------------
+
+export function figure6gen62(e: E, closes: readonly P[]): string {
+  const o = objetsVides();
+  const c = e.conique;
+  const autres: { x: number; y: number }[] = [];
+  if (e.famille === "A" || e.famille === "C" || e.famille === "D") autres.push(ptNum(e.P));
+  if (e.famille === "E") {
+    autres.push(...e.points.map(ptNum));
+    // Pied de la perpendiculaire du centre à d : la droite d reste dans la fenêtre.
+    const m = qNum(e.d.m);
+    const k = qNum(e.d.k);
+    autres.push({ x: (-m * k) / (1 + m * m), y: k / (1 + m * m) });
+  }
+  const fen = fenetreConique(c, autres);
+  const ext = Math.max(fen.xmax - fen.xmin, fen.ymax - fen.ymin);
+  switch (e.famille) {
+    case "A":
+      ajouterConique(o, c, ext, { couleur: "bleu" });
+      o.points.push({ p: ptNum(e.P), nom: "P" });
+      if (closes.includes("aTangente")) o.droites.push({ ...d3(e.tangente), couleur: "vert", epais: true });
+      break;
+    case "B":
+      ajouterConique(o, c, ext, { couleur: "bleu", asymptotes: closes.includes("bNombre") });
+      if (closes.includes("bNombre")) o.droites.push({ ...d3(droiteMK(e.d)), couleur: "gris", pointilles: true, nom: "d" });
+      if (closes.includes("bTangentes")) for (const t of e.tangentes) o.droites.push({ ...d3(droiteMK(t)), couleur: "vert", epais: true });
+      break;
+    case "C":
+      ajouterConique(o, c, ext, { couleur: "bleu" });
+      if (closes.includes("cNombre")) o.points.push({ p: ptNum(e.P), nom: "P" });
+      if (closes.includes("cTangentes")) for (const t of e.tangentes) o.droites.push({ ...d3(droiteMK(t)), couleur: "vert", epais: true });
+      break;
+    case "D":
+      o.points.push({ p: ptNum(e.P), nom: "P" });
+      o.droites.push({ ...d3(droiteMK(e.d)), couleur: "accent", nom: "d" });
+      if (closes.includes("dEquation")) ajouterConique(o, c, ext, { couleur: "vert" });
+      break;
+    case "E":
+      ajouterConique(o, c, ext, { couleur: "bleu" });
+      o.droites.push({ ...d3(droiteMK(e.d)), couleur: "accent", nom: "d" });
+      if (closes.includes("eContacts")) {
+        e.points.forEach((P, i) => {
+          o.points.push({ p: ptNum(P), nom: `T${i ? "₂" : "₁"}`, couleur: closes.includes("eProche") && i === e.proche ? "vert" : "encre" });
+          o.droites.push({ ...d3(droiteMK({ m: e.d.m, k: qSub(P.y, qMul(e.d.m, P.x)) })), couleur: "gris", pointilles: true });
+        });
+      }
+      break;
+  }
+  o.fenetre = fen;
+  return figureLieux(o);
+}

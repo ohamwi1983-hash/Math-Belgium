@@ -1,358 +1,309 @@
-import type { ExerciceIntersectionsConiques, ExerciceIntersectionsConiquesA, ExerciceIntersectionsConiquesB, Frac } from "../core6e/intersectionsConiques.types";
+import type { ExerciceIntersectionA, ExerciceIntersectionB, ExerciceIntersectionsConiques } from "../core6e/intersectionsConiques.types";
 import type { PhaseIntersectionsConiques } from "../moteur6e/typesIntersectionsConiques";
+import { latexDroite, latexPoint, latexQ, latexSomme, lireEquation, lirePoint, milieu, polyCoef, proportionnels, ptNum, q, qNum, qSub } from "../moteur6e/algebreLieux";
+import { c2Conique, latexConique, polyConique } from "../moteur6e/algebreConiques";
+import type { Conique } from "../moteur6e/algebreConiques";
+import { polyCercleB, polyEquationX } from "../moteur6e/verificationIntersectionsConiques";
+import { f } from "./fragmentsCombinatoire";
+import type { AideCombi, ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
+import { champDroiteUI, champEquationUI, champListePointsUI, champNombreUI, champPointUI, d3, nomPoint, PH_POINT } from "./textesLieux";
+import { EXACT, L, eqPoly } from "./textesConiques";
+import { figureLieux } from "./figureLieux";
+import { ajouterConique, fenetreConique, objetsVides } from "./traceConiques";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen61`. Dispatch sur
- * `exercice.famille` PUIS `phase`, mirroir `formatEquationConiqueCaracteristiques.ts` (6gen59) —
- * dispatcher générique piloté par `champs: ChampDef[]`, jamais de JSX par écran (CLAUDE.md).
+ * Textes de `6gen61` — Intersection d'une conique et d'une droite (6e ch. 10, § 4 ; audit, lots B et C).
+ * Conique « de centre O, d'axes les axes du repère » dite en toutes lettres (I1), données en prose
+ * (plus rien de coupé à 680 px, P4), exemples de champ de FORMAT seulement (I3), aides en KaTeX (I2),
+ * figure : la droite n'est tracée qu'APRÈS le nombre de points communs.
  */
 
-export type TypeChamp = "texte" | "choix" | "liste";
+type E = ExerciceIntersectionsConiques;
+type P = PhaseIntersectionsConiques;
 
-export interface OptionChoix {
-  valeur: string;
-  label: string;
+const NATURE = { ellipse: "une ellipse", hyperbole: "une hyperbole", cercle: "un cercle" } as const;
+
+const yEgal = (e: ExerciceIntersectionA) => `y=${latexSomme([
+  [e.m, "x"],
+  [e.k, ""],
+])}`;
+const delta = (eq: [bigint, bigint, bigint]) => eq[1] * eq[1] - 4n * eq[0] * eq[2];
+
+function donneesConique(e: ExerciceIntersectionA): string {
+  if (e.nature === "cercle") return `$\\Gamma$ est le cercle de centre $O$ qui passe par $${nomPoint("S", e.S)}$.`;
+  return `$\\Gamma$ est ${NATURE[e.nature]} de centre $O$ dont les axes de symétrie sont les axes du repère ; $${nomPoint("S", e.S)}$ est un sommet et $${nomPoint("F", e.F!)}$ un foyer.`;
+}
+function donneesDroite(e: ExerciceIntersectionA): string {
+  const ab = `$${nomPoint("A", e.A)}$ et $${nomPoint("B", e.B)}$`;
+  if (e.sousTypeDroite === "deuxPoints") return `$d$ est la droite $(AB)$, avec ${ab}.`;
+  if (e.sousTypeDroite === "mediatrice") return `$d$ est la médiatrice du segment $[AB]$, avec ${ab}.`;
+  return `$d$ est la hauteur issue de $C$ du triangle $ABC$, avec ${ab} et $${nomPoint("C", e.C!)}$.`;
+}
+function c1Latex(e: ExerciceIntersectionB): string {
+  return `y=${latexSomme([
+    [q(1), "x^2"],
+    [q(e.b1), "x"],
+    [q(e.c1), ""],
+  ])}`;
+}
+function c2Latex(e: ExerciceIntersectionB): string {
+  return `${latexSomme([
+    [q(e.A2), "x^2"],
+    [q(e.B2), "y^2"],
+    [q(e.D2), "x"],
+    [q(e.E2), "y"],
+    [q(e.F2), ""],
+  ])}=0`;
+}
+function c1Nul(e: ExerciceIntersectionB): string {
+  return latexSomme([
+    [q(1), "x^2"],
+    [q(e.b1), "x"],
+    [q(-1), "y"],
+    [q(e.c1), ""],
+  ]);
 }
 
-export interface ChampDef {
-  type: TypeChamp;
-  label: string;
-  placeholder?: string;
-  options?: OptionChoix[];
-  minuscule?: boolean;
-  /** `type==="liste"` uniquement — add-as-needed 0..maxLignes lignes. */
-  labelAjout?: string;
-  labelAucune?: string;
-  maxLignes?: number;
-}
+export const FORMAT_6GEN61: FormatCombinatoire<E, P> = {
+  consigneGenerale(e) {
+    if (e.famille === "A") return f("On cherche les points communs à une conique $\\Gamma$ et à une droite $d$." + EXACT);
+    return f("La parabole $C_1$ et l'ellipse $C_2$ ci-dessous se coupent en plusieurs points. Montre, sans résoudre le système, que ces points sont sur un même cercle, puis détermine ce cercle." + EXACT);
+  },
+  donnees(e) {
+    if (e.famille === "A") return [f(donneesConique(e)), f(donneesDroite(e))];
+    return [f(`$C_1\\,:\\ ${c1Latex(e)}$`), f(`$C_2\\,:\\ ${c2Latex(e)}$`)];
+  },
+  consigneEcran(e, p) {
+    switch (p) {
+      case "aConique":
+        return f("Écris une équation de la conique $\\Gamma$.");
+      case "aDroite":
+        return f("Écris une équation de la droite $d$.");
+      case "aEquationX":
+        return f("Remplace $y$ dans l'équation de $\\Gamma$ par son expression tirée de l'équation de $d$ : écris l'équation du second degré en $x$ obtenue.");
+      case "aNombre":
+        return f("Combien de points communs ont $\\Gamma$ et $d$ ?");
+      case "aPoints":
+        return f("Donne les coordonnées de chaque point commun (un par ligne).");
+      case "bCouple":
+        return e.famille === "B" ? f(`On écrit $C_1\\,:\\ ${c1Nul(e)}=0$. Pour quels nombres $\\lambda$ et $\\mu$ (non nuls tous les deux) l'équation $\\lambda\\cdot C_1+\\mu\\cdot C_2=0$ est-elle celle d'un cercle ? Donne un couple $(\\lambda\\,;\\mu)$.`) : [];
+      case "bCercle":
+        return f("Écris l'équation du cercle obtenu avec ce couple.");
+      case "bCentreRayon":
+        return f("Donne le centre $\\Omega$ et le rayon $r$ de ce cercle.");
+    }
+  },
+  champs(_e, p): ChampCombi[] {
+    switch (p) {
+      case "aConique":
+        return [champEquationUI("Équation de $\\Gamma$")];
+      case "aDroite":
+        return [champDroiteUI("Équation de $d$")];
+      case "aEquationX":
+        return [champEquationUI("Équation en $x$", ["x"])];
+      case "aNombre":
+        return [
+          {
+            type: "choix",
+            label: "",
+            options: [
+              { valeur: "0", label: "Aucun" },
+              { valeur: "1", label: "Un seul" },
+              { valeur: "2", label: "Deux" },
+            ],
+          },
+        ];
+      case "aPoints":
+        return [champListePointsUI("Points communs")];
+      case "bCouple":
+        return [{ type: "texte", label: "$(\\lambda\\,;\\mu)$", placeholder: PH_POINT }];
+      case "bCercle":
+        return [champEquationUI("Équation du cercle")];
+      case "bCentreRayon":
+        return [champPointUI("Centre $\\Omega$"), champNombreUI("Rayon $r$")];
+    }
+  },
+  aides: aides61,
+  reponseAttendue: reponse61,
+  explication: explication61,
+  libellePhase: (_e, p) => LIBELLES[p],
+  messageCible: cible61,
+};
 
-export interface AideAvecLatex {
-  texte: string;
-  latex: string | null;
-}
+const LIBELLES: Record<P, string> = {
+  aConique: "Équation de Γ",
+  aDroite: "Équation de d",
+  aEquationX: "Équation en x",
+  aNombre: "Nombre de points communs",
+  aPoints: "Points communs",
+  bCouple: "Couple (λ ; μ)",
+  bCercle: "Équation du cercle",
+  bCentreRayon: "Centre et rayon",
+};
 
-export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
-function texte(valeur: string): FragmentConsigne {
-  return { type: "texte", valeur };
-}
-function latex(valeur: string): FragmentConsigne {
-  return { type: "latex", valeur };
-}
-
-const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
-
-function champTexte(label: string, placeholder: string, minuscule = false): ChampDef {
-  return { type: "texte", label, placeholder, minuscule };
-}
-
-function champChoix(label: string, options: OptionChoix[]): ChampDef {
-  return { type: "choix", label, options };
-}
-
-function champListe(label: string, labelAjout: string, labelAucune: string, maxLignes: number): ChampDef {
-  return { type: "liste", label, labelAjout, labelAucune, maxLignes };
-}
-
-// ============================================================================
-// Petits formateurs numériques/LaTeX partagés.
-// ============================================================================
-
-function afficherFrac(f: Frac): string {
-  if (f.d === 1) return `${f.n}`;
-  return f.n < 0 ? `-\\frac{${-f.n}}{${f.d}}` : `\\frac{${f.n}}{${f.d}}`;
-}
-
-function afficherPoint(p: { x: Frac; y: Frac }): string {
-  return `(${afficherFrac(p.x)};${afficherFrac(p.y)})`;
-}
-
-function termeSigne(coeff: number, expr: string, premier: boolean): string {
-  if (coeff === 0) return "";
-  const signe = coeff < 0 ? "-" : premier ? "" : "+";
-  const abs = Math.abs(coeff);
-  const coeffTxt = abs === 1 ? "" : `${abs}`;
-  return `${signe}${coeffTxt}${expr}`;
-}
-
-/** Formate une constante additive (jamais premier terme) : "" si nulle, "+3" ou "-2" sinon. */
-function formatConstante(v: number): string {
-  if (v === 0) return "";
-  return v < 0 ? `${v}` : `+${v}`;
-}
-
-function afficherConiqueLatex(p: number, q: number, n: number): string {
-  return `${termeSigne(p, "x^2", true)}${termeSigne(q, "y^2", false)}=${n}`;
-}
-
-function afficherDroiteLatex(m: Frac, c: Frac): string {
-  const termeM = m.n === 0 ? "" : `${afficherFrac(m)}x`;
-  let termeC = "";
-  if (c.n !== 0) {
-    const abs = c.d === 1 ? `${Math.abs(c.n)}` : `\\frac{${Math.abs(c.n)}}{${c.d}}`;
-    termeC = termeM === "" ? (c.n < 0 ? `-${abs}` : abs) : `${c.n < 0 ? "-" : "+"}${abs}`;
-  }
-  const corps = termeM + termeC;
-  return `y=${corps === "" ? "0" : corps}`;
-}
-
-// ============================================================================
-// Famille A.
-// ============================================================================
-
-const LIBELLE_NATURE: Record<"ellipse" | "hyperbole" | "cercle", string> = { ellipse: "Ellipse", hyperbole: "Hyperbole", cercle: "Cercle" };
-
-function coniqueLatexA(e: ExerciceIntersectionsConiquesA): string {
-  return afficherConiqueLatex(e.conique.p, e.conique.q, e.conique.n);
-}
-
-function consigneSousType(sousType: ExerciceIntersectionsConiquesA["sousTypeDroite"]): FragmentConsigne[] {
-  if (sousType === "deuxPoints") return [texte("établis l'équation de la droite passant par A et B")];
-  if (sousType === "mediatrice") return [texte("établis l'équation de la médiatrice du segment "), latex("[A;B]")];
-  return [texte("établis l'équation de la hauteur du triangle ABC issue de C, perpendiculaire au côté "), latex("[A;B]")];
-}
-
-export function consigneGeneraleA(e: ExerciceIntersectionsConiquesA): FragmentConsigne[] {
-  return [texte(`On étudie l'intersection d'une droite et d'une conique (${LIBELLE_NATURE[e.natureConique]}). Détermine leurs équations, résous l'équation du second degré obtenue par substitution, puis donne les points d'intersection.`)];
-}
-
-export function blocDonneesA(e: ExerciceIntersectionsConiquesA): string[] {
-  const lignes: string[] = [];
-  if (e.coniqueDirecte) {
-    lignes.push(`\\text{Conique : }${coniqueLatexA(e)}`);
-  } else {
-    const car = e.caracteristiques!;
-    lignes.push(`\\text{Sommet : }S(${car.sommetS.x};${car.sommetS.y})`);
-    lignes.push(`\\text{Foyer : }F(${car.foyerF.x};${car.foyerF.y})`);
-  }
-  if (e.donneesLigne.sousType === "deuxPoints") {
-    lignes.push(`A${afficherPoint(e.donneesLigne.A)}\\text{, }B${afficherPoint(e.donneesLigne.B)}`);
-  } else if (e.donneesLigne.sousType === "mediatrice") {
-    lignes.push(`A${afficherPoint(e.donneesLigne.A)}\\text{, }B${afficherPoint(e.donneesLigne.B)}`);
-    lignes.push(`\\text{Droite = médiatrice de }[A;B]`);
-  } else {
-    lignes.push(`A${afficherPoint(e.donneesLigne.A)}\\text{, }B${afficherPoint(e.donneesLigne.B)}\\text{, }C${afficherPoint(e.donneesLigne.C)}`);
-    lignes.push(`\\text{Droite = hauteur issue de }C`);
-  }
-  return lignes;
-}
-
-export function consigneEcranA(e: ExerciceIntersectionsConiquesA, phase: PhaseIntersectionsConiques): FragmentConsigne[] {
-  if (phase === "aEcran1") return [texte("Établis l'équation de la conique depuis ses caractéristiques (sommet S, foyer F).")];
-  if (phase === "aEcran2") return [texte("À partir des données ci-dessus, "), ...consigneSousType(e.sousTypeDroite), texte(".")];
-  if (phase === "aEcran3") return [texte("Substitue l'équation de la droite CONFIRMÉE dans celle de la conique CONFIRMÉE, développe, et résous l'équation du second degré obtenue en x. Donne le discriminant et le nombre de solutions (0, 1, ou 2).")];
-  return [texte("À partir de la résolution CONFIRMÉE, donne les coordonnées du (ou des) point(s) d'intersection — aucune ligne si le discriminant est négatif.")];
-}
-
-/** ACCUMULE les écrans déjà confirmés (correctif transversal — voir CLAUDE.md/`docs/historique-
- * 6e.md`, même bug déjà corrigé sur `formatIdentificationConiques.ts`, 6gen58) : `aEcran3`/`aEcran4`
- * ne montraient QUE l'info de l'écran immédiatement précédent — `aEcran1` est SAUTÉ si
- * `coniqueDirecte` (voir `typesIntersectionsConiques.ts`), donc la ligne "conique confirmée" n'est
- * accumulée que dans le cas contraire. Plus ancien en premier. */
-export function etatActuelA(e: ExerciceIntersectionsConiquesA, phase: PhaseIntersectionsConiques): string[] | null {
-  const lignes: string[] = [];
-  if (!e.coniqueDirecte && (phase === "aEcran2" || phase === "aEcran3" || phase === "aEcran4")) {
-    lignes.push(`\\text{Conique confirmée (étape 1) : }${coniqueLatexA(e)}`);
-  }
-  if (phase === "aEcran3" || phase === "aEcran4") {
-    lignes.push(`\\text{Droite confirmée : }${afficherDroiteLatex(e.droite.m, e.droite.c)}`);
-  }
-  // 2 fragments COURTS (jamais une seule longue phrase `\text{...}`) — un `\text{...}` KaTeX ne se
-  // scinde jamais sur plusieurs lignes ; une phrase trop longue déborde silencieusement du cadre
-  // mobile (375px), piège documenté CLAUDE.md/`docs/historique-6e.md` (déjà rencontré et évité pour
-  // `blocDonneesC`/`blocDonneesD`, 6gen59 — trouvé ici par inspection visuelle d'une capture 375px).
-  if (phase === "aEcran4") lignes.push(`\\Delta=${e.discriminant}\\text{ (confirmé)}`, `${e.nombreSolutions}\\text{ solution(s) (confirmé)}`);
-  return lignes.length > 0 ? lignes : null;
-}
-
-export function champsEcranA(_e: ExerciceIntersectionsConiquesA, phase: PhaseIntersectionsConiques): ChampDef[] {
-  if (phase === "aEcran1") return [champTexte("Équation de la conique =", "ex : x^2/25+y^2/16=1")];
-  if (phase === "aEcran2") return [champTexte("Équation de la droite =", "ex : y=2x+1")];
-  if (phase === "aEcran3") {
-    return [
-      champTexte("Discriminant =", "ex : 64", true),
-      champChoix("Nombre de solutions =", [
-        { valeur: "0", label: "0 (aucune)" },
-        { valeur: "1", label: "1 (tangente)" },
-        { valeur: "2", label: "2 (sécante)" },
-      ]),
-    ];
-  }
-  return [champListe("Points d'intersection", "+ Ajouter un point", "Pas de point d'intersection", 2)];
-}
-
-export function niveauAideMaxEcranA(e: ExerciceIntersectionsConiquesA, phase: PhaseIntersectionsConiques): number {
-  return phase === "aEcran2" && e.sousTypeDroite !== "deuxPoints" ? 2 : 0;
-}
-
-export function aideNiveau1A(): AideAvecLatex {
-  return { texte: "Rappel : la médiatrice d'un segment passe par son MILIEU, avec une pente PERPENDICULAIRE à celle du segment ; une hauteur d'un triangle passe par le SOMMET indiqué, avec une pente PERPENDICULAIRE au CÔTÉ OPPOSÉ (jamais un autre côté).", latex: null };
-}
-
-export function aideNiveau2A(e: ExerciceIntersectionsConiquesA): AideAvecLatex {
-  if (e.donneesLigne.sousType === "mediatrice") {
-    const milieu = { x: { n: e.donneesLigne.A.x.n * e.donneesLigne.B.x.d + e.donneesLigne.B.x.n * e.donneesLigne.A.x.d, d: 2 * e.donneesLigne.A.x.d * e.donneesLigne.B.x.d }, y: { n: e.donneesLigne.A.y.n * e.donneesLigne.B.y.d + e.donneesLigne.B.y.n * e.donneesLigne.A.y.d, d: 2 * e.donneesLigne.A.y.d * e.donneesLigne.B.y.d } };
-    return { texte: "Point de passage et pente calculés séparément (équation non assemblée) :", latex: `\\text{milieu de }[A;B]=${afficherPoint(milieu)}\\text{, pente}=${afficherFrac(e.droite.m)}` };
-  }
-  if (e.donneesLigne.sousType === "hauteur") {
-    return { texte: "Point de passage et pente calculés séparément (équation non assemblée) :", latex: `C=${afficherPoint(e.donneesLigne.C)}\\text{, pente}=${afficherFrac(e.droite.m)}` };
-  }
-  return AUCUNE_AIDE;
-}
-
-// ============================================================================
-// Famille B.
-// ============================================================================
-
-function c1Latex(e: ExerciceIntersectionsConiquesB): string {
-  return `y=x^2${termeSigne(e.b1, "x", false)}${formatConstante(e.c1)}`;
-}
-
-function c2Latex(e: ExerciceIntersectionsConiquesB): string {
-  return `${termeSigne(e.A2, "x^2", true)}${termeSigne(e.B2, "y^2", false)}${termeSigne(e.D2, "x", false)}${termeSigne(e.E2, "y", false)}${formatConstante(e.F2)}=0`;
-}
-
-export function consigneGeneraleB(): FragmentConsigne[] {
+function aideConique(c: Conique): AideCombi[] {
+  if (c.type === "cercle") return [{ texte: "Cercle de centre $O$ et de rayon $r$ :", latex: "x^2+y^2=r^2" }, { texte: "Ici :", latex: `r^2=OS^2=${latexQ(c.r2)}` }];
+  const rel = c.type === "ellipse" ? "b^2=a^2-c^2" : "b^2=c^2-a^2";
   return [
-    texte("On donne 2 coniques "),
-    latex("C_1"),
-    texte(" et "),
-    latex("C_2"),
-    texte(". Montre que leurs points d'intersection se trouvent sur un CERCLE, sans jamais résoudre le système "),
-    latex("\\{C_1,C_2\\}"),
-    texte(" directement — cherche une combinaison "),
-    latex("\\lambda C_1+\\mu C_2=0"),
-    texte(" qui SOIT un cercle."),
+    { texte: `$a$ est la distance du centre au sommet, $c$ celle du centre au foyer, puis ${c.type === "ellipse" ? "pour une ellipse" : "pour une hyperbole"} :`, latex: rel },
+    { texte: "Ici, l'axe focal est celui de $S$ et $F$ :", latex: `a=OS=${Math.round(Math.sqrt(qNum((c as Extract<Conique, { a2: unknown }>).a2)))},\\quad c=OF=${Math.round(Math.sqrt(qNum(c2Conique(c as Extract<Conique, { type: "ellipse" | "hyperbole" }>))))}` },
   ];
 }
 
-export function blocDonneesB(e: ExerciceIntersectionsConiquesB): string[] {
-  return [`C_1 : ${c1Latex(e)}`, `C_2 : ${c2Latex(e)}`];
-}
-
-export function consigneEcranB(_e: ExerciceIntersectionsConiquesB, phase: PhaseIntersectionsConiques): FragmentConsigne[] {
-  if (phase === "bEcran1") {
-    return [
-      texte("Forme la combinaison "),
-      latex("\\lambda C_1+\\mu C_2=0"),
-      texte(". Pose les conditions sur "),
-      latex("\\lambda,\\mu"),
-      texte(" pour que les coefficients de "),
-      latex("x^2"),
-      texte(" et de "),
-      latex("y^2"),
-      texte(" soient ÉGAUX (aucun terme croisé "),
-      latex("xy"),
-      texte(" n'apparaît jamais ici) — donne une paire "),
-      latex("(\\lambda,\\mu)"),
-      texte(" qui convient."),
-    ];
+function aides61(e: E, p: P): AideCombi[] {
+  if (e.famille === "A") {
+    switch (p) {
+      case "aConique":
+        return aideConique(e.conique);
+      case "aDroite": {
+        const AB = { x: qSub(e.B.x, e.A.x), y: qSub(e.B.y, e.A.y) };
+        const vAB = `\\overrightarrow{AB}\\begin{pmatrix}${latexQ(AB.x)}\\\\ ${latexQ(AB.y)}\\end{pmatrix}`;
+        if (e.sousTypeDroite === "deuxPoints") return [{ texte: "Pente de la droite $(AB)$ :", latex: "m=\\dfrac{y_B-y_A}{x_B-x_A}" }, { texte: "Ici :", latex: vAB }];
+        if (e.sousTypeDroite === "mediatrice") return [{ texte: "La médiatrice de $[AB]$ passe par le milieu $M$ de $[AB]$ et a $\\overrightarrow{AB}$ pour vecteur normal." }, { texte: "Ici :", latex: `M${latexPoint(milieu(e.A, e.B))},\\quad ${vAB}` }];
+        return [{ texte: "La hauteur issue de $C$ passe par $C$ et est perpendiculaire à $(AB)$ : $\\overrightarrow{AB}$ en est un vecteur normal." }, { texte: "Ici :", latex: `C${latexPoint(e.C!)},\\quad ${vAB}` }];
+      }
+      case "aEquationX":
+        return [{ texte: "Isole $y$ dans l'équation de $d$, remplace-le dans celle de $\\Gamma$, développe, puis multiplie par un dénominateur commun." }, { texte: "Ici :", latex: yEgal(e) }];
+      case "aNombre":
+        return [{ texte: "Pour une équation du second degré : $\\Delta>0$, deux points ; $\\Delta=0$, un seul (la droite est tangente) ; $\\Delta<0$, aucun." }, { texte: "L'équation obtenue :", latex: eqPoly(polyEquationX(e.eq), ["x"]) }];
+      default:
+        return [{ texte: "Résous l'équation en $x$, puis calcule l'ordonnée avec l'équation de $d$." }, { texte: "Ici :", latex: `\\Delta=${delta(e.eq)}` }];
+    }
   }
-  if (phase === "bEcran2") {
-    return [
-      texte("Avec le couple "),
-      latex("(\\lambda,\\mu)"),
-      texte(" CONFIRMÉ, substitue dans "),
-      latex("\\lambda C_1+\\mu C_2"),
-      texte(" et donne l'équation BRUTE du cercle obtenu (pas encore sous forme standard)."),
-    ];
+  switch (p) {
+    case "bCouple":
+      return [{ texte: "Une équation de cercle a des coefficients de $x^2$ et de $y^2$ égaux (et aucun terme en $xy$)." }, { texte: "Dans $\\lambda\\cdot C_1+\\mu\\cdot C_2$ :", latex: `x^2\\ :\\ \\lambda+${e.A2}\\mu,\\qquad y^2\\ :\\ ${e.B2}\\mu` }];
+    case "bCercle":
+      return [{ texte: "Remplace $\\lambda$ et $\\mu$, développe et réduis, puis divise par le coefficient de $x^2$." }, { texte: "Avec le couple :", latex: `(\\lambda\\,;\\mu)=(${e.lambda}\\,;${e.mu})` }];
+    default:
+      return [{ texte: "Complète les carrés :", latex: "x^2+y^2-2hx-2ky+c=0\\iff(x-h)^2+(y-k)^2=h^2+k^2-c" }, { texte: "L'équation du cercle :", latex: eqPoly(polyCercleB(e)) }];
   }
-  return [texte("Complète le carré sur x et sur y à partir de l'équation CONFIRMÉE de l'étape précédente, pour identifier le centre et le rayon du cercle.")];
 }
 
-/** ACCUMULE les écrans déjà confirmés — même correctif que `etatActuelA` (voir sa doc-string). */
-export function etatActuelB(e: ExerciceIntersectionsConiquesB, phase: PhaseIntersectionsConiques): string[] | null {
-  const lignes: string[] = [];
-  if (phase === "bEcran2" || phase === "bEcran3") {
-    lignes.push(`\\text{Couple confirmé (étape 1) : }\\lambda=${e.lambda}\\text{, }\\mu=${e.mu}`);
+function reponse61(e: E, p: P): string[] {
+  if (e.famille === "A") {
+    switch (p) {
+      case "aConique":
+        return [latexConique(e.conique)];
+      case "aDroite":
+        return [yEgal(e)];
+      case "aEquationX":
+        return [eqPoly(polyEquationX(e.eq), ["x"])];
+      case "aNombre":
+        return [`\\text{${["aucun", "un seul", "deux"][e.verdict]}}`];
+      default:
+        return e.points.map(latexPoint);
+    }
   }
-  if (phase === "bEcran3") {
-    lignes.push(`\\text{Équation confirmée (étape 2) : }${termeSigne(e.K, "x^2", true)}${termeSigne(e.K, "y^2", false)}${termeSigne(e.coeffX, "x", false)}${termeSigne(e.coeffY, "y", false)}${formatConstante(e.constanteBrute)}=0`);
+  switch (p) {
+    case "bCouple":
+      return [`(\\lambda\\,;\\mu)=(${e.lambda}\\,;${e.mu})`, "\\text{ou tout couple proportionnel}"];
+    case "bCercle":
+      return [eqPoly(polyCercleB(e))];
+    default:
+      return [`\\Omega${latexPoint(e.centre)}`, `r=${e.rayon}`];
   }
-  return lignes.length > 0 ? lignes : null;
 }
 
-export function champsEcranB(_e: ExerciceIntersectionsConiquesB, phase: PhaseIntersectionsConiques): ChampDef[] {
-  if (phase === "bEcran1") return [champTexte("λ =", "ex : 2", true), champTexte("μ =", "ex : 1", true)];
-  if (phase === "bEcran2") return [champTexte("Équation brute du cercle =", "ex : 5x^2+5y^2-20x+10y-20=0")];
-  return [champTexte("Centre (abscisse) =", "ex : 2", true), champTexte("Centre (ordonnée) =", "ex : -1", true), champTexte("Rayon =", "ex : 3", true)];
-}
-
-export function niveauAideMaxEcranB(phase: PhaseIntersectionsConiques): number {
-  return phase === "bEcran1" ? 2 : 0;
-}
-
-export function aideNiveau1B(): AideAvecLatex {
-  return { texte: "Rappel : tout point qui vérifie à la fois C1=0 et C2=0 vérifie AUTOMATIQUEMENT n'importe quelle combinaison λC1+μC2=0 — cherche λ,μ pour que cette combinaison soit un cercle, plutôt que de résoudre le système {C1,C2} directement (un polynôme de degré 4, sans racine simple en général).", latex: "C_1=0\\quad C_2=0\\quad\\Rightarrow\\quad \\lambda C_1+\\mu C_2=0" };
-}
-
-export function aideNiveau2B(e: ExerciceIntersectionsConiquesB): AideAvecLatex {
-  const c1FormeImplicite = `x^2${termeSigne(e.b1, "x", false)}-y${formatConstante(e.c1)}`;
-  return { texte: "Combinaison générale posée (λ,μ non déterminés, conditions d'égalité non traduites) :", latex: `\\lambda(${c1FormeImplicite})+\\mu(${c2Latex(e)})` };
-}
-
-// ============================================================================
-// Dispatch commun.
-// ============================================================================
-
-export function consigneGenerale(exercice: ExerciceIntersectionsConiques): FragmentConsigne[] {
-  return exercice.famille === "A" ? consigneGeneraleA(exercice) : consigneGeneraleB();
-}
-
-export function blocDonnees(exercice: ExerciceIntersectionsConiques): string[] {
-  return exercice.famille === "A" ? blocDonneesA(exercice) : blocDonneesB(exercice);
-}
-
-export function consigneEcran(exercice: ExerciceIntersectionsConiques, phase: PhaseIntersectionsConiques): FragmentConsigne[] {
-  return exercice.famille === "A" ? consigneEcranA(exercice, phase) : consigneEcranB(exercice, phase);
-}
-
-export function etatActuel(exercice: ExerciceIntersectionsConiques, phase: PhaseIntersectionsConiques): string[] | null {
-  return exercice.famille === "A" ? etatActuelA(exercice, phase) : etatActuelB(exercice, phase);
-}
-
-export function champsEcran(exercice: ExerciceIntersectionsConiques, phase: PhaseIntersectionsConiques): ChampDef[] {
-  return exercice.famille === "A" ? champsEcranA(exercice, phase) : champsEcranB(exercice, phase);
-}
-
-export function niveauAideMaxEcran(exercice: ExerciceIntersectionsConiques, phase: PhaseIntersectionsConiques): number {
-  return exercice.famille === "A" ? niveauAideMaxEcranA(exercice, phase) : niveauAideMaxEcranB(phase);
-}
-
-export function aideNiveau1(exercice: ExerciceIntersectionsConiques, phase: PhaseIntersectionsConiques): AideAvecLatex {
-  if (niveauAideMaxEcran(exercice, phase) === 0) return AUCUNE_AIDE;
-  return exercice.famille === "A" ? aideNiveau1A() : aideNiveau1B();
-}
-
-export function aideNiveau2(exercice: ExerciceIntersectionsConiques, phase: PhaseIntersectionsConiques): AideAvecLatex {
-  if (niveauAideMaxEcran(exercice, phase) === 0) return AUCUNE_AIDE;
-  return exercice.famille === "A" ? aideNiveau2A(exercice) : aideNiveau2B(exercice);
-}
-
-export const LIBELLE_PHASE: Record<PhaseIntersectionsConiques, string> = {
-  aEcran1: "Étape 1 (équation de la conique)",
-  aEcran2: "Étape 2 (équation de la droite)",
-  aEcran3: "Étape 3 (discriminant et nombre de solutions)",
-  aEcran4: "Étape 4 (points d'intersection)",
-  bEcran1: "Étape 1 (couple λ,μ)",
-  bEcran2: "Étape 2 (équation brute du cercle)",
-  bEcran3: "Étape 3 (centre et rayon)",
-};
-
-export const LIBELLE_FAMILLE: Record<ExerciceIntersectionsConiques["famille"], string> = {
-  A: "A — Intersection droite-conique",
-  B: "B — Intersection de 2 coniques (combinaison linéaire)",
-};
-
-export function formatReponseAttenduePhaseLatex(exercice: ExerciceIntersectionsConiques, phase: PhaseIntersectionsConiques): string[] {
-  if (exercice.famille === "A") {
-    if (phase === "aEcran1") return [coniqueLatexA(exercice)];
-    if (phase === "aEcran2") return [afficherDroiteLatex(exercice.droite.m, exercice.droite.c)];
-    if (phase === "aEcran3") return [`\\Delta=${exercice.discriminant}\\text{, }${exercice.nombreSolutions}\\text{ solution(s)}`];
-    if (exercice.points.length === 0) return ["\\text{Aucun point d'intersection}"];
-    return exercice.points.map((p) => afficherPoint(p));
+function explication61(e: E, p: P): FragmentConsigne[][] {
+  if (e.famille === "A") {
+    switch (p) {
+      case "aConique":
+        return L(`$${latexConique(e.conique)}$.`, e.conique.type === "cercle" ? "Le rayon est la distance $OS$." : "Piège : $a^2$ va sous le carré de la variable de l'axe focal (celui de $S$ et $F$).");
+      case "aDroite":
+        return L(`$d\\,:\\ ${yEgal(e)}$, soit $${latexDroite(e.droite)}$.`);
+      case "aEquationX":
+        return L(`On remplace $y$ par $${latexSomme([[e.m, "x"], [e.k, ""]])}$ dans l'équation de $\\Gamma$, on développe et on multiplie par un dénominateur commun : $${eqPoly(polyEquationX(e.eq), ["x"])}$.`, "Toute équation proportionnelle convient.");
+      case "aNombre": {
+        const d = delta(e.eq);
+        return L(`$\\Delta=(${e.eq[1]})^2-4\\cdot${e.eq[0]}\\cdot(${e.eq[2]})=${d}$ : ${d > 0n ? "$\\Delta>0$, deux points communs" : d === 0n ? "$\\Delta=0$, un seul point commun : $d$ est tangente à $\\Gamma$" : "$\\Delta<0$, aucun point commun"}.`, "Piège : le signe de $\\Delta$ ne dépend pas du facteur par lequel on a multiplié l'équation.");
+      }
+      default:
+        return L(`Les solutions de l'équation donnent les abscisses ; l'équation de $d$ donne les ordonnées : ${e.points.map((P) => `$${latexPoint(P)}$`).join(" et ")}.`, "Vérification : chaque point vérifie l'équation de $\\Gamma$ et celle de $d$.");
+    }
   }
-  if (phase === "bEcran1") return [`\\lambda=${exercice.lambda}\\text{, }\\mu=${exercice.mu}`];
-  if (phase === "bEcran2") return [`${termeSigne(exercice.K, "x^2", true)}${termeSigne(exercice.K, "y^2", false)}${termeSigne(exercice.coeffX, "x", false)}${termeSigne(exercice.coeffY, "y", false)}${formatConstante(exercice.constanteBrute)}=0`];
-  return [`\\text{Centre : }(${exercice.centre.x};${exercice.centre.y})\\text{, rayon}=${exercice.rayon}`];
+  switch (p) {
+    case "bCouple":
+      return L(`Il faut $\\lambda+${e.A2}\\mu=${e.B2}\\mu$, soit $\\lambda=${e.lambda}\\,\\mu$ : par exemple $(\\lambda\\,;\\mu)=(${e.lambda}\\,;${e.mu})$.`, "Tout point commun à $C_1$ et $C_2$ annule $C_1$ et $C_2$, donc aussi $\\lambda\\cdot C_1+\\mu\\cdot C_2$ : il est sur ce cercle.");
+    case "bCercle":
+      return L(`On développe et on divise par $${e.B2}$ : $${eqPoly(polyCercleB(e))}$.`);
+    default:
+      return L(`En complétant les carrés : $(x${qNum(e.centre.x) < 0 ? "+" : "-"}${Math.abs(qNum(e.centre.x))})^2+(y${qNum(e.centre.y) < 0 ? "+" : "-"}${Math.abs(qNum(e.centre.y))})^2=${e.rayon * e.rayon}$ : $\\Omega${latexPoint(e.centre)}$ et $r=${e.rayon}$.`, "Piège : le second membre est $r^2$, pas $r$.");
+  }
+}
+
+function cible61(e: E, p: P, v: string[]): FragmentConsigne[] | null {
+  if (e.famille !== "A") return null;
+  if (p === "aConique" && (e.conique.type === "ellipse" || e.conique.type === "hyperbole")) {
+    try {
+      const poly = lireEquation(v[0], ["x", "y"]).poly;
+      const ech: Conique = { ...e.conique, axe: e.conique.axe === "x" ? "y" : "x" };
+      if (proportionnels(poly, polyConique(ech))) return f("$a^2$ et $b^2$ sont échangés : l'axe focal est celui du sommet et du foyer donnés.");
+      const autre: Conique = { ...e.conique, type: e.conique.type === "ellipse" ? "hyperbole" : "ellipse" };
+      if (proportionnels(poly, polyConique(autre))) return f(e.conique.type === "ellipse" ? "Le foyer est entre le centre et le sommet : c'est une ellipse." : "Le foyer est au-delà du sommet : c'est une hyperbole.");
+    } catch {
+      return null;
+    }
+  }
+  if (p === "aEquationX") {
+    try {
+      const poly = lireEquation(v[0], ["x"]).poly;
+      if (polyCoef(poly, { x: 2 }).n === 0n) return f("L'équation obtenue est du second degré : $y^2$ donne un terme en $x^2$.");
+    } catch {
+      return null;
+    }
+  }
+  if (p === "aPoints" && e.points.length === 2 && v[0].split("\n").filter((l) => l.trim()).length === 1) return f("Il manque un point : l'équation a deux solutions.");
+  if (p === "aPoints") {
+    try {
+      const lus = v[0].split("\n").filter((l) => l.trim()).map((l) => lirePoint(l));
+      const surD = lus.every((P) => Math.abs(P.y.valeur - (qNum(e.m) * P.x.valeur + qNum(e.k))) < 1e-9);
+      if (!surD) return f("Calcule l'ordonnée de chaque point avec l'équation de $d$ : chaque point est sur $d$.");
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Figure
+// ---------------------------------------------------------------------------
+
+export function figure6gen61(e: E, closes: readonly P[]): string {
+  const o = objetsVides();
+  if (e.famille === "A") {
+    const autres = [ptNum(e.S), ...(e.F ? [ptNum(e.F)] : [])];
+    const verdictJuge = closes.includes("aNombre");
+    if (verdictJuge) autres.push(ptNum(e.A), ptNum(e.B), ...(e.C ? [ptNum(e.C)] : []));
+    const fen = fenetreConique(e.conique, autres);
+    if (closes.includes("aConique")) ajouterConique(o, e.conique, Math.max(fen.xmax - fen.xmin, fen.ymax - fen.ymin), { couleur: "bleu" });
+    o.points.push({ p: ptNum(e.S), nom: "S" });
+    if (e.F) o.points.push({ p: ptNum(e.F), nom: "F", couleur: "accent" });
+    if (verdictJuge) {
+      o.droites.push({ ...d3(e.droite), couleur: "vert", epais: true, nom: "d" });
+      o.points.push({ p: ptNum(e.A), nom: "A" }, { p: ptNum(e.B), nom: "B" });
+      if (e.C) o.points.push({ p: ptNum(e.C), nom: "C" });
+    }
+    if (closes.includes("aPoints")) e.points.forEach((P, i) => o.points.push({ p: ptNum(P), nom: e.points.length > 1 ? `I${i ? "₂" : "₁"}` : "I", couleur: "vert" }));
+    else if (verdictJuge) e.points.forEach((P) => o.points.push({ p: ptNum(P), nom: "?", couleur: "vert" }));
+    o.fenetre = fen;
+    return figureLieux(o);
+  }
+  // B : parabole et ellipse, puis le cercle trouvé.
+  const parab: Conique = { type: "parabole", sommet: { x: q(-e.b1, 2), y: q(4 * e.c1 - e.b1 * e.b1, 4) }, axe: "y", sens: 1, p: q(1, 2) };
+  const hx = q(-e.D2, 2 * e.A2);
+  const hy = q(-e.E2, 2 * e.B2);
+  const M = -e.F2 + (e.D2 * e.D2) / (4 * e.A2) + (e.E2 * e.E2) / (4 * e.B2);
+  const ellipse: Conique | null = M > 0 ? (e.A2 < e.B2 ? { type: "ellipse", centre: { x: hx, y: hy }, axe: "x", a2: q(Math.round(M * 4 * e.A2 * e.B2), 4 * e.A2 * e.A2 * e.B2), b2: q(Math.round(M * 4 * e.A2 * e.B2), 4 * e.A2 * e.B2 * e.B2) } : { type: "ellipse", centre: { x: hx, y: hy }, axe: "y", a2: q(Math.round(M * 4 * e.A2 * e.B2), 4 * e.A2 * e.B2 * e.B2), b2: q(Math.round(M * 4 * e.A2 * e.B2), 4 * e.A2 * e.A2 * e.B2) }) : null;
+  const cercle: Conique = { type: "cercle", centre: e.centre, r2: q(e.rayon * e.rayon) };
+  const fen = fenetreConique(cercle, ellipse ? [ptNum(ellipse.type === "ellipse" ? ellipse.centre : e.centre)] : []);
+  const ext = Math.max(fen.xmax - fen.xmin, fen.ymax - fen.ymin);
+  ajouterConique(o, parab, ext, { couleur: "bleu", epais: false });
+  if (ellipse) ajouterConique(o, ellipse, ext, { couleur: "violet", epais: false });
+  if (closes.includes("bCercle")) ajouterConique(o, cercle, ext, { couleur: "vert" });
+  if (closes.includes("bCentreRayon")) o.points.push({ p: ptNum(e.centre), nom: "Ω", couleur: "vert" });
+  o.fenetre = fen;
+  return figureLieux(o);
 }
 
