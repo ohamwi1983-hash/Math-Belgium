@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import { activerAide, demarrerSessionAnglesAssocies, soumettreReponse } from "./moteur/sessionAnglesAssocies";
 import type { EtatSessionAnglesAssocies } from "./moteur/typesAnglesAssocies";
@@ -14,6 +14,9 @@ import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { lignesDeLEtape } from "../export/corrigeTableau";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { correctionDetailleeAnglesAssocies } from "./generateurs/anglesAssocies/corrigeDetaille";
+import { ProgressionPuces } from "../components/ProgressionPuces";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { ecranClos, nombreDecimalSaisi, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 
 const CONSIGNE_GENERALE = "Détermine la valeur demandée à l'aide des angles associés.";
 
@@ -55,11 +58,21 @@ export function AppAnglesAssocies() {
    * l'écran pour qu'il reparte d'un champ vide (audit du chapitre 5 : la saisie précédente restait
    * affichée sous le nouvel énoncé). */
   const [numeroExercice, setNumeroExercice] = useState(0);
+  /** Écrans clos de l'exercice en cours (puces cliquables → fiche en lecture seule). */
+  const [historique, setHistorique] = useState<EcranClos[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionAnglesAssocies) {
+  function viderHistorique() {
+    setHistorique([]);
+    setFicheOuverteIndex(null);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionAnglesAssocies, votreReponse: ReactNode) {
     const transitionDEcran = nouvelEtat.resultats.length !== etat.resultats.length;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.revele });
+      const revele = nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.revele;
+      setHistorique((h) => [...h, ecranClos("Valeur demandée", votreReponse, revele, etat.niveauAide > 0, reponseAttendueEcran(), corrigeDetailleEcranCourant())]);
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -67,6 +80,7 @@ export function AppAnglesAssocies() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) viderHistorique();
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
     setNumeroExercice((n) => n + 1);
@@ -74,18 +88,28 @@ export function AppAnglesAssocies() {
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    viderHistorique();
     setEtat(demarrerSessionAnglesAssocies(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteAnglesAssocies)));
     setNumeroExercice((n) => n + 1);
   }
 
   const exercice = etat.exerciceCourant;
 
+  function reponseAttendueEcran() {
+    return etat.reglages.affichageReponseApresEchec ? <Katex expression={decimal3Latex(exercice.valeurCible)} /> : undefined;
+  }
+
+  /** Corrigé détaillé « comme au tableau » de l'écran (mêmes lignes que le papier) — UNE seule source
+   * pour la validation (après la réponse) et pour l'entrée d'historique (fiche de la puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeAnglesAssocies(exercice), "a")} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: etat.reglages.affichageReponseApresEchec ? <Katex expression={decimal3Latex(exercice.valeurCible)} /> : undefined,
-        // Corrigé détaillé de l'écran qui se clôt (mêmes lignes que le papier).
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeAnglesAssocies(exercice), "a")} />,
+        reponseAttendue: reponseAttendueEcran(),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -101,6 +125,8 @@ export function AppAnglesAssocies() {
       </header>
 
       <main className="card">
+        <ProgressionPuces segments={segmentsDepuisHistorique(historique, 1, !enAttente)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
+
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={<BlocEnonceAnglesAssocies exercice={exercice} />} />
           <EtapeAnglesAssocies
@@ -110,11 +136,15 @@ export function AppAnglesAssocies() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAide(etat))}
-            onValider={(valeur) => terminerEtape(soumettreReponse(etat, valeur))}
+            onValider={(valeur) => terminerEtape(soumettreReponse(etat, valeur), nombreDecimalSaisi(valeur))}
             validation={validation}
           />
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex].entree} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

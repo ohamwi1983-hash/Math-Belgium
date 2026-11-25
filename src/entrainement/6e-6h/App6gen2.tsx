@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceFonctionsCyclometriques } from "./generateurs6e/fonctionsCyclometriques";
 import {
@@ -14,6 +14,10 @@ import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { correctionDetailleeFonctionsCyclometriques, resultatFonctionsCyclometriquesLatex } from "./generateurs6e/fonctionsCyclometriques/corrigeDetaille";
+import { ProgressionPuces } from "../components/ProgressionPuces";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { ecranClos, segmentsDepuisHistorique, type EcranClos } from "../4e/ui/historiqueProgression";
+import { saisieEnLatex6e } from "./ui6e/saisieEnLatex6e";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
 
@@ -47,10 +51,20 @@ interface TransitionEnAttente {
 export function App6gen2() {
   const [etat, setEtat] = useState<EtatSessionFonctionsCyclometriques>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Écrans clos de l'exercice en cours (puces cliquables → fiche en lecture seule). */
+  const [historique, setHistorique] = useState<EcranClos[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionFonctionsCyclometriques) {
+  function viderHistorique() {
+    setHistorique([]);
+    setFicheOuverteIndex(null);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionFonctionsCyclometriques, votreReponse: ReactNode) {
     if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.resultats[nouvelEtat.resultats.length - 1].revele });
+      const revele = nouvelEtat.resultats[nouvelEtat.resultats.length - 1].revele;
+      setHistorique((h) => [...h, ecranClos("Valeur", votreReponse, revele, etat.niveauAide > 0, reponseAttendueEcran(), corrigeDetailleEcranCourant())]);
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -58,12 +72,14 @@ export function App6gen2() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) viderHistorique();
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    viderHistorique();
     setEtat(
       demarrerSessionFonctionsCyclometriques(REGLAGES_DEMO, () => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])),
     );
@@ -75,12 +91,21 @@ export function App6gen2() {
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
 
+  function reponseAttendueEcran() {
+    return exercice.existe ? <Katex expression={resultatFonctionsCyclometriquesLatex(exercice) as string} /> : "N'existe pas";
+  }
+
+  /** Corrigé détaillé « comme au tableau » (source unique avec le papier) — écran unique « a ». UNE
+   * seule source pour la validation (après la réponse) et pour l'entrée d'historique (fiche de la puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={correctionDetailleeFonctionsCyclometriques(exercice)} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: exercice.existe ? <Katex expression={resultatFonctionsCyclometriquesLatex(exercice) as string} /> : "N'existe pas",
-        // Corrigé détaillé « comme au tableau » (source unique avec le papier) — écran unique « a ».
-        corrigeDetaille: <CorrigeDetailleEcran etapes={correctionDetailleeFonctionsCyclometriques(exercice)} />,
+        reponseAttendue: reponseAttendueEcran(),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -95,6 +120,7 @@ export function App6gen2() {
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
+        <ProgressionPuces segments={segmentsDepuisHistorique(historique, 1, !enAttente)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
         <div className="card-body">
           <EtapeFonctionsCyclometriques
             key={etat.indexExercice}
@@ -104,11 +130,15 @@ export function App6gen2() {
             niveauAide={etat.niveauAide}
             niveauAideMax={NIVEAU_AIDE_MAX}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => terminerEtape(soumettreReponseFonctionsCyclometriques(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseFonctionsCyclometriques(etat, reponse), reponse.existe ? saisieEnLatex6e(reponse.texte ?? "") : "N'existe pas")}
             validation={validation}
           />
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex].entree} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

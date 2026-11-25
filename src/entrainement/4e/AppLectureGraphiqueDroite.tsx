@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { correctionDetailleeLectureGraphiqueDroite } from "./generateurs/lectureGraphiqueDroite/corrigeDetaille";
@@ -18,6 +18,9 @@ import { EtapeLectureParametrique } from "./components/EtapeLectureParametrique"
 import { Katex } from "./components/Katex";
 import { formatReponseAttendueLatex } from "./ui/formatLectureGraphiqueDroite";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { ProgressionPuces } from "../components/ProgressionPuces";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { ecranClos, saisieEnLatex, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -58,11 +61,21 @@ export function AppLectureGraphiqueDroite() {
    * l'exercice précédent ne survive à « Générer » ou à « Nouvel exercice » (audit chapitre 7,
    * point 2). */
   const [numeroExercice, setNumeroExercice] = useState(0);
+  /** Écrans clos de l'exercice en cours (puces cliquables → fiche en lecture seule). */
+  const [historique, setHistorique] = useState<EcranClos[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionLectureGraphiqueDroite) {
+  function viderHistorique() {
+    setHistorique([]);
+    setFicheOuverteIndex(null);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionLectureGraphiqueDroite, votreReponse: ReactNode) {
     const transitionDEcran = nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!;
+      const titre = etat.exerciceCourant.variante === "cartesienne" ? "Équation cartésienne" : "Équations paramétriques";
+      setHistorique((h) => [...h, ecranClos(titre, votreReponse, resultat.revele, etat.niveauAide > 0, reponseAttendueEcran(), corrigeDetailleEcranCourant())]);
       setEnAttente({ etatSuivant: nouvelEtat, revele: resultat.revele });
       return;
     }
@@ -71,7 +84,10 @@ export function AppLectureGraphiqueDroite() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    if (enAttente.etatSuivant.terminee) setNumeroExercice((n) => n + 1);
+    if (enAttente.etatSuivant.terminee) {
+      setNumeroExercice((n) => n + 1);
+      viderHistorique();
+    }
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -83,15 +99,26 @@ export function AppLectureGraphiqueDroite() {
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    viderHistorique();
     setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionLectureGraphiqueDroite(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteLectureGraphiqueDroite)));
+  }
+
+  function reponseAttendueEcran() {
+    return <Katex expression={formatReponseAttendueLatex(exercice)} />;
+  }
+
+  /** Corrigé détaillé « comme au tableau » de l'écran unique — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique (fiche de la puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLectureGraphiqueDroite(exercice), lettreEtape(0))} />;
   }
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: <Katex expression={formatReponseAttendueLatex(exercice)} />,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeLectureGraphiqueDroite(exercice), lettreEtape(0))} />,
+        reponseAttendue: reponseAttendueEcran(),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -107,6 +134,7 @@ export function AppLectureGraphiqueDroite() {
       </header>
 
       <main className="card">
+        <ProgressionPuces segments={segmentsDepuisHistorique(historique, 1, !enAttente)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
         <div className="card-body">
         {exercice.variante === "cartesienne" ? (
           <EtapeLectureCartesienne
@@ -116,7 +144,7 @@ export function AppLectureGraphiqueDroite() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(texte) => terminerEtape(soumettreReponseCartesienne(etat, texte))}
+            onValider={(texte) => terminerEtape(soumettreReponseCartesienne(etat, texte), saisieEnLatex(texte))}
             validation={validation}
           />
         ) : (
@@ -127,12 +155,24 @@ export function AppLectureGraphiqueDroite() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => terminerEtape(soumettreReponseParametrique(etat, reponse))}
+            onValider={(reponse) =>
+              terminerEtape(
+                soumettreReponseParametrique(etat, reponse),
+                <>
+                  <span style={{ display: "block" }}>{saisieEnLatex(reponse.texteX)}</span>
+                  <span style={{ display: "block" }}>{saisieEnLatex(reponse.texteY)}</span>
+                </>,
+              )
+            }
             validation={validation}
           />
         )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex].entree} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

@@ -43,6 +43,18 @@ function extremumVersReponse(e: EtatExtremum): ReponseExtremum {
   return { existe: true, x: evaluerValeurCyclometrique(e.xTexte) as number, y: evaluerValeurCyclometrique(e.yTexte) as number };
 }
 
+/** Valeurs TELLES QUE TAPÉES (la réponse transmise au moteur n'en garde que la valeur relue) — pour
+ * la fiche de la puce (« Ta réponse »). `null` : « N'existe pas » choisi. */
+export interface SaisiesApparierCyclo {
+  ordonnee: string | null;
+  maximum: { x: string; y: string } | null;
+  minimum: { x: string; y: string } | null;
+}
+
+function extremumSaisi(e: EtatExtremum): { x: string; y: string } | null {
+  return e.existe ? { x: e.xTexte, y: e.yTexte } : null;
+}
+
 function ChampExtremum({ titre, etat, onChange, erronee, desactive }: { titre: string; etat: EtatExtremum; onChange: (e: EtatExtremum) => void; erronee: boolean; desactive: boolean }) {
   return (
     <div className="field">
@@ -77,7 +89,7 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValiderLettre: (lettre: number) => void;
-  onValider: (reponse: ReponseEcranUniqueGraphiquesCyclometriques) => void;
+  onValider: (reponse: ReponseEcranUniqueGraphiquesCyclometriques, saisies: SaisiesApparierCyclo) => void;
   validation?: ValidationEtapeProps | null;
 }
 
@@ -131,7 +143,8 @@ export function EtapeApparierGraphiqueCyclo({
     if (!complet) return;
     const illisible = domIllisible || imIllisible || (ordonnee.existe === true && !lisible(ordonnee.xTexte)) || !extremumLisible(maximum) || !extremumLisible(minimum);
     if (illisible || domf === null || imf === null) {
-      retour.tenter(derniere as ReponseEcranUniqueGraphiquesCyclometriques, domIllisible || imIllisible ? MESSAGES_ILLISIBLE_CYCLO.borne : MESSAGES_ILLISIBLE_CYCLO.extremum, onValider);
+      // Message de blocage : `onValider` n'est jamais appelé (aucune tentative comptée).
+      retour.tenter(derniere as ReponseEcranUniqueGraphiquesCyclometriques, domIllisible || imIllisible ? MESSAGES_ILLISIBLE_CYCLO.borne : MESSAGES_ILLISIBLE_CYCLO.extremum, () => {});
       return;
     }
     const reponse: ReponseEcranUniqueGraphiquesCyclometriques = {
@@ -143,7 +156,8 @@ export function EtapeApparierGraphiqueCyclo({
       maximum: extremumVersReponse(maximum),
       minimum: extremumVersReponse(minimum),
     };
-    retour.tenter(reponse, null, onValider);
+    const saisies: SaisiesApparierCyclo = { ordonnee: ordonnee.existe ? ordonnee.xTexte : null, maximum: extremumSaisi(maximum), minimum: extremumSaisi(minimum) };
+    retour.tenter(reponse, null, (r) => onValider(r, saisies));
   }
 
   const cible: FragmentConsigne[] | null = diagnostic ? cibleJustification(exercice, diagnostic) : null;

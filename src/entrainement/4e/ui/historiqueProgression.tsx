@@ -59,7 +59,14 @@ export function saisieEnLatex(texte: string): ReactNode {
   } catch {
     // saisie non analysable : affichée telle quelle, typographie corrigée
   }
-  return texte.replace(/-/g, "−").replace(/(\d)\.(\d)/g, "$1,$2");
+  return saisieTexte(texte);
+}
+
+/** Saisie courte de l'élève (nombre, fréquence, lettre…) telle qu'il l'a tapée, typographie
+ * seulement : « − » typographique, virgule décimale ; champ vide → « — ». */
+export function saisieTexte(texte: string): string {
+  const t = texte.trim();
+  return t === "" ? "—" : t.replace(/-/g, "−").replace(/(\d)\.(\d)/g, "$1,$2");
 }
 
 /** Nombre en texte : virgule décimale, « − » typographique. */
@@ -72,6 +79,16 @@ export function nombreTexte(valeur: number): string {
 export function nombreSaisi(valeur: number): string {
   if (Math.abs(valeur * 100 - Math.round(valeur * 100)) < 1e-9) return nombreTexte(Math.round(valeur * 100) / 100);
   return "≈ " + nombreTexte(Math.round(valeur * 100) / 100);
+}
+
+/** Valeur numérique lue dans un champ (le texte tapé n'est plus disponible) : écrite telle quelle
+ * jusqu'à 6 décimales (« 0,342 » reste « 0,342 », jamais arrondi à 2 décimales comme `nombreSaisi`),
+ * sinon arrondie (« ≈ ») — une fraction ou une racine tapée arrive ici en nombre flottant. */
+export function nombreDecimalSaisi(valeur: number): string {
+  if (!Number.isFinite(valeur)) return "—";
+  const arrondi = Math.round(valeur * 1e6) / 1e6;
+  if (Math.abs(valeur - arrondi) < 1e-12) return nombreTexte(arrondi);
+  return "≈ " + nombreTexte(Math.round(valeur * 1000) / 1000);
 }
 
 /** Entrée de récapitulatif apparue avec l'écran qui vient de se clore (`null` si l'écran n'en ajoute

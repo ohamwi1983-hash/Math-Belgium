@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import { demarrerSessionPointVectoriel, soumettreReponseCoordonnees } from "./moteur/sessionPointVectoriel";
 import type { EtatSessionPointVectoriel } from "./moteur/typesPointVectoriel";
@@ -13,6 +13,9 @@ import { formatNombreLatex } from "./ui/formatPointVectoriel";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lignesDeLEtape } from "../export/corrigeTableau";
 import { correctionDetailleePointVectoriel } from "./generateurs/pointVectoriel/corrigeDetaille";
+import { ProgressionPuces } from "../components/ProgressionPuces";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { ecranClos, nombreDecimalSaisi, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 
 const CONSIGNE_GENERALE = "Détermine les coordonnées de ce point à partir de la relation vectorielle.";
 
@@ -53,11 +56,21 @@ export function AppPointVectoriel() {
   /** Incrémenté à chaque nouvel exercice (« Nouvel exercice » ou « Générer ») : sert de `key` à
    * l'écran, pour que ses champs repartent vides au lieu de garder la saisie précédente. */
   const [numeroExercice, setNumeroExercice] = useState(0);
+  /** Écrans clos de l'exercice en cours (puces cliquables → fiche en lecture seule). */
+  const [historique, setHistorique] = useState<EcranClos[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionPointVectoriel) {
+  function viderHistorique() {
+    setHistorique([]);
+    setFicheOuverteIndex(null);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionPointVectoriel, votreReponse: ReactNode) {
     const transitionDEcran = nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!;
+      // Pas d'aide sur cet écran : jamais « réussi avec aide ».
+      setHistorique((h) => [...h, ecranClos("Coordonnées", votreReponse, resultat.coordonneesRevele, false, reponseAttendueEcran(), corrigeDetailleEcranCourant())]);
       setEnAttente({ etatSuivant: nouvelEtat, revele: resultat.coordonneesRevele });
       return;
     }
@@ -66,7 +79,10 @@ export function AppPointVectoriel() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    if (enAttente.etatSuivant.terminee) setNumeroExercice((n) => n + 1);
+    if (enAttente.etatSuivant.terminee) {
+      setNumeroExercice((n) => n + 1);
+      viderHistorique();
+    }
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -75,19 +91,26 @@ export function AppPointVectoriel() {
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    viderHistorique();
     setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionPointVectoriel(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VariantePointVectoriel)));
+  }
+
+  function reponseAttendueEcran() {
+    return <Katex expression={`${exercice.pointCherche}(${formatNombreLatex(exercice.reponse.x)} \\,;\\, ${formatNombreLatex(exercice.reponse.y)})`} />;
+  }
+
+  /** Corrigé détaillé « comme au tableau » de l'écran unique — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique (fiche de la puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePointVectoriel(exercice), "a")} />;
   }
 
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: (
-          <Katex
-            expression={`${exercice.pointCherche}(${formatNombreLatex(exercice.reponse.x)} \\,;\\, ${formatNombreLatex(exercice.reponse.y)})`}
-          />
-        ),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleePointVectoriel(exercice), "a")} />,
+        reponseAttendue: reponseAttendueEcran(),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -103,6 +126,7 @@ export function AppPointVectoriel() {
       </header>
 
       <main className="card">
+        <ProgressionPuces segments={segmentsDepuisHistorique(historique, 1, !enAttente)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <EtapePointVectoriel
@@ -110,11 +134,15 @@ export function AppPointVectoriel() {
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            onValider={(reponse) => terminerEtape(soumettreReponseCoordonnees(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseCoordonnees(etat, reponse), `${exercice.pointCherche}(${nombreDecimalSaisi(reponse.x)} ; ${nombreDecimalSaisi(reponse.y)})`)}
             validation={validation}
           />
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex].entree} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }
