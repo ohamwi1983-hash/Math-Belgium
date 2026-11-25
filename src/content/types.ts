@@ -1092,6 +1092,47 @@ export type IllustrationSpec =
       }[]
       caption: string
     }
+  | {
+      /**
+       * Nuage de points d'une série statistique à deux variables (5e ch. 6), dans un repère dont les
+       * axes longent le bord gauche et le bord bas du cadre — ils ne commencent pas forcément à 0 :
+       * une brisure d'axe est dessinée quand `xMin > 0` (ou `yMin > 0`). Accessoires optionnels :
+       * droites d'ajustement y = ax + b, points remarquables (G, G₁, G₂ : croix entourée), écarts
+       * verticaux à une droite (avec, si `squares`, les carrés de ces écarts dessinés comme de vrais
+       * carrés à l'écran), axes en pointillés par G avec les signes des quatre quadrants (et, si
+       * `rectangles`, le rectangle de chaque point à G, vert si le produit des écarts est positif,
+       * rouge sinon), bandes verticales (interpolation / extrapolation).
+       */
+      kind: 'scatterPlot'
+      points: { x: number; y: number; tone?: 'accent' | 'good' | 'bad' | 'faint'; label?: string }[]
+      xMin: number
+      xMax: number
+      yMin: number
+      yMax: number
+      xTicks: number[]
+      yTicks: number[]
+      xTickLabels?: Record<number, string>
+      yTickLabels?: Record<number, string>
+      xAxisLabel: string
+      yAxisLabel: string
+      /** Quadrillage fin aux graduations. */
+      grid?: boolean
+      /** Droites y = ax + b, sur [from ; to] (par défaut toute la largeur du cadre). `labelX` : abscisse
+       * du point d'ancrage de l'étiquette (par défaut près du bord droit du tronçon) ; l'étiquette se
+       * place du côté libre de la droite (`labelPos` au-dessus ou en dessous), jamais sur le trait. */
+      lines?: { a: number; b: number; tone: 'accent' | 'good' | 'bad' | 'faint'; label?: string; from?: number; to?: number; dashed?: boolean; labelX?: number; labelPos?: 'above' | 'below' }[]
+      /** Points remarquables (G, G₁, G₂…) : croix entourée + étiquette (texte brut, `_` = indice). */
+      marks?: { x: number; y: number; label: string; tone: 'accent' | 'good' | 'bad' | 'ink'; labelPos?: 'above' | 'below' | 'left' | 'right' | 'above-left' | 'above-right' | 'below-left' | 'below-right' }[]
+      /** Écarts verticaux des points du nuage à la droite y = ax + b ; `squares` : carrés de ces écarts. */
+      residuals?: { a: number; b: number; squares?: boolean }
+      /** Deux axes en pointillés par le point (x ; y) — en général G — et signes des quadrants. */
+      quadrants?: { x: number; y: number; rectangles?: boolean }
+      /** Bandes verticales ombrées sur [from ; to], étiquette en bas de la bande. */
+      bands?: { from: number; to: number; tone: 'accent' | 'good' | 'bad'; label?: string }[]
+      /** Cadre plus carré, pour les petits nuages côte à côte (`illustrationGroup`). */
+      compact?: boolean
+      caption: string
+    }
 
 export interface ExempleStep {
   tag: string
