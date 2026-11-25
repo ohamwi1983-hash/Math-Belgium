@@ -4259,9 +4259,9 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
           "Chaque contrainte supplémentaire (fixer 4 cartes de même hauteur pour un carré, par exemple) réduit la liberté laissée pour composer le reste de la main : moins de cartes restent à choisir librement, donc moins de mains différentes peuvent en résulter. C'est pourquoi 224 mains « carré » (très contraintes) sont bien moins nombreuses que les 107 520 mains « paire » (contrainte plus légère) — le nombre de mains total $C_{32}^5=201\\,376$ reste la seule limite commune aux deux.",
       },
       {
-        enonce: "Pourquoi le paradoxe du Chevalier de Méré se résout-il en comptant les triplets ORDONNÉS plutôt que les partitions non ordonnées de chaque somme ?",
+        enonce: "Avec trois dés, les sommes 9 et 10 s'écrivent chacune de 6 façons sans tenir compte de l'ordre. Pourquoi le problème des trois dés de Galilée se résout-il en comptant les triplets ordonnés plutôt que ces décompositions ?",
         corrige:
-          "Les 6 partitions de la somme 9 et les 6 partitions de la somme 10 donnent une fausse impression d'égalité, car elles ne représentent pas le même nombre de façons RÉELLES d'obtenir chaque somme avec 3 dés distincts : une partition aux 3 valeurs différentes correspond à $3!=6$ lancers ordonnés possibles, une partition avec une paire de valeurs identiques n'en correspond qu'à 3, et une partition aux 3 valeurs identiques qu'à 1 seul. En comptant ces arrangements ordonnés, la somme 9 totalise 25 triplets contre 27 pour la somme 10 — un écart invisible tant qu'on ne compte que les partitions.",
+          "Les 6 partitions de la somme 9 et les 6 partitions de la somme 10 donnent une fausse impression d'égalité, car elles ne sont pas équiprobables : elles ne représentent pas le même nombre de façons réelles d'obtenir chaque somme avec 3 dés distincts : une partition aux 3 valeurs différentes correspond à $3!=6$ lancers ordonnés possibles, une partition avec une paire de valeurs identiques n'en correspond qu'à 3, et une partition aux 3 valeurs identiques qu'à 1 seul. En comptant ces arrangements ordonnés, la somme 9 totalise 25 triplets contre 27 pour la somme 10 — un écart invisible tant qu'on ne compte que les partitions.",
       },
     ],
     probabilitehypergeometrique: [
