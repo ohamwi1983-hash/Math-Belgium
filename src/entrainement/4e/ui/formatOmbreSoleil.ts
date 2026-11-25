@@ -8,13 +8,15 @@ import type {
   ExerciceOmbreSoleilDirectionInconnue,
   ExerciceOmbreSoleilObstacle,
   ExerciceOmbreSoleilSimple,
+  ExerciceOmbreSoleilSolidePose,
   ObstacleOmbreSoleil,
   Piquet,
   PiquetAResoudre,
+  SegmentContourOmbre,
 } from "../core/ombreSoleil.types";
 import { additionner3D, multiplierScalaire3D, produitScalaire3D, soustraire3D } from "../moteur/geometrieEspace";
 import { sommetPiquet } from "../moteur/verificationOmbreSoleil";
-import { calculerEchelleProjection, DIRECTION_VUE_3D, HAUTEUR_SVG, LARGEUR_SVG, projeter3DVersPixel } from "./solide3DSketch";
+import { calculerAretesAvecVisibilite, calculerEchelleProjection, DIRECTION_VUE_3D, HAUTEUR_SVG, LARGEUR_SVG, projeter3DVersPixel } from "./solide3DSketch";
 
 /**
  * Présentation — "Ombre au soleil" (41e générateur, chapitre "Géométrie dans l'espace").
@@ -165,7 +167,217 @@ export function elementsScene(exercice: ExerciceOmbreSoleil, indexObstacleMisEnE
     };
     return fusionner(sol, obstacles, { points: etiquettesObstacles(exercice), segments: [] }, elementsExemple(exercice.piquetExemple, exercice.ombreExemple), elementsBaton(exercice.baton));
   }
+  if (exercice.variante === "solidePose") return fusionner(sol, elementsSolidePose(exercice), elementsDonneeSolidePose(exercice));
   return fusionner(sol, elementsPaireConnue(exercice));
+}
+
+// --- Variante `solidePose` : solide dessiné, donnée, étiquettes en pixels ---------------------------
+
+/** Arêtes du solide (visibles en trait plein, cachées en pointillé clair — visibilité calculée sur le
+ * solide SEUL, jamais avec les sommets virtuels du cadrage) et ses sommets nommés, petits disques. */
+export function elementsSolidePose(exercice: ExerciceOmbreSoleilSolidePose): ElementsCroquis {
+  const S = exercice.solide.sommets;
+  return {
+    points: Object.entries(S).map(([nom, p]) => ({ position: p, label: nom, couleur: COULEURS_OMBRE.arete, rayon: 2.5 })),
+    segments: calculerAretesAvecVisibilite(exercice.solide).map((a) => ({
+      a: S[a.sommets[0]]!,
+      b: S[a.sommets[1]]!,
+      couleur: a.visible ? COULEURS_OMBRE.arete : COULEURS_OMBRE.areteCachee,
+      pointille: !a.visible,
+    })),
+  };
+}
+
+/** La donnée : rayon (pointillé) et ombre au sol (trait plein) de l'arête connue — ou du piquet P de
+ * la pyramide, dessiné lui-même avec son sommet P. */
+export function elementsDonneeSolidePose(exercice: ExerciceOmbreSoleilSolidePose): ElementsCroquis {
+  const k = exercice.piquetConnu;
+  const sommet = sommetPiquet(k);
+  const couleur = COULEURS_OMBRE.exemple;
+  const piquet = exercice.forme === "pyramide";
+  return {
+    points: [...(piquet ? [{ position: sommet, label: k.id, couleur, rayon: 2.5 }] : []), { position: exercice.ombreConnue, label: `${k.id}′`, couleur }],
+    segments: [
+      ...(piquet ? [{ a: k.base, b: sommet, couleur: COULEURS_OMBRE.baton }] : []),
+      { a: sommet, b: exercice.ombreConnue, couleur, pointille: true },
+      { a: k.base, b: exercice.ombreConnue, couleur },
+    ],
+  };
+}
+
+/** Le pied O de l'apex de la pyramide et les diagonales de la base qui le donnent (aide, corrigé). */
+export function elementsPiedApex(exercice: ExerciceOmbreSoleilSolidePose, couleur: string = COULEURS_OMBRE.aide): ElementsCroquis {
+  const S = exercice.solide.sommets;
+  const O: Point3D = { x: S.S!.x, y: S.S!.y, z: 0 };
+  return {
+    points: [{ position: O, label: "O", couleur, rayon: 3 }],
+    segments: [
+      { a: S.A!, b: S.C!, couleur, pointille: true },
+      { a: S.B!, b: S.D!, couleur, pointille: true },
+    ],
+  };
+}
+
+/** Nom d'un point du sol de la variante : sommet de la base (« A ») ou ombre (« F′ »). */
+export function pointSolSolidePose(exercice: ExerciceOmbreSoleilSolidePose, nom: string): Point3D {
+  if (!nom.endsWith("′")) return exercice.solide.sommets[nom]!;
+  const id = nom.slice(0, -1);
+  if (id === exercice.piquetConnu.id) return exercice.ombreConnue;
+  const projete = exercice.piquets.find((p) => p.piquet.id === id);
+  if (projete) return projete.ombre;
+  return exercice.ombresAutres.find((o) => o.id === id)!.ombre;
+}
+
+/** Ombres des sommets du haut (vertes, rayon pointillé) : celles déjà trouvées avant l'écran `index`
+ * (écrans « point »), ou toutes (`index` = nombre d'écrans : écran « contour », conclusion). */
+export function ombresSolidePose(exercice: ExerciceOmbreSoleilSolidePose, index: number): ElementsCroquis {
+  const trouvees = exercice.piquets.slice(0, index).map((p) => ({ id: p.piquet.id, sommet: sommetPiquet(p.piquet), ombre: p.ombre }));
+  const autres = index >= exercice.piquets.length ? exercice.ombresAutres : [];
+  return fusionner(...[...trouvees, ...autres].map((o) => elementsOmbreSommet(o.sommet, o.ombre, `${o.id}′`)));
+}
+
+/** Segment candidat du contour, dans l'état voulu (orange coché, vert juste, rouge choisi à tort). */
+export function dessinSegmentContour(exercice: ExerciceOmbreSoleilSolidePose, s: SegmentContourOmbre, couleur: string): SegmentExtraSolide3D {
+  return { a: pointSolSolidePose(exercice, s.extremites[0]), b: pointSolSolidePose(exercice, s.extremites[1]), couleur };
+}
+
+/** Le contour de l'ombre, trait plein vert. */
+export function elementsContourSolidePose(exercice: ExerciceOmbreSoleilSolidePose, couleur: string = COULEURS_OMBRE.correct): ElementsCroquis {
+  const c = exercice.contourOmbre;
+  return { points: [], segments: c.map((a, i) => ({ a, b: c[(i + 1) % c.length]!, couleur })) };
+}
+
+/** Libellé d'un segment candidat : « [BF′] ». */
+export function libelleSegmentContour(s: SegmentContourOmbre): string {
+  return `[${s.extremites[0]}${s.extremites[1]}]`;
+}
+
+const cleEtiquette = (p: Point3D) => `${p.x.toFixed(4)},${p.y.toFixed(4)},${p.z.toFixed(4)}`;
+
+/**
+ * Étiquettes de la variante `solidePose` placées en PIXELS réels (même méthode que les étiquettes
+ * K, L, M des obstacles et les pieds du corrigé : `meilleurDecalageEtiquette`) : chaque étiquette est
+ * posée là où elle touche le moins de traits (arêtes, rayons, traces, contour, segments candidats),
+ * de points et d'étiquettes déjà posées. Calculée sur `tout` — tout ce que l'écran peut montrer,
+ * aides et états compris — pour que les étiquettes ne bougent pas d'un état à l'autre. Renvoie le
+ * décalage de chaque point, repéré par sa position.
+ */
+export function placerEtiquettesSolidePose(exercice: ExerciceOmbreSoleilSolidePose, tout: ElementsCroquis): Map<string, Px> {
+  const echelle = calculerEchelleProjection(solidePourAffichage(exercice));
+  const px = (p: Point3D): Px => projeter3DVersPixel(p, echelle);
+  const traits: [Px, Px][] = tout.segments.map((s) => [px(s.a), px(s.b)]);
+  const points: Px[] = tout.points.map((p) => px(p.position));
+  // Une étiquette par position ; les plus contraintes (dégagement seul le plus faible : sommet caché
+  // au milieu des arêtes…) sont posées d'abord, les autres s'écartent d'elles.
+  const uniques = tout.points.filter((pt, i) => pt.label !== "" && tout.points.findIndex((q) => cleEtiquette(q.position) === cleEtiquette(pt.position)) === i);
+  const autresDe = (p: Px) => points.filter((q) => Math.hypot(q.x - p.x, q.y - p.y) > 0.5);
+  const ordre = uniques
+    .map((pt) => {
+      const p = px(pt.position);
+      return { pt, p, seul: meilleurDecalageEtiquette([p], traits, autresDe(p), []).degagement };
+    })
+    .sort((a, b) => a.seul - b.seul);
+  const posees: Px[] = [];
+  const decalages = new Map<string, Px>();
+  for (const { pt, p } of ordre) {
+    const autres = autresDe(p);
+    // Une étiquette reste nettement plus près de SON point que de tout autre point dessiné : sinon
+    // deux ombres voisines (E′ et H′) échangeaient leurs noms à la lecture.
+    const garde = (c: Px) => autres.every((q) => Math.hypot(q.x - c.x, q.y - c.y) > Math.hypot(p.x - c.x, p.y - c.y) + 4);
+    let choix = meilleurDecalageEtiquette([p], traits, autres, posees, garde);
+    let d = choix.d;
+    if (choix.degagement < 2) {
+      // Repli (sommet caché au milieu des arêtes…) : on élargit la recherche jusqu'à ≈ 36 px.
+      const ancres = [p, ...[0, 1, 2, 3, 4, 5, 6, 7].map((k) => ({ x: p.x + 10 * Math.cos((k * Math.PI) / 4), y: p.y + 10 * Math.sin((k * Math.PI) / 4) }))];
+      const large = meilleurDecalageEtiquette(ancres, traits, autres, posees, garde);
+      if (large.degagement > choix.degagement + 1) {
+        choix = large;
+        d = { x: ancres[large.ancre]!.x - p.x + large.d.x, y: ancres[large.ancre]!.y - p.y + large.d.y };
+      }
+    }
+    posees.push({ x: p.x + d.x, y: p.y + d.y });
+    decalages.set(cleEtiquette(pt.position), d);
+  }
+  return decalages;
+}
+
+/** Applique les décalages calculés par `placerEtiquettesSolidePose`. */
+export function appliquerEtiquettes(elements: ElementsCroquis, decalages: Map<string, Px>): ElementsCroquis {
+  return { points: elements.points.map((pt) => ({ ...pt, decalageLabel: pt.decalageLabel ?? decalages.get(cleEtiquette(pt.position)) })), segments: elements.segments };
+}
+
+/** « du cube », « de la caisse » (le pavé, comme dans l'énoncé), « de la pyramide ». */
+export function duSolidePose(exercice: ExerciceOmbreSoleilSolidePose): string {
+  return exercice.forme === "cube" ? "du cube" : exercice.forme === "pave" ? "de la caisse" : "de la pyramide";
+}
+
+/** « [BF] » (arête connue du cube / du pavé) ou « [BP] » (piquet de la pyramide). */
+export function nomDonneeSolidePose(exercice: ExerciceOmbreSoleilSolidePose): string {
+  return `[${exercice.piedConnu}${exercice.piquetConnu.id}]`;
+}
+
+export function consignePointSolidePose(exercice: ExerciceOmbreSoleilSolidePose, index: number): string {
+  const id = exercice.piquets[index]!.piquet.id;
+  const k = exercice.piquetConnu.id;
+  const donnee =
+    exercice.forme === "pyramide"
+      ? `Le piquet ${nomDonneeSolidePose(exercice)} a la même hauteur que la pyramide ; son ombre au sol va de ${exercice.piedConnu} jusqu'à ${k}′ (trait pointillé : le rayon qui passe par ${k}).`
+      : `L'ombre de l'arête verticale ${nomDonneeSolidePose(exercice)} est donnée : elle va de ${exercice.piedConnu} jusqu'à ${k}′ (trait pointillé : le rayon qui passe par ${k}).`;
+  return insecablesEcran(`${donnee} Choisis le point ${id}′ où tombe l'ombre du sommet ${id}.`);
+}
+
+export function aidesPointSolidePose(exercice: ExerciceOmbreSoleilSolidePose, index: number): [string, string] {
+  const id = exercice.piquets[index]!.piquet.id;
+  const pied = exercice.piedsPiquets[index]!;
+  const k = exercice.piquetConnu.id;
+  const ombreDonnee = `[${exercice.piedConnu}${k}′]`;
+  if (exercice.forme === "pyramide") {
+    return [
+      "Méthode : l'ombre d'un sommet est à l'intersection du rayon issu de ce sommet, parallèle au rayon donné, et de la trace au sol issue de son pied (le point du sol à sa verticale), parallèle à l'ombre donnée. Le pied du sommet d'une pyramide régulière est le centre de sa base.",
+      `Le pied de ${id} est le centre O de la base, à l'intersection des diagonales [AC] et [BD] ; elles sont tracées en rose, avec le rayon issu de ${id}. ${id} et ${k} sont à la même hauteur : la trace [O${id}′] est parallèle à ${ombreDonnee} et de même longueur.`,
+    ];
+  }
+  return [
+    "Méthode : l'ombre d'un sommet est à l'intersection du rayon issu de ce sommet, parallèle au rayon donné, et de la trace au sol issue de son pied (le point du sol à sa verticale), parallèle à l'ombre donnée. Deux arêtes verticales de même hauteur ont des ombres parallèles et de même longueur.",
+    `Le pied de ${id} est le coin ${pied} de la base, juste en dessous. Le rayon issu de ${id} est tracé en rose : l'ombre ${id}′ est le point de ce rayon qui est sur la parallèle à ${ombreDonnee} menée par ${pied} — l'ombre [${pied}${id}′] de l'arête [${pied}${id}] a la même longueur que ${ombreDonnee}.`,
+  ];
+}
+
+export function consigneContourSolidePose(exercice: ExerciceOmbreSoleilSolidePose): string {
+  return `Les ombres de tous les sommets sont construites. Coche les segments qui forment le contour de l'ombre ${duSolidePose(exercice)} sur le sol.`;
+}
+
+/** Espaces insécables avant « : ; ? ! » dans un texte d'écran rendu tel quel (consigne de
+ * `ChoixCandidatsOmbre`, messages) — les aides passent déjà par `TexteInsistance`. */
+export function insecablesEcran(texte: string): string {
+  return texte.replace(/ ([:;?!])/g, "\u00a0$1");
+}
+
+/** Points de la base et ombres qui ne sont pas des coins du contour (intérieurs à l'ombre). */
+export function pointsInterieursSolidePose(exercice: ExerciceOmbreSoleilSolidePose): string[] {
+  const noms = [...Object.keys(exercice.solide.sommets).filter((n) => exercice.solide.sommets[n]!.z === 0), ...[exercice.piquetConnu.id, ...exercice.piquets.map((p) => p.piquet.id), ...exercice.ombresAutres.map((o) => o.id)].filter((id) => id !== "P").map((id) => `${id}′`)];
+  return noms.filter((n) => !exercice.nomsContour.includes(n));
+}
+
+export function aidesContourSolidePose(exercice: ExerciceOmbreSoleilSolidePose): [string, string] {
+  const interieurs = pointsInterieursSolidePose(exercice);
+  const k = exercice.nomsContour.length;
+  return [
+    "Méthode : l'ombre d'un solide posé au sol est la plus petite surface qui contient sa base et les ombres de tous ses sommets. Son contour relie les points les plus extérieurs : un segment qui traverse la zone ombrée n'est pas sur le bord.",
+    interieurs.length > 0
+      ? `Ici, le contour a ${k} côtés. ${interieurs.length > 1 ? `Les points ${interieurs.slice(0, -1).join(", ")} et ${interieurs[interieurs.length - 1]} sont` : `Le point ${interieurs[0]} est`} à l'intérieur de l'ombre : aucun segment qui en part n'est sur le bord.`
+      : `Ici, le contour a ${k} côtés et passe par tous les points. Un côté du contour laisse tous les autres points du même côté que lui.`,
+  ];
+}
+
+/** Message ciblé après une sélection refusée : segment intérieur coché, côté oublié (jamais lesquels). */
+export function cibleSelectionContour(exercice: ExerciceOmbreSoleilSolidePose, ids: readonly string[]): string {
+  const choisis = exercice.segmentsCandidats.filter((s) => ids.includes(s.id));
+  const enTrop = choisis.some((s) => !s.surContour);
+  const manque = exercice.segmentsCandidats.some((s) => s.surContour && !ids.includes(s.id));
+  if (enTrop && manque) return "Au moins un segment coché traverse l'ombre (il n'est pas sur son bord), et il manque au moins un côté.";
+  if (enTrop) return insecablesEcran("Au moins un segment coché traverse l'ombre : il n'est pas sur son bord.");
+  return insecablesEcran("Il manque au moins un côté : le contour doit faire le tour complet de l'ombre.");
 }
 
 // --- Candidats ------------------------------------------------------------------------------------
@@ -398,6 +610,9 @@ export function texteConclusion(exercice: ExerciceOmbreSoleil): string {
     }
     return `Le rayon issu du sommet de A heurte d'abord ${libelleObstacle(exercice, exercice.indexObstacleTouche)} (en vert) : l'ombre du sommet s'arrête sur sa surface, elle n'atteint pas le sol.`;
   }
+  if (exercice.variante === "solidePose") {
+    return insecablesEcran(`L'ombre ${duSolidePose(exercice)} sur le sol est le polygone ${exercice.nomsContour.join("")} (en vert) : son contour relie les points les plus extérieurs parmi la base et les ombres des sommets.`);
+  }
   return "L'ombre portée du campanile est reconstituée : son contour relie la base aux ombres des sommets. Les ombres des autres sommets s'obtiennent par le même procédé.";
 }
 
@@ -429,6 +644,9 @@ export function elementsConclusion(exercice: ExerciceOmbreSoleil): ElementsCroqu
       elementsOmbreSommet(sommetPiquet(exercice.baton), exercice.ombre, "A′"),
       { points: [], segments: auSol ? [{ a: exercice.baton.base, b: exercice.ombre, couleur: COULEURS_OMBRE.correct }] : [] },
     );
+  }
+  if (exercice.variante === "solidePose") {
+    return fusionner(elementsScene(exercice), ombresSolidePose(exercice, exercice.piquets.length), elementsContourSolidePose(exercice));
   }
   const ombres = [
     ...exercice.piquets.map((p) => ({ id: p.piquet.id, sommet: sommetPiquet(p.piquet), ombre: p.ombre })),
@@ -494,7 +712,19 @@ export function messagePointFaux(erreur: ErreurPointOmbre, exercice?: ExerciceOm
       return `${tete}le rayon passe au-dessus de cet obstacle sans le toucher : l'ombre ne s'y arrête pas.`;
     case "surObstacleMauvaiseFace":
       return `${tete}il est bien sur ${touche ?? "l'obstacle touché"}, mais pas à l'endroit où le rayon le heurte (suis la trace au sol issue du pied, puis remonte jusqu'au rayon).`;
+    case "piedVoisin":
+      return `${tete}la trace au sol qui y mène part d'un autre coin de la base que le pied du sommet. Elle doit partir du pied du sommet, le point du sol juste à sa verticale.`;
     default:
       return "Ce n'était pas le bon point.";
   }
+}
+
+/** Variante `solidePose` : « mauvais pied » dit avec les noms de l'instance (coin de la base juste en
+ * dessous, ou centre O de la base pour l'apex) ; les autres erreurs comme ailleurs. */
+export function messagePointFauxSolidePose(erreur: ErreurPointOmbre, exercice: ExerciceOmbreSoleilSolidePose, index: number): string {
+  if (erreur !== "piedVoisin") return insecablesEcran(messagePointFaux(erreur));
+  const id = exercice.piquets[index]!.piquet.id;
+  return insecablesEcran(exercice.forme === "pyramide"
+    ? `Ce n'était pas le bon point : la trace au sol qui y mène part d'un coin de la base. Le pied du sommet ${id} est le centre O de la base : c'est de là que part la trace, parallèle à l'ombre donnée.`
+    : `Ce n'était pas le bon point : c'est l'ombre d'un autre sommet, la trace au sol qui y mène part d'un autre coin de la base. Le pied de ${id} est le coin ${exercice.piedsPiquets[index]} juste en dessous : c'est de là que part la trace.`);
 }

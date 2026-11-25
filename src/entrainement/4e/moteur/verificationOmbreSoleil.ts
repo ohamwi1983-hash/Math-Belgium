@@ -1,5 +1,5 @@
 import type { Point3D } from "../core/geometrieEspace.types";
-import type { ExerciceOmbreSoleilDirectionInconnue, ExerciceOmbreSoleilObstacle, Piquet, PointCandidat } from "../core/ombreSoleil.types";
+import type { ExerciceOmbreSoleilDirectionInconnue, ExerciceOmbreSoleilObstacle, ExerciceOmbreSoleilSolidePose, Piquet, PointCandidat } from "../core/ombreSoleil.types";
 import { distance3D } from "./geometrieEspace";
 
 /**
@@ -29,4 +29,16 @@ export function verifierPoint(candidats: readonly PointCandidat[], ombre: Point3
   const candidat = candidats.find((c) => c.id === id);
   if (!candidat) return false;
   return distance3D(candidat.position, ombre) < EPSILON_OMBRE;
+}
+
+/** Écran "contour" (variante solidePose) : l'ensemble coché doit être EXACTEMENT l'ensemble des côtés
+ * du contour, recalculé ici depuis le contour (enveloppe convexe) et non lu dans `surContour`. */
+export function verifierContour(exercice: ExerciceOmbreSoleilSolidePose, ids: readonly string[]): boolean {
+  const k = exercice.nomsContour.length;
+  const cotes = new Set(exercice.nomsContour.map((a, i) => [a, exercice.nomsContour[(i + 1) % k]].sort().join("|")));
+  const coches = new Set(ids);
+  if (coches.size !== ids.length) return false;
+  const choisis = exercice.segmentsCandidats.filter((s) => coches.has(s.id));
+  if (choisis.length !== ids.length || choisis.length !== cotes.size) return false;
+  return choisis.every((s) => cotes.has([...s.extremites].sort().join("|")));
 }

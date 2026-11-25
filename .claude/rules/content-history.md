@@ -2639,6 +2639,12 @@ paths:
   la main, rotation au doigt) — `cavaliere-reglage-widget` (§ 1), `positions-cube-widget` (§ 3–4,
   défi), `trois-plans-widget` (§ 6), `section-cube-widget` (§ 9), `fenetre-durer-widget` (§ 10),
   `point-de-fuite-widget` (§ 11), `ombre-soleil-lampe-widget` (§ 12).
+  **Manuel, chantier D (25/11) — gen41 « Ombre d'un solide posé au sol »** (ex. 3 b 2ᵉ partie, 3 d, 3 e
+  et 9 du manuel) : variante `solidePose` AJOUTÉE EN FIN de catalogue de gen41 ; seule la description de
+  la carte gen41 (section `ombre`) est complétée (« Construis enfin l'ombre d'un solide posé au sol
+  (cube, caisse ou pyramide) à partir de l'ombre d'une arête ou d'un piquet, puis trace son contour. ») —
+  aucun bloc de cours ajouté (le § 12 traite déjà rayons parallèles, trace au sol et contour de l'ombre
+  du campanile). Détail : `.claude/rules/feuilles-evaluations.md`, « 4e ch. 8, manuel — gen41 ».
 
 - **Ateliers — figure épinglée pendant la manipulation (tous chapitres)** : retour utilisateur « les
   curseurs/boutons sont trop éloignés du dessin : en les manipulant, on ne voit plus le graphe ».

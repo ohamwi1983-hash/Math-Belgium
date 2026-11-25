@@ -1018,6 +1018,60 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   (53 / 60 : liste des leurres) et libre (57 / 60), gen101 « deux plans » (59 / 60, tirage bridé) ; gen103
   et gen107 « cavalière » : mêmes exercices, textes changés ; documents réels (2 plans, 2 séries +
   aménagée + corrigé + grille + feuille + Word) : 0 débordement à 680 / 820 / 1 280 px, 0 `.katex-error`.
+- **4e ch. 8, manuel — gen41 « Ombre d'un solide posé au sol » (chantier D, 25/11)** : variante
+  `solidePose` AJOUTÉE EN FIN de `CATALOGUE_VARIANTES` (indice 3 : codes 0–2 inchangés) ; tirage libre de
+  l'adaptateur et des codes = les trois variantes d'avant (`VARIANTES_TIRAGE_LIBRE`, même `randomInt(0, 2)`),
+  l'appli la tire une fois sur quatre (`genererExerciceOmbreSoleilLibre`). Situations du manuel (ex. 3 b,
+  3 d, 3 e, 9) : cube (côté 2–4), caisse = pavé (3–4 × 2–3 × 2–3) ou pyramide régulière à base carrée
+  (3–4, hauteur 3–5), forme tirée au tiers AVANT les essais ; donnée = ombre d'une arête verticale VISIBLE
+  ([BF], [CG]…) dont la trace part vers l'extérieur de la base, ou piquet [XP] planté à un coin visible de
+  la base de la pyramide, de même hauteur qu'elle (P′ hors de l'ombre de la pyramide). Ombre vers l'avant
+  (composante de profondeur retournée, même tirage : vers l'arrière elle tombait derrière le solide sur le
+  dessin), longueur ≤ 2,2 × la plus grande dimension, toutes les ombres de sommets hors de la base et hors
+  du dessin du solide (12 px) ; sur le dessin, l'ombre d'une verticale fait au moins 20° avec la verticale
+  et le rayon au moins 12° avec l'ombre (sinon arête, rayon et ombre se confondaient en un seul trait). Écrans : un « point » par sommet du haut dont l'ombre est un coin du contour
+  (deux pour le cube et la caisse — le troisième coin et l'ombre intérieure suivent « par le même
+  procédé » —, S pour la pyramide), `ChoixCandidatsOmbre`, 1 tentative, leurres `distracteursSol` + au
+  moins un `piedVoisin` (nouvelle `ErreurPointOmbre` : trace partie d'un autre coin = l'ombre d'un autre
+  sommet, ou d'un coin au lieu du centre O pour l'apex ; message `messagePointFauxSolidePose`) ; puis
+  « contour » (`EtapeContourSolidePose`) : sélection MULTIPLE à 3 tentatives (`TENTATIVES_CONTOUR`,
+  `tentativesMaxEcran`), cases carrées, parmi les ombres de TOUTES les arêtes (12 pour le cube et la caisse,
+  8 pour la pyramide ; une arête de la base est sa propre ombre), segments cochés dessinés en orange,
+  message « traverse l'ombre / il manque un côté » (`cibleSelectionContour`), écran clos : côtés ✓ (même
+  oubliés), choisis à tort ✗ ; `verifierContour` recalcule les côtés depuis l'enveloppe. Contour =
+  enveloppe convexe de la base et des ombres (`enveloppeConvexe` du campanile), net : point intérieur à
+  ≥ 10 px du bord, coin à ≥ 10 px de la corde de ses voisins ; aucun rayon, trace ou côté à moins de 9 px
+  d'un point nommé dont il ne part pas (sinon le sommet caché D et le centre O perdaient la place de leur
+  étiquette). Aides : propriété du cours, puis posée pour l'instance (pied = coin juste en dessous / centre O
+  à l'intersection des diagonales, tracées en rose avec le rayon ; « le contour a 6 côtés, C et E′ sont à
+  l'intérieur »). Étiquettes de TOUTE la figure (sommets, ombres, candidats, O, P) placées en pixels par
+  `placerEtiquettesSolidePose` (`meilleurDecalageEtiquette`, les plus contraintes d'abord, chaque étiquette
+  plus près de SON point que de tout autre de 4 px — sans cette garde, E′ et H′ voisins échangeaient leurs
+  noms à la lecture —, repli élargi à ≈ 36 px, calcul sur tout ce que l'écran peut montrer : elles ne bougent pas quand une aide s'ouvre ;
+  écran « contour » : sur la figure close — seul un segment coché à tort peut frôler une étiquette). Corrigé
+  (une lettre par écran) : d ∥ rayon donné, d′ ∥ ombre donnée issue du pied (O = (AC) ∩ (BD) pour l'apex),
+  X′ = d ∩ d′, vérification « même longueur que l'ombre donnée », piège « mauvais pied » ; contour : autres
+  ombres « même construction », polygone, piège listant les segments qui traversent l'ombre ; figure
+  annotée (traces d′ en pointillés roses, O et diagonales). Papier : « Un cube ABCDEFGH est posé sur le sol…
+  on connaît l'ombre de l'arête verticale [BF] : elle va de B jusqu'à F′… » / « Une caisse en forme de
+  parallélépipède rectangle… » / « Une pyramide régulière de base carrée ABCD et de sommet S… Un piquet
+  vertical [CP], planté au coin C de la base, a la même hauteur que la pyramide… », figure, puis « Construis
+  l'ombre de ce solide sur le sol. Trace ta construction sur la figure de l'énoncé, que tu joins à ta
+  feuille. » ; barème 4 (cube / caisse : 1 + 1 + autres ombres 1 + contour 1 ; pyramide : O 1, S′ 1,5,
+  contour 1,5) ; brève « Ombre du cube : le polygone ABF′G′H′D ». Profil `forme` = `cube` / `pave` /
+  `pyramide`, aucun cas particulier. Niveaux mesurés (600 tirages) : cube et caisse 4 · 8 min, pyramide
+  3 · 6 (méthode 1, piège 1 : le contour ne garde pas les ombres d'arêtes qui traversent l'ombre,
+  `sansCharge`). Mesuré : collecteur 600 tirages (0 NaN / notation clavier / KaTeX invalide / majuscule
+  d'insistance ; ombres, pieds, O, translation et contour recalculés indépendamment — enveloppe de Jarvis —,
+  `verifierContour` juste sur l'ensemble exact et faux sur ±1 segment, barème = 4) ; étiquettes (écrans
+  « point », « contour », conclusion, énoncé et corrigé papier) : 0 ambiguë, 0 qui chevauche un trait de
+  plus d'1 px ; frôlement < 1 px (boîte approchée) : O, l'aide de niveau 2 de la pyramide, 32 écrans sur
+  206 (le centre est entouré des diagonales et des arêtes latérales), D 4 figures sur 600 ; médiane du
+  dégagement 3,8 px ; génération : cube médiane 9 ms, caisse 55 ms, pyramide 50 ms, max ≈ 0,5 s
+  (`MAX_TENTATIVES_SOLIDE_POSE` 60 000), 0 échec sur 1 500 ; appli 26 % de « solide posé » ; rang de la
+  bonne réponse (candidats plus proches du pied) 0 : 12 %, 1 : 40 %, 2 : 22 %, 3 : 26 % (imposer un rang
+  tiré d'avance multipliait le temps par 3 et faisait échouer 14 % des tirages : non retenu) ; `?code=`
+  60 graines × (libre, simple, obstacle, direction inconnue) : instances ET énoncés papier identiques.
 - **5e ch. 5 (lots B, C, D, 5gen25–35)** : lecture `moteur5e/saisieDerivees.ts` (`lireNombreDerivees`,
   `nombreExactRefuseDerivees`, `expressionLisibleDerivees` — syntaxe seule —, messages par nature de champ
   `MESSAGES_ILLISIBLE_DERIVEES`), refus SANS tentative dans chaque moteur (`refusSaisie…` partagé avec l'écran) ;

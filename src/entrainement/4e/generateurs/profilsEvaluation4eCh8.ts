@@ -81,5 +81,8 @@ export function profilOmbreSoleil(e: ExerciceOmbreSoleil): ProfilInstance {
   // générateur tire déjà cette issue avant sa boucle de rejet (`cibleSol`).
   if (e.variante === "obstacle") return { casParticulier: null, forme: e.variante };
   if (e.variante === "directionInconnue") return { casParticulier: null, forme: `${e.piquets.length}-sommets` };
+  // Solide posé au sol (manuel 4e ch. 8) : la forme du solide (cube, pavé, pyramide) est visible
+  // dans l'énoncé, jamais un verdict.
+  if (e.variante === "solidePose") return { casParticulier: null, forme: e.forme };
   return { casParticulier: null };
 }

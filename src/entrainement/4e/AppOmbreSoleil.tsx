@@ -8,13 +8,15 @@ import {
   demarrerSessionOmbreSoleil,
   sequencePourExercice,
   soumettreConclusion,
+  soumettreContour,
   soumettreReponseDirection,
   soumettreReponseDirectionInconnue,
   soumettreReponsePoint,
   soumettreReponsePointSimple,
+  tentativesMaxEcran,
 } from "./moteur/sessionOmbreSoleil";
 import type { EtatSessionOmbreSoleil, PhaseOmbreSoleil } from "./moteur/typesOmbreSoleil";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOmbreSoleil } from "./generateurs/ombreSoleil";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOmbreSoleil, genererExerciceOmbreSoleilLibre } from "./generateurs/ombreSoleil";
 import type { VarianteOmbreSoleil } from "./core/ombreSoleil.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeConclusionOmbreSoleil } from "./components/EtapeConclusionOmbreSoleil";
@@ -23,6 +25,8 @@ import { EtapeDirectionOmbre } from "./components/EtapeDirectionOmbre";
 import { EtapePointOmbre } from "./components/EtapePointOmbre";
 import { EtapePointSimple } from "./components/EtapePointSimple";
 import { EtapePointSommetOmbre } from "./components/EtapePointSommetOmbre";
+import { EtapePointSolidePose } from "./components/EtapePointSolidePose";
+import { EtapeContourSolidePose } from "./components/EtapeContourSolidePose";
 import type { FicheChoixOmbre } from "./components/ChoixCandidatsOmbre";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -42,8 +46,10 @@ const REGLAGES_DEMO: ReglagesSession = {
   affichageExplication: true,
 };
 
+/** Tirage libre de l'appli : l'ombre d'un solide posé au sol une fois sur quatre
+ * (`genererExerciceOmbreSoleilLibre`) ; un `?code=` imprimé reste tiré comme par l'adaptateur. */
 function nouvelleSession(): EtatSessionOmbreSoleil {
-  return demarrerSessionOmbreSoleil(REGLAGES_DEMO, genererExerciceOmbreSoleil);
+  return demarrerSessionOmbreSoleil(REGLAGES_DEMO, genererExerciceOmbreSoleilLibre);
 }
 
 /** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
@@ -60,6 +66,7 @@ const TITRES_ECRANS: Record<PhaseOmbreSoleil, string> = {
   directionInconnue: "Direction de la lumière",
   direction: "Direction de la lumière",
   point: "Ombre du sommet",
+  contour: "Contour de l'ombre",
   conclusion: "Conclusion",
 };
 
@@ -145,7 +152,7 @@ export function AppOmbreSoleil() {
 
   const commun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
-    tentativesMax: etat.reglages.tentativesMax,
+    tentativesMax: tentativesMaxEcran(etat),
     niveauAide: etat.niveauAide,
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
     validation,
@@ -180,6 +187,16 @@ export function AppOmbreSoleil() {
               {...commun}
               onValider={(id, fiche) => terminerEtape(soumettreReponsePoint(etat, id), fiche)}
             />
+          ) : phase === "point" && exercice.variante === "solidePose" ? (
+            <EtapePointSolidePose
+              key={cle}
+              exercice={exercice}
+              index={etat.resolus.length}
+              {...commun}
+              onValider={(id, fiche) => terminerEtape(soumettreReponsePoint(etat, id), fiche)}
+            />
+          ) : phase === "contour" && exercice.variante === "solidePose" ? (
+            <EtapeContourSolidePose key={cle} exercice={exercice} {...commun} onValider={(ids, fiche) => terminerEtape(soumettreContour(etat, ids), fiche)} />
           ) : (
             <EtapeConclusionOmbreSoleil
               key={cle}
