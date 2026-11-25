@@ -335,7 +335,18 @@ partagé ; contenu, aides, tentatives et vérification inchangés, `SelecteurVar
   pas de bloc de données) ; `apercuEnonce` (`CadreActions`) mesure formules KaTeX entières et mots, pose
   `data-apercu-coupe` + `--apercu-coupe`, et « … » recouvre tout ce qui ne tient pas — jamais une
   formule coupée au milieu, rien de masqué sans « … ». Pas de `text-overflow: ellipsis` : les éléments
-  positionnés de KaTeX restent peints au-delà des points de suspension (Chromium). C : `EtapeSelectionGraphiqueQCM` (6gen8/11/20/21) et `EtapeApparierGraphiqueCyclo`
+  positionnés de KaTeX restent peints au-delà des points de suspension (Chromium). **Aperçu jamais vide
+  (25/11, 6gen106)** : un bloc de données SANS texte hors figures / tableaux / images (figure seule)
+  donnait un bandeau « … » seul ; `apercuEnonce` (`donneesSansTexte`) pose alors `data-apercu-consigne`
+  et l'aperçu montre la consigne générale (même rendu que « pas de bloc de données »), « … » final pour la
+  figure masquée — automatique, aucun générateur à modifier (bénéficiaires recensés : rapport du lot H2,
+  6e ch. 7) ; un bloc qui a du texte garde l'aperçu d'avant. Deux options OPT-IN de `EnTeteExercice`
+  (×3, mêmes props) : `apercu` (résumé explicite, ex. 6gen106 « 7 × 4 : A → B, sans P » — span
+  `.entete-exercice-apercu`, jamais affiché déplié, seul aperçu du bandeau `.avec-apercu`, « … » final)
+  et `figureToujoursVisible` (copie de la figure rendue seulement quand l'énoncé est replié,
+  `.entete-figure-replie` : sous la ligne d'aperçu, 130 px de haut au plus, 100 px clavier ouvert,
+  chevron calé sur la ligne, « … » limité à la ligne). Socle `AppEcransTrigo` : `DefinitionEcrans.apercuEnonce(e)`
+  et `ConfigAppEcrans.figureToujoursVisible` (6gen106 seulement aujourd'hui). C : `EtapeSelectionGraphiqueQCM` (6gen8/11/20/21) et `EtapeApparierGraphiqueCyclo`
   (6gen5) en grille 2 × 2 dès 312 px, carte cliquable (même sélection), `LoupeGraphique` plein écran ;
   6gen20 : graphique de f épinglé (`ReferenceEpinglee`). 5gen25 : grille dès qu'il y a la place.
 - Styles : `src/entrainement/cadre.css`, chargé APRÈS `theme.css`, tout sous `.entrainement`.

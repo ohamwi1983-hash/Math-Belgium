@@ -43,6 +43,9 @@ export interface ConfigAppEcrans<E, P extends string> {
    * (6e ch. 1, « Fonctions réciproques & cyclométriques »). */
   eyebrow?: string;
   sousTitre?: string;
+  /** La figure de l'énoncé reste visible sous le bandeau replié (opt-in, 6gen106 ; absent : rien ne
+   * change). */
+  figureToujoursVisible?: boolean;
 }
 
 interface TransitionEnAttente<E, P extends string> {
@@ -254,6 +257,8 @@ export function AppEcransTrigo<E, P extends string>({ config }: { config: Config
           messageIllisible={def.messageIllisible(e, phase)}
           approchee={def.approchee ? (v) => def.approchee!(e, phase, v) : undefined}
           bonneOption={choix && def.bonneOption ? def.bonneOption(e, phase) : undefined}
+          apercuEnonce={def.apercuEnonce ? def.apercuEnonce(e) : undefined}
+          figureToujoursVisible={config.figureToujoursVisible && figure ? <FigureSvg svg={figure} largeurMax={config.largeurFigure} /> : undefined}
           onValider={(v) => terminerEtape(soumettreEcran(def, etat, v), v)}
         />
       </main>

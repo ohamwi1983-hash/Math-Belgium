@@ -1419,6 +1419,16 @@ export const analyseCombinatoire: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 103. Anagrammes et contraintes »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Au moins un : le complément',
+          generatorId: '6gen105',
+          description: [
+            "Choisis d'abord la stratégie la plus directe (le contraire pour « au moins un », deux cas pour « au plus un », un produit pour « exactement »), puis compte avec des combinaisons, sans compter un groupe deux fois.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 105. Au moins un : le complément »',
+        },
       ],
     },
 
@@ -1985,6 +1995,16 @@ export const analyseCombinatoire: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 102. Triangle de Pascal et propriétés »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Terme indépendant',
+          generatorId: '6gen107',
+          description: [
+            "Écris l'exposant de x dans le terme général, trouve le rang k qui l'annule (ou conclus qu'il n'y en a pas), puis calcule le terme indépendant.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 107. Terme indépendant »',
+        },
       ],
     },
 
@@ -2313,6 +2333,16 @@ export const analyseCombinatoire: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 46. Dénombrement combinatoire pur — problèmes »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Chemins dans un quadrillage',
+          generatorId: '6gen106',
+          description: [
+            'Compte les chemins les plus courts sur un quadrillage : de A à B, en passant par un point, ou en évitant un point fermé.',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 106. Chemins dans un quadrillage »',
         },
       ],
     },
@@ -2915,6 +2945,26 @@ export const analyseCombinatoire: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 48. Probabilité binomiale et séquence exacte »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Avec ou sans remise ? Choisir le modèle',
+          generatorId: '6gen108',
+          description: [
+            'Lis comment se font les tirages pour choisir la loi (binomiale avec remise, hypergéométrique sans remise), puis calcule une probabilité, y compris « au moins un » et « au plus un ».',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 108. Avec ou sans remise ? Choisir le modèle »',
+        },
+        {
+          kind: 'entrainement',
+          title: "Détective d'erreurs : analyse combinatoire",
+          generatorId: '6gen109',
+          description: [
+            "Trouve la ligne fausse dans la copie d'un élève (ordre compté à tort, collier, dénominateur, exposants inversés, « − 1 » oublié, lettres répétées), explique l'erreur et corrige le résultat.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: "6e (6h) → « 109. Détective d'erreurs : analyse combinatoire »",
         },
         { kind: 'video', title: 'Synthèse du chapitre', youtubeId: 'CZGQSI3TBZ4' },
       ],

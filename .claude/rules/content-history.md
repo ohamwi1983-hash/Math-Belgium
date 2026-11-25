@@ -199,6 +199,16 @@ paths:
   probabilités » § 5–6), 6 `titreCourt`, 15 phrases d'`essentiel`, 21 cartes. Formules longues coupées en plusieurs
   `$…$` (aucune ne défile plus à 390 px, tiroirs ouverts). Les cartes des générateurs 6gen100–109 et les ateliers
   sont ajoutés par d'autres agents. Détail : `.claude/rules/feuilles-evaluations.md`, « 6e ch. 7, lots A, F, D ».
+  **Lot H, seconde moitié (6gen105–6gen109, nouveaux générateurs, agent H2)** : cartes 6gen105 « Au moins un : le
+  complément » en fin de § 2 (après 6gen44) ; 6gen107 « Terme indépendant » en fin de § 3, précédée d'un `methode`
+  « Méthode — terme indépendant de x » (terme général, exposant de x, k entier ou « aucun », exemple
+  (x² − 2/x)⁹ → 5376) ; 6gen106 « Chemins dans un quadrillage » en fin de § 4, précédée d'un `methode` « Méthode —
+  chemins dans un quadrillage » (mot de m + n flèches, C₍ₘ₊ₙ₎ⁿ, passer par P = produit, éviter P = complément) ;
+  6gen108 « Avec ou sans remise ? Choisir le modèle » puis 6gen109 « Détective d'erreurs : analyse combinatoire » en
+  fin de § 6 (avant la vidéo de synthèse). Aucun `exemple` ajouté (donc rien dans `ENONCES_DEMONSTRATION`) ;
+  registres (`registry.ts`, `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts`, processus
+  3 / 3 / 2 / 3 / 3, sections `denombrementcombine`, `denombrementproblemes`, `binomenewton`, `binomialesequence` ×2).
+  Descriptions de carte en texte brut. Détail : `.claude/rules/feuilles-evaluations.md`, « 6e ch. 7, lot H2 ».
 
 - **6e (6h), Chapitre 6 — corrigé « comme au tableau » et niveaux (6gen30–33, 6gen74–76)** : corrigés détaillés
   typés partagés écran / papier (`generateurs6e/*/corrigeDetaille.ts`, brique `ui6e/corrigeProbabilites.ts`),
