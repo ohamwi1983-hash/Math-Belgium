@@ -304,13 +304,13 @@ export const coniques: ChapterContent = {
           kind: 'exempleLibre',
           label: "Démonstration — équation réduite de l'ellipse",
           blocks: [
-            { kind: 'para', text: R`**Définition** : $P(x\,;y) \in \mathcal{E} \iff \sqrt{(x-c)^2+y^2} + \sqrt{(x+c)^2+y^2} = 2a$.` },
-            { kind: 'para', text: R`**Élévation au carré** (deux membres positifs) : $\iff (x-c)^2+y^2+(x+c)^2+y^2+2\sqrt{(x-c)^2+y^2}\,\sqrt{(x+c)^2+y^2} = 4a^2$.` },
-            { kind: 'para', text: R`**On isole le produit des racines et on divise par 2** : $\iff \sqrt{(x-c)^2+y^2}\,\sqrt{(x+c)^2+y^2} = 2a^2-c^2-x^2-y^2$.` },
-            { kind: 'para', text: R`**Nouvelle élévation au carré.** Le membre de gauche est positif : l'équivalence n'est vraie que si le membre de droite l'est aussi, c'est-à-dire si $x^2+y^2 \leq 2a^2-c^2$. Sous cette condition : $\iff \big((x-c)^2+y^2\big)\big((x+c)^2+y^2\big) = (2a^2-c^2-x^2-y^2)^2$.` },
-            { kind: 'para', text: R`**Regroupement en produit remarquable** : $\iff \big((x^2+y^2+c^2)-2cx\big)\big((x^2+y^2+c^2)+2cx\big) = \big(2a^2-(x^2+y^2+c^2)\big)^2$.` },
-            { kind: 'para', text: R`**Termes semblables** : $\iff (a^2-c^2)x^2+a^2y^2 = a^2(a^2-c^2)$.` },
-            { kind: 'para', text: R`**On pose** $b^2=a^2-c^2$, $b>0$ (possible car $a>c$) : $\iff b^2x^2+a^2y^2 = a^2b^2 \iff \dfrac{x^2}{a^2} + \dfrac{y^2}{b^2} = 1$.` },
+            { kind: 'para', text: R`**Définition** : $P(x\,;y) \in \mathcal{E}$ $\iff \sqrt{(x-c)^2+y^2} + \sqrt{(x+c)^2+y^2}$ $= 2a$.` },
+            { kind: 'para', text: R`**Élévation au carré** (deux membres positifs) : $\iff (x-c)^2+y^2+(x+c)^2+y^2$ $+\,2\sqrt{(x-c)^2+y^2}\,\sqrt{(x+c)^2+y^2}$ $= 4a^2$.` },
+            { kind: 'para', text: R`**On isole le produit des racines et on divise par 2** : $\iff \sqrt{(x-c)^2+y^2}\,\sqrt{(x+c)^2+y^2}$ $= 2a^2-c^2-x^2-y^2$.` },
+            { kind: 'para', text: R`**Nouvelle élévation au carré.** Le membre de gauche est positif : l'équivalence n'est vraie que si le membre de droite l'est aussi, c'est-à-dire si $x^2+y^2 \leq 2a^2-c^2$. Sous cette condition : $\iff \big((x-c)^2+y^2\big)\big((x+c)^2+y^2\big)$ $= (2a^2-c^2-x^2-y^2)^2$.` },
+            { kind: 'para', text: R`**Regroupement en produit remarquable** : $\iff \big((x^2+y^2+c^2)-2cx\big)$ $\cdot\,\big((x^2+y^2+c^2)+2cx\big)$ $= \big(2a^2-(x^2+y^2+c^2)\big)^2$.` },
+            { kind: 'para', text: R`**Termes semblables** : $\iff (a^2-c^2)x^2+a^2y^2$ $= a^2(a^2-c^2)$.` },
+            { kind: 'para', text: R`**On pose** $b^2=a^2-c^2$, $b>0$ (possible car $a>c$) : $\iff b^2x^2+a^2y^2 = a^2b^2$ $\iff \dfrac{x^2}{a^2} + \dfrac{y^2}{b^2} = 1$.` },
             { kind: 'para', text: R`**La condition posée est automatique.** Avec $2a^2-c^2=a^2+b^2$, elle s'écrit $x^2+y^2 \leq a^2+b^2$ ; or tout point solution de l'équation finale vérifie $\frac{x^2}{a^2} \leq 1$ et $\frac{y^2}{b^2} \leq 1$, donc $x^2 \leq a^2$ et $y^2 \leq b^2$. Toutes les équivalences sont donc justifiées.` },
           ],
         },
@@ -318,7 +318,7 @@ export const coniques: ChapterContent = {
           kind: 'definition',
           label: "À retenir — équation cartésienne de l'ellipse",
           items: [
-            R`L'ellipse de foyers $F(c\,;0)$ et $F'(-c\,;0)$ dont les points se trouvent à des distances de $F$ et $F'$ dont la somme vaut $2a$, avec $a > c$, a pour équation : $\dfrac{x^2}{a^2} + \dfrac{y^2}{b^2} = 1 \quad \text{avec} \quad b^2 = a^2-c^2 \;\, (b>0)$`,
+            R`L'ellipse de foyers $F(c\,;0)$ et $F'(-c\,;0)$ dont les points se trouvent à des distances de $F$ et $F'$ dont la somme vaut $2a$, avec $a > c$, a pour équation : $\dfrac{x^2}{a^2} + \dfrac{y^2}{b^2} = 1$ avec $b^2 = a^2-c^2$ ($b>0$).`,
           ],
         },
         {
@@ -412,7 +412,7 @@ export const coniques: ChapterContent = {
           label: "Démonstration — l'ellipse est un cercle aplati",
           blocks: [
             { kind: 'para', text: R`Soit $\mathcal{C}$ le cercle $x^2+y^2=a^2$ et $0<b<a$. À tout point $M(x\,;y_M)$ du plan, associe le point $P\left(x\,;\frac{b}{a}\,y_M\right)$ : même abscisse, ordonnée multipliée par $\frac{b}{a}$. Inversement, $P(x\,;y)$ provient du point $M\left(x\,;\frac{a}{b}\,y\right)$.` },
-            { kind: 'para', text: R`$P(x\,;y)$ provient d'un point du cercle $\iff x^2+\left(\frac{a}{b}\,y\right)^2=a^2 \iff x^2+\frac{a^2y^2}{b^2}=a^2$.` },
+            { kind: 'para', text: R`$P(x\,;y)$ provient d'un point du cercle $\iff x^2+\left(\frac{a}{b}\,y\right)^2 =a^2 \iff x^2+\frac{a^2y^2}{b^2}$ $=a^2$.` },
             { kind: 'para', text: R`En divisant par $a^2$ : $\iff \dfrac{x^2}{a^2}+\dfrac{y^2}{b^2}=1$. Les points obtenus sont exactement ceux de l'ellipse : l'ellipse est l'image du cercle de rayon $a$ par cet aplatissement vertical de rapport $\frac{b}{a}$.` },
           ],
         },
@@ -464,7 +464,7 @@ export const coniques: ChapterContent = {
             { kind: 'para', text: R`**Les deux génératrices** ($r \geq c-a$) : $\mathcal{C}_1 \equiv (x-c)^2+y^2 = r^2$ et $\mathcal{C}_2 \equiv (x+c)^2+y^2 = (2a+r)^2$.` },
             { kind: 'para', text: R`**On soustrait la première équation de la seconde** : $4cx = 4a^2+4ar$, donc $r = \dfrac{c}{a}x - a$.` },
             { kind: 'para', text: R`**On remplace** $r$ **dans** $\mathcal{C}_1$ : $(x-c)^2+y^2 = \left(\dfrac{c}{a}x-a\right)^2$.` },
-            { kind: 'para', text: R`**Développement et regroupement** : $x^2-2cx+c^2+y^2 = \dfrac{c^2}{a^2}x^2-2cx+a^2 \iff \left(\dfrac{a^2-c^2}{a^2}\right)x^2 + y^2 = a^2-c^2$.` },
+            { kind: 'para', text: R`**Développement et regroupement** : $x^2-2cx+c^2+y^2 = \dfrac{c^2}{a^2}x^2-2cx+a^2$ $\iff \left(\dfrac{a^2-c^2}{a^2}\right)x^2 + y^2 = a^2-c^2$.` },
             { kind: 'para', text: R`**On pose** $b^2=c^2-a^2$, $b>0$ (possible car $c>a$) : $-\dfrac{b^2}{a^2}x^2 + y^2 = -b^2$, puis, en divisant par $-b^2$ : $\dfrac{x^2}{a^2} - \dfrac{y^2}{b^2} = 1$.` },
             { kind: 'para', text: R`**Analyse du lieu.** La condition $r = \frac{c}{a}x - a \geq c-a$ impose $x \geq a$ : ces génératrices ne donnent que la branche de droite. Pour l'autre branche, on échange les rôles de $F$ et $F'$ (cercle de centre $F'$ et de rayon $r$, cercle de centre $F$ et de rayon $2a+r$), ce qui donne la même équation avec $x \leq -a$. Inversement, tout point de cette équation vérifie $|x|\geq a$ et provient de l'une des deux constructions : l'équation décrit exactement les deux branches.` },
           ],
@@ -473,7 +473,7 @@ export const coniques: ChapterContent = {
           kind: 'definition',
           label: "À retenir — équation cartésienne de l'hyperbole",
           items: [
-            R`L'hyperbole de foyers $F(c\,;0)$ et $F'(-c\,;0)$ dont les points se trouvent à des distances de $F$ et $F'$ dont la valeur absolue de la différence vaut $2a$, avec $c > a$, a pour équation : $\dfrac{x^2}{a^2} - \dfrac{y^2}{b^2} = 1 \quad \text{avec} \quad b^2 = c^2-a^2 \;\, (b>0)$`,
+            R`L'hyperbole de foyers $F(c\,;0)$ et $F'(-c\,;0)$ dont les points se trouvent à des distances de $F$ et $F'$ dont la valeur absolue de la différence vaut $2a$, avec $c > a$, a pour équation : $\dfrac{x^2}{a^2} - \dfrac{y^2}{b^2} = 1$ avec $b^2 = c^2-a^2$ ($b>0$).`,
           ],
         },
         { kind: 'subheading', text: "Caractéristiques de l'hyperbole" },
@@ -532,7 +532,7 @@ export const coniques: ChapterContent = {
           label: "Démonstration — les asymptotes de l'hyperbole",
           blocks: [
             { kind: 'para', text: R`Sur la branche de droite, la moitié supérieure est le graphique de $f(x)=\dfrac{b}{a}\sqrt{x^2-a^2}$ ($x\geq a$). Montrons que $\lim\limits_{x\to+\infty}\left(f(x)-\dfrac{b}{a}x\right)=0$.` },
-            { kind: 'para', text: R`**On multiplie par l'expression conjuguée** : $f(x)-\dfrac{b}{a}x=\dfrac{b}{a}\left(\sqrt{x^2-a^2}-x\right)=\dfrac{b}{a}\cdot\dfrac{(x^2-a^2)-x^2}{\sqrt{x^2-a^2}+x}=\dfrac{-ab}{\sqrt{x^2-a^2}+x}$.` },
+            { kind: 'para', text: R`**On multiplie par l'expression conjuguée** : $f(x)-\dfrac{b}{a}x =\dfrac{b}{a}\left(\sqrt{x^2-a^2}-x\right)$ $=\dfrac{b}{a}\cdot\dfrac{(x^2-a^2)-x^2}{\sqrt{x^2-a^2}+x}$ $=\dfrac{-ab}{\sqrt{x^2-a^2}+x}$.` },
             { kind: 'para', text: R`**Limite** : le dénominateur tend vers $+\infty$ quand $x\to+\infty$, donc la différence tend vers $0$ : la droite $y=\frac{b}{a}x$ est asymptote oblique en $+\infty$. Elle est même **négative** : la courbe reste sous son asymptote.` },
             { kind: 'para', text: R`**Les autres morceaux** s'en déduisent par symétrie : la moitié inférieure ($y=-f(x)$) a pour asymptote $y=-\frac{b}{a}x$ en $+\infty$, et la branche de gauche, symétrique de celle de droite par rapport à l'axe des ordonnées, admet les mêmes droites comme asymptotes en $-\infty$.` },
           ],
@@ -568,8 +568,8 @@ export const coniques: ChapterContent = {
           label: "Démonstration — l'hyperbole équilatère dans le repère de ses asymptotes",
           blocks: [
             { kind: 'para', text: R`Prends **les asymptotes elles-mêmes** comme axes : l'axe des $X$ porté par la droite $y=x$, l'axe des $Y$ porté par la droite $y=-x$, avec la même unité. Les nouvelles coordonnées d'un point $(x\,;y)$ sont ses distances signées à ces deux droites : $X=\dfrac{x+y}{\sqrt{2}}$ et $Y=\dfrac{x-y}{\sqrt{2}}$.` },
-            { kind: 'para', text: R`**On factorise** : $x^2-y^2=(x+y)(x-y)=\sqrt{2}\,X\cdot\sqrt{2}\,Y=2XY$.` },
-            { kind: 'para', text: R`**Conclusion** : $x^2-y^2=a^2 \iff 2XY=a^2 \iff XY=\dfrac{a^2}{2}$. Dans le repère de ses asymptotes, l'hyperbole équilatère a pour équation $XY=k$, avec $k=\dfrac{a^2}{2}$ ; ses axes de symétrie sont alors les droites $Y=X$ et $Y=-X$.` },
+            { kind: 'para', text: R`**On factorise** : $x^2-y^2=(x+y)(x-y)$ $=\sqrt{2}\,X\cdot\sqrt{2}\,Y=2XY$.` },
+            { kind: 'para', text: R`**Conclusion** : $x^2-y^2=a^2$ $\iff 2XY=a^2$ $\iff XY=\dfrac{a^2}{2}$. Dans le repère de ses asymptotes, l'hyperbole équilatère a pour équation $XY=k$, avec $k=\dfrac{a^2}{2}$ ; ses axes de symétrie sont alors les droites $Y=X$ et $Y=-X$.` },
             { kind: 'para', text: R`**Dans l'autre sens**, l'hyperbole $xy=k$ ($k>0$, asymptotes = axes du repère) est équilatère, avec $a^2=2k$ : sommets $(\sqrt{k}\,;\sqrt{k})$ et $(-\sqrt{k}\,;-\sqrt{k})$, à la distance $a=\sqrt{2k}$ du centre ; foyers $(\sqrt{2k}\,;\sqrt{2k})$ et $(-\sqrt{2k}\,;-\sqrt{2k})$, à la distance $c=a\sqrt{2}=2\sqrt{k}$. Si $k<0$, les branches sont dans les quadrants II et IV.` },
           ],
         },
@@ -685,17 +685,17 @@ export const coniques: ChapterContent = {
           label: "Démonstration — caractérisation foyer-directrice de l'ellipse",
           blocks: [
             { kind: 'para', text: R`**Condition de départ** : $\dfrac{|PF|}{\text{dist}(P\,;d)} = \dfrac{c}{a}$, avec $P(x\,;y)$, $F(c\,;0)$ et $d\equiv x=\frac{a^2}{c}$.` },
-            { kind: 'para', text: R`**Produit en croix** : $\iff a\sqrt{(x-c)^2+y^2} = c\cdot\left|x-\dfrac{a^2}{c}\right| = |cx-a^2|$.` },
-            { kind: 'para', text: R`**Élévation au carré** (deux membres positifs) : $\iff a^2(x^2-2cx+c^2+y^2) = c^2x^2-2a^2cx+a^4$.` },
-            { kind: 'para', text: R`**Le terme** $-2a^2cx$ **s'élimine ; on regroupe** : $\iff (a^2-c^2)x^2+a^2y^2 = a^2(a^2-c^2)$.` },
-            { kind: 'para', text: R`**Avec** $b^2 = a^2-c^2$ : $\iff b^2x^2+a^2y^2 = a^2b^2 \iff \dfrac{x^2}{a^2}+\dfrac{y^2}{b^2} = 1$.` },
+            { kind: 'para', text: R`**Produit en croix** : $\iff a\sqrt{(x-c)^2+y^2} = c\cdot\left|x-\dfrac{a^2}{c}\right|$ $= |cx-a^2|$.` },
+            { kind: 'para', text: R`**Élévation au carré** (deux membres positifs) : $\iff a^2(x^2-2cx+c^2+y^2)$ $= c^2x^2-2a^2cx+a^4$.` },
+            { kind: 'para', text: R`**Le terme** $-2a^2cx$ **s'élimine ; on regroupe** : $\iff (a^2-c^2)x^2+a^2y^2$ $= a^2(a^2-c^2)$.` },
+            { kind: 'para', text: R`**Avec** $b^2 = a^2-c^2$ : $\iff b^2x^2+a^2y^2 = a^2b^2$ $\iff \dfrac{x^2}{a^2}+\dfrac{y^2}{b^2} = 1$.` },
           ],
         },
         {
           kind: 'exempleLibre',
           label: "Démonstration — caractérisation foyer-directrice de l'hyperbole",
           blocks: [
-            { kind: 'para', text: R`Les quatre premières étapes sont identiques (rien n'y suppose $c<a$) : $\dfrac{|PF|}{\text{dist}(P\,;d)} = \dfrac{c}{a} \iff (a^2-c^2)x^2+a^2y^2 = a^2(a^2-c^2)$.` },
+            { kind: 'para', text: R`Les quatre premières étapes sont identiques (rien n'y suppose $c<a$) : $\dfrac{|PF|}{\text{dist}(P\,;d)} = \dfrac{c}{a}$ $\iff (a^2-c^2)x^2+a^2y^2$ $= a^2(a^2-c^2)$.` },
             { kind: 'para', text: R`**Cette fois** $c>a$ **: on pose** $b^2 = c^2-a^2>0$, de sorte que $a^2-c^2=-b^2$ : $\iff -b^2x^2+a^2y^2 = -a^2b^2$.` },
             { kind: 'para', text: R`**Division par** $-a^2b^2$ : $\iff \dfrac{x^2}{a^2}-\dfrac{y^2}{b^2} = 1$. Le même foyer $F(c\,;0)$ et la même directrice $x=\frac{a^2}{c}$ décrivent cette fois les **deux** branches.` },
           ],
@@ -758,7 +758,7 @@ export const coniques: ChapterContent = {
           label: 'Exemple résolu — foyer F(0 ; 1), directrice d ≡ y = 4, excentricité 1⁄2',
           blocks: [
             { kind: 'para', text: R`**Nature** : $e=\frac{1}{2}<1$, c'est une ellipse. La directrice est **horizontale** : $\text{dist}(P\,;d)=|y-4|$.` },
-            { kind: 'para', text: R`**Équation** : $x^2+(y-1)^2=\dfrac{1}{4}(y-4)^2 \iff 4x^2+4y^2-8y+4=y^2-8y+16 \iff 4x^2+3y^2=12$.` },
+            { kind: 'para', text: R`**Équation** : $x^2+(y-1)^2 =\dfrac{1}{4}(y-4)^2$ $\iff 4x^2+4y^2-8y+4 =y^2-8y+16$ $\iff 4x^2+3y^2 =12$.` },
             { kind: 'para', text: R`**Réduite** : $\dfrac{x^2}{3}+\dfrac{y^2}{4}=1$ — le plus grand dénominateur est sous $y^2$ : axe focal vertical, $a=2$, $b=\sqrt{3}$, $c=1$.` },
             { kind: 'para', text: R`**Contrôle** : foyer $(0\,;c)=(0\,;1)$ ✓, $e=\frac{c}{a}=\frac{1}{2}$ ✓, directrice $y=\frac{a^2}{c}=4$ ✓.` },
           ],
@@ -875,12 +875,12 @@ export const coniques: ChapterContent = {
           label: 'Exemple résolu — 16x² − 36y² + 80x + 252y − 197 = 0',
           blocks: [
             { kind: 'para', text: "**1) Transformation de l'équation.**" },
-            { kind: 'para', text: R`$16x^2 - 36y^2 + 80x + 252y - 197 = 0$` },
-            { kind: 'para', text: R`$\iff (16x^2 + 80x) - (36y^2 - 252y) = 197$` },
-            { kind: 'para', text: R`$\iff (16x^2+80x+100) - (36y^2-252y+441) = 197+100-441$` },
+            { kind: 'para', text: R`$16x^2 - 36y^2 + 80x + 252y - 197$ $= 0$` },
+            { kind: 'para', text: R`$\iff (16x^2 + 80x) - (36y^2 - 252y)$ $= 197$` },
+            { kind: 'para', text: R`$\iff (16x^2+80x+100)$ $-\,(36y^2-252y+441)$ $= 197+100-441$` },
             { kind: 'para', text: R`car $16x^2+80x+100 = (4x+10)^2$ et $36y^2-252y+441 = (6y-21)^2$ :` },
             { kind: 'para', text: R`$\iff (4x+10)^2 - (6y-21)^2 = -144$` },
-            { kind: 'para', text: R`$\iff 16\left(x+\dfrac{5}{2}\right)^2 - 36\left(y-\dfrac{7}{2}\right)^2 = -144$` },
+            { kind: 'para', text: R`$\iff 16\left(x+\dfrac{5}{2}\right)^2 - 36\left(y-\dfrac{7}{2}\right)^2$ $= -144$` },
             { kind: 'para', text: R`$\iff -\dfrac{\left(x+\frac{5}{2}\right)^2}{9} + \dfrac{\left(y-\frac{7}{2}\right)^2}{4} = 1$` },
             {
               kind: 'para',
@@ -954,14 +954,14 @@ export const coniques: ChapterContent = {
           kind: 'astuce',
           label: 'Vérifier la réduction en testant un sommet',
           text:
-            R`Une fois les sommets calculés dans $R_1$ (ici $S\left(-\frac{5}{2}\,;\frac{11}{2}\right)$), substitue-les dans l'équation générale de départ : $16\cdot\frac{25}{4}-36\cdot\frac{121}{4}+80\cdot\left(-\frac{5}{2}\right)+252\cdot\frac{11}{2}-197 = 100-1089-200+1386-197 = 0$ ✓. Un contrôle de 10 secondes qui attrape toute erreur de complétion de carré ou de signe !`,
+            R`Une fois les sommets calculés dans $R_1$ (ici $S\left(-\frac{5}{2}\,;\frac{11}{2}\right)$), substitue-les dans l'équation générale de départ : $16\cdot\frac{25}{4}-36\cdot\frac{121}{4}+80\cdot\left(-\frac{5}{2}\right)$ $+252\cdot\frac{11}{2}-197$ vaut $100-1089-200+1386-197 = 0$ ✓. Un contrôle de 10 secondes qui attrape toute erreur de complétion de carré ou de signe !`,
         },
         { kind: 'subheading', text: 'Réduire l’équation d’une parabole' },
         {
           kind: 'exempleLibre',
           label: 'Exemple résolu — y² − 4y − 8x + 28 = 0',
           blocks: [
-            { kind: 'para', text: R`**1) Un seul carré** (en $y$), $x$ au premier degré : c'est une parabole d'axe focal horizontal. On complète le carré en $y$ : $y^2-4y+4 = 8x-28+4 \iff (y-2)^2 = 8x-24 \iff (y-2)^2 = 8(x-3)$.` },
+            { kind: 'para', text: R`**1) Un seul carré** (en $y$), $x$ au premier degré : c'est une parabole d'axe focal horizontal. On complète le carré en $y$ : $y^2-4y+4 = 8x-28+4 \iff (y-2)^2$ $= 8x-24 \iff (y-2)^2 = 8(x-3)$.` },
             { kind: 'para', text: R`**2) Changement de repère** : origine $O'(3\,;2)$, $x'=x-3$, $y'=y-2$ ; l'équation devient $y'^2=8x'$, de la forme $y'^2=2px'$ avec $2p=8$, donc $p=4$.` },
             { kind: 'para', text: R`**3) Éléments dans** $R_1$. Sommet $S(3\,;2)$, axe focal $y=2$, ouverture vers les $x$ positifs (coefficient positif) ; foyer à $\frac{p}{2}=2$ du sommet : $F(5\,;2)$ ; directrice à $2$ de l'autre côté : $d\equiv x=1$.` },
             { kind: 'para', text: R`**4) Contrôle** : le point $(5\,;-2)$ est sur la courbe ($(-4)^2=16=8\cdot2$ ✓) ; sa distance au foyer $F(5\,;2)$ vaut $4$ et sa distance à la directrice vaut $5-1=4$ ✓.` },
@@ -1007,9 +1007,9 @@ export const coniques: ChapterContent = {
           kind: 'exempleLibre',
           label: 'Exemple résolu — trois équations qui ne sont pas des coniques',
           blocks: [
-            { kind: 'para', text: R`**a)** $x^2+4y^2-2x+16y+17=0 \iff (x-1)^2+4(y+2)^2 = -17+1+16 = 0$ : une somme de carrés nulle, donc $x=1$ et $y=-2$ — c'est le **point** $(1\,;-2)$.` },
-            { kind: 'para', text: R`**b)** $x^2+4y^2-2x+16y+20=0 \iff (x-1)^2+4(y+2)^2 = -3$ : le premier membre est positif, l'ensemble est **vide**.` },
-            { kind: 'para', text: R`**c)** $x^2-4y^2-2x+1=0 \iff (x-1)^2=4y^2 \iff x-1=2y$ ou $x-1=-2y$ : **deux droites sécantes** en $(1\,;0)$, $y=\frac{x-1}{2}$ et $y=-\frac{x-1}{2}$.` },
+            { kind: 'para', text: R`**a)** $x^2+4y^2-2x+16y+17 =0$ $\iff (x-1)^2+4(y+2)^2$ $= -17+1+16 = 0$ : une somme de carrés nulle, donc $x=1$ et $y=-2$ — c'est le **point** $(1\,;-2)$.` },
+            { kind: 'para', text: R`**b)** $x^2+4y^2-2x+16y+20 =0$ $\iff (x-1)^2+4(y+2)^2 = -3$ : le premier membre est positif, l'ensemble est **vide**.` },
+            { kind: 'para', text: R`**c)** $x^2-4y^2-2x+1=0$ $\iff (x-1)^2=4y^2$ $\iff x-1=2y$ ou $x-1=-2y$ : **deux droites sécantes** en $(1\,;0)$, $y=\frac{x-1}{2}$ et $y=-\frac{x-1}{2}$.` },
           ],
         },
         {
@@ -1067,7 +1067,7 @@ export const coniques: ChapterContent = {
           kind: 'definition',
           label: 'Définition — rayons focaux',
           items: [
-            R`Pour un point $P$ d'une ellipse de foyers $F$ et $F'$, les distances $|PF|$ et $|PF'|$ sont les **rayons focaux** de $P$. La propriété caractéristique de l'ellipse s'écrit alors : $|PF| + |PF'| = 2a \quad \text{(pour tout point } P \text{ de l'ellipse)}$`,
+            R`Pour un point $P$ d'une ellipse de foyers $F$ et $F'$, les distances $|PF|$ et $|PF'|$ sont les **rayons focaux** de $P$. La propriété caractéristique de l'ellipse s'écrit alors : $|PF| + |PF'| = 2a$ pour tout point $P$ de l'ellipse.`,
           ],
         },
         {
@@ -1075,8 +1075,8 @@ export const coniques: ChapterContent = {
           label: "Démonstration — les rayons focaux en fonction de l'abscisse",
           blocks: [
             { kind: 'para', text: R`Soit $P(x\,;y)$ un point de l'ellipse $\dfrac{x^2}{a^2}+\dfrac{y^2}{b^2}=1$, de foyers $F(c\,;0)$ et $F'(-c\,;0)$, avec $b^2=a^2-c^2$ et $e=\frac{c}{a}$.` },
-            { kind: 'para', text: R`**On remplace** $y^2$ grâce à l'équation : $y^2=b^2\left(1-\frac{x^2}{a^2}\right)=(a^2-c^2)-\frac{(a^2-c^2)x^2}{a^2}$.` },
-            { kind: 'para', text: R`**Carré du rayon focal** : $|PF|^2=(x-c)^2+y^2=x^2-2cx+c^2+a^2-c^2-x^2+\frac{c^2x^2}{a^2}=a^2-2cx+\frac{c^2x^2}{a^2}=\left(a-\frac{c}{a}x\right)^2$.` },
+            { kind: 'para', text: R`**On remplace** $y^2$ grâce à l'équation : $y^2 =b^2\left(1-\frac{x^2}{a^2}\right)$ $=(a^2-c^2)-\frac{(a^2-c^2)x^2}{a^2}$.` },
+            { kind: 'para', text: R`**Carré du rayon focal** : $|PF|^2 =(x-c)^2+y^2$ $=x^2-2cx+c^2+a^2-c^2-x^2+\frac{c^2x^2}{a^2}$ $=a^2-2cx+\frac{c^2x^2}{a^2} =\left(a-\frac{c}{a}x\right)^2$.` },
             { kind: 'para', text: R`**Signe** : $|x|\leq a$ et $c<a$, donc $\frac{c}{a}x\leq c<a$ et $a-\frac{c}{a}x>0$. D'où $|PF|=a-\dfrac{c}{a}x=a-ex$, puis $|PF'|=2a-|PF|=a+ex$.` },
             { kind: 'para', text: R`**Bornes** : quand $x$ parcourt $[-a\,;a]$, $a-ex$ décroît de $a+c$ à $a-c$ : $a-c\leq|PF|\leq a+c$. Le minimum est atteint au sommet $(a\,;0)$, le plus proche de $F$, le maximum au sommet $(-a\,;0)$.` },
           ],
@@ -1101,8 +1101,8 @@ export const coniques: ChapterContent = {
           kind: 'methode',
           label: "Méthode — aire du triangle FPF′ en 3 étapes",
           items: [
-            R`(1) **Rayons focaux.** Si l'énoncé donne le rapport $k = \frac{|PF|}{|PF'|}$, résous le système $\{|PF|+|PF'|=2a \; ; \; |PF|=k\cdot|PF'|\} \implies |PF'| = \dfrac{2a}{k+1}$, $|PF| = \dfrac{2ak}{k+1}$.`,
-            R`(2) **Angle au sommet** $P$, par la loi des cosinus dans le triangle $FPF'$, dont le troisième côté est $|FF'|=2c$ : $\cos(\widehat{FPF'}) = \dfrac{|PF|^2+|PF'|^2-4c^2}{2\cdot|PF|\cdot|PF'|}$ avec $c^2=a^2-b^2$.`,
+            R`(1) **Rayons focaux.** Si l'énoncé donne le rapport $k = \frac{|PF|}{|PF'|}$, résous le système formé par $|PF|+|PF'|=2a$ et $|PF|=k\cdot|PF'|$ : $|PF'| = \dfrac{2a}{k+1}$ et $|PF| = \dfrac{2ak}{k+1}$.`,
+            R`(2) **Angle au sommet** $P$, par la loi des cosinus dans le triangle $FPF'$, dont le troisième côté est $|FF'|=2c$ : $\cos(\widehat{FPF'})$ $= \dfrac{|PF|^2+|PF'|^2-4c^2}{2\cdot|PF|\cdot|PF'|}$ avec $c^2=a^2-b^2$.`,
             R`(3) **Aire**, par la formule du sinus : $\text{aire} = \dfrac{1}{2}\cdot|PF|\cdot|PF'|\cdot\sin(\widehat{FPF'})$ avec $\sin = \sqrt{1-\cos^2}$.`,
           ],
         },
@@ -1122,15 +1122,15 @@ export const coniques: ChapterContent = {
             {
               kind: 'para',
               text:
-                R`**(2) Angle** — loi des cosinus, avec $4c^2=36$ : $\cos(\widehat{FPF'}) = \dfrac{\frac{400}{9}+\frac{100}{9}-36}{2\cdot\frac{20}{3}\cdot\frac{10}{3}} = \dfrac{\frac{176}{9}}{\frac{400}{9}} = \dfrac{11}{25}$.`,
+                R`**(2) Angle** — loi des cosinus, avec $4c^2=36$ : $\cos(\widehat{FPF'}) = \dfrac{\frac{400}{9}+\frac{100}{9}-36}{2\cdot\frac{20}{3}\cdot\frac{10}{3}}$ $= \dfrac{\frac{176}{9}}{\frac{400}{9}} = \dfrac{11}{25}$.`,
             },
             {
               kind: 'para',
-              text: R`**(3) Aire** — d'abord le sinus : $\sin(\widehat{FPF'}) = \sqrt{1-\dfrac{121}{625}} = \sqrt{\dfrac{504}{625}} = \dfrac{6\sqrt{14}}{25}$.`,
+              text: R`**(3) Aire** — d'abord le sinus : $\sin(\widehat{FPF'}) = \sqrt{1-\dfrac{121}{625}}$ $= \sqrt{\dfrac{504}{625}} = \dfrac{6\sqrt{14}}{25}$.`,
             },
             {
               kind: 'para',
-              text: R`Puis l'aire : $\text{aire} = \dfrac{1}{2}\cdot\dfrac{20}{3}\cdot\dfrac{10}{3}\cdot\dfrac{6\sqrt{14}}{25} = \dfrac{1200\sqrt{14}}{450} = \dfrac{8\sqrt{14}}{3} \approx 9{,}98$.`,
+              text: R`Puis l'aire : $\text{aire} = \dfrac{1}{2}\cdot\dfrac{20}{3}\cdot\dfrac{10}{3}\cdot\dfrac{6\sqrt{14}}{25} = \dfrac{1200\sqrt{14}}{450}$ $= \dfrac{8\sqrt{14}}{3} \approx 9{,}98$.`,
             },
             {
               kind: 'para',
@@ -1168,7 +1168,7 @@ export const coniques: ChapterContent = {
           label: 'Démonstration — aire du triangle focal en fonction de b et de l’angle',
           blocks: [
             { kind: 'para', text: R`Notons $r_1=|PF|$, $r_2=|PF'|$ et $\theta=\widehat{FPF'}$, pour un point $P$ de l'ellipse non situé sur l'axe focal. On sait que $r_1+r_2=2a$ et $|FF'|=2c$.` },
-            { kind: 'para', text: R`**Loi des cosinus** : $4c^2=r_1^2+r_2^2-2r_1r_2\cos\theta=(r_1+r_2)^2-2r_1r_2(1+\cos\theta)=4a^2-2r_1r_2(1+\cos\theta)$.` },
+            { kind: 'para', text: R`**Loi des cosinus** : $4c^2 =r_1^2+r_2^2-2r_1r_2\cos\theta$ $=(r_1+r_2)^2-2r_1r_2(1+\cos\theta)$ $=4a^2-2r_1r_2(1+\cos\theta)$.` },
             { kind: 'para', text: R`**On isole le produit** : $2r_1r_2(1+\cos\theta)=4(a^2-c^2)=4b^2$, donc $r_1r_2=\dfrac{2b^2}{1+\cos\theta}$.` },
             { kind: 'para', text: R`**Aire** : $\dfrac{1}{2}r_1r_2\sin\theta=\dfrac{b^2\sin\theta}{1+\cos\theta}$. Avec $\sin\theta=2\sin\frac{\theta}{2}\cos\frac{\theta}{2}$ et $1+\cos\theta=2\cos^2\frac{\theta}{2}$ : $\text{aire}=b^2\tan\dfrac{\theta}{2}$.` },
             { kind: 'para', text: R`**Recoupement sur l'exemple** : $b^2=16$, $\cos\theta=\frac{11}{25}$, $\sin\theta=\frac{6\sqrt{14}}{25}$, donc $\frac{\sin\theta}{1+\cos\theta}=\frac{6\sqrt{14}}{36}=\frac{\sqrt{14}}{6}$ et l'aire vaut $16\cdot\frac{\sqrt{14}}{6}=\frac{8\sqrt{14}}{3}$ ✓.` },
@@ -1220,7 +1220,7 @@ export const coniques: ChapterContent = {
               text:
                 R`On vient de voir que $|BF|=|BF'|=a$. Le triangle $FBF'$ est donc **rectangle isocèle** en $B$, et Pythagore donne :`,
             },
-            { kind: 'para', text: R`$a^2+a^2 = (2c)^2 \iff 2a^2=4c^2 \iff a^2=2c^2$` },
+            { kind: 'para', text: R`$a^2+a^2 = (2c)^2 \iff 2a^2 =4c^2 \iff a^2$ $=2c^2$` },
             { kind: 'para', text: R`$\implies e^2 = \dfrac{c^2}{a^2} = \dfrac{1}{2} \implies e = \dfrac{\sqrt{2}}{2} \approx 0{,}707$` },
           ],
         },
@@ -1256,7 +1256,7 @@ export const coniques: ChapterContent = {
               text:
                 R`L'ellipse $\frac{x^2}{a^2}+\frac{y^2}{b^2}=1$ a pour foyer $F(c\,;0)$, pour sommets $A'(-a\,;0)$ et $B(0\,;b)$. Le point $P$ de l'ellipse d'abscisse $c$ et d'ordonnée positive est tel que $(OP)$ est parallèle à $(A'B)$. Quelle est l'excentricité ?`,
             },
-            { kind: 'para', text: R`**Ordonnée de** $P$ : $\frac{c^2}{a^2}+\frac{y^2}{b^2}=1 \iff y^2=b^2\cdot\frac{a^2-c^2}{a^2}=\frac{b^4}{a^2}$, donc $P\left(c\,;\frac{b^2}{a}\right)$.` },
+            { kind: 'para', text: R`**Ordonnée de** $P$ : $\frac{c^2}{a^2}+\frac{y^2}{b^2} =1 \iff y^2$ $=b^2\cdot\frac{a^2-c^2}{a^2} =\frac{b^4}{a^2}$, donc $P\left(c\,;\frac{b^2}{a}\right)$.` },
             { kind: 'para', text: R`**Pentes** : $(OP)$ a pour pente $\dfrac{b^2/a}{c}=\dfrac{b^2}{ac}$ ; $(A'B)$ a pour pente $\dfrac{b-0}{0-(-a)}=\dfrac{b}{a}$.` },
             { kind: 'para', text: R`**Parallélisme** : $\dfrac{b^2}{ac}=\dfrac{b}{a} \iff b=c$. Alors $a^2 = b^2+c^2 = 2c^2$ et $e = \dfrac{c}{a} = \dfrac{\sqrt{2}}{2}$.` },
             {
@@ -1275,7 +1275,7 @@ export const coniques: ChapterContent = {
               text:
                 R`Les directrices d'une ellipse sont $x=\pm \frac{a^2}{c}$ : leur distance vaut $\frac{2a^2}{c} = \frac{2a}{e}$. Les foyers sont $(\pm c\,;0)$ : leur distance vaut $2c=2ae$. La condition $D(\text{directrices}) = k\cdot D(\text{foyers})$ s'écrit donc :`,
             },
-            { kind: 'para', text: R`$\dfrac{2a}{e} = k\cdot 2ae \iff 1 = ke^2 \iff e^2 = \dfrac{1}{k} \implies e = \dfrac{1}{\sqrt{k}}$` },
+            { kind: 'para', text: R`$\dfrac{2a}{e} = k\cdot 2ae \iff 1 = ke^2 \iff e^2 = \dfrac{1}{k}$ $\implies e = \dfrac{1}{\sqrt{k}}$` },
             {
               kind: 'para',
               text:
@@ -1345,18 +1345,18 @@ export const coniques: ChapterContent = {
             },
             { kind: 'para', text: R`$\sqrt{(x-3)^2+(y+2)^2} = \dfrac{5}{3}\left|x+\dfrac{1}{5}\right|$` },
             { kind: 'para', text: R`$\iff (x-3)^2+(y+2)^2 = \dfrac{25}{9}\left(x+\dfrac{1}{5}\right)^2$` },
-            { kind: 'para', text: R`$\iff 9x^2-54x+81+9y^2+36y+36 = 25x^2+10x+1$` },
-            { kind: 'para', text: R`$\iff 16x^2 - 9y^2 + 64x - 36y - 116 = 0$` },
+            { kind: 'para', text: R`$\iff 9x^2-54x+81+9y^2+36y+36$ $= 25x^2+10x+1$` },
+            { kind: 'para', text: R`$\iff 16x^2 - 9y^2 + 64x - 36y - 116$ $= 0$` },
             {
               kind: 'para',
               text:
                 R`**3) Résolution du système.** On substitue $y=-\frac{3}{4}x-3$ dans l'équation de la conique. Comme $y^2=\frac{9}{16}x^2+\frac{9}{2}x+9$, il vient $-9y^2=-\frac{81}{16}x^2-\frac{81}{2}x-81$ et $-36y=27x+108$ :`,
             },
-            { kind: 'para', text: R`$16x^2 - \dfrac{81}{16}x^2 - \dfrac{81}{2}x - 81 + 64x + 27x + 108 - 116 = 0$` },
+            { kind: 'para', text: R`$16x^2 - \dfrac{81}{16}x^2 - \dfrac{81}{2}x - 81$ $+\,64x + 27x + 108 - 116 = 0$` },
             { kind: 'para', text: R`$\iff 175x^2 + 808x - 1424 = 0$ (après multiplication par 16).` },
             {
               kind: 'para',
-              text: R`**4) Discriminant et racines.** $\Delta = 808^2+4\cdot175\cdot1424 = 652\,864+996\,800 = 1\,649\,664 = 9216\cdot179$.`,
+              text: R`**4) Discriminant et racines.** $\Delta = 808^2+4\cdot175\cdot1424$ $= 652\,864+996\,800$ $= 1\,649\,664 = 9216\cdot179$.`,
             },
             { kind: 'para', text: R`Donc $\sqrt{\Delta} = 96\sqrt{179}$ et $x = \dfrac{-808\pm96\sqrt{179}}{350} = \dfrac{-404\pm48\sqrt{179}}{175}$.` },
             { kind: 'para', text: R`En reportant dans $y=-\frac{3}{4}x-3$ : $y = \dfrac{-222\mp36\sqrt{179}}{175}$.` },
@@ -1405,7 +1405,7 @@ export const coniques: ChapterContent = {
           label: 'Exemple résolu — trois droites parallèles face à une même ellipse',
           blocks: [
             { kind: 'para', text: R`On coupe l'ellipse $\dfrac{x^2}{8}+\dfrac{y^2}{2}=1$, c'est-à-dire $x^2+4y^2=8$, par les droites $y=\frac{1}{2}x+k$ pour $k=1$, $k=2$ et $k=3$.` },
-            { kind: 'para', text: R`**Substitution générale** : $x^2+4\left(\frac{1}{2}x+k\right)^2=8 \iff 2x^2+4kx+4k^2-8=0 \iff x^2+2kx+2k^2-4=0$, de discriminant $\Delta=4k^2-4(2k^2-4)=16-4k^2$.` },
+            { kind: 'para', text: R`**Substitution générale** : $x^2+4\left(\frac{1}{2}x+k\right)^2=8$ $\iff 2x^2+4kx+4k^2-8=0$ $\iff x^2+2kx+2k^2-4=0$, de discriminant $\Delta=4k^2-4(2k^2-4)=16-4k^2$.` },
             { kind: 'para', text: R`$k=1$ : $\Delta=12>0$, deux points ($x=-1\pm\sqrt{3}$) : droite **sécante**.` },
             { kind: 'para', text: R`$k=2$ : $\Delta=0$, l'équation devient $x^2+4x+4=(x+2)^2=0$ : un seul point, double, $(-2\,;1)$ : droite **tangente**.` },
             { kind: 'para', text: R`$k=3$ : $\Delta=-20<0$, aucun point : droite **extérieure**.` },
@@ -1439,7 +1439,7 @@ export const coniques: ChapterContent = {
           kind: 'piege',
           label: 'Coefficient de x² nul : un seul point, mais pas de tangence',
           text:
-            R`Coupe l'hyperbole $x^2-\frac{y^2}{4}=1$ par la droite $y=2x+1$, parallèle à l'asymptote $y=2x$ : $x^2-\frac{(2x+1)^2}{4}=1 \iff x^2-x^2-x-\frac{1}{4}=1 \iff x=-\frac{5}{4}$, puis $y=-\frac{3}{2}$. Les termes en $x^2$ se sont **annulés** : l'équation est du premier degré, il n'y a pas de discriminant, et l'unique point $\left(-\frac{5}{4}\,;-\frac{3}{2}\right)$ n'est **pas** un point de tangence — la droite traverse la courbe. Même phénomène pour une droite parallèle à l'axe d'une parabole ($y=3$ coupe $y^2=2x$ en un seul point, $\left(\frac{9}{2}\,;3\right)$). La règle « $\Delta=0 \iff$ tangente » ne vaut **que** si l'équation reste du second degré.`,
+            R`Coupe l'hyperbole $x^2-\frac{y^2}{4}=1$ par la droite $y=2x+1$, parallèle à l'asymptote $y=2x$ : $x^2-\frac{(2x+1)^2}{4}=1$, soit $x^2-x^2-x-\frac{1}{4}=1$, d'où $x=-\frac{5}{4}$, puis $y=-\frac{3}{2}$. Les termes en $x^2$ se sont **annulés** : l'équation est du premier degré, il n'y a pas de discriminant, et l'unique point $\left(-\frac{5}{4}\,;-\frac{3}{2}\right)$ n'est **pas** un point de tangence — la droite traverse la courbe. Même phénomène pour une droite parallèle à l'axe d'une parabole ($y=3$ coupe $y^2=2x$ en un seul point, $\left(\frac{9}{2}\,;3\right)$). La règle « $\Delta=0 \iff$ tangente » ne vaut **que** si l'équation reste du second degré.`,
         },
         {
           kind: 'piege',
@@ -1470,7 +1470,7 @@ export const coniques: ChapterContent = {
             { kind: 'para', text: R`**Éliminer** $x^2$ : en additionnant les deux équations, $3y^2=48$, donc $y^2=16$ et $y=\pm4$.` },
             { kind: 'para', text: R`**Reporter dans l'hyperbole** : $x^2=y^2-7=9$, donc $x=\pm3$.` },
             { kind: 'para', text: R`**Quatre points communs** : $(3\,;4)$, $(-3\,;4)$, $(3\,;-4)$ et $(-3\,;-4)$. Vérification pour $(3\,;4)$ : $9+32=41$ ✓ et $16-9=7$ ✓ ; les trois autres s'en déduisent par symétrie.` },
-            { kind: 'para', text: R`**Une combinaison qui donne un cercle.** $(x^2+2y^2-41)+\frac{1}{2}(x^2-y^2+7)=0 \iff \frac{3}{2}x^2+\frac{3}{2}y^2-\frac{75}{2}=0 \iff x^2+y^2=25$. Ce cercle passe par les quatre points communs — mais tous ses points ne sont pas communs aux deux coniques : il faut encore le **recouper** avec l'une d'elles.` },
+            { kind: 'para', text: R`**Une combinaison qui donne un cercle.** $(x^2+2y^2-41)+\frac{1}{2}(x^2-y^2+7) =0$ $\iff \frac{3}{2}x^2+\frac{3}{2}y^2-\frac{75}{2}=0$ $\iff x^2+y^2=25$. Ce cercle passe par les quatre points communs — mais tous ses points ne sont pas communs aux deux coniques : il faut encore le **recouper** avec l'une d'elles.` },
           ],
         },
         {
@@ -1547,10 +1547,10 @@ export const coniques: ChapterContent = {
           kind: 'exempleLibre',
           label: "Démonstration — pente de la tangente à l'ellipse",
           blocks: [
-            { kind: 'para', text: R`$P$ **est sur l'ellipse** : $\dfrac{x_P^2}{a^2}+\dfrac{y_P^2}{b^2}=1 \iff b^2x_P^2+a^2y_P^2=a^2b^2$, donc $y_P = \pm\dfrac{b}{a}\sqrt{a^2-x_P^2}$.` },
+            { kind: 'para', text: R`$P$ **est sur l'ellipse** : $\dfrac{x_P^2}{a^2}+\dfrac{y_P^2}{b^2} =1$ $\iff b^2x_P^2+a^2y_P^2 =a^2b^2$, donc $y_P = \pm\dfrac{b}{a}\sqrt{a^2-x_P^2}$.` },
             { kind: 'para', text: R`**Branche supérieure** ($y_P>0$) : $P$ est un point du graphique de $f(x) = \dfrac{b}{a}\sqrt{a^2-x^2}$, avec $x_P \in \,]-a\,;a[$.` },
             { kind: 'para', text: R`**Dérivée** (dérivée d'une racine composée) : $f'(x)=\dfrac{b}{a}\cdot\dfrac{-2x}{2\sqrt{a^2-x^2}}$, donc $f'(x_P) = -\dfrac{bx_P}{a\sqrt{a^2-x_P^2}}$.` },
-            { kind: 'para', text: R`**Sans racine** : comme $\sqrt{a^2-x_P^2}=\frac{a}{b}\,y_P$, on obtient $f'(x_P) = -\dfrac{bx_P}{a\cdot\frac{a}{b}y_P} = -\dfrac{b^2x_P}{a^2y_P}$.` },
+            { kind: 'para', text: R`**Sans racine** : comme $\sqrt{a^2-x_P^2}=\frac{a}{b}\,y_P$, on obtient $f'(x_P) = -\dfrac{bx_P}{a\cdot\frac{a}{b}y_P}$ $= -\dfrac{b^2x_P}{a^2y_P}$.` },
             { kind: 'para', text: R`**Branche inférieure** ($y_P<0$) : on dérive $-f$ ; $f'$ change de signe, mais $\sqrt{a^2-x_P^2}=-\frac{a}{b}\,y_P$ aussi : la formule $-\dfrac{b^2x_P}{a^2y_P}$ reste la même.` },
           ],
         },
@@ -1572,7 +1572,7 @@ export const coniques: ChapterContent = {
           label: "Démonstration — forme dédoublée de la tangente à l'ellipse",
           blocks: [
             { kind: 'para', text: R`**Équation de la tangente** en $P(x_P\,;y_P)$, $y_P\neq0$ : $y-y_P=-\dfrac{b^2x_P}{a^2y_P}(x-x_P)$.` },
-            { kind: 'para', text: R`**On multiplie par** $a^2y_P$ : $a^2y_Py-a^2y_P^2=-b^2x_Px+b^2x_P^2 \iff b^2x_Px+a^2y_Py=b^2x_P^2+a^2y_P^2$.` },
+            { kind: 'para', text: R`**On multiplie par** $a^2y_P$ : $a^2y_Py-a^2y_P^2 =-b^2x_Px+b^2x_P^2$ $\iff b^2x_Px+a^2y_Py$ $=b^2x_P^2+a^2y_P^2$.` },
             { kind: 'para', text: R`$P$ **est sur l'ellipse** : le second membre vaut $a^2b^2$. En divisant par $a^2b^2$ : $\dfrac{x\,x_P}{a^2}+\dfrac{y\,y_P}{b^2}=1$.` },
             { kind: 'para', text: R`**Si** $y_P=0$, $P$ est un sommet $(\pm a\,;0)$ : la tangente est la verticale $x=\pm a$, et la formule donne $\frac{x\cdot(\pm a)}{a^2}=1 \iff x=\pm a$ — elle reste vraie. Pour l'hyperbole, le même calcul avec la pente $+\frac{b^2x_P}{a^2y_P}$ donne $\frac{x\,x_P}{a^2}-\frac{y\,y_P}{b^2}=1$.` },
           ],
@@ -1583,7 +1583,7 @@ export const coniques: ChapterContent = {
           blocks: [
             { kind: 'para', text: R`Soit $P(x_P\,;y_P)$ un point de la parabole $y^2=2px$ avec $y_P>0$ : il est sur le graphique de $f(x)=\sqrt{2px}$.` },
             { kind: 'para', text: R`**Pente** : $f'(x)=\dfrac{2p}{2\sqrt{2px}}=\dfrac{p}{\sqrt{2px}}$, donc $f'(x_P)=\dfrac{p}{y_P}$ (même résultat sur la branche inférieure).` },
-            { kind: 'para', text: R`**Équation** : $y-y_P=\dfrac{p}{y_P}(x-x_P) \iff y\,y_P-y_P^2=px-px_P$. Comme $y_P^2=2px_P$ : $y\,y_P=px-px_P+2px_P=p(x+x_P)$.` },
+            { kind: 'para', text: R`**Équation** : $y-y_P =\dfrac{p}{y_P}(x-x_P) \iff y\,y_P-y_P^2$ $=px-px_P$. Comme $y_P^2=2px_P$ : $y\,y_P=px-px_P+2px_P=p(x+x_P)$.` },
             { kind: 'para', text: R`**Au sommet** ($x_P=y_P=0$), la formule donne $0=px$, soit $x=0$ : la tangente verticale.` },
           ],
         },
@@ -1598,21 +1598,21 @@ export const coniques: ChapterContent = {
             },
             {
               kind: 'para',
-              text: R`**2) Pente.** $f'(3) = -\dfrac{b^2x_P}{a^2y_P} = -\dfrac{16\cdot3}{25\cdot\frac{16}{5}} = -\dfrac{48}{80} = -\dfrac{3}{5}$.`,
+              text: R`**2) Pente.** $f'(3) = -\dfrac{b^2x_P}{a^2y_P} = -\dfrac{16\cdot3}{25\cdot\frac{16}{5}}$ $= -\dfrac{48}{80} = -\dfrac{3}{5}$.`,
             },
             { kind: 'para', text: R`Contrôle par la première écriture : $-\dfrac{bx_P}{a\sqrt{a^2-x_P^2}} = -\dfrac{4\cdot3}{5\cdot4} = -\dfrac{3}{5}$ ✓.` },
             {
               kind: 'para',
-              text: R`**3) Équation de la tangente.** $y-\dfrac{16}{5} = -\dfrac{3}{5}(x-3) \iff y = -\dfrac{3}{5}x+5 \iff 3x+5y=25$.`,
+              text: R`**3) Équation de la tangente.** $y-\dfrac{16}{5} = -\dfrac{3}{5}(x-3) \iff y = -\dfrac{3}{5}x+5$ $\iff 3x+5y =25$.`,
             },
             {
               kind: 'para',
-              text: R`**4) Contrôle par la forme dédoublée.** $\dfrac{3x}{25}+\dfrac{\frac{16}{5}y}{16}=1 \iff \dfrac{3x}{25}+\dfrac{y}{5}=1 \iff 3x+5y=25$ ✓ — même droite.`,
+              text: R`**4) Contrôle par la forme dédoublée.** $\dfrac{3x}{25}+\dfrac{\frac{16}{5}y}{16}=1$ $\iff \dfrac{3x}{25}+\dfrac{y}{5}=1$ $\iff 3x+5y=25$ ✓ — même droite.`,
             },
             {
               kind: 'para',
               text:
-                R`**5) Contrôle par le discriminant.** En substituant $y=-\frac{3}{5}x+5$ dans $16x^2+25y^2=400$ : $16x^2+9x^2-150x+625-400 = 25x^2-150x+225 = 25(x-3)^2$. Racine **double** en $x=3$, donc $\Delta=0$ : la droite est bien tangente, et le point de contact est bien $P$ ✓.`,
+                R`**5) Contrôle par le discriminant.** En substituant $y=-\frac{3}{5}x+5$ dans $16x^2+25y^2=400$ : $16x^2+9x^2-150x+625-400$ $= 25x^2-150x+225 = 25(x-3)^2$. Racine **double** en $x=3$, donc $\Delta=0$ : la droite est bien tangente, et le point de contact est bien $P$ ✓.`,
             },
           ],
         },
@@ -1635,7 +1635,7 @@ export const coniques: ChapterContent = {
           kind: 'exempleLibre',
           label: "Exemple résolu — tangentes à une hyperbole et à une parabole",
           blocks: [
-            { kind: 'para', text: R`**Hyperbole** $\dfrac{x^2}{9}-\dfrac{y^2}{16}=1$ **au point** $P\left(5\,;\frac{16}{3}\right)$. Vérification : $\frac{25}{9}-\frac{256/9}{16}=\frac{25}{9}-\frac{16}{9}=1$ ✓. Forme dédoublée : $\dfrac{5x}{9}-\dfrac{\frac{16}{3}y}{16}=1 \iff \dfrac{5x}{9}-\dfrac{y}{3}=1 \iff 5x-3y=9$.` },
+            { kind: 'para', text: R`**Hyperbole** $\dfrac{x^2}{9}-\dfrac{y^2}{16}=1$ **au point** $P\left(5\,;\frac{16}{3}\right)$. Vérification : $\frac{25}{9}-\frac{256/9}{16}=\frac{25}{9}-\frac{16}{9}=1$ ✓. Forme dédoublée : $\dfrac{5x}{9}-\dfrac{\frac{16}{3}y}{16}=1$ $\iff \dfrac{5x}{9}-\dfrac{y}{3}=1$ $\iff 5x-3y=9$.` },
             { kind: 'para', text: R`Contrôle par la pente : $\dfrac{b^2x_P}{a^2y_P}=\dfrac{16\cdot5}{9\cdot\frac{16}{3}}=\dfrac{5}{3}$, et la droite $5x-3y=9$ a bien pour pente $\frac{5}{3}$ ✓.` },
             { kind: 'para', text: R`**Parabole** $y^2=4x$ ($2p=4$, $p=2$) **au point** $P(4\,;4)$. Forme dédoublée : $4y=2(x+4) \iff y=\dfrac{1}{2}x+2$. Pente $\frac{p}{y_P}=\frac{2}{4}=\frac{1}{2}$ ✓. Cette tangente coupe l'axe focal en $T(-4\,;0)$ : l'abscisse de $T$ est l'opposée de celle de $P$ (on s'en servira en section 6).` },
           ],
@@ -1664,8 +1664,8 @@ export const coniques: ChapterContent = {
           label: 'Démonstration — condition de tangence d’une droite à une ellipse',
           blocks: [
             { kind: 'para', text: R`On cherche quand la droite $y=mx+k$ est tangente à l'ellipse $b^2x^2+a^2y^2=a^2b^2$, c'est-à-dire quand leur intersection est un point double.` },
-            { kind: 'para', text: R`**Substitution** : $b^2x^2+a^2(mx+k)^2=a^2b^2 \iff (b^2+a^2m^2)x^2+2a^2mkx+a^2(k^2-b^2)=0$ — une équation du second degré, car $b^2+a^2m^2>0$.` },
-            { kind: 'para', text: R`**Discriminant** (réduit) : $\dfrac{\Delta}{4}=a^4m^2k^2-(b^2+a^2m^2)\,a^2(k^2-b^2)=a^2\left(b^4-b^2k^2+a^2m^2b^2\right)=a^2b^2\left(a^2m^2+b^2-k^2\right)$.` },
+            { kind: 'para', text: R`**Substitution** : $b^2x^2+a^2(mx+k)^2 =a^2b^2$ $\iff (b^2+a^2m^2)x^2+2a^2mkx$ $+\,a^2(k^2-b^2)=0$ — une équation du second degré, car $b^2+a^2m^2>0$.` },
+            { kind: 'para', text: R`**Discriminant** (réduit) : $\dfrac{\Delta}{4}$ $=a^4m^2k^2-(b^2+a^2m^2)\,a^2(k^2-b^2)$ $=a^2\left(b^4-b^2k^2+a^2m^2b^2\right)$ $=a^2b^2\left(a^2m^2+b^2-k^2\right)$.` },
             { kind: 'para', text: R`**Conclusion** : la droite est tangente $\iff \Delta=0 \iff k^2=a^2m^2+b^2$. Pour toute pente $m$, il y a donc exactement **deux** tangentes, symétriques par rapport au centre.` },
           ],
         },
@@ -1913,9 +1913,8 @@ export const coniques: ChapterContent = {
           ],
         },
         {
-          kind: 'illustrationGroup',
-          items: [
-            {
+          kind: 'illustration',
+          illustration: {
               kind: 'vectorPlane',
               xMin: -6.5, xMax: 6.5, yMin: -6.09375, yMax: 6.09375,
               curves: [
@@ -1934,8 +1933,11 @@ export const coniques: ChapterContent = {
               ],
               caption:
                 R`Miroir elliptique : quel que soit le point d'impact, un rayon parti de $F'$ repasse par $F$. La tangente $3x+5y=25$ y fait le même angle avec $(PF')$ qu'avec $(PF)$.`,
-            },
-            {
+          },
+        },
+        {
+          kind: 'illustration',
+          illustration: {
               kind: 'vectorPlane',
               xMin: -7, xMax: 7, yMin: -6.5625, yMax: 6.5625,
               curvesOfY: [
@@ -1959,8 +1961,7 @@ export const coniques: ChapterContent = {
               ],
               caption:
                 R`Miroir hyperbolique $\frac{x^2}{9}-\frac{y^2}{16}=1$ : le rayon issu de $F$ frappe le miroir en $P\left(\frac{15}{4}\,;3\right)$ et repart comme s'il venait de $F'$ (prolongement en pointillé). La tangente $20x-9y=48$ fait des angles égaux avec le rayon incident et le rayon réfléchi.`,
-            },
-          ],
+          },
         },
         {
           kind: 'astuce',
@@ -2208,7 +2209,7 @@ export const coniques: ChapterContent = {
             text: R`$\cos(\widehat{FPF'}) = \dfrac{|PF|^2+|PF'|^2-4c^2}{2|PF|\,|PF'|}$`,
             condition: R`$c^2=a^2-b^2$ (loi des cosinus)`,
           },
-          { text: R`$\text{aire} = \dfrac{1}{2}|PF|\,|PF'|\sin(\widehat{FPF'})=b^2\tan\dfrac{\widehat{FPF'}}{2}$` },
+          { text: R`$\text{aire} = \dfrac{1}{2}|PF|\,|PF'|\sin(\widehat{FPF'})$`, condition: R`ou directement $\text{aire}=b^2\tan\dfrac{\theta}{2}$, avec $\theta=\widehat{FPF'}$` },
         ],
       },
       {
