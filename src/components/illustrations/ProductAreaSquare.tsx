@@ -50,7 +50,7 @@ export function ProductAreaSquare({ p1, p1Label, p2, p2Label, productLabel, axis
       <text x={(LEFT + RIGHT) / 2} y={H - 8} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {axisLabel1}
       </text>
-      <text x="8" y={TOP - 10} className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
+      <text x="8" y={TOP - 16} className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {axisLabel2}
       </text>
     </svg>

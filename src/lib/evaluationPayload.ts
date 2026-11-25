@@ -4358,13 +4358,13 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce:
           "Pourquoi l'espérance $E(X)$ ne tombe-t-elle presque jamais sur une des valeurs que $X$ peut réellement prendre ?",
         corrige:
-          "$E(X)$ est une moyenne **pondérée** par les probabilités, pas une des valeurs observables de $X$ : rien ne garantit qu'elle coïncide avec l'une d'elles. Un dé équilibré donne $E(X)=3,5$, qu'aucune face ne porte ; une loi plus penchée vers certaines valeurs donne une espérance qui se rapproche de celles-ci sans forcément tomber pile dessus — exactement comme un centre de gravité, qui n'a pas besoin de coïncider avec un point matériel précis du système.",
+          "$E(X)$ est une moyenne **pondérée** par les probabilités, pas une des valeurs observables de $X$ : rien ne garantit qu'elle coïncide avec l'une d'elles. Un dé équilibré donne $E(X)=3{,}5$, qu'aucune face ne porte ; une loi plus penchée vers certaines valeurs donne une espérance qui se rapproche de celles-ci sans forcément tomber pile dessus — exactement comme un centre de gravité, qui n'a pas besoin de coïncider avec un point matériel précis du système.",
       },
       {
         enonce:
           "Deux jeux peuvent avoir exactement la même espérance sans être aussi risqués l'un que l'autre. Qu'est-ce qui les distingue alors, et quelle grandeur le mesure ?",
         corrige:
-          "L'espérance ne renseigne que sur le résultat moyen à long terme, jamais sur la dispersion des résultats individuels autour de cette moyenne. Deux jeux équitables (espérance nulle) peuvent avoir des gains très différents en valeur absolue — ±1€ pour l'un, ±100€ pour l'autre — sans que l'espérance s'en aperçoive. C'est l'écart-type $\\sigma(X)$ qui mesure cette dispersion : plus il est grand, plus les résultats individuels s'éloignent typiquement de la moyenne, donc plus le jeu est risqué.",
+          "L'espérance ne renseigne que sur le résultat moyen à long terme, jamais sur la dispersion des résultats individuels autour de cette moyenne. Deux jeux équitables (espérance nulle) peuvent avoir des gains très différents en valeur absolue — ±1 € pour l'un, ±100 € pour l'autre — sans que l'espérance s'en aperçoive. C'est l'écart-type $\\sigma(X)$ qui mesure cette dispersion : plus il est grand, plus les résultats individuels s'éloignent typiquement de la moyenne, donc plus le jeu est risqué.",
       },
       {
         enonce:
@@ -4376,9 +4376,9 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
     loibinomiale: [
       {
         enonce:
-          "Pourquoi le coefficient $C(n,k)$ est-il indispensable dans la formule de la loi binomiale, alors que $p^k(1-p)^{n-k}$ donne déjà une probabilité ?",
+          "Pourquoi le coefficient $C_n^k$ est-il indispensable dans la formule de la loi binomiale, alors que $p^k(1-p)^{n-k}$ donne déjà une probabilité ?",
         corrige:
-          "$p^k(1-p)^{n-k}$ ne calcule la probabilité que d'UN seul ordre précis d'apparition des $k$ succès parmi les $n$ épreuves. Mais l'événement « $k$ succès » regroupe toutes les façons de répartir ces $k$ succès parmi les $n$ épreuves, et chacune de ces répartitions a exactement la même probabilité $p^k(1-p)^{n-k}$. $C(n,k)$ compte précisément ce nombre de répartitions possibles ; l'oublier revient à ne compter qu'un seul chemin parmi les $C(n,k)$ qui mènent au même résultat.",
+          "$p^k(1-p)^{n-k}$ ne calcule la probabilité que d'UN seul ordre précis d'apparition des $k$ succès parmi les $n$ épreuves. Mais l'événement « $k$ succès » regroupe toutes les façons de répartir ces $k$ succès parmi les $n$ épreuves, et chacune de ces répartitions a exactement la même probabilité $p^k(1-p)^{n-k}$. $C_n^k$ compte précisément ce nombre de répartitions possibles ; l'oublier revient à ne compter qu'un seul chemin parmi les $C_n^k$ qui mènent au même résultat.",
       },
       {
         enonce:
@@ -4432,21 +4432,21 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
     loinormale: [
       {
         enonce:
-          "La règle empirique dit que 95,4% des valeurs sont dans $[\\mu-2\\sigma;\\mu+2\\sigma]$, donc 4,6% en dehors. Pourquoi la probabilité d'être seulement au-dessus de $\\mu+2\\sigma$ (un seul côté) vaut-elle la moitié de ce complément, et pas le complément entier ?",
+          "La règle empirique dit qu'environ $95{,}4\\,\\%$ des valeurs sont dans $[\\mu-2\\sigma\\,;\\mu+2\\sigma]$, donc environ $4{,}6\\,\\%$ en dehors. Pourquoi la probabilité d'être seulement au-dessus de $\\mu+2\\sigma$ (un seul côté) vaut-elle la moitié de ce complément, et pas le complément entier ?",
         corrige:
-          "La courbe de la loi normale est symétrique par rapport à $\\mu$ : la zone « en dehors de l'intervalle » se compose de deux queues, une au-dessus de $\\mu+2\\sigma$ et une au-dessous de $\\mu-2\\sigma$, parfaitement identiques par symétrie. Le complément total (4,6%) se partage donc également entre les deux ; isoler un seul côté revient à ne garder que l'une des deux moitiés, soit 2,3%.",
+          "La courbe de la loi normale est symétrique par rapport à $\\mu$ : la zone « en dehors de l'intervalle » se compose de deux queues, une au-dessus de $\\mu+2\\sigma$ et une au-dessous de $\\mu-2\\sigma$, parfaitement identiques par symétrie. Le complément total (environ $4{,}6\\,\\%$) se partage donc également entre les deux ; isoler un seul côté revient à ne garder que l'une des deux moitiés, soit environ $2{,}3\\,\\%$.",
       },
       {
         enonce:
           "Pourquoi est-il nécessaire de standardiser $X$ (calculer $Z=(X-\\mu)/\\sigma$) avant de pouvoir utiliser la table de $\\Phi$ ?",
         corrige:
-          "La table de $\\Phi$ n'a été construite que pour LA loi normale centrée réduite $N(0,1)$ — une seule table ne peut pas couvrir toutes les combinaisons possibles de $\\mu$ et $\\sigma$. La standardisation transforme n'importe quelle variable $X\\sim N(\\mu,\\sigma)$ en une variable $Z$ qui suit toujours exactement $N(0,1)$, quels que soient $\\mu$ et $\\sigma$ de départ — c'est ce changement de variable qui permet de réutiliser la même table pour tous les cas.",
+          "La table de $\\Phi$ n'a été construite que pour LA loi normale centrée réduite $\\mathcal{N}(0\\,;1)$ — une seule table ne peut pas couvrir toutes les combinaisons possibles de $\\mu$ et $\\sigma$. La standardisation transforme n'importe quelle variable $X\\sim\\mathcal{N}(\\mu\\,;\\sigma)$ en une variable $Z$ qui suit toujours exactement $\\mathcal{N}(0\\,;1)$, quels que soient $\\mu$ et $\\sigma$ de départ — c'est ce changement de variable qui permet de réutiliser la même table pour tous les cas.",
       },
       {
         enonce:
-          "$\\Phi(-z)$ n'est pas égal à $\\Phi(z)$, alors que la courbe de densité de $N(0,1)$ est elle-même parfaitement symétrique par rapport à 0. Comment ces deux faits sont-ils compatibles ?",
+          "$\\Phi(-z)$ n'est pas égal à $\\Phi(z)$, alors que la courbe de densité de $\\mathcal{N}(0\\,;1)$ est elle-même parfaitement symétrique par rapport à 0. Comment ces deux faits sont-ils compatibles ?",
         corrige:
-          "$\\Phi(z)$ n'est pas la densité elle-même, mais l'aire **cumulée à gauche** de $z$ — et cette aire cumulée n'a aucune raison d'être symétrique même si la courbe qu'elle mesure l'est. $\\Phi(-z)$ est la petite aire de la queue gauche, $\\Phi(z)$ (pour $z>0$) est la grande aire qui inclut toute la partie gauche plus la moitié droite jusqu'à $z$ : la vraie relation issue de cette symétrie est $\\Phi(-z)=1-\\Phi(z)$, une symétrie par rapport à 0,5, pas par rapport à l'axe des ordonnées.",
+          "$\\Phi(z)$ n'est pas la densité elle-même, mais l'aire **cumulée à gauche** de $z$ — et cette aire cumulée n'a aucune raison d'être symétrique même si la courbe qu'elle mesure l'est. $\\Phi(-z)$ est la petite aire de la queue gauche, $\\Phi(z)$ (pour $z>0$) est la grande aire qui inclut toute la partie gauche plus la moitié droite jusqu'à $z$ : la vraie relation issue de cette symétrie est $\\Phi(-z)=1-\\Phi(z)$, une symétrie par rapport au point $(0\\,;0{,}5)$, pas par rapport à l'axe des ordonnées.",
       },
     ],
     extensionsbayes: [
@@ -4460,13 +4460,13 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce:
           "Quelle est la différence entre une probabilité a priori et une probabilité a posteriori dans le théorème de Bayes, et pourquoi les confondre est une erreur ?",
         corrige:
-          "La probabilité a priori ($q_j$) décrit la proportion de la catégorie $j$ avant toute observation — ce qu'on sait sur la population en général. La probabilité a posteriori ($P(\\text{cat.}j \\mid \\text{critère})$) intègre l'information apportée par un critère effectivement observé, et peut donc être très différente de $q_j$ si ce critère est plus ou moins fréquent selon la catégorie. Répondre $q_j$ à une question posée après observation du critère revient à ignorer complètement cette information nouvelle, alors que c'est justement elle que le théorème de Bayes permet d'exploiter.",
+          "La probabilité a priori ($P(C_j)$) décrit la proportion de la catégorie $C_j$ avant toute observation — ce qu'on sait sur la population en général. La probabilité a posteriori ($P(C_j\\mid S)$) intègre l'information apportée par un critère effectivement observé, et peut donc être très différente de $P(C_j)$ si ce critère est plus ou moins fréquent selon la catégorie. Répondre $P(C_j)$ à une question posée après observation du critère revient à ignorer complètement cette information nouvelle, alors que c'est justement elle que le théorème de Bayes permet d'exploiter.",
       },
       {
         enonce:
-          "Les approximations binomiale→normale ($n>30$, $0,3<p<0,7$) et binomiale→Poisson ($n\\geq30$, $p\\leq0,1$) ne se chevauchent jamais. Pourquoi, et que faire pour un $p$ intermédiaire comme $p=0,2$ ?",
+          "Avec les conventions de ce cours, les approximations binomiale → normale ($n>30$, $0{,}3<p<0{,}7$) et binomiale → Poisson ($n\\geq30$, $p\\leq0{,}1$, $np\\leq15$) ne se recouvrent pas. Pourquoi chacune convient-elle à son régime, et que faire pour un $p$ intermédiaire comme $p=0{,}2$ ?",
         corrige:
-          "Chaque approximation remplace la binomiale par une loi dont la forme colle bien à un régime particulier : la loi normale, symétrique, convient quand $p$ est proche de $0,5$ (la binomiale elle-même devient alors presque symétrique) ; la loi de Poisson, elle, modélise des événements rares et convient quand $p$ est proche de 0. Un $p$ intermédiaire ne ressemble franchement à aucun des deux régimes : ni assez symétrique pour la normale, ni assez rare pour Poisson. La seule option rigoureusement correcte reste alors la formule binomiale exacte.",
+          "Chaque approximation remplace la binomiale par une loi dont la forme lui ressemble dans un régime particulier : la loi normale, symétrique, convient quand $p$ n'est pas trop proche de 0 ou de 1 (la binomiale devient alors presque symétrique) ; la loi de Poisson modélise des comptages d'événements rares et convient quand $p$ est proche de 0. Pour un $p$ intermédiaire, les conditions du cours ne valident aucune des deux : on calcule avec la loi binomiale exacte (à la calculatrice). Ces conditions sont des conventions prudentes : pour un très grand $n$ (par exemple $n=1000$, $p=0{,}2$), l'approximation normale serait en fait excellente.",
       },
     ],
     loipoisson: [

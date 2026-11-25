@@ -3,6 +3,7 @@ import type { FormulaireData } from "../../content/types";
 import { normaliserLogDecimal } from "../../lib/notationLog";
 import type { AnnexeDocument } from "./assemblerEvaluationHtml";
 import { echapperHtml } from "./genererFeuilleExercicesHtml";
+import { tablePhiHtml } from "../../lib/tablePhi";
 
 /**
  * Annexes imprimées des documents (voir `AnnexeDocument`, `assemblerEvaluationHtml.ts`).
@@ -10,11 +11,11 @@ import { echapperHtml } from "./genererFeuilleExercicesHtml";
  * - `annexeFormulaire` : le formulaire de fin de chapitre (`ChapterContent.formulaire` : groupes,
  *   formules, conditions), mis en page comme le « Formulaire seul » du site (deux colonnes, une
  *   seule dans la version aménagée) — case « Joindre le formulaire du chapitre en annexe ».
- * - Point d'extension prévu (décision de l'utilisateur, pas encore implémenté) : une table de la
- *   loi normale Φ, jointe seulement si au moins une question du document en a besoin. Il suffira
- *   d'écrire ici `annexeTableNormale(): AnnexeDocument` et de l'ajouter dans
- *   `evaluationLocal.ts::annexesDuDocument` quand un item le demande (par ex. un champ
- *   `besoinTableNormale` posé par l'adaptateur sur l'item).
+ * - `annexeTableNormale` : la table COMPLÈTE de la loi normale centrée réduite Φ (6e ch. 8, décision
+ *   de l'utilisateur du 18/11/2026 : UNE seule table en annexe, jamais d'extrait dans l'énoncé), même
+ *   source que le cours et les générateurs (`lib/tablePhi.ts`). Reste à la brancher (lot E du
+ *   6e ch. 8) : l'ajouter UNE fois dans `evaluationLocal.ts::annexesDuDocument` quand au moins un
+ *   item du document la demande (champ booléen posé par l'adaptateur, ex. `besoinTablePhi`).
  */
 
 /** Mini-syntaxe `RichText` du contenu (`$latex$`, `**gras**` — même découpage que
@@ -49,5 +50,17 @@ export function annexeFormulaire(chapitre: { slug: string; title: string; level:
     titre: `Annexe — Formulaire : ${chapitre.title}`,
     meta: `${chapitre.level} · chapitre ${chapitre.chapterNumber} · ${total} formule${total > 1 ? "s" : ""}`,
     html: `<div class="formulaire-papier">${groupes}</div>`,
+  };
+}
+
+/** Annexe « Table de la loi normale centrée réduite » : la table complète (z de 0,00 à 3,49), en deux
+ * demi-tableaux côte à côte pour tenir sur une page A4, avec sa règle de lecture. Styles en ligne :
+ * rendu identique dans la copie, l'aménagée et la feuille d'exercices. */
+export function annexeTableNormale(): AnnexeDocument {
+  return {
+    id: "table-normale",
+    titre: "Annexe — Table de la loi normale centrée réduite",
+    meta: "Φ(z) = P(Z ≤ z)",
+    html: `<div class="table-normale-papier">${tablePhiHtml()}</div>`,
   };
 }
