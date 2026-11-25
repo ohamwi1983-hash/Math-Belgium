@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
 import { Katex } from "../components/Katex";
 import { RenduFragments } from "../components/RenduFragments";
@@ -75,7 +75,10 @@ export function AppCombinatoire<E, P extends string>({ config }: { config: Confi
     return (
       <span className="equation-box-termes">
         {fmt.reponseAttendue(exercice, p).map((frag, i) => (
-          <Katex key={i} expression={frag} />
+          <Fragment key={i}>
+            {i > 0 && <span> ; </span>}
+            <Katex expression={frag} />
+          </Fragment>
         ))}
       </span>
     );
