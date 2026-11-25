@@ -1145,6 +1145,12 @@
   .entrainement .gen-tiroir {
     display: none;
   }
+
+  /* Bureau : l'énoncé ne se replie pas (colonne de gauche, figure déjà visible dans le bloc de
+   * données) — la copie « figure gardée » (`EnTeteExercice.figureToujoursVisible`) ferait doublon. */
+  .entrainement .entete-exercice > .entete-figure-replie {
+    display: none;
+  }
 }
 
 /* ---------- C — choix entre graphiques ---------- */

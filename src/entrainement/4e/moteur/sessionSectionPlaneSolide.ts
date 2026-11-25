@@ -25,7 +25,9 @@ import type { ReglagesEtape } from "./etapeTentatives";
 import {
   ciblesAuxiliaires,
   cleSegment,
+  etapeParallele,
   facesPretesPourSegment,
+  verifierCoteParallele,
   pairesLignesValides,
   pointDebloqueParFaceAuxiliaire,
   polygoneFerme,
@@ -44,6 +46,7 @@ export const TENTATIVES_MAX_CHOIX_FACE = 1;
 
 /** Nombre de tentatives de l'écran COURANT — 1 pour un choix de face, `reglages.tentativesMax`
  * pour le choix des 2 droites. Utilisé par le moteur ET par l'affichage du message d'erreur. */
+/** Une seule tentative aussi sur l'écran « parallèle » (choix parmi les trois côtés de KLM). */
 export function tentativesMaxPhase(etat: Pick<EtatSessionSectionPlaneSolide, "phase" | "reglages">): number {
   return etat.phase === "auxiliaireLignes" ? etat.reglages.tentativesMax : TENTATIVES_MAX_CHOIX_FACE;
 }
@@ -68,8 +71,9 @@ function phaseDepuisEtat(
   etat: Pick<EtatSessionSectionPlaneSolide, "exerciceCourant">,
   connus: ReadonlySet<number>,
   segmentsTraces: ReadonlySet<string>,
-): "segmentDirect" | "auxiliaireLignes" | "conclusion" {
+): "segmentDirect" | "auxiliaireLignes" | "parallele" | "conclusion" {
   if (polygoneFerme(etat.exerciceCourant, segmentsTraces)) return "conclusion";
+  if (etat.exerciceCourant.planParallele) return "parallele";
   if (facesPretesPourSegment(etat.exerciceCourant, connus, segmentsTraces).length > 0) return "segmentDirect";
   return "auxiliaireLignes";
 }
@@ -195,6 +199,8 @@ export function soumettreReponseSegmentDirect(
   const facesPretes = facesPretesPourSegment(etat.exerciceCourant, connusSet, segmentsTracesSet);
   const faceConfirmee = facesPretes.find((f) => f.face === faceChoisie) ?? facesPretes[0];
   segmentsTracesSet.add(cleSegment(faceConfirmee.pointA, faceConfirmee.pointB));
+  // Variantes du manuel : la droite (point donné, point connu) donne aussi un nouveau point.
+  if (faceConfirmee.nouveau !== undefined) connusSet.add(faceConfirmee.nouveau);
   const segmentAutomatique = tracerDernierSegmentSiSeul(etat, connusSet, segmentsTracesSet);
 
   const phase = phaseDepuisEtat(etat, connusSet, segmentsTracesSet);
@@ -202,6 +208,7 @@ export function soumettreReponseSegmentDirect(
   return {
     ...etat,
     phase,
+    connus: [...connusSet],
     segmentsTraces: [...segmentsTracesSet],
     segmentAutomatique,
     etapeCourante: demarrerEtapeTentatives(),
@@ -348,6 +355,44 @@ function constructionConfirmee(
   // Ne devrait jamais arriver — garde défensive.
   const point = pointDebloqueParFaceAuxiliaire(exercice, connus, ligne1, ligne2, faceChoisie);
   return { face: faceChoisie, pointConnu: point ?? exercice.points[0].id, pointCible: point ?? exercice.points[0].id };
+}
+
+/** Écran « parallèle » (variante du manuel) : le côté de KLM choisi doit être parallèle au côté de la
+ * section de la face courante (une tentative). Le côté est ensuite tracé et son autre extrémité
+ * trouvée, que le choix soit juste ou révélé ; le dernier côté (deux points connus) se trace seul. */
+export function soumettreReponseParallele(etat: EtatSessionSectionPlaneSolide, cote: number): EtatSessionSectionPlaneSolide {
+  if (etat.terminee || etat.phase !== "parallele") {
+    throw new Error("soumettreReponseParallele : la session n'est pas à l'étape parallele");
+  }
+  const etape = etapeParallele(etat.exerciceCourant, etat.connus);
+  if (!etape) throw new Error("soumettreReponseParallele : aucun côté à tracer");
+
+  const etapeCourante = soumettreEtapeTentatives<number>(etat.etapeCourante, cote, {
+    ...reglagesEtape(etat),
+    verifier: (r) => verifierCoteParallele(etat.exerciceCourant, etat.connus, r),
+    revelerReponse: () => {},
+  });
+  if (!etapeCourante.terminee) return { ...etat, etapeCourante };
+
+  const connusSet = new Set(etat.connus);
+  const segmentsTracesSet = new Set(etat.segmentsTraces);
+  connusSet.add(etape.vers);
+  segmentsTracesSet.add(cleSegment(etape.depuis, etape.vers));
+  const segmentAutomatique = tracerDernierSegmentSiSeul(etat, connusSet, segmentsTracesSet);
+  const phase = phaseDepuisEtat(etat, connusSet, segmentsTracesSet);
+
+  return {
+    ...etat,
+    phase,
+    connus: [...connusSet],
+    segmentsTraces: [...segmentsTracesSet],
+    segmentAutomatique,
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresAccumules: [...etat.scoresAccumules, etapeCourante.score as number],
+    revelesAccumules: [...etat.revelesAccumules, etapeCourante.revelee],
+    niveauxAideAccumules: [...etat.niveauxAideAccumules, etat.niveauAide],
+  };
 }
 
 /** Écran de conclusion, dernière étape : aucune interaction/vérification (spec, "Condition

@@ -1018,6 +1018,60 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   (53 / 60 : liste des leurres) et libre (57 / 60), gen101 « deux plans » (59 / 60, tirage bridé) ; gen103
   et gen107 « cavalière » : mêmes exercices, textes changés ; documents réels (2 plans, 2 séries +
   aménagée + corrigé + grille + feuille + Word) : 0 débordement à 680 / 820 / 1 280 px, 0 `.katex-error`.
+- **4e ch. 8, manuel — gen41 « Ombre d'un solide posé au sol » (chantier D, 25/11)** : variante
+  `solidePose` AJOUTÉE EN FIN de `CATALOGUE_VARIANTES` (indice 3 : codes 0–2 inchangés) ; tirage libre de
+  l'adaptateur et des codes = les trois variantes d'avant (`VARIANTES_TIRAGE_LIBRE`, même `randomInt(0, 2)`),
+  l'appli la tire une fois sur quatre (`genererExerciceOmbreSoleilLibre`). Situations du manuel (ex. 3 b,
+  3 d, 3 e, 9) : cube (côté 2–4), caisse = pavé (3–4 × 2–3 × 2–3) ou pyramide régulière à base carrée
+  (3–4, hauteur 3–5), forme tirée au tiers AVANT les essais ; donnée = ombre d'une arête verticale VISIBLE
+  ([BF], [CG]…) dont la trace part vers l'extérieur de la base, ou piquet [XP] planté à un coin visible de
+  la base de la pyramide, de même hauteur qu'elle (P′ hors de l'ombre de la pyramide). Ombre vers l'avant
+  (composante de profondeur retournée, même tirage : vers l'arrière elle tombait derrière le solide sur le
+  dessin), longueur ≤ 2,2 × la plus grande dimension, toutes les ombres de sommets hors de la base et hors
+  du dessin du solide (12 px) ; sur le dessin, l'ombre d'une verticale fait au moins 20° avec la verticale
+  et le rayon au moins 12° avec l'ombre (sinon arête, rayon et ombre se confondaient en un seul trait). Écrans : un « point » par sommet du haut dont l'ombre est un coin du contour
+  (deux pour le cube et la caisse — le troisième coin et l'ombre intérieure suivent « par le même
+  procédé » —, S pour la pyramide), `ChoixCandidatsOmbre`, 1 tentative, leurres `distracteursSol` + au
+  moins un `piedVoisin` (nouvelle `ErreurPointOmbre` : trace partie d'un autre coin = l'ombre d'un autre
+  sommet, ou d'un coin au lieu du centre O pour l'apex ; message `messagePointFauxSolidePose`) ; puis
+  « contour » (`EtapeContourSolidePose`) : sélection MULTIPLE à 3 tentatives (`TENTATIVES_CONTOUR`,
+  `tentativesMaxEcran`), cases carrées, parmi les ombres de TOUTES les arêtes (12 pour le cube et la caisse,
+  8 pour la pyramide ; une arête de la base est sa propre ombre), segments cochés dessinés en orange,
+  message « traverse l'ombre / il manque un côté » (`cibleSelectionContour`), écran clos : côtés ✓ (même
+  oubliés), choisis à tort ✗ ; `verifierContour` recalcule les côtés depuis l'enveloppe. Contour =
+  enveloppe convexe de la base et des ombres (`enveloppeConvexe` du campanile), net : point intérieur à
+  ≥ 10 px du bord, coin à ≥ 10 px de la corde de ses voisins ; aucun rayon, trace ou côté à moins de 9 px
+  d'un point nommé dont il ne part pas (sinon le sommet caché D et le centre O perdaient la place de leur
+  étiquette). Aides : propriété du cours, puis posée pour l'instance (pied = coin juste en dessous / centre O
+  à l'intersection des diagonales, tracées en rose avec le rayon ; « le contour a 6 côtés, C et E′ sont à
+  l'intérieur »). Étiquettes de TOUTE la figure (sommets, ombres, candidats, O, P) placées en pixels par
+  `placerEtiquettesSolidePose` (`meilleurDecalageEtiquette`, les plus contraintes d'abord, chaque étiquette
+  plus près de SON point que de tout autre de 4 px — sans cette garde, E′ et H′ voisins échangeaient leurs
+  noms à la lecture —, repli élargi à ≈ 36 px, calcul sur tout ce que l'écran peut montrer : elles ne bougent pas quand une aide s'ouvre ;
+  écran « contour » : sur la figure close — seul un segment coché à tort peut frôler une étiquette). Corrigé
+  (une lettre par écran) : d ∥ rayon donné, d′ ∥ ombre donnée issue du pied (O = (AC) ∩ (BD) pour l'apex),
+  X′ = d ∩ d′, vérification « même longueur que l'ombre donnée », piège « mauvais pied » ; contour : autres
+  ombres « même construction », polygone, piège listant les segments qui traversent l'ombre ; figure
+  annotée (traces d′ en pointillés roses, O et diagonales). Papier : « Un cube ABCDEFGH est posé sur le sol…
+  on connaît l'ombre de l'arête verticale [BF] : elle va de B jusqu'à F′… » / « Une caisse en forme de
+  parallélépipède rectangle… » / « Une pyramide régulière de base carrée ABCD et de sommet S… Un piquet
+  vertical [CP], planté au coin C de la base, a la même hauteur que la pyramide… », figure, puis « Construis
+  l'ombre de ce solide sur le sol. Trace ta construction sur la figure de l'énoncé, que tu joins à ta
+  feuille. » ; barème 4 (cube / caisse : 1 + 1 + autres ombres 1 + contour 1 ; pyramide : O 1, S′ 1,5,
+  contour 1,5) ; brève « Ombre du cube : le polygone ABF′G′H′D ». Profil `forme` = `cube` / `pave` /
+  `pyramide`, aucun cas particulier. Niveaux mesurés (600 tirages) : cube et caisse 4 · 8 min, pyramide
+  3 · 6 (méthode 1, piège 1 : le contour ne garde pas les ombres d'arêtes qui traversent l'ombre,
+  `sansCharge`). Mesuré : collecteur 600 tirages (0 NaN / notation clavier / KaTeX invalide / majuscule
+  d'insistance ; ombres, pieds, O, translation et contour recalculés indépendamment — enveloppe de Jarvis —,
+  `verifierContour` juste sur l'ensemble exact et faux sur ±1 segment, barème = 4) ; étiquettes (écrans
+  « point », « contour », conclusion, énoncé et corrigé papier) : 0 ambiguë, 0 qui chevauche un trait de
+  plus d'1 px ; frôlement < 1 px (boîte approchée) : O, l'aide de niveau 2 de la pyramide, 32 écrans sur
+  206 (le centre est entouré des diagonales et des arêtes latérales), D 4 figures sur 600 ; médiane du
+  dégagement 3,8 px ; génération : cube médiane 9 ms, caisse 55 ms, pyramide 50 ms, max ≈ 0,5 s
+  (`MAX_TENTATIVES_SOLIDE_POSE` 60 000), 0 échec sur 1 500 ; appli 26 % de « solide posé » ; rang de la
+  bonne réponse (candidats plus proches du pied) 0 : 12 %, 1 : 40 %, 2 : 22 %, 3 : 26 % (imposer un rang
+  tiré d'avance multipliait le temps par 3 et faisait échouer 14 % des tirages : non retenu) ; `?code=`
+  60 graines × (libre, simple, obstacle, direction inconnue) : instances ET énoncés papier identiques.
 - **5e ch. 5 (lots B, C, D, 5gen25–35)** : lecture `moteur5e/saisieDerivees.ts` (`lireNombreDerivees`,
   `nombreExactRefuseDerivees`, `expressionLisibleDerivees` — syntaxe seule —, messages par nature de champ
   `MESSAGES_ILLISIBLE_DERIVEES`), refus SANS tentative dans chaque moteur (`refusSaisie…` partagé avec l'écran) ;
@@ -4023,7 +4077,208 @@ différents ; documents (2 plans, interdite / autorisée en deux colonnes ; éva
 corrigé + grille + feuille + aménagée + Word copie / corrigé / grille) : 0 `.katex-error`, 0 débordement à
 680 / 820 / 1 280 px ; page du chapitre 390 px : cartes présentes, 0 « $ » ni « ** ».
 
+## 4e ch. 8, manuel — gen103 « Trois points alignés » (variante ajoutée, 25/11, chantier C)
+
+D'après l'exercice 11 « Démontrer » du manuel (pyramide SABC, M, N, P sur les arêtes issues du sommet ;
+a) I, J, K alignés ; b) cas MP ∥ AC). Variante `alignes` AJOUTÉE EN FIN de `CATALOGUE_VARIANTES` (indice 2) :
+`?code=` des variantes 0 et 1 et tirage libre de l'adaptateur et des codes inchangés (`VARIANTES_HISTORIQUES`,
+mesuré : 60 graines × libre / droite-plan / deux-plans, 180 / 180 exercices identiques au code d'avant) ;
+l'appli tire « alignes » une fois sur trois (`genererExerciceDemontrerParallelismeLibre`, mesuré 34 %).
+- **Situation** (`generateurs/demontrerParallelisme/alignes.ts`) : pyramide SABC propre (A(0 ; 2 ; 0), B(3 ; 0 ; 0),
+  C(6 ; 3 ; 0), S(3 ; 1,7 ; 5), faces au format du socle `Solide3D` ; seule [AC] cachée, comme la figure du
+  manuel — le tétraèdre du socle dessinait [DB] et [DC] presque l'un sur l'autre, N et P s'y confondaient).
+  SM = a·SA, SN = b·SB, SP = c·SC, rapports continus dans [0,2 ; 0,8], jamais montrés ; (MN) coupe (AB) en
+  A + λ(B − A), λ = b(1 − a)/(b − a). Rejet : rapports écartés de 0,12 (0,15 pour le côté non parallèle du cas
+  toit), cadre ≤ 1,75 fois celui du solide, points construits à 40 px l'un de l'autre et à 22 px des sommets
+  et de M, N, P.
+- **Cas toit = cas particulier du profil** (pas une `forme`, pas une variante séparée) : tiré une fois sur trois
+  AVANT les données, côté parallèle (MN ∥ AB, NP ∥ BC ou MP ∥ AC) à parts égales ; l'énoncé le DIT (« de sorte
+  que les droites (MP) et (AC) sont parallèles »), la question change (« Démontre que la droite (IJ) est
+  parallèle à la droite (AC). ») — ce n'est pas un verdict. Choix : en évaluation, le cas général (l'exercice
+  du manuel) sort par défaut, le professeur ajoute le cas toit par la case de la rangée « Trois points
+  alignés » (`LIBELLE_CAS_GEN103`, même dans toutes les séries, dernière question de la variante) ; la feuille
+  d'exercices et l'appli gardent les deux cas. `forme` = variante (inchangée pour les deux autres).
+- **Écrans** (choix fermés figés ✗ / ✓, une tentative, `EtapeChoixPlans`, message propre dans `messageRevele`) :
+  « Méthode » (trois points communs à deux plans sécants ; toit : (IJ) = intersection des plans puis théorème
+  du toit ; leurres « un même plan », « les trois côtés du triangle ABC », « à la règle », « plans
+  parallèles » ; toit « droite des milieux », « (IJ) parallèle au plan (MNP) », « dessin », « même plan »),
+  « Points communs » (chaque point sur un côté de MNP ⊂ (MNP) et sur un côté de ABC ⊂ (ABC) ; leurres « une
+  moitié seulement », « sur les côtés des triangles », « plans des faces latérales », côtés de MNP décalés
+  d'un cran — lecture de l'énoncé), « Conclusion » (plans distincts car M ∉ (ABC), sécants, droite commune ;
+  leurres « confondus », « parallèles car triangles disjoints », « dans (MNP) donc alignés », « sécants en un
+  point ») ou « Théorème du toit » (leurres « deux droites de (ABC) », « (IJ) et (MP) dans (MNP) », « aucun
+  point commun sur la figure », « plans parallèles »). 3 leurres sur 4 tirés, ordre mélangé ; aides à deux
+  niveaux (propriété du cours, puis posée pour l'instance), jamais la réponse.
+- **Figure** (`ui/figureTroisPointsAlignes.ts`, même cavalière, visibilité et couleurs que gen101 / gen103,
+  aucun identifiant SVG) : pyramide, M, N, P, triangle MNP (violet, côté caché en pointillé) ; côtés prolongés
+  (bleu) et I, J, K (rouge) seulement une fois l'écran « Points communs » clos et dans le corrigé ; droite
+  d'intersection (rouge) et, cas toit, les deux parallèles (vert) à la fin. Cadre IDENTIQUE à chaque état (il
+  contient toujours I, J, K : pas de saut, et la place de construire sur papier) ; étiquettes placées une
+  fois pour toutes en évitant tous les traits du dessin COMPLET (`placerEtiquettes`). Appli : figure gardée
+  sous l'énoncé replié (`EnTeteExercice.figureToujoursVisible`, aperçu = la consigne) ; la copie gardée était
+  aussi rendue sur bureau (≥ 1 024 px, énoncé jamais replié) : masquée par `cadre.css` (vaut pour tous les
+  générateurs qui l'utilisent).
+- **Papier** : énoncé en prose + figure (pyramide, M, N, P, triangle MNP) + « Démontre que les points I, J et
+  K sont alignés. » ; étapes a, b, c dans le corrigé (`corrigeAlignes.ts` : `I\in(MN)\subset(MNP)`, `M\notin(ABC)`,
+  `(MNP)\neq(ABC)`, `(MNP)\cap(ABC)=d`, conclusion `I,\,J,\,K\in d` ; toit : `I\neq J` justifié, `(MNP)\cap(ABC)=(IJ)`,
+  `I\notin(AC)`, théorème du toit), figure complète en `figureHtml` ; barème 1 + 1,5 + 1,5 ; `titrePapier`
+  « Positions de deux plans » (§ 5) ou, cas toit, « Intersection de deux plans » (§ 8). Jamais regroupé (comme
+  les autres variantes de gen103). Niveau mesuré : 3 · 8 min dans les deux cas (3 étapes, méthode 1, piège 0).
+- **Mesures** (dossier de travail `4e-ch8-C` : `coll.mts`, `code.mts`, `parcours.cjs`, `planche.cjs`,
+  `docs.cjs`, `deborde.cjs`, `capdoc.cjs`) : 2 000 tirages (dont 400 par le tirage libre de l'appli) ;
+  géométrie recalculée (chaque point construit sur ses deux droites, I, J, K alignés, (IJ) ∥ côté de la base
+  dans le cas toit, parallélisme déclaré ⟺ géométrie), une seule option valable par écran, rang de la bonne
+  option 25 % chacun, 27 800 relations du corrigé contrôlées sur les positions 3D : 0 anomalie, 0 KaTeX
+  invalide, 0 NaN / notation clavier / majuscules d'insistance / « déterminant » ; cas toit 34 %, côtés
+  parallèles 1/3 chacun ; iPhone 13 et 1 280 px (deux cas généraux, deux cas toit, réponses justes et
+  fausses, et les deux anciennes variantes) : 0 erreur console, scrollWidth = largeur, I, J, K absents avant
+  la fin de l'écran 2, présents après ; documents réels (2 plans, interdite / autorisée en deux colonnes, cas
+  toit coché ou non : évaluation 2 séries + aménagée + corrigé + grille + feuille + aménagée + Word copie /
+  corrigé / grille) : 0 `.katex-error`, 0 débordement à 680 / 820 / 1 280 px, cas toit sur une question de
+  chaque série quand la case est cochée, jamais sinon.
+
+## 4e ch. 8, manuel — gen40 « Section plane d'un solide » (chantier B, 25/11/2026)
+
+D'après le manuel (ex. 4 a, 6 b 3–4, 7 b 2–3, exemples résolus 6 a / 7 a). **Trois variantes AJOUTÉES EN FIN de
+`CATALOGUE_VARIANTES`** (indices 5, 6, 7 : `faceInterieure`, `prolongement`, `parallele`) ; tirage libre de
+l'adaptateur et des codes INCHANGÉ (`genererExerciceSectionPlaneSolide`) ; l'appli les tire par
+`genererExerciceSectionPlaneSolideLibre` : triangle 1 fois sur 6 (inchangé), chaque variante du manuel 1 fois sur 9,
+historique 1 fois sur 2. Générateur `generateurs/sectionPlaneSolide/variantesManuel.ts` (petits outils recopiés
+d'`index.ts` : pas d'import circulaire).
+- **Contrat** (`core/sectionPlaneSolide.types.ts`, champs facultatifs : absents des anciennes variantes, exercices et
+  `?code=` identiques) : `variante`, `pointsAppui` (point donné qui n'est PAS un sommet de la section : id
+  `ID_APPUI_BASE + i` = 100 + i, nature `face` / `prolongement`, `face`, `arete`, `auDelaDe`, `facesPlan`), `planParallele`
+  (sommet, K, L, M et leurs arêtes, côtés [KL], [LM], [KM] avec leur face) ; `idsDepart: number[]` (P, Q, R — sommet ou point
+  d'appui ; un seul, P, pour « parallele ») : les lettres P, Q, R, S… restent l'indice dans `connus`, qui contient les ids
+  d'appui. Étapes de référence nouvelles : `appui` (face, point d'appui, point connu, point trouvé) et `parallele` (face, côté
+  de KLM, point connu, point trouvé). `resolutionReference(…, appuis = [])` : sans appui, comportement identique (codes).
+- **« faceInterieure »** : point intérieur à une face VISIBLE (rectangle u, v ∈ [0,25 ; 0,75], triangle barycentres ≥ 0,2),
+  un point sur une arête de cette face, le troisième sur une arête hors de la face, lettres mélangées ; exigés : à ≥ 9 % (taille
+  du croquis) des arêtes dessinées, ≥ 12 % des sommets, ≥ 13 % des points de section (les faces fuyantes — dessus, côté, base
+  du prisme — sont minces sur le dessin : première version à 6 / 10 / 8 %, étiquettes P / Q collées et point presque sur [DE]
+  du prisme, vus sur capture), à ≥ 25 % du côté de chaque extrémité du côté qui le porte. Tous les gabarits (tétraèdre ≈ 50 %,
+  prisme ≈ 30 %) ; k = 3 (48 %), 4 (40 %), 5, 6.
+- **« prolongement »** : 2 points hors du solide 4 fois sur 5 tirés (1 sinon ; acceptés : ≈ 22 % à deux), t ∈ [−0,55 ; −0,2] ∪
+  [1,2 ; 1,55] sur la droite d'une arête ; exigés : dans le cadre du croquis (marge 7 %), HORS de la silhouette du solide
+  (enveloppe convexe projetée, ≥ 6 %), droite prolongée dessinée hors du solide (sinon elle passerait sur les faces), ≥ 9 % des
+  sommets, ≥ 5 % des arêtes, ≥ 10 % des points de section, deux points hors du solide à ≥ 15 % l'un de l'autre ; aucune face
+  TRAVERSÉE dont le plan contient deux points d'appui ; chaque point d'appui sert dans la résolution de référence. Une face non
+  traversée dont le plan contient les deux (manuel 6 b 4 : (BCD)) reste un distracteur (« la droite (PQ) ne traverse pas cette
+  face »). Tétraèdre rare (≈ 1 % : la droite prolongée passe presque toujours sur le dessin du solide).
+- **Écran « tracer dans une face » généralisé** (variantes à points d'appui seulement) : `facesPretesPourSegment` (Couche B)
+  ajoute les faces à UN point de section connu dont le plan contient un point d'appui connu, aligné (recalculé) avec ce point et
+  l'autre point de section de la face → `appui`, `nouveau` ; le moteur trace le côté ET ajoute le nouveau point. Consigne « …
+  dont le plan contient 2 points connus (points de section ou points donnés)… », aides (méthode ; où est chaque point, « dans le
+  plan de chaque face qui contient l'arête [GH] »), messages (face non traversée dont le plan contient deux points connus, un
+  seul point connu dans le plan, aucun), aperçu orange entre les deux points du plan ; écran clos : droite prolongée en violet,
+  côté et nouveau point. Récapitulatif « Points donnés : P sur l'arête [GH], Q dans la face (EFGH), R sur la droite (CD),
+  au-delà de D » ; compteur de points de section sans les points d'appui.
+- **« parallele »** (cube ou pavé) : K, L, M sur les trois arêtes du sommet VISIBLE (t ∈ [0,3 ; 0,7]), triangle KLM dessiné en vert
+  (donnée), P sur une arête qui ne part PAS de ce sommet (sur la même arête que K, étiquettes serrées : vu sur le papier) ; π à
+  ≥ 0,6 de (KLM), sommets de section à ≥ 12 % de K, L, M ; k = 3 (≈ 38 %), 4 (≈ 1,4 %), 5 (≈ 9 %), 6 (≈ 52 %). Écran propre `EtapeParalleleSection` (phase `parallele`) : on fait le tour depuis P (face et point de départ
+  donnés), l'élève choisit le côté de KLM parallèle (une tentative, ✗ / ✓ figés, message « [LM] est dans la face (BCGF), qui
+  n'est ni la face (ABFE) ni parallèle à elle ») ; aides : propriété « deux plans parallèles coupés par un troisième » + faces
+  opposées ; niveau 2 : « la face (ABFE) est parallèle à la face (DCGH) : cherche le côté de KLM tracé dans cette face-là » ;
+  écran clos : côté tracé, côté de KLM repassé en orange. Dernier côté automatique. **Adaptation** : « tracer une parallèle » à
+  l'écran = choisir le côté de KLM (la construction est dessinée à la validation) ; sur papier, l'élève trace réellement.
+- **Tableau d'appartenance** (TOUTES les variantes, anciennes comprises) : `ui/tableauAppartenanceSection.ts`, chaîne SVG
+  autonome (rasterisée par le Word, qui ne garde que les `<svg>` d'un `figureHtml`) — une colonne par face (cube / pavé :
+  Haut, Bas, Gauche, Droite, Avant, Arrière + nom de la face ; prisme / tétraèdre : sommets), une ligne par point, lettre dans
+  chaque face dont le PLAN le contient. Papier : DERNIÈRE ligne du corrigé (étape de fermeture, « Tableau »), points donnés puis,
+  dans l'ordre de la résolution de référence, points auxiliaires I₁… (violet) et points trouvés. Appli : écran de conclusion,
+  points dans l'ordre de l'élève.
+- **Papier** : énoncé selon la variante (« P est sur l'arête [GH], Q est dans la face (EFGH) et R est sur la droite (CD),
+  au-delà de D » ; « les points K, L et M sont sur les arêtes [FE], [FB] et [FG], et P est un point de l'arête [CG]. On coupe le
+  solide par le plan π parallèle au plan (KLM) et passant par P. »), consigne globale + « Trace ta construction sur la figure de
+  l'énoncé, que tu joins à ta feuille » (nouvelles variantes seulement : énoncés anciens inchangés) ; corrigé `etapesAppuiSection`
+  (X ∈ face, ou X ∈ (uv) et (uv) ⊂ face ; Z ∈ face ; plan de coupe ∩ face = (XZ) ; S = (XZ) ∩ (uv) ; piège « le point donné
+  n'est pas un sommet ») et `etapesParalleleSection` ((KLM) ∩ face de KLM = (KL) ; faces parallèles ; π ∥ (KLM) ; π ∩ face ∥ (KL) ;
+  piège « jamais parallèle à un côté d'une face sécante »), `COURS_DEUX_PLANS` ; barèmes propres (4 points) ; figure : droite
+  prolongée (gris), triangle KLM (vert), constructions d'appui (violet). « l'hexagone » (était « le hexagone », écran et corrigé).
+- **Niveaux** (constants dans la variante, la forme de la section est la réponse) : `faceInterieure` et `prolongement` 4 · 9 min
+  (3 étapes `sansCharge`, lecture 1, méthode 1, piège 1 : point donné hors section), `parallele` 3 · 9 min (piège 0). Profil :
+  jamais le cas « triangle » pour ces variantes, `forme` = `<variante>-<k>-cotes`.
+- **Mesuré** : collecteur (dossier de travail `4e-ch8-B/codes/collecteur.ts` : 300 tirages par nouvelle variante, 100 par
+  ancienne ; corrigé papier, énoncés, brève, barème, ancien corrigé ; chaque ligne `\in` / `\subset` / `\parallel` / `\cap` / `=`
+  évaluée sur les positions 3D ; sessions jouées juste ET faux avec textes d'écran, aides, messages et corrigés d'écran ; côté
+  de KLM attendu recalculé par les directions) : 40 684 relations, 0 fausse, 0 NaN / undefined / notation clavier / KaTeX
+  invalide, barèmes = 4, tableau complet sans doublon, toutes les sessions closes ; niveaux constants (ci-dessus, anciennes
+  variantes inchangées : 3 · 9, triangle 1 · 7). `?code=` : 60 graines × (libre + 5 anciennes variantes) = 360 / 360 identiques.
+  Playwright (iPhone 13 et 1 280 px, 12 codes, réponses justes et fausses, aides des deux niveaux) : 39 parcours, 0 erreur
+  console, scrollWidth = largeur, 0 `.katex-error`, tableau présent à la conclusion. Documents réels (2 plans : 2 et 1 question
+  par variante, interdite / autorisée, deux colonnes ; évaluation 2 séries + aménagée + corrigé + grille + feuille + aménagée +
+  Word copie / corrigé / grille) : 0 `.katex-error`, 0 débordement à 680 / 820 / 1 280 px, structure (variante + `forme`)
+  B = A. `npm run build` : 25 pages pré-rendues.
+
+## 4e ch. 8, manuel — gen135 « Réalité ou illusion ? » (nouveau, noté, 25/11, chantier A)
+
+D'après l'exercice 1 du manuel (fig. 35 : « Ces solides, dont les faces sont supposées planes, paraissent
+« normaux »… »). § 6 « Positions de trois plans », processus 3 TRANSFÉRER (sur papier, rien n'indique ni le
+théorème ni les plans ; l'élève applique le théorème par l'absurde, à travers le dessin). Coquille
+`4e/components/AppEspaceLotH.tsx` réutilisée telle quelle (`AppRealiteIllusion.tsx`), trois écrans `choix`
+(une tentative, ✗ / ✓ figés, message propre au choix faux) ; fichiers `core/realiteIllusion.types.ts`,
+`generateurs/realiteIllusion/{index,corrigeDetaille,exportEvaluation}.ts`, `ui/formatRealiteIllusion.ts`.
+- **Solide** ABCDEF : base ABC (z = 0), dessus DEF, arêtes latérales [AD], [BE], [CF], faces latérales
+  ABED, BCFE, ACFD ; figure `figureEspaceSvg` du lot H (même cavalière, visibilité des arêtes). Variantes
+  (= `forme` du profil, jamais le verdict) : `tronc` (sommet S au-dessus, D, E, F sur (SA), (SB), (SC) à des
+  hauteurs différentes — dessus oblique) et `prisme` (arêtes verticales, hauteurs différentes ; prolongements
+  vers le haut ou le bas à parts égales). Base quadrilatère ÉCARTÉE : quatre faces latérales planes n'imposent
+  PAS des arêtes concourantes (contre-exemple : base [0 ; 4] × [0 ; 2], dessus [1 ; 3] × [0 ; 2] — faces
+  planes, (AE) ∩ (BF) ≠ (CG) ∩ (DH)), et trois faces latérales ne sont jamais deux à deux adjacentes : le
+  théorème ne conclut pas. « Cube percé » (fig. 34) écarté aussi (pas de façon sûre de le dessiner faux).
+- **Verdict** existe / impossible tiré à parts égales AVANT le dessin (puis le sens, avant la boucle de rejet :
+  sinon le taux de rejet propre à chaque verdict faisait du sens un indice — mesuré avant correction, 23 / 3
+  « haut » sur 26 troncs). Un dessin impossible est un dessin POSSIBLE déjà contrôlé dont une arête latérale
+  est déplacée (mêmes bases, dessus et hauteurs) : tronc — le sommet du dessus glisse parallèlement à (Ox)
+  jusqu'à la droite (pied, J), J sur une autre arête à 35–80 px de S ; prisme — arête penchée d'au moins 12°.
+  Sur le dessin : I (les deux autres arêtes), J, K ; I à 26 px au moins de l'arête déplacée, hauteurs de IJK
+  ≥ 20 px, côtés ≥ 30 px, points au-delà du dessus (ou de la base) sur chaque prolongement. Contrôles communs
+  aux deux verdicts : faces latérales convexes sur le dessin, dessus non aplati, arêtes du tronc ouvertes
+  d'au moins 10° deux à deux, même visibilité que le solide de référence, aucun sommet à moins de 12 px d'une
+  arête qui ne passe pas par lui, sommets ≥ 22 px, solide ≥ 120 × 110 px dans un cadre qui contient DÈS
+  L'ÉNONCÉ les extrémités des prolongements (la figure ne saute pas ; place pour prolonger sur papier).
+- **Écrans** : a) « Quels plans du solide faut-il considérer ? » (les trois faces latérales ; leurres : base
+  + deux faces → trois droites par un même sommet, « on n'apprend rien » ; dessus + deux faces ; base, dessus
+  et une face → pas d'arête commune) ; b) arêtes prolongées « concourantes / parallèles toutes les trois / ni
+  concourantes ni parallèles » (ordre fixe ; arêtes en couleur après a, prolongements et S ou I, J, K après b
+  seulement) ; c) verdict, quatre options aux textes FIXES (peut exister / impossible avec la justification
+  du théorème / « arêtes toujours parallèles » / « on ne peut pas conclure sur un dessin »), explications selon
+  l'instance. Ordres des écrans a et c tirés une fois (`ordre1`, `ordre3`). Aides à deux niveaux (théorème, puis
+  posé pour l'instance ; jamais la réponse).
+- **Corrigé** (une lettre par écran) : a) trois lignes `(ABED)\cap(BCFE)=(BE)`… ; b) cavalière = projection
+  parallèle (§ 1), lignes « sur le dessin » (`\cap`, `\in`, `\notin`, `\parallel`, `\nparallel`), figure annotée
+  (`figureHtml`, prolongements pointillés de la couleur de chaque arête) ; c) conclusion par l'absurde
+  (impossible) ou « pyramide SABC / prisme coupé par le plan (DEF) ; trois points sont toujours dans un plan »
+  (existe), remarque « une face seule ne permet pas de conclure ». Un Piège par étape.
+- **Papier** : « On a dessiné en perspective cavalière le solide ABCDEF ci-dessous (base ABC, dessus DEF). » +
+  figure SANS prolongement + « Ce solide, dont les faces sont supposées planes, peut-il exister ? Justifie. »
+  (consigne du professeur, sans méthode) ; étapes dans le corrigé ; barème 1 + 1 + 2. Figure papier annoncée à
+  300 px (`width="300"`, au lieu de 380) : un groupe a), b), c) en imprime DEUX par rangée (seuil 316 px) sur la
+  copie, le corrigé et l'aménagée, une par rangée dans la feuille (QR code). **Regroupé** (`REGROUPEMENTS.gen135`,
+  `fig`, ligne vide) : « On a dessiné en perspective cavalière chacun des solides ABCDEF ci-dessous (base ABC,
+  dessus DEF). Chacun de ces solides, dont les faces sont supposées planes, peut-il exister ? Justifie. » —
+  première exception à « solides et espace jamais regroupés » : seule la figure change d'une instance à l'autre.
+- **Niveau** : deux étapes qui raisonnent + une lecture (b), méthode 2, piège 0, `sansCharge` → 3 · moyen,
+  9 min, constant dans les deux verdicts et les deux variantes. Profil : `forme` = variante, aucun cas
+  particulier, pas de `calcul`, aucun groupe à verdict (le nom des variantes ne dit pas la réponse). Pilote
+  `trois-plans`, processus 3 ; carte en § 6 après gen101.
+
+Mesures (dossier de travail `4e-ch8-A` : `sim135.mts`, `diag135.mts`, `code135.mts`, `figs.cjs`, `parcours.cjs`,
+`docsA.cjs`, `deborde.cjs`, `page.cjs`) : 800 tirages (400 par variante) — disposition recalculée sur le dessin
+(intersection des droites projetées) et planéité des faces latérales en 3D : 0 écart (existe ⟺ faces planes ⟺
+concourantes / parallèles) ; verdicts 198 / 202 et 208 / 192, libres 205 / 195 ; une seule bonne option par
+écran, textes d'options identiques pour tous les tirages (1 ensemble par écran) ; corrigé KaTeX strict, 0 NaN /
+notation clavier / « déterminant » / radian ; barème = 4 ; niveau 3 · 9 min pour 100 % des tirages. Temps de
+tirage : tronc ≈ 17 ms en moyenne (impossible : ≤ 0,3 s au pire), prisme ≈ 3 ms. `?code=` : 180 / 180 (60
+graines × libre + 2 variantes) appli = adaptateur. iPhone 13 et 1 280 px (2 variantes × 3 graines : juste,
+faux, mélange) : scrollWidth = largeur, 0 erreur console, réponse et corrigé révélés après un choix faux, choix
+vides après « Nouvel exercice ». Documents réels (2 plans : interdite 2 × 2, autorisée deux colonnes 3 × 2 ;
+évaluation 2 séries + aménagée + corrigé + grille, feuille + aménagée, Word copie / corrigé / grille) : groupes
+à figure formés (4 et 6 cellules), 0 `.katex-error`, 0 débordement à 680 / 820 / 1 280 px. Page du chapitre
+(390 px) : carte après gen101, 0 « $ » ni « ** ».
+
 ## 5e ch. 6, lot H1 — 5gen76, 5gen77, 5gen36–5gen38 (nouveaux, notés)
+
 
 Socle d'écrans `AppEcransTrigo` sans modification (choix jugés ✗ / ✓ en une tentative, champs en trois, `approchee` et
 `parse_error` refusés SANS tentative, aides à deux niveaux, corrigé après chaque réponse). Corrigés

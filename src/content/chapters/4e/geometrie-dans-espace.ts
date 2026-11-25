@@ -725,6 +725,12 @@ export const geometrieDansEspace: ChapterContent = {
             'passe par ce point.',
         },
         {
+          kind: 'para',
+          text:
+            '**Conséquence** : si deux plans sécants ont plusieurs points communs, tous ces points sont sur leur droite ' +
+            'd\'intersection — ils sont **alignés**. C\'est la méthode pour démontrer que trois points de l\'espace sont alignés.',
+        },
+        {
           kind: 'illustrationGroup',
           items: [
             {
@@ -1031,6 +1037,18 @@ export const geometrieDansEspace: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 101. Positions de deux plans et de trois plans »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Réalité ou illusion ?',
+          generatorId: 'gen135',
+          description: [
+            'Un solide dessiné en perspective cavalière, faces supposées planes : peut-il exister ? ' +
+              'Repère les trois plans en jeu, prolonge ses arêtes latérales sur le dessin, puis conclus ' +
+              'avec le théorème des trois plans : leurs droites d\'intersection doivent être concourantes ou parallèles.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 135. Réalité ou illusion ? »',
+        },
       ],
     },
 
@@ -1155,6 +1173,10 @@ export const geometrieDansEspace: ChapterContent = {
             'Sur un solide en perspective cavalière, démontre qu\'une droite est parallèle à un plan, ou que ' +
               'deux plans sont parallèles : choisis le critère du cours, la ou les droites témoins, puis ' +
               'justifie chaque parallélisme (rectangle, parallélogramme, droite des milieux).',
+            'Variante « Trois points alignés » : sur une pyramide SABC, démontre que trois points I, J, K ' +
+              'sont alignés parce qu\'ils sont communs à deux plans sécants, donc sur leur droite ' +
+              'd\'intersection ; dans le cas particulier d\'un côté parallèle à la base, conclus par le ' +
+              'théorème du toit.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 103. Démontrer un parallélisme »',
@@ -1670,7 +1692,10 @@ export const geometrieDansEspace: ChapterContent = {
             'Reconstruis progressivement le polygone de section d\'un solide en perspective ' +
               'cavalière, un point ou un segment à la fois. Segment direct dès que 2 points d\'une ' +
               'face sont connus, sinon construction d\'un point auxiliaire. Le dernier côté se ' +
-              'referme tout seul.',
+              'referme tout seul. Variantes : un point donné à l\'intérieur d\'une face, des points ' +
+              'donnés sur le prolongement d\'une arête (hors du solide), et la section par un plan ' +
+              'parallèle à un plan donné, construite à coups de parallèles. Le corrigé se termine par ' +
+              'le tableau d\'appartenance des points aux faces.',
           ],
           chantier: '4e',
           whereLabel: "4e → « 40. Section plane d'un solide »",
@@ -2375,7 +2400,9 @@ export const geometrieDansEspace: ChapterContent = {
           description: [
             'Retrouve la direction de la lumière à partir d\'un exemple déjà résolu. Projette ' +
               'ensuite un ou plusieurs points pour reconstituer une ombre — au sol, ou sur le ' +
-              'premier solide-obstacle que le rayon rencontre.',
+              'premier solide-obstacle que le rayon rencontre. Construis enfin l\'ombre d\'un ' +
+              'solide posé au sol (cube, caisse ou pyramide) à partir de l\'ombre d\'une arête ' +
+              'ou d\'un piquet, puis trace son contour.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 41. Ombre au soleil »',

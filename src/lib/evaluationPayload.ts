@@ -117,6 +117,7 @@ export type IdGenerateurPilote =
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29' | 'gen84' | 'gen86' | 'gen91' | 'gen87' | 'gen90' | 'gen82' | 'gen89' | 'gen88' | 'gen85' | 'gen83' | 'gen129' | 'gen130'
   | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54' | 'gen92' | 'gen93' | 'gen94' | 'gen95' | 'gen96' | 'gen97' | 'gen98' | 'gen99' | 'gen131' | 'gen132'
   | 'gen39' | 'gen40' | 'gen41' | 'gen100' | 'gen101' | 'gen103' | 'gen102' | 'gen105' | 'gen104' | 'gen107' | 'gen106' | 'gen133' | 'gen134'
+  | 'gen135'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen63'
   | '5gen62'
@@ -438,6 +439,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'deux-droites', generatorId: 'gen100', label: 'Positions de deux droites et plan déterminé (gen100)', processus: 2 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'position', generatorId: 'gen39', label: "Position d'une droite par rapport à un plan (gen39)", processus: 2 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'trois-plans', generatorId: 'gen101', label: 'Positions de deux plans et de trois plans (gen101)', processus: 2 },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'trois-plans', generatorId: 'gen135', label: 'Réalité ou illusion ? (gen135)', processus: 3 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'parallelisme', generatorId: 'gen103', label: 'Démontrer un parallélisme (gen103)', processus: 3 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'percee', generatorId: 'gen102', label: 'Point de percée par plan auxiliaire (gen102)', processus: 2 },
   { chapitreSlug: 'geometrie-dans-espace', sectionId: 'cavaliere', generatorId: 'gen104', label: 'Dessiner en perspective cavalière (gen104)', processus: 2 },

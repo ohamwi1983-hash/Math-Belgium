@@ -1,9 +1,10 @@
 import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
-import type { EtapeResolutionSection, ExerciceSectionPlaneSolide } from "../../core/sectionPlaneSolide.types";
+import type { ExerciceSectionPlaneSolide } from "../../core/sectionPlaneSolide.types";
 import { facesContenantLigne } from "../../moteur/verificationSectionPlaneSolide";
-import { COURS_PERCEE, COURS_SECTION, droiteTex, listeEt, memeDirection, nomTex, phrase, planTex, segmentTex, type FigureEspace } from "../../ui/corrigeEspace1";
-import { libellePoint, nomPolygoneSection, segmentSurFaceCachee } from "../../ui/formatSectionPlaneSolide";
+import { COURS_DEUX_PLANS, COURS_PERCEE, COURS_SECTION, droiteTex, listeEt, memeDirection, nomTex, phrase, planTex, segmentTex, type FigureEspace } from "../../ui/corrigeEspace1";
+import { leNomPolygone, libellePoint, segmentSurFaceCachee } from "../../ui/formatSectionPlaneSolide";
+import { type LigneTableauAppartenance, tableauAppartenanceSvg } from "../../ui/tableauAppartenanceSection";
 import { construireSvgSectionPlaneSolide, nomPointAuxiliaire, ordreCycliqueDepuisP, ordreLabelsDepuisExercice } from "./figure";
 
 /**
@@ -19,8 +20,12 @@ import { construireSvgSectionPlaneSolide, nomPointAuxiliaire, ordreCycliqueDepui
 
 type E = ExerciceSectionPlaneSolide;
 
-/** Plan de coupe, toujours nommé par les trois points de départ. */
+/** Plan de coupe, nommé par les trois points de départ (variante « parallele » : le plan π). */
 const PLAN_COUPE = ["P", "Q", "R"];
+
+function planCoupeTex(e: E): string {
+  return e.planParallele ? "\\pi" : planTex(PLAN_COUPE);
+}
 
 /** Figure de la brique : sommets, points de section (sur leur arête) nommés selon `connus`, points
  * auxiliaires `aux`. */
@@ -30,9 +35,11 @@ export function figureEspaceSection(e: E, connus: readonly number[], aux: { nom:
     faces: e.solide.faces,
     points: [
       ...connus.map((id) => {
-        const p = e.points.find((x) => x.id === id)!;
+        const p = e.points.find((x) => x.id === id);
+        if (!p) return { nom: libellePoint(connus, id), position: e.pointsAppui!.find((x) => x.id === id)!.position };
         return { nom: libellePoint(connus, id), position: p.position, surSegment: p.arete };
       }),
+      ...(e.planParallele?.points ?? []).map((k) => ({ nom: k.nom, position: k.position, surSegment: k.arete })),
       ...aux.map((a) => ({ nom: a.nom, position: a.position })),
     ],
   };
@@ -76,7 +83,7 @@ export function etapesSegmentSection(e: E, connus: readonly number[], face: numb
   const lignes: LigneCalcul[] = [
     ligne(`${nomTex(X)}\\in${F}`, phrase(`$${nomTex(X)}$ est sur l'arête $${segmentTex(...areteDe(e, x))}$ de la face`)),
     ligne(`${nomTex(Y)}\\in${F}`, phrase(`$${nomTex(Y)}$ est sur l'arête $${segmentTex(...areteDe(e, y))}$ de la face`)),
-    ligne(`${planTex(PLAN_COUPE)}\\cap${F}=${droiteTex(X, Y)}`, phrase(`$${nomTex(X)}$ et $${nomTex(Y)}$ sont communs aux deux plans`)),
+    ligne(`${planCoupeTex(e)}\\cap${F}=${droiteTex(X, Y)}`, phrase(`$${nomTex(X)}$ et $${nomTex(Y)}$ sont communs aux deux plans`)),
   ];
   const cache = segmentSurFaceCachee(e, a, b);
   return [
@@ -96,7 +103,7 @@ export function etapesLignesSection(e: E, connus: readonly number[], l1: string,
   const lignes: LigneCalcul[] = [];
   const segment = [l1, l2].find((c) => c.startsWith("segment:"));
   const ordre: [string, [string, string]][] = segment === l2 ? [[l2, d2], [l1, d1]] : [[l1, d1], [l2, d2]];
-  if (segment) lignes.push(ligne(`${droiteTex(...nomsLigne(e, connus, segment))}\\subset${planTex(PLAN_COUPE)}`, "côté de la section déjà tracé : dans le plan de coupe"));
+  if (segment) lignes.push(ligne(`${droiteTex(...nomsLigne(e, connus, segment))}\\subset${planCoupeTex(e)}`, "côté de la section déjà tracé : dans le plan de coupe"));
   if (commune !== undefined) {
     for (const [cle, d] of ordre) lignes.push(ligne(`${droiteTex(...d)}\\subset${faceTex(e, commune)}`, `${natureLigne(cle)} de la face ${nomFaceIndex(e, commune)}`));
     lignes.push(ligne(`${nomTex(nomI)}=${droiteTex(...d1)}\\cap${droiteTex(...d2)}`, `deux droites non parallèles de la face ${nomFaceIndex(e, commune)}`));
@@ -124,7 +131,7 @@ export function etapesFaceSection(
   const Z = libellePoint(connus, pointConnu);
   const S = libellePoint(apres, pointCible);
   const F = faceTex(e, face);
-  const PQR = planTex(PLAN_COUPE);
+  const PQR = planCoupeTex(e);
   const lignes: LigneCalcul[] = [];
   const dansCoupe = [ligne1, ligne2].find((c) => c.startsWith("segment:"));
   const dansFace = [ligne1, ligne2].find((c) => facesContenantLigne(e, c).includes(face));
@@ -142,10 +149,93 @@ export function etapesFaceSection(
   ];
 }
 
+/** Écran « tracer dans une face » avec un point donné hors section (variantes du manuel) : le plan
+ * de la face contient ce point et un point de section connu ; la droite qui les joint donne le côté
+ * et un nouveau point. */
+export function etapesAppuiSection(
+  e: E,
+  connus: readonly number[],
+  etape: { face: number; appui: number; pointConnu: number; pointCible: number },
+  lettre: string,
+  avecPiege = true,
+): EtapeCorrection[] {
+  const { face, appui, pointConnu, pointCible } = etape;
+  const apres = [...connus, pointCible];
+  const X = libellePoint(connus, appui);
+  const Z = libellePoint(connus, pointConnu);
+  const S = libellePoint(apres, pointCible);
+  const F = faceTex(e, face);
+  const donne = e.pointsAppui!.find((x) => x.id === appui)!;
+  const lignes: LigneCalcul[] = [];
+  if (donne.nature === "face") {
+    lignes.push(ligne(`${nomTex(X)}\\in${F}`, "point donné à l'intérieur de cette face"));
+  } else {
+    const [u, v] = donne.arete!;
+    lignes.push(ligne(`${nomTex(X)}\\in${droiteTex(u, v)}`, phrase(`point donné sur la droite $${droiteTex(u, v)}$, au-delà de $${nomTex(donne.auDelaDe!)}$`)));
+    lignes.push(ligne(`${droiteTex(u, v)}\\subset${F}`, phrase(`$${segmentTex(u, v)}$ est une arête de la face ${nomFaceIndex(e, face)}`)));
+  }
+  lignes.push(ligne(`${nomTex(Z)}\\in${F}`, phrase(`$${nomTex(Z)}$ est sur l'arête $${segmentTex(...areteDe(e, pointConnu))}$ de la face`)));
+  lignes.push(ligne(`${planCoupeTex(e)}\\cap${F}=${droiteTex(X, Z)}`, phrase(`$${nomTex(X)}$ et $${nomTex(Z)}$ sont communs aux deux plans`)));
+  const [u, v] = areteDe(e, pointCible);
+  lignes.push(ligne(`${nomTex(S)}=${droiteTex(X, Z)}\\cap${droiteTex(u, v)}`, phrase(`la droite, prolongée, coupe l'arête $${segmentTex(u, v)}$ de la face`)));
+  const cache = segmentSurFaceCachee(e, pointConnu, pointCible);
+  const piegeTexte =
+    donne.nature === "face"
+      ? `Le point ${X} n'est pas un sommet de la section : il est sur le côté [${Z}${S}], dont les deux extrémités sont sur des arêtes de la face.`
+      : `Le point ${X}, hors du solide, n'est pas un sommet de la section : il sert seulement à tracer la droite (${X}${Z}) dans le plan de la face.`;
+  return [
+    utilise(lettre, phrase(`Dès que le plan d'une face contient deux points du plan de coupe, la droite qui les joint est l'intersection des deux plans ; prolongée jusqu'au bord de la face, elle donne le côté de la section dans cette face ${COURS_SECTION}.`)),
+    calcul(lettre, lignes),
+    resultat(lettre, phrase(`Côté $${segmentTex(Z, S)}$ de la section, dans la face ${nomFaceIndex(e, face)}${cache ? " (face cachée : en pointillés)" : ""} ; nouveau point $${nomTex(S)}$ sur l'arête $${segmentTex(u, v)}$.`)),
+    ...(avecPiege ? [piege(lettre, [texte(piegeTexte)])] : []),
+  ];
+}
+
+/** Écran « parallèle » (variante du manuel) : le côté de la face `face` tracé par le dernier point
+ * trouvé, parallèle au côté de KLM situé dans cette face ou dans la face qui lui est parallèle. */
+export function etapesParalleleSection(
+  e: E,
+  connus: readonly number[],
+  etape: { face: number; cote: number; pointConnu: number; pointCible: number },
+  lettre: string,
+  avecPiege = true,
+): EtapeCorrection[] {
+  const plan = e.planParallele!;
+  const { face, cote, pointConnu, pointCible } = etape;
+  const c = plan.cotes[cote]!;
+  const [k1, k2] = [plan.points[c.a]!, plan.points[c.b]!];
+  const apres = [...connus, pointCible];
+  const Z = libellePoint(connus, pointConnu);
+  const S = libellePoint(apres, pointCible);
+  const F = faceTex(e, face);
+  const Fc = faceTex(e, c.face);
+  const KL = droiteTex(k1.nom, k2.nom);
+  const lignes: LigneCalcul[] = [
+    ligne(`${planTex(["K", "L", "M"])}\\cap${Fc}=${KL}`, phrase(`$${nomTex(k1.nom)}$ et $${nomTex(k2.nom)}$ sont sur des arêtes de la face ${nomFaceIndex(e, c.face)}`)),
+  ];
+  if (c.face !== face) {
+    lignes.push(ligne(`${F}\\parallel${Fc}`, "faces opposées du pavé"));
+    lignes.push(ligne(`${planTex(["K", "L", "M"])}\\cap${F}\\parallel${KL}`, "le plan (KLM) coupe ces deux faces parallèles"));
+  }
+  lignes.push(ligne(`\\pi\\parallel${planTex(["K", "L", "M"])}`, "donnée"));
+  lignes.push(ligne(`\\pi\\cap${F}\\parallel${KL}`, c.face === face ? "le plan de la face coupe les deux plans parallèles π et (KLM)" : "le plan de la face coupe les deux plans parallèles π et (KLM), puis la ligne précédente"));
+  lignes.push(ligne(`${nomTex(Z)}\\in\\pi\\cap${F}`, phrase(`$${nomTex(Z)}$ est un point de section, sur l'arête $${segmentTex(...areteDe(e, pointConnu))}$ de la face`)));
+  const [u, v] = areteDe(e, pointCible);
+  lignes.push(ligne(`${nomTex(S)}\\in${droiteTex(u, v)}`, phrase(`la parallèle à $${KL}$ menée par $${nomTex(Z)}$ coupe l'arête $${segmentTex(u, v)}$ de la face`)));
+  const cache = segmentSurFaceCachee(e, pointConnu, pointCible);
+  return [
+    utilise(lettre, phrase(`Si un plan coupe deux plans parallèles, les deux droites d'intersection sont parallèles ${COURS_DEUX_PLANS}. Ici, π est parallèle à (KLM), et les faces opposées d'un pavé sont parallèles.`)),
+    calcul(lettre, lignes),
+    resultat(lettre, phrase(`Côté $${segmentTex(Z, S)}$ de la section, parallèle à $${segmentTex(k1.nom, k2.nom)}$, dans la face ${nomFaceIndex(e, face)}${cache ? " (face cachée : en pointillés)" : ""} ; nouveau point $${nomTex(S)}$ sur l'arête $${segmentTex(u, v)}$.`)),
+    ...(avecPiege ? [piege(lettre, [texte("Le côté cherché n'est parallèle qu'au côté de KLM situé dans la même face ou dans la face parallèle, jamais à un côté situé dans une face sécante.")])] : []),
+  ];
+}
+
 /** Lettres des écrans de la résolution de référence : un segment = une lettre, un point auxiliaire =
  * deux lettres (« droites », « face »), puis la fermeture. */
 export interface EcranSection {
-  type: "segment" | "lignes" | "face" | "fermeture";
+  /** « appui » / « parallele » : variantes du manuel (un écran chacun). */
+  type: "segment" | "lignes" | "face" | "appui" | "parallele" | "fermeture";
   /** Indice de l'étape de `resolutionReference` (absent pour la fermeture). */
   reference?: number;
 }
@@ -154,6 +244,7 @@ export function ecransSection(e: E): EcranSection[] {
   const ecrans: EcranSection[] = [];
   e.resolutionReference.forEach((etape, i) => {
     if (etape.type === "segment") ecrans.push({ type: "segment", reference: i });
+    else if (etape.type === "appui" || etape.type === "parallele") ecrans.push({ type: etape.type, reference: i });
     else ecrans.push({ type: "lignes", reference: i }, { type: "face", reference: i });
   });
   ecrans.push({ type: "fermeture" });
@@ -207,11 +298,32 @@ function etapeFermeture(e: E, lettre: string): EtapeCorrection[] {
     utilise(lettre, phrase(`Un plan coupe un solide convexe suivant un polygone fermé ; chaque face traversée en donne exactement un côté ${COURS_SECTION}.`)),
     calcul(lettre, lignes),
     {
-      ...resultat(lettre, phrase(`La section est le ${nomPolygoneSection(k)} ${noms.join("")}${caches.length ? ` ; ${caches.length > 1 ? `les côtés ${listeEt(caches)}, sur des faces cachées, se tracent` : `le côté ${caches[0]}, sur une face cachée, se trace`} en pointillés` : ""}.`)),
+      ...resultat(lettre, phrase(`La section est ${leNomPolygone(k)} ${noms.join("")}${caches.length ? ` ; ${caches.length > 1 ? `les côtés ${listeEt(caches)}, sur des faces cachées, se tracent` : `le côté ${caches[0]}, sur une face cachée, se trace`} en pointillés` : ""}.`)),
       figureHtml: construireSvgSectionPlaneSolide(e, true),
     },
     verification(lettre, phrase(`${k} faces traversées, ${k} côtés : le polygone est fermé, et deux côtés consécutifs se rejoignent sur une arête.`), verifs.length ? verifs : undefined),
+    {
+      label: "Tableau",
+      sousQuestion: lettre,
+      fragments: [texte("Appartenance des points aux faces, dans l'ordre de la construction (chaque point dans les faces dont le plan le contient) :")],
+      figureHtml: tableauAppartenanceSvg(e, lignesTableauReference(e)),
+    },
   ];
+}
+
+/** Lignes du tableau d'appartenance du corrigé papier : points donnés, puis, dans l'ordre de la
+ * résolution de référence, chaque point auxiliaire (I₁, I₂…) et chaque nouveau point de section. */
+export function lignesTableauReference(e: E): LigneTableauAppartenance[] {
+  const ordre = ordreLabelsDepuisExercice(e);
+  const position = (id: number) => e.points.find((p) => p.id === id)?.position ?? e.pointsAppui!.find((x) => x.id === id)!.position;
+  const lignes: LigneTableauAppartenance[] = e.idsDepart.map((id) => ({ nom: libellePoint(ordre, id), position: position(id) }));
+  let rang = 0;
+  for (const etape of e.resolutionReference) {
+    if (etape.type === "segment") continue;
+    if (etape.type === "auxiliaire") lignes.push({ nom: nomPointAuxiliaire(rang++), position: etape.pointAuxiliaire, auxiliaire: true });
+    lignes.push({ nom: libellePoint(ordre, etape.pointCible), position: position(etape.pointCible) });
+  }
+  return lignes;
 }
 
 function facesParalleles(f: FigureEspace, a: readonly string[], b: readonly string[]): boolean {
@@ -231,14 +343,16 @@ function facesParalleles(f: FigureEspace, a: readonly string[], b: readonly stri
 function connusAvant(e: E, i: number): number[] {
   const ordre = ordreLabelsDepuisExercice(e);
   const ref = e.resolutionReference;
-  const nouveaux = ref.slice(0, i).filter((x): x is Extract<EtapeResolutionSection, { type: "auxiliaire" }> => x.type === "auxiliaire").length;
-  return ordre.slice(0, 3 + nouveaux);
+  const nouveaux = ref.slice(0, i).filter((x) => x.type !== "segment").length;
+  return ordre.slice(0, e.idsDepart.length + nouveaux);
 }
 
 export function correctionDetailleeSectionPlaneSolide(e: E): EtapeCorrection[] {
   const etapes: EtapeCorrection[] = [];
   let rang = 0;
   let premierSegment = true;
+  let premierAppui = true;
+  let premierParallele = true;
   ecransSection(e).forEach((ecran, i) => {
     const lettre = lettreEcranSection(i);
     if (ecran.type === "fermeture") {
@@ -250,6 +364,16 @@ export function correctionDetailleeSectionPlaneSolide(e: E): EtapeCorrection[] {
     if (ref.type === "segment") {
       etapes.push(...etapesSegmentSection(e, connus, ref.face, ref.pointA, ref.pointB, lettre, premierSegment));
       premierSegment = false;
+      return;
+    }
+    if (ref.type === "appui") {
+      etapes.push(...etapesAppuiSection(e, connus, ref, lettre, premierAppui));
+      premierAppui = false;
+      return;
+    }
+    if (ref.type === "parallele") {
+      etapes.push(...etapesParalleleSection(e, connus, ref, lettre, premierParallele));
+      premierParallele = false;
       return;
     }
     const nomI = nomPointAuxiliaire(ecran.type === "lignes" ? rang : rang++);

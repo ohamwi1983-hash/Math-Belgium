@@ -61,6 +61,43 @@ function libelleArete(exercice: ExerciceSectionPlaneSolide, id: number): string 
   return point ? `[${point.arete[0]}${point.arete[1]}]` : "";
 }
 
+/** Point donné hors section (variantes du manuel), ou `undefined`. */
+export function pointAppui(exercice: ExerciceSectionPlaneSolide, id: number) {
+  return exercice.pointsAppui?.find((x) => x.id === id);
+}
+
+/** Où se trouve un point connu : « sur l'arête [AB] », « dans la face (ABFE) », « sur la droite (BC),
+ * au-delà de C ». */
+export function descriptionPointConnu(exercice: ExerciceSectionPlaneSolide, id: number): string {
+  const appui = pointAppui(exercice, id);
+  if (!appui) return `sur l'arête ${libelleArete(exercice, id)}`;
+  if (appui.nature === "face") return `dans la face ${libelleFace(exercice, appui.face!)}`;
+  return `sur la droite (${appui.arete!.join("")}), au-delà de ${appui.auDelaDe}`;
+}
+
+/** Position d'un point connu (sommet de section ou point donné hors section). */
+export function positionConnu(exercice: ExerciceSectionPlaneSolide, id: number): Point3D | null {
+  return exercice.points.find((p) => p.id === id)?.position ?? pointAppui(exercice, id)?.position ?? null;
+}
+
+/** Le point est-il dans le PLAN de la face ? */
+export function pointDansPlanDeFace(exercice: ExerciceSectionPlaneSolide, point: Point3D, face: number): boolean {
+  const [a, b, c] = exercice.solide.faces[face]!.slice(0, 3).map((n) => exercice.solide.sommets[n]!);
+  const normale = normalePlan(a!, b!, c!);
+  return Math.abs(produitScalaire3D(normale, soustraire3D(point, a!))) / Math.sqrt(normeCarree3D(normale)) < 1e-6;
+}
+
+/** Points connus dont le PLAN de la face contient la position (sommets de section de la face, points
+ * donnés hors section situés dans ce plan), dans l'ordre de `connus`. */
+export function connusDansPlanDeFace(exercice: ExerciceSectionPlaneSolide, connus: readonly number[], face: number): number[] {
+  return connus.filter((id) => {
+    const sommet = exercice.points.find((p) => p.id === id);
+    if (sommet) return sommet.faces.includes(face);
+    const appui = pointAppui(exercice, id);
+    return appui ? pointDansPlanDeFace(exercice, appui.position, face) : false;
+  });
+}
+
 /** Libellé d'une droite candidate (arête, diagonale ou segment déjà tracé), ex. "arête [BF]". */
 export function libelleLigne(exercice: ExerciceSectionPlaneSolide, connus: readonly number[], cle: string): string {
   const statique = exercice.lignesStatiques.find((l) => l.cle === cle);
@@ -76,6 +113,17 @@ const NOMS_POLYGONE: Record<number, string> = { 3: "triangle", 4: "quadrilatère
 
 export function nomPolygoneSection(k: number): string {
   return NOMS_POLYGONE[k] ?? `polygone à ${k} côtés`;
+}
+
+/** « le triangle », « le pentagone », « l'hexagone » (h muet). */
+export function leNomPolygone(k: number): string {
+  const nom = nomPolygoneSection(k);
+  return nom.startsWith("hexagone") ? `l'${nom}` : `le ${nom}`;
+}
+
+/** Arête « [FE] » écrite depuis le sommet donné (K, L, M de la variante « parallele »). */
+export function areteDepuisSommet(arete: readonly [string, string], sommet: string): string {
+  return `[${arete[0] === sommet ? arete.join("") : [...arete].reverse().join("")}]`;
 }
 
 /** Face (index) commune aux 2 points de section d'un segment — celle où le segment est tracé. */
@@ -103,10 +151,33 @@ export const COULEUR_CONSTRUCTION = "#7048e8";
  * ordre réel de découverte. */
 export function pointsExtraConnus(exercice: ExerciceSectionPlaneSolide, connus: readonly number[]): PointExtraSolide3D[] {
   return connus.map((id) => {
-    const point = exercice.points.find((p) => p.id === id);
-    if (!point) throw new Error(`pointsExtraConnus : point inconnu (id=${id})`);
-    return { position: point.position, label: libellePoint(connus, id), couleur: COULEUR_CONNU };
+    const position = positionConnu(exercice, id);
+    if (!position) throw new Error(`pointsExtraConnus : point inconnu (id=${id})`);
+    return { position, label: libellePoint(connus, id), couleur: COULEUR_CONNU };
   });
+}
+
+/** Couleurs des données propres aux variantes du manuel : droite prolongée d'une arête (gris), plan
+ * (KLM) donné (vert). */
+export const COULEUR_PROLONGEMENT = "#868e96";
+export const COULEUR_PLAN_DONNE = "#2f9e44";
+
+/** Données dessinées en plus des points connus (variantes du manuel) : la droite d'une arête
+ * prolongée jusqu'au point donné hors du solide ; le triangle KLM et ses sommets. Vide pour les
+ * variantes historiques. */
+export function decorDonnees(exercice: ExerciceSectionPlaneSolide): { segments: SegmentExtraSolide3D[]; points: PointExtraSolide3D[] } {
+  const segments: SegmentExtraSolide3D[] = [];
+  const points: PointExtraSolide3D[] = [];
+  for (const appui of exercice.pointsAppui ?? []) {
+    if (appui.nature !== "prolongement" || !appui.auDelaDe) continue;
+    segments.push({ a: exercice.solide.sommets[appui.auDelaDe]!, b: appui.position, couleur: COULEUR_PROLONGEMENT, epaisseur: 1.5 });
+  }
+  const plan = exercice.planParallele;
+  if (plan) {
+    for (const cote of plan.cotes) segments.push({ a: plan.points[cote.a]!.position, b: plan.points[cote.b]!.position, couleur: COULEUR_PLAN_DONNE, epaisseur: 2 });
+    for (const p of plan.points) points.push({ position: p.position, label: p.nom, couleur: COULEUR_PLAN_DONNE, labelExterieur: true, rayon: 4 });
+  }
+  return { segments, points };
 }
 
 /** Le segment de section est-il sur une face CACHÉE du croquis (convention de la perspective
@@ -138,10 +209,37 @@ export function apercuSegmentFace(
   face: number | null,
 ): SegmentExtraSolide3D | null {
   if (face === null) return null;
+  if (exercice.pointsAppui) {
+    // Variantes du manuel : les deux points connus du PLAN de la face, quels qu'ils soient.
+    const dansPlan = connusDansPlanDeFace(exercice, connus, face);
+    if (dansPlan.length !== 2) return null;
+    return { a: positionConnu(exercice, dansPlan[0]!)!, b: positionConnu(exercice, dansPlan[1]!)!, couleur: COULEUR_SELECTION, pointille: true };
+  }
   const pointsDeFace = exercice.points.filter((p) => p.faces.includes(face) && connus.includes(p.id));
   if (pointsDeFace.length !== 2) return null;
   const [a, b] = pointsDeFace;
   return { a: a.position, b: b.position, couleur: COULEUR_SELECTION, pointille: true };
+}
+
+/** Construction confirmée d'un écran « tracer dans une face » avec un point donné hors section : la
+ * droite (point donné, point connu) prolongée jusqu'au nouveau point, le côté, le nouveau point. */
+export function elementsConstructionAppui(
+  exercice: ExerciceSectionPlaneSolide,
+  connus: readonly number[],
+  prete: { appui?: number; pointA: number; pointB: number } | null | undefined,
+): { segments: SegmentExtraSolide3D[]; points: PointExtraSolide3D[] } {
+  if (!prete || prete.appui === undefined) return { segments: [], points: [] };
+  const x = positionConnu(exercice, prete.appui);
+  const a = positionConnu(exercice, prete.pointA);
+  const b = exercice.points.find((p) => p.id === prete.pointB)?.position;
+  if (!x || !a || !b) return { segments: [], points: [] };
+  return {
+    segments: [
+      { a: x, b: extremiteEloignee(a, b, x), couleur: COULEUR_CONSTRUCTION, pointille: true },
+      { a, b, couleur: COULEUR_CONNU, pointille: segmentSurFaceCachee(exercice, prete.pointA, prete.pointB) },
+    ],
+    points: [{ position: b, label: lettreProchainPoint(connus), couleur: COULEUR_CONSTRUCTION }],
+  };
 }
 
 /** Aperçu (pointillé orange) des droites actuellement sélectionnées à l'écran B, étape 1 — arêtes,
@@ -192,8 +290,10 @@ export function elementsConstructionAuxiliaire(
 
 /** Compteurs SANS total (audit chapitre 8, point 24) : « 3/5 » donnait d'entrée le nombre de
  * côtés de la section. */
-export function texteProgression(connus: readonly number[], segmentsTraces: readonly string[]): string {
-  return `Points de section trouvés : ${connus.length} — Segments tracés : ${segmentsTraces.length}`;
+export function texteProgression(connus: readonly number[], segmentsTraces: readonly string[], exercice?: ExerciceSectionPlaneSolide): string {
+  // Variantes du manuel : les points donnés hors section ne sont pas des points de section.
+  const nombre = exercice ? connus.filter((id) => !pointAppui(exercice, id)).length : connus.length;
+  return `Points de section trouvés : ${nombre} — Segments tracés : ${segmentsTraces.length}`;
 }
 
 /** Récapitulatif « Ce qu'on sait déjà » — points de section connus (avec leur arête) et segments
@@ -203,17 +303,33 @@ export function calculerRecapitulatifSectionPlaneSolide(
   connus: readonly number[],
   segmentsTraces: readonly string[],
 ): EntreeRecapitulatif[] {
-  const points = connus.map((id) => `${libellePoint(connus, id)} sur ${libelleArete(exercice, id)}`).join(", ");
   const segments = segmentsTraces
     .map((cle) => {
       const [a, b] = cle.split("-").map(Number);
       return nomSegment(connus, a, b);
     })
     .join(", ");
-  return [
-    { libelle: "Points de section", valeur: points, estLatex: false, revele: false },
-    { libelle: "Segments tracés", valeur: segments || "aucun pour l'instant", estLatex: false, revele: false },
-  ];
+  const entreeSegments: EntreeRecapitulatif = { libelle: "Segments tracés", valeur: segments || "aucun pour l'instant", estLatex: false, revele: false };
+  if (exercice.variante) {
+    // Variantes du manuel : les données d'abord (points donnés, plan (KLM)), puis la section.
+    const entrees: EntreeRecapitulatif[] = [];
+    const plan = exercice.planParallele;
+    if (plan) entrees.push({ libelle: "Plan donné (KLM)", valeur: plan.points.map((p) => `${p.nom} sur ${areteDepuisSommet(p.arete, plan.sommet)}`).join(", "), estLatex: false, revele: false });
+    const donnes = exercice.idsDepart.map((id) => `${libellePoint(connus, id)} ${descriptionPointConnu(exercice, id)}`).join(", ");
+    entrees.push({ libelle: plan ? "Point donné" : "Points donnés", valeur: donnes, estLatex: false, revele: false });
+    const trouves = connus.filter((id) => !exercice.idsDepart.includes(id)).map((id) => `${libellePoint(connus, id)} sur ${libelleArete(exercice, id)}`);
+    entrees.push({ libelle: "Points de section trouvés", valeur: trouves.join(", ") || "aucun pour l'instant", estLatex: false, revele: false });
+    return [...entrees, entreeSegments];
+  }
+  const points = connus.map((id) => `${libellePoint(connus, id)} sur ${libelleArete(exercice, id)}`).join(", ");
+  return [{ libelle: "Points de section", valeur: points, estLatex: false, revele: false }, entreeSegments];
+}
+
+/** Consigne générale de l'en-tête de l'appli, selon la variante. */
+export function consigneGeneraleSection(exercice: ExerciceSectionPlaneSolide): string {
+  if (exercice.planParallele) return "Détermine la section de ce solide par le plan π parallèle au plan (KLM) et passant par P.";
+  if (exercice.variante) return "Détermine la section de ce solide par le plan (PQR).";
+  return "Détermine la section plane de ce solide.";
 }
 
 // --- Écran A — segment direct ------------------------------------------------------------------------
@@ -241,13 +357,43 @@ export function candidatsFaces(exercice: ExerciceSectionPlaneSolide, segmentsTra
  * face (qui désignait directement la réponse, audit chapitre 8, point 20) : l'élève doit encore
  * trouver lui-même la face qui possède 2 de ces arêtes. */
 export function texteAideSegmentNiveau2(exercice: ExerciceSectionPlaneSolide, connus: readonly number[]): string {
+  if (exercice.pointsAppui) {
+    // Variantes du manuel : où est chaque point connu, et dans quels plans de faces est un point donné.
+    const detail = connus
+      .map((id) => {
+        const appui = pointAppui(exercice, id);
+        const ou = `${libellePoint(connus, id)} est ${descriptionPointConnu(exercice, id)}`;
+        if (appui?.nature === "prolongement") return `${ou} : il est dans le plan de chaque face qui contient l'arête [${appui.arete!.join("")}]`;
+        return ou;
+      })
+      .join(" ; ");
+    return `${detail}. Une face convient si son plan contient 2 de ces points et si la droite qui les joint traverse la face.`;
+  }
   const detail = connus.map((id) => `${libellePoint(connus, id)} est sur l'arête ${libelleArete(exercice, id)}`).join(", ");
   return `${detail}. Une face convient si 2 de ces points sont sur ses arêtes.`;
+}
+
+/** Consigne de l'écran « tracer dans une face », selon la variante. */
+export function consigneSegmentDirect(exercice: ExerciceSectionPlaneSolide): string {
+  return exercice.pointsAppui
+    ? "Sélectionne une face dont le plan contient 2 points connus (points de section ou points donnés) : la droite qui les joint y donne un côté de la section."
+    : CONSIGNE_SEGMENT_DIRECT;
+}
+
+export function texteAideSegmentNiveau1(exercice: ExerciceSectionPlaneSolide): string {
+  return exercice.pointsAppui
+    ? "Rappel de la méthode : dès que le plan d'une face contient 2 points du plan de coupe, la droite qui les joint est l'intersection des deux plans. Prolongée jusqu'aux arêtes de la face, elle donne le côté de la section dans cette face."
+    : TEXTE_AIDE_SEGMENT_NIVEAU1;
 }
 
 /** Réponse révélée de l'écran A — la face confirmée et le segment tracé. */
 export function texteReponseSegmentDirect(exercice: ExerciceSectionPlaneSolide, connus: readonly number[], face: number): string {
   const pret = facesPretesPourSegment(exercice, new Set(connus), new Set()).find((f) => f.face === face);
+  if (pret && pret.appui !== undefined) {
+    const nouveau = lettreProchainPoint(connus);
+    const z = libellePoint(connus, pret.pointA);
+    return `Face ${libelleFace(exercice, face)} : la droite (${libellePoint(connus, pret.appui)}${z}) coupe l'arête ${libelleArete(exercice, pret.pointB)} en ${nouveau} ; on trace le côté [${z}${nouveau}].`;
+  }
   const segment = pret ? ` : on y trace le segment ${nomSegment(connus, pret.pointA, pret.pointB)}` : "";
   return `Face ${libelleFace(exercice, face)}${segment}.`;
 }
@@ -334,12 +480,18 @@ export function texteReponseFace(
 
 // --- Conclusion ----------------------------------------------------------------------------------------
 
+/** Premier point donné qui est un sommet de la section (P pour les variantes historiques ; variantes
+ * du manuel : P, Q ou R selon celui qui est sur une arête). */
+export function premierSommetDonne(exercice: ExerciceSectionPlaneSolide): number {
+  return exercice.idsDepart.find((id) => exercice.points.some((p) => p.id === id)) ?? exercice.ordreCyclique[0]!;
+}
+
 /** Nom du polygone fermé, lettres dans l'ordre du parcours depuis P (ex. "pentagone PQSTR"). */
 export function texteConclusion(exercice: ExerciceSectionPlaneSolide, connus: readonly number[], segmentAutomatique: string | null): string[] {
-  const { ordreCyclique, idsDepart } = exercice;
-  const indexP = ordreCyclique.indexOf(idsDepart[0]);
+  const { ordreCyclique } = exercice;
+  const indexP = ordreCyclique.indexOf(premierSommetDonne(exercice));
   const ordre = [...ordreCyclique.slice(indexP), ...ordreCyclique.slice(0, indexP)];
-  const lignes = [`Le polygone de section est fermé : c'est le ${nomPolygoneSection(ordre.length)} ${ordre.map((id) => libellePoint(connus, id)).join("")}.`];
+  const lignes = [`Le polygone de section est fermé : c'est ${leNomPolygone(ordre.length)} ${ordre.map((id) => libellePoint(connus, id)).join("")}.`];
   if (segmentAutomatique) {
     const [a, b] = segmentAutomatique.split("-").map(Number);
     lignes.unshift(`Ses 2 points étant connus, le dernier segment ${nomSegment(connus, a, b)} se trace directement et referme la section.`);
@@ -358,6 +510,15 @@ export function messageFaceSegmentFausse(exercice: ExerciceSectionPlaneSolide, c
   const nom = libelleFace(exercice, face);
   const pts = pointsDeSectionDeLaFace(exercice, face);
   const connusFace = pts.filter((p) => connus.includes(p.id));
+  if (exercice.pointsAppui) {
+    // Variantes du manuel : on compte les points connus du PLAN de la face.
+    const dansPlan = connusDansPlanDeFace(exercice, connus, face);
+    const noms = dansPlan.map((id) => libellePoint(connus, id));
+    if (pts.length === 0 && dansPlan.length >= 2) return `Ce n'était pas la bonne face : le plan de la face ${nom} contient bien ${noms[0]} et ${noms[1]}, mais la droite (${noms[0]}${noms[1]}) ne traverse pas cette face : le plan de coupe ne la coupe pas.`;
+    if (pts.length === 0) return `Ce n'était pas la bonne face : le plan de coupe ne traverse pas la face ${nom}, aucun côté de la section n'y passe.`;
+    if (dansPlan.length === 0) return `Ce n'était pas la bonne face : le plan de la face ${nom} ne contient encore aucun point connu.`;
+    return `Ce n'était pas la bonne face : le plan de la face ${nom} ne contient qu'un seul point connu (${noms[0]}). Il en faut deux pour tracer la droite d'intersection.`;
+  }
   if (pts.length === 0) return `Ce n'était pas la bonne face : le plan de coupe ne traverse pas la face ${nom}, aucun côté de la section n'y passe.`;
   if (connusFace.length === 0) return `Ce n'était pas la bonne face : la face ${nom} n'a encore aucun point de section connu, on ne peut pas y tracer de segment.`;
   return `Ce n'était pas la bonne face : la face ${nom} n'a qu'un seul point de section connu (${libellePoint(connus, connusFace[0]!.id)}). Il en faut deux pour tracer un segment ; l'autre se construira avec un point auxiliaire.`;
@@ -378,4 +539,80 @@ export function messageFaceAuxiliaireFausse(exercice: ExerciceSectionPlaneSolide
   if (connusFace.length === 2) return `${tete}les deux points de section de la face ${nom} sont déjà connus : I n'y apporte rien.`;
   if (connusFace.length === 0) return `${tete}I est bien dans le plan de la face ${nom}, mais aucun point de section n'y est encore connu : il n'y a rien à relier à I.`;
   return `${tete}dans la face ${nom}, I est confondu avec ${libellePoint(connus, connusFace[0]!.id)} : la droite qui les relierait n'est pas définie.`;
+}
+
+// --- Variante « parallele » (manuel, ex. 4 a) : plan π parallèle à (KLM) passant par P ---------------
+
+/** Nom d'un côté du triangle KLM, ex. « [KL] ». */
+export function nomCoteKLM(exercice: ExerciceSectionPlaneSolide, cote: number): string {
+  const plan = exercice.planParallele!;
+  const c = plan.cotes[cote]!;
+  return `[${plan.points[c.a]!.nom}${plan.points[c.b]!.nom}]`;
+}
+
+/** Face (index) du solide parallèle à la face donnée, distincte d'elle (pavé : la face opposée). */
+export function faceParallele(exercice: ExerciceSectionPlaneSolide, face: number): number | null {
+  const normale = (f: number) => {
+    const [a, b, c] = exercice.solide.faces[f]!.slice(0, 3).map((n) => exercice.solide.sommets[n]!);
+    return normalePlan(a!, b!, c!);
+  };
+  const n = normale(face);
+  for (let f = 0; f < exercice.solide.faces.length; f++) {
+    if (f === face) continue;
+    const m = normale(f);
+    const croix = { x: n.y * m.z - n.z * m.y, y: n.z * m.x - n.x * m.z, z: n.x * m.y - n.y * m.x };
+    if (normeCarree3D(croix) < 1e-9 * normeCarree3D(n) * normeCarree3D(m)) return f;
+  }
+  return null;
+}
+
+export function consigneParallele(exercice: ExerciceSectionPlaneSolide, connus: readonly number[], face: number, depuis: number): string {
+  return `Dans la face ${libelleFace(exercice, face)}, trace par ${libellePoint(connus, depuis)} le côté suivant de la section. Il est parallèle à quel côté du triangle KLM ?`;
+}
+
+export const TEXTE_AIDE_PARALLELE_NIVEAU1 =
+  "Deux plans parallèles coupés par un même plan le sont suivant deux droites parallèles. Ici, π est parallèle à (KLM) : dans chaque face, le côté de la section est parallèle à l'intersection du plan (KLM) avec cette face, ou avec la face qui lui est parallèle (les faces opposées d'un pavé sont parallèles).";
+
+/** Aide 2 : la face (celle-ci, ou sa face parallèle) où le plan (KLM) laisse un côté du triangle. */
+export function texteAideParalleleNiveau2(exercice: ExerciceSectionPlaneSolide, face: number): string {
+  const plan = exercice.planParallele!;
+  if (plan.cotes.some((c) => c.face === face)) return `Le plan (KLM) coupe lui-même la face ${libelleFace(exercice, face)} : cherche le côté du triangle KLM tracé dans cette face.`;
+  const opposee = faceParallele(exercice, face);
+  return opposee === null ? "" : `La face ${libelleFace(exercice, face)} est parallèle à la face ${libelleFace(exercice, opposee)} : cherche le côté du triangle KLM tracé dans cette face-là.`;
+}
+
+/** Côté de KLM situé dans la face, ou dans la face qui lui est parallèle. */
+export function coteKLMDeLaFace(exercice: ExerciceSectionPlaneSolide, face: number): number {
+  const plan = exercice.planParallele!;
+  const direct = plan.cotes.findIndex((c) => c.face === face);
+  if (direct >= 0) return direct;
+  const opposee = faceParallele(exercice, face);
+  return plan.cotes.findIndex((c) => c.face === opposee);
+}
+
+export function texteReponseParallele(exercice: ExerciceSectionPlaneSolide, connus: readonly number[], etape: { face: number; depuis: number; vers: number }): string {
+  const nom = nomCoteKLM(exercice, coteKLMDeLaFace(exercice, etape.face));
+  return `Dans la face ${libelleFace(exercice, etape.face)}, le côté de la section est parallèle à ${nom} : la parallèle à (${nom.slice(1, -1)}) menée par ${libellePoint(connus, etape.depuis)} coupe l'arête ${libelleArete(exercice, etape.vers)} en ${lettreProchainPoint(connus)}.`;
+}
+
+/** Pourquoi le côté de KLM choisi ne convient pas (une tentative). */
+export function messageCoteParalleleFaux(exercice: ExerciceSectionPlaneSolide, face: number, cote: number): string {
+  const faceCote = exercice.planParallele!.cotes[cote]!.face;
+  return `Ce n'était pas le bon côté : ${nomCoteKLM(exercice, cote)} est dans la face ${libelleFace(exercice, faceCote)}, qui n'est ni la face ${libelleFace(exercice, face)} ni parallèle à elle. Rien n'oblige le côté cherché à lui être parallèle.`;
+}
+
+/** Construction confirmée de l'écran « parallèle » : le côté tracé et son nouveau point, et le côté
+ * de KLM auquel il est parallèle, repassé en orange. */
+export function elementsConstructionParallele(
+  exercice: ExerciceSectionPlaneSolide,
+  connus: readonly number[],
+  etape: { face: number; depuis: number; vers: number },
+): { segments: SegmentExtraSolide3D[]; points: PointExtraSolide3D[] } {
+  const plan = exercice.planParallele!;
+  const cote = plan.cotes[coteKLMDeLaFace(exercice, etape.face)];
+  const a = positionConnu(exercice, etape.depuis)!;
+  const b = positionConnu(exercice, etape.vers)!;
+  const segments: SegmentExtraSolide3D[] = [{ a, b, couleur: COULEUR_CONSTRUCTION, pointille: segmentSurFaceCachee(exercice, etape.depuis, etape.vers) }];
+  if (cote) segments.push({ a: plan.points[cote.a]!.position, b: plan.points[cote.b]!.position, couleur: COULEUR_SELECTION, epaisseur: 3 });
+  return { segments, points: [{ position: b, label: lettreProchainPoint(connus), couleur: COULEUR_CONSTRUCTION }] };
 }

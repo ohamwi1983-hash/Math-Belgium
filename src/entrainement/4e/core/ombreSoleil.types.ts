@@ -18,7 +18,7 @@ import type { Point3D, Solide3D } from "./geometrieEspace.types";
  * restait rien à projeter.
  */
 
-export type VarianteOmbreSoleil = "simple" | "obstacle" | "directionInconnue";
+export type VarianteOmbreSoleil = "simple" | "obstacle" | "directionInconnue" | "solidePose";
 
 export interface Piquet {
   id: string;
@@ -58,7 +58,10 @@ export type ErreurPointOmbre =
   | "traverseObstacle"
   | "obstacleSuivant"
   | "surObstacleSurvole"
-  | "surObstacleMauvaiseFace";
+  | "surObstacleMauvaiseFace"
+  /** Variante `solidePose` : trace au sol partie du pied d'un AUTRE sommet (un autre coin de la base,
+   * ou un coin au lieu du centre O de la base pour l'apex de la pyramide). */
+  | "piedVoisin";
 
 export interface PointCandidat {
   id: string;
@@ -152,6 +155,52 @@ export interface ExerciceOmbreSoleilDirectionInconnue {
   cadrage: CadrageScene;
 }
 
-export type ExerciceOmbreSoleil = ExerciceOmbreSoleilSimple | ExerciceOmbreSoleilObstacle | ExerciceOmbreSoleilDirectionInconnue;
+/** Forme du solide de la variante `solidePose` (le profil d'évaluation la lit comme `forme`). */
+export type FormeSolidePose = "cube" | "pave" | "pyramide";
+
+/** Segment candidat de l'écran « contour » : l'ombre d'une arête du solide (une arête de la base est
+ * sa propre ombre). `extremites` : noms des deux points du sol (« A », « F′ »…). */
+export interface SegmentContourOmbre {
+  id: string;
+  extremites: [string, string];
+  /** Le segment est un côté du contour de l'ombre (enveloppe convexe). */
+  surContour: boolean;
+}
+
+/**
+ * Variante D — ombre d'un solide posé au sol (manuel, ex. 3 b 2ᵉ partie, 3 d, 3 e, 9) : un cube, un
+ * pavé (caisse) ou une pyramide régulière à base carrée. Donnée : l'ombre d'UNE arête verticale du
+ * cube / du pavé (son sommet du haut, son ombre), ou celle du sommet P d'un piquet vertical planté à un
+ * coin de la base de la pyramide, de même hauteur qu'elle (ex. 9). L'élève projette les sommets du
+ * haut (un écran « point » par élément de `piquets` ; le pied d'un sommet est le coin de la base juste
+ * en dessous, ou le centre O de la base pour l'apex), puis choisit les côtés du contour parmi les
+ * ombres de toutes les arêtes (sélection multiple, 3 tentatives).
+ */
+export interface ExerciceOmbreSoleilSolidePose {
+  variante: "solidePose";
+  forme: FormeSolidePose;
+  direction: Point3D;
+  /** Le solide réel, translaté (base ABCD au sol ; EFGH au-dessus de ABCD, ou apex S). */
+  solide: Solide3D;
+  /** Donnée : l'arête verticale connue (id = son sommet du haut) ou le piquet P de la pyramide. */
+  piquetConnu: Piquet;
+  /** Nom du pied du piquet connu (toujours un coin de la base). */
+  piedConnu: string;
+  ombreConnue: Point3D;
+  /** Sommets du haut que l'élève projette (un écran chacun), avec leurs 4 points candidats. */
+  piquets: PiquetAResoudre[];
+  /** Nom du pied de chaque sommet projeté (« B » ; « O » pour l'apex de la pyramide). */
+  piedsPiquets: string[];
+  /** Ombres des autres sommets du haut (ni connu, ni projeté), construites « par le même procédé ». */
+  ombresAutres: OmbreSommet[];
+  /** Contour de l'ombre portée (enveloppe convexe de la base et des ombres), ordre du tracé. */
+  contourOmbre: Point3D[];
+  nomsContour: string[];
+  /** Candidats de l'écran « contour » (ombres de TOUTES les arêtes), dans un ordre fixe. */
+  segmentsCandidats: SegmentContourOmbre[];
+  cadrage: CadrageScene;
+}
+
+export type ExerciceOmbreSoleil = ExerciceOmbreSoleilSimple | ExerciceOmbreSoleilObstacle | ExerciceOmbreSoleilDirectionInconnue | ExerciceOmbreSoleilSolidePose;
 
 export type GenerateurExerciceOmbreSoleil = () => ExerciceOmbreSoleil;

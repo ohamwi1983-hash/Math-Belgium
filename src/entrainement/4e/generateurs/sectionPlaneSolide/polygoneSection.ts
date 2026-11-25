@@ -327,7 +327,16 @@ export type EtapeResolutionReference =
       face: number;
       pointConnu: number;
       pointCible: number;
-    };
+    }
+  | { type: "appui"; face: number; appui: number; pointConnu: number; pointCible: number }
+  | { type: "parallele"; face: number; cote: number; pointConnu: number; pointCible: number };
+
+/** Point donné qui n'est pas un sommet de la section (variantes « faceInterieure » /
+ * « prolongement ») : son id (hors de `polygone.points`) et sa position. */
+export interface AppuiResolution {
+  id: number;
+  position: Point3D;
+}
 
 /** Projection cavalière du croquis (45°, coefficient 0,5) — réécrite ici en 2 lignes plutôt
  * qu'importée de `ui/projectionCavaliere.ts` (la Couche A ne dépend jamais de la présentation) ;
@@ -425,7 +434,12 @@ export function meilleureConstruction(
  * ne fait jamais que croître, donc aucun coup disponible à un instant donné ne peut jamais être
  * "manqué" en en jouant un autre d'abord (argument de confluence).
  */
-export function resolutionReference(solide: Solide3D, polygone: PolygoneSection, depart: readonly number[]): EtapeResolutionReference[] | null {
+export function resolutionReference(
+  solide: Solide3D,
+  polygone: PolygoneSection,
+  depart: readonly number[],
+  appuis: readonly AppuiResolution[] = [],
+): EtapeResolutionReference[] | null {
   const connus = new Set<number>(depart);
   const segmentsTraces = new Set<string>();
   const lignesStatiques = lignesCandidatesStatiques(solide);
@@ -441,6 +455,16 @@ export function resolutionReference(solide: Solide3D, polygone: PolygoneSection,
       continue;
     }
 
+    // Variantes du manuel : une face dont le plan contient un point donné (hors section) et un point
+    // de section connu — sans effet quand `appuis` est vide (variantes historiques inchangées).
+    const appui = appuis.length > 0 ? facePreteAppui(solide, polygone, connus, appuis) : null;
+    if (appui) {
+      connus.add(appui.pointCible);
+      segmentsTraces.add(cleSegment(appui.pointConnu, appui.pointCible));
+      etapes.push(appui);
+      continue;
+    }
+
     const lignesTracees = segmentsAttendus(polygone)
       .filter(([a, b]) => segmentsTraces.has(cleSegment(a, b)))
       .map(([a, b]) => ligneSegmentTrace(polygone, a, b));
@@ -451,6 +475,78 @@ export function resolutionReference(solide: Solide3D, polygone: PolygoneSection,
     etapes.push(construction);
   }
   return null;
+}
+
+/** Première face traversée (ordre de `facesCroisees`) dont un seul point de section est connu et
+ * dont le PLAN contient un point donné hors section X, aligné (et distinct) avec ce point connu et
+ * l'autre point de section de la face : la droite qui joint X au point connu donne le côté. */
+export function facePreteAppui(
+  solide: Solide3D,
+  polygone: PolygoneSection,
+  connus: ReadonlySet<number>,
+  appuis: readonly AppuiResolution[],
+): Extract<EtapeResolutionReference, { type: "appui" }> | null {
+  for (const face of polygone.facesCroisees) {
+    const pointsFace = polygone.points.filter((p) => p.faces.includes(face));
+    if (pointsFace.length !== 2) continue;
+    const [pa, pb] = pointsFace;
+    if (connus.has(pa.id) === connus.has(pb.id)) continue;
+    const connu = connus.has(pa.id) ? pa : pb;
+    const cible = connus.has(pa.id) ? pb : pa;
+    for (const x of appuis) {
+      if (!connus.has(x.id)) continue;
+      if (!ligneDansFace(solide, [x.position, x.position], face)) continue;
+      if (!alignesDistincts(connu.position, x.position, cible.position)) continue;
+      return { type: "appui", face, appui: x.id, pointConnu: connu.id, pointCible: cible.id };
+    }
+  }
+  return null;
+}
+
+/** Projection (repère du croquis) et enveloppe convexe 2D du solide — pour vérifier qu'un point
+ * donné HORS du solide (variante « prolongement ») est dessiné hors de sa silhouette : sinon il
+ * semblerait posé sur une face. */
+export function projectionCroquis(p: Point3D): { x: number; y: number } {
+  return projeterCavaliere(p);
+}
+
+export function tailleCroquis(solide: Solide3D): number {
+  const projetes = Object.values(solide.sommets).map(projeterCavaliere);
+  return Math.max(Math.max(...projetes.map((p) => p.x)) - Math.min(...projetes.map((p) => p.x)), Math.max(...projetes.map((p) => p.y)) - Math.min(...projetes.map((p) => p.y)));
+}
+
+/** Distance (signée) d'un point 2D à l'enveloppe convexe des sommets projetés : < 0 à l'intérieur. */
+export function distanceSilhouette(solide: Solide3D, point: { x: number; y: number }): number {
+  const pts = Object.values(solide.sommets).map(projeterCavaliere).sort((a, b) => a.x - b.x || a.y - b.y);
+  const croix = (o: { x: number; y: number }, a: { x: number; y: number }, b: { x: number; y: number }) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+  const bas: { x: number; y: number }[] = [];
+  for (const p of pts) {
+    while (bas.length >= 2 && croix(bas[bas.length - 2], bas[bas.length - 1], p) <= 1e-12) bas.pop();
+    bas.push(p);
+  }
+  const haut: { x: number; y: number }[] = [];
+  for (const p of [...pts].reverse()) {
+    while (haut.length >= 2 && croix(haut[haut.length - 2], haut[haut.length - 1], p) <= 1e-12) haut.pop();
+    haut.push(p);
+  }
+  const enveloppe = [...bas.slice(0, -1), ...haut.slice(0, -1)]; // sens trigonométrique
+  let dedans = true;
+  let distance = Infinity;
+  for (let i = 0; i < enveloppe.length; i++) {
+    const a = enveloppe[i];
+    const b = enveloppe[(i + 1) % enveloppe.length];
+    if (croix(a, b, point) < 0) dedans = false;
+    distance = Math.min(distance, distanceSegment2D(point, a, b));
+  }
+  return dedans ? -distance : distance;
+}
+
+export function distanceSegment2D(p: { x: number; y: number }, a: { x: number; y: number }, b: { x: number; y: number }): number {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const l2 = dx * dx + dy * dy;
+  const t = l2 === 0 ? 0 : Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / l2));
+  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
 }
 
 export function simulationResoluble(solide: Solide3D, polygone: PolygoneSection, depart: readonly number[]): boolean {

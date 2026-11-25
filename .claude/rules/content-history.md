@@ -2639,6 +2639,27 @@ paths:
   la main, rotation au doigt) — `cavaliere-reglage-widget` (§ 1), `positions-cube-widget` (§ 3–4,
   défi), `trois-plans-widget` (§ 6), `section-cube-widget` (§ 9), `fenetre-durer-widget` (§ 10),
   `point-de-fuite-widget` (§ 11), `ombre-soleil-lampe-widget` (§ 12).
+  **Manuel, chantier B (25/11/2026)** : description de la carte gen40 (§ 9 `section`) complétée pour annoncer
+  les trois variantes inspirées du manuel (point dans une face, points sur le prolongement d'une arête, plan
+  parallèle à un plan donné) et le tableau d'appartenance du corrigé ; aucun bloc de cours ajouté (la
+  méthode « deux points d'une même face », le point auxiliaire et « un plan coupe deux plans parallèles
+  suivant deux droites parallèles » sont déjà aux § 5 et § 9). Détail : `.claude/rules/feuilles-evaluations.md`,
+  « 4e ch. 8, manuel — gen40 ».
+
+  **Manuel, chantier A (25/11)** : nouveau générateur gen135 « Réalité ou illusion ? » (exercice 1 du manuel,
+  processus 3) — carte « S'entraîner » ajoutée en § 6 `trois-plans`, juste après celle de gen101 (description en
+  texte brut) ; aucun autre changement du cours (la description de la section n'a pas été touchée : le § 6 énonce
+  déjà le théorème, et le § 1 dit que la cavalière projette parallèlement). Registres (`registry.ts`,
+  `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts` : union + pilote `trois-plans`,
+  processus 3 ; `regroupementsPapier.ts`). Détail : `.claude/rules/feuilles-evaluations.md`, « 4e ch. 8, manuel —
+  gen135 ».
+
+  **Manuel, chantier D (25/11) — gen41 « Ombre d'un solide posé au sol »** (ex. 3 b 2ᵉ partie, 3 d, 3 e
+  et 9 du manuel) : variante `solidePose` AJOUTÉE EN FIN de catalogue de gen41 ; seule la description de
+  la carte gen41 (section `ombre`) est complétée (« Construis enfin l'ombre d'un solide posé au sol
+  (cube, caisse ou pyramide) à partir de l'ombre d'une arête ou d'un piquet, puis trace son contour. ») —
+  aucun bloc de cours ajouté (le § 12 traite déjà rayons parallèles, trace au sol et contour de l'ombre
+  du campanile). Détail : `.claude/rules/feuilles-evaluations.md`, « 4e ch. 8, manuel — gen41 ».
 
 - **Ateliers — figure épinglée pendant la manipulation (tous chapitres)** : retour utilisateur « les
   curseurs/boutons sont trop éloignés du dessin : en les manipulant, on ne voit plus le graphe ».
@@ -4401,6 +4422,20 @@ paths:
   `components/EtapesDemontrerParallelisme.tsx`, `core/demontrerParallelisme.types.ts`,
   `moteur/sessionDemontrerParallelisme.ts`, `ui/formatDemontrerParallelisme.ts`,
   `generateurs/demontrerParallelisme/` (geometrieParallelisme, index, profil, exportEvaluation).
+  **Manuel, ex. 11 « Démontrer » (25/11, chantier C)** : variante « Trois points alignés » AJOUTÉE EN FIN
+  de catalogue (indice 2 ; `?code=` des deux autres variantes et tirage libre de l'adaptateur inchangés,
+  l'appli la tire une fois sur trois par `genererExerciceDemontrerParallelismeLibre`). Pyramide SABC
+  propre (`alignes.ts::pyramideSABC`, faces au format du socle ; le tétraèdre du socle dessinait [DB] et
+  [DC] presque l'un sur l'autre), M, N, P sur [SA], [SB], [SC] (rapports tirés dans [0,2 ; 0,8], jamais
+  montrés), I = (MN) ∩ (AB), J = (NP) ∩ (BC), K = (MP) ∩ (AC) ; cas « toit » une fois sur trois (un côté de
+  MNP parallèle à la base, DIT par l'énoncé, le point correspondant n'existe pas : « Démontre que (JK) est
+  parallèle à (AB) »). Écrans : idée / points communs / conclusion (ou théorème du toit). Figure propre
+  `ui/figureTroisPointsAlignes.ts` ; textes `ui/formatTroisPointsAlignes.ts` ; corrigé
+  `corrigeAlignes.ts`. Carte de la section `parallelisme` : un paragraphe de description ajouté. Le cours
+  dit déjà (§ 5) que deux plans distincts qui partagent un point partagent toute une droite par ce point,
+  mais n'énonce pas en toutes lettres « des points communs à deux plans sécants sont alignés » (proposition
+  de phrase dans le rapport, cours non réécrit). Détail : `.claude/rules/feuilles-evaluations.md`,
+  « 4e ch. 8, manuel — gen103 « Trois points alignés » ».
 - **4e, Chapitre 8 — gen102 « Point de percée par plan auxiliaire »** (section `percee`, processus
   2). La méthode du cours, un écran par étape, sur parallélépipède, cube ou prisme droit (et
   tétraèdre pour un plan par trois points) : d = (XY) passe par des sommets, milieux d'arêtes,

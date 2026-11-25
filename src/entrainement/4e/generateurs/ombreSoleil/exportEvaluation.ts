@@ -1,4 +1,4 @@
-import type { ExerciceOmbreSoleil, VarianteOmbreSoleil } from "../../core/ombreSoleil.types";
+import type { ExerciceOmbreSoleil, ExerciceOmbreSoleilSolidePose, VarianteOmbreSoleil } from "../../core/ombreSoleil.types";
 import type { AdaptateurFeuilleExercices, BaremeExercice, BlocCorrection, CriteresDifficulte, EnoncePapier, FragmentConsigne, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { etapesDuCorrige } from "../../../export/niveauDifficulte";
 import { correctionDetailleeOmbreSoleil } from "./corrigeDetaille";
@@ -6,7 +6,9 @@ import { construireSvgOmbreSoleil } from "./figure";
 import { texte } from "../../../export/fragmentsDocx";
 import {
   libelleObstacle,
+  nomDonneeSolidePose,
   nomObstacle,
+  duSolidePose,
   texteConclusion,
 } from "../../ui/formatOmbreSoleil";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOmbreSoleil } from "./index";
@@ -36,8 +38,23 @@ import { profilOmbreSoleil } from "../profilsEvaluation4eCh8";
 
 // --- Énoncé papier et étapes ---
 
+/** Variante `solidePose` : « Un cube ABCDEFGH est posé sur le sol… », la donnée en prose (manuel,
+ * ex. 3 d, 3 e, 9), sans méthode. */
+function contexteSolidePose(e: ExerciceOmbreSoleilSolidePose): string {
+  const k = e.piquetConnu.id;
+  if (e.forme === "pyramide") {
+    return `Une pyramide régulière de base carrée ABCD et de sommet S est posée sur le sol. Un piquet vertical ${nomDonneeSolidePose(e)}, planté au coin ${e.piedConnu} de la base, a la même hauteur que la pyramide : les points ${k} et S sont dans un même plan horizontal. Au soleil, l'ombre de ${k} sur le sol est le point ${k}′ (le trait pointillé est le rayon qui passe par ${k}).`;
+  }
+  const solide = e.forme === "cube" ? "Un cube ABCDEFGH" : "Une caisse en forme de parallélépipède rectangle ABCDEFGH";
+  return `${solide} est posé${e.forme === "cube" ? "" : "e"} sur le sol (sa base ABCD est sur le sol). Au soleil, on connaît l'ombre de l'arête verticale ${nomDonneeSolidePose(e)} : elle va de ${e.piedConnu} jusqu'à ${k}′, l'ombre du sommet ${k} (le trait pointillé est le rayon qui passe par ${k}).`;
+}
+
+/** Consigne papier de la variante `solidePose` (convention du chapitre pour une construction). */
+const CONSIGNE_PAPIER_SOLIDE_POSE = "Construis l'ombre de ce solide sur le sol. Trace ta construction sur la figure de l'énoncé, que tu joins à ta feuille.";
+
 /** Contexte de la scène (ce que montre la figure), sans méthode. */
 function contexteScene(exercice: ExerciceOmbreSoleil): string {
+  if (exercice.variante === "solidePose") return contexteSolidePose(exercice);
   if (exercice.variante === "directionInconnue") {
     const k = exercice.piquetConnu.id;
     return `L'ombre du sommet ${k} du campanile est connue : les deux traits pointillés relient ce sommet ${k}, puis son pied (le point du sol à sa verticale), à son ombre ${k}′ sur le sol. Ils donnent la direction de la lumière du soleil et celle des ombres au sol.`;
@@ -55,6 +72,7 @@ function sommetsAProjeter(exercice: Extract<ExerciceOmbreSoleil, { variante: "di
 }
 
 function consignePapier(exercice: ExerciceOmbreSoleil): string {
+  if (exercice.variante === "solidePose") return CONSIGNE_PAPIER_SOLIDE_POSE;
   if (exercice.variante === "simple") return "Construis l'ombre du bâton A au soleil ; nomme A′ l'ombre de son sommet.";
   // Obstacles NOMMÉS sur la figure quand il y en a plusieurs (audit 4e ch. 8, G11) : « lequel ? » a
   // alors une réponse écrite ; avec un seul obstacle, il n'y a rien à nommer.
@@ -74,6 +92,12 @@ function consignesEtapes(exercice: ExerciceOmbreSoleil): string[] {
     return [
       "Trace le rayon issu du sommet du bâton A, parallèle au rayon de l'exemple (du sommet de E à E′).",
       "Trouve le point A′ où l'ombre du sommet de A s'arrête réellement : sur un obstacle, ou sur le sol.",
+    ];
+  }
+  if (exercice.variante === "solidePose") {
+    return [
+      ...exercice.piquets.map((p) => `Construis l'ombre ${p.piquet.id}′ du sommet ${p.piquet.id}.`),
+      `${exercice.ombresAutres.length > 0 ? "Construis de même les ombres des autres sommets, puis trace" : "Trace"} le contour de l'ombre ${duSolidePose(exercice)} sur le sol.`,
     ];
   }
   const premier = exercice.piquets[0].piquet.id;
@@ -100,6 +124,10 @@ function construireCorrectionOmbreSoleil(instance: ExerciceOmbreSoleil): BlocCor
   if (instance.variante === "obstacle" && instance.indexObstacleTouche !== null) {
     detail = `La trace au sol issue du pied de A passe sous ${libelleObstacle(instance, instance.indexObstacleTouche)}. ${detail}`;
   }
+  if (instance.variante === "solidePose") {
+    const ids = [...instance.piquets.map((p) => p.piquet.id), ...instance.ombresAutres.map((o) => o.id)];
+    detail = `Chaque sommet ${ids.join(", ")} se projette sur la parallèle au rayon donné ; la trace au sol part de son pied, parallèle à l'ombre donnée et de même longueur. ${detail}`;
+  }
   if (instance.variante === "directionInconnue") {
     const ids = [...instance.piquets.map((p) => p.piquet.id), ...instance.ombresAutres.map((o) => o.id)].join(", ");
     detail = `Chaque sommet hors du sol (${ids}) se projette en suivant la direction donnée par la paire connue ; ses ombres sont notées ${ids
@@ -123,11 +151,17 @@ const LETTRES = "abcdefghij";
  * piège constant dans la variante « obstacle » (des obstacles sur la trace au sol, que le rayon les
  * heurte ou non : le verdict ne change pas le niveau), aucun nombre. */
 function criteresDifficulteOmbreSoleil(exercice: ExerciceOmbreSoleil): CriteresDifficulte {
+  // `solidePose` : aucune lecture (chaque sommet est une construction), piège 1 — le contour passe par
+  // les points les plus extérieurs, des ombres d'arêtes tracées le traversent (donnée de la figure).
+  if (exercice.variante === "solidePose") return { ...etapesDuCorrige(correctionDetailleeOmbreSoleil(exercice), []), sansCharge: true, methode: 1, piege: 1, nombres: 0 };
   const lecture = exercice.variante === "simple" ? [] : ["a"];
   return { ...etapesDuCorrige(correctionDetailleeOmbreSoleil(exercice), lecture), sansCharge: true, methode: 1, piege: exercice.variante === "obstacle" ? 1 : 0, nombres: 0 };
 }
 
 function reponseBreveOmbreSoleil(exercice: ExerciceOmbreSoleil): FragmentConsigne[] {
+  if (exercice.variante === "solidePose") {
+    return [texte(`Ombre ${duSolidePose(exercice)} : le polygone ${exercice.nomsContour.join("")} (voir la figure du corrigé).`)];
+  }
   if (exercice.variante === "simple") return [texte("Ombre du bâton A : du pied de A jusqu'à A′, parallèle à l'ombre de E (voir la figure du corrigé).")];
   if (exercice.variante === "obstacle") {
     return [
@@ -141,8 +175,38 @@ function reponseBreveOmbreSoleil(exercice: ExerciceOmbreSoleil): FragmentConsign
   return [texte(`Ombres ${exercice.piquets.map((p) => `${p.piquet.id}′`).join(", ")} et contour de l'ombre portée : voir la figure du corrigé.`)];
 }
 
+function baremeSolidePose(e: ExerciceOmbreSoleilSolidePose, reponseFinale: FragmentConsigne[]): BaremeExercice {
+  const fin = LETTRES[e.piquets.length]!;
+  const criteres =
+    e.forme === "pyramide"
+      ? [
+          { sousQuestion: "a", critere: [texte("Pied O du sommet S : centre de la base (intersection des diagonales)")], points: 1 },
+          { sousQuestion: "a", critere: [texte(`S′ : rayon issu de S parallèle à ${e.piquetConnu.id}${e.piquetConnu.id}′ et trace au sol issue de O parallèle à l'ombre du piquet`)], points: 1.5 },
+          { sousQuestion: fin, critere: [texte(`Contour de l'ombre ${e.nomsContour.join("")} tracé, sans segment intérieur`)], points: 1.5 },
+        ]
+      : [
+          ...e.piquets.map((p, i) => ({
+            sousQuestion: LETTRES[i]!,
+            critere: [texte(`Ombre ${p.piquet.id}′ : rayon issu de ${p.piquet.id} parallèle au rayon donné et trace au sol issue du pied ${e.piedsPiquets[i]}, parallèle à l'ombre donnée`)],
+            points: 1,
+          })),
+          { sousQuestion: fin, critere: [texte(`Ombre${e.ombresAutres.length > 1 ? "s" : ""} ${e.ombresAutres.map((o) => `${o.id}′`).join(" et ")} construite${e.ombresAutres.length > 1 ? "s" : ""} par le même procédé`)], points: 1 },
+          { sousQuestion: fin, critere: [texte(`Contour de l'ombre ${e.nomsContour.join("")} tracé, sans segment intérieur`)], points: 1 },
+        ];
+  return {
+    reponseFinale,
+    criteres,
+    erreursFrequentes: [
+      { description: [texte(e.forme === "pyramide" ? "Trace au sol de S partie d'un coin de la base au lieu du centre O" : "Trace au sol partie d'un autre coin que le pied du sommet")], cout: "0 pt sur l'ombre de ce sommet" },
+      { description: [texte("Contour qui garde un segment intérieur à l'ombre (ombre d'une arête qui la traverse)")], cout: "−0,5" },
+    ],
+    reponsesAcceptees: [[texte("Ombre hachurée ou coloriée au lieu du seul contour, si le contour est juste")]],
+  };
+}
+
 function baremeOmbreSoleil(exercice: ExerciceOmbreSoleil): BaremeExercice {
   const reponseFinale = reponseBreveOmbreSoleil(exercice);
+  if (exercice.variante === "solidePose") return baremeSolidePose(exercice, reponseFinale);
   if (exercice.variante === "simple") {
     return {
       reponseFinale,

@@ -827,6 +827,12 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     consigne: (g) => `Dans chaque cas, voici quatre équations et leurs quatre paraboles, dans le désordre. ${g.q}`,
     ligne: (g) => sansPointFinal(g.liste),
   }),
+  // gen135 (4e ch. 8, manuel) : seule la figure change d'une instance à l'autre.
+  gen135: fig({
+    motif: re(String.raw`On a dessiné en perspective cavalière le solide ABCDEF ci-dessous \(base ABC, dessus DEF\)\.\nCe solide, dont les faces sont supposées planes, peut-il exister \? Justifie\.`),
+    consigne: "On a dessiné en perspective cavalière chacun des solides ABCDEF ci-dessous (base ABC, dessus DEF). Chacun de ces solides, dont les faces sont supposées planes, peut-il exister ? Justifie.",
+    ligne: () => "",
+  }),
   gen23: fig({
     // Exception « réponse graphique » (décision 2, audit 4e ch. 6) : la construction se trace sur la
     // figure de l'énoncé, jointe à la feuille.

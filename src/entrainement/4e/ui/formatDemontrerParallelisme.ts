@@ -5,9 +5,11 @@ import type {
   ExerciceDemontrerParallelisme,
   ExerciceDeuxPlansParalleles,
   ExerciceDroitePlanParallele,
+  ExerciceTroisPointsAlignes,
   OptionDemonstration,
   RaisonParallele,
 } from "../core/demontrerParallelisme.types";
+import { consigneAlignes, ecransAlignes, enonceAlignes, reponseEcranAlignes } from "./formatTroisPointsAlignes";
 import { distance3D, EPSILON_3D, sontParalleles3D, soustraire3D } from "../moteur/geometrieEspace";
 import { COULEUR_CONSTRUCTION, COULEUR_DROITE, NOMS_COULEURS_PLANS, pointsPlan, positionNommee, type DroiteFigure, type OptionsFigure } from "./figurePositionsPlans";
 import { descriptionPlan, descriptionSolide, minusculeInitiale, nomPlan, phraseMilieux } from "./formatPositionsPlans";
@@ -29,14 +31,20 @@ import { CRITERE_DEUX_PLANS, CRITERE_DROITE_PLAN, libelle, texteRaison } from ".
 
 export { libelle };
 
+/** Les deux variantes « parallélisme » (droite ∥ plan, deux plans) : la variante « trois points
+ * alignés » a ses propres textes (`formatTroisPointsAlignes.ts`) ; seuls `enonce`,
+ * `consigneGlobale`, `ecransExercice` et `reponseEcran` acceptent les trois et lui délèguent. */
+export type ExerciceParallelisme = Exclude<ExerciceDemontrerParallelisme, ExerciceTroisPointsAlignes>;
+
 // --- Énoncé -----------------------------------------------------------------------------------------
 
-export function nomP(e: ExerciceDemontrerParallelisme, i = 0): string {
+export function nomP(e: ExerciceParallelisme, i = 0): string {
   return nomPlan(e, i);
 }
 
 /** Énoncé (sans la consigne) : solide, milieux, droite et plan(s) représentés. */
 export function enonce(e: ExerciceDemontrerParallelisme): string {
+  if (e.variante === "alignes") return enonceAlignes(e);
   const milieux = phraseMilieux(e);
   const debut = `Voici ${descriptionSolide(e)}.${milieux ? ` ${milieux}` : ""}`;
   if (e.variante === "droite-plan") {
@@ -47,23 +55,24 @@ export function enonce(e: ExerciceDemontrerParallelisme): string {
 
 /** Consigne globale (écran et papier) : ce qu'il faut démontrer, sans la méthode. */
 export function consigneGlobale(e: ExerciceDemontrerParallelisme): string {
+  if (e.variante === "alignes") return consigneAlignes(e);
   if (e.variante === "droite-plan") return `Démontre que la droite ${libelle(e.droite)} est parallèle au plan ${nomP(e)}.`;
   return `Démontre que les plans ${nomP(e, 0)} et ${nomP(e, 1)} sont parallèles.`;
 }
 
 // --- Géométrie de présentation ------------------------------------------------------------------
 
-function points(e: ExerciceDemontrerParallelisme, d: DroiteNommee2): [Point3D, Point3D] {
+function points(e: ExerciceParallelisme, d: DroiteNommee2): [Point3D, Point3D] {
   return [positionNommee(e, d[0]), positionNommee(e, d[1])];
 }
 
-function paralleles(e: ExerciceDemontrerParallelisme, a: DroiteNommee2, b: DroiteNommee2): boolean {
+function paralleles(e: ExerciceParallelisme, a: DroiteNommee2, b: DroiteNommee2): boolean {
   const [a1, a2] = points(e, a);
   const [b1, b2] = points(e, b);
   return sontParalleles3D(soustraire3D(a2, a1), soustraire3D(b2, b1));
 }
 
-function memeDroite(e: ExerciceDemontrerParallelisme, a: DroiteNommee2, b: DroiteNommee2): boolean {
+function memeDroite(e: ExerciceParallelisme, a: DroiteNommee2, b: DroiteNommee2): boolean {
   const [a1, a2] = points(e, a);
   const [b1, b2] = points(e, b);
   const d = soustraire3D(a2, a1);
@@ -76,7 +85,7 @@ function pointCommunNomme(a: DroiteNommee2, b: DroiteNommee2): string | null {
 }
 
 /** « G et H sont deux points du plan (ABG), le plan ABGH. » — pourquoi la droite est dans le plan i. */
-export function raisonDansPlan(e: ExerciceDemontrerParallelisme, d: DroiteNommee2, i: number): string {
+export function raisonDansPlan(e: ExerciceParallelisme, d: DroiteNommee2, i: number): string {
   const nom = e.plans[i]!;
   const description = descriptionPlan(e, i);
   if (d.every((n) => nom.includes(n))) return `${d[0]} et ${d[1]} font partie des trois points qui nomment le plan ${nomP(e, i)}`;
@@ -141,6 +150,7 @@ function ecranJustification(raison: RaisonParallele, justifications: OptionDemon
 /** Écrans de l'exercice. `paires` : les deux parallélismes confirmés à l'écran 2 de `deux-plans`
  * (ceux de l'élève s'ils sont justes, sinon la paire attendue) — ils fixent les écrans 3 et 4. */
 export function ecransExercice(e: ExerciceDemontrerParallelisme, paires: [number, number] | null = null): EcranDemontrerParallelisme[] {
+  if (e.variante === "alignes") return ecransAlignes(e);
   if (e.variante === "droite-plan") {
     return [
       {
@@ -238,7 +248,7 @@ export function explicationOption(liste: OptionDemonstration[], choix: string, c
   return [`« ${choisie.texte} » ne convient pas : ${minusculeInitiale(choisie.defaut)}`, `Il fallait choisir : ${valable.texte}`, conclusion];
 }
 
-export function conclusionCritere(e: ExerciceDemontrerParallelisme): string {
+export function conclusionCritere(e: ExerciceParallelisme): string {
   if (e.variante === "droite-plan") return `Le cours : une droite est parallèle à un plan si elle est parallèle à une droite de ce plan. Il reste à trouver cette droite.`;
   return `Le cours : deux plans sont parallèles si deux droites sécantes du premier sont parallèles à deux droites du second. Il reste à trouver ces droites.`;
 }
@@ -251,7 +261,7 @@ export function explicationTemoin(e: ExerciceDroitePlanParallele, choix: string)
   return [`« ${libelle(e.candidats[i]!)} » ne convient pas : ${minusculeInitiale(e.defautsCandidats[i]!)}`, `La droite témoin : ${ok}`];
 }
 
-export function conclusionJustification(e: ExerciceDemontrerParallelisme, numero: number): string {
+export function conclusionJustification(e: ExerciceParallelisme, numero: number): string {
   if (e.variante === "droite-plan") {
     return `${libelle(e.droite)} est parallèle à ${libelle(e.raison.droite2)}, une droite du plan ${nomP(e)} : la droite ${libelle(e.droite)} est parallèle au plan ${nomP(e)}.`;
   }
@@ -261,6 +271,7 @@ export function conclusionJustification(e: ExerciceDemontrerParallelisme, numero
 // --- Réponses attendues (fiches de l'historique) -----------------------------------------------------
 
 export function reponseEcran(e: ExerciceDemontrerParallelisme, ecran: number, paires: [number, number] | null = null): string {
+  if (e.variante === "alignes") return reponseEcranAlignes(e, ecran);
   if (ecran === 0) return e.criteres.find((c) => c.valide)!.texte;
   if (e.variante === "droite-plan") {
     if (ecran === 1) return libelle(e.candidats[e.temoin]!);
@@ -274,13 +285,13 @@ export function reponseEcran(e: ExerciceDemontrerParallelisme, ecran: number, pa
   return texteRaison(e.candidats[ecran === 2 ? a : b]!.raison!);
 }
 
-export function critereValable(e: ExerciceDemontrerParallelisme): string {
+export function critereValable(e: ExerciceParallelisme): string {
   return e.variante === "droite-plan" ? CRITERE_DROITE_PLAN(libelle(e.droite), nomP(e)) : CRITERE_DEUX_PLANS(nomP(e, 0), nomP(e, 1));
 }
 
 // --- Figure ----------------------------------------------------------------------------------------
 
-function droiteFigure(e: ExerciceDemontrerParallelisme, d: DroiteNommee2, couleur: string): DroiteFigure {
+function droiteFigure(e: ExerciceParallelisme, d: DroiteNommee2, couleur: string): DroiteFigure {
   const [a, b] = points(e, d);
   return { a, b, couleur };
 }
@@ -288,7 +299,7 @@ function droiteFigure(e: ExerciceDemontrerParallelisme, d: DroiteNommee2, couleu
 /** Éléments de la figure : la droite (T) en rouge (énoncé) ; une fois les témoins confirmés, la
  * droite témoin en bleu (droite-plan) ou les deux parallélismes (bleu, rouge) ; à la fin, les sections
  * complètes des plans. */
-export function elementsFigure(e: ExerciceDemontrerParallelisme, temoins: [number, number] | number | null, fin: boolean): Omit<OptionsFigure, "mode"> {
+export function elementsFigure(e: ExerciceParallelisme, temoins: [number, number] | number | null, fin: boolean): Omit<OptionsFigure, "mode"> {
   if (e.variante === "droite-plan") {
     const droites = [droiteFigure(e, e.droite, COULEUR_DROITE)];
     if (typeof temoins === "number") droites.push(droiteFigure(e, e.candidats[temoins]!, COULEUR_CONSTRUCTION));
@@ -305,7 +316,7 @@ export function elementsFigure(e: ExerciceDemontrerParallelisme, temoins: [numbe
   return { sections: fin, droites };
 }
 
-export function legendeFigure(e: ExerciceDemontrerParallelisme, temoins: [number, number] | number | null, fin: boolean): string {
+export function legendeFigure(e: ExerciceParallelisme, temoins: [number, number] | number | null, fin: boolean): string {
   const sections = fin ? (e.variante === "droite-plan" ? " En pointillés : la section complète du plan dans le solide." : " En pointillés : la section complète de chaque plan dans le solide.") : "";
   if (e.variante === "droite-plan") {
     return typeof temoins === "number" ? `En rouge, la droite ${libelle(e.droite)} ; en bleu, la droite témoin ${libelle(e.candidats[temoins]!)}, dans le plan ${nomP(e)}.${sections}` : "";
@@ -316,6 +327,6 @@ export function legendeFigure(e: ExerciceDemontrerParallelisme, temoins: [number
 }
 
 /** Le point nommé appartient-il au plan i ? (corrigé) */
-export function nommeDansPlan(e: ExerciceDemontrerParallelisme, nom: string, i: number): boolean {
+export function nommeDansPlan(e: ExerciceParallelisme, nom: string, i: number): boolean {
   return pointAppartientAuPlan(positionNommee(e, nom), pointsPlan(e, i));
 }

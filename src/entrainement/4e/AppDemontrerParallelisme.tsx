@@ -1,7 +1,7 @@
 import { Fragment, useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceDemontrerParallelisme } from "./core/demontrerParallelisme.types";
-import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDemontrerParallelisme } from "./generateurs/demontrerParallelisme";
+import { CATALOGUE_VARIANTES, construireAvecVariante, genererExerciceDemontrerParallelisme, genererExerciceDemontrerParallelismeLibre } from "./generateurs/demontrerParallelisme";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { activerAide, demarrer, ecranSuivant, nombreEcrans, type EtatDemontrerParallelisme } from "./moteur/sessionDemontrerParallelisme";
 import {
@@ -20,7 +20,10 @@ import {
   nomP,
   paireCorrecte,
   reponseEcran,
+  type ExerciceParallelisme,
 } from "./ui/formatDemontrerParallelisme";
+import { conclusionEcranAlignes, constructionVisible, legendeAlignes, listeEcranAlignes, messageFauxAlignes } from "./ui/formatTroisPointsAlignes";
+import { figureTroisPointsAlignesSvg } from "./ui/figureTroisPointsAlignes";
 import { COULEUR_DROITE, COULEURS_PLANS, figurePositionsPlansSvg } from "./ui/figurePositionsPlans";
 import { ecranClos, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
@@ -39,7 +42,10 @@ import { correctionDetailleeDemontrerParallelisme } from "./generateurs/demontre
  * `parallelisme`, processus 3 TRANSFÉRER). Deux variantes :
  * - droite parallèle à un plan : critère, droite témoin, justification (3 écrans) ;
  * - deux plans parallèles : critère, deux parallélismes à droites sécantes, deux justifications
- *   (4 écrans).
+ *   (4 écrans) ;
+ * - trois points alignés (manuel, ex. 11 ; tirée une fois sur trois par `…Libre`, `?code=` des deux
+ *   autres variantes inchangés) : idée, points communs, conclusion (3 écrans) ; cas toit une fois sur
+ *   trois (un côté de MNP parallèle à la base, dit par l'énoncé).
  * Tous les écrans sont des choix fermés (UNE tentative). La droite témoin (ou les deux parallélismes)
  * se trace sur la figure une fois l'écran 2 clos ; à la fin, les sections complètes des plans. Aucun
  * point affiché. `?code=` (QR code d'une feuille) : première instance tirée avec les MÊMES fonctions
@@ -48,7 +54,7 @@ import { correctionDetailleeDemontrerParallelisme } from "./generateurs/demontre
 
 function exerciceInitial(): ExerciceDemontrerParallelisme {
   const code = lireCodeDepuisUrl();
-  if (!code) return genererExerciceDemontrerParallelisme();
+  if (!code) return genererExerciceDemontrerParallelismeLibre();
   return genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceDemontrerParallelisme, construireAvecVariante);
 }
 
@@ -61,7 +67,7 @@ interface TransitionEnAttente {
   derniere: boolean;
 }
 
-function Legende({ e }: { e: ExerciceDemontrerParallelisme }) {
+function Legende({ e }: { e: ExerciceParallelisme }) {
   const pastille = (couleur: string, rond = false) => (
     <span aria-hidden="true" style={{ display: "inline-block", width: 14, height: rond ? 4 : 14, borderRadius: 3, background: couleur, opacity: rond ? 1 : 0.75 }} />
   );
@@ -118,7 +124,7 @@ export function AppDemontrerParallelisme() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.derniere) {
-      recommencer(genererExerciceDemontrerParallelisme());
+      recommencer(genererExerciceDemontrerParallelismeLibre());
       return;
     }
     setEtat(ecranSuivant(etat));
@@ -145,11 +151,30 @@ export function AppDemontrerParallelisme() {
 
   const communs = { aides: courant.aides, niveauAide: etat.niveauAide, onActiverAide: () => setEtat(activerAide(etat)), validation };
   const fin = !!enAttente?.derniere;
-  const elements = elementsFigure(e, temoins, fin);
-  const figure = figurePositionsPlansSvg(e, { mode: "ecran", ...elements });
-  const legende = legendeFigure(e, temoins, fin);
+  // Trois points alignés : les côtés prolongés et I, J, K une fois l'écran « Points communs » clos ;
+  // la droite d'intersection à la fin.
+  const construction = e.variante === "alignes" && constructionVisible(ecran, !!enAttente);
+  const figure =
+    e.variante === "alignes" ? figureTroisPointsAlignesSvg(e, { mode: "ecran", construction, finale: fin }) : figurePositionsPlansSvg(e, { mode: "ecran", ...elementsFigure(e, temoins, fin) });
+  const legende = e.variante === "alignes" ? legendeAlignes(e, construction, fin) : legendeFigure(e, temoins, fin);
 
   function ecranCourant(): ReactNode {
+    if (e.variante === "alignes") {
+      if (courant.genre !== "choix") return null;
+      return (
+        <EtapeChoixPlans
+          {...communs}
+          consigne={courant.consigne}
+          etiquette={courant.titre}
+          options={courant.options}
+          attendue={courant.attendue}
+          explication={(choix) => explicationOption(listeEcranAlignes(e, ecran), choix, conclusionEcranAlignes(e, ecran))}
+          onValider={(id) => {
+            conclure(id === courant.attendue, <p style={{ margin: 0 }}>{courant.options.find((o) => o.id === id)!.texte}</p>, reponseEcran(e, ecran), messageFauxAlignes(ecran));
+          }}
+        />
+      );
+    }
     if (courant.genre === "paires" && e.variante === "deux-plans") {
       return (
         <EtapeDeuxChoix
@@ -195,7 +220,7 @@ export function AppDemontrerParallelisme() {
   const blocDonnees = (
     <>
       <div style={{ maxWidth: 460, margin: "8px auto 0" }} dangerouslySetInnerHTML={{ __html: figure }} />
-      <Legende e={e} />
+      {e.variante !== "alignes" && <Legende e={e} />}
       {legende && <p style={{ margin: "6px 0 0", fontSize: "0.92em", textAlign: "center" }}>{legende}</p>}
     </>
   );
@@ -213,7 +238,23 @@ export function AppDemontrerParallelisme() {
         <ProgressionPuces segments={segmentsDepuisHistorique(historique, total, !enAttente)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
 
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={`${enonce(e)} ${consigneGlobale(e)}`} blocDonnees={blocDonnees} />
+          {e.variante === "alignes" ? (
+            // Trois points alignés : la figure sert à chaque écran (I, J, K y apparaissent après l'écran
+            // « Points communs ») — gardée visible sous l'énoncé replié, résumé = ce qu'il faut démontrer.
+            <EnTeteExercice
+              consigneGenerale={`${enonce(e)} ${consigneGlobale(e)}`}
+              blocDonnees={blocDonnees}
+              apercu={consigneGlobale(e)}
+              figureToujoursVisible={
+                <>
+                  <div style={{ maxWidth: 460, margin: "0 auto" }} dangerouslySetInnerHTML={{ __html: figure }} />
+                  {legende && <p style={{ margin: "6px 0 0", fontSize: "0.92em", textAlign: "center" }}>{legende}</p>}
+                </>
+              }
+            />
+          ) : (
+            <EnTeteExercice consigneGenerale={`${enonce(e)} ${consigneGlobale(e)}`} blocDonnees={blocDonnees} />
+          )}
           <Fragment key={`${generation}-${ecran}`}>{ecranCourant()}</Fragment>
         </div>
       </main>

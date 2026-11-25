@@ -1,9 +1,9 @@
 import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
-import type { ExerciceOmbreSoleil, ExerciceOmbreSoleilDirectionInconnue, Piquet } from "../../core/ombreSoleil.types";
+import type { ExerciceOmbreSoleil, ExerciceOmbreSoleilDirectionInconnue, ExerciceOmbreSoleilSolidePose, Piquet } from "../../core/ombreSoleil.types";
 import type { Point3D } from "../../core/geometrieEspace.types";
 import { COURS_OMBRE, listeEt, nomTex, phrase } from "../../ui/corrigeEspace1";
-import { libelleObstacle } from "../../ui/formatOmbreSoleil";
+import { duSolidePose, libelleObstacle } from "../../ui/formatOmbreSoleil";
 import { construireSvgOmbreSoleil, nomPied } from "./figure";
 
 /**
@@ -132,9 +132,75 @@ function etapesDirectionInconnue(e: ExerciceOmbreSoleilDirectionInconnue): Etape
   return etapes;
 }
 
+/** Variante D — ombre d'un solide posé au sol. Une lettre par sommet projeté (rayon d ∥ rayon donné,
+ * trace d′ issue du PIED — le coin de la base juste en dessous, ou le centre O de la base pour l'apex
+ * — parallèle à l'ombre donnée, ombre = d ∩ d′, même longueur que l'ombre donnée), puis le contour
+ * (enveloppe de la base et des ombres ; les segments qui traversent l'ombre n'en sont pas). */
+function etapesSolidePose(e: ExerciceOmbreSoleilSolidePose): EtapeCorrection[] {
+  const L = "abcdefghij";
+  const k = e.piquetConnu.id;
+  const pk = e.piedConnu;
+  const pyramide = e.forme === "pyramide";
+  const rayonDonne = `(${t(k)}${ombre(k)})`;
+  const ombreDonnee = `[${t(pk)}${ombre(k)}]`;
+  const etapes: EtapeCorrection[] = [];
+  e.piquets.forEach((p, i) => {
+    const id = p.piquet.id;
+    const pied = e.piedsPiquets[i]!;
+    const lettre = L[i]!;
+    const utiliseTexte = pyramide
+      ? `Au soleil, les rayons sont parallèles ${COURS_OMBRE} : le rayon issu de $${t(id)}$ est parallèle au rayon donné $${rayonDonne}$, de même sens. Les ombres au sol de deux segments verticaux sont parallèles ; de même hauteur, elles ont aussi la même longueur. Le pied du sommet d'une pyramide régulière est le centre de sa base.`
+      : `Au soleil, les rayons sont parallèles ${COURS_OMBRE} : le rayon issu de $${t(id)}$ est parallèle au rayon donné $${rayonDonne}$, de même sens. Les ombres au sol de deux arêtes verticales sont parallèles et, les arêtes ayant la même hauteur, de même longueur : la trace au sol part du pied de l'arête, le coin de la base juste en dessous.`;
+    const lignes: LigneCalcul[] = [];
+    if (pyramide) lignes.push(ligne(`O=(AC)\\cap(BD)`, phrase(`pied de $${t(id)}$ : centre de la base carrée, à l'intersection de ses diagonales`)));
+    lignes.push(
+      ligne(`d${i ? `_${i + 1}` : ""}\\parallel${rayonDonne}`, phrase(`rayon issu de $${t(id)}$ (les rayons du soleil sont parallèles)`)),
+      ligne(`d'${i ? `_${i + 1}` : ""}\\parallel(${t(pk)}${ombre(k)})`, phrase(`trace au sol issue du pied $${t(pied)}$ (ombres au sol parallèles)`)),
+      ligne(`${ombre(id)}=d${i ? `_${i + 1}` : ""}\\cap d'${i ? `_${i + 1}` : ""}`, "l'ombre du sommet est sur le rayon et au sol"),
+    );
+    etapes.push(
+      utilise(lettre, phrase(utiliseTexte)),
+      calcul(lettre, lignes),
+      resultat(lettre, phrase(`$${ombre(id)}$ est l'ombre du sommet $${t(id)}$ ; l'ombre au sol du segment vertical $[${t(pied)}${t(id)}]$ est $[${t(pied)}${ombre(id)}]$.`)),
+      verification(
+        lettre,
+        phrase(
+          pyramide
+            ? `$${t(id)}$ et $${t(k)}$ sont à la même hauteur : $[O${ombre(id)}]$ est parallèle à $${ombreDonnee}$, de même sens et de même longueur.`
+            : `$[${t(pied)}${ombre(id)}]$ est parallèle à $${ombreDonnee}$, de même sens et de même longueur (arêtes de même hauteur).`,
+        ),
+      ),
+    );
+    if (i === 0) {
+      etapes.push(
+        piege(lettre, [
+          texte(
+            pyramide
+              ? "La trace au sol part du pied du sommet : le centre O de la base, pas un coin de la base."
+              : `La trace au sol part du pied de ${id}, le coin ${pied} juste en dessous ; partir d'un autre coin donne l'ombre d'un autre sommet.`,
+          ),
+        ]),
+      );
+    }
+  });
+  const fin = L[e.piquets.length]!;
+  const lignes: LigneCalcul[] = e.ombresAutres.map((o) => ligne(`${ombre(o.id)}=d_{${t(o.id)}}\\cap d'_{${t(o.id)}}`, phrase(`même construction pour le sommet $${t(o.id)}$`)));
+  const contour = e.nomsContour.map(nomTex).join("");
+  lignes.push(ligne(`\\text{contour}=${contour}`, "polygone qui entoure la base et les ombres des sommets"));
+  const interieurs = e.segmentsCandidats.filter((s) => !s.surContour).map((s) => `$[${nomTex(s.extremites[0])}${nomTex(s.extremites[1])}]$`);
+  etapes.push(
+    utilise(fin, phrase(`L'ombre d'un solide posé au sol est la plus petite surface qui contient sa base et les ombres de tous ses sommets ${COURS_OMBRE} : son contour relie les points les plus extérieurs ; ses côtés sont des ombres d'arêtes.`)),
+    calcul(fin, lignes),
+    { ...resultat(fin, phrase(`Ombre ${duSolidePose(e)} : le polygone $${contour}$ (en vert sur la figure).`)), figureHtml: construireSvgOmbreSoleil(e, true) },
+    piege(fin, phrase(`Les segments ${listeEt(interieurs)} traversent l'ombre : ce ne sont pas des côtés du contour.`)),
+  );
+  return etapes;
+}
+
 export function correctionDetailleeOmbreSoleil(e: E): EtapeCorrection[] {
   if (e.variante === "simple") return etapesSimple(e);
   if (e.variante === "obstacle") return etapesObstacle(e);
+  if (e.variante === "solidePose") return etapesSolidePose(e);
   return etapesDirectionInconnue(e);
 }
 

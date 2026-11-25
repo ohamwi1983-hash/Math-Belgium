@@ -69,7 +69,11 @@ export const CAS_SECTION_TRIANGLE = "triangle";
 
 export const LIBELLE_CAS_SECTION_PLANE_SOLIDE = "Inclure un cas direct : section triangulaire (P, Q, R autour d'un sommet, aucun point auxiliaire)";
 
+/** Variantes du manuel (point dans une face, prolongement d'une arête, plan parallèle) : une section
+ * triangulaire n'y est PAS un raccourci (point donné à exploiter, parallèles à tracer) — jamais le cas
+ * particulier « triangle » ; `forme` préfixée par la variante (même charge dans toutes les séries). */
 export function profilSectionPlaneSolide(e: ExerciceSectionPlaneSolide): ProfilInstance {
+  if (e.variante) return { casParticulier: null, forme: `${e.variante}-${e.points.length}-cotes` };
   return { casParticulier: e.points.length === 3 ? CAS_SECTION_TRIANGLE : null, forme: `${e.points.length}-cotes` };
 }
 
@@ -81,5 +85,8 @@ export function profilOmbreSoleil(e: ExerciceOmbreSoleil): ProfilInstance {
   // générateur tire déjà cette issue avant sa boucle de rejet (`cibleSol`).
   if (e.variante === "obstacle") return { casParticulier: null, forme: e.variante };
   if (e.variante === "directionInconnue") return { casParticulier: null, forme: `${e.piquets.length}-sommets` };
+  // Solide posé au sol (manuel 4e ch. 8) : la forme du solide (cube, pavé, pyramide) est visible
+  // dans l'énoncé, jamais un verdict.
+  if (e.variante === "solidePose") return { casParticulier: null, forme: e.forme };
   return { casParticulier: null };
 }

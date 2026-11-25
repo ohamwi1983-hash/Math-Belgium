@@ -8,7 +8,10 @@ import type {
   ExerciceOmbreSoleilDirectionInconnue,
   ExerciceOmbreSoleilObstacle,
   ExerciceOmbreSoleilSimple,
+  ExerciceOmbreSoleilSolidePose,
+  FormeSolidePose,
   ObstacleOmbreSoleil,
+  SegmentContourOmbre,
   OmbreSommet,
   Piquet,
   PiquetAResoudre,
@@ -695,21 +698,357 @@ function construireDirectionInconnue(): ExerciceOmbreSoleilDirectionInconnue {
   throw new Error(`construireDirectionInconnue : aucune instance valide trouvée après ${MAX_TENTATIVES_INSTANCE} tentatives`);
 }
 
+// --- Variante D — Ombre d'un solide posé au sol (manuel, ex. 3 b, 3 d, 3 e, 9) ---------------------
+
+const NOMS_BASE = ["A", "B", "C", "D"] as const;
+const NOMS_HAUT = ["E", "F", "G", "H"] as const;
+/** Arêtes verticales VISIBLES en perspective cavalière (D–H est cachée) : seules candidates pour
+ * l'arête donnée et pour le coin du piquet de la pyramide. */
+const COINS_VISIBLES = ["A", "B", "C"] as const;
+/** Pixels : un point hors du contour reste à cette distance de son bord, un sommet du contour à cette
+ * distance de la corde de ses voisins (sinon « est-il sur le bord ? » ne se lirait pas sur le dessin). */
+const NETTETE_CONTOUR_PX = 10;
+/** Pixels : les ombres et les candidats restent hors du dessin du solide (l'ombre doit se voir). */
+const MARGE_DESSIN_SOLIDE_PX = 12;
+/** Pixels : arête la plus courte du solide sur le dessin. */
+const ARETE_MIN_PX = 24;
+/** Pixels : un candidat ne touche aucun trait déjà dessiné (arêtes, rayon et ombre donnés). */
+const ECART_CANDIDAT_TRAIT_PX = 7;
+/** Pixels : un rayon, une trace ou un côté du contour passe à cette distance au moins des points
+ * nommés dont il ne part pas. */
+const ECART_TRAIT_POINT_PX = 9;
+/** Le pavé (caisse basse) est la forme la plus contrainte : jusqu'à 60 000 essais (≈ 0,5 s au pire). */
+const MAX_TENTATIVES_SOLIDE_POSE = 60000;
+/** Longueur de l'ombre d'une verticale du solide, au plus ce multiple de sa plus grande dimension. */
+const RAPPORT_OMBRE_MAX = 2.2;
+
+const FACES_BOITE: string[][] = [
+  ["A", "B", "C", "D"],
+  ["E", "F", "G", "H"],
+  ["A", "B", "F", "E"],
+  ["D", "C", "G", "H"],
+  ["A", "D", "H", "E"],
+  ["B", "C", "G", "F"],
+];
+
+/** Cube (côté 2 à 4), pavé « caisse » plus large que haut, ou pyramide régulière à base carrée —
+ * mêmes noms et mêmes faces que les gabarits du chapitre (`solide3D/gabarits.ts`), dimensions tirées. */
+function construireSolidePoseBrut(forme: FormeSolidePose): Solide3D {
+  if (forme === "pyramide") {
+    const c = choisir([3, 4]);
+    const h = choisir([3, 4, 5]);
+    return {
+      id: "pyramideCarree",
+      label: "Pyramide régulière à base carrée ABCD-S",
+      sommets: { A: { x: 0, y: 0, z: 0 }, B: { x: c, y: 0, z: 0 }, C: { x: c, y: c, z: 0 }, D: { x: 0, y: c, z: 0 }, S: { x: c / 2, y: c / 2, z: h } },
+      faces: [["A", "B", "C", "D"], ["A", "B", "S"], ["B", "C", "S"], ["C", "D", "S"], ["D", "A", "S"]],
+    };
+  }
+  const s = choisir([2, 3, 4]);
+  const [w, d, h] = forme === "cube" ? [s, s, s] : [choisir([3, 4]), choisir([2, 3]), choisir([2, 2.5, 3])];
+  const sommets: Record<string, Point3D> = {};
+  const coins = [
+    [0, 0],
+    [w, 0],
+    [w, d],
+    [0, d],
+  ];
+  coins.forEach(([x, y], i) => {
+    sommets[NOMS_BASE[i]] = { x, y, z: 0 };
+    sommets[NOMS_HAUT[i]] = { x, y, z: h };
+  });
+  return { id: forme === "cube" ? "cube" : "parallelepipede", label: forme === "cube" ? "Cube ABCDEFGH" : "Parallélépipède rectangle ABCDEFGH", sommets, faces: FACES_BOITE };
+}
+
+/** Le point du sol `p` est-il dans le rectangle de la base (élargi de `marge`) ? */
+function dansBase(p: Point3D, base: Point3D[], marge: number): boolean {
+  const xs = base.map((b) => b.x);
+  const ys = base.map((b) => b.y);
+  return p.x > Math.min(...xs) - marge && p.x < Math.max(...xs) + marge && p.y > Math.min(...ys) - marge && p.y < Math.max(...ys) + marge;
+}
+
+/** Distance signée (pixels) de `p` au polygone convexe `poly` (sens trigonométrique, plan projeté) :
+ * positive dehors, négative dedans. */
+function distanceSigneePolygone(p: { x: number; y: number }, poly: { x: number; y: number }[], echelle: number): number {
+  let dehors = -Infinity;
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i];
+    const b = poly[(i + 1) % poly.length];
+    const longueur = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+    dehors = Math.max(dehors, -((b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x)) / longueur);
+  }
+  if (dehors <= 0) return dehors * echelle;
+  // Dehors : vraie distance au bord (et pas seulement à la droite d'un côté).
+  let min = Infinity;
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i];
+    const b = poly[(i + 1) % poly.length];
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy || 1)));
+    min = Math.min(min, Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy));
+  }
+  return min * echelle;
+}
+
+/** Enveloppe convexe des sommets projetés (le dessin du solide), sens trigonométrique. */
+function dessinSolide(solide: Solide3D): { x: number; y: number }[] {
+  return enveloppeConvexe(Object.values(solide.sommets).map((s) => ({ ...projeter2D(s), z: 0 })));
+}
+
+const PROBABILITE_PYRAMIDE = 1 / 3;
+
+function construireSolidePose(): ExerciceOmbreSoleilSolidePose {
+  // Forme tirée UNE fois, avant les essais (sinon la plus facile à construire l'emporterait).
+  const forme: FormeSolidePose = Math.random() < PROBABILITE_PYRAMIDE ? "pyramide" : Math.random() < 0.5 ? "cube" : "pave";  for (let tentative = 0; tentative < MAX_TENTATIVES_SOLIDE_POSE; tentative++) {
+    const tiree = construireDirection(1, forme === "pave" ? 2 : 3);
+    // Ombre vers l'avant (comme les figures du manuel) : vers l'arrière, elle tomberait derrière le
+    // solide sur le dessin et se lirait mal — on tourne la composante de profondeur, même tirage.
+    const direction = tiree.y > 0 ? { ...tiree, y: -tiree.y } : tiree;
+    const solide = construireSolidePoseBrut(forme);
+    const S = solide.sommets;
+    const base = NOMS_BASE.map((n) => S[n]);
+    const pyramide = forme === "pyramide";
+    const hauteur = pyramide ? S.S.z : S.E.z;
+    // Translation au sol commune à toutes les verticales de même hauteur.
+    const v: Point3D = { x: (hauteur * direction.x) / -direction.z, y: (hauteur * direction.y) / -direction.z, z: 0 };
+    // Ombre pas trop longue : sinon le solide devient minuscule sur le dessin.
+    const tailleBase = Math.max(...base.map((p) => p.x)) - Math.min(...base.map((p) => p.x));
+    if (Math.hypot(v.x, v.y) > RAPPORT_OMBRE_MAX * Math.max(tailleBase, hauteur)) continue;
+    // Sur le dessin, l'ombre d'une verticale ne doit pas prolonger la verticale elle-même (angle à
+    // la verticale ≥ 20°), et le rayon doit se distinguer de l'ombre (angle en X′ ≥ 12°) : sinon
+    // arête, rayon et ombre se confondaient en un seul trait.
+    const v2 = projeter2D(v);
+    const angle = (a: { x: number; y: number }, b: { x: number; y: number }) => (Math.acos(Math.max(-1, Math.min(1, (a.x * b.x + a.y * b.y) / (Math.hypot(a.x, a.y) * Math.hypot(b.x, b.y) || 1)))) * 180) / Math.PI;
+    if (angle(v2, { x: 0, y: -1 }) < 20) continue;
+    if (angle({ x: -v2.x, y: -v2.y }, { x: -v2.x, y: hauteur - v2.y }) < 12) continue;
+    const ombreDe = (p: Point3D) => intersectionAvecSol(p, direction);
+
+    // L'ombre doit déborder franchement de la base : toutes les ombres de sommets hors de la base.
+    const hauts = pyramide ? [{ id: "S", sommet: S.S, pied: "O" }] : NOMS_HAUT.map((n, i) => ({ id: n as string, sommet: S[n], pied: NOMS_BASE[i] as string }));
+    const ombresHauts = hauts.map((h) => ({ ...h, ombre: ombreDe(h.sommet) }));
+    if (ombresHauts.some((o) => dansBase(o.ombre, base, 0.5))) continue;
+
+    // Donnée : un coin VISIBLE d'où l'ombre part vers l'extérieur de la base (sinon elle passerait
+    // sous le solide).
+    const coinsPossibles = COINS_VISIBLES.filter((n) => [0.3, 0.6, 1].every((t) => !dansBase(additionner3D(S[n], multiplierScalaire3D(v, t)), base, -1e-6)));
+    if (coinsPossibles.length === 0) continue;
+    const coin = choisir(coinsPossibles);
+    const piedConnu = coin as string;
+    const piquetConnu: Piquet = pyramide ? { id: "P", base: S[coin], hauteur } : { id: NOMS_HAUT[NOMS_BASE.indexOf(coin)], base: S[coin], hauteur };
+    const ombreConnue = ombreDe(sommetPiquet(piquetConnu));
+
+    // Contour : enveloppe convexe de la base et des ombres des sommets du haut.
+    const nommes = [...NOMS_BASE.map((n) => ({ nom: n as string, p: S[n] })), ...ombresHauts.map((o) => ({ nom: `${o.id}′`, p: o.ombre }))];
+    const contourOmbre = enveloppeConvexe(nommes.map((n) => n.p));
+    const nomDe = (p: Point3D) => nommes.find((n) => distance3D(n.p, p) < 1e-9)!.nom;
+    let nomsContour = contourOmbre.map(nomDe);
+    // Le tracé commence au premier coin de la base présent sur le contour (lecture « ABF′G′… »).
+    const debut = nomsContour.findIndex((n) => NOMS_BASE.includes(n as (typeof NOMS_BASE)[number]));
+    const ordre = [...contourOmbre.slice(debut), ...contourOmbre.slice(0, debut)];
+    nomsContour = ordre.map(nomDe);
+
+    // Écrans « point » : les sommets du haut dont l'ombre est un coin du contour (hors donnée) — deux
+    // pour le cube et le pavé (le troisième coin, et l'ombre intérieure, suivent « par le même
+    // procédé »), l'apex S pour la pyramide.
+    const surContour = (nom: string) => nomsContour.includes(nom);
+    const candidatsEcran = ombresHauts.filter((o) => o.id !== piquetConnu.id && surContour(`${o.id}′`));
+    if (!pyramide && candidatsEcran.length < 2) continue;
+    const aProjeter = pyramide ? candidatsEcran : melanger(candidatsEcran).slice(0, 2);
+    if (aProjeter.length === 0) continue;
+    const ombresAutres: OmbreSommet[] = ombresHauts.filter((o) => o.id !== piquetConnu.id && !aProjeter.includes(o)).map((o) => ({ id: o.id, sommet: o.sommet, ombre: o.ombre }));
+
+    // Échelle provisoire (sans candidats) pour les contrôles en pixels qui ne dépendent que de la scène.
+    const toutesOmbres = ombresHauts.map((o) => o.ombre);
+    const sommetPiquetConnu = sommetPiquet(piquetConnu);
+    const pointsScene = [...Object.values(S), ...toutesOmbres, ombreConnue, sommetPiquetConnu];
+    const contour2D = ordre.map(projeter2D);
+    const silhouette = dessinSolide(solide);
+
+    // Points candidats de chaque écran.
+    const piquets: PiquetAResoudre[] = [];
+    const piedsPiquets: string[] = [];
+    let echec = false;
+    const traitsDonnes: [Point3D, Point3D][] = [
+      ...calculerAretesSolide(solide).map((a): [Point3D, Point3D] => [S[a[0]], S[a[1]]]),
+      [sommetPiquetConnu, ombreConnue],
+      [piquetConnu.base, ombreConnue],
+      ...(pyramide ? [[piquetConnu.base, sommetPiquetConnu] as [Point3D, Point3D]] : []),
+    ];
+    const echelleScene = echellePixel(pointsScene);
+    for (const s of aProjeter) {
+      const piquet = piquetDepuisSommet(s.id, s.sommet);
+      const coinsVoisins = NOMS_BASE.filter((n) => n !== s.pied).map((n) => S[n]);
+      const pool: CandidatBrut[] = [
+        ...distracteursSol(piquet, direction, s.ombre),
+        ...coinsVoisins.map((c) => ({ position: additionner3D(c, v), erreur: "piedVoisin" as const })),
+      ];
+      // Hors de la base (sous le solide), hors de son dessin, et jamais sur une ombre déjà dessinée.
+      const dejaDessinees = [ombreConnue, ...piquets.map((p) => p.ombre)];
+      const valide = (c: CandidatBrut) =>
+        !dansBase(c.position, base, 0.3) &&
+        distanceSigneePolygone(projeter2D(c.position), silhouette, echelleScene) > MARGE_DESSIN_SOLIDE_PX &&
+        dejaDessinees.every((o) => distance3D(c.position, o) > 0.3);
+      // Au moins un « mauvais pied » (l'erreur propre à la variante) ; rang de la bonne réponse
+      // équilibré autant que possible par `choisirDistracteurs`.
+      const distracteurs = choisirDistracteurs(pool, s.ombre, piquet.base, valide, (trio) => trio.some((c) => c.erreur === "piedVoisin"));
+      if (!distracteurs) {
+        echec = true;
+        break;
+      }
+      piquets.push({ piquet, ombre: s.ombre, pointsCandidats: versCandidats(s.ombre, distracteurs) });
+      piedsPiquets.push(s.pied);
+    }
+    if (echec) continue;
+
+    const candidats = piquets.flatMap((p) => p.pointsCandidats.map((c) => c.position));
+    const pointsSol = [...base, ...toutesOmbres, ombreConnue, ...candidats];
+    const cadrage = construireCadrage(pointsSol, [...Object.values(S), sommetPiquetConnu, ...candidats]);
+    const echelle = echellePixel(cadrage.points);
+
+    // Lisibilité : arêtes assez longues ; ombres hors du dessin du solide ; contour net ; candidats
+    // séparés entre eux, des points dessinés et des traits donnés.
+    const longueurs = calculerAretesSolide(solide).map((a) => distancePixel(S[a[0]], S[a[1]], echelle));
+    if (Math.min(...longueurs) < ARETE_MIN_PX) continue;
+    if ([...toutesOmbres, ombreConnue].some((o) => distanceSigneePolygone(projeter2D(o), silhouette, echelle) < MARGE_DESSIN_SOLIDE_PX)) continue;
+    const interieurs = nommes.filter((n) => !nomsContour.includes(n.nom));
+    if (interieurs.some((n) => -distanceSigneePolygone(projeter2D(n.p), contour2D, echelle) < NETTETE_CONTOUR_PX)) continue;
+    const coinsNets = contour2D.every((p, i) => {
+      const a = contour2D[(i + contour2D.length - 1) % contour2D.length];
+      const b = contour2D[(i + 1) % contour2D.length];
+      return distanceSigneePolygone(p, [a, b], echelle) >= NETTETE_CONTOUR_PX;
+    });
+    if (!coinsNets) continue;
+    if (pyramide) {
+      const ombre2D = projeter2D(ombreConnue);
+      if (distanceSigneePolygone(ombre2D, contour2D, echelle) < 18) continue;
+      // Le piquet ne se confond avec aucune arête de la pyramide (hors de son pied).
+      const milieu = { x: piquetConnu.base.x, y: piquetConnu.base.y, z: hauteur / 2 };
+      const aretesHorsPied = calculerAretesSolide(solide).filter((a) => a[0] !== coin && a[1] !== coin);
+      if ([milieu, sommetPiquetConnu].some((p) => aretesHorsPied.some((a) => distancePixelSegment(p, S[a[0]], S[a[1]], echelle) < 12))) continue;
+      if (calculerAretesSolide(solide).some((a) => distancePixelSegment(sommetPiquetConnu, S[a[0]], S[a[1]], echelle) < 12)) continue;
+    }
+    // Aucun rayon ni aucune trace au sol (donnée, construction du corrigé, côtés du contour) ne frôle
+    // un point nommé qui n'est pas son extrémité : sur le dessin, il semblerait passer par lui (et
+    // son étiquette n'aurait plus de place — sommet caché D, centre O).
+    const O: Point3D = pyramide ? { x: S.S.x, y: S.S.y, z: 0 } : S.A;
+    const nommesFigure: Point3D[] = [...Object.values(S), ...toutesOmbres, ombreConnue, sommetPiquetConnu, ...(pyramide ? [O] : [])];
+    // Chaque trait : ses extrémités et les points qui lui appartiennent par construction (le pied
+    // d'un rayon — triangle sommet / pied / ombre —, O sur les diagonales) sont exemptés.
+    const pied = (p: Point3D): Point3D => ({ x: p.x, y: p.y, z: 0 });
+    const traitsConstruction: { a: Point3D; b: Point3D; exemptes: Point3D[] }[] = [
+      ...ombresHauts.map((o) => ({ a: o.sommet, b: o.ombre, exemptes: [pied(o.sommet)] })),
+      ...ombresHauts.map((o) => ({ a: pied(o.sommet), b: o.ombre, exemptes: [o.sommet] })),
+      { a: sommetPiquetConnu, b: ombreConnue, exemptes: [piquetConnu.base] },
+      { a: piquetConnu.base, b: ombreConnue, exemptes: [sommetPiquetConnu] },
+      ...ordre.map((p, i) => ({ a: p, b: ordre[(i + 1) % ordre.length]!, exemptes: [] as Point3D[] })),
+      ...(pyramide ? [{ a: S.A, b: S.C, exemptes: [O] }, { a: S.B, b: S.D, exemptes: [O] }] : []),
+    ];
+    const frole = nommesFigure.some((p) =>
+      traitsConstruction.some(
+        (t) => [t.a, t.b, ...t.exemptes].every((q) => distance3D(p, q) > 1e-9) && distancePixelSegment(p, t.a, t.b, echelle) < ECART_TRAIT_POINT_PX,
+      ),
+    );
+    if (frole) continue;
+    const pointsDessines = (index: number) => [
+      ...Object.values(S),
+      ombreConnue,
+      sommetPiquetConnu,
+      ...(pyramide ? [{ x: S.S.x, y: S.S.y, z: 0 }] : []),
+      ...piquets.slice(0, index).map((p) => p.ombre),
+    ];
+    const lisibles = piquets.every(
+      (p, i) =>
+        candidatsLisibles(p.pointsCandidats, pointsDessines(i), echelle) &&
+        p.pointsCandidats.every((c) => traitsDonnes.every(([a, b]) => distancePixelSegment(c.position, a, b, echelle) >= ECART_CANDIDAT_TRAIT_PX)),
+    );
+    if (!lisibles) continue;
+
+    // Écran « contour » : les ombres de TOUTES les arêtes (une arête de la base est sa propre ombre).
+    const ombreNom = (nomHaut: string) => `${nomHaut}′`;
+    const paires: [string, string][] = pyramide
+      ? [["A", "B"], ["B", "C"], ["C", "D"], ["D", "A"], ["A", "S′"], ["B", "S′"], ["C", "S′"], ["D", "S′"]]
+      : [
+          ["A", "B"], ["B", "C"], ["C", "D"], ["D", "A"],
+          ...NOMS_BASE.map((n, i): [string, string] => [n, ombreNom(NOMS_HAUT[i])]),
+          ...NOMS_HAUT.map((n, i): [string, string] => [ombreNom(n), ombreNom(NOMS_HAUT[(i + 1) % 4])]),
+        ];
+    const k = nomsContour.length;
+    const estCote = (a: string, b: string) => {
+      const i = nomsContour.indexOf(a);
+      const j = nomsContour.indexOf(b);
+      return i >= 0 && j >= 0 && ((i + 1) % k === j || (j + 1) % k === i);
+    };
+    const segmentsCandidats: SegmentContourOmbre[] = paires.map(([a, b], i) => ({ id: `s${i}`, extremites: [a, b], surContour: estCote(a, b) }));
+    // Chaque côté du contour doit être l'ombre d'une arête (toujours vrai pour un solide convexe posé).
+    if (segmentsCandidats.filter((s) => s.surContour).length !== k) continue;
+    return {
+      variante: "solidePose",
+      forme,
+      direction,
+      solide,
+      piquetConnu,
+      piedConnu,
+      ombreConnue,
+      piquets,
+      piedsPiquets,
+      ombresAutres,
+      contourOmbre: ordre,
+      nomsContour,
+      segmentsCandidats,
+      cadrage,
+    };
+  }
+  throw new Error(`construireSolidePose : aucune instance valide trouvée après ${MAX_TENTATIVES_SOLIDE_POSE} tentatives`);
+}
+
+/** Arêtes (paires de noms) d'un solide, dérivées de ses faces. */
+function calculerAretesSolide(solide: Solide3D): [string, string][] {
+  const cles = new Set<string>();
+  const aretes: [string, string][] = [];
+  for (const face of solide.faces) {
+    face.forEach((n, i) => {
+      const [a, b] = [n, face[(i + 1) % face.length]].sort();
+      if (!cles.has(`${a}-${b}`)) {
+        cles.add(`${a}-${b}`);
+        aretes.push([a, b]);
+      }
+    });
+  }
+  return aretes;
+}
+
 // --- Catalogue de variantes (convention CLAUDE.md) -------------------------------------------------
 
+/** Nouvelles variantes TOUJOURS en fin de catalogue : les indices, donc les `?code=` déjà imprimés,
+ * ne changent pas. */
 export const CATALOGUE_VARIANTES: { id: VarianteOmbreSoleil; label: string }[] = [
   { id: "simple", label: "Ombre simple sur sol plat" },
   { id: "obstacle", label: "Ombre avec obstacle" },
   { id: "directionInconnue", label: "Direction inconnue à déduire" },
+  { id: "solidePose", label: "Ombre d'un solide posé au sol" },
 ];
+
+/** Variantes du tirage libre de l'ADAPTATEUR et des codes : les trois d'avant, tirées comme avant
+ * (même appel `randomInt(0, 2)`), pour que les codes « libres » déjà imprimés rejouent le même
+ * exercice. L'appli tire en plus la variante « solide posé » (`genererExerciceOmbreSoleilLibre`). */
+const VARIANTES_TIRAGE_LIBRE = CATALOGUE_VARIANTES.slice(0, 3);
 
 export function construireAvecVarianteId(varianteId: VarianteOmbreSoleil): ExerciceOmbreSoleil {
   if (varianteId === "simple") return construireSimple();
   if (varianteId === "obstacle") return construireObstacle();
+  if (varianteId === "solidePose") return construireSolidePose();
   return construireDirectionInconnue();
 }
 
 export function genererExerciceOmbreSoleil(): ExerciceOmbreSoleil {
-  const varianteId = CATALOGUE_VARIANTES[randomInt(0, CATALOGUE_VARIANTES.length - 1)].id;
+  const varianteId = VARIANTES_TIRAGE_LIBRE[randomInt(0, VARIANTES_TIRAGE_LIBRE.length - 1)].id;
   return construireAvecVarianteId(varianteId);
+}
+
+/** Tirage libre de l'APPLI : l'ombre d'un solide posé au sol une fois sur quatre (autant que chacune
+ * des trois autres variantes), sinon le tirage libre d'avant. Un `?code=` imprimé reste tiré par
+ * `genererExerciceOmbreSoleil` (même fonction que l'adaptateur). */
+export function genererExerciceOmbreSoleilLibre(): ExerciceOmbreSoleil {
+  return Math.random() < 1 / 4 ? construireSolidePose() : genererExerciceOmbreSoleil();
 }
