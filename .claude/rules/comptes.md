@@ -15,6 +15,7 @@ paths:
   - "src/components/carnet/**"
   - "src/routes/ClassePage.tsx"
   - "src/lib/pageClasse*"
+  - "src/lib/ordreChapitres.ts"
   - "src/components/eleve/classe.css"
   - "supabase/**"
   - ".env*"
@@ -40,7 +41,8 @@ de fichier).
 Partage d'un enregistrement du coffre avec un collègue par un lien : `0009_partages_plans.sql` (section « Partage
 entre collègues » après « Page « Mon coffre » refondue »). Plus tard (pas fait) : envoi direct par adresse, partage du carnet.
 Page de classe à code pour les élèves SANS compte (`/classe`), publiée depuis le carnet : `0010_page_classe.sql` (section
-« Page de classe » en fin de fichier).
+« Page de classe » en fin de fichier). « Mon ordre des chapitres » du professeur (et plus jamais le numéro du site sur ce que
+voient les élèves) : `0011_ordre_chapitres.sql` (section « Mon ordre des chapitres (0011) » en fin de fichier).
 
 ## Décisions de l'utilisateur
 
@@ -1456,3 +1458,96 @@ recharger `/carnet` → une classe → « Page des élèves » → « Créer le 
 du code, publication automatique (« Publié le … »), lecture par un téléphone SANS compte (`/classe`, code tapé puis QR),
 « Nouveau code » (l'ancien refusé), « Couper le code », et que la limite d'essais reconnaît bien l'adresse (en-têtes de
 la passerelle Supabase : `select current_setting('request.headers', true)` depuis une fonction de test au besoin).
+
+## Mon ordre des chapitres (0011) — 25/11/2026 : `supabase/migrations/0011_ordre_chapitres.sql`
+
+Décisions du professeur : (1) **plus jamais le numéro de chapitre du SITE sur ce que voient les élèves** — documents imprimés
+et Word (feuille, évaluation, aménagée, corrigé, grille, examen, remédiation, annexe formulaire), diapositives et PowerPoint,
+export HTML et impression du cours, page de classe, texte pour l'agenda scolaire, évaluation blanche / feuille de l'assistant
+élève, pages de générateurs imprimées : TITRE seul (« 4e · Géométrie dans l'espace »), ou le numéro DU PROFESSEUR s'il a rangé
+ses chapitres (« 4e · Chapitre 3 — Géométrie dans l'espace ») ; sur le site public (accueil, page de chapitre à l'écran,
+recherche, Mon suivi, plan) le numéro du site reste un repère, et l'accueil le dit (« Numérotés dans l'ordre du site : ton
+professeur peut les voir dans un autre ordre. ») ; (2) **« Mon ordre »** : par année, le professeur range les chapitres ; ses
+outils (carnet, page de classe, coffre, page de conception) et ses documents suivent ce rangement ; un chapitre absent du
+rangement (ajouté au site plus tard) vient à la fin dans l'ordre du site ; « Revenir à l'ordre du site » ; « Ne pas numéroter
+mes documents » (titre seul même avec un ordre). AUCUNE donnée d'élève.
+
+**Schéma 0011** (idempotent, à coller APRÈS 0010, suppose 0001 et 0002 ; « Success. No rows returned ») : deux COLONNES de
+`carnet_reglages` — `ordre_chapitres jsonb` (NULL = ordre du site ; sinon `{ "4e": [slugs…], … }`, contrainte
+`carnet_reglages_ordre_chapitres_valide` = `public.ordre_chapitres_valide(j)` : objet ≤ 8 clés `^[a-z0-9][a-z0-9-]{0,19}$`,
+listes de 1 à 40 slugs distincts `^[a-z0-9][a-z0-9-]{0,79}$` ; `immutable`, `search_path = ''`, `anon` sans droit d'exécution)
+et `ordre_sans_numero boolean not null default false`. **Pourquoi `carnet_reglages` et pas `profils`** : ses droits sont donnés
+à la TABLE (0002) — une colonne de plus est couverte sans droit de colonne, et relancer 0001 / 0002 ne retire rien (un droit
+de colonne sur `profils` serait effacé par le `revoke all` de 0001, cf. 0005). RLS de 0002 inchangé (le sien, compte actif ;
+`anon` rien ; l'admin ne voit rien) ; `supprimer_mon_compte()` inchangé (cascade). Vérifié sur Postgres 16 local (faux
+schéma `auth`, 0001 → 0010 + données, 0011 ×3, 0001 → 0010 relancés, 0011 encore) : 86 vérifications (dossier de travail
+`ordre-chapitres/test_sql.py` : sortie vide, données / contraintes / sécurité identiques, valeurs valides — 40 chapitres,
+8 niveaux, slug de 80 car., objet vide, NULL —, 23 valeurs invalides refusées — 23514, superutilisateur compris —, NULL du
+booléen — 23502 —, RLS croisé, insertion au nom d'un autre — 42501 —, `anon` — 42501 —, compte désactivé, suppression).
+
+**0011 pas appliquée** : `compteDonnees.ts::lireOrdreChapitres` → `{ actif: false }` (42703 / PGRST204 mentionnant
+`ordre_chapitres` / `ordre_sans_numero`, ou table absente) ; le site garde l'ordre du site et imprime le titre seul ; la carte
+du profil dit « Applique la migration 0011… » (boutons désactivés) ; rien n'est écrit.
+
+**Code** :
+- `lib/ordreChapitres.ts` — la SEULE règle, tout le monde passe par lui : `chapitresDansMonOrdre(niveau, ordre, chapitres?)`,
+  `numeroAffiche(chapitre, ordre)` (ce que voient les élèves : numéro du professeur ou `null`, jamais le site),
+  `numeroRepere` (outils du professeur : le sien, à défaut celui du site), `libelleChapitre` (« Chapitre 3 — Titre » /
+  « Titre », option `titre`), `surtitreChapitre`, `prefixeChapitre`, `titreSectionImprime` (réécrit AU RENDU le titre de
+  section stocké « 8. Titre — 2. Section » d'un plan multi-chapitres), `lireRangement` (lecture tolérante = contrainte SQL),
+  `estOrdreDuSite`, `rangementNormalise`. Ordre du professeur connecté gardé dans le module (`ordreCourant()`,
+  `useOrdreChapitres()` par `useSyncExternalStore`) : lu par `CompteProvider` à la connexion (`lireOrdreChapitres`, à part du
+  profil : une panne ou 0011 absente ne bloque rien), remis à « sans-compte » à la déconnexion. Les modules de documents, purs,
+  le lisent sans injection.
+- `compteDonnees.ts` : `lireOrdreChapitres` (`ligneExiste`), `enregistrerOrdreChapitres` (aucune année rangée → NULL ; ligne
+  créée si besoin, 23505 → mise à jour), `ordreChapitresAbsent`.
+- Écran : `components/compte/OrdreChapitresCarte.tsx` + `ordre-chapitres.css`, carte « Mon ordre des chapitres » de « Mon
+  profil » (ancre `#ordre-chapitres`, amenée à l'écran) : onglets par année (`role=tablist`, flèches / Début / Fin, « ton
+  ordre » / « ordre du site »), liste `<ol>` avec pastilles de numéro (en direct, orange quand l'ordre est réglé), « n° 8 sur le
+  site » en petit, « Monter » / « Descendre » de 44 px (libellés lus, texte masqué sous 560 px ; le focus suit le chapitre, et
+  passe à l'autre bouton au bord), glisser-déposer à la souris en plus, annonce `aria-live` « … : chapitre 1 sur 8 »,
+  « Revenir à l'ordre du site » (par année), case « Ne pas numéroter mes documents », aperçu « Sur tes documents : « 4e ·
+  Chapitre 1 — … » », pastille « non enregistré », Enregistrer / Annuler, retour « Enregistré. … ». Une année remise à l'ordre
+  du site par les flèches reste « réglée » (le professeur en veut les numéros) : seul « Revenir à l'ordre du site » la retire.
+  Liens : réglages du carnet (fieldset « Ordre des chapitres ») et « Noter la séance » (sous la liste des chapitres, nouvel
+  onglet : la saisie reste).
+- Documents (`evaluationLocal.ts`) : AU RENDU, avec l'ordre du professeur qui IMPRIME (`ordreDuPlan` ; un plan partagé
+  s'imprime avec l'ordre du destinataire ; `EnTeteEvaluation.sansOrdreProfesseur`, posé par `compositionEleve.ts`, force le
+  titre seul côté élève, même en « Voir comme un élève ») : `surtitreDuPlan` (plan d'un chapitre : surtitre recalculé, même
+  pour un ancien plan « 4e · Chapitre 8 »), `avecTitresImprimes` (titres de section multi-chapitres, lignes de groupes
+  comprises), `annexeFormulaire(chapitre, ordre)`. Le plan enregistré, ses graines, les QR `?code=`, les partages et la
+  remédiation ne changent pas (forme canonique stockée : titres « 8. … — » de `construireItemsPayload`, surtitre neuf stocké
+  sans numéro). Panneau de conception : chapitres proposés et puces dans l'ordre du professeur, numéros `numeroRepere`, lignes
+  d'un document multi-chapitres triées par chapitre dans cet ordre (copie, corrigé, examen « par chapitre »).
+- Carnet : `carnet.ts::resoudreSeance` → `chapitre.numero` (IMPRIMÉ : Smartschool, fiche, agenda, texte en rubriques ;
+  `null` = titre seul) et `chapitre.repere` (carte de séance) ; `chapitresDeLaClasse`, `progressionClasse`, liste « Chapitre »
+  de « Noter la séance », `EvaluationMatiere`, synthèse de l'agenda : ordre / numéros du professeur. `CarnetPage` re-rend quand
+  l'ordre arrive et n'auto-publie la page de classe qu'une fois l'ordre lu. Page de classe : titre publié « Chapitre 1 —
+  Suites » ou « Suites » (`pageClasseContenu.ts::titreChapitre`), republié tout seul quand l'ordre change.
+- Coffre : `coffreResume.ts::chapitresDuPlan` → `numeroRepere` (résumé « Ch. n », recherche « ch n », « Ranger par
+  chapitre » dans l'ordre du professeur ; page d'un partage : ordre du destinataire).
+- Site : impression / export du cours — `ChapterPage` et `Formulaire` portent deux spans, `.ecran-seul` (numéro du site,
+  repère) et `.impression-seule` (niveau seul ou numéro du professeur), classes d'`index.css` ; `buildHtml.ts` retire
+  `.ecran-seul` du clone ; diapo de titre et sujet du PowerPoint : `surtitreChapitre` ; nom du fichier exporté
+  `{niveau}-{slug}.html` ; pages de générateurs : les 350+ « Chapitre n — Titre » écrits dans les applis (`.app-subtitle`,
+  déjà masqués à l'écran) ne s'impriment plus, `EntrainementPage` imprime « niveau · libellé » (`.gen-chapitre-imprime`) —
+  aucun générateur réécrit ; liste des chapitres de l'assistant élève : titres seuls.
+
+**Vérifications** (dossier de travail `ordre-chapitres/`) : `test_sql.py` (86) ; `purs.test.ts` (esbuild + node, 49 : lecture
+tolérante, ordre partiel / slug inconnu / absents à la fin, numéros affichés / repères, « ne pas numéroter », titres de
+section réécrits, annexe, carnet — Smartschool texte et HTML, agenda scolaire, synthèse, progression —, coffre) ; `docs.cjs`
+(documents RÉELS sur le Vite de développement : évaluation 2 chapitres et 1 chapitre en 2 séries + aménagées + corrigés +
+grilles, feuille + aménagée, examen par chapitre, feuille de l'assistant élève, Word copie / corrigé / grille, dans les trois
+cas sans ordre / ordre / ne pas numéroter — 710 vérifications : 0 « Chapitre 8 » ni « 8. Géométrie » du site, surtitres et
+titres de section attendus, annexe, plan enregistré inchangé, 252 mesures à 680 (impression) / 820 / 1 280 px : 0 formule
+sortie, 0 `.katex-error`) ; `parcours.mjs` (Vite de développement :5345 + faux client `faux-supabase.js` étendu — options
+`ordre`, `sansNumero`, `ordreAbsent`, contrainte imitée —, iPhone 13 et 1 280 px, clair et sombre : 195 vérifications —
+carte, clavier, focus, annonce, boutons, onglets, enregistrement / relecture / NULL / ne pas numéroter, page du chapitre à
+l'écran « 4e — Chapitre 8 » et imprimée « 4e — Chapitre 1 » / « 4e », page de classe « Chapitre 1 — Suites » puis « Suites »
+sans 0011, lien des réglages → carte à l'écran, 0011 absente, accueil, cibles ≥ 44 px, `scrollWidth` = largeur, 0 erreur
+console) ; `generateurs.mjs` (25 : pages de générateurs imprimées, visiteur et professeur). Captures dans
+`ordre-chapitres/captures/`.
+
+**Mise en service** : SQL Editor → New query → coller TOUT `0011_ordre_chapitres.sql` → Run → « Success. No rows returned » ;
+recharger `/profil` → « Mon ordre des chapitres » → ranger → Enregistrer. À vérifier contre le vrai projet : enregistrement
+(ligne `carnet_reglages` créée si absente), rechargement, documents et page de classe avec le numéro du professeur.
