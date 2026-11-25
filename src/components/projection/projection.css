@@ -282,7 +282,13 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
 
 /* Instruments : SVG plein cadre, seuls le corps et la poignée de l'équerre captent le pointeur */
 .projection-instrument { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; touch-action: none; }
-.eq-corps { fill: rgb(47 111 176 / 0.12); stroke: #2f6fb0; stroke-width: 2.5; stroke-linejoin: round; pointer-events: visiblePainted; cursor: move; }
+.eq-corps { fill: rgb(47 111 176 / 0.12); stroke: #2f6fb0; stroke-width: 2.5; stroke-linejoin: round; }
+/* Zone d'appui : le triangle + une bande autour (largeur du trait = 2 × seuil au doigt, posée en ligne) ; le curseur
+   (« tracer » près d'un bord, « déplacer » ailleurs) est choisi au survol par Tableau.tsx. */
+.eq-zone { fill: transparent; stroke: transparent; stroke-linejoin: round; pointer-events: all; cursor: move; }
+.eq-mesure line { stroke-width: 3; stroke-linecap: round; }
+.eq-longueur rect { fill: #fff; stroke-width: 2; }
+.eq-longueur text { font: 600 18px var(--mono); fill: #182430; text-anchor: middle; }
 .eq-rapporteur { fill: none; stroke: #2f6fb0; stroke-width: 1.5; }
 .eq-traits line { stroke: #1f4e7d; stroke-width: 1.5; }
 .eq-axe { stroke: #2f6fb0; stroke-width: 1.5; stroke-dasharray: 6 6; }
@@ -290,6 +296,7 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
 .eq-zero { font-weight: 700; }
 .eq-degre { font: 500 13px var(--mono); fill: #1f4e7d; text-anchor: middle; dominant-baseline: middle; }
 .eq-poignee { fill: #fff; stroke: #2f6fb0; stroke-width: 2.5; pointer-events: visiblePainted; cursor: grab; }
+.eq-poignee.verrou { fill: #eef2f5; cursor: move; }
 .eq-poignee-fleche { fill: none; stroke: #2f6fb0; stroke-width: 2; stroke-linecap: round; pointer-events: none; }
 .eq-angle rect { fill: #fff; stroke: #2f6fb0; stroke-width: 2; }
 .eq-angle text { font: 600 17px var(--mono); fill: #1f4e7d; text-anchor: middle; }
@@ -387,6 +394,7 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
 .projection-fluo:focus-visible, .projection-epaisseur:focus-visible { outline: 3px solid #b65c1f; outline-offset: 2px; }
 .projection-duree[aria-pressed="true"] { background: #182430; border-color: #182430; color: #fff; }
 .projection-fonds { display: inline-flex; gap: 4px; align-items: center; }
+.projection-trace { display: inline-flex; align-items: center; gap: 6px; }
 .projection-couleur { width: 36px; height: 36px; border-radius: 50%; border: 3px solid #fff; background: var(--c); box-shadow: 0 0 0 1px #ccd8e0; cursor: pointer; flex: none; }
 .projection-couleur.actif { box-shadow: 0 0 0 3px #182430; }
 .projection-duree { min-height: 40px; padding: 0 12px; border: 1px solid #ccd8e0; border-radius: 999px; background: #fff; color: #182430; font: 600 14px var(--sans); cursor: pointer; }
@@ -451,7 +459,7 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
 .prof-etiquette { margin: 0; display: flex; align-items: center; gap: 10px; font: 600 12px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); min-height: 44px; }
 .prof-pas { color: var(--accent-ink); }
 .prof-stylo { margin-left: auto; display: flex; align-items: center; gap: 4px; }
-.prof-palette { display: flex; justify-content: center; }
+.prof-palette { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
 .prof-palette .projection-palette { box-shadow: none; gap: 4px; padding: 4px 8px; }
 .prof-palette .projection-palette-nom { display: none; }
 .prof-stylo .projection-outil { color: var(--ink-soft); }

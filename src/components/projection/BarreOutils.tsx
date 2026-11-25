@@ -168,6 +168,41 @@ export function PaletteFond({ projection, compacte = false }: { projection: Proj
   )
 }
 
+/**
+ * Palette de l'équerre (affichée tant qu'elle est posée, partagée avec l'autre écran) : trait tracé le long d'un bord
+ * en segment (borné au bord) ou en droite (prolongée jusqu'aux bords de la diapo) ; cadenas = rotation verrouillée
+ * (on fait glisser l'équerre sans la tourner : parallèles).
+ */
+export function PaletteEquerre({ magasin }: { magasin: MagasinInstruments }) {
+  const trace = useInstrument(magasin, (e) => e.equerre.trace)
+  const verrou = useInstrument(magasin, (e) => e.equerre.verrou)
+  return (
+    <div className="projection-palette projection-palette--equerre" role="group" aria-label="Équerre : tracer le long d'un bord">
+      <span className="projection-palette-nom" aria-hidden="true">
+        Équerre
+      </span>
+      {(
+        [
+          ['segment', 'Segment', 'Trait borné au bord de l\'équerre'],
+          ['droite', 'Droite', 'Trait prolongé jusqu\'aux bords de la diapo'],
+        ] as const
+      ).map(([valeur, nom, aide]) => (
+        <button key={valeur} type="button" className="projection-duree projection-trace" aria-pressed={trace === valeur} title={aide} onClick={() => magasin.equerre({ trace: valeur })}>
+          <Pictogramme nom={valeur} taille={18} />
+          {nom}
+        </button>
+      ))}
+      <span className="projection-separateur" aria-hidden="true" />
+      <Bouton
+        label="Verrouiller la rotation (parallèles)"
+        picto={verrou ? 'cadenas' : 'cadenas-ouvert'}
+        actif={verrou}
+        onClick={() => magasin.equerre({ verrou: !verrou })}
+      />
+    </div>
+  )
+}
+
 /** Équerre (Q), compas (C), calculatrice (K) : équerre et calculatrice sont partagées avec l'autre écran. */
 export function BoutonsInstruments({ outils, setOutils, magasin }: { outils: OutilsLocaux; setOutils: (f: (o: OutilsLocaux) => OutilsLocaux) => void; magasin: MagasinInstruments }) {
   const equerre = useInstrument(magasin, (e) => e.equerre.visible)
@@ -210,12 +245,14 @@ export function BarreOutils({
 }) {
   const { etat, suivant, precedent, basculerBlanc, lancerMinuteur, arreterMinuteur } = projection
   const reste = useResteMinuteur(etat.minuteur.fin)
+  const equerre = useInstrument(magasin, (e) => e.equerre.visible)
   return (
     <div className={`projection-barre${visible ? '' : ' masquee'}`} role="toolbar" aria-label="Outils de projection" onClick={(e) => e.stopPropagation()}>
       <span className="projection-fil">{fil}</span>
       <div className="projection-palettes">
       {etat.blanc && <PaletteFond projection={projection} />}
       {outils.stylo && <PaletteDessin outils={outils} setOutils={setOutils} />}
+      {equerre && <PaletteEquerre magasin={magasin} />}
       {outils.menuMinuteur && (
         <div className="projection-palette" role="group" aria-label="Minuteur">
           {DUREES_MINUTEUR.map((m) => (

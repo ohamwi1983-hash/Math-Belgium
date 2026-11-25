@@ -184,7 +184,7 @@ interactif ; `touch-action: none` sur ce qui se manipule, classe `.projection-in
   retire le dernier élément de la page courante (un trait de gomme annulé fait réapparaître ce qu'il
   effaçait) ; « Tout effacer » vaut pour la page courante.
 - **Synchronisation** (deux écrans, même `BroadcastChannel`) : `trait` + `point` (tracé libre), `element`
-  (ajout OU remplacement par id : trait aimanté, arc en cours, étiquette déplacée), `retirer`, `effacer`,
+  (ajout OU remplacement par id : trait à l'équerre, arc en cours, étiquette déplacée), `retirer`, `effacer`,
   `annotations` (tout, en réponse à la `demande` d'une fenêtre qui s'ouvre ou se recharge : la fenêtre
   des diapos ouverte après coup reçoit ce qui était déjà écrit), `instruments`. Fond de l'écran blanc
   dans `EtatProjection.fond`.
@@ -193,10 +193,30 @@ interactif ; `touch-action: none` sur ce qui se manipule, classe `.projection-in
   instrument posé au tableau) :
   - **Équerre Aristo** (Q) : triangle rectangle isocèle transparent, hypoténuse de 13 carreaux graduée
     en carreaux (0 au milieu, demi-graduations), rapporteur demi-cercle (traits tous les 5°,
-    étiquettes 30/45/60 de chaque côté), axe médian pointillé. Glisser le corps = déplacer ; poignée
-    ronde = tourner autour du 0, angle affiché en direct (sens mathématique) avec cran à ±3° sur les
-    multiples de 30° et de 45°. Un trait de stylo / fluo commencé à ≤ 12 px logiques d'un bord
-    (dedans ou dehors) **s'aimante** : segment droit le long de ce bord, borné au bord. Re-clic = masquée.
+    étiquettes 30/45/60 de chaque côté), axe médian pointillé. Poignée ronde = tourner autour du 0,
+    angle affiché en direct (sens mathématique) avec cran à ±3° sur les multiples de 30° et de 45°.
+    Re-clic = masquée.
+    **Tracer directement** (décision du 25/11/2026) — règle d'appui sur l'équerre (`surEquerre`) : à
+    ≤ seuil d'un des trois bords, dedans ou dehors (`seuilBord` : 12 px logiques à la souris / au
+    stylet, 20 au doigt, jamais moins de 10 / 22 px RÉELS — vue réduite du professeur —, plafond 30) =
+    **tracer** le long de ce bord, SANS activer le stylo, dans la couleur et l'épaisseur du stylo courant
+    (fluo si le surligneur est l'outil actif) ; gomme ou compas actifs gardent la main ; ailleurs dans
+    le triangle = **déplacer** ; juste autour mais au-delà du seuil = l'outil actif s'il y en a un, sinon
+    rien. Zone d'appui = polygone `.eq-zone` transparent (le triangle + un trait de 2 × seuil au doigt) ;
+    curseur choisi au survol (`crosshair` près d'un bord, `move` ailleurs). Le trait n'est ajouté qu'après
+    4 px réels de mouvement (un simple appui ne laisse rien et ne fait pas « diapo suivante ») ; le clic
+    qui suit le relâchement de TOUT geste est avalé (il tombait sinon sur la diapo = diapo suivante).
+    Palette de l'équerre (`PaletteEquerre`, au-dessus de la barre tant qu'elle est posée ; dans la vue
+    du professeur à côté de la palette de dessin), état PARTAGÉ dans `EtatEquerre` : **Segment** (borné
+    au bord) / **Droite** (prolongée jusqu'aux bords de la diapo, `droiteDansDiapo`) ; **cadenas** =
+    rotation verrouillée (`verrou` : poignée remplacée par un cadenas, la tirer déplace) pour faire
+    glisser l'équerre et tracer des parallèles. **Perpendiculaire** : les deux côtés de l'angle droit
+    sont perpendiculaires (vérifié : 90,000°) — côté gauche posé sur une droite, tracer le long du côté
+    droit. **Graduation** : en segment le long de l'hypoténuse, extrémités accrochées au demi-carreau à
+    ≤ 4 px ; pendant le tracé, petits traits aux extrémités (couleur du trait) et longueur sous
+    l'hypoténuse (`EtatEquerre.mesure`, donc visibles sur l'autre écran) dans l'unité du compas
+    (« 2,5 carreaux » sur quadrillage / repère, sinon « 2,5 u ») ; retirés au relâchement. Annuler,
+    annotations par diapo et deux écrans : comme les autres traits (`element` ajout / remplacement).
   - **Compas** (C, outil de la palette : couleur et épaisseur du stylo) : appuyer sur le centre et
     écarter (rayon), relâcher ; appuyer ensuite loin du centre et tourner = arc (angles « déroulés »,
     tour complet possible) ; appuyer près du centre = nouveau centre. Rayon affiché dans UNE unité
@@ -271,6 +291,18 @@ professeur, repère partagé — 78 vérifications, 0 erreur console. Pièges : 
 `position: absolute; left: 50%` + `translateX(-50%)` plafonne sa largeur à la moitié du parent (les
 palettes passaient sur deux lignes) — `left/right` + `align-items: center` ; la vue du professeur
 change de taille quand la palette s'ouvre : recalculer les coordonnées d'écran après coup.
+Tracer à l'équerre (25/11/2026, dossier de travail `equerre-tracer/` : `verif-equerre.mjs`) : Vite de
+développement + faux client connecté, 4e ch. 6, 1 280 × 720 et 1 920 × 1 080 — stylo rangé : trait droit le
+long de l'hypoténuse malgré un tracé en zigzag (couleur / épaisseur du stylo, même diapo), simple appui = rien,
+glisser ailleurs = déplacer, curseur au survol, Ctrl+Z ; « Droite » touchant les bords de la diapo ; côtés
+de l'angle droit perpendiculaires (90,000°) passant par le sommet ; cadenas : glissée le long de la 1re
+droite puis 2e perpendiculaire parallèle, poignée verrouillée sans rotation ; trois parallèles à 30°
+(écarts de 70,0 px, segments −4,5 → 4,5) ; repère « 2,5 carreaux » / « 3 u » pendant le tracé et retiré
+au relâchement ; gomme prioritaire ; pages séparées. Doigt (CDP) : trait sur le bord, déplacer, toucher
+sans glisser = rien, jamais de diapo suivante. Deux fenêtres : repère et longueur vus au tableau pendant
+le tracé du professeur, trait reçu, Droite / cadenas partagés, droite du tableau reçue chez le
+professeur, Ctrl+Z — 63 vérifications, 0 erreur console ; `verif-outils.mjs` repassé (77 + 1 : son
+repère d'écran du professeur, pris avant l'ouverture de la palette de l'équerre, est à recalculer).
 
 ## Page d'un générateur `/entrainement/:chantier/:generatorId` (refonte du 22/11/2026)
 

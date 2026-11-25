@@ -23,6 +23,10 @@ export type NomPictogramme =
   | 'surligneur'
   | 'epingle'
   | 'masquer'
+  | 'cadenas'
+  | 'cadenas-ouvert'
+  | 'segment'
+  | 'droite'
 
 export function Pictogramme({ nom, taille = 20 }: { nom: NomPictogramme; taille?: number }) {
   return (
@@ -159,6 +163,24 @@ function trace(nom: NomPictogramme) {
           <path d="M12 13v7" />
         </>
       )
+    case 'cadenas':
+      return (
+        <>
+          <rect x="5" y="11" width="14" height="10" rx="2" />
+          <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+        </>
+      )
+    case 'cadenas-ouvert':
+      return (
+        <>
+          <rect x="5" y="11" width="14" height="10" rx="2" />
+          <path d="M8 11V7a4 4 0 0 1 7.5-2" />
+        </>
+      )
+    case 'segment':
+      return <path d="M5 17L19 7M4 14.5l2 3.5M18 6l2 3.5" />
+    case 'droite':
+      return <path d="M2 19L22 5" />
     case 'masquer':
       return (
         <>
