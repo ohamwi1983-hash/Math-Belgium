@@ -1,58 +1,32 @@
 import type { ExerciceLoiNormale } from "../../core6e/loiNormale.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, ProfilInstance, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
-import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatLoiNormale";
+import type { ProfilInstance } from "../../../export/genererFeuilleExercices";
+import { FORMAT_6GEN51 } from "../../ui6e/formatLoiNormale";
 import { phasesPourExercice } from "../../moteur6e/typesLoiNormale";
+import type { PhaseLoiNormale } from "../../moteur6e/typesLoiNormale";
+import { construireAdaptateurProvisoire } from "../adaptateurVariablesAleatoires";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLoiNormale } from "./index";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceLoiNormale>` pour `6gen51` (Loi normale) —
- * NOUVEAU, même principe que `variablesDiscretesEsperance/exportEvaluation.ts` (6gen49).
+ * Adaptateur papier de `6gen51` — PROVISOIRE (lot C ; la table de Φ en annexe et le corrigé « comme au
+ * tableau » sont le lot E).
+ * Profil (règle validée le 24/11/2026, Casio Graph Math+ : `NormCD`, `InvNormCD` avec queue gauche,
+ * droite ou centrale) : `calcul: 'exacte'` quand la calculatrice donne directement la réponse — A et B
+ * (probabilité), C et D « ≤ », « ≥ » et « centrée ». C et D « depuis 0 » (P(0 ≤ Z ≤ t) : la
+ * transformation reste à faire) et E (règle empirique) : pas de `calcul`.
  */
-
-function entete(exercice: ExerciceLoiNormale) {
-  return [...consigneGenerale(exercice), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
-}
-
-function construireEnonce(exercice: ExerciceLoiNormale): SectionExercice {
-  const phases = phasesPourExercice(exercice);
-  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
-}
-
-function construireCorrection(exercice: ExerciceLoiNormale): BlocCorrection[] {
-  const phases = phasesPourExercice(exercice);
-  const lettres = "abcdefghijklmnopqrstuvwxyz";
-  return phases.map((phase, i) => ({
-    type: "paragraphe",
-    fragments: [texte(`${lettres[i] ?? String(i + 1)}) `), latex(formatReponseAttenduePhaseLatex(exercice, phase).join(",\\ "))],
-  }));
-}
-
-/** Profil (tirage équilibré) de 6gen51.
- * Calculatrice des élèves de 6e (6h) : Casio Graph Math+ (lois binomiale, normale, de Poisson et
- * hypergéométrique intégrées, `BinomialPD`/`BinomialCD`, `NormCD`/`InvNormCD`, `HypergeoPD`…). Règle validée
- * (revue des profils, 24/11/2026) : `calcul: 'exacte'` SEULEMENT si la calculatrice donne directement la
- * réponse demandée — la variante n'est alors jamais tirée « calculatrice autorisée ». Aucun cas particulier
- * ni `forme`.
- * - A et B (probabilité « à l'aide de la table Φ », Z ou X ~ N(μ, σ)) : `NormCD(a, b, σ, μ)` donne la
- *   probabilité directement (symétrie, standardisation et table court-circuitées) → `exacte`.
- * - C et D « cumulée » (P(Z ≤ t) = p, P(X ≤ a) = p) : `InvNormCD(p, σ, μ)` donne t ou a directement → `exacte`.
- * - C et D « symétrique » / « encadrée » : la transformation de la probabilité (0,5 + p, Φ(k) − p) reste à
- *   faire avant la calculatrice → pas de `calcul`.
- * - E (règle empirique 68-95-99,7) : retrouver μ et σ, compter les côtés → pas de `calcul`. */
-export function profilLoiNormale(exercice: ExerciceLoiNormale): ProfilInstance {
-  if (exercice.famille === "A" || exercice.famille === "B") return { casParticulier: null, calcul: "exacte" };
-  if ((exercice.famille === "C" || exercice.famille === "D") && exercice.sousType === "cumulee") return { casParticulier: null, calcul: "exacte" };
+export function profilLoiNormale(e: ExerciceLoiNormale): ProfilInstance {
+  if (e.famille === "A" || e.famille === "B") return { casParticulier: null, calcul: "exacte" };
+  if ((e.famille === "C" || e.famille === "D") && e.sousType !== "depuisZero") return { casParticulier: null, calcul: "exacte" };
   return { casParticulier: null };
 }
 
-export const adaptateurEvaluationLoiNormale: AdaptateurFeuilleExercices<ExerciceLoiNormale> = {
+export const adaptateurEvaluationLoiNormale = construireAdaptateurProvisoire<ExerciceLoiNormale, PhaseLoiNormale>({
   titreDocument: "Loi normale — Évaluation",
   nomFichierBase: "loi-normale",
   genererInstance: genererExerciceLoiNormale,
   catalogueVariantes: CATALOGUE_VARIANTES,
-  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
-  construireEnonce,
-  construireCorrection,
+  genererInstanceAvecVariante: construireAvecVarianteId,
+  format: FORMAT_6GEN51,
+  phases: phasesPourExercice,
   profilInstance: profilLoiNormale,
-};
+});

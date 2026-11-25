@@ -1,39 +1,30 @@
 import type { ExerciceLoiBinomiale } from "../../core6e/loiBinomiale.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
-import { latex, texte } from "../../../export/fragmentsDocx";
-import { blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "../../ui6e/formatLoiBinomiale";
+import type { ProfilInstance } from "../../../export/genererFeuilleExercices";
+import { FORMAT_6GEN50 } from "../../ui6e/formatLoiBinomiale";
 import { phasesPourExercice } from "../../moteur6e/typesLoiBinomiale";
+import type { PhaseLoiBinomiale } from "../../moteur6e/typesLoiBinomiale";
+import { construireAdaptateurProvisoire } from "../adaptateurVariablesAleatoires";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLoiBinomiale } from "./index";
 
 /**
- * Adaptateur `AdaptateurFeuilleExercices<ExerciceLoiBinomiale>` pour `6gen50` (Loi binomiale) —
- * NOUVEAU, même principe que `variablesDiscretesEsperance/exportEvaluation.ts` (6gen49).
+ * Adaptateur papier de `6gen50` — PROVISOIRE (lots B et C ; lot E à venir). L'écran « diagramme »
+ * (trois diagrammes à comparer, propres à l'appli) n'est pas imprimé. Profil (règle du 24/11) :
+ * A et B sans `calcul` (décider, construire la loi puis E, V, σ : la démarche est évaluée) ; C exige
+ * le logarithme → `calculatriceIndispensable`.
  */
-
-function entete(exercice: ExerciceLoiBinomiale) {
-  return [...consigneGenerale(exercice), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
+export function profilLoiBinomiale(_e: ExerciceLoiBinomiale): ProfilInstance {
+  return { casParticulier: null };
 }
 
-function construireEnonce(exercice: ExerciceLoiBinomiale): SectionExercice {
-  const phases = phasesPourExercice(exercice);
-  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
-}
-
-function construireCorrection(exercice: ExerciceLoiBinomiale): BlocCorrection[] {
-  const phases = phasesPourExercice(exercice);
-  const lettres = "abcdefghijklmnopqrstuvwxyz";
-  return phases.map((phase, i) => ({
-    type: "paragraphe",
-    fragments: [texte(`${lettres[i] ?? String(i + 1)}) `), latex(formatReponseAttenduePhaseLatex(exercice, phase).join(",\\ "))],
-  }));
-}
-
-export const adaptateurEvaluationLoiBinomiale: AdaptateurFeuilleExercices<ExerciceLoiBinomiale> = {
+export const adaptateurEvaluationLoiBinomiale = construireAdaptateurProvisoire<ExerciceLoiBinomiale, PhaseLoiBinomiale>({
   titreDocument: "Loi binomiale — Évaluation",
   nomFichierBase: "loi-binomiale",
   genererInstance: genererExerciceLoiBinomiale,
   catalogueVariantes: CATALOGUE_VARIANTES,
-  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0]),
-  construireEnonce,
-  construireCorrection,
-};
+  genererInstanceAvecVariante: construireAvecVarianteId,
+  format: FORMAT_6GEN50,
+  phases: phasesPourExercice,
+  phasesPapier: (e) => phasesPourExercice(e).filter((p) => p !== "bDiagramme"),
+  profilInstance: profilLoiBinomiale,
+  calculatriceIndispensable: ["C_trouverN"],
+});

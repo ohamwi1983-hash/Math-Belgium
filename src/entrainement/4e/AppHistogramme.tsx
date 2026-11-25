@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
 import { correctionDetailleeHistogramme } from "./generateurs/histogramme/corrigeDetaille";
@@ -18,10 +18,11 @@ import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeClassementHistogramme } from "./components/EtapeClassementHistogramme";
 import { EtapeFrequencesHistogramme } from "./components/EtapeFrequencesHistogramme";
 import { EtapeTraceHistogramme } from "./components/EtapeTraceHistogramme";
-import { formatClassementAttenduTexte, formatEnonceTexte, formatFrequencesAttenduesTexte, formatTraceAttendueTexte } from "./ui/formatHistogramme";
+import { formatClasseTexte, formatClassementAttenduTexte, formatEnonceTexte, formatFrequencesAttenduesTexte, formatTraceAttendueTexte } from "./ui/formatHistogramme";
 import { EnTeteExercice } from "./components/EnTeteExercice";
-import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { ecranClos, nombreTexte, saisieTexte, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -44,24 +45,17 @@ function sessionInitiale(): EtatSessionHistogramme {
 }
 
 /** Séquence dépendant de `exercice.variante` ("effectif" : classement → trace ; "frequence" :
- * classement → frequences → trace, voir `typesHistogramme.ts`) — "trace" (toujours la dernière
- * phase) n'a jamais besoin de sa propre branche "close" : jamais consultée comme phase passée.
- * Puces purement visuelles (pas de `onSegmentClick`). */
+ * classement → frequences → trace, voir `typesHistogramme.ts`). Puces construites depuis
+ * l'historique des écrans clos (`segmentsDepuisHistorique`), cliquables (fiche en lecture seule). */
 function sequencePourExercice(exercice: EtatSessionHistogramme["exerciceCourant"]): PhaseHistogramme[] {
   return exercice.variante === "frequence" ? ["classement", "frequences", "trace"] : ["classement", "trace"];
 }
 
-function calculerSegmentsProgression(etat: EtatSessionHistogramme): EtatPuceProgression[] {
-  const sequence = sequencePourExercice(etat.exerciceCourant);
-  const indexCourant = sequence.indexOf(etat.phase);
-  return sequence.map((phase, index) => {
-    if (index === indexCourant) return "courante";
-    if (index > indexCourant) return "a-venir";
-    const revele = phase === "classement" ? etat.classementRevele : etat.frequencesRevele;
-    if (revele) return "revele";
-    const niveauAide = phase === "classement" ? etat.niveauAideClassement : etat.niveauAideFrequences;
-    return niveauAide > 0 ? "aide" : "correcte";
-  });
+const TITRES_PHASES: Record<PhaseHistogramme, string> = { classement: "Effectifs", frequences: "Fréquences", trace: "Histogramme" };
+
+/** Valeurs saisies classe par classe, même présentation que la réponse attendue (« [a ; b[ → … »). */
+function valeursParClasse(exercice: EtatSessionHistogramme["exerciceCourant"], valeurs: string[], unite = ""): string {
+  return exercice.classes.map((_, i) => `${formatClasseTexte(exercice, i)} → ${saisieTexte(valeurs[i] ?? "")}${unite}`).join(", ");
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -80,8 +74,16 @@ export function AppHistogramme() {
    * remonter leur état local — sans lui, un exercice à moins de classes gardait les champs de
    * l'exercice précédent et « Valider » restait désactivé. */
   const [numeroExercice, setNumeroExercice] = useState(0);
+  /** Écrans clos de l'exercice en cours (puces cliquables → fiche en lecture seule). */
+  const [historique, setHistorique] = useState<EcranClos[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionHistogramme) {
+  function viderHistorique() {
+    setHistorique([]);
+    setFicheOuverteIndex(null);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionHistogramme, votreReponse: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       // "trace" est toujours la phase terminale (variante "effectif" : classement → trace ;
@@ -94,6 +96,8 @@ export function AppHistogramme() {
           : etat.phase === "frequences"
             ? nouvelEtat.frequencesRevele
             : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.traceRevele;
+      const niveauAide = etat.phase === "classement" ? etat.niveauAideClassement : etat.phase === "frequences" ? etat.niveauAideFrequences : etat.niveauAideTrace;
+      setHistorique((h) => [...h, ecranClos(TITRES_PHASES[etat.phase], votreReponse, revele, niveauAide > 0, reponseAttendueEcran(), corrigeDetailleEcranCourant())]);
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
@@ -102,13 +106,17 @@ export function AppHistogramme() {
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    viderHistorique();
     setNumeroExercice((n) => n + 1);
     setEtat(demarrerSessionHistogramme(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteHistogramme)));
   }
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    if (enAttente.etatSuivant.terminee) setNumeroExercice((n) => n + 1);
+    if (enAttente.etatSuivant.terminee) {
+      setNumeroExercice((n) => n + 1);
+      viderHistorique();
+    }
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -116,19 +124,30 @@ export function AppHistogramme() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
+  /** Texte de la réponse attendue (la fiche le montre tel quel ; l'écran l'encadre en `.answer-reveal`). */
+  function reponseAttendueEcran() {
+    return (
+      <>
+        {phase === "classement" && <>Effectifs attendus : {formatClassementAttenduTexte(exercice)}</>}
+        {phase === "frequences" && <>Fréquences attendues : {formatFrequencesAttenduesTexte(exercice)}</>}
+        {phase === "trace" && <>Hauteurs attendues : {formatTraceAttendueTexte(exercice)}</>}
+      </>
+    );
+  }
+
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeHistogramme(exercice), lettreEtape(sequencePourExercice(exercice).indexOf(phase)))} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: (
-          <div className="answer-reveal">
-            {phase === "classement" && <>Effectifs attendus : {formatClassementAttenduTexte(exercice)}</>}
-            {phase === "frequences" && <>Fréquences attendues : {formatFrequencesAttenduesTexte(exercice)}</>}
-            {phase === "trace" && <>Hauteurs attendues : {formatTraceAttendueTexte(exercice)}</>}
-          </div>
-        ),
+        reponseAttendue: <div className="answer-reveal">{reponseAttendueEcran()}</div>,
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeHistogramme(exercice), lettreEtape(sequencePourExercice(exercice).indexOf(phase)))} />,
+        corrigeDetaille: corrigeDetailleEcranCourant(),
       }
     : null;
 
@@ -142,7 +161,7 @@ export function AppHistogramme() {
       </header>
 
       <main className="card">
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={segmentsDepuisHistorique(historique, sequencePourExercice(exercice).length, !enAttente)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
 
         <div className="card-body">
           <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={null} />
@@ -154,7 +173,7 @@ export function AppHistogramme() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideClassement}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseClassement(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseClassement(etat, reponse), valeursParClasse(exercice, reponse))}
               validation={validation}
             />
           ) : phase === "frequences" ? (
@@ -165,7 +184,7 @@ export function AppHistogramme() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideFrequences}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseFrequences(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseFrequences(etat, reponse), valeursParClasse(exercice, reponse, " %"))}
               validation={validation}
             />
           ) : (
@@ -176,12 +195,16 @@ export function AppHistogramme() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideTrace}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseTrace(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseTrace(etat, reponse), valeursParClasse(exercice, reponse.map(nombreTexte), exercice.variante === "frequence" ? " %" : ""))}
               validation={validation}
             />
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex].entree} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

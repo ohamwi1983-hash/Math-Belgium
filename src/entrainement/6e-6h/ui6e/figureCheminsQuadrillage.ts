@@ -29,7 +29,7 @@ interface Geo {
 function geometrie(e: ExerciceChemins): Geo {
   const s = Math.min(42, Math.floor(250 / e.m), Math.floor(165 / e.n));
   const x0 = 30;
-  const y0 = 26;
+  const y0 = 34; // place pour l'étiquette « B » au-dessus du coin (rognée à 26 quand l'énoncé est replié)
   return { s, x0, y0, L: x0 * 2 + e.m * s, H: y0 + e.n * s + 30 };
 }
 /** Coordonnées écran du nœud (i colonnes à droite de A, j lignes au-dessus). */

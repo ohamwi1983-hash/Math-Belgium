@@ -5781,3 +5781,50 @@ accents, caractères ignorés, 25 lettres (champ intact), mot vide ; 2ⁿ mots n
 distinctes dans le cadre, 0 chevauchement, colonnes = Cₙᵏ) ; 160 réglages (n, ε) comparés à `Math.pow`
 (valeur, approximation, erreur). Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667 (9 ateliers du
 chapitre). Scripts et captures : `scratchpad/g2-6e7/`.
+
+## 6e (6h), Chapitre 8 — lot H1 de l'audit (nouveaux générateurs 6gen110–6gen115, 25/11/2026)
+
+Six générateurs nouveaux sur le socle `AppEcransTrigo` (détail, profils et mesures : `.claude/rules/feuilles-evaluations.md`,
+section « 6e ch. 8, lot H1 ») : 6gen110 variance et écart-type (§ 1), 6gen111 Y = aX + b (§ 1), 6gen112 fonction de
+répartition (§ 3), 6gen113 densité de probabilité (§ 3), 6gen114 discrète ou continue ? (§ 4, Connaître), 6gen115 loi
+uniforme continue (§ 5). Cartes « S'entraîner » ajoutées en fin de section (6gen110 et 6gen111 après 6gen49) ; registres
+par ajout (`registry.ts`, `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts` : union et entrées
+pilotes avec processus, `regroupementsPapier.ts` : 6gen111, 6gen114). Aucun bloc de cours ajouté : le cours ne contient pas
+encore E(aX + b) = aE(X) + b et V(aX + b) = a²V(X) (6gen111, démonstration D2 du lot F), ni P(a < X ≤ b) = F(b) − F(a) pour
+une variable discrète (6gen112 escalier), ni « trouver k » (6gen113) ni le sens inverse de la loi uniforme (6gen115).
+
+## 6e (6h), Chapitre 8 — lots B et C de l'audit (générateurs 6gen49–6gen53, 25/11/2026)
+
+Lot B (socle du ch. 7 réutilisé, détail dans `feuilles-evaluations.md`, « 6e ch. 8 (lots B et C) ») : les
+cinq moteurs, écrans et récapitulatifs d'origine sont remplacés par `AppCombinatoire` (illisible gratuit,
+« % » et « 19! » lus, choix fermés seuls et à une tentative — plus aucun bouton recouvert par un champ (G17) —,
+`?code=`, champs vidés, messages ciblés, explication après échec, corrigé consultable après chaque réponse),
+la lecture `saisieVariablesAleatoires.ts` (consigne d'arrondi explicite, virgule décimale, vérification
+exacte : plus de tolérance 0,01) ; plus aucun exemple de champ ni aide qui donne la réponse ; verdicts tirés
+avant les nombres ; variantes du sélecteur qui varient. Lot C :
+- 6gen49 : A, conditions variées des deux côtés (≤ < ≥ > = ≠ pair impair entre hors), verdict « contraires »
+  50 / 50, aucun événement certain / impossible / doublé, la moitié des « non contraires » ont P₁ + P₂ = 1 ;
+  loi en vrai tableau (`TableauLoi`) ; B contextes à effectifs (dé à 6–12 faces avec gains groupés, roue,
+  enquête) et hypergéométrique nommée, X défini ; C mise positive, conclusion favorable / défavorable /
+  équitable demandée (tirée au tiers), « imposer » : mise équitable puis jugement d'une mise proposée. V et σ :
+  renvoyés au futur 6gen110 (carte réécrite).
+- 6gen50 : A reconnaître (binomiale 50 / 50 ; sinon UNE condition échoue : nombre d'épreuves non fixé, épreuves
+  dépendantes ou p qui change, X qui ne compte pas des succès), puis n et p (« 20 % » accepté) ; B recentrée
+  (décision 3) : loi complète de 𝓑(n ; p), n ≤ 5, diagramme à reconnaître parmi trois (juste, miroir, p = 0,5),
+  E et V exactes, σ ; C trouver n (60 couples, inéquation jugée par son ensemble de solutions, n isolé, sens qui
+  change). Anciennes B « exactement… tous » retirées (`retiree`).
+- 6gen51 refondu : table de Φ consultable (`TablePhi`, composant partagé créé ici, le cours n'en avait pas
+  encore) sous chaque écran A–D, courbe de Gauss hachurée, référence = lecture de table (z au centième, Φ à
+  4 décimales) ou calculatrice, lecture inverse : deux cases voisines acceptées ; écrans « écriture avec Φ »
+  et « égalité de table » (choix seuls) ; sens inverse avec cibles NÉGATIVES (symétrie) et forme « ≥ » ajoutée
+  en fin ; contextes réalistes (μ > 0), x tels que z tombe pile au centième ; E règle empirique (68,3 / 95,4 /
+  99,7) ou valeur exacte acceptées.
+- 6gen52 (Transférer) : A épreuve composée cohérente (jeu à deux épreuves, double six, pièce et dé, deux roues ;
+  cartes réelles en direct) puis trouver n ; D vrai Bayes P(Cⱼ | S), catégorie tirée, messages « a priori »,
+  « conditionnement inversé », « intersection » ; F loi reconstruite, E(X), total attendu ; B, C, E retirées
+  (décision 3, `retiree`).
+- 6gen53 : A verdict « approximable » 50 / 50 (sinon une condition échoue au tiers), λ = np, P(X = k) ;
+  B λ ≤ 15, contextes dans les conditions du cours (plus de gauchers à 12 %), X défini, k près de λ et
+  résultat entre 0,005 et 0,995 ; écran « stratégie » supprimé (le type de question le donnait).
+Cartes du chapitre (descriptions de 6gen49–53) réécrites. Hors périmètre : le cours (agent AFD), 6gen110–122,
+le papier définitif (lot E : corrigé « comme au tableau », niveaux, profils d'équilibre, annexe Φ).

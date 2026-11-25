@@ -1,474 +1,336 @@
-import type { EvenementLoiA, ExerciceEsperanceA, ExerciceEsperanceB, ExerciceEsperanceC, ExerciceVariablesDiscretesEsperance } from "../core6e/variablesDiscretesEsperance.types";
+import type { ExerciceEsperanceA, ExerciceVariablesDiscretesEsperance, PredicatA } from "../core6e/variablesDiscretesEsperance.types";
+import { indicesPredicat } from "../generateurs6e/variablesDiscretesEsperance/familleA";
+import { esperanceB, loiB } from "../generateurs6e/variablesDiscretesEsperance/familleB";
+import { esperanceBruteC, esperanceNetteC } from "../generateurs6e/variablesDiscretesEsperance/familleC";
+import { probabiliteEvenementA } from "../moteur6e/verificationVariablesDiscretesEsperance";
 import type { PhaseVariablesDiscretesEsperance } from "../moteur6e/typesVariablesDiscretesEsperance";
+import { versNombre } from "../moteur6e/saisieCombinatoire";
+import type { Rationnel } from "../moteur6e/saisieCombinatoire";
+import { vautEnviron } from "../moteur6e/saisieVariablesAleatoires";
+import { arrondiLatex, decimalLatex, f, fractionLatex, m, t } from "./fragmentsCombinatoire";
+import type { ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen49`. Dispatch sur
- * `exercice.famille` PUIS `sousType` (B/C) PUIS `phase`, mirroir `formatDenombrementFondamental.ts`
- * (6gen43).
- *
- * **Vigilance signe orphelin / groupe LaTeX vide / texte français en mode maths** (bug déjà
- * rencontré et corrigé sur plusieurs générateurs 6e, documenté par CLAUDE.md) — toute clause en
- * français mêlée à du LaTeX passe TOUJOURS par `\text{...}`, jamais du texte brut en mode maths ;
- * chaque phrase française reste un fragment `string[]` COURT (jamais une phrase longue dans un
- * seul bloc `\text{...}`, voir le bug n°2 documenté par `6gen51`). Couverture de régression :
- * `formatVariablesDiscretesEsperance.test.ts`, scan sur de nombreux tirages aléatoires.
+ * Textes de `6gen49` (6e ch. 8, § 1) — audit, lots B et C : virgule décimale partout (plus
+ * « 0.21875 »), X toujours défini, aucune donnée découpée en formules centrées (prose avec KaTeX en
+ * ligne ; la loi de A est un vrai tableau, `TableauLoi`), aucun exemple de champ, aides à deux niveaux
+ * qui ne donnent jamais la réponse (avant : l'aide 2 de C affichait E, réponse de l'écran), conclusion
+ * du jeu demandée.
  */
 
-export type TypeChamp = "texte" | "choix";
+type E = ExerciceVariablesDiscretesEsperance;
+type P = PhaseVariablesDiscretesEsperance;
 
-export interface OptionChoix {
-  valeur: string;
-  label: string;
-}
+export const ANNONCE_PROBABILITES_49 = "Donne les probabilités sous forme exacte (fraction ou décimal) ou arrondies au millième.";
+const ANNONCE_ESPERANCE_49 = "Espérance : valeur exacte ou arrondie au centième.";
 
-export interface ChampDef {
-  type: TypeChamp;
-  label: string;
-  placeholder?: string;
-  options?: OptionChoix[];
-}
-
-export interface AideAvecLatex {
-  texte: string;
-  latex: string | null;
-}
-
-const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
-
-/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`,
- * rendu via `components/RenduFragments.tsx`. */
-export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
-
-function texte(valeur: string): FragmentConsigne {
-  return { type: "texte", valeur };
-}
-function latexFrag(valeur: string): FragmentConsigne {
-  return { type: "latex", valeur };
-}
-
-function champTexte(label: string, placeholder: string): ChampDef {
-  return { type: "texte", label, placeholder };
-}
-
-// ============================================================================
-// Petits formateurs numériques/LaTeX partagés.
-// ============================================================================
-
-function pgcd(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b !== 0) [a, b] = [b, a % b];
-  return a || 1;
-}
-
-/** Fraction EXACTE irréductible en LaTeX (jamais de décimal, convention CLAUDE.md) — utilisée pour
- * toute probabilité, stockée en fraction num/den exacte sur le core. */
-export function fractionLatex(num: number, den: number): string {
-  let n = num;
-  let d = den;
-  if (d < 0) {
-    n = -n;
-    d = -d;
-  }
-  const g = pgcd(n, d);
-  n /= g;
-  d /= g;
-  if (d === 1) return `${n}`;
-  return n < 0 ? `-\\dfrac{${-n}}{${d}}` : `\\dfrac{${n}}{${d}}`;
-}
-
-function formatDecimal(v: number, decimales: number): string {
-  return v.toFixed(decimales).replace(".", "{,}");
-}
-
-/** Un nombre proche d'un entier s'affiche en entier (jamais "3,00") ; sinon décimal à 2 décimales. */
-function nombreLatex(v: number): string {
-  if (Math.abs(v - Math.round(v)) < 1e-9) return `${Math.round(v)}`;
-  return formatDecimal(v, 2);
-}
-
-/** `valeur − m`, signe géré explicitement (jamais de double signe orphelin "--", voir bug n°3 de
- * `6gen51`) — réutilisée pour le gain net ("gainBrut−m", famille C "imposer") ET pour E(m)
- * ("esperanceBrute−m"). */
-export function expressionMoinsMLatex(valeur: number): string {
-  if (Math.abs(valeur) < 1e-9) return "-m";
-  const texte = nombreLatex(Math.abs(valeur));
-  return valeur > 0 ? `${texte}-m` : `-${texte}-m`;
-}
-
-// ============================================================================
-// Famille A — Loi discrète donnée : cumuls et événements contraires.
-// ============================================================================
-
-/** Table `x_i`/`p_i` en LaTeX (array 2 lignes) — `p_i` toujours en fraction irréductible. */
-function tableLoiLatexA(e: ExerciceEsperanceA): string {
-  const colonnes = "c".repeat(e.xs.length);
-  const ligneX = e.xs.map((x) => `${x}`).join(" & ");
-  const ligneP = e.psNumerateurs.map((num) => fractionLatex(num, e.psDenominateur)).join(" & ");
-  return `\\begin{array}{c|${colonnes}}x_i & ${ligneX}\\\\\\hline p_i & ${ligneP}\\end{array}`;
-}
-
-/** Notation compacte KaTeX d'un événement — `X\geq k`/`X\leq k`/`X=k`/`k_1\leq X\leq k_2`. */
-export function libelleEvenementLatexA(e: EvenementLoiA, xs: number[]): string {
-  switch (e.type) {
-    case "auMoins":
-      return `X\\geq ${xs[e.iMin]}`;
-    case "auPlus":
-      return `X\\leq ${xs[e.iMin]}`;
-    case "exact":
-      return `X=${xs[e.iMin]}`;
-    case "intervalle":
-      return `${xs[e.iMin]}\\leq X\\leq ${xs[e.iMax ?? e.iMin]}`;
+/** Condition d'un événement, en fragments (« $X\leq 3$ », « $X$ est pair »). */
+export function predicatFragments(p: PredicatA): FragmentConsigne[] {
+  switch (p.t) {
+    case "le":
+      return [m(`X\\leq ${p.k}`)];
+    case "lt":
+      return [m(`X<${p.k}`)];
+    case "ge":
+      return [m(`X\\geq ${p.k}`)];
+    case "gt":
+      return [m(`X>${p.k}`)];
+    case "eq":
+      return [m(`X=${p.k}`)];
+    case "ne":
+      return [m(`X\\neq ${p.k}`)];
+    case "pair":
+      return [m("X"), t(" est pair")];
+    case "impair":
+      return [m("X"), t(" est impair")];
+    case "entre":
+      return [m(`${p.a}\\leq X\\leq ${p.b}`)];
+    case "hors":
+      return [m(`X<${p.a}`), t(" ou "), m(`X>${p.b}`)];
   }
 }
 
-/** Même notation, texte BRUT (jamais du LaTeX) — pour un `label` de `ChampDef` (rendu tel quel,
- * jamais passé par KaTeX, voir `EtapeChampsVariablesDiscretesEsperance.tsx`). */
-function libelleEvenementTexteA(e: EvenementLoiA, xs: number[]): string {
-  switch (e.type) {
-    case "auMoins":
-      return `X ≥ ${xs[e.iMin]}`;
-    case "auPlus":
-      return `X ≤ ${xs[e.iMin]}`;
-    case "exact":
-      return `X = ${xs[e.iMin]}`;
-    case "intervalle":
-      return `${xs[e.iMin]} ≤ X ≤ ${xs[e.iMax ?? e.iMin]}`;
-  }
+function evenementsA(e: ExerciceEsperanceA): FragmentConsigne[] {
+  return [t("On considère les événements "), m("E_1"), t(" : « "), ...predicatFragments(e.e1), t(" » et "), m("E_2"), t(" : « "), ...predicatFragments(e.e2), t(" ».")];
 }
 
-/** Ensemble d'indices couverts par un événement — TOUJOURS un intervalle contigu de `xs` (voir
- * en-tête `generateurs6e/variablesDiscretesEsperance/familleA.ts`) — notation compacte quel que
- * soit le nombre de valeurs couvertes. */
-function plageLatexA(indices: number[], xs: number[]): string {
-  if (indices.length === 1) return `X=${xs[indices[0]]}`;
-  return `${xs[indices[0]]}\\leq X\\leq ${xs[indices[indices.length - 1]]}`;
+function probaLatex(r: Rationnel): string {
+  const x = versNombre(r);
+  const dec = Number(x.toFixed(6));
+  if (Math.abs(dec - x) < 1e-12) return decimalLatex(x);
+  return `${fractionLatex(r)}\\approx ${arrondiLatex(x, 3)}`;
 }
 
-export function consigneGeneraleA(): FragmentConsigne[] {
-  return [texte("Voici la loi de probabilité d'une variable aléatoire discrète X. Calcule les 2 probabilités demandées, puis détermine si les 2 événements considérés sont contraires.")];
+function valeurLatex(r: Rationnel, d = 2): string {
+  const x = versNombre(r);
+  if (Math.abs(Number(x.toFixed(6)) - x) < 1e-12) return decimalLatex(x);
+  return `${fractionLatex(r)}\\approx ${arrondiLatex(x, d)}`;
 }
 
-export function blocDonneesA(e: ExerciceEsperanceA): string[] {
-  return [tableLoiLatexA(e), `\\text{Événement 1 : }${libelleEvenementLatexA(e.evenement1, e.xs)}`, `\\text{Événement 2 : }${libelleEvenementLatexA(e.evenement2, e.xs)}`];
+function euros(x: number): string {
+  return `${decimalLatex(x)}\\ \\text{€}`;
 }
 
-export function consigneEcranA(phase: PhaseVariablesDiscretesEsperance): FragmentConsigne[] {
-  if (phase === "aEcran1") return [texte("Identifie les valeurs de xᵢ incluses dans l'événement 1, puis additionne les pᵢ correspondants.")];
-  if (phase === "aEcran2") return [texte("Fais de même pour l'événement 2.")];
-  return [texte("Les 2 événements ci-dessus sont-ils contraires ?")];
+function eurosTexte(x: number): string {
+  return `${x.toFixed(Number.isInteger(x) ? 0 : 2).replace(".", ",")} €`;
 }
 
-export function etatActuelA(e: ExerciceEsperanceA, phase: PhaseVariablesDiscretesEsperance): string[] | null {
-  if (phase === "aEcran2") return [`P(${libelleEvenementLatexA(e.evenement1, e.xs)})=${fractionLatex(e.probabilite1Numerateur, e.psDenominateur)}\\text{ (confirmée)}`];
-  if (phase === "aEcran3") {
-    return [
-      `P(${libelleEvenementLatexA(e.evenement1, e.xs)})=${fractionLatex(e.probabilite1Numerateur, e.psDenominateur)}\\text{ (confirmée)}`,
-      `P(${libelleEvenementLatexA(e.evenement2, e.xs)})=${fractionLatex(e.probabilite2Numerateur, e.psDenominateur)}\\text{ (confirmée)}`,
-    ];
-  }
-  return null;
+function listeValeursLatex(e: ExerciceEsperanceA, indices: number[]): string {
+  return `\\{${indices.map((i) => e.xs[i]).join("\\,;\\,")}\\}`;
 }
 
-export function champsA(e: ExerciceEsperanceA, phase: PhaseVariablesDiscretesEsperance): ChampDef[] {
-  if (phase === "aEcran1") return [champTexte(`P(${libelleEvenementTexteA(e.evenement1, e.xs)}) =`, "ex : 0,6 ou 3/5")];
-  if (phase === "aEcran2") return [champTexte(`P(${libelleEvenementTexteA(e.evenement2, e.xs)}) =`, "ex : 0,4 ou 2/5")];
-  return [
-    {
-      type: "choix",
-      label: "Les 2 événements sont =",
-      options: [
-        { valeur: "contraires", label: "Contraires" },
-        { valeur: "non_contraires", label: "Non contraires" },
-      ],
-    },
-  ];
+function sommeTermesA(e: ExerciceEsperanceA, indices: number[]): string {
+  return indices.map((i) => decimalLatex(e.poids[i] / 20)).join("+");
 }
 
-export function niveauAideMaxA(phase: PhaseVariablesDiscretesEsperance): number {
-  return phase === "aEcran3" ? 2 : 0;
+/** Ensembles voisins (symbole large / strict confondu) d'un prédicat, pour un message ciblé. */
+function voisinsStrictLarge(p: PredicatA, xs: number[]): number[][] {
+  const v: PredicatA[] = [];
+  if (p.t === "le") v.push({ t: "lt", k: p.k });
+  if (p.t === "lt") v.push({ t: "le", k: p.k });
+  if (p.t === "ge") v.push({ t: "gt", k: p.k });
+  if (p.t === "gt") v.push({ t: "ge", k: p.k });
+  return v.map((q) => indicesPredicat(q, xs));
 }
 
-export function aideNiveau1A(): AideAvecLatex {
-  return { texte: "Deux événements sont contraires seulement si leur intersection est VIDE ET si leur union est l'univers complet — pas seulement si leurs probabilités semblent complémentaires.", latex: null };
+const OPTIONS_STATUT = [
+  { valeur: "favorable", label: "favorable au joueur" },
+  { valeur: "defavorable", label: "défavorable au joueur" },
+  { valeur: "equitable", label: "équitable" },
+];
+
+function libelleStatut(s: string): string {
+  return s === "favorable" ? "favorable au joueur" : s === "defavorable" ? "défavorable au joueur" : "équitable";
 }
 
-export function aideNiveau2A(e: ExerciceEsperanceA): AideAvecLatex {
-  const plage1 = plageLatexA(e.indices1, e.xs);
-  const plage2 = plageLatexA(e.indices2, e.xs);
-  return { texte: "Valeurs couvertes par chacun des 2 événements (chevauchement éventuel non signalé, à toi de le repérer) :", latex: `${plage1}\\text{ (év. 1) ; }${plage2}\\text{ (év. 2)}` };
-}
-
-// ============================================================================
-// Famille B — Construire une loi de probabilité et calculer l'espérance.
-// ============================================================================
-
-export function consigneGeneraleB(): FragmentConsigne[] {
-  return [texte("Construis la loi de probabilité complète de X, puis calcule son espérance "), latexFrag("E(X)=\\sum x_i\\cdot\\, p_i"), texte(".")];
-}
-
-export function blocDonneesB(e: ExerciceEsperanceB): string[] {
-  if (e.sousType === "contexteDirect") {
-    const lignes = e.issues.map((issue) => `\\text{${issue.label} : gain }${issue.valeur}\\text{, effectif }${issue.effectif}\\text{ sur }${e.totalEffectifs}`);
-    return [...e.phraseContexte, ...lignes];
-  }
-  return [`N=${e.N}\\text{ (population totale)}`, `K=${e.K}\\text{ (favorables)}`, `n=${e.n}\\text{ (tirages sans remise)}`, "X=\\text{nombre de succès parmi les tirages}"];
-}
-
-export function consigneEcranB(e: ExerciceEsperanceB, phase: PhaseVariablesDiscretesEsperance): FragmentConsigne[] {
-  if (phase === "bEcran1") {
-    return e.sousType === "contexteDirect"
-      ? [texte("Pour chaque résultat possible, reporte sa valeur (déjà connue du contexte) et calcule sa probabilité à partir des effectifs.")]
-      : [texte("Pour chaque valeur possible de k, reporte k et calcule P(X=k) avec la formule hypergéométrique.")];
-  }
-  return [texte("Calcule l'espérance "), latexFrag("E(X)=\\sum x_i\\cdot\\, p_i"), texte(" à partir de la loi CONFIRMÉE de l'étape précédente.")];
-}
-
-function tableLoiConfirmeeLatexB(e: ExerciceEsperanceB): string {
-  const colonnes = "c".repeat(e.loi.length);
-  const ligneX = e.loi.map((l) => `${l.valeur}`).join(" & ");
-  const ligneP = e.loi.map((l) => fractionLatex(l.probabiliteNumerateur, l.probabiliteDenominateur)).join(" & ");
-  return `\\begin{array}{c|${colonnes}}x_i & ${ligneX}\\\\\\hline p_i & ${ligneP}\\end{array}`;
-}
-
-export function etatActuelB(e: ExerciceEsperanceB, phase: PhaseVariablesDiscretesEsperance): string[] | null {
-  if (phase === "bEcran2") return [`${tableLoiConfirmeeLatexB(e)}\\text{ (confirmée)}`];
-  return null;
-}
-
-export function champsB(e: ExerciceEsperanceB, phase: PhaseVariablesDiscretesEsperance): ChampDef[] {
-  if (phase === "bEcran1") {
-    if (e.sousType === "contexteDirect") {
-      return e.issues.flatMap((issue) => [champTexte(`${issue.label} — gain =`, "ex : 5"), champTexte(`${issue.label} — p =`, "ex : 0,3 ou 3/10")]);
+export const FORMAT_6GEN49: FormatCombinatoire<E, P> = {
+  consigneGenerale(e) {
+    if (e.famille === "A") return [t("La loi de probabilité de "), m("X"), t(" est donnée dans le tableau. "), t(ANNONCE_PROBABILITES_49)];
+    if (e.famille === "B") return [t("On note "), m("X"), t(` ${e.definitionX}. Construis la loi de `), m("X"), t(", puis calcule son espérance. "), t(ANNONCE_PROBABILITES_49), t(" "), t(ANNONCE_ESPERANCE_49)];
+    if (e.sousType === "verifier") return [t("On note "), m("X"), t(" le gain net du joueur (montant reçu moins la mise), en euros. Valeurs exactes ou arrondies au centième.")];
+    return [t("On note "), m("G"), t(" le montant reçu par le joueur (avant de retirer la mise), en euros. Valeurs exactes ou arrondies au centième.")];
+  },
+  donnees(e): FragmentConsigne[][] {
+    if (e.famille === "A") return [evenementsA(e)];
+    if (e.famille === "B") return [[t(e.texte)]];
+    if (e.sousType === "verifier") return [[t(e.texte)], [t(`La mise est de ${eurosTexte(e.mise)}.`)]];
+    return [[t(e.texte)]];
+  },
+  consigneEcran(e, p) {
+    switch (p) {
+      case "aP1":
+        return [t("Calcule "), m("P(E_1)"), t(".")];
+      case "aP2":
+        return [t("Calcule "), m("P(E_2)"), t(".")];
+      case "aContraires":
+        return [t("Les événements "), m("E_1"), t(" et "), m("E_2"), t(" sont-ils contraires ?")];
+      case "bLoi":
+        return [t("Complète la loi de "), m("X"), t(" : donne la probabilité de chaque valeur possible.")];
+      case "bEsperance":
+        return [t("Calcule l'espérance "), m("E(X)"), t(".")];
+      case "cEsperanceNette":
+        return [t("Calcule l'espérance "), m("E(X)"), t(" du gain net.")];
+      case "cConclusion":
+        return [t("Pour le joueur, ce jeu est…")];
+      case "cEsperanceBrute":
+        return [t("Calcule l'espérance "), m("E(G)"), t(" du montant reçu.")];
+      case "cMise":
+        return [t("Quelle mise "), m("m"), t(" rend le jeu équitable ?")];
+      case "cJugerMise":
+        return e.famille === "C" ? [t(`L'organisateur fixe finalement la mise à ${eurosTexte(e.mise)}. Pour le joueur, le jeu est alors…`)] : [];
     }
-    return e.loi.flatMap((_, i) => [champTexte(`k n°${i + 1} — k =`, "ex : 1"), champTexte(`k n°${i + 1} — P(X=k) =`, "ex : 0,45 ou 9/20")]);
-  }
-  return [champTexte("E(X) =", "ex : 1,2")];
-}
-
-export function niveauAideMaxB(e: ExerciceEsperanceB, phase: PhaseVariablesDiscretesEsperance): number {
-  return e.sousType === "hypergeometrique" && phase === "bEcran1" ? 2 : 0;
-}
-
-export function aideNiveau1B(): AideAvecLatex {
-  return { texte: "Rappel de la formule hypergéométrique, pour chaque valeur de k possible :", latex: "P(X=k)=\\dfrac{C(K,k)\\cdot C(N-K,n-k)}{C(N,n)}" };
-}
-
-export function aideNiveau2B(e: ExerciceEsperanceB): AideAvecLatex {
-  if (e.sousType !== "hypergeometrique") return AUCUNE_AIDE;
-  const premiere = e.loi[0];
-  return { texte: "Une des valeurs de la table déjà calculée (les autres restent à toi) :", latex: `P(X=${premiere.valeur})=${fractionLatex(premiere.probabiliteNumerateur, premiere.probabiliteDenominateur)}` };
-}
-
-// ============================================================================
-// Famille C — Jeu équitable, espérance nulle.
-// ============================================================================
-
-export function consigneGeneraleC(sousType: ExerciceEsperanceC["sousType"]): FragmentConsigne[] {
-  if (sousType === "verifier") return [texte("Calcule l'espérance de gain net E, puis conclus si le jeu est favorable au joueur, défavorable, ou équitable.")];
-  return [texte("Un joueur doit payer une mise m pour jouer (à soustraire de chaque gain). Détermine la valeur de m qui rend le jeu équitable ("), latexFrag("E=0"), texte(").")];
-}
-
-export function blocDonneesC(e: ExerciceEsperanceC): string[] {
-  const lignes = e.issues.map((issue) => `\\text{${issue.label} : gain brut }${issue.gainBrut}\\text{, probabilité }${fractionLatex(issue.probabiliteNumerateur, issue.probabiliteDenominateur)}`);
-  const base = [...e.phraseContexte, ...lignes];
-  if (e.sousType === "imposer") base.push("\\text{Mise à payer pour jouer : }m\\text{ (inconnue)}");
-  return base;
-}
-
-export function consigneEcranC(phase: PhaseVariablesDiscretesEsperance): FragmentConsigne[] {
-  switch (phase) {
-    case "cVerifierEcran1":
-      return [texte("Établis la loi du gain net (ici, gain net = gain brut) : reporte, pour chaque issue, son gain net et sa probabilité.")];
-    case "cVerifierEcran2":
-      return [texte("Calcule l'espérance "), latexFrag("E=\\sum p_i\\cdot\\, \\text{gain}_i"), texte(" à partir de la loi CONFIRMÉE de l'étape précédente.")];
-    case "cImposerEcran1":
-      return [texte("Établis la loi du gain net EN FONCTION DE m (gain net = gain brut − m) : reporte, pour chaque issue, l'expression du gain net et sa probabilité.")];
-    case "cImposerEcran2":
-      return [texte("Calcule l'expression de "), latexFrag("E(m)=\\sum p_i\\cdot\\, (\\text{gain net})_i"), texte(", en fonction de m, à partir de la loi CONFIRMÉE de l'étape précédente.")];
-    default:
-      return [texte("Résous "), latexFrag("E(m)=0"), texte(" pour trouver la valeur de m qui rend le jeu équitable, à partir de l'expression CONFIRMÉE de l'étape précédente.")];
-  }
-}
-
-/** ACCUMULE les écrans déjà confirmés (correctif transversal — voir CLAUDE.md/`docs/historique-
- * 6e.md`, même bug que sur `6gen1`/`6gen58` : `cImposerEcran3` omettait la loi(m) confirmée de
- * `cImposerEcran1`, ne montrant que l'espérance E(m) de `cImposerEcran2`). Plus ancien en premier. */
-export function etatActuelC(e: ExerciceEsperanceC, phase: PhaseVariablesDiscretesEsperance): string[] | null {
-  if (phase === "cVerifierEcran2") {
-    const lignes = e.issues.map((issue) => `${issue.gainBrut}\\text{ (p=}${fractionLatex(issue.probabiliteNumerateur, issue.probabiliteDenominateur)}\\text{)}`);
-    return [`\\text{Loi confirmée : }${lignes.join("\\text{, }")}`];
-  }
-  if (phase === "cImposerEcran2" || phase === "cImposerEcran3") {
-    const lignes = e.issues.map((issue) => `${expressionMoinsMLatex(issue.gainBrut)}\\text{ (p=}${fractionLatex(issue.probabiliteNumerateur, issue.probabiliteDenominateur)}\\text{)}`);
-    const ligneLoi = `\\text{Loi confirmée (étape 1) : }${lignes.join("\\text{, }")}`;
-    if (phase === "cImposerEcran2") return [ligneLoi];
-    return [ligneLoi, `E(m)=${expressionMoinsMLatex(e.esperanceBrute)}\\text{ (confirmée, étape 2)}`];
-  }
-  return null;
-}
-
-export function champsC(e: ExerciceEsperanceC, phase: PhaseVariablesDiscretesEsperance): ChampDef[] {
-  switch (phase) {
-    case "cVerifierEcran1":
-      return e.issues.flatMap((issue) => [champTexte(`${issue.label} — net =`, "ex : 10"), champTexte(`${issue.label} — p =`, "ex : 0,4 ou 2/5")]);
-    case "cVerifierEcran2":
-      return [champTexte("E =", "ex : 1")];
-    case "cImposerEcran1":
-      return e.issues.flatMap((issue) => [champTexte(`${issue.label} — net(m) =`, "ex : 8-m"), champTexte(`${issue.label} — p =`, "ex : 0,5 ou 1/2")]);
-    case "cImposerEcran2":
-      return [champTexte("E(m) =", "ex : 2-m")];
-    default:
-      return [champTexte("m =", "ex : 2")];
-  }
-}
-
-export function niveauAideMaxC(phase: PhaseVariablesDiscretesEsperance): number {
-  return phase === "cVerifierEcran2" ? 2 : 0;
-}
-
-export function aideNiveau1C(): AideAvecLatex {
-  return { texte: "Rappel : E>0 signifie que le jeu est favorable au joueur, E<0 défavorable, E=0 équitable.", latex: "E>0\\quad E<0\\quad E=0" };
-}
-
-export function aideNiveau2C(e: ExerciceEsperanceC): AideAvecLatex {
-  return { texte: "Valeur de E déjà calculée (à toi de conclure sur le caractère favorable/défavorable/équitable) :", latex: nombreLatex(e.esperanceBrute) };
-}
-
-// ============================================================================
-// Dispatch commun.
-// ============================================================================
-
-export function consigneGenerale(exercice: ExerciceVariablesDiscretesEsperance): FragmentConsigne[] {
-  switch (exercice.famille) {
-    case "A":
-      return consigneGeneraleA();
-    case "B":
-      return consigneGeneraleB();
-    case "C":
-      return consigneGeneraleC(exercice.sousType);
-  }
-}
-
-export function blocDonnees(exercice: ExerciceVariablesDiscretesEsperance): string[] {
-  switch (exercice.famille) {
-    case "A":
-      return blocDonneesA(exercice);
-    case "B":
-      return blocDonneesB(exercice);
-    case "C":
-      return blocDonneesC(exercice);
-  }
-}
-
-export function consigneEcran(exercice: ExerciceVariablesDiscretesEsperance, phase: PhaseVariablesDiscretesEsperance): FragmentConsigne[] {
-  switch (exercice.famille) {
-    case "A":
-      return consigneEcranA(phase);
-    case "B":
-      return consigneEcranB(exercice, phase);
-    case "C":
-      return consigneEcranC(phase);
-  }
-}
-
-export function etatActuel(exercice: ExerciceVariablesDiscretesEsperance, phase: PhaseVariablesDiscretesEsperance): string[] | null {
-  switch (exercice.famille) {
-    case "A":
-      return etatActuelA(exercice, phase);
-    case "B":
-      return etatActuelB(exercice, phase);
-    case "C":
-      return etatActuelC(exercice, phase);
-  }
-}
-
-export function champsEcran(exercice: ExerciceVariablesDiscretesEsperance, phase: PhaseVariablesDiscretesEsperance): ChampDef[] {
-  switch (exercice.famille) {
-    case "A":
-      return champsA(exercice, phase);
-    case "B":
-      return champsB(exercice, phase);
-    case "C":
-      return champsC(exercice, phase);
-  }
-}
-
-export function niveauAideMaxEcran(exercice: ExerciceVariablesDiscretesEsperance, phase: PhaseVariablesDiscretesEsperance): number {
-  switch (exercice.famille) {
-    case "A":
-      return niveauAideMaxA(phase);
-    case "B":
-      return niveauAideMaxB(exercice, phase);
-    case "C":
-      return niveauAideMaxC(phase);
-  }
-}
-
-export function aideNiveau1(exercice: ExerciceVariablesDiscretesEsperance, phase: PhaseVariablesDiscretesEsperance): AideAvecLatex {
-  if (niveauAideMaxEcran(exercice, phase) === 0) return AUCUNE_AIDE;
-  switch (exercice.famille) {
-    case "A":
-      return aideNiveau1A();
-    case "B":
-      return aideNiveau1B();
-    case "C":
-      return aideNiveau1C();
-  }
-}
-
-export function aideNiveau2(exercice: ExerciceVariablesDiscretesEsperance, phase: PhaseVariablesDiscretesEsperance): AideAvecLatex {
-  if (niveauAideMaxEcran(exercice, phase) === 0) return AUCUNE_AIDE;
-  switch (exercice.famille) {
-    case "A":
-      return aideNiveau2A(exercice);
-    case "B":
-      return aideNiveau2B(exercice);
-    case "C":
-      return aideNiveau2C(exercice);
-  }
-}
-
-export const LIBELLE_PHASE: Record<PhaseVariablesDiscretesEsperance, string> = {
-  aEcran1: "Étape 1 (P(événement 1))",
-  aEcran2: "Étape 2 (P(événement 2))",
-  aEcran3: "Étape 3 (contraires ?)",
-  bEcran1: "Étape 1 (loi complète)",
-  bEcran2: "Étape 2 (espérance)",
-  cVerifierEcran1: "Étape 1 (loi du gain net)",
-  cVerifierEcran2: "Étape 2 (espérance E)",
-  cImposerEcran1: "Étape 1 (loi du gain net en fonction de m)",
-  cImposerEcran2: "Étape 2 (E(m))",
-  cImposerEcran3: "Étape 3 (m pour E=0)",
+  },
+  champs(e, p): ChampCombi[] {
+    switch (p) {
+      case "aP1":
+        return [{ type: "texte", label: "$P(E_1)$" }];
+      case "aP2":
+        return [{ type: "texte", label: "$P(E_2)$" }];
+      case "aContraires":
+        return [
+          {
+            type: "choix",
+            label: "",
+            options: [
+              { valeur: "oui", label: "Oui, ils sont contraires" },
+              { valeur: "non", label: "Non, ils ne sont pas contraires" },
+            ],
+          },
+        ];
+      case "bLoi":
+        return e.famille === "B" ? loiB(e).map((l) => ({ type: "texte", label: `$P(X=${l.valeur < 0 ? `-${-l.valeur}` : l.valeur})$` })) : [];
+      case "bEsperance":
+      case "cEsperanceNette":
+        return [{ type: "texte", label: "$E(X)$" }];
+      case "cEsperanceBrute":
+        return [{ type: "texte", label: "$E(G)$" }];
+      case "cMise":
+        return [{ type: "texte", label: "Mise $m$ (en €)" }];
+      case "cConclusion":
+      case "cJugerMise":
+        return [{ type: "choix", label: "", options: OPTIONS_STATUT }];
+    }
+  },
+  aides(e, p) {
+    switch (p) {
+      case "aP1":
+      case "aP2":
+        return [
+          { texte: "La probabilité d'un événement est la somme des probabilités des valeurs de $X$ qui le réalisent." },
+          { texte: `Repère dans le tableau les valeurs de $X$ qui vérifient la condition de $E_${p === "aP1" ? 1 : 2}$ (attention aux symboles stricts et larges), puis additionne leurs probabilités.` },
+        ];
+      case "aContraires":
+        return [
+          { texte: "Deux événements sont contraires si, à la fois, aucune valeur ne leur est commune ET, ensemble, ils couvrent toutes les valeurs de $X$." },
+          { texte: "Écris la liste des valeurs de $E_1$, puis celle de $E_2$, et compare-les aux valeurs du tableau. $P(E_1)+P(E_2)=1$ ne suffit pas à conclure." },
+        ];
+      case "bLoi":
+        if (e.famille === "B" && e.sousType === "hypergeometrique")
+          return [
+            { texte: "Tirage simultané (sans remise) : loi hypergéométrique,", latex: "P(X=k)=\\dfrac{C_K^k\\,C_{N-K}^{n-k}}{C_N^n}" },
+            { texte: `Ici $N=${e.N}$, $K=${e.K}$ et $n=${e.n}$ : le dénominateur est $C_{${e.N}}^{${e.n}}$ pour toutes les valeurs.` },
+          ];
+        return [
+          { texte: "Les issues sont équiprobables : $P(X=x)$ = nombre d'issues qui donnent $x$, divisé par le nombre total d'issues." },
+          { texte: e.famille === "B" && e.sousType === "contexteDirect" ? `Il y a ${e.total} issues en tout ; plusieurs issues peuvent donner la même valeur de $X$ : regroupe-les.` : "Regroupe les issues qui donnent la même valeur." },
+        ];
+      case "bEsperance":
+        return [
+          { texte: "L'espérance est la moyenne des valeurs de $X$ pondérée par leurs probabilités :", latex: "E(X)=\\sum x_i\\,P(X=x_i)" },
+          { texte: "Multiplie chaque valeur de la loi (écran précédent) par sa probabilité, puis additionne les produits." },
+        ];
+      case "cEsperanceNette":
+        return [
+          { texte: "Pour chaque issue, gain net = montant reçu − mise ; puis :", latex: "E(X)=\\sum x_i\\,P(X=x_i)" },
+          { texte: "Plus court : calcule d'abord le montant reçu moyen, puis retire la mise (elle est payée à chaque partie)." },
+        ];
+      case "cEsperanceBrute":
+        return [
+          { texte: "Espérance du montant reçu :", latex: "E(G)=\\sum g_i\\,P(G=g_i)" },
+          { texte: "Les probabilités viennent des effectifs : nombre d'objets de la catégorie divisé par le total. Une issue qui ne rapporte rien compte pour 0." },
+        ];
+      case "cMise":
+        return [
+          { texte: "Le jeu est équitable quand le gain net moyen est nul :", latex: "E(G)-m=0" },
+          { texte: "Utilise l'espérance de l'écran précédent." },
+        ];
+      case "cConclusion":
+      case "cJugerMise":
+        return [
+          { texte: "Un jeu est équitable si l'espérance du gain net est nulle, favorable au joueur si elle est positive, défavorable si elle est négative." },
+          { texte: p === "cJugerMise" ? "Compare la mise proposée à la mise équitable de l'écran précédent : une mise plus grande fait baisser le gain net moyen." : "Regarde le signe de $E(X)$ calculée à l'écran précédent." },
+        ];
+    }
+  },
+  reponseAttendue(e, p) {
+    if (e.famille === "A") {
+      if (p === "aP1") return [`P(E_1)=${probaLatex(probabiliteEvenementA(e, e.indices1))}`];
+      if (p === "aP2") return [`P(E_2)=${probaLatex(probabiliteEvenementA(e, e.indices2))}`];
+      return [e.contraires ? "\\text{oui, contraires}" : "\\text{non, pas contraires}"];
+    }
+    if (e.famille === "B") {
+      if (p === "bLoi") return loiB(e).map((l) => `P(X=${l.valeur})=${probaLatex(l.p)}`);
+      return [`E(X)=${valeurLatex(esperanceB(e))}`];
+    }
+    if (p === "cEsperanceNette") return [`E(X)=${euros(versNombre(esperanceNetteC(e)))}`];
+    if (p === "cEsperanceBrute") return [`E(G)=${euros(versNombre(esperanceBruteC(e)))}`];
+    if (p === "cMise") return [`m=${euros(versNombre(esperanceBruteC(e)))}`];
+    return [`\\text{${libelleStatut(e.statut)}}`];
+  },
+  explication(e, p) {
+    if (e.famille === "A") {
+      if (p === "aP1" || p === "aP2") {
+        const ind = p === "aP1" ? e.indices1 : e.indices2;
+        const nom = p === "aP1" ? "E_1" : "E_2";
+        return [f(`$${nom}$ est réalisé pour $X\\in${listeValeursLatex(e, ind)}$ : $P(${nom})=${sommeTermesA(e, ind)}=${probaLatex(probabiliteEvenementA(e, ind))}$.`)];
+      }
+      const inter = e.indices1.filter((i) => e.indices2.includes(i));
+      const union = new Set([...e.indices1, ...e.indices2]);
+      const manque = e.xs.filter((_, i) => !union.has(i));
+      const lignes = [f(`$E_1$ : $X\\in${listeValeursLatex(e, e.indices1)}$ ; $E_2$ : $X\\in${listeValeursLatex(e, e.indices2)}$.`)];
+      if (e.contraires) lignes.push(f("Aucune valeur commune, et ensemble ils couvrent toutes les valeurs de $X$ : ils sont contraires."));
+      else {
+        if (inter.length > 0) lignes.push(f(`Valeur${inter.length > 1 ? "s" : ""} commune${inter.length > 1 ? "s" : ""} : $${inter.map((i) => e.xs[i]).join("\\,;\\,")}$.`));
+        if (manque.length > 0) lignes.push(f(`Valeur${manque.length > 1 ? "s" : ""} couverte${manque.length > 1 ? "s" : ""} par aucun des deux : $${manque.join("\\,;\\,")}$.`));
+        lignes.push(f("Ils ne sont donc pas contraires" + (versNombre(probabiliteEvenementA(e, e.indices1)) + versNombre(probabiliteEvenementA(e, e.indices2)) === 1 ? ", même si $P(E_1)+P(E_2)=1$." : ".")));
+      }
+      return lignes;
+    }
+    if (e.famille === "B") {
+      if (p === "bLoi") {
+        if (e.sousType === "hypergeometrique") return loiB(e).map((l) => f(`$P(X=${l.valeur})=\\dfrac{C_{${e.K}}^{${l.valeur}}\\,C_{${e.N - e.K}}^{${e.n - l.valeur}}}{C_{${e.N}}^{${e.n}}}=${probaLatex(l.p)}$`));
+        return loiB(e).map((l) => {
+          const eff = e.issues.filter((i) => i.valeur === l.valeur).reduce((s, i) => s + i.effectif, 0);
+          return f(`$P(X=${l.valeur})=\\dfrac{${eff}}{${e.total}}=${probaLatex(l.p)}$`);
+        });
+      }
+      const termes = loiB(e).map((l) => `${l.valeur < 0 ? `(${l.valeur})` : l.valeur}\\times ${fractionLatex(l.p)}`);
+      return [f(`$E(X)=${termes.join("+")}=${valeurLatex(esperanceB(e))}$${e.sousType === "hypergeometrique" ? ` (on retrouve $\\dfrac{nK}{N}=\\dfrac{${e.n}\\times ${e.K}}{${e.N}}$)` : ""}.`)];
+    }
+    const termesG = e.issues.filter((i) => i.gainBrut !== 0).map((i) => `${i.gainBrut}\\times\\dfrac{${i.effectif}}{${e.total}}`);
+    const eg = versNombre(esperanceBruteC(e));
+    if (p === "cEsperanceNette") return [f(`$E(\\text{montant reçu})=${termesG.join("+")}=${decimalLatex(eg)}$ ; $E(X)=${decimalLatex(eg)}-${decimalLatex(e.mise)}=${decimalLatex(versNombre(esperanceNetteC(e)))}$ (en €).`)];
+    if (p === "cEsperanceBrute") return [f(`$E(G)=${termesG.join("+")}=${decimalLatex(eg)}$ (en €).`)];
+    if (p === "cMise") return [f(`$E(G)-m=0$ donne $m=E(G)=${decimalLatex(eg)}$ € : avec cette mise, le gain net moyen est nul.`)];
+    const en = versNombre(esperanceNetteC(e));
+    if (p === "cConclusion") return [f(`$E(X)=${decimalLatex(en)}$ ${en > 0 ? "> 0 : le joueur gagne en moyenne, le jeu lui est favorable." : en < 0 ? "< 0 : le joueur perd en moyenne, le jeu lui est défavorable." : "= 0 : le jeu est équitable."}`)];
+    return [f(`Mise équitable : $${decimalLatex(eg)}$ € ; mise fixée : $${decimalLatex(e.mise)}$ €. Gain net moyen : $${decimalLatex(eg)}-${decimalLatex(e.mise)}=${decimalLatex(en)}$ €, donc le jeu est ${libelleStatut(e.statut)}.`)];
+  },
+  libellePhase(_e, p) {
+    const libelles: Record<P, string> = {
+      aP1: "P(E₁)",
+      aP2: "P(E₂)",
+      aContraires: "Contraires ?",
+      bLoi: "Loi de X",
+      bEsperance: "Espérance",
+      cEsperanceNette: "Espérance du gain net",
+      cConclusion: "Conclusion",
+      cEsperanceBrute: "Espérance du montant reçu",
+      cMise: "Mise équitable",
+      cJugerMise: "Mise proposée",
+    };
+    return libelles[p];
+  },
+  messageCible(e, p, valeurs) {
+    const v = valeurs[0] ?? "";
+    if (e.famille === "A" && (p === "aP1" || p === "aP2")) {
+      const ind = p === "aP1" ? e.indices1 : e.indices2;
+      const pred = p === "aP1" ? e.e1 : e.e2;
+      const complement = e.xs.map((_, i) => i).filter((i) => !ind.includes(i));
+      if (vautEnviron(v, versNombre(probabiliteEvenementA(e, complement)))) return [t("C'est la probabilité de l'événement contraire : relis la condition.")];
+      for (const voisin of voisinsStrictLarge(pred, e.xs)) if (vautEnviron(v, versNombre(probabiliteEvenementA(e, voisin)))) return f("Relis le symbole : « $<$ » et « $>$ » excluent la valeur écrite, « $\\leq$ » et « $\\geq$ » l'incluent.");
+      return null;
+    }
+    if (e.famille === "B" && p === "bEsperance" && e.sousType === "contexteDirect") {
+      const moyenneSimple = loiB(e).reduce((s, l) => s + l.valeur, 0) / loiB(e).length;
+      if (vautEnviron(v, moyenneSimple)) return [t("C'est la moyenne simple des valeurs : il faut les pondérer par leurs probabilités.")];
+      return null;
+    }
+    if (e.famille === "C") {
+      const eg = versNombre(esperanceBruteC(e));
+      if (p === "cEsperanceNette" && vautEnviron(v, eg)) return [t("C'est le montant reçu moyen : retire encore la mise.")];
+      if (p === "cMise" && vautEnviron(v, -eg)) return [t("Une mise est un montant positif payé par le joueur.")];
+    }
+    return null;
+  },
 };
 
-export const LIBELLE_FAMILLE: Record<ExerciceVariablesDiscretesEsperance["famille"], string> = {
-  A: "A — Loi donnée : cumuls et événements contraires",
-  B: "B — Construire la loi et calculer E(X)",
-  C: "C — Jeu équitable, espérance nulle",
-};
+// ============================================================================
+// Papier (provisoire, lot E à venir) : loi en prose, rien n'est coupé à l'impression
+// ============================================================================
 
-/** Récapitulatif final : affiche toujours la réponse CORRECTE connue de l'exercice — jamais
- * recalculée depuis la saisie élève. */
-export function formatReponseAttenduePhaseLatex(exercice: ExerciceVariablesDiscretesEsperance, phase: PhaseVariablesDiscretesEsperance): string[] {
-  if (exercice.famille === "A") {
-    if (phase === "aEcran1") return [fractionLatex(exercice.probabilite1Numerateur, exercice.psDenominateur)];
-    if (phase === "aEcran2") return [fractionLatex(exercice.probabilite2Numerateur, exercice.psDenominateur)];
-    return [exercice.contraires ? "\\text{Contraires}" : "\\text{Non contraires}"];
-  }
-  if (exercice.famille === "B") {
-    if (phase === "bEcran1") return exercice.loi.map((l) => `${l.valeur}:\\,${fractionLatex(l.probabiliteNumerateur, l.probabiliteDenominateur)}`);
-    return [nombreLatex(exercice.esperance)];
-  }
-  // famille C
-  if (phase === "cVerifierEcran1" || phase === "cImposerEcran1") {
-    return exercice.issues.map((issue) => {
-      const gainNet = exercice.sousType === "verifier" ? `${issue.gainBrut}` : expressionMoinsMLatex(issue.gainBrut);
-      return `${gainNet}:\\,${fractionLatex(issue.probabiliteNumerateur, issue.probabiliteDenominateur)}`;
-    });
-  }
-  if (phase === "cVerifierEcran2") return [nombreLatex(exercice.esperanceBrute)];
-  if (phase === "cImposerEcran2") return [expressionMoinsMLatex(exercice.esperanceBrute)];
-  return [nombreLatex(exercice.mSolution)];
+export function loiEnProseA(e: ExerciceEsperanceA): FragmentConsigne[] {
+  const r: FragmentConsigne[] = [t("Loi de "), m("X"), t(" : ")];
+  e.xs.forEach((x, i) => {
+    if (i > 0) r.push(t(" ; "));
+    r.push(m(`P(X=${x})=${decimalLatex(e.poids[i] / 20)}`));
+  });
+  r.push(t("."));
+  return r;
+}
+
+export function donneesPapier49(e: E): FragmentConsigne[][] {
+  const d = FORMAT_6GEN49.donnees(e);
+  return e.famille === "A" ? [loiEnProseA(e), ...d] : d;
 }
 

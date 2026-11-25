@@ -99,7 +99,7 @@ export function BlockRenderer({ block, enTiroir }: { block: Block; enTiroir?: bo
       return <OperationChain block={block} />
     case 'tablePhi':
       return (
-        <figure className="table-phi-bloc">
+        <figure className="table-phi-cours-bloc">
           <TablePhi />
           {block.caption && (
             <figcaption>

@@ -29,14 +29,14 @@ export function TablePhi({
 }) {
   const cible = surligner === undefined ? null : caseDe(surligner)
   return (
-    <div className={compact ? 'table-phi table-phi--compact' : 'table-phi'}>
-      {titre && <p className="table-phi-titre">{titre}</p>}
-      <div className="table-phi-cadre" role="region" aria-label="Table de la loi normale centrée réduite" tabIndex={0}>
+    <div className={compact ? 'table-phi-cours table-phi-cours--compact' : 'table-phi-cours'}>
+      {titre && <p className="table-phi-cours-titre">{titre}</p>}
+      <div className="table-phi-cours-cadre" role="region" aria-label="Table de la loi normale centrée réduite" tabIndex={0}>
         <table>
-          <caption className="table-phi-caption">Φ(z) = P(Z ≤ z), Z ∼ 𝒩(0 ; 1)</caption>
+          <caption className="table-phi-cours-caption">Φ(z) = P(Z ≤ z), Z ∼ 𝒩(0 ; 1)</caption>
           <thead>
             <tr>
-              <th scope="col" className="table-phi-coin">z</th>
+              <th scope="col" className="table-phi-cours-coin">z</th>
               {COLONNES_TABLE_PHI.map((c, j) => (
                 <th key={j} scope="col" className={cible && cible.colonne === j ? 'is-cible' : undefined}>
                   {formatZ(c)}
@@ -46,7 +46,7 @@ export function TablePhi({
           </thead>
           <tbody>
             {LIGNES_TABLE_PHI.map((l, i) => (
-              <tr key={i} className={i % 5 === 4 ? 'table-phi-filet' : undefined}>
+              <tr key={i} className={i % 5 === 4 ? 'table-phi-cours-filet' : undefined}>
                 <th scope="row" className={cible && cible.ligne === i ? 'is-cible' : undefined}>
                   {l.toFixed(1).replace('.', ',')}
                 </th>
@@ -65,7 +65,7 @@ export function TablePhi({
         </table>
       </div>
       {legende && (
-        <p className="table-phi-legende">
+        <p className="table-phi-cours-legende">
           Ligne : unités et dixième de z · colonne : centième. Exemple : Φ(1,23) se lit ligne 1,2, colonne 0,03. Pour z &lt; 0 :
           Φ(−z) = 1 − Φ(z). Au-delà de 3,49 : Φ(z) ≈ 1.
         </p>

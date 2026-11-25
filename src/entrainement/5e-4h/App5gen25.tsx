@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, derivee, genererExerciceAssociation, genererExerciceAssociationLibre } from "./generateurs5e/association/index";
 import { EcranJustificationAssociation } from "./components5e/EcranJustificationAssociation";
@@ -34,6 +34,10 @@ import { FonctionRicheAssociationGraph } from "./components5e/FonctionRicheAssoc
 import { FonctionVarieeAssociationGraph } from "./components5e/FonctionVarieeAssociationGraph";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { ProgressionPuces } from "../components/ProgressionPuces";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { ecranClos, saisieEnLatex, saisieTexte, segmentsDepuisHistorique, type EcranClos } from "../4e/ui/historiqueProgression";
+import { TexteRiche5e } from "./components5e/TexteRiche5e";
 
 /** Une seule tentative : avec autant de menus que de lettres, plusieurs essais permettraient de
  * trouver l'association par élimination (audit 5c5a, point 8). */
@@ -93,6 +97,40 @@ function reponseAttendueAssociation(exercice: ExerciceAssociation) {
   );
 }
 
+/** Choix de l'écran « association » : une ligne par élément numéroté (lettre choisie, ou « f′ n'existe pas ici »). */
+function associationChoisieAffichee(choix: (number | "aucune" | null)[]): ReactNode {
+  return (
+    <>
+      {choix.map((c, numero) => (
+        <span key={numero} style={{ display: "block" }}>
+          Élément {numero + 1} → {c === null ? "—" : c === "aucune" ? "f′ n'existe pas ici" : LETTRES[c]}
+        </span>
+      ))}
+    </>
+  );
+}
+
+/** Saisie de l'écran « justification » : option choisie (libellé) ou valeur tapée, champ par champ. */
+function justificationSaisieAffichee(exercice: ExerciceAssociation, r: Record<string, string>): ReactNode {
+  return (
+    <>
+      {specJustification(exercice).champs.map((c) => (
+        <span key={c.id} style={{ display: "block" }}>
+          {c.kind === "choix" ? (
+            <>
+              <TexteRiche5e texte={c.label} /> {c.options.find((o) => o.id === r[c.id])?.label ?? "—"}
+            </>
+          ) : (
+            <>
+              <Katex expression={c.label} /> {c.kind === "expression" ? saisieEnLatex(r[c.id] ?? "") : saisieTexte(r[c.id] ?? "")}
+            </>
+          )}
+        </span>
+      ))}
+    </>
+  );
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionAssociation;
   revele: boolean;
@@ -105,8 +143,16 @@ export function App5gen25() {
   /** Incrémenté à chaque nouvel exercice : entre dans la clé d'écran, pour que les menus
    * reviennent à « Choisis… » même quand la famille ne change pas. */
   const [numeroGeneration, setNumeroGeneration] = useState(0);
+  /** Écrans clos de l'exercice en cours (puces cliquables → fiche en lecture seule). */
+  const [historique, setHistorique] = useState<EcranClos[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionAssociation) {
+  function viderHistorique() {
+    setHistorique([]);
+    setFicheOuverteIndex(null);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionAssociation, votreReponse: ReactNode) {
     const transitionDEcran = nouvelEtat.terminee !== etat.terminee || nouvelEtat.phase !== etat.phase || nouvelEtat.indexExercice !== etat.indexExercice;
     if (transitionDEcran) {
       const revele = nouvelEtat.derniereEtapeRevelee;
@@ -119,6 +165,10 @@ export function App5gen25() {
             : etat.etapeCourante.tentativesUtilisees + 1 < etat.reglages.tentativesMax
               ? messageChoixJustification(etat.exerciceCourant)
               : null;
+      setHistorique((h) => [
+        ...h,
+        ecranClos(etat.phase === "association" ? "Association" : "Justification", votreReponse, revele, etat.niveauAide > 0, reponseAttendueEcran(), corrigeDetailleEcranCourant()),
+      ]);
       setEnAttente({ etatSuivant: nouvelEtat, revele, messageRevele: message });
       return;
     }
@@ -127,6 +177,7 @@ export function App5gen25() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) viderHistorique();
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
     setNumeroGeneration((g) => g + 1);
@@ -134,6 +185,7 @@ export function App5gen25() {
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    viderHistorique();
     setEtat(demarrerSessionAssociation(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
     setNumeroGeneration((g) => g + 1);
   }
@@ -146,12 +198,23 @@ export function App5gen25() {
   const cleEcran = `${numeroGeneration}-${etat.indexExercice}-${exercice.famille}`;
 
   const lettreEcran = etat.phase === "association" ? "a" : "b";
+
+  function reponseAttendueEcran() {
+    return etat.phase === "association" ? reponseAttendueAssociation(exercice) : undefined;
+  }
+
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeAssociation(exercice), lettreEcran)} />;
+  }
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
         ...(enAttente.messageRevele ? { messageRevele: enAttente.messageRevele } : {}),
-        reponseAttendue: etat.phase === "association" ? reponseAttendueAssociation(exercice) : undefined,
-        corrigeDetaille: <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeAssociation(exercice), lettreEcran)} />,
+        reponseAttendue: reponseAttendueEcran(),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -188,6 +251,7 @@ export function App5gen25() {
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
+        <ProgressionPuces segments={segmentsDepuisHistorique(historique, 2, !enAttente)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
         <div className="card-body">
           {etat.phase === "justification" ? (
             <EcranJustificationAssociation
@@ -204,7 +268,7 @@ export function App5gen25() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMax}
               onActiverAide={onActiverAide}
-              onValider={(r) => terminerEtape(soumettreReponseJustification(etat, r))}
+              onValider={(r) => terminerEtape(soumettreReponseJustification(etat, r), justificationSaisieAffichee(exercice, r))}
               validation={validation}
             />
           ) : (
@@ -221,7 +285,7 @@ export function App5gen25() {
             niveauAide={etat.niveauAide}
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
-            onValider={(choix) => terminerEtape(soumettreReponseAssociation(etat, choix))}
+            onValider={(choix) => terminerEtape(soumettreReponseAssociation(etat, choix), associationChoisieAffichee(choix))}
             diagnostiquer={(choix) =>
               diagnostiquerLignes(exercice.ordreLettres, choix, exercice.famille === "grapheDeriveeAvancee" ? exercice.singulier : undefined)
             }
@@ -233,6 +297,10 @@ export function App5gen25() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex].entree} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

@@ -156,7 +156,7 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
   3 moyen · 4 difficile · 5 à 7 très difficile. Il monte avec… » (numéros dans leurs cases teintées).
   Rien sur la copie d'évaluation, son corrigé, sa grille, l'examen ni en Word (les étoiles n'y
   étaient pas) : ces documents n'impriment pas de niveau.
-- **Chapitres notés** : 6e ch. 5, 6e ch. 4, 4e ch. 3, 6e ch. 3, 5e ch. 3, 4e ch. 4, 4e ch. 2, 4e ch. 5, 5e ch. 2, 6e ch. 2 (6gen6–12), 4e ch. 1 (gen7–9, gen55), 6e ch. 1 (6gen1–5), 5e ch. 1 (5gen1–5), 5e ch. 4 (5gen20–24), 4e ch. 6 (gen20–29, gen82–91), 4e ch. 7 (gen42–54), 4e ch. 8 (gen39–41, gen100–107), 5e ch. 5 (5gen25–35), 6e ch. 6 (6gen30–33, 6gen74–76), 6e ch. 7 (6gen43–48, lot E ; 6gen100–104) (ni `difficulte` ni
+- **Chapitres notés** : 6e ch. 5, 6e ch. 4, 4e ch. 3, 6e ch. 3, 5e ch. 3, 4e ch. 4, 4e ch. 2, 4e ch. 5, 5e ch. 2, 6e ch. 2 (6gen6–12), 4e ch. 1 (gen7–9, gen55), 6e ch. 1 (6gen1–5), 5e ch. 1 (5gen1–5), 5e ch. 4 (5gen20–24), 4e ch. 6 (gen20–29, gen82–91), 4e ch. 7 (gen42–54), 4e ch. 8 (gen39–41, gen100–107), 5e ch. 5 (5gen25–35), 6e ch. 6 (6gen30–33, 6gen74–76), 6e ch. 7 (6gen43–48, lot E ; 6gen100–104), 6e ch. 8 (6gen110–115, lot H1) (ni `difficulte` ni
   `dureeMinutes` : `criteresDifficulte` seul). **Conversion PROVISOIRE** pour les autres adaptateurs
   (non encore notés) : leurs étoiles → niveau ★ 2, ★★ 3, ★★★ 5, durée = leur
   constante `dureeMinutes` ; sans étoiles → rien d'affiché. Vrai/faux : niveau 2 (facile), provisoire.
@@ -1062,6 +1062,16 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   dénominateur commun). Dénombrement : décimal non entier = message SANS tentative ; probabilité de 6gen108 : exacte
   ou décimale d'au moins quatre décimales à 0,00005 près, décimal plus court proche = « trop arrondi » sans tentative.
   Détail : section « 6e ch. 7, lot H2 — 6gen105–6gen109 » plus bas.
+- **6e ch. 8, lot H1 (6gen110–6gen115, nouveaux, notés)** : socle d'écrans du 5e (`AppEcransTrigo`, sans
+  modification ; choix jugés ✗ / ✓ par `bonneOption`, `piegeChoixRevele`, `aidesChoixDeuxNiveaux`, `approchee` = décimal
+  proche d'une valeur exacte refusé SANS tentative, `aReprendre` = σ écrit avec une racine en 6gen110). Lecture commune
+  `moteur6e/lectureVariablesAleatoiresLotH1.ts` (évaluateur du 6e : fractions, virgule, « − », √, π ; préfixe « E(X) = »,
+  « σ = », « P(…) = », « k = » ; unité finale ; « % » ; milliers « 12 500 » ; « 3 4 » illisible, jamais un produit deviné ;
+  `statutArrondiCentieme` : exacte OU au moins deux décimales à un demi-centième, plus court = « trop arrondi » sans
+  tentative ; fonction de x comparée en cinq points). Briques `ui6e/outilsVariablesAleatoiresLotH1.ts` (rationnels exacts,
+  `dl` « 0{,}15 », `ql` fraction, `texteAvantFormule` : texte « … ci-dessous : » + tableau KaTeX affiché sur papier) et
+  `ui6e/figuresVariablesAleatoiresLotH1.ts` (escalier à points pleins / vides, densité sur quadrillage sans identifiant).
+  Détail : section « 6e ch. 8, lot H1 — 6gen110–6gen115 » plus bas.
 - **6e ch. 6, lot G2 (6gen162–6gen163, nouveaux)** : socle d'écrans du 5e (`AppEcransTrigo`, sans
   modification ; `bonneOption` = choix jugés ✗ / ✓ pour la ligne et l'erreur de 6gen163, `approchee` =
   valeur décimale proche d'une valeur exacte refusée SANS tentative). Lecture commune
@@ -1096,6 +1106,31 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   `generateurs6e/adaptateurCombinatoire.ts`, en attendant le lot E). Codes : catalogues gardés dans leur
   ordre, ajouts EN FIN (6gen43 `C_arrangement`, 6gen44 `E_anagrammes`, 6gen45 `D_pascal`) ; tous les
   `?code=` des six générateurs rouvrent un exercice différent d'avant (générateurs refaits).
+- **6e ch. 8 (lots B et C, 6gen49–6gen53)** : les cinq générateurs passent sur le socle du ch. 7
+  (`AppCombinatoire` / `EcranCombinatoire` / `sessionCombinatoire`, sans changer le ch. 7 : ajouts
+  facultatifs `sousTitre`, `complement` — outil rendu sous la consigne de l'écran, visible quand l'énoncé
+  se replie —, entrées `retiree` filtrées du sélecteur ; attente `{ verif }` dans `attentesCombinatoire.ts`
+  = vérification propre au générateur, `refus` sans tentative + `statut`). Lecture des valeurs réelles
+  `moteur6e/saisieVariablesAleatoires.ts` (exacte d'abord par `saisieCombinatoire`, sinon e, ln, √, « 19! »,
+  « % », milliers) : `valeurArrondie` (consigne « arrondie à 10⁻ᵈ », plusieurs cibles — table OU
+  calculatrice —, tolérance d'une demi-unité par terme pour une somme de termes arrondis ; un décimal trop
+  court refusé sans tentative SEULEMENT s'il est l'arrondi juste à sa précision), `valeurExacte` (arrondi
+  juste refusé sans tentative), `valeurExacteOuArrondie`, `valeurParmi` (lecture inverse : deux cases
+  voisines), `entier`, `inequationEnN` (jugée par son ensemble de solutions sur une grille de n, loin de la
+  frontière : « 1 − 0,9ⁿ > 0,9 », « 0,9ⁿ < 0,1 », « ≥ » équivalents ; `isolee` exige n seul). Probabilités
+  exactes par la nature `probabilite` du socle. Table de Φ : valeurs `lib/tablePhi.ts` (z 0,00–3,49, série
+  de erf), composant PARTAGÉ `entrainement/components/TablePhi.tsx` (repliable, défilement interne,
+  colonne des z collée) — à réutiliser pour l'annexe papier (lot E) et par le cours. Figures
+  `components6e/CourbeGauss.tsx` (aires hachurées, borne inconnue nommée), `TableauLoi.tsx` (vrai tableau,
+  défile dans son bloc), `DiagrammeBarres.tsx`. Adaptateurs PROVISOIRES `generateurs6e/adaptateurVariablesAleatoires.ts`
+  (mêmes textes que l'écran, situation en prose, une question par écran, réponses au corrigé ;
+  `phasesPapier`, `donneesPapier`) en attendant le lot E (corrigé « comme au tableau » : emplacement
+  `config.corrigeDetaille` de `AppCombinatoire`, aujourd'hui l'explication du format). Codes : 6gen49,
+  6gen51 (14 identifiants gardés, `C_superieure`, `D_superieure` EN FIN), 6gen53 inchangés en indices ;
+  6gen50 et 6gen52 : variantes retirées gardées en place (`retiree: true`, un ancien code rouvre un tirage
+  libre), 6gen50 `B_loi` EN FIN ; tous les exercices tirés diffèrent d'avant (générateurs refaits).
+  Profils provisoires : 6gen51 `exacte` pour A, B et C/D « ≤, ≥, centrée » (NormCD / InvNormCD), rien pour
+  « depuis 0 » et E ; `calculatriceIndispensable` 6gen50 `C_trouverN`, 6gen52 A, 6gen53 B.
 - **6e ch. 7 (lot E, papier de 6gen43–6gen48, notés, corrigé « comme au tableau »)** : adaptateur COMMUN
   `generateurs6e/adaptateurCombinatoire.ts::construireAdaptateurCombinatoire` (le générateur ne décrit que
   sa situation papier, ses questions, sa brève, son corrigé, son barème, ses critères et son profil ;
@@ -1161,9 +1196,15 @@ XML). Outils du chantier (dossier de travail, à recopier) : `verifReg.cjs`, `do
   Python, 350 / 350) ; `arrondirZ` (z au centième), `phiTable(z)` (lecture, symétrie pour z < 0, dernière case
   au-delà de 3,49), `lectureInverse(p)` (case la plus proche ; à égalité, les DEUX z : 0,95 → [1,64 ; 1,65], et le
   cours prend le milieu 1,645 ; p < 0,5 : lecture de 1 − p puis changement de signe), `tablePhiHtml()` (HTML
-  autonome à styles en ligne, deux demi-tableaux pour une page A4). Écran : `components/TablePhi.tsx`
-  (`surligner`, `compact`, `legende`, colonne z collante, défile dans son cadre à 390 px) ; cours : bloc
-  `tablePhi` (§ 6, avec la méthode « Lire la table ») ; papier : `export/annexesPapier.ts::annexeTableNormale()`
+  autonome à styles en ligne, deux demi-tableaux pour une page A4). **Fusion avec le lot C (25/11)** : les deux
+  lots avaient créé `lib/tablePhi.ts` — un seul fichier, une seule `TABLE`, les deux API gardées (celle des
+  générateurs `phiExacte`, `phiInverse`, `valeurTablePhi` (case de |z|, sans symétrie), `lignesTablePhi`,
+  `lectureInverseTable` (tolérante : les deux cases qui encadrent p) est vérifiée identique à l'ancienne sur
+  14 000 entrées). Deux composants, deux usages : générateurs `entrainement/components/TablePhi.tsx`
+  (repliable, classes `.table-phi*` sous `.entrainement`) ; cours `components/TablePhi.tsx` (`surligner`,
+  `compact`, `legende`, colonne z collante, défile dans son cadre à 390 px, classes `.table-phi-cours*` —
+  jamais `.table-phi`, réservée au générateur) ; cours : bloc `tablePhi` (§ 6, avec la méthode « Lire la
+  table ») ; papier : `export/annexesPapier.ts::annexeTableNormale()`
   — à brancher par le lot E (une seule fois par document, quand un item déclare en avoir besoin). Conditions
   d'approximation présentées comme des CONVENTIONS du cours : normale $n>30$ et $0{,}3<p<0{,}7$, Poisson
   $n\geq30$, $p\leq0{,}1$, $np\leq15$ ; correction de continuité enseignée (décision 2 : tableau des 4 cas, exemples
@@ -1789,7 +1830,7 @@ codes, aménagée si cochée) intitulée « Remédiation — <titre sans « Éva
 Décision de l'utilisateur (maquette validée) : le corrigé détaillé des feuilles d'exercices et des
 évaluations ne saute plus d'étape. **Chapitres migrés** : 6e ch. 5 (pilote, 6gen34–42, 6gen93–99) ;
 4e ch. 3 (gen10–13, gen68–72 — voir « Lectures graphiques et décisions » plus bas) ; 6e ch. 4
-(6gen23–29, 6gen77–84) ; 5e ch. 3 (5gen14–19, 5gen44–49) ; 6e ch. 3 (6gen13–22, 6gen85–92) ; 4e ch. 4 (gen30–38, gen108–112) ; 4e ch. 2 (gen1–6, gen57, gen67) ; 4e ch. 5 (gen14–19, gen58, gen73–81, gen122) ; 5e ch. 2 (5gen6–13) ; 6e ch. 2 (6gen6–12) ; 4e ch. 1 (gen7–9, gen55) ; 6e ch. 1 (6gen1–5) ; 5e ch. 1 (5gen1–5) ; 5e ch. 4 (5gen20–24) ; 4e ch. 6 (gen20–29, gen82–91) ; 4e ch. 7 (gen42–48, gen49–54) ; 4e ch. 8 (gen39–41, gen100–107) ; 5e ch. 5 (5gen25–35) ; 6e ch. 6 (6gen30–33, 6gen74–76) ; 6e ch. 7 (6gen43–48, lot E ; 6gen100–104). Les autres adaptateurs s'affichent comme avant (contrat rétrocompatible).
+(6gen23–29, 6gen77–84) ; 5e ch. 3 (5gen14–19, 5gen44–49) ; 6e ch. 3 (6gen13–22, 6gen85–92) ; 4e ch. 4 (gen30–38, gen108–112) ; 4e ch. 2 (gen1–6, gen57, gen67) ; 4e ch. 5 (gen14–19, gen58, gen73–81, gen122) ; 5e ch. 2 (5gen6–13) ; 6e ch. 2 (6gen6–12) ; 4e ch. 1 (gen7–9, gen55) ; 6e ch. 1 (6gen1–5) ; 5e ch. 1 (5gen1–5) ; 5e ch. 4 (5gen20–24) ; 4e ch. 6 (gen20–29, gen82–91) ; 4e ch. 7 (gen42–48, gen49–54) ; 4e ch. 8 (gen39–41, gen100–107) ; 5e ch. 5 (5gen25–35) ; 6e ch. 6 (6gen30–33, 6gen74–76) ; 6e ch. 7 (6gen43–48, lot E ; 6gen100–104), 6e ch. 8 (6gen110–115, lot H1). Les autres adaptateurs s'affichent comme avant (contrat rétrocompatible).
 - 6e ch. 6 (6gen30–33, 6gen74–76 ; 6gen69 = quiz, hors périmètre ; notés, `criteresDifficulte`) : brique `6e-6h/ui6e/corrigeProbabilites.ts` (`COURS_*` § 1–4 ; `frac` / `brute` ; `lignesFraction` « = n/d » brute → simplifiée « on simplifie par g » → « = » décimal exact ou « ≈ » au centième / millième sous 0,1 ; `lignesFraction4` et `egal4` pour 6gen32, dont l'écran arrondit à 10⁻⁴ ; `lignesProduit` (règle du produit, fractions brutes de l'urne), `lignesSommeFractions` (même dénominateur), `lignesComplement` ; figures HTML `tableauDoubleHtml`, `vennDeuxHtml`, `vennTroisHtml`). Corrigés `generateurs6e/{probabilitesEnsembles,tiragesArbres,independanceBayes,probabilitesProblemes,arbreTableauEffectifs,frequenceProbabilite,paradoxesProbabilites}/corrigeDetaille.ts`, une lettre par écran (`lettreEcran…`), branchés dans les 7 applis ; exceptions : 6gen32 « tableau donné » (trois vraies questions papier, l'écran en pose une : `lettreEcranIndependanceBayes`), 6gen76 (prédiction sans étape : modéliser / calculer / conclure = a, b, c). Probabilité : formule du cours, valeurs substituées (dénominateur commun N), calcul, fraction réduite, décimal ; test d'indépendance comparé EN NOMBRES (`n(A∩B)·N` contre `n(A)·n(B)`, ou fractions sur N²), jamais sur des arrondis ; 6gen75 : écart relatif calculé avec les fractions exactes (jamais la fréquence arrondie), comparaison au seuil selon `verdictAttendu`. Données de 6gen30 B : `EvenementFamilleB.issues` / `explication` et `issuesAetB` (issues listées si ≤ 8, sinon comptage expliqué ; aucun tirage aléatoire ajouté : `?code=` inchangés). **Lectures** : 6gen30 A étape b « case lue » (P(A∩B̄), P(Ā∩B)), 6gen75 C écran 1, 6gen76 conclure. **Verdict sans charge** (niveau et durée constants dans un verdict) : 6gen30 dernière étape, 6gen32 B test, 6gen74 indépendance, 6gen75 règle de décision. Méthode 1 partout sauf 6gen33 (2, problème) et 6gen76 Monty Hall (2) ; piège : 6gen31 B (exactement n − 1 impossible), 6gen33 E et F « vérifier », 6gen75 B (modèle des 11 sommes), 6gen76 (tous) ; nombres = calculatrice (6gen32 C, 6gen33 profil, 6gen75, Méré). Collecteur `corrige-6e6` (algèbre d'événements : `P(…)`, `P(X|Y)`, `P(X\mid Y)`, `n(…)`, `\cap`, `\cup`, `\overline{}`, `\bar{}` remplacés par leur valeur depuis l'univers de l'instance ; `\div` ; milliers `\,`).
 - 5e ch. 5, moitié 2 (5gen31 étudier une fonction, 5gen32 optimisation, 5gen33 contexte économique, 5gen34 extrema bornés, 5gen35 vitesse et position ; notés, `criteresDifficulte`) : brique `5e-4h/ui5e/corrigeDerivees2.ts` (`COURS_*` § 3–11 ; `lignesDeriveePoly` « 3·2x² − 2·3x + 5 » puis réduite ; `lignesValeurPoly` / `lignesValeurQ` (substitution entière ou fractionnaire) ; `lignesTrinome` (Δ, radical simplifié √8 = 2√2, racines croissantes, ≈ au centième) ; `pointsTest` : une valeur test entière par intervalle). Corrigés `generateurs5e/{etudierFonction,optimisationGeometrique,contexteEconomique,extremaBornes,vitessePosition}/corrigeDetaille.ts`, une lettre par écran (5gen31 sans l'écran « recap »), branchés dans les 5 applis ; figures de 5gen31 sorties dans `etudierFonction/figures.ts` (sans `docx`). Relations de l'optimum réutilisées pour les valeurs exactes (x³ = V/2 ⇒ h = 2x, aire 6πx² ; P = r(4 + π) ⇒ h = r ; c/q = aq ⇒ C_M = 2aq + b ; c = a·r ⇒ c/(x − e) = ±a√r) ; f(e ± √r) d'un polynôme : puissances développées dans ℤ[√r], le conjugué par changement de signe de √r ; f″ d'une rationnelle avec D(x) nommé (u, v, v′ = 2D·D′, simplification par D) ; Horner coefficient par coefficient (5gen34 degré 4) ; valeurs approchées calculées avec les valeurs NON arrondies (B du trapèze, t₂ et temps total, dichotomie en décimaux exacts). **Lectures** : 5gen31 graphique, 5gen34 comparaison, 5gen35 rejet. **Niveaux** : méthode 1 (5gen31, 5gen33 A/B, 5gen34, 5gen35 B, 5gen32 cubique), 2 (5gen32 géométrique), 0 (5gen33 dichotomie, 5gen35 A) ; piège 1 : valeur exclue / polynôme (constant dans la famille), solution négative à rejeter (5gen32 trapèze, marges, fenêtre B ; 5gen33 B ; 5gen35), 5gen34 constant (la borne est le verdict) ; nombres = profil `calcul` pour 5gen31 et 5gen32. Mesuré (200 libres + 30 par variante) : 5gen31 niv. 5–6, 17–25 min (constante 25) ; 5gen32 5–7, 16–21 (cubique 3, 10 ; constante 15) ; 5gen33 4–5, 14–18 (15) ; 5gen34 5–6, 15–18 (12) ; 5gen35 3–6, 13–18 (12). Collecteur `corrige-5e5-m2` (outils de `corrige-5e4`, primes f′ f″ C′_T R′_T B′ D′ u′ → fonctions de l'instance, variable t / q / r / α renommée x, équations sans solution non testables) : 1 810 tirages, ≈ 51 900 relations, 0 fausse ; documents réels (2 graines × 2 plans × avec / sans regroupement : évaluation 2 séries, aménagée, corrigé, grille, feuille, Word du corrigé) : 0 `.katex-error`, 0 formule coupée et 0 débordement à 680 / 820 / 1 280 px ; iPhone 13 : corrigé sous la réponse attendue, scrollWidth 390, 0 erreur console.
 - 5e ch. 5, moitié 1 (5gen25 association, 5gen26 définition, 5gen27 fonction dérivée, 5gen28 tangentes, 5gen29 étude locale, 5gen30 lecture graphique ; notés, `criteresDifficulte`) : brique `5e-4h/ui5e/corrigeDerivees1.ts` (`COURS_*` § 1–6, `lignesValeurPoly` entier ou fractionnaire, `lignesDeriveePoly` « n·c·xⁿ⁻¹ » puis réduit, `lignesTrinomeUnitaireNul` après division par 3a — mise en évidence, identité, Δ, racines e ± √r simplifiées —, `lignesTangenteEntiere` remplie / distribuée / réduite, `tableauSignesEtudeLatex` sorti de l'adaptateur de 5gen29 (réexporté), `zonesTableau` / `phraseSens` / `lignesSignesZones` tirés du MÊME tableau attendu que l'écran). Corrigés `generateurs5e/{association,definitionDerivee,fonctionDerivee,tangentes,etudeLocale,lectureGraphiqueDerivees}/corrigeDetaille.ts`, une lettre par ÉCRAN, branchés dans les 6 applis (5gen25 : sauf la famille « A avancée », hors export ; 5gen28 : lettre de l'écran = `lettreEtapeTangente`, l'étape papier « dérivée » vient avant) ; figure 5gen30 sortie dans `lectureGraphiqueDerivees/figure.ts`. 5gen25 : lecture par élément (signe de f′ zone par zone, sommets, f(0)) puis la lettre, figure f et f′ superposées (A) ou sommets et (0 ; f(0)) marqués (B) ; C : chaque dérivée écrite puis réduite jusqu'à l'expression lettrée. 5gen26 : f(a + h) − f(a) au même dénominateur avec f(a) réduit (d·A − n·B), h mis en évidence, × 1/h, h remplacé par 0, vérification par les règles du § 3. 5gen27 : u′, v′, g′(u) écrits avant simplification, formule posée puis remplie (termes calculés à part au-delà de 32 caractères), quotient ambigu par v = sin²/cos² et simplification. 5gen28 : radicale avec dénominateur rendu rationnel ; double tangence : f − t = (x − p)²·Q, identités, pente en q. 5gen29 : domaine (carré isolé), signe d'un trinôme / du numérateur, nature par changement de signe, valeur en e ± √r par x², x³ puis chaque terme (exacte puis ≈). 5gen30 : une relation par chose lue, justification = où on lit. **Lectures** : 5gen25 A et B (association, comme 6gen85) ; 5gen27 b (décomposition) ; 5gen30 tangentes horizontales, valeurs, inflexions, asymptotes sauf oblique. **Niveaux** : méthode 0 pour 5gen25 A, 5gen26, 5gen27 somme, 5gen29 (f′ donnée, démarche imposée), 5gen30 ; 1 sinon. Pièges dans les données : 5gen25 B deux graphiques de mêmes variations, C puissance de ax + b avec a ≠ 1 ; 5gen26 a < 0 (non affine) ; 5gen27 facteur trigonométrique d'argument ax + b dans un produit / quotient, quotient ambigu ; 5gen28 double tangence seulement (racine double de f′ = verdict : non notée) ; 5gen29 rationnelle avec CE (la racine double, verdict, n'est pas notée) ; 5gen30 point plein, branches de même signe, deux AH, aucune asymptote. Nombres 0 imposés pour 5gen25 et 5gen30 (« ≈ » = lecture sur quadrillage). Durées (constante → mesurée, 200 tirages libres + 30 par variante) : 5gen25 6 → 3–6 (niv. 1–3) ; 5gen26 8 → 6–8 (niv. 1–3) ; 5gen27 5 → 6–7 (niv. 1–3) ; 5gen28 7 → 8–10 (niv. 3–4) ; 5gen29 12 → 6–21 (niv. 1–4 ; irrationnelle avancée 21, charge 3 sur les valeurs) ; 5gen30 12 → 9–12 (niv. 1–3). Collecteur `corrige-5e5-m1` (outils de `corrige-5e4` + dérivée numérique d'un `(…)'`, fonctions f, f′, f″, u, v, u′, v′, g, g′, t de l'instance, variable h, chaînes « ⟺ » rouvertes, équations sans solution réelle comptées à part, lectures de 5gen30 et correspondance de 5gen25 comparées à l'instance) : 2 520 tirages, ≈ 22 800 relations, 0 fausse. Documents (2 graines, avec / sans regroupement, évaluation 2 séries + aménagée + feuille + Word) : 0 `.katex-error`, 0 formule coupée, 0 débordement à 680 / 820 / 1 280 px ; iPhone 13 : corrigé de l'étape ratée, scrollWidth 390, 0 erreur console.
@@ -1964,19 +2005,34 @@ formule y passe en fragments `[texte("car "), latex("i^{3}=-i")]`).
   5gen5, `(paire)` pour positionsPlans) ; section plane (gen40) calcule désormais son corrigé
   même quand l'écran est réussi. Un corrigé qui ne rend rien (`CorrigeDetailleEcran` sans ligne
   pour cette étape) n'affiche pas de bouton (détection dans le DOM avant peinture). Nouvelle
-  appli avec fiche : même schéma, rien d'autre à câbler. Applis avec corrigé mais SANS fiche
-  (puces non cliquables, seul le bouton de l'écran s'applique) : 35 de 4e (AppAnglesAssocies,
-  AppAssocierParaboles, AppBicarree, AppCercleConditions, AppChaslesSansFigure,
-  AppComparaisonSeries, AppConstructionVectorielle, AppConstruireInequation, AppDetectiveAnalytique,
-  AppDifferencesSecondes, AppDroiteCercle, AppDroitesParametre, AppDroitesRemarquables,
-  AppEquationParabolePoints, AppEquationParametre, AppHistogramme, AppIntersectionCercles,
-  AppIntersectionPlansParallelisme, AppLectureGraphiqueDroite, AppLectureParabole, AppLireDroite,
-  AppLireSolidePerspective, AppMoyennePonderee, AppParaboleDroite, AppPointVectoriel,
-  AppProblemesFraction, AppProjeteSymetrique, AppQuelAngle, AppReductionVectorielle,
-  AppTableauFrequences, AppTraduireLieu, AppTrajectoiresRencontre, AppTransformationsGraphiques,
-  AppTroisEcritures, AppVecteursDirecteurs), 5gen2, 5gen3, 5gen25, 6gen2, 6gen5 (5gen50–53 passent
-  par `CoqueTrig5e`, dont la fiche est branchée). Non branchés (refonte du 6e ch. 7 par d'autres
-  chantiers, à faire avec eux) : 6gen43–48, 6gen100–109. Vérifié 25/11 (dossier de travail
+  appli avec fiche : même schéma, rien d'autre à câbler. **Toute appli à corrigé a désormais sa
+  fiche** (lot 2, 25/11 : l'élève revoit à tout moment, depuis la puce, sa réponse ET le corrigé,
+  juste ou faux) : les 24 applis sur coquille (`AppTransfertSecondDegre` ×22, `AppEspaceLotH` ×2)
+  et 6gen100–109 (socle `AppEcransTrigo`) l'avaient déjà par leur socle ; branchées une à une :
+  AppAnglesAssocies, AppComparaisonSeries, AppConstructionVectorielle, AppLectureGraphiqueDroite,
+  AppPointVectoriel, AppQuelAngle, AppReductionVectorielle, AppTransformationsGraphiques, 5gen2,
+  6gen2, 6gen5 (mono-écran : UNE puce, `segmentsDepuisHistorique(historique, 1, !enAttente)` —
+  « Étape 1 / 1 », cliquable dès l'écran clos, vidée au nouvel exercice), AppHistogramme,
+  AppMoyennePonderee, AppTableauFrequences, 5gen3, 5gen25 (puces historiques remplacées par
+  `segmentsDepuisHistorique` : la dernière étape se clôt et se consulte comme les autres). Même
+  outillage partout : `ecranClos`/`segmentsDepuisHistorique` (`4e/ui/historiqueProgression.tsx`,
+  aussi importés depuis 5e/6e), `reponseAttendueEcran()` + `corrigeDetailleEcranCourant()` locales
+  (une source pour la validation et la fiche). « Ta réponse » = la saisie RÉELLE, passée à
+  `terminerEtape(nouvelEtat, votreReponse)` depuis le `onValider` : texte libre → `saisieEnLatex`
+  (4e/5e) ou `saisieEnLatex6e` (`6e-6h/ui6e/saisieEnLatex6e.tsx`, lecteur 6e : π, √) ; nombre court →
+  `saisieTexte` ; valeur déjà relue en nombre → `nombreDecimalSaisi` (jusqu'à 6 décimales, jamais
+  arrondi à 2 comme `nombreSaisi`) ; choix → libellé de l'option. Quand le composant ne transmettait
+  que la valeur relue, il passe aussi le texte tapé en 2e argument de `onValider` (seuils de
+  `EtapeConditionsComposerFonctions`, `SaisiesApparierCyclo` de `EtapeApparierGraphiqueCyclo`) ;
+  domaines (`EnsembleReelGuide`) : l'ensemble construit, valeurs relues. 5gen25, écran
+  « justification » : pas de réponse attendue (comme à l'écran), le corrigé la donne. Non branchés
+  (à faire avec leurs chantiers) : 6gen43–48, 6gen49–53, 6gen71. Vérifié lot 2 (dossier
+  `corrige-puces-2`, `compare2.mjs` / `visuel2.mjs`, rejouant `?code=` pour le passage juste) : 50
+  applis, 101 écrans clos comparés (85 révélés, 16 justes), corrigé de l'écran = corrigé de la fiche
+  101 / 101, « Ta réponse » = la saisie, puces vides après « Nouvel exercice » ; 6 applis (gen17,
+  gen27, gen38, gen31, 5gen25, 6gen2) en iPhone 13 et 1 280 px, clair / sombre, fiche juste et
+  fiche fausse dépliées : bouton 48 px, `aria-expanded` true, scrollWidth = largeur, 0
+  `.katex-error`, 0 erreur console. Lot 1 : vérifié 25/11 (dossier de travail
   `corrige-puces`, `compare.mjs` / `visuel.mjs`) : 240 applis du registre, 417 écrans clos comparés
   (377 révélés, 40 justes) — texte du corrigé de l'écran = texte du corrigé déplié dans la fiche de
   la puce, 417 / 417 ; iPhone 13 et 1 280 px, clair / sombre (9 générateurs 4e / 5e / 6e, figure
@@ -2356,6 +2412,61 @@ vérifications `moteur6e/verification*.ts`, modèles `core6e/*.ts`, définitions
   fausses, illisibles, aides, nouvel exercice à champs vides) ≈ 420 contrôles, scrollWidth 390, 0 erreur console ;
   documents réels (évaluation 2 séries + aménagée + corrigé + grille + feuille + Word copie / corrigé) : 0
   débordement à 680 / 820 / 1 280 px, 0 `.katex-error`.
+
+## 6e ch. 8, lot H1 — 6gen110–6gen115 (nouveaux, notés)
+
+Corrigés `generateurs6e/{varianceLoiDiscrete,transformationAffineVA,fonctionRepartition,densiteProbabilite,discreteOuContinue,loiUniformeContinue}/corrigeDetaille.ts`,
+une lettre par écran, partagés par l'appli (`AppEcransTrigo`, corrigé consultable après chaque réponse) et l'adaptateur ;
+textes `ui6e/format*.ts`, vérifications `moteur6e/verification*.ts`, modèles `core6e/*.ts`, définitions `ui6e/definition*.ts`.
+Cartes : 6gen110 et 6gen111 en fin de § 1 (après 6gen49), 6gen112 et 6gen113 en fin de § 3, 6gen114 en fin de § 4,
+6gen115 en fin de § 5 ; AUCUN bloc de cours ajouté (lot F : E(aX + b), V(aX + b) et P(a < X ≤ b) = F(b) − F(a) en discret ne
+sont pas encore écrits dans le cours).
+- **6gen110 « Variance et écart-type »** (§ 1, Appliquer) : `calcul` (gain avec pertes, pannes, buts ; probabilités en
+  centièmes, multiples de 0,05 ; loi choisie pour que σ soit un décimal EXACT à deux décimales au plus) — E(X), E(X²), V par
+  König, σ (sans racine : « √2,89 » à reprendre, sans tentative) ; `risque` (deux jeux de même espérance, entre −2 € et 6 €,
+  une perte et un gain possibles chacun, variances différentes d'au moins 25 % ; jeu le plus risqué = verdict 50/50 tiré
+  AVANT les lois) — espérances, variances, choix fermé. Ligne des produits omise quand elle dépasse 34 caractères visibles
+  (5 termes) : on écrit directement les valeurs des produits. Profil : `calcul: 'exacte'` (la Casio Graph Math+ donne x̄ et
+  σx d'une liste pondérée), `risque` sans `calcul`. Niveaux : calcul 2 · 10 min (3 · 10 avec une valeur négative : piège du
+  carré), risque 3 · 10 min pour les deux verdicts.
+- **6gen111 « Y = aX + b »** (§ 1, Appliquer) : familles `conversion` (devise — « 1 € pour 1,25 dollar », jamais le signe
+  « $ » qui casse le regroupement —, °C → °F), `jeu` (mise, points), `decroissant` (prime, carburant restant : a < 0) ; donnée
+  V(X) ou σ(X) (`forme`) ; écrans a et b, E(Y), V(Y), σ(Y). Messages ciblés : aV + b, a non au carré, b ajouté, σ négatif.
+  Aucun `calcul`. Niveaux 3 · 10 (4 · 10 si a < 0).
+- **6gen112 « Fonction de répartition »** (§ 1 / § 3, carte au § 3, Appliquer) : `escalier` (F aux valeurs, intervalle
+  « a < X ≤ b », « a ≤ X ≤ b » ou « a < X < b », « au moins k » / « plus de k » ; figure escalier dans le corrigé) ;
+  `continue` (F₁, F₂ ; numéro valide 50/50 AVANT le reste ; la fausse n'atteint pas 1, dépasse 1 puis décroît, ou devient
+  négative ; puis P(X ≤ a) / P(X > a), P(a < X < b), f = F′). Critères fixes : escalier 3 · 8, continue 3 · 10 quel que soit
+  le numéro. Aucun `calcul`.
+- **6gen113 « Densité de probabilité »** (§ 3, Appliquer) : `trace` (triangle, trapèze, marche, plateau, montée ; sommets
+  aux abscisses entières, hauteurs k ou 2k ; bornes a, b, c tirées là où la hauteur tombe sur une ligne du quadrillage,
+  multiple de k/2 — rien à deviner entre deux lignes ; figure dans l'énoncé SANS zone, zone grisée dans le corrigé ;
+  hauteurs « 0,5k ») ; `formule` (k·x, k·x², k(L − x), kx(L − x) sur [0 ; L]) : k, P(a ≤ X ≤ b), E(X). Niveaux trace 3 · 8,
+  formule 2 · 8. Aucun `calcul`.
+- **6gen114 « Discrète ou continue ? »** (§ 4, Connaître) : 16 situations (dont taille arrondie au centimètre = discrète,
+  appels / lancers jusqu'au premier 6 = discrètes sans maximum) ; nature 50/50 AVANT la situation ; trois choix fermés
+  (nature, ensemble des valeurs parmi trois, outil : somme des P(X = k) / intégrale, P(X = c)). Variantes = natures →
+  `groupe_nature`. Critères fixes 2 · 8 pour les deux natures.
+- **6gen115 « Loi uniforme continue »** (§ 5, Appliquer ; remplace l'ancienne famille E de 6gen52) : `direct` (arrivée,
+  livreur, panne, cuisson, trajet ; a ≠ 0 ; événement intérieur, qui DÉBORDE de [a ; b] — borne jamais négative —, au moins,
+  au plus = `forme`) : densité, probabilité, E, V et σ (exacte ou au centième) ; `inverse` (E et V donnés, b − a multiple de 3
+  pour V décimal exact) : b − a, a et b, P(X ≤ c) avec c ≠ milieu. Niveaux direct 3 · 11 (4 · 11 si l'intervalle déborde),
+  inverse 3 · 8. Aucun `calcul`.
+- **Papier** : énoncé = situation (+ tableau KaTeX affiché ou figure) + consigne globale ; aucun cas particulier.
+  Regroupement a), b), c) : 6gen111 (« Dans chaque situation, écris Y sous la forme Y = aX + b… », ligne = la situation) et
+  6gen114 (« Dans chaque situation, la variable X est-elle discrète ou continue ?… ») ; écartés 6gen110 (contexte + tableau
+  propres), 6gen112 et 6gen113 (loi, fonctions ou figure ET consigne qui nomme les événements), 6gen115 (événement dans la
+  consigne). Aucun besoin de table de Φ.
+- **Mesures** : collecteur (`…/scratchpad/h1-6e8/collecteur.ts`, réponses recalculées indépendamment — variance par la
+  définition, intervalles du discret par énumération des valeurs, validité de F₁ / F₂ par balayage numérique, aires par
+  Simpson, intersection recalculée — écritures justes variées, fausses, illisibles, pièges) 250 tirages par variante :
+  0 réponse juste refusée, 0 fausse acceptée, 0 KaTeX invalide, ≈ 24 100 relations du corrigé évaluées, 0 fausse ; regroupement
+  6gen111 et 6gen114 reconnus 250 / 250 ; plans réels 10 × 2 séries (interdite, autorisée) : structure B = A, 0 instance
+  identique ; verdicts B ≠ A : `groupe_nature` 30 / 30, 6gen110 risque 14 / 30, 6gen112 continue 13 / 30 (≈ 1/2 attendu),
+  niveau et durée constants par verdict ; iPhone 13 (6 × 8 parcours : justes, fausses, illisibles, aides, tentatives
+  épuisées, « Voir comment on y arrive », nouvel exercice à champs vides) ≈ 510 contrôles, scrollWidth 390, 0 erreur console,
+  0 `.katex-error` ; documents réels (évaluation 2 séries + aménagée + corrigé + grille + feuille + aménagée + Word copie /
+  corrigé, interdite / autorisée) : 0 débordement, 0 formule coupée, 0 `.katex-error` à 680 / 820 / 1 280 px.
 
 ## 6e ch. 6, lot G2 — 6gen162–6gen163 (nouveaux, notés)
 

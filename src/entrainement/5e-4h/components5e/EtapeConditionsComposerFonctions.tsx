@@ -61,7 +61,8 @@ interface Props {
   texteAideNiveau1: string;
   latexAideNiveau2: string | null;
   termesEtatActuel?: string[];
-  onValider: (reponse: ReponseCondition[]) => void;
+  /** `seuilsSaisis` : les seuils tels que tapés (fiche de la puce : la saisie réelle, jamais la valeur relue). */
+  onValider: (reponse: ReponseCondition[], seuilsSaisis: string[]) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
@@ -119,7 +120,7 @@ export function EtapeConditionsComposerFonctions({ dir, consigne, donnees, tenta
     setIllisible(false);
     const reponse = lignes.map((l, i) => ({ comparateur: l.comparateur as ComparateurSeuil, seuil: valeurs[i] as number }));
     setSoumise(reponse);
-    onValider(reponse);
+    onValider(reponse, lignes.map((l) => l.seuil));
   }
 
   return (

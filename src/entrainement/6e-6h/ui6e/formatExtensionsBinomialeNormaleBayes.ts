@@ -1,761 +1,227 @@
-import type { ExerciceExtA, ExerciceExtB, ExerciceExtC, ExerciceExtD, ExerciceExtE, ExerciceExtF, ExerciceExtensionsBinomialeNormaleBayes } from "../core6e/extensionsBinomialeNormaleBayes.types";
-import { destandardiserD, valeurCibleTableD, valeurZD } from "../generateurs6e/loiNormale/familleD";
-import type { CalculerReferenceExtensionsBinomialeNormaleBayes, PhaseExtensionsBinomialeNormaleBayes } from "../moteur6e/typesExtensionsBinomialeNormaleBayes";
-import { esperanceF, jointCategorie3D, probabilitesF, probabiliteUniformeE, r3DeduitD } from "../moteur6e/verificationExtensionsBinomialeNormaleBayes";
+import type { ExerciceExtA, ExerciceExtensionsBinomialeNormaleBayes } from "../core6e/extensionsBinomialeNormaleBayes.types";
+import { frontiereA } from "../generateurs6e/extensionsBinomialeNormaleBayes/familles";
+import { bayesD, esperanceF, intersectionD, pA, probabilitesF, referenceA, totaleD, totalF } from "../moteur6e/verificationExtensionsBinomialeNormaleBayes";
+import type { PhaseExtensionsBinomialeNormaleBayes } from "../moteur6e/typesExtensionsBinomialeNormaleBayes";
+import { versNombre } from "../moteur6e/saisieCombinatoire";
+import type { Rationnel } from "../moteur6e/saisieCombinatoire";
+import { inequationInverse, vautEnviron } from "../moteur6e/saisieVariablesAleatoires";
+import { arrondiLatex, decimalLatex, f, fractionLatex, m, milliersTexte, t } from "./fragmentsCombinatoire";
+import type { ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen52`. Dispatch sur
- * `exercice.famille` PUIS `phase`, mirroir `formatLoiNormale.ts`/`formatDenombrementFondamental.ts`,
- * jamais importé par un autre générateur (chaque générateur reste indépendant — CLAUDE.md).
- *
- * **`calculerReferenceExtensionsBinomialeNormaleBayes`** — LA fonction qui relie Couche A
- * (`Phi`/`PhiInverse`, `generateurs6e/loiNormale/`, ce fichier a le droit d'importer) et Couche B
- * (`moteur6e/verificationExtensionsBinomialeNormaleBayes.ts`, qui ne le peut jamais) — MÊME PONT que
- * `6gen51` (`ui6e/formatLoiNormale.ts::calculerReferenceLoiNormale`) : injectée dans
- * `sessionExtensionsBinomialeNormaleBayes.ts` comme `calculerReference`, et réutilisée ICI pour les
- * mêmes calculs côté "état actuel". Seule la famille C en a besoin (loi normale inverse) — toutes
- * les autres familles renvoient `{}`.
- *
- * `probabilitesF`/`esperanceF`/`jointCategorie3D`/`r3DeduitD`/`probabiliteUniformeE` sont importées
- * de `moteur6e/verificationExtensionsBinomialeNormaleBayes.ts` (Couche B, "état actuel"/récap ont le
- * droit d'utiliser cette même vérité que la vérification — jamais une 2e formule dupliquée).
- *
- * **Vigilance signe orphelin / `%` non échappé / groupe LaTeX vide / débordement horizontal** (bugs
- * déjà rencontrés et corrigés sur plusieurs générateurs 6e, documentés CLAUDE.md) —
- * `formatDecimalVirgule`/`formatPourcentage` ci-dessous sont les SEULES fonctions qui convertissent
- * un nombre en LaTeX décimal/pourcentage dans ce module ; tout pourcentage narratif est TOUJOURS
- * suivi de `\%` échappé (jamais `%` brut dans un fragment `\text{...}`). Couverture de régression :
- * `formatExtensionsBinomialeNormaleBayes.test.ts`, scan de nombreux tirages des 6 familles.
+ * Textes de `6gen52` (6e ch. 8, § 7, Transférer) — audit, lot C : X et S toujours définis, données en
+ * prose (pourcentages écrits comme dans un énoncé), notation P(A|B) du ch. 6, virgule décimale, aucun
+ * exemple de champ (avant : « ex : (1-0.06)^n < 0.09999999999999998 », la réponse en notation clavier),
+ * aides qui ne donnent plus « n ≈ 9.903 ».
  */
 
-export type TypeChamp = "texte" | "choix";
+type E = ExerciceExtensionsBinomialeNormaleBayes;
+type P = PhaseExtensionsBinomialeNormaleBayes;
 
-export interface OptionChoix {
-  valeur: string;
-  label: string;
+/** p (ou 1 − p) en KaTeX : fraction irréductible, ou décimal si le dénominateur est 100. */
+function pLatexDe(num: number, den: number): string {
+  if (den === 100 || den === 10) return decimalLatex(num / den);
+  return `\\dfrac{${num}}{${den}}`;
+}
+function pLatex(e: ExerciceExtA): string {
+  return pLatexDe(e.pNum, e.pDen);
+}
+function unMoinsPLatex(e: ExerciceExtA): string {
+  return pLatexDe(e.pDen - e.pNum, e.pDen);
+}
+function qLatex(e: ExerciceExtA): string {
+  const q = unMoinsPLatex(e);
+  return q.startsWith("\\dfrac") ? `\\left(${q}\\right)` : q;
 }
 
-export interface ChampDef {
-  type: TypeChamp;
-  label: string;
-  placeholder?: string;
-  options?: OptionChoix[];
+function probaLatex(r: Rationnel): string {
+  const x = versNombre(r);
+  if (Math.abs(Number(x.toFixed(6)) - x) < 1e-12) return decimalLatex(x);
+  return `${fractionLatex(r)}\\approx ${arrondiLatex(x, 3)}`;
 }
 
-export interface AideAvecLatex {
-  texte: string;
-  latex: string | null;
-}
+const C = (i: number) => `C_{${i + 1}}`;
 
-/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
- * `ui6e/formatProprietesLogarithme.ts`, rendu via `components/RenduFragments.tsx`. */
-export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
-
-function texte(valeur: string): FragmentConsigne {
-  return { type: "texte", valeur };
-}
-function latex(valeur: string): FragmentConsigne {
-  return { type: "latex", valeur };
-}
-
-const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
-
-function champTexte(label: string, placeholder: string): ChampDef {
-  return { type: "texte", label, placeholder };
-}
-
-/** Décimal français (virgule) — jamais un `.` anglais brut dans un fragment `\text{...}`/mode maths
- * (convention transversale du chantier). */
-function formatDecimalVirgule(v: number): string {
-  const arrondi = Math.round(v * 10000) / 10000;
-  return String(arrondi).replace(".", "{,}");
-}
-
-/** Pourcentage en TEXTE BRUT pour une phrase narrative — MÊME convention que `formatPourcentageMot`
- * de `formatLoiBinomiale.ts` (`6gen50`, bug `%` non échappé trouvé et corrigé, CLAUDE.md) : le `\%`
- * est déjà collé au nombre (aucun espace), ce token reste donc intact face au découpage par mot de
- * `decouperEnFragmentsTexte`. */
-function formatPourcentageMot(v: number): string {
-  const pct = Math.round(v * 10000) / 100;
-  return `${String(pct).replace(".", ",")}\\%`;
-}
-
-/** Longueur MAXIMALE (en caractères) d'un fragment `\text{...}` avant retour à la ligne — mirroir
- * EXACT `formatLoiBinomiale.ts`/`formatBinomialeSequenceOrdonnee.ts` (6gen48/50) : une phrase
- * française complète comme fragment KaTeX unique déborde horizontalement dès que l'écran est étroit
- * (`white-space:nowrap` interne à KaTeX, aucun retour à la ligne possible — bug trouvé et corrigé en
- * vérification Playwright, voir `docs/historique-6e.md`, section "Création — 6gen52"). */
-const LONGUEUR_MAX_LIGNE = 28;
-
-/** Découpe un texte narratif BRUT (jamais déjà en LaTeX) en plusieurs fragments `\text{...}` COURTS
- * — voir `LONGUEUR_MAX_LIGNE` ci-dessus. Toute phrase narrative de ce fichier passe par cette
- * fonction avant affichage, jamais un `\text{...}` unique englobant une phrase entière. */
-function decouperEnFragmentsTexte(texte: string): string[] {
-  const mots = texte.split(" ");
-  const lignes: string[] = [];
-  let courante = "";
-  for (const mot of mots) {
-    const candidate = courante === "" ? mot : `${courante} ${mot}`;
-    if (candidate.length > LONGUEUR_MAX_LIGNE && courante !== "") {
-      lignes.push(courante);
-      courante = mot;
-    } else {
-      courante = candidate;
+export const FORMAT_6GEN52: FormatCombinatoire<E, P> = {
+  consigneGenerale(e) {
+    if (e.famille === "A") return [t("Trouve le plus petit nombre de répétitions qui convient, à l'aide du logarithme.")];
+    if (e.famille === "D") return [t("Probabilités exactes, ou arrondies au millième.")];
+    return [t("On note "), m("X"), t(` ${e.definitionX}. Probabilités exactes ; espérance exacte.`)];
+  },
+  donnees(e): FragmentConsigne[][] {
+    if (e.famille === "A") return [[t(e.texte)], [t(`Combien de ${e.unite} faut-il au minimum pour que la probabilité qu'${e.evenement} dépasse `), m(decimalLatex(e.seuil)), t(" ?")]];
+    if (e.famille === "D") {
+      const c = e.contexte;
+      return [
+        [t(`${c.intro} : `), m(C(0)), t(` (${c.categories[0]}) pour ${e.q[0]} %, `), m(C(1)), t(` (${c.categories[1]}) pour ${e.q[1]} % et `), m(C(2)), t(` (${c.categories[2]}) pour le reste.`)],
+        [t("On note "), m("S"), t(` l'événement « ${c.critere} ». Dans la catégorie `), m(C(0)), t(", "), m("S"), t(` est réalisé dans ${e.r[0]} % des cas ; dans `), m(C(1)), t(`, ${e.r[1]} % ; dans `), m(C(2)), t(`, ${e.r[2]} %.`)],
+        [t(`On choisit au hasard ${c.individu} et l'on constate que `), m("S"), t(" est réalisé. Quelle est la probabilité qu'il s'agisse de la catégorie "), m(C(e.j)), t(` (${c.categories[e.j]}) ?`)],
+      ];
     }
-  }
-  if (courante !== "") lignes.push(courante);
-  return lignes.map((ligne) => `\\text{${ligne}}`);
-}
-
-// ============================================================================
-// Famille A — Indépendance composée + trouver n via logarithme.
-// ============================================================================
-
-export function consigneGeneraleA(): FragmentConsigne[] {
-  return [
-    texte("Une expérience aléatoire, de probabilité de succès p à une seule répétition, est répétée de façon indépendante. Détermine le nombre minimal de répétitions pour que "),
-    latex("P(\\text{au moins 1 succès})"),
-    texte(" dépasse un seuil donné."),
-  ];
-}
-
-export function blocDonneesA(e: ExerciceExtA): string[] {
-  return [...decouperEnFragmentsTexte(e.contexteTexte), `\\text{Seuil : }${formatDecimalVirgule(e.seuil)}`];
-}
-
-export function consigneEcranA(phase: PhaseExtensionsBinomialeNormaleBayes): FragmentConsigne[] {
-  if (phase === "aComposeEcran1P") return [texte("Calcule p, la probabilité du succès composé (réussite des DEUX épreuves indépendantes).")];
-  if (phase === "aEcranAucunAuMoins") return [texte("Pour UNE SEULE répétition : calcule "), latex("P(\\text{aucun succès})"), texte(" puis "), latex("P(\\text{au moins 1 succès})"), texte(".")];
-  if (phase === "aEcranTrouverN1") return [texte("Pose l'inéquation correspondant à « "), latex("P(\\text{au moins 1 succès})>\\text{seuil}"), texte(" » en fonction de n, PUIS isole "), latex("(1-p)^n"), texte(".")];
-  return [texte("Résous l'inéquation CONFIRMÉE pour trouver n (utilise le logarithme), puis arrondis au nombre entier supérieur.")];
-}
-
-/** Lignes confirmées à l'écran "p composé" — présent UNIQUEMENT pour `sousType==="compose"` (1er
- * écran dans ce cas ; réutilisées par tout écran ultérieur, correctif transversal accumulation, voir
- * CLAUDE.md/`docs/historique-6e.md`). */
-function lignesEcranPComposeA(e: ExerciceExtA): string[] {
-  return e.sousType === "compose" ? [`p=${formatDecimalVirgule(e.p)}\\text{ (confirmé, étape 1)}`] : [];
-}
-
-/** Lignes confirmées à l'écran "aucun/au moins" — écran 1 (sousType `direct`) ou écran 2 (sousType
- * `compose`, après l'écran p composé). */
-function lignesEcranAucunAuMoinsA(e: ExerciceExtA): string[] {
-  const numeroEcran = e.sousType === "compose" ? 2 : 1;
-  return [`P(\\text{aucun succès})=${formatDecimalVirgule(1 - e.p)}\\text{ (confirmé, étape ${numeroEcran})}`, `P(\\text{au moins 1 succès})=${formatDecimalVirgule(e.p)}\\text{ (confirmé, étape ${numeroEcran})}`];
-}
-
-/** ACCUMULE les écrans déjà confirmés (correctif transversal — voir CLAUDE.md/`docs/historique-
- * 6e.md`, même bug que sur `6gen1`/`6gen58`) : `aEcranTrouverN1` omettait `p` (sousType `compose`) ;
- * `aEcranTrouverN2` ne montrait QUE l'inéquation isolée de l'écran précédent, jamais `p`/les
- * probabilités "aucun/au moins" des écrans antérieurs. Plus ancien en premier. */
-export function etatActuelA(e: ExerciceExtA, phase: PhaseExtensionsBinomialeNormaleBayes): string[] | null {
-  if (phase === "aEcranAucunAuMoins") return e.sousType === "compose" ? lignesEcranPComposeA(e) : null;
-  const numeroEcranIsolee = e.sousType === "compose" ? 3 : 2;
-  if (phase === "aEcranTrouverN1") return [...lignesEcranPComposeA(e), ...lignesEcranAucunAuMoinsA(e)];
-  if (phase === "aEcranTrouverN2") {
-    return [...lignesEcranPComposeA(e), ...lignesEcranAucunAuMoinsA(e), `1-(1-${formatDecimalVirgule(e.p)})^n<${formatDecimalVirgule(1 - e.seuil)}\\text{ (confirmé, étape ${numeroEcranIsolee}, forme isolée)}`];
-  }
-  return null;
-}
-
-function exempleInequationPoseeA(e: ExerciceExtA): string {
-  return `ex : 1-(1-${e.p})^n > ${e.seuil}`;
-}
-function exempleInequationIsoleeA(e: ExerciceExtA): string {
-  return `ex : (1-${e.p})^n < ${1 - e.seuil}`;
-}
-
-export function champsA(e: ExerciceExtA, phase: PhaseExtensionsBinomialeNormaleBayes): ChampDef[] {
-  if (phase === "aComposeEcran1P") return [champTexte("p = p1 × p2 =", "ex : 0,12")];
-  if (phase === "aEcranAucunAuMoins") return [champTexte("P(aucun succès) =", "ex : 0,88"), champTexte("P(au moins 1 succès) =", "ex : 0,12")];
-  if (phase === "aEcranTrouverN1") return [champTexte("Inéquation posée (en n) =", exempleInequationPoseeA(e)), champTexte("Inéquation isolée (en n) =", exempleInequationIsoleeA(e))];
-  return [champTexte("n (nombre minimal de répétitions) =", "ex : 22")];
-}
-
-export function niveauAideMaxA(phase: PhaseExtensionsBinomialeNormaleBayes): number {
-  return phase === "aEcranTrouverN2" ? 2 : 0;
-}
-
-export function aideNiveau1A(phase: PhaseExtensionsBinomialeNormaleBayes): AideAvecLatex {
-  if (phase !== "aEcranTrouverN2") return AUCUNE_AIDE;
-  return { texte: "Diviser (ou multiplier) une inégalité par un nombre négatif en inverse le sens. Ici, ln(1−p) est toujours négatif car 0<1−p<1.", latex: "\\ln(1-p)<0" };
-}
-
-export function aideNiveau2A(e: ExerciceExtA, phase: PhaseExtensionsBinomialeNormaleBayes): AideAvecLatex {
-  if (phase !== "aEcranTrouverN2") return AUCUNE_AIDE;
-  const v = Math.log(1 - e.seuil) / Math.log(1 - e.p);
-  return { texte: "La division a déjà été effectuée, SANS préciser le sens de l'inégalité ni arrondir (à toi de déterminer le sens correct, puis d'arrondir au nombre entier supérieur) :", latex: `n \\approx ${v.toFixed(3)}` };
-}
-
-// ============================================================================
-// Famille B — Binomial classique étendu (réutilise 6gen48/6gen50).
-// ============================================================================
-
-const OPTIONS_STRATEGIE: OptionChoix[] = [
-  { valeur: "termeUnique", label: "Terme unique" },
-  { valeur: "somme", label: "Somme de termes" },
-  { valeur: "complement", label: "Complément (1 − ...)" },
-];
-
-function libelleTypeQuestionB(e: ExerciceExtB): string {
-  switch (e.typeQuestion) {
-    case "exactement":
-      return `P(X=${e.k})`;
-    case "auMoins":
-      return `P(X\\ge ${e.k})`;
-    case "auPlus":
-      return `P(X\\le ${e.k})`;
-    case "aucun":
-      return "P(X=0)";
-    default:
-      return "P(X=n)";
-  }
-}
-
-export function consigneGeneraleB(): FragmentConsigne[] {
-  return [texte("On étudie n épreuves identiques et indépendantes, chacune avec la même probabilité p de succès. Identifie d'abord la stratégie de calcul adaptée (terme unique, somme de plusieurs termes, ou complément), puis calcule.")];
-}
-
-export function blocDonneesB(e: ExerciceExtB): string[] {
-  return [...decouperEnFragmentsTexte(e.contexte.texte), `n=${e.n}`, `p=${formatDecimalVirgule(e.p)}`, `\\text{Calculer : }${libelleTypeQuestionB(e)}`];
-}
-
-function estEcran1B(phase: PhaseExtensionsBinomialeNormaleBayes): boolean {
-  return phase === "bTermeUniqueEcran1" || phase === "bSommeEcran1" || phase === "bComplementEcran1";
-}
-function estEcran2B(phase: PhaseExtensionsBinomialeNormaleBayes): boolean {
-  return phase === "bTermeUniqueEcran2" || phase === "bSommeEcran2" || phase === "bComplementEcran2";
-}
-
-export function consigneEcranB(phase: PhaseExtensionsBinomialeNormaleBayes): FragmentConsigne[] {
-  if (estEcran1B(phase)) return [texte("Identifie la stratégie de calcul adaptée, puis liste le ou les termes k à calculer (séparés par des virgules).")];
-  if (estEcran2B(phase)) return [texte("Calcule chaque valeur "), latex("P(X=k)"), texte(" listée à l'étape précédente (CONFIRMÉE), dans le même ordre.")];
-  return [texte("Combine les valeurs CONFIRMÉES de l'étape précédente pour obtenir le résultat final (somme, ou complément "), latex("1-\\ldots"), texte(").")];
-}
-
-/** Ligne confirmée à l'écran 1 (stratégie + termes) — réutilisée par tout écran ultérieur (correctif
- * transversal accumulation, voir CLAUDE.md/`docs/historique-6e.md`). */
-function ligneEcran1B(e: ExerciceExtB): string {
-  return `\\text{Stratégie confirmée (étape 1) : }${OPTIONS_STRATEGIE.find((o) => o.valeur === e.strategie)?.label}\\text{, termes : }${e.termesACalculer.join(",\\,")}`;
-}
-
-/** ACCUMULE les écrans déjà confirmés (correctif transversal, voir CLAUDE.md/`docs/historique-
- * 6e.md`) : `bSommeEcran3`/`bComplementEcran3` omettait la stratégie/les termes de l'écran 1, ne
- * montrant que les valeurs de l'écran 2. Plus ancien en premier. */
-export function etatActuelB(e: ExerciceExtB, phase: PhaseExtensionsBinomialeNormaleBayes): string[] | null {
-  if (estEcran2B(phase)) return [ligneEcran1B(e)];
-  if (phase === "bSommeEcran3" || phase === "bComplementEcran3") {
-    return [ligneEcran1B(e), `\\text{Valeurs confirmées (étape 2) : }${e.valeursTermes.map((v) => formatDecimalVirgule(v)).join(",\\,")}`];
-  }
-  return null;
-}
-
-export function champsB(e: ExerciceExtB, phase: PhaseExtensionsBinomialeNormaleBayes): ChampDef[] {
-  if (estEcran1B(phase)) return [{ type: "choix", label: "Stratégie :", options: OPTIONS_STRATEGIE }, champTexte("k à calculer (séparés par des virgules) =", "ex : 3")];
-  if (estEcran2B(phase)) return e.termesACalculer.map((k) => champTexte(`P(X=${k}) =`, "ex : 0,25"));
-  return [champTexte("Résultat final =", "ex : 0,84")];
-}
-
-export function niveauAideMaxB(phase: PhaseExtensionsBinomialeNormaleBayes): number {
-  return estEcran1B(phase) ? 2 : 0;
-}
-
-export function aideNiveau1B(phase: PhaseExtensionsBinomialeNormaleBayes): AideAvecLatex {
-  if (!estEcran1B(phase)) return AUCUNE_AIDE;
-  return { texte: "« Exactement k », « aucun » et « tous » se calculent avec un seul terme. « Au moins »/« au plus » se calculent par somme directe, sauf quand un simple complément (1 − ...) est plus rapide (souvent quand un seul terme manque au total).", latex: null };
-}
-
-export function aideNiveau2B(e: ExerciceExtB, phase: PhaseExtensionsBinomialeNormaleBayes): AideAvecLatex {
-  if (!estEcran1B(phase)) return AUCUNE_AIDE;
-  return { texte: "La stratégie correcte pour cet exercice est déjà identifiée ci-dessous — la liste des termes k à calculer reste à toi :", latex: OPTIONS_STRATEGIE.find((o) => o.valeur === e.strategie)?.label ?? null };
-}
-
-// ============================================================================
-// Famille C — Loi normale inverse en contexte (réutilise 6gen51 famille D).
-// ============================================================================
-
-const OPTIONS_TRANSFORMATION_C: OptionChoix[] = [
-  { valeur: "cumulee", label: "Directe" },
-  { valeur: "symetrique", label: "Symétrique" },
-  { valeur: "encadree", label: "Encadrée" },
-];
-
-function equationCibleDepartC(e: ExerciceExtC): string {
-  const b = e.base;
-  if (b.sousType === "cumulee") return `P(X\\le a)=${formatDecimalVirgule(b.p)}`;
-  if (b.sousType === "symetrique") return `P(\\mu\\le X\\le a)=${formatDecimalVirgule(b.p)}`;
-  return `P(a\\le X\\le ${formatDecimalVirgule(b.b)})=${formatDecimalVirgule(b.p)}`;
-}
-
-export function consigneGeneraleC(): FragmentConsigne[] {
-  return [
-    latex("X"),
-    texte(" suit une loi normale "),
-    latex("N(\\mu,\\sigma)"),
-    texte(". À partir d'un seuil de classement donné, détermine la valeur seuil a correspondante : reformule pour la table, lis-la à l'envers, puis dé-standardise."),
-  ];
-}
-
-export function blocDonneesC(e: ExerciceExtC): string[] {
-  return [...decouperEnFragmentsTexte(e.contexteTexte), `X\\sim\\mathcal{N}(${formatDecimalVirgule(e.base.mu)}\\text{ ; }${formatDecimalVirgule(e.base.sigma)})`, equationCibleDepartC(e)];
-}
-
-export function consigneEcranC(phase: PhaseExtensionsBinomialeNormaleBayes): FragmentConsigne[] {
-  if (phase === "cEcran1") return [texte("Identifie la transformation nécessaire pour adapter la probabilité donnée à une lecture directe de la table, et calcule la valeur cible.")];
-  if (phase === "cEcran2") return [texte("Lis la table À L'ENVERS : trouve z tel que "), latex("\\Phi(z)"), texte(" égale la valeur cible CONFIRMÉE.")];
-  return [texte("Dé-standardise à partir du z CONFIRMÉ : "), latex("a=\\mu+z\\cdot\\sigma"), texte(".")];
-}
-
-/** ACCUMULE les écrans déjà confirmés (correctif transversal, voir CLAUDE.md/`docs/historique-
- * 6e.md`) : `cEcran3` omettait Φ(z) confirmé à `cEcran1`, ne montrant que z de `cEcran2`. Plus
- * ancien en premier. */
-export function etatActuelC(e: ExerciceExtC, phase: PhaseExtensionsBinomialeNormaleBayes): string[] | null {
-  if (phase === "cEcran2") return [`\\Phi(z)=${formatDecimalVirgule(valeurCibleTableD(e.base))}\\text{ (confirmé, étape 1)}`];
-  if (phase === "cEcran3") return [`\\Phi(z)=${formatDecimalVirgule(valeurCibleTableD(e.base))}\\text{ (confirmé, étape 1)}`, `z=${formatDecimalVirgule(valeurZD(e.base))}\\text{ (confirmé, étape 2)}`];
-  return null;
-}
-
-export function champsC(phase: PhaseExtensionsBinomialeNormaleBayes): ChampDef[] {
-  if (phase === "cEcran1") return [{ type: "choix", label: "Transformation :", options: OPTIONS_TRANSFORMATION_C }, champTexte("Φ(z) =", "ex : 0,9750")];
-  if (phase === "cEcran2") return [champTexte("z =", "ex : 1,96")];
-  return [champTexte("a =", "ex : 129,4")];
-}
-
-export function niveauAideMaxC(phase: PhaseExtensionsBinomialeNormaleBayes): number {
-  return phase === "cEcran1" || phase === "cEcran3" ? 2 : 0;
-}
-
-export function aideNiveau1C(phase: PhaseExtensionsBinomialeNormaleBayes): AideAvecLatex {
-  if (phase === "cEcran1") return { texte: "La table ne donne QUE Φ(z)=P(Z≤z) directement — toute autre probabilité doit être reformulée sous cette forme avant lecture.", latex: "\\Phi(z)=P(Z\\le z)" };
-  if (phase === "cEcran3") return { texte: "Rappel de la formule inverse (à partir de z=(a−μ)/σ) :", latex: "a=\\mu+z\\cdot\\sigma" };
-  return AUCUNE_AIDE;
-}
-
-export function aideNiveau2C(e: ExerciceExtC, phase: PhaseExtensionsBinomialeNormaleBayes): AideAvecLatex {
-  const b = e.base;
-  if (phase === "cEcran1") {
-    if (b.sousType === "cumulee") return { texte: "Relation de conversion (déjà sous la bonne forme) :", latex: `\\Phi(z)=p=${formatDecimalVirgule(b.p)}` };
-    if (b.sousType === "symetrique") return { texte: "Relation de conversion appliquée en partie (valeur finale non isolée) :", latex: "\\Phi(z)=p+0{,}5" };
-    return { texte: "Relation de conversion appliquée en partie (valeur finale non isolée) :", latex: "\\Phi(z)=\\Phi(z_b)-p" };
-  }
-  if (phase === "cEcran3") return { texte: "μ, σ et z substitués (calcul final non fait) :", latex: `a=${formatDecimalVirgule(b.mu)}+(${formatDecimalVirgule(valeurZD(b))})\\times ${formatDecimalVirgule(b.sigma)}` };
-  return AUCUNE_AIDE;
-}
-
-/** Pont Couche A ↔ Couche B — voir en-tête de fichier. Seule la famille C en a besoin. */
-export const calculerReferenceExtensionsBinomialeNormaleBayes: CalculerReferenceExtensionsBinomialeNormaleBayes = (exercice, phase) => {
-  if (exercice.famille !== "C") return {};
-  if (phase === "cEcran1") return { cibleTable: valeurCibleTableD(exercice.base) };
-  if (phase === "cEcran2") return { zReference: valeurZD(exercice.base) };
-  if (phase === "cEcran3") return { aReference: destandardiserD(exercice.base, valeurZD(exercice.base)) };
-  return {};
+    return [
+      [t(`${e.texte} : ${e.labels[0]} (${e.valeurs[0]} €), ${e.labels[1]} (${e.valeurs[1]} €) et ${e.labels[2]} (${e.valeurs[2]} €).`)],
+      [t(`${e.pourcentage1} % des ${e.individus} ont choisi ${e.labels[0]}, ${e.pourcentage2} % ${e.labels[1]}, et les autres ${e.labels[2]}.`)],
+      [t(`On compte ${milliersTexte(e.population)} ${e.individus}.`)],
+    ];
+  },
+  consigneEcran(e, p) {
+    switch (p) {
+      case "aP":
+        return [t("Quelle est la probabilité "), m("p"), t(" de succès à chaque répétition ?")];
+      case "aInequation":
+        return [t("Écris l'inéquation en "), m("n"), t(" qui traduit la condition.")];
+      case "aIsole":
+        return [t("Résous l'inéquation : isole "), m("n"), t(".")];
+      case "aN":
+        return e.famille === "A" ? [t(`Quel est le plus petit nombre de ${e.unite} qui convient ?`)] : [];
+      case "dTotale":
+        return [t("Calcule "), m("P(S)"), t(".")];
+      case "dIntersection":
+        return e.famille === "D" ? [t("Calcule "), m(`P(${C(e.j)}\\cap S)`), t(".")] : [];
+      case "dBayes":
+        return e.famille === "D" ? [t("Déduis-en "), m(`P(${C(e.j)}|S)`), t(".")] : [];
+      case "fLoi":
+        return [t("Donne la loi de "), m("X"), t(" : la probabilité de chaque montant.")];
+      case "fEsperance":
+        return [t("Calcule l'espérance "), m("E(X)"), t(".")];
+      case "fTotal":
+        return e.famille === "F" ? [t(`Quel montant total, en euros, peut-on attendre chaque mois des ${milliersTexte(e.population)} ${e.individus} ?`)] : [];
+    }
+  },
+  champs(e, p): ChampCombi[] {
+    switch (p) {
+      case "aP":
+        return [{ type: "texte", label: "$p$" }];
+      case "aInequation":
+        return [{ type: "texte", label: "Inéquation en $n$", placeholder: "inéquation en n" }];
+      case "aIsole":
+        return [{ type: "texte", label: "$n$ isolé", placeholder: "n seul d'un côté" }];
+      case "aN":
+        return [{ type: "texte", label: "$n$" }];
+      case "dTotale":
+        return [{ type: "texte", label: "$P(S)$" }];
+      case "dIntersection":
+        return e.famille === "D" ? [{ type: "texte", label: `$P(${C(e.j)}\\cap S)$` }] : [];
+      case "dBayes":
+        return e.famille === "D" ? [{ type: "texte", label: `$P(${C(e.j)}|S)$` }] : [];
+      case "fLoi":
+        return e.famille === "F" ? e.valeurs.map((v) => ({ type: "texte" as const, label: `$P(X=${v})$` })) : [];
+      case "fEsperance":
+        return [{ type: "texte", label: "$E(X)$" }];
+      case "fTotal":
+        return [{ type: "texte", label: "Total (en €)" }];
+    }
+  },
+  aides(e, p) {
+    switch (p) {
+      case "aP":
+        return e.famille === "A" && e.sousType === "compose"
+          ? [{ texte: "Pour deux événements indépendants, la probabilité qu'ils se réalisent tous les deux est le produit :", latex: "P(A\\cap B)=P(A)\\times P(B)" }, { texte: "Repère les deux événements qui doivent se produire ensemble, et la probabilité de chacun." }]
+          : [{ texte: "Issues équiprobables : nombre de cas favorables divisé par le nombre de cas possibles (ou probabilité donnée par le texte)." }, { texte: "Compte les issues qui font gagner une répétition (une fraction ou un pourcentage conviennent)." }];
+      case "aInequation":
+        return [
+          { texte: "« Au moins un succès » est le contraire de « aucun succès » ; sur $n$ répétitions :", latex: "P(\\text{au moins un succès})=1-(1-p)^n" },
+          { texte: "Remplace $p$ par la valeur de l'écran précédent ; la probabilité doit dépasser le seuil." },
+        ];
+      case "aIsole":
+        return [
+          { texte: "Isole la puissance, puis prends le logarithme des deux membres :", latex: "\\ln\\left(a^n\\right)=n\\ln a" },
+          { texte: "Le logarithme d'un nombre entre 0 et 1 est négatif : diviser par un nombre négatif change le sens de l'inégalité." },
+        ];
+      case "aN":
+        return [{ texte: "$n$ est un nombre entier : prends le premier entier qui vérifie l'inéquation." }, { texte: "Contrôle à la calculatrice : la probabilité doit dépasser le seuil pour ce nombre, et pas pour le précédent." }];
+      case "dTotale":
+        return e.famille === "D"
+          ? [
+              { texte: "Probabilités totales : les trois catégories se partagent la population, donc :", latex: "P(S)=\\sum_{i=1}^{3}P(C_i)\\times P(S|C_i)" },
+              { texte: `Traduis les pourcentages : $P(C_1)=${decimalLatex(e.q[0] / 100)}$, $P(S|C_1)=${decimalLatex(e.r[0] / 100)}$, et de même pour $C_2$ et $C_3$ (la part de $C_3$ est le reste).` },
+            ]
+          : [];
+      case "dIntersection":
+        return e.famille === "D" ? [{ texte: "Probabilité d'un « et » le long d'une branche de l'arbre :", latex: `P(${C(e.j)}\\cap S)=P(${C(e.j)})\\times P(S|${C(e.j)})` }, { texte: `Utilise les données de la catégorie $${C(e.j)}$.` }] : [];
+      case "dBayes":
+        return e.famille === "D" ? [{ texte: "Formule de Bayes : on sait que $S$ est réalisé, on remonte à la catégorie :", latex: `P(${C(e.j)}|S)=\\dfrac{P(${C(e.j)}\\cap S)}{P(S)}` }, { texte: "Divise le résultat de l'écran précédent par $P(S)$ du premier écran." }] : [];
+      case "fLoi":
+        return [{ texte: "La probabilité d'un montant est la proportion des personnes qui l'ont choisi ; les trois probabilités ont pour somme 1." }, { texte: "La troisième option rassemble « les autres » : retrouve sa part par différence." }];
+      case "fEsperance":
+        return [{ texte: "Moyenne des montants pondérée par leurs probabilités :", latex: "E(X)=\\sum x_i\\,P(X=x_i)" }, { texte: "Utilise la loi de l'écran précédent." }];
+      case "fTotal":
+        return [{ texte: "En moyenne, chaque personne paie $E(X)$ : le total attendu est la taille de la population multipliée par $E(X)$." }, { texte: "Utilise l'espérance de l'écran précédent." }];
+    }
+  },
+  reponseAttendue(e, p) {
+    if (e.famille === "A") {
+      const fr = frontiereA(pA(e), e.seuil);
+      if (p === "aP") return [e.facteurs ? `p=${e.facteurs.join("\\times ")}=${pLatex(e)}` : `p=${pLatex(e)}`];
+      if (p === "aInequation") return [`1-${qLatex(e)}^{n}>${decimalLatex(e.seuil)}`];
+      if (p === "aIsole") return [`n>\\dfrac{\\ln(${decimalLatex(1 - e.seuil)})}{\\ln${unMoinsPLatex(e).startsWith("\\dfrac") ? `\\left(${unMoinsPLatex(e)}\\right)` : `(${unMoinsPLatex(e)})`}}\\approx ${arrondiLatex(fr, 2)}`];
+      return [`n=${e.valeurN}`];
+    }
+    if (e.famille === "D") {
+      if (p === "dTotale") return [`P(S)=${probaLatex(totaleD(e))}`];
+      if (p === "dIntersection") return [`P(${C(e.j)}\\cap S)=${probaLatex(intersectionD(e))}`];
+      return [`P(${C(e.j)}|S)=${probaLatex(bayesD(e))}`];
+    }
+    if (p === "fLoi") return probabilitesF(e).map((x, i) => `P(X=${e.valeurs[i]})=${decimalLatex(x)}`);
+    if (p === "fEsperance") return [`E(X)=${decimalLatex(esperanceF(e))}`];
+    return [`${decimalLatex(totalF(e))}\\ \\text{€}`];
+  },
+  explication(e, p) {
+    if (e.famille === "A") {
+      const q = qLatex(e);
+      const fr = frontiereA(pA(e), e.seuil);
+      if (p === "aP") return [f(e.facteurs ? `Les deux événements sont indépendants : $p=${e.facteurs.join("\\times ")}=${pLatex(e)}$.` : `$p=${pLatex(e)}$.`)];
+      if (p === "aInequation") return [f(`« Au moins un succès » : $1-${q}^{n}$. Il faut $1-${q}^{n}>${decimalLatex(e.seuil)}$.`)];
+      if (p === "aIsole") return [f(`$${q}^{n}<${decimalLatex(1 - e.seuil)}$, donc $n\\ln${q.startsWith("\\left") ? q : `(${q})`}<\\ln(${decimalLatex(1 - e.seuil)})$ ; ce logarithme est négatif, le sens change : $n>${arrondiLatex(fr, 2)}$ (environ).`)];
+      const n = e.valeurN;
+      const pp = pA(e);
+      return [f(`Premier entier au-delà de $${arrondiLatex(fr, 2)}$ : $n=${n}$. Contrôle : $1-${q}^{${n - 1}}\\approx ${arrondiLatex(1 - (1 - pp) ** (n - 1), 4)}$ et $1-${q}^{${n}}\\approx ${arrondiLatex(1 - (1 - pp) ** n, 4)}$.`)];
+    }
+    if (e.famille === "D") {
+      const termes = [0, 1, 2].map((i) => `${decimalLatex(e.q[i] / 100)}\\times ${decimalLatex(e.r[i] / 100)}`);
+      if (p === "dTotale") return [f(`$P(S)=${termes.join("+")}=${probaLatex(totaleD(e))}$.`)];
+      if (p === "dIntersection") return [f(`$P(${C(e.j)}\\cap S)=${termes[e.j]}=${probaLatex(intersectionD(e))}$.`)];
+      return [f(`$P(${C(e.j)}|S)=\\dfrac{${decimalLatex(versNombre(intersectionD(e)))}}{${decimalLatex(versNombre(totaleD(e)))}}=${probaLatex(bayesD(e))}$ : sachant S, la part de $${C(e.j)}$ passe de $${decimalLatex(e.q[e.j] / 100)}$ à environ $${arrondiLatex(versNombre(bayesD(e)), 3)}$.`)];
+    }
+    const pr = probabilitesF(e);
+    if (p === "fLoi") return [f(`$P(X=${e.valeurs[0]})=${decimalLatex(pr[0])}$, $P(X=${e.valeurs[1]})=${decimalLatex(pr[1])}$ et, par différence, $P(X=${e.valeurs[2]})=1-${decimalLatex(pr[0])}-${decimalLatex(pr[1])}=${decimalLatex(pr[2])}$.`)];
+    if (p === "fEsperance") return [f(`$E(X)=${e.valeurs.map((v, i) => `${v}\\times ${decimalLatex(pr[i])}`).join("+")}=${decimalLatex(esperanceF(e))}$ €.`)];
+    return [f(`$${milliersTexte(e.population).replace(/ /g, "\\,")}\\times ${decimalLatex(esperanceF(e))}=${decimalLatex(totalF(e))}$ €.`)];
+  },
+  libellePhase(_e, p) {
+    const l: Record<P, string> = {
+      aP: "Probabilité p",
+      aInequation: "Inéquation",
+      aIsole: "n isolé",
+      aN: "n minimal",
+      dTotale: "P(S)",
+      dIntersection: "Intersection",
+      dBayes: "Bayes",
+      fLoi: "Loi de X",
+      fEsperance: "Espérance",
+      fTotal: "Total attendu",
+    };
+    return l[p];
+  },
+  messageCible(e, p, valeurs) {
+    const v = valeurs[0] ?? "";
+    if (e.famille === "A") {
+      if ((p === "aInequation" || p === "aIsole") && inequationInverse(v, referenceA(e), frontiereA(pA(e), e.seuil)))
+        return p === "aIsole" ? f("Le sens est inversé : $\\ln(1-p)$ est négatif, et diviser par un nombre négatif change le sens de l'inégalité.") : [t("Le sens est inversé : la probabilité doit dépasser le seuil.")];
+      if (p === "aN" && v.replace(/\D/g, "") === String(e.valeurN - 1)) return [t("Pour ce nombre, la probabilité ne dépasse pas encore le seuil : prends l'entier suivant.")];
+      return null;
+    }
+    if (e.famille === "D") {
+      if (p === "dBayes") {
+        if (vautEnviron(v, e.q[e.j] / 100)) return [t("C'est la part de la catégorie dans toute la population : ici, on sait déjà que S est réalisé.")];
+        if (vautEnviron(v, e.r[e.j] / 100)) return [t("C'est la probabilité de S dans la catégorie : le conditionnement est inversé.")];
+        if (vautEnviron(v, versNombre(intersectionD(e)))) return [t("C'est la probabilité de l'intersection : divise-la par P(S).")];
+      }
+      if (p === "dTotale" && vautEnviron(v, (e.r[0] + e.r[1] + e.r[2]) / 300)) return [t("C'est la moyenne simple des trois pourcentages : pondère chacun par la part de sa catégorie.")];
+      return null;
+    }
+    if (p === "fEsperance" && vautEnviron(v, (e.valeurs[0] + e.valeurs[1] + e.valeurs[2]) / 3)) return [t("C'est la moyenne simple des montants : pondère chacun par sa probabilité.")];
+    if (p === "fTotal" && vautEnviron(v, esperanceF(e))) return [t("C'est le montant moyen d'une personne : multiplie par la taille de la population.")];
+    return null;
+  },
 };
-
-// ============================================================================
-// Famille D — Théorème de Bayes à 3 catégories.
-// ============================================================================
-
-export function consigneGeneraleD(): FragmentConsigne[] {
-  return [texte("3 catégories se partagent une population. Pour 2 d'entre elles, on connaît la probabilité conditionnelle d'un critère ; la probabilité totale du critère (toutes catégories confondues) permet de déduire par différence la conditionnelle manquante pour la 3e catégorie.")];
-}
-
-export function blocDonneesD(e: ExerciceExtD): string[] {
-  return [
-    ...decouperEnFragmentsTexte(e.contexte.texte),
-    ...decouperEnFragmentsTexte(`Catégorie 1 (${e.contexte.labelCategorie1}) : ${formatPourcentageMot(e.q1)} des individus`),
-    ...decouperEnFragmentsTexte(`Catégorie 2 (${e.contexte.labelCategorie2}) : ${formatPourcentageMot(e.q2)} des individus`),
-    ...decouperEnFragmentsTexte(`Catégorie 3 (${e.contexte.labelCategorie3}) : le reste des individus`),
-    ...decouperEnFragmentsTexte(`Parmi la catégorie 1, ${formatPourcentageMot(e.r1)} vérifient : ${e.contexte.labelCritere}`),
-    ...decouperEnFragmentsTexte(`Parmi la catégorie 2, ${formatPourcentageMot(e.r2)} vérifient : ${e.contexte.labelCritere}`),
-    ...decouperEnFragmentsTexte(`Au total (toutes catégories), ${formatPourcentageMot(e.pTotal)} vérifient : ${e.contexte.labelCritere}`),
-  ];
-}
-
-export function consigneEcranD(phase: PhaseExtensionsBinomialeNormaleBayes): FragmentConsigne[] {
-  if (phase === "dEcran1") return [texte("Identifie les 3 catégories et leurs probabilités d'appartenance (converties en décimal), en déduisant celle de la 3e catégorie.")];
-  if (phase === "dEcran2") return [texte("Calcule la probabilité conjointe (catégorie ∩ critère) pour les 2 catégories dont la conditionnelle est connue.")];
-  if (phase === "dEcran3") return [texte("Utilise la probabilité totale du critère (donnée) pour déduire, PAR DIFFÉRENCE, la probabilité conjointe manquante de la 3e catégorie.")];
-  return [texte("Calcule la conditionnelle demandée "), latex("P(\\text{critère}\\mid\\text{3e catégorie})"), texte(", à partir de la valeur CONFIRMÉE de l'étape précédente et de "), latex("q_3"), texte(" CONFIRMÉ de l'étape 1.")];
-}
-
-/** Lignes confirmées à l'écran 1 (probabilités d'appartenance) — réutilisées par tout écran
- * ultérieur (correctif transversal accumulation, voir CLAUDE.md/`docs/historique-6e.md`). */
-function lignesEcran1D(e: ExerciceExtD): string[] {
-  return [`q_1=${formatDecimalVirgule(e.q1)}\\text{ (confirmé, étape 1)}`, `q_2=${formatDecimalVirgule(e.q2)}\\text{ (confirmé, étape 1)}`, `q_3=${formatDecimalVirgule(e.q3)}\\text{ (confirmé, étape 1)}`];
-}
-
-/** Lignes confirmées à l'écran 2 (probabilités conjointes connues) — réutilisées par tout écran
- * ultérieur. */
-function lignesEcran2D(e: ExerciceExtD): string[] {
-  return [`q_1\\cdot r_1=${formatDecimalVirgule(e.q1 * e.r1)}\\text{ (confirmé, étape 2)}`, `q_2\\cdot r_2=${formatDecimalVirgule(e.q2 * e.r2)}\\text{ (confirmé, étape 2)}`];
-}
-
-/** ACCUMULE les écrans déjà confirmés (correctif transversal — voir CLAUDE.md/`docs/historique-
- * 6e.md`, même bug que sur `6gen1`/`6gen58`) : `dEcran3` omettait `q1`/`q2`/`q3` de l'écran 1 ;
- * `dEcran4` omettait les probabilités conjointes de l'écran 2. Plus ancien en premier. */
-export function etatActuelD(e: ExerciceExtD, phase: PhaseExtensionsBinomialeNormaleBayes): string[] | null {
-  if (phase === "dEcran2") return lignesEcran1D(e);
-  if (phase === "dEcran3") return [...lignesEcran1D(e), ...lignesEcran2D(e)];
-  if (phase === "dEcran4") return [...lignesEcran1D(e), ...lignesEcran2D(e), `P(\\text{crit.}\\cap\\text{cat. 3})=${formatDecimalVirgule(jointCategorie3D(e))}\\text{ (confirmé, étape 3)}`];
-  return null;
-}
-
-export function champsD(phase: PhaseExtensionsBinomialeNormaleBayes): ChampDef[] {
-  if (phase === "dEcran1") return [champTexte("q₁ =", "ex : 0,3"), champTexte("q₂ =", "ex : 0,3"), champTexte("q₃ =", "ex : 0,4")];
-  if (phase === "dEcran2") return [champTexte("P(critère ∩ cat. 1) =", "ex : 0,06"), champTexte("P(critère ∩ cat. 2) =", "ex : 0,09")];
-  if (phase === "dEcran3") return [champTexte("P(critère ∩ cat. 3) =", "ex : 0,2")];
-  return [champTexte("P(critère | cat. 3) =", "ex : 0,5")];
-}
-
-export function niveauAideMaxD(phase: PhaseExtensionsBinomialeNormaleBayes): number {
-  return phase === "dEcran3" ? 2 : 0;
-}
-
-export function aideNiveau1D(phase: PhaseExtensionsBinomialeNormaleBayes): AideAvecLatex {
-  if (phase !== "dEcran3") return AUCUNE_AIDE;
-  return { texte: "La probabilité totale du critère est la SOMME des probabilités conjointes sur les 3 catégories — isole celle qui manque par différence.", latex: "P(\\text{critère})=\\sum_{i=1}^{3}q_i\\cdot r_i" };
-}
-
-export function aideNiveau2D(e: ExerciceExtD, phase: PhaseExtensionsBinomialeNormaleBayes): AideAvecLatex {
-  if (phase !== "dEcran3") return AUCUNE_AIDE;
-  return { texte: "Somme des 2 valeurs déjà connues effectuée (soustraction depuis le total non faite) :", latex: `${formatDecimalVirgule(e.q1 * e.r1 + e.q2 * e.r2)}` };
-}
-
-// ============================================================================
-// Famille E — Loi uniforme continue.
-// ============================================================================
-
-export function consigneGeneraleE(): FragmentConsigne[] {
-  return [
-    latex("X"),
-    texte(" suit une loi uniforme sur "),
-    latex("[a;b]"),
-    texte(" : la densité de probabilité est constante sur tout l'intervalle. Calcule "),
-    latex("P(c\\le X\\le d)"),
-    texte(" en comparant les longueurs des intervalles "),
-    latex("[c;d]"),
-    texte(" et "),
-    latex("[a;b]"),
-    texte(" (aucune table, aucune intégrale nécessaire)."),
-  ];
-}
-
-export function blocDonneesE(e: ExerciceExtE): string[] {
-  return [...decouperEnFragmentsTexte(e.contexte.texte), `X\\sim\\mathcal{U}([${e.a}\\text{ ; }${e.b}])`, `\\text{Calculer : }P(${e.c}\\le X\\le ${e.d})`];
-}
-
-export function consigneEcranE(phase: PhaseExtensionsBinomialeNormaleBayes): FragmentConsigne[] {
-  if (phase === "eEcran1") return [texte("Détermine la longueur de l'intervalle "), latex("[c;d]"), texte(" (numérateur) et celle de "), latex("[a;b]"), texte(" (dénominateur) — le rapport n'est pas encore demandé.")];
-  return [texte("Calcule la probabilité finale : rapport des 2 longueurs CONFIRMÉES.")];
-}
-
-export function etatActuelE(e: ExerciceExtE, phase: PhaseExtensionsBinomialeNormaleBayes): string[] | null {
-  if (phase !== "eEcran2") return null;
-  return [`\\text{longueur}[c;d]=${e.d - e.c}\\text{, longueur}[a;b]=${e.b - e.a}\\text{ (confirmées)}`];
-}
-
-export function champsE(phase: PhaseExtensionsBinomialeNormaleBayes): ChampDef[] {
-  if (phase === "eEcran1") return [champTexte("Longueur de [c;d] =", "ex : 15"), champTexte("Longueur de [a;b] =", "ex : 60")];
-  return [champTexte("P(c≤X≤d) =", "ex : 0,25")];
-}
-
-export function niveauAideMaxE(phase: PhaseExtensionsBinomialeNormaleBayes): number {
-  return phase === "eEcran1" ? 2 : 0;
-}
-
-export function aideNiveau1E(phase: PhaseExtensionsBinomialeNormaleBayes): AideAvecLatex {
-  if (phase !== "eEcran1") return AUCUNE_AIDE;
-  return { texte: "Pour une loi uniforme, la probabilité d'un intervalle est proportionnelle à sa longueur — quel que soit l'endroit où il se trouve dans [a;b].", latex: null };
-}
-
-export function aideNiveau2E(e: ExerciceExtE, phase: PhaseExtensionsBinomialeNormaleBayes): AideAvecLatex {
-  if (phase !== "eEcran1") return AUCUNE_AIDE;
-  return { texte: "Longueur de [c;d] et de [a;b], données séparément (le rapport reste à faire) :", latex: `${e.d - e.c}\\text{ et }${e.b - e.a}` };
-}
-
-// ============================================================================
-// Famille F — Reconstruire une loi depuis des % croisés + espérance appliquée.
-// ============================================================================
-
-export function consigneGeneraleF(): FragmentConsigne[] {
-  return [texte("Plusieurs options se partagent une population. Reconstruis la loi de probabilité complète de "), latex("X"), texte(" (le montant associé à chaque option), calcule son espérance, puis applique-la à une population donnée.")];
-}
-
-export function blocDonneesF(e: ExerciceExtF): string[] {
-  return [
-    ...decouperEnFragmentsTexte(e.contexte.texte),
-    `\\text{${e.labels[0]} : }${e.valeurs[0]}\\text{ €}`,
-    `\\text{${e.labels[1]} : }${e.valeurs[1]}\\text{ €}`,
-    `\\text{${e.labels[2]} : }${e.valeurs[2]}\\text{ €}`,
-    ...decouperEnFragmentsTexte(`${e.labels[0]} choisie par ${formatPourcentageMot(e.pourcentage1 / 100)} des clients`),
-    ...decouperEnFragmentsTexte(`${e.labels[1]} choisie par ${formatPourcentageMot(e.pourcentage2 / 100)} des clients`),
-    ...decouperEnFragmentsTexte(`${e.labels[2]} choisie par le reste des clients`),
-    `N=${e.population}\\text{ (population totale)}`,
-  ];
-}
-
-export function consigneEcranF(phase: PhaseExtensionsBinomialeNormaleBayes): FragmentConsigne[] {
-  if (phase === "fEcran1") return [texte("Traduis les pourcentages donnés en probabilités décimales, et déduis par différence la probabilité manquante (celle qui correspond à « le reste »).")];
-  if (phase === "fEcran2") return [texte("Construis la loi complète de "), latex("X"), texte(" : pour chaque option, reporte sa valeur (déjà connue) et sa probabilité CONFIRMÉE.")];
-  if (phase === "fEcran3") return [texte("Calcule l'espérance "), latex("E(X)=\\sum x_i\\cdot p_i"), texte(" à partir de la loi CONFIRMÉE de l'étape précédente.")];
-  return [texte("Multiplie "), latex("E(X)"), texte(" CONFIRMÉE par la taille de la population pour estimer le total attendu.")];
-}
-
-/** Table confirmée à l'écran 2 (loi complète, valeurs ET probabilités CONFIRMÉES de l'écran 1
- * intégrées) — réutilisée par tout écran ultérieur (correctif transversal accumulation, voir
- * CLAUDE.md/`docs/historique-6e.md`). */
-function ligneTableConfirmeeF(e: ExerciceExtF): string {
-  const colonnes = "c".repeat(e.valeurs.length);
-  const [p1, p2, p3] = probabilitesF(e);
-  const ligneX = e.valeurs.map((v) => `${v}`).join(" & ");
-  const ligneP = [p1, p2, p3].map((p) => formatDecimalVirgule(p)).join(" & ");
-  return `\\begin{array}{c|${colonnes}}x_i & ${ligneX}\\\\\\hline p_i & ${ligneP}\\end{array}\\text{ (confirmée, étape 2)}`;
-}
-
-/** ACCUMULE les écrans déjà confirmés (correctif transversal, voir CLAUDE.md/`docs/historique-
- * 6e.md`) : `fEcran4` ne montrait QUE E(X) de l'écran 3, jamais la loi complète (déjà confirmée à
- * l'écran 2, laquelle intègre elle-même p₁/p₂/p₃ de l'écran 1). Plus ancien en premier. */
-export function etatActuelF(e: ExerciceExtF, phase: PhaseExtensionsBinomialeNormaleBayes): string[] | null {
-  if (phase === "fEcran2") {
-    const [p1, p2, p3] = probabilitesF(e);
-    return [`p_1=${formatDecimalVirgule(p1)}\\text{, }p_2=${formatDecimalVirgule(p2)}\\text{, }p_3=${formatDecimalVirgule(p3)}\\text{ (confirmées, étape 1)}`];
-  }
-  if (phase === "fEcran3") return [ligneTableConfirmeeF(e)];
-  if (phase === "fEcran4") return [ligneTableConfirmeeF(e), `E(X)=${formatDecimalVirgule(esperanceF(e))}\\text{ (confirmée, étape 3)}`];
-  return null;
-}
-
-export function champsF(e: ExerciceExtF, phase: PhaseExtensionsBinomialeNormaleBayes): ChampDef[] {
-  if (phase === "fEcran1") return [champTexte(`p(${e.labels[0]}) =`, "ex : 0,3"), champTexte(`p(${e.labels[1]}) =`, "ex : 0,2"), champTexte(`p(${e.labels[2]}) =`, "ex : 0,5")];
-  if (phase === "fEcran2") return e.labels.flatMap((label, i) => [champTexte(`${label} — valeur =`, `ex : ${e.valeurs[i]}`), champTexte(`${label} — probabilité =`, "ex : 0,3")]);
-  if (phase === "fEcran3") return [champTexte("E(X) =", "ex : 21")];
-  return [champTexte("Total attendu sur la population =", "ex : 10500")];
-}
-
-export function niveauAideMaxF(): number {
-  return 0;
-}
-export function aideNiveau1F(): AideAvecLatex {
-  return AUCUNE_AIDE;
-}
-export function aideNiveau2F(): AideAvecLatex {
-  return AUCUNE_AIDE;
-}
-
-// ============================================================================
-// Dispatch commun.
-// ============================================================================
-
-export function consigneGenerale(exercice: ExerciceExtensionsBinomialeNormaleBayes): FragmentConsigne[] {
-  switch (exercice.famille) {
-    case "A":
-      return consigneGeneraleA();
-    case "B":
-      return consigneGeneraleB();
-    case "C":
-      return consigneGeneraleC();
-    case "D":
-      return consigneGeneraleD();
-    case "E":
-      return consigneGeneraleE();
-    case "F":
-      return consigneGeneraleF();
-  }
-}
-
-export function blocDonnees(exercice: ExerciceExtensionsBinomialeNormaleBayes): string[] {
-  switch (exercice.famille) {
-    case "A":
-      return blocDonneesA(exercice);
-    case "B":
-      return blocDonneesB(exercice);
-    case "C":
-      return blocDonneesC(exercice);
-    case "D":
-      return blocDonneesD(exercice);
-    case "E":
-      return blocDonneesE(exercice);
-    case "F":
-      return blocDonneesF(exercice);
-  }
-}
-
-export function consigneEcran(exercice: ExerciceExtensionsBinomialeNormaleBayes, phase: PhaseExtensionsBinomialeNormaleBayes): FragmentConsigne[] {
-  switch (exercice.famille) {
-    case "A":
-      return consigneEcranA(phase);
-    case "B":
-      return consigneEcranB(phase);
-    case "C":
-      return consigneEcranC(phase);
-    case "D":
-      return consigneEcranD(phase);
-    case "E":
-      return consigneEcranE(phase);
-    case "F":
-      return consigneEcranF(phase);
-  }
-}
-
-export function etatActuel(exercice: ExerciceExtensionsBinomialeNormaleBayes, phase: PhaseExtensionsBinomialeNormaleBayes): string[] | null {
-  switch (exercice.famille) {
-    case "A":
-      return etatActuelA(exercice, phase);
-    case "B":
-      return etatActuelB(exercice, phase);
-    case "C":
-      return etatActuelC(exercice, phase);
-    case "D":
-      return etatActuelD(exercice, phase);
-    case "E":
-      return etatActuelE(exercice, phase);
-    case "F":
-      return etatActuelF(exercice, phase);
-  }
-}
-
-export function champsEcran(exercice: ExerciceExtensionsBinomialeNormaleBayes, phase: PhaseExtensionsBinomialeNormaleBayes): ChampDef[] {
-  switch (exercice.famille) {
-    case "A":
-      return champsA(exercice, phase);
-    case "B":
-      return champsB(exercice, phase);
-    case "C":
-      return champsC(phase);
-    case "D":
-      return champsD(phase);
-    case "E":
-      return champsE(phase);
-    case "F":
-      return champsF(exercice, phase);
-  }
-}
-
-export function niveauAideMaxEcran(exercice: ExerciceExtensionsBinomialeNormaleBayes, phase: PhaseExtensionsBinomialeNormaleBayes): number {
-  switch (exercice.famille) {
-    case "A":
-      return niveauAideMaxA(phase);
-    case "B":
-      return niveauAideMaxB(phase);
-    case "C":
-      return niveauAideMaxC(phase);
-    case "D":
-      return niveauAideMaxD(phase);
-    case "E":
-      return niveauAideMaxE(phase);
-    case "F":
-      return niveauAideMaxF();
-  }
-}
-
-export function aideNiveau1(exercice: ExerciceExtensionsBinomialeNormaleBayes, phase: PhaseExtensionsBinomialeNormaleBayes): AideAvecLatex {
-  switch (exercice.famille) {
-    case "A":
-      return aideNiveau1A(phase);
-    case "B":
-      return aideNiveau1B(phase);
-    case "C":
-      return aideNiveau1C(phase);
-    case "D":
-      return aideNiveau1D(phase);
-    case "E":
-      return aideNiveau1E(phase);
-    case "F":
-      return aideNiveau1F();
-  }
-}
-
-export function aideNiveau2(exercice: ExerciceExtensionsBinomialeNormaleBayes, phase: PhaseExtensionsBinomialeNormaleBayes): AideAvecLatex {
-  switch (exercice.famille) {
-    case "A":
-      return aideNiveau2A(exercice, phase);
-    case "B":
-      return aideNiveau2B(exercice, phase);
-    case "C":
-      return aideNiveau2C(exercice, phase);
-    case "D":
-      return aideNiveau2D(exercice, phase);
-    case "E":
-      return aideNiveau2E(exercice, phase);
-    case "F":
-      return aideNiveau2F();
-  }
-}
-
-export const LIBELLE_PHASE: Record<PhaseExtensionsBinomialeNormaleBayes, string> = {
-  aComposeEcran1P: "Étape 1 (probabilité composée p₁×p₂)",
-  aEcranAucunAuMoins: "Étape (aucun succès / au moins 1 succès)",
-  aEcranTrouverN1: "Étape (inéquation posée + isolée)",
-  aEcranTrouverN2: "Étape (valeur finale de n)",
-  bTermeUniqueEcran1: "Étape 1 (stratégie + terme)",
-  bTermeUniqueEcran2: "Étape 2 (valeur du terme)",
-  bSommeEcran1: "Étape 1 (stratégie + termes)",
-  bSommeEcran2: "Étape 2 (valeurs des termes)",
-  bSommeEcran3: "Étape 3 (somme finale)",
-  bComplementEcran1: "Étape 1 (stratégie + terme)",
-  bComplementEcran2: "Étape 2 (valeur du terme)",
-  bComplementEcran3: "Étape 3 (complément final)",
-  cEcran1: "Étape 1 (transformation + valeur cible)",
-  cEcran2: "Étape 2 (lecture inverse de la table)",
-  cEcran3: "Étape 3 (dé-standardisation)",
-  dEcran1: "Étape 1 (probabilités d'appartenance)",
-  dEcran2: "Étape 2 (probabilités conjointes connues)",
-  dEcran3: "Étape 3 (déduction par différence)",
-  dEcran4: "Étape 4 (conditionnelle finale)",
-  eEcran1: "Étape 1 (longueurs des intervalles)",
-  eEcran2: "Étape 2 (probabilité finale)",
-  fEcran1: "Étape 1 (probabilités reconstruites)",
-  fEcran2: "Étape 2 (loi complète de X)",
-  fEcran3: "Étape 3 (espérance E(X))",
-  fEcran4: "Étape 4 (total attendu sur la population)",
-};
-
-export const LIBELLE_FAMILLE: Record<ExerciceExtensionsBinomialeNormaleBayes["famille"], string> = {
-  A: "A — Indépendance composée + trouver n",
-  B: "B — Binomial classique étendu",
-  C: "C — Loi normale inverse en contexte",
-  D: "D — Bayes à 3 catégories",
-  E: "E — Loi uniforme continue",
-  F: "F — Reconstruire une loi + espérance appliquée",
-};
-
-/** Récapitulatif final : affiche toujours la réponse CORRECTE connue de l'exercice — jamais
- * recalculée depuis la saisie élève. */
-export function formatReponseAttenduePhaseLatex(exercice: ExerciceExtensionsBinomialeNormaleBayes, phase: PhaseExtensionsBinomialeNormaleBayes): string[] {
-  if (exercice.famille === "A") {
-    if (phase === "aComposeEcran1P") return [`${formatDecimalVirgule(exercice.p)}`];
-    if (phase === "aEcranAucunAuMoins") return [`${formatDecimalVirgule(1 - exercice.p)},\\,${formatDecimalVirgule(exercice.p)}`];
-    if (phase === "aEcranTrouverN1") return [`1-(1-${formatDecimalVirgule(exercice.p)})^n>${formatDecimalVirgule(exercice.seuil)}\\text{, puis }(1-${formatDecimalVirgule(exercice.p)})^n<${formatDecimalVirgule(1 - exercice.seuil)}`];
-    return [`${exercice.valeurN}`];
-  }
-  if (exercice.famille === "B") {
-    if (estEcran1B(phase)) return [`${OPTIONS_STRATEGIE.find((o) => o.valeur === exercice.strategie)?.label}\\text{, }${exercice.termesACalculer.join(",\\,")}`];
-    if (estEcran2B(phase)) return [exercice.valeursTermes.map((v) => formatDecimalVirgule(v)).join(",\\,")];
-    return [`${formatDecimalVirgule(exercice.resultatFinal)}`];
-  }
-  if (exercice.famille === "C") {
-    if (phase === "cEcran1") return [`${formatDecimalVirgule(valeurCibleTableD(exercice.base))}`];
-    if (phase === "cEcran2") return [`${formatDecimalVirgule(valeurZD(exercice.base))}`];
-    return [`${formatDecimalVirgule(destandardiserD(exercice.base, valeurZD(exercice.base)))}`];
-  }
-  if (exercice.famille === "D") {
-    if (phase === "dEcran1") return [`${formatDecimalVirgule(exercice.q1)},\\,${formatDecimalVirgule(exercice.q2)},\\,${formatDecimalVirgule(exercice.q3)}`];
-    if (phase === "dEcran2") return [`${formatDecimalVirgule(exercice.q1 * exercice.r1)},\\,${formatDecimalVirgule(exercice.q2 * exercice.r2)}`];
-    if (phase === "dEcran3") return [`${formatDecimalVirgule(jointCategorie3D(exercice))}`];
-    return [`${formatDecimalVirgule(r3DeduitD(exercice))}`];
-  }
-  if (exercice.famille === "E") {
-    if (phase === "eEcran1") return [`${exercice.d - exercice.c},\\,${exercice.b - exercice.a}`];
-    return [`${formatDecimalVirgule(probabiliteUniformeE(exercice))}`];
-  }
-  // famille F
-  const [p1, p2, p3] = probabilitesF(exercice);
-  if (phase === "fEcran1") return [`${formatDecimalVirgule(p1)},\\,${formatDecimalVirgule(p2)},\\,${formatDecimalVirgule(p3)}`];
-  if (phase === "fEcran2") {
-    const probas = [p1, p2, p3];
-    return [exercice.valeurs.map((v, i) => `${v}\\text{ (}${formatDecimalVirgule(probas[i])}\\text{)}`).join(",\\,")];
-  }
-  if (phase === "fEcran3") return [`${formatDecimalVirgule(esperanceF(exercice))}`];
-  return [`${Math.round(esperanceF(exercice) * exercice.population)}`];
-}
-

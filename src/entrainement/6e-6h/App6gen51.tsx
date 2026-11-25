@@ -1,217 +1,74 @@
-import { useState } from "react";
 import type { ReactNode } from "react";
-import type { ReglagesSession6e } from "./core6e/session6e.types";
+import type { ExerciceLoiNormale } from "./core6e/loiNormale.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLoiNormale } from "./generateurs6e/loiNormale";
-import type { IdVarianteLoiNormale } from "./generateurs6e/loiNormale";
-import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionLoiNormale, soumettreReponseEcran } from "./moteur6e/sessionLoiNormale";
-import type { EtatSessionLoiNormale } from "./moteur6e/typesLoiNormale";
-import { diagnostiquerEcran } from "./moteur6e/verificationLoiNormale";
-import { EtapeChampsLoiNormale } from "./components6e/EtapeChampsLoiNormale";
-import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { Katex } from "./components/Katex";
-import { blocDonnees, calculerReferenceLoiNormale, champsEcran, consigneEcran, consigneGenerale, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatLoiNormale";
-import type { ChampDef } from "./ui6e/formatLoiNormale";
-import { calculerRecapitulatifLoiNormale, calculerSegmentsProgressionLoiNormale } from "./ui6e/recapitulatifLoiNormale";
-import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
-import { ProgressionPuces } from "../components/ProgressionPuces";
-import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
-import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { arrondir, bornesZ } from "./generateurs6e/loiNormale/calculs";
+import type { PhaseLoiNormale } from "./moteur6e/typesLoiNormale";
+import { DEFINITION_6GEN51, attentesLoiNormale } from "./moteur6e/verificationLoiNormale";
+import { FORMAT_6GEN51, xTexte, zTexte } from "./ui6e/formatLoiNormale";
+import { AppCombinatoire } from "./components6e/AppCombinatoire";
+import type { ConfigAppCombinatoire } from "./components6e/AppCombinatoire";
+import { CourbeGauss } from "./components6e/CourbeGauss";
+import type { EtiquetteGauss } from "./components6e/CourbeGauss";
+import { TablePhi } from "../components/TablePhi";
 
 /**
- * `6gen51` — Loi normale (premier générateur du nouveau chapitre "Variables aléatoires et lois de
- * probabilités"). Même patron que `App6gen37.tsx` : un dispatcher générique piloté par
- * `ui6e/formatLoiNormale.ts`/`moteur6e/verificationLoiNormale.ts`, PAS de JSX par famille/écran —
- * un SEUL composant écran (`EtapeChampsLoiNormale`, mélange texte/choix) suffit pour toutes les
- * familles (voir en-tête de ce composant pour la justification, différente de 6gen37 qui avait
- * besoin d'un second composant dédié).
+ * `6gen51` — Loi normale (6e ch. 8, § 6, processus 2 APPLIQUER), refondu (audit, lot C) : table de Φ
+ * CONSULTABLE sous la consigne de chaque écran (A à D), courbe de Gauss avec l'aire cherchée hachurée
+ * (borne inconnue nommée t, z ou a), choix fermés seuls sur leur écran (G17). Socle commun du ch. 7.
  */
-
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3 };
-
-function nouvelleSession(): EtatSessionLoiNormale {
-  return demarrerSessionLoiNormale(REGLAGES_DEMO, genererExerciceLoiNormale, calculerReferenceLoiNormale);
+function figure(e: ExerciceLoiNormale): ReactNode {
+  const avecZero = (l: EtiquetteGauss[], texte = "0") => (l.every((x) => Math.abs(x.z) > 0.45) ? [...l, { z: 0, texte }] : l);
+  switch (e.famille) {
+    case "A":
+    case "B": {
+      const { z1, z2 } = bornesZ(e);
+      const aire = e.sousType === "inferieur" ? { de: null, a: z1 } : e.sousType === "superieur" ? { de: z1, a: null } : { de: z1, a: z2 };
+      const txt = (z: number, x: number) => (e.famille === "A" ? zTexte(z) : xTexte(x));
+      const lab: EtiquetteGauss[] = [{ z: z1, texte: txt(z1, e.famille === "B" ? e.x1 : 0) }];
+      if (z2 !== null) lab.push({ z: z2, texte: txt(z2, e.famille === "B" ? (e.x2 as number) : 0) });
+      return <CourbeGauss aires={[aire]} etiquettes={avecZero(lab, e.famille === "A" ? "0" : xTexte(e.mu))} axe={e.famille === "A" ? "z" : e.contexte.unite} description="Courbe de Gauss : l'aire hachurée est la probabilité cherchée." />;
+    }
+    case "C":
+    case "D": {
+      const l = e.famille === "C" ? "t" : "a";
+      const z = e.famille === "C" ? e.t : e.z;
+      const centre = e.famille === "C" ? "0" : xTexte(e.mu);
+      const aires = e.sousType === "inferieur" ? [{ de: null, a: z }] : e.sousType === "superieur" ? [{ de: z, a: null }] : e.sousType === "centre" ? [{ de: -z, a: z }] : [{ de: 0, a: z }];
+      const lab: EtiquetteGauss[] = [{ z, texte: l }];
+      if (e.sousType === "centre") lab.push({ z: -z, texte: e.famille === "C" ? "−t" : "" });
+      return <CourbeGauss aires={aires} etiquettes={avecZero(lab, centre)} axe={e.famille === "C" ? "z" : e.contexte.unite} description="Courbe de Gauss : l'aire hachurée correspond à la probabilité donnée ; la borne cherchée est nommée." />;
+    }
+    case "E": {
+      const k = e.k;
+      const aires = !e.unCote ? [{ de: null, a: -k }, { de: k, a: null }] : e.coteDemande === "superieur" ? [{ de: k, a: null }] : [{ de: null, a: -k }];
+      const lab: EtiquetteGauss[] = [
+        { z: -k, texte: xTexte(arrondir(e.mu - k * e.sigma, 2)) },
+        { z: 0, texte: xTexte(e.mu) },
+        { z: k, texte: xTexte(arrondir(e.mu + k * e.sigma, 2)) },
+      ];
+      return <CourbeGauss aires={aires} etiquettes={lab} axe={e.contexte.unite} description="Courbe de Gauss : l'aire hachurée est la proportion cherchée." />;
+    }
+  }
 }
 
-/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
- * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
- * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
- * passer à l'écran suivant"). */
-interface TransitionEnAttente {
-  etatSuivant: EtatSessionLoiNormale;
-  revele: boolean;
-}
-
-/** Formate la réponse de l'élève pour UN écran (`champs`/`valeurs` apparié par index) en une ligne
- * lisible "label = valeur" (ou "label : valeur" si le label ne se termine pas déjà par `=`/`:`) —
- * pour un champ `choix`, affiche le LABEL de l'option choisie, jamais sa valeur technique. Consultée
- * en lecture seule par `FicheReponseEcran` (voir `onValider` ci-dessous), jamais par le moteur. */
-function formatVotreReponseChamps(champs: ChampDef[], valeurs: string[]): string {
-  return champs
-    .map((champ, i) => {
-      const brut = valeurs[i] ?? "";
-      const valeurAffichee = champ.type === "choix" ? champ.options?.find((o) => o.valeur === brut)?.label ?? brut : brut;
-      const label = champ.label.trim();
-      return /[=:]$/.test(label) ? `${label} ${valeurAffichee}` : `${label} : ${valeurAffichee}`;
-    })
-    .join(" ; ");
-}
+const CONFIG: ConfigAppCombinatoire<ExerciceLoiNormale, PhaseLoiNormale> = {
+  id: "6gen51",
+  titre: "Loi normale",
+  sousTitre: "Chapitre 8 — Variables aléatoires",
+  catalogue: CATALOGUE_VARIANTES,
+  genererLibre: genererExerciceLoiNormale,
+  genererVariante: construireAvecVarianteId,
+  definition: DEFINITION_6GEN51,
+  attentes: attentesLoiNormale,
+  format: FORMAT_6GEN51,
+  complement: (e) => (
+    <>
+      {figure(e)}
+      {e.famille !== "E" && <TablePhi />}
+    </>
+  ),
+};
 
 export function App6gen51() {
-  const [etat, setEtat] = useState<EtatSessionLoiNormale>(nouvelleSession);
-  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
-  // Voir le commentaire sur `key` plus bas (rendu de `EtapeChampsLoiNormale`) : incrémenté à
-  // chaque appel de `forcerVariante` UNIQUEMENT (le panneau dev repart toujours d'`indexExercice=0`
-  // — `etat.indexExercice` seul ne suffit donc pas à distinguer 2 variantes forcées consécutives
-  // partageant le même nom de phase initiale, ex. `A_superieur` puis `A_intervalle`, toutes deux
-  // "aEcran1").
-  const [nonceForcage, setNonceForcage] = useState(0);
-  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
-   * tenu ICI, à part de `EtatSessionLoiNormale`, jamais dans le moteur : la saisie de l'élève n'a
-   * aucune autre utilité une fois l'écran clos. Remis à vide à chaque nouvel exercice, comme
-   * `enAttente` — mirroir `AppAnalyseFonction.tsx` (4e). */
-  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
-  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
-
-  /** Réutilise `calculerRecapitulatifLoiNormale` (même mécanisme que `RecapitulatifPanel`) pour la
-   * réponse ATTENDUE : l'entrée qui vient d'être ajoutée est toujours la DERNIÈRE du tableau, les
-   * écrans se closent dans l'ordre. */
-  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionLoiNormale) {
-    const recap = calculerRecapitulatifLoiNormale(nouvelEtat);
-    const derniere = recap[recap.length - 1];
-    if (!derniere) return;
-    setHistorique((h) => [
-      ...h,
-      {
-        titre: derniere.libelle,
-        votreReponse,
-        correcte: !derniere.revele,
-        reponseAttendue: derniere.revele ? (
-          <span className="equation-box-termes">
-            {(derniere.valeurs ?? [derniere.valeur]).map((v, i) => (
-              <Katex key={i} expression={v} />
-            ))}
-          </span>
-        ) : undefined,
-      },
-    ]);
-  }
-
-  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'écran se clôt RÉELLEMENT
-   * (`transitionDEcran`) — jamais à chaque clic sur "Valider" : tant qu'il reste des tentatives, une
-   * réponse fausse renvoie un état où `etapeCourante.terminee` reste `false` SANS clore l'écran, et
-   * `onValider`/`soumettreReponseEcran` sont quand même rappelés à CHAQUE tentative. Même garde que
-   * `AppAnalyseFonction.tsx` (4e) — piège déjà documenté CLAUDE.md. */
-  function terminerEtape(nouvelEtat: EtatSessionLoiNormale, votreReponse?: ReactNode) {
-    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
-    if (transitionDEcran) {
-      if (votreReponse !== undefined) {
-        ajouterHistorique(votreReponse, nouvelEtat);
-      }
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
-      return;
-    }
-    setEtat(nouvelEtat);
-  }
-
-  function passerEcranSuivant() {
-    if (!enAttente) return;
-    if (enAttente.etatSuivant.terminee) {
-      setEtat(nouvelleSession());
-      setHistorique([]);
-      setFicheOuverteIndex(null);
-    } else {
-      setEtat(enAttente.etatSuivant);
-    }
-    setEnAttente(null);
-  }
-
-  function forcerVariante(id: string) {
-    setEnAttente(null);
-    setNonceForcage((n) => n + 1);
-    setHistorique([]);
-    setFicheOuverteIndex(null);
-    setEtat(demarrerSessionLoiNormale(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteLoiNormale), calculerReferenceLoiNormale));
-  }
-
-  const exercice = etat.exerciceCourant;
-  const phase = etat.phase;
-
-  // Hook DEV-ONLY (jamais en dehors de import.meta.env.DEV/?dev=1) : expose l'exercice tiré tel
-  // quel sur `window` — permet à la vérification Playwright (build de production) de reconstruire
-  // la réponse EXACTE attendue à chaque écran depuis les vrais paramètres tirés, jamais en
-  // re-parsant le LaTeX affiché (fragile). Jamais consommé par le code applicatif lui-même — mirroir
-  // `App6gen37.tsx`.
-  const modeDevActif = import.meta.env.DEV || new URLSearchParams(window.location.search).get("dev") === "1";
-  if (modeDevActif) {
-    (window as unknown as { __debug6gen51?: unknown }).__debug6gen51 = { exercice, phase, reference: calculerReferenceLoiNormale(exercice, phase) };
-  }
-
-  const validation = enAttente
-    ? {
-        revele: enAttente.revele,
-        reponseAttendue: (
-          <span className="equation-box-termes">
-            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </span>
-        ),
-        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
-        onSuivant: passerEcranSuivant,
-      }
-    : null;
-
-  const aideCommun = {
-    tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
-    tentativesMax: etat.reglages.tentativesMax,
-    niveauAide: etat.niveauAide,
-    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
-    onActiverAide: () => setEtat(activerAideSuivante(etat)),
-    validation,
-  };
-
-  return (
-    <div className="app-shell">
-      <header className="app-header">
-        <p className="app-eyebrow">6e — Entraînement</p>
-        <h1 className="app-title">Loi normale</h1>
-        <p className="app-subtitle">Chapitre 8 — Variables aléatoires et lois de probabilités</p>
-        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionLoiNormale(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
-      </header>
-      <main className="card">
-        <RecapitulatifPanel entrees={calculerRecapitulatifLoiNormale(etat)} />
-        <EtapeChampsLoiNormale
-          // `${indexExercice}-${nonceForcage}-${phase}`, PAS seulement `phase` (à la différence
-          // de `App6gen37.tsx`/`App6gen26.tsx`) — 6gen51 est le premier générateur où le NOMBRE
-          // DE CHAMPS d'un même nom de phase varie aussi selon le SOUS-TYPE au sein de la MÊME
-          // famille (ex. famille A "aEcran1" : 2 champs pour inferieur/superieur, 4 pour
-          // intervalle) : 2 exercices CONSÉCUTIFS de la famille A avec des sous-types différents
-          // partagent le même nom de phase ("aEcran1") sans que React ne remonte le composant
-          // (clé inchangée) — l'état interne `valeurs` (`useState`, initialisé une seule fois à
-          // la taille de `champs` du PREMIER montage) resterait alors à l'ANCIENNE taille,
-          // cassant silencieusement la saisie des champs additionnels (bug trouvé et corrigé en
-          // vérification Playwright, voir `docs/historique-6e.md`). `indexExercice` change à
-          // CHAQUE nouvel exercice de la progression NATURELLE (jamais lors d'une simple
-          // tentative ratée sur le même écran, qui doit continuer à préserver la saisie déjà
-          // tapée) — mais repart TOUJOURS de 0 pour une variante forcée depuis le panneau dev,
-          // d'où `nonceForcage` en complément (voir sa déclaration ci-dessus).
-          key={`${etat.indexExercice}-${nonceForcage}-${phase}`}
-          {...aideCommun}
-          consigneGenerale={consigneGenerale(exercice)}
-          blocDonnees={blocDonnees(exercice)}
-          consigneEcran={consigneEcran(exercice, phase)}
-          champs={champsEcran(exercice, phase)}
-          aideNiveau1={formatAideNiveau1(exercice, phase)}
-          aideNiveau2={formatAideNiveau2(exercice, phase)}
-          diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs, calculerReferenceLoiNormale(exercice, phase))}
-          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), formatVotreReponseChamps(champsEcran(exercice, phase), valeurs))}
-        />
-      </main>
-
-      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
-        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
-      )}
-    </div>
-  );
+  return <AppCombinatoire config={CONFIG} />;
 }

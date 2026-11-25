@@ -1,63 +1,46 @@
-import type { ExerciceLoiBinomiale, FamilleLoiBinomiale } from "../../core6e/loiBinomiale.types";
-import { construireFamilleA, genererFamilleA } from "./familleA";
-import { construireFamilleB, genererFamilleB } from "./familleB";
-import { calculerNMinimalC, construireFamilleC, genererFamilleC } from "./familleC";
+import type { ExerciceLoiBinomiale } from "../../core6e/loiBinomiale.types";
+import { construireFamilleA } from "./familleA";
+import { construireFamilleB } from "./familleB";
+import { calculerNMinimalC, construireFamilleC } from "./familleC";
 
-export { construireFamilleA, genererFamilleA, construireFamilleB, genererFamilleB, construireFamilleC, genererFamilleC, calculerNMinimalC };
+export { construireFamilleA, construireFamilleB, construireFamilleC, calculerNMinimalC };
 
 /**
- * Couche A (6e) — point d'entrée `6gen50` ("Loi binomiale"). Tirage à 2 niveaux (mirroir
- * `generateurs6e/binomialeSequenceOrdonnee/index.ts`, 6gen48) : la FAMILLE (A/B/C) est tirée
- * ÉQUIPROBABLE en premier, PUIS le générateur de famille tire le reste en interne.
+ * `6gen50` « Loi binomiale » (6e ch. 8, § 2, Appliquer). Catalogue refait (audit, lot C ; décision 3) :
+ * les cinq variantes B « exactement / au moins / au plus / aucun / tous » (doublons de 6gen48, ch. 7)
+ * sont RETIRÉES mais gardées à leur place (`retiree: true`, jamais montrées ni tirées) : les codes
+ * `?code=` de A et de C gardent leur variante ; un ancien code d'une variante retirée rouvre un tirage
+ * libre. La nouvelle famille B (« B_loi ») est AJOUTÉE EN FIN.
  */
 
-const N_DEFAUT_A = 8;
-const P_DEFAUT_A = 0.2;
-const N_DEFAUT_B = 8;
-const P_DEFAUT_B = 0.5;
-const P_DEFAUT_C = 0.1;
-const SEUIL_DEFAUT_C = 0.9;
+export type IdVarianteLoiBinomiale = "A_justifier" | "B_exactement" | "B_auMoins" | "B_auPlus" | "B_aucun" | "B_tous" | "C_trouverN" | "B_loi";
 
-export type IdVarianteLoiBinomiale = "A_justifier" | "B_exactement" | "B_auMoins" | "B_auPlus" | "B_aucun" | "B_tous" | "C_trouverN";
-
-export const CATALOGUE_VARIANTES: { id: IdVarianteLoiBinomiale; label: string }[] = [
-  { id: "A_justifier", label: "A — Justifier la loi binomiale (identification + Bernoulli)" },
-  { id: "B_exactement", label: "B — Exactement k succès (terme unique) + E(X)" },
-  { id: "B_auMoins", label: "B — Au moins k succès (somme ou complément) + E(X)" },
-  { id: "B_auPlus", label: "B — Au plus k succès (somme ou complément) + E(X)" },
-  { id: "B_aucun", label: "B — Aucun succès (terme unique) + E(X)" },
-  { id: "B_tous", label: "B — Tous des succès (terme unique) + E(X)" },
-  { id: "C_trouverN", label: "C — Trouver n via logarithme (au moins 1 succès)" },
+export const CATALOGUE_VARIANTES: { id: IdVarianteLoiBinomiale; label: string; retiree?: boolean }[] = [
+  { id: "A_justifier", label: "A — Reconnaître une loi binomiale (ou la condition qui échoue)" },
+  { id: "B_exactement", label: "B — (retirée : exactement k, voir 6gen48)", retiree: true },
+  { id: "B_auMoins", label: "B — (retirée : au moins k, voir 6gen48)", retiree: true },
+  { id: "B_auPlus", label: "B — (retirée : au plus k, voir 6gen48)", retiree: true },
+  { id: "B_aucun", label: "B — (retirée : aucun succès, voir 6gen48)", retiree: true },
+  { id: "B_tous", label: "B — (retirée : tous des succès, voir 6gen48)", retiree: true },
+  { id: "C_trouverN", label: "C — Trouver n (au moins un succès, logarithme)" },
+  { id: "B_loi", label: "B — Loi complète, diagramme, E(X), V(X) et σ(X)" },
 ];
 
-export function construireAvecVarianteId(id: IdVarianteLoiBinomiale): ExerciceLoiBinomiale {
+export function construireAvecVarianteId(id: IdVarianteLoiBinomiale | string): ExerciceLoiBinomiale {
   switch (id) {
     case "A_justifier":
-      return construireFamilleA(N_DEFAUT_A, P_DEFAUT_A);
-    case "B_exactement":
-      return construireFamilleB(N_DEFAUT_B, P_DEFAUT_B, "exactement");
-    case "B_auMoins":
-      return construireFamilleB(N_DEFAUT_B, P_DEFAUT_B, "auMoins");
-    case "B_auPlus":
-      return construireFamilleB(N_DEFAUT_B, P_DEFAUT_B, "auPlus");
-    case "B_aucun":
-      return construireFamilleB(N_DEFAUT_B, P_DEFAUT_B, "aucun");
-    case "B_tous":
-      return construireFamilleB(N_DEFAUT_B, P_DEFAUT_B, "tous");
+      return construireFamilleA();
+    case "B_loi":
+      return construireFamilleB();
     case "C_trouverN":
-      return construireFamilleC(P_DEFAUT_C, SEUIL_DEFAUT_C);
+      return construireFamilleC();
+    default:
+      return genererExerciceLoiBinomiale();
   }
 }
 
-const FAMILLES: FamilleLoiBinomiale[] = ["A", "B", "C"];
-
-const CONSTRUCTEURS_PAR_FAMILLE: Record<FamilleLoiBinomiale, () => ExerciceLoiBinomiale> = {
-  A: genererFamilleA,
-  B: genererFamilleB,
-  C: genererFamilleC,
-};
-
+/** Tirage libre : une variante non retirée au hasard, à parts égales. */
 export function genererExerciceLoiBinomiale(): ExerciceLoiBinomiale {
-  const famille = FAMILLES[Math.floor(Math.random() * FAMILLES.length)];
-  return CONSTRUCTEURS_PAR_FAMILLE[famille]();
+  const actives = CATALOGUE_VARIANTES.filter((v) => !v.retiree);
+  return construireAvecVarianteId(actives[Math.floor(Math.random() * actives.length)].id);
 }

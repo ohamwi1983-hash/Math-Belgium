@@ -1,15 +1,19 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import { activerAide, demarrerSessionTransformationGraphique, soumettreReponse } from "./moteur/sessionTransformationsGraphiques";
 import type { EtatSessionTransformationGraphique } from "./moteur/typesTransformationsGraphiques";
 import { genererExerciceTransformationGraphique } from "./generateurs/transformationsGraphiques";
 import { EtapeTransformationExercice } from "./components/EtapeTransformationExercice";
-import { formatEquationTransformationLatex } from "./ui/formatTransformationsGraphiques";
+import { formatApercuEquation, formatEquationTransformationLatex } from "./ui/formatTransformationsGraphiques";
+import type { ReponseTransformationGraphique } from "./core/transformationsGraphiques.types";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 import { correctionDetailleeTransformationsGraphiques } from "./generateurs/transformationsGraphiques/corrigeDetaille";
+import { ProgressionPuces } from "../components/ProgressionPuces";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { ecranClos, nombreTexte, segmentsDepuisHistorique, type EcranClos } from "./ui/historiqueProgression";
 
 const CONSIGNE_GENERALE = "Étudie les transformations graphiques de cette parabole.";
 
@@ -44,16 +48,43 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
+/** Dernière soumission de l'écran unique (les parties déjà closes gardent leur valeur, champs gelés) :
+ * fonction tapée (même aperçu que sous le champ), position des curseurs et choix de la symétrie. */
+function reponseTransformationAffichee(reponse: ReponseTransformationGraphique): ReactNode {
+  const c = reponse.curseurs;
+  return (
+    <>
+      <span style={{ display: "block" }}>
+        Fonction : <Katex expression={formatApercuEquation(reponse.equation)} />
+      </span>
+      <span style={{ display: "block" }}>
+        Curseurs : TH = {nombreTexte(c.th)} ; TV = {nombreTexte(c.tv)} ; EV/CV = {nombreTexte(c.ev)}/{nombreTexte(c.cv)}
+      </span>
+      <span style={{ display: "block" }}>Symétrie d'axe Ox : {c.sox ? "oui" : "non"}</span>
+    </>
+  );
+}
+
 export function AppTransformationsGraphiques() {
   const [etat, setEtat] = useState<EtatSessionTransformationGraphique>(sessionInitiale);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Compteur de génération, clé de l'écran : « Nouvel exercice » remonte l'écran (champs vidés). */
   const [generation, setGeneration] = useState(0);
+  /** Écrans clos de l'exercice en cours (puces cliquables → fiche en lecture seule). */
+  const [historique, setHistorique] = useState<EcranClos[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionTransformationGraphique) {
+  function viderHistorique() {
+    setHistorique([]);
+    setFicheOuverteIndex(null);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionTransformationGraphique, votreReponse: ReactNode) {
     if (nouvelEtat.terminee !== etat.terminee) {
       const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!;
-      setEnAttente({ etatSuivant: nouvelEtat, revele: resultat.equationRevele || resultat.curseursRevele || resultat.soxRevele });
+      const revele = resultat.equationRevele || resultat.curseursRevele || resultat.soxRevele;
+      setHistorique((h) => [...h, ecranClos("Transformations", votreReponse, revele, etat.aideUtilisee, reponseAttendueEcran(resultat), corrigeDetailleEcranCourant())]);
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -61,7 +92,10 @@ export function AppTransformationsGraphiques() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    if (enAttente.etatSuivant.terminee) setGeneration((g) => g + 1);
+    if (enAttente.etatSuivant.terminee) {
+      setGeneration((g) => g + 1);
+      viderHistorique();
+    }
     setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
     setEnAttente(null);
   }
@@ -69,25 +103,36 @@ export function AppTransformationsGraphiques() {
   const exercice = etat.exerciceCourant;
   const resultatEnAttente = enAttente ? enAttente.etatSuivant.resultats[enAttente.etatSuivant.resultats.length - 1]! : null;
 
+  /** Parties révélées seulement (les autres étaient justes). */
+  function reponseAttendueEcran(resultat: { equationRevele: boolean; curseursRevele: boolean; soxRevele: boolean }) {
+    return (
+      <>
+        {resultat.equationRevele && (
+          <div>
+            Fonction attendue : <Katex expression={formatEquationTransformationLatex(exercice)} />
+          </div>
+        )}
+        {resultat.curseursRevele && (
+          <p>
+            Curseurs attendus : TH = {String(exercice.p).replace("-", "−")} ; TV = {String(exercice.q).replace("-", "−")} ; EV/CV = {exercice.ev}/{exercice.cv} (ou un rapport égal)
+          </p>
+        )}
+        {resultat.soxRevele && <p>Symétrie d'axe Ox : {exercice.sox ? "oui" : "non"}</p>}
+      </>
+    );
+  }
+
+  /** Corrigé détaillé « comme au tableau » de l'écran unique — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique (fiche de la puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={correctionDetailleeTransformationsGraphiques(exercice)} />;
+  }
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendue: resultatEnAttente && (
-          <>
-            {resultatEnAttente.equationRevele && (
-              <div>
-                Fonction attendue : <Katex expression={formatEquationTransformationLatex(exercice)} />
-              </div>
-            )}
-            {resultatEnAttente.curseursRevele && (
-              <p>
-                Curseurs attendus : TH = {String(exercice.p).replace("-", "−")} ; TV = {String(exercice.q).replace("-", "−")} ; EV/CV = {exercice.ev}/{exercice.cv} (ou un rapport égal)
-              </p>
-            )}
-            {resultatEnAttente.soxRevele && <p>Symétrie d'axe Ox : {exercice.sox ? "oui" : "non"}</p>}
-          </>
-        ),
-        corrigeDetaille: <CorrigeDetailleEcran etapes={correctionDetailleeTransformationsGraphiques(exercice)} />,
+        reponseAttendue: resultatEnAttente && reponseAttendueEcran(resultatEnAttente),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }
@@ -102,6 +147,7 @@ export function AppTransformationsGraphiques() {
       </header>
 
       <main className="card">
+        <ProgressionPuces segments={segmentsDepuisHistorique(historique, 1, !enAttente)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <EtapeTransformationExercice
@@ -116,11 +162,15 @@ export function AppTransformationsGraphiques() {
             soxRevele={etat.etapeSox.revelee}
             aideActivee={etat.aideUtilisee}
             onActiverAide={() => setEtat(activerAide(etat))}
-            onValider={(reponse) => terminerEtape(soumettreReponse(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponse(etat, reponse), reponseTransformationAffichee(reponse))}
             validation={validation}
           />
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex].entree} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

@@ -1,409 +1,178 @@
-import type { ExerciceLoiPoisson, ExerciceLoiPoissonA, ExerciceLoiPoissonB, FamilleLoiPoisson, StrategiePoissonB } from "../core6e/loiPoisson.types";
+import type { ConditionPoisson, ExerciceLoiPoisson, ExerciceLoiPoissonB } from "../core6e/loiPoisson.types";
+import { resultatB } from "../generateurs6e/loiPoisson/familles";
+import { probabilitePoisson } from "../generateurs6e/loiPoisson/poisson";
+import { lambdaA } from "../moteur6e/verificationLoiPoisson";
 import type { PhaseLoiPoisson } from "../moteur6e/typesLoiPoisson";
+import { vautEnviron } from "../moteur6e/saisieVariablesAleatoires";
+import { arrondiLatex, decimalLatex, f, m, t } from "./fragmentsCombinatoire";
+import type { ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen53`. Dispatch sur
- * `exercice.famille` PUIS `phase`, mirroir `formatLoiBinomiale.ts` (6gen50), jamais importé par un
- * autre générateur (chaque générateur reste indépendant — CLAUDE.md).
- *
- * **PREMIÈRE apparition de la loi de Poisson sur la plateforme** — la formule P(X=k)=e^(−λ)·λᵏ/k!
- * est introduite explicitement : en PROSE dans la consigne de l'écran de calcul famille A (aEcran3,
- * qui n'a pas d'aide prévue par la spec), et en LaTeX dans l'aide niveau 1 des écrans de calcul
- * famille B (aide toujours prévue là, par la spec).
- *
- * **Vigilance signe orphelin / groupe LaTeX vide / texte français en mode maths** — toute clause en
- * français mêlée à du LaTeX passe TOUJOURS par `\text{...}`, jamais du texte brut en mode maths ;
- * `%` toujours échappé `\%` (piège documenté 6gen50 — jamais utilisé ici, aucun pourcentage dans ce
- * générateur, uniquement des comptages/taux). Couverture de régression :
- * `formatLoiPoisson.test.ts`, scan sur 300 tirages réels.
- *
- * **Pas de nombre énorme illisible dans une aide** — pour `strategie==="termeUnique"` (λ pouvant
- * atteindre 75, spec), l'aide niveau 2 révèle `e^{-λ}` (toujours dans (0,1], sûr à afficher) plutôt
- * que `λ^k`/`k!` séparément (peuvent atteindre 10^100+, illisibles et inutiles — voir
- * `generateurs6e/loiPoisson/poisson.ts` pour la raison de fond).
+ * Textes de `6gen53` (6e ch. 8, § 8) — audit, lots B et C : X défini, consigne d'arrondi explicite,
+ * virgule décimale (avant : « 0.1754673698 »), aucun exemple de champ (« ex : 5 » était λ), aides qui
+ * ne confirment plus deux conditions sur trois, plus de « termes CONFIRMÉS » jamais confirmés.
  */
 
-export type TypeChamp = "texte" | "choix";
+type E = ExerciceLoiPoisson;
+type P = PhaseLoiPoisson;
 
-export interface OptionChoix {
-  valeur: string;
-  label: string;
-}
-
-export interface ChampDef {
-  type: TypeChamp;
-  label: string;
-  placeholder?: string;
-  options?: OptionChoix[];
-  /** `true` pour un label réduit à une lettre/symbole de variable (ex. "λ =") — évite que le
-   * `text-transform: uppercase` global de `.field-label` transforme "λ" en "Λ" (majuscule grecque
-   * distincte), mirroir `.field-label-minuscule` déjà établi pour "n"/"p" (6gen50). */
-  minuscule?: boolean;
-}
-
-export interface AideAvecLatex {
-  texte: string;
-  latex: string | null;
-}
-
-const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
-
-/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`,
- * rendu via `components/RenduFragments.tsx`. */
-export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
-
-function texte(valeur: string): FragmentConsigne {
-  return { type: "texte", valeur };
-}
-function latex(valeur: string): FragmentConsigne {
-  return { type: "latex", valeur };
-}
-
-function champTexte(label: string, placeholder: string, minuscule = false): ChampDef {
-  return { type: "texte", label, placeholder, minuscule };
-}
-
-/** Seuil de découpage — RÉDUIT à 24 (au lieu de 28 chez `6gen48`/`6gen50`, `formatLoiBinomiale.ts`)
- * suite à un débordement RÉELLEMENT observé en vérification Playwright à 375px : le contexte
- * "allergieA" produit une ligne de 28 caractères pile au seuil ("Un médicament est administré")
- * dont le rendu KaTeX déborde malgré tout du conteneur — les lettres ACCENTUÉES (ici "é" ×2, dans
- * "médicament"/"administré") se composent en base+accent superposé (voir en-tête
- * `generateurs6e/loiPoisson/contextes.ts`/`familleA.ts`, aucun rapport direct mais même famille de
- * piège KaTeX) et rendent visiblement plus large qu'un caractère ASCII simple à taille de police
- * égale — un compte de caractères brut ne capture pas cet écart. Seuil resserré ICI (fichier propre
- * à ce générateur, aucun autre générateur affecté) plutôt que retouché globalement. */
-const LONGUEUR_MAX_LIGNE = 24;
-
-/** Découpe un texte français long en PLUSIEURS entrées `string[]`, aux frontières de MOTS
- * uniquement — mirroir EXACT `decouperEnFragmentsTexte` de `formatLoiBinomiale.ts` (6gen50). */
-function decouperEnFragmentsTexte(texte: string): string[] {
-  const mots = texte.split(" ");
-  const lignes: string[] = [];
-  let courante = "";
-  for (const mot of mots) {
-    const candidate = courante === "" ? mot : `${courante} ${mot}`;
-    if (candidate.length > LONGUEUR_MAX_LIGNE && courante !== "") {
-      lignes.push(courante);
-      courante = mot;
-    } else {
-      courante = candidate;
-    }
-  }
-  if (courante !== "") lignes.push(courante);
-  return lignes.map((ligne) => `\\text{${ligne}}`);
-}
-
-/** Décimal EXACT (jamais arrondi de façon trompeuse pour un affichage "réponse correcte") — mirroir
- * `formatDecimalExact` de `formatLoiBinomiale.ts`. */
-function formatDecimalExact(v: number): string {
-  const s = v.toFixed(10).replace(/0+$/, "").replace(/\.$/, "");
-  return s === "" || s === "-" ? "0" : s;
-}
-
-/** Décimal ARRONDI pour un affichage d'AIDE (valeur partielle, pas la réponse finale) — un nombre
- * "normal" dans l'immense majorité des cas, puisque cette fonction n'est appelée que sur des
- * quantités volontairement bornées dans (0,1] (voir en-tête de fichier, "pas de nombre énorme
- * illisible"). **Piège trouvé en vérification Playwright** : pour λ=75 (exemple même de la spec),
- * `e^{-λ}≈2,7×10⁻³³` — arrondi à 6 décimales, cette valeur devient EXACTEMENT `0`, une aide
- * trompeuse (suggère faussement une valeur nulle plutôt qu'infinitésimale). Bascule donc en
- * notation scientifique `m×10^e` UNIQUEMENT quand l'arrondi décimal classique collapse à 0 pour une
- * valeur réellement non nulle — jamais dans le cas normal, qui reste un simple décimal lisible. */
-function formatDecimalArrondi(v: number, chiffres = 6): string {
-  const arrondi = Number(v.toFixed(chiffres));
-  if (arrondi === 0 && v !== 0) {
-    const [mantisse, exposant] = v.toExponential(2).split("e");
-    return `${mantisse}\\times10^{${Number(exposant)}}`;
-  }
-  return formatDecimalExact(arrondi);
-}
-
-/** `p` (famille A) toujours affiché en fraction irréductible — ensemble FIXE de candidats
- * (`generateurs6e/loiPoisson/familleA.ts`, `CANDIDATS_A`). */
-const FRACTIONS_P_A: Record<string, [number, number]> = {
-  "0.1": [1, 10],
-  "0.08": [2, 25],
-  "0.05": [1, 20],
+export const LIBELLES_CONDITION_POISSON: Record<ConditionPoisson, string> = {
+  n: "$n\\geq 30$",
+  p: "$p\\leq 0{,}1$",
+  np: "$n\\times p\\leq 15$",
 };
 
-function formatFractionPA(p: number): string {
-  const paire = FRACTIONS_P_A[`${p}`];
-  if (!paire) return `${p}`;
-  return `\\dfrac{${paire[0]}}{${paire[1]}}`;
-}
-
-const LIBELLE_STRATEGIE: Record<StrategiePoissonB, string> = {
-  termeUnique: "un seul terme",
-  somme: "une somme de plusieurs termes",
-  complement: "un complément (1 moins une somme de termes)",
-};
-
-// ============================================================================
-// Famille A — Approximation binomiale → Poisson.
-// ============================================================================
-
-const CONDITIONS_APPROXIMATION = ["Le nombre d'épreuves n est au moins égal à 30 (n≥30).", "La probabilité de succès p est au plus égale à 0,1 (p≤0,1).", "Le produit n·p est au plus égal à 15 (n·p≤15)."];
-
-export function consigneGeneraleA(): FragmentConsigne[] {
-  return [
-    texte("Un contexte binomial "),
-    latex("B(n,p)"),
-    texte(" est donné, avec n grand et p petit. Vérifie les conditions d'approximation par une loi de Poisson, calcule λ, puis calcule la probabilité demandée."),
-  ];
-}
-
-export function blocDonneesA(e: ExerciceLoiPoissonA): string[] {
-  return [...decouperEnFragmentsTexte(e.contexte.texte), `n=${e.n}`, `p=${formatFractionPA(e.p)}`, `\\text{Demandé : }P(X=${e.k})`];
-}
-
-export function consigneEcranA(phase: PhaseLoiPoisson): FragmentConsigne[] {
-  if (phase === "aEcran1") return [texte("Vérifie si chacune des 3 conditions suivantes est remplie dans ce contexte.")];
-  if (phase === "aEcran2") return [texte("Calcule la valeur de "), latex("\\lambda=n\\cdot p"), texte(", la moyenne théorique du nombre d'occurrences.")];
-  return [
-    texte("Calcule "),
-    latex("P(X=k)"),
-    texte(" à l'aide de la formule de Poisson "),
-    latex("P(X=k)=e^{-\\lambda}\\cdot\\dfrac{\\lambda^k}{k!}"),
-    texte(", avec la valeur de λ CONFIRMÉE à l'étape précédente."),
-  ];
-}
-
-/** ACCUMULE les écrans déjà confirmés (correctif transversal, voir CLAUDE.md/`docs/historique-
- * 6e.md`) : `aEcran3` omettait la confirmation des 3 conditions d'approximation de `aEcran1`, ne
- * montrant que λ de `aEcran2`. Plus ancien en premier. */
-export function etatActuelA(e: ExerciceLoiPoissonA, phase: PhaseLoiPoisson): string[] | null {
-  if (phase !== "aEcran3") return null;
-  return ["\\text{Les 3 conditions sont réunies (confirmé, étape 1)}", `\\lambda=${formatDecimalExact(e.lambda)}\\text{ (confirmé, étape 2)}`];
-}
-
-export function champsA(e: ExerciceLoiPoissonA, phase: PhaseLoiPoisson): ChampDef[] {
-  if (phase === "aEcran1") {
-    const options: OptionChoix[] = [
-      { valeur: "vrai", label: "Vrai" },
-      { valeur: "faux", label: "Faux" },
-    ];
-    return CONDITIONS_APPROXIMATION.map((label) => ({ type: "choix", label, options }));
-  }
-  if (phase === "aEcran2") return [champTexte("λ = n·p =", "ex : 5", true)];
-  return [champTexte(`P(X=${e.k}) =`, "ex : 0,175467")];
-}
-
-export function niveauAideMaxA(phase: PhaseLoiPoisson): number {
-  return phase === "aEcran1" ? 2 : 0;
-}
-
-export function aideNiveau1A(phase: PhaseLoiPoisson): AideAvecLatex {
-  if (phase !== "aEcran1") return AUCUNE_AIDE;
-  return {
-    texte: "Rappel des 3 conditions nécessaires pour approcher une loi binomiale B(n,p) par une loi de Poisson : n≥30 (un grand nombre d'épreuves) ; p≤0,1 (une probabilité de succès faible) ; n·p≤15 (le produit reste modéré).",
-    latex: "n\\geq30\\qquad p\\leq0{,}1\\qquad n\\cdot p\\leq15",
-  };
-}
-
-export function aideNiveau2A(phase: PhaseLoiPoisson): AideAvecLatex {
-  if (phase !== "aEcran1") return AUCUNE_AIDE;
-  return {
-    texte: "2 des 3 conditions sont déjà confirmées : n≥30 et p≤0,1. Il reste à vérifier n·p≤15.",
-    latex: "n\\geq30\\qquad p\\leq0{,}1\\qquad(\\text{reste à vérifier : }n\\cdot p\\leq15)",
-  };
-}
-
-// ============================================================================
-// Famille B — Application directe.
-// ============================================================================
-
-function formatQuestionMathB(e: ExerciceLoiPoissonB): string {
+export function evenementB(e: ExerciceLoiPoissonB): string {
   switch (e.typeQuestion) {
     case "exactement":
       return `P(X=${e.k})`;
-    case "entreAetB":
-      return `P(${e.k}\\leq X\\leq ${e.kSecondaire})`;
     case "auPlus":
       return `P(X\\leq ${e.k})`;
     case "auMoins":
       return `P(X\\geq ${e.k})`;
+    case "entreAetB":
+      return `P(${e.k}\\leq X\\leq ${e.kHaut})`;
   }
 }
 
-function estEcranLambdaB(phase: PhaseLoiPoisson): boolean {
-  return phase === "bTermeUniqueEcran1" || phase === "bSommeEcran1" || phase === "bComplementEcran1";
-}
-function estEcranIdentificationB(phase: PhaseLoiPoisson): boolean {
-  return phase === "bSommeEcran2" || phase === "bComplementEcran2";
-}
-function estEcranFinalSepareB(phase: PhaseLoiPoisson): boolean {
-  return phase === "bSommeEcran3" || phase === "bComplementEcran3";
+function p4(x: number): string {
+  return arrondiLatex(x, 4);
 }
 
-export function consigneGeneraleB(): FragmentConsigne[] {
-  return [
-    texte(
-      "Un taux moyen d'occurrence est donné pour une échelle de référence. Détermine λ adapté à la question posée, identifie la stratégie de calcul adaptée, puis calcule la probabilité demandée à l'aide de la loi de Poisson.",
-    ),
-  ];
+function sommeLatex(lambda: number, a: number, b: number): string {
+  let s = 0;
+  for (let i = a; i <= b; i++) s += probabilitePoisson(lambda, i);
+  return p4(s);
 }
 
-export function blocDonneesB(e: ExerciceLoiPoissonB): string[] {
-  return [...decouperEnFragmentsTexte(e.contexte.texteTauxBase(e.tauxBase)), ...decouperEnFragmentsTexte(e.contexte.texteCible(e.valeurCible)), `\\text{Demandé : }${formatQuestionMathB(e)}`];
-}
-
-export function consigneEcranB(phase: PhaseLoiPoisson): FragmentConsigne[] {
-  if (estEcranLambdaB(phase)) {
-    return [texte("Détermine la valeur de λ adaptée à la question posée : ajuste le taux de base donné à la bonne échelle (durée ou effectif demandé), ne le recopie jamais tel quel.")];
-  }
-  if (phase === "bTermeUniqueEcranFinal") {
-    return [
-      texte("Identifie la stratégie de calcul, indique le nombre d'occurrences k concerné, puis calcule directement la probabilité demandée à l'aide de la formule de Poisson "),
-      latex("P(X=k)=e^{-\\lambda}\\cdot\\dfrac{\\lambda^k}{k!}"),
-      texte("."),
-    ];
-  }
-  if (estEcranIdentificationB(phase)) {
-    return [
-      texte("Identifie la stratégie de calcul adaptée à la question posée, puis indique le(s) nombre(s) d'occurrences pour lesquels il faut calculer "),
-      latex("P(X=i)"),
-      texte("."),
-    ];
-  }
-  if (phase === "bSommeEcran3") return [texte("Additionne les termes CONFIRMÉS de l'étape précédente pour obtenir la probabilité demandée.")];
-  return [texte("Calcule 1 moins la somme des termes CONFIRMÉS de l'étape précédente pour obtenir la probabilité demandée.")];
-}
-
-export function etatActuelB(e: ExerciceLoiPoissonB, phase: PhaseLoiPoisson): string[] | null {
-  if (phase === "bTermeUniqueEcranFinal") return [`\\lambda=${formatDecimalExact(e.lambda)}\\text{ (confirmé)}`];
-  if (estEcranIdentificationB(phase)) return [`\\lambda=${formatDecimalExact(e.lambda)}\\text{ (confirmé)}`];
-  if (estEcranFinalSepareB(phase)) {
-    const termes = e.termesACalculer.map((k) => `P(X=${k})`).join(",\\ ");
-    return [`\\lambda=${formatDecimalExact(e.lambda)}\\text{ (confirmé)}`, ...decouperEnFragmentsTexte(`Stratégie : ${LIBELLE_STRATEGIE[e.strategie]}`), `\\text{Termes : }${termes}`];
-  }
-  return null;
-}
-
-export function champsB(_e: ExerciceLoiPoissonB, phase: PhaseLoiPoisson): ChampDef[] {
-  if (estEcranLambdaB(phase)) return [champTexte("λ =", "ex : 75", true)];
-  const optionsStrategie: OptionChoix[] = [
-    { valeur: "termeUnique", label: "Un seul terme" },
-    { valeur: "somme", label: "Une somme de plusieurs termes" },
-    { valeur: "complement", label: "Un complément (1 moins une somme de termes)" },
-  ];
-  if (phase === "bTermeUniqueEcranFinal") {
-    return [{ type: "choix", label: "Stratégie =", options: optionsStrategie }, champTexte("Nombre d'occurrences k =", "ex : 75", true), champTexte("Probabilité demandée =", "ex : 0,046")];
-  }
-  if (estEcranIdentificationB(phase)) {
-    return [{ type: "choix", label: "Stratégie =", options: optionsStrategie }, champTexte("Nombre(s) d'occurrences à calculer (séparés par une virgule) =", "ex : 0,1,2,3")];
-  }
-  return [champTexte("Résultat final (probabilité demandée) =", "ex : 0,37")];
-}
-
-export function niveauAideMaxB(phase: PhaseLoiPoisson): number {
-  if (estEcranLambdaB(phase)) return 2;
-  if (phase === "bTermeUniqueEcranFinal") return 2;
-  if (estEcranIdentificationB(phase)) return 0;
-  return 2; // écrans finaux séparés (somme/complement)
-}
-
-export function aideNiveau1B(phase: PhaseLoiPoisson): AideAvecLatex {
-  if (estEcranLambdaB(phase)) {
-    return { texte: "Rappel : λ doit être adapté à l'unité de temps ou à l'effectif de la question posée — jamais simplement recopié du taux de base donné.", latex: null };
-  }
-  if (phase === "bTermeUniqueEcranFinal" || phase === "bSommeEcran3" || phase === "bComplementEcran3") {
-    return { texte: "Rappel de la formule de Poisson, à appliquer pour chaque terme nécessaire :", latex: "P(X=k)=e^{-\\lambda}\\cdot\\dfrac{\\lambda^k}{k!}" };
-  }
-  return AUCUNE_AIDE;
-}
-
-export function aideNiveau2B(e: ExerciceLoiPoissonB, phase: PhaseLoiPoisson): AideAvecLatex {
-  if (estEcranLambdaB(phase)) {
-    return { texte: "Le facteur d'ajustement a déjà été identifié, le calcul final n'est pas fait :", latex: `\\lambda = ${formatDecimalExact(e.tauxBase)}\\times ${formatDecimalExact(e.facteurEchelle)}` };
-  }
-  if (phase === "bTermeUniqueEcranFinal") {
-    return {
-      texte: "Astuce pour éviter de manipuler des nombres énormes : pars de e^(-λ), puis multiplie successivement par λ/1, puis λ/2, ... jusqu'à λ/k, plutôt que de calculer λ^k et k! séparément.",
-      latex: `e^{-\\lambda}\\approx ${formatDecimalArrondi(Math.exp(-e.lambda))}`,
-    };
-  }
-  if (phase === "bSommeEcran3" || phase === "bComplementEcran3") {
-    const premierK = e.termesACalculer[0];
-    const restants = e.termesACalculer.length - 1;
-    return {
-      texte: restants > 0 ? `Le premier terme est déjà calculé, il reste ${restants} terme(s) à calculer :` : "Ce terme est déjà calculé :",
-      latex: `P(X=${premierK})\\approx ${formatDecimalArrondi(e.valeursTermes[0])}`,
-    };
-  }
-  return AUCUNE_AIDE;
-}
-
-// ============================================================================
-// Dispatch commun.
-// ============================================================================
-
-export function consigneGenerale(exercice: ExerciceLoiPoisson): FragmentConsigne[] {
-  return exercice.famille === "A" ? consigneGeneraleA() : consigneGeneraleB();
-}
-
-export function blocDonnees(exercice: ExerciceLoiPoisson): string[] {
-  return exercice.famille === "A" ? blocDonneesA(exercice) : blocDonneesB(exercice);
-}
-
-export function consigneEcran(exercice: ExerciceLoiPoisson, phase: PhaseLoiPoisson): FragmentConsigne[] {
-  return exercice.famille === "A" ? consigneEcranA(phase) : consigneEcranB(phase);
-}
-
-export function etatActuel(exercice: ExerciceLoiPoisson, phase: PhaseLoiPoisson): string[] | null {
-  return exercice.famille === "A" ? etatActuelA(exercice, phase) : etatActuelB(exercice, phase);
-}
-
-export function champsEcran(exercice: ExerciceLoiPoisson, phase: PhaseLoiPoisson): ChampDef[] {
-  return exercice.famille === "A" ? champsA(exercice, phase) : champsB(exercice, phase);
-}
-
-export function niveauAideMaxEcran(exercice: ExerciceLoiPoisson, phase: PhaseLoiPoisson): number {
-  return exercice.famille === "A" ? niveauAideMaxA(phase) : niveauAideMaxB(phase);
-}
-
-export function aideNiveau1(exercice: ExerciceLoiPoisson, phase: PhaseLoiPoisson): AideAvecLatex {
-  return exercice.famille === "A" ? aideNiveau1A(phase) : aideNiveau1B(phase);
-}
-
-export function aideNiveau2(exercice: ExerciceLoiPoisson, phase: PhaseLoiPoisson): AideAvecLatex {
-  return exercice.famille === "A" ? aideNiveau2A(phase) : aideNiveau2B(exercice, phase);
-}
-
-export const LIBELLE_PHASE: Record<PhaseLoiPoisson, string> = {
-  aEcran1: "Étape 1 (conditions d'approximation)",
-  aEcran2: "Étape 2 (calcul de λ)",
-  aEcran3: "Étape 3 (calcul de P(X=k))",
-  bTermeUniqueEcran1: "Étape 1 (calcul de λ)",
-  bTermeUniqueEcranFinal: "Étape 2 (stratégie + calcul final)",
-  bSommeEcran1: "Étape 1 (calcul de λ)",
-  bSommeEcran2: "Étape 2 (stratégie + termes à calculer)",
-  bSommeEcran3: "Étape 3 (somme des termes)",
-  bComplementEcran1: "Étape 1 (calcul de λ)",
-  bComplementEcran2: "Étape 2 (stratégie + terme(s) à calculer)",
-  bComplementEcran3: "Étape 3 (complément)",
+export const FORMAT_6GEN53: FormatCombinatoire<E, P> = {
+  consigneGenerale(e) {
+    if (e.famille === "A") return [t("Approximation d'une loi binomiale par une loi de Poisson (conditions du cours : "), m("n\\geq 30"), t(", "), m("p\\leq 0{,}1"), t(", "), m("n\\times p\\leq 15"), t("). Probabilités arrondies à "), m("10^{-4}"), t(".")];
+    return [m("X"), t(" suit une loi de Poisson ; ajuste d'abord "), m("\\lambda"), t(" à la situation. Probabilités arrondies à "), m("10^{-4}"), t(".")];
+  },
+  donnees(e): FragmentConsigne[][] {
+    if (e.famille === "A") return [[...f(e.texte), t(" On s'intéresse à "), m(`P(X=${e.k})`), t(".")]];
+    return [[t(e.texte + ` On note `), m("X"), t(` ${e.definitionX}. On cherche `), m(evenementB(e)), t(".")]];
+  },
+  consigneEcran(e, p) {
+    switch (p) {
+      case "aVerdict":
+        return [t("Peut-on approcher la loi de "), m("X"), t(" par une loi de Poisson ?")];
+      case "aCondition":
+        return [t("Quelle condition n'est pas vérifiée ?")];
+      case "aLambda":
+      case "bLambda":
+        return [t("Quel est le paramètre "), m("\\lambda"), t(" de la loi de Poisson ?")];
+      case "aProba":
+        return e.famille === "A" ? [t("Calcule "), m(`P(X=${e.k})`), t(", arrondie à "), m("10^{-4}"), t(".")] : [];
+      case "bProba":
+        return e.famille === "B" ? [t("Calcule "), m(evenementB(e)), t(", arrondie à "), m("10^{-4}"), t(".")] : [];
+    }
+  },
+  champs(e, p): ChampCombi[] {
+    switch (p) {
+      case "aVerdict":
+        return [
+          {
+            type: "choix",
+            label: "",
+            options: [
+              { valeur: "oui", label: "Oui, les trois conditions sont vérifiées" },
+              { valeur: "non", label: "Non, une condition n'est pas vérifiée" },
+            ],
+          },
+        ];
+      case "aCondition":
+        return [{ type: "choix", label: "", options: (["n", "p", "np"] as ConditionPoisson[]).map((c) => ({ valeur: c, label: LIBELLES_CONDITION_POISSON[c] })) }];
+      case "aLambda":
+      case "bLambda":
+        return [{ type: "texte", label: "$\\lambda$" }];
+      case "aProba":
+        return e.famille === "A" ? [{ type: "texte", label: `$P(X=${e.k})$` }] : [];
+      case "bProba":
+        return e.famille === "B" ? [{ type: "texte", label: `$${evenementB(e)}$` }] : [];
+    }
+  },
+  aides(e, p) {
+    switch (p) {
+      case "aVerdict":
+      case "aCondition":
+        return [
+          { texte: "On peut approcher une loi binomiale $\\mathscr{B}(n\\,;\\,p)$ par une loi de Poisson si les trois conditions sont vérifiées : $n\\geq 30$, $p\\leq 0{,}1$ et $n\\times p\\leq 15$." },
+          { texte: "Repère $n$ (nombre d'épreuves) et $p$ dans le texte, puis teste chaque condition, $n\\times p$ compris." },
+        ];
+      case "aLambda":
+        return [{ texte: "Pour l'approximation, on garde la même espérance :", latex: "\\lambda=n\\times p" }, { texte: "Repère $n$ et $p$ dans le texte." }];
+      case "bLambda":
+        return [
+          { texte: "$\\lambda$ est le nombre moyen d'événements sur la durée ou l'effectif étudiés : on adapte le taux donné à l'échelle de la question." },
+          { texte: "Compare l'échelle du taux (par minute, pour 1 000…) à celle de la question : combien de fois est-elle plus grande ?" },
+        ];
+      case "aProba":
+        return [{ texte: "Loi de Poisson :", latex: "P(X=k)=e^{-\\lambda}\\,\\dfrac{\\lambda^{k}}{k!}" }, { texte: "Remplace $\\lambda$ (écran précédent) et $k$ ; à la calculatrice, la loi de Poisson donne aussi la valeur directement." }];
+      case "bProba":
+        return e.famille === "B"
+          ? [
+              { texte: "Chaque terme se calcule par :", latex: "P(X=k)=e^{-\\lambda}\\,\\dfrac{\\lambda^{k}}{k!}" },
+              {
+                texte:
+                  e.typeQuestion === "exactement"
+                    ? "Un seul terme : remplace $\\lambda$ et $k$."
+                    : e.typeQuestion === "auMoins"
+                      ? "« Au moins » contient beaucoup de valeurs : passe par l'événement contraire, en faisant attention à sa première valeur."
+                      : "Additionne les probabilités des valeurs concernées (ou utilise les probabilités cumulées de la calculatrice), sans arrondir les termes en route.",
+              },
+            ]
+          : [];
+    }
+  },
+  reponseAttendue(e, p) {
+    if (e.famille === "A") {
+      if (p === "aVerdict") return [e.approximable ? "\\text{oui}" : "\\text{non}"];
+      if (p === "aCondition") return [LIBELLES_CONDITION_POISSON[e.condition ?? "n"].replace(/\$/g, "") + "\\ \\text{n'est pas vérifiée}"];
+      if (p === "aLambda") return [`\\lambda=${decimalLatex(lambdaA(e))}`];
+      return [`P(X=${e.k})\\approx ${p4(probabilitePoisson(lambdaA(e), e.k))}`];
+    }
+    if (p === "bLambda") return [`\\lambda=${decimalLatex(e.lambda)}`];
+    return [`${evenementB(e)}\\approx ${p4(resultatB(e))}`];
+  },
+  explication(e, p) {
+    if (e.famille === "A") {
+      const lam = lambdaA(e);
+      const pp = decimalLatex(e.pCentiemes / 100);
+      const verifs = `$n=${e.n}$ ${e.n >= 30 ? "≥" : "<"} 30 ; $p=${pp}$ ${e.pCentiemes <= 10 ? "≤" : ">"} 0,1 ; $n\\times p=${decimalLatex(lam)}$ ${lam <= 15 ? "≤" : ">"} 15.`;
+      if (p === "aVerdict" || p === "aCondition") return [f(verifs), f(e.approximable ? "Les trois conditions sont vérifiées : on peut approcher par une loi de Poisson." : "Une condition échoue : l'approximation de Poisson n'est pas justifiée.")];
+      if (p === "aLambda") return [f(`$\\lambda=n\\times p=${e.n}\\times ${pp}=${decimalLatex(lam)}$.`)];
+      return [f(`$P(X=${e.k})=e^{-${decimalLatex(lam)}}\\times\\dfrac{${decimalLatex(lam)}^{${e.k}}}{${e.k}!}\\approx ${p4(probabilitePoisson(lam, e.k))}$.`)];
+    }
+    if (p === "bLambda") return [f(`On adapte le taux à l'échelle de la question : $\\lambda=${e.calculLambda}=${decimalLatex(e.lambda)}$.`)];
+    const lam = decimalLatex(e.lambda);
+    switch (e.typeQuestion) {
+      case "exactement":
+        return [f(`$P(X=${e.k})=e^{-${lam}}\\times\\dfrac{${lam}^{${e.k}}}{${e.k}!}\\approx ${p4(resultatB(e))}$.`)];
+      case "auPlus":
+        return [f(`$P(X\\leq ${e.k})=P(X=0)+\\ldots+P(X=${e.k})\\approx ${p4(resultatB(e))}$ (probabilités cumulées).`)];
+      case "auMoins":
+        return [f(`Le contraire de « $X\\geq ${e.k}$ » est « $X\\leq ${e.k - 1}$ » : $P(X\\geq ${e.k})=1-P(X\\leq ${e.k - 1})\\approx 1-${sommeLatex(e.lambda, 0, e.k - 1)}=${p4(resultatB(e))}$.`)];
+      case "entreAetB":
+        return [f(`$P(${e.k}\\leq X\\leq ${e.kHaut})=P(X=${e.k})+\\ldots+P(X=${e.kHaut})\\approx ${p4(resultatB(e))}$ (ou $P(X\\leq ${e.kHaut})-P(X\\leq ${e.k - 1})$).`)];
+    }
+  },
+  libellePhase(_e, p) {
+    const l: Record<P, string> = { aVerdict: "Approximable ?", aCondition: "Condition non vérifiée", aLambda: "Paramètre λ", aProba: "Probabilité", bLambda: "Paramètre λ", bProba: "Probabilité" };
+    return l[p];
+  },
+  messageCible(e, p, valeurs) {
+    const v = valeurs[0] ?? "";
+    if (e.famille === "B" && p === "bProba") {
+      const P = (i: number) => probabilitePoisson(e.lambda, i);
+      let cum = 0;
+      for (let i = 0; i <= e.k; i++) cum += P(i);
+      if (e.typeQuestion === "auMoins" && vautEnviron(v, 1 - cum, 2e-4)) return f(`« Au moins ${e.k} » contient la valeur ${e.k} : son contraire est $X\\leq ${e.k - 1}$, pas $X\\leq ${e.k}$.`);
+      if (e.typeQuestion === "entreAetB" && vautEnviron(v, resultatB(e) - P(e.k), 2e-4)) return [t(`La valeur ${e.k} est comprise dans l'intervalle : ajoute aussi son terme.`)];
+      if (e.typeQuestion === "auPlus" && vautEnviron(v, cum - P(e.k), 2e-4)) return [t(`« Au plus ${e.k} » contient la valeur ${e.k}.`)];
+      return null;
+    }
+    return null;
+  },
 };
-
-export const LIBELLE_FAMILLE: Record<FamilleLoiPoisson, string> = {
-  A: "A — Approximation binomiale → Poisson",
-  B: "B — Application directe",
-};
-
-/** Récapitulatif final : affiche toujours la réponse CORRECTE connue de l'exercice — jamais
- * recalculée depuis la saisie élève. */
-export function formatReponseAttenduePhaseLatex(exercice: ExerciceLoiPoisson, phase: PhaseLoiPoisson): string[] {
-  if (exercice.famille === "A") {
-    if (phase === "aEcran1") return ["\\text{Les 3 conditions sont réunies (Vrai)}"];
-    if (phase === "aEcran2") return [`\\lambda=${formatDecimalExact(exercice.lambda)}`];
-    return [formatDecimalExact(exercice.probabilite)];
-  }
-  if (estEcranLambdaB(phase)) return [`\\lambda=${formatDecimalExact(exercice.lambda)}`];
-  if (phase === "bTermeUniqueEcranFinal") {
-    return [...decouperEnFragmentsTexte(LIBELLE_STRATEGIE[exercice.strategie]), `k=${exercice.k}`, formatDecimalExact(exercice.resultatFinal)];
-  }
-  if (estEcranIdentificationB(phase)) {
-    const termes = exercice.termesACalculer.map((k) => `k=${k}`).join(",\\ ");
-    return [...decouperEnFragmentsTexte(LIBELLE_STRATEGIE[exercice.strategie]), termes];
-  }
-  return [formatDecimalExact(exercice.resultatFinal)];
-}
-
-export type { ExerciceLoiPoissonA, ExerciceLoiPoissonB };

@@ -3,7 +3,8 @@
  *
  * SEULE source de la table du site (décision de l'utilisateur, 18/11/2026, 6e ch. 8) :
  * - le cours l'affiche en entier (bloc `tablePhi` du chapitre « Variables aléatoires », § 6) ;
- * - les générateurs l'affichent à l'écran, consultable (`components/TablePhi.tsx`) ;
+ * - les générateurs l'affichent à l'écran, consultable (`entrainement/components/TablePhi.tsx`, repliable,
+ *   via `lignesTablePhi`) ; le cours, en entier et figée (`components/TablePhi.tsx`, via `valeurCase`) ;
  * - le papier l'imprime UNE fois, en annexe, quand une question du document en a besoin
  *   (`tablePhiHtml`, enveloppé par `entrainement/export/annexesPapier.ts::annexeTableNormale`).
  * Toutes les valeurs affichées ou attendues viennent d'ici : une réponse « lue dans la table » est
@@ -161,4 +162,64 @@ export function tablePhiHtml(options: { surligner?: number; enDeuxParties?: bool
     `Exemple : Φ(1,23) se lit ligne 1,2, colonne 0,03. Pour z &lt; 0 : Φ(−z) = 1 − Φ(z). Au-delà de 3,49 : Φ(z) ≈ 1.</p>`
   if (!enDeuxParties) return `${legende}${partie(0, 34)}`
   return `${legende}<div style="display:flex;gap:10px;justify-content:center;align-items:flex-start;flex-wrap:wrap">${partie(0, 17)}${partie(18, 34)}</div>`
+}
+
+/* ------------------------------------------------------------------------------------------------
+ * API des générateurs (6gen51 et suivants, lot C) — mêmes valeurs que ci-dessus (même `TABLE`).
+ * Fusion du 25/11/2026 : les deux lots avaient créé `lib/tablePhi.ts` ; un seul fichier, les deux
+ * API gardées, une seule table de valeurs.
+ * --------------------------------------------------------------------------------------------- */
+
+/** Φ(z) exacte (alias de `phiExact`, nom employé par les générateurs). */
+export const phiExacte = phiExact
+
+/** Inverse de Φ par dichotomie (p dans ]0 ; 1[). */
+export function phiInverse(p: number): number {
+  let lo = -8
+  let hi = 8
+  for (let i = 0; i < 80; i++) {
+    const mid = (lo + hi) / 2
+    if (phiExact(mid) < p) lo = mid
+    else hi = mid
+  }
+  return (lo + hi) / 2
+}
+
+/** Case de la table pour |z| arrondi au centième (au-delà de 3,49 : la dernière case). Contrairement
+ * à `phiTable`, PAS de symétrie : on lit toujours la case de |z|. */
+export function valeurTablePhi(z: number): number {
+  const c = caseDe(Math.abs(z))
+  return c ? TABLE[c.ligne][c.colonne] : TABLE[34][9]
+}
+
+/** Lignes de la table (z de 0,0 à 3,4) : 10 valeurs par ligne. */
+export function lignesTablePhi(): { z: number; valeurs: number[] }[] {
+  return LIGNES_TABLE_PHI.map((z, i) => ({ z, valeurs: [...TABLE[i]] }))
+}
+
+/**
+ * Lecture INVERSE tolérante (vérification des réponses) : les z ≥ 0 (au centième) dont la case encadre
+ * `p` (p ≥ 0,5). Si p tombe entre deux cases, les DEUX voisines sont rendues (« deux valeurs voisines
+ * acceptées ») ; si plusieurs z ont la même case (queue de table), tous. `lectureInverse` (plus haut)
+ * rend, elle, la case la plus PROCHE (ce que le cours enseigne).
+ */
+export function lectureInverseTable(p: number): number[] {
+  const candidats: { z: number; v: number }[] = []
+  for (let i = 0; i <= Math.round(Z_MAX_TABLE * 100); i++) {
+    candidats.push({ z: i / 100, v: TABLE[Math.floor(i / 10)][i % 10] })
+  }
+  let dessous: { z: number; v: number } | null = null
+  let dessus: { z: number; v: number } | null = null
+  for (const c of candidats) {
+    if (c.v <= p + 1e-12) dessous = c
+    if (c.v >= p - 1e-12 && !dessus) dessus = c
+  }
+  const r = new Set<number>()
+  const exacts = candidats.filter((c) => Math.abs(c.v - p) < 1e-12)
+  if (exacts.length > 0) exacts.forEach((c) => r.add(c.z))
+  else {
+    if (dessous) candidats.filter((c) => Math.abs(c.v - dessous!.v) < 1e-12).forEach((c) => r.add(c.z))
+    if (dessus) candidats.filter((c) => Math.abs(c.v - dessus!.v) < 1e-12).forEach((c) => r.add(c.z))
+  }
+  return [...r].sort((a, b) => a - b)
 }

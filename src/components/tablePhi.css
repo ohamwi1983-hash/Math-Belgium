@@ -1,6 +1,6 @@
 /* Table de Φ partagée (cours et générateurs, `components/TablePhi.tsx`). Jetons du site, avec
    repli sur ceux des générateurs (`entrainement/theme.css`) puis sur une valeur fixe. */
-.table-phi {
+.table-phi-cours {
   margin: 18px 0;
   --tphi-ligne: var(--line, var(--color-border, #c9ced4));
   --tphi-fond: var(--surface, var(--color-surface, #fff));
@@ -10,22 +10,22 @@
   --tphi-cible: var(--accent-soft, var(--color-warning-bg, #fde7c8));
   --tphi-cible-encre: var(--accent-ink, var(--color-text, #7a3a0c));
 }
-.table-phi-titre {
+.table-phi-cours-titre {
   font-weight: 600;
   margin: 0 0 6px;
 }
-.table-phi-cadre {
+.table-phi-cours-cadre {
   overflow-x: auto;
   max-width: 100%;
   border: 1px solid var(--tphi-ligne);
   border-radius: 8px;
   background: var(--tphi-fond);
 }
-.table-phi-cadre:focus-visible {
+.table-phi-cours-cadre:focus-visible {
   outline: 2px solid var(--accent, var(--color-primary, #b65c1f));
   outline-offset: 2px;
 }
-.table-phi table {
+.table-phi-cours table {
   border-collapse: separate;
   border-spacing: 0;
   font-family: var(--mono, 'IBM Plex Mono', Consolas, monospace);
@@ -33,7 +33,7 @@
   color: var(--tphi-encre);
   margin: 0 auto;
 }
-.table-phi-caption {
+.table-phi-cours-caption {
   caption-side: top;
   text-align: left;
   padding: 8px 10px 6px;
@@ -41,63 +41,63 @@
   font-size: 13.5px;
   color: var(--tphi-doux);
 }
-.table-phi th,
-.table-phi td {
+.table-phi-cours th,
+.table-phi-cours td {
   padding: 4px 8px;
   text-align: center;
   white-space: nowrap;
   border-bottom: 1px solid var(--tphi-ligne);
 }
-.table-phi thead th {
+.table-phi-cours thead th {
   background: var(--tphi-entete);
   font-weight: 600;
   position: sticky;
   top: 0;
 }
-.table-phi tbody th {
+.table-phi-cours tbody th {
   background: var(--tphi-entete);
   font-weight: 600;
   position: sticky;
   left: 0;
   border-right: 1px solid var(--tphi-ligne);
 }
-.table-phi-coin {
+.table-phi-cours-coin {
   left: 0;
   z-index: 1;
   border-right: 1px solid var(--tphi-ligne);
 }
-.table-phi tbody tr.table-phi-filet th,
-.table-phi tbody tr.table-phi-filet td {
+.table-phi-cours tbody tr.table-phi-cours-filet th,
+.table-phi-cours tbody tr.table-phi-cours-filet td {
   border-bottom: 2px solid var(--tphi-ligne);
 }
-.table-phi tbody tr:last-child th,
-.table-phi tbody tr:last-child td {
+.table-phi-cours tbody tr:last-child th,
+.table-phi-cours tbody tr:last-child td {
   border-bottom: none;
 }
-.table-phi td.is-axe {
+.table-phi-cours td.is-axe {
   background: color-mix(in srgb, var(--tphi-cible) 45%, transparent);
 }
-.table-phi .is-cible {
+.table-phi-cours .is-cible {
   background: var(--tphi-cible);
   color: var(--tphi-cible-encre);
   font-weight: 700;
 }
-.table-phi--compact table {
+.table-phi-cours--compact table {
   font-size: 12px;
 }
-.table-phi--compact th,
-.table-phi--compact td {
+.table-phi-cours--compact th,
+.table-phi-cours--compact td {
   padding: 3px 5px;
 }
-.table-phi-legende {
+.table-phi-cours-legende {
   font-size: 13.5px;
   color: var(--tphi-doux);
   margin: 6px 2px 0;
 }
-.table-phi-bloc {
+.table-phi-cours-bloc {
   margin: 22px 0;
 }
-.table-phi-bloc figcaption {
+.table-phi-cours-bloc figcaption {
   font-size: 14px;
   color: var(--ink-soft, #59636e);
   margin-top: 8px;

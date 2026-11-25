@@ -1,555 +1,247 @@
-import type { ExerciceLoiBinomiale, ExerciceLoiBinomialeA, ExerciceLoiBinomialeB, ExerciceLoiBinomialeC, FamilleLoiBinomiale } from "../core6e/loiBinomiale.types";
-import type { StrategieBinomialeA } from "../core6e/binomialeSequenceOrdonnee.types";
-import { coefficientBinomial } from "../generateurs6e/combinatoire";
+import type { ExerciceLoiBinomiale } from "../core6e/loiBinomiale.types";
+import { LIBELLES_CONDITION } from "../generateurs6e/loiBinomiale/contextes";
+import { loiBinomialeExacte, probabiliteBinomiale } from "../generateurs6e/loiBinomiale/familleB";
+import { frontiereC, uniteC } from "../generateurs6e/loiBinomiale/familleC";
+import { esperanceEtVariance, referenceC } from "../moteur6e/verificationLoiBinomiale";
 import type { PhaseLoiBinomiale } from "../moteur6e/typesLoiBinomiale";
+import { combinaisonBig, versNombre } from "../moteur6e/saisieCombinatoire";
+import type { Rationnel } from "../moteur6e/saisieCombinatoire";
+import { inequationInverse, vautEnviron } from "../moteur6e/saisieVariablesAleatoires";
+import { arrondiLatex, decimalLatex, f, fractionLatex, m, t } from "./fragmentsCombinatoire";
+import type { ChampCombi, FormatCombinatoire, FragmentConsigne } from "./fragmentsCombinatoire";
 
 /**
- * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen50`. Dispatch sur
- * `exercice.famille` PUIS `phase`, mirroir `formatBinomialeSequenceOrdonnee.ts` (6gen48), jamais
- * importé par un autre générateur (chaque générateur reste indépendant — CLAUDE.md).
- *
- * **Vigilance signe orphelin / groupe LaTeX vide / texte français en mode maths** — toute clause en
- * français mêlée à du LaTeX passe TOUJOURS par `\text{...}`, jamais du texte brut en mode maths.
- * Couverture de régression : `formatLoiBinomiale.test.ts`, scan sur fixtures ET 300 tirages réels.
- *
- * `p`/`seuil` sont toujours DÉCIMAUX en interne mais toujours AFFICHÉS sous forme de FRACTION
- * irréductible (convention transversale CLAUDE.md) — voir `FRACTIONS` ci-dessous, table statique car
- * ces valeurs sont toujours tirées d'ensembles FIXES de candidats (`generateurs6e/loiBinomiale/
- * familleA.ts`/`familleB.ts`/`familleC.ts`). **Exception explicite (spec)** : `valeurN` (famille C,
- * écran 3) est un entier positif brut (nombre d'épreuves), jamais une fraction.
+ * Textes de `6gen50` (6e ch. 8, § 2) — audit, lots B et C : notation 𝓑(n ; p) calligraphique
+ * (décision 4), Cₙᵏ, virgule décimale, X défini dans chaque texte, aucun exemple de champ (avant :
+ * « ex : 1-(1-1/10)^n > 9/10 », la réponse dans 100 % des C), aides qui ne donnent ni la stratégie ni
+ * « n ≈ 21,854 ».
  */
 
-export type TypeChamp = "texte" | "choix";
+type E = ExerciceLoiBinomiale;
+type P = PhaseLoiBinomiale;
 
-export interface OptionChoix {
-  valeur: string;
-  label: string;
+export const BINOMIALE = (n: string | number, p: string) => `\\mathscr{B}(${n}\\,;\\,${p})`;
+
+function pLatex(num: number, den: number): string {
+  if (den === 10 || den === 100) return decimalLatex(num / den);
+  return `\\dfrac{${num}}{${den}}`;
 }
 
-export interface ChampDef {
-  type: TypeChamp;
-  label: string;
-  placeholder?: string;
-  options?: OptionChoix[];
-  /** `true` pour un label RÉDUIT À UNE LETTRE DE VARIABLE (ex. "n =", "p ="), où le
-   * `text-transform: uppercase` global de `.field-label` casserait une distinction pédagogique —
-   * ici spécifiquement "p" (paramètre de Bernoulli) vs "P" (notation `P(X=k)` déjà utilisée pour la
-   * probabilité demandée ailleurs sur le même écran) — mirroir `.field-label-minuscule` déjà établi
-   * pour "a"/"b"/"c" dans "Analyse d'une fonction du second degré" (voir `App.css`). Jamais utilisé
-   * pour un label-phrase complet (checklist, stratégie, interprétation QCM), où la MAJUSCULE ne
-   * casse aucune distinction. */
-  minuscule?: boolean;
+function probaLatex(r: Rationnel): string {
+  const x = versNombre(r);
+  if (Math.abs(Number(x.toFixed(8)) - x) < 1e-14) return decimalLatex(x, 8);
+  return `${fractionLatex(r)}\\approx ${arrondiLatex(x, 4)}`;
 }
 
-export interface AideAvecLatex {
-  texte: string;
-  latex: string | null;
+function termeLatex(n: number, p: number, k: number): string {
+  return `C_{${n}}^{${k}}\\times ${decimalLatex(p)}^{${k}}\\times ${decimalLatex(1 - p)}^{${n - k}}`;
 }
 
-/** Fragment de consigne mixant prose française et LaTeX inline — jamais de phrase française
- * entière passée à KaTeX (piège documenté, "libellé français brut en mode maths"). Rendu via
- * `components/RenduFragments.tsx`. */
-export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
-
-function texte(valeur: string): FragmentConsigne {
-  return { type: "texte", valeur };
+function frontiereLatex(e: E & { famille: "C" }): string {
+  return `\\dfrac{\\ln(${decimalLatex(1 - e.seuil)})}{\\ln(${decimalLatex(1 - e.p)})}`;
 }
 
-function latex(valeur: string): FragmentConsigne {
-  return { type: "latex", valeur };
-}
-
-const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
-
-function champTexte(label: string, placeholder: string, minuscule = false): ChampDef {
-  return { type: "texte", label, placeholder, minuscule };
-}
-
-/** Seuil de découpage identique à `6gen48` (`formatBinomialeSequenceOrdonnee.ts`), revérifié à
- * 375px lors de la vérification Playwright de ce générateur. */
-const LONGUEUR_MAX_LIGNE = 28;
-
-/** Découpe un texte français long en PLUSIEURS entrées `string[]`, aux frontières de MOTS
- * uniquement — mirroir EXACT `decouperEnFragmentsTexte` de `formatBinomialeSequenceOrdonnee.ts`
- * (6gen48), voir son en-tête pour la justification complète du piège évité. */
-function decouperEnFragmentsTexte(texte: string): string[] {
-  const mots = texte.split(" ");
-  const lignes: string[] = [];
-  let courante = "";
-  for (const mot of mots) {
-    const candidate = courante === "" ? mot : `${courante} ${mot}`;
-    if (candidate.length > LONGUEUR_MAX_LIGNE && courante !== "") {
-      lignes.push(courante);
-      courante = mot;
-    } else {
-      courante = candidate;
+export const FORMAT_6GEN50: FormatCombinatoire<E, P> = {
+  consigneGenerale(e) {
+    if (e.famille === "A") return [t("Lis la situation, puis décide si "), m("X"), t(" suit une loi binomiale.")];
+    if (e.famille === "B") return [m("X"), t(" suit une loi binomiale. Probabilités : fraction ou décimal exact, ou arrondi au millième.")];
+    return [t("Trouve le plus petit nombre d'épreuves qui convient, à l'aide du logarithme.")];
+  },
+  donnees(e): FragmentConsigne[][] {
+    if (e.famille === "A" || e.famille === "B") return [f(e.texte)];
+    return [f(e.texte), [t(`Combien de ${uniteC(e)} faut-il au minimum pour que la probabilité qu'${e.evenement} dépasse `), m(decimalLatex(e.seuil)), t(" ?")]];
+  },
+  consigneEcran(e, p) {
+    switch (p) {
+      case "aVerdict":
+        return [t("La variable "), m("X"), t(" suit-elle une loi binomiale ?")];
+      case "aParametres":
+        return [t("Donne les paramètres de la loi : "), m(BINOMIALE("n", "p")), t(".")];
+      case "aCondition":
+        return [t("Quelle condition du schéma de Bernoulli n'est pas respectée ?")];
+      case "bLoi":
+        return [t("Complète la loi de "), m("X"), t(" : calcule "), m("P(X=k)"), t(" pour chaque valeur de "), m("k"), t(".")];
+      case "bDiagramme":
+        return [t("Lequel de ces diagrammes en barres représente la loi de "), m("X"), t(" ?")];
+      case "bEV":
+        return [t("Calcule l'espérance "), m("E(X)"), t(" et la variance "), m("V(X)"), t(" (valeurs exactes).")];
+      case "bSigma":
+        return [t("Calcule l'écart-type "), m("\\sigma(X)"), t(", arrondi au centième.")];
+      case "cInequation":
+        return [t("Écris l'inéquation en "), m("n"), t(" qui traduit la condition.")];
+      case "cIsole":
+        return [t("Résous l'inéquation : isole "), m("n"), t(".")];
+      case "cN":
+        return e.famille === "C" ? [t(`Quel est le plus petit nombre de ${uniteC(e)} qui convient ?`)] : [];
     }
-  }
-  if (courante !== "") lignes.push(courante);
-  return lignes.map((ligne) => `\\text{${ligne}}`);
-}
-
-// ============================================================================
-// Fractions irréductibles pour p/seuil (ensembles FIXES de candidats).
-// ============================================================================
-
-const FRACTIONS: Record<string, [number, number]> = {
-  "0.02": [1, 50],
-  "0.05": [1, 20],
-  "0.08": [2, 25],
-  "0.1": [1, 10],
-  "0.15": [3, 20],
-  "0.2": [1, 5],
-  "0.25": [1, 4],
-  "0.3": [3, 10],
-  "0.4": [2, 5],
-  "0.5": [1, 2],
-  "0.6": [3, 5],
-  "0.7": [7, 10],
-  "0.75": [3, 4],
-  "0.8": [4, 5],
-  "0.9": [9, 10],
-  "0.95": [19, 20],
-  "0.99": [99, 100],
-};
-
-function formatFraction(v: number, style: "frac" | "dfrac" = "dfrac"): string {
-  const paire = FRACTIONS[`${v}`];
-  if (!paire) return `${v}`;
-  const [num, den] = paire;
-  return `\\${style}{${num}}{${den}}`;
-}
-
-function pgcd(a: number, b: number): number {
-  return b === 0 ? a : pgcd(b, a % b);
-}
-
-/** `n·p` en fraction irréductible — `p` toujours tiré de `FRACTIONS` (dénominateur connu). */
-function formatEsperanceFraction(n: number, p: number): string {
-  const paire = FRACTIONS[`${p}`];
-  if (!paire) return formatDecimalExact(n * p);
-  const [num, den] = paire;
-  const numeroTotal = n * num;
-  if (numeroTotal % den === 0) return `${numeroTotal / den}`;
-  const d = pgcd(numeroTotal, den);
-  return `\\dfrac{${numeroTotal / d}}{${den / d}}`;
-}
-
-/** Décimal EXACT (jamais arrondi de façon trompeuse) — mirroir `formatDecimalExact` de
- * `formatBinomialeSequenceOrdonnee.ts` (6gen48). */
-function formatDecimalExact(v: number): string {
-  const s = v.toFixed(10).replace(/0+$/, "").replace(/\.$/, "");
-  return s === "" || s === "-" ? "0" : s;
-}
-
-const LIBELLE_STRATEGIE: Record<StrategieBinomialeA, string> = {
-  termeUnique: "un seul terme",
-  somme: "une somme de plusieurs termes",
-  complement: "un complément (1 moins un terme)",
-};
-
-// ============================================================================
-// Famille A — Justifier qu'une variable suit une loi binomiale.
-// ============================================================================
-
-const CONDITIONS_BERNOULLI = (labelSucces: string): string[] => [
-  "Le nombre d'épreuves est fixé à l'avance.",
-  "Les épreuves sont indépendantes les unes des autres.",
-  `Chaque épreuve n'a que 2 issues possibles : « ${labelSucces} » ou non.`,
-  "La probabilité de succès reste constante d'une épreuve à l'autre.",
-];
-
-export function consigneGeneraleA(): FragmentConsigne[] {
-  return [texte("Un contexte décrit une répétition d'épreuves. Identifie le nombre d'épreuves n et la probabilité de succès p, puis vérifie que les conditions du schéma de Bernoulli répété sont réunies.")];
-}
-
-export function blocDonneesA(e: ExerciceLoiBinomialeA): string[] {
-  return decouperEnFragmentsTexte(e.contexte.texteTemplate(e.n, e.p));
-}
-
-export function consigneEcranA(phase: PhaseLoiBinomiale): FragmentConsigne[] {
-  if (phase === "aEcran1") return [texte("Identifie le nombre d'épreuves n et la probabilité de succès p décrits dans l'énoncé.")];
-  return [texte("Vérifie si chacune des 4 conditions suivantes est remplie dans ce contexte.")];
-}
-
-export function etatActuelA(e: ExerciceLoiBinomialeA, phase: PhaseLoiBinomiale): string[] | null {
-  if (phase !== "aEcran2") return null;
-  return [`n=${e.n}`, `p=${formatFraction(e.p)}`];
-}
-
-export function champsA(e: ExerciceLoiBinomialeA, phase: PhaseLoiBinomiale): ChampDef[] {
-  if (phase === "aEcran1") {
-    return [champTexte("n (nombre d'épreuves) =", "ex : 8", true), champTexte("p (probabilité de succès) =", "ex : 0,2 ou 1/5", true)];
-  }
-  const options: OptionChoix[] = [
-    { valeur: "vrai", label: "Vrai" },
-    { valeur: "faux", label: "Faux" },
-  ];
-  return CONDITIONS_BERNOULLI(e.contexte.labelSucces).map((label) => ({ type: "choix", label, options }));
-}
-
-export function niveauAideMaxA(phase: PhaseLoiBinomiale): number {
-  return phase === "aEcran2" ? 2 : 0;
-}
-
-export function aideNiveau1A(phase: PhaseLoiBinomiale): AideAvecLatex {
-  if (phase !== "aEcran2") return AUCUNE_AIDE;
-  return {
-    texte: "Rappel des 4 conditions du schéma de Bernoulli répété : un nombre d'épreuves fixé à l'avance ; des épreuves indépendantes entre elles ; exactement 2 issues possibles à chaque épreuve (succès/échec) ; une probabilité de succès constante d'une épreuve à l'autre.",
-    latex: null,
-  };
-}
-
-export function aideNiveau2A(phase: PhaseLoiBinomiale): AideAvecLatex {
-  if (phase !== "aEcran2") return AUCUNE_AIDE;
-  return {
-    texte: "2 des 4 conditions sont déjà confirmées : le nombre d'épreuves est fixé à l'avance, et chaque épreuve n'a que 2 issues possibles. Il reste à vérifier les 2 autres.",
-    latex: null,
-  };
-}
-
-// ============================================================================
-// Famille B — Calculs directs (référence à 6gen48).
-// ============================================================================
-
-function formatQuestionMathB(e: ExerciceLoiBinomialeB): string {
-  switch (e.typeQuestion) {
-    case "exactement":
-      return `P(X=${e.k})`;
-    case "auMoins":
-      return `P(X\\geq ${e.k})`;
-    case "auPlus":
-      return `P(X\\leq ${e.k})`;
-    case "aucun":
-      return "P(X=0)";
-    case "tous":
-      return `P(X=${e.n})`;
-  }
-}
-
-function formatQuestionQualificatifB(e: ExerciceLoiBinomialeB): string {
-  switch (e.typeQuestion) {
-    case "exactement":
-      return `(exactement ${e.k} succès)`;
-    case "auMoins":
-      return `(au moins ${e.k} succès)`;
-    case "auPlus":
-      return `(au plus ${e.k} succès)`;
-    case "aucun":
-      return "(aucun succès)";
-    case "tous":
-      return "(tous des succès)";
-  }
-}
-
-function estEcran1B(phase: PhaseLoiBinomiale): boolean {
-  return phase === "bTermeUniqueEcran1" || phase === "bSommeEcran1" || phase === "bComplementEcran1";
-}
-function estEcran2B(phase: PhaseLoiBinomiale): boolean {
-  return phase === "bTermeUniqueEcran2" || phase === "bSommeEcran2" || phase === "bComplementEcran2";
-}
-function estEcran3B(phase: PhaseLoiBinomiale): boolean {
-  return phase === "bSommeEcran3" || phase === "bComplementEcran3";
-}
-function estEsperanceB(phase: PhaseLoiBinomiale): boolean {
-  return phase === "bTermeUniqueEsperance" || phase === "bSommeEsperance" || phase === "bComplementEsperance";
-}
-
-export function consigneGeneraleB(): FragmentConsigne[] {
-  return [texte("n épreuves indépendantes sont répétées, chacune avec la même probabilité de succès p. Identifie la stratégie de calcul adaptée à la question, calcule la probabilité demandée, puis calcule le nombre moyen de succès attendu.")];
-}
-
-export function blocDonneesB(e: ExerciceLoiBinomialeB): string[] {
-  return [...decouperEnFragmentsTexte(e.contexte.texte), `n=${e.n}`, `p=${formatFraction(e.p)}`, `\\text{Demandé : }${formatQuestionMathB(e)}`, ...decouperEnFragmentsTexte(formatQuestionQualificatifB(e))];
-}
-
-export function consigneEcranB(e: ExerciceLoiBinomialeB, phase: PhaseLoiBinomiale): FragmentConsigne[] {
-  if (estEcran1B(phase)) {
-    return [
-      texte("Identifie la stratégie de calcul (un seul terme, une somme de plusieurs termes, ou un complément), puis indique le(s) nombre(s) de succès k pour lesquels il faut calculer "),
-      latex("P(X=k)"),
-      texte("."),
-    ];
-  }
-  if (estEcran2B(phase)) {
-    return [
-      texte("Calcule la valeur de chaque terme "),
-      latex("P(X=k)"),
-      texte(" identifié à l'étape précédente, à l'aide de la formule "),
-      latex("C(n,k)\\cdot p^k\\cdot(1-p)^{n-k}"),
-      texte("."),
-    ];
-  }
-  if (estEcran3B(phase)) {
-    return [
-      texte(
-        e.strategie === "somme"
-          ? "Additionne les termes CONFIRMÉS de l'étape précédente pour obtenir la probabilité demandée."
-          : "Calcule 1 moins le terme CONFIRMÉ de l'étape précédente pour obtenir la probabilité demandée.",
-      ),
-    ];
-  }
-  return [texte("Calcule l'espérance "), latex("E(X)=n\\cdot p"), texte(", puis choisis l'interprétation correcte de cette valeur.")];
-}
-
-/** Lignes confirmées à l'écran 1 (stratégie + termes identifiés) — réutilisées par tout écran
- * ultérieur (correctif transversal accumulation, voir CLAUDE.md/`docs/historique-6e.md`). */
-function lignesEcran1B(e: ExerciceLoiBinomialeB): string[] {
-  const termes = e.termesACalculer.map((k) => `P(X=${k})`).join(",\\ ");
-  return [...decouperEnFragmentsTexte(`Stratégie (étape 1) : ${LIBELLE_STRATEGIE[e.strategie]}`), `\\text{Termes (étape 1) : }${termes}`];
-}
-
-/** Lignes confirmées à l'écran 2 (valeur de chaque terme) — réutilisées par tout écran ultérieur. */
-function lignesEcran2B(e: ExerciceLoiBinomialeB): string[] {
-  return e.termesACalculer.map((k, i) => `P(X=${k})=${formatDecimalExact(e.valeursTermes[i])}\\text{ (confirmé, étape 2)}`);
-}
-
-/** ACCUMULE les écrans déjà confirmés (correctif transversal — voir CLAUDE.md/`docs/historique-
- * 6e.md`, même bug que sur `6gen1`/`6gen58`) : `bXxxEcran3` (somme/complément) ne montrait QUE les
- * valeurs de l'écran 2, jamais la stratégie/les termes de l'écran 1 ; `bXxxEsperance` (dernier écran,
- * quelle que soit la stratégie) ne montrait QUE le résultat de l'écran immédiatement précédent,
- * jamais les écrans antérieurs. Plus ancien en premier. */
-export function etatActuelB(e: ExerciceLoiBinomialeB, phase: PhaseLoiBinomiale): string[] | null {
-  if (estEcran2B(phase)) return lignesEcran1B(e);
-  if (estEcran3B(phase)) return [...lignesEcran1B(e), ...lignesEcran2B(e)];
-  if (estEsperanceB(phase)) {
-    const lignes = [...lignesEcran1B(e), ...lignesEcran2B(e)];
-    if (e.strategie !== "termeUnique") lignes.push(`${formatQuestionMathB(e)}=${formatDecimalExact(e.resultatFinal)}\\text{ (confirmé, étape 3)}`);
-    return lignes;
-  }
-  return null;
-}
-
-const OPTIONS_INTERPRETATION_ESPERANCE: OptionChoix[] = [
-  { valeur: "correcte", label: "E(X) représente le nombre moyen de succès attendu si l'on répète l'expérience un grand nombre de fois." },
-  { valeur: "probabiliteExacte", label: "E(X) représente la probabilité d'obtenir exactement ce nombre de succès à chaque répétition." },
-  { valeur: "maximumPossible", label: "E(X) représente le nombre maximal de succès possible sur n épreuves." },
-  { valeur: "certitude", label: "E(X) représente le nombre de succès obtenu à coup sûr après n épreuves." },
-];
-
-export function champsB(e: ExerciceLoiBinomialeB, phase: PhaseLoiBinomiale): ChampDef[] {
-  if (estEcran1B(phase)) {
-    return [
-      {
-        type: "choix",
-        label: "Stratégie =",
-        options: [
-          { valeur: "termeUnique", label: "Un seul terme" },
-          { valeur: "somme", label: "Une somme de plusieurs termes" },
-          { valeur: "complement", label: "Un complément (1 moins un terme)" },
-        ],
-      },
-      champTexte("Nombre(s) de succès k à calculer (séparés par une virgule) =", "ex : 3"),
-    ];
-  }
-  if (estEcran2B(phase)) return e.termesACalculer.map((k) => champTexte(`P(X=${k}) =`, "ex : 0,21875"));
-  if (estEcran3B(phase)) return [champTexte("Résultat final (probabilité demandée) =", "ex : 0,5")];
-  return [champTexte("E(X)=n·p =", "ex : 4", true), { type: "choix", label: "Interprétation correcte de E(X) =", options: OPTIONS_INTERPRETATION_ESPERANCE }];
-}
-
-export function niveauAideMaxB(phase: PhaseLoiBinomiale): number {
-  return estEcran1B(phase) || estEcran2B(phase) ? 2 : 0;
-}
-
-export function aideNiveau1B(phase: PhaseLoiBinomiale): AideAvecLatex {
-  if (estEcran1B(phase)) {
-    return {
-      texte: "3 stratégies possibles selon la formulation de la question : un seul terme (« exactement »/« aucun »/« tous »), une somme de plusieurs termes (« au plus »/« au moins », en sommant directement quand il y a peu de termes), ou un complément (1 moins un terme extrême, ex. « au moins 1 » = 1 − P(X=0)).",
-      latex: "\\text{au moins 1}=1-P(X=0)",
+  },
+  champs(e, p): ChampCombi[] {
+    switch (p) {
+      case "aVerdict":
+        return [
+          {
+            type: "choix",
+            label: "",
+            options: [
+              { valeur: "oui", label: "Oui, c'est une loi binomiale" },
+              { valeur: "non", label: "Non, ce n'est pas une loi binomiale" },
+            ],
+          },
+        ];
+      case "aParametres":
+        return [
+          { type: "texte", label: "$n$" },
+          { type: "texte", label: "$p$" },
+        ];
+      case "aCondition":
+        return [{ type: "choix", label: "", options: (Object.keys(LIBELLES_CONDITION) as (keyof typeof LIBELLES_CONDITION)[]).map((c) => ({ valeur: c, label: LIBELLES_CONDITION[c] })) }];
+      case "bLoi":
+        return e.famille === "B" ? Array.from({ length: e.n + 1 }, (_, k) => ({ type: "texte" as const, label: `$P(X=${k})$` })) : [];
+      case "bDiagramme":
+        return [{ type: "choix", label: "", options: [1, 2, 3].map((i) => ({ valeur: String(i), label: `Diagramme ${i}` })) }];
+      case "bEV":
+        return [
+          { type: "texte", label: "$E(X)$" },
+          { type: "texte", label: "$V(X)$" },
+        ];
+      case "bSigma":
+        return [{ type: "texte", label: "$\\sigma(X)$" }];
+      case "cInequation":
+        return [{ type: "texte", label: "Inéquation en $n$", placeholder: "inéquation en n" }];
+      case "cIsole":
+        return [{ type: "texte", label: "$n$ isolé", placeholder: "n seul d'un côté" }];
+      case "cN":
+        return [{ type: "texte", label: "$n$" }];
+    }
+  },
+  aides(e, p) {
+    switch (p) {
+      case "aVerdict":
+      case "aCondition":
+        return [
+          { texte: "Loi binomiale : un nombre $n$ d'épreuves fixé à l'avance, indépendantes, à deux issues (succès ou échec), de même probabilité de succès $p$ ; $X$ compte les succès." },
+          { texte: "Pose-toi les questions dans l'ordre : sait-on à l'avance combien d'épreuves on fait ? Le résultat d'une épreuve change-t-il les suivantes ? Que compte $X$ : des succès, ou autre chose ?" },
+        ];
+      case "aParametres":
+        return [{ texte: "$n$ est le nombre d'épreuves ; $p$ est la probabilité d'un succès à une épreuve." }, { texte: "Repère combien de fois l'épreuve est répétée, et ce qui compte comme succès pour $X$ (une fraction ou un pourcentage conviennent pour $p$)." }];
+      case "bLoi":
+        return e.famille === "B"
+          ? [
+              { texte: "Pour chaque $k$ de $0$ à $n$ :", latex: "P(X=k)=C_n^k\\,p^k\\,(1-p)^{n-k}" },
+              { texte: `Ici $n=${e.n}$, $p=${decimalLatex(e.p)}$ et $1-p=${decimalLatex(1 - e.p)}$. À la fin, la somme des probabilités doit valoir 1.` },
+            ]
+          : [];
+      case "bDiagramme":
+        return [{ texte: "Le sommet du diagramme est la valeur de $k$ la plus probable ; elle est proche de $n\\times p$." }, { texte: "Compare avec ta loi : quelle valeur a la plus grande probabilité, et de quel côté le diagramme s'étire-t-il ?" }];
+      case "bEV":
+        return e.famille === "B" ? [{ texte: "Pour une loi binomiale :", latex: "E(X)=n\\,p\\qquad V(X)=n\\,p\\,(1-p)" }, { texte: `Ici $n=${e.n}$ et $p=${decimalLatex(e.p)}$.` }] : [];
+      case "bSigma":
+        return [{ texte: "L'écart-type est la racine carrée de la variance :", latex: "\\sigma(X)=\\sqrt{V(X)}" }, { texte: "Utilise la variance de l'écran précédent." }];
+      case "cInequation":
+        return e.famille === "C"
+          ? [
+              { texte: "« Au moins un succès » est le contraire de « aucun succès » ; sur $n$ épreuves :", latex: "P(\\text{au moins un succès})=1-(1-p)^n" },
+              { texte: `Ici $p=${decimalLatex(e.p)}$ et la probabilité doit dépasser $${decimalLatex(e.seuil)}$.` },
+            ]
+          : [];
+      case "cIsole":
+        return [
+          { texte: "Isole la puissance, puis prends le logarithme des deux membres :", latex: "\\ln\\left(a^n\\right)=n\\ln a" },
+          { texte: "Le logarithme d'un nombre entre 0 et 1 est négatif : diviser par un nombre négatif change le sens de l'inégalité." },
+        ];
+      case "cN":
+        return [{ texte: "$n$ est un nombre entier : prends le premier entier qui vérifie l'inéquation." }, { texte: "Contrôle à la calculatrice : la probabilité doit dépasser le seuil pour ce nombre, et pas pour le précédent." }];
+    }
+  },
+  reponseAttendue(e, p) {
+    if (e.famille === "A") {
+      if (p === "aVerdict") return [e.binomiale ? "\\text{oui}" : "\\text{non}"];
+      if (p === "aParametres") return [`${BINOMIALE(e.n, pLatex(e.pNum, e.pDen))}`];
+      return [`\\text{${e.condition ? LIBELLES_CONDITION[e.condition] : ""}}`];
+    }
+    if (e.famille === "B") {
+      if (p === "bLoi") return loiBinomialeExacte(e.n, e.p).map((r, k) => `P(X=${k})=${probaLatex(r)}`);
+      if (p === "bDiagramme") return [`\\text{Diagramme ${e.ordreDiagrammes.indexOf("juste") + 1}}`];
+      const { E, V } = esperanceEtVariance(e.n, e.p);
+      if (p === "bEV") return [`E(X)=${decimalLatex(E)}`, `V(X)=${decimalLatex(V)}`];
+      return [`\\sigma(X)=\\sqrt{${decimalLatex(V)}}\\approx ${arrondiLatex(Math.sqrt(V), 2)}`];
+    }
+    if (p === "cInequation") return [`1-${decimalLatex(1 - e.p)}^{n}>${decimalLatex(e.seuil)}`];
+    if (p === "cIsole") return [`n>${frontiereLatex(e)}\\approx ${arrondiLatex(frontiereC(e.p, e.seuil), 2)}`];
+    return [`n=${e.valeurN}`];
+  },
+  explication(e, p) {
+    if (e.famille === "A") {
+      if (p === "aVerdict" && e.binomiale) return [f(`Nombre d'épreuves fixé ($n=${e.n}$), épreuves indépendantes à deux issues, même probabilité de succès $p=${pLatex(e.pNum, e.pDen)}$, et $X$ compte les succès : $X\\sim${BINOMIALE(e.n, pLatex(e.pNum, e.pDen))}$.`)];
+      if (p === "aParametres") return [f(`$n=${e.n}$ épreuves, probabilité de succès $p=${pLatex(e.pNum, e.pDen)}$ : $X\\sim${BINOMIALE(e.n, pLatex(e.pNum, e.pDen))}$.`)];
+      const pourquoi =
+        e.condition === "nombre"
+          ? "On s'arrête quand un résultat se produit : on ne sait pas à l'avance combien d'épreuves on fera."
+          : e.condition === "independance"
+            ? "Le résultat d'une épreuve (ou le rang de l'épreuve) modifie la probabilité de succès : les épreuves ne sont pas identiques et indépendantes."
+            : "$X$ additionne des valeurs qui ne sont pas des succès (plus de deux issues par épreuve) : elle ne compte pas des succès.";
+      return [f(`${pourquoi} Ce n'est donc pas une loi binomiale.`)];
+    }
+    if (e.famille === "B") {
+      if (p === "bLoi") return loiBinomialeExacte(e.n, e.p).map((r, k) => f(`$P(X=${k})=${termeLatex(e.n, e.p, k)}=${probaLatex(r)}$`));
+      if (p === "bDiagramme") {
+        const loi = loiBinomialeExacte(e.n, e.p).map(versNombre);
+        const mode = loi.indexOf(Math.max(...loi));
+        return [f(`La valeur la plus probable est $k=${mode}$ (proche de $n\\times p=${decimalLatex(e.n * e.p)}$) ; ${e.p < 0.5 ? "le sommet est décalé à gauche et la queue s'étire à droite" : "le sommet est décalé à droite et la queue s'étire à gauche"}.`)];
+      }
+      const { E, V } = esperanceEtVariance(e.n, e.p);
+      if (p === "bEV") return [f(`$E(X)=${e.n}\\times ${decimalLatex(e.p)}=${decimalLatex(E)}$ ; $V(X)=${e.n}\\times ${decimalLatex(e.p)}\\times ${decimalLatex(1 - e.p)}=${decimalLatex(V)}$.`)];
+      return [f(`$\\sigma(X)=\\sqrt{${decimalLatex(V)}}\\approx ${arrondiLatex(Math.sqrt(V), 2)}$.`)];
+    }
+    const q = decimalLatex(1 - e.p);
+    if (p === "cInequation") return [f(`« Au moins un succès » : $1-${q}^{n}$. Il faut $1-${q}^{n}>${decimalLatex(e.seuil)}$.`)];
+    if (p === "cIsole")
+      return [
+        f(`$${q}^{n}<${decimalLatex(1 - e.seuil)}$, donc $n\\ln(${q})<\\ln(${decimalLatex(1 - e.seuil)})$.`),
+        f(`$\\ln(${q})<0$ : en divisant, le sens change, $n>${frontiereLatex(e)}\\approx ${arrondiLatex(frontiereC(e.p, e.seuil), 2)}$.`),
+      ];
+    const n = e.valeurN;
+    return [f(`Premier entier au-delà de $${arrondiLatex(frontiereC(e.p, e.seuil), 2)}$ : $n=${n}$. Contrôle : $1-${q}^{${n - 1}}\\approx ${arrondiLatex(1 - (1 - e.p) ** (n - 1), 4)}$ et $1-${q}^{${n}}\\approx ${arrondiLatex(1 - (1 - e.p) ** n, 4)}$.`)];
+  },
+  libellePhase(_e, p) {
+    const l: Record<P, string> = {
+      aVerdict: "Loi binomiale ?",
+      aParametres: "Paramètres n et p",
+      aCondition: "Condition non respectée",
+      bLoi: "Loi de X",
+      bDiagramme: "Diagramme",
+      bEV: "E(X) et V(X)",
+      bSigma: "Écart-type",
+      cInequation: "Inéquation",
+      cIsole: "n isolé",
+      cN: "n minimal",
     };
-  }
-  if (estEcran2B(phase)) return { texte: "Rappel de la formule :", latex: "P(X=k)=C(n,k)\\cdot p^k\\cdot(1-p)^{n-k}" };
-  return AUCUNE_AIDE;
-}
-
-export function aideNiveau2B(e: ExerciceLoiBinomialeB, phase: PhaseLoiBinomiale): AideAvecLatex {
-  if (estEcran1B(phase)) {
-    const strategie = LIBELLE_STRATEGIE[e.strategie];
-    if (e.strategie === "termeUnique") return { texte: `La stratégie identifiée dans l'énoncé est : ${strategie}.`, latex: `P(X=${e.k})` };
-    if (e.strategie === "complement") return { texte: `La stratégie identifiée dans l'énoncé est : ${strategie}.`, latex: `1-P(X=${e.termesACalculer[0]})` };
-    const somme = e.termesACalculer.map((k) => `P(X=${k})`).join("+");
-    return { texte: `La stratégie identifiée dans l'énoncé est : ${strategie}.`, latex: somme };
-  }
-  if (estEcran2B(phase)) {
-    const premierK = e.termesACalculer[0];
-    const coefficient = coefficientBinomial(e.n, premierK);
-    return { texte: `Coefficient binomial déjà calculé pour le premier terme (les puissances de p et 1−p restent à substituer) :`, latex: `C(${e.n},${premierK})=${coefficient}` };
-  }
-  return AUCUNE_AIDE;
-}
-
-// ============================================================================
-// Famille C — Trouver n via logarithme, "au moins 1 succès".
-// ============================================================================
-
-export function consigneGeneraleC(): FragmentConsigne[] {
-  return [
-    texte(
-      "Une épreuve est répétée n fois, indépendamment, avec une probabilité p de succès à chaque fois. Détermine le nombre minimal n de répétitions pour que la probabilité d'obtenir au moins un succès dépasse le seuil donné.",
-    ),
-  ];
-}
-
-export function blocDonneesC(e: ExerciceLoiBinomialeC): string[] {
-  return [...decouperEnFragmentsTexte(e.contexte.texte), `p=${formatFraction(e.p)}`, `\\text{Seuil : }${formatFraction(e.seuil)}`];
-}
-
-export function consigneEcranC(phase: PhaseLoiBinomiale): FragmentConsigne[] {
-  if (phase === "cEcran1") return [texte("Pose l'inéquation correspondant à « P(au moins 1 succès) > seuil », en fonction de n.")];
-  if (phase === "cEcran2") return [texte("Isole "), latex("(1-p)^n"), texte(" dans l'inéquation CONFIRMÉE de l'étape précédente.")];
-  return [texte("Résous l'inéquation CONFIRMÉE pour trouver n (utilise le logarithme), puis arrondis au nombre entier supérieur pour obtenir le nombre minimal d'épreuves.")];
-}
-
-function formatInequationPoseeC(e: ExerciceLoiBinomialeC): string {
-  return `1-(1-${formatFraction(e.p, "frac")})^n>${formatFraction(e.seuil, "frac")}`;
-}
-
-function formatInequationIsoleeC(e: ExerciceLoiBinomialeC): string {
-  return `(1-${formatFraction(e.p, "frac")})^n<1-${formatFraction(e.seuil, "frac")}`;
-}
-
-/** ACCUMULE les écrans déjà confirmés (correctif transversal, voir CLAUDE.md/`docs/historique-
- * 6e.md`) : `cEcran3` omettait l'inéquation posée de `cEcran1`, ne montrant que l'inéquation isolée
- * de `cEcran2`. Plus ancien en premier. */
-export function etatActuelC(e: ExerciceLoiBinomialeC, phase: PhaseLoiBinomiale): string[] | null {
-  if (phase === "cEcran2") return [`${formatInequationPoseeC(e)}\\text{ (confirmé, étape 1)}`];
-  if (phase === "cEcran3") return [`${formatInequationPoseeC(e)}\\text{ (confirmé, étape 1)}`, `${formatInequationIsoleeC(e)}\\text{ (confirmé, étape 2)}`];
-  return null;
-}
-
-function exempleInequationPoseeC(e: ExerciceLoiBinomialeC): string {
-  const [np, dp] = FRACTIONS[`${e.p}`] ?? [e.p, 1];
-  const [ns, ds] = FRACTIONS[`${e.seuil}`] ?? [e.seuil, 1];
-  return `ex : 1-(1-${np}/${dp})^n > ${ns}/${ds}`;
-}
-
-function exempleInequationIsoleeC(e: ExerciceLoiBinomialeC): string {
-  const [np, dp] = FRACTIONS[`${e.p}`] ?? [e.p, 1];
-  const un = FRACTIONS[`${1 - e.seuil}`.replace(/^0\.(\d+)0*$/, "0.$1")] ?? null;
-  const droite = un ? `${un[0]}/${un[1]}` : formatDecimalExact(1 - e.seuil);
-  return `ex : (1-${np}/${dp})^n < ${droite}`;
-}
-
-export function champsC(e: ExerciceLoiBinomialeC, phase: PhaseLoiBinomiale): ChampDef[] {
-  if (phase === "cEcran1") return [champTexte("Inéquation posée (en n) =", exempleInequationPoseeC(e))];
-  if (phase === "cEcran2") return [champTexte("Inéquation isolée (en n) =", exempleInequationIsoleeC(e))];
-  return [champTexte("n (nombre minimal d'épreuves) =", "ex : 22")];
-}
-
-export function niveauAideMaxC(phase: PhaseLoiBinomiale): number {
-  return phase === "cEcran3" ? 2 : 0;
-}
-
-export function aideNiveau1C(phase: PhaseLoiBinomiale): AideAvecLatex {
-  if (phase !== "cEcran3") return AUCUNE_AIDE;
-  return { texte: "Diviser (ou multiplier) une inégalité par un nombre négatif en inverse le sens. Ici, ln(1−p) est toujours négatif car 0<1−p<1.", latex: "\\ln(1-p)<0" };
-}
-
-export function aideNiveau2C(e: ExerciceLoiBinomialeC, phase: PhaseLoiBinomiale): AideAvecLatex {
-  if (phase !== "cEcran3") return AUCUNE_AIDE;
-  const v = Math.log(1 - e.seuil) / Math.log(1 - e.p);
-  return {
-    texte: "La division a déjà été effectuée, SANS préciser le sens de l'inégalité ni arrondir (à toi de déterminer le sens correct, puis d'arrondir au nombre entier supérieur) :",
-    latex: `n \\approx ${v.toFixed(3)}`,
-  };
-}
-
-// ============================================================================
-// Dispatch commun.
-// ============================================================================
-
-export function consigneGenerale(exercice: ExerciceLoiBinomiale): FragmentConsigne[] {
-  if (exercice.famille === "A") return consigneGeneraleA();
-  if (exercice.famille === "B") return consigneGeneraleB();
-  return consigneGeneraleC();
-}
-
-export function blocDonnees(exercice: ExerciceLoiBinomiale): string[] {
-  if (exercice.famille === "A") return blocDonneesA(exercice);
-  if (exercice.famille === "B") return blocDonneesB(exercice);
-  return blocDonneesC(exercice);
-}
-
-export function consigneEcran(exercice: ExerciceLoiBinomiale, phase: PhaseLoiBinomiale): FragmentConsigne[] {
-  if (exercice.famille === "A") return consigneEcranA(phase);
-  if (exercice.famille === "B") return consigneEcranB(exercice, phase);
-  return consigneEcranC(phase);
-}
-
-export function etatActuel(exercice: ExerciceLoiBinomiale, phase: PhaseLoiBinomiale): string[] | null {
-  if (exercice.famille === "A") return etatActuelA(exercice, phase);
-  if (exercice.famille === "B") return etatActuelB(exercice, phase);
-  return etatActuelC(exercice, phase);
-}
-
-export function champsEcran(exercice: ExerciceLoiBinomiale, phase: PhaseLoiBinomiale): ChampDef[] {
-  if (exercice.famille === "A") return champsA(exercice, phase);
-  if (exercice.famille === "B") return champsB(exercice, phase);
-  return champsC(exercice, phase);
-}
-
-export function niveauAideMaxEcran(exercice: ExerciceLoiBinomiale, phase: PhaseLoiBinomiale): number {
-  if (exercice.famille === "A") return niveauAideMaxA(phase);
-  if (exercice.famille === "B") return niveauAideMaxB(phase);
-  return niveauAideMaxC(phase);
-}
-
-export function aideNiveau1(exercice: ExerciceLoiBinomiale, phase: PhaseLoiBinomiale): AideAvecLatex {
-  if (exercice.famille === "A") return aideNiveau1A(phase);
-  if (exercice.famille === "B") return aideNiveau1B(phase);
-  return aideNiveau1C(phase);
-}
-
-export function aideNiveau2(exercice: ExerciceLoiBinomiale, phase: PhaseLoiBinomiale): AideAvecLatex {
-  if (exercice.famille === "A") return aideNiveau2A(phase);
-  if (exercice.famille === "B") return aideNiveau2B(exercice, phase);
-  return aideNiveau2C(exercice, phase);
-}
-
-export const LIBELLE_PHASE: Record<PhaseLoiBinomiale, string> = {
-  aEcran1: "Étape 1 (identifier n et p)",
-  aEcran2: "Étape 2 (conditions de Bernoulli)",
-  bTermeUniqueEcran1: "Étape 1 (stratégie + terme à calculer)",
-  bTermeUniqueEcran2: "Étape 2 (calcul du terme)",
-  bTermeUniqueEsperance: "Étape supplémentaire (espérance E(X))",
-  bSommeEcran1: "Étape 1 (stratégie + termes à calculer)",
-  bSommeEcran2: "Étape 2 (calcul des termes)",
-  bSommeEcran3: "Étape 3 (somme des termes)",
-  bSommeEsperance: "Étape supplémentaire (espérance E(X))",
-  bComplementEcran1: "Étape 1 (stratégie + terme à calculer)",
-  bComplementEcran2: "Étape 2 (calcul du terme)",
-  bComplementEcran3: "Étape 3 (complément)",
-  bComplementEsperance: "Étape supplémentaire (espérance E(X))",
-  cEcran1: "Étape 1 (inéquation posée)",
-  cEcran2: "Étape 2 (inéquation isolée)",
-  cEcran3: "Étape 3 (résolution par logarithme)",
-};
-
-export const LIBELLE_FAMILLE: Record<FamilleLoiBinomiale, string> = {
-  A: "A — Justifier la loi binomiale",
-  B: "B — Calculs directs",
-  C: "C — Trouver n via logarithme",
-};
-
-/** Récapitulatif final : affiche toujours la réponse CORRECTE connue de l'exercice — jamais
- * recalculée depuis la saisie élève. */
-export function formatReponseAttenduePhaseLatex(exercice: ExerciceLoiBinomiale, phase: PhaseLoiBinomiale): string[] {
-  if (exercice.famille === "A") {
-    if (phase === "aEcran1") return [`n=${exercice.n}`, `p=${formatFraction(exercice.p)}`];
-    return [`\\text{Les 4 conditions sont réunies (Vrai)}`];
-  }
-  if (exercice.famille === "B") {
-    if (estEcran1B(phase)) {
-      const termes = exercice.termesACalculer.map((k) => `k=${k}`).join(",\\ ");
-      return [...decouperEnFragmentsTexte(LIBELLE_STRATEGIE[exercice.strategie]), termes];
+    return l[p];
+  },
+  messageCible(e, p, valeurs) {
+    if (e.famille === "B" && p === "bLoi") {
+      for (let k = 1; k < e.n; k++) {
+        const sansC = versNombre(probabiliteBinomiale(e.n, e.p, k)) / Number(combinaisonBig(e.n, k));
+        if (vautEnviron(valeurs[k] ?? "", sansC)) return f("Il manque le coefficient $C_n^k$ : il compte les ordres possibles des succès.");
+      }
+      return null;
     }
-    if (estEcran2B(phase)) return exercice.termesACalculer.map((k, i) => `P(X=${k})=${formatDecimalExact(exercice.valeursTermes[i])}`);
-    if (estEcran3B(phase)) return [formatDecimalExact(exercice.resultatFinal)];
-    return [`E(X)=${formatEsperanceFraction(exercice.n, exercice.p)}`, "\\text{Nombre moyen de succès attendu}"];
-  }
-  if (phase === "cEcran1") return [formatInequationPoseeC(exercice)];
-  if (phase === "cEcran2") return [formatInequationIsoleeC(exercice)];
-  return [`n=${exercice.valeurN}`];
-}
+    if (e.famille === "B" && p === "bEV") {
+      const { E } = esperanceEtVariance(e.n, e.p);
+      if (vautEnviron(valeurs[1] ?? "", E)) return f("$V(X)$ n'est pas égale à $E(X)$ : $V(X)=n\\,p\\,(1-p)$.");
+      return null;
+    }
+    if (e.famille === "B" && p === "bSigma") {
+      const { V } = esperanceEtVariance(e.n, e.p);
+      if (vautEnviron(valeurs[0] ?? "", V) || vautEnviron(valeurs[0] ?? "", V * V)) return [t("L'écart-type est la racine carrée de la variance.")];
+      return null;
+    }
+    if (e.famille === "C" && (p === "cInequation" || p === "cIsole")) {
+      if (inequationInverse(valeurs[0] ?? "", referenceC(e), frontiereC(e.p, e.seuil))) return p === "cIsole" ? f("Le sens est inversé : $\\ln(1-p)$ est négatif, et diviser par un nombre négatif change le sens de l'inégalité.") : [t("Le sens est inversé : la probabilité doit dépasser le seuil.")];
+      return null;
+    }
+    if (e.famille === "C" && p === "cN" && (valeurs[0] ?? "").replace(/\D/g, "") === String(e.valeurN - 1)) return [t("Pour ce nombre, la probabilité ne dépasse pas encore le seuil : prends l'entier suivant.")];
+    return null;
+  },
+};
 
-export type { ExerciceLoiBinomialeA, ExerciceLoiBinomialeB, ExerciceLoiBinomialeC };

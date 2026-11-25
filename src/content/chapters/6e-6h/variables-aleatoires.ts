@@ -559,11 +559,29 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'entrainement',
           title: 'Variables aléatoires discrètes et espérance',
           generatorId: '6gen49',
-          description: [
-            "Construis une loi de probabilité, calcule son espérance, juge un jeu (favorable, équitable ou défavorable) et reconnais des événements contraires.",
-          ],
+          description: ["Calcule des probabilités sur une loi donnée, reconnais des événements contraires, construis une loi, calcule l'espérance et juge un jeu."],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 49. Variables aléatoires discrètes et espérance »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Variance et écart-type d\'une loi discrète',
+          generatorId: '6gen110',
+          description: [
+            "Calcule l'espérance, E(X²), puis la variance par la formule de König et l'écart-type ; ou compare deux jeux de même espérance : lequel est le plus risqué ?",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 110. Variance et écart-type d\'une loi discrète »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Transformation affine Y = aX + b',
+          generatorId: '6gen111',
+          description: [
+            "Conversion de devise ou de température, mise retranchée, prime qui diminue : écris Y = aX + b, puis calcule E(Y), V(Y) et σ(Y) sans reconstruire la loi.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 111. Transformation affine Y = aX + b »',
         },
       ],
     },
@@ -892,9 +910,7 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'entrainement',
           title: 'Loi binomiale',
           generatorId: '6gen50',
-          description: [
-            'Reconnais un schéma de Bernoulli, établis la loi binomiale complète, son espérance, sa variance et son écart-type, et résous un « trouver n ».',
-          ],
+          description: ['Reconnais un schéma de Bernoulli (ou la condition qui échoue), construis la loi complète avec son diagramme, calcule E, V et σ, et résous un « trouver n ».'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 50. Loi binomiale »',
         },
@@ -1091,6 +1107,26 @@ export const variablesAleatoires: ChapterContent = {
           text:
             "Tu as déjà rencontré la moyenne et l'écart-type d'une série de données, en statistique descriptive. L'idée ne change pas ici : $E(X)$ reste une moyenne, $\\sigma(X)$ reste une mesure de dispersion autour de cette moyenne. Seul l'outil de calcul change — une somme devient une intégrale, parce que $X$ prend maintenant toutes les valeurs d'un intervalle, qu'on ne peut plus énumérer.",
         },
+        {
+          kind: 'entrainement',
+          title: 'Fonction de répartition',
+          generatorId: '6gen112',
+          description: [
+            "Construis l'escalier d'une loi discrète et calcule des probabilités d'intervalles (attention aux bornes), ou reconnais la fonction de répartition d'une variable continue, puis P(X ≤ a), P(a < X < b) et la densité f = F′.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 112. Fonction de répartition »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Densité de probabilité',
+          generatorId: '6gen113',
+          description: [
+            "Trouve k pour que l'aire sous la densité vaille 1, puis calcule des probabilités comme des aires (densité tracée) ou par une primitive, et l'espérance.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 113. Densité de probabilité »',
+        },
       ],
     },
     {
@@ -1170,6 +1206,16 @@ export const variablesAleatoires: ChapterContent = {
               ],
             },
           ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Discrète ou continue ?',
+          generatorId: '6gen114',
+          description: [
+            "Classe la variable d'une situation (on compte ou on mesure exactement ?), donne l'ensemble de ses valeurs, puis l'outil de calcul : somme des P(X = k) ou intégrale d'une densité.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 114. Discrète ou continue ? »',
         },
       ],
     },
@@ -1298,6 +1344,16 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'piege',
           text: "La variance de la loi uniforme est $\\dfrac{(b-a)^2}{12}$, avec le **carré** : $\\dfrac{b-a}{12}$ n'a même pas la bonne unité (des minutes au lieu de minutes au carré). Et pour un intervalle qui déborde de $[a\\,;b]$, on coupe d'abord aux bornes : une probabilité ne dépasse jamais 1.",
+        },
+        {
+          kind: 'entrainement',
+          title: 'Loi uniforme continue',
+          generatorId: '6gen115',
+          description: [
+            "Bus, livreur, panne sur un câble : densité, probabilité (même quand l'intervalle déborde), E(X), V(X) et σ(X) ; ou retrouve a et b à partir de E(X) et V(X).",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 115. Loi uniforme continue »',
         },
       ],
     },
@@ -1700,9 +1756,7 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'entrainement',
           title: 'Loi normale',
           generatorId: '6gen51',
-          description: [
-            'Standardise, lis la table de Φ (directement, par symétrie ou à l\'envers) et retrouve une valeur de x à partir d\'une proportion.',
-          ],
+          description: ["Standardise, écris la probabilité avec Φ, lis la table (consultable à l'écran) dans les deux sens, et applique la règle empirique."],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 51. Loi normale »',
         },
@@ -2001,9 +2055,7 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'entrainement',
           title: 'Extensions binomiale, normale et Bayes',
           generatorId: '6gen52',
-          description: [
-            'Combine des épreuves composées (« trouver n »), le théorème de Bayes à 3 catégories et l\'espérance appliquée à une population.',
-          ],
+          description: ["Épreuves composées et « trouver n », théorème de Bayes à trois catégories, loi reconstruite et espérance appliquée."],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 52. Extensions binomiale, normale et Bayes »',
         },
@@ -2349,9 +2401,7 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'entrainement',
           title: 'Loi de Poisson',
           generatorId: '6gen53',
-          description: [
-            "Vérifie les conditions de l'approximation binomiale → Poisson, ajuste λ à l'échelle de la question et calcule une probabilité de Poisson.",
-          ],
+          description: ["Juge si l'approximation binomiale→Poisson est permise, ajuste λ à l'échelle de la question et calcule des probabilités de Poisson."],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 53. Loi de Poisson »',
         },

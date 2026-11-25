@@ -1024,6 +1024,10 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     ],
   },
   "6gen104": simple(String.raw`(?<ligne>[^\n]+)\nCalcule ce nombre en justifiant par la méthode des étoiles et des barres\.`, "Dans chaque situation, calcule le nombre demandé en justifiant par la méthode des étoiles et des barres."),
+  // 6e ch. 8, lot H1 (6gen110–6gen115) : la situation est la ligne (6gen111, 6gen114) ; 6gen110, 6gen112,
+  // 6gen113, 6gen115 écartés (tableau, figure ou événements propres à l'instance dans la consigne).
+  "6gen111": simple(String.raw`(?<ligne>[^\n]+)\nÉcris Y sous la forme \$Y=aX\+b\$, puis calcule \$E\(Y\)\$, \$V\(Y\)\$ et \$\\sigma\(Y\)\$ sans chercher la loi de Y\.`, "Dans chaque situation, écris Y sous la forme $Y=aX+b$, puis calcule $E(Y)$, $V(Y)$ et $\\sigma(Y)$ sans chercher la loi de Y."),
+  "6gen114": simple(String.raw`(?<ligne>[^\n]+)\nLa variable X est-elle discrète ou continue \? Donne l'ensemble de ses valeurs possibles, puis dis comment on calcule une probabilité \$P\(a\\leq X\\leq b\)\$ et si \$P\(X=c\)\$ peut être non nulle\. Justifie\.`, "Dans chaque situation, la variable X est-elle discrète ou continue ? Donne l'ensemble de ses valeurs possibles, puis dis comment on calcule une probabilité $P(a\\leq X\\leq b)$ et si $P(X=c)$ peut être non nulle. Justifie."),
   // 6e ch. 7, lot E (6gen43–6gen48) : la situation (avec sa question) est la ligne ; la consigne commune
   // est la consigne globale de l'énoncé papier. Énoncés à vraies questions (6gen45 C, D ; 6gen47 B) : jamais.
   "6gen43": simple(String.raw`(?<ligne>[^\n]+)\nRéponds en justifiant ta démarche\.`, "Dans chaque situation, réponds à la question en justifiant ta démarche."),

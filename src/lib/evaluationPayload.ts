@@ -96,6 +96,7 @@ export type IdGenerateurPilote =
   | '6gen100' | '6gen101' | '6gen102' | '6gen103' | '6gen104'
   | '6gen105' | '6gen106' | '6gen107' | '6gen108' | '6gen109'
   | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
+  | '6gen110' | '6gen111' | '6gen112' | '6gen113' | '6gen114' | '6gen115'
   | '6gen23' | '6gen24' | '6gen25' | '6gen26' | '6gen27' | '6gen28' | '6gen29' | '6gen77' | '6gen84' | '6gen82' | '6gen78' | '6gen80' | '6gen83' | '6gen79' | '6gen81'
   | '6gen34' | '6gen35' | '6gen36' | '6gen37' | '6gen38' | '6gen39' | '6gen40' | '6gen41' | '6gen42' | '6gen93' | '6gen95' | '6gen94' | '6gen97' | '6gen96' | '6gen98' | '6gen99'
   | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
@@ -225,8 +226,14 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'variables-aleatoires', sectionId: 'variablesdiscretes', generatorId: '6gen49', label: '' },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'loibinomiale', generatorId: '6gen50', label: '' },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'loinormale', generatorId: '6gen51', label: '' },
-  { chapitreSlug: 'variables-aleatoires', sectionId: 'extensionsbayes', generatorId: '6gen52', label: '' },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'extensionsbayes', generatorId: '6gen52', label: '', processus: 3 },
   { chapitreSlug: 'variables-aleatoires', sectionId: 'loipoisson', generatorId: '6gen53', label: '' },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'variablesdiscretes', generatorId: '6gen110', label: 'Variance et écart-type d\'une loi discrète (6gen110)', processus: 2 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'variablesdiscretes', generatorId: '6gen111', label: 'Transformation affine Y = aX + b (6gen111)', processus: 2 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'variablecontinue', generatorId: '6gen112', label: 'Fonction de répartition (6gen112)', processus: 2 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'variablecontinue', generatorId: '6gen113', label: 'Densité de probabilité (6gen113)', processus: 2 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'discreteoucontinue', generatorId: '6gen114', label: 'Discrète ou continue ? (6gen114)', processus: 1 },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'loiuniformecontinue', generatorId: '6gen115', label: 'Loi uniforme continue (6gen115)', processus: 2 },
   { chapitreSlug: 'primitives-integrales', sectionId: 'primitives', generatorId: '6gen23', label: '' },
   { chapitreSlug: 'primitives-integrales', sectionId: 'conditioninitiale', generatorId: '6gen24', label: '' },
   { chapitreSlug: 'primitives-integrales', sectionId: 'integralesdefinies', generatorId: '6gen77', label: 'L\'intégrale lue sur un graphique (6gen77)' },

@@ -1,24 +1,23 @@
-import type { ContexteLoiBinomialeA, ExerciceLoiBinomialeA } from "../../core6e/loiBinomiale.types";
-import { tirerParmi } from "./aleatoire";
-import { CONTEXTES_A } from "./contextes";
+import type { ExerciceLoiBinomialeA } from "../../core6e/loiBinomiale.types";
+import { tirerEntier, tirerParmi } from "./aleatoire";
+import { CONTEXTES_A_BINOMIAUX, CONTEXTES_A_NON_BINOMIAUX, virgule } from "./contextes";
 
 /**
- * Couche A (6e) — génération famille A ("Justifier qu'une variable suit une loi binomiale") pour
- * `6gen50`. `n`/`p` restent à IDENTIFIER par l'élève (contrairement à `6gen48`) — voir en-tête
- * `core6e/loiBinomiale.types.ts`.
+ * 6gen50, famille A (audit, G8) : reconnaître un schéma de Bernoulli. Avant, les 4 conditions étaient
+ * TOUJOURS vraies (verdict constant). Le verdict « binomiale ? » est tiré d'abord (50 / 50), puis le
+ * contexte ; un contexte non binomial fait échouer UNE condition. n et p varient (plus de n = 8,
+ * p = 0,2 figés au sélecteur).
  */
 
-export const CANDIDATS_N_A: readonly number[] = [5, 6, 7, 8, 9, 10, 11, 12];
-/** Pourcentages "ronds", lisibles dans une phrase française une fois formatés
- * (`contextes.ts::formatPourcentageMot`). */
-export const CANDIDATS_P_A: readonly number[] = [0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9];
-
-/** Construction déterministe (`n`/`p` fixés) — utilisée par `CATALOGUE_VARIANTES`/
- * `construireAvecVarianteId`. `contexte` optionnel (par défaut tiré au hasard). */
-export function construireFamilleA(n: number, p: number, contexte?: ContexteLoiBinomialeA): ExerciceLoiBinomialeA {
-  return { famille: "A", contexte: contexte ?? tirerParmi(CONTEXTES_A), n, p };
-}
-
-export function genererFamilleA(): ExerciceLoiBinomialeA {
-  return construireFamilleA(tirerParmi(CANDIDATS_N_A), tirerParmi(CANDIDATS_P_A));
+export function construireFamilleA(): ExerciceLoiBinomialeA {
+  const binomiale = Math.random() < 0.5;
+  const n = tirerEntier(5, 20);
+  if (!binomiale) {
+    const c = tirerParmi(CONTEXTES_A_NON_BINOMIAUX);
+    return { famille: "A", texte: c.texte(Math.min(n, 8)), binomiale: false, n: 0, pNum: 0, pDen: 1, condition: c.condition };
+  }
+  const c = tirerParmi(CONTEXTES_A_BINOMIAUX);
+  const p = tirerParmi(c.p);
+  const pTexte = c.ecriture === "pourcent" ? `${p.num} %` : c.ecriture === "decimal" ? virgule(p.num / p.den) : "";
+  return { famille: "A", texte: c.texte(n, pTexte), binomiale: true, n, pNum: p.num, pDen: p.den, condition: null };
 }
