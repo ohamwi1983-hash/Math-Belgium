@@ -213,6 +213,10 @@ export type InteractiveWidgetTag =
   | 'hypergeometrique-binomiale-widget'
   | 'etoiles-barres-widget'
   | 'mains-poker-widget'
+  | 'anagrammes-fusion-widget'
+  | 'table-ronde-collier-widget'
+  | 'mots-binome-widget'
+  | 'approximation-binome-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

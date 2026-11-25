@@ -622,6 +622,17 @@ export const analyseCombinatoire: ChapterContent = {
             "l'erreur la plus fréquente de ce sous-type. Un collier **n'est pas** une simple " +
             'table : la réflexion y ajoute une symétrie supplémentaire à prendre en compte !',
         },
+        {
+          kind: 'atelier',
+          tag: 'table-ronde-collier-widget',
+          label: 'Manipule toi-même : table ronde et collier',
+          caption:
+            'Tourne et retourne une disposition de n personnes ou perles, ou touche-en deux ' +
+            "pour les échanger : le widget dit si c'est encore la même table (ou le même " +
+            'collier) et liste les n files qui se lisent sur une même table. Toutes les ' +
+            'dispositions sont énumérées pour n ≤ 5 : on en compte (n − 1)! pour une table et ' +
+            '(n − 1)! ÷ 2 pour un collier (n ≥ 3). Essaie aussi n = 2 : retourner ne change rien.',
+        },
         { kind: 'subheading', text: 'Combinaison avec répétitions — dernier cas de la classification' },
         {
           kind: 'definition',
@@ -1037,6 +1048,17 @@ export const analyseCombinatoire: ChapterContent = {
             'exactement une permutation simple. Diviser par les factorielles des effectifs ' +
             'répétés ($4!$ pour les I, $4!$ pour les S, $2!$ pour les P) retire précisément les ' +
             'réordonnancements internes des lettres identiques, qui ne produisent aucun mot nouveau.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'anagrammes-fusion-widget',
+          label: 'Manipule toi-même : anagrammes',
+          caption:
+            'Tape un mot : le widget compte ses lettres et calcule n! ÷ (n₁! × n₂! × …), puis ' +
+            'retire le mot de départ pour obtenir les anagrammes (MISSISSIPPI : 34 650 mots, ' +
+            'soit 34 649 anagrammes). Pour un mot court, toutes les permutations sont ' +
+            'affichées avec des lettres identiques numérotées (P₁, P₂) ; rends-les ' +
+            'indiscernables et les permutations qui donnent le même mot fusionnent.',
         },
         { kind: 'subheading', text: 'Lettres groupées : la méthode du bloc' },
         {
@@ -1533,6 +1555,16 @@ export const analyseCombinatoire: ChapterContent = {
             },
           ],
         },
+        {
+          kind: 'atelier',
+          tag: 'mots-binome-widget',
+          label: 'Manipule toi-même : les 2ⁿ mots de (a + b)ⁿ',
+          caption:
+            'Développe (a + b)ⁿ sans réduire : chaque mot de n lettres a ou b dit dans quel ' +
+            'facteur on a pris a ou b. Regroupe les 2ⁿ mots par nombre de b : les colonnes ' +
+            'ont pour hauteurs Cₙ⁰, Cₙ¹, …, Cₙⁿ, la ligne n du triangle de Pascal. Touche ' +
+            'un mot pour voir le terme du développement auquel il contribue.',
+        },
         { kind: 'subheading', text: 'Développer un binôme terme par terme' },
         {
           kind: 'exempleLibre',
@@ -1973,6 +2005,16 @@ export const analyseCombinatoire: ChapterContent = {
             '$1+n\\varepsilon = 2$, alors que $1{,}01^{100} \\approx 2{,}705$. Les termes en ' +
             '$\\varepsilon^2$, $\\varepsilon^3$… ne sont plus négligeables ($C_{100}^2 \\times ' +
             '0{,}01^2 \\approx 0{,}495$ à lui seul).',
+        },
+        {
+          kind: 'atelier',
+          tag: 'approximation-binome-widget',
+          label: 'Manipule toi-même : (1 + ε)ⁿ ≈ 1 + nε',
+          caption:
+            "Règle n et ε : la valeur exacte de (1 + ε)ⁿ, l'approximation 1 + nε et l'erreur " +
+            "s'affichent, avec les premiers termes du développement. Tant que nε est petit, " +
+            'la courbe colle à la droite ; essaie 1,01¹⁰⁰ : 1 + nε = 2, alors que la valeur ' +
+            'exacte vaut environ 2,705.',
         },
         {
           kind: 'entrainement',

@@ -213,6 +213,10 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'hypergeometrique-binomiale-widget': () => import('../../interactive/register-hypergeometrique-binomiale-widget.js'),
   'etoiles-barres-widget': () => import('../../interactive/register-etoiles-barres-widget.js'),
   'mains-poker-widget': () => import('../../interactive/register-mains-poker-widget.js'),
+  'anagrammes-fusion-widget': () => import('../../interactive/register-anagrammes-fusion-widget.js'),
+  'table-ronde-collier-widget': () => import('../../interactive/register-table-ronde-collier-widget.js'),
+  'mots-binome-widget': () => import('../../interactive/register-mots-binome-widget.js'),
+  'approximation-binome-widget': () => import('../../interactive/register-approximation-binome-widget.js'),
 }
 
 /**
