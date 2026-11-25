@@ -240,6 +240,13 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'trois-miroirs-widget': () => import('../../interactive/register-trois-miroirs-widget.js'),
   'dandelin-cone-widget': () => import('../../interactive/register-dandelin-cone-widget.js'),
   'reduire-translation-widget': () => import('../../interactive/register-reduire-translation-widget.js'),
+  'nuage-mayer-widget': () => import('../../interactive/register-nuage-mayer-widget.js'),
+  'moindres-carres-widget': () => import('../../interactive/register-moindres-carres-widget.js'),
+  'quadrants-covariance-widget': () => import('../../interactive/register-quadrants-covariance-widget.js'),
+  'devine-r-widget': () => import('../../interactive/register-devine-r-widget.js'),
+  'point-aberrant-widget': () => import('../../interactive/register-point-aberrant-widget.js'),
+  'jusqu-ou-prevoir-widget': () => import('../../interactive/register-jusqu-ou-prevoir-widget.js'),
+  'changer-unites-widget': () => import('../../interactive/register-changer-unites-widget.js'),
 }
 
 /**

@@ -240,6 +240,13 @@ export type InteractiveWidgetTag =
   | 'trois-miroirs-widget'
   | 'dandelin-cone-widget'
   | 'reduire-translation-widget'
+  | 'nuage-mayer-widget'
+  | 'moindres-carres-widget'
+  | 'quadrants-covariance-widget'
+  | 'devine-r-widget'
+  | 'point-aberrant-widget'
+  | 'jusqu-ou-prevoir-widget'
+  | 'changer-unites-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }
