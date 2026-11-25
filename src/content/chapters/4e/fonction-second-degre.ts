@@ -130,7 +130,7 @@ export const fonctionSecondDegre: ChapterContent = {
       titreCourt: 'Étudier une parabole',
       partie: 'La parabole : la lire, la transformer',
       essentiel: [
-        'Le signe de a donne l\'allure : si $a > 0$, la parabole est ouverte vers le haut et a un **minimum** ; si $a < 0$, elle est ouverte vers le bas et a un **maximum**. c est l\'ordonnée à l\'origine : $f(0) = c$.',
+        'Le signe de a donne l\'allure : si $a > 0$, la parabole est ouverte vers le haut et a un **minimum** ; si $a < 0$, elle est ouverte vers le bas et a un **maximum**. Le terme c est l\'ordonnée à l\'origine : $f(0) = c$.',
         'Le sommet : $x_S = -\\dfrac{b}{2a}$ et $y_S = f(x_S)$ ; l\'axe de symétrie est la droite $x = x_S$. Le domaine est toujours ℝ ; l\'image vaut $[y_S\\,;\\,{+\\infty}[$ si $a > 0$ et $]{-\\infty}\\,;\\,y_S]$ si $a < 0$.',
         'Tableau de signes : à l\'extérieur des zéros, f(x) a le signe de a ; entre les zéros, le signe opposé.',
       ],

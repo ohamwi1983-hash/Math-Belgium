@@ -7,6 +7,9 @@ paths:
   - "src/lib/katexAccessible.ts"
   - "src/entrainement/components/KatexAccessible.tsx"
   - "scripts/*lecture-formules*"
+  - "src/lib/lienChapitre.ts"
+  - "src/lib/prerequisChapitre.ts"
+  - "scripts/verifier-liens-chapitres.mjs"
 ---
 
 # Conventions de rédaction du contenu (`ChapterContent`)

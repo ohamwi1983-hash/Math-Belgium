@@ -2204,7 +2204,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         { question: 'Sommet et p de $(y-3)^2 = 4(x+1)$ ?', reponse: 'S(−1 ; 3) et $2p = 4$, donc $p = 2$ (axe horizontal).' },
       ],
       utilise: [
-        { cible: '4e/fonction-second-degre#etudier', poids: 'utile', rappel: 'Le signe de a donne l\'allure : si $a > 0$, la parabole est ouverte vers le haut et a un **minimum** ; si $a < 0$, elle est ouverte vers le bas et a un **maximum**. c est l\'ordonnée à l\'origine : $f(0) = c$.' },
+        { cible: '4e/fonction-second-degre#etudier', poids: 'utile', rappel: 'Le signe de a donne l\'allure : si $a > 0$, la parabole est ouverte vers le haut et a un **minimum** ; si $a < 0$, elle est ouverte vers le bas et a un **maximum**. Le terme c est l\'ordonnée à l\'origine : $f(0) = c$.' },
       ],
       blocks: [
         { kind: 'video', title: 'La parabole : foyer, directrice, équation et construction au compas', youtubeId: 'C8pnTijgKro' },

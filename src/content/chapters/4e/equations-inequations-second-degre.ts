@@ -875,7 +875,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         { question: 'Dans $]-2;3]$, quelles bornes sont incluses ?', reponse: 'Seulement 3 : −2 est exclu (crochet ouvert vers l\'intérieur).' },
       ],
       utilise: [
-        { cible: '4e/fonction-second-degre#etudier', poids: 'utile', rappel: 'Le signe de a donne l\'allure : si $a > 0$, la parabole est ouverte vers le haut et a un **minimum** ; si $a < 0$, elle est ouverte vers le bas et a un **maximum**. c est l\'ordonnée à l\'origine : $f(0) = c$. Tableau de signes : à l\'extérieur des zéros, f(x) a le signe de a ; entre les zéros, le signe opposé.' },
+        { cible: '4e/fonction-second-degre#etudier', poids: 'utile', rappel: 'Le signe de a donne l\'allure : si $a > 0$, la parabole est ouverte vers le haut et a un **minimum** ; si $a < 0$, elle est ouverte vers le bas et a un **maximum**. Le terme c est l\'ordonnée à l\'origine : $f(0) = c$. Tableau de signes : à l\'extérieur des zéros, f(x) a le signe de a ; entre les zéros, le signe opposé.' },
       ],
       blocks: [
         { kind: 'video', title: 'Étudier le signe d\'un trinôme', youtubeId: 'gZ82w5l4vWQ' },

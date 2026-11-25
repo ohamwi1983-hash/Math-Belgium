@@ -6504,3 +6504,34 @@ nuage de sens inversé, pas de 2,5 de la grue arrondi à l'affichage (pas de 5),
 équations, prévision de x négative (série de l'espérance de vie), écran « associer » de 5gen76 : la planche des
 quatre nuages était illisible sous le bandeau replié (nuage de l'écran seul, en grand), points posés sur un axe ou sur
 la brisure (marges), tableau de 9 colonnes à en-tête long qui débordait dans l'aménagée (coupé en deux blocs).
+
+## Tous niveaux — Chapitres autonomes : renvois nommés, « Ce chapitre utilise… », « Je bloque » (25/11/2026)
+
+Décision du professeur (« ok pour tout », carte des prérequis validée — dossier de travail `carte-prerequis/` :
+`renvois.json`, `prerequis.json`, `carte.html`) : chaque chapitre se lit seul, quel que soit l'ordre suivi en classe.
+Mécanismes : `content-authoring.md`, « Chapitres autonomes » ; composants : `chapter-components.md` (`Prerequis.tsx`) ;
+« Je bloque » : `cote-eleve.md`.
+- **Renvois chiffrés réécrits** (111 = 103 du cours dans 20 fichiers + 8 hors du cours) : retrouvés par leur TEXTE
+  (le 4e ch. 8 avait changé depuis la carte ; numéros de ligne décalés), 92 automatiquement, 19 à la main (phrases
+  coupées entre deux littéraux). 87 liens nommés `[[…]]` au final ; champs bruts (libellés, sous-titres, étiquettes,
+  chapeaux) : nom en clair ou renvoi retiré. Phrases relues et retouchées : début de phrase sans « « Titre », étape n »
+  sujet (« En probabilités ([[…]]), elle sert… », « Les exponentielles ([[…]]) donnent directement… », « Cette bascule
+  sert déjà à comparer deux exponentielles… ([[…]]) »), « Le quiz de la fonction du second degré ([[…#revision]]) »,
+  libellé « Tu connais déjà ça » → « La parabole, point de départ » (4e ch. 3, faux si ce chapitre passe en premier),
+  liens sortis du gras (`**binôme de Newton** ([[…]])`). Hors du cours : corrigés de gen24/25/26 (« (voir « Équations
+  et inéquations du second degré », étape 1) »), grille de gen80, deux justifications du quiz 6gen66, deux énoncés de
+  démonstration de `evaluationPayload.ts` (titres et clés inchangés), et les sous-titres des quiz 6gen64–72
+  (« révision complète du chapitre « Fonctions logarithmes » », comme 6gen73).
+- **Points de la carte corrigés** : synthèse des Suites (« le prochain chapitre relie les suites aux limites », faux)
+  → « Les limites de fonctions ([[5e-4h/limites-asymptotes]]) prolongent cette idée de convergence » ; le lien
+  Probabilités → Logarithmes est `utile` (il l'était déjà dans les données de la carte, gardé tel quel).
+- **Champ `utilise`** rempli depuis `prerequis.json` : 99 entrées (44 indispensables) dans 65 étapes de 15 chapitres
+  (31 étapes avec « Cette étape utilise »), 78 rappels distincts (aucun identique mot pour mot à « L'essentiel » de
+  l'étape citée : tous gardés en `rappel`). Décisions : binôme de Newton rappelé dans « Formule de Moivre » (6e ch. 5),
+  logarithmes avant exponentielles (rappels dans les 5 étapes concernées), calcul vectoriel avant le cercle
+  trigonométrique (rappel dans « La résultante »), gen24–26 : `jeBloque` sur les entrées `utile` du second degré.
+  Acquis des années précédentes non listés (décision 5).
+- **Contrôle au build** `scripts/verifier-liens-chapitres.mjs` (dans `npm run build`, après
+  `verifier-enonces-evaluation.mjs`) : liens résolus, aucun lien dans un champ brut ni dans un gras, entrées `utilise`
+  valides, aucun renvoi chiffré dans les chapitres et les questions « Formule ». Avant réécriture : 99 textes en
+  défaut ; après : 0.

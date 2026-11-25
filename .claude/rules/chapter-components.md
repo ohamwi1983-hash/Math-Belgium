@@ -84,6 +84,23 @@ Composants :
 - `ReviserVue.tsx` — « Teste-toi » (champ `cartes`, « à revoir » remises en fin de paquet), « La fiche
   du chapitre » (une ligne par `essentiel`), liens vers synthèse / formulaire / quiz / impression
   (rendus ensuite par `ChapterPage`, visibles dans l'onglet Réviser).
+- `Prerequis.tsx` (chapitres autonomes, 25/11/2026 ; données : champ `utilise` des sections, voir
+  `content-authoring.md`, « Chapitres autonomes ») — `CeChapitreUtilise` : sur la CARTE, après les onglets
+  et avant « Avant de commencer », encadré REPLIÉ (`button` + `aria-expanded`, ≥ 52 px) « Ce chapitre
+  utilise… · n étapes de k autres chapitres » ; déplié : une phrase d'explication, puis par chapitre cité
+  (titre = lien vers sa carte, année entre parenthèses si autre année) une ligne par étape citée (lien
+  « Étape n · titre court » ≥ 44 px, même onglet — on est sur la carte, rien à perdre ; « indispensable » /
+  « utile · pour l'étape 3, 5 »). Classe `.ce-chapitre-utilise` ajoutée aux listes « ce que chaque vue
+  montre » (carte seulement). `EtapeUtilise` : dans le corps de l'étape, juste sous « L'essentiel », pour les
+  entrées `indispensable` seulement : « Cette étape utilise » puis une ligne-bouton par prérequis (titre
+  court + « « Chapitre », étape n », pastille « Rappel » / « Fermer », ≥ 48 px) qui déplie SUR PLACE le
+  rappel (`rappel`, sinon « L'essentiel » de l'étape citée) et « Revoir l'étape (nouvel onglet) » — nouvel
+  onglet choisi pour ne pas perdre la lecture de l'étape en cours. Résolution : `lib/prerequisChapitre.ts`
+  (`resoudreUtilise`, `phrasesRappel`, `prerequisJeBloque`). Les deux sont `no-export` (ni impression ni
+  export HTML), jetons du site seulement (clair, sombre, thèmes du panneau « Aa »).
+- Liens nommés `[[niveau/slug#section]]` dans le texte (`Math.tsx::LienChapitre`, React Router `Link`) :
+  `ChapterRoute` donne `key={path}` à `ChapterPage`, qui se remonte donc en changeant de chapitre (haut de
+  page, état de la carte remis à zéro).
 - `src/lib/parcoursChapitre.ts` — progression et cartes en `localStorage` (clés
   `parcours:{niveau}/{slug}`, `cartes:{niveau}/{slug}`, try/catch partout, rien envoyé au serveur),
   `dureeEtape`, `titreCourt`. Clé GLOBALE `parcours:derniere-etape` (`{ "4e": { chapitre, section,
