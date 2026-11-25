@@ -211,6 +211,15 @@ export const statistiqueDeuxVariables: ChapterContent = {
           label: 'Axes inversés ou nuage écrasé',
           text: R`Si tu mets la note en abscisse et les heures en ordonnée, la droite que tu traceras ensuite prévoira les heures à partir de la note, ce n'est pas la question. Et un repère gradué de $0$ à $20$ pour des notes qui vont de $8$ à $15$ écrase le nuage dans une bande étroite : on ne voit plus sa forme. Choisis les graduations d'après les données.`,
         },
+        // Lot H1 (générateurs) : carte en FIN de section.
+        {
+          kind: 'entrainement',
+          title: 'Point moyen et valeurs manquantes',
+          generatorId: '5gen77',
+          description: ['Calcule le point moyen G d\'une série, retrouve une ou deux valeurs effacées connaissant G, puis écris la droite de Mayer à partir de G₁ et G₂ et fais des prévisions dans les deux sens.'],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 77. Point moyen et valeurs manquantes »',
+        },
       ],
     },
     // ═══════════════════════════════════════════════════════════════════════════════════════════
@@ -395,6 +404,15 @@ export const statistiqueDeuxVariables: ChapterContent = {
           label: 'Une prévision lointaine aussi sûre qu’une prévision au milieu',
           text: R`Plus la valeur de $x$ est loin des données, plus la prévision est incertaine : une petite erreur sur la pente se multiplie par la distance, et la relation elle-même peut changer (le chauffage s'arrête en été, une croissance finit par ralentir). Une extrapolation se donne toujours avec une réserve.`,
         },
+        // Lot H1 (générateurs) : carte en FIN de section.
+        {
+          kind: 'entrainement',
+          title: 'Lire un nuage de points',
+          generatorId: '5gen76',
+          description: ['Sur un nuage dessiné : y a-t-il une relation ? De quelle forme (affine, en arc, qui décolle) et dans quel sens ? Juge l\'intensité à l\'œil, puis associe quatre nuages à leur coefficient de corrélation.'],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 76. Lire un nuage de points »',
+        },
       ],
     },
     // ═══════════════════════════════════════════════════════════════════════════════════════════
@@ -565,6 +583,15 @@ export const statistiqueDeuxVariables: ChapterContent = {
           kind: 'piege',
           label: 'Le premier et le dernier point au lieu des points moyens',
           text: R`La droite qui joint le premier et le dernier point du nuage n'est pas la droite de Mayer : elle ne dépend que de deux mesures. La droite de Mayer passe par les **points moyens** $G_1$ et $G_2$, qui ne sont en général pas des points du nuage.`,
+        },
+        // Lot H1 (générateurs) : carte en FIN de section.
+        {
+          kind: 'entrainement',
+          title: 'Droite de Mayer',
+          generatorId: '5gen36',
+          description: ['Range les données, partage-les en deux groupes (n pair ou impair), calcule G₁, G₂, la pente et l\'équation, vérifie que la droite passe par G, puis fais une prévision. Le nuage se complète écran après écran.'],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 36. Droite de Mayer »',
         },
       ],
     },
@@ -772,6 +799,15 @@ export const statistiqueDeuxVariables: ChapterContent = {
           kind: 'piege',
           label: 'Arrondir a trop tôt, ou échanger x̄ et ȳ dans b',
           text: R`$b = \bar{y} - a\bar{x}$, et pas $\bar{x} - a\bar{y}$ : c'est la condition « la droite passe par $G$ », $\bar{y} = a\bar{x} + b$. Et, comme pour Mayer, on calcule $b$ avec la pente non arrondie : avec $\bar{x} = 133{,}75$, arrondir $a$ de $0{,}0267003$ à $0{,}03$ décale $b$ de près de $0{,}44$.`,
+        },
+        // Lot H1 (générateurs) : carte en FIN de section.
+        {
+          kind: 'entrainement',
+          title: 'Droite des moindres carrés',
+          generatorId: '5gen37',
+          description: ['À la main sur une petite série (point moyen, tableau des écarts, pente, ordonnée à l\'origine, prévision) ou à la calculatrice sur une série réelle (a et b arrondis, prévisions dans les deux sens).'],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 37. Droite des moindres carrés »',
         },
         {
           kind: 'entrainement',
@@ -993,6 +1029,15 @@ export const statistiqueDeuxVariables: ChapterContent = {
           kind: 'piege',
           label: 'Un r plus grand que 1',
           text: R`Un coefficient comme $r = 1{,}3$ est impossible (démonstration ci-dessus) : il trahit une erreur de calcul, souvent $S_x$ pris à la place de $\sigma_x$, une covariance mal calculée ou une racine oubliée.`,
+        },
+        // Lot H1 (générateurs) : carte en FIN de section.
+        {
+          kind: 'entrainement',
+          title: 'Covariance et coefficient de corrélation',
+          generatorId: '5gen38',
+          description: ['Calcule la covariance par les deux formules, les écarts-types σx et σy (sans les confondre avec Sx et Sy), puis r ; interprète le sens et l\'intensité de la corrélation avec le tableau du cours.'],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 38. Covariance et coefficient de corrélation »',
         },
       ],
     },

@@ -1174,4 +1174,19 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
       },
     ],
   },
+  // 5e ch. 6, lot H1 : 5gen76 « forme » et « intensité » (la figure est la ligne) ; écartés : 5gen76
+  // « associer » (coefficients dans la consigne), 5gen77, 5gen36, 5gen37, 5gen38 (série de données propre
+  // à chaque instance, comme gen31 / gen33).
+  "5gen76": fig(
+    {
+      motif: re(String.raw`Observe le nuage de points ci-dessous\.\nY a-t-il une relation entre x et y \? Si oui, quelle fonction pourrait ajuster ce nuage \(affine, du second degré ou exponentielle\), et comment y varie-t-il quand x augmente \? Justifie\.`),
+      consigne: "Pour chaque nuage de points ci-dessous, dis s'il y a une relation entre x et y ; si oui, quelle fonction pourrait l'ajuster (affine, du second degré ou exponentielle) et comment y varie quand x augmente. Justifie.",
+      ligne: () => "",
+    },
+    {
+      motif: re(String.raw`Observe le nuage de points ci-dessous : il justifie un ajustement affine\.\nDonne le sens \(positive ou négative\) et l'intensité \(forte, moyenne, faible ou nulle\) de la corrélation entre x et y\. Justifie\.`),
+      consigne: "Chaque nuage de points ci-dessous justifie un ajustement affine. Pour chacun, donne le sens (positive ou négative) et l'intensité (forte, moyenne, faible ou nulle) de la corrélation entre x et y. Justifie.",
+      ligne: () => "",
+    },
+  ),
 };

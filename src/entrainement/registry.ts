@@ -304,6 +304,12 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '5gen79': entree(CH_5E_STATISTIQUE_DEUX_VARIABLES, () => import('./5e-4h/App5gen79').then((m) => ({ default: m.App5gen79 }))),
   '5gen80': entree(CH_5E_STATISTIQUE_DEUX_VARIABLES, () => import('./5e-4h/App5gen80').then((m) => ({ default: m.App5gen80 }))),
   '5gen81': entree(CH_5E_STATISTIQUE_DEUX_VARIABLES, () => import('./5e-4h/App5gen81').then((m) => ({ default: m.App5gen81 }))),
+  // --- 5e, chapitre 6 : Statistique à deux variables (lot H1) ---
+  '5gen76': entree(CH_5E_STATISTIQUE_DEUX_VARIABLES, () => import('./5e-4h/App5gen76').then((m) => ({ default: m.App5gen76 }))),
+  '5gen77': entree(CH_5E_STATISTIQUE_DEUX_VARIABLES, () => import('./5e-4h/App5gen77').then((m) => ({ default: m.App5gen77 }))),
+  '5gen36': entree(CH_5E_STATISTIQUE_DEUX_VARIABLES, () => import('./5e-4h/App5gen36').then((m) => ({ default: m.App5gen36 }))),
+  '5gen37': entree(CH_5E_STATISTIQUE_DEUX_VARIABLES, () => import('./5e-4h/App5gen37').then((m) => ({ default: m.App5gen37 }))),
+  '5gen38': entree(CH_5E_STATISTIQUE_DEUX_VARIABLES, () => import('./5e-4h/App5gen38').then((m) => ({ default: m.App5gen38 }))),
 
   // --- 6e, chapitre 1 : Fonctions réciproques & cyclométriques ---
   '6gen1': entree(CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES, () => import('./6e-6h/App6gen1').then((m) => ({ default: m.App6gen1 }))),
