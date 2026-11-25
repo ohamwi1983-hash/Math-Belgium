@@ -154,8 +154,8 @@ function dessinPrisme(): Dessin {
   return { base, dessus, reference: dessus, sommet: null };
 }
 
-/** Arête latérale p déplacée : vers un faux sommet (tronc) ou penchée (prisme). */
-function deplacer(d: Dessin, variante: VarianteRealiteIllusion, sens: "haut" | "bas", p: number): Point3D[] {
+/** Arête latérale p déplacée : sommet du dessus glissé (tronc) ou arête penchée (prisme). */
+function deplacer(d: Dessin, variante: VarianteRealiteIllusion, p: number): Point3D[] {
   const b = d.base[p]!;
   const dessus = [...d.dessus];
   if (variante === "tronc") {
@@ -217,7 +217,7 @@ function essai(variante: VarianteRealiteIllusion, verdict: VerdictRealiteIllusio
 }
 
 function construire(variante: VarianteRealiteIllusion, verdict: VerdictRealiteIllusion, sens: "haut" | "bas", d: Dessin, p: number | null): ExerciceRealiteIllusion | null {
-  const dessus = p === null ? d.dessus : deplacer(d, variante, sens, p);
+  const dessus = p === null ? d.dessus : deplacer(d, variante, p);
   const solide = solideDe(d.base, dessus);
   const reference = solideDe(d.base, d.reference);
   if (cleVisibilite(solide) !== cleVisibilite(reference)) return rejet("visibilite");

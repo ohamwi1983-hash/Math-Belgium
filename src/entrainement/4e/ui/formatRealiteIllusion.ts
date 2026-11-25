@@ -188,7 +188,10 @@ export function figureRI(e: E, mode: ModeFigureEspace, etape: number): string {
     for (const p of e.points) marques.push({ position: p.position, couleur: p.nom === "S" ? COULEUR_CONSTRUCTION : COULEUR_DROITE, label: p.nom });
   }
   const cadre: Point3D[] = e.prolongements.flat();
-  return figureEspaceSvg({ mode, solide: e.solide, cadre, aretes, segments, marques, ariaLabel: "Solide ABCDEF en perspective cavalière" });
+  const svg = figureEspaceSvg({ mode, solide: e.solide, cadre, aretes, segments, marques, ariaLabel: "Solide ABCDEF en perspective cavalière" });
+  // Papier : largeur annoncée de 300 px (au lieu de 380) — un groupe a), b), c) en imprime deux par
+  // rangée (seuil 316 px de `rangsDesFigures`), place gardée au-dessus du solide pour les prolongements.
+  return mode === "papier" ? svg.replace("<svg viewBox=", '<svg width="300" height="240" viewBox=').replace("max-width:380px", "max-width:300px") : svg;
 }
 
 export function figureEcranRI(e: E, ctx: { ecran: number; clos: boolean }): string {

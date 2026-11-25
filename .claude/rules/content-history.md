@@ -2639,6 +2639,13 @@ paths:
   la main, rotation au doigt) — `cavaliere-reglage-widget` (§ 1), `positions-cube-widget` (§ 3–4,
   défi), `trois-plans-widget` (§ 6), `section-cube-widget` (§ 9), `fenetre-durer-widget` (§ 10),
   `point-de-fuite-widget` (§ 11), `ombre-soleil-lampe-widget` (§ 12).
+  **Manuel, chantier A (25/11)** : nouveau générateur gen135 « Réalité ou illusion ? » (exercice 1 du manuel,
+  processus 3) — carte « S'entraîner » ajoutée en § 6 `trois-plans`, juste après celle de gen101 (description en
+  texte brut) ; aucun autre changement du cours (la description de la section n'a pas été touchée : le § 6 énonce
+  déjà le théorème, et le § 1 dit que la cavalière projette parallèlement). Registres (`registry.ts`,
+  `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts` : union + pilote `trois-plans`,
+  processus 3 ; `regroupementsPapier.ts`). Détail : `.claude/rules/feuilles-evaluations.md`, « 4e ch. 8, manuel —
+  gen135 ».
 
 - **Ateliers — figure épinglée pendant la manipulation (tous chapitres)** : retour utilisateur « les
   curseurs/boutons sont trop éloignés du dessin : en les manipulant, on ne voit plus le graphe ».
