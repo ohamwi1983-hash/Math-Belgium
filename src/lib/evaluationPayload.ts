@@ -103,6 +103,7 @@ export type IdGenerateurPilote =
   | '6gen30' | '6gen31' | '6gen32' | '6gen33' | '6gen74' | '6gen75' | '6gen76'
   | '6gen160' | '6gen161' | '6gen162' | '6gen163'
   | '6gen54' | '6gen55' | '6gen56' | '6gen57'
+  | '6gen123' | '6gen124' | '6gen125' | '6gen126' | '6gen127'
   | '6gen58' | '6gen59' | '6gen60' | '6gen61' | '6gen62' | '6gen63'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen55' | 'gen57' | 'gen10' | 'gen11' | 'gen12' | 'gen13' | 'gen67' | 'gen68' | 'gen69' | 'gen70' | 'gen71' | 'gen72'
   | 'gen113' | 'gen114' | 'gen115' | 'gen116' | 'gen117' | 'gen118' | 'gen119' | 'gen120' | 'gen121' | 'gen122'
@@ -290,6 +291,11 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'lieux-geometriques', sectionId: 'cercles', generatorId: '6gen55', label: '' },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'lieux-elimination', generatorId: '6gen56', label: '' },
   { chapitreSlug: 'lieux-geometriques', sectionId: 'methode-generatrices', generatorId: '6gen57', label: '' },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'methode-generale-demonstration', generatorId: '6gen123', label: 'Démontrer par la géométrie analytique (6gen123)', processus: 3 },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'points-droites-remarquables', generatorId: '6gen124', label: 'Points remarquables et droite d\'Euler (6gen124)', processus: 2 },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'cercles', generatorId: '6gen125', label: 'Reconnaître droites, points et cercles remarquables (6gen125)', processus: 1 },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'cercles', generatorId: '6gen126', label: 'Tangentes et position relative droite–cercle (6gen126)', processus: 2 },
+  { chapitreSlug: 'lieux-geometriques', sectionId: 'lieux-elimination', generatorId: '6gen127', label: 'Quelle est la nature du lieu ? (6gen127)', processus: 1 },
   { chapitreSlug: 'coniques', sectionId: 'identifier', generatorId: '6gen58', label: '' },
   { chapitreSlug: 'coniques', sectionId: 'excentricite', generatorId: '6gen59', label: '' },
   { chapitreSlug: 'coniques', sectionId: 'airefocale', generatorId: '6gen60', label: '' },

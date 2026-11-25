@@ -5940,3 +5940,18 @@ recalcul indépendant : 400 réglages Poisson / binomiale (binomiale par produit
 4,5 σ/√N sur 10 000 parties), 350 cases de table + 190 lectures inverses contre `lib/tablePhi.ts` : 0 faux ; gestes au
 doigt (CDP) : toucher / glisser k, boutons − / +. Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667
 (15 ateliers du chapitre). Scripts et captures : `scratchpad/g2-6e8/`.
+
+## 6e (6h), Chapitre 9 — lot H1 de l'audit (nouveaux générateurs 6gen123–6gen127, 25/11/2026)
+
+Cinq générateurs nouveaux sur le socle `AppEcransTrigo` (détail, profils et mesures : `.claude/rules/feuilles-evaluations.md`,
+section « 6e ch. 9, lot H1 ») : 6gen123 démontrer par la géométrie analytique (§ 3, Transférer), 6gen124 points remarquables
+et droite d'Euler (§ 1), 6gen125 reconnaître droites, points et cercles remarquables (§ 1–§ 2, Connaître), 6gen126 tangentes et
+position relative droite–cercle (§ 2), 6gen127 quelle est la nature du lieu ? (§ 4, Connaître). Cartes « S'entraîner » ajoutées
+en fin de section (6gen124 après 6gen54, 6gen125 et 6gen126 après 6gen55, 6gen123 après l'historique du § 3, 6gen127 après
+6gen56) ; registres par ajout (`registry.ts`, `evaluationAdapterRegistry.ts` avec `versionPapier`, `evaluationPayload.ts` :
+union et entrées pilotes avec processus — les libellés vides de 6gen54–57 laissés aux lots qui les refont —,
+`regroupementsPapier.ts` : 6gen124, 6gen126, 6gen127). Aucun bloc de cours ajouté : le cours ne traite pas encore l'orthocentre,
+le centre du cercle circonscrit, la droite d'Euler ni le cercle des neuf points (6gen124, 6gen125), les cercles exinscrits
+(6gen125), la tangente verticale et la longueur PT par Pythagore (6gen126), l'octogone et les quatre demi-droites comme natures
+(6gen127, la définition « 7 natures » est à corriger par le lot A) — lot F de l'audit.
+

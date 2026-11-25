@@ -538,6 +538,16 @@ export const lieuxGeometriques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 54. Points et droites remarquables du triangle »',
         },
+        {
+          kind: 'entrainement',
+          title: "Points remarquables et droite d'Euler",
+          generatorId: '6gen124',
+          description: [
+            "Calcule le centre de gravité, une médiatrice et une hauteur en forme implicite, le centre du cercle circonscrit et l'orthocentre d'un triangle, puis le centre du cercle des neuf points sur la droite d'Euler.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: "6e (6h) → « 124. Points remarquables et droite d'Euler »",
+        },
       ],
     },
 
@@ -884,6 +894,26 @@ export const lieuxGeometriques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 55. Cercles »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Reconnaître droites, points et cercles remarquables',
+          generatorId: '6gen125',
+          description: [
+            'Sur une figure codée, nomme la droite, le point ou le cercle remarquable tracé, puis la propriété qui le caractérise (point de concours, distances égales, centre).',
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 125. Reconnaître droites, points et cercles remarquables »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Tangentes et position relative droite–cercle',
+          generatorId: '6gen126',
+          description: [
+            "Droite sécante, tangente ou extérieure à un cercle (distance au centre), tangente en un point du cercle, tangentes issues d'un point extérieur — la verticale comprise — et longueur PT.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 126. Tangentes et position relative droite–cercle »',
+        },
       ],
     },
 
@@ -985,6 +1015,16 @@ export const lieuxGeometriques: ChapterContent = {
             alt: 'Portrait de René Descartes',
             caption: 'René Descartes (1596–1650), portrait attribué à Frans Hals, vers 1649.',
           },
+        },
+        {
+          kind: 'entrainement',
+          title: 'Démontrer par la géométrie analytique',
+          generatorId: '6gen123',
+          description: [
+            "Choisis un repère qui ne perd pas la généralité, calcule les coordonnées en lettres, puis établis l'égalité qui prouve la propriété : diagonales du parallélogramme, médianes, Varignon, médiane du triangle rectangle, losange.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 123. Démontrer par la géométrie analytique »',
         },
       ],
     },
@@ -1363,6 +1403,16 @@ export const lieuxGeometriques: ChapterContent = {
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 56. Lieux géométriques et élimination de paramètre »',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Quelle est la nature du lieu ?',
+          generatorId: '6gen127',
+          description: [
+            "Reconnais la nature d'un lieu (vide, point, droite(s), cercle, bande, losange, carré plein, octogone, demi-droites) à partir de sa condition, en comparant au bon seuil, puis donne ses éléments caractéristiques.",
+          ],
+          chantier: '6e-6h',
+          whereLabel: '6e (6h) → « 127. Quelle est la nature du lieu ? »',
         },
       ],
     },

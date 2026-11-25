@@ -537,6 +537,11 @@ import { adaptateurEvaluationPointsDroitesRemarquablesTriangle } from '../entrai
 import { adaptateurEvaluationCercles } from '../entrainement/6e-6h/generateurs6e/cercles/exportEvaluation'
 import { adaptateurEvaluationLieuxGeometriquesParametres } from '../entrainement/6e-6h/generateurs6e/lieuxGeometriquesParametres/exportEvaluation'
 import { adaptateurEvaluationMethodeGeneratrices } from '../entrainement/6e-6h/generateurs6e/methodeGeneratrices/exportEvaluation'
+import { adaptateurEvaluation123 } from '../entrainement/6e-6h/generateurs6e/demontrerAnalytique/exportEvaluation'
+import { adaptateurEvaluation124 } from '../entrainement/6e-6h/generateurs6e/pointsRemarquablesEuler/exportEvaluation'
+import { adaptateurEvaluation125 } from '../entrainement/6e-6h/generateurs6e/reconnaitreRemarquables/exportEvaluation'
+import { adaptateurEvaluation126 } from '../entrainement/6e-6h/generateurs6e/tangentesPositionCercle/exportEvaluation'
+import { adaptateurEvaluation127 } from '../entrainement/6e-6h/generateurs6e/natureLieu/exportEvaluation'
 import { adaptateurEvaluationIdentificationConiques } from '../entrainement/6e-6h/generateurs6e/identificationConiques/exportEvaluation'
 import { adaptateurEvaluationEquationConiqueCaracteristiques } from '../entrainement/6e-6h/generateurs6e/equationConiqueCaracteristiques/exportEvaluation'
 import { adaptateurEvaluationAireExcentriciteConique } from '../entrainement/6e-6h/generateurs6e/aireExcentriciteConique/exportEvaluation'
@@ -676,6 +681,11 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen55': adaptateurEvaluationCercles as unknown as AdaptateurFeuilleExercices<never>,
   '6gen56': adaptateurEvaluationLieuxGeometriquesParametres as unknown as AdaptateurFeuilleExercices<never>,
   '6gen57': adaptateurEvaluationMethodeGeneratrices as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen123': versionPapier(adaptateurEvaluation123) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen124': versionPapier(adaptateurEvaluation124) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen125': versionPapier(adaptateurEvaluation125) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen126': versionPapier(adaptateurEvaluation126) as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen127': versionPapier(adaptateurEvaluation127) as unknown as AdaptateurFeuilleExercices<never>,
   '6gen58': adaptateurEvaluationIdentificationConiques as unknown as AdaptateurFeuilleExercices<never>,
   '6gen59': adaptateurEvaluationEquationConiqueCaracteristiques as unknown as AdaptateurFeuilleExercices<never>,
   '6gen60': adaptateurEvaluationAireExcentriciteConique as unknown as AdaptateurFeuilleExercices<never>,
