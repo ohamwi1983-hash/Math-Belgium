@@ -61,6 +61,8 @@ export interface ExerciceLieuxGeometriquesParametres {
   equationLatex?: string;
   centre?: Pt;
   R?: Q;
+  /** Paramètres tirés (corrigé « comme au tableau » du lot E : nombres de l'énoncé, sans les relire dans les textes). */
+  params: Record<string, number | string | boolean>;
   /** Figure : configuration (avant) et lieu (après la dernière réponse). */
   configuration: ObjetsLieux;
   lieu: ObjetsLieux;

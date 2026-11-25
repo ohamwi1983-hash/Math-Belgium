@@ -5,6 +5,10 @@ import { FORMAT_6GEN56, figure6gen56 } from "./ui6e/formatLieuxGeometriquesParam
 import { AppCombinatoire } from "./components6e/AppCombinatoire";
 import type { ConfigAppCombinatoire } from "./components6e/AppCombinatoire";
 import { FigureLieux } from "./components6e/FigureLieux";
+import { phasesPourExercice } from "./moteur6e/typesLieuxGeometriquesParametres";
+import { correctionDetailleeLieux } from "./generateurs6e/lieuxGeometriquesParametres/corrigeDetaille";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 
 /**
  * `6gen56` — Lieux géométriques et élimination de paramètre (6e ch. 9, § 4 et § 6, processus 2
@@ -26,6 +30,8 @@ const CONFIG: ConfigAppCombinatoire<ExerciceLieuxGeometriquesParametres, PhaseLi
   format: FORMAT_6GEN56,
   complement: (e, _p, closes) => <FigureLieux svg={figure6gen56(e, closes)} />,
   pucesAvantPremierEcran: (e) => (e.sousType === "E_paralleles" || e.sousType === "E_carre" ? 2 : null),
+  // Corrigé « comme au tableau » de l'écran (lot E) : même source que le papier, une lettre par écran.
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleeLieux(e), phasesPourExercice(e), p)} />,
 };
 
 export function App6gen56() {

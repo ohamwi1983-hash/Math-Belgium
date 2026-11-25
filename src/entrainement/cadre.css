@@ -675,10 +675,13 @@
   }
 
   /* Ce qui était un bloc (ligne de données, formule centrée, ligne d'une `.equation-box`) reste
-   * séparé du suivant. */
+   * séparé du suivant. `!important` (25/11, lot E du 6e ch. 9) : un bloc qui porte une marge EN LIGNE
+   * (les lignes de données `<p style="margin: 4px 0">` du socle du 6e ch. 7, `EcranCombinatoire`)
+   * gardait sa marge droite nulle et deux lignes se collaient (« y+4=0(BC) : … ») ; les blocs sans
+   * marge en ligne avaient déjà cet écart, rien ne change pour eux. */
   .entrainement .entete-exercice.est-replie :is(div, p, li, .katex-display, .equation-box > *):not(.katex *, :last-child),
   .entrainement[data-saisie] .entete-exercice :is(div, p, li, .katex-display, .equation-box > *):not(.katex *, :last-child) {
-    margin-right: 0.9em;
+    margin-right: 0.9em !important;
   }
 
   /* Une formule est un seul bloc : `apercuEnonce` la garde entière ou la recouvre entière. */

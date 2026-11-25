@@ -73,8 +73,8 @@ const NATURES_E: OptionLieu[] = [
   { valeur: "octogone", label: "Un octogone (son bord)" },
 ];
 
-function base(famille: Ex["famille"], sousType: SousTypeLieux, verdict: string): Pick<Ex, "famille" | "sousType" | "verdict" | "configuration" | "lieu" | "consignes" | "aides" | "explications"> {
-  return { famille, sousType, verdict, configuration: {}, lieu: {}, consignes: {}, aides: {}, explications: {} };
+function base(famille: Ex["famille"], sousType: SousTypeLieux, verdict: string, params: Ex["params"] = {}): Pick<Ex, "famille" | "sousType" | "verdict" | "configuration" | "lieu" | "consignes" | "aides" | "explications" | "params"> {
+  return { famille, sousType, verdict, configuration: {}, lieu: {}, consignes: {}, aides: {}, explications: {}, params };
 }
 
 function polyDist2(p: Pt): Poly {
@@ -102,7 +102,7 @@ export function construireParallelesA(): Ex {
     const d1 = droiteNormalisee(q(a), q(b), q(g - k));
     const d2 = droiteNormalisee(q(a), q(b), q(g + k));
     return {
-      ...base("A", "A_paralleles", "deuxDroites"),
+      ...base("A", "A_paralleles", "deuxDroites", { a, b, g, k }),
       phases: ["nature", "droites"],
       consigne: "Détermine l'ensemble des points $P(x\\,;y)$ dont les coordonnées vérifient l'équation donnée.",
       donnees: [`$|${expr}|=${k}$`],
@@ -134,7 +134,7 @@ export function construireLosangeA(): Ex {
   const k = tirerEntier(1, 6);
   const S = [pt(p + k, qq), pt(p, qq + k), pt(p - k, qq), pt(p, qq - k)];
   return {
-    ...base("A", "A_losange", "carre"),
+    ...base("A", "A_losange", "carre", { p, q: qq, k }),
     phases: ["nature", "sommets"],
     consigne: "Détermine l'ensemble des points $P(x\\,;y)$ dont les coordonnées vérifient l'équation donnée.",
     donnees: [`$${abs("x", p)}+${abs("y", qq)}=${k}$`],
@@ -167,7 +167,7 @@ export function construireNonBorneA(): Ex {
   const O1 = pt(p + k, qq);
   const O2 = pt(p - k, qq);
   return {
-    ...base("A", "A_nonBorne", "demiDroites"),
+    ...base("A", "A_nonBorne", "demiDroites", { p, q: qq, k }),
     phases: ["nature", "droites", "sommets"],
     consigne: "Détermine l'ensemble des points $P(x\\,;y)$ dont les coordonnées vérifient l'équation donnée.",
     donnees: [`$${abs("x", p)}-${abs("y", qq)}=${k}$`],
@@ -254,7 +254,7 @@ export function construireBissectrices(): Ex {
       [q(c2), ""],
     ]);
     return {
-      ...base("B", "B_bissectrices", "deuxDroites"),
+      ...base("B", "B_bissectrices", "deuxDroites", { a1, b1, c1, a2, b2, c2, n }),
       phases: ["droites"],
       consigne: "On cherche le lieu des points $P$ situés à égale distance des deux droites $d_1$ et $d_2$.",
       donnees: [`$d_1\\,:\\ ${e1}=0$`, `$d_2\\,:\\ ${e2}=0$`],
@@ -303,7 +303,7 @@ export function construireDroiteB(): Ex {
     const c = (ex: string) => eq.get(ex) ?? q(0);
     const d = droiteNormalisee(c("x:1"), c("y:1"), c(""));
     return {
-      ...base("B", "B_droite", "droite"),
+      ...base("B", "B_droite", "droite", { k }),
       phases: ["equation", "nature"],
       consigne: "On cherche le lieu des points $P(x\\,;y)$ tels que $PA^2-PB^2=k$.",
       donnees: [`$A${lp(A)}$, $B${lp(B)}$, $k=${k}$`],
@@ -331,7 +331,7 @@ export function construireCerclePerp(): Ex {
   const R = q(k);
   const eq = polySub(polyDist2(centre), polyConst(R));
   const ex = {
-    ...base("B", "B_cerclePerp", "cercle"),
+    ...base("B", "B_cerclePerp", "cercle", { x0, y0, k }),
     consigne: "On cherche le lieu des points $P$ tels que la somme des carrés de leurs distances aux droites $a$ et $b$ vaille $k$.",
     donnees: [`$a\\,:\\ x=${x0}$, $b\\,:\\ y=${y0}$, $k=${k}$`],
     equation: eq,
@@ -371,7 +371,7 @@ export function construireSeuil2Points(regime: "cercle" | "point" | "vide" = tir
     const R = q(Rn);
     const eq = polySub(polyAdd(polyDist2(A), polyDist2(B)), polyConst(q(k)));
     const ex = {
-      ...base("B", "B_seuil2Points", regime),
+      ...base("B", "B_seuil2Points", regime, { k, seuil }),
       consigne: "On cherche le lieu des points $P(x\\,;y)$ tels que $PA^2+PB^2=k$.",
       donnees: [`$A${lp(A)}$, $B${lp(B)}$, $k=${k}$`],
       equation: eq,
@@ -405,7 +405,7 @@ export function construireSeuilCarre(regime: "cercle" | "point" | "vide" = tirer
     const R = q(Rn);
     const eq = EQ(`2x^2+2y^2+${4 * c * c}-${k}=0`);
     const ex = {
-      ...base("B", "B_seuilCarre", regime),
+      ...base("B", "B_seuilCarre", regime, { c, k }),
       consigne: "On cherche le lieu des points $P$ tels que la somme des carrés de leurs distances aux quatre droites qui portent les côtés du carré vaille $k$.",
       donnees: [`carré de sommets $(${c}\\,;${c})$, $(-${c}\\,;${c})$, $(-${c}\\,;-${c})$, $(${c}\\,;-${c})$ ; $k=${k}$`],
       equation: eq,
@@ -460,7 +460,7 @@ export function construireApollonius(casK1: boolean = Math.random() < 0.5): Ex {
   if (casK1) {
     const d = droiteNormalisee(q(1), q(0), q(-h));
     return {
-      ...base("B", "B_apollonius", "droite"),
+      ...base("B", "B_apollonius", "droite", { a, h, kn, kd }),
       ...commun,
       phases: ["equation", "nature"],
       equationLatex: latexDroite(d),
@@ -477,7 +477,7 @@ export function construireApollonius(casK1: boolean = Math.random() < 0.5): Ex {
   const centre = pt(x0, 0);
   const R = qDiv(qMul(q(4 * a * a), k), qMul(qSub(k, q(1)), qSub(k, q(1))));
   const ex = {
-    ...base("B", "B_apollonius", "cercle"),
+    ...base("B", "B_apollonius", "cercle", { a, h, kn, kd }),
     ...commun,
     equationLatex: `${latexPoly(eq)}=0`,
     centre,
@@ -517,10 +517,10 @@ export function construireFamilleC(verdict: "cercle" | "point" | "vide" = tirerP
     [q(E), "y"],
     [q(F), ""],
   ]);
-  const eqLatex = `${mx}(x^2+y^2)${reste === "0" ? "" : reste.startsWith("-") ? reste : `+${reste}`}=0`;
+  const eqLatex = `${m === 1 ? "x^2+y^2" : `${mx}(x^2+y^2)`}${reste === "0" ? "" : reste.startsWith("-") ? reste : `+${reste}`}=0`;
   const eq = EQ(`${m}(x^2+y^2)+${s(D)}x+${s(E)}y+${s(F)}=0`);
   const ex = {
-    ...base("C", "C", verdict),
+    ...base("C", "C", verdict, { m, h, k, D, E, F }),
     phases: ["centreR", "nature"] as Ex["phases"],
     consigne: "Détermine la nature de l'ensemble des points $P(x\\,;y)$ dont les coordonnées vérifient l'équation donnée.",
     donnees: [`$${eqLatex}$`],
@@ -576,7 +576,7 @@ export function construireSubstitution(forme: "racine" | "racineMoins" | "affine
   const de = forme === "racine" ? p : p - 4;
   const a = forme === "racineMoins" ? p : p + 4;
   return {
-    ...base("D", "D_substitution", correcte),
+    ...base("D", "D_substitution", correcte, { forme, p, q: qq, r }),
     phases: ["equation", "restriction"],
     consigne: "Le point $P(x\\,;y)$ dépend d'un paramètre $t$. Détermine le lieu de $P$ quand $t$ parcourt son domaine.",
     donnees: [`$${xParam}$, $${yParam}$, avec $${domaine}$`],
@@ -647,7 +647,7 @@ export function construireFractions(forme: "fraction" | "cube" | "carre" = tirer
     const correcte = forme === "fraction" ? "privee" : forme === "cube" ? "entiere" : "demiDroite";
     const xo = P0[0];
     return {
-      ...base("D", "D_fractions", correcte),
+      ...base("D", "D_fractions", correcte, { forme, a, b, c, pente, ord }),
       phases: ["equation", "restriction"],
       consigne: "Le point $P(x\\,;y)$ dépend d'un paramètre $t$. Détermine le lieu de $P$ quand $t$ parcourt son domaine.",
       donnees: [`$${xParam}$, $${yParam}$, avec $${domaine}$`],
@@ -706,7 +706,7 @@ export function construireRatio(domaine: "reels" | "positifs" = tirerParmi(["ree
   const correcte = domaine === "reels" ? "entiere" : "moitieSans";
   const tm = (v: number) => (v === 1 ? "" : v === -1 ? "-" : `${v}`);
   return {
-    ...base("D", "D_ratio", correcte),
+    ...base("D", "D_ratio", correcte, { m, n, a, b, domaine }),
     phases: ["equation", "restriction"],
     consigne: "Le point $P(x\\,;y)$ dépend d'un paramètre $t$. Détermine le lieu de $P$ quand $t$ parcourt son domaine.",
     donnees: [`$x=${tm(a)}t^${m}$, $y=${tm(b)}t^${n}$, avec $${domaine === "reels" ? "t\\in\\mathbb{R}" : "t>0"}$`],
@@ -749,7 +749,7 @@ export function construireParallelesE(regime: "vide" | "bandePleine" | "pairDeDr
   const droites = regime === "pairDeDroites" ? [p + (d - k) / 2, p + (d + k) / 2].map((c) => (verticale ? droiteNormalisee(q(1), q(0), qOpp(c)) : droiteNormalisee(q(0), q(1), qOpp(c)))) : undefined;
   const lig = (c: number) => (verticale ? { a: 1, b: 0, c: -c } : { a: 0, b: 1, c: -c });
   return {
-    ...base("E", "E_paralleles", nature),
+    ...base("E", "E_paralleles", nature, { verticale, p, d, k }),
     phases: regime === "pairDeDroites" ? ["nature", "droites"] : ["nature"],
     consigne: "On cherche le lieu des points $P$ dont la somme des distances aux droites $a$ et $b$ vaut $k$.",
     donnees: [`$a\\,:\\ ${v}=${p}$, $b\\,:\\ ${v}=${p + d}$, $k=${k}$`],
@@ -779,7 +779,7 @@ export function construirePerpendiculaires(): Ex {
   const k = tirerEntier(1, 6);
   const S = [pt(p + k, qq), pt(p, qq + k), pt(p - k, qq), pt(p, qq - k)];
   return {
-    ...base("E", "E_perpendiculaires", "carre"),
+    ...base("E", "E_perpendiculaires", "carre", { p, q: qq, k }),
     phases: ["nature", "sommets"],
     consigne: "On cherche le lieu des points $P$ dont la somme des distances aux droites perpendiculaires $a$ et $b$ vaut $k$.",
     donnees: [`$a\\,:\\ x=${p}$, $b\\,:\\ y=${qq}$, $k=${k}$`],
@@ -811,7 +811,7 @@ export function construireSecantes(): Ex {
     [q(-qq0), "y"],
   ]);
   return {
-    ...base("E", "E_secantes", "parallelogramme"),
+    ...base("E", "E_secantes", "parallelogramme", { pp, qq: qq0, n, k }),
     phases: ["nature", "sommets"],
     consigne: "On cherche le lieu des points $P$ dont la somme des distances aux droites sécantes $a$ et $b$ vaut $k$.",
     donnees: [`$a\\,:\\ y=0$, $b\\,:\\ ${bLatex}=0$, $k=${k}$`],
@@ -838,7 +838,7 @@ export function construireCarreE(regime: "vide" | "bandePleine" | "formeEtendue"
   const S = [pt(c, mm), pt(-c, mm), pt(-mm, c), pt(-mm, -c), pt(-c, -mm), pt(c, -mm), pt(mm, -c), pt(mm, c)];
   const carre = [pt(c, c), pt(-c, c), pt(-c, -c), pt(c, -c)];
   return {
-    ...base("E", "E_carre", nature),
+    ...base("E", "E_carre", nature, { c, j, k }),
     phases: regime === "formeEtendue" ? ["nature", "sommets"] : ["nature"],
     consigne: "On cherche le lieu des points $P$ dont la somme des distances aux quatre droites qui portent les côtés du carré vaut $k$.",
     donnees: [`carré de sommets $(${c}\\,;${c})$, $(-${c}\\,;${c})$, $(-${c}\\,;-${c})$, $(${c}\\,;-${c})$ ; $k=${k}$`],

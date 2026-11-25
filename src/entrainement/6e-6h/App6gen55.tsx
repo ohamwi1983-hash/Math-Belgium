@@ -6,6 +6,10 @@ import { FORMAT_6GEN55, figure6gen55 } from "./ui6e/formatCercles";
 import { AppCombinatoire } from "./components6e/AppCombinatoire";
 import type { ConfigAppCombinatoire } from "./components6e/AppCombinatoire";
 import { FigureLieux } from "./components6e/FigureLieux";
+import { phasesPourExercice } from "./moteur6e/typesCercles";
+import { correctionDetailleeCercles } from "./generateurs6e/cercles/corrigeDetaille";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 
 /**
  * `6gen55` — Cercles (6e ch. 9, § 2, processus 2 APPLIQUER ; audit du chapitre, lots B et C). Socle
@@ -26,6 +30,8 @@ const CONFIG: ConfigAppCombinatoire<ExerciceCercles, PhaseCercles> = {
   format: FORMAT_6GEN55,
   complement: (e, _p, closes) => <FigureLieux svg={figure6gen55(e, closes)} />,
   pucesAvantPremierEcran: (e) => (e.famille === "B" ? 3 : null),
+  // Corrigé « comme au tableau » de l'écran (lot E) : même source que le papier, une lettre par écran.
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleeCercles(e), phasesPourExercice(e), p)} />,
 };
 
 export function App6gen55() {

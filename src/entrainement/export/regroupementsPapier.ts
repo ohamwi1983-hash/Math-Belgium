@@ -1039,6 +1039,34 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     ],
   },
   "6gen127": simple(String.raw`On cherche le lieu des points \$P\(x\\,;y\)\$ du plan (?<ligne>[^\n]+)\nQuelle est la nature de ce lieu \?[^\n]*`, "Pour chaque condition, on cherche le lieu des points $P(x\\,;y)$ du plan qui la vérifient. Quelle est la nature de ce lieu ? Donne ses éléments caractéristiques (centre et rayon, sommets, équations des droites…), s'il y en a. Justifie."),
+  // 6e ch. 9, lot E (6gen54–6gen57) : « On donne … » (les données de l'instance) est la ligne, la consigne
+  // de l'énoncé papier passe à la forme « chaque ». Écartés : 6gen54 G et H (massif, dalle, miroir, billard :
+  // contexte propre à l'instance), 6gen57 (Transférer : configuration de trois phrases propre à l'instance).
+  "6gen54": {
+    formes: [
+      { motif: re(String.raw`On donne (?<ligne>[^\n]+), milieux respectifs des côtés [^\n]+ d'un triangle ${M}\.\nDétermine les coordonnées des sommets [^\n]+`), consigne: "Dans chaque cas, $A'$, $B'$ et $C'$ sont les milieux respectifs des côtés $[BC]$, $[CA]$ et $[AB]$ d'un triangle $ABC$. Détermine les coordonnées de ses sommets." },
+      { motif: re(String.raw`On donne le triangle ${M} : (?<ligne>[^\n]+)\.\nLa bissectrice de l'angle [^\n]+`), consigne: "Dans chaque triangle $ABC$, la bissectrice de l'angle $\\widehat{ABC}$ coupe $[AC]$ en $I$. Détermine les coordonnées de $I$." },
+      { motif: re(String.raw`On donne (?<ligne>[^\n]+)\.\nDétermine les points ${M} de ${M} tels que l'aire [^\n]+`), consigne: "Dans chaque cas, détermine les points $C$ de la droite $d$ (paramétrée par $C(t)$) tels que l'aire du triangle $ABC$ soit égale à $k$." },
+      { motif: re(String.raw`Dans le triangle ${M}, on donne (?<ligne>[^\n]+)\.\nDétermine les coordonnées de ${M} et de ${M}, puis [^\n]+`), consigne: "Dans chaque triangle $ABC$, on donne le sommet $A$ et les médianes issues de $B$ et de $C$. Détermine les coordonnées de $B$ et de $C$, puis une équation de chacun des trois côtés." },
+      { motif: re(String.raw`On donne les points (?<ligne>[^\n]+)\.\n(?<q>Détermine toutes les droites qui passent par [^\n]+)`), consigne: dansChaqueCas },
+      { motif: re(String.raw`On donne les points (?<ligne>[^\n]+)\.\n(?<q>Détermine les coordonnées du symétrique [^\n]+)`), consigne: dansChaqueCas },
+    ],
+  },
+  "6gen55": {
+    formes: [
+      { motif: re(String.raw`On donne (?:les points |le point )?(?<ligne>[^\n]+)\.\n(?<q>Détermine [^\n]+)`), consigne: dansChaqueCas },
+      { motif: re(String.raw`On donne les droites (?<ligne>[^\n]+)\.\nCes trois droites forment le triangle ${M}\. (?<q>Détermine [^\n]+)`), consigne: (g) => `Dans chaque cas, les trois droites données forment un triangle $ABC$. ${g.q}` },
+    ],
+  },
+  "6gen56": {
+    formes: [
+      { motif: re(String.raw`On considère l'équation (?<ligne>${M})\.\n(?<q>[^\n]+)`), consigne: (g) => chaque(g.q, "cette équation", "chaque équation") },
+      { motif: re(String.raw`Le point ${M} dépend du paramètre ${M} : (?<ligne>[^\n]+)\.\n(?<q>[^\n]+)`), consigne: (g) => `Dans chaque cas, le point $P(x\\,;y)$ dépend du paramètre $t$. ${g.q}` },
+      { motif: re(String.raw`On donne (?<ligne>[^\n]+)\.\n(?<q>Détermine [^\n]+)`), consigne: dansChaqueCas },
+    ],
+  },
+  // 6gen129 (finition du lot E) : la représentation paramétrique et son intervalle sont la ligne.
+  "6gen129": simple(String.raw`Dans un repère orthonormé, un point ${M} se déplace selon la représentation paramétrique (?<ligne>${M}, avec ${M})\.\nÉlimine le paramètre t pour obtenir une équation cartésienne de la courbe, puis précise la partie de cette courbe réellement décrite par M\.`, "Dans chaque cas, un point $M$ se déplace dans un repère orthonormé selon la représentation paramétrique donnée. Élimine le paramètre t pour obtenir une équation cartésienne de la courbe, puis précise la partie de cette courbe réellement décrite par M."),
   // 6e ch. 8, lot E (6gen49–6gen53) : la situation (avec sa question) est la ligne ; la consigne commune
   // est la consigne globale de l'énoncé papier. 6gen51 A et C : « Z suit 𝒩(0 ; 1) » passe dans la
   // consigne, la probabilité (ou l'égalité donnée) est la ligne. Écartés : 6gen49 A (tableau propre à

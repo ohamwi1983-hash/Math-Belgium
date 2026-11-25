@@ -6071,3 +6071,19 @@ le centre du cercle circonscrit, la droite d'Euler ni le cercle des neuf points 
 (6gen125), la tangente verticale et la longueur PT par Pythagore (6gen126), l'octogone et les quatre demi-droites comme natures
 (6gen127, la définition « 7 natures » est à corriger par le lot A) — lot F de l'audit.
 
+
+## 6e (6h), Chapitre 9 — lot E de l'audit (papier et évaluations de 6gen54–6gen57, 25/11/2026)
+
+Adaptateurs papier définitifs des quatre générateurs (détail : `feuilles-evaluations.md`, « 6e ch. 9 (lot E… ») sur
+l'adaptateur commun du ch. 7 : énoncé « On donne … » + une consigne sans méthode ni verdict (6gen54 C avec le
+paramétrage C(t), E « toutes les droites », H sans « deux points Ad, Bd » ; 6gen55 G inscrit ou exinscrit nommé ; 6gen56
+carré placé, D « partie réellement décrite » ; 6gen57 configuration en prose, processus 3), corrigé « comme au tableau »
+partagé écran / papier (`corrigeDetaille.ts` par générateur, brique `ui6e/corrigeLieux.ts` : droites simplifiées,
+systèmes ligne par ligne, symétriques), figure du lieu ou du cercle sous le dernier résultat (chaîne SVG de l'écran),
+barème sur 4, réponse brève, niveaux mesurés, profils (`droiteAxe`, `origineSurCercle`, `triangleRectangle`, `m1`,
+`centreOrigine` ; verdicts jamais dans le profil), `versionPapier`, regroupements (6gen54 A–F, 6gen55, 6gen56 ; et
+6gen129). Adaptateur provisoire `adaptateurLieux.ts` supprimé. 6gen56 : `params` sur l'instance (ajout pur, mêmes
+`?code=`), C à m = 1 écrit sans parenthèses. Finitions : cours § 1 (« Trois constructions qui reviennent souvent »)
+et quiz 6gen72 (thème 1, l'affirmation fausse « la seule droite… » devient « si P est le milieu de [AB], une seule
+droite… » : fausse, une infinité) alignés sur 6gen54 E (2 droites, 1 seule ou une infinité) ; aperçu de l'énoncé
+replié : lignes de données collées corrigées dans `cadre.css` (écart « bloc suivant » en `!important`).

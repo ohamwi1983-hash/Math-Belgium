@@ -6,6 +6,10 @@ import { FORMAT_6GEN57, figure6gen57 } from "./ui6e/formatMethodeGeneratrices";
 import { AppCombinatoire } from "./components6e/AppCombinatoire";
 import type { ConfigAppCombinatoire } from "./components6e/AppCombinatoire";
 import { FigureLieux } from "./components6e/FigureLieux";
+import { phasesPourExercice } from "./moteur6e/typesMethodeGeneratrices";
+import { correctionDetailleeMethodeGeneratrices } from "./generateurs6e/methodeGeneratrices/corrigeDetaille";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 
 /**
  * `6gen57` — Problèmes de lieux : méthode des génératrices (6e ch. 9, § 5, processus 3 TRANSFÉRER ;
@@ -29,6 +33,8 @@ const CONFIG: ConfigAppCombinatoire<ExerciceMethodeGeneratrices, PhaseMethodeGen
   // Le nombre de morceaux (donc d'écrans) se lit sur l'équation factorisée : on ne le montre
   // qu'après l'écran d'élimination (il trahirait un facteur y).
   pucesMasquees: () => ({ nombre: 5, jusqua: 1 }),
+  // Corrigé « comme au tableau » de l'écran (lot E) : même source que le papier, une lettre par écran.
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleeMethodeGeneratrices(e), phasesPourExercice(e), p)} />,
 };
 
 export function App6gen57() {

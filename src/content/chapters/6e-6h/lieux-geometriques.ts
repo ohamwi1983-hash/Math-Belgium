@@ -1049,9 +1049,12 @@ export const lieuxGeometriques: ChapterContent = {
         {
           kind: 'methode',
           items: [
-            '**Droites passant par** $P$ **et équidistantes de** $A$ **et de** $B$ : il y en a deux — la parallèle à ' +
-              '$(AB)$ passant par $P$, et la droite qui passe par $P$ et par le milieu de $[AB]$. On oublie ' +
-              'souvent la parallèle.',
+            '**Droites passant par** $P$ **et équidistantes de** $A$ **et de** $B$ : ce sont les droites parallèles à ' +
+              '$(AB)$ ou qui passent par le milieu de $[AB]$. Si $P$ n\'est pas sur $(AB)$, il y en a deux — la ' +
+              'parallèle à $(AB)$ passant par $P$, et la droite qui passe par $P$ et par le milieu de $[AB]$ ; on ' +
+              "oublie souvent la parallèle. Si $P$ est sur $(AB)$ sans en être le milieu, ces deux droites sont " +
+              '$(AB)$ elle-même : une seule droite. Si $P$ est le milieu de $[AB]$, toute droite passant par $P$ ' +
+              'convient : une infinité.',
             "**Carré** : la rotation de 90° envoie $\\vec{v}=(x\\,;y)$ sur $(-y\\,;x)$. Si $O$ est le centre et " +
               '$\\vec{v}=\\overrightarrow{OA}$, les sommets sont $O+\\vec{v}$, $O+\\text{rot}(\\vec{v})$, $O-\\vec{v}$, ' +
               '$O-\\text{rot}(\\vec{v})$ ; le centre est aussi le pied de la perpendiculaire menée d\'un sommet à ' +

@@ -6,6 +6,10 @@ import { FORMAT_6GEN54, figure6gen54 } from "./ui6e/formatPointsDroitesRemarquab
 import { AppCombinatoire } from "./components6e/AppCombinatoire";
 import type { ConfigAppCombinatoire } from "./components6e/AppCombinatoire";
 import { FigureLieux } from "./components6e/FigureLieux";
+import { phasesPourExercice } from "./moteur6e/typesPointsDroitesRemarquablesTriangle";
+import { correctionDetailleePointsDroites } from "./generateurs6e/pointsDroitesRemarquablesTriangle/corrigeDetaille";
+import { corrigeDeLEcran } from "./ui6e/corrigeCombinatoire";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
 
 /**
  * `6gen54` — Constructions analytiques dans le triangle (6e ch. 9, § 1, processus 2 APPLIQUER ; audit
@@ -27,6 +31,8 @@ const CONFIG: ConfigAppCombinatoire<ExercicePointsDroitesRemarquablesTriangle, P
   format: FORMAT_6GEN54,
   complement: (e, _p, closes) => <FigureLieux svg={figure6gen54(e, closes)} />,
   pucesAvantPremierEcran: (e) => (e.famille === "E" ? 2 : null),
+  // Corrigé « comme au tableau » de l'écran (lot E) : même source que le papier, une lettre par écran.
+  corrigeDetaille: (e, p) => <CorrigeDetailleEcran etapes={corrigeDeLEcran(correctionDetailleePointsDroites(e), phasesPourExercice(e), p)} />,
 };
 
 export function App6gen54() {
