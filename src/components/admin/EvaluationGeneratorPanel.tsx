@@ -2,6 +2,7 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import { Link, useSearchParams } from 'react-router-dom'
 import type { CartoucheEcole } from '../../entrainement/export/cartouche'
 import { estConnecteActif, useCompte } from '../../lib/compteContexte'
+import { chapitresDansMonOrdre, numeroRepere, surtitreChapitre, useOrdreChapitres } from '../../lib/ordreChapitres'
 import { enregistrerPlanCoffre, importerPlansLocaux, lirePlanCoffre, listerPlans, supprimerPlanCoffre, type PlanCoffre } from '../../lib/compteDonnees'
 import { cartoucheDepuisCompte, ecoleParDefaut, messageErreur, plansLocauxAImporter } from '../../lib/compteValidation'
 import { LEVELS } from '../../content/chaptersIndex'
@@ -370,12 +371,16 @@ export function EvaluationGeneratorPanel({
 
   const levelSlug = resoudreLevelSlug(niveau, heures)
   const niveauEntry = levelSlug ? LEVELS.find((l) => l.slug === levelSlug) : undefined
+  // « Mon ordre des chapitres » : chapitres proposés et documents multi-chapitres dans l'ordre du
+  // professeur connecté, avec SON numéro (à défaut celui du site, simple repère sur cette page).
+  const { ordre: ordreProf } = useOrdreChapitres()
+  const chapitresDuNiveau = niveauEntry ? chapitresDansMonOrdre(niveauEntry.slug, ordreProf, niveauEntry.chapters) : []
 
   /** Chapitres fonctionnels parmi ceux cochés — `.admin-eval-chapitre-chip` désactive déjà toute
    * sélection d'un chapitre non câblé (voir plus bas), donc en pratique `chapitres` est toujours
    * entièrement fonctionnel ; le filtre reste une garantie défensive si `levelSlug` change sous les
    * pieds d'une sélection déjà faite. */
-  const chapitres = (niveauEntry?.chapters.filter((c) => chapitresSlugs.includes(c.slug)) ?? []).filter((c) => estChapitreFonctionnel(levelSlug, c.slug))
+  const chapitres = chapitresDuNiveau.filter((c) => chapitresSlugs.includes(c.slug)).filter((c) => estChapitreFonctionnel(levelSlug, c.slug))
 
   const [lignes, setLignes] = useState<LigneSelection[]>(() => lignesInitiales(chapitres))
 
@@ -1134,7 +1139,7 @@ export function EvaluationGeneratorPanel({
     const m = decoderMatiere(matiereDemandee)
     const nh = m ? resoudreNiveauHeures(m.levelSlug) : null
     const niveauCarnet = m ? LEVELS.find((l) => l.slug === m.levelSlug) : undefined
-    const chapitresCarnet = m && niveauCarnet ? niveauCarnet.chapters.filter((c) => m.chapitres.some((x) => x.slug === c.slug) && estChapitreFonctionnel(m.levelSlug, c.slug)) : []
+    const chapitresCarnet = m && niveauCarnet ? chapitresDansMonOrdre(niveauCarnet.slug, ordreProf, niveauCarnet.chapters).filter((c) => m.chapitres.some((x) => x.slug === c.slug) && estChapitreFonctionnel(m.levelSlug, c.slug)) : []
     const suivant = new URLSearchParams(params)
     const depuis = /^\d{4}-\d{2}-\d{2}$/.test(suivant.get('depuis') ?? '') ? (suivant.get('depuis') as string).split('-').reverse().join('/') : ''
     const classe = (suivant.get('classe') ?? '').trim().slice(0, 40)
@@ -1280,7 +1285,14 @@ export function EvaluationGeneratorPanel({
     const niveauLabel = niveauEntry?.label ?? niveau
     // Points EFFECTIFS écrits dans les lignes (automatiques, verrouillés ou ajustés) ; feuille
     // d'exercices : sans points, lignes telles quelles (sans l'état propre au panneau).
-    const lignesPoints = estExercice ? lignes.map(({ modePoints: _m, ...l }) => (void _m, l)) : lignes.map(materialiser)
+    const lignesBrutes = estExercice ? lignes.map(({ modePoints: _m, ...l }) => (void _m, l)) : lignes.map(materialiser)
+    // Document multi-chapitres : chapitres dans l'ordre du professeur (`chapitres`, « Mon ordre des
+    // chapitres »), quel que soit l'ordre où ils ont été cochés ; tri stable à l'intérieur d'un chapitre.
+    const rangChapitre = (slug: string) => {
+      const i = chapitres.findIndex((c) => c.slug === slug)
+      return i < 0 ? chapitres.length : i
+    }
+    const lignesPoints = lignesBrutes.map((l, i) => ({ l, i })).sort((a, b) => rangChapitre(a.l.chapitreSlug) - rangChapitre(b.l.chapitreSlug) || a.i - b.i).map((x) => x.l)
     const entete: EnTeteEvaluation = {
       numero: estExercice ? undefined : numero,
       date,
@@ -1296,7 +1308,8 @@ export function EvaluationGeneratorPanel({
       afficherDuree: estExercice ? false : afficherDuree,
       joindreFormulaire,
       deuxColonnes,
-      surtitre: chapitres.length === 1 ? `${niveauLabel} · Chapitre ${chapitres[0].chapterNumber}` : niveauLabel,
+      // Stocké SANS numéro (le rendu le recalcule : `evaluationLocal.ts::surtitreDuPlan`).
+      surtitre: chapitres.length === 1 ? surtitreChapitre(niveauLabel, chapitres[0], null) : niveauLabel,
       // Comptes : école choisie + nom du profil (absent sans session : cartouche historique).
       ...(cartouche ? { cartouche } : {}),
       titreChapitre: chapitres.length === 1 ? chapitres[0].title : undefined,
@@ -2164,7 +2177,7 @@ export function EvaluationGeneratorPanel({
             {niveauEntry?.label ?? niveau} — Chapitre{' '}
             {(() => {
               const c = niveauEntry?.chapters.find((c) => c.slug === verrouille.chapitreSlug)
-              return c ? `${c.chapterNumber}. ${c.title}` : verrouille.chapitreSlug
+              return c ? `${numeroRepere(c, ordreProf)}. ${c.title}` : verrouille.chapitreSlug
             })()}
           </p>
         ) : (
@@ -2202,11 +2215,11 @@ export function EvaluationGeneratorPanel({
                 <p className="admin-eval-indisponible">Aucun chapitre disponible pour l'instant.</p>
               ) : (
                 <div className="admin-eval-chapitres-chips" role="group" aria-labelledby="eval-chapitres-label">
-                  {niveauEntry.chapters.map((c) => {
+                  {chapitresDuNiveau.map((c) => {
                     const fonctionnel = estChapitreFonctionnel(levelSlug, c.slug)
                     return (
                       <button key={c.slug} type="button" className="admin-eval-chapitre-chip" aria-pressed={chapitresSlugs.includes(c.slug)} disabled={!fonctionnel} onClick={() => basculerChapitre(c.slug)}>
-                        {c.chapterNumber}. {c.title}
+                        {numeroRepere(c, ordreProf)}. {c.title}
                         {fonctionnel ? '' : ' (bientôt)'}
                       </button>
                     )
@@ -2470,7 +2483,7 @@ export function EvaluationGeneratorPanel({
                                   }
                                 >
                                   <span className="conc-notion-titre">
-                                    {chapitres.length > 1 ? `${c.chapterNumber}.` : ''}
+                                    {chapitres.length > 1 ? `${numeroRepere(c, ordreProf)}.` : ''}
                                     {s.number}. {s.title}
                                   </span>
                                   <span className="conc-pastilles">{ps.map((p) => <Fragment key={p}>{pastille(p, true)}</Fragment>)}</span>
@@ -2540,7 +2553,7 @@ export function EvaluationGeneratorPanel({
                   <div className="conc-chapitre" key={chapitreCourant.slug}>
                     {chapitres.length > 1 && (
                       <h3 className="conc-chapitre-titre">
-                        {chapitreCourant.chapterNumber}. {chapitreCourant.title}
+                        {numeroRepere(chapitreCourant, ordreProf)}. {chapitreCourant.title}
                       </h3>
                     )}
                     {sectionsRendues}

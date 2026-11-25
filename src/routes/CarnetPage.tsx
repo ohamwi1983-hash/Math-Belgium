@@ -52,6 +52,7 @@ import { creneauPropose, creneauxDuJour, seanceDuCreneau, type Creneau } from '.
 import { AGENDA_INACTIF, ajouterEvenement, ajouterPeriode, chargerAgenda, enregistrerSeuil, modifierEvenement, modifierPeriode, supprimerEvenement, supprimerPeriode, type DonneesAgenda } from '../lib/agendaDonnees'
 import { predicatSuppression, type ContexteAgenda, type Evenement, type PeriodeBulletin, type SaisieEvenement } from '../lib/agendaEvenements'
 import { estConnecteActif, useCompte } from '../lib/compteContexte'
+import { useOrdreChapitres } from '../lib/ordreChapitres'
 import { messageErreur } from '../lib/compteValidation'
 import { construireContenuPage, memeContenu } from '../lib/pageClasseContenu'
 import type { ReglagesPageClasse } from '../lib/pageClasse'
@@ -131,6 +132,9 @@ function MessageCarnetInactif() {
 function Carnet() {
   const compte = useCompte()
   const client = compte.client
+  // « Mon ordre des chapitres » : le carnet (listes, textes, agenda, page de classe) suit l'ordre du
+  // professeur ; re-rendu et nouvelle vérification de la page de classe quand il arrive ou change.
+  const etatOrdre = useOrdreChapitres()
   const [params, setParams] = useSearchParams()
   const [donnees, setDonnees] = useState<Donnees | null>(null)
   const [absent, setAbsent] = useState(false)
@@ -273,7 +277,8 @@ function Carnet() {
   const publicationEnCours = useRef(false)
   const synchroniserPages = useCallback(
     async (d: Donnees, forcerMessage = false): Promise<void> => {
-      if (!client || !d.pages.actif || publicationEnCours.current) return
+      // L'ordre du professeur décide du titre publié (« Chapitre 3 — Suites ») : attendre sa lecture.
+      if (!client || !d.pages.actif || publicationEnCours.current || etatOrdre.etat === 'chargement') return
       const aPublier = d.pages.pages.flatMap((p) => {
         const classe = d.classes.find((c) => c.id === p.classe_id)
         if (!classe || p.code === null) return []
@@ -308,7 +313,7 @@ function Carnet() {
         publicationEnCours.current = false
       }
     },
-    [client, aujourdhuiPublication],
+    [client, aujourdhuiPublication, etatOrdre],
   )
   useEffect(() => {
     if (donnees) void synchroniserPages(donnees)
@@ -585,6 +590,13 @@ function Carnet() {
         onRubriques={(r) => void changerRubriques(r)}
         onCompetences={(l) => void changerCompetences(l)}
       />
+      <fieldset className="carnet-fieldset">
+        <legend>Ordre des chapitres</legend>
+        <p className="compte-aide">
+          Ton carnet, ta page de classe, ton coffre et tes documents suivent l'ordre où tu donnes les chapitres, avec tes numéros (jamais ceux du site).{' '}
+          <Link to="/profil#ordre-chapitres">Mon ordre des chapitres</Link>
+        </p>
+      </fieldset>
       <fieldset className="carnet-fieldset">
         <legend>Horaire des séances</legend>
         <label className="carnet-case">

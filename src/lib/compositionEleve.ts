@@ -27,6 +27,7 @@ import { aleatoireDepuisGraine, fractionsRepartition, partageEgal, partsAuProrat
 import { mettreAEchelle, mettreAEchelleParGroupes } from '../entrainement/export/examen'
 import { tirerGraine } from '../entrainement/export/codeExercice'
 import { DEPASSEMENT_MAX } from '../components/admin/conception/composer'
+import { surtitreChapitre } from './ordreChapitres'
 
 /**
  * Parcours ÉLÈVE — composition automatique d'une feuille d'exercices ou d'une ÉVALUATION BLANCHE
@@ -1182,7 +1183,9 @@ export function enteteEleve(reglages: ReglagesEleve, chapter: ChapterContent): E
     // Calculatrice choisie : contraint le tirage de `construirePlan` comme chez le professeur (feuille :
     // rien d'imprimé ; blanche : « Calculatrice interdite / autorisée » dans l'encadré « Mon score »).
     ...(reglages.calculatrice ? { calculatrice: reglages.calculatrice } : {}),
-    surtitre: `${niveauLabel} · Chapitre ${chapter.chapterNumber}`,
+    // Côté élève : jamais le numéro du site (décision du 25/11/2026) — titre seul.
+    surtitre: surtitreChapitre(niveauLabel, chapter, null),
+    sansOrdreProfesseur: true,
     titreChapitre: chapter.title,
     urlChapitre: `https://math-belgium.vercel.app/${reglages.levelSlug}/${chapter.slug}`,
   }

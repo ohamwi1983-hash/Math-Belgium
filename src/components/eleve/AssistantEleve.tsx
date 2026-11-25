@@ -647,7 +647,8 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
               <select value={chapitreSlug} onChange={(e) => changerChapitre(e.target.value)}>
                 {chapitresDisponibles(levelSlug).map((c) => (
                   <option key={c.slug} value={c.slug}>
-                    {c.chapterNumber}. {c.title}
+                    {/* Côté élève : jamais le numéro du site (son professeur peut suivre un autre ordre). */}
+                    {c.title}
                   </option>
                 ))}
               </select>

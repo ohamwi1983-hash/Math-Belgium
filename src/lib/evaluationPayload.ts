@@ -5200,6 +5200,9 @@ export interface EnTeteEvaluation {
   surtitre?: string
   titreChapitre?: string
   urlChapitre?: string
+  /** Document de l'assistant élève (`compositionEleve.ts`) : jamais le numéro de chapitre d'un
+   * professeur (titre seul), même ouvert par un professeur connecté (« Voir comme un élève »). */
+  sansOrdreProfesseur?: boolean
   /** Génération locale uniquement — case « Joindre le formulaire du chapitre en annexe » : une page
    * « Annexe — Formulaire : … » par chapitre du plan qui a un formulaire, à la fin de la copie, de
    * l'aménagée et de la feuille d'exercices (jamais du corrigé ni de la grille). Absent (plans
@@ -5283,6 +5286,8 @@ export function construireItemsPayload(entete: EnTeteEvaluation, lignes: LigneSe
     const section = chapitre?.sections.find((s) => s.id === ligne.sectionId)
     if (!chapitre || !section) continue
 
+    // Forme d'ORIGINE (numéro du site) stockée telle quelle dans le plan ; réécrite AU RENDU avec le
+    // numéro du professeur qui imprime, ou le titre seul (`ordreChapitres.ts::titreSectionImprime`).
     const titreSection = multiChapitres ? `${chapitre.chapterNumber}. ${chapitre.title} — ${section.number}. ${section.title}` : `${section.number}. ${section.title}`
     const sectionRef = { chapitreSlug: ligne.chapitreSlug, numero: section.number, titre: section.title }
 

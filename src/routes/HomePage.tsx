@@ -331,6 +331,8 @@ export function HomePage() {
               <h2 className="accueil-liste-titre">
                 Les {pluriel(l.chapters.length, 'chapitre')} de {l.label}
               </h2>
+              {/* Numéros du site = simple repère (décision du 25/11/2026) : le professeur peut suivre un autre ordre. */}
+              <p className="accueil-ordre-note">Numérotés dans l'ordre du site : ton professeur peut les voir dans un autre ordre.</p>
               {l.chapters.length === 0 ? <p className="empty-note">Aucun chapitre publié pour l'instant.</p> : <ListeChapitres level={l} etats={chapitres[l.slug]} />}
             </div>
           )

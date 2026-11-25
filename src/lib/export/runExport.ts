@@ -8,5 +8,5 @@ export async function runExport(chapter: ChapterContent, onProgress: (progress: 
   onProgress({ done: 0, total: 0 })
   const { buildHtmlBlob } = await import('./buildHtml')
   const blob = await buildHtmlBlob(chapter, amenage)
-  downloadBlob(blob, `chapitre-${chapter.chapterNumber}-${chapter.slug}${amenage ? '-amenage' : ''}.html`)
+  downloadBlob(blob, `${chapter.levelSlug}-${chapter.slug}${amenage ? '-amenage' : ''}.html`)
 }

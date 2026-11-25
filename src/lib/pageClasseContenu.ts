@@ -20,6 +20,7 @@ import { aUnDevoir, INTITULE_BILAN } from './carnetDevoirs'
 import type { Evenement } from './agendaEvenements'
 import { heureDe, journee, plage, type GrilleHoraire } from './horaire'
 import type { ContenuPageClasse, DevoirPublie, EtapePubliee, GenerateurPublie, InterroPubliee, SeancePubliee } from './pageClasse'
+import { libelleChapitre, ordreCourant } from './ordreChapitres'
 
 export const MAX_INTERROS = 3
 export const MAX_DEVOIRS = 6
@@ -46,9 +47,11 @@ function ajouterJours(iso: string, n: number): string {
   return d.toISOString().slice(0, 10)
 }
 
+/** Titre publié : « Chapitre 3 — Suites » (numéro du professeur s'il a rangé ses chapitres et numérote
+ * ses documents) ou « Suites » — jamais le numéro du site (« Mon ordre des chapitres »). */
 function titreChapitre(niveau: string, slug: string): string {
   const c = findChapter(niveau, slug)
-  return c ? titreCourtChapitre(c.slug, c.title) : ''
+  return c ? libelleChapitre(c, ordreCourant(), { titre: titreCourtChapitre(c.slug, c.title) }) : ''
 }
 
 /** Heure d'une interro : « 2e heure » (réglage « numéro ») ou « 09h35 → 10h25 » (réglage « plage »,

@@ -16,6 +16,7 @@ import { PanneauModal } from './PanneauModal'
 import { Icone } from './Icones'
 import { dureeEtape, insecables, minusculeInitiale, titreCourt, useParcours } from '../../lib/parcoursChapitre'
 import { useMediaQuery } from '../../lib/useMediaQuery'
+import { numeroAffiche, useOrdreChapitres } from '../../lib/ordreChapitres'
 import { BoutonLecture } from '../lecture/BoutonLecture'
 import { EcouterEtape } from '../lecture/BoutonEcouter'
 
@@ -68,6 +69,8 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
   const etape = indexEtape >= 0 ? sections[indexEtape] : null
   const vue: Vue = etape ? 'etape' : fragment === 'reviser' ? 'reviser' : fragment === 'entrainer' ? 'entrainer' : fragment === 'projeter' ? 'projeter' : 'carte'
   const large = useMediaQuery('(min-width: 1200px)')
+  const { ordre } = useOrdreChapitres()
+  const numeroImprime = numeroAffiche(chapter, ordre)
   const colonneDroite = large && vue === 'etape'
   const { etat, ouvrir, marquer } = useParcours(chapter)
   const [introOuverte, setIntroOuverte] = useState(false)
@@ -119,7 +122,12 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
       <div className="page chapter-main">
         <header className="chapter-head">
           <p className="eyebrow">
-            {chapter.level} — Chapitre {chapter.chapterNumber}
+            {/* Numéro du SITE : simple repère à l'écran ; imprimé / exporté, le niveau seul ou le
+                numéro du professeur connecté qui a rangé ses chapitres (`lib/ordreChapitres.ts`). */}
+            <span className="ecran-seul">
+              {chapter.level} — Chapitre {chapter.chapterNumber}
+            </span>
+            <span className="impression-seule">{numeroImprime === null ? chapter.level : `${chapter.level} — Chapitre ${numeroImprime}`}</span>
           </p>
           <h1 className="chapter-title">{chapter.title}</h1>
           <p className="chapter-lede">

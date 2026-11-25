@@ -7,6 +7,7 @@ import { Diapo } from '../../components/projection/Diapo'
 import { Paginateur } from '../../components/projection/Paginateur'
 import { inlinerPolices, retirerPreferenceSombre, toutesLesReglesCss } from '../export/buildHtml'
 import { downloadBlob } from '../export/downloadBlob'
+import { surtitreChapitre } from '../ordreChapitres'
 
 /**
  * « Télécharger en PowerPoint » du mode projection : les MÊMES diapos (construites et découpées comme
@@ -251,7 +252,7 @@ export async function telechargerPptx(chapter: ChapterContent, choix: Pick<Choix
     const pptx = new PptxGenJS()
     pptx.layout = 'LAYOUT_16x9'
     pptx.title = `${chapter.title} — projection`
-    pptx.subject = `${chapter.level} · chapitre ${chapter.chapterNumber}`
+    pptx.subject = surtitreChapitre(chapter.level, chapter)
     pptx.company = 'Chapitres de maths — FWB'
 
     const noeuds = Array.from(planche.querySelectorAll<HTMLElement>('.pptx-diapo > .diapo'))

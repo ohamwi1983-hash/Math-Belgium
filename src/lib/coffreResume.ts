@@ -19,6 +19,7 @@ import type { Block } from '../content/types'
 import { titreCourtChapitre } from '../entrainement/export/examen'
 import type { ElementPlan, PlanDocument } from './evaluationLocal'
 import type { TypePlan } from './compteValidation'
+import { numeroRepere } from './ordreChapitres'
 
 /** Champs d'un enregistrement du coffre utiles ici (`compteDonnees.ts::PlanCoffre`). */
 export interface PlanResumable {
@@ -81,7 +82,9 @@ export interface ChapitrePlan {
 export function chapitresDuPlan(plan: PlanDocument): ChapitrePlan[] {
   return (plan.chapitresSlugs ?? []).map((slug) => {
     const c = findChapter(plan.levelSlug, slug)
-    return c ? { slug, numero: c.chapterNumber, titre: c.title, court: titreCourtChapitre(slug, c.title) } : { slug, numero: null, titre: slug, court: slug }
+    // Numéro du professeur qui LIT (son ordre réglé, à défaut celui du site) : un plan partagé se range
+    // et se résume avec l'ordre du destinataire.
+    return c ? { slug, numero: numeroRepere(c), titre: c.title, court: titreCourtChapitre(slug, c.title) } : { slug, numero: null, titre: slug, court: slug }
   })
 }
 

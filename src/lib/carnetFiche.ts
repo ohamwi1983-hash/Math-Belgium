@@ -67,7 +67,7 @@ export function ficheSeanceHtml(r: SeanceResolue & { professeur: string }): stri
   <p class="surtitre">${e(['Carnet de matière vue', r.ecole, r.professeur].filter(Boolean).join(' · '))}</p>
   <h1>${e(r.classe)} — ${e(capitaleDate(r.date))}</h1>
   ${r.horaire ? `<p class="horaire">${e(r.horaire)}</p>` : ''}
-  ${r.chapitre ? `<p class="chapitre">${e(r.chapitre.niveau)} — Chapitre ${r.chapitre.numero} : ${e(r.chapitre.titre)}</p>` : ''}
+  ${r.chapitre ? `<p class="chapitre">${e(r.chapitre.niveau)} — ${r.chapitre.numero !== null ? `Chapitre ${r.chapitre.numero} : ` : ''}${e(r.chapitre.titre)}</p>` : ''}
 </header>
 ${bloc('Vu en classe', parties)}
 ${r.generateurs.length > 0 ? bloc('Exercices et générateurs utilisés', liste(r.generateurs.map((g) => `<li>${e(g.titre)}${g.url ? `<span class="lien">${e(g.url)}</span>` : ''}</li>`))) : ''}
@@ -102,7 +102,7 @@ export function agendaPeriodeHtml(a: Agenda, options: OptionsSortieAgenda & { pr
     const contenu: string[] = []
     contenu.push(
       r.chapitre
-        ? `<p class="chapitre">${lienOuTexte(r.chapitre.url, `Ch. ${r.chapitre.numero} — ${r.chapitre.titre}`)}${plusieurs ? ` <span class="niveau">· ${e(r.chapitre.niveau)}</span>` : ''}</p>`
+        ? `<p class="chapitre">${lienOuTexte(r.chapitre.url, r.chapitre.numero !== null ? `Ch. ${r.chapitre.numero} — ${r.chapitre.titre}` : r.chapitre.titre)}${plusieurs ? ` <span class="niveau">· ${e(r.chapitre.niveau)}</span>` : ''}</p>`
         : `<p class="chapitre">Chapitre retiré du site (${e(s.seance.chapitre)})</p>`,
     )
     contenu.push(r.parties.length > 0 ? `<ul>${r.parties.map((p) => `<li>${lienOuTexte(p.url, p.texte)}${url(p.url)}</li>`).join('')}</ul>` : '<p class="vide">Aucune partie cochée.</p>')

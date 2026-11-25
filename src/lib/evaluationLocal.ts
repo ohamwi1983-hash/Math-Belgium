@@ -16,6 +16,7 @@ import { horaireExamen, lignesConsignes, mettreAEchelle, sessionParDefaut, titre
 import { annexeFormulaire, annexeTableNormale } from '../entrainement/export/annexesPapier'
 import { niveauEtDuree, type NiveauDifficulte } from '../entrainement/export/niveauDifficulte'
 import { findChapter, LEVELS } from '../content/chaptersIndex'
+import { ordreCourant, surtitreChapitre, titreSectionImprime, type OrdreChapitres } from './ordreChapitres'
 import { encoderCode, tirerGraine } from '../entrainement/export/codeExercice'
 import { ENTRAINEMENT_REGISTRY } from '../entrainement/registry'
 import { EVALUATION_ADAPTER_REGISTRY } from './evaluationAdapterRegistry'
@@ -1081,7 +1082,7 @@ export function itemsDuDocument(plan: PlanDocument, items: ItemEvaluation[]): It
   })
 }
 
-function enteteSerie(entete: EnTeteEvaluation, serieLettre: string, examen?: ExamenDocument): EnteteEvaluationSerie {
+function enteteSerie(entete: EnTeteEvaluation, serieLettre: string, examen?: ExamenDocument, surtitre: string | undefined = entete.surtitre): EnteteEvaluationSerie {
   return {
     ...(examen ? { examen } : {}),
     numero: entete.numero,
@@ -1095,7 +1096,7 @@ function enteteSerie(entete: EnTeteEvaluation, serieLettre: string, examen?: Exa
     afficherTitresSection: entete.afficherTitresSection,
     mode: entete.mode,
     afficherDuree: entete.afficherDuree,
-    surtitre: entete.surtitre,
+    surtitre,
     titreChapitre: entete.titreChapitre,
     urlChapitre: entete.urlChapitre,
     deuxColonnes: entete.deuxColonnes,
@@ -1126,7 +1127,7 @@ export function annexesDuDocument(plan: PlanDocument, items: ItemEvaluation[]): 
   if (plan.entete.joindreFormulaire) {
     for (const slug of plan.chapitresSlugs) {
       const chapitre = findChapter(plan.levelSlug, slug)
-      const annexe = chapitre ? annexeFormulaire(chapitre) : null
+      const annexe = chapitre ? annexeFormulaire(chapitre, ordreDuPlan(plan)) : null
       if (annexe) annexes.push(annexe)
     }
   }
@@ -1134,13 +1135,47 @@ export function annexesDuDocument(plan: PlanDocument, items: ItemEvaluation[]): 
   return annexes
 }
 
+/* ----------------------------------------------------------------------------------------------
+ * Numéro de chapitre imprimé (« Mon ordre des chapitres », décision du 25/11/2026)
+ * -------------------------------------------------------------------------------------------- */
+
+/** Ordre qui décide du numéro de chapitre imprimé : celui du professeur qui IMPRIME (connecté, son
+ * ordre réglé — un plan partagé s'imprime donc avec l'ordre du destinataire), jamais pour un document
+ * de l'assistant élève (`sansOrdreProfesseur`) ; `null` = titre seul, jamais le numéro du site. */
+export function ordreDuPlan(plan: PlanDocument): OrdreChapitres | null {
+  return plan.entete.sansOrdreProfesseur ? null : ordreCourant()
+}
+
+/** Surtitre imprimé (feuille d'exercices) : recalculé AU RENDU pour un plan d'un seul chapitre —
+ * « 4e · Chapitre 3 — Titre » ou « 4e · Titre » —, même si le plan enregistré porte l'ancien
+ * « 4e · Chapitre 8 » (numéro du site). Le plan lui-même ne change pas. */
+export function surtitreDuPlan(plan: PlanDocument): string | undefined {
+  const unique = plan.chapitresSlugs.length === 1 ? findChapter(plan.levelSlug, plan.chapitresSlugs[0]) : undefined
+  return unique ? surtitreChapitre(plan.entete.niveauLabel, unique, ordreDuPlan(plan)) : plan.entete.surtitre
+}
+
+/** Titres de section d'un document multi-chapitres réécrits au rendu (`titreSectionImprime`) :
+ * « 3. Titre — 2. Section » (numéro du professeur) ou « Titre — 2. Section ». */
+function avecTitresImprimes(items: ItemEvaluation[], ordre: OrdreChapitres | null): ItemEvaluation[] {
+  const titre = (it: ItemEvaluation) => titreSectionImprime(it.titreSection, it.chapitres?.[0], ordre)
+  return items.map((it) => {
+    const t = titre(it)
+    const groupe = it.groupe?.map((l) => {
+      const tl = titre(l.item)
+      return tl === l.item.titreSection ? l : { ...l, item: { ...l.item, titreSection: tl } }
+    })
+    if (t === it.titreSection && (!groupe || groupe.every((l, i) => l === it.groupe![i]))) return it
+    return { ...it, titreSection: t, ...(groupe ? { groupe } : {}) }
+  })
+}
+
 export async function genererDocumentsDepuisPlan(plan: PlanDocument): Promise<DocumentGenere[]> {
   const documents: DocumentGenere[] = []
   const exercice = plan.entete.mode === 'exercice'
   const examen = examenDuPlan(plan)
   for (const serie of plan.series) {
-    const items = itemsDuDocument(plan, await itemsDepuisSerie(serie))
-    const entete = enteteSerie(plan.entete, serie.lettre, examen)
+    const items = itemsDuDocument(plan, avecTitresImprimes(await itemsDepuisSerie(serie), ordreDuPlan(plan)))
+    const entete = enteteSerie(plan.entete, serie.lettre, examen, surtitreDuPlan(plan))
     const annexes = annexesDuDocument(plan, items)
     if (exercice) {
       documents.push({ type: 'feuille', libelle: 'Feuille d’exercices (énoncé, je vérifie, corrigé)', suffixe: 'feuille', blob: await genererFeuilleExercicesComplete(entete, items, annexes) })
@@ -1243,7 +1278,7 @@ export async function genererDocxDepuisPlan(plan: PlanDocument, lettre: string, 
   if (!serie) return null
   const docx = await import('../entrainement/export/evaluationDocx')
   const generer = type === 'copie' ? docx.genererCopieEvaluationDocx : type === 'corrige' ? docx.genererCorrigeEvaluationDocx : docx.genererGrilleEvaluationDocx
-  return generer(enteteSerie(plan.entete, lettre, examenDuPlan(plan)), itemsDuDocument(plan, await itemsDepuisSerie(serie)))
+  return generer(enteteSerie(plan.entete, lettre, examenDuPlan(plan), surtitreDuPlan(plan)), itemsDuDocument(plan, avecTitresImprimes(await itemsDepuisSerie(serie), ordreDuPlan(plan))))
 }
 
 /** Copie Word (.docx) d'une série d'évaluation. */

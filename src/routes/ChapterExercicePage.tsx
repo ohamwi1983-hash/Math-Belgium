@@ -6,6 +6,7 @@ import { AssistantEleve } from '../components/eleve/AssistantEleve'
 import { LEVELS, findChapter } from '../content/chaptersIndex'
 import { estConnecteActif, useCompte } from '../lib/compteContexte'
 import { usePageNonIndexee } from '../lib/useDocumentMeta'
+import { numeroRepere, useOrdreChapitres } from '../lib/ordreChapitres'
 
 /** Page `/{levelSlug}/{chapterSlug}/exercices` — publique, comme `/exercice` (décision de
  * l'utilisateur : les élèves s'en servent pour préparer leurs évaluations), verrouillée sur LE
@@ -17,6 +18,7 @@ export function ChapterExercicePage() {
   const { levelSlug, chapterSlug } = useParams<{ levelSlug: string; chapterSlug: string }>()
   const chapter = levelSlug && chapterSlug ? findChapter(levelSlug, chapterSlug) : undefined
   const compte = useCompte()
+  const { ordre } = useOrdreChapitres()
   const connecte = estConnecteActif(compte)
   // « Voir comme un élève » (décision de l'utilisateur) : `?vue=eleve` montre l'assistant au professeur.
   const [params] = useSearchParams()
@@ -47,7 +49,7 @@ export function ChapterExercicePage() {
           <EspaceConception
             type="feuille"
             titre={`Feuille d'exercices — ${chapter.title}`}
-            sousTitre={`${level?.label ?? chapter.level} · chapitre ${chapter.chapterNumber}`}
+            sousTitre={`${level?.label ?? chapter.level} · chapitre ${numeroRepere(chapter, ordre)}`}
             sansNiveau
             lienEleve={`/${levelSlug}/${chapterSlug}/exercices?vue=eleve`}
             panneau={(publier) => <EvaluationGeneratorPanel mode="exercice" verrouille={{ levelSlug, chapitreSlug: chapterSlug }} onResume={publier} />}

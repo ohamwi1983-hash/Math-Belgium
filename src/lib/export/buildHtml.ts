@@ -178,6 +178,9 @@ export async function buildHtmlBlob(chapter: ChapterContent, amenage = false): P
 
   const clone = page.cloneNode(true) as HTMLElement
   clone.querySelectorAll('.no-export, iframe').forEach((el) => el.remove())
+  // Numéro du site (repère d'écran) retiré ; le texte prévu pour l'impression s'affiche aussi à l'écran.
+  clone.querySelectorAll('.ecran-seul').forEach((el) => el.remove())
+  clone.querySelectorAll('.impression-seule').forEach((el) => el.classList.remove('impression-seule'))
 
   const css = await inlinerPolices(retirerPreferenceSombre(toutesLesReglesCss()))
   const titre = echapperHtml(chapter.title)

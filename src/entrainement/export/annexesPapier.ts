@@ -4,6 +4,7 @@ import { normaliserLogDecimal } from "../../lib/notationLog";
 import type { AnnexeDocument } from "./assemblerEvaluationHtml";
 import { echapperHtml } from "./genererFeuilleExercicesHtml";
 import { tablePhiHtml } from "../../lib/tablePhi";
+import { numeroAffiche, ordreCourant, type OrdreChapitres } from "../../lib/ordreChapitres";
 
 /**
  * Annexes imprimées des documents (voir `AnnexeDocument`, `assemblerEvaluationHtml.ts`).
@@ -50,10 +51,12 @@ function formulesVersHtml(latex: string): string {
     .join(" ");
 }
 
-export function annexeFormulaire(chapitre: { slug: string; title: string; level: string; chapterNumber: number; formulaire?: FormulaireData }): AnnexeDocument | null {
+/** `ordre` : ordre du professeur qui imprime (`lib/ordreChapitres.ts`) — son numéro, sinon aucun (jamais celui du site). */
+export function annexeFormulaire(chapitre: { slug: string; levelSlug: string; title: string; level: string; chapterNumber: number; formulaire?: FormulaireData }, ordre: OrdreChapitres | null = ordreCourant()): AnnexeDocument | null {
   const formulaire = chapitre.formulaire;
   if (!formulaire || formulaire.groups.length === 0) return null;
   const total = formulaire.groups.reduce((n, g) => n + g.formulas.length, 0);
+  const numero = numeroAffiche(chapitre, ordre);
   const groupes = formulaire.groups
     .map(
       (g) =>
@@ -65,7 +68,7 @@ export function annexeFormulaire(chapitre: { slug: string; title: string; level:
   return {
     id: `formulaire:${chapitre.slug}`,
     titre: `Annexe — Formulaire : ${chapitre.title}`,
-    meta: `${chapitre.level} · chapitre ${chapitre.chapterNumber} · ${total} formule${total > 1 ? "s" : ""}`,
+    meta: `${chapitre.level} · ${numero !== null ? `chapitre ${numero} · ` : ""}${total} formule${total > 1 ? "s" : ""}`,
     html: `<div class="formulaire-papier">${groupes}</div>`,
   };
 }

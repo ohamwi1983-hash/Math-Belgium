@@ -34,6 +34,7 @@ import { AvertissementsInterro, MessageAgendaInactif } from './AgendaUi'
 import { useCarnet } from './contexteCarnet'
 import { generateursEvaluation, useTableProcessus, type GenerateurEvaluation } from './processusCarnet'
 import { chapitreEnCours, chapitreParDefaut, heureCourte, jourMois } from './outilsCarnet'
+import { chapitresDansMonOrdre, numeroRepere, ordreCourant } from '../../lib/ordreChapitres'
 
 /** Interro à annoncer / contrôle-bilan : ce qu'il faut pour créer ou mettre à jour l'événement
  * « Interrogation » de l'agenda (0006). */
@@ -608,9 +609,9 @@ export function FormulaireSeance({
               <option value="">— choisir —</option>
               {niveauxOrdonnes.map((l) => (
                 <optgroup key={l.slug} label={l.label}>
-                  {l.chapters.map((c) => (
+                  {chapitresDansMonOrdre(l.slug, ordreCourant(), l.chapters).map((c) => (
                     <option key={c.slug} value={`${l.slug}/${c.slug}`}>
-                      {c.chapterNumber}. {c.title}
+                      {numeroRepere(c)}. {c.title}
                       {enCours === `${l.slug}/${c.slug}` ? ' (en cours)' : ''}
                     </option>
                   ))}
@@ -618,6 +619,13 @@ export function FormulaireSeance({
               ))}
             </select>
             {erreurs.chapitre && <p className="compte-erreur-champ">{erreurs.chapitre}</p>}
+            <p className="compte-aide">
+              Rangés dans ton ordre (à défaut, celui du site).{' '}
+              {/* Nouvel onglet : la saisie reste dans le panneau. */}
+              <a href="/profil#ordre-chapitres" target="_blank" rel="noopener">
+                Mon ordre des chapitres
+              </a>
+            </p>
           </div>
 
           {chapitre && (

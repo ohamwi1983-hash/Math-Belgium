@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { findChapter } from '../../content/chaptersIndex'
 import { dateCourte, libelleNiveau, matiereDepuis, structureChapitre, texteBrut, type Classe, type Seance } from '../../lib/carnet'
 import { urlEvaluationMatiere } from '../../lib/carnetMatiere'
+import { numeroRepere } from '../../lib/ordreChapitres'
 
 /** Date proposée : première séance du chapitre de la séance la plus récente. */
 function dateParDefaut(seances: Seance[]): string {
@@ -26,7 +27,7 @@ export function EvaluationMatiere({ classe, seances, sansTitre = false }: { clas
     const structure = chapitre ? structureChapitre(chapitre) : []
     return {
       slug: c.slug,
-      titre: chapitre ? `Ch. ${chapitre.chapterNumber} — ${texteBrut(chapitre.title)}` : c.slug,
+      titre: chapitre ? `Ch. ${numeroRepere(chapitre)} — ${texteBrut(chapitre.title)}` : c.slug,
       sections: c.sections.map((s) => {
         const sec = structure.find((x) => x.id === s)
         return sec ? `${sec.numero}. ${texteBrut(sec.titre)}` : s

@@ -24,6 +24,7 @@ import {
   type Seance,
   type SeanceResolue,
 } from './carnet'
+import { chapitresDansMonOrdre, numeroAffiche, ordreCourant } from './ordreChapitres'
 
 /* ------------------------------------------------------------------------------- dates */
 
@@ -275,11 +276,12 @@ export function syntheseAgenda(liste: SeanceAgenda[]): SyntheseAgenda {
       const niveauIndex = LEVELS.findIndex((l) => l.slug === s.seance.niveau)
       c = {
         cle,
-        numero: chap ? chap.chapterNumber : null,
+        // Agenda imprimé / copié : numéro du professeur s'il a rangé ses chapitres, sinon titre seul.
+        numero: chap ? numeroAffiche(chap) : null,
         titre: chap ? texteBrut(chap.title) : s.seance.chapitre,
         niveau: chap ? chap.level : s.seance.niveau,
         sections: new Set(),
-        ordre: (niveauIndex < 0 ? 99 : niveauIndex) * 1000 + (chap?.chapterNumber ?? 999),
+        ordre: (niveauIndex < 0 ? 99 : niveauIndex) * 1000 + (chap ? chapitresDansMonOrdre(chap.levelSlug, ordreCourant()).findIndex((x) => x.slug === chap.slug) + 1 : 999),
       }
       chapitres.set(cle, c)
     }

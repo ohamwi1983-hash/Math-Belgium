@@ -129,7 +129,7 @@ export function CarteSeance({ seance, compacte = false, titreId }: { seance: Sea
       {r.chapitre ? (
         <p className="carnet-seance-chapitre">
           <Link to={`/${seance.niveau}/${seance.chapitre}`}>
-            Ch. {r.chapitre.numero} — {r.chapitre.titre}
+            Ch. {r.chapitre.repere} — {r.chapitre.titre}
           </Link>
         </p>
       ) : (

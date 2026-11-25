@@ -1815,6 +1815,10 @@ table.feature-table--synthese { font-family: inherit; font-size: 0.94em; }
  * « Ma feuille » / « Mon évaluation » / « Mon examen » à droite, collant ; sous 960 px : une colonne et
  * une barre fixée en bas qui ouvre le panneau (feuille du bas). Processus : 1 = --proc1 (vert sarcelle),
  * 2 = --proc2 (bleu franc), 3 = --proc3 (rouge bordeaux). Cibles ≥ 44 px sur téléphone. */
+/* Numéro de chapitre du SITE : simple repère à l'écran, jamais imprimé ni exporté (décision du
+   25/11/2026, `lib/ordreChapitres.ts`) — `.impression-seule` porte ce qui s'imprime à la place. */
+.impression-seule { display: none; }
+@media print { .ecran-seul { display: none !important; } .impression-seule { display: inline; } }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .conc { gap: 16px; }
 .conc button:focus-visible, .conc input:focus-visible, .conc select:focus-visible, .conc textarea:focus-visible, .conc summary:focus-visible {
@@ -2827,6 +2831,7 @@ body:has(.accueil) { background: var(--paper); }
 .accueil-chevron { flex: none; font-size: 22px; line-height: 1; color: var(--ink-faint); }
 
 .accueil-liste-titre { margin: 6px 0 0; font: 600 13px/1.3 var(--sans); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); }
+.accueil-ordre-note { margin: -4px 0 0; font: 400 13px/1.4 var(--sans); color: var(--ink-soft); }
 .accueil-chapitres { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .accueil-chapitre {
   display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px; box-sizing: border-box; height: 100%;

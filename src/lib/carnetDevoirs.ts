@@ -334,7 +334,7 @@ export function donneesTexteAgenda(
   }
   return {
     entete: enteteSeance(r),
-    chapitre: r.chapitre ? { ligne: `MATHÉMATIQUES — Chapitre ${r.chapitre.numero} : `, titre: r.chapitre.titre, url: r.chapitre.url } : null,
+    chapitre: r.chapitre ? { ligne: r.chapitre.numero !== null ? `MATHÉMATIQUES — Chapitre ${r.chapitre.numero} : ` : 'MATHÉMATIQUES — ', titre: r.chapitre.titre, url: r.chapitre.url } : null,
     objectif: (options.objectif ?? seance.objectif ?? '').replace(/\s+/g, ' ').trim(),
     parties,
     processus,

@@ -11,6 +11,7 @@ import { qrCodeSvg } from '../../entrainement/export/qrSvg'
 import { disposerAtelier } from './dispositionAtelier'
 import { Pictogramme } from './Pictogrammes'
 import './projection.css'
+import { surtitreChapitre, useOrdreChapitres } from '../../lib/ordreChapitres'
 
 /**
  * Une diapo 16:9 dessinée à 1 280 × 720 px LOGIQUES (la scène la met à l'échelle de l'écran), fond
@@ -35,6 +36,7 @@ export interface OptionsAtelier {
 export function Diapo({ diapo, chapter, pas, mode, debut, atelier }: { diapo: DonneesDiapo; chapter: ChapterContent; pas: number; mode: ModeDiapo; debut?: number; atelier?: OptionsAtelier }) {
   const contenu = useRef<HTMLDivElement>(null)
   const racine = useRef<HTMLDivElement>(null)
+  useOrdreChapitres() // re-rendu quand l'ordre du professeur arrive (surtitre de la diapo de titre)
   const toutVisible = mode === 'export' || mode === 'mesure'
   const p = toutVisible ? diapo.pas : Math.min(pas, diapo.pas)
   useAjustement(racine, contenu, mode !== 'mesure' && diapo.type !== 'atelier', diapo.cle)
@@ -74,7 +76,8 @@ function corps(d: DonneesDiapo, chapter: ChapterContent, pas: number, mode: Mode
       return (
         <>
           <p className="diapo-surtitre" data-pptx="">
-            {chapter.level} · Chapitre {chapter.chapterNumber} · {chapter.title}
+            {/* Jamais le numéro du site devant la classe : titre seul, ou numéro du professeur (`lib/ordreChapitres.ts`). */}
+            {surtitreChapitre(chapter.level, chapter)}
           </p>
           <p className="diapo-etape" data-pptx="">
             Étape {d.section.number}

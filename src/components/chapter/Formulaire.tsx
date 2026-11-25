@@ -1,6 +1,7 @@
 import type { ChapterContent } from '../../content/types'
 import { RichText } from '../Math'
 import { imprimerFormulaireAmenage, imprimerFormulaireSeul } from '../../lib/imprimer'
+import { numeroAffiche, useOrdreChapitres } from '../../lib/ordreChapitres'
 
 /**
  * Formulaire de fin de chapitre ("fiche de référence") : toutes les formules nécessaires pour
@@ -8,7 +9,9 @@ import { imprimerFormulaireAmenage, imprimerFormulaireSeul } from '../../lib/imp
  * après `RecapFinal` — voir `ChapterContent.formulaire` pour le schéma de données.
  */
 export function Formulaire({ formulaire, chapter }: { formulaire: ChapterContent['formulaire']; chapter: ChapterContent }) {
+  const { ordre } = useOrdreChapitres()
   if (!formulaire) return null
+  const numeroImprime = numeroAffiche(chapter, ordre)
   const total = formulaire.groups.reduce((n, g) => n + g.formulas.length, 0)
 
   return (
@@ -18,7 +21,10 @@ export function Formulaire({ formulaire, chapter }: { formulaire: ChapterContent
         <div className="formulaire-entete">
           <h2>Formulaire — {chapter.title}</h2>
           <p className="formulaire-meta">
-            {chapter.level} · chapitre {chapter.chapterNumber}
+            <span className="ecran-seul">
+              {chapter.level} · chapitre {chapter.chapterNumber}
+            </span>
+            <span className="impression-seule">{numeroImprime === null ? chapter.level : `${chapter.level} · chapitre ${numeroImprime}`}</span>
             <br />
             {total} formule{total > 1 ? 's' : ''}
           </p>

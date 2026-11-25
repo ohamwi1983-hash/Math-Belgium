@@ -14,6 +14,7 @@ import type { ChapterContent } from '../content/types'
 import { findChapter, LEVELS } from '../content/chaptersIndex'
 import { heureTexte } from '../entrainement/export/examen'
 import type { MatiereVue } from './carnetMatiere'
+import { chapitresDansMonOrdre, numeroAffiche, numeroRepere, ordreCourant } from './ordreChapitres'
 
 export const SITE_URL = 'https://math-belgium.vercel.app'
 export const NOM_CLASSE_MAX = 40
@@ -467,7 +468,10 @@ export interface SeanceResolue {
   horaire: string | null
   classe: string
   ecole: string
-  chapitre: { numero: number; titre: string; niveau: string; url: string } | null
+  /** `numero` : numéro IMPRIMÉ (texte Smartschool, fiche, agenda — vus par les élèves et leurs parents) = celui
+   * du professeur s'il a rangé ses chapitres, sinon `null` (titre seul, jamais le numéro du site) ;
+   * `repere` : numéro montré au professeur dans le carnet (le sien, à défaut celui du site). */
+  chapitre: { numero: number | null; repere: number; titre: string; niveau: string; url: string } | null
   parties: { texte: string; url: string }[]
   generateurs: { titre: string; url: string }[]
   devoir: string
@@ -495,7 +499,7 @@ export function resoudreSeance(
     horaire: horaireTexte(seance, options.format, options.avecGrille ?? false),
     classe: classe.nom.trim(),
     ecole: options.ecole?.trim() ?? '',
-    chapitre: chapitre ? { numero: chapitre.chapterNumber, titre: texteBrut(chapitre.title), niveau: chapitre.level, url: base } : null,
+    chapitre: chapitre ? { numero: numeroAffiche(chapitre), repere: numeroRepere(chapitre), titre: texteBrut(chapitre.title), niveau: chapitre.level, url: base } : null,
     parties: lignesPartiesVues(seance.parties, structure).map((l) => ({ texte: texteLignePartie(l), url: `${base}#${l.sectionId}` })),
     generateurs,
     devoir: seance.devoir.trim(),
@@ -525,7 +529,7 @@ export interface OptionsTexteSeance {
 export function texteSmartschool(r: SeanceResolue, options: OptionsTexteSeance = {}): string {
   const liens = options.liens ?? true
   const lignes: string[] = [enteteSeance(r)]
-  if (r.chapitre) lignes.push(`Chapitre ${r.chapitre.numero} — ${r.chapitre.titre}`)
+  if (r.chapitre) lignes.push(r.chapitre.numero !== null ? `Chapitre ${r.chapitre.numero} — ${r.chapitre.titre}` : r.chapitre.titre)
   if (r.parties.length > 0) {
     lignes.push('', 'Vu en classe :')
     for (const p of r.parties) lignes.push(`• ${p.texte}`, ...(liens ? [`  ${p.url}`] : []))
@@ -550,7 +554,7 @@ export function htmlSmartschool(r: SeanceResolue, options: OptionsTexteSeance = 
   const liens = options.liens ?? true
   const lien = (url: string, texte: string) => (liens && url ? `<a href="${echapperHtml(url)}">${echapperHtml(texte)}</a>` : echapperHtml(texte))
   const h: string[] = [`<p><strong>${echapperHtml(enteteSeance(r))}</strong>`]
-  if (r.chapitre) h.push(`<br>Chapitre ${r.chapitre.numero} — ${lien(r.chapitre.url, r.chapitre.titre)}`)
+  if (r.chapitre) h.push(`<br>${r.chapitre.numero !== null ? `Chapitre ${r.chapitre.numero} — ` : ''}${lien(r.chapitre.url, r.chapitre.titre)}`)
   h.push('</p>')
   if (r.parties.length > 0) {
     h.push('<p>Vu en classe :</p><ul>')
@@ -598,10 +602,10 @@ export interface ChapitreProgression {
   derniereSeance: string | null
 }
 
-/** Chapitres à montrer pour une classe : ceux de son niveau (dans l'ordre du site), puis ceux des
- * séances qui n'en font pas partie. */
+/** Chapitres à montrer pour une classe : ceux de son niveau (dans l'ordre du professeur, à défaut
+ * celui du site — « Mon ordre des chapitres »), puis ceux des séances qui n'en font pas partie. */
 export function chapitresDeLaClasse(classe: Pick<Classe, 'niveau'>, seances: Pick<Seance, 'niveau' | 'chapitre'>[]): ChapterContent[] {
-  const liste: ChapterContent[] = [...(LEVELS.find((l) => l.slug === classe.niveau)?.chapters ?? [])]
+  const liste: ChapterContent[] = classe.niveau ? chapitresDansMonOrdre(classe.niveau, ordreCourant()) : []
   for (const s of seances) {
     const c = findChapter(s.niveau, s.chapitre)
     if (c && !liste.includes(c)) liste.push(c)
@@ -637,7 +641,7 @@ export function progressionClasse(seances: Seance[], chapitres: ChapterContent[]
     return {
       levelSlug: chapitre.levelSlug,
       slug: chapitre.slug,
-      numero: chapitre.chapterNumber,
+      numero: numeroRepere(chapitre),
       titre: texteBrut(chapitre.title),
       sections,
       vues: sections.reduce((t, s) => t + s.vues, 0),
