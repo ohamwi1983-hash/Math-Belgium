@@ -226,6 +226,11 @@ export type InteractiveWidgetTag =
   | 'simulateur-jeu-esperance-widget'
   | 'regle-empirique-widget'
   | 'bayes-trois-categories-widget'
+  | 'trace-lieu-widget'
+  | 'points-remarquables-widget'
+  | 'generatrices-animees-widget'
+  | 'courbe-parametree-widget'
+  | 'aire-variable-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

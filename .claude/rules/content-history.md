@@ -5940,3 +5940,69 @@ recalcul indépendant : 400 réglages Poisson / binomiale (binomiale par produit
 4,5 σ/√N sur 10 000 parties), 350 cases de table + 190 lectures inverses contre `lib/tablePhi.ts` : 0 faux ; gestes au
 doigt (CDP) : toucher / glisser k, boutons − / +. Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667
 (15 ateliers du chapitre). Scripts et captures : `scratchpad/g2-6e8/`.
+
+## 6e (6h), Chapitre 9 — lot G de l'audit, première moitié (5 ateliers + 5 réemplois, agent G1, 25/11/2026)
+
+Le chapitre n'avait aucun atelier. Dix blocs `atelier` ajoutés, seuls (aucun autre bloc touché), placés par ancre
+solide (le cours est réécrit en parallèle). Repères tracés avec `geo-analytique-commun.js` (4e ch. 7 : fenêtre FIXE,
+axes fléchés, poignées) importé en tête de chaque module ; KaTeX par `katex-shadow.js` ; curseurs − / + de
+`variables-aleatoires-commun.js` ; nouveau module `src/interactive/lieux-geometriques-commun.js` (fractions et
+racines simplifiées en LaTeX, `texDroite`, distances point–segment / demi-droite / polygone, lecture automatique
+`lecteur`, styles des repères). Repères orthonormés (même unité en x et y : cercles ronds), figure dans une `<svg>`
+sans bouton dans son conteneur, coordonnées avec espaces insécables, légendes en Unicode.
+- **`aire-variable-widget`** (§ 1, fin de la sous-section « Aire variable », juste avant « Symétrique d'un point ») :
+  A(1 ; 1), B(5 ; 1), C(t) = P₀ + t·u sur quatre droites (⟂ (AB) : x = 3, oblique y = 2x − 3, par A : y = −x + 2,
+  ∥ (AB) : y = 3), t au pas de 0,125, k de 0 à 8 au pas de 0,5. Une seule `<svg>` à deux panneaux : triangle et
+  graphique de l'aire en V (½|K + Mt|, K et M affichés). C₁, C₂ symétriques par rapport au point I = d ∩ (AB)
+  (milieu de [C₁C₂]) ; symétrique C₁′ de C₁ par rapport à (AB) dessiné hors de d quand d n'est pas ⟂ (AB) (corrige
+  C3 de l'audit) ; k = 0 : une position (triangle aplati) ; d ∥ (AB) : aire constante 4. C glissé au doigt
+  (projeté sur d), toucher le graphique choisit t.
+- **`points-remarquables-widget`** (§ 1, juste avant la carte 6gen54 — à remonter après la nouvelle sous-section
+  « points remarquables » du cours quand elle existera) : sommets entiers glissés (ou sommet + curseurs x, y),
+  triangle aplati (angle < 6°) refusé ; familles médianes / G (orange), hauteurs / H (violet, côté prolongé en
+  pointillé quand le pied tombe dehors), médiatrices / O + cercle circonscrit (bleu), bissectrices / I + cercle
+  inscrit (vert), droite d'Euler (rose), cercle des neuf points (ocre, ses neuf points marqués). G, O, H, N en
+  fractions exactes, I approché (« ≈ ») ; OG→ et OH→ exacts, OH→ = 3 OG→, GH = 2 OG ; nature (acutangle,
+  rectangle : H au sommet et O milieu de l'hypoténuse, obtus : O et H dehors, isocèle : axe = droite d'Euler,
+  équilatéral : tout confondu). Préréglages quelconque, isocèle, rectangle, obtus, équilatéral (sommet non entier).
+  Étiquettes des points : première place libre parmi 8 (ni sur une autre étiquette ni sur un point).
+- **`trace-lieu-widget`** (§ 4, en fin de section juste avant la carte 6gen56 : il reprend toutes les conditions
+  de la section) : base `lieux-complexes-widget` (6e ch. 5), refaite. Huit conditions : MA² + MB² = k (A(−2 ; 0),
+  B(2 ; 0), seuil 8 : cercle / point I / vide), MA² = k·MB² (k au quart, cercle de centre 2(k+1)/(k−1) et de rayon
+  8√n/|n−4| pour k = n/4, médiatrice pour k = 1, « on ne divise pas par 1 − k »), MA² − MB² = k (x = k/8),
+  |x − 2| ± |y + 1| = k (losange / point / vide ; quatre demi-droites ou deux droites), deux parallèles x = ±2
+  (vide / bande pleine / deux droites), carré [−2 ; 2]² (vide / carré plein / octogone, piège 4c contre 4c²),
+  angle AMB droit (cercle de diamètre [AB], A et B exclus en ronds vides). M vert ⟺ distance EXACTE de M au lieu
+  ≤ 0,13 ; trace effacée quand k change ; panneau « Le lieu pour cette valeur de k » (équivalences, seuil, nature).
+  Formules longues coupées en plusieurs KaTeX (Apollonius, carré : elles débordaient à 320 px).
+- **`generatrices-animees-widget`** (§ 5, après l'exemple du rectangle, juste avant « Une médiane qui émerge… ») :
+  « ▶ Lancer » (24 pas par seconde), α en curseur ; configurations rectangle (segment ouvert (2 ; 0)–(2 ; 3), α = 0
+  singulier, α = 6 exclu par l'énoncé), céviennes (médiane 4x + 3y − 12 = 0, ]M ; A[), perpendiculaires (x = 1,
+  (1 ; 0) jamais atteint, α = 0 : parallèles, P hors cadre signalé), angles α et 2α (cercle de centre A(2 ; 0) et de
+  rayon 2 privé de (4 ; 0), O atteint pour α = 90°, d₂ verticale pour α = 45°). Équations des génératrices pour α ;
+  « Montrer le lieu » : équation brute factorisée, statut des morceaux, restriction, ronds vides (tracés PAR-DESSUS
+  la trace). Fenêtre fixe par configuration.
+- **`courbe-parametree-widget`** (§ 6, juste après la figure de l'astroïde) : astroïde, cercle (option
+  t ∈ [0 ; π] : demi-cercle y ≥ −1), x = cos t, y = cos 2t (arc de y = 2x² − 1), x = t², y = t⁴ (demi-parabole
+  parcourue deux fois), x = t + 1, y = t² − 3 (entière) ; courbe décrite (orange) sur la courbe cartésienne
+  complète (gris pointillé) ; t trigonométrique au pas de π/48 écrit en fraction de π ; panneau « Éliminer t »
+  (identité, équation, partie décrite).
+- **Réemplois** (légendes réécrites pour le ch. 9) : `relations-droites-widget` (§ 1, juste avant « Caractériser une
+  droite par sa pente » : directeur (−b ; a) ⟂ normale (a ; b), a₁b₂ − a₂b₁ = 0), `distance-droite-widget` (§ 1,
+  juste avant la « Boîte à outils » : comparer à |ax + by + c| / √(a² + b²)), `cercle-equation-widget` (§ 2, juste
+  avant « Cercle passant par 3 points » : même forme x² + y² + Dx + Ey + F = 0 que le cours),
+  `triangle-deformable-widget` (§ 2, juste avant « Cercle passant par 2 points » : le cercle par trois points,
+  diamètre a / sin Â), `droite-cercle-widget` (§ 2, juste avant la carte 6gen55 : la droite y est écrite y = mx + p,
+  comme l'exemple des tangentes du cours, ce que la légende dit).
+Vérifié (Vite, page réelle, panneau, iPhone 13 clair / sombre et 1 280 px) : 0 erreur console, scrollWidth 390,
+0 `.katex-error`, 0 KaTeX qui déborde, Shadow DOM sans `^ $ \ * NaN undefined Infinity`, 0 étiquette SVG rognée ;
+balayages contre un recalcul indépendant (sources LaTeX lues par un espion sur `katex.renderToString`) : 40 820
+positions de M sur 157 régimes (distance au lieu mesurée par changement de signe de la condition exacte, natures
+contre les règles du cours) ; 232 triangles entiers (O et H par intersection de deux médiatrices / hauteurs, I
+pondéré, N, OH→ = 3 OG→, nature) ; 784 valeurs de α (P comparé à l'intersection géométrique, sur le lieu et dans la
+restriction, raison affichée quand il n'y a pas de P) ; 582 valeurs de t (point, équation cartésienne, restriction,
+demi-cercle) ; 204 réglages d'aire (aire de C₁ et C₂ par la formule des coordonnées, sur d, milieu = I, verdict de C) :
+0 faux. Gestes au doigt (CDP) dans le panneau : M glissé et tracé en arc (21 points verts), sommet C glissé, C glissé
+sur d, graphique touché, « Lancer » / « Pause ». Épinglage dans le panneau : 0 KO à 390 × 664 et 375 × 667
+(10 ateliers du chapitre). `tsc`, `oxlint`, `npm run build` (24 pages) propres. Scripts et captures :
+`scratchpad/g1-6e9/`.

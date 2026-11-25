@@ -181,6 +181,17 @@ export const lieuxGeometriques: ChapterContent = {
             },
           ],
         },
+        {
+          kind: 'atelier',
+          tag: 'relations-droites-widget',
+          label: 'Manipule toi-même : parallèles, perpendiculaires ou sécantes ?',
+          caption:
+            'Rappel de 4e. Règle les coefficients de deux droites ax + by + c = 0 : l’atelier lit un ' +
+            'vecteur directeur (−b ; a) de chacune, perpendiculaire à la normale (a ; b), puis teste le ' +
+            'parallélisme (critère de colinéarité, l’équivalent de a₁b₂ − a₂b₁ = 0) et la ' +
+            'perpendicularité (produit scalaire nul). Pour deux sécantes, il calcule le point ' +
+            'd’intersection pas à pas. En mode Défi, trouve la position relative en un seul essai.',
+        },
         { kind: 'subheading', text: 'Caractériser une droite par sa pente' },
         {
           kind: 'methode',
@@ -270,6 +281,17 @@ export const lieuxGeometriques: ChapterContent = {
             caption:
               'distance de P(2;−1) à la droite d : 3x−4y+12=0, via le pied de la perpendiculaire H — PH=4,4',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'distance-droite-widget',
+          label: 'Manipule toi-même : la plus courte distance',
+          caption:
+            'Rappel de 4e. Déplace C, ou les points P et R qui fixent d : la perpendiculaire par C, le ' +
+            'pied H et la distance CH se recalculent pas à pas. Compare avec la formule |ax + by + c| / ' +
+            '√(a² + b²) ci-dessus : même résultat. Fais glisser Q sur d : CQ est toujours plus long que ' +
+            'CH, sauf en H. En mode « Deux parallèles », la distance entre d et d′ est celle d’un point ' +
+            'de d′ à d.',
         },
         { kind: 'subheading', text: 'Boîte à outils — les 5 questions classiques sur les droites' },
         {
@@ -475,6 +497,18 @@ export const lieuxGeometriques: ChapterContent = {
             'rapport à $(AB)$ — jamais une seule, tant que $d$ n\'est ni parallèle à $(AB)$ ni ' +
             'sécante en A ou B.',
         },
+        {
+          kind: 'atelier',
+          tag: 'aire-variable-widget',
+          label: 'Manipule toi-même : l’aire variable',
+          caption:
+            'A(1 ; 1) et B(5 ; 1) sont fixes, C glisse sur une droite d. En bas, l’aire du triangle ABC ' +
+            'en fonction de t : un V, ½|K + Mt|. La droite « aire = k » coupe le V en deux points : deux ' +
+            'positions C₁ et C₂, symétriques par rapport au point I où d coupe (AB). Elles ne sont ' +
+            'symétriques par rapport à la droite (AB) que si d est perpendiculaire à (AB) : choisis « d ' +
+            'oblique » pour le voir. Essaie aussi k = 0, une droite qui passe par A, et une parallèle à ' +
+            '(AB).',
+        },
         { kind: 'subheading', text: "Symétrique d'un point par rapport à une droite" },
         {
           kind: 'definition',
@@ -527,6 +561,18 @@ export const lieuxGeometriques: ChapterContent = {
             'fin du calcul !',
         },
         {
+          kind: 'atelier',
+          tag: 'points-remarquables-widget',
+          label: 'Manipule toi-même : les points remarquables du triangle',
+          caption:
+            'Fais glisser A, B et C. Allume les médianes (G, centre de gravité), les hauteurs (H, ' +
+            'orthocentre), les médiatrices (O, centre du cercle circonscrit), les bissectrices (I, centre ' +
+            'du cercle inscrit). O, G et H restent toujours alignés sur la droite d’Euler, avec GH = 2 × ' +
+            'OG. Essaie les triangles équilatéral (tout est confondu), rectangle (H au sommet de l’angle ' +
+            'droit, O au milieu de l’hypoténuse) et obtus (O et H sortent du triangle), puis le cercle ' +
+            'des neuf points.',
+        },
+        {
           kind: 'entrainement',
           title: 'Points et droites remarquables du triangle',
           generatorId: '6gen54',
@@ -576,6 +622,16 @@ export const lieuxGeometriques: ChapterContent = {
               '$=\\sqrt{\\dfrac{D^2}{4}+\\dfrac{E^2}{4}-F}$.',
           ],
         },
+        {
+          kind: 'atelier',
+          tag: 'cercle-equation-widget',
+          label: 'Manipule toi-même : centre, rayon et équation',
+          caption:
+            'Rappel de 4e. Règle le centre et le rayon, et regarde la forme générale x² + y² + Dx + Ey + ' +
+            'F = 0 se développer. Ou pars de D, E et F, et complète les carrés pour retrouver le centre ' +
+            '(−D/2 ; −E/2) et le rayon : si D²/4 + E²/4 − F est négatif, ce n’est pas un cercle (aucun ' +
+            'point) ; s’il est nul, un seul point.',
+        },
         { kind: 'subheading', text: 'Cercle passant par 3 points' },
         {
           kind: 'methode',
@@ -614,6 +670,16 @@ export const lieuxGeometriques: ChapterContent = {
             caption:
               "cercle de centre (2;−1) et rayon 5 passant par A(5;3), B(−3;−1) et C(2;−6) — trois points non alignés déterminent toujours un unique cercle",
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'triangle-deformable-widget',
+          label: 'Manipule toi-même : le cercle par trois points',
+          caption:
+            'Rappel de 4e. Fais glisser les sommets : le cercle qui passe par les trois points (le cercle ' +
+            'circonscrit au triangle) existe toujours tant que le triangle n’est pas aplati. Son diamètre ' +
+            'vaut a / sin Â = b / sin B̂ = c / sin Ĉ (loi des sinus). Quand les trois points s’alignent ' +
+            'presque, le cercle devient immense : trois points alignés n’ont pas de cercle.',
         },
         { kind: 'subheading', text: 'Cercle passant par 2 points, rayon donné' },
         {
@@ -872,6 +938,16 @@ export const lieuxGeometriques: ChapterContent = {
             caption:
               'depuis P(0;13), 2 tangentes au cercle de centre O et rayon 5, touchant en T₁ et T₂ — longueur PT₁=PT₂=12',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'droite-cercle-widget',
+          label: 'Manipule toi-même : droite et cercle',
+          caption:
+            'Rappel de 4e. La droite est écrite ici y = mx + p (ou x = k si elle est verticale), comme ' +
+            'dans l’exemple des tangentes ci-dessus. En remplaçant y dans l’équation du cercle, on ' +
+            'obtient une équation du second degré : Δ < 0, aucun point commun ; Δ = 0, la droite est ' +
+            'tangente ; Δ > 0, deux points. Cherche les valeurs de p qui rendent la droite tangente.',
         },
         {
           kind: 'entrainement',
@@ -1353,6 +1429,17 @@ export const lieuxGeometriques: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'trace-lieu-widget',
+          label: 'Manipule toi-même : trace le lieu',
+          caption:
+            'Choisis une condition, puis promène M : il devient vert quand il la vérifie, et laisse une ' +
+            'trace. Fais glisser k pour voir défiler les régimes : cercle, point ou vide (MA² + MB² = k) ' +
+            '; médiatrice pour k = 1 (Apollonius) ; bande pleine ou deux droites ; carré plein ou ' +
+            'octogone ; losange (somme) contre quatre demi-droites (différence). « Montrer le lieu » le ' +
+            'trace en entier, points exclus en rond vide (angle droit : A et B).',
+        },
+        {
           kind: 'entrainement',
           title: 'Lieux géométriques et élimination de paramètre',
           generatorId: '6gen56',
@@ -1532,6 +1619,17 @@ export const lieuxGeometriques: ChapterContent = {
             "l'équation du lieu de sa restriction : décrire un lieu sans sa restriction, c'est " +
             'une réponse incomplète.',
         },
+        {
+          kind: 'atelier',
+          tag: 'generatrices-animees-widget',
+          label: 'Manipule toi-même : les génératrices en mouvement',
+          caption:
+            'Lance l’animation ou fais glisser α : les deux génératrices tournent ensemble et leur point ' +
+            'd’intersection P laisse une trace. Pour α = 0, elles sont confondues (morceau singulier). ' +
+            'Avec les perpendiculaires, le point (1 ; 0) n’est jamais atteint ; avec les angles α et 2α, ' +
+            'P fait le tour d’un cercle sauf un point. « Montrer le lieu » donne l’équation factorisée, ' +
+            'le statut de chaque morceau et la restriction.',
+        },
         { kind: 'subheading', text: "Une médiane qui émerge d'une famille de céviennes" },
         {
           kind: 'exempleLibre',
@@ -1708,6 +1806,17 @@ export const lieuxGeometriques: ChapterContent = {
             ],
             caption: "astroïde $x=\\cos^3\\lambda$, $y=\\sin^3\\lambda$, d'équation cartésienne $x^{2/3}+y^{2/3}=1$",
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'courbe-parametree-widget',
+          label: 'Manipule toi-même : une courbe paramétrée',
+          caption:
+            'Fais varier t (ou lance l’animation) : le point P trace sa courbe en orange, par-dessus la ' +
+            'courbe cartésienne complète en gris, obtenue en éliminant t. Astroïde, cercle et t + 1 ; t² ' +
+            '− 3 décrivent toute leur courbe ; x = cos t, y = cos 2t ne décrit qu’un arc de parabole, et ' +
+            'x = t², y = t⁴ une demi-parabole parcourue deux fois. L’équation seule ne dit pas tout : il ' +
+            'faut aussi la partie décrite.',
         },
         {
           kind: 'astuce',
