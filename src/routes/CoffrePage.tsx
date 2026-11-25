@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState, type FormEven
 import { Link, useSearchParams } from 'react-router-dom'
 import '../components/carnet/carnet.css'
 import { MenuActions } from '../components/carnet/MenuActions'
+import { copierTexte } from '../components/carnet/outilsCarnet'
 import { Champ } from '../components/compte/Champ'
 import { BandeauEspace } from '../components/compte/BandeauEspace'
 import { MenuEspace } from '../components/compte/MenuEspace'
@@ -14,6 +15,7 @@ import {
   compteType,
   correspondRecherche,
   dateCourte,
+  dateLongue,
   datesTexte,
   liensRemediation,
   NOMS_PROCESSUS,
@@ -32,8 +34,12 @@ import {
 import { estConnecteActif, useCompte } from '../lib/compteContexte'
 import { dupliquerPlan, importerPlansLocaux, listerPlans, renommerPlan, supprimerPlanCoffre, type PlanCoffre } from '../lib/compteDonnees'
 import { cartoucheDepuisCompte, ecoleParDefaut, erreurTitrePlan, messageErreur, plansLocauxAImporter, routeDuPlan, type PlanLocal, type TypePlan } from '../lib/compteValidation'
+import { arreterPartage, creerPartage, etatPartage, listerPartages, partageDuPlan, PartagesAbsents, texteAjouts, urlPartage, type PartagePlan } from '../lib/partages'
 
 const CLE_ENREGISTREES = 'math-belgium-evaluations-enregistrees'
+/** 0009 pas appliquée : texte du bouton « Partager » (décision du 25/11/2026). */
+const MESSAGE_0009 =
+  'Applique la migration 0009 pour partager : dans Supabase, SQL Editor → New query → colle tout le fichier supabase/migrations/0009_partages_plans.sql → Run. Ton coffre marche comme avant en attendant.'
 const CLE_RANGEMENT = 'math-belgium-coffre-ranger'
 
 type Rangement = 'recents' | 'chapitre'
@@ -123,6 +129,19 @@ function Coffre() {
   const [renommage, setRenommage] = useState<{ id: string; titre: string; erreur: string | null } | null>(null)
   const [aSupprimer, setASupprimer] = useState<string | null>(null)
   const [tiroirOuvert, setTiroirOuvert] = useState(false)
+  /** Liens de partage (0009) : `absent` = migration pas appliquée (le coffre marche comme avant). */
+  const [partages, setPartages] = useState<PartagePlan[]>([])
+  const [etatPartages, setEtatPartages] = useState<'chargement' | 'actif' | 'absent' | 'erreur'>('chargement')
+  /** Bloc « Partager » d'un enregistrement : message (migration absente, erreur, lien copié…). */
+  const [infoPartage, setInfoPartage] = useState<{ planId: string; texte: string; erreur?: boolean; repli?: boolean } | null>(null)
+  const [aArreter, setAArreter] = useState<string | null>(null)
+  /** Lien qui vient d'être créé : focus sur « Copier le lien » dès que le bloc est rendu. */
+  const focusCopie = useRef(false)
+  useEffect(() => {
+    if (!focusCopie.current) return
+    focusCopie.current = false
+    requestAnimationFrame(() => racine.current?.querySelector<HTMLElement>('[data-action="copier-lien"]')?.focus())
+  }, [partages])
   /** Téléphone : focus à placer sur le titre du tiroir dès qu'il s'affiche (la navigation qui pose
    * `?id=` est une transition : le tiroir n'existe pas encore au moment du choix). */
   const focusTiroir = useRef(false)
@@ -143,6 +162,24 @@ function Coffre() {
   useEffect(() => {
     void recharger()
   }, [recharger])
+
+  const rechargerPartages = useCallback(async () => {
+    if (!client) return
+    try {
+      const r = await listerPartages(client)
+      if (r.actif) {
+        setPartages(r.partages)
+        setEtatPartages('actif')
+      } else setEtatPartages('absent')
+    } catch {
+      // Une panne de lecture des partages ne bloque jamais le coffre : « Partager » réessaiera.
+      setEtatPartages('erreur')
+    }
+  }, [client])
+
+  useEffect(() => {
+    void rechargerPartages()
+  }, [rechargerPartages])
 
   // Filtres demandés par l'adresse (carnet) : appliqués une fois les plans lus, puis retirés de l'URL.
   // Le niveau n'est retenu que si le coffre en contient (sinon aucune pastille ne permettrait de l'ôter).
@@ -219,6 +256,8 @@ function Coffre() {
     if (planId !== idChoisi) {
       setRenommage(null)
       setASupprimer(null)
+      setAArreter(null)
+      setInfoPartage(null)
     }
     if (telephone && planId) {
       if (planId !== idChoisi) {
@@ -307,6 +346,57 @@ function Coffre() {
     focusDans(suivant ? `[data-plan="${CSS.escape(suivant.id)}"]` : '.coffre-recherche')
   }
 
+  /** « Partager » : crée un lien (jeton tiré par la base, copie figée sans cartouche, 30 jours). */
+  async function partager(plan: PlanCoffre) {
+    setAArreter(null)
+    if (etatPartages === 'absent') {
+      setInfoPartage({ planId: plan.id, texte: MESSAGE_0009 })
+      return
+    }
+    setOccupe(true)
+    setInfoPartage(null)
+    try {
+      const cree = await creerPartage(client!, plan)
+      setPartages((liste) => [cree, ...liste])
+      setEtatPartages('actif')
+      setInfoPartage({ planId: plan.id, texte: 'Lien de partage créé : copie-le et envoie-le à ton collègue.' })
+      focusCopie.current = true
+    } catch (ex) {
+      // Migration pas encore appliquée (lecture initiale en panne, puis table absente) : même message.
+      if (ex instanceof PartagesAbsents) {
+        setEtatPartages('absent')
+        setInfoPartage({ planId: plan.id, texte: MESSAGE_0009 })
+      } else setInfoPartage({ planId: plan.id, texte: messageErreur(ex), erreur: true })
+    } finally {
+      setOccupe(false)
+    }
+  }
+
+  async function copierLien(partage: PartagePlan, planId: string) {
+    const ok = await copierTexte(urlPartage(partage.jeton))
+    setInfoPartage(
+      ok
+        ? { planId, texte: 'Lien copié : colle-le dans un message à ton collègue (e-mail, Smartschool…).' }
+        : { planId, texte: 'Copie impossible ici : sélectionne le lien ci-dessus et copie-le à la main.', erreur: true, repli: true },
+    )
+    if (!ok) focusDans('.coffre-partage-lien input')
+  }
+
+  async function arreter(partage: PartagePlan, planId: string) {
+    setOccupe(true)
+    try {
+      await arreterPartage(client!, partage.id)
+      setPartages((liste) => liste.map((p) => (p.id === partage.id ? { ...p, revoque: true } : p)))
+      setAArreter(null)
+      setInfoPartage({ planId, texte: 'Partage arrêté : le lien ne fonctionne plus. Les collègues qui l’avaient déjà ajouté gardent leur copie.' })
+      focusDans('[data-action="partager"]')
+    } catch (ex) {
+      setInfoPartage({ planId, texte: messageErreur(ex), erreur: true })
+    } finally {
+      setOccupe(false)
+    }
+  }
+
   const aImporter = plans ? plansLocauxAImporter(locaux, plans) : []
   const comptesTypes = ORDRE_TYPES.map((t) => ({ type: t, total: tous.filter((p) => p.type === t).length, filtre: avantType.filter((p) => p.type === t).length })).filter((c) => c.total > 0)
   const niveaux = [...new Set(tous.map((p) => p.contenu.levelSlug))].sort((a, b) => rangNiveau(a) - rangNiveau(b))
@@ -316,6 +406,21 @@ function Coffre() {
 
   const propsFiche = (plan: PlanCoffre) => ({
     plan,
+    partage: etatPartages === 'actif' ? partageDuPlan(partages, plan.id) : null,
+    partagesPrets: etatPartages !== 'chargement',
+    infoPartage: infoPartage?.planId === plan.id ? infoPartage : null,
+    confirmationArret: aArreter === plan.id,
+    onPartager: () => void partager(plan),
+    onCopierLien: (p: PartagePlan) => void copierLien(p, plan.id),
+    onArreter: () => {
+      setInfoPartage(null)
+      setAArreter(plan.id)
+    },
+    onAnnulerArret: () => {
+      setAArreter(null)
+      focusDans('[data-action="arreter-partage"]')
+    },
+    onConfirmerArret: (p: PartagePlan) => void arreter(p, plan.id),
     resume: resumes.get(plan.id)!,
     surtitre: surtitreMiniature,
     origine: (() => {
@@ -357,6 +462,8 @@ function Coffre() {
       mode === 'recents'
         ? [TYPES[plan.type].singulier, resume.niveau, chapitresTexte(resume.chapitres)]
         : [TYPES[plan.type].singulier, resume.chapitres.length > 1 && !liee ? chapitresTexte(resume.chapitres) : '', contenuCourt(resume)]
+    const partage = etatPartages === 'actif' ? partageDuPlan(partages, plan.id) : null
+    if (partage && etatPartage(partage) === 'actif') meta.push('partagé')
     const actif = choisi?.id === plan.id
     return (
       <button
@@ -609,6 +716,11 @@ function Coffre() {
                     setRenommage(null)
                     setASupprimer(choisi.id)
                   }}
+                  onPartagerTiroir={() => {
+                    setTiroirOuvert(true)
+                    const p = etatPartages === 'actif' ? partageDuPlan(partages, choisi.id) : null
+                    if (!p || etatPartage(p) !== 'actif') void partager(choisi)
+                  }}
                 />
               )}
             </>
@@ -646,6 +758,16 @@ interface ProprietesFiche {
   onSupprimer: () => void
   onAnnulerSuppression: () => void
   onConfirmerSuppression: () => void
+  /** Dernier lien de partage de l'enregistrement (0009 ; `null` : jamais partagé ou migration absente). */
+  partage: PartagePlan | null
+  partagesPrets: boolean
+  infoPartage: { texte: string; erreur?: boolean; repli?: boolean } | null
+  confirmationArret: boolean
+  onPartager: () => void
+  onCopierLien: (p: PartagePlan) => void
+  onArreter: () => void
+  onAnnulerArret: () => void
+  onConfirmerArret: (p: PartagePlan) => void
 }
 
 const lienPanneau = (plan: PlanCoffre) => `${routeDuPlan(plan.type)}?plan=${encodeURIComponent(plan.id)}`
@@ -797,6 +919,8 @@ function Fiche(p: ProprietesFiche & { dansTiroir?: boolean }) {
         </div>
       )}
 
+      <BlocPartage {...p} />
+
       <div className="coffre-fiche-actions">
         {p.confirmation ? (
           <div className="profil-confirmation coffre-confirmation" role="group" aria-labelledby={`${p.titreId}-conf`} onKeyDown={(e) => echapDans(e, p.onAnnulerSuppression)}>
@@ -824,6 +948,11 @@ function Fiche(p: ProprietesFiche & { dansTiroir?: boolean }) {
             <button type="button" className="carnet-bouton" data-action="renommer" disabled={p.occupe || !!p.renommage} onClick={p.onRenommer}>
               Renommer
             </button>
+            {!(p.partage && etatPartage(p.partage) === 'actif') && (
+              <button type="button" className="carnet-bouton" data-action="partager" disabled={p.occupe || !p.partagesPrets} onClick={p.onPartager}>
+                {p.partage ? 'Partager à nouveau' : 'Partager'}
+              </button>
+            )}
             <button type="button" className="carnet-bouton" disabled={p.occupe} onClick={p.onDupliquer}>
               Dupliquer
             </button>
@@ -833,6 +962,87 @@ function Fiche(p: ProprietesFiche & { dansTiroir?: boolean }) {
           </div>
         )}
       </div>
+    </section>
+  )
+}
+
+/** Bloc « Partager avec un collègue » de la fiche : lien actif (copier, état, arrêter) ou dernier lien
+ * arrêté / expiré ; message « Applique la migration 0009… » quand la base n'a pas encore les partages. */
+function BlocPartage(p: ProprietesFiche) {
+  const annuler = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (p.confirmationArret) annuler.current?.focus()
+  }, [p.confirmationArret])
+  if (!p.partage && !p.infoPartage) return null
+  const etat = p.partage ? etatPartage(p.partage) : null
+  const idTitre = `${p.titreId}-partage`
+  const echap = (e: ClavierReact) => {
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      e.stopPropagation()
+      p.onAnnulerArret()
+    }
+  }
+  return (
+    <section className="coffre-fiche-bloc coffre-partage" aria-labelledby={idTitre}>
+      <h3 id={idTitre} className="coffre-etiquette-bloc">
+        Partager avec un collègue
+      </h3>
+      {p.partage && etat === 'actif' && (
+        <>
+          <p className="coffre-partage-etat">
+            <span className="profil-pastille ok">Partagé</span> {texteAjouts(p.partage.nombre_ajouts)} · expire le {dateLongue(p.partage.expire_le)}
+          </p>
+          <div className="coffre-partage-lien">
+            <input type="text" readOnly value={urlPartage(p.partage.jeton)} aria-label="Lien de partage" onFocus={(e) => e.currentTarget.select()} spellCheck={false} />
+            <button type="button" className="carnet-bouton principal" data-action="copier-lien" onClick={() => p.onCopierLien(p.partage!)}>
+              Copier le lien
+            </button>
+          </div>
+        </>
+      )}
+      {p.partage && etat !== 'actif' && (
+        <p className="coffre-partage-etat">
+          <span className="profil-pastille attention">{etat === 'arrete' ? 'Partage arrêté' : 'Lien expiré'}</span>{' '}
+          {etat === 'expire' ? `le ${dateLongue(p.partage.expire_le)} · ` : ''}
+          {texteAjouts(p.partage.nombre_ajouts)}
+        </p>
+      )}
+      {p.infoPartage && (
+        <p className={`coffre-note${p.infoPartage.erreur ? ' compte-erreur-champ' : ''}`} role={p.infoPartage.erreur ? 'alert' : 'status'}>
+          {p.infoPartage.texte}
+        </p>
+      )}
+      {p.partage && etat === 'actif' && (
+        <>
+          <p className="coffre-note">
+            Ton collègue doit être connecté à son compte professeur. Il ajoute une copie à son coffre (mêmes exercices ou nouveau tirage) : tes changements ne lui parviennent pas, et
+            inversement. Ton école et ton nom ne sont pas transmis : il imprime avec les siens.
+          </p>
+          {p.confirmationArret ? (
+            <div className="profil-confirmation coffre-confirmation" role="group" aria-labelledby={`${idTitre}-conf`} onKeyDown={echap}>
+              <p id={`${idTitre}-conf`} className="profil-confirmation-titre">
+                Arrêter le partage ?
+              </p>
+              <p>Le lien ne fonctionnera plus, tout de suite. Les collègues qui l’ont déjà ajouté gardent leur copie.</p>
+              <div className="profil-actions">
+                <button ref={annuler} type="button" className="carnet-bouton" onClick={p.onAnnulerArret}>
+                  Annuler
+                </button>
+                <button type="button" className="carnet-bouton coffre-danger-plein" disabled={p.occupe} onClick={() => p.onConfirmerArret(p.partage!)}>
+                  Arrêter le partage
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="profil-actions">
+              <button type="button" className="carnet-bouton coffre-danger" data-action="arreter-partage" disabled={p.occupe} onClick={p.onArreter}>
+                Arrêter le partage
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </section>
   )
 }
@@ -880,11 +1090,12 @@ function Miniature({ surtitre, titre }: { surtitre: string; titre: string }) {
 /** Téléphone : fiche en tiroir au-dessus de la barre « Mon espace » — réduit (type, date, titre,
  * résumé, « Ouvrir dans le panneau » + « … ») ou ouvert (fiche complète). */
 function Tiroir(
-  p: ProprietesFiche & { ouvert: boolean; onBasculer: () => void; onFermer: () => void; onRenommerTiroir: () => void; onSupprimerTiroir: () => void },
+  p: ProprietesFiche & { ouvert: boolean; onBasculer: () => void; onFermer: () => void; onRenommerTiroir: () => void; onSupprimerTiroir: () => void; onPartagerTiroir: () => void },
 ) {
   const { plan, resume } = p
   const idCorps = `${p.titreId}-corps`
-  const ouvert = p.ouvert || !!p.renommage || p.confirmation
+  const ouvert = p.ouvert || !!p.renommage || p.confirmation || p.confirmationArret
+  const partageActif = !!p.partage && etatPartage(p.partage) === 'actif'
   const resumeTexte = [resume.niveau, chapitresTexte(resume.chapitres, false), contenuCourt(resume), resume.series.length > 1 ? `séries ${resume.series.join(', ')}` : ''].filter(Boolean).join(' · ')
   return (
     <div className={`coffre-tiroir${ouvert ? ' ouvert' : ''}`}>
@@ -917,9 +1128,10 @@ function Tiroir(
                 Ouvrir dans le panneau
               </Link>
               <MenuActions
-                libelle={`Autres actions — « ${plan.titre} » : voir le contenu, renommer, dupliquer, supprimer`}
+                libelle={`Autres actions — « ${plan.titre} » : voir le contenu, partager, renommer, dupliquer, supprimer`}
                 actions={[
                   { texte: 'Voir le contenu', onChoisir: p.onBasculer },
+                  { texte: partageActif ? 'Lien de partage' : 'Partager', onChoisir: p.onPartagerTiroir, desactive: p.occupe || !p.partagesPrets },
                   { texte: 'Renommer', onChoisir: p.onRenommerTiroir, desactive: p.occupe },
                   { texte: 'Dupliquer', onChoisir: p.onDupliquer, desactive: p.occupe },
                   { texte: 'Supprimer…', onChoisir: p.onSupprimerTiroir, danger: true, desactive: p.occupe },
