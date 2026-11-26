@@ -120,7 +120,7 @@ export function champs(e: E, p: P): ChampEcran[] {
     case "versement":
       return [{ label: "versement annuel", labelLatex: "a=", unite: "€", placeholder: "ex. : 1 884,57" }];
     case "tauxMensuel":
-      return [{ label: "taux mensuel", labelLatex: "i_{\\text{mens}}=", unite: "%", placeholder: "ex. : 0,247" }];
+      return [{ label: "taux mensuel", labelLatex: "i_{\\text{mensuel}}=", unite: "%", placeholder: "ex. : 0,247" }];
     default:
       return [];
   }
@@ -180,7 +180,7 @@ export function reponse(e: E, p: P): Frag[] {
     case "versement":
       return [lx(`a\\approx ${centL(versementCherche(e))}`), tx(" €")];
     case "tauxMensuel":
-      return [lx(`i_{\\text{mens}}\\approx ${pourcentFixeL(100 * iPeriode(e), 3)}`)];
+      return [lx(`i_{\\text{mensuel}}\\approx ${pourcentFixeL(100 * iPeriode(e), 3)}`)];
   }
 }
 
@@ -214,7 +214,7 @@ export function aide1(e: E, p: P): AideEcran {
     case "versement":
       return { texte: [tx("Utilise l'égalité de l'écran précédent, avec le taux en écriture décimale.")] };
     case "tauxMensuel":
-      return { texte: [tx("Le taux mensuel équivalent donne la même valeur acquise sur un an que le taux annuel :")], latex: "(1+i_{\\text{mens}})^{12}=1+i_{\\text{an}}" };
+      return { texte: [tx("Le taux mensuel équivalent donne la même valeur acquise sur un an que le taux annuel :")], latex: "(1+i_{\\text{mensuel}})^{12}=1+i_{\\text{annuel}}" };
   }
 }
 
@@ -229,7 +229,7 @@ export function aide2(e: E, p: P): AideEcran | null {
       return { texte: [tx("Un placement à intérêts composés pendant un an multiplie le capital par "), lx(`1+i=${fL(e)}`), tx(".")] };
     case "valeur":
       return e.variante === "mensuel"
-        ? { texte: [tx("Ici, avec le taux mensuel de l'écran précédent (gardé en mémoire) et "), lx(`n=${n}`), tx(" versements :")], latex: `V_{${n}}=${montantL(e.a)}\\cdot\\dfrac{(1+i_{\\text{mens}})^{${n}}-1}{i_{\\text{mens}}}` }
+        ? { texte: [tx("Ici, avec le taux mensuel de l'écran précédent (gardé en mémoire) et "), lx(`n=${n}`), tx(" versements :")], latex: `V_{${n}}=${montantL(e.a)}\\cdot\\dfrac{(1+i_{\\text{mensuel}})^{${n}}-1}{i_{\\text{mensuel}}}` }
         : { texte: [tx("Ici :")], latex: `V_{${n}}=${montantL(e.a)}\\cdot\\dfrac{${fL(e)}^{${n}}-1}{${iL(e)}}` };
     case "cherchee":
       return { texte: [tx("Ici, avec la valeur de l'écran précédent :")], latex: `V_{${e.n}}\\cdot ${fL(e)}` };
@@ -244,7 +244,7 @@ export function aide2(e: E, p: P): AideEcran | null {
     case "versement":
       return { texte: [tx("Ici :")], latex: e.apres ? `a=\\dfrac{${montantL(e.cible)}\\cdot ${iL(e)}}{\\left(${fL(e)}^{${e.n}}-1\\right)\\cdot ${fL(e)}}` : `a=\\dfrac{${montantL(e.cible)}\\cdot ${iL(e)}}{${fL(e)}^{${e.n}}-1}` };
     case "tauxMensuel":
-      return { texte: [tx("Ici :")], latex: `1+i_{\\text{mens}}=\\sqrt[12]{${fL(e)}}` };
+      return { texte: [tx("Ici :")], latex: `1+i_{\\text{mensuel}}=\\sqrt[12]{${fL(e)}}` };
   }
 }
 

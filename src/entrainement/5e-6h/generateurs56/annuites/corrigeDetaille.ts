@@ -100,7 +100,7 @@ function etape(e: E, p: PhaseAnnuites, l: string): EtapeCorrection[] {
       if (e.variante === "mensuel")
         return [
           utilise(l, [t("Même formule avec le taux mensuel (gardé en mémoire) et "), f(`n=12\\cdot ${e.n}=${n}`), t(" versements.")]),
-          calcul(l, [ligne(`V_{${n}}=${A}\\cdot\\dfrac{(1+i_{\\text{mens}})^{${n}}-1}{i_{\\text{mens}}}`), ligne(`\\approx ${centL(Vn(e))}`)]),
+          calcul(l, [ligne(`V_{${n}}=${A}\\cdot\\dfrac{(1+i_{\\text{mensuel}})^{${n}}-1}{i_{\\text{mensuel}}}`), ligne(`\\approx ${centL(Vn(e))}`)]),
           { ...resultat(l, fr(reponse(e, "valeur"))), figureHtml: figure(e) },
           verification(l, [t(`Avec le taux mensuel arrondi au millième de %, on trouve un résultat qui peut différer de quelques centimes à quelques euros : on garde le taux en mémoire.`)]),
         ];
@@ -156,8 +156,8 @@ function etape(e: E, p: PhaseAnnuites, l: string): EtapeCorrection[] {
     case "tauxMensuel": {
       const r = Math.pow(1 + iDe(e), 1 / 12);
       return [
-        utilise(l, [t("Taux équivalents : "), f("(1+i_{\\text{mens}})^{12}=1+i_{\\text{an}}"), t(".")]),
-        calcul(l, [ligne(`1+i_{\\text{mens}}=\\sqrt[12]{${fL(e)}}\\approx ${nL(r, 7, true)}`), ligne(`i_{\\text{mens}}\\approx ${nL(r - 1, 7, true)}\\approx ${pourcentFixeL(100 * (r - 1), 3)}`, "en %, au millième")]),
+        utilise(l, [t("Taux équivalents : "), f("(1+i_{\\text{mensuel}})^{12}=1+i_{\\text{annuel}}"), t(".")]),
+        calcul(l, [ligne(`1+i_{\\text{mensuel}}=\\sqrt[12]{${fL(e)}}\\approx ${nL(r, 7, true)}`), ligne(`i_{\\text{mensuel}}\\approx ${nL(r - 1, 7, true)}\\approx ${pourcentFixeL(100 * (r - 1), 3)}`, "en %, au millième")]),
         resultat(l, fr(reponse(e, "tauxMensuel"))),
       ];
     }

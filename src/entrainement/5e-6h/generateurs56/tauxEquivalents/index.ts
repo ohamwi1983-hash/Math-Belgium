@@ -68,7 +68,7 @@ export function phasesTauxEquivalents(e: ExerciceTauxEquivalents): PhaseTauxEqui
   }
 }
 
-const tauxPeriodique = (k: Periode) => (k === 2 ? tauxEntre(0.6, 3, 0.05) : k === 4 ? tauxEntre(0.3, 1.6, 0.05) : tauxEntre(0.1, 0.6, 0.01));
+const tauxPeriodique = (k: Periode) => (k === 2 ? tauxEntre(0.5, 2.5, 0.05) : k === 4 ? tauxEntre(0.3, 1.2, 0.05) : tauxEntre(0.1, 0.4, 0.01));
 
 function base(v: VarianteTauxEquivalents, extra: Partial<ExerciceTauxEquivalents> = {}): ExerciceTauxEquivalents {
   return {
@@ -97,7 +97,7 @@ function construire(v: VarianteTauxEquivalents): ExerciceTauxEquivalents {
       return base(v, { k, taux: tauxPeriodique(k) });
     }
     case "depuisAnnuel":
-      return base(v, { k: parmi([2, 4, 12] as Periode[]), taux: tauxEntre(1, 7, 0.1) });
+      return base(v, { k: parmi([2, 4, 12] as Periode[]), taux: tauxEntre(1, 5, 0.1) });
     case "comparer": {
       // Verdict et contexte tirés AVANT les nombres.
       const gagnante: "A" | "B" = Math.random() < 0.5 ? "A" : "B";
@@ -117,7 +117,7 @@ function construire(v: VarianteTauxEquivalents): ExerciceTauxEquivalents {
       return base(v, { k: 4, taux: 1.4, kB: 12, tauxB: 0.47, gagnante: "B", emprunt: false });
     }
     case "precompte":
-      return base(v, { taux: tauxEntre(1, 5, 0.05), precompte: parmi([15, 25, 30]), C0: parmi([entier(4, 80) * 250, entier(2, 30) * 1000]) });
+      return base(v, { taux: tauxEntre(1, 5, 0.05), precompte: parmi([25, 30]), C0: parmi([entier(4, 80) * 250, entier(2, 30) * 1000]) });
     case "depreciation":
       return base(v, { taux: tauxEntre(0.8, 3, 0.1), C0: entier(80, 400) * 100, duree: entier(6, 36) });
     case "longuePeriode": {

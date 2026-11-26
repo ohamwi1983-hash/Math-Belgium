@@ -14,7 +14,7 @@ type E = ExerciceCredit;
 const t = texte;
 const f = latex;
 const fr = (x: unknown) => x as FragmentConsigne[];
-const IM = "i_{\\text{mens}}";
+const IM = "i_{\\text{mensuel}}";
 const nL4 = (x: number) => nL(x, 4);
 
 function figure(e: E): string {

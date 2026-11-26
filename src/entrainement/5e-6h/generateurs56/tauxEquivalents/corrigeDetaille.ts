@@ -15,7 +15,7 @@ const t = texte;
 const f = latex;
 const fr = (x: unknown) => x as FragmentConsigne[];
 const iP = (k: Periode) => `i_{${NOM_PERIODE[k].indice}}`;
-const IA = "i_{\\text{an}}";
+const IA = "i_{\\text{annuel}}";
 
 function ligneAnnee(k: Periode, facteurT: string, versAnnuel: boolean): string {
   const mois = NOM_PERIODE[k].mois;
@@ -45,7 +45,7 @@ function etape(e: E, p: PhaseTauxEquivalents, l: string): EtapeCorrection[] {
       if (e.variante === "depreciation")
         return [
           utilise(l, [t("Perdre "), f("d"), t(" % de sa valeur, c'est la multiplier par "), f("1-d"), t(" (écriture décimale) ; sur un an, douze fois de suite.")]),
-          calcul(l, [ligne(`V_{12}=V_0\\,(1-d_{\\text{mens}})^{12}`), ligne(`V_{12}=V_0\\,(1-d_{\\text{an}})`), ligne(`1-d_{\\text{an}}=(1-d_{\\text{mens}})^{12}`, "même valeur au bout d'un an")]),
+          calcul(l, [ligne(`V_{12}=V_0\\,(1-d_{\\text{mensuel}})^{12}`), ligne(`V_{12}=V_0\\,(1-d_{\\text{annuel}})`), ligne(`1-d_{\\text{annuel}}=(1-d_{\\text{mensuel}})^{12}`, "même valeur au bout d'un an")]),
           resultat(l, fr(reponse(e, "relation"))),
           piege(l, [t("Additionner les baisses ("), f("12\\,d"), t(") : chaque baisse porte sur une valeur déjà diminuée.")]),
         ];
@@ -82,7 +82,7 @@ function etape(e: E, p: PhaseTauxEquivalents, l: string): EtapeCorrection[] {
         const g = Math.pow(1 - e.taux / 100, 12);
         return [
           utilise(l, [t("On calcule la part de valeur qui reste au bout d'un an, puis ce qui est perdu.")]),
-          calcul(l, [ligne(`1-d_{\\text{an}}=${decimalL(1 - e.taux / 100)}^{12}`), ligne(`\\approx ${nL(g, 6, true)}`), ligne(`d_{\\text{an}}\\approx 1-${nL(g, 6, true)}\\approx ${nL(1 - g, 6, true)}\\approx ${pourcentFixeL(depreciationAnnuelle(e), 2)}`, "en %, au centième")]),
+          calcul(l, [ligne(`1-d_{\\text{annuel}}=${decimalL(1 - e.taux / 100)}^{12}`), ligne(`\\approx ${nL(g, 6, true)}`), ligne(`d_{\\text{annuel}}\\approx 1-${nL(g, 6, true)}\\approx ${nL(1 - g, 6, true)}\\approx ${pourcentFixeL(depreciationAnnuelle(e), 2)}`, "en %, au centième")]),
           resultat(l, [t("Dépréciation annuelle : "), ...fr(reponse(e, "taux")), t(".")]),
         ];
       }
@@ -141,7 +141,7 @@ function etape(e: E, p: PhaseTauxEquivalents, l: string): EtapeCorrection[] {
       ];
     case "valeur":
       return [
-        utilise(l, [t("Chaque mois, la valeur est multipliée par "), f("1-d_{\\text{mens}}"), t(" : suite géométrique "), f("V_n=V_0\\,(1-d)^n"), t(".")]),
+        utilise(l, [t("Chaque mois, la valeur est multipliée par "), f("1-d_{\\text{mensuel}}"), t(" : suite géométrique "), f("V_n=V_0\\,(1-d)^n"), t(".")]),
         calcul(l, [ligne(`V_{${e.duree}}=${montantL(e.C0)}\\cdot ${decimalL(1 - e.taux / 100)}^{${e.duree}}`), ligne(`\\approx ${centL(valeurDepreciee(e))}`)]),
         resultat(l, fr(reponse(e, "valeur"))),
       ];

@@ -15,12 +15,12 @@ type E = ExerciceTauxEquivalents;
 type P = PhaseTauxEquivalents;
 
 export const NOM_PERIODE: Record<Periode, { adj: string; indice: string; par: string; mois: number }> = {
-  2: { adj: "semestriel", indice: "\\text{sem}", par: "par semestre", mois: 6 },
-  4: { adj: "trimestriel", indice: "\\text{trim}", par: "par trimestre", mois: 3 },
-  12: { adj: "mensuel", indice: "\\text{mens}", par: "par mois", mois: 1 },
+  2: { adj: "semestriel", indice: "\\text{semestriel}", par: "par semestre", mois: 6 },
+  4: { adj: "trimestriel", indice: "\\text{trimestriel}", par: "par trimestre", mois: 3 },
+  12: { adj: "mensuel", indice: "\\text{mensuel}", par: "par mois", mois: 1 },
 };
 const iP = (k: Periode) => `i_{${NOM_PERIODE[k].indice}}`;
-const IA = "i_{\\text{an}}";
+const IA = "i_{\\text{annuel}}";
 
 /** Valeur attendue (en %) et précision de l'écran de taux. */
 export function tauxAttendu(e: E, p: P): { valeur: number; dec: number } {
@@ -115,7 +115,7 @@ export function libelle(e: E, p: P): string {
 export function consigne(e: E, p: P): Frag[] {
   switch (p) {
     case "relation":
-      if (e.variante === "depreciation") return [tx("Quelle relation lie le taux mensuel "), lx("d_{\\text{mens}}"), tx(" et le taux annuel "), lx("d_{\\text{an}}"), tx(" de dépréciation ?")];
+      if (e.variante === "depreciation") return [tx("Quelle relation lie le taux mensuel "), lx("d_{\\text{mensuel}}"), tx(" et le taux annuel "), lx("d_{\\text{annuel}}"), tx(" de dépréciation ?")];
       if (e.variante === "longuePeriode") return [tx(`Quelle équation donne le taux annuel moyen `), lx("t"), tx(" (en écriture décimale) ?")];
       return [tx("Quelle relation lie les deux taux équivalents ?")];
     case "taux":
@@ -171,7 +171,7 @@ function textesOptions(e: E, p: P): Frag[][] {
     ];
   }
   if (e.variante === "depreciation")
-    return [[lx("1-d_{\\text{an}}=(1-d_{\\text{mens}})^{12}")], [lx("d_{\\text{an}}=12\\,d_{\\text{mens}}")], [lx("1+d_{\\text{an}}=(1+d_{\\text{mens}})^{12}")], [lx("d_{\\text{an}}=(d_{\\text{mens}})^{12}")]];
+    return [[lx("1-d_{\\text{annuel}}=(1-d_{\\text{mensuel}})^{12}")], [lx("d_{\\text{annuel}}=12\\,d_{\\text{mensuel}}")], [lx("1+d_{\\text{annuel}}=(1+d_{\\text{mensuel}})^{12}")], [lx("d_{\\text{annuel}}=(d_{\\text{mensuel}})^{12}")]];
   if (e.variante === "longuePeriode") {
     const P2 = decimalL(e.taux / 100);
     const N = e.duree;
@@ -208,7 +208,7 @@ export function reponse(e: E, p: P): Frag[] {
     case "tauxB":
     case "tauxNet": {
       const { valeur, dec } = tauxAttendu(e, p);
-      const nom = p === "tauxNet" ? "i_{\\text{net}}" : p !== "taux" || e.variante === "versAnnuel" ? IA : e.variante === "depuisAnnuel" ? iP(e.k) : e.variante === "depreciation" ? "d_{\\text{an}}" : "t";
+      const nom = p === "tauxNet" ? "i_{\\text{net}}" : p !== "taux" || e.variante === "versAnnuel" ? IA : e.variante === "depuisAnnuel" ? iP(e.k) : e.variante === "depreciation" ? "d_{\\text{annuel}}" : "t";
       return [lx(`${nom}\\approx ${pourcentFixeL(valeur, dec)}`)];
     }
     case "brut":
@@ -234,12 +234,12 @@ export function aide1(e: E, p: P): AideEcran {
     case "relation":
       if (e.variante === "depreciation") return { texte: [tx("Perdre un pourcentage, c'est multiplier par 1 moins ce pourcentage ; sur un an, on applique douze fois la baisse mensuelle.")] };
       if (e.variante === "longuePeriode") return { texte: [tx("Une évolution annuelle de taux t, répétée chaque année, multiplie la grandeur par "), lx(e.baisse ? "1-t" : "1+t"), tx(" par an : sur plusieurs années, les facteurs se multiplient.")] };
-      return { texte: [tx("Deux taux sont équivalents s'ils donnent la même valeur acquise au bout d'un an :")], latex: `(1+i_{\\text{sem}})^2=(1+i_{\\text{trim}})^4=(1+i_{\\text{mens}})^{12}=1+${IA}` };
+      return { texte: [tx("Deux taux sont équivalents s'ils donnent la même valeur acquise au bout d'un an :")], latex: `(1+i_{\\text{semestriel}})^2=(1+i_{\\text{trimestriel}})^4=(1+i_{\\text{mensuel}})^{12}=1+${IA}` };
     case "taux":
     case "tauxA":
     case "tauxB":
       if (e.variante === "depuisAnnuel") return { texte: [tx("Isole le taux périodique : prends la racine k-ième (ou la puissance "), lx("\\frac{1}{k}"), tx(") de "), lx(`1+${IA}`), tx(", puis retire 1.")] };
-      if (e.variante === "depreciation") return { texte: [tx("Calcule "), lx("(1-d_{\\text{mens}})^{12}"), tx(" : c'est la part de valeur qui reste au bout d'un an ; le taux de dépréciation est ce qui est perdu.")] };
+      if (e.variante === "depreciation") return { texte: [tx("Calcule "), lx("(1-d_{\\text{mensuel}})^{12}"), tx(" : c'est la part de valeur qui reste au bout d'un an ; le taux de dépréciation est ce qui est perdu.")] };
       if (e.variante === "longuePeriode") return { texte: [tx("Isole "), lx(e.baisse ? "1-t" : "1+t"), tx(" par la racine N-ième, puis déduis t et écris-le en %.")] };
       return { texte: [tx("Élève le facteur périodique "), lx("1+i"), tx(" à la puissance du nombre de périodes dans l'année, retire 1, puis écris le résultat en %.")] };
     case "choix":
@@ -251,7 +251,7 @@ export function aide1(e: E, p: P): AideEcran {
     case "tauxNet":
       return { texte: [tx("Le taux net est ce que rapporte réellement le placement, une fois le précompte retenu : intérêt net divisé par le capital, ou taux brut multiplié par la part gardée.")] };
     case "valeur":
-      return { texte: [tx("Chaque mois, la valeur est multipliée par "), lx("1-d_{\\text{mens}}"), tx(" : c'est une suite géométrique.")], latex: "V_n=V_0\\,(1-d)^n" };
+      return { texte: [tx("Chaque mois, la valeur est multipliée par "), lx("1-d_{\\text{mensuel}}"), tx(" : c'est une suite géométrique.")], latex: "V_n=V_0\\,(1-d)^n" };
   }
 }
 
@@ -264,7 +264,7 @@ export function aide2(e: E, p: P): AideEcran | null {
     case "taux":
       if (e.variante === "versAnnuel") return { texte: [tx("Ici :")], latex: `1+${IA}=${decimalL(1 + e.taux / 100)}^{${e.k}}` };
       if (e.variante === "depuisAnnuel") return { texte: [tx("Ici :")], latex: `1+${iP(e.k)}=\\sqrt[${e.k}]{${decimalL(1 + e.taux / 100)}}` };
-      if (e.variante === "depreciation") return { texte: [tx("Ici :")], latex: `1-d_{\\text{an}}=${decimalL(1 - e.taux / 100)}^{12}` };
+      if (e.variante === "depreciation") return { texte: [tx("Ici :")], latex: `1-d_{\\text{annuel}}=${decimalL(1 - e.taux / 100)}^{12}` };
       return { texte: [tx("Ici :")], latex: e.baisse ? `1-t=\\sqrt[${e.duree}]{${decimalL(1 - e.taux / 100)}}` : `1+t=\\sqrt[${e.duree}]{${decimalL(1 + e.taux / 100)}}` };
     case "tauxA":
       return { texte: [tx("Ici :")], latex: `1+${IA}=${decimalL(1 + e.taux / 100)}^{${e.k}}` };

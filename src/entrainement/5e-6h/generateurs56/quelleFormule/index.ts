@@ -63,7 +63,7 @@ export const FAMILLE_DU_TYPE: Record<TypeProbleme, Famille> = {
 export const FORMULES: Record<Famille, string[]> = {
   simple: ["C_t=C_0\\,(1+i\\cdot t)", "C_0=\\dfrac{I}{i\\cdot t}", "i=\\dfrac{I}{C_0\\cdot t}", "t=\\dfrac{I}{C_0\\cdot i}"],
   composes: ["C_n=C_0\\,(1+i)^n", "C_0=C_n\\,(1+i)^{-n}", "i=\\sqrt[n]{\\dfrac{C_n}{C_0}}-1", "C_0\\,(1+i)^n\\geq C", "(1+i)^n\\geq 2"],
-  equivalent: ["i_{\\text{an}}=(1+i_{\\text{trim}})^4-1", "i_{\\text{mens}}=\\sqrt[12]{1+i_{\\text{an}}}-1"],
+  equivalent: ["i_{\\text{annuel}}=(1+i_{\\text{trimestriel}})^4-1", "i_{\\text{mensuel}}=\\sqrt[12]{1+i_{\\text{annuel}}}-1"],
   annuites: ["V_n=a\\,\\dfrac{(1+i)^n-1}{i}", "a=\\dfrac{V_n\\cdot i}{(1+i)^n-1}", "V_0=a\\,\\dfrac{1-(1+i)^{-n}}{i}", "m=\\dfrac{C\\cdot i}{1-(1+i)^{-n}}"],
 };
 
@@ -147,9 +147,9 @@ function modeleDe(type: TypeProbleme): Modele {
     case "tauxEquivalent":
       if (Math.random() < 0.5) {
         const q = tauxEntre(0.3, 1.6, 0.05);
-        return { enonce: `Un capital est placé pendant un an au taux trimestriel de ${pourcentT(q)} (intérêts composés). À quel taux annuel faudrait-il le placer pour obtenir le même montant au bout d'un an ?`, grandeur: "taux", formule: "i_{\\text{an}}=(1+i_{\\text{trim}})^4-1", depart: "(1+i_{\\text{trim}})^4=1+i_{\\text{an}}", indice: "on change la période du taux en gardant la même valeur acquise : taux équivalents", donnees: [[`i_{\\text{trim}}=${iL(q)}`, "taux trimestriel"]], substitution: `i_{\\text{an}}=${decimalL(1 + q / 100)}^4-1` };
+        return { enonce: `Un capital est placé pendant un an au taux trimestriel de ${pourcentT(q)} (intérêts composés). À quel taux annuel faudrait-il le placer pour obtenir le même montant au bout d'un an ?`, grandeur: "taux", formule: "i_{\\text{annuel}}=(1+i_{\\text{trimestriel}})^4-1", depart: "(1+i_{\\text{trimestriel}})^4=1+i_{\\text{annuel}}", indice: "on change la période du taux en gardant la même valeur acquise : taux équivalents", donnees: [[`i_{\\text{trimestriel}}=${iL(q)}`, "taux trimestriel"]], substitution: `i_{\\text{annuel}}=${decimalL(1 + q / 100)}^4-1` };
       }
-      return { enonce: `Quel est le taux mensuel équivalent à un taux annuel de ${pourcentT(pA)} ?`, grandeur: "taux", formule: "i_{\\text{mens}}=\\sqrt[12]{1+i_{\\text{an}}}-1", depart: "(1+i_{\\text{mens}})^{12}=1+i_{\\text{an}}", indice: "on change la période du taux : taux équivalents", donnees: [[`i_{\\text{an}}=${iL(pA)}`, "taux annuel"]], substitution: `i_{\\text{mens}}=\\sqrt[12]{${decimalL(1 + pA / 100)}}-1` };
+      return { enonce: `Quel est le taux mensuel équivalent à un taux annuel de ${pourcentT(pA)} ?`, grandeur: "taux", formule: "i_{\\text{mensuel}}=\\sqrt[12]{1+i_{\\text{annuel}}}-1", depart: "(1+i_{\\text{mensuel}})^{12}=1+i_{\\text{annuel}}", indice: "on change la période du taux : taux équivalents", donnees: [[`i_{\\text{annuel}}=${iL(pA)}`, "taux annuel"]], substitution: `i_{\\text{mensuel}}=\\sqrt[12]{${decimalL(1 + pA / 100)}}-1` };
     case "annuitesPlacement": {
       const a = entier(6, 60) * 50;
       if (Math.random() < 0.5)

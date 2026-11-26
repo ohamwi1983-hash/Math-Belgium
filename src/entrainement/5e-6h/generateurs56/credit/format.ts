@@ -18,7 +18,7 @@ type P = PhaseCredit;
 
 const OBJETS = ["une voiture d'occasion", "un scooter", "des travaux d'isolation", "du matériel informatique"];
 export const iL = (e: E) => nL(iMensuel(e), 7, true);
-const IM = "i_{\\text{mens}}";
+const IM = "i_{\\text{mensuel}}";
 
 /* ----------------------------------------------------------------------------------------------
  * Énoncé
