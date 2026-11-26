@@ -65,6 +65,13 @@ export const sectionsFinance: ChapterSection[] = [
     partie: 'Algèbre financière',
     blocks: [
       { kind: 'para', text: 'Étape en cours de rédaction.' },
+      {
+        kind: 'atelier',
+        tag: 'simulateur-credit-widget',
+        label: 'Manipule toi-même : simulateur de crédit',
+        caption:
+          'Règle le capital emprunté, le TAEG et la durée : le simulateur calcule le taux mensuel équivalent, la mensualité et le coût du crédit. Les barres montrent, mois après mois, la part d’intérêts (qui diminue) et la part de capital remboursé (qui augmente) ; le tableau d’amortissement détaille chaque ligne.',
+      },
       // ⟨fin-etape credit⟩
     ],
   },

@@ -259,6 +259,7 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'fractales-widget': () => import('../../interactive/register-fractales-widget.js'),
   'simple-compose-widget': () => import('../../interactive/register-simple-compose-widget.js'),
   'ligne-temps-annuites-widget': () => import('../../interactive/register-ligne-temps-annuites-widget.js'),
+  'simulateur-credit-widget': () => import('../../interactive/register-simulateur-credit-widget.js'),
 }
 
 /**

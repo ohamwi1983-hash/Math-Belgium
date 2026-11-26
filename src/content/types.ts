@@ -259,6 +259,7 @@ export type InteractiveWidgetTag =
   | 'fractales-widget'
   | 'simple-compose-widget'
   | 'ligne-temps-annuites-widget'
+  | 'simulateur-credit-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }
