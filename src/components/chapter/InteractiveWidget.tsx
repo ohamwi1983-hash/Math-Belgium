@@ -251,6 +251,7 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'point-aberrant-widget': () => import('../../interactive/register-point-aberrant-widget.js'),
   'jusqu-ou-prevoir-widget': () => import('../../interactive/register-jusqu-ou-prevoir-widget.js'),
   'changer-unites-widget': () => import('../../interactive/register-changer-unites-widget.js'),
+  'heron-rectangles-widget': () => import('../../interactive/register-heron-rectangles-widget.js'),
 }
 
 /**

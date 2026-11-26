@@ -63,6 +63,13 @@ export const sectionsReels: ChapterSection[] = [
     partie: 'Les nombres réels',
     blocks: [
       { kind: 'para', text: 'Étape en cours de rédaction.' },
+      {
+        kind: 'atelier',
+        tag: 'heron-rectangles-widget',
+        label: 'Manipule toi-même : les rectangles de Héron',
+        caption:
+          'Tous les rectangles ont la même aire A ; la longueur suivante est la moyenne des deux côtés. Les rectangles se rapprochent du carré de côté √A, et chacun encadre √A entre sa largeur et sa longueur. Les chiffres communs aux deux bornes, donc sûrs, sont en vert : leur nombre double à peu près à chaque étape.',
+      },
       // ⟨fin-etape approcher-densite⟩
     ],
   },

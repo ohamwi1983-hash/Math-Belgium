@@ -251,6 +251,7 @@ export type InteractiveWidgetTag =
   | 'point-aberrant-widget'
   | 'jusqu-ou-prevoir-widget'
   | 'changer-unites-widget'
+  | 'heron-rectangles-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }
