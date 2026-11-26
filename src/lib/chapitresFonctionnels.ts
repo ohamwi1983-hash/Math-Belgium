@@ -14,6 +14,9 @@ export const LEVELSLUG_FONCTIONNEL_6E = '6e-6h'
  * convention de lien vers un générateur) — sa page `/evaluation` est donc à la racine. */
 export const LEVELSLUG_FONCTIONNEL_4E = '4e'
 export const LEVELSLUG_FONCTIONNEL_5E = '5e-4h'
+/** 5e (6h) : aucune page d'évaluation chez plateforme-maths (niveau créé directement dans ce dépôt) —
+ * génération des feuilles et évaluations LOCALE seulement (`evaluationLocal.ts`). */
+export const LEVELSLUG_FONCTIONNEL_5E_6H = '5e-6h'
 
 /** Numéro de chapitre — utilisé UNIQUEMENT pour départager les banques vrai/faux d'une page
  * d'évaluation qui en sert plusieurs (`AppEvaluation6e.tsx` : 2 chapitres ; `AppEvaluation4e.tsx` :
@@ -52,6 +55,7 @@ const CHAPITRES_FONCTIONNELS: { levelSlug: string; chapitreSlug: string }[] = [
   { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'probabilites' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'lieux-geometriques' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'coniques' },
+  { levelSlug: LEVELSLUG_FONCTIONNEL_5E_6H, chapitreSlug: 'nombres-reels-suites' },
 ]
 
 export function estChapitreFonctionnel(levelSlug: string | null, chapitreSlug: string): boolean {

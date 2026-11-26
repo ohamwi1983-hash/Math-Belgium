@@ -69,7 +69,7 @@ import {
 import {
   CHAPITRE_FONCTIONNEL_SLUG,
   HEURES_PAR_NIVEAU,
-  HEURES_SEMAINE_DEFAUT,
+  heuresSemaineDefaut,
   NIVEAU_NUMERO,
   buildEvaluationUrl,
   catalogueVariantesExercice,
@@ -273,7 +273,7 @@ export function EvaluationGeneratorPanel({
    * `<select>` simple dès que `!verrouille`. En mode `verrouille`, reste figé à `[verrouille.chapitreSlug]`. */
   const [chapitresSlugs, setChapitresSlugs] = useState<string[]>(verrouille ? [verrouille.chapitreSlug] : [CHAPITRE_FONCTIONNEL_SLUG])
   const [titre, setTitre] = useState('')
-  const [heuresSemaine, setHeuresSemaine] = useState(HEURES_SEMAINE_DEFAUT[niveauHeuresVerrouille?.niveau ?? '6e'])
+  const [heuresSemaine, setHeuresSemaine] = useState(heuresSemaineDefaut(niveauHeuresVerrouille?.niveau ?? '6e', niveauHeuresVerrouille?.heures ?? '6H'))
   const [calculatrice, setCalculatrice] = useState<'interdite' | 'autorisee'>('interdite')
   const [nombreSeries, setNombreSeries] = useState(1)
   const nombreSeriesEffectif = estExercice ? 1 : nombreSeries
@@ -414,7 +414,7 @@ export function EvaluationGeneratorPanel({
   function reglerNiveauHeures(prochainNiveau: NiveauCode, prochainesHeures: string) {
     setNiveau(prochainNiveau)
     setHeures(prochainesHeures)
-    setHeuresSemaine(HEURES_SEMAINE_DEFAUT[prochainNiveau])
+    setHeuresSemaine(heuresSemaineDefaut(prochainNiveau, prochainesHeures))
     const prochainLevelSlug = resoudreLevelSlug(prochainNiveau, prochainesHeures)
     const prochainNiveauEntry = prochainLevelSlug ? LEVELS.find((l) => l.slug === prochainLevelSlug) : undefined
     const prochainChapitre = prochainNiveauEntry?.chapters[0]
@@ -1179,7 +1179,7 @@ export function EvaluationGeneratorPanel({
     const generateurs = processusChoisis.length
     setNiveau(nh.niveau)
     setHeures(nh.heures)
-    setHeuresSemaine(HEURES_SEMAINE_DEFAUT[nh.niveau])
+    setHeuresSemaine(heuresSemaineDefaut(nh.niveau, nh.heures))
     setChapitresSlugs(chapitresCarnet.map((c) => c.slug))
     setLignes(lignesCarnet)
     setFiltreProcessus('tout')
@@ -2333,7 +2333,7 @@ export function EvaluationGeneratorPanel({
       </section>
       {!verrouille && (
         <p className="admin-eval-intro">
-          Sont fonctionnels : tous les chapitres de 4e, de 5e (4h) et de 6e (6h). Pour ces trois niveaux, la génération se fait désormais directement ici (aucune redirection), vrai/faux
+          Sont fonctionnels : tous les chapitres de 4e, de 5e (4h), de 5e (6h) et de 6e (6h). Pour ces quatre niveaux, la génération se fait désormais directement ici (aucune redirection), vrai/faux
           compris — sauf « Fonctions réciproques et cyclométriques » dont la banque vrai/faux reste sur plateforme-maths.
         </p>
       )}
