@@ -487,4 +487,6 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '6gen141': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen141').then((m) => ({ default: m.App6gen141 }))),
   '6gen142': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen142').then((m) => ({ default: m.App6gen142 }))),
   '6gen143': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen143').then((m) => ({ default: m.App6gen143 }))),
+  // 5e (6h), « Nombres réels et suites », algèbre financière (chantier F) : 56gen23–56gen28.
+  '56gen24': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen24').then((m) => ({ default: m.App56gen24 }))),
 }

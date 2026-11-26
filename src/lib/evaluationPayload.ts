@@ -135,6 +135,7 @@ export type IdGenerateurPilote =
   | '5gen73' | '5gen74' | '5gen75'
   | '5gen78' | '5gen79' | '5gen80' | '5gen81'
   | '5gen76' | '5gen77' | '5gen36' | '5gen37' | '5gen38'
+  | '56gen23' | '56gen24' | '56gen25' | '56gen26' | '56gen27' | '56gen28'
 
 export interface GeneratorConfig {
   chapitreSlug: string
@@ -527,6 +528,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'statistique-deux-variables', sectionId: 'mayer', generatorId: '5gen36', label: 'Droite de Mayer (5gen36)', processus: 2 },
   { chapitreSlug: 'statistique-deux-variables', sectionId: 'moindres-carres', generatorId: '5gen37', label: 'Droite des moindres carrés (5gen37)', processus: 2 },
   { chapitreSlug: 'statistique-deux-variables', sectionId: 'correlation', generatorId: '5gen38', label: 'Covariance et coefficient de corrélation (5gen38)', processus: 2 },
+  // 5e (6h), « Nombres réels et suites », algèbre financière (chantier F).
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'interets', generatorId: '56gen24', label: 'Intérêt simple (56gen24)', processus: 2 },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même
