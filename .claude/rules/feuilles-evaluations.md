@@ -4525,3 +4525,70 @@ mesurée avec l'ancienne répartition ; 25 / 50 / 25 : de 42 à 59 min, médiane
 - **Calculatrice** des élèves : Casio Graph Math+ (menus Récurrence, Table, Équation) — `calcul: 'exacte'` seulement
   si elle donne la réponse directement ; le menu Récurrence donne directement un terme d'une suite définie par
   récurrence ou par formule explicite (voir « 56gen : profils » ci-dessous).
+
+## 5e (6h) — nouveaux générateurs 56gen20–56gen22 (chantier E2, 26/11/2026, notés)
+
+Socle d'écrans du 5e (`AppEcransTrigo`, sans modification : champs à trois tentatives, choix fermé jugé ✗ / ✓ en une
+tentative, `parse_error` / `approchee` / `aReprendre` SANS tentative, aides à deux niveaux, corrigé de l'étape après
+chaque réponse, `?code=` par `genererAvecCode`). Applis `5e-6h/App56gen20–22.tsx` (en-tête « 5e (6h) — Entraînement » /
+« Nombres réels et suites », jamais de numéro de chapitre). Code propre : `generateurs56/{heron,sommeSigma,rangEpsilon}/`
+(`index.ts` types + générateur, `ui/format….ts` textes, `ui/definition….ts` contrat `DefinitionEcrans`,
+`moteur/verification….ts`, `corrigeDetaille.ts`, `exportEvaluation.ts` avec le profil). Communs aux trois :
+`generateurs56/nombres56.ts` (10⁻ᵏ KaTeX / Unicode, `egalOuEnvironL`, `scientifiqueL`, `tronqueL` « 3{,}272727\ldots »,
+par défaut / par excès, `affineVarL`, `fractionL`, `avecNotationE` : « 9,2e-5 » lu comme 9,2·10⁻⁵) et
+`generateurs56/expression56.ts` (expression en i, j ou n par `evaluerExpressionGenerale` du 5e, comparée en plusieurs
+valeurs : toute forme équivalente acceptée ; erreur de syntaxe ou autre lettre = `parse_error`). Renvois « (cours, § n) » =
+numéros d'étape du chapitre (5, 7, 8, 9). Registres : `registry.ts`, `EVALUATION_ADAPTER_REGISTRY_56` (`versionPapier`),
+`evaluationPayload.ts` (union, pilote : `approcher-densite`, `suites-arithmetiques`, `limite-suite`, processus 2),
+`REGROUPEMENTS["56gen21"]` et `["56gen22"]`.
+- **56gen20 « Héron et encadrements successifs »** (étape 5). Variantes `rectangle` (p × q entiers, 2 ≤ p, q ≥ p + 3, A non
+  carré), `unite` (rectangle A × 1, 5 ≤ A ≤ 40), `puissances`. Héron (notations du cours : rectangle n de longueur aₙ, largeur
+  A/aₙ, a₁ = q) : écrans deuxième rectangle (a₂ exact, largeur au dix-millième ±1,1·10⁻⁴), encadrement par le troisième
+  (minorant par défaut, majorant par excès ; arrondi ordinaire accepté), premier rectangle dont l'écart aₙ − A/aₙ est < 10⁻ᵏ
+  (k ∈ {3 ; 4 ; 5 ; 6}, menu Récurrence ; réponse entre le 4ᵉ et le 9ᵉ rectangle, écart trouvé ≤ ε/2 et précédent ≥ 2ε),
+  valeur approchée (|x − √A| ≤ 10⁻ᵏ, lecture). Puissances : c = entier le plus proche de √P (P sans facteur carré, 2 à 23),
+  base √P − c ou c − √P dans ]0 ; 1/2[ ; écrans base² = u₁ − v₁√P, base⁴ = u₂ − v₂√P (u, v entiers), fraction irréductible
+  u₂/v₂ (décimal refusé sans tentative, fraction non simplifiée « à reprendre »), écart fraction − √P à deux chiffres
+  significatifs — toujours POSITIF (base⁴/v₂ : valeur par excès), d'où aucun écran « par défaut / par excès » (verdict
+  constant). Deux écrans au carré suffisent (2 − √3)⁴ = 97 − 56√3 donne 97/56 comme le manuel (1552/896 réduit). Papier :
+  deux vraies questions (encadrements des rectangles 2 et 3 ; rang et valeur — puissances : fraction ; écart). Profil
+  `calcul: 'calculatrice'` partout, `calculatriceIndispensable: true`. Niveaux : Héron 3 · 10 min, puissances 3 · 11 (méthode 0,
+  piège 0, nombres 1 ; Héron d = lecture).
+- **56gen21 « Calculer avec le symbole Σ »** (étape 7 ; Σ géométrique de l'étape 8). Variantes `ecrire` (somme en extension
+  u₁ + u₂ + u₃ + ⋯ + uₙ, arithmétique ou géométrique : terme général en i, borne n, valeur), `developper` (i² + b, i(i + b),
+  2ⁱ − i, (−1)ⁱ·i ; i de k ∈ {0…3} : nombre de termes, premier et dernier, valeur), `uneSuite` (nature arithmétique /
+  géométrique tirée à PARTS ÉGALES avant les nombres = choix fermé « ni l'une ni l'autre » en leurre ; puis éléments et
+  valeur), `mixte` (Σ(c·qⁱ + a·i + b) comme l'exercice 23 d : partie géométrique, partie arithmétique, total), `litteral`
+  (Σ_{i=1}^{n} (a·i + b) ou c·qⁱ en fonction de n, comparée en n = 1…8), `changementIndice` (j = i − k + 1 : borne, g(j),
+  valeur). Valeurs entières calculables à la main (termes ≤ 3 000, partie géométrique ≤ 5 000). Papier : la somme + une
+  consigne (« Calcule cette somme. », « Développe… », « … en fonction de n », « Écris… avec Σ… ») ; regroupés : calculer
+  (uneSuite + mixte), développer, en fonction de n. **Profil `calcul`** : la touche Σ de la Casio Graph Math+ donne
+  directement la valeur d'une somme numérique → `exacte` pour `developper`, `uneSuite`, `mixte` ; rien pour `ecrire`,
+  `changementIndice`, `litteral` (démarche évaluée). `forme` = variante (+ arithmétique / géométrique quand l'énoncé le
+  montre), jamais la nature de `uneSuite`. Niveaux : ecrire 2 · 8, developper 2–3 · 8 (piège 1 si k ≠ 1), uneSuite 3–4 · 8
+  (méthode 1, piège si k ≠ 1 — indépendant du verdict), mixte 3 · 8, litteral 2 · 6, changementIndice 2 · 8.
+- **56gen22 « Rang à partir duquel |uₙ − ℓ| < ε »** (étape 9). Définition du cours : n > m ⇒ |uₙ − ℓ| < ε ; on demande le PLUS
+  PETIT m (= premier rang qui convient moins 1, comme l'exemple résolu du cours « m = 999 », « m = 27 »). Variantes
+  `rationnelle` (uₙ = (an + b)/(cn + d), c, d > 0 ; signe de bc − ad tiré à parts égales AVANT les nombres ; écrans limite
+  exacte — décimal approché refusé sans tentative —, |uₙ − ℓ| = K/(c(cn + d)) sans valeur absolue, borne B de « n > B »
+  (exacte ou au centième ; calcul en entiers, ε = μ·10⁻ᵏ, μ ∈ {1 ; 2 ; 5}), m = ⌊B⌋ ; B entier : au rang B l'écart vaut
+  exactement ε), `geometrique` (ℓ + k/qⁿ, ℓ + k·rⁿ avec r décimal, ℓ + k/(−q)ⁿ ; premier rang N par la table, N ≤ 60, aucun
+  écart à moins de 4 % de ε ; m = N − 1), `fibonacci` (vₙ = Fₙ₊₁/Fₙ : v_{n₀} en fraction, Φ exact ou ±6·10⁻⁴, premier rang
+  par le menu Récurrence — |vₙ − Φ| = 1/(Fₙ Φⁿ) décroissant, marge 15 % —, m = N − 1). Messages ciblés : signe gardé dans
+  la valeur absolue, premier rang donné pour m, borne prise pour le premier rang, inverses sans changer le sens… Papier :
+  « Détermine la limite ℓ de cette suite, puis le plus petit rang m… » (regroupé : ligne « uₙ = … ; ε = … ») ; Fibonacci :
+  deux vraies questions. Profil : `calculatrice` + `calculatriceIndispensable` pour `geometrique` et `fibonacci`, rien pour
+  `rationnelle` ; `forme` = variante (+ forme géométrique). Niveaux : rationnelle 3 · 9, géométrique 4 · 10, Fibonacci 4 · 10
+  (méthode 1 — l'énoncé ne dit ni inéquation ni table —, d = lecture).
+
+Mesures (dossier de travail `56-E2` : `banc20/21/22.mts` + `collecteur.mts`, `reg.mts`, `parcours.cjs`, `docs.cjs`,
+`deborde.cjs`) : 300 tirages par variante (3 600) — réponses canoniques saisies comme un élève (« − », virgule, « 3·2^(i−1) »,
+« (1+√5)/2 », « 9,2e-5 ») toutes acceptées, réponses fausses refusées, réponses recalculées indépendamment (écart de Héron
+par itération, base⁴ = u₂ − v₂√P, Sₙ par sommation, m par balayage et en entiers exacts, écart décroissant), KaTeX strict
+de toutes les consignes, aides, réponses, corrigés, barèmes et énoncés papier, 0 notation clavier / NaN / point décimal,
+barème = 4, niveau jamais provisoire ; verdicts (5 000 tirages) : nature arithmétique 50,7 %, suite au-dessus de ℓ 49,7 % ; `?code=` 900 / 900 (60 graines ×
+(libre + variantes)) appli = adaptateur ; regroupement 30 / 30 par variante visée, 0 ailleurs. Parcours réels (iPhone 13
+clair et 1 280 px sombre, 6 à 9 exercices par générateur, juste / faux / épuisé / aides / illisible) : scrollWidth = largeur,
+0 erreur console, 0 `.katex-error`, 0 « $ » visible, saisie illisible refusée sans tentative, champs vides au nouvel
+exercice. Documents réels (évaluation 2 séries + aménagée + corrigé + grille, feuille + aménagée, Word copie / corrigé /
+grille) : 0 `.katex-error`, 0 débordement à 680 (impression) / 820 / 1 280 px.
