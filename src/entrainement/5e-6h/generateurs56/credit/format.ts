@@ -32,7 +32,7 @@ export function situation(e: E): Frag[] {
     case "montantEmprunte":
       return [tx(`Pour financer ${OBJETS[e.objet]}, ${p} peut rembourser ${eurT(e.m)} par mois pendant ${e.n} mois. Un organisme lui propose un prêt à tempérament au TAEG de ${pourcentT(e.taeg)}.`)];
     case "tableau":
-      return [tx(`${p} emprunte ${eurT(e.C)} au TAEG de ${pourcentT(e.taeg)}, remboursables en ${e.n} mensualités de ${eurT(e.m)}. Le tableau ci-dessous est le début (ou un extrait) de son tableau d'amortissement.`)];
+      return [tx(`${p} emprunte ${eurT(e.C)} au TAEG de ${pourcentT(e.taeg)}, remboursables en ${e.n} mensualités de ${eurT(e.m)}. Le tableau ci-dessous est ${e.k === 1 ? "le début" : "un extrait"} de son tableau d'amortissement.`)];
     case "amortissementConstant":
       return [tx(`Un jeune artisan emprunte ${eurT(e.C)} à ses parents pour s'installer. Il rembourse en ${e.n} mois : chaque mois, la même part du capital (amortissement constant), plus un intérêt de ${pourcentT(e.r)} sur la partie du capital qui n'est pas encore remboursée.`)];
   }
