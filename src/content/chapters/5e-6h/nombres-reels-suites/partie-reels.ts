@@ -16,7 +16,8 @@ const R = String.raw
 /** Rapports de termes consécutifs de Fibonacci (réduites de la fraction continue de Φ). */
 const PHI = (1 + Math.sqrt(5)) / 2
 const REDUITES = [1, 2, 3 / 2, 5 / 3, 8 / 5, 13 / 8, 21 / 13, 34 / 21]
-const ETIQUETTES_REDUITES = ['1', '2', '3⁄2', '5⁄3', '8⁄5', '13⁄8', '21⁄13', '34⁄21']
+/** Barre entre espaces fines insécables (U+202F) : la barre de fraction ⁄ est rendue minuscule dans la police des figures. */
+const ETIQUETTES_REDUITES = ['1', '2', '3 / 2', '5 / 3', '8 / 5', '13 / 8', '21 / 13', '34 / 21']
 
 export const sectionsReels: ChapterSection[] = [
   // ═══════════════════════════════════════════════════════════════════════════════════════════
@@ -43,7 +44,7 @@ export const sectionsReels: ChapterSection[] = [
       {
         kind: 'intuition',
         label: 'Pour visualiser',
-        text: R`Tu dois carreler un sol carré **et** sa diagonale avec des carreaux carrés tous identiques, sans jamais couper un carreau. Si un carreau tient exactement $n$ fois dans le côté et $m$ fois dans la diagonale, il est une **commune mesure** des deux segments, et le rapport diagonale sur côté vaut $\dfrac{m}{n}$. Les pythagoriciens pensaient qu'un tel carreau existe toujours, quitte à le prendre minuscule. Pour le côté et la diagonale d'un carré, il n'existe pas : aucun carreau, si petit soit-il, ne convient.`,
+        text: R`Imagine une petite baguette, toujours la même, que tu reportes bout à bout. Si elle tient exactement $n$ fois dans le côté d'un carré **et** $m$ fois dans sa diagonale, elle est une **commune mesure** des deux segments, et le rapport diagonale sur côté vaut $\dfrac{m}{n}$. Les pythagoriciens pensaient qu'une telle baguette existe toujours, quitte à la prendre minuscule. Pour le côté et la diagonale d'un carré, elle n'existe pas : aucune baguette, si petite soit-elle, ne tombe juste dans les deux.`,
       },
       {
         kind: 'para',
@@ -120,13 +121,13 @@ export const sectionsReels: ChapterSection[] = [
       },
       {
         kind: 'exemple',
-        badge: 'jamais, toujours ou parfois ? quatre égalités entre naturels',
+        badge: 'jamais ou souvent ? quatre égalités entre naturels',
         formula: R`Pour quels couples de naturels non nuls $(m\,;n)$ les égalités suivantes sont-elles vérifiées : $m^2 = 7n^2$ ; $m^2 = 9n^2$ ; $m^3 = 2n^3$ ; $m^3 = 64n^3$ ?`,
         steps: [
           { tag: 'm² = 7n²', text: R`Jamais : l'exposant de $7$ est pair dans $m^2$, impair dans $7n^2$ (démonstration ci-dessus).` },
-          { tag: 'm² = 9n²', text: R`Toujours dès que $m = 3n$ : $9n^2 = (3n)^2$. Une infinité de couples, $(3\,;1)$, $(6\,;2)$… car $\sqrt{9} = 3$ est un naturel.` },
+          { tag: 'm² = 9n²', text: R`Souvent : exactement quand $m = 3n$, car $9n^2 = (3n)^2$. Une infinité de couples, $(3\,;1)$, $(6\,;2)$… car $\sqrt{9} = 3$ est un naturel.` },
           { tag: 'm³ = 2n³', text: R`Jamais : dans un cube $m^3$, chaque exposant est un multiple de $3$ ; dans $2n^3$, l'exposant de $2$ vaut $1$ plus un multiple de $3$.` },
-          { tag: 'm³ = 64n³', text: R`Toujours dès que $m = 4n$, car $64 = 4^3$ : $\sqrt[3]{64} = 4$.` },
+          { tag: 'm³ = 64n³', text: R`Souvent : exactement quand $m = 4n$, car $64n^3 = (4n)^3$ : $\sqrt[3]{64} = 4$.` },
         ],
         result: { tag: 'conclusion', text: R`$\sqrt{7}$ et $\sqrt[3]{2}$ sont irrationnels ; $\sqrt{9}$ et $\sqrt[3]{64}$ sont des naturels.` },
       },
@@ -165,28 +166,26 @@ export const sectionsReels: ChapterSection[] = [
         kind: 'illustration',
         illustration: {
           kind: 'numberSetsNesting',
+          // Positions calculées pour que chaque point ET son étiquette restent dans leur couronne, sans toucher un
+          // contour ni une autre étiquette (script `ensembles.py` du dossier de travail 56-A).
           rings: [
             { rx: 176, ry: 145, label: 'ℝ' },
-            { rx: 136, ry: 110, label: 'ℚ' },
-            { rx: 96, ry: 76, label: 'ℤ' },
-            { rx: 50, ry: 40, label: 'ℕ' },
+            { rx: 144, ry: 110, label: 'ℚ' },
+            { rx: 96, ry: 70, label: 'ℤ' },
+            { rx: 52, ry: 34, label: 'ℕ' },
           ],
           examplePoints: [
-            { dx: -34, dy: 6, label: '0', anchor: 'start' },
-            { dx: -2, dy: 20, label: '23⁵', anchor: 'start' },
-            { dx: -60, dy: -18, label: '−2', anchor: 'end' },
-            { dx: -26, dy: 54, label: '∛(−27)', anchor: 'start' },
-            { dx: 50, dy: 24, label: '−10⁶', anchor: 'start' },
-            { dx: -112, dy: 8, label: '3⁄7', anchor: 'start' },
-            { dx: 58, dy: -48, label: 'sin 30°', anchor: 'start' },
-            { dx: -60, dy: 88, label: '3·10⁻⁶', anchor: 'start' },
-            { dx: 98, dy: 30, label: '−12,03', anchor: 'start' },
-            { dx: 68, dy: -98, label: 'cos 17°', anchor: 'start' },
-            { dx: -156, dy: 20, label: 'π⁄2', anchor: 'start' },
-            { dx: 104, dy: 88, label: '∛(−7)', anchor: 'start' },
-            { dx: -38, dy: 124, label: '−√5⁄2', anchor: 'start' },
+            { dx: 28, dy: 5, label: '0', anchor: 'start' },
+            { dx: -14, dy: 20, label: '23⁵' },
+            { dx: 55, dy: 41, label: '−2' },
+            { dx: 22, dy: 53, label: '∛−27', anchor: 'end' },
+            { dx: 22, dy: 92, label: 'sin 30°', anchor: 'end' },
+            { dx: 19, dy: -79, label: '3·10⁻⁶', anchor: 'start' },
+            { dx: -17, dy: 125, label: 'cos 17°', anchor: 'start' },
+            { dx: 28, dy: -121, label: 'π⁄2', anchor: 'start' },
+            { dx: -68, dy: -118, label: '−½·√5', anchor: 'start' },
           ],
-          caption: R`Chaque nombre est placé dans le plus petit ensemble qui le contient : $23^5 = 6\,436\,343 \in \mathbb{N}$, $\sqrt[3]{-27} = -3 \in \mathbb{Z}$, $\sin 30^\circ = \dfrac{1}{2} \in \mathbb{Q}$ ; $\cos 17^\circ$, $\dfrac{\pi}{2}$, $\sqrt[3]{-7}$ et $-\dfrac{\sqrt{5}}{2}$ sont irrationnels.`,
+          caption: R`Chaque nombre est placé dans le plus petit ensemble qui le contient : $23^5 = 6\,436\,343 \in \mathbb{N}$, $\sqrt[3]{-27} = -3 \in \mathbb{Z}$, $\sin 30^\circ = \dfrac{1}{2} \in \mathbb{Q}$ ; $3 \cdot 10^{-6} \in \mathbb{Q}$ ; $\cos 17^\circ$, $\dfrac{\pi}{2}$ et $-\dfrac{1}{2}\sqrt{5}$ sont irrationnels.`,
         },
       },
       {
@@ -235,8 +234,6 @@ export const sectionsReels: ChapterSection[] = [
             { x: 0.5, y: 1.618, label: 'ℓ', tone: 'good', node: false, labelPos: 'above' },
             { x: 1.81, y: 1.618, label: 'L', tone: 'accent', node: false, labelPos: 'above' },
             { x: 0, y: 0.81, label: 'L', tone: 'ink', node: false, labelPos: 'left' },
-            { x: 0.5, y: 0.75, label: 'rectangle d’or', tone: 'good', node: false, labelPos: 'above' },
-            { x: 1.81, y: 0.75, label: 'carré', tone: 'accent', node: false, labelPos: 'above' },
           ],
           caption: R`Le rectangle d'or (vert) mesure $L$ sur $\ell$ ; avec le carré de côté $L$ (orange), on obtient un rectangle $(L + \ell)$ sur $L$ de même forme : $\dfrac{L + \ell}{L} = \dfrac{L}{\ell} = \Phi$.`,
         },
@@ -588,7 +585,7 @@ export const sectionsReels: ChapterSection[] = [
           { kind: 'para', text: R`Soit $a$ un réel. On veut prouver $a \cdot 0 = 0$ en n'utilisant que les axiomes.` },
           { kind: 'para', text: R`**1.** $0$ est neutre pour l'addition, donc $0 + 0 = 0$, et $a \cdot 0 = a \cdot (0 + 0)$.` },
           { kind: 'para', text: R`**2.** Par distributivité, $a \cdot (0 + 0) = a \cdot 0 + a \cdot 0$. Donc $a \cdot 0 = a \cdot 0 + a \cdot 0$.` },
-          { kind: 'para', text: R`**3.** Ajoutons l'opposé $-(a \cdot 0)$ aux deux membres : à gauche, on obtient $0$ (symétrique) ; à droite, $\big(a \cdot 0 + a \cdot 0\big) + \big(-(a \cdot 0)\big) = a \cdot 0 + \big(a \cdot 0 + (-(a \cdot 0))\big) = a \cdot 0 + 0 = a \cdot 0$ (associativité, symétrique, neutre).` },
+          { kind: 'para', text: R`**3.** Ajoutons l'opposé $-(a \cdot 0)$ aux deux membres. À gauche, on obtient $0$ (symétrique). À droite, on regroupe autrement (associativité) : $a \cdot 0 + \big(a \cdot 0 + (-(a \cdot 0))\big)$, c'est-à-dire $a \cdot 0 + 0$ (symétrique), donc $a \cdot 0$ (neutre).` },
           { kind: 'para', text: R`**Conclusion.** $0 = a \cdot 0$ : un produit dont un facteur est nul est nul. Cette règle « évidente » est bien une conséquence des axiomes.` },
         ],
       },
@@ -620,8 +617,8 @@ export const sectionsReels: ChapterSection[] = [
         badge: 'encadrer Φ par des intervalles emboîtés',
         formula: R`Les réduites $1$ ; $2$ ; $\dfrac{3}{2}$ ; $\dfrac{5}{3}$ ; $\dfrac{8}{5}$ ; $\dfrac{13}{8}$ ; $\dfrac{21}{13}$ ; $\dfrac{34}{21}$ de la fraction continue de $\Phi$ (étape 1) sont tour à tour inférieures et supérieures à $\Phi$. Écris les intervalles qu'elles forment deux à deux et leurs longueurs.`,
         steps: [
-          { tag: 'intervalles', text: R`$[1\,;2] \supset \left[\dfrac{3}{2}\,;\dfrac{5}{3}\right] \supset \left[\dfrac{8}{5}\,;\dfrac{13}{8}\right] \supset \left[\dfrac{21}{13}\,;\dfrac{34}{21}\right]$` },
-          { tag: 'en décimal', text: R`$[1\,;2] \supset [1{,}5\,;1{,}667] \supset [1{,}6\,;1{,}625] \supset [1{,}6154\,;1{,}6190]$` },
+          { tag: 'intervalles', text: R`$[1\,;2] \supset \left[\dfrac{3}{2}\,;\dfrac{5}{3}\right]$ $\supset \left[\dfrac{8}{5}\,;\dfrac{13}{8}\right]$ $\supset \left[\dfrac{21}{13}\,;\dfrac{34}{21}\right]$` },
+          { tag: 'en décimal', text: R`$[1\,;2] \supset [1{,}5\,;1{,}667]$ $\supset [1{,}6\,;1{,}625]$ $\supset [1{,}6154\,;1{,}6190]$` },
           { tag: 'longueurs', text: R`$1$ ; $\dfrac{5}{3} - \dfrac{3}{2} = \dfrac{1}{6}$ ; $\dfrac{13}{8} - \dfrac{8}{5} = \dfrac{1}{40}$ ; $\dfrac{34}{21} - \dfrac{21}{13} = \dfrac{442 - 441}{273} = \dfrac{1}{273}$` },
         ],
         result: { tag: 'conclusion', text: R`Les intervalles sont emboîtés et de plus en plus courts ; $\Phi \approx 1{,}6180$ appartient à chacun d'eux.` },
@@ -635,11 +632,11 @@ export const sectionsReels: ChapterSection[] = [
           ticks: [1, 2],
           rows: [
             { ranges: [{ from: 1, to: 2, tone: 'accent', label: '[1 ; 2]' }], overlapAt: PHI },
-            { ranges: [{ from: 1.5, to: 5 / 3, tone: 'accent', label: '[3⁄2 ; 5⁄3]' }], overlapAt: PHI },
-            { ranges: [{ from: 1.6, to: 1.625, tone: 'accent', label: '[8⁄5 ; 13⁄8]' }], overlapAt: PHI },
-            { ranges: [{ from: 21 / 13, to: 34 / 21, tone: 'accent', label: '[21⁄13 ; 34⁄21]' }], overlapAt: PHI },
+            { ranges: [{ from: 1.5, to: 5 / 3, tone: 'accent', label: '[3 / 2 ; 5 / 3]' }], overlapAt: PHI },
+            { ranges: [{ from: 1.6, to: 1.625, tone: 'accent', label: '[8 / 5 ; 13 / 8]' }], overlapAt: PHI },
+            { ranges: [{ from: 21 / 13, to: 34 / 21, tone: 'accent', label: '[21 / 13 ; 34 / 21]' }], overlapAt: PHI },
           ],
-          caption: R`Quatre intervalles emboîtés de plus en plus courts ; le point vert, $\Phi \approx 1{,}618$, est dans chacun d'eux.`,
+          caption: R`Quatre intervalles emboîtés de plus en plus courts ; le rond marque $\Phi \approx 1{,}618$, qui est dans chacun d'eux.`,
         },
       },
       {
@@ -756,7 +753,7 @@ export const sectionsReels: ChapterSection[] = [
         kind: 'rappel',
         label: 'Traduire une distance en intervalle (r > 0)',
         items: [
-          R`$|x - a| \leq r \iff a - r \leq x \leq a + r \iff x \in [a - r\,;a + r]$ : les réels à distance au plus $r$ de $a$.`,
+          R`$|x - a| \leq r$ $\iff a - r \leq x \leq a + r$ $\iff x \in [a - r\,;a + r]$ : les réels à distance au plus $r$ de $a$.`,
           R`$|x - a| < r \iff x \in\ ]a - r\,;a + r[$ ; $|x - a| \geq r \iff x \leq a - r$ ou $x \geq a + r$.`,
         ],
       },
@@ -790,7 +787,7 @@ export const sectionsReels: ChapterSection[] = [
           { tag: '|2x − 5| < 3', text: R`$-3 < 2x - 5 < 3$, donc $2 < 2x < 8$ et $1 < x < 4$.` },
           { tag: '|x + 5| > 3', text: R`$|x - (-5)| > 3$ : distance à $-5$ plus grande que $3$. Donc $x + 5 < -3$ ou $x + 5 > 3$, c'est-à-dire $x < -8$ ou $x > -2$.` },
         ],
-        result: { tag: 'résultat', text: R`$[1\,;5]$ ; $]1\,;4[$ ; $]-\infty\,;-8[\ \cup\ ]-2\,;+\infty[$` },
+        result: { tag: 'résultat', text: R`$[1\,;5]$ ; $]1\,;4[$ ; $]{-\infty}\,;-8[\ \cup\ ]{-2}\,;+\infty[$` },
       },
       {
         kind: 'piege',
@@ -814,7 +811,7 @@ export const sectionsReels: ChapterSection[] = [
         formula: R`Résous dans $\mathbb{R}$ : $|x - 2| = 5$ ; $|3x + 1| = 0$ ; $|3x + 1| = -2$.`,
         steps: [
           { tag: 'c > 0', text: R`$|x - 2| = 5 \iff x - 2 = 5$ ou $x - 2 = -5 \iff x = 7$ ou $x = -3$.` },
-          { tag: 'c = 0', text: R`$|3x + 1| = 0 \iff 3x + 1 = 0 \iff x = -\dfrac{1}{3}$.` },
+          { tag: 'c = 0', text: R`$|3x + 1| = 0$ $\iff 3x + 1 = 0$ $\iff x = -\dfrac{1}{3}$.` },
           { tag: 'c < 0', text: R`Une valeur absolue n'est jamais négative : $|3x + 1| = -2$ n'a aucune solution.` },
         ],
         result: { tag: 'résultat', text: R`$S = \{-3\,;7\}$ ; $S = \left\{-\dfrac{1}{3}\right\}$ ; $S = \varnothing$` },
@@ -824,8 +821,8 @@ export const sectionsReels: ChapterSection[] = [
         badge: 'deux valeurs absolues égales',
         formula: R`Résous dans $\mathbb{R}$ : $|5x + 1| = |x - 3|$.`,
         steps: [
-          { tag: 'égaux', text: R`$5x + 1 = x - 3 \iff 4x = -4 \iff x = -1$.` },
-          { tag: 'opposés', text: R`$5x + 1 = -(x - 3) = -x + 3 \iff 6x = 2 \iff x = \dfrac{1}{3}$.` },
+          { tag: 'égaux', text: R`$5x + 1 = x - 3$ $\iff 4x = -4$ $\iff x = -1$.` },
+          { tag: 'opposés', text: R`$5x + 1 = -(x - 3) = -x + 3$ $\iff 6x = 2$ $\iff x = \dfrac{1}{3}$.` },
           { tag: 'vérifier', text: R`$x = -1$ : $|-4| = |-4| = 4$. $x = \dfrac{1}{3}$ : $\left|\dfrac{8}{3}\right| = \left|-\dfrac{8}{3}\right| = \dfrac{8}{3}$.` },
         ],
         result: { tag: 'résultat', text: R`$S = \left\{-1\,;\dfrac{1}{3}\right\}$` },
@@ -836,10 +833,10 @@ export const sectionsReels: ChapterSection[] = [
         formula: R`Résous dans $\mathbb{R}$ : $|x^2 - 4| > 2$.`,
         steps: [
           { tag: 'enlever la valeur absolue', text: R`$|x^2 - 4| > 2 \iff x^2 - 4 < -2$ ou $x^2 - 4 > 2 \iff x^2 < 2$ ou $x^2 > 6$.` },
-          { tag: 'premier cas', text: R`$x^2 < 2 \iff |x| < \sqrt{2} \iff -\sqrt{2} < x < \sqrt{2}$.` },
-          { tag: 'second cas', text: R`$x^2 > 6 \iff |x| > \sqrt{6} \iff x < -\sqrt{6}$ ou $x > \sqrt{6}$.` },
+          { tag: 'premier cas', text: R`$x^2 < 2$ $\iff |x| < \sqrt{2}$ $\iff -\sqrt{2} < x < \sqrt{2}$.` },
+          { tag: 'second cas', text: R`$x^2 > 6$ $\iff |x| > \sqrt{6}$ $\iff x < -\sqrt{6}$ ou $x > \sqrt{6}$.` },
         ],
-        result: { tag: 'résultat', text: R`$S = \ ]-\infty\,;-\sqrt{6}[\ \cup\ ]-\sqrt{2}\,;\sqrt{2}[\ \cup\ ]\sqrt{6}\,;+\infty[$` },
+        result: { tag: 'résultat', text: R`$S = \ ]{-\infty}\,;-\sqrt{6}[$ $\cup\ ]{-\sqrt{2}}\,;\sqrt{2}[$ $\cup\ ]\sqrt{6}\,;+\infty[$` },
       },
       {
         kind: 'illustration',
@@ -852,17 +849,25 @@ export const sectionsReels: ChapterSection[] = [
           xMin: -3.3,
           xMax: 3.3,
           xTicks: [-3, -2, -1, 1, 2, 3],
-          yTicks: [2, 4],
+          yTicks: [4],
           fixedYRange: { min: -0.5, max: 6 },
           points: [
-            { x: -Math.sqrt(6), y: 2, label: '−√6', tone: 'bad', labelPos: 'left' },
-            { x: -Math.sqrt(2), y: 2, label: '−√2', tone: 'bad', labelPos: 'below' },
-            { x: Math.sqrt(2), y: 2, label: '√2', tone: 'bad', labelPos: 'below' },
-            { x: Math.sqrt(6), y: 2, label: '√6', tone: 'bad', labelPos: 'right' },
+            { x: -Math.sqrt(6), y: 2, label: '', tone: 'bad' },
+            { x: -Math.sqrt(2), y: 2, label: '', tone: 'bad' },
+            { x: Math.sqrt(2), y: 2, label: '', tone: 'bad' },
+            { x: Math.sqrt(6), y: 2, label: '', tone: 'bad' },
+          ],
+          // Étiquettes posées à la main sous la droite y = 2, là où la courbe ne passe pas.
+          textLabels: [
+            { x: -2.85, y: 1.35, text: '−√6', tone: 'bad', anchor: 'middle' },
+            { x: -1.0, y: 1.35, text: '−√2', tone: 'bad', anchor: 'middle' },
+            { x: 1.0, y: 1.35, text: '√2', tone: 'bad', anchor: 'middle' },
+            { x: 2.85, y: 1.35, text: '√6', tone: 'bad', anchor: 'middle' },
+            { x: -3.2, y: 2.35, text: 'y = 2', tone: 'faint', anchor: 'start' },
           ],
           xAxisLabel: 'x',
           yAxisLabel: 'y',
-          caption: R`La courbe de $y = |x^2 - 4|$ (le morceau de parabole sous l'axe est replié au-dessus) est au-dessus de la droite $y = 2$ sur $]-\infty\,;-\sqrt{6}[$, sur $]-\sqrt{2}\,;\sqrt{2}[$ et sur $]\sqrt{6}\,;+\infty[$.`,
+          caption: R`La courbe de $y = |x^2 - 4|$ (le morceau de parabole sous l'axe est replié au-dessus) est au-dessus de la droite $y = 2$ sur $]{-\infty}\,;-\sqrt{6}[$, sur $]{-\sqrt{2}}\,;\sqrt{2}[$ et sur $]\sqrt{6}\,;+\infty[$.`,
         },
       },
       {
@@ -872,9 +877,9 @@ export const sectionsReels: ChapterSection[] = [
         steps: [
           { tag: 'lire des distances', text: R`$|x - (-6)|$ est la distance de $x$ à $-6$, $|x - 4|$ sa distance à $4$. On cherche les réels plus proches de $4$ que de $-6$.` },
           { tag: 'milieu', text: R`Le milieu de $-6$ et $4$ est $\dfrac{-6 + 4}{2} = -1$ : ce sont les réels situés après $-1$.` },
-          { tag: 'confirmer par le calcul', text: R`Deux nombres positifs sont dans le même ordre que leurs carrés : $(x + 6)^2 > (x - 4)^2 \iff 12x + 36 > -8x + 16 \iff 20x > -20 \iff x > -1$.` },
+          { tag: 'confirmer par le calcul', text: R`Deux nombres positifs sont dans le même ordre que leurs carrés : $(x + 6)^2 > (x - 4)^2$ $\iff 12x + 36 > -8x + 16$ $\iff 20x > -20$ $\iff x > -1$.` },
         ],
-        result: { tag: 'résultat', text: R`$S = \ ]-1\,;+\infty[$` },
+        result: { tag: 'résultat', text: R`$S = \ ]{-1}\,;+\infty[$` },
       },
       {
         kind: 'piege',
@@ -966,8 +971,8 @@ export const sectionsReels: ChapterSection[] = [
           yTicks: [2, 4, 6, 8],
           fixedYRange: { min: -0.5, max: 9 },
           points: [
-            { x: -1.5, y: 2.5, label: '(−3⁄2 ; 5⁄2)', tone: 'good', labelPos: 'below' },
-            { x: 1, y: 5, label: '(1 ; 5)', tone: 'good', labelPos: 'left' },
+            { x: -1.5, y: 2.5, label: '(−1,5 ; 2,5)', tone: 'good', labelPos: 'below' },
+            { x: 1, y: 5, label: '(1 ; 5)', tone: 'good', labelPos: 'right' },
           ],
           xAxisLabel: 'x',
           yAxisLabel: 'y',
@@ -1035,7 +1040,7 @@ export const sectionsReels: ChapterSection[] = [
         formula: R`Les côtés d'un rectangle mesurent $12{,}4$ cm et $7{,}8$ cm, à $0{,}1$ cm près. Encadre son périmètre et son aire.`,
         steps: [
           { tag: 'encadrer les côtés', text: R`$12{,}3 \leq a \leq 12{,}5$ et $7{,}7 \leq b \leq 7{,}9$.` },
-          { tag: 'périmètre', text: R`$2(12{,}3 + 7{,}7) \leq 2(a + b) \leq 2(12{,}5 + 7{,}9)$, donc $40 \leq P \leq 40{,}8$ : $P = 40{,}4$ cm à $0{,}4$ cm près.` },
+          { tag: 'périmètre', text: R`$2(12{,}3 + 7{,}7) \leq 2(a + b)$ $\leq 2(12{,}5 + 7{,}9)$, donc $40 \leq P \leq 40{,}8$ : $P = 40{,}4$ cm à $0{,}4$ cm près.` },
           { tag: 'aire', text: R`$12{,}3 \times 7{,}7 \leq ab \leq 12{,}5 \times 7{,}9$, donc $94{,}71 \leq A \leq 98{,}75$ (en cm²).` },
           { tag: 'comparer', text: R`Le calcul « direct » donne $12{,}4 \times 7{,}8 = 96{,}72$, mais l'aire réelle peut s'en écarter de plus de $2$ cm².` },
         ],
@@ -1046,8 +1051,8 @@ export const sectionsReels: ChapterSection[] = [
         label: 'Démonstration — comment l’erreur se propage dans un périmètre et une aire',
         blocks: [
           { kind: 'para', text: R`On mesure deux longueurs $x$ et $y$ ; on obtient $a$ et $b$ à $e$ près : $a - e \leq x \leq a + e$ et $b - e \leq y \leq b + e$, avec $a - e > 0$ et $b - e > 0$.` },
-          { kind: 'para', text: R`**Périmètre.** En additionnant (compatibilité de $\leq$ avec l'addition), puis en multipliant par $2 > 0$ : $2(a + b) - 4e \leq 2(x + y) \leq 2(a + b) + 4e$. L'erreur sur le périmètre est au plus $4e$.` },
-          { kind: 'para', text: R`**Aire.** Toutes les longueurs étant positives, on peut multiplier les encadrements (compatibilité avec la multiplication par un positif) : $(a - e)(b - e) \leq xy \leq (a + e)(b + e)$, c'est-à-dire $ab - (a + b)\,e + e^2 \leq xy \leq ab + (a + b)\,e + e^2$. L'erreur sur l'aire est au plus $(a + b)\,e + e^2$.` },
+          { kind: 'para', text: R`**Périmètre.** En additionnant (compatibilité de $\leq$ avec l'addition), puis en multipliant par $2 > 0$ : $2(a + b) - 4e \leq 2(x + y)$ $\leq 2(a + b) + 4e$. L'erreur sur le périmètre est au plus $4e$.` },
+          { kind: 'para', text: R`**Aire.** Toutes les longueurs étant positives, on peut multiplier les encadrements (compatibilité avec la multiplication par un positif) : $(a - e)(b - e) \leq xy \leq (a + e)(b + e)$, c'est-à-dire $ab - (a + b)\,e + e^2 \leq xy$ $\leq ab + (a + b)\,e + e^2$. L'erreur sur l'aire est au plus $(a + b)\,e + e^2$.` },
           { kind: 'para', text: R`**Conséquence.** Avec des mesures données à $10^{-n}$ près, le périmètre est connu à $4 \cdot 10^{-n}$ près, et l'aire à environ $(a + b) \cdot 10^{-n}$ près : plus les côtés sont grands, plus l'erreur sur l'aire est grande.` },
         ],
       },
@@ -1074,8 +1079,9 @@ export const sectionsReels: ChapterSection[] = [
           kind: 'vectorPlane',
           xMin: -0.6,
           xMax: 9.9,
-          yMin: -0.9,
-          yMax: 6.4,
+          // Domaine isotrope (rapport 16/15) : le dernier rectangle doit paraître presque carré.
+          yMin: -2.6,
+          yMax: 7.24,
           showAxes: false,
           vectors: [
             { from: { x: 0, y: 0 }, to: { x: 9, y: 0 }, tone: 'faint', arrow: false },
@@ -1091,7 +1097,7 @@ export const sectionsReels: ChapterSection[] = [
             { from: { x: 0, y: 2 }, to: { x: 0, y: 4.1036 }, tone: 'good', arrow: false },
           ],
           points: [
-            { x: 7.3, y: 2, label: '9 × 2', tone: 'ink', node: false, labelPos: 'above' },
+            { x: 7.25, y: 0.55, label: '9 × 2', tone: 'ink', node: false, labelPos: 'above' },
             { x: 5.5, y: 2.75, label: '5,5 × 3,27', tone: 'bad', node: false, labelPos: 'right' },
             { x: 2.2, y: 4.1036, label: '4,39 × 4,10', tone: 'good', node: false, labelPos: 'above' },
           ],
@@ -1124,7 +1130,7 @@ export const sectionsReels: ChapterSection[] = [
         label: 'Démonstration — √A reste toujours entre la largeur et la longueur',
         blocks: [
           { kind: 'para', text: R`**1.** Si $a > 0$ et $a \geq \sqrt{A}$, alors $\dfrac{A}{a} \leq \dfrac{A}{\sqrt{A}} = \sqrt{A}$ : la largeur est sous $\sqrt{A}$ quand la longueur est au-dessus.` },
-          { kind: 'para', text: R`**2.** Pour tout $a_n > 0$ : $a_{n+1} - \sqrt{A} = \dfrac{a_n^2 + A - 2a_n\sqrt{A}}{2a_n} = \dfrac{(a_n - \sqrt{A})^2}{2a_n} \geq 0$. Donc, dès le deuxième rectangle, la longueur est au-dessus de $\sqrt{A}$, et par le point 1, la largeur en dessous.` },
+          { kind: 'para', text: R`**2.** Pour tout $a_n > 0$ : $a_{n+1} - \sqrt{A} = \dfrac{a_n^2 + A - 2a_n\sqrt{A}}{2a_n}$ $= \dfrac{(a_n - \sqrt{A})^2}{2a_n} \geq 0$. Donc, dès le deuxième rectangle, la longueur est au-dessus de $\sqrt{A}$, et par le point 1, la largeur en dessous.` },
           { kind: 'para', text: R`**3.** La longueur diminue : comme $\dfrac{A}{a_n} \leq a_n$, la moyenne $a_{n+1}$ des deux côtés est au plus $a_n$. L'encadrement se resserre donc à chaque étape.` },
           { kind: 'para', text: R`**4.** L'égalité du point 2 explique la rapidité : l'écart à $\sqrt{A}$ est remplacé par (presque) son **carré**, divisé par $2a_n$. Un écart de $0{,}01$ devient environ $0{,}0001$, puis $0{,}00000001$.` },
         ],
@@ -1150,8 +1156,8 @@ export const sectionsReels: ChapterSection[] = [
         badge: 'approcher √3 par une fraction avec des puissances',
         formula: R`Sachant que $0 < \sqrt{3} - 1 < 1$, calcule $(\sqrt{3} - 1)^2$, $(\sqrt{3} - 1)^4$ et $(\sqrt{3} - 1)^8$ sous la forme $u - v\sqrt{3}$, et déduis-en une fraction proche de $\sqrt{3}$.`,
         steps: [
-          { tag: 'carrés successifs', text: R`$(\sqrt{3} - 1)^2 = 3 - 2\sqrt{3} + 1 = 4 - 2\sqrt{3}$ ; $(4 - 2\sqrt{3})^2 = 16 - 16\sqrt{3} + 12 = 28 - 16\sqrt{3}$.` },
-          { tag: 'encore une fois', text: R`$(28 - 16\sqrt{3})^2 = 784 - 896\sqrt{3} + 768 = 1552 - 896\sqrt{3}$.` },
+          { tag: 'carrés successifs', text: R`$(\sqrt{3} - 1)^2 = 3 - 2\sqrt{3} + 1$ $= 4 - 2\sqrt{3}$ ; $(4 - 2\sqrt{3})^2 = 16 - 16\sqrt{3} + 12$ $= 28 - 16\sqrt{3}$.` },
+          { tag: 'encore une fois', text: R`$(28 - 16\sqrt{3})^2 = 784 - 896\sqrt{3} + 768$ $= 1552 - 896\sqrt{3}$.` },
           { tag: 'un nombre petit', text: R`Une puissance d'un nombre compris entre $0$ et $1$ diminue : $1552 - 896\sqrt{3} = (\sqrt{3} - 1)^8 \approx 0{,}082$. En le négligeant, $\sqrt{3} \approx \dfrac{1552}{896} = \dfrac{97}{56}$.` },
           { tag: 'précision', text: R`$\dfrac{97}{56} = 1{,}7321428\ldots$ et $\sqrt{3} = 1{,}7320508\ldots$ : l'erreur vaut $\dfrac{0{,}082}{896} \approx 9 \cdot 10^{-5}$.` },
         ],
