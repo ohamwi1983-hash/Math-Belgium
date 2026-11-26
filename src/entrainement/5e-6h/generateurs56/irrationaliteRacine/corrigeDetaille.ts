@@ -1,6 +1,7 @@
 import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import { decompositionL } from "../communReels/outilsReels";
+import { lignesDecomposition } from "../communReels/corrigeReels";
 import type { ExerciceIrrationalite } from "./core/types";
 import { mkL, nkL, racineNL, reponse } from "./ui/format";
 
@@ -13,24 +14,6 @@ import { mkL, nkL, racineNL, reponse } from "./ui/format";
 type E = ExerciceIrrationalite;
 const t = texte;
 const f = latex;
-
-/** Divisions successives : « 72 = 2·36 », « = 2·2·18 »… puis la forme regroupée. */
-function lignesDecomposition(e: E): LigneCalcul[] {
-  const premiers: number[] = [];
-  let reste = e.N;
-  const L: LigneCalcul[] = [];
-  while (reste > 1) {
-    let p = 2;
-    while (reste % p !== 0) p++;
-    premiers.push(p);
-    reste /= p;
-    const membre = [...premiers, ...(reste > 1 ? [reste] : [])].join("\\cdot ");
-    L.push(ligne(`${L.length === 0 ? `${e.N}` : ""}=${membre}`, reste > 1 ? `on divise ${reste * p} par ${p}` : `${p} est premier`));
-  }
-  const regroupe = decompositionL(e.facteurs);
-  if (regroupe !== premiers.join("\\cdot ")) L.push(ligne(`=${regroupe}`, "on regroupe les facteurs égaux"));
-  return L;
-}
 
 export function correctionDetailleeIrrationalite(e: E): EtapeCorrection[] {
   const r = racineNL(e);
@@ -49,7 +32,7 @@ export function correctionDetailleeIrrationalite(e: E): EtapeCorrection[] {
     piege("b", [t("Élever "), f(r), t(" à la puissance "), f(`${k}`), t(" donne "), f(`${e.N}`), t(", pas "), f(`${e.N}^{${k}}`), t(".")]),
 
     utilise("c", [t("Divisions successives par les nombres premiers 2, 3, 5, 7… ; la décomposition d'un naturel en facteurs premiers est unique.")]),
-    calcul("c", lignesDecomposition(e)),
+    calcul("c", lignesDecomposition(e.N)),
     resultat("c", reponse(e, "facteurs")),
     piege("c", [t("S'arrêter à un facteur qui n'est pas premier (4, 6, 8, 9…).")]),
   ];

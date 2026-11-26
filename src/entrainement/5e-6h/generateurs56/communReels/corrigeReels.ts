@@ -1,0 +1,25 @@
+import type { LigneCalcul } from "../../../export/genererFeuilleExercices";
+import { ligne } from "../../../export/corrigeTableau";
+import { decomposer, decompositionL } from "./outilsReels";
+
+/**
+ * Briques de corrigé « comme au tableau » communes aux générateurs 56gen14–56gen19 (sans `docx`).
+ */
+
+/** Décomposition par divisions successives : « 72 = 2·36 », « = 2·2·18 »… puis la forme regroupée. */
+export function lignesDecomposition(N: number): LigneCalcul[] {
+  const premiers: number[] = [];
+  let reste = N;
+  const L: LigneCalcul[] = [];
+  while (reste > 1) {
+    let p = 2;
+    while (reste % p !== 0) p++;
+    premiers.push(p);
+    reste /= p;
+    const membre = [...premiers, ...(reste > 1 ? [reste] : [])].join("\\cdot ");
+    L.push(ligne(`${L.length === 0 ? `${N}` : ""}=${membre}`, reste > 1 ? `on divise ${reste * p} par ${p}` : `${p} est premier`));
+  }
+  const regroupe = decompositionL(decomposer(N));
+  if (regroupe !== premiers.join("\\cdot ")) L.push(ligne(`=${regroupe}`, "on regroupe les facteurs égaux"));
+  return L;
+}

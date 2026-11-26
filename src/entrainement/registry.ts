@@ -508,4 +508,7 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
 
   // --- 5e (6h), chapitre 1 : nouveaux générateurs « Les nombres réels » (chantier E1) ---
   '56gen14': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen14').then((m) => ({ default: m.App56gen14 }))),
+  '56gen15': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen15').then((m) => ({ default: m.App56gen15 }))),
+  '56gen16': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen16').then((m) => ({ default: m.App56gen16 }))),
+  '56gen17': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen17').then((m) => ({ default: m.App56gen17 }))),
 }

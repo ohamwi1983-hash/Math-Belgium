@@ -99,7 +99,7 @@ export function mode(e: E, p: P): ModeEcran {
 export const RACCOURCIS_DECOMPOSITION = [{ libelle: "·", texte: " · " }, ..."²³⁴⁵⁶⁷⁸⁹".split("").map((c) => ({ libelle: c, texte: c }))];
 
 /** Aperçu KaTeX de la décomposition saisie (rien si illisible). */
-function apercuDecomposition(texte: string): string | null {
+export function apercuDecomposition(texte: string): string | null {
   const s = texte.trim();
   if (!s) return null;
   const morceaux = s.replace(/^[^=]*=/, "").split(/\s*(?:[·*×xX.∙•⋅])\s*|\s+/).filter((m) => m !== "");

@@ -544,6 +544,9 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'definir-suite', generatorId: '56gen12', label: 'Suite récurrente affine (56gen12)' },
   // 5e (6h), « Nombres réels et suites » : nouveaux générateurs de la partie « Les nombres réels » (chantier E1, 26/11/2026).
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'irrationnels', generatorId: '56gen14', label: 'Rationnel ou irrationnel ? (56gen14)', processus: 1 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'irrationnels', generatorId: '56gen15', label: 'Démontrer qu’un nombre est irrationnel (56gen15)', processus: 2 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'ecritures-decimales', generatorId: '56gen16', label: 'Écriture décimale et fraction (56gen16)', processus: 2 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'axiomes', generatorId: '56gen17', label: 'Énoncés quantifiés et axiomes (56gen17)', processus: 1 },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même
