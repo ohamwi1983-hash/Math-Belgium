@@ -25,9 +25,15 @@ export const valF = (a: Fr56): number => a.n / a.d;
 export const egalF = (a: Fr56, b: Fr56): boolean => a.n === b.n && a.d === b.d;
 
 /** LaTeX : entier, ou `\dfrac{p}{q}` avec le signe devant. */
+/** Entier en LaTeX, milliers séparés par `\,` dès 10 000. */
+function entL(n: number): string {
+  const s = String(Math.abs(n));
+  return s.length > 4 ? s.replace(/\B(?=(\d{3})+(?!\d))/g, "\\,") : s;
+}
+
 export function latexF(a: Fr56): string {
-  if (a.d === 1) return `${a.n}`;
-  return `${a.n < 0 ? "-" : ""}\\dfrac{${Math.abs(a.n)}}{${a.d}}`;
+  if (a.d === 1) return `${a.n < 0 ? "-" : ""}${entL(a.n)}`;
+  return `${a.n < 0 ? "-" : ""}\\dfrac{${entL(a.n)}}{${entL(a.d)}}`;
 }
 /** LaTeX entre parenthèses si négatif ou fractionnaire (base d'une puissance, facteur d'un produit). */
 export function latexFP(a: Fr56): string {

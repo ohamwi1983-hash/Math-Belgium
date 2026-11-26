@@ -10,7 +10,8 @@ import { adaptateurEcrans56 } from "../../commun56/adaptateurEcrans56";
  * 56gen8, famille « fractales » AJOUTÉE EN FIN de catalogue (5e (6h), étape 10 : flocon de von Koch,
  * triangle de Sierpinski). Variantes `koch` (nombre de côtés et périmètre à l'étape n, limite du
  * périmètre, limite de l'aire = somme infinie : 8/5 de l'aire de départ) et `sierpinski` (nombre de
- * triangles, aire et périmètre à l'étape n, limites). Nombres choisis pour des résultats entiers ;
+ * triangles, aire et périmètre à l'étape n, limites). Étape n ≥ 3 (la figure montre les étapes 0 à 2 :
+ * jamais la réponse à compter). Nombres choisis pour des résultats exacts ;
  * aucun verdict tiré (les limites sont la propriété à reconnaître, choix fermé à une tentative).
  */
 
@@ -51,11 +52,11 @@ function melange(n: number): number[] {
 }
 
 export function genererKoch(): ExerciceKoch {
-  const [c, n] = choisir<[number, number]>([[9, 2], [27, 2], [27, 3], [81, 3], [81, 4], [9, 1], [27, 1]]);
+  const [c, n] = choisir<[number, number]>([[27, 3], [81, 3], [81, 4], [243, 4]]);
   return { famille56: "koch", c, n, ordre: melange(4) };
 }
 export function genererSierpinski(): ExerciceSierpinski {
-  const [c, A0, n] = choisir<[number, number, number]>([[8, 64, 2], [8, 64, 3], [16, 256, 2], [16, 256, 3], [8, 64, 4], [16, 256, 4]]);
+  const [c, A0, n] = choisir<[number, number, number]>([[8, 64, 3], [16, 256, 3], [8, 64, 4], [16, 256, 4]]);
   return { famille56: "sierpinski", c, A0, n, ordre: melange(4) };
 }
 export const genererFractale = (): ExerciceFractale => (Math.random() < 0.5 ? genererKoch() : genererSierpinski());

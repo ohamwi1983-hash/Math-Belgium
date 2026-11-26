@@ -111,7 +111,7 @@ function consigneGenerale(e: ExerciceInstable): Frag[] {
     t(" ; on note "),
     l("e_n"),
     t(" l'écart entre le terme calculé et le terme exact au rang n (avec "),
-    l(`e_1=${dL(e)}-${latexF(e.L)}`),
+    l(`e_1=${dL(e)}-${latexFP(e.L)}`),
     t(")."),
   ];
 }
@@ -185,7 +185,7 @@ function aide1(e: ExerciceInstable, p: PhaseInstable): AideEcran {
 function aide2(e: ExerciceInstable, p: PhaseInstable): AideEcran | null {
   if (p === "u2") return { texte: [t("Calcule "), l(`${latexFP(e.a)}\\cdot ${latexF(e.L)}`), t(" puis ajoute "), l(`${e.b}`), t(".")] };
   if (p === "facteur") return { texte: [t("Tu obtiens "), l("u_{n+1}-L=a(u_n-L)"), t(".")] };
-  if (p === "ecart") return { texte: [t("Ici "), l(`e_1=${dL(e)}-${latexF(e.L)}=${latexF(ecart1(e))}`), t(".")], latex: `e_{${e.n}}=${latexFP(e.a)}^{${e.n - 1}}\\cdot ${latexFP(ecart1(e))}` };
+  if (p === "ecart") return { texte: [t("Ici "), l(`e_1=${dL(e)}-${latexFP(e.L)}=${latexF(ecart1(e))}`), t(".")], latex: `e_{${e.n}}=${latexFP(e.a)}^{${e.n - 1}}\\cdot ${latexFP(ecart1(e))}` };
   return null;
 }
 function correction(e: ExerciceInstable): EtapeCorrection[] {
@@ -195,7 +195,7 @@ function correction(e: ExerciceInstable): EtapeCorrection[] {
     resultat("a", [l("u_2=u_1"), t(", donc tous les termes valent "), l(latexF(e.L)), t(" : la suite exacte est constante, "), l(`L=${latexF(e.L)}`), t(" est son point fixe.")]),
     utilise("b", [t("Le point fixe vérifie "), l("L=aL+b"), t(".")]),
     calcul("b", [ligne("u_{n+1}-L=(au_n+b)-(aL+b)"), ligne("e_{n+1}=a(u_n-L)=a\\,e_n")]),
-    calcul("c", [ligne(`e_1=${dL(e)}-${latexF(e.L)}=${latexF(ecart1(e))}`), ligne(`e_{${e.n}}=a^{${e.n - 1}}e_1=${latexFP(e.a)}^{${e.n - 1}}\\cdot ${latexFP(ecart1(e))}`), ligne(`e_{${e.n}}\\approx ${approxL(valF(ecartN(e)))}`)]),
+    calcul("c", [ligne(`e_1=${dL(e)}-${latexFP(e.L)}=${latexF(ecart1(e))}`), ligne(`e_{${e.n}}=a^{${e.n - 1}}e_1=${latexFP(e.a)}^{${e.n - 1}}\\cdot ${latexFP(ecart1(e))}`), ligne(`e_{${e.n}}\\approx ${approxL(valF(ecartN(e)))}`)]),
     resultat(
       "d",
       e.instable

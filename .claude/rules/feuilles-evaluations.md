@@ -4527,4 +4527,72 @@ mesurée avec l'ancienne répartition ; 25 / 50 / 25 : de 42 à 59 min, médiane
   'nombres-reels-suites'` et l'id de l'étape, `processus`), `export/regroupementsPapier.ts` si l'énoncé se regroupe.
 - **Calculatrice** des élèves : Casio Graph Math+ (menus Récurrence, Table, Équation) — `calcul: 'exacte'` seulement
   si elle donne la réponse directement ; le menu Récurrence donne directement un terme d'une suite définie par
-  récurrence ou par formule explicite (voir « 56gen : profils » ci-dessous).
+  récurrence ou par formule explicite (voir « Profils revus pour la Casio Graph Math+ » ci-dessous).
+- **Variantes ajoutées à une copie** (socle commun `src/entrainement/5e-6h/commun56/`) : une nouvelle variante va
+  EN FIN de catalogue ; l'adaptateur d'origine reste tel quel (`genererInstance` = tirage d'origine : mêmes indices,
+  mêmes `?code=`) ; l'appli tire la nouvelle variante une fois sur n par une fonction `genererExercice56genNLibre`.
+  Deux voies : (1) la variante se coule dans les écrans de la copie (56gen11 « Malthus » = famille
+  `villesCroissance` avec un contexte et un drapeau `malthus`) ; (2) sinon, elle est écrite sur le socle d'écrans
+  partagé (`DefinitionEcrans`, `AppEcransTrigo`) et l'appli devient « mixte » : `commun56/AppMixte56.tsx` tient
+  l'exercice courant, rend l'appli copiée (renommée `App56genNAncienne`, pilotée par `premier` / `controle`) ou le
+  socle d'écrans (crochets FACULTATIFS ajoutés à `ConfigAppEcrans` : `premierExercice`, `auNouvelExercice`,
+  `auChoixVariante` — absents, rien ne change pour les autres générateurs) ; papier :
+  `commun56/adaptateurEcrans56.ts` (adaptateur tiré de la `DefinitionEcrans` : énoncé = données + UNE consigne,
+  écrans = « Étape n » du corrigé, barème par écran, critères) et `commun56/adaptateurMixte.ts` (aiguillage par
+  instance, catalogue concaténé, `calculatriceIndispensable` fusionné), exporté par
+  `generateurs56/<nom>/exportEvaluation56.ts`. Lecture des saisies : `commun56/lecture56.ts` (virgule, milliers,
+  « − », fractions, √, préfixe « q = », unité finale ; `null` = illisible, refusé sans tentative), rationnels exacts
+  `commun56/fraction56.ts`.
+
+## 5e (6h), chantier D — copies enrichies 56gen1–56gen13 (26/11/2026)
+
+- **Copies** (189 fichiers, `copier.mjs`) : 56gen1 ← 5gen14, 56gen2 ← 5gen15, 56gen3 ← 5gen44, 56gen4 ← 5gen45,
+  56gen5 ← 5gen46, 56gen6 ← 5gen16, 56gen7 ← 5gen48, 56gen8 ← 5gen17, 56gen9 ← 5gen47, 56gen10 ← 5gen49,
+  56gen11 ← 5gen18, 56gen12 ← 5gen19, 56gen13 ← 5gen41. Seuls changements visibles : en-tête « 5e (6h) —
+  Entraînement », sous-titre « Nombres réels et suites » (plus de « Chapitre 3 »). Regroupements : 56gen5 et 56gen6
+  reprennent ceux de 5gen46 et 5gen16. Mesuré (`identite.cjs`) : 60 graines × (tirage libre + chaque variante
+  d'origine), 3 720 tirages, instance ET sorties papier (énoncé papier, corrigé, brève, barème, profil, critères,
+  regroupement) identiques à la 4h. Seule nuance : 56gen8 a désormais un `profilInstance` (celui des fractales),
+  qui rend `{ casParticulier: null }` pour les scénarios d'origine — équivalent à l'absence de profil.
+- **Profils revus pour la Casio Graph Math+** : aucun `calcul: 'exacte'` changé. Les `exacte` des copies (5gen15
+  termes calculables à la main, 5gen19 termes et L au centième, 5gen47 et 5gen49 « mode exact », 5gen48
+  « périodique ») sont tous dans des variantes MÊLÉES (`exacte` / `calculatrice` tirés dans la même variante) :
+  `exacte` y veut dire « faisable sans calculatrice » pour le mode « interdite », comme décidé le 24/11 pour les
+  générateurs mêlés ; la Casio (menu Récurrence, S⇔D pour 0,3777… → 17/45) ne donne pas davantage la réponse que
+  la TI-30XB à la question posée (retrouver q, poser la récurrence, trouver L). Nouvelles variantes : aucune
+  `exacte` ; `calculatrice` + `calculatriceIndispensable` pour « données arrondies », « triangle rectangle »
+  (côté moyen arrondi) et « point fixe et erreur d'arrondi ».
+- **Variantes ajoutées** (en fin de catalogue, taux de tirage de l'appli entre parenthèses) :
+  56gen2 `inserer` (1/5 ; q^(k+1) = b/a, une ou deux raisons à parts égales selon la parité de k + 1 ; écrans :
+  q^(k+1), raison(s), termes) ; 56gen3 `arrondies` (1/5 ; cinq mesures arrondies d'un phénomène géométrique — bactéries
+  et rayons X ≈ 1,41, désintégration ≈ 0,78… — ou arithmétique, verdict à parts égales ; écarts, quotients au
+  centième, nature (choix), raison approchée et estimation de u₈ acceptées dans la plage des valeurs observées ;
+  étendue relative de la bonne grandeur ≤ le tiers de l'autre) ; 56gen5 `quatre-somme`, `quatre-produit`, `triangle`
+  (1/3 ; système à choisir parmi quatre, inconnues, termes ; produit : u₁ et −u₁, deux suites ; triangle :
+  q⁴ = q² + 1, q² = Φ exact, côté exact, côté moyen au centième) ; 56gen8 `koch`, `sierpinski` (1/4 ; figure des
+  étapes 0 à 2, étape demandée ≥ 3 ; nombre de côtés / triangles, périmètre, aire, limites ; aire du flocon → 8A₀/5
+  par la somme infinie) ; 56gen11 `malthus` (1/4) ; 56gen12 `instable` (1/4 ; u₁ = L point fixe, la calculatrice
+  part d'un arrondi ; u₂ exact, eₙ₊₁ = a·eₙ, eₙ à 1 % près, comportement ; |a| > 1 ou < 1 à parts égales).
+  Choix fermés jugés ✗ / ✓ (`bonneOption`), message ciblé sous la réponse révélée (`piegeChoixRevele`), aides à
+  deux niveaux (propriété du cours, puis posée pour l'instance), valeur décimale approchée refusée SANS tentative
+  quand la forme exacte est demandée (`approchee`), corrigé « comme au tableau » consultable après chaque réponse.
+  Aucun verdict dans `forme` ; niveau et durée constants par verdict (inserer 4 · 8, arrondies 4 · 11, fractales
+  4 · 10, instable 5 · 11 ; quatre-somme 3 · 8, quatre-produit 4 · 8, triangle 5 · 11).
+- **Quiz 56gen13** : 16 thèmes dans l'ordre des étapes — réels (`irrationnels`, `ecrituresDecimales`,
+  `quantificateursAxiomes`, `valeurAbsolue`, `densiteApproximation` : 16 affirmations chacun), suites (les sept
+  thèmes de 5gen41, 20 chacun, barres « / » remplacées par `\dfrac`), finance (`interetsSimplesComposes` 16,
+  `tauxEquivalents`, `annuites`, `creditTaeg` 14) ; autant de vraies que de fausses, vérification rapide seulement
+  (valeurs recalculées : `verif` du dossier `56-D`) ; `nombreExercices` = taille réelle du thème (`nombreQuestions`).
+  Banque unique `quizNombresReelsSuites/banqueChapitre.ts` (appli ET `lib/banquesVraiFaux.ts`, chapitre
+  `nombres-reels-suites`), thèmes reliés aux étapes dans `QUIZ_THEMES_EVALUATION_PILOTE` ; carte
+  `recap.entrainement` du chapitre.
+- **Mesuré** : collecteur (`collecteur.cjs`) 400 tirages par famille nouvelle : bonnes réponses jugées justes à chaque
+  écran, réponse modifiée jugée fausse, illisible → `parse_error`, KaTeX strict de tous les textes (écran, aides,
+  corrigé, papier, barème), aucune notation clavier / NaN / majuscule d'insistance, contrôles mathématiques
+  indépendants, verdicts ≈ 50 / 50 : 0 anomalie ; Malthus 400 tirages, bascule recalculée par balayage, 0 écart.
+  Playwright (`parcours.cjs`, iPhone 13 clair et 1 280 px sombre, 11 parcours chacun, `?code=` par variante) :
+  0 erreur console, scrollWidth = largeur, aucun « $ », « [[ » ni `.katex-error` ; quiz (`quiz.cjs`) : sessions de
+  14 et 20 affirmations sans répétition, bon dénominateur. Documents réels (`docs.cjs`, 4 plans : nouvelles
+  variantes + vrai/faux réels et finance, anciennes variantes ; calculatrice interdite / autorisée ; évaluation
+  2 séries + aménagée + corrigé + grille + Word, feuille + aménagée) : 40 HTML, 0 débordement à 680 / 820 / 1 280 px,
+  0 `.katex-error`.

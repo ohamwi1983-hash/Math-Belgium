@@ -121,7 +121,7 @@ function reponseAttendue(e: ExerciceInserer, p: PhaseInserer): Frag[] {
 function correction(e: ExerciceInserer): EtapeCorrection[] {
   const n = e.k + 2;
   const exp = e.k + 1;
-  const autres = termes(e).map((c, i) => ligne(`u_{${i + 2}}=${latexFP(e.a)}\\cdot ${latexFP(e.q)}^{${i + 1}}=${latexF(c)}`));
+  const autres = termes(e).map((c, i) => ligne(`u_{${i + 2}}=${latexFP(e.a)}\\cdot ${latexFP(e.q)}${i === 0 ? "" : `^{${i + 1}}`}=${latexF(c)}`));
   return [
     utilise("a", [t("Terme général d'une suite géométrique : "), l("u_n=u_1\\cdot q^{n-1}"), t(`. Avec les ${nombres(e.k)} insérés, `), l(latexF(e.b)), t(` est le terme de rang ${n}.`)]),
     calcul("a", [ligne(`u_{${n}}=u_1\\cdot q^{${exp}}`), ligne(`${latexF(e.b)}=${latexFP(e.a)}\\cdot q^{${exp}}`), ligne(`q^{${exp}}=\\dfrac{${latexF(e.b)}}{${latexF(e.a)}}=${latexF(qk(e))}`)]),

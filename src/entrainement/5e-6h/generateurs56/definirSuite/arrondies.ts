@@ -72,7 +72,7 @@ export function genererArrondies(): ExerciceArrondies {
     const c = choisir(CONTEXTES.filter((x) => x.nature === nature));
     const r = choisir(c.raisons);
     const u1 = c.depart[0] + Math.random() * (c.depart[1] - c.depart[0]);
-    const brut = Array.from({ length: 5 }, (_, i) => (nature === "geometrique" ? u1 * Math.pow(r, i) : u1 + i * r) * (1 + (Math.random() - 0.5) * 0.006));
+    const brut = Array.from({ length: 5 }, (_, i) => (nature === "geometrique" ? u1 * Math.pow(r, i) : u1 + i * r) * (1 + (Math.random() - 0.5) * 0.012));
     const valeurs = brut.map((v) => arrondir(v, c.dec));
     if (valeurs.some((v) => v <= 0)) continue;
     const e: ExerciceArrondies = { famille56: "arrondies", contexteId: c.id, nature, phrase: c.phrase, unite: c.unite, dec: c.dec, valeurs, rang: 8 };
@@ -81,8 +81,11 @@ export function genererArrondies(): ExerciceArrondies {
     if (d.some((x) => x === 0)) continue;
     // Le verdict doit se LIRE sans ambiguïté : quotients presque constants et écarts nettement variables
     // (géométrique), ou l'inverse (arithmétique).
-    if (nature === "geometrique" && !(etendue(q) <= 0.03 && etendue(d) >= 0.15 * Math.max(...d.map(Math.abs)))) continue;
-    if (nature === "arithmetique" && !(etendue(d) <= 0.08 * Math.abs(moyenne(d)) && etendue(q) >= 0.04)) continue;
+    // Étendues RELATIVES (étendue / moyenne) : celle de la bonne grandeur au plus le tiers de l'autre.
+    const relQ = etendue(q) / Math.abs(moyenne(q));
+    const relD = etendue(d) / Math.abs(moyenne(d));
+    if (nature === "geometrique" && !(etendue(q) <= 0.03 && relQ * 3 <= relD)) continue;
+    if (nature === "arithmetique" && !(relD <= 0.08 && etendue(q) >= 0.04 && relD * 3 <= relQ)) continue;
     return e;
   }
   return { famille56: "arrondies", contexteId: "bacteries", nature: "geometrique", phrase: CONTEXTES[0].phrase, unite: "milliers", dec: 0, valeurs: [50, 71, 100, 141, 199], rang: 8 };
