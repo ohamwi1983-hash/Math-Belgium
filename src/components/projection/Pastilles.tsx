@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { hauteurAuDessus, useCompacte } from './useCompacte'
 import { clePageBlanche } from '../../lib/projection/annotations'
 import { ajouterRecente, couleurFluo, couleurStylo, lireRecentes, NUANCIER_FLUO, NUANCIER_STYLO, teinteDe } from '../../lib/projection/couleurs'
 import type { CouleursRecentes } from '../../lib/projection/couleurs'
@@ -73,10 +74,15 @@ function useRecentes(): [CouleursRecentes, (genre: 'stylo' | 'fluo', c: string) 
 /**
  * Colonne étroite le long du bord gauche (au-dessus de la pastille) : stylo (4 couleurs rapides + dernières couleurs du
  * nuancier), fluo (idem), 3 épaisseurs, gomme, annuler, tout effacer, « Nuancier ». Choisir une couleur garde la colonne
- * ouverte ; elle se replie au premier trait.
+ * ouverte ; elle se replie au premier trait. Hauteur insuffisante (écran bas en paysage, vue du professeur) : deux
+ * colonnes côte à côte (stylo + fluo | trait, gomme, annuler, effacer, nuancier), jamais de défilement.
  */
 export function ColonneDessin({ outils, setOutils, id }: { outils: OutilsLocaux; setOutils: SetOutils; id: string }) {
   const [recentes, ajouterRecente] = useRecentes()
+  const ref = useRef<HTMLDivElement>(null)
+  const compacte = useCompacte(ref, hauteurAuDessus)
+  // Nuancier en grand (à la place de la colonne) : la colonne est masquée le temps du choix.
+  const [nuancierLarge, setNuancierLarge] = useState(false)
   const traitActif = outils.outil === 'stylo' || outils.outil === 'compas'
   const choisirStylo = (c: string) => setOutils((o) => ({ ...o, outil: o.outil === 'compas' ? 'compas' : 'stylo', couleur: c }))
   const choisirFluo = (c: string) => setOutils((o) => ({ ...o, outil: 'fluo', fluo: c }))
@@ -84,7 +90,16 @@ export function ColonneDessin({ outils, setOutils, id }: { outils: OutilsLocaux;
   const fluos = [...COULEURS_FLUO, ...recentes.fluo.map((c) => ({ valeur: c, nom: 'Couleur choisie' }))]
   return (
     <>
-      <div id={id} className="projection-colonne projection-interactif" role="group" aria-label="Stylo, surligneur et gomme" onClick={(e) => e.stopPropagation()}>
+      <div
+        ref={ref}
+        id={id}
+        className={`projection-colonne projection-interactif${compacte ? ' compacte' : ''}`}
+        role="group"
+        aria-label="Stylo, surligneur et gomme"
+        hidden={outils.nuancier && nuancierLarge}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="colonne-groupe">
         <p className="colonne-nom" aria-hidden="true">
           {outils.outil === 'compas' ? 'Compas' : 'Stylo'}
         </p>
@@ -119,6 +134,8 @@ export function ColonneDessin({ outils, setOutils, id }: { outils: OutilsLocaux;
             />
           ))}
         </div>
+        </div>
+        <div className="colonne-groupe">
         <p className="colonne-nom" aria-hidden="true">
           Trait
         </p>
@@ -164,6 +181,7 @@ export function ColonneDessin({ outils, setOutils, id }: { outils: OutilsLocaux;
         >
           <Pictogramme nom="nuancier" taille={18} /> Nuancier
         </button>
+        </div>
       </div>
       {outils.nuancier && (
         <Nuancier
@@ -175,6 +193,8 @@ export function ColonneDessin({ outils, setOutils, id }: { outils: OutilsLocaux;
             else choisirFluo(c)
           }}
           fermer={() => setOutils((o) => ({ ...o, nuancier: false }))}
+          force={compacte}
+          surLarge={setNuancierLarge}
         />
       )}
     </>
@@ -184,9 +204,30 @@ export function ColonneDessin({ outils, setOutils, id }: { outils: OutilsLocaux;
 /**
  * Nuancier (à côté de la colonne) : stylo — 24 teintes foncées à moyennes lisibles sur la diapo claire + réglage fin
  * (teinte, clarté ; une couleur trop claire est assombrie) ; fluo — 12 pastels + réglage de la teinte. Une couleur prise
- * rejoint les couleurs rapides (3 dernières, mémorisées dans ce navigateur). Se ferme au premier trait.
+ * rejoint les couleurs rapides (3 dernières, mémorisées dans ce navigateur). Se ferme au premier trait. Hauteur
+ * insuffisante (ou colonne compacte) : en GRAND, à la place de la colonne (grille de 8, réglage fin à droite).
  */
-function Nuancier({ id, outils, choisir, fermer }: { id: string; outils: OutilsLocaux; choisir: (genre: 'stylo' | 'fluo', c: string) => void; fermer: () => void }) {
+function Nuancier({
+  id,
+  outils,
+  choisir,
+  fermer,
+  force,
+  surLarge,
+}: {
+  id: string
+  outils: OutilsLocaux
+  choisir: (genre: 'stylo' | 'fluo', c: string) => void
+  fermer: () => void
+  force: boolean
+  surLarge: (large: boolean) => void
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const large = useCompacte(ref, hauteurAuDessus, force)
+  useEffect(() => {
+    surLarge(large)
+    return () => surLarge(false)
+  }, [large, surLarge])
   const [onglet, setOnglet] = useState<'stylo' | 'fluo'>(outils.outil === 'fluo' ? 'fluo' : 'stylo')
   const depart = teinteDe(onglet === 'fluo' ? outils.fluo : outils.couleur)
   const [teinte, setTeinte] = useState(depart.h)
@@ -197,7 +238,8 @@ function Nuancier({ id, outils, choisir, fermer }: { id: string; outils: OutilsL
   const idClarte = useId()
   const grille = onglet === 'stylo' ? NUANCIER_STYLO : NUANCIER_FLUO
   return (
-    <div id={id} className="projection-nuancier projection-interactif" role="dialog" aria-label="Nuancier" onClick={(e) => e.stopPropagation()}>
+    <div ref={ref} id={id} className={`projection-nuancier projection-interactif${large ? ' large' : ''}`} role="dialog" aria-label="Nuancier" onClick={(e) => e.stopPropagation()}>
+      <div className="nuancier-gauche">
       <div className="nuancier-tete">
         <div className="nuancier-onglets" role="radiogroup" aria-label="Couleurs du">
           {(
@@ -228,6 +270,8 @@ function Nuancier({ id, outils, choisir, fermer }: { id: string; outils: OutilsL
           />
         ))}
       </div>
+      </div>
+      <div className="nuancier-droite">
       <p className="nuancier-titre">Réglage fin</p>
       <div className="nuancier-reglage">
         <label htmlFor={idTeinte}>Teinte</label>
@@ -254,6 +298,7 @@ function Nuancier({ id, outils, choisir, fermer }: { id: string; outils: OutilsL
         <button type="button" className="projection-duree nuancier-prendre" onClick={() => choisir(onglet, apercu)}>
           Prendre cette couleur
         </button>
+      </div>
       </div>
     </div>
   )

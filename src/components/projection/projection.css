@@ -666,6 +666,11 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
   display: flex; flex-direction: column; gap: 4px; padding: 6px 6px 8px; background: #fff; border: 1px solid #dfe7ec; border-radius: 12px;
   box-shadow: 0 10px 28px rgb(0 0 0 / 0.18); user-select: none;
 }
+.colonne-groupe { display: flex; flex-direction: column; gap: 4px; }
+/* Hauteur insuffisante : deux colonnes côte à côte (stylo + fluo | trait, gomme, annuler, effacer, nuancier). */
+.projection-colonne.compacte { flex-direction: row; align-items: flex-start; gap: 10px; }
+.projection-colonne.compacte .colonne-groupe:first-child .colonne-grille { grid-template-columns: repeat(4, 44px); }
+.projection-colonne[hidden], .projection-nuancier[hidden] { display: none; }
 .colonne-nom { margin: 4px 0 0; text-align: center; font: 500 11px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: #6b7a86; }
 .colonne-grille { display: grid; grid-template-columns: repeat(3, 44px); gap: 4px; justify-content: center; }
 .projection-colonne .projection-couleur { width: 44px; height: 44px; border-width: 4px; }
@@ -685,6 +690,12 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
   display: flex; flex-direction: column; gap: 8px; padding: 8px 10px 10px; background: #fff; border: 1px solid #dfe7ec; border-radius: 12px;
   box-shadow: 0 10px 28px rgb(0 0 0 / 0.18); color: #182430; user-select: none;
 }
+.nuancier-gauche, .nuancier-droite { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+/* En grand, à la place de la colonne (hauteur insuffisante) : grille de 8, réglage fin à droite. */
+.projection-nuancier.large { left: 12px; flex-direction: row; align-items: flex-start; gap: 14px; max-width: calc(100% - 24px); }
+.prof-scene-zone .projection-nuancier.large { left: 8px; max-width: calc(100% - 16px); }
+.projection-nuancier.large .nuancier-grille { grid-template-columns: repeat(8, 44px); }
+.projection-nuancier.large .nuancier-droite { width: 240px; }
 .nuancier-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .nuancier-onglets { display: flex; gap: 4px; }
 .nuancier-onglets .projection-duree { min-height: 44px; }
@@ -750,14 +761,24 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
   width: 300px; max-width: 100%; box-sizing: border-box; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin;
   flex-wrap: nowrap; align-items: stretch; justify-content: flex-start; padding: 8px 10px 10px; gap: 8px; border-radius: 12px;
 }
+.traceur-bloc { display: flex; flex-direction: column; align-items: stretch; gap: 6px; min-width: 0; }
 .projection-blanc-outils .traceur-ligne { justify-content: flex-start; }
-.projection-blanc-outils .traceur-saisie { flex: 1 1 160px; width: auto; min-width: 0; }
-.projection-blanc-outils .traceur-apercu { flex: 1 0 100%; max-width: 100%; }
-.projection-blanc-outils .traceur-liste { flex: 1 0 100%; flex-direction: column; justify-content: flex-start; }
-.projection-blanc-outils .traceur-courbe { justify-content: space-between; }
+.traceur-ligne--saisie { flex-wrap: nowrap; }
+.projection-blanc-outils .traceur-saisie { flex: 1 1 120px; width: auto; min-width: 0; }
+.projection-blanc-outils .traceur-apercu { max-width: 100%; }
+.projection-blanc-outils .traceur-liste { flex-direction: column; justify-content: flex-start; }
+.projection-blanc-outils .traceur-courbe { justify-content: space-between; min-width: 0; }
+.traceur-courbe .math-inline { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .projection-blanc-outils .traceur-groupe { flex-wrap: wrap; }
 .projection-blanc-outils .traceur-axe { flex: 1 0 100%; margin: 4px 0 0; }
-.projection-blanc-outils .projection-separateur { display: none; }
+.traceur-bloc--marques { flex-direction: row; flex-wrap: wrap; }
+/* Hauteur insuffisante (écran bas en paysage, vue du professeur) : trois blocs côte à côte, sans défilement. */
+.projection-blanc-outils .projection-palette--traceur.compacte { width: max-content; flex-direction: row; align-items: flex-start; gap: 12px; }
+.projection-palette--traceur.compacte .traceur-bloc--saisie { width: 250px; }
+.projection-palette--traceur.compacte .traceur-axe-long { display: none; }
+.projection-palette--traceur.compacte .traceur-echelle { flex-wrap: nowrap; }
+.projection-palette--traceur.compacte .traceur-axe { flex: none; margin: 0 4px 0 2px; }
+.projection-palette--traceur.compacte .traceur-bloc--marques { flex-direction: column; align-items: stretch; }
 
 /* Vue du professeur : posés sur la diapo projetée */
 .prof-scene-zone .projection-pastille { --bas: 8px; left: 8px; }

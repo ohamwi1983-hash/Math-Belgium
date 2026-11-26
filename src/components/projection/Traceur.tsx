@@ -1,4 +1,5 @@
-import { useId, useMemo, useState } from 'react'
+import { useId, useMemo, useRef, useState } from 'react'
+import { useCompacte } from './useCompacte'
 import { MathInline } from '../Math'
 import { normaliserSigneMoins } from '../../lib/normaliserSaisie'
 import { ECHELLES, lireFonction, NOMS_COURBES, placeEtiquette, pointsRemarquables, texteGraduation, traceMemorise, versPxX, versPxY } from '../../lib/projection/traceur'
@@ -100,6 +101,17 @@ export function EtiquettesCourbes({ courbes, page }: { courbes: Courbe[]; page: 
   )
 }
 
+/** Hauteur offerte au traceur : sous la petite barre de l'écran blanc, jusqu'à la réserve du bas (`--bas-outils`). */
+function hauteurTraceur(el: HTMLElement): number {
+  const boite = el.parentElement
+  const parent = boite?.offsetParent as HTMLElement | null
+  if (!boite || !parent) return 0
+  const reserve = parseFloat(getComputedStyle(boite).getPropertyValue('--bas-outils')) || 0
+  let autres = 0
+  for (const enfant of Array.from(boite.children)) if (enfant !== el) autres += (enfant as HTMLElement).offsetHeight + 6
+  return parent.clientHeight - boite.offsetTop - reserve - autres
+}
+
 /** Couleur d'une nouvelle courbe : la première couleur du stylo pas encore prise sur la page. */
 function couleurLibre(courbes: Courbe[]): string {
   const ordre = [COULEURS_STYLO[1], COULEURS_STYLO[0], COULEURS_STYLO[2], COULEURS_STYLO[3]]
@@ -158,54 +170,59 @@ export function PaletteTraceur({
     replier?.()
   }
   const vue = vueDe(page)
+  const ref = useRef<HTMLDivElement>(null)
+  const compacte = useCompacte(ref, hauteurTraceur)
 
   return (
-    <div id={id} className="projection-palette projection-palette--traceur projection-interactif" role="group" aria-label="Traceur de fonctions sur le repère">
-      <form
-        className="traceur-ligne"
-        onSubmit={(e) => {
-          e.preventDefault()
-          tracer()
-        }}
-      >
-        <label className="traceur-etiquette" htmlFor={idChamp}>
-          <MathInline tex={`${nom}(x) =`} />
-        </label>
-        <input
-          id={idChamp}
-          className="traceur-saisie"
-          type="text"
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck={false}
-          placeholder="ex. x² − 2x − 3"
-          value={saisie}
-          aria-invalid={erreur ? true : undefined}
-          aria-describedby={erreur ? `${idChamp}-erreur` : undefined}
-          onChange={(e) => {
-            setSaisie(normaliserSigneMoins(e.target.value))
-            setErreur(null)
+    <div
+      ref={ref}
+      id={id}
+      className={`projection-palette projection-palette--traceur projection-interactif${compacte ? ' compacte' : ''}`}
+      role="group"
+      aria-label="Traceur de fonctions sur le repère"
+    >
+      {/* Trois blocs : saisie + liste, réglages (angles, échelles), points à marquer — empilés dans le panneau étroit,
+          côte à côte quand la hauteur manque (écran bas en paysage, vue du professeur). */}
+      <div className="traceur-bloc traceur-bloc--saisie">
+        <form
+          className="traceur-ligne traceur-ligne--saisie"
+          onSubmit={(e) => {
+            e.preventDefault()
+            tracer()
           }}
-        />
+        >
+          <label className="traceur-etiquette" htmlFor={idChamp}>
+            <MathInline tex={`${nom}(x) =`} />
+          </label>
+          <input
+            id={idChamp}
+            className="traceur-saisie"
+            type="text"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            placeholder="ex. x² − 2x − 3"
+            value={saisie}
+            aria-invalid={erreur ? true : undefined}
+            aria-describedby={erreur ? `${idChamp}-erreur` : undefined}
+            onChange={(e) => {
+              setSaisie(normaliserSigneMoins(e.target.value))
+              setErreur(null)
+            }}
+          />
+          <button type="submit" className="projection-duree traceur-tracer">
+            Tracer
+          </button>
+        </form>
         <span className="traceur-apercu" aria-live="polite">
           {apercu?.ok ? <MathInline tex={`${nom}(x) = ${apercu.latex}`} /> : null}
         </span>
-        <button type="submit" className="projection-duree traceur-tracer">
-          Tracer
-        </button>
-        <span className="traceur-groupe" role="group" aria-label="Angles des fonctions trigonométriques">
-          {(
-            [
-              ['rad', 'RAD', 'Angles en radians'],
-              ['deg', 'DEG', 'Angles en degrés'],
-            ] as const
-          ).map(([v, l, aide]) => (
-            <button key={v} type="button" className="projection-duree traceur-choix" aria-pressed={page.angle === v} title={aide} onClick={() => projection.majPage({ angle: v })}>
-              {l}
-            </button>
-          ))}
-        </span>
+        {erreur && (
+          <p id={`${idChamp}-erreur`} className="traceur-erreur" role="alert">
+            {erreur}
+          </p>
+        )}
         {courbes.length > 0 && (
           <ul className="traceur-liste" aria-label="Courbes tracées">
             {courbes.map((c) => {
@@ -222,26 +239,34 @@ export function PaletteTraceur({
             })}
           </ul>
         )}
-      </form>
-      {erreur && (
-        <p id={`${idChamp}-erreur`} className="traceur-erreur" role="alert">
-          {erreur}
-        </p>
-      )}
-      <div className="traceur-ligne">
+      </div>
+      <div className="traceur-bloc traceur-bloc--reglages">
+        <span className="traceur-groupe" role="group" aria-label="Angles des fonctions trigonométriques">
+          {(
+            [
+              ['rad', 'RAD', 'Angles en radians'],
+              ['deg', 'DEG', 'Angles en degrés'],
+            ] as const
+          ).map(([v, l, aide]) => (
+            <button key={v} type="button" className="projection-duree traceur-choix" aria-pressed={page.angle === v} title={aide} onClick={() => projection.majPage({ angle: v })}>
+              {l}
+            </button>
+          ))}
+        </span>
         {(['ex', 'ey'] as const).map((axe) => (
-          <span key={axe} className="traceur-groupe" role="group" aria-label={axe === 'ex' ? 'Échelle de l’axe des abscisses : un carreau vaut' : 'Échelle de l’axe des ordonnées : un carreau vaut'}>
+          <span key={axe} className="traceur-groupe traceur-echelle" role="group" aria-label={axe === 'ex' ? 'Échelle de l’axe des abscisses : un carreau vaut' : 'Échelle de l’axe des ordonnées : un carreau vaut'}>
             <span className="traceur-axe" aria-hidden="true">
-              <MathInline tex={axe === 'ex' ? 'x' : 'y'} /> : 1 carreau =
+              <MathInline tex={axe === 'ex' ? 'x' : 'y'} /> :<span className="traceur-axe-long"> 1 carreau =</span>
             </span>
             {ECHELLES.map((v) => (
-              <button key={v} type="button" className="projection-duree traceur-choix" aria-pressed={vue[axe] === v} onClick={() => projection.majPage({ vue: avecEchelle(vue, axe, v) })}>
+              <button key={v} type="button" className="projection-duree traceur-choix" aria-pressed={vue[axe] === v} title={`1 carreau = ${texteGraduation(v)}`} onClick={() => projection.majPage({ vue: avecEchelle(vue, axe, v) })}>
                 {texteGraduation(v)}
               </button>
             ))}
           </span>
         ))}
-        <span className="projection-separateur" aria-hidden="true" />
+      </div>
+      <div className="traceur-bloc traceur-bloc--marques">
         {(
           [
             ['zeros', 'Zéros'],

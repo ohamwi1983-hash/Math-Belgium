@@ -457,6 +457,15 @@ réponses : pastilles à GAUCHE, repli automatique dès qu'on écrit ; dossier d
   tant qu'un outil est actif, même barre masquée. État ouvert / fermé (`OutilsLocaux.palette`, `nuancier`,
   `menuFond`, `traceur`) LOCAL à chaque fenêtre : rien ne s'ouvre sur l'écran de la classe quand le professeur
   ouvre une palette chez lui. Colonne, traceur et menu du fond s'excluent (jamais l'un sur l'autre).
+- **Hauteur insuffisante** (écran bas en paysage ≈ 870 × 400 — l'appareil du professeur —, vue du professeur à
+  1 280 × 720 ; retouche du 27/11/2026) : JAMAIS de défilement. `useCompacte` (`useCompacte.ts`) mesure avant
+  l'affichage : contenu qui déborde → disposition compacte (hauteur normale retenue), retour à la normale dès que la
+  hauteur offerte (`hauteurAuDessus`, `hauteurTraceur`) la permet. Colonne : deux colonnes côte à côte (stylo + fluo en
+  grilles de 4 | trait, gomme, annuler, effacer, Nuancier), 352 × 248 px avec 3 + 3 couleurs récentes à 870 × 400.
+  Nuancier : en GRAND à la place de la colonne (masquée, revient à la fermeture), grille de 8 et réglage fin à droite
+  (656 × 212). Traceur : trois blocs côte à côte (saisie + liste | RAD / DEG, « x : » et « y : » sur une rangée —
+  « 1 carreau = » en infobulle | Zéros, Sommet, Intersections), 760 × 164 avec deux courbes. Ailleurs (1 024 × 768,
+  1 280 × 720 et plus en un écran) : la colonne étroite et le panneau de 300 px d'avant.
 - **Nuancier** (`Nuancier`, à droite de la colonne ; `lib/projection/couleurs.ts` PUR) : onglets Stylo / Fluo.
   Stylo : 24 teintes (11 teintes × 2 clartés + 2 gris), toutes à un contraste ≥ 3 sur la diapo claire (#fbfaf7,
   trait épais = « gros caractère ») + réglage fin teinte / clarté (curseurs `range` de 44 px, aperçu, « Prendre
@@ -510,7 +519,9 @@ réponses : pastilles à GAUCHE, repli automatique dès qu'on écrit ; dossier d
   rechargement (vue revenue), PowerPoint et PDF de la page zoomée (relus), 1 280 × 720 / 1 024 × 768 / 1 920 × 1 080 /
   870 × 400 (téléphone paysage : colonne et traceur défilent, rien coupé), thème sombre (palettes claires), deux
   écrans (pastille et barre posées sur la diapo du professeur, rien chez la classe, trait reçu, boutons de l'équerre
-  ≥ 44 px réels, zoom du professeur reçu au tableau, molette au tableau reçue chez le professeur) — 109 + 77
+  ≥ 44 px réels, zoom du professeur reçu au tableau, molette au tableau reçue chez le professeur), puis la retouche
+  « hauteur insuffisante » (colonne, nuancier, traceur avec deux courbes : entiers sans défilement à 870 × 400 et dans la
+  vue du professeur, une seule colonne à 1 024 × 768 et 1 920 × 1 080, cibles ≥ 44 px) — 129 + 77
   vérifications, 0 erreur console.
 
 **Vérifications** (24/11/2026, dossier de travail `projection/` : `verif.mjs`, `verif-prod.mjs`,
