@@ -147,6 +147,7 @@ export type IdGenerateurPilote =
   | '5gen76' | '5gen77' | '5gen36' | '5gen37' | '5gen38'
   | '56gen1' | '56gen2' | '56gen3' | '56gen4' | '56gen5' | '56gen6' | '56gen7' | '56gen8' | '56gen9' | '56gen10' | '56gen11' | '56gen12'
   | '56gen20' | '56gen21' | '56gen22'
+  | '56gen23' | '56gen24' | '56gen25' | '56gen26' | '56gen27' | '56gen28'
 
 export interface GeneratorConfig {
   chapitreSlug: string
@@ -556,6 +557,13 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'approcher-densite', generatorId: '56gen20', label: 'Héron et encadrements successifs (56gen20)', processus: 2 },
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'suites-arithmetiques', generatorId: '56gen21', label: 'Calculer avec le symbole Σ (56gen21)', processus: 2 },
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'limite-suite', generatorId: '56gen22', label: 'Rang à partir duquel |uₙ − ℓ| < ε (56gen22)', processus: 2 },
+  // 5e (6h), « Nombres réels et suites », algèbre financière (chantier F).
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'interets', generatorId: '56gen24', label: 'Intérêt simple (56gen24)', processus: 2 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'interets', generatorId: '56gen25', label: 'Intérêts composés (56gen25)', processus: 2 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'taux-equivalents', generatorId: '56gen26', label: 'Taux équivalents et taux réel (56gen26)', processus: 2 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'annuites', generatorId: '56gen27', label: 'Annuités : placement et remboursement (56gen27)', processus: 2 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'credit', generatorId: '56gen28', label: "Crédit et tableau d'amortissement (56gen28)", processus: 3 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'credit', generatorId: '56gen23', label: 'Quelle formule ? Reconnaître le problème financier (56gen23)', processus: 1 },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même

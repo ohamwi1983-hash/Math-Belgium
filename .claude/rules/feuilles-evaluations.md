@@ -3651,6 +3651,62 @@ console, 0 `.katex-error` (le tableau d'interprétation, `array`, coupé à son 
 formule dans « Ce qu'on utilise ») ; documents réels (évaluation 2 séries + aménagée + corrigé + grille + feuille +
 aménagée + Word du corrigé, interdite et autorisée) 0 débordement à 680 / 820 / 1 280 px, 0 `.katex-error`.
 
+## 5e (6h), « Nombres réels et suites », chantier F — 56gen23–56gen28 (algèbre financière, nouveaux, notés)
+
+Socle d'écrans du 5e (`AppEcransTrigo` + `DefinitionEcrans`) réutilisé SANS modification (`bonneOption` = choix jugés
+✗ / ✓, `aidesChoixDeuxNiveaux`, `approchee` = montant ou taux trop arrondi refusé SANS tentative, `tableau`). Dossier
+`src/entrainement/5e-6h/` : `App56genN.tsx` + `generateurs56/<nom>/{index,format,definition,corrigeDetaille,exportEvaluation}.ts`
+(`quelleFormule`, `interetSimple`, `interetsComposes`, `tauxEquivalents`, `annuites`, `credit`) ; briques communes
+`generateurs56/finance/commun.ts` : écriture des montants (`montantT` donnée « 1 307,50 », `centT` résultat au centime,
+« € » toujours HORS du KaTeX — `\text{€}` n'est pas strict), des taux (« 3,5 % », `pourcentFixeL`), lecture d'une saisie
+(`lireNombre` : « 1 307,39 € », « 1.307,39 », « 3,5 % », fraction, expression ; « € », « % », « ans » retirés), tolérances
+(`statutMontant` : un centime de L'UNE des valeurs admises ; `statutTaux` : 0,01 point sur un taux annuel, 0,001 point sur un
+taux périodique au millième, écriture décimale « 0,0571 » admise), `tropArrondi`, dates (année de 365 jours, jours exacts,
+jamais de 29 février, `decompositionJours`), `pronom(prénom)` (il / elle), `repartir` (barème au quart de point, total 4) et
+`ligneTempsSvg` (ligne du temps autonome, fond blanc, sans identifiant : versements au-dessus, flèches capitaliser /
+actualiser sous les graduations, étiquettes des points marqués sous les flèches). Notations du cours (chantier C) :
+`i_{\text{annuel}}`, `i_{\text{semestriel}}`, `i_{\text{trimestriel}}`, `i_{\text{mensuel}}`, TAEG ; aides Casio Graph
+Math+ (menu Table pour une durée en exposant, jamais de logarithme ni de menu financier). Calculs exacts, arrondi au centime à
+la fin ; quand une valeur intermédiaire arrondie est d'usage (mensualité de la banque, taux mensuel « 0,286 % », capital
+restant dû imprimé, capital après les années entières de la convention mixte), le résultat calculé avec elle est AUSSI
+admis et le corrigé le dit (coût du crédit avec la mensualité arrondie, puis l'écart avec la mensualité exacte).
+
+- **56gen23 « Quelle formule ? »** (étape 14, carte en dernier, Connaître) : neuf types = variantes, tirés au neuvième AVANT
+  les nombres, `groupe_type` ; trois choix fermés : famille (4 options fixes), grandeur cherchée (6 options fixes), formule
+  (la juste, transformée, + 3 leurres : jamais la formule de départ ni une formule équivalente, `EQUIVALENTES`). Énoncés
+  sans ambiguïté (« à intérêt simple / composés » dit, ou durée ≤ 1 an). Papier : situation + « Reconnais le type de
+  problème, la grandeur cherchée et la formule à utiliser (transformée si nécessaire). Ne fais pas le calcul. » ; REGROUPÉ
+  (entrée `56gen23`). Corrigé : indice décisif, données, formule de départ puis transformée, formule avec les données (sans
+  calcul). Aucun `calcul`, aucune `forme` ; niveau 3 · 8 min constant.
+- **56gen24 « Intérêt simple »** (étape 11) : jours exacts entre deux dates (premier mois, mois entiers sur une ligne,
+  dernier mois), mois, quinzaines ; retrouver le capital (intérêt ou valeur acquise donnés), le taux (dates, taux recalculé
+  depuis la valeur acquise imprimée, à 0,002 point du taux tiré), la durée en mois (données exactes au centime). Écran
+  « formule » (choix) dans les variantes « retrouver ». Messages : jour du dépôt compté, mois de 30 jours, taux en %, durée
+  non convertie, année de 360 jours, Cₜ(1 − i·t).
+- **56gen25 « Intérêts composés »** : suite (choix) + Cₙ + intérêts ; valeur actuelle ; taux (racine n-ième) ; durée par
+  la table (inéquation choisie, premier n — marges d'au moins 1 € des deux côtés —, capital atteint : vraie question
+  papier) ; doublement (règle de 72 en vérification) ; convention mixte (composés puis simple sur le capital atteint).
+- **56gen26 « Taux équivalents et taux réel »** : périodique ↔ annuel (relation choisie), comparer deux offres (VERDICT A / B
+  tiré AVANT les nombres, contexte placement / emprunt indépendant, écart des taux annuels 0,05–0,6 point, `sansCharge`),
+  précompte (donnée de l'énoncé, 25 ou 30 %), dépréciation mensuelle → annuelle + valeur après m mois, évolution sur N ans
+  → taux annuel moyen. Taux d'épargne plausibles (0,3–1,2 % par trimestre, 0,1–0,4 % par mois).
+- **56gen27 « Annuités »** : Vₙ au dernier versement, valeur une période après (moment choisi), V₀, retrouver a (au dernier
+  versement ou un an après), versements mensuels au taux mensuel équivalent ; ligne du temps dans le corrigé.
+- **56gen28 « Crédit et tableau d'amortissement »** : taux mensuel, mensualité, coût ; montant empruntable ; deux lignes du
+  tableau (extrait imprimé, ligne de départ 1 ou au hasard) ; amortissement constant (suite arithmétique des intérêts,
+  mensualité du mois k, total par la somme arithmétique : vraies questions papier).
+
+Profils : `calcul: 'calculatrice'` + `calculatriceIndispensable: true` pour 56gen24–28 (puissances, racines, table — la
+calculatrice ne donne jamais directement la réponse : pas d'`exacte`), `forme` = variante (+ donnée ou contexte visible),
+jamais un verdict. Registres par ajout (`registry.ts`, `evaluationAdapterRegistry.ts` — dans la table `…_5E`, `versionPapier`,
+adaptateurs suffixés `…56` —, `evaluationPayload.ts` : union + pilotes sections `interets`, `taux-equivalents`, `annuites`,
+`credit`). **Mesures** (dossier `56-F` du scratchpad : `collecteur.ts`, `gens.ts` aux réponses recalculées par boucles,
+`extra.ts`, `pw.ts`, `plans56.cjs`) : 150 tirages par variante × 34 variantes, ≈ 16 000 relations numériques du corrigé, 0
+fausse ; 0 KaTeX invalide / notation clavier / NaN ; réponses justes (plusieurs écritures) acceptées, jamais de message ciblé
+sur une réponse juste ; types de 56gen23 1 / 9 chacun (9 000 tirages : 956–1 050), gagnante de « comparer » 1 021 / 979 ;
+niveau et durée constants par verdict ; regroupement de 56gen23 300 / 300 ; plans réels 2 séries : même structure, nombres
+différents, `?code=` 58 / 58 ; iPhone 13 : 141 contrôles, 0 erreur console.
+
 ## 5e ch. 5, lot H — 5gen73–75 (nouveaux, notés)
 
 Socle d'écrans du 5e (`AppEcransTrigo` + `DefinitionEcrans`) réutilisé SANS modification (options `figure`,
