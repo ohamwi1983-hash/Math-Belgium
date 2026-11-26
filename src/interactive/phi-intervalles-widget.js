@@ -15,7 +15,7 @@
 import { styleKatex, tex, texIntervalle, CSS_BASE } from './katex-shadow.js'
 import { CSS_LIEUX } from './lieux-geometriques-commun.js'
 import { CSS_STAT, el, texte } from './statistique-deux-variables-commun.js'
-import { CSS_RS, nb, texNb, indice, droiteGraduee } from './nombres-reels-suites-commun.js'
+import { CSS_RS, insecables, nb, texNb, indice, droiteGraduee } from './nombres-reels-suites-commun.js'
 
 var PHI = (1 + Math.sqrt(5)) / 2
 var F = [0, 1, 1]
@@ -80,6 +80,11 @@ class PhiIntervallesWidget extends HTMLElement {
   }
 
   _rendre() {
+    this._dessiner()
+    insecables(this._sh)
+  }
+
+  _dessiner() {
     var sh = this._sh, n = this._n, z = this._z, W = fenetre(z)
     sh.getElementById('suivant').disabled = n >= NMAX
     sh.getElementById('precedent').disabled = n <= NMIN

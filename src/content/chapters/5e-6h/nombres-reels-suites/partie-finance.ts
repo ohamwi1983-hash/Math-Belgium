@@ -18,9 +18,9 @@ export const sectionsFinance: ChapterSection[] = [
       {
         kind: 'atelier',
         tag: 'simple-compose-widget',
-        label: 'Manipule toi-même : intérêt simple ou intérêts composés ?',
+        label: 'Manipule toi-même : intérêt simple ou intérêts composés ?',
         caption:
-          'Pour 10 000 € placés, la valeur acquise à intérêt simple suit une droite, celle à intérêts composés une courbe. Elles se croisent au bout d’un an : avant, l’intérêt simple rapporte un peu plus ; après, les intérêts composés l’emportent. Augmente le taux pour mieux voir l’écart.',
+          'Pour 10 000 € placés, la valeur acquise à intérêt simple suit une droite, celle à intérêts composés une courbe. Elles se croisent au bout d’un an : avant, l’intérêt simple rapporte un peu plus ; après, les intérêts composés l’emportent. Augmente le taux pour mieux voir l’écart.',
       },
       // ⟨fin-etape interets⟩
     ],
@@ -49,9 +49,9 @@ export const sectionsFinance: ChapterSection[] = [
       {
         kind: 'atelier',
         tag: 'ligne-temps-annuites-widget',
-        label: 'Manipule toi-même : la ligne du temps des annuités',
+        label: 'Manipule toi-même : la ligne du temps des annuités',
         caption:
-          'Règle le versement, leur nombre et le taux, puis choisis la date d’évaluation : chaque versement est capitalisé (flèche vers la droite, × (1 + i) par période) ou actualisé (vers la gauche, × (1 + i)⁻¹). La somme des valeurs donne Vₙ, V₀ ou Vₙ(1 + i).',
+          'Règle le versement, leur nombre et le taux, puis choisis la date d’évaluation : chaque versement est capitalisé (flèche vers la droite, × (1 + i) par période) ou actualisé (vers la gauche, × (1 + i)⁻¹). La somme des valeurs donne Vₙ, V₀ ou Vₙ(1 + i).',
       },
       // ⟨fin-etape annuites⟩
     ],
@@ -68,9 +68,9 @@ export const sectionsFinance: ChapterSection[] = [
       {
         kind: 'atelier',
         tag: 'simulateur-credit-widget',
-        label: 'Manipule toi-même : simulateur de crédit',
+        label: 'Manipule toi-même : simulateur de crédit',
         caption:
-          'Règle le capital emprunté, le TAEG et la durée : le simulateur calcule le taux mensuel équivalent, la mensualité et le coût du crédit. Les barres montrent, mois après mois, la part d’intérêts (qui diminue) et la part de capital remboursé (qui augmente) ; le tableau d’amortissement détaille chaque ligne.',
+          'Règle le capital emprunté, le TAEG et la durée : le simulateur calcule le taux mensuel équivalent, la mensualité et le coût du crédit. Les barres montrent, mois après mois, la part d’intérêts (qui diminue) et la part de capital remboursé (qui augmente) ; le tableau d’amortissement détaille chaque ligne.',
       },
       // ⟨fin-etape credit⟩
     ],

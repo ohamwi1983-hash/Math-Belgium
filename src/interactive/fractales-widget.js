@@ -15,7 +15,7 @@ import { styleKatex, tex, texEgalites, CSS_BASE } from './katex-shadow.js'
 import { curseurHTML, majCurseur, borner } from './variables-aleatoires-commun.js'
 import { CSS_LIEUX } from './lieux-geometriques-commun.js'
 import { CSS_STAT, el } from './statistique-deux-variables-commun.js'
-import { CSS_RS, nb, nbFixe } from './nombres-reels-suites-commun.js'
+import { CSS_RS, insecables, nb, nbFixe } from './nombres-reels-suites-commun.js'
 
 var NMAX = 6, L = 400, H = 400, COTE = 300
 var A0 = Math.sqrt(3) / 4
@@ -104,6 +104,11 @@ class FractalesWidget extends HTMLElement {
   }
 
   _rendre() {
+    this._dessiner()
+    insecables(this._sh)
+  }
+
+  _dessiner() {
     var sh = this._sh, f = this._f, n = this._n, G = grandeurs(f, n)
     sh.querySelectorAll('[data-f]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-f') === f)) })
     majCurseur(sh, 'n', n, 'n=' + n)

@@ -17,7 +17,7 @@ import { styleKatex, tex, texEgalites, CSS_BASE } from './katex-shadow.js'
 import { curseurHTML, majCurseur, borner } from './variables-aleatoires-commun.js'
 import { CSS_LIEUX } from './lieux-geometriques-commun.js'
 import { CSS_STAT, el, texte, repereStat } from './statistique-deux-variables-commun.js'
-import { CSS_RS, nb, texNb, indice } from './nombres-reels-suites-commun.js'
+import { CSS_RS, insecables, nb, texNb, indice } from './nombres-reels-suites-commun.js'
 
 var LMAX = 12, HMAX = 8
 var R = repereStat({ xMin: 0, xMax: LMAX, yMin: 0, yMax: HMAX, ux: 34, uy: 34, pasX: 2, pasY: 2, grilleX: 1, grilleY: 1, nomX: 'longueur', nomY: 'largeur', mg: 34, mb: 40, md: 18 })
@@ -99,6 +99,11 @@ class HeronRectanglesWidget extends HTMLElement {
   }
 
   _rendre() {
+    this._dessiner()
+    insecables(this._sh)
+  }
+
+  _dessiner() {
     var sh = this._sh, A = this._A, n = this._n, suite = this._suite(), rac = Math.sqrt(A)
     var inA1 = sh.getElementById('a1')
     inA1.min = String(this._a1Min())

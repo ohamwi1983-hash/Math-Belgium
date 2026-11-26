@@ -18,7 +18,7 @@ import { styleKatex, tex, texEgalites, CSS_BASE } from './katex-shadow.js'
 import { curseurHTML, majCurseur, borner } from './variables-aleatoires-commun.js'
 import { CSS_LIEUX } from './lieux-geometriques-commun.js'
 import { CSS_STAT, el, texte, repereStat } from './statistique-deux-variables-commun.js'
-import { CSS_RS, nb, nbFixe, euros, texNb, texEuros, texPct, pct } from './nombres-reels-suites-commun.js'
+import { CSS_RS, insecables, nb, nbFixe, euros, texNb, texEuros, texPct, pct } from './nombres-reels-suites-commun.js'
 
 var NMAX = 84
 var R = repereStat({ xMin: 0, xMax: NMAX, yMin: 0, yMax: 100, ux: 5, uy: 2.3, pasX: 12, pasY: 20, grilleX: 6, grilleY: 10, nomX: 'mois', nomY: '% de la mensualité', mg: 40, mb: 40, md: 14, mh: 26, etiqX: function (v) { return nb(v, 0) }, etiqY: function (v) { return nb(v, 0) } })
@@ -95,6 +95,11 @@ class SimulateurCreditWidget extends HTMLElement {
   }
 
   _rendre() {
+    this._dessiner()
+    insecables(this._sh)
+  }
+
+  _dessiner() {
     var sh = this._sh, C = this._C, taeg = this._tp / 100, n = this._n, P = plan(C, taeg, n)
     majCurseur(sh, 'C', C, 'C=' + texNb(C, 0))
     majCurseur(sh, 't', this._tp, '\\text{TAEG}=' + texPct(taeg, 1))

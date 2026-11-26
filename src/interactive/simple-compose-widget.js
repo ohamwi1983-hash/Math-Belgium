@@ -14,7 +14,7 @@ import { styleKatex, tex, texEgalites, CSS_BASE } from './katex-shadow.js'
 import { curseurHTML, majCurseur, borner } from './variables-aleatoires-commun.js'
 import { CSS_LIEUX } from './lieux-geometriques-commun.js'
 import { CSS_STAT, el, texte, repereStat } from './statistique-deux-variables-commun.js'
-import { CSS_RS, nb, euros, texNb, texEuros, pct, texPct } from './nombres-reels-suites-commun.js'
+import { CSS_RS, insecables, nb, euros, texNb, texEuros, pct, texPct } from './nombres-reels-suites-commun.js'
 
 var C0 = 10000, TMAX = 3
 var R = repereStat({ xMin: 0, xMax: TMAX, yMin: 10000, yMax: 20000, ux: 128, uy: 0.026, pasX: 0.5, pasY: 2000, grilleX: 0.25, grilleY: 1000, nomX: 't (années)', nomY: 'valeur acquise (€)', mg: 50, mb: 40, md: 16, mh: 26, etiqX: function (v) { return nb(v, 1) }, etiqY: function (v) { return nb(v, 0) } })
@@ -83,6 +83,11 @@ class SimpleComposeWidget extends HTMLElement {
   }
 
   _rendre() {
+    this._dessiner()
+    insecables(this._sh)
+  }
+
+  _dessiner() {
     var sh = this._sh, i = this._ip / 100, m = this._m, t = m / 12
     majCurseur(sh, 'i', this._ip, 'i=' + texPct(i, 1))
     majCurseur(sh, 't', m, 't=' + (m % 12 === 0 ? String(m / 12) : '\\tfrac{' + m + '}{12}'))

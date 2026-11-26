@@ -16,7 +16,7 @@ import { styleKatex, tex, texEgalites, CSS_BASE } from './katex-shadow.js'
 import { curseurHTML, majCurseur, borner } from './variables-aleatoires-commun.js'
 import { CSS_LIEUX } from './lieux-geometriques-commun.js'
 import { CSS_STAT, el, texte, repereStat } from './statistique-deux-variables-commun.js'
-import { CSS_RS, nb, texSci, txtSci, indice } from './nombres-reels-suites-commun.js'
+import { CSS_RS, insecables, nb, texSci, txtSci, indice } from './nombres-reels-suites-commun.js'
 
 var NMAX = 20
 var R = repereStat({ xMin: 0, xMax: NMAX + 0.6, yMin: -0.4, yMax: 0.7, ux: 20, uy: 280, pasX: 2, pasY: 0.1, grilleX: 1, nomX: 'n', nomY: 'ũₙ', mg: 40, mb: 40, md: 14, etiqX: function (v) { return v > NMAX ? '' : nb(v, 0) }, etiqY: function (v) { return nb(v, 1) } })
@@ -83,6 +83,11 @@ class CalculatricePrudenceWidget extends HTMLElement {
   }
 
   _rendre() {
+    this._dessiner()
+    insecables(this._sh)
+  }
+
+  _dessiner() {
     var sh = this._sh, k = this._k, N = this._N
     majCurseur(sh, 'k', k, 'k=' + k)
     majCurseur(sh, 'N', N, 'n\\leq ' + N)

@@ -42,9 +42,9 @@ export const sectionsReels: ChapterSection[] = [
       {
         kind: 'atelier',
         tag: 'phi-intervalles-widget',
-        label: 'Manipule toi-même : des intervalles emboîtés autour de Φ',
+        label: 'Manipule toi-même : des intervalles emboîtés autour de Φ',
         caption:
-          'Les rapports de deux termes consécutifs de la suite de Fibonacci (1, 2, 3⁄2, 5⁄3, 8⁄5…) tombent tour à tour sous Φ et au-dessus. Deux rapports consécutifs forment un intervalle qui contient Φ, emboîté dans le précédent et de plus en plus court. Agrandis la droite (×10, ×100…) pour suivre les intervalles : aucun rationnel n’est dans tous, seul Φ, irrationnel, l’est.',
+          'Les rapports de deux termes consécutifs de la suite de Fibonacci (1, 2, 3⁄2, 5⁄3, 8⁄5…) tombent tour à tour sous Φ et au-dessus. Deux rapports consécutifs forment un intervalle qui contient Φ, emboîté dans le précédent et de plus en plus court. Agrandis la droite (×10, ×100…) pour suivre les intervalles : aucun rationnel n’est dans tous, seul Φ, irrationnel, l’est.',
       },
       // ⟨fin-etape axiomes⟩
     ],
@@ -61,9 +61,9 @@ export const sectionsReels: ChapterSection[] = [
       {
         kind: 'atelier',
         tag: 'valeur-absolue-distance-widget',
-        label: 'Manipule toi-même : valeur absolue et distance sur la droite',
+        label: 'Manipule toi-même : valeur absolue et distance sur la droite',
         caption:
-          'Règle a et r, choisis le symbole (<, ≤, >, ≥ ou =) : les solutions de |x − a| ◇ r s’allument sur la droite et s’écrivent en intervalles. Fais glisser le point x pour lire sa distance à a. Essaie aussi r = 0 et r négatif : une distance n’est jamais négative.',
+          'Règle a et r, choisis le symbole (<, ≤, >, ≥ ou =) : les solutions de |x − a| ◇ r s’allument sur la droite et s’écrivent en intervalles. Fais glisser le point x pour lire sa distance à a. Essaie aussi r = 0 et r négatif : une distance n’est jamais négative.',
       },
       // ⟨fin-etape valeur-absolue⟩
     ],
@@ -80,9 +80,9 @@ export const sectionsReels: ChapterSection[] = [
       {
         kind: 'atelier',
         tag: 'heron-rectangles-widget',
-        label: 'Manipule toi-même : les rectangles de Héron',
+        label: 'Manipule toi-même : les rectangles de Héron',
         caption:
-          'Tous les rectangles ont la même aire A ; la longueur suivante est la moyenne des deux côtés. Les rectangles se rapprochent du carré de côté √A, et chacun encadre √A entre sa largeur et sa longueur. Les chiffres communs aux deux bornes, donc sûrs, sont en vert : leur nombre double à peu près à chaque étape.',
+          'Tous les rectangles ont la même aire A ; la longueur suivante est la moyenne des deux côtés. Les rectangles se rapprochent du carré de côté √A, et chacun encadre √A entre sa largeur et sa longueur. Les chiffres communs aux deux bornes, donc sûrs, sont en vert : leur nombre double à peu près à chaque étape.',
       },
       // ⟨fin-etape approcher-densite⟩
     ],

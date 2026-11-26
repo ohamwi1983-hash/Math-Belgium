@@ -15,7 +15,7 @@ import { styleKatex, tex, texEgalites, CSS_BASE } from './katex-shadow.js'
 import { curseurHTML, majCurseur, borner } from './variables-aleatoires-commun.js'
 import { CSS_LIEUX } from './lieux-geometriques-commun.js'
 import { CSS_STAT, el, texte, repereStat } from './statistique-deux-variables-commun.js'
-import { CSS_RS, nb, texNb, indice } from './nombres-reels-suites-commun.js'
+import { CSS_RS, insecables, nb, texNb, indice } from './nombres-reels-suites-commun.js'
 
 var KMAX = 10
 var RP = repereStat({ xMin: 0, xMax: KMAX + 1, yMin: 0, yMax: 1.1, ux: 34, uy: 250, pasX: 100, pasY: 0.1, grilleX: 100, nomX: '', nomY: '', mg: 58, mb: 44, md: 10, mh: 26, etiqY: function (v) { return nb(v, 1) }, etiqX: function () { return '' } })
@@ -67,6 +67,11 @@ class SerieHarmoniqueWidget extends HTMLElement {
   }
 
   _rendre() {
+    this._dessiner()
+    insecables(this._sh)
+  }
+
+  _dessiner() {
     var sh = this._sh, K = this._K, vue = this._vue, N = 1 << K
     sh.querySelectorAll('[data-v]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === vue)) })
     majCurseur(sh, 'K', K, 'K=' + K)

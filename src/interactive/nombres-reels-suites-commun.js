@@ -118,6 +118,21 @@ export function droiteGraduee(svg, o) {
   return px
 }
 
+/**
+ * Espaces insécables à la française dans tout le texte d'une racine (hors <style> et KaTeX) :
+ * espace ordinaire avant « : ; ? ! » et à l'intérieur de « … » → U+00A0. À appeler à la fin de chaque rendu.
+ */
+export function insecables(racine) {
+  var tw = document.createTreeWalker(racine, NodeFilter.SHOW_TEXT), n
+  while ((n = tw.nextNode())) {
+    var p = n.parentElement
+    if (!p || p.closest('style,.katex')) continue
+    var t = n.nodeValue
+    if (!/ [:;?!»]|« /.test(t)) continue
+    n.nodeValue = t.replace(/ ([:;?!»])/g, '\u00a0$1').replace(/« /g, '«\u00a0')
+  }
+}
+
 /** Styles propres aux ateliers du chapitre (en plus de CSS_BASE, CSS_LIEUX, CSS_STAT). */
 export var CSS_RS =
   '.tableau td.g,.tableau th.g{text-align:left;}' +

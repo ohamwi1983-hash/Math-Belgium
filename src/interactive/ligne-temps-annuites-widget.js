@@ -18,7 +18,7 @@ import { styleKatex, tex, texEgalites, CSS_BASE } from './katex-shadow.js'
 import { curseurHTML, majCurseur, borner } from './variables-aleatoires-commun.js'
 import { CSS_LIEUX } from './lieux-geometriques-commun.js'
 import { CSS_STAT, el, texte } from './statistique-deux-variables-commun.js'
-import { CSS_RS, nb, euros, texNb, texEuros, texPct } from './nombres-reels-suites-commun.js'
+import { CSS_RS, insecables, nb, euros, texNb, texEuros, texPct } from './nombres-reels-suites-commun.js'
 
 var DMAX = 11, L = 480, H = 268, X0 = 26, X1 = 446, YL = 132
 function px(d) { return X0 + d * (X1 - X0) / DMAX }
@@ -86,6 +86,11 @@ class LigneTempsAnnuitesWidget extends HTMLElement {
   }
 
   _rendre() {
+    this._dessiner()
+    insecables(this._sh)
+  }
+
+  _dessiner() {
     var sh = this._sh, a = this._a, n = this._n, i = this._ip / 100, q = 1 + i, cible = this._cible
     var d = cible === '0' ? 0 : cible === 'n' ? n : n + 1
     majCurseur(sh, 'a', a, 'a=' + texNb(a, 0))

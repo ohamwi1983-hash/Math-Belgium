@@ -16,7 +16,7 @@ import { styleKatex, tex, texEgalites, texIntervalle, CSS_BASE } from './katex-s
 import { curseurHTML, majCurseur, borner } from './variables-aleatoires-commun.js'
 import { CSS_LIEUX } from './lieux-geometriques-commun.js'
 import { CSS_STAT, el, texte } from './statistique-deux-variables-commun.js'
-import { CSS_RS, nb, texNb, droiteGraduee } from './nombres-reels-suites-commun.js'
+import { CSS_RS, insecables, nb, texNb, droiteGraduee } from './nombres-reels-suites-commun.js'
 
 var MIN = -10, MAX = 10, L = 460, H = 158, X0 = 22, X1 = 430, YD = 92
 var SYMBOLES = [
@@ -150,6 +150,11 @@ class ValeurAbsolueDistanceWidget extends HTMLElement {
   }
 
   _rendre() {
+    this._dessiner()
+    insecables(this._sh)
+  }
+
+  _dessiner() {
     var sh = this._sh, a = this._a, r = this._r, x = this._x, s = this._s
     var sym = SYMBOLES.filter(function (o) { return o.id === s })[0]
     sh.querySelectorAll('[data-s]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-s') === s)) })
