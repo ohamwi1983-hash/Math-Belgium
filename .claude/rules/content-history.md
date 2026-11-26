@@ -6535,3 +6535,34 @@ Mécanismes : `content-authoring.md`, « Chapitres autonomes » ; composants : `
   `verifier-enonces-evaluation.mjs`) : liens résolus, aucun lien dans un champ brut ni dans un gras, entrées `utilise`
   valides, aucun renvoi chiffré dans les chapitres et les questions « Formule ». Avant réécriture : 99 textes en
   défaut ; après : 0.
+
+## 5e (6h), Chapitre 1 — Nombres réels et suites : partie « Algèbre financière », étapes 11–14 (chantier C, 26/11/2026)
+
+Fichier `src/content/chapters/5e-6h/nombres-reels-suites/partie-finance.ts` (squelette du coordinateur : ids, titres,
+kickers, `titreCourt`, `partie` gardés ; marqueurs `// ⟨fin-etape …⟩` en dernière ligne). D'après le manuel (pages
+« Algèbre financière » : introduction, explorations 1–6, synthèse 1–9, exercices) : situations reprises, nombres recalculés
+ou nouveaux par script (`scratchpad/56-C/calculs.py`). **Erreurs du manuel non recopiées** : 15 000 · 1,025⁴ = 16 557,19 ;
+valeurs acquises journalières indexées depuis v₀ = C₀ (vₙ = C₀ + n·C₀i/365) ; scooter 1 740 € / 24 × 75 € : taux mensuel
+EXACT 0,273 % (TAEG ≈ 3,33 %) — le manuel annonce 0,286 % et 3,49 %, incohérents (24 × 75 € à 0,286 % ne valent que
+1 737,21 €) ; coût 340,04 € avec la mensualité arrondie, 340,09 € sans arrondi (encadré `attention`) ; bon de caisse
+reformulé (2,1 % capitalisé, précompte retenu au terme sur le total des intérêts) ; taux d'épargne plausibles (0,6 % par
+trimestre / 0,19 % par mois / 2,4 % par an au lieu de 1,4 % / 0,47 % / 5,6 %) ; précompte toujours « donnée de l'énoncé » ;
+seule source juridique citée : livre VII du Code de droit économique (sans la loi de 2010). Pas de logarithme : durée par
+la table (1,03ⁿ ≥ 2 → 24 ans), jamais de menu financier.
+**Contenu** : 31 blocs `exemple` / `exempleLibre` dont 6 démonstrations (Cₙ = C₀(1 + i)ⁿ ; intérêt simple > composé sur
+1/k d'année, par (1 + h)ᵏ > 1 + kh de l'étape 9 ; relations des taux équivalents ; Vₙ par la somme géométrique ; V₀ = Vₙ(1 + i)⁻ⁿ ;
+mensualité depuis V₀), 2 `intuition` (boule de neige ; part d'intérêts qui diminue), 2 « Le sais-tu ? » (Aristote / tokos,
+Calvin, 1789 ; règle de 72 chez Pacioli, 1494), 3 « À quoi ça sert ? » (inflation sur un an, épargne-pension, TAEG pour
+comparer des offres), 5 figures (`curvePlot` : simple contre composé au taux irréaliste de 100 %, solde de Lucas, parts
+intérêts / capital du prêt de 10 000 €, mensualités amortissement constant / constante ; `operationChain` : ligne du temps
+trimestrielle) et 4 tableaux. Liens internes à la même page par `[[5e-6h/nombres-reels-suites#…|étape n]]`. Cartes
+56gen24, 56gen25 (§ 11), 56gen26 (§ 12), 56gen27 (§ 13), 56gen28 puis 56gen23 (§ 14) ; aucun atelier posé (chantier G).
+Parcours : 12 phrases d'`essentiel`, 16 cartes ; 5 puces de synthèse, 5 groupes de formulaire ; 31 énoncés par clé
+(`ENONCES_DEMONSTRATION['nombres-reels-suites']`, sections `interets`, `taux-equivalents`, `annuites`, `credit` — le chapitre
+n'est pas encore dans `CHAPITRES_ENONCES_VERIFIES` : à ajouter quand les trois parties seront fusionnées).
+**Pièges rencontrés** : la `caption` d'un `featureTable` est en texte BRUT (deux légendes à `$` corrigées en Unicode) ; cinq
+formules trop larges à 390 px coupées en plusieurs `$…$`. **Vérifié** : `tsc`, `controle:lecture`, liens et énoncés ; contrôle
+maison (`scratchpad/56-C/controle.mjs`) : 723 formules en KaTeX strict, lecture en mots sans `\`, 0 notation clavier ;
+Playwright (Vite de dev) iPhone 13 et 1 280 px, clair et sombre, étapes 11–14 tiroirs ouverts + Réviser : 0 erreur console,
+scrollWidth = largeur, 0 `$` / `[[` / `**` / `.katex-error`, aucune formule plus large que son bloc ; figures relues
+(`scratchpad/56-C/figs/`). Reste signalé : le kicker FIXE de l'étape 12 « (1 + i_mensuel)¹² = 1 + i_annuel » contient « _ ».
