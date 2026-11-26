@@ -4,9 +4,9 @@ import type { ChapterContent } from '../../content/types'
 import type { Aller } from '../chapter/CarteChapitre'
 import { lireParcours, titreCourt } from '../../lib/parcoursChapitre'
 import type { ChoixProjection, Inclusion } from '../../lib/projection/diapos'
-import { INCLUSIONS, INCLUSIONS_DEFAUT, diaposEtape, enregistrerChoix, lireChoix, urlProjection } from '../../lib/projection/diapos'
+import { INCLUSIONS, INCLUSIONS_DEFAUT, construireDiapos, diaposEtape, enregistrerChoix, lireChoix, urlProjection } from '../../lib/projection/diapos'
 import { ouvrirFenetreDiapos } from '../../lib/projection/fenetre'
-import { aDesAnnotations, lireAnnotations, resumeAnnotations } from '../../lib/projection/annotations'
+import { aDesAnnotations, lireAnnotations, resumeAnnotations, resumeDansSelection } from '../../lib/projection/annotations'
 import type { DonneesAnnotations } from '../../lib/projection/annotations'
 import { GardeProfesseur } from './GardeProfesseur'
 import { Pictogramme } from './Pictogrammes'
@@ -29,6 +29,16 @@ export default function LanceurProjection({ chapter, aller }: { chapter: Chapter
   )
 }
 
+const nombre = (n: number, mot: string, accord = '') => `${n} ${mot}${n > 1 ? 's' : ''}${accord ? ` ${accord}${n > 1 ? 's' : ''}` : ''}`
+
+/** « 2 diapos annotées · 1 page blanche dans ces étapes » ; rien ici mais ailleurs : le dire (elles restent gardées). */
+function texteResumeLanceur(ici: { diapos: number; blanches: number }, total: { diapos: number; blanches: number }): string {
+  const morceaux = [ici.diapos ? nombre(ici.diapos, 'diapo', 'annotée') : '', ici.blanches ? nombre(ici.blanches, 'page', 'blanche') : ''].filter(Boolean)
+  if (morceaux.length) return `${morceaux.join(' · ')} dans ces étapes`
+  const ailleurs = total.diapos + total.blanches
+  return `Aucune dans ces étapes (${ailleurs} ailleurs dans le chapitre, gardée${ailleurs > 1 ? 's' : ''})`
+}
+
 function Lanceur({ chapter, aller }: { chapter: ChapterContent; aller: Aller }) {
   const navigate = useNavigate()
   const [choix, setChoix] = useState<ChoixProjection>(() => {
@@ -47,7 +57,9 @@ function Lanceur({ chapter, aller }: { chapter: ChapterContent; aller: Aller }) 
       vivant = false
     }
   }, [chapter])
-  const resume = gardees ? resumeAnnotations(gardees) : null
+  // Annotations des étapes choisies (l'export ne prend que celles-là) ; les autres restent gardées.
+  const resume = useMemo(() => (gardees ? resumeDansSelection(gardees, construireDiapos(chapter, choix).map((d) => d.cle)) : null), [gardees, chapter, choix])
+  const resumeTotal = gardees ? resumeAnnotations(gardees) : null
   const titre = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
@@ -186,7 +198,7 @@ function Lanceur({ chapter, aller }: { chapter: ChapterContent; aller: Aller }) 
         <Pictogramme nom="ecran" taille={18} />
         {choix.ecran === 'deux' ? 'Lancer (deux écrans)' : 'Lancer (plein écran)'}
       </button>
-      {resume && (
+      {resume && resumeTotal && (
         <label className="lanceur-option lanceur-annotations">
           <input type="checkbox" checked={avecAnnotations} onChange={(e) => setAvecAnnotations(e.target.checked)} />
           <span className="lanceur-case" aria-hidden="true">
@@ -194,11 +206,7 @@ function Lanceur({ chapter, aller }: { chapter: ChapterContent; aller: Aller }) 
           </span>
           <span>
             Avec mes annotations
-            <small>
-              {[resume.diapos ? `${resume.diapos} diapo${resume.diapos > 1 ? 's' : ''} annotée${resume.diapos > 1 ? 's' : ''}` : '', resume.blanches ? `${resume.blanches} page${resume.blanches > 1 ? 's' : ''} blanche${resume.blanches > 1 ? 's' : ''}` : '']
-                .filter(Boolean)
-                .join(' · ')}
-            </small>
+            <small>{texteResumeLanceur(resume, resumeTotal)}</small>
           </span>
         </label>
       )}

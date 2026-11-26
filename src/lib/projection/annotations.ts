@@ -105,9 +105,10 @@ export interface DonneesAnnotations {
 
 export const donneesVides = (): DonneesAnnotations => ({ v: 1, pages: [], blanches: {}, vues: {}, fond: 'uni', maj: Date.now() })
 
-/** Une page blanche « à garder » : un élément, ou un fond autre qu'uni (un écran blanc ouvert pour masquer ne compte pas). */
+/** Une page blanche « à garder » (exportée, comptée) : au moins un élément écrit dessus. Une page restée vierge — écran
+ * blanc ouvert pour masquer la diapo, ou page vide au fond repris de la précédente — ne compte pas. */
 export function pageBlancheUtile(p: PageBlanche, pages: Map<string, ElementAnnotation[]>): boolean {
-  return (pages.get(clePageBlanche(p.id))?.length ?? 0) > 0 || p.fond !== 'uni'
+  return (pages.get(clePageBlanche(p.id))?.length ?? 0) > 0
 }
 
 /** Résumé : nombre de diapos annotées et de pages blanches à exporter. */
@@ -118,6 +119,15 @@ export function resumeAnnotations(d: Pick<DonneesAnnotations, 'pages' | 'blanche
   let blanches = 0
   for (const liste of Object.values(d.blanches)) for (const p of liste) if (pageBlancheUtile(p, pages)) blanches++
   return { diapos, blanches }
+}
+
+/** Même résumé, limité aux diapos d'une sélection (clés AVANT découpage : `s:3` couvre aussi `s:3~1`, `s:3~2`). */
+export function resumeDansSelection(d: Pick<DonneesAnnotations, 'pages' | 'blanches'>, clesDiapos: string[]): { diapos: number; blanches: number } {
+  const cles = new Set(clesDiapos)
+  const dedans = (cle: string) => cles.has(cle) || cles.has(cle.split('~')[0])
+  const pages: [string, ElementAnnotation[]][] = d.pages.filter(([k]) => !k.startsWith('d:') || dedans(k.slice(2)))
+  const blanches = Object.fromEntries(Object.entries(d.blanches).filter(([k]) => dedans(k)))
+  return resumeAnnotations({ pages, blanches })
 }
 
 export const aDesAnnotations = (d: Pick<DonneesAnnotations, 'pages' | 'blanches'>) => {

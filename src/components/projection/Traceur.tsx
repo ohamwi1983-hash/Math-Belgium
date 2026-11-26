@@ -89,7 +89,7 @@ export function EtiquettesCourbes({ courbes, page }: { courbes: Courbe[]; page: 
         </span>
       ))}
       {poses.map(({ p, x, y, couleur }, i) => (
-        <span key={i} className="traceur-point" style={{ left: x, top: y, borderColor: couleur }} title={NOMS_POINTS[p.genre]}>
+        <span key={i} className="traceur-point" style={{ left: x, top: y, borderColor: couleur }} title={NOMS_POINTS[p.genre]} data-tex={p.latex}>
           <MathInline tex={p.latex} />
         </span>
       ))}
@@ -203,7 +203,7 @@ export function PaletteTraceur({
             {courbes.map((c) => {
               const l = lireFonction(c.saisie, page.angle)
               return (
-                <li key={c.id} className="traceur-courbe" style={{ ['--c' as string]: c.couleur }}>
+                <li key={c.id} className="traceur-courbe" style={{ ['--c' as string]: c.couleur }} data-tex={l.ok ? l.latex : c.saisie}>
                   <span className="traceur-pastille" aria-hidden="true" />
                   <MathInline tex={l.ok ? `${c.nom}(x) = ${l.latex}` : `${c.nom}`} />
                   <button type="button" className="traceur-retirer" aria-label={`Retirer la courbe ${c.nom}`} title={`Retirer la courbe ${c.nom}`} onClick={() => annotations.retirer(cle, c.id)}>

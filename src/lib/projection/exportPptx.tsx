@@ -388,7 +388,7 @@ export function telechargerPptx(chapter: ChapterContent, choix: Pick<ChoixProjec
  *   sous les zones de texte ; le stylo, par-dessus) ;
  * - pages de l'écran blanc : insérées juste après la diapo d'où elles ont été ouvertes, dans l'ordre, avec
  *   leur fond (uni, quadrillé, repère gradué à l'échelle choisie) et leurs annotations (courbes comprises) ;
- *   une page restée vierge et unie (écran blanc ouvert pour masquer) n'est pas exportée ;
+ *   une page restée vierge (écran blanc ouvert pour masquer) n'est pas exportée ;
  * - PDF (16:9, une page par diapo) : fond en JPEG, annotations en PNG transparent par-dessus, textes simples en
  *   texte INVISIBLE (sélectionnable, cherchable ; caractères latins seulement, sans police embarquée).
  */

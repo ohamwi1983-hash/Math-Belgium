@@ -462,6 +462,7 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
   position: absolute; bottom: 64px; left: 12px; right: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none;
 }
 .projection-palette {
+  user-select: none;
   display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; padding: 6px 10px; background: #fff; border: 1px solid #dfe7ec;
   border-radius: 8px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.14); pointer-events: auto;
 }
@@ -608,7 +609,7 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
 .traceur-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
 .traceur-courbe { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 0 0 12px; border: 2px solid var(--c); border-radius: 999px; background: #fff; color: #182430; font-size: 18px; }
 .traceur-pastille { width: 18px; height: 5px; border-radius: 3px; background: var(--c); flex: none; }
-.traceur-retirer { width: 44px; height: 40px; border: 0; border-radius: 999px; background: transparent; color: #51626f; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.traceur-retirer { width: 44px; height: 44px; margin: -2px 0; border: 0; border-radius: 999px; background: transparent; color: #51626f; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
 .traceur-retirer:hover { background: #f6dede; color: #b23a3a; }
 .traceur-retirer:focus-visible, .traceur-saisie:focus-visible { outline: 3px solid #b65c1f; outline-offset: 1px; }
 
@@ -634,3 +635,4 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
 .prof-palette .traceur-saisie { width: 200px; }
 .pages-traceur { display: inline-flex; align-items: center; gap: 6px; }
 .pages-traceur .katex { font-size: 1.05em; }
+.traceur-saisie { user-select: text; }
