@@ -531,6 +531,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   // 5e (6h), « Nombres réels et suites », algèbre financière (chantier F).
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'interets', generatorId: '56gen24', label: 'Intérêt simple (56gen24)', processus: 2 },
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'interets', generatorId: '56gen25', label: 'Intérêts composés (56gen25)', processus: 2 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'taux-equivalents', generatorId: '56gen26', label: 'Taux équivalents et taux réel (56gen26)', processus: 2 },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même
