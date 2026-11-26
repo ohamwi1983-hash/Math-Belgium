@@ -346,6 +346,7 @@ import { adaptateurEvaluationMeilleurAjustement } from '../entrainement/5e-4h/ge
 import { adaptateurEvaluationCorrelationCausalite } from '../entrainement/5e-4h/generateurs5e/correlationCausalite/exportEvaluation'
 import { adaptateurEvaluationDetectiveStatDeuxVariables } from '../entrainement/5e-4h/generateurs5e/detectiveStatistique/exportEvaluation'
 import { adaptateurEvaluationInteretSimple56 } from '../entrainement/5e-6h/generateurs56/interetSimple/exportEvaluation'
+import { adaptateurEvaluationInteretsComposes56 } from '../entrainement/5e-6h/generateurs56/interetsComposes/exportEvaluation'
 import { adaptateurEvaluationLireNuage } from '../entrainement/5e-4h/generateurs5e/lireNuage/exportEvaluation'
 import { adaptateurEvaluationPointMoyen } from '../entrainement/5e-4h/generateurs5e/pointMoyenStat/exportEvaluation'
 import { adaptateurEvaluationDroiteMayer } from '../entrainement/5e-4h/generateurs5e/droiteMayer/exportEvaluation'
@@ -431,6 +432,7 @@ export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExe
   '5gen38': versionPapier(adaptateurEvaluationCorrelation) as unknown as AdaptateurFeuilleExercices<never>,
   // 5e (6h), algèbre financière (chantier F).
   '56gen24': versionPapier(adaptateurEvaluationInteretSimple56) as unknown as AdaptateurFeuilleExercices<never>,
+  '56gen25': versionPapier(adaptateurEvaluationInteretsComposes56) as unknown as AdaptateurFeuilleExercices<never>,
 }
 
 import { adaptateurEvaluationDenombrementFondamental } from '../entrainement/6e-6h/generateurs6e/denombrementFondamental/exportEvaluation'
