@@ -636,3 +636,6 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
 .pages-traceur { display: inline-flex; align-items: center; gap: 6px; }
 .pages-traceur .katex { font-size: 1.05em; }
 .traceur-saisie { user-select: text; }
+/* Palettes et boîtes toujours claires (thème sombre du système compris) : cases à cocher et titres lisibles. */
+.projection-palette, .projection-accueil > div { color-scheme: light; }
+.projection-accueil h2 { color: #182430; }
