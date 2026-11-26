@@ -8,8 +8,9 @@ import { lireDernieresEtapes, lireParcours, titreCourt, type DerniereEtape, type
 import { ATTRIBUT_ANNEE, anneeDeDepart, ecrireAnneeChoisie } from '../lib/anneeAccueil'
 
 /** Teinte par niveau — réutilise les jetons déjà dédiés au codage couleur des diagrammes
- * (`--accent`/`--sky`/`--plan`, voir `index.css`), jamais une couleur inventée pour l'occasion. */
-const LEVEL_TONE = ['accent', 'sky', 'plan'] as const
+ * (`--accent`/`--sky`/`--good`/`--plan`, voir `index.css`), jamais une couleur inventée pour l'occasion.
+ * Par slug (et non par rang) : ajouter une année ne change pas la couleur des autres. */
+const LEVEL_TONE: Record<string, string> = { '4e': 'accent', '5e-4h': 'sky', '5e-6h': 'good', '6e-6h': 'plan' }
 
 const BASE_URL = 'https://math-belgium.vercel.app'
 
@@ -18,8 +19,8 @@ const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? 's' : ''}`
 /**
  * Ce que l'accueil montre selon l'année, en CSS seulement (règles générées depuis `LEVELS`, donc
  * présentes dans la page pré-rendue) : sans année (`<html>` sans `data-annee-accueil`), les cartes
- * « Tu es en… » ; avec une année, ses onglets, son titre et SES chapitres. Les trois années restent
- * dans le DOM (liens des 24 chapitres dans le HTML pré-rendu, pour les moteurs de recherche).
+ * « Tu es en… » ; avec une année, ses onglets, son titre et SES chapitres. Toutes les années restent
+ * dans le DOM (liens de tous les chapitres dans le HTML pré-rendu, pour les moteurs de recherche).
  */
 const REGLES_ANNEES = [
   `html:not([${ATTRIBUT_ANNEE}]) .accueil-avec-annee{display:none}`,
@@ -303,13 +304,13 @@ export function HomePage() {
         <section className="annees-choix" aria-labelledby="titre-choix-annee">
           <h2 id="titre-choix-annee">Tu es en…</h2>
           <p className="choix-aide">Choisis ton année : tu verras tes chapitres et où tu en es. Tu pourras en changer quand tu veux.</p>
-          <div className="choix-cartes">
-            {LEVELS.map((l, i) => (
+          <div className="choix-cartes" style={{ '--n-annees': LEVELS.length } as React.CSSProperties}>
+            {LEVELS.map((l) => (
               <button
                 key={l.slug}
                 type="button"
                 className="choix-carte"
-                style={{ '--annee-c': `var(--${LEVEL_TONE[i] ?? 'accent'})` } as React.CSSProperties}
+                style={{ '--annee-c': `var(--${LEVEL_TONE[l.slug] ?? 'accent'})` } as React.CSSProperties}
                 onClick={() => choisir(l.slug, true)}
               >
                 <span className="choix-nom">{l.label}</span>
@@ -329,7 +330,7 @@ export function HomePage() {
                 <CarteSuivi niveau={l.slug} />
               </div>
               <h2 className="accueil-liste-titre">
-                Les {pluriel(l.chapters.length, 'chapitre')} de {l.label}
+                {l.chapters.length === 1 ? `Le chapitre de ${l.label}` : `Les ${pluriel(l.chapters.length, 'chapitre')} de ${l.label}`}
               </h2>
               {/* Numéros du site = simple repère (décision du 25/11/2026) : le professeur peut suivre un autre ordre. */}
               <p className="accueil-ordre-note">Numérotés dans l'ordre du site : ton professeur peut les voir dans un autre ordre.</p>

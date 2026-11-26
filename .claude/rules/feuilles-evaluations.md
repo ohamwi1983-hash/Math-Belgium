@@ -291,11 +291,14 @@ testable seul) ; contrat `criteresDifficulte(instance) → CriteresDifficulte`
   **Calculatrice des élèves, par année** (utilisateur, 24/11/2026) — c'est ELLE qui décide « la calculatrice
   donne la réponse » : 4e et 5e 4h → **TI-30XB MultiView** (scientifique : fractions, √ et π exacts,
   stats 1 et 2 variables — Q1/Q3 = médianes des demi-séries, PAS la règle du seuil du cours —, nCr/nPr,
-  table de valeurs ; ni complexes, ni ∫, ni dérivée, ni solveur) ; 6e 6h (et la future 5e 6h) → **Casio
+  table de valeurs ; ni complexes, ni ∫, ni dérivée, ni solveur) ; 6e 6h et 5e 6h (niveau `5e-6h`, 26/11/2026) → **Casio
   Graph Math+** (mode complexe a+bi, `Conjg`/`Abs`/`Arg`, ∫ et d/dx numériques, `SolveN`, application
   Équations, lois binomiale / normale / Poisson / hypergéométrique et leurs inverses, G-Solve : zéros,
   extremums, intersections, ∫dx). Sources : manuel en ligne Casio GRAPH MATH+ (menu Catalogue, Calculs,
-  Équations, Graph&Table), guide et fiche TI-30XS/XB MultiView. Appliqué (partie 2 de la revue) :
+  Équations, Graph&Table), guide et fiche TI-30XS/XB MultiView. **Où c'est décidé** : nulle part dans le code
+  (aucune table « année → calculatrice ») — c'est le `profilInstance` de CHAQUE générateur (`calcul`,
+  `calculatriceIndispensable`) qui l'applique ; un générateur copié d'une année à l'autre (5e (4h) → 5e (6h),
+  TI-30XB → Casio) doit donc revoir chacun de ses `calcul: 'exacte'`. Appliqué (partie 2 de la revue) :
   6gen34 tout ; 6gen35 A, C ; 6gen79 signe, comparer (toute la variante : ne garder que l'issue « on ne peut
   pas conclure » rendrait le verdict prévisible) ; 6gen47 A ; 6gen48 A exactement / aucun / tous ; 6gen51 A,
   B, C et D « cumulée » ; 6gen52 B exactement / aucun / tous, C « cumulée » (`profilInstance` créé pour

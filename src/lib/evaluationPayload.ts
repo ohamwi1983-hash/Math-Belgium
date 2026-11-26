@@ -20,9 +20,10 @@ export const EVALUATION_BASE_URL_6E_6H = 'https://plateforme-maths.vercel.app/6e
 export const EVALUATION_BASE_URL_4E = 'https://plateforme-maths.vercel.app/evaluation'
 export const EVALUATION_BASE_URL_5E_4H = 'https://plateforme-maths.vercel.app/5e-4h/evaluation'
 
-/** Niveau + nombre d'heures ne se combinent pas librement : seules ces 3 combinaisons existent
- * réellement dans les deux dépôts à ce jour (voir `LEVELS` dans `chaptersIndex.ts`). `null` = pas
- * encore de chantier plateforme-maths pour cette combinaison. */
+/** Niveau + nombre d'heures ne se combinent pas librement : seules ces 4 combinaisons existent
+ * (voir `LEVELS` dans `chaptersIndex.ts`) — 4e, 5e (4h), 5e (6h), 6e (6h) ; la 5e (6h) n'existe que
+ * dans ce dépôt (génération locale, pas d'URL plateforme-maths). `null` = pas de chapitres pour cette
+ * combinaison. */
 export type NiveauCode = '4e' | '5e' | '6e'
 
 export const HEURES_PAR_NIVEAU: Record<NiveauCode, string[]> = {
@@ -35,6 +36,7 @@ const NIVEAU_HEURES_VERS_LEVELSLUG: Record<string, string> = {
   '4e|': '4e',
   '5e|4H': '5e-4h',
   '6e|6H': '6e-6h',
+  '5e|6H': '5e-6h',
 }
 
 export function resoudreLevelSlug(niveau: NiveauCode, heures: string): string | null {
@@ -65,12 +67,20 @@ export const NIVEAU_NUMERO: Record<NiveauCode, number> = { '4e': 4, '5e': 5, '6e
  * (donc quels générateurs) est utilisé, celui-là n'est qu'un texte affiché sur la copie. */
 export const HEURES_SEMAINE_DEFAUT: Record<NiveauCode, string> = { '4e': '5', '5e': '4', '6e': '6' }
 
+/** Volume affiché par défaut pour un couple niveau / heures : le nombre d'heures du chantier quand il
+ * y en a un (« 6H » → 6 : 5e (6h) imprime « 6h/sem », pas les 4 h de la 5e (4h)), sinon
+ * `HEURES_SEMAINE_DEFAUT` (4e, sans heures). Mêmes valeurs qu'avant pour 4e, 5e (4h) et 6e (6h). */
+export function heuresSemaineDefaut(niveau: NiveauCode, heures: string): string {
+  const m = /^(\d+)H$/.exec(heures)
+  return m ? m[1] : HEURES_SEMAINE_DEFAUT[niveau]
+}
+
 /** Chapitres ayant un « générateur d'évaluations » fonctionnel côté plateforme-maths — les autres
  * apparaissent dans le sélecteur mais restent désactivés. Déplacé dans `chapitresFonctionnels.ts`
  * (voir son en-tête — évite que ce fichier, volumineux et en croissance, finisse dans le chunk
  * principal via `ExerciseGeneratorSection.tsx`, qui n'a besoin que de ces quelques éléments) —
  * réexporté tel quel, aucun import existant ailleurs à changer. */
-export { LEVELSLUG_FONCTIONNEL_6E, LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, CHAPITRE_FONCTIONNEL_SLUG, estChapitreFonctionnel, type ChapitreFonctionnel } from './chapitresFonctionnels'
+export { LEVELSLUG_FONCTIONNEL_6E, LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, LEVELSLUG_FONCTIONNEL_5E_6H, CHAPITRE_FONCTIONNEL_SLUG, estChapitreFonctionnel, type ChapitreFonctionnel } from './chapitresFonctionnels'
 import { LEVELSLUG_FONCTIONNEL_6E, LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, type ChapitreFonctionnel } from './chapitresFonctionnels'
 import { catalogueAvecGroupes, variantesDe } from '../entrainement/export/groupesVerdict'
 import { QUESTIONS_FORMULES } from './questionsFormules'

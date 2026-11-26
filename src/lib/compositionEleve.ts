@@ -2,7 +2,7 @@ import type { ChapterContent } from '../content/types'
 import { LEVELS } from '../content/chaptersIndex'
 import { EVALUATION_ADAPTER_REGISTRY } from './evaluationAdapterRegistry'
 import {
-  HEURES_SEMAINE_DEFAUT,
+  heuresSemaineDefaut,
   NIVEAU_NUMERO,
   catalogueVariantesExercice,
   construireItemsPayload,
@@ -1174,7 +1174,7 @@ export function enteteEleve(reglages: ReglagesEleve, chapter: ChapterContent): E
     titre: `${blanche ? 'Évaluation blanche' : "Feuille d'exercices"} — ${chapter.title}`,
     niveauLabel,
     niveauNumero: nh ? NIVEAU_NUMERO[nh.niveau] : 0,
-    heuresSemaine: nh ? HEURES_SEMAINE_DEFAUT[nh.niveau] : '',
+    heuresSemaine: nh ? heuresSemaineDefaut(nh.niveau, nh.heures) : '',
     nombreSeries: 1,
     afficherTitresSection: false,
     mode: blanche ? 'evaluation' : 'exercice',

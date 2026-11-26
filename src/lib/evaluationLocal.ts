@@ -23,7 +23,7 @@ import { EVALUATION_ADAPTER_REGISTRY } from './evaluationAdapterRegistry'
 import { groupeVerdict } from '../entrainement/export/groupesVerdict'
 import { indexVariante, tirerInstance, varianteToujoursExacte } from './tirageInstance'
 import { chapitreAUneBanqueVraiFauxLocale, chargerThemeVraiFaux } from './banquesVraiFaux'
-import { LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, LEVELSLUG_FONCTIONNEL_6E, type EnTeteEvaluation, type ItemPayload, type LigneSelection, type QuestionOuverte } from './evaluationPayload'
+import { LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, LEVELSLUG_FONCTIONNEL_5E_6H, LEVELSLUG_FONCTIONNEL_6E, type EnTeteEvaluation, type ItemPayload, type LigneSelection, type QuestionOuverte } from './evaluationPayload'
 
 /**
  * Génération locale (SANS passer par plateforme-maths) des documents d'une évaluation / feuille
@@ -53,7 +53,7 @@ import { LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, LEVELSLUG_FONCTIONN
  * réciproques et cyclométriques »). Hors portée → l'appelant retombe sur `buildEvaluationUrl`.
  */
 
-const LEVELSLUGS_GENERATION_LOCALE = new Set([LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, LEVELSLUG_FONCTIONNEL_6E])
+const LEVELSLUGS_GENERATION_LOCALE = new Set([LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, LEVELSLUG_FONCTIONNEL_6E, LEVELSLUG_FONCTIONNEL_5E_6H])
 const URL_SITE = 'https://math-belgium.vercel.app'
 const LETTRES_SERIE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const LETTRES = 'abcdefghijklmnopqrstuvwxyz'
