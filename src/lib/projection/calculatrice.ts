@@ -19,11 +19,13 @@
 
 export type ModeAngle = 'deg' | 'rad'
 
-type NomFonction = 'sin' | 'cos' | 'tan' | 'asin' | 'acos' | 'atan' | 'ln' | 'log' | 'racine'
+type NomFonction = 'sin' | 'cos' | 'tan' | 'asin' | 'acos' | 'atan' | 'ln' | 'log' | 'racine' | 'abs'
 
-type Noeud =
+export type Noeud =
   | { t: 'nb'; v: number; src: string }
   | { t: 'cst'; nom: 'pi' | 'e' | 'ans' }
+  /** Variable x (traceur de fonctions seulement). */
+  | { t: 'var' }
   | { t: 'neg'; a: Noeud }
   | { t: 'bin'; op: '+' | '-' | '*' | '/' | 'implicite'; a: Noeud; b: Noeud }
   | { t: 'pow'; a: Noeud; b: Noeud }
@@ -32,8 +34,9 @@ type Noeud =
 
 type Jeton =
   | { t: 'nb'; v: number; src: string }
-  | { t: 'op'; v: '+' | '-' | '*' | '/' | '^' | '²' | '(' | ')' | '√' }
+  | { t: 'op'; v: '+' | '-' | '*' | '/' | '^' | '²' | '(' | ')' | '√' | '|' }
   | { t: 'cst'; v: 'pi' | 'e' | 'ans' }
+  | { t: 'var' }
   | { t: 'fn'; v: NomFonction }
 
 export class ErreurCalcul extends Error {
@@ -51,6 +54,7 @@ const NOMS: [string, Jeton][] = (
     ['arccos', { t: 'fn', v: 'acos' }],
     ['arctan', { t: 'fn', v: 'atan' }],
     ['racine', { t: 'fn', v: 'racine' }],
+    ['abs', { t: 'fn', v: 'abs' }],
     ['sqrt', { t: 'fn', v: 'racine' }],
     ['asin', { t: 'fn', v: 'asin' }],
     ['acos', { t: 'fn', v: 'acos' }],
@@ -69,7 +73,12 @@ const NOMS: [string, Jeton][] = (
 
 const INVERSE: Partial<Record<NomFonction, NomFonction>> = { sin: 'asin', cos: 'acos', tan: 'atan' }
 
-export function decouper(saisie: string): Jeton[] {
+/** Options de lecture : `variable` = la lettre x est la variable (traceur de fonctions), et « |…| » une valeur absolue. */
+export interface OptionsLecture {
+  variable?: boolean
+}
+
+export function decouper(saisie: string, options: OptionsLecture = {}): Jeton[] {
   const s = saisie.replace(/[−–—]/g, '-')
   const jetons: Jeton[] = []
   let i = 0
@@ -86,8 +95,8 @@ export function decouper(saisie: string): Jeton[] {
       i += src.length
       continue
     }
-    if ('+-*/^()²√×÷·:'.includes(c)) {
-      const v = c === '×' || c === '·' ? '*' : c === '÷' || c === ':' ? '/' : (c as '+' | '-' | '*' | '/' | '^' | '²' | '(' | ')' | '√')
+    if ('+-*/^()²√×÷·:'.includes(c) || (options.variable && c === '|')) {
+      const v = c === '×' || c === '·' ? '*' : c === '÷' || c === ':' ? '/' : (c as '+' | '-' | '*' | '/' | '^' | '²' | '(' | ')' | '√' | '|')
       jetons.push({ t: 'op', v })
       i++
       continue
@@ -100,6 +109,11 @@ export function decouper(saisie: string): Jeton[] {
     if (/[a-zA-Z]/.test(c)) {
       const reste = s.slice(i).toLowerCase()
       const trouve = NOMS.find(([n]) => reste.startsWith(n))
+      if (!trouve && options.variable && reste[0] === 'x') {
+        jetons.push({ t: 'var' })
+        i++
+        continue
+      }
       if (!trouve) throw new ErreurCalcul(`« ${s.slice(i).match(/^[a-zA-Z]+/)?.[0]} » n'est pas reconnu`, 'syntaxe')
       i += trouve[0].length
       let jeton = trouve[1]
@@ -118,13 +132,16 @@ export function decouper(saisie: string): Jeton[] {
   return jetons
 }
 
-export function analyser(saisie: string): Noeud {
-  const jetons = decouper(saisie)
+export function analyser(saisie: string, options: OptionsLecture = {}): Noeud {
+  const jetons = decouper(saisie, options)
   if (jetons.length === 0) throw new ErreurCalcul('Rien à calculer', 'syntaxe')
   let k = 0
   const voir = () => jetons[k]
   const estOp = (j: Jeton | undefined, v: string) => !!j && j.t === 'op' && j.v === v
-  const debutAtome = (j: Jeton | undefined) => !!j && (j.t === 'nb' || j.t === 'cst' || j.t === 'fn' || estOp(j, '(') || estOp(j, '√'))
+  // Valeur absolue « |…| » : à l'intérieur (profondeur > 0), une barre FERME ; dehors, elle ouvre.
+  let profondeurAbs = 0
+  const debutAtome = (j: Jeton | undefined) =>
+    !!j && (j.t === 'nb' || j.t === 'cst' || j.t === 'var' || j.t === 'fn' || estOp(j, '(') || estOp(j, '√') || (estOp(j, '|') && profondeurAbs === 0))
 
   const somme = (): Noeud => {
     let a = produit()
@@ -195,6 +212,19 @@ export function analyser(saisie: string): Noeud {
       k++
       return { t: 'cst', nom: j.v }
     }
+    if (j.t === 'var') {
+      k++
+      return { t: 'var' }
+    }
+    if (estOp(j, '|') && profondeurAbs === 0) {
+      k++
+      profondeurAbs++
+      const a = somme()
+      profondeurAbs--
+      if (estOp(voir(), '|')) k++
+      else if (voir()) throw new ErreurCalcul('Barre « | » fermante attendue', 'syntaxe')
+      return { t: 'fn', nom: 'abs', a: { t: 'par', a } }
+    }
     if (j.t === 'fn') {
       k++
       if (!voir()) throw new ErreurCalcul(`Argument manquant après ${j.v}`, 'syntaxe')
@@ -207,6 +237,7 @@ export function analyser(saisie: string): Noeud {
     }
     if (estOp(j, '(')) return parenthese()
     if (estOp(j, ')')) throw new ErreurCalcul('Parenthèse fermante en trop', 'syntaxe')
+    if (estOp(j, '|')) throw new ErreurCalcul('Barre « | » mal placée', 'syntaxe')
     throw new ErreurCalcul(`« ${j.t === 'op' ? (j.v === '*' ? '×' : j.v === '/' ? '÷' : j.v) : ''} » mal placé`, 'syntaxe')
   }
   const arbre = somme()
@@ -240,6 +271,8 @@ export function evaluer(n: Noeud, mode: ModeAngle, ans: number): number {
     switch (m.t) {
       case 'nb':
         return m.v
+      case 'var':
+        throw new ErreurCalcul('« x » n’a pas de valeur ici', 'syntaxe')
       case 'cst':
         return m.nom === 'pi' ? Math.PI : m.nom === 'e' ? Math.E : ans
       case 'par':
@@ -296,6 +329,8 @@ export function evaluer(n: Noeud, mode: ModeAngle, ans: number): number {
           case 'racine':
             if (x < 0) throw new ErreurCalcul('√ d’un nombre négatif', 'domaine')
             return Math.sqrt(x)
+          case 'abs':
+            return Math.abs(x)
         }
       }
     }
@@ -306,7 +341,7 @@ export function evaluer(n: Noeud, mode: ModeAngle, ans: number): number {
 }
 
 /** Bruit d'arrondi effacé : 30,000000000000004 → 30 ; 1e-17 → 0. */
-function nettoyer(v: number): number {
+export function nettoyer(v: number): number {
   const r = Math.round(v)
   if (Math.abs(v - r) < 1e-10 * Math.max(1, Math.abs(v))) return r === 0 ? 0 : r
   if (Math.abs(v) < 1e-14) return 0
@@ -435,31 +470,41 @@ const LATEX_FN: Record<NomFonction, string> = {
   ln: '\\ln',
   log: '\\log',
   racine: '\\sqrt',
+  abs: '',
 }
 
 function nombreLatex(src: string): string {
   return src.replace(/^[.,]/, '0,').replace(/[.,]$/, '').replace(/[.,]/, '{,}')
 }
 
-export function enLatex(n: Noeud, mode: ModeAngle): string {
+/** `fractions` (traceur) : a/b s'écrit en fraction, 2*x comme 2x. */
+export function enLatex(n: Noeud, mode: ModeAngle, options: { fractions?: boolean } = {}): string {
+  const sansPar = (m: Noeud) => (m.t === 'par' ? m.a : m)
   const lx = (m: Noeud): string => {
     switch (m.t) {
       case 'nb':
         return nombreLatex(m.src)
       case 'cst':
         return m.nom === 'pi' ? '\\pi' : m.nom === 'e' ? '\\mathrm{e}' : '\\mathrm{Ans}'
+      case 'var':
+        return 'x'
       case 'par':
         return `\\left(${lx(m.a)}\\right)`
       case 'neg':
         return `-${lx(m.a)}`
       case 'bin':
+        if (options.fractions && m.op === '/') return `\\dfrac{${lx(sansPar(m.a))}}{${lx(sansPar(m.b))}}`
+        if (options.fractions && m.op === '*' && m.a.t === 'nb' && (m.b.t === 'var' || (m.b.t === 'pow' && m.b.a.t === 'var'))) return `${lx(m.a)}${lx(m.b)}`
+        // 2x, 3x², 2√x : sans espace ; 2·sin(30), 3(1 + 2) : petite espace.
+        if (m.op === 'implicite' && m.a.t === 'nb' && (m.b.t === 'var' || (m.b.t === 'pow' && m.b.a.t === 'var') || (m.b.t === 'fn' && m.b.nom === 'racine'))) return `${lx(m.a)}${lx(m.b)}`
         return m.op === 'implicite' ? `${lx(m.a)}\\,${lx(m.b)}` : `${lx(m.a)} ${m.op === '*' ? '\\times' : m.op === '/' ? '\\div' : m.op} ${lx(m.b)}`
       case 'pow': {
-        const base = m.a.t === 'nb' || m.a.t === 'cst' || m.a.t === 'par' ? lx(m.a) : `\\left(${lx(m.a)}\\right)`
-        return `{${base}}^{${lx(m.b.t === 'par' ? m.b.a : m.b)}}`
+        const base = m.a.t === 'nb' || m.a.t === 'cst' || m.a.t === 'var' || m.a.t === 'par' || (m.a.t === 'fn' && m.a.nom === 'abs') ? lx(m.a) : `\\left(${lx(m.a)}\\right)`
+        return `{${base}}^{${lx(m.b.t === 'par' ? m.b.a : m.b).replace(/\\dfrac/g, '\\frac')}}`
       }
       case 'fn': {
         if (m.nom === 'racine') return `\\sqrt{${lx(m.a.t === 'par' ? m.a.a : m.a)}}`
+        if (m.nom === 'abs') return `\\left|${lx(m.a.t === 'par' ? m.a.a : m.a)}\\right|`
         // Degrés : sin(40) s'affiche sin(40°) (argument numérique simple).
         const degre = mode === 'deg' && (m.nom === 'sin' || m.nom === 'cos' || m.nom === 'tan')
         const interieur = m.a.t === 'par' ? m.a.a : m.a

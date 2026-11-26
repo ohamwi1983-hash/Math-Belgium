@@ -1,4 +1,8 @@
 import { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
+import { clePageBlanche } from '../../lib/projection/annotations'
+import type { MagasinAnnotations } from './magasinAnnotations'
+import { PaletteTraceur } from './Traceur'
 import { Pictogramme } from './Pictogrammes'
 import type { NomPictogramme } from './Pictogrammes'
 import { useInstrument } from './instruments'
@@ -43,6 +47,8 @@ export interface OutilsLocaux {
   epaisseur: Epaisseur
   ensemble: boolean
   menuMinuteur: boolean
+  /** Palette « Télécharger » (PowerPoint / PDF annotés, nouvelle séance). */
+  menuExport: boolean
   pleinEcran: boolean
 }
 
@@ -150,21 +156,80 @@ export function PaletteDessin({ outils, setOutils }: { outils: OutilsLocaux; set
   )
 }
 
-/** Fond de l'écran blanc : uni, quadrillé, repère (partagé avec l'autre écran). */
-export function PaletteFond({ projection, compacte = false }: { projection: Projection; compacte?: boolean }) {
+/**
+ * Écran blanc : pages de la diapo (« Page 2 / 3 », ‹ ›, « + Nouvelle page », supprimer après confirmation) et fond
+ * de la page affichée (uni, quadrillé, repère) — partagés avec l'autre écran. `compacte` : vue du professeur.
+ */
+export function PaletteFond({ projection, annotations, compacte = false }: { projection: Projection; annotations: MagasinAnnotations; compacte?: boolean }) {
+  const [confirmer, setConfirmer] = useState(false)
+  const page = projection.pageBlanche()
+  const liste = projection.pagesBlanches()
+  const rang = page ? liste.findIndex((p) => p.id === page.id) + 1 : 0
+  useEffect(() => setConfirmer(false), [page?.id])
+  if (!page) return null
   return (
-    <div className={compacte ? 'projection-fonds' : 'projection-palette'} role="group" aria-label="Fond de l'écran blanc">
+    <div className={`projection-palette projection-palette--fond${compacte ? ' compacte' : ''}`} role="group" aria-label="Écran blanc : pages et fond">
+      {confirmer ? (
+        <span className="pages-confirmer" role="alertdialog" aria-label={`Supprimer la page ${rang}`}>
+          <span className="pages-question">Supprimer la page {rang} et ce qui y est écrit ?</span>
+          <button
+            type="button"
+            className="projection-duree projection-duree--stop"
+            autoFocus
+            onClick={() => {
+              const id = projection.supprimerPage()
+              if (id) annotations.oublierPage(clePageBlanche(id))
+              setConfirmer(false)
+            }}
+          >
+            Supprimer
+          </button>
+          <button type="button" className="projection-duree" onClick={() => setConfirmer(false)}>
+            Annuler
+          </button>
+        </span>
+      ) : (
+        <>
+          {!compacte && (
+            <span className="projection-palette-nom" aria-hidden="true">
+              Page
+            </span>
+          )}
+          <Bouton label="Page blanche précédente" picto="precedent" raccourci="Page préc." onClick={() => projection.allerPage(-1)} />
+          <span className="pages-compteur" aria-live="polite">
+            Page {rang} / {liste.length}
+          </span>
+          <Bouton label="Page blanche suivante" picto="suivant" raccourci="Page suiv." onClick={() => projection.allerPage(1)} />
+          <button type="button" className="projection-duree pages-nouvelle" title="Garder cette page et passer à une page vierge" onClick={() => projection.nouvellePage()}>
+            + Nouvelle page
+          </button>
+          <Bouton label="Supprimer cette page" picto="effacer" onClick={() => setConfirmer(true)} />
+          <span className="projection-separateur" aria-hidden="true" />
+        </>
+      )}
       {!compacte && (
         <span className="projection-palette-nom" aria-hidden="true">
           Fond
         </span>
       )}
       {FONDS.map((f) => (
-        <button key={f.valeur} type="button" className="projection-duree" aria-pressed={projection.etat.fond === f.valeur} onClick={() => projection.choisirFond(f.valeur)}>
+        <button key={f.valeur} type="button" className="projection-duree" aria-pressed={page.fond === f.valeur} onClick={() => projection.choisirFond(f.valeur)}>
           {f.nom}
         </button>
       ))}
     </div>
+  )
+}
+
+/** Palettes de l'écran blanc : pages + fond, et le traceur de fonctions sur le repère. */
+export function PalettesBlanc({ projection, annotations, outils, compacte = false }: { projection: Projection; annotations: MagasinAnnotations; outils: OutilsLocaux; compacte?: boolean }) {
+  const page = projection.pageBlanche()
+  if (!page) return null
+  return (
+    <>
+      <PaletteFond projection={projection} annotations={annotations} compacte={compacte} />
+      {page.fond === 'repere' && <PaletteTraceur projection={projection} annotations={annotations} page={page} outils={outils} compacte={compacte} />}
+    </>
   )
 }
 
@@ -232,8 +297,13 @@ export function BarreOutils({
   basculerPleinEcran,
   quitter,
   magasin,
+  annotations,
+  paletteExport,
 }: {
   magasin: MagasinInstruments
+  annotations: MagasinAnnotations
+  /** Palette « Télécharger » (absente sur l'écran de la classe en deux écrans). */
+  paletteExport?: ReactNode
   projection: Projection
   total: number
   fil: string
@@ -250,7 +320,8 @@ export function BarreOutils({
     <div className={`projection-barre${visible ? '' : ' masquee'}`} role="toolbar" aria-label="Outils de projection" onClick={(e) => e.stopPropagation()}>
       <span className="projection-fil">{fil}</span>
       <div className="projection-palettes">
-      {etat.blanc && <PaletteFond projection={projection} />}
+      {outils.menuExport && paletteExport}
+      {etat.blanc && <PalettesBlanc projection={projection} annotations={annotations} outils={outils} />}
       {outils.stylo && <PaletteDessin outils={outils} setOutils={setOutils} />}
       {equerre && <PaletteEquerre magasin={magasin} />}
       {outils.menuMinuteur && (
@@ -292,13 +363,25 @@ export function BarreOutils({
         aria-label={reste !== null ? `Minuteur : ${formatDuree(reste)} restantes` : 'Minuteur'}
         title="Minuteur"
         aria-expanded={outils.menuMinuteur}
-        onClick={() => setOutils((o) => ({ ...o, menuMinuteur: !o.menuMinuteur, stylo: false }))}
+        onClick={() => setOutils((o) => ({ ...o, menuMinuteur: !o.menuMinuteur, menuExport: false, stylo: false }))}
       >
         <Pictogramme nom="minuteur" />
         {reste !== null && <span className="projection-temps">{formatDuree(reste)}</span>}
       </button>
       <Bouton label="Écran blanc" picto="ecran-blanc" actif={etat.blanc} onClick={basculerBlanc} raccourci="B" />
       <Bouton label="Vue d'ensemble" picto="grille" actif={outils.ensemble} onClick={() => setOutils((o) => ({ ...o, ensemble: !o.ensemble }))} raccourci="G" />
+      {paletteExport && (
+        <button
+          type="button"
+          className={`projection-outil${outils.menuExport ? ' actif' : ''}`}
+          aria-label="Télécharger le PowerPoint ou le PDF annoté"
+          title="Télécharger le PowerPoint ou le PDF annoté · Nouvelle séance"
+          aria-expanded={outils.menuExport}
+          onClick={() => setOutils((o) => ({ ...o, menuExport: !o.menuExport, menuMinuteur: false }))}
+        >
+          <Pictogramme nom="telecharger" />
+        </button>
+      )}
       <Bouton label={outils.pleinEcran ? 'Quitter le plein écran' : 'Plein écran'} picto={outils.pleinEcran ? 'quitter-plein-ecran' : 'plein-ecran'} onClick={basculerPleinEcran} raccourci="F" />
       <span className="projection-separateur" aria-hidden="true" />
       <Bouton label="Précédent" picto="precedent" onClick={precedent} raccourci="←" />

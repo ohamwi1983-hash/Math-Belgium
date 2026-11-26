@@ -8,7 +8,11 @@ import { EPAISSEURS } from './BarreOutils'
 import type { OutilsLocaux } from './BarreOutils'
 import { Pictogramme } from './Pictogrammes'
 import { HAUTEUR, LARGEUR } from './Scene'
-import type { Arc, ElementAnnotation, Epingle, FondBlanc, MessageProjection, Projection, Trait } from './useProjection'
+import type { Arc, Epingle, FondBlanc, PageBlanche, Projection, Trait } from './useProjection'
+import type { MagasinAnnotations } from './magasinAnnotations'
+import { peindreCourbes, peindreTraits } from '../../lib/projection/peinture'
+import { texteGraduation } from '../../lib/projection/traceur'
+import { EtiquettesCourbes } from './Traceur'
 
 /** Unité commune du quadrillage, des graduations de l'équerre et du rayon du compas : 1 carreau = 40 px logiques
  * (32 carreaux sur la largeur de la diapo, 18 sur la hauteur). */
@@ -26,8 +30,6 @@ const DEMI_CARREAU = 20
 const CRAN_GRADUATION = 4
 const POIGNEE: P = [0, -DEMI + 52]
 const DEG = Math.PI / 180
-/** Clé des annotations de l'écran blanc (les diapos sont numérotées à partir de 0). */
-const PAGE_BLANCHE = -1
 
 type P = [number, number]
 
@@ -144,6 +146,9 @@ type Geste =
 export function Annotations({
   projection,
   magasin,
+  annotations,
+  page,
+  blanche,
   outils,
   echelle,
   role,
@@ -151,25 +156,27 @@ export function Annotations({
 }: {
   projection: Projection
   magasin: MagasinInstruments
+  /** Annotations de toutes les pages (magasin de la page de projection : conservées, exportées). */
+  annotations: MagasinAnnotations
+  /** Clé STABLE de la page affichée : `d:<clé de diapo>` ou `b:<id de page blanche>`. */
+  page: string
+  /** Page de l'écran blanc affichée (fond, échelle du repère pour les courbes), null sur une diapo. */
+  blanche: PageBlanche | null
   outils: OutilsLocaux
   echelle: number
   role: Role
   grille: boolean
 }) {
+  const canvasCourbes = useRef<HTMLCanvasElement>(null)
   const canvasFluo = useRef<HTMLCanvasElement>(null)
   const canvasStylo = useRef<HTMLCanvasElement>(null)
   const racine = useRef<HTMLDivElement>(null)
-  const parDiapo = useRef(new Map<number, ElementAnnotation[]>())
-  /** Résultats épinglés retirés au × (par page) : « Annuler » les remet, dans l'ordre inverse. `longueur` =
-   * nombre d'éléments de la page juste après le retrait (si on a ajouté autre chose depuis, « Annuler »
-   * retire d'abord ces ajouts). */
-  const retraits = useRef(new Map<number, { el: Epingle; longueur: number }[]>())
   const [, setVersion] = useState(0)
-  const { etat, envoyer, ecouter, id } = projection
-  // L'écran blanc est une page à part (clé −1) : ce qu'on y écrit ne salit pas la diapo, et inversement.
-  const index = etat.blanc ? PAGE_BLANCHE : etat.index
-  const indexRef = useRef(index)
-  indexRef.current = index
+  const { id } = projection
+  const pageRef = useRef(page)
+  pageRef.current = page
+  const blancheRef = useRef(blanche)
+  blancheRef.current = blanche
   const outilsRef = useRef(outils)
   outilsRef.current = outils
   const grilleRef = useRef(grille)
@@ -182,160 +189,67 @@ export function Annotations({
   const compas = useInstrument(magasin, (e) => e.compas)
   const actif = outils.stylo
 
-  const liste = useCallback((i = indexRef.current) => {
-    let l = parDiapo.current.get(i)
-    if (!l) {
-      l = []
-      parDiapo.current.set(i, l)
-    }
-    return l
-  }, [])
+  const liste = useCallback(() => annotations.liste(pageRef.current), [annotations])
 
   const dessiner = useCallback(() => {
-    const cf = canvasFluo.current
-    const cs = canvasStylo.current
-    const xf = cf?.getContext('2d')
-    const xs = cs?.getContext('2d')
-    if (!cf || !cs || !xf || !xs) return
-    const k = cs.width / LARGEUR
-    for (const [c, x] of [
-      [cf, xf],
-      [cs, xs],
-    ] as const) {
-      x.setTransform(1, 0, 0, 1, 0, 0)
-      x.clearRect(0, 0, c.width, c.height)
-      x.setTransform(k, 0, 0, k, 0, 0)
-      x.lineJoin = 'round'
-    }
-    const tracer = (x: CanvasRenderingContext2D, el: Trait | Arc) => {
-      x.beginPath()
-      if (el.genre === 'arc') {
-        if (Math.abs(el.a1 - el.a0) >= 2 * Math.PI) x.arc(el.cx, el.cy, el.r, 0, 2 * Math.PI)
-        else x.arc(el.cx, el.cy, el.r, el.a0, el.a1, el.a1 < el.a0)
-      } else {
-        el.points.forEach(([px, py], i) => (i === 0 ? x.moveTo(px, py) : x.lineTo(px, py)))
-        if (el.points.length === 1) x.lineTo(el.points[0][0] + 0.1, el.points[0][1])
-      }
-      x.stroke()
-    }
-    for (const el of liste()) {
-      if (el.genre === 'epingle') continue
-      if (el.genre !== 'arc' && el.gomme) {
-        for (const x of [xf, xs]) {
-          x.globalCompositeOperation = 'destination-out'
-          x.strokeStyle = '#000'
-          x.lineCap = 'round'
-          x.lineWidth = el.epaisseur ?? 44
-          tracer(x, el)
-        }
-      } else if (el.genre !== 'arc' && el.fluo) {
-        xf.globalCompositeOperation = 'multiply'
-        xf.strokeStyle = el.couleur
-        xf.lineCap = 'butt'
-        xf.lineWidth = el.epaisseur ?? 22
-        tracer(xf, el)
-      } else {
-        xs.globalCompositeOperation = 'source-over'
-        xs.strokeStyle = el.couleur
-        xs.lineCap = 'round'
-        xs.lineWidth = el.epaisseur ?? 5
-        tracer(xs, el)
-      }
-    }
-    xf.globalCompositeOperation = 'source-over'
-    xs.globalCompositeOperation = 'source-over'
-  }, [liste])
+    const xf = canvasFluo.current?.getContext('2d')
+    const xs = canvasStylo.current?.getContext('2d')
+    if (!xf || !xs) return
+    peindreTraits(xf, xs, annotations.liste(pageRef.current), xs.canvas.width / LARGEUR)
+  }, [annotations])
 
-  const rafraichir = useCallback(
-    (i: number, epingles: boolean) => {
-      if (i !== indexRef.current) return
-      dessiner()
-      if (epingles) setVersion((v) => v + 1)
-    },
-    [dessiner],
-  )
+  const dessinerCourbes = useCallback(() => {
+    const xc = canvasCourbes.current?.getContext('2d')
+    if (!xc) return
+    peindreCourbes(xc, annotations.courbes(pageRef.current), blancheRef.current, xc.canvas.width / LARGEUR)
+  }, [annotations])
 
   // Résolution des canvas = taille réelle à l'écran (net à toute échelle).
   useEffect(() => {
     if (!echelle) return
     const dpr = window.devicePixelRatio || 1
-    for (const c of [canvasFluo.current, canvasStylo.current]) {
+    for (const c of [canvasCourbes.current, canvasFluo.current, canvasStylo.current]) {
       if (!c) continue
       c.width = Math.round(LARGEUR * echelle * dpr)
       c.height = Math.round(HAUTEUR * echelle * dpr)
     }
     dessiner()
-  }, [echelle, dessiner])
+    dessinerCourbes()
+  }, [echelle, dessiner, dessinerCourbes])
 
-  // Changement de diapo : on montre les annotations de la nouvelle diapo (gardées en mémoire).
+  // Changement de page (diapo, page blanche) : on montre ce qui y a été écrit (gardé).
   useEffect(() => {
     geste.current = null
     dessiner()
     setVersion((v) => v + 1)
-  }, [index, dessiner])
+  }, [page, dessiner])
+  // Changement de page ou de repère (échelle, angles, fond) : les courbes sont recalculées depuis leur expression.
+  useEffect(() => {
+    dessinerCourbes()
+  }, [page, blanche, dessinerCourbes])
+
+  // Tout changement (ici ou reçu de l'autre fenêtre) sur la page affichée : repeindre ; élément ajouté ou retiré : re-rendu.
+  useEffect(
+    () =>
+      annotations.abonner((p, structure) => {
+        if (p !== null && p !== pageRef.current) return
+        dessiner()
+        if (structure) {
+          dessinerCourbes()
+          setVersion((v) => v + 1)
+        }
+      }),
+    [annotations, dessiner, dessinerCourbes],
+  )
 
   // ---------- actions locales (appliquées puis envoyées à l'autre fenêtre) ----------
-  const ajouter = useCallback(
-    (el: ElementAnnotation) => {
-      liste().push(el)
-      envoyer({ type: 'element', de: id, index: indexRef.current, element: el })
-      rafraichir(indexRef.current, el.genre === 'epingle')
-    },
-    [liste, envoyer, id, rafraichir],
-  )
-  const remplacer = useCallback(
-    (el: ElementAnnotation) => {
-      const l = liste()
-      const i = l.findIndex((x) => x.id === el.id)
-      if (i >= 0) l[i] = el
-      else l.push(el)
-      envoyer({ type: 'element', de: id, index: indexRef.current, element: el })
-      rafraichir(indexRef.current, el.genre === 'epingle')
-    },
-    [liste, envoyer, id, rafraichir],
-  )
-  const retirer = useCallback(
-    (idEl: string) => {
-      const l = liste()
-      const i = l.findIndex((x) => x.id === idEl)
-      if (i < 0) return
-      l.splice(i, 1)
-      envoyer({ type: 'retirer', de: id, index: indexRef.current, id: idEl })
-      rafraichir(indexRef.current, true)
-    },
-    [liste, envoyer, id, rafraichir],
-  )
-
-  /** × d'une étiquette épinglée : retrait annulable (Ctrl/Cmd+Z, bouton « Annuler »). */
-  const retirerEpingle = useCallback(
-    (el: Epingle) => {
-      const i = indexRef.current
-      retirer(el.id)
-      const pile = retraits.current.get(i) ?? []
-      pile.push({ el, longueur: liste(i).length })
-      retraits.current.set(i, pile)
-    },
-    [retirer, liste],
-  )
+  const ajouter = useCallback((el: Trait | Arc | Epingle) => annotations.ajouter(pageRef.current, el), [annotations])
+  const remplacer = useCallback((el: Trait | Arc | Epingle) => annotations.remplacer(pageRef.current, el), [annotations])
+  const retirer = useCallback((idEl: string) => annotations.retirer(pageRef.current, idEl), [annotations])
 
   useEffect(() => {
-    const annuler = () => {
-      const l = liste()
-      const pile = retraits.current.get(indexRef.current)
-      const dernier = pile?.[pile.length - 1]
-      if (dernier && l.length <= dernier.longueur) {
-        pile!.pop()
-        ajouter(dernier.el)
-        return
-      }
-      if (l.length) retirer(l[l.length - 1].id)
-    }
-    const effacer = () => {
-      retraits.current.delete(indexRef.current)
-      liste().length = 0
-      envoyer({ type: 'effacer', de: id, index: indexRef.current })
-      rafraichir(indexRef.current, true)
-    }
+    const annuler = () => annotations.annuler(pageRef.current)
+    const effacer = () => annotations.effacer(pageRef.current)
     const surTouche = (e: KeyboardEvent) => {
       if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey || e.key.toLowerCase() !== 'z') return
       const chemin = e.composedPath() as HTMLElement[]
@@ -351,7 +265,7 @@ export function Annotations({
       window.removeEventListener('projection:effacer', effacer)
       window.removeEventListener('keydown', surTouche)
     }
-  }, [liste, retirer, ajouter, envoyer, id, rafraichir])
+  }, [annotations])
 
   // Écran tactile (tableau interactif, tablette) : le × des étiquettes reste visible (pas de survol au doigt).
   useEffect(() => {
@@ -364,54 +278,6 @@ export function Annotations({
     window.addEventListener('pointerdown', noter, true)
     return () => window.removeEventListener('pointerdown', noter, true)
   }, [])
-
-  // ---------- messages de l'autre fenêtre ----------
-  useEffect(
-    () =>
-      ecouter((m: MessageProjection) => {
-        switch (m.type) {
-          case 'demande': {
-            const toutes = [...parDiapo.current].filter(([, l]) => l.length > 0)
-            if (toutes.length) envoyer({ type: 'annotations', de: id, toutes })
-            return
-          }
-          case 'annotations':
-            parDiapo.current = new Map(m.toutes.map(([i, l]) => [i, l.map((el) => (el.genre === undefined || el.genre === 'trait' ? { ...el, points: [...el.points] } : { ...el }))]))
-            rafraichir(indexRef.current, true)
-            return
-          case 'trait':
-            liste(m.index).push({ ...m.trait, points: [...m.trait.points] })
-            rafraichir(m.index, false)
-            return
-          case 'point': {
-            const t = liste(m.index).find((x) => x.id === m.id)
-            if (t && (t.genre === undefined || t.genre === 'trait')) t.points.push([m.x, m.y])
-            rafraichir(m.index, false)
-            return
-          }
-          case 'effacer':
-            liste(m.index).length = 0
-            rafraichir(m.index, true)
-            return
-          case 'element': {
-            const l = liste(m.index)
-            const i = l.findIndex((x) => x.id === m.element.id)
-            if (i >= 0) l[i] = m.element
-            else l.push(m.element)
-            rafraichir(m.index, m.element.genre === 'epingle')
-            return
-          }
-          case 'retirer': {
-            const l = liste(m.index)
-            const i = l.findIndex((x) => x.id === m.id)
-            if (i >= 0) l.splice(i, 1)
-            rafraichir(m.index, true)
-            return
-          }
-        }
-      }),
-    [ecouter, envoyer, id, liste, rafraichir],
-  )
 
   // Compas quitté ici (autre outil, stylo rangé) : il disparaît aussi de l'autre écran.
   const compasActif = actif && outils.outil === 'compas'
@@ -433,9 +299,7 @@ export function Annotations({
     const o = outilsRef.current
     switch (g.g) {
       case 'trait':
-        g.trait.points.push(p)
-        envoyer({ type: 'point', de: id, index: indexRef.current, id: g.trait.id, x: p[0], y: p[1] })
-        dessiner()
+        annotations.point(pageRef.current, g.trait, p)
         return
       case 'regle': {
         if (!g.ajoute && Math.hypot(p[0] - g.p0[0], p[1] - g.p0[1]) * Math.max(echelleRef.current, 0.01) < 4) return
@@ -568,9 +432,7 @@ export function Annotations({
     if (o.outil === 'compas') return debutCompas(e, p)
     const trait: Trait = { id: nouvelId(id), couleur: couleurTrait(o), gomme: o.outil === 'gomme', fluo: o.outil === 'fluo', epaisseur: epaisseur(o), points: [p] }
     commencer(e, { g: 'trait', trait })
-    liste().push(trait)
-    envoyer({ type: 'trait', de: id, index: indexRef.current, trait })
-    dessiner()
+    annotations.commencerTrait(pageRef.current, trait)
   }
 
   const surCanvas = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -618,11 +480,16 @@ export function Annotations({
     e.currentTarget.dataset.bord = pres ? 'oui' : 'non'
   }
 
-  const epingles = (parDiapo.current.get(index) ?? []).filter((el): el is Epingle => el.genre === 'epingle')
+  const elementsPage = annotations.pages.get(page) ?? []
+  const epingles = elementsPage.filter((el): el is Epingle => el.genre === 'epingle')
+  const courbes = annotations.courbes(page)
   const gomme = actif && outils.outil === 'gomme'
 
   return (
     <div ref={racine} className="projection-tableau" style={{ '--cible': `${Math.round(Math.max(44, echelle > 0 ? 44 / echelle : 44))}px` } as React.CSSProperties}>
+      {/* Courbes du traceur SOUS le surligneur et le stylo (on écrit par-dessus), puis leurs étiquettes. */}
+      <canvas ref={canvasCourbes} className="projection-annotations projection-annotations--courbes" aria-hidden="true" />
+      {blanche?.fond === 'repere' && courbes.length > 0 && <EtiquettesCourbes courbes={courbes} page={blanche} />}
       <canvas ref={canvasFluo} className="projection-annotations projection-annotations--fluo" aria-hidden="true" />
       <canvas
         ref={canvasStylo}
@@ -654,7 +521,7 @@ export function Annotations({
               title="Retirer ce résultat (Ctrl+Z pour le remettre)"
               onClick={(e) => {
                 e.stopPropagation()
-                retirerEpingle(el)
+                annotations.retirerEpingle(pageRef.current, el)
               }}
             >
               <span className="projection-epingle-croix" aria-hidden="true">
@@ -685,7 +552,7 @@ export function Annotations({
         role={role}
         echelle={echelle}
         versDiapo={versDiapo}
-        diapo={index}
+        diapo={page}
         epingler={(latex) => {
           const c = magasin.lire().calc
           // En bas de la zone de contenu, du côté opposé à la calculatrice (au-dessus de la barre) : à déplacer
@@ -855,8 +722,9 @@ function DessinCompas({ compas, grille }: { compas: EtatCompas; grille: boolean 
   )
 }
 
-/** Écran blanc : uni, quadrillé (carreaux de 40 px logiques) ou repère gradué (origine au centre, 1 graduation = 1 carreau). */
-export function FondBlancTableau({ fond }: { fond: FondBlanc }) {
+/** Écran blanc : uni, quadrillé (carreaux de 40 px logiques) ou repère gradué (origine au centre, 1 graduation = 1 carreau
+ * = `ex` unités en abscisse, `ey` en ordonnée : 0,5 / 1 / 2 / 5 / 10, choisis dans le traceur). */
+export function FondBlancTableau({ fond, ex = 1, ey = 1 }: { fond: FondBlanc; ex?: number; ey?: number }) {
   if (fond === 'uni') return <div className="projection-blanc" aria-label="Écran blanc" />
   const verticales = []
   const horizontales = []
@@ -871,7 +739,7 @@ export function FondBlancTableau({ fond }: { fond: FondBlanc }) {
       graduations.push(<line key={`gx${x}`} className="rp-trait" x1={x} y1={oy - 5} x2={x} y2={oy + 5} />)
       graduations.push(
         <text key={`tx${x}`} className="rp-nombre" x={x} y={oy + 22} textAnchor="middle">
-          {String(n).replace('-', '−')}
+          {texteGraduation(n * ex)}
         </text>,
       )
     }
@@ -881,7 +749,7 @@ export function FondBlancTableau({ fond }: { fond: FondBlanc }) {
       graduations.push(<line key={`gy${y}`} className="rp-trait" x1={ox - 5} y1={y} x2={ox + 5} y2={y} />)
       graduations.push(
         <text key={`ty${y}`} className="rp-nombre" x={ox - 10} y={y + 5} textAnchor="end">
-          {String(n).replace('-', '−')}
+          {texteGraduation(n * ey)}
         </text>,
       )
     }

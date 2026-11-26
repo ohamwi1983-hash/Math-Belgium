@@ -49,3 +49,9 @@ input:focus-visible + .lanceur-case { outline: 2px solid var(--accent); outline-
 .lanceur-etat.erreur { color: var(--bad); }
 .lanceur-aide { margin: 0; font: 400 13px/1.45 var(--sans); color: var(--ink-faint); }
 @media print { .lanceur-projection { display: none !important; } }
+/* Export : PowerPoint et PDF côte à côte (empilés sur téléphone) ; case « Avec mes annotations » */
+.lanceur-exports { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lanceur-exports .lanceur-pptx { width: 100%; }
+@media (max-width: 420px) { .lanceur-exports { grid-template-columns: 1fr; } }
+.lanceur-annotations span:last-child { display: flex; flex-direction: column; }
+.lanceur-annotations small { font: 400 13px/1.3 var(--sans); color: var(--ink-soft); }

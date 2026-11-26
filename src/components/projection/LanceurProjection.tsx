@@ -6,13 +6,16 @@ import { lireParcours, titreCourt } from '../../lib/parcoursChapitre'
 import type { ChoixProjection, Inclusion } from '../../lib/projection/diapos'
 import { INCLUSIONS, INCLUSIONS_DEFAUT, diaposEtape, enregistrerChoix, lireChoix, urlProjection } from '../../lib/projection/diapos'
 import { ouvrirFenetreDiapos } from '../../lib/projection/fenetre'
+import { aDesAnnotations, lireAnnotations, resumeAnnotations } from '../../lib/projection/annotations'
+import type { DonneesAnnotations } from '../../lib/projection/annotations'
 import { GardeProfesseur } from './GardeProfesseur'
 import { Pictogramme } from './Pictogrammes'
 import './lanceur.css'
 
 /**
  * Vue `#projeter` de la page du chapitre (maquette « Main », téléphone d'abord) : étapes à projeter,
- * contenus à inclure, un ou deux écrans, « Lancer », « Télécharger en PowerPoint ». Réservée au
+ * contenus à inclure, un ou deux écrans, « Lancer », « Télécharger en PowerPoint / en PDF » (avec les annotations
+ * gardées dans ce navigateur si le professeur le souhaite — case cochée d'office quand il y en a). Réservée au
  * professeur connecté (`GardeProfesseur`). Choix mémorisé dans le navigateur (`projection:{niveau}/{slug}`).
  * Rendue seulement quand le fragment vaut `#projeter` : la page pré-rendue n'en contient rien.
  */
@@ -34,6 +37,17 @@ function Lanceur({ chapter, aller }: { chapter: ChapterContent; aller: Aller }) 
     return lireChoix(chapter, { etapes: premiere ? [premiere.id] : [], inclure: INCLUSIONS_DEFAUT, ecran: 'un' })
   })
   const [export_, setExport] = useState<{ etat: 'pret' | 'encours' | 'erreur' | 'fait'; texte?: string }>({ etat: 'pret' })
+  // Annotations gardées de la dernière projection de ce chapitre (navigateur seulement).
+  const [gardees, setGardees] = useState<DonneesAnnotations | null>(null)
+  const [avecAnnotations, setAvecAnnotations] = useState(true)
+  useEffect(() => {
+    let vivant = true
+    void lireAnnotations(chapter).then((d) => vivant && setGardees(d && aDesAnnotations(d) ? d : null))
+    return () => {
+      vivant = false
+    }
+  }, [chapter])
+  const resume = gardees ? resumeAnnotations(gardees) : null
   const titre = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
@@ -73,16 +87,21 @@ function Lanceur({ chapter, aller }: { chapter: ChapterContent; aller: Aller }) 
     navigate(urlProjection(chapter, choix, 'seul'))
   }
 
-  async function telecharger() {
+  async function telecharger(format: 'pptx' | 'pdf') {
     if (choix.etapes.length === 0 || export_.etat === 'encours') return
+    const nom = format === 'pptx' ? 'PowerPoint' : 'PDF'
     setExport({ etat: 'encours', texte: 'Préparation des diapos…' })
     try {
-      const { telechargerPptx } = await import('../../lib/projection/exportPptx')
-      await telechargerPptx(chapter, choix, (fait, n) => setExport({ etat: 'encours', texte: `Diapo ${fait} sur ${n}…` }))
-      setExport({ etat: 'fait', texte: 'PowerPoint téléchargé.' })
+      const { telechargerProjection } = await import('../../lib/projection/exportPptx')
+      await telechargerProjection(chapter, choix, {
+        format,
+        annotations: avecAnnotations ? gardees : null,
+        progression: (fait, n) => setExport({ etat: 'encours', texte: `Diapo ${fait} sur ${n}…` }),
+      })
+      setExport({ etat: 'fait', texte: `${nom} téléchargé.` })
     } catch (err) {
-      console.warn('Export PowerPoint', err)
-      setExport({ etat: 'erreur', texte: 'Le PowerPoint n’a pas pu être préparé. Réessaie ; si cela se reproduit, choisis moins d’étapes.' })
+      console.warn(`Export ${nom}`, err)
+      setExport({ etat: 'erreur', texte: `Le ${nom} n’a pas pu être préparé. Réessaie ; si cela se reproduit, choisis moins d’étapes.` })
     }
   }
 
@@ -167,10 +186,32 @@ function Lanceur({ chapter, aller }: { chapter: ChapterContent; aller: Aller }) 
         <Pictogramme nom="ecran" taille={18} />
         {choix.ecran === 'deux' ? 'Lancer (deux écrans)' : 'Lancer (plein écran)'}
       </button>
-      <button type="button" className="lanceur-pptx" onClick={() => void telecharger()} disabled={choix.etapes.length === 0 || export_.etat === 'encours'} aria-describedby="lanceur-pptx-etat">
-        <Pictogramme nom="telecharger" taille={18} />
-        Télécharger en PowerPoint
-      </button>
+      {resume && (
+        <label className="lanceur-option lanceur-annotations">
+          <input type="checkbox" checked={avecAnnotations} onChange={(e) => setAvecAnnotations(e.target.checked)} />
+          <span className="lanceur-case" aria-hidden="true">
+            {avecAnnotations && <Pictogramme nom="coche" taille={15} />}
+          </span>
+          <span>
+            Avec mes annotations
+            <small>
+              {[resume.diapos ? `${resume.diapos} diapo${resume.diapos > 1 ? 's' : ''} annotée${resume.diapos > 1 ? 's' : ''}` : '', resume.blanches ? `${resume.blanches} page${resume.blanches > 1 ? 's' : ''} blanche${resume.blanches > 1 ? 's' : ''}` : '']
+                .filter(Boolean)
+                .join(' · ')}
+            </small>
+          </span>
+        </label>
+      )}
+      <div className="lanceur-exports">
+        <button type="button" className="lanceur-pptx" onClick={() => void telecharger('pptx')} disabled={choix.etapes.length === 0 || export_.etat === 'encours'} aria-describedby="lanceur-pptx-etat">
+          <Pictogramme nom="telecharger" taille={18} />
+          Télécharger en PowerPoint
+        </button>
+        <button type="button" className="lanceur-pptx" onClick={() => void telecharger('pdf')} disabled={choix.etapes.length === 0 || export_.etat === 'encours'} aria-describedby="lanceur-pptx-etat">
+          <Pictogramme nom="telecharger" taille={18} />
+          Télécharger en PDF
+        </button>
+      </div>
       <p id="lanceur-pptx-etat" className={`lanceur-etat${export_.etat === 'erreur' ? ' erreur' : ''}`} role="status" aria-live="polite">
         {export_.texte ?? ''}
       </p>

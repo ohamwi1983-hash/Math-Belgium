@@ -4,7 +4,7 @@ import type { ChapterContent } from '../../content/types'
 import { findChapter } from '../../content/chaptersIndex'
 import { usePageNonIndexee } from '../../lib/useDocumentMeta'
 import { titreCourt } from '../../lib/parcoursChapitre'
-import type { Diapo as DonneesDiapo, Role } from '../../lib/projection/diapos'
+import type { ChoixProjection, Diapo as DonneesDiapo, Role } from '../../lib/projection/diapos'
 import { choixDepuisUrl, construireDiapos, texteBrut } from '../../lib/projection/diapos'
 import { fenetreDiapos, ouvrirFenetreDiapos } from '../../lib/projection/fenetre'
 import { RichText } from '../Math'
@@ -13,13 +13,17 @@ import { Diapo } from './Diapo'
 import { Paginateur } from './Paginateur'
 import { Scene } from './Scene'
 import { Annotations, FondBlancTableau } from './Tableau'
-import { BarreOutils, basculerCompas, basculerFluo, basculerStylo, BoutonsInstruments, COULEURS_FLUO, COULEURS_STYLO, DUREES_MINUTEUR, formatDuree, PaletteDessin, PaletteEquerre, PaletteFond, useResteMinuteur } from './BarreOutils'
+import { BarreOutils, basculerCompas, basculerFluo, basculerStylo, BoutonsInstruments, COULEURS_FLUO, COULEURS_STYLO, DUREES_MINUTEUR, formatDuree, PaletteDessin, PaletteEquerre, PalettesBlanc, useResteMinuteur } from './BarreOutils'
 import { useInstrument, useMagasinInstruments } from './instruments'
 import type { OutilsLocaux } from './BarreOutils'
 import { GardeProfesseur } from './GardeProfesseur'
 import { Pictogramme } from './Pictogrammes'
-import { useProjection } from './useProjection'
+import { clePageCourante, useProjection } from './useProjection'
 import type { Projection } from './useProjection'
+import { lireAnnotations, aDesAnnotations } from '../../lib/projection/annotations'
+import type { DonneesAnnotations } from '../../lib/projection/annotations'
+import { useConservation, useMagasinAnnotations } from './magasinAnnotations'
+import { DialogueQuitter, PaletteExport, useExportAnnote, useResume } from './ExportAnnote'
 import './projection.css'
 
 /**
@@ -73,6 +77,15 @@ function Projection({ chapter }: { chapter: ChapterContent }) {
   const brutes = useMemo(() => construireDiapos(chapter, choix), [chapter, choix])
   const [diapos, setDiapos] = useState<DonneesDiapo[] | null>(null)
   const surFini = useCallback((d: DonneesDiapo[]) => setDiapos(d), [])
+  // Annotations gardées dans ce navigateur pour ce chapitre (lues pendant le découpage des diapos).
+  const [gardees, setGardees] = useState<DonneesAnnotations | null | undefined>(undefined)
+  useEffect(() => {
+    let vivant = true
+    void lireAnnotations(chapter).then((d) => vivant && setGardees(d))
+    return () => {
+      vivant = false
+    }
+  }, [chapter])
 
   if (brutes.length === 0) {
     return (
@@ -82,17 +95,21 @@ function Projection({ chapter }: { chapter: ChapterContent }) {
       </div>
     )
   }
-  if (!diapos) {
+  if (!diapos || gardees === undefined) {
     return (
       <div className="projection projection--chargement theme-clair">
         <p className="projection-preparation" role="status">
           Préparation des diapos…
         </p>
-        <Paginateur diapos={brutes} chapter={chapter} onFini={surFini} />
+        {!diapos && <Paginateur diapos={brutes} chapter={chapter} onFini={surFini} />}
       </div>
     )
   }
-  return role === 'prof' ? <VuePresentateur chapter={chapter} diapos={diapos} /> : <VueDiapos chapter={chapter} diapos={diapos} role={role} repli={repli} />
+  return role === 'prof' ? (
+    <VuePresentateur chapter={chapter} diapos={diapos} choix={choix} gardees={gardees} />
+  ) : (
+    <VueDiapos chapter={chapter} diapos={diapos} role={role} repli={repli} choix={choix} gardees={gardees} />
+  )
 }
 
 // ---------- outils communs ----------
@@ -204,7 +221,7 @@ function usePresDuBas(actif: boolean): boolean {
 /** Raccourcis clavier — UNIQUEMENT pendant la projection (écouteur posé par cette page). Une touche
  * frappée dans un champ, un curseur ou un bouton d'atelier (Shadow DOM compris) lui revient ; sur un
  * bouton (palette, calculatrice), seules les lettres restent des raccourcis (elles n'y font rien d'autre). */
-function useClavier(actions: Record<string, () => void>) {
+function useClavier(actions: Record<string, (() => void) | undefined>) {
   const ref = useRef(actions)
   ref.current = actions
   useEffect(() => {
@@ -217,7 +234,11 @@ function useClavier(actions: Record<string, () => void>) {
       const a = ref.current
       const touche = e.key.length === 1 ? e.key.toLowerCase() : e.key
       const action =
-        touche === 'ArrowRight' || touche === 'ArrowDown' || touche === 'PageDown' || touche === ' ' || touche === 'Enter' || touche === 'n'
+        touche === 'PageDown' && a.pageSuivante
+          ? a.pageSuivante
+          : touche === 'PageUp' && a.pagePrecedente
+            ? a.pagePrecedente
+            : touche === 'ArrowRight' || touche === 'ArrowDown' || touche === 'PageDown' || touche === ' ' || touche === 'Enter' || touche === 'n'
           ? a.suivant
           : touche === 'ArrowLeft' || touche === 'ArrowUp' || touche === 'PageUp' || touche === 'Backspace' || touche === 'p'
             ? a.precedent
@@ -260,7 +281,15 @@ function useInactivite(gele: boolean): [boolean, () => void] {
   const reveiller = useCallback(() => {
     setVisible(true)
     window.clearTimeout(t.current)
-    t.current = window.setTimeout(() => setVisible(false), 3000)
+    const masquer = () => {
+      // Champ de la barre en cours de saisie (traceur f(x)) : la barre reste.
+      if (document.activeElement?.closest('.projection-barre, .projection-palettes') && document.activeElement.matches('input, textarea')) {
+        t.current = window.setTimeout(masquer, 3000)
+        return
+      }
+      setVisible(false)
+    }
+    t.current = window.setTimeout(masquer, 3000)
   }, [])
   useEffect(() => {
     reveiller()
@@ -371,27 +400,69 @@ function etiquette(d: DonneesDiapo): string {
   }
 }
 
-const OUTILS_DEPART: OutilsLocaux = { stylo: false, outil: 'stylo', couleur: COULEURS_STYLO[0].valeur, fluo: COULEURS_FLUO[0].valeur, epaisseur: 'moyen', ensemble: false, menuMinuteur: false, pleinEcran: false }
+const OUTILS_DEPART: OutilsLocaux = { stylo: false, outil: 'stylo', couleur: COULEURS_STYLO[0].valeur, fluo: COULEURS_FLUO[0].valeur, epaisseur: 'moyen', ensemble: false, menuMinuteur: false, menuExport: false, pleinEcran: false }
+
+/**
+ * Annotations de la page de projection : magasin (toutes les pages), conservation dans le navigateur, page
+ * affichée (diapo ou page blanche), export annoté, « Nouvelle séance », résumé.
+ */
+function useAnnotationsProjection(chapter: ChapterContent, diapos: DonneesDiapo[], choix: Pick<ChoixProjection, 'etapes' | 'inclure'>, projection: Projection, gardees: DonneesAnnotations | null) {
+  const annotations = useMagasinAnnotations(projection, gardees?.pages)
+  const sauver = useConservation(chapter, annotations, projection.etat)
+  const exp = useExportAnnote(chapter, choix, diapos, annotations, projection.etat)
+  const resume = useResume(annotations, projection.etat)
+  const page = clePageCourante(projection.etat, diapos)
+  const blanche = projection.pageBlanche()
+  const nouvelleSeance = useCallback(() => {
+    annotations.toutEffacer()
+    projection.oublierPagesBlanches()
+    window.setTimeout(sauver, 0)
+  }, [annotations, projection, sauver])
+  return { annotations, exp, resume, page, blanche, nouvelleSeance }
+}
+
+/** Fond de l'écran blanc : celui de la page blanche affichée (échelle du repère comprise). */
+function FondPage({ projection }: { projection: Projection }) {
+  const p = projection.pageBlanche()
+  if (!projection.etat.blanc) return null
+  return <FondBlancTableau fond={p?.fond ?? projection.etat.fond} ex={p?.ex} ey={p?.ey} />
+}
 
 /** Sélecteur des éléments qui gardent leurs clics (jamais « diapo suivante »). */
 const INTERACTIFS = 'button, a, input, select, textarea, .diapo-atelier, .projection-barre, .projection-interactif'
 
 // ---------- un écran / fenêtre des diapos ----------
 
-function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; diapos: DonneesDiapo[]; role: Role; repli: boolean }) {
+function VueDiapos({
+  chapter,
+  diapos,
+  role,
+  repli,
+  choix,
+  gardees,
+}: {
+  chapter: ChapterContent
+  diapos: DonneesDiapo[]
+  role: Role
+  repli: boolean
+  choix: Pick<ChoixProjection, 'etapes' | 'inclure'>
+  gardees: DonneesAnnotations | null
+}) {
   const navigate = useNavigate()
-  const projection = useProjection(chapter, diapos, role)
+  const projection = useProjection(chapter, diapos, role, gardees ?? undefined)
   const magasin = useMagasinInstruments(projection)
+  const ann = useAnnotationsProjection(chapter, diapos, choix, projection, gardees)
+  const [demandeQuitter, setDemandeQuitter] = useState(false)
   const { etat, suivant, precedent, aller, basculerBlanc } = projection
   const [message, signaler] = useMessage()
   const { plein, basculer } = usePleinEcran(signaler)
   const [outils, setOutils] = useState<OutilsLocaux>(OUTILS_DEPART)
   const [accueil, setAccueil] = useState(role === 'diapos')
-  const [barreActive] = useInactivite(outils.stylo || outils.menuMinuteur || outils.ensemble)
+  const [barreActive] = useInactivite(outils.stylo || outils.menuMinuteur || outils.menuExport || outils.ensemble || demandeQuitter)
   const atelierPlein = useAtelierPlein(projection)
   const pleinIci = atelierPlein.plein && diapos[etat.index]?.type === 'atelier'
   const presDuBas = usePresDuBas(pleinIci)
-  const barreVisible = pleinIci ? presDuBas || outils.stylo || outils.menuMinuteur || outils.ensemble : barreActive
+  const barreVisible = pleinIci ? presDuBas || outils.stylo || outils.menuMinuteur || outils.menuExport || outils.ensemble : barreActive
   const glisse = useRef<{ x: number; y: number } | null>(null)
   const d = diapos[etat.index]
 
@@ -399,7 +470,7 @@ function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; 
     if (repli) signaler('La fenêtre des diapos a été bloquée par le navigateur : projection sur un seul écran. Autorise les fenêtres surgissantes de ce site pour utiliser deux écrans.')
   }, [repli, signaler])
 
-  const quitter = useCallback(() => {
+  const quitterVraiment = useCallback(() => {
     if (document.fullscreenElement) void document.exitFullscreen?.().catch(() => undefined)
     if (role === 'diapos') {
       window.close()
@@ -407,10 +478,18 @@ function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; 
     }
     navigate(`/${chapter.levelSlug}/${chapter.slug}#projeter`)
   }, [navigate, chapter, role])
+  // Quitter avec des annotations : proposer de les télécharger (pas sur l'écran de la classe en deux écrans).
+  const quitter = useCallback(() => {
+    if (role !== 'diapos' && aDesAnnotations({ pages: ann.annotations.instantane(), blanches: projection.etat.blanches })) setDemandeQuitter(true)
+    else quitterVraiment()
+  }, [role, ann.annotations, projection.etat.blanches, quitterVraiment])
 
   useClavier({
-    suivant: () => !outils.ensemble && suivant(),
-    precedent: () => !outils.ensemble && precedent(),
+    suivant: () => !outils.ensemble && !demandeQuitter && suivant(),
+    precedent: () => !outils.ensemble && !demandeQuitter && precedent(),
+    // Écran blanc affiché : Page préc. / Page suiv. passent d'une page blanche à l'autre.
+    pageSuivante: etat.blanc ? () => projection.allerPage(1) : undefined,
+    pagePrecedente: etat.blanc ? () => projection.allerPage(-1) : undefined,
     debut: () => aller(0),
     fin: () => aller(diapos.length - 1),
     blanc: basculerBlanc,
@@ -425,7 +504,7 @@ function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; 
       if (accueil) setAccueil(false)
       else if (pleinIci) atelierPlein.sortir()
       else if (outils.ensemble) setOutils((o) => ({ ...o, ensemble: false }))
-      else if (outils.stylo || outils.menuMinuteur) setOutils((o) => ({ ...o, stylo: false, menuMinuteur: false }))
+      else if (outils.stylo || outils.menuMinuteur || outils.menuExport) setOutils((o) => ({ ...o, stylo: false, menuMinuteur: false, menuExport: false }))
       else setOutils((o) => ({ ...o, ensemble: true }))
     },
   })
@@ -434,8 +513,8 @@ function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; 
     <div
       className={`projection projection--diapos${barreActive ? '' : ' inactive'}${pleinIci ? ' atelier-plein' : ''}`}
       onClick={(e) => {
-        if (outils.stylo || outils.menuMinuteur) {
-          if (outils.menuMinuteur) setOutils((o) => ({ ...o, menuMinuteur: false }))
+        if (outils.stylo || outils.menuMinuteur || outils.menuExport) {
+          if (outils.menuMinuteur || outils.menuExport) setOutils((o) => ({ ...o, menuMinuteur: false, menuExport: false }))
           return
         }
         const cible = e.target as HTMLElement
@@ -457,8 +536,8 @@ function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; 
         {(echelle) => (
           <>
             {d && <Diapo key={d.cle} diapo={d} chapter={chapter} pas={etat.pas} mode="direct" debut={etat.debut} atelier={{ plein: atelierPlein.plein, basculerPlein: atelierPlein.basculer }} />}
-            {etat.blanc && <FondBlancTableau fond={etat.fond} />}
-            <Annotations projection={projection} magasin={magasin} outils={outils} echelle={echelle} role={role} grille={etat.blanc && etat.fond !== 'uni'} />
+            <FondPage projection={projection} />
+            <Annotations projection={projection} magasin={magasin} annotations={ann.annotations} page={ann.page} blanche={ann.blanche} outils={outils} echelle={echelle} role={role} grille={!!ann.blanche && ann.blanche.fond !== 'uni'} />
           </>
         )}
       </Scene>
@@ -486,8 +565,11 @@ function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; 
         basculerPleinEcran={basculer}
         quitter={quitter}
         magasin={magasin}
+        annotations={ann.annotations}
+        paletteExport={role === 'diapos' ? undefined : <PaletteExport exp={ann.exp} resume={ann.resume} nouvelleSeance={ann.nouvelleSeance} />}
       />
       {outils.ensemble && <VueEnsemble chapter={chapter} diapos={diapos} projection={projection} fermer={() => setOutils((o) => ({ ...o, ensemble: false }))} />}
+      {demandeQuitter && <DialogueQuitter exp={ann.exp} resume={ann.resume} quitter={quitterVraiment} fermer={() => setDemandeQuitter(false)} />}
       {accueil && (
         <div className="projection-accueil" role="dialog" aria-modal="true" aria-labelledby="projection-accueil-titre" onClick={(e) => e.stopPropagation()}>
           <div>
@@ -524,11 +606,13 @@ function VueDiapos({ chapter, diapos, role, repli }: { chapter: ChapterContent; 
 
 // ---------- vue du professeur (deux écrans) ----------
 
-function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos: DonneesDiapo[] }) {
+function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: ChapterContent; diapos: DonneesDiapo[]; choix: Pick<ChoixProjection, 'etapes' | 'inclure'>; gardees: DonneesAnnotations | null }) {
   const navigate = useNavigate()
   const [params] = useSearchParams()
-  const projection = useProjection(chapter, diapos, 'prof')
+  const projection = useProjection(chapter, diapos, 'prof', gardees ?? undefined)
   const magasin = useMagasinInstruments(projection)
+  const ann = useAnnotationsProjection(chapter, diapos, choix, projection, gardees)
+  const [demandeQuitter, setDemandeQuitter] = useState(false)
   const equerreVisible = useInstrument(magasin, (e) => e.equerre.visible)
   const { etat, suivant, precedent, aller, basculerBlanc, lancerMinuteur, arreterMinuteur, basculerAtelierPlein } = projection
   const [message, signaler] = useMessage()
@@ -563,16 +647,22 @@ function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos:
     setFenetreOuverte(!!f)
   }
 
-  const quitter = () => {
+  const quitterVraiment = () => {
     if (document.fullscreenElement) void document.exitFullscreen?.().catch(() => undefined)
     const f = fenetreDiapos()
     if (f && !f.closed) f.close()
     navigate(`/${chapter.levelSlug}/${chapter.slug}#projeter`)
   }
+  const quitter = () => {
+    if (aDesAnnotations({ pages: ann.annotations.instantane(), blanches: etat.blanches })) setDemandeQuitter(true)
+    else quitterVraiment()
+  }
 
   useClavier({
-    suivant: () => !outils.ensemble && suivant(),
-    precedent: () => !outils.ensemble && precedent(),
+    suivant: () => !outils.ensemble && !demandeQuitter && suivant(),
+    precedent: () => !outils.ensemble && !demandeQuitter && precedent(),
+    pageSuivante: etat.blanc ? () => projection.allerPage(1) : undefined,
+    pagePrecedente: etat.blanc ? () => projection.allerPage(-1) : undefined,
     debut: () => aller(0),
     fin: () => aller(diapos.length - 1),
     blanc: basculerBlanc,
@@ -585,6 +675,7 @@ function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos:
     pleinEcran: basculer,
     echap: () => {
       if (etat.atelierPlein) basculerAtelierPlein(false)
+      else if (outils.menuExport) setOutils((o) => ({ ...o, menuExport: false }))
       else setOutils((o) => (o.ensemble ? { ...o, ensemble: false } : o.stylo ? { ...o, stylo: false } : { ...o, ensemble: true }))
     },
   })
@@ -615,9 +706,17 @@ function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos:
           <button type="button" className="projection-bouton" aria-pressed={etat.blanc} onClick={basculerBlanc} title="Écran blanc (B)">
             <Pictogramme nom="ecran-blanc" /> {etat.blanc ? 'Rallumer' : 'Écran blanc'}
           </button>
-          {etat.blanc && <PaletteFond projection={projection} compacte />}
           <button type="button" className="projection-bouton" aria-pressed={outils.ensemble} onClick={() => setOutils((o) => ({ ...o, ensemble: !o.ensemble }))} title="Vue d'ensemble (G)">
             <Pictogramme nom="grille" /> Vue d'ensemble
+          </button>
+          <button
+            type="button"
+            className="projection-bouton"
+            aria-expanded={outils.menuExport}
+            title="Télécharger le PowerPoint ou le PDF annoté · Nouvelle séance"
+            onClick={() => setOutils((o) => ({ ...o, menuExport: !o.menuExport }))}
+          >
+            <Pictogramme nom="telecharger" /> Télécharger
           </button>
           <button type="button" className="projection-bouton" onClick={basculer} title="Plein écran (F)">
             <Pictogramme nom={plein ? 'quitter-plein-ecran' : 'plein-ecran'} />
@@ -629,6 +728,11 @@ function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos:
         </div>
       </header>
 
+      {outils.menuExport && (
+        <div className="prof-export">
+          <PaletteExport exp={ann.exp} resume={ann.resume} nouvelleSeance={ann.nouvelleSeance} compacte />
+        </div>
+      )}
       <div className="prof-corps">
         <section className="prof-courante" aria-label="Diapo projetée">
           <div className="prof-etiquette">
@@ -663,8 +767,9 @@ function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos:
               <BoutonsInstruments outils={outils} setOutils={setOutils} magasin={magasin} />
             </span>
           </div>
-          {(outils.stylo || equerreVisible) && (
+          {(outils.stylo || equerreVisible || etat.blanc) && (
             <div className="prof-palette">
+              {etat.blanc && <PalettesBlanc projection={projection} annotations={ann.annotations} outils={outils} compacte />}
               {outils.stylo && <PaletteDessin outils={outils} setOutils={setOutils} />}
               {equerreVisible && <PaletteEquerre magasin={magasin} />}
             </div>
@@ -673,8 +778,8 @@ function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos:
             {(echelle) => (
               <>
                 {d && (d.type === 'atelier' ? <DiapoAtelierProf diapo={d} chapter={chapter} /> : <Diapo key={d.cle} diapo={d} chapter={chapter} pas={etat.pas} mode="direct" debut={etat.debut} />)}
-                {etat.blanc && <FondBlancTableau fond={etat.fond} />}
-                <Annotations projection={projection} magasin={magasin} outils={outils} echelle={echelle} role="prof" grille={etat.blanc && etat.fond !== 'uni'} />
+                <FondPage projection={projection} />
+                <Annotations projection={projection} magasin={magasin} annotations={ann.annotations} page={ann.page} blanche={ann.blanche} outils={outils} echelle={echelle} role="prof" grille={!!ann.blanche && ann.blanche.fond !== 'uni'} />
               </>
             )}
           </Scene>
@@ -730,6 +835,7 @@ function VuePresentateur({ chapter, diapos }: { chapter: ChapterContent; diapos:
         </aside>
       </div>
       {outils.ensemble && <VueEnsemble chapter={chapter} diapos={diapos} projection={projection} fermer={() => setOutils((o) => ({ ...o, ensemble: false }))} />}
+      {demandeQuitter && <DialogueQuitter exp={ann.exp} resume={ann.resume} quitter={quitterVraiment} fermer={() => setDemandeQuitter(false)} />}
       {message && (
         <p className="projection-message" role="status">
           {message}

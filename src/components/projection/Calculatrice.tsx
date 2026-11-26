@@ -47,8 +47,9 @@ export function Calculatrice({
   echelle: number
   versDiapo: (x: number, y: number) => [number, number]
   epingler: (latex: string) => void
-  /** Page courante (diapo, ou −1 pour l'écran blanc) : sans punaise, la calculatrice se ferme quand elle change. */
-  diapo: number
+  /** Clé de la page courante (`d:…` diapo, `b:…` page de l'écran blanc) : sans punaise, la calculatrice se ferme
+   * quand on change de DIAPO (pas en ouvrant l'écran blanc ni en passant d'une page blanche à l'autre). */
+  diapo: string
 }) {
   const calc = useInstrument(magasin, (e) => e.calc)
   const champ = useRef<HTMLInputElement>(null)
@@ -66,7 +67,7 @@ export function Calculatrice({
   useEffect(() => {
     const avant = diapoAvant.current
     diapoAvant.current = diapo
-    if (avant === diapo || avant < 0 || diapo < 0) return
+    if (avant === diapo || avant.startsWith('b:') || diapo.startsWith('b:')) return
     const c = magasin.lire().calc
     if (c.visible && !c.garde) magasin.calc({ visible: false })
   }, [diapo, magasin])

@@ -2,15 +2,22 @@ import { createRoot } from 'react-dom/client'
 import { useEffect, useRef } from 'react'
 import type { ChapterContent } from '../../content/types'
 import type { ChoixProjection, Diapo as DonneesDiapo } from './diapos'
-import { construireDiapos, texteBrut } from './diapos'
+import { construireDiapos, latexEnTexte, texteBrut } from './diapos'
 import { Diapo } from '../../components/projection/Diapo'
 import { Paginateur } from '../../components/projection/Paginateur'
+import { FondBlancTableau } from '../../components/projection/Tableau'
+import { EtiquettesCourbes } from '../../components/projection/Traceur'
+import { MathInline } from '../../components/Math'
 import { inlinerPolices, retirerPreferenceSombre, toutesLesReglesCss } from '../export/buildHtml'
 import { downloadBlob } from '../export/downloadBlob'
-import { surtitreChapitre } from '../ordreChapitres'
+import { libelleChapitre, surtitreChapitre } from '../ordreChapitres'
+import { cleDiapo, clePageBlanche, pageBlancheUtile } from './annotations'
+import type { Courbe, DonneesAnnotations, ElementAnnotation, Epingle, PageBlanche } from './annotations'
+import { peindreCourbes, peindreTraits } from './peinture'
+import { lireFonction } from './traceur'
 
 /**
- * « Télécharger en PowerPoint » du mode projection : les MÊMES diapos (construites et découpées comme
+ * « Télécharger en PowerPoint / PDF » du mode projection (avec ou sans annotations, voir `telechargerProjection`) : les MÊMES diapos (construites et découpées comme
  * à l'écran), chacune dans son état final (tout révélé). Chargé à la demande (`import()` depuis le
  * lanceur), avec `pptxgenjs`.
  *
@@ -119,9 +126,11 @@ function chargerImage(src: string): Promise<HTMLImageElement> {
   })
 }
 
-async function rasteriser(noeud: HTMLElement, css: string): Promise<string> {
+/** Image 1 920 × 1 080 d'un nœud (SVG `<foreignObject>` autonome). `fond` null = transparent (calque d'étiquettes) ;
+ * `masquerNatifs` : les textes posés en zones de texte PowerPoint ne sont pas dans l'image. */
+async function rasteriser(noeud: HTMLElement, css: string, options: { fond: string | null; masquerNatifs?: boolean }): Promise<HTMLCanvasElement> {
   const clone = cloner(noeud) as HTMLElement
-  clone.querySelectorAll<HTMLElement>('[data-pptx-natif]').forEach((e) => (e.style.visibility = 'hidden'))
+  if (options.masquerNatifs) clone.querySelectorAll<HTMLElement>('[data-pptx-natif]').forEach((e) => (e.style.visibility = 'hidden'))
   const xhtml = new XMLSerializer().serializeToString(clone)
   const l = LARGEUR * ECHELLE_IMAGE
   const h = HAUTEUR * ECHELLE_IMAGE
@@ -135,10 +144,12 @@ async function rasteriser(noeud: HTMLElement, css: string): Promise<string> {
   canvas.width = l
   canvas.height = h
   const ctx = canvas.getContext('2d')!
-  ctx.fillStyle = '#fbfaf7'
-  ctx.fillRect(0, 0, l, h)
+  if (options.fond) {
+    ctx.fillStyle = options.fond
+    ctx.fillRect(0, 0, l, h)
+  }
   ctx.drawImage(img, 0, 0, l, h)
-  return canvas.toDataURL('image/png')
+  return canvas
 }
 
 interface TexteNatif {
@@ -213,85 +224,285 @@ function textesNatifs(diapo: HTMLElement): TexteNatif[] {
   return res
 }
 
-/** Planche hors écran : toutes les diapos dans leur état final. */
-function Planche({ diapos, chapter, pret }: { diapos: DonneesDiapo[]; chapter: ChapterContent; pret: (el: HTMLElement) => void }) {
+const pause = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+// ---------- annotations (export annoté) ----------
+
+/** Une diapo du fichier : une diapo de la projection, ou une page de l'écran blanc insérée juste après sa diapo. */
+type Element =
+  | { genre: 'diapo'; d: DonneesDiapo; page: string; rang: number }
+  | { genre: 'blanche'; d: DonneesDiapo; p: PageBlanche; page: string; numero: number }
+
+const L_IMG = LARGEUR * ECHELLE_IMAGE
+const H_IMG = HAUTEUR * ECHELLE_IMAGE
+
+function toile(): [HTMLCanvasElement, CanvasRenderingContext2D] {
+  const c = document.createElement('canvas')
+  c.width = L_IMG
+  c.height = H_IMG
+  return [c, c.getContext('2d')!]
+}
+
+/** Étiquettes KaTeX d'une page (résultats épinglés, noms des courbes, points remarquables) : calque transparent. */
+function CalqueEtiquettes({ elements, page }: { elements: ElementAnnotation[]; page: PageBlanche | null }) {
+  const courbes = elements.filter((e): e is Courbe => e.genre === 'courbe')
+  return (
+    <>
+      {page?.fond === 'repere' && courbes.length > 0 && <EtiquettesCourbes courbes={courbes} page={page} />}
+      {elements
+        .filter((e): e is Epingle => e.genre === 'epingle')
+        .map((e) => (
+          <div key={e.id} className="projection-epingle" style={{ left: e.x, top: e.y }}>
+            <MathInline tex={e.latex} />
+          </div>
+        ))}
+    </>
+  )
+}
+
+const aDesEtiquettes = (elements: ElementAnnotation[], page: PageBlanche | null) =>
+  elements.some((e) => e.genre === 'epingle') || (page?.fond === 'repere' && elements.some((e) => e.genre === 'courbe'))
+
+/** Planche hors écran : chaque diapo dans son état final, chaque page blanche (fond), et les calques d'étiquettes. */
+function Planche({ elements, pages, chapter, pret }: { elements: Element[]; pages: Map<string, ElementAnnotation[]>; chapter: ChapterContent; pret: (el: HTMLElement) => void }) {
   const ref = useRef<HTMLDivElement>(null)
   const signal = useRef(pret)
   useEffect(() => {
     if (ref.current) signal.current(ref.current)
   }, [])
+  const taille = { width: LARGEUR, height: HAUTEUR, marginBottom: 20, position: 'relative' as const }
   return (
     <div ref={ref}>
-      {diapos.map((d) => (
-        <div key={d.cle} className="pptx-diapo" style={{ width: LARGEUR, height: HAUTEUR, marginBottom: 20 }}>
-          <Diapo diapo={d} chapter={chapter} pas={d.pas} mode="export" />
-        </div>
-      ))}
+      {elements.map((e, i) => {
+        const liste = pages.get(e.page) ?? []
+        const blanche = e.genre === 'blanche' ? e.p : null
+        return (
+          <div key={`${e.page}-${i}`} data-i={i}>
+            <div className="pptx-diapo" style={taille}>
+              {e.genre === 'diapo' ? <Diapo diapo={e.d} chapter={chapter} pas={e.d.pas} mode="export" /> : <FondBlancTableau fond={e.p.fond} ex={e.p.ex} ey={e.p.ey} />}
+            </div>
+            {aDesEtiquettes(liste, blanche) && (
+              <div className="pptx-calque" style={taille}>
+                <CalqueEtiquettes elements={liste} page={blanche} />
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
 
-const pause = (ms: number) => new Promise((r) => setTimeout(r, ms))
+/**
+ * Calques d'annotation d'une page, à 1 920 × 1 080 :
+ * - `fluo` : le surligneur « cuit » sur le fond — dans les zones surlignées, le fond multiplié par la couleur du
+ *   fluo (exactement le `mix-blend-mode: multiply` de l'écran), ailleurs transparent ; posé SOUS les zones de
+ *   texte du PowerPoint (le texte reste noir et modifiable par-dessus) ;
+ * - `stylo` : courbes du traceur, traits, arcs du compas, étiquettes (KaTeX) ; transparent, posé par-dessus.
+ * Les instruments (équerre, compas, calculatrice) ne sont jamais exportés.
+ */
+async function calques(elements: ElementAnnotation[], page: PageBlanche | null, fond: HTMLCanvasElement, etiquettes: HTMLElement | null, css: string): Promise<{ fluo: HTMLCanvasElement | null; stylo: HTMLCanvasElement | null }> {
+  const [cf, xf] = toile()
+  const [cs, xs] = toile()
+  peindreTraits(xf, xs, elements, ECHELLE_IMAGE)
+  const avecFluo = elements.some((e) => (e.genre === undefined || e.genre === 'trait') && e.fluo && !e.gomme)
+  const avecStylo = elements.some((e) => e.genre === 'arc' || e.genre === 'epingle' || e.genre === 'courbe' || ((e.genre === undefined || e.genre === 'trait') && !e.fluo && !e.gomme))
+  let fluo: HTMLCanvasElement | null = null
+  if (avecFluo) {
+    const [c, x] = toile()
+    x.drawImage(fond, 0, 0)
+    x.globalCompositeOperation = 'multiply'
+    x.drawImage(cf, 0, 0)
+    x.globalCompositeOperation = 'destination-in'
+    x.drawImage(cf, 0, 0)
+    x.globalCompositeOperation = 'source-over'
+    fluo = c
+  }
+  let stylo: HTMLCanvasElement | null = null
+  if (avecStylo) {
+    const [c, x] = toile()
+    const courbes = elements.filter((e): e is Courbe => e.genre === 'courbe')
+    if (page && courbes.length) {
+      const [cc, xc] = toile()
+      peindreCourbes(xc, courbes, page, ECHELLE_IMAGE)
+      x.drawImage(cc, 0, 0)
+    }
+    x.drawImage(cs, 0, 0)
+    if (etiquettes) x.drawImage(await rasteriser(etiquettes, css, { fond: null }), 0, 0)
+    stylo = c
+  }
+  return { fluo, stylo }
+}
 
-export async function telechargerPptx(chapter: ChapterContent, choix: Pick<ChoixProjection, 'etapes' | 'inclure'>, progression?: (fait: number, total: number) => void): Promise<void> {
-  const brutes = construireDiapos(chapter, choix)
+/** Latin-1 seulement (polices standard du PDF, sans police embarquée) : le texte invisible sert à sélectionner / chercher. */
+function versLatin1(t: string): string {
+  return t
+    .replace(/[’‘]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/[—–−]/g, '-')
+    .replace(/…/g, '...')
+    .replace(/[  ]/g, ' ')
+    .replace(/œ/g, 'oe')
+    .replace(/Œ/g, 'OE')
+    .replace(/[^\u0000-ÿ]/g, '')
+}
+
+/** « Chapitre 3 — Titre — annoté.pptx » (numéro du PROFESSEUR s'il a rangé ses chapitres, jamais celui du site). */
+function nomFichier(chapter: ChapterContent, annote: boolean, extension: string): string {
+  const base = libelleChapitre(chapter, undefined, { titre: texteBrut(chapter.title) })
+  return `${base}${annote ? ' — annoté' : ''}.${extension}`.replace(/[\\/:*?"<>|]+/g, '-')
+}
+
+export interface OptionsExport {
+  format?: 'pptx' | 'pdf'
+  /** Annotations à poser (export annoté) ; absent ou null = diapos seules. */
+  annotations?: DonneesAnnotations | null
+  /** Diapos déjà découpées (depuis la projection) : sinon construites et découpées ici. */
+  diapos?: DonneesDiapo[]
+  progression?: (fait: number, total: number) => void
+}
+
+/** Ancien point d'entrée (lanceur) : PowerPoint sans annotations. */
+export function telechargerPptx(chapter: ChapterContent, choix: Pick<ChoixProjection, 'etapes' | 'inclure'>, progression?: (fait: number, total: number) => void): Promise<void> {
+  return telechargerProjection(chapter, choix, { format: 'pptx', progression })
+}
+
+/**
+ * PowerPoint ou PDF des diapos (état final, même découpage qu'à l'écran), avec ou sans annotations :
+ * - diapo annotée : l'image de fond et les zones de texte modifiables restent ; l'annotation est une image
+ *   transparente À PART (le professeur peut la supprimer) — deux images si la diapo est surlignée (le fluo,
+ *   sous les zones de texte ; le stylo, par-dessus) ;
+ * - pages de l'écran blanc : insérées juste après la diapo d'où elles ont été ouvertes, dans l'ordre, avec
+ *   leur fond (uni, quadrillé, repère gradué à l'échelle choisie) et leurs annotations (courbes comprises) ;
+ *   une page restée vierge et unie (écran blanc ouvert pour masquer) n'est pas exportée ;
+ * - PDF (16:9, une page par diapo) : fond en JPEG, annotations en PNG transparent par-dessus, textes simples en
+ *   texte INVISIBLE (sélectionnable, cherchable ; caractères latins seulement, sans police embarquée).
+ */
+export async function telechargerProjection(chapter: ChapterContent, choix: Pick<ChoixProjection, 'etapes' | 'inclure'>, options: OptionsExport = {}): Promise<void> {
+  const format = options.format ?? 'pptx'
+  const ann = options.annotations ?? null
+  const pages = new Map(ann?.pages ?? [])
   const hote = document.createElement('div')
   hote.className = 'projection-mesure'
   hote.setAttribute('aria-hidden', 'true')
   document.body.appendChild(hote)
   const racine = createRoot(hote)
   try {
-    const [{ default: PptxGenJS }, css] = await Promise.all([import('pptxgenjs'), cssAutonome()])
-    const finales = await new Promise<DonneesDiapo[]>((resolve) => racine.render(<Paginateur diapos={brutes} chapter={chapter} onFini={resolve} />))
-    const planche = await new Promise<HTMLElement>((resolve) => racine.render(<Planche diapos={finales} chapter={chapter} pret={resolve} />))
+    const [bibliotheque, css] = await Promise.all([format === 'pptx' ? import('pptxgenjs') : import('jspdf'), cssAutonome()])
+    const finales =
+      options.diapos ?? (await new Promise<DonneesDiapo[]>((resolve) => racine.render(<Paginateur diapos={construireDiapos(chapter, choix)} chapter={chapter} onFini={resolve} />)))
+    const elements: Element[] = []
+    finales.forEach((d, rang) => {
+      elements.push({ genre: 'diapo', d, page: cleDiapo(d.cle), rang })
+      let numero = 0
+      for (const p of ann?.blanches[d.cle] ?? []) if (pageBlancheUtile(p, pages)) elements.push({ genre: 'blanche', d, p, page: clePageBlanche(p.id), numero: ++numero })
+    })
+    const annote = elements.some((e) => e.genre === 'blanche' || (pages.get(e.page)?.length ?? 0) > 0)
+    const planche = await new Promise<HTMLElement>((resolve) => racine.render(<Planche elements={elements} pages={pages} chapter={chapter} pret={resolve} />))
     await document.fonts?.ready
     // Ateliers (module chargé à la demande, Web Component construit) et ajustement des diapos.
     await pause(finales.some((d) => d.type === 'atelier') ? 1500 : 500)
     await document.fonts?.ready
 
-    const pptx = new PptxGenJS()
-    pptx.layout = 'LAYOUT_16x9'
-    pptx.title = `${chapter.title} — projection`
-    pptx.subject = surtitreChapitre(chapter.level, chapter)
-    pptx.company = 'Chapitres de maths — FWB'
+    type Pptx = InstanceType<typeof import('pptxgenjs').default>
+    type Pdf = InstanceType<typeof import('jspdf').jsPDF>
+    let pptx: Pptx | null = null
+    let pdf: Pdf | null = null
+    if (format === 'pptx') {
+      const PptxGenJS = (bibliotheque as typeof import('pptxgenjs')).default
+      pptx = new PptxGenJS()
+      pptx.layout = 'LAYOUT_16x9'
+      pptx.title = `${texteBrut(chapter.title)} — projection${annote ? ' annotée' : ''}`
+      pptx.subject = surtitreChapitre(chapter.level, chapter)
+      pptx.company = 'Chapitres de maths — FWB'
+    } else {
+      const { jsPDF } = bibliotheque as typeof import('jspdf')
+      pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: [PDF_L, PDF_H], compress: true })
+      pdf.setProperties({ title: `${texteBrut(chapter.title)}${annote ? ' — annoté' : ''}`, subject: surtitreChapitre(chapter.level, chapter), creator: 'Chapitres de maths — FWB' })
+    }
 
-    const noeuds = Array.from(planche.querySelectorAll<HTMLElement>('.pptx-diapo > .diapo'))
-    for (let i = 0; i < noeuds.length; i++) {
-      progression?.(i + 1, noeuds.length)
-      const noeud = noeuds[i]
-      const d = finales[i]
-      const textes = textesNatifs(noeud)
-      const image = await rasteriser(noeud, css)
-      noeud.querySelectorAll('[data-pptx-natif]').forEach((e) => e.removeAttribute('data-pptx-natif'))
-      const diapo = pptx.addSlide()
-      diapo.background = { color: 'FBFAF7' }
-      const notes = d.notes.map(texteBrut).filter(Boolean)
-      diapo.addImage({ data: image, x: 0, y: 0, w: 10, h: 5.625, altText: notes.join(' — ').slice(0, 900) || chapter.title })
-      for (const t of textes) {
-        diapo.addText(t.runs, {
-          x: t.x * POUCE,
-          y: t.y * POUCE,
-          w: t.w * POUCE,
-          h: Math.max(t.h, t.taille * t.interligne) * POUCE,
-          fontSize: Math.round(t.taille * POINT * 10) / 10,
-          fontFace: t.police,
-          color: t.couleur,
-          bold: t.gras,
-          margin: 0,
-          valign: 'top',
-          lineSpacingMultiple: Math.round(t.interligne * 100) / 100,
-          bullet: t.puce ? { indent: 30 * POINT } : false,
-          isTextBox: true,
-        })
+    const blocs = Array.from(planche.children) as HTMLElement[]
+    for (let i = 0; i < elements.length; i++) {
+      options.progression?.(i + 1, elements.length)
+      const e = elements[i]
+      const bloc = blocs[i]
+      const cadre = bloc.querySelector<HTMLElement>('.pptx-diapo')!
+      const noeud = e.genre === 'diapo' ? cadre.querySelector<HTMLElement>('.diapo')! : cadre
+      const liste = pages.get(e.page) ?? []
+      const blanche = e.genre === 'blanche' ? e.p : null
+      const textes = e.genre === 'diapo' ? textesNatifs(noeud) : []
+      // PowerPoint : textes simples en zones de texte (masqués de l'image) ; PDF : tout dans l'image.
+      const fond = await rasteriser(noeud, css, { fond: '#fbfaf7', masquerNatifs: format === 'pptx' })
+      noeud.querySelectorAll('[data-pptx-natif]').forEach((n) => n.removeAttribute('data-pptx-natif'))
+      const { fluo, stylo } = liste.length ? await calques(liste, blanche, fond, bloc.querySelector<HTMLElement>('.pptx-calque'), css) : { fluo: null, stylo: null }
+      const notes = notesElement(e, liste)
+
+      if (pptx) {
+        const diapo = pptx.addSlide()
+        diapo.background = { color: e.genre === 'blanche' ? 'FFFFFF' : 'FBFAF7' }
+        diapo.addImage({ data: fond.toDataURL('image/png'), x: 0, y: 0, w: 10, h: 5.625, altText: notes.join(' — ').slice(0, 900) || texteBrut(chapter.title) })
+        if (fluo) diapo.addImage({ data: fluo.toDataURL('image/png'), x: 0, y: 0, w: 10, h: 5.625, altText: 'Annotations du professeur (surligneur)' })
+        for (const t of textes) {
+          diapo.addText(t.runs, {
+            x: t.x * POUCE,
+            y: t.y * POUCE,
+            w: t.w * POUCE,
+            h: Math.max(t.h, t.taille * t.interligne) * POUCE,
+            fontSize: Math.round(t.taille * POINT * 10) / 10,
+            fontFace: t.police,
+            color: t.couleur,
+            bold: t.gras,
+            margin: 0,
+            valign: 'top',
+            lineSpacingMultiple: Math.round(t.interligne * 100) / 100,
+            bullet: t.puce ? { indent: 30 * POINT } : false,
+            isTextBox: true,
+          })
+        }
+        if (stylo) diapo.addImage({ data: stylo.toDataURL('image/png'), x: 0, y: 0, w: 10, h: 5.625, altText: 'Annotations du professeur' })
+        diapo.addNotes(notes.join('\n'))
+      } else if (pdf) {
+        if (i > 0) pdf.addPage([PDF_L, PDF_H], 'landscape')
+        pdf.addImage(fond.toDataURL('image/jpeg', 0.88), 'JPEG', 0, 0, PDF_L, PDF_H, undefined, 'FAST')
+        if (fluo || stylo) {
+          // Une seule image d'annotation par page : surligneur cuit sur le fond (texte compris), puis stylo.
+          const [c, x] = toile()
+          if (fluo) x.drawImage(fluo, 0, 0)
+          if (stylo) x.drawImage(stylo, 0, 0)
+          pdf.addImage(c.toDataURL('image/png'), 'PNG', 0, 0, PDF_L, PDF_H, undefined, 'FAST')
+        }
+        for (const t of textes) {
+          const texte = versLatin1(t.runs.map((r) => r.text).join(''))
+          if (!texte.trim()) continue
+          const k = PDF_L / LARGEUR
+          pdf.setFont('helvetica', t.gras ? 'bold' : 'normal')
+          pdf.setFontSize(t.taille * k)
+          pdf.text(texte, t.x * k + (t.puce ? 30 * k : 0), t.y * k, { baseline: 'top', maxWidth: Math.max(10, (t.w - (t.puce ? 30 : 0)) * k), lineHeightFactor: t.interligne, renderingMode: 'invisible' })
+        }
       }
-      const titreDiapo = `${i + 1}. ${texteBrut(d.section.title)}`
-      diapo.addNotes([titreDiapo, ...notes].join('\n'))
       await pause(0)
     }
-    const blob = (await pptx.write({ outputType: 'blob' })) as Blob
-    downloadBlob(blob, `projection-${chapter.levelSlug}-${chapter.slug}.pptx`)
+    if (pptx) downloadBlob((await pptx.write({ outputType: 'blob' })) as Blob, nomFichier(chapter, annote, 'pptx'))
+    else if (pdf) downloadBlob(pdf.output('blob'), nomFichier(chapter, annote, 'pdf'))
   } finally {
     racine.unmount()
     hote.remove()
   }
+}
+
+/** Page PDF 16:9 en points (10 × 5,625 pouces, comme le PowerPoint). */
+const PDF_L = 720
+const PDF_H = 405
+
+/** Notes du présentateur : titre de la diapo, corrigé / réponse ; page blanche : sa place et ses courbes. */
+function notesElement(e: Element, liste: ElementAnnotation[]): string[] {
+  if (e.genre === 'diapo') return [`${e.rang + 1}. ${texteBrut(e.d.section.title)}`, ...e.d.notes.map(texteBrut).filter(Boolean)]
+  const courbes = liste
+    .filter((x): x is Courbe => x.genre === 'courbe')
+    .map((c) => {
+      const l = lireFonction(c.saisie, e.p.angle)
+      return `${c.nom}(x) = ${l.ok ? latexEnTexte(l.latex) : c.saisie}`
+    })
+  const fond = e.p.fond === 'repere' ? 'repère' : e.p.fond === 'quadrille' ? 'quadrillé' : 'uni'
+  return [`Page blanche ${e.numero} (${fond}) — après « ${texteBrut(e.d.section.title)} »`, ...courbes]
 }
