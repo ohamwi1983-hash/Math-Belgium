@@ -74,7 +74,7 @@ export function correctionDetailleeSansAbs(e: E): EtapeCorrection[] {
     const L: LigneCalcul[] = [];
     for (const tm of [t1, t2]) {
       const s = signe(e, tm, i);
-      L.push(ligne(`\\left|${interieurL(tm)}\\right|=${s > 0 ? interieurL(tm) : affineL(-tm.a, -tm.b)}`, s > 0 ? `${interieurL(tm).replace(/-/g, "−")} ≥ 0 ici` : `${interieurL(tm).replace(/-/g, "−")} < 0 ici`));
+      L.push(ligne(`\\left|${interieurL(tm)}\\right|=${s > 0 ? interieurL(tm) : affineL(-tm.a, -tm.b)}`, [f(`${interieurL(tm)}${s > 0 ? "\\geq" : "<"}0`), t(" sur cet intervalle")]));
     }
     const remplace = `${termeRemplace(t1, signe(e, t1, i), true)}${termeRemplace(t2, signe(e, t2, i), false)}${e.k === 0 ? "" : e.k > 0 ? `+${e.k}` : `${e.k}`}`;
     L.push(ligne(`f(x)=${remplace}`, "on remplace chaque valeur absolue"));

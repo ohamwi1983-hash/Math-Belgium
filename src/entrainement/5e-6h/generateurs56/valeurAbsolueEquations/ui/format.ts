@@ -1,6 +1,7 @@
 import { lx, tx } from "../../../../5e-4h/ui5e/ecransTrigo.types";
 import type { AideEcran, Frag, ModeEcran, OptionEcran } from "../../../../5e-4h/ui5e/ecransTrigo.types";
 import { lireEnsemble, RACCOURCIS_ENSEMBLE } from "../../../../5e-4h/moteur5e/ensemblesReels";
+import { lireValeur } from "../../../../5e-4h/moteur5e/lectureValeurTrigo";
 import { ensembleXL, nombreExactL } from "../../communReels/ensemblesExacts";
 import { qL } from "../../communReels/outilsReels";
 import type { ExerciceAbsolue, PhaseAbsolue, SorteOption } from "../core/types";
@@ -100,6 +101,8 @@ export function versEnsembleTexte(texte: string): string {
   const s = texte.trim();
   const morceaux = s.split(/\s+ou\s+|\s*;\s*|\s*,\s+/);
   if (morceaux.length >= 1 && morceaux.every((m) => /^x\s*=\s*\S/.test(m))) return `{${morceaux.map((m) => m.replace(/^x\s*=\s*/, "")).join(" ; ")}}`;
+  // Nombres seuls (« 3 », « −2 ; 5 ») : lus comme l'ensemble de ces nombres (réponse lisible, jugée).
+  if (morceaux.length >= 1 && morceaux.every((m) => !/[[\]{}∪∅ℝ∞]/.test(m) && lireValeur(m) !== null)) return `{${morceaux.join(" ; ")}}`;
   return s;
 }
 
