@@ -1,4 +1,4 @@
-import type { ChapterSection } from '../../../types'
+import type { ChapterSection, FormulaireGroupe } from '../../../types'
 
 /**
  * 5e (6h) — Nombres réels et suites, partie « Les suites ».
@@ -67,3 +67,9 @@ export const sectionsSuites: ChapterSection[] = [
     ],
   },
 ]
+
+/** Puces de « Ce qu'il faut retenir » de cette partie (KaTeX, voir content-authoring.md « Synthèses en KaTeX »). */
+export const recapItemsSuites: string[] = []
+
+/** Groupes du formulaire de fin de chapitre pour cette partie (formules utiles aux générateurs). */
+export const formulaireGroupesSuites: FormulaireGroupe[] = []

@@ -1,7 +1,7 @@
 import type { ChapterContent } from '../../types'
-import { sectionsReels } from './nombres-reels-suites/partie-reels'
-import { sectionsSuites } from './nombres-reels-suites/partie-suites'
-import { sectionsFinance } from './nombres-reels-suites/partie-finance'
+import { sectionsReels, recapItemsReels, formulaireGroupesReels } from './nombres-reels-suites/partie-reels'
+import { sectionsSuites, recapItemsSuites, formulaireGroupesSuites } from './nombres-reels-suites/partie-suites'
+import { sectionsFinance, recapItemsFinance, formulaireGroupesFinance } from './nombres-reels-suites/partie-finance'
 
 /**
  * 5e (6h), chapitre 1 — Nombres réels et suites (avec l'algèbre financière comme application des suites).
@@ -20,7 +20,9 @@ export const nombresReelsSuites: ChapterContent = {
     'Des nombres qui ne sont pas des fractions jusqu’au remboursement d’un crédit : les réels, les suites ' +
     'arithmétiques et géométriques, leurs limites, et leur application aux intérêts et aux emprunts.',
   sections: [...sectionsReels, ...sectionsSuites, ...sectionsFinance],
+  formulaire: { groups: [...formulaireGroupesReels, ...formulaireGroupesSuites, ...formulaireGroupesFinance] },
   recap: {
-    items: ['Synthèse en cours de rédaction.'],
+    items: [...recapItemsReels, ...recapItemsSuites, ...recapItemsFinance],
+    // entrainement : quiz 56gen13 (posé par le chantier D).
   },
 }
