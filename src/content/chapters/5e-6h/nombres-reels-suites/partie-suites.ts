@@ -70,6 +70,13 @@ export const sectionsSuites: ChapterSection[] = [
     partie: 'Les suites',
     blocks: [
       { kind: 'para', text: 'Étape en cours de rédaction.' },
+      {
+        kind: 'atelier',
+        tag: 'serie-harmonique-widget',
+        label: 'Manipule toi-même : la série harmonique diverge',
+        caption:
+          'Groupe les termes 1⁄n par paquets de 1, 2, 4, 8… termes : chaque paquet vaut au moins 1⁄2 (Oresme). Les sommes partielles dépassent donc n’importe quel nombre, très lentement : il faut 12 367 termes pour dépasser 10.',
+      },
       // ⟨fin-etape sommes-infinies⟩
     ],
   },

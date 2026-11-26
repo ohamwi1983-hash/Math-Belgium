@@ -255,6 +255,7 @@ export type InteractiveWidgetTag =
   | 'valeur-absolue-distance-widget'
   | 'phi-intervalles-widget'
   | 'calculatrice-prudence-widget'
+  | 'serie-harmonique-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

@@ -255,6 +255,7 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'valeur-absolue-distance-widget': () => import('../../interactive/register-valeur-absolue-distance-widget.js'),
   'phi-intervalles-widget': () => import('../../interactive/register-phi-intervalles-widget.js'),
   'calculatrice-prudence-widget': () => import('../../interactive/register-calculatrice-prudence-widget.js'),
+  'serie-harmonique-widget': () => import('../../interactive/register-serie-harmonique-widget.js'),
 }
 
 /**
