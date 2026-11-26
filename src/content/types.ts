@@ -257,6 +257,7 @@ export type InteractiveWidgetTag =
   | 'calculatrice-prudence-widget'
   | 'serie-harmonique-widget'
   | 'fractales-widget'
+  | 'simple-compose-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

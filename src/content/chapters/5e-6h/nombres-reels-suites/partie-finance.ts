@@ -15,6 +15,13 @@ export const sectionsFinance: ChapterSection[] = [
     partie: 'Algèbre financière',
     blocks: [
       { kind: 'para', text: 'Étape en cours de rédaction.' },
+      {
+        kind: 'atelier',
+        tag: 'simple-compose-widget',
+        label: 'Manipule toi-même : intérêt simple ou intérêts composés ?',
+        caption:
+          'Pour 10 000 € placés, la valeur acquise à intérêt simple suit une droite, celle à intérêts composés une courbe. Elles se croisent au bout d’un an : avant, l’intérêt simple rapporte un peu plus ; après, les intérêts composés l’emportent. Augmente le taux pour mieux voir l’écart.',
+      },
       // ⟨fin-etape interets⟩
     ],
   },
