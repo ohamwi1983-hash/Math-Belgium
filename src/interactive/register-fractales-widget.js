@@ -1,0 +1,1 @@
+import './fractales-widget.js'

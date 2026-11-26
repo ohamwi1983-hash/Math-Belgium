@@ -355,6 +355,12 @@ export const sectionsFinance: ChapterSection[] = [
         description: ['Calcule une valeur acquise ou une valeur actuelle à intérêts composés, retrouve le taux par une racine n-ième, cherche une durée par la table de la calculatrice (doublement compris) et traite une durée non entière avec la convention des banques.'],
         chantier: '5e-6h',
         whereLabel: '5e (6h) → « 25. Intérêts composés »',
+      {
+        kind: 'atelier',
+        tag: 'simple-compose-widget',
+        label: 'Manipule toi-même : intérêt simple ou intérêts composés ?',
+        caption:
+          'Pour 10 000 € placés, la valeur acquise à intérêt simple suit une droite, celle à intérêts composés une courbe. Elles se croisent au bout d’un an : avant, l’intérêt simple rapporte un peu plus ; après, les intérêts composés l’emportent. Augmente le taux pour mieux voir l’écart.',
       },
       // ⟨fin-etape interets⟩
     ],
@@ -703,6 +709,12 @@ export const sectionsFinance: ChapterSection[] = [
         description: ['Calcule la valeur acquise d’une suite de versements (au moment du dernier ou une période après), la valeur actuelle d’un remboursement, ou retrouve le montant des versements, avec des versements en début ou en fin de période ; le corrigé dessine la ligne du temps.'],
         chantier: '5e-6h',
         whereLabel: '5e (6h) → « 27. Annuités : placement et remboursement »',
+      {
+        kind: 'atelier',
+        tag: 'ligne-temps-annuites-widget',
+        label: 'Manipule toi-même : la ligne du temps des annuités',
+        caption:
+          'Règle le versement, leur nombre et le taux, puis choisis la date d’évaluation : chaque versement est capitalisé (flèche vers la droite, × (1 + i) par période) ou actualisé (vers la gauche, × (1 + i)⁻¹). La somme des valeurs donne Vₙ, V₀ ou Vₙ(1 + i).',
       },
       // ⟨fin-etape annuites⟩
     ],
@@ -917,6 +929,12 @@ export const sectionsFinance: ChapterSection[] = [
         description: ['Lis une situation d’épargne ou d’emprunt, reconnais le type de problème (intérêt simple, intérêts composés, taux équivalent, annuités, mensualité), la grandeur cherchée et la formule à utiliser, sans faire le calcul.'],
         chantier: '5e-6h',
         whereLabel: '5e (6h) → « 23. Quelle formule ? Reconnaître le problème financier »',
+      {
+        kind: 'atelier',
+        tag: 'simulateur-credit-widget',
+        label: 'Manipule toi-même : simulateur de crédit',
+        caption:
+          'Règle le capital emprunté, le TAEG et la durée : le simulateur calcule le taux mensuel équivalent, la mensualité et le coût du crédit. Les barres montrent, mois après mois, la part d’intérêts (qui diminue) et la part de capital remboursé (qui augmente) ; le tableau d’amortissement détaille chaque ligne.',
       },
       // ⟨fin-etape credit⟩
     ],

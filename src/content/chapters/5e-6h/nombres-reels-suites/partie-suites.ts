@@ -361,6 +361,12 @@ export const sectionsSuites: ChapterSection[] = [
         ],
         chantier: '5e-6h',
         whereLabel: '5e (6h) → « Suite récurrente affine et régime permanent »',
+      {
+        kind: 'atelier',
+        tag: 'calculatrice-prudence-widget',
+        label: 'Manipule toi-même : calculatrice… prudence !',
+        caption:
+          'La suite définie par u₁ = 1⁄7 et uₙ₊₁ = 29uₙ − 4 est constante : 29 · 1⁄7 − 4 = 1⁄7. Mais si on tape u₁ arrondi à k décimales, l’écart avec 1⁄7 est multiplié par 29 à chaque pas, et les termes calculés finissent par s’envoler, même avec quinze décimales.',
       },
       // ⟨fin-etape definir-suite⟩
     ],
@@ -1601,6 +1607,19 @@ export const sectionsSuites: ChapterSection[] = [
         ],
         chantier: '5e-6h',
         whereLabel: '5e (6h) → « Détective d’erreurs : suites »',
+      {
+        kind: 'atelier',
+        tag: 'serie-harmonique-widget',
+        label: 'Manipule toi-même : la série harmonique diverge',
+        caption:
+          'Groupe les termes 1⁄n par paquets de 1, 2, 4, 8… termes : chaque paquet vaut au moins 1⁄2 (Oresme). Les sommes partielles dépassent donc n’importe quel nombre, très lentement : il faut 12 367 termes pour dépasser 10.',
+      },
+      {
+        kind: 'atelier',
+        tag: 'fractales-widget',
+        label: 'Manipule toi-même : flocon de von Koch et triangle de Sierpinski',
+        caption:
+          'Avance étape par étape. Le flocon de von Koch a une aire qui tend vers 2√3⁄5 (pour un triangle de départ de côté 1) et un périmètre qui tend vers +∞ ; le triangle de Sierpinski a une aire qui tend vers 0 et un périmètre total qui tend vers +∞. Le panneau écrit les suites géométriques qui le prouvent.',
       },
       // ⟨fin-etape sommes-infinies⟩
     ],

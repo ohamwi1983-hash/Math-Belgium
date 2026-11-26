@@ -661,6 +661,12 @@ export const sectionsReels: ChapterSection[] = [
         description: ['Dis si des énoncés avec ∀ et ∃ sont vrais ou faux (l’ordre compte), écris leur négation, puis retrouve quel axiome justifie chaque étape d’un calcul : associativité, distributivité, neutre, symétrique, compatibilité de ≤…'],
         chantier: '5e-6h',
         whereLabel: '5e (6h) → « 17. Énoncés quantifiés et axiomes »',
+      {
+        kind: 'atelier',
+        tag: 'phi-intervalles-widget',
+        label: 'Manipule toi-même : des intervalles emboîtés autour de Φ',
+        caption:
+          'Les rapports de deux termes consécutifs de la suite de Fibonacci (1, 2, 3⁄2, 5⁄3, 8⁄5…) tombent tour à tour sous Φ et au-dessus. Deux rapports consécutifs forment un intervalle qui contient Φ, emboîté dans le précédent et de plus en plus court. Agrandis la droite (×10, ×100…) pour suivre les intervalles : aucun rationnel n’est dans tous, seul Φ, irrationnel, l’est.',
       },
       // ⟨fin-etape axiomes⟩
     ],
@@ -1005,6 +1011,12 @@ export const sectionsReels: ChapterSection[] = [
         description: ['Écris une expression comme |x − a| + |bx + c| par morceaux : zéros, tableau, expression réduite sur chaque intervalle, contrôle aux bornes.'],
         chantier: '5e-6h',
         whereLabel: '5e (6h) → « 19. Écrire sans valeur absolue »',
+      {
+        kind: 'atelier',
+        tag: 'valeur-absolue-distance-widget',
+        label: 'Manipule toi-même : valeur absolue et distance sur la droite',
+        caption:
+          'Règle a et r, choisis le symbole (<, ≤, >, ≥ ou =) : les solutions de |x − a| ◇ r s’allument sur la droite et s’écrivent en intervalles. Fais glisser le point x pour lire sa distance à a. Essaie aussi r = 0 et r négatif : une distance n’est jamais négative.',
       },
       // ⟨fin-etape valeur-absolue⟩
     ],
@@ -1233,6 +1245,12 @@ export const sectionsReels: ChapterSection[] = [
         description: ['Applique l’algorithme de Héron à √A depuis un premier rectangle : termes successifs, encadrements, nombre d’étapes pour une précision donnée (menu Récurrence), puis la méthode des puissances pour approcher √p par une fraction.'],
         chantier: '5e-6h',
         whereLabel: '5e (6h) → « 20. Héron et encadrements successifs »',
+      {
+        kind: 'atelier',
+        tag: 'heron-rectangles-widget',
+        label: 'Manipule toi-même : les rectangles de Héron',
+        caption:
+          'Tous les rectangles ont la même aire A ; la longueur suivante est la moyenne des deux côtés. Les rectangles se rapprochent du carré de côté √A, et chacun encadre √A entre sa largeur et sa longueur. Les chiffres communs aux deux bornes, donc sûrs, sont en vert : leur nombre double à peu près à chaque étape.',
       },
       // ⟨fin-etape approcher-densite⟩
     ],

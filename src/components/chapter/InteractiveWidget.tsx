@@ -251,6 +251,15 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'point-aberrant-widget': () => import('../../interactive/register-point-aberrant-widget.js'),
   'jusqu-ou-prevoir-widget': () => import('../../interactive/register-jusqu-ou-prevoir-widget.js'),
   'changer-unites-widget': () => import('../../interactive/register-changer-unites-widget.js'),
+  'heron-rectangles-widget': () => import('../../interactive/register-heron-rectangles-widget.js'),
+  'valeur-absolue-distance-widget': () => import('../../interactive/register-valeur-absolue-distance-widget.js'),
+  'phi-intervalles-widget': () => import('../../interactive/register-phi-intervalles-widget.js'),
+  'calculatrice-prudence-widget': () => import('../../interactive/register-calculatrice-prudence-widget.js'),
+  'serie-harmonique-widget': () => import('../../interactive/register-serie-harmonique-widget.js'),
+  'fractales-widget': () => import('../../interactive/register-fractales-widget.js'),
+  'simple-compose-widget': () => import('../../interactive/register-simple-compose-widget.js'),
+  'ligne-temps-annuites-widget': () => import('../../interactive/register-ligne-temps-annuites-widget.js'),
+  'simulateur-credit-widget': () => import('../../interactive/register-simulateur-credit-widget.js'),
 }
 
 /**

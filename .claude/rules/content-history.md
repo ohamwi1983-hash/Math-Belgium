@@ -6664,3 +6664,63 @@ brut Unicode ; étiquette de `referenceLine` longue (« Φ ≈ 1,618 », « 533,
 `controle:lecture` ; page (Vite de développement) à 390 / 1 280 px, clair / sombre, carte, étapes 6–10 tiroirs ouverts
 et Réviser : 0 `$`, 0 `[[`, 0 astérisque, 0 notation clavier, 0 `.katex-error`, 0 débordement, 0 formule qui défile,
 0 erreur console ; figures capturées et relues (`scratchpad/56-B/figs/`).
+## 5e (6h), Nombres réels et suites — neuf ateliers nouveaux (chantier G, 26/11/2026)
+
+Neuf Web Components (Shadow DOM) dans `src/interactive/`, chacun posé par un bloc `atelier` juste avant le marqueur
+`// ⟨fin-etape …⟩` de son étape (le cours est rédigé en parallèle par les chantiers A, B, C ; fusion par le
+coordinateur). Nouveau module `nombres-reels-suites-commun.js` : écritures à la belge (`nb`, `nbFixe`, `texNb`,
+`euros` « 10 340,04 € », `pct` « 3,5 % », espace fine des milliers dès 4 chiffres), exposants / indices Unicode,
+notation scientifique (`texSci`, `txtSci` : « 2,6 · 10²⁶ »), droite graduée à fenêtre FIXE avec flèche
+(`droiteGraduee`), `insecables(racine)` (espace ordinaire avant « : ; ? ! » et dans « … » → U+00A0, hors KaTeX,
+appelé à la fin de chaque rendu : `_rendre()` = `_dessiner()` + `insecables`), styles `CSS_RS`. Le reste vient des
+modules partagés (`katex-shadow.js`, curseurs − / + de `variables-aleatoires-commun.js`, `CSS_LIEUX`, `repereStat`
+de `statistique-deux-variables-commun.js`). Retours du professeur appliqués : flèches d'axes, fenêtres FIXES (un zoom
+ou une échelle est un CHOIX de l'élève parmi des fenêtres fixes, jamais recalé sur un paramètre), jetons du thème
+clair / sombre, Unicode en exposant, aucune notation clavier visible (« 1⁄7 » avec U+2044, jamais « 1/7 »), cibles
+≥ 44 px, curseurs et boutons au clavier, figure principale seule dans sa `<svg>` (épinglage et projection).
+- **`phi-intervalles-widget`** (étape 3, axiomes) : rapports rₖ = Fₖ₊₁/Fₖ ajoutés un à un (vert sous Φ, rouge
+  au-dessus), intervalles Iₖ = [rₖ ; rₖ₊₁] empilés (six derniers), longueur 1/(FₖFₖ₊₁) ; zoom ×1 à ×10 000 (fenêtres
+  fixes centrées sur Φ, demi-largeur 0,7/10ᶻ), compte des rapports hors cadre, message quand l'intervalle est plus
+  court que 3 px. Rappel en note : I₁, I₃, I₅, I₇ = les intervalles du cours.
+- **`valeur-absolue-distance-widget`** (étape 4) : droite −10…10, a (−6…6), r (−2…6), x glissé au doigt ou au
+  curseur (pas 0,5) ; symboles < ≤ = ≥ > ; solutions en vert (bornes pleines / creuses), crochets « r » de part et
+  d'autre de a, distance de x à a mesurée ; chaîne d'équivalences et S en intervalles ; cas r = 0 ({a}, ∅, ℝ, ℝ∖{a})
+  et r < 0 (∅ ou ℝ : « une distance n'est jamais négative »).
+- **`heron-rectangles-widget`** (étape 5) : A (2…60), a₁ (pas 0,5, avec A/a₁ ≤ 8 pour tenir dans le cadre FIXE
+  12 × 8), rectangles successifs et carré √A en pointillés ; tableau des bornes à 10⁻⁹ près (inférieure par
+  défaut, supérieure par excès : l'encadrement affiché reste vrai), chiffres communs aux deux bornes en vert ;
+  quand les côtés ne diffèrent plus qu'au-delà de la 12ᵉ décimale, le widget le dit sans prétendre qu'ils sont
+  égaux (la longueur reste au-dessus de √A). √18 depuis 9 × 2 : 5,5 ; 4,386 ; 4,24500 ; 4,2426413 / 4,2426400 (cours).
+- **`calculatrice-prudence-widget`** (étape 6) : u₁ = 1/7 arrondi à k décimales (1…15), uₙ₊₁ = 29uₙ − 4, calcul
+  EXACT en BigInt (Mₙ₊₁ = 29Mₙ − 4·10ᵏ ; un calcul en flottants ajouterait sa propre erreur, elle aussi multipliée
+  par 29) ; graphique fixe (n 0…20, u −0,4…0,7), termes hors cadre en triangles au bord ; tableau des termes et des
+  écarts eₙ = 29ⁿ⁻¹e₁ ; premier terme à plus de 0,01 de 1/7 : n = 3 (k = 3), 5 (k = 6), 11 (k = 15).
+- **`serie-harmonique-widget`** (étape 10) : vue « Paquets » (colonnes 0…10, termes empilés, ligne 1/2) et vue
+  « Sommes partielles » (n 0…1 024, paliers 1 + k/2 en n = 2ᵏ) ; H₁₀₂₄ ≈ 7,5092 ≥ 6 ; paquets ≈ 0,5833 ; 0,6345 ;
+  … ; 0,6927 ; seuils 4, 31, 12 367 termes pour dépasser 2, 4, 10.
+- **`fractales-widget`** (étape 10) : von Koch et Sierpinski, étapes 0…6, côté 1 ; tableaux nombre / côté /
+  périmètre (fractions exactes) / aire ; Koch Aₙ = A₀(1 + 3/5(1 − (4/9)ⁿ)) → 2√3/5 ≈ 0,6928, Pₙ = 3(4/3)ⁿ ;
+  Sierpinski Aₙ = A₀(3/4)ⁿ → 0, périmètre total 3(3/2)ⁿ, aire retirée = A₀.
+- **`simple-compose-widget`** (étape 11) : 10 000 €, taux 1 %…25 % (pas 0,5), durée 0…36 mois ; vue « Valeurs
+  acquises » (repère fixe 0…3 ans × 10 000…20 000 €, zone verte sur ]0 ; 1[) et vue « Écart » simple − composés,
+  trois échelles fixes au choix (±250, ±25, ±2,5 €), message si l'écart est trop petit ou sort du cadre ; tableau
+  1 mois / 6 mois / 1 an / 2 ans / 3 ans (3 % : 10 025,00 / 10 024,66… comme le cours ; écart maximal 1,11 €).
+- **`ligne-temps-annuites-widget`** (étape 13) : a (100…3 000), n (1…10), i (0,5…10 %), date d'évaluation 0, n ou
+  n + 1 ; arcs de capitalisation au-dessus (vers la droite), d'actualisation en dessous ; ligne fixe 0…11 ;
+  tableau versement par versement (somme sans arrondi intermédiaire) = formule du cours. Préréglages : 1 200 €,
+  5 ans, 3 % → Vₙ ≈ 6 370,96 € ; 2 000 €, 4 ans, 4 % → V₀ ≈ 7 259,79 €.
+- **`simulateur-credit-widget`** (étape 14) : C (500…30 000), TAEG (0,5…15 %, pas 0,1), n (6…84 mois) ; taux mensuel,
+  mensualité arrondie au centime, total, coût = n × mensualité arrondie − C (le coût avec la mensualité exacte,
+  somme de la colonne des intérêts, est signalé : 340,04 / 340,09 € pour l'exemple du cours) ; barres empilées en %
+  de la mensualité (repère fixe 0…84 mois × 0…100 %) ; tableau d'amortissement déroulant, sans arrondi intermédiaire.
+Vérifié (Vite, vraie page du chapitre, atelier ouvert dans son panneau, iPhone 13 390 × 664 et 1 280 px, clair et
+sombre : 36 combinaisons, chacune avec un scénario d'interaction réelle — boutons, curseurs, glisser au doigt pour x
+dans l'atelier de la valeur absolue) : 0 erreur console, scrollWidth = largeur, 0 `.katex-error` ni commande KaTeX
+inconnue (texte rouge), 0 KaTeX qui déborde, 0 étiquette SVG rognée, texte visible sans `$ ^ \ / * <= >= sqrt NaN
+undefined Infinity [[`, `aria-label` sans `\ { } _ ^`. Valeurs recoupées par un recalcul indépendant
+(`scratchpad/56-G/calculs.py`, fractions exactes) : Héron √18 (cinq rectangles), termes ũₙ pour k = 3, 6, 15, Hₙ
+et paquets, aires et périmètres des deux fractales (n ≤ 6), simple / composé à 3, 10, 25 %, annuités (6 370,96 ;
+6 562,09 ; 5 495,65 ; 7 259,79 ; détail par versement), crédits (10 000 € 6,4 % 12 mois : 861,67, 340,04 / 340,09,
+trois premières lignes ; 15 000 € 5 % 48 mois : 344,69, 1 545,12 / 1 544,90). Épinglage dans le panneau
+(`chapitre-retouches/ateliers.cjs`) : 9 / 9 épinglés, 0 KO à 390 × 664 et 375 × 667. Captures et scripts :
+`scratchpad/56-G/` (`final/`, `cap/`, `tout.sh`, `ouvrir.cjs`, `act-*.cjs`).

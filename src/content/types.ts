@@ -251,6 +251,15 @@ export type InteractiveWidgetTag =
   | 'point-aberrant-widget'
   | 'jusqu-ou-prevoir-widget'
   | 'changer-unites-widget'
+  | 'heron-rectangles-widget'
+  | 'valeur-absolue-distance-widget'
+  | 'phi-intervalles-widget'
+  | 'calculatrice-prudence-widget'
+  | 'serie-harmonique-widget'
+  | 'fractales-widget'
+  | 'simple-compose-widget'
+  | 'ligne-temps-annuites-widget'
+  | 'simulateur-credit-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }
