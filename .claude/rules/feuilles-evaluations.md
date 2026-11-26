@@ -4720,3 +4720,92 @@ clair et 1 280 px sombre, 6 à 9 exercices par générateur, juste / faux / épu
 0 erreur console, 0 `.katex-error`, 0 « $ » visible, saisie illisible refusée sans tentative, champs vides au nouvel
 exercice. Documents réels (évaluation 2 séries + aménagée + corrigé + grille, feuille + aménagée, Word copie / corrigé /
 grille) : 0 `.katex-error`, 0 débordement à 680 (impression) / 820 / 1 280 px.
+
+## 5e (6h), « Les nombres réels » — 56gen14–56gen19 (nouveaux, notés, chantier E1, 26/11/2026)
+
+Convention de dossier du chantier D (`5e-6h/App56genN.tsx`, code propre au générateur dans
+`5e-6h/generateurs56/<nom>/{core,moteur,ui}/`, `corrigeDetaille.ts`, `exportEvaluation.ts`). Socle d'écrans du 5e
+(`AppEcransTrigo` + `DefinitionEcrans`, SANS modification) : choix fermés jugés ✗ / ✓ et figés (`bonneOption`),
+`piegeChoixRevele`, `aidesChoixDeuxNiveaux`, champs à trois tentatives, saisie illisible et forme à reprendre
+(`aReprendre`) ou valeur approchée (`approchee`) refusées SANS tentative, corrigé « comme au tableau » après chaque
+réponse, `?code=` par `genererAvecCode` avec les fonctions de l'adaptateur. En-tête « 5e (6h) — Entraînement » /
+« Nombres réels et suites » (jamais de numéro de chapitre). Renvois du corrigé « (cours, étape n) » (les sections du
+chapitre sont des étapes). Modules communs `generateurs56/communReels/` : `outilsReels.ts` (tirages, facteurs premiers
+`decomposer` / `decompositionL` / `decompositionTexte`, LECTURE d'une décomposition `lireDecomposition` — « 2³ · 3² »,
+« 2^3*3^2 », « 2 · 2 · 2 · 3 · 3 », préfixe « 72 = » —, racines simplifiées, rationnels), `corrigeReels.ts`
+(`lignesDecomposition` : une division par ligne, arrêt dès que le reste est premier, puis regroupement),
+`ensemblesExacts.ts` (ensembles à bornes EXACTES — rationnels, ±c√r — écrits en KaTeX : ∅, ℝ, ℝ∖{a}, {a ; b},
+réunions ; conversion vers `5e-4h/moteur5e/ensemblesReels.ts`, qui lit la saisie et compare ; `nombreExactL` pour
+l'aperçu). Exposants tapés par boutons « ² … ⁹ » (jamais de « ^ » visible), placeholders sans notation clavier.
+
+- **56gen14 « Rationnel ou irrationnel ? »** (étape 1, Connaître) : quatre nombres, un choix fermé par nombre (ℕ, ℤ,
+  ℚ, ℝ∖ℚ, ordre fixe). L'ensemble de CHAQUE nombre est tiré au quart AVANT le nombre, indépendamment (pas de
+  déduction par élimination) ; gabarits par famille et par ensemble (`core/nombres.ts`) : racines
+  (√(9/4), √8·√2, √50/√2, ∛(−27), √0,49, √n, ∛n, √(2/9)…), écritures (fraction égale à un entier, (−2)⁴, 3,7·10²,
+  k,(9) = k + 1, 0,(12), 3·10⁻⁶, −12,03, 22/7, 2⁻³, 0,101001000…, 0,123456789101112…, 1,1223334444…), expressions
+  ((√a)², (√a − √b)(√a + √b), (1 + √a)² − 2√a, √12 − √3…) et constantes (valeurs remarquables, sin²α + cos²α, π,
+  π/2, Φ, Φ² − Φ, Φ(Φ − 1)…). Variantes : les quatre familles + `melange` (tirage libre). Au moins une écriture
+  « déguisée » par exercice (sinon retiré : 1 / 256) → piège CONSTANT 1. Papier : consigne + quatre VRAIES questions
+  a)–d) (non regroupé). Profil `forme` = variante, `calcul: 'exacte'` (la Graph Math+ affiche la forme simplifiée).
+  Niveau 3 · 10 min partout.
+- **56gen15 « Démontrer qu'un nombre est irrationnel »** (étape 1, Appliquer) : ᵏ√N en cinq écrans (hypothèse
+  ᵏ√N = m/n — choix —, mᵏ = ?·nᵏ — champ —, décomposition de N — champ, juste en valeur mais facteur non premier = à
+  reprendre —, exposants — choix —, conclusion — choix). Verdict irrationnel / naturel à 50/50 AVANT N, N dans la même
+  plage pour les deux verdicts (carree 12–200, grande 200–1 000, cubique 16–1 000), jamais premier ; textes d'options
+  FIXES, mêmes écrans dans les deux verdicts. Papier : « Le nombre √N est-il rationnel ou irrationnel ? Démontre ta
+  réponse. » ; regroupé (« Chacun des nombres suivants… »). Pas de `calcul` (on démontre). Niveau 3 · 12 min
+  (méthode 1, `sansCharge`) dans les deux verdicts.
+- **56gen16 « Écriture décimale et fraction »** (étape 2, Appliquer) : `diviser` (fraction périodique, période ≤ 6
+  chiffres ; écriture tapée « 0,2(428571) », affichée avec la barre du cours, comparée en VALEUR exacte ; écriture
+  coupée « … » à reprendre ; longueur de la période — lecture — ; borne n − 1 par les restes — choix —) ;
+  `versFraction` (0 à 2 chiffres avant la période, période minimale de 1 à 3 chiffres ; multiples 10ᵏ⁺ᵖx et 10ᵏx —
+  choix —, différence, fraction irréductible ; une fois sur six période « 9 » : 7,07(9) = 177/25, `forme`
+  `versFraction-neuf`, piège 1) ; `critere` (verdict limitée / périodique à 50/50 AVANT la fraction ; fraction donnée
+  TOUJOURS réductible, facteur commun pris dans la même liste pour les deux verdicts — piège constant 1 ;
+  simplification, décomposition du dénominateur, verdict à trois options dont « illimitée non périodique »).
+  Regroupé (une consigne par variante). Niveaux : diviser 1 · 7, versFraction 2 · 8 (neuf 3 · 8), critere 3 · 8
+  (deux verdicts).
+- **56gen17 « Énoncés quantifiés et axiomes »** (étape 3, Connaître) : `quantifies` — deux énoncés vrai / faux (verdict
+  de chacun à 50/50 AVANT l'énoncé ; la FORME — ∀x ∃y, ∃y ∀x, ∀, ∃ — est tirée indépendamment du verdict : sans cela,
+  « ∃y ∀x » était faux 82 fois sur 100 ; 19 prédicats à deux quantificateurs avec leurs deux ordres, 11 énoncés à un
+  quantificateur ; témoin ou contre-exemple au corrigé) puis la négation d'un troisième (quatre options mélangées une
+  fois : juste / condition seule niée / quantificateurs seuls / ordre inversé) ; `axiomes` — huit gabarits de calcul
+  numérotés (associativité, commutativité, neutre, symétrique, distributivité, définitions de la soustraction et de
+  la division, axiomes de l'ordre) : l'axiome de chaque étape (bonne réponse + trois leurres, deux de la même famille).
+  Non regroupé. Niveaux 3 · 8 (quantifies, tous verdicts), 2 · 8 (axiomes).
+- **56gen18 « Équations et inéquations avec valeurs absolues »** (étape 4, Appliquer) : `equation` |ax + b| = c et
+  `inequation` |ax + b| ⋚ c — signe de c (négatif, nul, positif) tiré au tiers AVANT les nombres, symbole au quart —,
+  `deuxAbsolues` |ax + b| = |cx + d| (cas A = B, A = −B, réunion), `carre` |x² − k| ⋚ c (1 ≤ c < k : bornes ±√(k − c),
+  ±√(k + c) simplifiées). Écran « traduction » (choix fermé, quatre options prises dans une liste canonique selon le
+  cas — le signe de c est visible dans l'énoncé), puis l'ensemble des solutions tapé librement ({−3 ; 7}, ]1 ; 4] ∪ …,
+  ℝ ∖ {2}, ∅, « x = 3 ou x = −5 » lu comme {3 ; −5}, bornes avec √). Valeur décimale proche d'une solution exacte :
+  approchée, sans tentative. Papier « Résous dans ℝ : … » ; regroupé (« chaque équation » / « chaque inéquation »).
+  `forme` = variante (+ « petit » / « grand » pour les inéquations), jamais le signe de c. Niveaux 3 · 6 (equation,
+  inequation dans les trois signes, carre), 2 · 8 (deuxAbsolues).
+- **56gen19 « Écrire sans valeur absolue »** (étape 4, Appliquer) : α|x − p| + β|bx + c| + k (`somme`, `difference`,
+  `coefficient`), zéros distincts à au moins 1 d'écart, morceaux voisins jamais identiques. Écrans : zéros rangés (deux
+  champs ; zéros échangés : message ciblé), puis l'expression réduite sur x < z₁, z₁ ≤ x < z₂, x ≥ z₂ (lecture
+  `polynomeSaisi` ; juste mais non réduite ou avec parenthèses : à reprendre ; « 0 » accepté). Corrigé : chaque |…|
+  remplacé (signe justifié), distribution, réduction ; f par morceaux (`cases`) et raccord aux zéros. Regroupé
+  (« Écris chaque expression sans valeur absolue. »). Niveau 3 · 10 min.
+
+Mesures (dossier de travail `56-E1` : `outils/collecteur.ts` — évaluateur `evalLatex.ts` recopié de `corrige-6e2-m2` —,
+`outils/verdicts.ts`, `parcours.cjs`, `docs.cjs`) : collecteur 300 tirages par variante + 300 libres (7 800 instances) :
+KaTeX strict valide partout, aucune notation clavier, « - » au clavier, majuscule d'insistance, NaN ; chaque étape a
+« Ce qu'on utilise », « Calcul » (lignes toutes avec une relation, aucune répétée) et « Résultat » ; 10 219 égalités
+numériques des corrigés, 0 fausse ; une seule option juste par choix fermé ; réponses justes acceptées (et jamais
+« à reprendre » ni message ciblé), saisie illisible refusée ; barème = 4 ; contrôles indépendants (classe de chaque nombre
+de 56gen14 évaluée numériquement, produit des facteurs et puissance parfaite de 56gen15, valeur du développement et
+critère 2/5 de 56gen16, ensemble des solutions de 56gen18 testé en 300 points + bornes ± 10⁻⁶, morceaux de 56gen19 en
+200 points) : 0 écart ; niveau et durée constants dans chaque verdict ; regroupement reconnu 100 % (56gen15, 16, 18, 19).
+Verdicts sur 20 000 tirages : 56gen15 naturel 49,7–50,4 %, 56gen17 vrai 49,7 % (50,0–50,9 % dans chaque forme), 56gen18
+signe de c 33,1–33,9 %. `?code=` : même instance pour un même code (libre + chaque variante, 20 graines).
+Playwright (`parcours.cjs`, iPhone 13 et 1 280 px, clair / sombre, ouverture par `?code=`, passe « fausse » —
+illisible sans tentative, réponses fausses jusqu'à la réponse révélée — et passe « juste » — réponses calculées par les
+modules du générateur, corrigé déplié) : 128 / 128 parcours sans défaut (0 erreur console, scrollWidth = largeur, aucun
+« $ », « [[ », NaN ni `.katex-error` visible). Documents réels (`docs.cjs`, deux plans : évaluation 2 séries +
+aménagée + corrigé + grille + Word copie / corrigé / grille, feuille + aménagée, une et deux colonnes, calculatrice
+interdite / autorisée) : 0 débordement ni formule coupée à 680 / 820 / 1 280 px, 0 `.katex-error`, structure B = A.
+**Piège d'outil** : le serveur Vite de contrôle (`watch: null`) garde en mémoire les modules déjà transformés — le
+REDÉMARRER (et vider son `cacheDir`) après chaque modification, sinon parcours et documents testent l'ancien code ;
+de même, rebâtir le collecteur (esbuild, `NODE_PATH` vers `node_modules` pour résoudre `katex`) avant de le relancer.

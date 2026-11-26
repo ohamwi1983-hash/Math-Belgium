@@ -148,6 +148,7 @@ export type IdGenerateurPilote =
   | '56gen1' | '56gen2' | '56gen3' | '56gen4' | '56gen5' | '56gen6' | '56gen7' | '56gen8' | '56gen9' | '56gen10' | '56gen11' | '56gen12'
   | '56gen20' | '56gen21' | '56gen22'
   | '56gen23' | '56gen24' | '56gen25' | '56gen26' | '56gen27' | '56gen28'
+  | '56gen14' | '56gen15' | '56gen16' | '56gen17' | '56gen18' | '56gen19'
 
 export interface GeneratorConfig {
   chapitreSlug: string
@@ -564,6 +565,13 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'annuites', generatorId: '56gen27', label: 'Annuités : placement et remboursement (56gen27)', processus: 2 },
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'credit', generatorId: '56gen28', label: "Crédit et tableau d'amortissement (56gen28)", processus: 3 },
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'credit', generatorId: '56gen23', label: 'Quelle formule ? Reconnaître le problème financier (56gen23)', processus: 1 },
+  // 5e (6h), « Nombres réels et suites » : nouveaux générateurs de la partie « Les nombres réels » (chantier E1, 26/11/2026).
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'irrationnels', generatorId: '56gen14', label: 'Rationnel ou irrationnel ? (56gen14)', processus: 1 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'irrationnels', generatorId: '56gen15', label: 'Démontrer qu’un nombre est irrationnel (56gen15)', processus: 2 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'ecritures-decimales', generatorId: '56gen16', label: 'Écriture décimale et fraction (56gen16)', processus: 2 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'axiomes', generatorId: '56gen17', label: 'Énoncés quantifiés et axiomes (56gen17)', processus: 1 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'valeur-absolue', generatorId: '56gen18', label: 'Équations et inéquations avec valeurs absolues (56gen18)', processus: 2 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'valeur-absolue', generatorId: '56gen19', label: 'Écrire sans valeur absolue (56gen19)', processus: 2 },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même

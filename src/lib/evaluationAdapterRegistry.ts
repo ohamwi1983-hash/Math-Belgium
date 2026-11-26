@@ -797,6 +797,22 @@ export const EVALUATION_ADAPTER_REGISTRY_56: Record<string, AdaptateurFeuilleExe
   '56gen22': versionPapier(adaptateur56gen22) as unknown as AdaptateurFeuilleExercices<never>,
 }
 
+/** 5e (6h) — « Nombres réels et suites », partie « Les nombres réels » : nouveaux générateurs 56gen14–56gen19
+ * (chantier E1, 26/11/2026), code dans `5e-6h/generateurs56/`. */
+import { adaptateurEvaluationRationnel as adaptateur56gen14 } from '../entrainement/5e-6h/generateurs56/rationnelIrrationnel/exportEvaluation'
+import { adaptateurEvaluationIrrationalite as adaptateur56gen15 } from '../entrainement/5e-6h/generateurs56/irrationaliteRacine/exportEvaluation'
+import { adaptateurEvaluationDecimale as adaptateur56gen16 } from '../entrainement/5e-6h/generateurs56/ecritureDecimale/exportEvaluation'
+import { adaptateurEvaluationQuantif as adaptateur56gen17 } from '../entrainement/5e-6h/generateurs56/quantificateursAxiomes/exportEvaluation'
+import { adaptateurEvaluationAbsolue as adaptateur56gen18 } from '../entrainement/5e-6h/generateurs56/valeurAbsolueEquations/exportEvaluation'
+import { adaptateurEvaluationSansAbs as adaptateur56gen19 } from '../entrainement/5e-6h/generateurs56/sansValeurAbsolue/exportEvaluation'
+
+EVALUATION_ADAPTER_REGISTRY_56['56gen14'] = versionPapier(adaptateur56gen14) as unknown as AdaptateurFeuilleExercices<never>
+EVALUATION_ADAPTER_REGISTRY_56['56gen15'] = versionPapier(adaptateur56gen15) as unknown as AdaptateurFeuilleExercices<never>
+EVALUATION_ADAPTER_REGISTRY_56['56gen16'] = versionPapier(adaptateur56gen16) as unknown as AdaptateurFeuilleExercices<never>
+EVALUATION_ADAPTER_REGISTRY_56['56gen17'] = versionPapier(adaptateur56gen17) as unknown as AdaptateurFeuilleExercices<never>
+EVALUATION_ADAPTER_REGISTRY_56['56gen18'] = versionPapier(adaptateur56gen18) as unknown as AdaptateurFeuilleExercices<never>
+EVALUATION_ADAPTER_REGISTRY_56['56gen19'] = versionPapier(adaptateur56gen19) as unknown as AdaptateurFeuilleExercices<never>
+
 /** Lookup unique par `generatorId`, tous chantiers portés confondus — `evaluationLocal.ts` n'a pas
  * à savoir quel chantier a produit quel générateur. Chaque adaptateur reçoit ici son
  * `regroupement` a), b), c) (`export/regroupementsPapier.ts`, découpe de son énoncé papier — déjà
