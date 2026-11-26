@@ -32,8 +32,8 @@ const PARTS_64: { mois: number; interets: number; capital: number }[] = (() => {
   return lignes
 })()
 
-/** § 14 : 12 000 € en 60 mois à 0,4 % par mois, capital restant dû après t mois. */
-const RESTE_MENSUALITE_CONSTANTE = (t: number) => (12000 * (Math.pow(1.004, 60) - Math.pow(1.004, t))) / (Math.pow(1.004, 60) - 1)
+/** § 14 : 12 000 € en 60 mensualités constantes à 0,4 % par mois (≈ 225,36 €). */
+const MENSUALITE_CONSTANTE_12000 = (12000 * 0.004) / (1 - Math.pow(1.004, -60))
 
 export const sectionsFinance: ChapterSection[] = [
   // ═══════════════════════════════════════════════════════════════════════════════════════════════
@@ -179,7 +179,7 @@ export const sectionsFinance: ChapterSection[] = [
       },
       {
         kind: 'featureTable',
-        caption: R`$50\,000$ € à intérêts composés au taux annuel de $3{,}5\,\%$ (montants arrondis au centime, calculés sans arrondir en cours de route).`,
+        caption: '50 000 € à intérêts composés au taux annuel de 3,5 % (montants arrondis au centime, calculés sans arrondir en cours de route).',
         headers: ['Année', 'Capital au début', 'Intérêts de l’année', 'Valeur acquise à la fin'],
         rows: [
           ['$1$', '$50\\,000{,}00$', '$1\\,750{,}00$', '$51\\,750{,}00$'],
@@ -305,7 +305,7 @@ export const sectionsFinance: ChapterSection[] = [
       },
       {
         kind: 'featureTable',
-        caption: R`Valeurs acquises par $10\,000$ € au taux annuel de $3\,\%$ : $10\,000(1 + 0{,}03\cdot t)$ contre $10\,000\cdot 1{,}03^t$.`,
+        caption: 'Valeurs acquises par 10 000 € au taux annuel de 3 % : 10 000 · (1 + 0,03 · t) à intérêt simple, 10 000 · 1,03ᵗ à intérêts composés.',
         headers: ['Durée', 'Intérêt simple', 'Intérêts composés', 'Le plus avantageux'],
         rows: [
           ['un mois', '$10\\,025{,}00$', '$10\\,024{,}66$', 'simple'],
@@ -328,7 +328,7 @@ export const sectionsFinance: ChapterSection[] = [
           xTickLabels: { 0.5: '0,5', 1.5: '1,5' },
           yTicks: [1000, 2000, 3000, 4000],
           fixedYRange: { min: 0, max: 4700 },
-          points: [{ x: 1, y: 2000, label: 'un an', tone: 'bad', labelPos: 'left' }],
+          points: [{ x: 1, y: 2000, label: 'un an', tone: 'bad', labelPos: 'below' }],
           textLabels: [
             { x: 1.55, y: 3550, text: 'composés', tone: 'accent', anchor: 'end' },
             { x: 1.75, y: 2300, text: 'simple', tone: 'good', anchor: 'start' },
@@ -344,7 +344,7 @@ export const sectionsFinance: ChapterSection[] = [
         blocks: [
           { kind: 'para', text: R`Soit un taux annuel $i > 0$ et un entier $k \geq 2$. On montre qu'après $\frac{1}{k}$ d'année (six mois pour $k = 2$, un mois pour $k = 12$), la valeur acquise à intérêt simple, $C_0\left(1 + \frac{i}{k}\right)$, dépasse la valeur acquise à intérêts composés, $C_0(1+i)^{\frac{1}{k}}$.` },
           { kind: 'para', text: R`**Étape 1 — une inégalité connue.** Pour $h > 0$ et un entier $k \geq 2$, on a $(1+h)^k > 1 + kh$ : en distribuant le produit de $k$ facteurs $(1+h)$, on obtient $1$, puis $k$ fois $h$, puis d'autres termes tous positifs (voir [[5e-6h/nombres-reels-suites#limite-suite|étape 9]]).` },
-          { kind: 'para', text: R`**Étape 2 — avec h = i ÷ k.** $\left(1 + \frac{i}{k}\right)^k > 1 + k\cdot\frac{i}{k} = 1 + i$.` },
+          { kind: 'para', text: R`**Étape 2 — avec** $\boldsymbol{h = \frac{i}{k}}$**.** $\left(1 + \frac{i}{k}\right)^k > 1 + k\cdot\frac{i}{k} = 1 + i$.` },
           { kind: 'para', text: R`**Étape 3 — conclure.** Les deux membres sont positifs : en prenant la racine $k$-ième, $1 + \frac{i}{k} > \sqrt[k]{1+i} = (1+i)^{\frac{1}{k}}$. On multiplie par $C_0 > 0$ : l'intérêt simple rapporte plus. Pour $k = 2$ et $i = 0{,}03$ : $1{,}015^2 = 1{,}030225 > 1{,}03$.` },
         ],
       },
@@ -557,16 +557,16 @@ export const sectionsFinance: ChapterSection[] = [
           { kind: 'para', text: R`Chaque versement est capitalisé jusqu'au 1er janvier 2031 : le premier pendant $4$ ans, le dernier pas du tout.` },
           {
             kind: 'featureTable',
-            headers: ['Versement', 'Date', 'Valeur le 1er janvier 2031'],
+            headers: ['Versement', 'Le 1er janvier', 'Valeur le 1er janvier 2031'],
             rows: [
-              ['1er', '1er janvier 2027', '$1\\,200\\cdot 1{,}03^4 \\approx 1\\,350{,}61$'],
-              ['2e', '1er janvier 2028', '$1\\,200\\cdot 1{,}03^3 \\approx 1\\,311{,}27$'],
-              ['3e', '1er janvier 2029', '$1\\,200\\cdot 1{,}03^2 = 1\\,273{,}08$'],
-              ['4e', '1er janvier 2030', '$1\\,200\\cdot 1{,}03 = 1\\,236{,}00$'],
-              ['5e', '1er janvier 2031', '$1\\,200{,}00$'],
+              ['1er', '2027', '$1\\,200\\cdot 1{,}03^4 \\approx 1\\,350{,}61$'],
+              ['2e', '2028', '$1\\,200\\cdot 1{,}03^3 \\approx 1\\,311{,}27$'],
+              ['3e', '2029', '$1\\,200\\cdot 1{,}03^2 = 1\\,273{,}08$'],
+              ['4e', '2030', '$1\\,200\\cdot 1{,}03 = 1\\,236{,}00$'],
+              ['5e', '2031', '$1\\,200{,}00$'],
             ],
           },
-          { kind: 'para', text: R`**Somme.** $S = 1\,200 + 1\,200\cdot 1{,}03 + 1\,200\cdot 1{,}03^2 + 1\,200\cdot 1{,}03^3 + 1\,200\cdot 1{,}03^4 \approx 6\,370{,}96$ €. Lucas a versé $6\,000$ € : les intérêts lui ont rapporté $370{,}96$ €.` },
+          { kind: 'para', text: R`**Somme.** $S = 1\,200 + 1\,200\cdot 1{,}03$ $+ 1\,200\cdot 1{,}03^2 + 1\,200\cdot 1{,}03^3$ $+ 1\,200\cdot 1{,}03^4$ $\approx 6\,370{,}96$ €. Lucas a versé $6\,000$ € : les intérêts lui ont rapporté $370{,}96$ €.` },
         ],
       },
       {
@@ -579,7 +579,7 @@ export const sectionsFinance: ChapterSection[] = [
         blocks: [
           { kind: 'para', text: R`Soit $n$ versements de montant $a$, à intervalles d'une période, au taux $i$ par période, et $V_n$ la valeur acquise au moment du dernier versement.` },
           { kind: 'para', text: R`**Étape 1 — la valeur de chaque versement.** Le dernier versement n'a rien rapporté : il vaut $a$. L'avant-dernier a été capitalisé pendant une période : $a(1+i)$. … Le premier l'a été pendant $n-1$ périodes : $a(1+i)^{n-1}$.` },
-          { kind: 'para', text: R`**Étape 2 — une somme géométrique.** $V_n = a + a(1+i) + a(1+i)^2 + \ldots + a(1+i)^{n-1}$ : ce sont les $n$ premiers termes d'une suite géométrique de premier terme $a$ et de raison $q = 1+i$.` },
+          { kind: 'para', text: R`**Étape 2 — une somme géométrique.** $V_n = a + a(1+i) + a(1+i)^2$ $+ \ldots + a(1+i)^{n-1}$ : ce sont les $n$ premiers termes d'une suite géométrique de premier terme $a$ et de raison $q = 1+i$.` },
           { kind: 'para', text: R`**Étape 3 — appliquer la formule de la somme.** $S_n = u_1\cdot\dfrac{q^n - 1}{q - 1}$ avec $u_1 = a$ et $q - 1 = i$ : $V_n = a\cdot\dfrac{(1+i)^n - 1}{i}$.` },
           { kind: 'para', text: R`Pour Lucas : $V_5 = 1\,200\cdot\dfrac{1{,}03^5 - 1}{0{,}03} \approx 6\,370{,}96$ €, comme avec le tableau.` },
         ],
@@ -594,16 +594,21 @@ export const sectionsFinance: ChapterSection[] = [
       {
         kind: 'illustration',
         illustration: {
-          kind: 'sequencePlot',
+          kind: 'curvePlot',
+          curves: [],
+          xMin: 0,
+          xMax: 5.8,
+          xTicks: [1, 2, 3, 4, 5],
+          yTicks: [2000, 4000, 6000],
+          fixedYRange: { min: 0, max: 7600 },
           points: [
-            { n: 1, value: 1200, label: '1 200' },
-            { n: 2, value: 2436, label: '2 436' },
-            { n: 3, value: 3709.08, label: '3 709,08' },
-            { n: 4, value: 5020.35, label: '5 020,35' },
-            { n: 5, value: 6370.96, label: '6 370,96' },
+            { x: 1, y: 1200, label: '1 200', tone: 'accent', labelPos: 'above' },
+            { x: 2, y: 2436, label: '2 436', tone: 'accent', labelPos: 'above' },
+            { x: 3, y: 3709.08, label: '3 709,08', tone: 'accent', labelPos: 'above' },
+            { x: 4, y: 5020.35, label: '5 020,35', tone: 'accent', labelPos: 'above' },
+            { x: 5, y: 6370.96, label: '6 370,96', tone: 'accent', labelPos: 'above' },
           ],
-          connector: 'none',
-          xAxisLabel: 'nombre de versements',
+          xAxisLabel: 'versements',
           yAxisLabel: 'solde (€)',
           caption: R`Le compte de Lucas juste après chaque versement : chaque année, le solde est multiplié par $1{,}03$, puis augmenté de $1\,200$ €. Les écarts entre deux points grandissent légèrement ($1\,236$ ; $1\,273{,}08$ ; $1\,311{,}27$ ; $1\,350{,}61$).`,
         },
@@ -651,7 +656,7 @@ export const sectionsFinance: ChapterSection[] = [
         blocks: [
           { kind: 'para', text: R`Arthur et Emma veulent rénover leur maison. Ils peuvent rembourser $2\,000$ € par an pendant quatre ans, au taux annuel de $4\,\%$. Ils empruntent le 1er janvier 2027, et le premier remboursement a lieu le 31 décembre 2027. Quel montant peuvent-ils emprunter ?` },
           { kind: 'para', text: R`**Actualiser chaque remboursement au 1er janvier 2027.** Le premier a lieu une année plus tard, le dernier quatre années plus tard : $2\,000\cdot 1{,}04^{-1} \approx 1\,923{,}08$ ; $2\,000\cdot 1{,}04^{-2} \approx 1\,849{,}11$ ; $2\,000\cdot 1{,}04^{-3} \approx 1\,777{,}99$ ; $2\,000\cdot 1{,}04^{-4} \approx 1\,709{,}61$.` },
-          { kind: 'para', text: R`**Additionner.** $V_0 \approx 1\,923{,}08 + 1\,849{,}11 + 1\,777{,}99 + 1\,709{,}61 = 7\,259{,}79$ € (somme calculée sans arrondir en cours de route).` },
+          { kind: 'para', text: R`**Additionner.** $V_0 \approx 1\,923{,}08 + 1\,849{,}11$ $+ 1\,777{,}99 + 1\,709{,}61$ $= 7\,259{,}79$ € (somme calculée sans arrondir en cours de route).` },
           { kind: 'para', text: R`**Autre chemin.** La valeur acquise des quatre remboursements le 31 décembre 2030 vaut $V_4 = 2\,000\cdot\dfrac{1{,}04^4 - 1}{0{,}04} \approx 8\,492{,}93$ €. Actualisée de quatre ans : $8\,492{,}93\cdot 1{,}04^{-4} \approx 7\,259{,}79$ €, le même montant.` },
         ],
       },
@@ -668,8 +673,8 @@ export const sectionsFinance: ChapterSection[] = [
         label: 'Démonstration — la valeur actuelle de n annuités constantes',
         blocks: [
           { kind: 'para', text: R`Mêmes notations : $n$ versements $a$, au taux $i$ par période, le premier une période après la date $0$.` },
-          { kind: 'para', text: R`**Étape 1 — de Vₙ à V₀.** Les $n$ versements valent $V_n$ au moment du dernier, c'est-à-dire $n$ périodes après la date $0$. Actualiser de $n$ périodes, c'est multiplier par $(1+i)^{-n}$ : $V_0 = V_n(1+i)^{-n}$.` },
-          { kind: 'para', text: R`**Étape 2 — remplacer Vₙ.** $V_0 = a\cdot\dfrac{(1+i)^n - 1}{i}\cdot(1+i)^{-n}$.` },
+          { kind: 'para', text: R`**Étape 1 — de** $\boldsymbol{V_n}$ **à** $\boldsymbol{V_0}$**.** Les $n$ versements valent $V_n$ au moment du dernier, c'est-à-dire $n$ périodes après la date $0$. Actualiser de $n$ périodes, c'est multiplier par $(1+i)^{-n}$ : $V_0 = V_n(1+i)^{-n}$.` },
+          { kind: 'para', text: R`**Étape 2 — remplacer** $\boldsymbol{V_n}$**.** $V_0 = a\cdot\dfrac{(1+i)^n - 1}{i}\cdot(1+i)^{-n}$.` },
           { kind: 'para', text: R`**Étape 3 — distribuer.** $\left((1+i)^n - 1\right)(1+i)^{-n} = 1 - (1+i)^{-n}$, donc $V_0 = a\cdot\dfrac{1-(1+i)^{-n}}{i}$.` },
         ],
       },
@@ -679,7 +684,7 @@ export const sectionsFinance: ChapterSection[] = [
         formula: R`Deux amis veulent disposer du même capital dans dix ans. Le premier verse $90$ € au début de chaque mois sur un compte rémunéré à $2{,}3\,\%$ par an (intérêts composés). Le second place aujourd'hui une seule somme, aux mêmes conditions. Quel montant doit-il placer, et de quel capital disposeront-ils dans dix ans ?`,
         steps: [
           { tag: 'taux mensuel équivalent', text: R`$i = 1{,}023^{\frac{1}{12}} - 1 \approx 0{,}1897\,\%$ par mois.` },
-          { tag: 'capital du premier', text: R`$120$ versements en début de mois, regardés à la fin du dernier mois : $V = 90\cdot\dfrac{(1+i)^{120} - 1}{i}\cdot(1+i) \approx 12\,138{,}04$ €.` },
+          { tag: 'capital du premier', text: R`$120$ versements en début de mois, regardés à la fin du dernier mois : $V = 90\cdot\dfrac{(1+i)^{120} - 1}{i}\cdot(1+i)$ $\approx 12\,138{,}04$ €.` },
           { tag: 'placement unique', text: R`Dans dix ans, ce montant doit être atteint : $C_0 = 12\,138{,}04\cdot 1{,}023^{-10} \approx 9\,669{,}24$ €.` },
           { tag: 'comparer', text: R`Le premier aura versé $120\cdot 90 = 10\,800$ € en tout, le second $9\,669{,}24$ € d'un coup, mais dès aujourd'hui.` },
         ],
@@ -761,7 +766,7 @@ export const sectionsFinance: ChapterSection[] = [
           { kind: 'para', text: R`Un capital $C$ est emprunté au TAEG donné et remboursé par $n$ mensualités égales $m$, la première un mois après l'emprunt.` },
           { kind: 'para', text: R`**Étape 1 — le taux mensuel.** Les versements sont mensuels : il faut le taux mensuel équivalent au TAEG ([[5e-6h/nombres-reels-suites#taux-equivalents|étape 12]]) : $(1+i)^{12} = 1 + \text{TAEG}$, donc $i = (1+\text{TAEG})^{\frac{1}{12}} - 1$.` },
           { kind: 'para', text: R`**Étape 2 — le capital est la valeur actuelle des mensualités.** Le montant emprunté vaut la valeur actuelle des $n$ remboursements ([[5e-6h/nombres-reels-suites#annuites|étape 13]]) : $C = m\cdot\dfrac{1-(1+i)^{-n}}{i}$.` },
-          { kind: 'para', text: R`**Étape 3 — isoler m.** On multiplie par $i$ et on divise par $1-(1+i)^{-n}$ (non nul, car $(1+i)^{-n} < 1$) : $m = \dfrac{C\cdot i}{1-(1+i)^{-n}}$.` },
+          { kind: 'para', text: R`**Étape 3 — isoler** $\boldsymbol{m}$**.** On multiplie par $i$ et on divise par $1-(1+i)^{-n}$ (non nul, car $(1+i)^{-n} < 1$) : $m = \dfrac{C\cdot i}{1-(1+i)^{-n}}$.` },
         ],
       },
       {
@@ -820,12 +825,12 @@ export const sectionsFinance: ChapterSection[] = [
           { kind: 'para', text: R`**Mois 2.** Intérêts : $1\,669{,}75\cdot 0{,}00273 \approx 4{,}56$ € ; amortissement : $70{,}44$ € ; reste dû : $1\,599{,}31$ €. **Mois 3.** Intérêts $\approx 4{,}37$ €, amortissement $70{,}63$ €, reste dû $1\,528{,}68$ €.` },
           {
             kind: 'featureTable',
-            headers: ['Mois', 'Mensualité', 'Intérêts', 'Amortissement', 'Capital restant dû'],
+            headers: ['Mois', 'Intérêts', 'Amortissement', 'Reste dû'],
             rows: [
-              ['$0$', '', '', '', '$1\\,740{,}00$'],
-              ['$1$', '$75$', '$4{,}75$', '$70{,}25$', '$1\\,669{,}75$'],
-              ['$2$', '$75$', '$4{,}56$', '$70{,}44$', '$1\\,599{,}31$'],
-              ['$3$', '$75$', '$4{,}37$', '$70{,}63$', '$1\\,528{,}68$'],
+              ['$0$', '', '', '$1\\,740{,}00$'],
+              ['$1$', '$4{,}75$', '$70{,}25$', '$1\\,669{,}75$'],
+              ['$2$', '$4{,}56$', '$70{,}44$', '$1\\,599{,}31$'],
+              ['$3$', '$4{,}37$', '$70{,}63$', '$1\\,528{,}68$'],
             ],
           },
         ],
@@ -845,14 +850,14 @@ export const sectionsFinance: ChapterSection[] = [
           xTicks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
           yTicks: [200, 400, 600, 800],
           fixedYRange: { min: 0, max: 960 },
-          horizontalAsymptotes: [{ y: MENSUALITE_64, label: 'mensualité 861,67' }],
+          horizontalAsymptotes: [{ y: MENSUALITE_64 }],
           points: [
             ...PARTS_64.map((l) => ({ x: l.mois, y: l.capital, label: l.mois === 6 ? 'part capital' : '', tone: 'accent' as const, labelPos: 'below' as const })),
             ...PARTS_64.map((l) => ({ x: l.mois, y: l.interets, label: l.mois === 6 ? 'part intérêts' : '', tone: 'good' as const, labelPos: 'above' as const })),
           ],
           xAxisLabel: 'mois',
           yAxisLabel: '€',
-          caption: R`Prêt de $10\,000$ € au TAEG de $6{,}4\,\%$ en $12$ mois : chaque mensualité de $861{,}67$ € se partage entre les intérêts (de $51{,}83$ € le premier mois à $4{,}44$ € le dernier) et le capital remboursé (de $809{,}84$ € à $857{,}23$ €).`,
+          caption: R`Prêt de $10\,000$ € au TAEG de $6{,}4\,\%$ en $12$ mois : chaque mensualité de $861{,}67$ € (en pointillés) se partage entre les intérêts (de $51{,}83$ € le premier mois à $4{,}44$ € le dernier) et le capital remboursé (de $809{,}84$ € à $857{,}23$ €).`,
         },
       },
       { kind: 'subheading', text: 'Amortissement constant ou mensualité constante' },
@@ -863,7 +868,7 @@ export const sectionsFinance: ChapterSection[] = [
           { kind: 'para', text: R`Une jeune ébéniste emprunte $12\,000$ € à ses parents pour s'installer. Elle rembourse chaque mois la même part du capital pendant $60$ mois, et paie en plus un intérêt de $0{,}4\,\%$ sur le capital qui reste dû au début du mois. Quelles suites forment les colonnes du tableau ? Combien d'intérêts paiera-t-elle en tout ?` },
           { kind: 'para', text: R`**Amortissement.** $\frac{12\,000}{60} = 200$ € chaque mois : une suite constante.` },
           { kind: 'para', text: R`**Capital restant dû** après $k$ mois : $12\,000 - 200k$ : une suite arithmétique de raison $-200$.` },
-          { kind: 'para', text: R`**Intérêts** du mois $k$ : $0{,}004\cdot\left(12\,000 - 200(k-1)\right) = 48 - 0{,}8(k-1)$ : une suite arithmétique de premier terme $48$ € et de raison $-0{,}80$ €. Le dernier mois, ils valent $48 - 0{,}8\cdot 59 = 0{,}80$ €.` },
+          { kind: 'para', text: R`**Intérêts** du mois $k$ : $0{,}004\cdot\left(12\,000 - 200(k-1)\right)$ $= 48 - 0{,}8(k-1)$ : une suite arithmétique de premier terme $48$ € et de raison $-0{,}80$ €. Le dernier mois, ils valent $48 - 0{,}8\cdot 59 = 0{,}80$ €.` },
           { kind: 'para', text: R`**Mensualité** du mois $k$ : $200 + 48 - 0{,}8(k-1) = 248 - 0{,}8(k-1)$ : arithmétique elle aussi, de $248$ € à $200{,}80$ €.` },
           { kind: 'para', text: R`**Total des intérêts** : somme des $60$ termes d'une suite arithmétique, $S_{60} = \frac{60\,(48 + 0{,}80)}{2} = 1\,464$ €.` },
           { kind: 'para', text: R`**Comparaison.** Avec $60$ mensualités constantes au même taux de $0{,}4\,\%$ par mois, $m = \dfrac{12\,000\cdot 0{,}004}{1-1{,}004^{-60}} \approx 225{,}36$ € et les intérêts totalisent $60\cdot 225{,}36 - 12\,000 \approx 1\,521{,}41$ €. L'amortissement constant coûte moins cher, parce que le capital est remboursé plus vite au début ; en échange, les premières mensualités sont plus lourdes ($248$ € au lieu de $225{,}36$ €).` },
@@ -874,21 +879,21 @@ export const sectionsFinance: ChapterSection[] = [
         illustration: {
           kind: 'curvePlot',
           curves: [
-            { fn: (t: number) => 12000 - 200 * t, tone: 'good' },
-            { fn: RESTE_MENSUALITE_CONSTANTE, tone: 'accent' },
+            { fn: (t: number) => 248 - 0.8 * (t - 1), tone: 'good', xMin: 1, xMax: 60 },
+            { fn: () => MENSUALITE_CONSTANTE_12000, tone: 'accent', xMin: 1, xMax: 60 },
           ],
           xMin: 0,
-          xMax: 62,
+          xMax: 63,
           xTicks: [12, 24, 36, 48, 60],
-          yTicks: [3000, 6000, 9000, 12000],
-          fixedYRange: { min: 0, max: 13000 },
+          yTicks: [50, 100, 150, 200, 250],
+          fixedYRange: { min: 0, max: 330 },
           textLabels: [
-            { x: 33, y: 7600, text: 'mensualité constante', tone: 'accent', anchor: 'start' },
-            { x: 27, y: 5300, text: 'amortissement constant', tone: 'good', anchor: 'end' },
+            { x: 12, y: 268, text: 'amortissement constant', tone: 'good', anchor: 'start' },
+            { x: 4, y: 205, text: 'mensualité constante', tone: 'accent', anchor: 'start' },
           ],
           xAxisLabel: 'mois',
-          yAxisLabel: 'capital restant dû (€)',
-          caption: R`Capital restant dû pour $12\,000$ € remboursés en $60$ mois à $0{,}4\,\%$ par mois : en ligne droite avec l'amortissement constant, plus lentement au début avec des mensualités constantes (après $30$ mois, il reste $6\,000$ € dans le premier cas, environ $6\,358{,}85$ € dans le second). Seules les valeurs aux mois entiers ont un sens.`,
+          yAxisLabel: 'mensualité (€)',
+          caption: R`$12\,000$ € remboursés en $60$ mois à $0{,}4\,\%$ par mois. Avec l'amortissement constant, les mensualités forment une suite arithmétique décroissante, de $248$ € à $200{,}80$ € ; avec des mensualités constantes, on paie $225{,}36$ € chaque mois. Seules les valeurs aux mois entiers ont un sens.`,
         },
       },
       {
