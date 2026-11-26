@@ -2218,6 +2218,54 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: "λ inconnu, puis le seuil d'alerte", enonce: "Dans une région, la probabilité qu'aucun cas d'une maladie rare ne soit signalé un mois donné vaut $0{,}135$ ; le nombre de cas par mois suit une loi de Poisson. Détermine son paramètre, la valeur la plus probable, puis le plus petit nombre de cas $k$ tel que $P(X\\geq k)<0{,}05$." },
     ],
   },
+  // 5e (6h), « Nombres réels et suites », partie « Les nombres réels » (chantier A, 26/11/2026) — appariement PAR CLÉ
+  // (badge du bloc `exemple` ou label de l'`exempleLibre`, `src/content/chapters/5e-6h/nombres-reels-suites/partie-reels.ts`).
+  // Les parties « suites » et « finance » ajoutent leurs sections à côté.
+  'nombres-reels-suites': {
+    irrationnels: [
+      { cle: '√2 n’est pas une fraction', enonce: "Démontre que $\\sqrt{2}$ est irrationnel." },
+      { cle: 'pour tout nombre premier p', enonce: "Soit $p$ un nombre premier. Démontre que $\\sqrt{p}$ est irrationnel." },
+      { cle: 'quatre égalités entre naturels', enonce: "Pour quels couples de naturels non nuls $(m\\,;n)$ les égalités suivantes sont-elles vérifiées : $m^2 = 7n^2$ ; $m^2 = 9n^2$ ; $m^3 = 2n^3$ ; $m^3 = 64n^3$ ? Justifie." },
+      { cle: '∛7 est irrationnel', enonce: "Démontre que $\\sqrt[3]{7}$ est irrationnel. Explique pourquoi le même raisonnement ne s'applique pas à $\\sqrt[3]{64}$." },
+      { cle: 'placer des nombres dans le plus petit ensemble', enonce: "Donne le plus petit ensemble ($\\mathbb{N}$, $\\mathbb{Z}$, $\\mathbb{Q}$ ou $\\mathbb{R} \\setminus \\mathbb{Q}$) qui contient chacun des nombres suivants, en justifiant : $\\sqrt{\\dfrac{9}{4}}$ ; $\\dfrac{\\sqrt{8}}{\\sqrt{2}}$ ; $\\sqrt[3]{-27}$ ; $-\\dfrac{\\sqrt{5}}{2}$ ; $3 \\cdot 10^{-6}$ ; $1 + \\sqrt{2}$." },
+      { cle: 'Φ = 1 + 1/Φ', enonce: "Un rectangle d'or de longueur $L$ et de largeur $\\ell$ est semblable au rectangle obtenu en lui accolant un carré de côté $L$. Démontre que $\\Phi = \\dfrac{L}{\\ell}$ vérifie $\\Phi = 1 + \\dfrac{1}{\\Phi}$ et $\\Phi^2 - \\Phi - 1 = 0$, calcule $\\Phi$, puis démontre que $\\Phi$ est irrationnel." },
+      { cle: 'calculer les réduites', enonce: "Calcule les huit premières réduites de la fraction continue de $\\Phi$, en partant de $1$ et en appliquant chaque fois $r \\mapsto 1 + \\dfrac{1}{r}$. Que reconnais-tu ? Compare-les à $\\Phi$." },
+    ],
+    'ecritures-decimales': [
+      { cle: 'prévoir le centième chiffre', enonce: "Quel est le centième chiffre après la virgule de l'écriture décimale de $\\dfrac{2617}{7}$ ? Justifie." },
+      { cle: 'repérer la période grâce aux restes', enonce: "Écris $\\dfrac{17}{70}$ en décimal en détaillant les restes successifs de la division, et donne sa période." },
+      { cle: 'l’écriture décimale d’un rationnel', enonce: "Démontre que l'écriture décimale d'un rationnel $\\dfrac{m}{n}$ est limitée ou illimitée périodique, avec une période d'au plus $n - 1$ chiffres." },
+      { cle: 'écriture périodique → fraction irréductible', enonce: "Écris $2{,}1\\overline{36}$ sous forme de fraction irréductible." },
+      { cle: 'est celle d’un rationnel', enonce: "Démontre qu'un réel dont l'écriture décimale est limitée ou illimitée périodique est rationnel." },
+      { cle: '7,0799999… = 7,08', enonce: "Démontre que $7{,}07\\overline{9} = 7{,}08$." },
+      { cle: 'sans poser la division', enonce: "Sans poser la division, dis si l'écriture décimale de chaque nombre est limitée ou périodique, puis vérifie : $\\dfrac{3}{40}$ ; $\\dfrac{9}{250}$ ; $\\dfrac{7}{12}$ ; $\\dfrac{11}{24}$ ; $\\dfrac{5}{13}$." },
+    ],
+    axiomes: [
+      { cle: 'l’ordre des quantificateurs change le sens', enonce: "Dis si chaque énoncé est vrai ou faux, et justifie : (1) $\\forall x \\in \\mathbb{R}\\ \\exists y \\in \\mathbb{R} : y > x$ ; (2) $\\exists y \\in \\mathbb{R}\\ \\forall x \\in \\mathbb{R} : y > x$." },
+      { cle: 'a · 0 = 0', enonce: "Démontre, à partir des axiomes de l'addition et de la multiplication des réels, que $a \\cdot 0 = 0$ pour tout réel $a$. Cite l'axiome utilisé à chaque étape." },
+      { cle: 'encadrer Φ par des intervalles emboîtés', enonce: "Les réduites $1$ ; $2$ ; $\\dfrac{3}{2}$ ; $\\dfrac{5}{3}$ ; $\\dfrac{8}{5}$ ; $\\dfrac{13}{8}$ ; $\\dfrac{21}{13}$ ; $\\dfrac{34}{21}$ sont tour à tour inférieures et supérieures au nombre d'or $\\Phi$. Écris les intervalles emboîtés qu'elles forment deux à deux, calcule leurs longueurs et explique pourquoi $\\Phi$ appartient à chacun d'eux." },
+    ],
+    'valeur-absolue': [
+      { cle: 'distances le long d’une route', enonce: "Une boulangerie est située le long d'une route rectiligne. La maison A est à $80$ m de la boulangerie, la maison B à $25$ m. Quelles sont les distances possibles entre A et B ?" },
+      { cle: '|x| ≤ y si et seulement si', enonce: "Démontre que, pour tous réels $x$ et $y$ : $|x| \\leq y \\iff -y \\leq x \\leq y$." },
+      { cle: 'l’inégalité triangulaire', enonce: "Démontre que, pour tous réels $x$ et $y$ : $|x + y| \\leq |x| + |y|$." },
+      { cle: 'traduire une distance en intervalle', enonce: "Écris sous forme d'intervalle ou de réunion d'intervalles l'ensemble des réels $x$ tels que : $|x - 3| \\leq 2$ ; $|2x - 5| < 3$ ; $|x + 5| > 3$." },
+      { cle: 'les trois cas selon le signe de c', enonce: "Résous dans $\\mathbb{R}$ : $|x - 2| = 5$ ; $|3x + 1| = 0$ ; $|3x + 1| = -2$." },
+      { cle: 'deux valeurs absolues égales', enonce: "Résous dans $\\mathbb{R}$ : $|5x + 1| = |x - 3|$." },
+      { cle: 'une inéquation avec un carré', enonce: "Résous dans $\\mathbb{R}$ : $|x^2 - 4| > 2$." },
+      { cle: 'comparer deux distances', enonce: "Résous dans $\\mathbb{R}$ : $|x + 6| > |x - 4|$, en interprétant chaque membre comme une distance." },
+      { cle: '|x − 1| + |2x + 3|', enonce: "Écris $f(x) = |x - 1| + |2x + 3|$ sans valeur absolue." },
+    ],
+    'approcher-densite': [
+      { cle: 'encadrer le périmètre et l’aire', enonce: "Les côtés d'un rectangle mesurent $12{,}4$ cm et $7{,}8$ cm, à $0{,}1$ cm près. Encadre son périmètre et son aire." },
+      { cle: 'l’erreur se propage', enonce: "Deux longueurs $x$ et $y$ sont mesurées à $e$ près : on obtient $a$ et $b$ ($a - e > 0$, $b - e > 0$). Démontre que le périmètre $2(x + y)$ est connu à $4e$ près et l'aire $xy$ à $(a + b)\\,e + e^2$ près." },
+      { cle: 'encadrer √18 à 10⁻⁴ près', enonce: "En partant d'un rectangle de dimensions $2$ et $9$, écris les encadrements successifs de $\\sqrt{18}$ donnés par l'algorithme de Héron jusqu'à pouvoir donner sa valeur approchée à $10^{-4}$ près." },
+      { cle: '√A reste toujours entre', enonce: "Dans l'algorithme de Héron, $a_{n+1} = \\dfrac{1}{2}\\left(a_n + \\dfrac{A}{a_n}\\right)$ avec $A > 0$ et $a_1 > 0$. Démontre que, dès $n \\geq 2$, $\\dfrac{A}{a_n} \\leq \\sqrt{A} \\leq a_n$, et que la suite des longueurs $a_n$ diminue." },
+      { cle: 'approcher √3 par une fraction', enonce: "Sachant que $0 < \\sqrt{3} - 1 < 1$, calcule $(\\sqrt{3} - 1)^2$, $(\\sqrt{3} - 1)^4$ et $(\\sqrt{3} - 1)^8$ sous la forme $u - v\\sqrt{3}$, et déduis-en une fraction proche de $\\sqrt{3}$. Estime l'erreur commise." },
+      { cle: 'existe-t-il un plus petit rationnel', enonce: "Existe-t-il un plus petit rationnel dans l'intervalle $]3\\,;3{,}01]$ ? Un plus grand rationnel dans $[3\\,;3{,}01[$ ? Justifie." },
+      { cle: 'entre deux rationnels, il y a un irrationnel', enonce: "Soient $a < b$ deux rationnels. Démontre que $a + \\dfrac{b - a}{\\sqrt{2}}$ est un irrationnel compris entre $a$ et $b$." },
+    ],
+  },
 }
 
 /**

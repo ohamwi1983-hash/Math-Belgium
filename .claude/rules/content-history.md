@@ -6535,3 +6535,46 @@ Mécanismes : `content-authoring.md`, « Chapitres autonomes » ; composants : `
   `verifier-enonces-evaluation.mjs`) : liens résolus, aucun lien dans un champ brut ni dans un gras, entrées `utilise`
   valides, aucun renvoi chiffré dans les chapitres et les questions « Formule ». Avant réécriture : 99 textes en
   défaut ; après : 0.
+
+## 5e (6h), Chapitre 1 — Nombres réels et suites : partie « Les nombres réels », étapes 1–5 (chantier A, 26/11/2026)
+
+Fichier `5e-6h/nombres-reels-suites/partie-reels.ts` (squelette du coordinateur : ids, titres, kickers, `partie`, marqueurs
+`// ⟨fin-etape …⟩` gardés en dernière ligne). D'après les pages jaunes (explorations 1–6), bleues (synthèses 1–6) et vertes
+(exercices 1, 2, 11, 26) du manuel ; nombres recalculés par `scratchpad/56-A/calculs.py` (2617/7 = 373,(857142), centième
+chiffre 1 ; 17/70 = 0,2(428571) ; 2,1(36) = 47/22 ; 7,07(9) = 6372/900 = 7,08 ; Héron √18 depuis 2 × 9 : rectangle 5
+4,2426400 < √18 < 4,2426413 ; 97/56 − √3 ≈ 9,2·10⁻⁵ ; 161/72 pour √5 ; YBC 7289 ≈ 1,4142130 ; A4 297/210 ≈ 1,41429).
+Erreurs du manuel non reprises : |x| = −x si x < 0 (pas ≤), 1552/896 réduit à 97/56, renvois « chapitre n », « Principes de
+la géométrie » (Hilbert 1899 : « Fondements de la géométrie »). Étape 3 LÉGÈRE (décision du professeur) : axiomes en trois
+`featureTable` de référence, soustraction / division / inégalité stricte définies, une seule démonstration (a · 0 = 0).
+
+**Contenu** : 33 exemples et démonstrations, tous avec énoncé et titre parlant, appariés par CLÉ dans
+`ENONCES_DEMONSTRATION['nombres-reels-suites']` (sections de cette partie ; les chantiers B et C ajoutent les leurs) — le
+chapitre n'est pas encore dans `CHAPITRES_ENONCES_VERIFIES` (les parties suites et finance doivent d'abord avoir leurs
+énoncés) ; contrôle fait à part : 0 orphelin, 0 exemple sans énoncé. Démonstrations : √2, √p (p premier), ∛7 (exposants
+modulo 3, contraste 64 = 2⁶), Φ = 1 + 1/Φ et Φ irrationnel, écriture d'un rationnel limitée ou périodique (restes), et
+réciproque (10^{k+p}x − 10^k x), a · 0 = 0, |x| ≤ y ⇔ −y ≤ x ≤ y, inégalité triangulaire, propagation de l'erreur
+(4e ; (a + b)e + e²), Héron (a_{n+1} − √A = (a_n − √A)²/(2a_n)), irrationnel a + (b − a)/√2 entre deux rationnels. Critère du
+dénominateur 2ᵃ5ᵇ (sert à 56gen16), quantificateurs et négation (56gen17), |A| = |B|, |x² − 4| > 2, |x + 6| > |x − 4| par les
+distances, |x − 1| + |2x + 3| par morceaux (`signTable` de textes), méthode des puissances, densité, dénombrable / continu
+(Cantor admis). 2 intuitions (« baguette » commune mesure ; distance sans le côté), « Le sais-tu ? » : Hippase « selon la
+légende » (Aristote cite une preuve par le pair et l'impair), Stevin (Bruges, De Thiende / La Disme 1585), Eudoxe / Euclide
+livre V / Méray, Cantor, Dedekind (image Euclide), YBC 7289 (image de la tablette), Cantor 1874 / diagonale 1891 ; « À quoi
+ça sert ? » : format A4 (√2), 0,1 + 0,2 en base 2, tolérance d'usinage |d − 20| ≤ 0,05, racine carrée des calculatrices
+(Héron = Newton). Atelier repris `angle-d-or-widget` (étape 1). Cartes 56gen14–56gen20 (`chantier: '5e-6h'`). Parcours :
+15 phrases d'`essentiel`, 20 cartes ; synthèse 6 puces KaTeX, formulaire 5 groupes (seulement ce que demandent 56gen14–20).
+
+**Figures** (kinds existants, aucun nouveau) : carré et diagonale, rectangle d'or et carré (`vectorPlane` isotrope 16/15,
+`regions`), réduites autour de Φ (`curvePlot` sans courbe), ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ (`numberSetsNesting`, 9 exemples : positions
+calculées par `scratchpad/56-A/ensembles.py` pour qu'aucune étiquette ne touche un contour ni une autre — les couronnes
+latérales n'acceptent pas d'étiquette de 7 caractères ; −12,03, −10⁶, 3/7 et ∛−7 du manuel retirés faute de place),
+intervalles emboîtés (`intervalComparison`), |x − 3| ≤ 2 (`domainLine`), y = |x² − 4| et y = |x − 1| + |2x + 3| (`curvePlot`,
+étiquettes posées par `textLabels` hors de la courbe), rectangles de Héron (`vectorPlane` isotrope). **Piège relevé** : dans
+une étiquette de figure (IBM Plex Mono), la barre de fraction ⁄ (U+2044) entre deux CHIFFRES est composée en fraction
+minuscule (« ³⁄₇ » illisible) — écrire « 3 / 7 » avec des espaces fines insécables U+202F (« π⁄2 » reste lisible). **Piège
+KaTeX** : `]-\infty` rend le « − » BINAIRE (espacé) après le « ] » ouvrant ; écrire `]{-\infty}\,;-8[` (lecture en mots
+inchangée).
+
+**Vérifié** : `tsc` ; contrôle `scratchpad/56-A/verif.mjs` (472 champs RichText, 1 269 formules : KaTeX strict, 0 `$$` /
+`$` orphelin / `*` simple / notation clavier / point décimal / lecture vide) ; page (Vite de dev) à 390 et 1 280 px, clair et
+sombre, carte, 5 étapes (tiroirs ouverts, « Tout montrer ») et Réviser : 0 `$`, 0 `[[`, 0 `.katex-error`, 0 débordement,
+0 erreur console, 0 formule qui défile (17 formules coupées en plusieurs `$…$`).
