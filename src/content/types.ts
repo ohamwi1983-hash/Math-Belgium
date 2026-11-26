@@ -253,6 +253,7 @@ export type InteractiveWidgetTag =
   | 'changer-unites-widget'
   | 'heron-rectangles-widget'
   | 'valeur-absolue-distance-widget'
+  | 'phi-intervalles-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

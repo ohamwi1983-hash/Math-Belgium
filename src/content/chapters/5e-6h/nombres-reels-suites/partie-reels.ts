@@ -39,6 +39,13 @@ export const sectionsReels: ChapterSection[] = [
     partie: 'Les nombres réels',
     blocks: [
       { kind: 'para', text: 'Étape en cours de rédaction.' },
+      {
+        kind: 'atelier',
+        tag: 'phi-intervalles-widget',
+        label: 'Manipule toi-même : des intervalles emboîtés autour de Φ',
+        caption:
+          'Les rapports de deux termes consécutifs de la suite de Fibonacci (1, 2, 3⁄2, 5⁄3, 8⁄5…) tombent tour à tour sous Φ et au-dessus. Deux rapports consécutifs forment un intervalle qui contient Φ, emboîté dans le précédent et de plus en plus court. Agrandis la droite (×10, ×100…) pour suivre les intervalles : aucun rationnel n’est dans tous, seul Φ, irrationnel, l’est.',
+      },
       // ⟨fin-etape axiomes⟩
     ],
   },

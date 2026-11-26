@@ -253,6 +253,7 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'changer-unites-widget': () => import('../../interactive/register-changer-unites-widget.js'),
   'heron-rectangles-widget': () => import('../../interactive/register-heron-rectangles-widget.js'),
   'valeur-absolue-distance-widget': () => import('../../interactive/register-valeur-absolue-distance-widget.js'),
+  'phi-intervalles-widget': () => import('../../interactive/register-phi-intervalles-widget.js'),
 }
 
 /**
