@@ -355,6 +355,7 @@ export const sectionsFinance: ChapterSection[] = [
         description: ['Calcule une valeur acquise ou une valeur actuelle à intérêts composés, retrouve le taux par une racine n-ième, cherche une durée par la table de la calculatrice (doublement compris) et traite une durée non entière avec la convention des banques.'],
         chantier: '5e-6h',
         whereLabel: '5e (6h) → « 25. Intérêts composés »',
+      },
       {
         kind: 'atelier',
         tag: 'simple-compose-widget',
@@ -709,6 +710,7 @@ export const sectionsFinance: ChapterSection[] = [
         description: ['Calcule la valeur acquise d’une suite de versements (au moment du dernier ou une période après), la valeur actuelle d’un remboursement, ou retrouve le montant des versements, avec des versements en début ou en fin de période ; le corrigé dessine la ligne du temps.'],
         chantier: '5e-6h',
         whereLabel: '5e (6h) → « 27. Annuités : placement et remboursement »',
+      },
       {
         kind: 'atelier',
         tag: 'ligne-temps-annuites-widget',
@@ -929,6 +931,7 @@ export const sectionsFinance: ChapterSection[] = [
         description: ['Lis une situation d’épargne ou d’emprunt, reconnais le type de problème (intérêt simple, intérêts composés, taux équivalent, annuités, mensualité), la grandeur cherchée et la formule à utiliser, sans faire le calcul.'],
         chantier: '5e-6h',
         whereLabel: '5e (6h) → « 23. Quelle formule ? Reconnaître le problème financier »',
+      },
       {
         kind: 'atelier',
         tag: 'simulateur-credit-widget',

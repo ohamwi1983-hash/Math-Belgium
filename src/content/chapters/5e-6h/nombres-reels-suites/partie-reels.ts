@@ -661,6 +661,7 @@ export const sectionsReels: ChapterSection[] = [
         description: ['Dis si des énoncés avec ∀ et ∃ sont vrais ou faux (l’ordre compte), écris leur négation, puis retrouve quel axiome justifie chaque étape d’un calcul : associativité, distributivité, neutre, symétrique, compatibilité de ≤…'],
         chantier: '5e-6h',
         whereLabel: '5e (6h) → « 17. Énoncés quantifiés et axiomes »',
+      },
       {
         kind: 'atelier',
         tag: 'phi-intervalles-widget',
@@ -1011,6 +1012,7 @@ export const sectionsReels: ChapterSection[] = [
         description: ['Écris une expression comme |x − a| + |bx + c| par morceaux : zéros, tableau, expression réduite sur chaque intervalle, contrôle aux bornes.'],
         chantier: '5e-6h',
         whereLabel: '5e (6h) → « 19. Écrire sans valeur absolue »',
+      },
       {
         kind: 'atelier',
         tag: 'valeur-absolue-distance-widget',
@@ -1245,6 +1247,7 @@ export const sectionsReels: ChapterSection[] = [
         description: ['Applique l’algorithme de Héron à √A depuis un premier rectangle : termes successifs, encadrements, nombre d’étapes pour une précision donnée (menu Récurrence), puis la méthode des puissances pour approcher √p par une fraction.'],
         chantier: '5e-6h',
         whereLabel: '5e (6h) → « 20. Héron et encadrements successifs »',
+      },
       {
         kind: 'atelier',
         tag: 'heron-rectangles-widget',

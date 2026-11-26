@@ -361,6 +361,7 @@ export const sectionsSuites: ChapterSection[] = [
         ],
         chantier: '5e-6h',
         whereLabel: '5e (6h) → « Suite récurrente affine et régime permanent »',
+      },
       {
         kind: 'atelier',
         tag: 'calculatrice-prudence-widget',
@@ -1607,6 +1608,7 @@ export const sectionsSuites: ChapterSection[] = [
         ],
         chantier: '5e-6h',
         whereLabel: '5e (6h) → « Détective d’erreurs : suites »',
+      },
       {
         kind: 'atelier',
         tag: 'serie-harmonique-widget',
