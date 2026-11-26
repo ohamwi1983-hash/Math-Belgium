@@ -1,6 +1,6 @@
 import type { LigneCalcul } from "../../../export/genererFeuilleExercices";
 import { ligne } from "../../../export/corrigeTableau";
-import { decomposer, decompositionL } from "./outilsReels";
+import { decomposer, decompositionL, estPremier } from "./outilsReels";
 
 /**
  * Briques de corrigé « comme au tableau » communes aux générateurs 56gen14–56gen19 (sans `docx`).
@@ -17,9 +17,11 @@ export function lignesDecomposition(N: number): LigneCalcul[] {
     premiers.push(p);
     reste /= p;
     const membre = [...premiers, ...(reste > 1 ? [reste] : [])].join("\\cdot ");
-    L.push(ligne(`${L.length === 0 ? `${N}` : ""}=${membre}`, reste > 1 ? `on divise ${reste * p} par ${p}` : `${p} est premier`));
+    L.push(ligne(`${L.length === 0 ? `${N}` : ""}=${membre}`, reste > 1 ? `on divise ${reste * p} par ${p}${estPremier(reste) ? `, ${reste} est premier` : ""}` : `${p} est premier`));
+    if (estPremier(reste)) break;
   }
   const regroupe = decompositionL(decomposer(N));
-  if (regroupe !== premiers.join("\\cdot ")) L.push(ligne(`=${regroupe}`, "on regroupe les facteurs égaux"));
+  const dernier = [...premiers, ...(reste > 1 ? [reste] : [])].join("\\cdot ");
+  if (regroupe !== dernier) L.push(ligne(`=${regroupe}`, "on regroupe les facteurs égaux"));
   return L;
 }

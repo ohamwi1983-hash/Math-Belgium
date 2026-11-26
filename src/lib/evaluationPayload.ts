@@ -547,6 +547,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'irrationnels', generatorId: '56gen15', label: 'Démontrer qu’un nombre est irrationnel (56gen15)', processus: 2 },
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'ecritures-decimales', generatorId: '56gen16', label: 'Écriture décimale et fraction (56gen16)', processus: 2 },
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'axiomes', generatorId: '56gen17', label: 'Énoncés quantifiés et axiomes (56gen17)', processus: 1 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'valeur-absolue', generatorId: '56gen18', label: 'Équations et inéquations avec valeurs absolues (56gen18)', processus: 2 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'valeur-absolue', generatorId: '56gen19', label: 'Écrire sans valeur absolue (56gen19)', processus: 2 },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même

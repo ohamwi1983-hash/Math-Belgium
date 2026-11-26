@@ -1203,3 +1203,32 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
 REGROUPEMENTS["56gen5"] = REGROUPEMENTS["5gen46"];
 REGROUPEMENTS["56gen6"] = REGROUPEMENTS["5gen16"];
 
+
+// 5e (6h), nouveaux générateurs « Les nombres réels » (chantier E1, 26/11/2026). 56gen14 (quatre nombres en vraies
+// questions) et 56gen17 (vraies questions, ou calcul numéroté propre à l'instance) ne se regroupent pas.
+REGROUPEMENTS["56gen15"] = simple(
+  String.raw`Le nombre (?<ligne>${M}) est-il rationnel ou irrationnel\s?\? Démontre ta réponse\.`,
+  "Chacun des nombres suivants est-il rationnel ou irrationnel ? Démontre chaque réponse.",
+);
+REGROUPEMENTS["56gen16"] = {
+  formes: [
+    { motif: re(String.raw`Écris (?<ligne>${M}) sous forme de fraction irréductible\.`), consigne: "Écris chaque nombre sous forme de fraction irréductible." },
+    {
+      motif: re(String.raw`Sans effectuer la division, dis si (?<ligne>${M}) a une écriture décimale limitée ou illimitée périodique\. Justifie\.`),
+      consigne: "Sans effectuer la division, dis si chaque fraction a une écriture décimale limitée ou illimitée périodique. Justifie.",
+    },
+    {
+      motif: re(String.raw`Écris (?<ligne>${M}) sous forme décimale et donne la longueur de sa période\. Sans poser la division, combien de chiffres cette période pouvait-elle compter au plus\s?\? Justifie\.`),
+      consigne: "Écris chaque fraction sous forme décimale et donne la longueur de sa période. Sans poser la division, combien de chiffres chaque période pouvait-elle compter au plus ? Justifie.",
+    },
+  ],
+};
+REGROUPEMENTS["56gen18"] = {
+  formes: [
+    {
+      motif: re(String.raw`Résous dans (?<int>${M})\s?: (?<ligne>${M})\.`),
+      consigne: (g) => `Résous dans ${g.int} chaque ${/<|>|\\leq|\\geq/.test(g.ligne ?? "") ? "inéquation" : "équation"}.`,
+    },
+  ],
+};
+REGROUPEMENTS["56gen19"] = simple(String.raw`Écris (?<ligne>${M}) sans valeur absolue\.`, "Écris chaque expression sans valeur absolue.");

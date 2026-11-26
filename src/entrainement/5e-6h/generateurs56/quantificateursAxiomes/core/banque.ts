@@ -159,6 +159,51 @@ function predicats(): Predicat[] {
       ae: { vrai: true, lignes: [L("y=x", "pour chaque naturel x"), L("x\\leq x", "≤ est réflexive")], raison: [lx("y=x"), tx(" convient pour chaque x : l'énoncé est vrai.")] },
       ea: { vrai: false, lignes: [L("x=y+1", "on teste ce naturel"), L("y+1>y")], raison: [tx("Aucun naturel n'est plus grand que tous les naturels : "), lx("x=y+1"), tx(" le dépasse. L'énoncé est faux.")] },
     },
+    {
+      cle: "plusPetitStrictNaturel",
+      ensX: N,
+      ensY: N,
+      p: "y<x",
+      np: "y\\geq x",
+      ae: { vrai: false, lignes: [L("x=0", "contre-exemple"), L("y\\geq 0", "pour tout naturel y")], raison: [tx("Pour "), lx("x=0"), tx(", aucun naturel n'est plus petit : l'énoncé est faux.")] },
+      ea: { vrai: false, lignes: [L("x=0", "quel que soit y"), L("y\\geq 0", "aucun naturel n'est négatif")], raison: [tx("Quel que soit y, "), lx("x=0"), tx(" le met en défaut : l'énoncé est faux.")] },
+    },
+    {
+      cle: "archimede",
+      ensX: R,
+      ensY: N,
+      p: "y>x",
+      np: "y\\leq x",
+      ae: { vrai: true, lignes: [L("y>\\left|x\\right|\\geq x", "un naturel y plus grand que |x| existe (axiome d'Archimède)")], raison: [tx("Pour chaque réel x, un naturel plus grand que "), lx("\\left|x\\right|"), tx(" convient (axiome d'Archimède) : l'énoncé est vrai.")] },
+      ea: { vrai: false, lignes: [L("x=y", "on teste ce réel"), L("y>y", "faux")], raison: [tx("Avec "), lx("x=y"), tx(", "), lx("y>y"), tx(" est faux : aucun naturel ne dépasse tous les réels. L'énoncé est faux.")] },
+    },
+    {
+      cle: "entierEgal",
+      ensX: R,
+      ensY: "\\mathbb{Z}",
+      p: "y=x",
+      np: "y\\neq x",
+      ae: { vrai: false, lignes: [L("x=\\dfrac{1}{2}", "contre-exemple"), L("y=\\dfrac{1}{2}\\notin\\mathbb{Z}", "aucun entier ne convient")], raison: [tx("Pour "), lx("x=\\dfrac{1}{2}"), tx(", aucun entier ne convient : l'énoncé est faux.")] },
+      ea: { vrai: false, lignes: [L("x=y+1", "on teste ce réel"), L("y\\neq y+1")], raison: [tx("Un même entier ne peut pas être égal à deux réels différents : l'énoncé est faux.")] },
+    },
+    {
+      cle: "pair",
+      ensX: "\\mathbb{Z}",
+      ensY: "\\mathbb{Z}",
+      p: "x=2y",
+      np: "x\\neq 2y",
+      ae: { vrai: false, lignes: [L("x=1", "contre-exemple"), L("y=\\dfrac{1}{2}\\notin\\mathbb{Z}", "aucun entier ne convient")], raison: [lx("x=1"), tx(" n'est pas le double d'un entier : l'énoncé est faux.")] },
+      ea: { vrai: false, lignes: [L("x=2y+1", "on teste cet entier"), L("2y+1\\neq 2y")], raison: [tx("Avec "), lx("x=2y+1"), tx(", l'égalité est fausse : l'énoncé est faux.")] },
+    },
+    {
+      cle: "absMinore",
+      ensX: R,
+      ensY: R,
+      p: "\\left|x\\right|\\geq y",
+      np: "\\left|x\\right|<y",
+      ae: { vrai: true, lignes: [L("y=\\left|x\\right|", "y choisi après x"), L("\\left|x\\right|\\geq\\left|x\\right|", "≤ est réflexive")], raison: [tx("Pour chaque x, "), lx("y=\\left|x\\right|"), tx(" convient : l'énoncé est vrai.")] },
+      ea: { vrai: true, lignes: [L("y=0", "le même y pour tous les x"), L("\\left|x\\right|\\geq 0", "une valeur absolue est positive")], raison: [tx("Le même "), lx("y=0"), tx(" convient pour tous les x : l'énoncé est vrai.")] },
+    },
   ];
 }
 
@@ -181,28 +226,32 @@ function unQuantificateur(): EnonceQuantifie[] {
     s("absEgal", "\\forall x\\in\\mathbb{R} : \\left|x\\right|=x", false, [L("x=-1", "contre-exemple"), L("\\left|-1\\right|=1\\neq -1")], [lx("x=-1"), tx(" est un contre-exemple : l'énoncé est faux.")], aideTout),
     s("triangulaire", "\\forall x, y\\in\\mathbb{R} : \\left|x+y\\right|\\leq\\left|x\\right|+\\left|y\\right|", true, [L("\\left|x+y\\right|\\leq\\left|x\\right|+\\left|y\\right|", "inégalité triangulaire (étape 4)")], [tx("C'est l'inégalité triangulaire : l'énoncé est vrai.")], aideTout),
     s("absSomme", "\\forall x, y\\in\\mathbb{R} : \\left|x+y\\right|=\\left|x\\right|+\\left|y\\right|", false, [L("x=-1,\\ y=1", "contre-exemple"), L("\\left|-1+1\\right|=0\\neq 2")], [lx("x=-1"), tx(" et "), lx("y=1"), tx(" forment un contre-exemple : l'énoncé est faux.")], aideTout),
-    s("plusA", `\\exists x\\in\\mathbb{R} : x+${a}=x`, false, [L(`x+${a}=x`, "supposé"), L(`${a}=0`, "on ajoute −x : faux")], [tx("L'égalité donnerait "), lx(`${a}=0`), tx(" : l'énoncé est faux.")], aideExiste),
+    s("plusA", `\\exists x\\in\\mathbb{R} : x+${a}=x`, false, [L(`(x+${a})-x=${a}`, "pour tout réel x"), L(`${a}\\neq 0`, `donc x + ${a} ≠ x`)], [tx("Pour tout x, "), lx(`(x+${a})-x=${a}\\neq 0`), tx(" : aucun réel ne convient, l'énoncé est faux.")], aideExiste),
     s("double", "\\forall x\\in\\mathbb{R} : 2x>x", false, [L("x=-1", "contre-exemple"), L("-2<-1")], [lx("x=-1"), tx(" est un contre-exemple : l'énoncé est faux.")], aideTout),
     s("doubleExiste", "\\exists x\\in\\mathbb{R} : 2x>x", true, [L("x=1", "exemple"), L("2>1")], [lx("x=1"), tx(" convient : l'énoncé est vrai.")], aideExiste),
     s("plusUn", "\\forall x\\in\\mathbb{R} : x<x+1", true, [L("x+1-x=1>0", "pour tout réel x")], [tx("Pour tout x, la différence vaut 1 : l'énoncé est vrai.")], aideTout),
-    s("pair", "\\forall x\\in\\mathbb{Z}\\ \\exists y\\in\\mathbb{Z} : x=2y", false, [L("x=1", "contre-exemple"), L("y=\\dfrac{1}{2}\\notin\\mathbb{Z}")], [lx("x=1"), tx(" n'est pas le double d'un entier : l'énoncé est faux.")], AIDE_AE),
   ];
 }
 
-/** Énoncés de verdict imposé (`vrai`), en évitant les clés déjà prises. Deux quantificateurs sept fois
- * sur dix. */
+type Forme = "ae" | "ea" | "tout" | "existe";
+
+/** Énoncés de verdict imposé (`vrai`), en évitant les clés déjà prises. La FORME (∀x ∃y, ∃y ∀x, ∀, ∃)
+ * est tirée indépendamment du verdict (35 / 35 / 15 / 15 %), puis un énoncé de cette forme et de ce
+ * verdict : la forme ne trahit jamais le verdict (avant, « ∃y ∀x » était faux 82 fois sur 100). */
 export function tirerEnonce(vrai: boolean, pris: Set<string>): EnonceQuantifie {
   for (;;) {
-    if (Math.random() < 0.7) {
-      const p = parmi(predicats());
-      const ordre = Math.random() < 0.5 ? "ae" : "ea";
-      const v = ordre === "ae" ? p.ae : p.ea;
-      if (v.vrai !== vrai || pris.has(p.cle)) continue;
-      return { cle: p.cle, latex: ordre === "ae" ? ae(p) : ea(p), vrai, lignes: v.lignes, raison: v.raison, aide2: ordre === "ae" ? AIDE_AE : AIDE_EA };
+    const r = Math.random();
+    const forme: Forme = r < 0.35 ? "ae" : r < 0.7 ? "ea" : r < 0.85 ? "tout" : "existe";
+    if (forme === "ae" || forme === "ea") {
+      const candidats = predicats().filter((p) => (forme === "ae" ? p.ae : p.ea).vrai === vrai && !pris.has(p.cle));
+      if (candidats.length === 0) continue;
+      const p = parmi(candidats);
+      const v = forme === "ae" ? p.ae : p.ea;
+      return { cle: p.cle, latex: forme === "ae" ? ae(p) : ea(p), vrai, lignes: v.lignes, raison: v.raison, aide2: forme === "ae" ? AIDE_AE : AIDE_EA };
     }
-    const s = parmi(unQuantificateur());
-    if (s.vrai !== vrai || pris.has(s.cle)) continue;
-    return s;
+    const candidats = unQuantificateur().filter((s) => s.vrai === vrai && !pris.has(s.cle) && s.latex.startsWith(forme === "tout" ? "\\forall" : "\\exists"));
+    if (candidats.length === 0) continue;
+    return parmi(candidats);
   }
 }
 
