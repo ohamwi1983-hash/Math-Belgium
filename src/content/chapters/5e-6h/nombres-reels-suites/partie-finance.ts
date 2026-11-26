@@ -46,6 +46,13 @@ export const sectionsFinance: ChapterSection[] = [
     partie: 'Algèbre financière',
     blocks: [
       { kind: 'para', text: 'Étape en cours de rédaction.' },
+      {
+        kind: 'atelier',
+        tag: 'ligne-temps-annuites-widget',
+        label: 'Manipule toi-même : la ligne du temps des annuités',
+        caption:
+          'Règle le versement, leur nombre et le taux, puis choisis la date d’évaluation : chaque versement est capitalisé (flèche vers la droite, × (1 + i) par période) ou actualisé (vers la gauche, × (1 + i)⁻¹). La somme des valeurs donne Vₙ, V₀ ou Vₙ(1 + i).',
+      },
       // ⟨fin-etape annuites⟩
     ],
   },

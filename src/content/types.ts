@@ -258,6 +258,7 @@ export type InteractiveWidgetTag =
   | 'serie-harmonique-widget'
   | 'fractales-widget'
   | 'simple-compose-widget'
+  | 'ligne-temps-annuites-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }
