@@ -32,7 +32,7 @@ export function calculL(e: E): string {
 export function consigneGenerale(e: E): Frag[] {
   if (e.variante === "quantifies") return [tx("Dis si chacun de deux énoncés est vrai ou faux, puis trouve la négation d'un troisième énoncé.")];
   const hyp: Frag[] = e.hypotheses ? [tx("Soit x et y des réels tels que "), lx(e.hypotheses), tx(". ")] : [tx("Soit x, y et z des réels. ")];
-  return [...hyp, tx("Quel axiome (ou quelle définition) des réels justifie chaque étape du calcul suivant ? "), lx(calculL(e))];
+  return [...hyp, tx("Voici un calcul : "), lx(calculL(e)), tx(" Quel axiome (ou quelle définition) des réels justifie chacune de ses étapes ?")];
 }
 
 export function libelle(_e: E, p: P): string {

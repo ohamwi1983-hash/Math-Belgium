@@ -40,7 +40,7 @@ function enoncePapier(e: E): EnoncePapier {
     };
   const hyp: FragmentConsigne[] = e.hypotheses ? [t("Soit x et y des réels tels que "), f(e.hypotheses), t(". ")] : [t("Soit x, y et z des réels. ")];
   return {
-    section: { enteteFragments: [...hyp, t("Quel axiome (ou quelle définition) des nombres réels justifie chacune des étapes (1), (2) et (3) du calcul suivant ? "), f(calculL(e))], questions: [] },
+    section: { enteteFragments: [...hyp, t("Voici un calcul : "), f(calculL(e)), t(" Quel axiome (ou quelle définition) des nombres réels justifie chacune des étapes (1), (2) et (3) ?")], questions: [] },
     reponseBreve: reponseBreve(e),
   };
 }
