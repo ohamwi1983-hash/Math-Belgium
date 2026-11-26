@@ -350,6 +350,7 @@ import { adaptateurEvaluationInteretsComposes56 } from '../entrainement/5e-6h/ge
 import { adaptateurEvaluationTauxEquivalents56 } from '../entrainement/5e-6h/generateurs56/tauxEquivalents/exportEvaluation'
 import { adaptateurEvaluationAnnuites56 } from '../entrainement/5e-6h/generateurs56/annuites/exportEvaluation'
 import { adaptateurEvaluationCredit56 } from '../entrainement/5e-6h/generateurs56/credit/exportEvaluation'
+import { adaptateurEvaluationQuelleFormule56 } from '../entrainement/5e-6h/generateurs56/quelleFormule/exportEvaluation'
 import { adaptateurEvaluationLireNuage } from '../entrainement/5e-4h/generateurs5e/lireNuage/exportEvaluation'
 import { adaptateurEvaluationPointMoyen } from '../entrainement/5e-4h/generateurs5e/pointMoyenStat/exportEvaluation'
 import { adaptateurEvaluationDroiteMayer } from '../entrainement/5e-4h/generateurs5e/droiteMayer/exportEvaluation'
@@ -434,6 +435,7 @@ export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExe
   '5gen37': versionPapier(adaptateurEvaluationMoindresCarres) as unknown as AdaptateurFeuilleExercices<never>,
   '5gen38': versionPapier(adaptateurEvaluationCorrelation) as unknown as AdaptateurFeuilleExercices<never>,
   // 5e (6h), algèbre financière (chantier F).
+  '56gen23': versionPapier(adaptateurEvaluationQuelleFormule56) as unknown as AdaptateurFeuilleExercices<never>,
   '56gen24': versionPapier(adaptateurEvaluationInteretSimple56) as unknown as AdaptateurFeuilleExercices<never>,
   '56gen25': versionPapier(adaptateurEvaluationInteretsComposes56) as unknown as AdaptateurFeuilleExercices<never>,
   '56gen26': versionPapier(adaptateurEvaluationTauxEquivalents56) as unknown as AdaptateurFeuilleExercices<never>,

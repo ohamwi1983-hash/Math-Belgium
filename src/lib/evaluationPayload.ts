@@ -534,6 +534,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'taux-equivalents', generatorId: '56gen26', label: 'Taux équivalents et taux réel (56gen26)', processus: 2 },
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'annuites', generatorId: '56gen27', label: 'Annuités : placement et remboursement (56gen27)', processus: 2 },
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'credit', generatorId: '56gen28', label: "Crédit et tableau d'amortissement (56gen28)", processus: 3 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'credit', generatorId: '56gen23', label: 'Quelle formule ? Reconnaître le problème financier (56gen23)', processus: 1 },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même

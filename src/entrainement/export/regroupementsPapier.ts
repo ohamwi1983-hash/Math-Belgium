@@ -551,6 +551,11 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     String.raw`(?<ligne>.+)\nCette corrélation traduit-elle une relation de cause à effet \? Explique-la : causalité plausible, cause commune \(nomme-la\), coïncidence, causalité inverse ou effet décalé dans le temps\.`,
     "Pour chaque situation, dis si la corrélation traduit une relation de cause à effet et explique-la : causalité plausible, cause commune (nomme-la), coïncidence, causalité inverse ou effet décalé dans le temps.",
   ),
+  // 5e (6h), algèbre financière (chantier F) : la situation en contexte est la ligne.
+  "56gen23": simple(
+    String.raw`(?<ligne>.+)\nReconnais le type de problème, la grandeur cherchée et la formule à utiliser \(transformée si nécessaire\)\. Ne fais pas le calcul\.`,
+    "Pour chaque situation, reconnais le type de problème, la grandeur cherchée et la formule à utiliser (transformée si nécessaire). Ne fais pas les calculs.",
+  ),
   "5gen55": {
     formes: [{ motif: re(String.raw`Résous dans (?<int>${M}) l'inéquation (?<ligne>${M})\. (?<s>Donne .+)`), consigne: (g) => `Résous dans ${g.int} chaque inéquation. ${g.s}` }],
   },
