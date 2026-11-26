@@ -4500,3 +4500,28 @@ mesurée avec l'ancienne répartition ; 25 / 50 / 25 : de 42 à 59 min, médiane
   par `\qquad` est rendue partie par partie (un blanc de 1,6 em entre elles), une partie courte (≤ 32 signes de
   source) en `nowrap` : « σx = √V(x) » ne se coupe plus après « = » dans la colonne étroite. 26 formules à `\qquad`
   dans les formulaires, toutes à accolades équilibrées une fois découpées (contrôlé).
+
+## 5e (6h) — convention de dossier des générateurs 56genN (chantier D, 26/11/2026)
+
+À suivre par TOUS les chantiers de générateurs de la 5e (6h) (copies 56gen1–13, nouveaux 56gen14–28…) :
+
+- **Appli** : `src/entrainement/5e-6h/App56genN.tsx` (export `App56genN`), entrée `'56genN'` de
+  `entrainement/registry.ts` avec `CH_56_NOMBRES_REELS_SUITES` (chantier `'5e-6h'`).
+- **Code propre au générateur** : `src/entrainement/5e-6h/generateurs56/<nom>/` — générateur (`index.ts` +
+  modules), `exportEvaluation.ts` (adaptateur papier), `corrigeDetaille.ts`, profil (`profilEvaluation.ts`), et au
+  besoin les sous-dossiers `core/` (types), `moteur/` (session, vérification), `ui/` (textes, aides, format),
+  `composants/` (écrans React), `export/` (SVG papier). Profils communs à plusieurs copies :
+  `generateurs56/profilsEvaluationSuites56.ts`.
+- **Infrastructure partagée IMPORTÉE, jamais dupliquée** : `entrainement/components`, `entrainement/export`,
+  `5e-4h/components5e` génériques (`SelecteurVarianteDev`, `RecapitulatifPanel`, `EnTeteExercice`, `BoutonAide`,
+  `PiedEcranFonctions`, `EcranSaisieLimites`…), `5e-4h/moteur*`, `5e-4h/ui*` génériques (`formatExpressionLatex`,
+  `corrigeSuites1/2`…), `4e/…`. Une COPIE d'un générateur 5e (4h) copie exactement les fichiers que seul ce générateur
+  utilise (appli + adaptateur) ; ce que plusieurs générateurs de la 4h partagent reste importé (outil :
+  `copier.mjs` du dossier de travail `56-D`, qui réécrit les imports relatifs). Chaque fichier copié porte en tête
+  « Copie 5e (6h) de `…` ».
+- **Registres** : `lib/evaluationAdapterRegistry.ts::EVALUATION_ADAPTER_REGISTRY_56` (`versionPapier(...)`),
+  `lib/evaluationPayload.ts` (union `IdGenerateurPilote`, `GENERATEURS_EVALUATION_PILOTE` avec `chapitreSlug:
+  'nombres-reels-suites'` et l'id de l'étape, `processus`), `export/regroupementsPapier.ts` si l'énoncé se regroupe.
+- **Calculatrice** des élèves : Casio Graph Math+ (menus Récurrence, Table, Équation) — `calcul: 'exacte'` seulement
+  si elle donne la réponse directement ; le menu Récurrence donne directement un terme d'une suite définie par
+  récurrence ou par formule explicite (voir « 56gen : profils » ci-dessous).

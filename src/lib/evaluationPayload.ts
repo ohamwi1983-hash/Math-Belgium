@@ -135,6 +135,7 @@ export type IdGenerateurPilote =
   | '5gen73' | '5gen74' | '5gen75'
   | '5gen78' | '5gen79' | '5gen80' | '5gen81'
   | '5gen76' | '5gen77' | '5gen36' | '5gen37' | '5gen38'
+  | '56gen1' | '56gen2' | '56gen3' | '56gen4' | '56gen5' | '56gen6' | '56gen7' | '56gen8' | '56gen9' | '56gen10' | '56gen11' | '56gen12'
 
 export interface GeneratorConfig {
   chapitreSlug: string
@@ -527,6 +528,19 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'statistique-deux-variables', sectionId: 'mayer', generatorId: '5gen36', label: 'Droite de Mayer (5gen36)', processus: 2 },
   { chapitreSlug: 'statistique-deux-variables', sectionId: 'moindres-carres', generatorId: '5gen37', label: 'Droite des moindres carrés (5gen37)', processus: 2 },
   { chapitreSlug: 'statistique-deux-variables', sectionId: 'correlation', generatorId: '5gen38', label: 'Covariance et coefficient de corrélation (5gen38)', processus: 2 },
+  // 5e (6h), « Nombres réels et suites » : copies enrichies des générateurs de la 5e (4h) (chantier D, 26/11/2026).
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'suites-arithmetiques', generatorId: '56gen1', label: 'Suites arithmétiques, formule générale et termes (56gen1)' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'suites-geometriques', generatorId: '56gen2', label: 'Suites géométriques, formule générale et termes (56gen2)' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'definir-suite', generatorId: '56gen3', label: 'Définir et reconnaître une suite (56gen3)', processus: 2 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'suites-geometriques', generatorId: '56gen4', label: 'Sommes de termes consécutifs (56gen4)' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'suites-geometriques', generatorId: '56gen5', label: 'Termes consécutifs : trois, quatre, triangle rectangle (56gen5)', processus: 2 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'limite-suite', generatorId: '56gen6', label: 'Convergence et divergence des suites (56gen6)' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'sommes-infinies', generatorId: '56gen7', label: 'Somme infinie en situation (56gen7)', processus: 3 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'sommes-infinies', generatorId: '56gen8', label: 'Problèmes classiques et fractales (56gen8)', processus: 3 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'suites-geometriques', generatorId: '56gen9', label: 'Modéliser une situation par une suite (56gen9)', processus: 3 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'sommes-infinies', generatorId: '56gen10', label: "Détective d'erreurs : suites (56gen10)", processus: 3 },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'suites-geometriques', generatorId: '56gen11', label: 'Comparaison de deux suites (56gen11)' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'definir-suite', generatorId: '56gen12', label: 'Suite récurrente affine (56gen12)' },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même

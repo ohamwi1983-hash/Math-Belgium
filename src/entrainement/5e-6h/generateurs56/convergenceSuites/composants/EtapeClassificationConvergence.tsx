@@ -1,0 +1,135 @@
+// Copie 5e (6h) de `5e-4h/components5e/EtapeClassificationConvergence.tsx` (56gen6 ← 5gen16, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
+import { useState } from "react";
+import type { ExerciceConvergenceSuite } from "../../../../5e-4h/core5e/convergenceSuites.types";
+import type { PhaseConvergenceSuite } from "../moteur/typesConvergenceSuites";
+import { consigneGenerale, consignePhase, formatTermesDonneesLatex, lignesAideNiveau1, lignesAideNiveau2, optionsClassification } from "../ui/formatConvergenceSuites";
+import { LignesAideConvergence } from "./LignesAideConvergence";
+import { Katex } from "../../../../5e-4h/components/Katex";
+import { ValidationEcran } from "../../../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../../../components/ValidationEcran";
+import { BoutonAide } from "../../../../5e-4h/components5e/BoutonAide";
+import { formatMessageErreur } from "../../../../5e-4h/ui/messageErreur";
+import type { StatutVerification } from "../../../../5e-4h/moteur/statutVerification";
+import { EnTeteExercice } from "../../../../5e-4h/components5e/EnTeteExercice";
+
+interface Props {
+  exercice: ExerciceConvergenceSuite;
+  phase: "classificationArithmetique" | "classificationGeometrique" | "classifierQuelconque";
+  tentativesUtilisees: number;
+  tentativesMax: number;
+  niveauAide: number;
+  niveauAideMax: number;
+  onActiverAide: () => void;
+  onValider: (reponse: { classification: string; valeur?: string }) => void;
+  /**
+   * Statut à 3 valeurs (A.1) calculé côté PRÉSENTATION uniquement — optionnel, et VOLONTAIREMENT
+   * omis par `App5gen16.tsx` pour les 2 écrans purement catégoriels (classificationArithmetique/
+   * classificationGeometrique, aucun champ texte libre, donc aucune fonction `diagnostiquerXxx`
+   * n'existe pour eux côté `verificationConvergenceSuites.ts` — leur vérification reste un simple
+   * booléen, `verifierClassificationArithmetique`/`verifierClassificationGeometrique`) — fourni
+   * uniquement pour "classifierQuelconque", dont le champ conditionnel "valeur" peut légitimement
+   * échouer au parsing (`diagnostiquerClassifierQuelconque`, déjà exportée).
+   */
+  diagnostiquer?: (reponse: { classification: string; valeur?: string }) => StatutVerification;
+  /** Diagnostic INDÉPENDANT du seul champ texte libre de cet écran (A.2, surlignage rouge) —
+   * n'existe que pour "classifierQuelconque" quand l'option choisie exige une valeur numérique
+   * ("Converge vers une autre valeur"), jamais pour les 2 écrans purement catégoriels. */
+  diagnostiquerValeur?: (valeur: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
+}
+
+/** Écran de classification catégorielle — réutilisé par les 3 écrans "classification" de 5gen16
+ * (arithmétique : 3 boutons ; géométrique : 6 boutons ; quelconque/classifierQuelconque : 4
+ * boutons dont 1 révèle un champ numérique — "Converge vers une autre valeur"). */
+export function EtapeClassificationConvergence({
+  exercice,
+  phase,
+  tentativesUtilisees,
+  tentativesMax,
+  niveauAide,
+  niveauAideMax,
+  onActiverAide,
+  onValider,
+  diagnostiquer,
+  diagnostiquerValeur,
+  validation,
+}: Props) {
+  const options = optionsClassification(exercice, phase as PhaseConvergenceSuite);
+  const [choixId, setChoixId] = useState<string | null>(null);
+  const [valeur, setValeur] = useState("");
+  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const montrerErreurs = tentativesUtilisees > 0;
+  const optionChoisie = options.find((o) => o.id === choixId);
+  const complet = choixId !== null && (!optionChoisie?.requiertValeur || valeur.trim() !== "");
+  const apresEchec = tentativesUtilisees > 0;
+  const valeurErronee = apresEchec && !!optionChoisie?.requiertValeur && !!diagnostiquerValeur && diagnostiquerValeur(valeur) !== "correct";
+  const aide2 = lignesAideNiveau2(exercice, phase as PhaseConvergenceSuite);
+
+  function valider() {
+    if (!complet || choixId === null) return;
+    const reponse = { classification: choixId, valeur: optionChoisie?.requiertValeur ? valeur : undefined };
+    if (diagnostiquer) setDernierStatut(diagnostiquer(reponse));
+    onValider(reponse);
+  }
+
+  return (
+    <div>
+      <EnTeteExercice
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
+      <p className="prompt-text">{consignePhase(exercice, phase as PhaseConvergenceSuite)}</p>
+
+      <div className={options.length > 4 ? "options-liste-longue" : "options-grid-compact"}>
+        {options.map((o) => (
+          <button key={o.id} type="button" className={`btn ${choixId === o.id ? "toggle-active" : ""}`} onClick={() => setChoixId(o.id)}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+
+      {optionChoisie?.requiertValeur && (
+        <div className="field field-inline contenu-conditionnel">
+          <label className="field-label field-label-minuscule">
+            <Katex expression="\lim =" />
+          </label>
+          <input type="text" className={`text-input${valeurErronee ? " is-erronee" : ""}`} value={valeur} onChange={(e) => setValeur(e.target.value)} />
+        </div>
+      )}
+
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <LignesAideConvergence lignes={lignesAideNiveau1(exercice, phase as PhaseConvergenceSuite)} />
+          {niveauAide >= 2 && aide2.length > 0 && <LignesAideConvergence lignes={aide2} />}
+        </div>
+      )}
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {/* « Conclure » : une mauvaise conclusion clôt l'écran ; s'il reste ouvert après un échec,
+                c'est que la conclusion est juste et que seule la VALEUR de la limite est fausse. */}
+            {phase === "classifierQuelconque" && dernierStatut !== "parse_error"
+              ? `La conclusion est juste, mais la valeur de la limite ne l'est pas — tentative ${tentativesUtilisees}/${tentativesMax}, réessaie.`
+              : formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
+      )}
+      {validation && <ValidationEcran {...validation} />}
+    </div>
+  );
+}

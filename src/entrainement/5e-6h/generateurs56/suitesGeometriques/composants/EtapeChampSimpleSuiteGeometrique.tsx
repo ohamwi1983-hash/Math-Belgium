@@ -1,0 +1,103 @@
+// Copie 5e (6h) de `5e-4h/components5e/EtapeChampSimpleSuiteGeometrique.tsx` (56gen2 ← 5gen15, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
+import { normaliserSigneMoins } from "../../../../../lib/normaliserSaisie";
+import { useState } from "react";
+import type { ExerciceSuiteGeometrique } from "../../../../5e-4h/core5e/suitesGeometriques.types";
+import type { PhaseSuiteGeometrique } from "../moteur/typesSuiteGeometrique";
+import { consigneGenerale, consignePhase, formatTermesDonneesLatex, labelPhase, texteAideNiveau1, texteAideNiveau2, noteAideNiveau1 } from "../ui/formatSuiteGeometrique";
+import { Katex } from "../../../../5e-4h/components/Katex";
+import { ValidationEcran } from "../../../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../../../components/ValidationEcran";
+import { BoutonAide } from "../../../../5e-4h/components5e/BoutonAide";
+import { EnTeteExercice } from "../../../../5e-4h/components5e/EnTeteExercice";
+import { formatMessageErreur } from "../../../../5e-4h/ui/messageErreur";
+import type { StatutVerification } from "../../../../5e-4h/moteur/statutVerification";
+import { TexteInsistance } from "../../../../components/TexteInsistance";
+
+interface Props {
+  exercice: ExerciceSuiteGeometrique;
+  phase: PhaseSuiteGeometrique;
+  tentativesUtilisees: number;
+  tentativesMax: number;
+  niveauAide: number;
+  niveauAideMax: number;
+  onActiverAide: () => void;
+  onValider: (texte: string) => void;
+  /** Statut à 3 valeurs (A.1) calculé côté PRÉSENTATION uniquement — jamais consommé par le score/
+   * les tentatives. Optionnel : un appelant qui ne le fournit pas garde le message générique. */
+  diagnostiquer?: (texte: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
+}
+
+/** Écran à UN SEUL champ texte libre — réutilisé par 13 des 26 phases de 5gen15 (trouverU1/B1/B2,
+ * formuleGenerale/B1/B2, termeEloigne/B1/B2, sommeSn/B1/B2, resoudreXMoyenneSimple). `App5gen15.tsx`
+ * le rend avec `key={indexExercice-phase}` (même leçon que le reste du chantier 5e). */
+export function EtapeChampSimpleSuiteGeometrique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+  const [texte, setTexte] = useState("");
+  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const montrerErreurs = tentativesUtilisees > 0;
+  const apresEchec = tentativesUtilisees > 0;
+  const texteErronee = apresEchec && !!diagnostiquer && diagnostiquer(texte) !== "correct";
+
+  function valider() {
+    if (texte.trim() === "") return;
+    if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
+    onValider(texte);
+  }
+
+  const aide2 = texteAideNiveau2(exercice, phase);
+  // Exemples HORS de l'espace des tirages (q = 5/4 n'est pas dans le pool ; dénominateur 7
+  // impossible) — l'écran de la formule attend une expression en n, pas un nombre.
+  const placeholder = phase.startsWith("formuleGenerale") ? "ex : 7×(5/4)^(n−1)" : phase === "resoudreRangN" ? "ex : 15" : "ex : 13/7";
+
+  return (
+    <div>
+      <EnTeteExercice
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
+      <p className="prompt-text">{consignePhase(exercice, phase)}</p>
+      <div className="field field-inline">
+        <label className="field-label field-label-minuscule">
+          <Katex expression={labelPhase(exercice, phase)} />
+        </label>
+        <input
+          type="text"
+          className={`text-input${texteErronee ? " is-erronee" : ""}`}
+          value={texte}
+          onChange={(e) => setTexte(normaliserSigneMoins(e.target.value))}
+          placeholder={placeholder}
+        />
+      </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          {noteAideNiveau1(exercice, phase) && <p><TexteInsistance texte={noteAideNiveau1(exercice, phase)} /></p>}
+          <Katex expression={texteAideNiveau1(exercice, phase)} block />
+          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+        </div>
+      )}
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
+      )}
+      {validation && <ValidationEcran {...validation} />}
+    </div>
+  );
+}

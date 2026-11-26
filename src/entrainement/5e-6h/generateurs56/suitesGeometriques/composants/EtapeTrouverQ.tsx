@@ -1,0 +1,123 @@
+// Copie 5e (6h) de `5e-4h/components5e/EtapeTrouverQ.tsx` (56gen2 ← 5gen15, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
+import { normaliserSigneMoins } from "../../../../../lib/normaliserSaisie";
+import { useState } from "react";
+import type { ExerciceSuiteGeometrique } from "../../../../5e-4h/core5e/suitesGeometriques.types";
+import { consigneGenerale, consignePhase, formatTermesDonneesLatex, texteAideNiveau1, texteAideNiveau2, noteAideNiveau1 } from "../ui/formatSuiteGeometrique";
+import { Katex } from "../../../../5e-4h/components/Katex";
+import { ValidationEcran } from "../../../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../../../components/ValidationEcran";
+import { BoutonAide } from "../../../../5e-4h/components5e/BoutonAide";
+import { EnTeteExercice } from "../../../../5e-4h/components5e/EnTeteExercice";
+import { formatMessageErreur } from "../../../../5e-4h/ui/messageErreur";
+import type { StatutVerification } from "../../../../5e-4h/moteur/statutVerification";
+import { TexteInsistance } from "../../../../components/TexteInsistance";
+
+interface Props {
+  exercice: ExerciceSuiteGeometrique;
+  tentativesUtilisees: number;
+  tentativesMax: number;
+  niveauAide: number;
+  niveauAideMax: number;
+  onActiverAide: () => void;
+  onValider: (valeurs: string[]) => void;
+  /** Statut à 3 valeurs calculé côté PRÉSENTATION uniquement — optionnel. */
+  diagnostiquer?: (valeurs: string[]) => StatutVerification;
+  /** Diagnostic INDÉPENDANT par champ, index par index (A.2, surlignage rouge) — chaque valeur de
+   * q saisie est comparée à l'ENSEMBLE des q cibles (1 ou 2 branches, interchangeables). */
+  diagnostiquerChamp?: (index: number, valeur: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
+}
+
+const MAX_VALEURS = 2;
+
+/** Écran "trouverQ" — add-as-needed borné à 2 valeurs (`statutQ` ne vaut plus jamais que "unique"
+ * ou "double" — voir `core5e/suitesGeometriques.types.ts`, `StatutQ="aucune"` est devenu
+ * mathématiquement impossible sous la nouvelle construction et le bouton "aucune solution" a été
+ * retiré : il n'aurait plus jamais pu être la bonne réponse, un mode qui n'était plus qu'un piège
+ * dégénéré plutôt qu'un vrai cas pédagogique). */
+export function EtapeTrouverQ({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerChamp, validation}: Props) {
+  const [valeurs, setValeurs] = useState<string[]>([""]);
+  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const montrerErreurs = tentativesUtilisees > 0;
+  const complet = valeurs.every((v) => v.trim() !== "");
+  const apresEchec = tentativesUtilisees > 0;
+  const aide2 = texteAideNiveau2(exercice, "trouverQ");
+
+  function modifier(i: number, valeur: string) {
+    setValeurs((arr) => arr.map((v, j) => (j === i ? valeur : v)));
+  }
+  function ajouter() {
+    if (valeurs.length < MAX_VALEURS) setValeurs((arr) => [...arr, ""]);
+  }
+  function retirer(i: number) {
+    setValeurs((arr) => arr.filter((_, j) => j !== i));
+  }
+  function valider() {
+    if (!complet) return;
+    if (diagnostiquer) setDernierStatut(diagnostiquer(valeurs));
+    onValider(valeurs);
+  }
+
+  return (
+    <div>
+      <EnTeteExercice
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
+      <p className="prompt-text">{consignePhase(exercice, "trouverQ")}</p>
+
+      {valeurs.map((v, i) => {
+        const champErronee = apresEchec && !!diagnostiquerChamp && diagnostiquerChamp(i, v) !== "correct";
+        return (
+          <div key={i} className="field field-inline">
+            <label className="field-label field-label-minuscule">
+              <Katex expression={valeurs.length > 1 ? `q_{${i + 1}} =` : "q ="} />
+            </label>
+            <input type="text" className={`text-input${champErronee ? " is-erronee" : ""}`} value={v} onChange={(e) => modifier(i, normaliserSigneMoins(e.target.value))} />
+            {valeurs.length > 1 && (
+              <button type="button" className="btn liste-morceaux-retirer" aria-label="Retirer" onClick={() => retirer(i)}>
+                ×
+              </button>
+            )}
+          </div>
+        );
+      })}
+      {valeurs.length < MAX_VALEURS && (
+        <button type="button" className="btn" onClick={ajouter}>
+          + Ajouter une autre valeur
+        </button>
+      )}
+
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          {noteAideNiveau1(exercice, "trouverQ") && <p><TexteInsistance texte={noteAideNiveau1(exercice, "trouverQ")} /></p>}
+          <Katex expression={texteAideNiveau1(exercice, "trouverQ")} block />
+          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+        </div>
+      )}
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
+      )}
+      {validation && <ValidationEcran {...validation} />}
+    </div>
+  );
+}

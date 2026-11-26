@@ -1,0 +1,590 @@
+// Copie 5e (6h) de `5e-4h/App5gen15.tsx` (56gen2 ← 5gen15, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
+import { useState } from "react";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import type { ReglagesSession5e } from "../5e-4h/core5e/session5e.types";
+import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceSuiteGeometrique } from "./generateurs56/suitesGeometriques";
+import type { FamilleSuiteGeometriqueId } from "./generateurs56/suitesGeometriques";
+import { SelecteurVarianteDev } from "../5e-4h/components5e/SelecteurVarianteDev";
+import {
+  niveauAideMaxSuiteGeometrique,
+  activerAideSuivante,
+  ciblesCalculerTermesAlgebrique,
+  demarrerSessionSuiteGeometrique,
+  soumettreReponseCalculerSn,
+  soumettreReponseCalculerTermesAlgebrique,
+  soumettreReponseFormuleGenerale,
+  soumettreReponseFormuleGeneraleB1,
+  soumettreReponseFormuleGeneraleB2,
+  soumettreReponsePoserEquationAlgebrique,
+  soumettreReponsePoserEquationRangN,
+  soumettreReponseResoudreRangN,
+  soumettreReponseResoudreXAlgebrique,
+  soumettreReponseSommeInfinie,
+  soumettreReponseSommeInfinieB1,
+  soumettreReponseSommeInfinieB2,
+  soumettreReponseSommeSn,
+  soumettreReponseSommeSnB1,
+  soumettreReponseSommeSnB2,
+  soumettreReponseTermeEloigne,
+  soumettreReponseTermeEloigneB1,
+  soumettreReponseTermeEloigneB2,
+  soumettreReponseTermesProches,
+  soumettreReponseTermesProchesB1,
+  soumettreReponseTermesProchesB2,
+  soumettreReponseTrouverQ,
+  soumettreReponseTrouverU1,
+  soumettreReponseTrouverU1B1,
+  soumettreReponseTrouverU1B2,
+} from "./generateurs56/suitesGeometriques/moteur/sessionSuiteGeometrique";
+import type { ReponseEquation } from "./generateurs56/suitesGeometriques/moteur/sessionSuiteGeometrique";
+import { ordreComplet } from "./generateurs56/suitesGeometriques/moteur/typesSuiteGeometrique";
+import { correctionDetailleeSuiteGeometrique } from "./generateurs56/suitesGeometriques/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import type { EtatSessionSuiteGeometrique, PhaseSuiteGeometrique } from "./generateurs56/suitesGeometriques/moteur/typesSuiteGeometrique";
+import {
+  diagnostiquerEquationComplete,
+  diagnostiquerEquationCompleteEnN,
+  diagnostiquerFormuleGenerale,
+  diagnostiquerNombre,
+  diagnostiquerRangEntierPositif,
+  diagnostiquerSommeInfinie,
+  diagnostiquerSommeSn,
+  diagnostiquerTermes,
+  diagnostiquerTrouverQ,
+} from "./generateurs56/suitesGeometriques/moteur/verificationSuiteGeometrique";
+import type { ReponseSommeInfinie } from "./generateurs56/suitesGeometriques/moteur/verificationSuiteGeometrique";
+import type { StatutVerification } from "../5e-4h/moteur/statutVerification";
+import type { BrancheSuiteGeometrique, ExercicePrincipalSuiteGeometrique, ExerciceSuiteGeometrique } from "../5e-4h/core5e/suitesGeometriques.types";
+import {
+  diviserFractionQ,
+  entierVersFractionQ,
+  fractionQVersNombre,
+  multiplierFractionQ,
+  puissanceFractionQ,
+  soustraireFractionQ,
+  termeGeometriqueQ,
+} from "../5e-4h/generateurs5e/suitesGeometriques/fraction";
+import { EtapeChampSimpleSuiteGeometrique } from "./generateurs56/suitesGeometriques/composants/EtapeChampSimpleSuiteGeometrique";
+import { EtapePoserEquationGeometrique } from "./generateurs56/suitesGeometriques/composants/EtapePoserEquationGeometrique";
+import { EtapeSommeInfinie } from "./generateurs56/suitesGeometriques/composants/EtapeSommeInfinie";
+import { EtapeTermesMultiplesSuiteGeometrique } from "./generateurs56/suitesGeometriques/composants/EtapeTermesMultiplesSuiteGeometrique";
+import { EtapeTrouverQ } from "./generateurs56/suitesGeometriques/composants/EtapeTrouverQ";
+import { CalculatriceScientifique } from "../5e-4h/components5e/CalculatriceScientifique";
+import { LIBELLE_PHASE_SUITE_GEOMETRIQUE, formatTermesReponseAttendueSuiteGeometrique } from "./generateurs56/suitesGeometriques/ui/formatSuiteGeometrique";
+import { estSolutionDirecte } from "../5e-4h/moteur5e/saisieNombreSuites";
+import { calculerRecapitulatifSuiteGeometrique } from "./generateurs56/suitesGeometriques/ui/recapitulatifSuiteGeometrique";
+import { RecapitulatifPanel } from "../5e-4h/components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { Katex } from "../5e-4h/components/Katex";
+
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
+
+const PHASES_CHAMP_SIMPLE = new Set<PhaseSuiteGeometrique>([
+  "trouverU1",
+  "trouverU1B1",
+  "trouverU1B2",
+  "formuleGenerale",
+  "formuleGeneraleB1",
+  "formuleGeneraleB2",
+  "termeEloigne",
+  "termeEloigneB1",
+  "termeEloigneB2",
+  "sommeSn",
+  "sommeSnB1",
+  "sommeSnB2",
+  "resoudreXAlgebrique",
+  "calculerSn",
+  "resoudreRangN",
+]);
+
+const PHASES_TERMES_MULTIPLES = new Set<PhaseSuiteGeometrique>(["termesProches", "termesProchesB1", "termesProchesB2", "calculerTermesAlgebrique"]);
+const PHASES_SOMME_INFINIE = new Set<PhaseSuiteGeometrique>(["sommeInfinie", "sommeInfinieB1", "sommeInfinieB2"]);
+const PHASES_POSER_EQUATION = new Set<PhaseSuiteGeometrique>(["poserEquationAlgebrique", "poserEquationRangN"]);
+
+/**
+ * Statuts à 3 valeurs (A.1, `promptcorrectionsregroupees.md`) — wiring PRÉSENTATION uniquement,
+ * jamais consommé par le score/les tentatives. Réutilise DIRECTEMENT les fonctions déjà exportées
+ * par `verificationSuiteGeometrique.ts` — cibles/branches extraites ici avec EXACTEMENT la même
+ * logique que `moteur5e/sessionSuiteGeometrique.ts` (`brancheActive`, répliquée localement, même
+ * principe de duplication déjà établi entre les couches présentation/session/moteur de ce fichier).
+ */
+function brancheActiveGeo(exercice: ExercicePrincipalSuiteGeometrique, phase: PhaseSuiteGeometrique): BrancheSuiteGeometrique {
+  const index = phase.endsWith("B2") ? 1 : 0;
+  return exercice.branches[index];
+}
+/** Réplique EXACTE (fractions) — conversion en flottant réservée au point de comparaison avec la
+ * saisie de l'élève, voir `prompt5gen155gen16arithmetiqueexacte.md`. */
+function termeGeometriqueLocal(u1: BrancheSuiteGeometrique["u1"], q: BrancheSuiteGeometrique["q"], n: number): number {
+  return fractionQVersNombre(termeGeometriqueQ(u1, q, n));
+}
+
+/** Coefficients (pente, constante) de l'équation CIBLE — même calcul que `sessionSuiteGeometrique.ts`
+ * (petite duplication assumée, présentation pure, jamais un import moteur→générateur). */
+function penteConstanteEquationAlgebrique(exercice: Extract<ExerciceSuiteGeometrique, { famille: "algebriqueTermeGeneral" | "algebriqueSommeSn" }>): {
+  pente: number;
+  constante: number;
+} {
+  if (exercice.famille === "algebriqueTermeGeneral") {
+    const { up, un, p, n, q } = exercice;
+    const C = puissanceFractionQ(q, n - p);
+    const pente = soustraireFractionQ(entierVersFractionQ(un.a), multiplierFractionQ(C, entierVersFractionQ(up.a)));
+    const constante = soustraireFractionQ(un.b, multiplierFractionQ(C, entierVersFractionQ(up.b)));
+    return { pente: fractionQVersNombre(pente), constante: fractionQVersNombre(constante) };
+  }
+  if (exercice.sousCas === "A") {
+    const { u1, q, n, k } = exercice;
+    const C = diviserFractionQ(soustraireFractionQ(puissanceFractionQ(q, n), entierVersFractionQ(1)), soustraireFractionQ(q, entierVersFractionQ(1)));
+    const pente = multiplierFractionQ(C, entierVersFractionQ(u1.a));
+    const constante = soustraireFractionQ(multiplierFractionQ(C, entierVersFractionQ(u1.b)), k);
+    return { pente: fractionQVersNombre(pente), constante: fractionQVersNombre(constante) };
+  }
+  const { sn, k } = exercice;
+  return { pente: sn.a, constante: fractionQVersNombre(soustraireFractionQ(sn.b, k)) };
+}
+
+function diagnostiquerChampSimpleGeo(exercice: ExerciceSuiteGeometrique, phase: PhaseSuiteGeometrique, texte: string): StatutVerification {
+  if (phase === "trouverU1" || phase === "trouverU1B1" || phase === "trouverU1B2") {
+    if (exercice.famille !== "principal") return "parse_error";
+    return diagnostiquerNombre(texte, fractionQVersNombre(brancheActiveGeo(exercice, phase).u1));
+  }
+  if (phase === "formuleGenerale" || phase === "formuleGeneraleB1" || phase === "formuleGeneraleB2") {
+    if (exercice.famille !== "principal") return "parse_error";
+    const { u1, q } = brancheActiveGeo(exercice, phase);
+    return diagnostiquerFormuleGenerale(u1, q, texte);
+  }
+  if (phase === "termeEloigne" || phase === "termeEloigneB1" || phase === "termeEloigneB2") {
+    if (exercice.famille !== "principal") return "parse_error";
+    const { u1, q } = brancheActiveGeo(exercice, phase);
+    return diagnostiquerNombre(texte, termeGeometriqueLocal(u1, q, exercice.indiceTermeEloigne));
+  }
+  if (phase === "sommeSn" || phase === "sommeSnB1" || phase === "sommeSnB2") {
+    if (exercice.famille !== "principal") return "parse_error";
+    const { u1, q } = brancheActiveGeo(exercice, phase);
+    return diagnostiquerSommeSn(u1, q, exercice.indiceSn, texte);
+  }
+  if (phase === "resoudreXAlgebrique") {
+    return exercice.famille !== "algebriqueTermeGeneral" && exercice.famille !== "algebriqueSommeSn"
+      ? "parse_error"
+      : diagnostiquerNombre(texte, fractionQVersNombre(exercice.xReel));
+  }
+  if (phase === "calculerSn") {
+    return exercice.famille !== "algebriqueSommeSn" || exercice.sousCas !== "B"
+      ? "parse_error"
+      : diagnostiquerNombre(texte, fractionQVersNombre(exercice.k));
+  }
+  if (phase === "resoudreRangN") {
+    return exercice.famille !== "algebriqueRangN" ? "parse_error" : diagnostiquerRangEntierPositif(texte, exercice.n);
+  }
+  return "parse_error";
+}
+
+function diagnostiquerTermesMultiplesGeo(exercice: ExerciceSuiteGeometrique, phase: PhaseSuiteGeometrique, textes: string[]): StatutVerification {
+  if (phase === "termesProches" || phase === "termesProchesB1" || phase === "termesProchesB2") {
+    if (exercice.famille !== "principal") return "parse_error";
+    const { u1, q } = brancheActiveGeo(exercice, phase);
+    const cibles = exercice.indicesTermesProches.map((n) => termeGeometriqueLocal(u1, q, n));
+    return diagnostiquerTermes(textes, cibles);
+  }
+  if (phase === "calculerTermesAlgebrique") {
+    if (exercice.famille !== "algebriqueTermeGeneral" && exercice.famille !== "algebriqueSommeSn") return "parse_error";
+    return diagnostiquerTermes(textes, ciblesCalculerTermesAlgebrique(exercice));
+  }
+  return "parse_error";
+}
+
+function diagnostiquerSommeInfinieGeo(
+  exercice: ExerciceSuiteGeometrique,
+  phase: PhaseSuiteGeometrique,
+  reponse: ReponseSommeInfinie,
+): StatutVerification {
+  if (exercice.famille !== "principal") return "parse_error";
+  const { u1, q } = brancheActiveGeo(exercice, phase);
+  return diagnostiquerSommeInfinie(u1, q, reponse);
+}
+
+function diagnostiquerPoserEquationGeo(
+  exercice: ExerciceSuiteGeometrique,
+  phase: "poserEquationAlgebrique" | "poserEquationRangN",
+  reponse: ReponseEquation,
+): StatutVerification {
+  if (estSolutionDirecte(reponse.texte, phase === "poserEquationRangN" ? "n" : "x")) return "not_equivalent";
+  if (phase === "poserEquationRangN") {
+    if (exercice.famille !== "algebriqueRangN") return "parse_error";
+    return diagnostiquerEquationCompleteEnN(reponse.texte, exercice.u1, fractionQVersNombre(exercice.q), exercice.k);
+  }
+  if (exercice.famille !== "algebriqueTermeGeneral" && exercice.famille !== "algebriqueSommeSn") return "parse_error";
+  const { pente, constante } = penteConstanteEquationAlgebrique(exercice);
+  return diagnostiquerEquationComplete(reponse.texte, pente, constante);
+}
+
+/**
+ * A.2 (surlignage rouge par champ) — diagnostics INDÉPENDANTS champ par champ, jamais consommés par
+ * le score/les tentatives.
+ */
+function diagnostiquerChampTermesMultiplesGeo(
+  exercice: ExerciceSuiteGeometrique,
+  phase: PhaseSuiteGeometrique,
+  index: number,
+  texte: string,
+): StatutVerification {
+  if (phase === "termesProches" || phase === "termesProchesB1" || phase === "termesProchesB2") {
+    if (exercice.famille !== "principal") return "parse_error";
+    const { u1, q } = brancheActiveGeo(exercice, phase);
+    return diagnostiquerNombre(texte, termeGeometriqueLocal(u1, q, exercice.indicesTermesProches[index]));
+  }
+  if (phase === "calculerTermesAlgebrique") {
+    if (exercice.famille !== "algebriqueTermeGeneral" && exercice.famille !== "algebriqueSommeSn") return "parse_error";
+    const cibles = ciblesCalculerTermesAlgebrique(exercice);
+    return diagnostiquerNombre(texte, cibles[index]);
+  }
+  return "parse_error";
+}
+
+function diagnostiquerChampTrouverQ(exercice: ExerciceSuiteGeometrique, texte: string): StatutVerification {
+  if (exercice.famille !== "principal") return "parse_error";
+  for (const cible of exercice.branches.map((b) => fractionQVersNombre(b.q))) {
+    if (diagnostiquerNombre(texte, cible) === "correct") return "correct";
+  }
+  return diagnostiquerNombre(texte, fractionQVersNombre(exercice.branches[0].q)) === "parse_error" ? "parse_error" : "not_equivalent";
+}
+
+function nouvelleSession(): EtatSessionSuiteGeometrique {
+  return demarrerSessionSuiteGeometrique(REGLAGES_DEMO, genererExerciceSuiteGeometrique);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs5e/suitesGeometriques/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionSuiteGeometrique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionSuiteGeometrique(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceSuiteGeometrique, (id) => construireAvecFamilleId(id as FamilleSuiteGeometriqueId)));
+}
+
+/** Puces de progression — pas de `ORDRE_PHASES` statique (même raison que 5gen14) : la séquence
+ * réelle dépend de `exercice.famille`/`combo`/`statutQ` (branches B1/B2 dupliquées), donc toujours
+ * recalculée via `ordreComplet(exercice)`. Révélation lue depuis `etat.revelesPartiels[phase]`
+ * (peuplé depuis `etapeCourante.revelee` à la clôture de chaque phase,
+ * `sessionSuiteGeometrique.ts::soumettreEcran`) — jamais `score === 0`, même correctif que
+ * `calculerRecapitulatifSuiteGeometrique` (point A, balayage générique). */
+function calculerSegmentsProgression(
+  etat: EtatSessionSuiteGeometrique,
+  aideUtiliseeParPhase: Partial<Record<PhaseSuiteGeometrique, boolean>>,
+): EtatPuceProgression[] {
+  return ordreComplet(etat.exerciceCourant).map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = etat.scoresPartiels[phase];
+    if (score === undefined) return "a-venir";
+    if (etat.revelesPartiels[phase]) return "revele";
+    return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
+  });
+}
+
+/** Formateurs locaux "votreReponse" — un format court dérivé directement de la réponse typée. */
+function formatReponseSommeInfinie(reponse: ReponseSommeInfinie): string {
+  return reponse.existe ? reponse.valeur : "N'existe pas";
+}
+
+/** Réponse attendue d'un écran (bloc de validation et fiche des puces) — même source que le
+ * récapitulatif final. */
+function reponseAttendueEcran(exercice: ExerciceSuiteGeometrique, phase: PhaseSuiteGeometrique) {
+  return (
+    <span className="equation-box-termes">
+      {formatTermesReponseAttendueSuiteGeometrique(exercice, phase).map((frag, i) => (
+        <Katex key={i} expression={frag} />
+      ))}
+    </span>
+  );
+}
+
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionSuiteGeometrique;
+  revele: boolean;
+}
+
+function soumettreChampSimple(etat: EtatSessionSuiteGeometrique, phase: PhaseSuiteGeometrique, texte: string): EtatSessionSuiteGeometrique {
+  switch (phase) {
+    case "trouverU1":
+      return soumettreReponseTrouverU1(etat, texte);
+    case "trouverU1B1":
+      return soumettreReponseTrouverU1B1(etat, texte);
+    case "trouverU1B2":
+      return soumettreReponseTrouverU1B2(etat, texte);
+    case "formuleGenerale":
+      return soumettreReponseFormuleGenerale(etat, texte);
+    case "formuleGeneraleB1":
+      return soumettreReponseFormuleGeneraleB1(etat, texte);
+    case "formuleGeneraleB2":
+      return soumettreReponseFormuleGeneraleB2(etat, texte);
+    case "termeEloigne":
+      return soumettreReponseTermeEloigne(etat, texte);
+    case "termeEloigneB1":
+      return soumettreReponseTermeEloigneB1(etat, texte);
+    case "termeEloigneB2":
+      return soumettreReponseTermeEloigneB2(etat, texte);
+    case "sommeSn":
+      return soumettreReponseSommeSn(etat, texte);
+    case "sommeSnB1":
+      return soumettreReponseSommeSnB1(etat, texte);
+    case "sommeSnB2":
+      return soumettreReponseSommeSnB2(etat, texte);
+    case "resoudreXAlgebrique":
+      return soumettreReponseResoudreXAlgebrique(etat, texte);
+    case "calculerSn":
+      return soumettreReponseCalculerSn(etat, texte);
+    case "resoudreRangN":
+      return soumettreReponseResoudreRangN(etat, texte);
+    default:
+      return etat;
+  }
+}
+
+function soumettreTermesMultiples(etat: EtatSessionSuiteGeometrique, phase: PhaseSuiteGeometrique, textes: string[]): EtatSessionSuiteGeometrique {
+  switch (phase) {
+    case "termesProches":
+      return soumettreReponseTermesProches(etat, textes);
+    case "termesProchesB1":
+      return soumettreReponseTermesProchesB1(etat, textes);
+    case "termesProchesB2":
+      return soumettreReponseTermesProchesB2(etat, textes);
+    case "calculerTermesAlgebrique":
+      return soumettreReponseCalculerTermesAlgebrique(etat, textes);
+    default:
+      return etat;
+  }
+}
+
+function soumettreSommeInfinie(
+  etat: EtatSessionSuiteGeometrique,
+  phase: PhaseSuiteGeometrique,
+  reponse: ReponseSommeInfinie,
+): EtatSessionSuiteGeometrique {
+  switch (phase) {
+    case "sommeInfinie":
+      return soumettreReponseSommeInfinie(etat, reponse);
+    case "sommeInfinieB1":
+      return soumettreReponseSommeInfinieB1(etat, reponse);
+    case "sommeInfinieB2":
+      return soumettreReponseSommeInfinieB2(etat, reponse);
+    default:
+      return etat;
+  }
+}
+
+function soumettrePoserEquation(
+  etat: EtatSessionSuiteGeometrique,
+  phase: "poserEquationAlgebrique" | "poserEquationRangN",
+  reponse: ReponseEquation,
+): EtatSessionSuiteGeometrique {
+  if (phase === "poserEquationRangN") return soumettreReponsePoserEquationRangN(etat, reponse);
+  return soumettreReponsePoserEquationAlgebrique(etat, reponse);
+}
+
+export function App56gen2() {
+  const [etat, setEtat] = useState<EtatSessionSuiteGeometrique>(sessionInitiale);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionSuiteGeometrique`, jamais dans le moteur. Remis à vide à chaque
+   * nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Capture locale de `etat.niveauAide > 0` pour chaque phase CLOSE — le moteur remet
+   * `niveauAide` à 0 à chaque transition de phase (même mécanique que les autres générateurs de
+   * ce chantier). */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseSuiteGeometrique, boolean>>>({});
+  /** Incrémenté à chaque nouvel exercice (« Générer », « Nouvel exercice ») : entre dans la clé des
+   * écrans, pour que les champs repartent vides même si le nouvel exercice commence par le même
+   * écran que le précédent. */
+  const [numeroSession, setNumeroSession] = useState(0);
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
+   * qu'`AppAnalyseFonction.tsx`). Réutilise `calculerRecapitulatifSuiteGeometrique` pour la réponse
+   * ATTENDUE. */
+  function terminerEtape(nouvelEtat: EtatSessionSuiteGeometrique, votreReponse?: string) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele = nouvelEtat.derniereEtapeRevelee;
+      setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      if (votreReponse !== undefined) {
+        // Fiche de la phase qui VIENT de se clore — jamais la dernière ligne du récapitulatif (qui ne
+        // contient que les valeurs « confirmées » : toutes les fiches après la formule s'intitulaient
+        // sinon « Formule générale uₙ »).
+        const phaseClose = etat.phase;
+        const exerciceClos = etat.exerciceCourant;
+        setHistorique((h) => [
+          ...h,
+          {
+            corrigeDetaille: corrigeDetailleEcranCourant(),
+            titre: LIBELLE_PHASE_SUITE_GEOMETRIQUE[phaseClose],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? reponseAttendueEcran(exerciceClos, phaseClose) : undefined,
+          },
+        ]);
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
+    }
+    setEtat(nouvelEtat);
+  }
+
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+      setNumeroSession((n) => n + 1);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
+    setNumeroSession((n) => n + 1);
+    setEtat(demarrerSessionSuiteGeometrique(REGLAGES_DEMO, () => construireAvecFamilleId(id as FamilleSuiteGeometriqueId)));
+  }
+
+  const exercice = etat.exerciceCourant;
+  const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
+  const tentativesMax = etat.reglages.tentativesMax;
+  const cleEcran = `${numeroSession}-${etat.indexExercice}-${etat.phase}`;
+  const phase = etat.phase;
+
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSuiteGeometrique(exercice), lettreEtape(ordreComplet(exercice).indexOf(phase)))} />;
+  }
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttendueEcran(exercice, phase),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
+  return (
+    <div className="app-shell">
+      <header className="app-header">
+        <p className="app-eyebrow">5e — Entraînement</p>
+        <h1 className="app-title">Suites géométriques, formule générale et termes</h1>
+        <p className="app-subtitle">Chapitre 3 — Suites</p>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
+      </header>
+      <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+      <main className="card">
+        <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifSuiteGeometrique(etat)} />
+          <>
+              {PHASES_CHAMP_SIMPLE.has(phase) && (
+                <EtapeChampSimpleSuiteGeometrique
+                  key={cleEcran}
+                  exercice={exercice}
+                  phase={phase}
+                  tentativesUtilisees={tentativesUtilisees}
+                  tentativesMax={tentativesMax}
+                  niveauAide={etat.niveauAide}
+                  niveauAideMax={niveauAideMaxSuiteGeometrique(phase)}
+                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
+                  onValider={(texte) => terminerEtape(soumettreChampSimple(etat, phase, texte), texte)}
+                  diagnostiquer={(texte) => diagnostiquerChampSimpleGeo(exercice, phase, texte)}
+                  validation={validation}
+                />
+              )}
+              {PHASES_CHAMP_SIMPLE.has(phase) && <CalculatriceScientifique />}
+
+              {PHASES_TERMES_MULTIPLES.has(phase) && (
+                <EtapeTermesMultiplesSuiteGeometrique
+                  key={cleEcran}
+                  exercice={exercice}
+                  phase={phase}
+                  tentativesUtilisees={tentativesUtilisees}
+                  tentativesMax={tentativesMax}
+                  niveauAide={etat.niveauAide}
+                  niveauAideMax={niveauAideMaxSuiteGeometrique(phase)}
+                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
+                  onValider={(textes) => terminerEtape(soumettreTermesMultiples(etat, phase, textes), textes.join(" ; "))}
+                  diagnostiquer={(textes) => diagnostiquerTermesMultiplesGeo(exercice, phase, textes)}
+                  diagnostiquerChamp={(index, texte) => diagnostiquerChampTermesMultiplesGeo(exercice, phase, index, texte)}
+                  validation={validation}
+                />
+              )}
+              {PHASES_TERMES_MULTIPLES.has(phase) && <CalculatriceScientifique />}
+
+              {phase === "trouverQ" && (
+                <EtapeTrouverQ
+                  key={cleEcran}
+                  exercice={exercice}
+                  tentativesUtilisees={tentativesUtilisees}
+                  tentativesMax={tentativesMax}
+                  niveauAide={etat.niveauAide}
+                  niveauAideMax={niveauAideMaxSuiteGeometrique(phase)}
+                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
+                  onValider={(valeurs) => terminerEtape(soumettreReponseTrouverQ(etat, valeurs), valeurs.join(" ; "))}
+                  diagnostiquer={(valeurs) => (exercice.famille === "principal" ? diagnostiquerTrouverQ(exercice, valeurs) : "parse_error")}
+                  diagnostiquerChamp={(_index, texte) => diagnostiquerChampTrouverQ(exercice, texte)}
+                  validation={validation}
+                />
+              )}
+              {phase === "trouverQ" && <CalculatriceScientifique />}
+
+              {PHASES_SOMME_INFINIE.has(phase) && (
+                <EtapeSommeInfinie
+                  key={cleEcran}
+                  exercice={exercice}
+                  phase={phase as "sommeInfinie" | "sommeInfinieB1" | "sommeInfinieB2"}
+                  tentativesUtilisees={tentativesUtilisees}
+                  tentativesMax={tentativesMax}
+                  niveauAide={etat.niveauAide}
+                  niveauAideMax={niveauAideMaxSuiteGeometrique(phase)}
+                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
+                  onValider={(reponse) => terminerEtape(soumettreSommeInfinie(etat, phase, reponse), formatReponseSommeInfinie(reponse))}
+                  diagnostiquer={(reponse) => diagnostiquerSommeInfinieGeo(exercice, phase, reponse)}
+                  validation={validation}
+                />
+              )}
+              {PHASES_SOMME_INFINIE.has(phase) && <CalculatriceScientifique />}
+
+              {PHASES_POSER_EQUATION.has(phase) && (
+                <EtapePoserEquationGeometrique
+                  key={cleEcran}
+                  exercice={exercice}
+                  phase={phase as "poserEquationAlgebrique" | "poserEquationRangN"}
+                  tentativesUtilisees={tentativesUtilisees}
+                  tentativesMax={tentativesMax}
+                  niveauAide={etat.niveauAide}
+                  niveauAideMax={niveauAideMaxSuiteGeometrique(phase)}
+                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
+                  onValider={(reponse) =>
+                    terminerEtape(soumettrePoserEquation(etat, phase as "poserEquationAlgebrique" | "poserEquationRangN", reponse), reponse.texte)
+                  }
+                  diagnostiquer={(reponse) =>
+                    diagnostiquerPoserEquationGeo(exercice, phase as "poserEquationAlgebrique" | "poserEquationRangN", reponse)
+                  }
+                  validation={validation}
+                />
+              )}
+              {PHASES_POSER_EQUATION.has(phase) && <CalculatriceScientifique />}
+            </>
+        </div>
+      </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
+    </div>
+  );
+}

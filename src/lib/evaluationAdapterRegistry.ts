@@ -746,6 +746,37 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen143': versionPapier(adaptateurEvaluationDC) as unknown as AdaptateurFeuilleExercices<never>,
 }
 
+/** 5e (6h) — chapitre « Nombres réels et suites » : copies enrichies des générateurs de la 5e (4h)
+ * (56gen1–56gen12, chantier D ; adaptateurs COPIÉS dans `5e-6h/generateurs56/`, les deux années peuvent
+ * diverger). Le quiz 56gen13 n'a pas d'adaptateur : ses vrai/faux viennent de `lib/banquesVraiFaux.ts`. */
+import { adaptateurEvaluationSuitesArithmetiques as adaptateur56gen1 } from '../entrainement/5e-6h/generateurs56/suitesArithmetiques/exportEvaluation'
+import { adaptateurEvaluationSuitesGeometriques as adaptateur56gen2 } from '../entrainement/5e-6h/generateurs56/suitesGeometriques/exportEvaluation'
+import { adaptateurEvaluationDefinirSuite as adaptateur56gen3 } from '../entrainement/5e-6h/generateurs56/definirSuite/exportEvaluation'
+import { adaptateurEvaluationSommesTermes as adaptateur56gen4 } from '../entrainement/5e-6h/generateurs56/sommesTermes/exportEvaluation'
+import { adaptateurEvaluationTroisTermes as adaptateur56gen5 } from '../entrainement/5e-6h/generateurs56/troisTermes/exportEvaluation'
+import { adaptateurEvaluationConvergenceSuites as adaptateur56gen6 } from '../entrainement/5e-6h/generateurs56/convergenceSuites/exportEvaluation'
+import { adaptateurEvaluationSommeInfinie as adaptateur56gen7 } from '../entrainement/5e-6h/generateurs56/sommeInfinieSituation/exportEvaluation'
+import { adaptateurEvaluationSuitesClassiques as adaptateur56gen8 } from '../entrainement/5e-6h/generateurs56/suitesClassiques/exportEvaluation'
+import { adaptateurEvaluationModeliserSuite as adaptateur56gen9 } from '../entrainement/5e-6h/generateurs56/modeliserSuite/exportEvaluation'
+import { adaptateurEvaluationDetectiveSuites as adaptateur56gen10 } from '../entrainement/5e-6h/generateurs56/detectiveSuites/exportEvaluation'
+import { adaptateurEvaluationComparaisonSuites as adaptateur56gen11 } from '../entrainement/5e-6h/generateurs56/comparaisonSuites/exportEvaluation'
+import { adaptateurEvaluationSuiteRecurrenteAffine as adaptateur56gen12 } from '../entrainement/5e-6h/generateurs56/suiteRecurrenteAffine/exportEvaluation'
+
+export const EVALUATION_ADAPTER_REGISTRY_56: Record<string, AdaptateurFeuilleExercices<never>> = {
+  '56gen1': versionPapier(adaptateur56gen1) as unknown as AdaptateurFeuilleExercices<never>,
+  '56gen2': versionPapier(adaptateur56gen2) as unknown as AdaptateurFeuilleExercices<never>,
+  '56gen3': versionPapier(adaptateur56gen3) as unknown as AdaptateurFeuilleExercices<never>,
+  '56gen4': versionPapier(adaptateur56gen4) as unknown as AdaptateurFeuilleExercices<never>,
+  '56gen5': versionPapier(adaptateur56gen5) as unknown as AdaptateurFeuilleExercices<never>,
+  '56gen6': versionPapier(adaptateur56gen6) as unknown as AdaptateurFeuilleExercices<never>,
+  '56gen7': versionPapier(adaptateur56gen7) as unknown as AdaptateurFeuilleExercices<never>,
+  '56gen8': versionPapier(adaptateur56gen8) as unknown as AdaptateurFeuilleExercices<never>,
+  '56gen9': versionPapier(adaptateur56gen9) as unknown as AdaptateurFeuilleExercices<never>,
+  '56gen10': versionPapier(adaptateur56gen10) as unknown as AdaptateurFeuilleExercices<never>,
+  '56gen11': versionPapier(adaptateur56gen11) as unknown as AdaptateurFeuilleExercices<never>,
+  '56gen12': versionPapier(adaptateur56gen12) as unknown as AdaptateurFeuilleExercices<never>,
+}
+
 /** Lookup unique par `generatorId`, tous chantiers portés confondus — `evaluationLocal.ts` n'a pas
  * à savoir quel chantier a produit quel générateur. Chaque adaptateur reçoit ici son
  * `regroupement` a), b), c) (`export/regroupementsPapier.ts`, découpe de son énoncé papier — déjà
@@ -755,5 +786,6 @@ export const EVALUATION_ADAPTER_REGISTRY: Record<string, AdaptateurFeuilleExerci
     ...EVALUATION_ADAPTER_REGISTRY_4E,
     ...EVALUATION_ADAPTER_REGISTRY_5E,
     ...EVALUATION_ADAPTER_REGISTRY_6E,
+    ...EVALUATION_ADAPTER_REGISTRY_56,
   }).map(([id, adaptateur]) => [id, avecRegroupement(id, adaptateur)]),
 )

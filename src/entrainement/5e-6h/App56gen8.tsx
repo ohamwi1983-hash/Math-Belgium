@@ -1,0 +1,560 @@
+// Copie 5e (6h) de `5e-4h/App5gen17.tsx` (56gen8 ← 5gen17, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
+import { useState } from "react";
+import type { ReactNode } from "react";
+import type { ReglagesSession5e } from "../5e-4h/core5e/session5e.types";
+import { CATALOGUE_SCENARIOS, construireAvecScenarioId, genererExerciceSuiteClassique } from "./generateurs56/suitesClassiques";
+import type {
+  ExerciceCarresEmboites,
+  ExerciceEchiquier,
+  ExerciceFibonacci,
+  ExercicePapyrusRhind,
+  ExerciceSuiteClassique,
+  ExerciceSuitesCombinees,
+  ExerciceTrianglesZigzag,
+  ExerciceVitesse,
+  ScenarioSuiteClassique,
+} from "./generateurs56/suitesClassiques/core/suitesClassiques.types";
+import { SelecteurVarianteDev } from "../5e-4h/components5e/SelecteurVarianteDev";
+import {
+  niveauAideMaxSuiteClassique,
+  activerAideSuivante,
+  demarrerSessionSuiteClassique,
+  soumettreReponseAiresB,
+  soumettreReponseAiresZigzag,
+  soumettreReponseAiresZigzagAC,
+  soumettreReponseCalculV5,
+  soumettreReponseDistance11,
+  soumettreReponseDixTermes,
+  soumettreReponseFormuleRecurrence,
+  soumettreReponseHauteursZigzag,
+  soumettreReponseLimitePuissanceA,
+  soumettreReponseLongueurZigzag,
+  soumettreReponsePoidsComparaison,
+  soumettreReponsePoserEquationCombinees,
+  soumettreReponsePoserSysteme,
+  soumettreReponseProprieteInverse,
+  soumettreReponseResoudrePhi,
+  soumettreReponseResoudreRCombinees,
+  soumettreReponseResoudreSysteme,
+  soumettreReponseSommeInfinieA,
+  soumettreReponseSommeInfinieB,
+  soumettreReponseSommePartielleA,
+  soumettreReponseSommeTotale11,
+  soumettreReponseSommeTotaleEchiquier,
+  soumettreReponseSuiteFinalePapyrus,
+  soumettreReponseSuitesFinalesCombinees,
+  soumettreReponseTroisMethodes,
+  soumettreReponseU64,
+  tentativesMaxSuiteClassique,
+} from "./generateurs56/suitesClassiques/moteur/sessionSuiteClassique";
+import { ordreComplet } from "./generateurs56/suitesClassiques/moteur/typesSuiteClassique";
+import { correctionDetailleeSuiteClassique } from "./generateurs56/suitesClassiques/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+import type { EtatSessionSuiteClassique, PhaseSuiteClassique } from "./generateurs56/suitesClassiques/moteur/typesSuiteClassique";
+import {
+  diagnostiquerAiresB,
+  diagnostiquerAiresZigzag,
+  diagnostiquerAiresZigzagAC,
+  diagnostiquerCalculV5,
+  diagnostiquerChampListe,
+  diagnostiquerChampSuitesFinalesCombinees,
+  diagnostiquerDistance11,
+  diagnostiquerDixTermes,
+  diagnostiquerHauteursZigzag,
+  diagnostiquerLongueurZigzag,
+  diagnostiquerPoidsComparaison,
+  diagnostiquerResoudrePhi,
+  diagnostiquerResoudreRCombinees,
+  diagnostiquerResoudreSysteme,
+  diagnostiquerSommeInfinieA,
+  diagnostiquerSommeInfinieB,
+  diagnostiquerSommePartielleA,
+  diagnostiquerSommeTotale11,
+  diagnostiquerSommeTotaleEchiquier,
+  diagnostiquerSuiteFinalePapyrus,
+  diagnostiquerSuitesFinalesCombinees,
+  diagnostiquerTroisMethodes,
+  diagnostiquerU64,
+} from "./generateurs56/suitesClassiques/moteur/verificationSuiteClassique";
+import type { StatutVerification } from "../5e-4h/moteur/statutVerification";
+import { EtapeChampSimpleClassique } from "./generateurs56/suitesClassiques/composants/EtapeChampSimpleClassique";
+import { EtapeListeChampsClassique } from "./generateurs56/suitesClassiques/composants/EtapeListeChampsClassique";
+import { EtapeQCMClassique } from "./generateurs56/suitesClassiques/composants/EtapeQCMClassique";
+import { EtapeSuitesFinalesCombinees } from "./generateurs56/suitesClassiques/composants/EtapeSuitesFinalesCombinees";
+import { CalculatriceScientifique } from "../5e-4h/components5e/CalculatriceScientifique";
+import { LIBELLE_PHASE_SUITE_CLASSIQUE, formatTermesReponseAttendueLatex, formatTermesSuitesFinalesLatex, optionsQCM, texteReponseAttendueQCM } from "./generateurs56/suitesClassiques/ui/formatSuiteClassique";
+import { calculerRecapitulatifSuiteClassique } from "./generateurs56/suitesClassiques/ui/recapitulatifSuiteClassique";
+import { TexteMathsClassique } from "./generateurs56/suitesClassiques/composants/TexteMathsClassique";
+import { RecapitulatifPanel } from "../5e-4h/components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { Katex } from "../5e-4h/components/Katex";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
+
+const PHASES_CHAMP_SIMPLE = new Set<PhaseSuiteClassique>([
+  "u64",
+  "sommeTotaleEchiquier",
+  "resoudreRCombinees",
+  "distance11",
+  "sommeTotale11",
+  "calculV5",
+  "resoudrePhi",
+  "sommePartielleA",
+  "sommeInfinieA",
+  "sommeInfinieB",
+  "longueurZigzag",
+  "airesZigzagAC",
+]);
+
+const PHASES_LISTE = new Set<PhaseSuiteClassique>([
+  "poidsComparaison",
+  "resoudreSysteme",
+  "suiteFinalePapyrus",
+  "troisMethodes",
+  "dixTermes",
+  "hauteursZigzag",
+  "airesZigzag",
+  "airesB",
+]);
+
+const PHASES_QCM = new Set<PhaseSuiteClassique>([
+  "poserSysteme",
+  "poserEquationCombinees",
+  "formuleRecurrence",
+  "proprieteInverse",
+  "limitePuissanceA",
+]);
+
+/** Sous-ensembles de `PHASES_CHAMP_SIMPLE`/`PHASES_LISTE` qui justifient la calculatrice (calcul
+ * décimal non trivial visé par la consigne du scénario) — jamais les phases dont l'instance est
+ * construite pour rester entière (`resoudreRCombinees`, `dixTermes`, `airesB`) ni un calcul trivial
+ * à une seule division (`calculV5`, `sommeInfinieB`), qui partagent pourtant le même composant
+ * d'écran. Voir CLAUDE.md, section "Calculatrice scientifique", pour le détail par scénario. */
+const PHASES_CALCULATRICE_CHAMP_SIMPLE = new Set<PhaseSuiteClassique>([
+  "u64",
+  "sommeTotaleEchiquier",
+  "distance11",
+  "sommeTotale11",
+  "resoudrePhi",
+  "sommePartielleA",
+  "sommeInfinieA",
+  "longueurZigzag",
+  "airesZigzagAC",
+]);
+const PHASES_CALCULATRICE_LISTE = new Set<PhaseSuiteClassique>([
+  "poidsComparaison",
+  "resoudreSysteme",
+  "suiteFinalePapyrus",
+  "troisMethodes",
+  "hauteursZigzag",
+  "airesZigzag",
+]);
+
+function nouvelleSession(): EtatSessionSuiteClassique {
+  return demarrerSessionSuiteClassique(REGLAGES_DEMO, genererExerciceSuiteClassique);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions que l'adaptateur d'export
+ * (`generateurs5e/suitesClassiques/exportEvaluation.ts`) ; la suite reste un tirage normal. */
+function sessionInitiale(): EtatSessionSuiteClassique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionSuiteClassique(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_SCENARIOS, genererExerciceSuiteClassique, (id) => construireAvecScenarioId(id as ScenarioSuiteClassique)),
+  );
+}
+
+/** Puces de progression — pas de `ORDRE_PHASES` local ici : celui déjà exporté par
+ * `moteur5e/typesSuiteClassique.ts` (`Record<ScenarioSuiteClassique, PhaseSuiteClassique[]>`) suffit
+ * via `ordreComplet(exercice)`, même principe que 5gen14/5gen15/5gen16. Icône "revele" pilotée par
+ * `etat.revelesPartiels[phase]`, même source que `calculerRecapitulatifSuiteClassique` (jamais
+ * `scoresPartiels[phase] === 0`, point A). */
+function calculerSegmentsProgression(
+  etat: EtatSessionSuiteClassique,
+  aideUtiliseeParPhase: Partial<Record<PhaseSuiteClassique, boolean>>,
+): EtatPuceProgression[] {
+  return ordreComplet(etat.exerciceCourant).map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = etat.scoresPartiels[phase];
+    if (score === undefined) return "a-venir";
+    if (etat.revelesPartiels[phase]) return "revele";
+    return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
+  });
+}
+
+/** Libellé lisible du choix QCM — recherché dans le même catalogue d'options que celui affiché à
+ * l'élève (`optionsQCM`), jamais retapé ; rendu comme le bouton (prose + formules). */
+function labelQCMChoisi(exercice: ExerciceSuiteClassique, phase: PhaseSuiteClassique, choixId: string) {
+  const label = optionsQCM(exercice, phase).find((o) => o.id === choixId)?.label ?? choixId;
+  return <TexteMathsClassique texte={label} />;
+}
+
+function formatReponseSuitesFinalesCombinees(reponse: { arithmetique: string[]; geometrique: string[] }): string {
+  return `Arithmétique : ${reponse.arithmetique.join(" ; ")} — Géométrique : ${reponse.geometrique.join(" ; ")}`;
+}
+
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionSuiteClassique;
+  revele: boolean;
+}
+
+function reponseAttenduePourPhase(exercice: ExerciceSuiteClassique, phase: PhaseSuiteClassique) {
+  if (phase === "suitesFinalesCombinees" && exercice.scenario === "suitesCombinees") {
+    const { arithmetique, geometrique } = formatTermesSuitesFinalesLatex(exercice);
+    return (
+      <>
+        <div className="equation-box-termes">
+          <em>Arithmétique :</em>
+          {arithmetique.map((t, i) => (
+            <Katex key={`a${i}`} expression={t} />
+          ))}
+        </div>
+        <div className="equation-box-termes">
+          <em>Géométrique :</em>
+          {geometrique.map((t, i) => (
+            <Katex key={`g${i}`} expression={t} />
+          ))}
+        </div>
+      </>
+    );
+  }
+  const termes = formatTermesReponseAttendueLatex(exercice, phase);
+  if (termes !== null) {
+    return (
+      <span className="equation-box-termes">
+        {termes.map((t, i) => (
+          <Katex key={i} expression={t} />
+        ))}
+      </span>
+    );
+  }
+  const labelQCM = texteReponseAttendueQCM(exercice, phase);
+  return labelQCM === null ? null : (
+    <span>
+      <Katex expression={labelQCM} />
+    </span>
+  );
+}
+
+function soumettreChampSimple(etat: EtatSessionSuiteClassique, texte: string): EtatSessionSuiteClassique {
+  switch (etat.phase) {
+    case "u64":
+      return soumettreReponseU64(etat, texte);
+    case "sommeTotaleEchiquier":
+      return soumettreReponseSommeTotaleEchiquier(etat, texte);
+    case "resoudreRCombinees":
+      return soumettreReponseResoudreRCombinees(etat, texte);
+    case "distance11":
+      return soumettreReponseDistance11(etat, texte);
+    case "sommeTotale11":
+      return soumettreReponseSommeTotale11(etat, texte);
+    case "calculV5":
+      return soumettreReponseCalculV5(etat, texte);
+    case "resoudrePhi":
+      return soumettreReponseResoudrePhi(etat, texte);
+    case "sommePartielleA":
+      return soumettreReponseSommePartielleA(etat, texte);
+    case "sommeInfinieA":
+      return soumettreReponseSommeInfinieA(etat, texte);
+    case "sommeInfinieB":
+      return soumettreReponseSommeInfinieB(etat, texte);
+    case "longueurZigzag":
+      return soumettreReponseLongueurZigzag(etat, texte);
+    case "airesZigzagAC":
+      return soumettreReponseAiresZigzagAC(etat, texte);
+    default:
+      throw new Error(`soumettreChampSimple : phase inattendue '${etat.phase}'`);
+  }
+}
+
+function soumettreListe(etat: EtatSessionSuiteClassique, textes: string[]): EtatSessionSuiteClassique {
+  switch (etat.phase) {
+    case "poidsComparaison":
+      return soumettreReponsePoidsComparaison(etat, textes);
+    case "resoudreSysteme":
+      return soumettreReponseResoudreSysteme(etat, textes);
+    case "suiteFinalePapyrus":
+      return soumettreReponseSuiteFinalePapyrus(etat, textes);
+    case "troisMethodes":
+      return soumettreReponseTroisMethodes(etat, textes);
+    case "dixTermes":
+      return soumettreReponseDixTermes(etat, textes);
+    case "hauteursZigzag":
+      return soumettreReponseHauteursZigzag(etat, textes);
+    case "airesZigzag":
+      return soumettreReponseAiresZigzag(etat, textes);
+    case "airesB":
+      return soumettreReponseAiresB(etat, textes);
+    default:
+      throw new Error(`soumettreListe : phase inattendue '${etat.phase}'`);
+  }
+}
+
+function soumettreQCM(etat: EtatSessionSuiteClassique, choixId: string): EtatSessionSuiteClassique {
+  switch (etat.phase) {
+    case "poserSysteme":
+      return soumettreReponsePoserSysteme(etat, choixId as never);
+    case "poserEquationCombinees":
+      return soumettreReponsePoserEquationCombinees(etat, choixId as never);
+    case "formuleRecurrence":
+      return soumettreReponseFormuleRecurrence(etat, choixId as never);
+    case "proprieteInverse":
+      return soumettreReponseProprieteInverse(etat, choixId as never);
+    case "limitePuissanceA":
+      return soumettreReponseLimitePuissanceA(etat, choixId as never);
+    default:
+      throw new Error(`soumettreQCM : phase inattendue '${etat.phase}'`);
+  }
+}
+
+/**
+ * Statut à 3 valeurs — calculé côté présentation UNIQUEMENT (motif A.1, déjà prouvé sur 5gen2),
+ * jamais consommé pour le score/les tentatives, qui restent pilotés par `soumettreChampSimple`
+ * ci-dessus. Chaque `diagnostiquerXxx` importé attend le type d'exercice précis de son scénario —
+ * casté ici depuis l'union `ExerciceSuiteClassique` (même principe que `commeEchiquier`/... privés
+ * à `moteur5e/sessionSuiteClassique.ts`, non exportés donc non réutilisables directement ici) :
+ * cast sûr par construction, `phase` détermine univoquement le scénario réel de l'exercice.
+ */
+function diagnostiquerChampSimple(exercice: ExerciceSuiteClassique, phase: PhaseSuiteClassique, texte: string): StatutVerification {
+  switch (phase) {
+    case "u64":
+      return diagnostiquerU64(texte, exercice as ExerciceEchiquier);
+    case "sommeTotaleEchiquier":
+      return diagnostiquerSommeTotaleEchiquier(texte, exercice as ExerciceEchiquier);
+    case "resoudreRCombinees":
+      return diagnostiquerResoudreRCombinees(texte, exercice as ExerciceSuitesCombinees);
+    case "distance11":
+      return diagnostiquerDistance11(texte, exercice as ExerciceVitesse);
+    case "sommeTotale11":
+      return diagnostiquerSommeTotale11(texte, exercice as ExerciceVitesse);
+    case "calculV5":
+      return diagnostiquerCalculV5(texte, exercice as ExerciceFibonacci);
+    case "resoudrePhi":
+      return diagnostiquerResoudrePhi(texte, exercice as ExerciceFibonacci);
+    case "sommePartielleA":
+      return diagnostiquerSommePartielleA(texte, exercice as ExerciceCarresEmboites);
+    case "sommeInfinieA":
+      return diagnostiquerSommeInfinieA(texte, exercice as ExerciceCarresEmboites);
+    case "sommeInfinieB":
+      return diagnostiquerSommeInfinieB(texte, exercice as ExerciceCarresEmboites);
+    case "longueurZigzag":
+      return diagnostiquerLongueurZigzag(texte, exercice as ExerciceTrianglesZigzag);
+    case "airesZigzagAC":
+      return diagnostiquerAiresZigzagAC(texte, exercice as ExerciceTrianglesZigzag);
+    default:
+      throw new Error(`diagnostiquerChampSimple : phase inattendue '${phase}'`);
+  }
+}
+
+/** Même principe que `diagnostiquerChampSimple` ci-dessus, pour les 9 phases "liste de champs". */
+function diagnostiquerListe(exercice: ExerciceSuiteClassique, phase: PhaseSuiteClassique, textes: string[]): StatutVerification {
+  switch (phase) {
+    case "poidsComparaison":
+      return diagnostiquerPoidsComparaison(textes, exercice as ExerciceEchiquier);
+    case "resoudreSysteme":
+      return diagnostiquerResoudreSysteme(textes, exercice as ExercicePapyrusRhind);
+    case "suiteFinalePapyrus":
+      return diagnostiquerSuiteFinalePapyrus(textes, exercice as ExercicePapyrusRhind);
+    case "troisMethodes":
+      return diagnostiquerTroisMethodes(textes, exercice as ExerciceVitesse);
+    case "dixTermes":
+      return diagnostiquerDixTermes(textes, exercice as ExerciceFibonacci);
+    case "hauteursZigzag":
+      return diagnostiquerHauteursZigzag(textes, exercice as ExerciceTrianglesZigzag);
+    case "airesZigzag":
+      return diagnostiquerAiresZigzag(textes, exercice as ExerciceTrianglesZigzag);
+    case "airesB":
+      return diagnostiquerAiresB(textes, exercice as ExerciceCarresEmboites);
+    default:
+      throw new Error(`diagnostiquerListe : phase inattendue '${phase}'`);
+  }
+}
+
+export function App56gen8() {
+  const [etat, setEtat] = useState<EtatSessionSuiteClassique>(sessionInitiale);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionSuiteClassique`, jamais dans le moteur. Remis à vide à chaque
+   * nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Capture locale de `etat.niveauAide > 0` pour chaque phase CLOSE — le moteur remet
+   * `niveauAide` à 0 à chaque transition de phase (même mécanique que les autres générateurs de
+   * ce chantier). */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseSuiteClassique, boolean>>>({});
+  /** Incrémenté à chaque nouvel exercice (« Nouvel exercice », « Générer ») : fait partie de la clé
+   * des écrans, pour que les champs se vident même quand le nouvel exercice démarre sur la même
+   * phase que le précédent (audit 5e ch. 3, point 1). */
+  const [numeroSession, setNumeroSession] = useState(0);
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
+   * qu'`AppAnalyseFonction.tsx`). Réutilise `calculerRecapitulatifSuiteClassique` pour la réponse
+   * ATTENDUE. */
+  function terminerEtape(nouvelEtat: EtatSessionSuiteClassique, votreReponse?: ReactNode) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele = nouvelEtat.derniereEtapeRevelee;
+      setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      if (votreReponse !== undefined) {
+        // Fiche de l'écran QUI VIENT DE SE CLORE (`etat.phase`), jamais la dernière ligne du
+        // récapitulatif : celui-ci ne contient que les écrans antérieurs à la phase courante, donc
+        // la fiche du dernier écran d'un exercice reprenait le titre et la réponse de l'avant-dernier.
+        const phaseClose = etat.phase;
+        const exerciceClos = etat.exerciceCourant;
+        setHistorique((h) => [
+          ...h,
+          {
+            corrigeDetaille: corrigeDetailleEcranCourant(),
+            titre: LIBELLE_PHASE_SUITE_CLASSIQUE[phaseClose],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? reponseAttenduePourPhase(exerciceClos, phaseClose) : undefined,
+          },
+        ]);
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
+    }
+    setEtat(nouvelEtat);
+  }
+
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setNumeroSession((n) => n + 1);
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
+    setNumeroSession((n) => n + 1);
+    setEtat(demarrerSessionSuiteClassique(REGLAGES_DEMO, () => construireAvecScenarioId(id as ScenarioSuiteClassique)));
+  }
+
+  const exercice = etat.exerciceCourant;
+  const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
+  const tentativesMax = tentativesMaxSuiteClassique(etat, etat.phase);
+  const cleEcran = `${numeroSession}-${etat.indexExercice}-${etat.phase}`;
+  const phase = etat.phase;
+
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSuiteClassique(exercice), lettreEtape(ordreComplet(exercice).indexOf(phase)))} />;
+  }
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttenduePourPhase(exercice, phase),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
+  return (
+    <div className="app-shell">
+      <header className="app-header">
+        <p className="app-eyebrow">5e — Entraînement</p>
+        <h1 className="app-title">Problèmes classiques sur les suites</h1>
+        <p className="app-subtitle">Chapitre 3 — Suites</p>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
+      </header>
+      <SelecteurVarianteDev options={CATALOGUE_SCENARIOS} onGenerer={forcerVariante} />
+      <main className="card">
+        <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifSuiteClassique(etat)} />
+          <>
+              {PHASES_CHAMP_SIMPLE.has(phase) && (
+                <EtapeChampSimpleClassique
+                  key={cleEcran}
+                  exercice={exercice}
+                  phase={phase}
+                  tentativesUtilisees={tentativesUtilisees}
+                  tentativesMax={tentativesMax}
+                  niveauAide={etat.niveauAide}
+                  niveauAideMax={niveauAideMaxSuiteClassique(phase)}
+                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
+                  onValider={(texte) => terminerEtape(soumettreChampSimple(etat, texte), texte)}
+                  diagnostiquer={(texte) => diagnostiquerChampSimple(exercice, phase, texte)}
+                  validation={validation}
+                />
+              )}
+              {PHASES_CALCULATRICE_CHAMP_SIMPLE.has(phase) && <CalculatriceScientifique />}
+
+              {PHASES_LISTE.has(phase) && (
+                <EtapeListeChampsClassique
+                  key={cleEcran}
+                  exercice={exercice}
+                  phase={phase}
+                  tentativesUtilisees={tentativesUtilisees}
+                  tentativesMax={tentativesMax}
+                  niveauAide={etat.niveauAide}
+                  niveauAideMax={niveauAideMaxSuiteClassique(phase)}
+                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
+                  onValider={(textes) => terminerEtape(soumettreListe(etat, textes), textes.join(" ; "))}
+                  diagnostiquer={(textes) => diagnostiquerListe(exercice, phase, textes)}
+                  diagnostiquerChamp={(index, texte) => diagnostiquerChampListe(texte, index, exercice, phase)}
+                  validation={validation}
+                />
+              )}
+              {PHASES_CALCULATRICE_LISTE.has(phase) && <CalculatriceScientifique />}
+
+              {PHASES_QCM.has(phase) && (
+                <EtapeQCMClassique
+                  key={cleEcran}
+                  exercice={exercice}
+                  phase={phase}
+                  tentativesUtilisees={tentativesUtilisees}
+                  tentativesMax={tentativesMax}
+                  niveauAide={etat.niveauAide}
+                  niveauAideMax={niveauAideMaxSuiteClassique(phase)}
+                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
+                  onValider={(choixId) => terminerEtape(soumettreQCM(etat, choixId), labelQCMChoisi(exercice, phase, choixId))}
+                  validation={validation}
+                />
+              )}
+
+              {phase === "suitesFinalesCombinees" && exercice.scenario === "suitesCombinees" && (
+                <EtapeSuitesFinalesCombinees
+                  key={cleEcran}
+                  exercice={exercice}
+                  tentativesUtilisees={tentativesUtilisees}
+                  tentativesMax={tentativesMax}
+                  niveauAide={etat.niveauAide}
+                  niveauAideMax={niveauAideMaxSuiteClassique(phase)}
+                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
+                  onValider={(reponse) =>
+                    terminerEtape(soumettreReponseSuitesFinalesCombinees(etat, reponse), formatReponseSuitesFinalesCombinees(reponse))
+                  }
+                  diagnostiquer={(reponse) => diagnostiquerSuitesFinalesCombinees(reponse, exercice)}
+                  diagnostiquerChamp={(groupe, index, texte) => diagnostiquerChampSuitesFinalesCombinees(groupe, index, texte, exercice)}
+                  validation={validation}
+                />
+              )}
+            </>
+        </div>
+      </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
+    </div>
+  );
+}

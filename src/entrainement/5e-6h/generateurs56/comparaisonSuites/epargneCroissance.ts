@@ -1,0 +1,47 @@
+// Copie 5e (6h) de `5e-4h/generateurs5e/comparaisonSuites/epargneCroissance.ts` (56gen11 ← 5gen18, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
+import type { ExerciceEpargneCroissance } from "./core/comparaisonSuites.types";
+import { construireFenetre, trouverSeuil } from "./simulation";
+import { entierAleatoire, resoudrePeriode, tirerContexte } from "./utils";
+
+const TENTATIVES_MAX = 2000;
+const N_MAX_SIMULATION = 40;
+
+/** Côté A (géométrique, taux élevé, valeur initiale plus faible) vs côté B (géométrique, taux plus
+ * faible, valeur initiale plus élevée) — A finit toujours par dépasser B. Contexte tiré une seule
+ * fois par exercice, dans le bassin partagé filtré aux branches où il est narrativement cohérent. */
+export function construireEpargneCroissance(): ExerciceEpargneCroissance {
+  const contexte = tirerContexte("epargneCroissance");
+  for (let tentative = 0; tentative < TENTATIVES_MAX; tentative++) {
+    const u1 = entierAleatoire(500, 2000);
+    const r1Pct = entierAleatoire(8, 15);
+    const v1 = u1 + entierAleatoire(1000, 5000);
+    const r2Pct = entierAleatoire(2, 6);
+
+    const uDeN = (n: number) => u1 * Math.pow(1 + r1Pct / 100, n - 1);
+    const vDeN = (n: number) => v1 * Math.pow(1 + r2Pct / 100, n - 1);
+
+    const nSeuil = trouverSeuil(uDeN, vDeN, "aDepasseB", N_MAX_SIMULATION);
+    if (nSeuil === null || nSeuil < 3 || nSeuil > 20) continue;
+    const fenetre = construireFenetre(uDeN, vDeN, "aDepasseB", nSeuil, Math.max(u1, v1));
+    if (fenetre === null) continue;
+    const { nTable, uTable, vTable } = fenetre;
+    const { anneeDepart, traductionValeur, uniteContexte } = resoudrePeriode(contexte, nSeuil);
+    return {
+      famille: "epargneCroissance",
+      condition: "aDepasseB",
+      contexte,
+      u1,
+      r1Pct,
+      v1,
+      r2Pct,
+      anneeDepart,
+      nSeuil,
+      nTable,
+      uTable,
+      vTable,
+      traductionValeur,
+      uniteContexte,
+    };
+  }
+  throw new Error("construireEpargneCroissance : aucune instance valide trouvée après " + TENTATIVES_MAX + " tentatives");
+}
