@@ -230,8 +230,11 @@ glisser au doigt = suivant / précédent.
   vue d'ensemble (grille de vignettes `mode="vignette"`, atelier non monté), télécharger (palette
   PowerPoint / PDF annotés, nouvelle séance — « Projection annotée »), plein écran (Fullscreen
   API, refus ou absence → message « utilise F11 »), ‹ n / N ›, quitter (→ `#projeter`). Masquée (et le
-  curseur) après 3 s sans mouvement. Palettes centrées au-dessus (`.projection-palettes`) : fond de
-  l'écran blanc, dessin, minuteur. Infobulles = nom + raccourci.
+  curseur) après 3 s sans mouvement — stylo en main compris depuis le 27/11/2026 (la pastille du dessin,
+  elle, reste) ; pas tant qu'une palette est dépliée (colonne, nuancier, menu du fond, minuteur,
+  télécharger). Palettes centrées au-dessus (`.projection-palettes`) : minuteur et télécharger seulement ;
+  le dessin, l'équerre et l'écran blanc ont leurs palettes REPLIÉES à gauche (voir « Pastilles, zoom du
+  repère, nuancier »). Infobulles = nom + raccourci.
 
 **Outils de dessin et instruments** (décision du 24/11/2026 « toutes tes propositions » ; maquettes D1
 palette, D2 équerre, D3 compas + calculatrice). Pointer events partout (souris, doigt, stylet, tableau
@@ -240,9 +243,10 @@ interactif ; `touch-action: none` sur ce qui se manipule, classe `.projection-in
 - `Tableau.tsx` (`Annotations`) par-dessus la diapo, en px logiques 1 280 × 720 : canvas **fluo**
   dessous (`mix-blend-mode: multiply` — le conteneur `.projection-tableau` ne doit créer AUCUN contexte
   d'empilement, sinon le fluo ne se fond plus avec la diapo) puis canvas **stylo** (traits, arcs) ; la
-  gomme (44 px, `destination-out`) passe sur les deux. Palette `PaletteDessin` (`BarreOutils.tsx`) :
-  stylo 4 couleurs, fluo 4 couleurs pastel (jaune, vert, rose, bleu ; trait 22 px, bouts plats), 3
-  épaisseurs (`EPAISSEURS` : 3 / 5 / 9 px, aussi pour les arcs), gomme, annuler, tout effacer.
+  gomme (44 px, `destination-out`) passe sur les deux. Colonne du dessin `ColonneDessin`
+  (`Pastilles.tsx`, ouverte depuis la pastille) : stylo 4 couleurs, fluo 4 couleurs pastel (jaune, vert,
+  rose, bleu ; trait 22 px, bouts plats) + les 3 dernières couleurs du nuancier, 3 épaisseurs
+  (`EPAISSEURS` : 3 / 5 / 9 px, aussi pour les arcs), gomme, annuler, tout effacer, « Nuancier ».
 - **Gardées par PAGE, dans le navigateur** (depuis le 27/11/2026, voir « Projection annotée » plus bas) :
   `MagasinAnnotations` (`magasinAnnotations.ts`) = `Map<clé de page, ElementAnnotation[]>` (traits, arcs,
   résultats épinglés, courbes) ; clé STABLE `d:<clé de diapo>` / `b:<id de page blanche>` (jamais l'index) ;
@@ -274,8 +278,8 @@ interactif ; `touch-action: none` sur ce qui se manipule, classe `.projection-in
     curseur choisi au survol (`crosshair` près d'un bord, `move` ailleurs). Le trait n'est ajouté qu'après
     4 px réels de mouvement (un simple appui ne laisse rien et ne fait pas « diapo suivante ») ; le clic
     qui suit le relâchement de TOUT geste est avalé (il tombait sinon sur la diapo = diapo suivante).
-    Palette de l'équerre (`PaletteEquerre`, au-dessus de la barre tant qu'elle est posée ; dans la vue
-    du professeur à côté de la palette de dessin), état PARTAGÉ dans `EtatEquerre` : **Segment** (borné
+    Réglages de l'équerre = trois boutons COLLÉS à elle (`BoutonsEquerre` de `Tableau.tsx`, depuis le
+    27/11/2026 ; plus de palette au-dessus de la barre), état PARTAGÉ dans `EtatEquerre` : **Segment** (borné
     au bord) / **Droite** (prolongée jusqu'aux bords de la diapo, `droiteDansDiapo`) ; **cadenas** =
     rotation verrouillée (`verrou` : poignée remplacée par un cadenas, la tirer déplace) pour faire
     glisser l'équerre et tracer des parallèles. **Perpendiculaire** : les deux côtés de l'angle droit
@@ -331,11 +335,13 @@ interactif ; `touch-action: none` sur ce qui se manipule, classe `.projection-in
     d'abord ces ajouts. Écran de la CLASSE (deux écrans, `role=diapos`) : pas de × (affichage seulement),
     sauf avec la gomme comme avant.
 - **Écran blanc** : PLUSIEURS pages par diapo (voir « Projection annotée »), chacune son fond « uni /
-  quadrillé / repère » (palette au-dessus de la barre ; dans la vue du professeur, palette au-dessus de la
-  diapo projetée), partagé ; quadrillage de 40 px, repère = axes gradués à l'échelle de la page (0,5 / 1 /
-  2 / 5 / 10 par carreau), origine au centre (`FondBlancTableau`). Les instruments marchent dessus.
-- Vue du professeur : stylo + équerre / compas / calculatrice au-dessus de la diapo projetée, palette
-  en dessous (sans les intitulés) ; tout ce qui y est fait apparaît au tableau, et inversement.
+  quadrillé / repère » (menu « fond ▾ » de la petite barre en haut à gauche, `OutilsBlanc`), partagé ;
+  quadrillage de 40 px, repère = axes gradués à l'échelle de la VUE (zoom, déplacement : voir plus bas),
+  origine au centre à la vue de départ (`FondBlancTableau`). Les instruments marchent dessus.
+- Vue du professeur : stylo + équerre / compas / calculatrice au-dessus de la diapo projetée ; pastille,
+  colonne, nuancier, petite barre de l'écran blanc et traceur POSÉS sur la diapo projetée
+  (`.prof-scene-zone`, même principe qu'à l'écran de la classe) ; tout ce qui y est écrit apparaît au
+  tableau, et inversement.
 - **Un écran** : « Lancer » demande le plein écran DANS le clic (la navigation interne le garde).
   **Deux écrans** : `window.open` DANS le clic (`lib/projection/fenetre.ts`, nom fixe) → fenêtre
   `role=diapos` (accueil « Plein écran / Continuer sans ») ; la page courante devient la vue du
@@ -378,16 +384,17 @@ blanches multiples, traceur de fonctions ; dossier de travail `projection-annote
   supprimée).
 - **Pages de l'écran blanc** (`EtatProjection.blanches[cléDiapo]`, `vues[cléDiapo]`, `PageBlanche` :
   `id`, `fond`, `ex`, `ey`, `angle`, `marques`) : B ouvre la DERNIÈRE page vue de la diapo, ou en crée
-  une (fond = le dernier choisi) ; barre « Page 2 / 3 » ‹ › (`allerPage`), « + Nouvelle page » (vierge,
-  même fond / échelle, insérée après la page affichée), supprimer (confirmation dans la palette ; la
+  une (fond = le dernier choisi) ; petite barre en haut à gauche ‹ 2 / 3 › (`allerPage`), « + » nouvelle page (vierge,
+  même fond / échelle, insérée après la page affichée), supprimer (menu « fond ▾ », confirmation dans le menu ; la
   dernière page est remplacée par une page vierge ; ses annotations partent : `oublierPage`). Chaque page
   a ses annotations, son annulation, son « Tout effacer ». Clavier : → ← et B gardent leur rôle ; quitter
   la diapo (→ ←, vignette) REFERME l'écran blanc (ses pages sont rattachées à la diapo) ; Page préc. /
   Page suiv. passent d'une page blanche à l'autre tant que l'écran blanc est affiché (sur la dernière :
   rien), sinon leur rôle d'avant. La calculatrice (sans punaise) ne se ferme pas en passant d'une page
   blanche à l'autre.
-- **Traceur** (`Traceur.tsx` + `lib/projection/traceur.ts` PUR ; bouton « f(x) Traceur » de la palette
-  des pages pour replier / déplier — `OutilsLocaux.traceur`, déplié d'office) : « f(x) = » (nom suivant
+- **Traceur** (`Traceur.tsx` + `lib/projection/traceur.ts` PUR ; bouton f(x) de la petite barre de
+  l'écran blanc pour replier / déplier — `OutilsLocaux.traceur`, LOCAL : replié au départ, déplié quand on
+  choisit le fond « repère », replié dès qu'une courbe est tracée ou qu'on écrit) : « f(x) = » (nom suivant
   libre : f, g, h, k, m, p…) en saisie libre jamais bloquée (`type="text"`, seul `normaliserSigneMoins`),
   aperçu KaTeX en direct, « Tracer » ou Entrée ; erreurs du parseur en clair, rien effacé. Parseur de la
   calculatrice étendu (`analyser(s, { variable: true })` : jeton x, `|…|` — une barre FERME à
@@ -396,8 +403,8 @@ blanches multiples, traceur de fonctions ; dossier de travail `projection-annote
   défaut (choix de l'élève de 4e–6e en analyse ; DEG / RAD visibles, par page, les courbes sont
   recalculées). Couleurs = stylo (bleu, rouge, vert, noir, la première libre), épaisseur = stylo (≥ 4 px).
   Une courbe est un ÉLÉMENT de la page (`Courbe` : expression, jamais les pixels) : annuler, ×, tout
-  effacer, deux écrans, export, conservation. Échelle par axe (`ECHELLES`) : graduations et courbes
-  recalculées. Tracé (`echantillonner`) : un échantillon par pixel logique, bissection (14 niveaux) là où
+  effacer, deux écrans, export, conservation. Échelle par axe (`ECHELLES`, « 1 carreau = ») : réglage de
+  la VUE (`avecEchelle`), graduations et courbes recalculées, annotations attachées. Tracé (`echantillonner`) : un échantillon par pixel logique, bissection (14 niveaux) là où
   l'écart dépasse 6 px ; écart qui ne se résorbe pas (> 30 px) = discontinuité → polyligne coupée (1/x,
   tan x) ; NaN / hors domaine → bord approché par bissection (√x part de l'origine) ; canvas découpé au
   cadre, ordonnées bornées ; tracés mémorisés (`traceMemorise`). Dessin : canvas `--courbes` SOUS le fluo
@@ -436,6 +443,75 @@ blanches multiples, traceur de fonctions ; dossier de travail `projection-annote
   embarquée (≈ 100 ko par page). Noms : « Chapitre 3 - Titre - annote.pptx » / « Titre.pdf » = `libelleChapitre`
   (numéro du professeur, jamais celui du site) + « — annoté », écrits en ASCII (`nomFichier` : un accent
   ou un tiret long dans `download` fait perdre le nom dans Chromium — le fichier s'appelait « download »).
+
+**Pastilles, zoom du repère, nuancier** (décision du professeur du 27/11/2026, captures à l'appui : les palettes
+pleine largeur prenaient le tiers, voire la moitié inférieure de l'écran ; maquettes « pastilles » 1–5 validées,
+réponses : pastilles à GAUCHE, repli automatique dès qu'on écrit ; dossier de travail `projection-pastilles/`).
+- **Dessin** (`Pastilles.tsx`) : prendre un outil (stylo, fluo, compas : bouton ou S / H / C) ne fait apparaître
+  QUE la pastille ronde en bas à gauche, au-dessus de la barre (`PastilleDessin` : couleur, épaisseur,
+  pictogramme de l'outil ; `aria-expanded`, `aria-controls`, infobulle) — toute la diapo reste libre (maquette 1 ;
+  ouvrir la colonne d'office la faisait couvrir le texte de gauche, où le professeur écrit). La toucher ouvre la
+  colonne étroite (`ColonneDessin`, 154 px, grille de 3 × 44 px, défile si l'écran est bas) ; choisir une couleur
+  la GARDE ouverte ; elle se replie au premier trait (`surEcrire` d'`Annotations` : trait, règle de l'équerre,
+  compas), à Échap (puis Échap range l'outil, comme avant) ou en re-touchant la pastille. La pastille reste visible
+  tant qu'un outil est actif, même barre masquée. État ouvert / fermé (`OutilsLocaux.palette`, `nuancier`,
+  `menuFond`, `traceur`) LOCAL à chaque fenêtre : rien ne s'ouvre sur l'écran de la classe quand le professeur
+  ouvre une palette chez lui. Colonne, traceur et menu du fond s'excluent (jamais l'un sur l'autre).
+- **Nuancier** (`Nuancier`, à droite de la colonne ; `lib/projection/couleurs.ts` PUR) : onglets Stylo / Fluo.
+  Stylo : 24 teintes (11 teintes × 2 clartés + 2 gris), toutes à un contraste ≥ 3 sur la diapo claire (#fbfaf7,
+  trait épais = « gros caractère ») + réglage fin teinte / clarté (curseurs `range` de 44 px, aperçu, « Prendre
+  cette couleur ») : une couleur trop claire est ASSOMBRIE jusqu'au contraste 3 (`couleurStylo`). Fluo : 12 pastels
+  (`hsl(h, 100 %, 76 %)`, posés en multiply) + réglage de teinte. Une couleur prise rejoint les couleurs rapides (3
+  dernières par genre, `localStorage` `projection:couleurs-recentes`, try/catch) ; la pastille la montre ; fermé au
+  premier trait. La couleur est dans l'élément : deux écrans, export, conservation inchangés.
+- **Équerre** : Segment / Droite / cadenas = trois boutons collés à l'équerre (`--cible` = 44 px RÉELS, vue réduite
+  du professeur comprise), jamais tournés (toujours à l'endroit), placés au-delà du coin droit, sinon du coin gauche,
+  sinon sous l'hypoténuse — le premier qui tient dans la diapo, sinon recalés dedans. Visibles sur les deux écrans.
+- **Écran blanc** (`OutilsBlanc`) : UNE petite barre en haut à gauche — ‹ n / N › · + (nouvelle page) · « fond ▾ »
+  (menu `role="menu"` : uni, quadrillé, repère en `menuitemradio`, « Supprimer cette page… » avec confirmation DANS le
+  menu ; fermé au clic ailleurs) · f(x) (repère) · −, +, recentrer (repère). Masquée avec la barre du bas après
+  3 s (sauf menu / traceur dépliés). Traceur = panneau de 300 px sous elle (défile si besoin), replié sur f(x) dès
+  qu'une courbe est tracée (la liste avec × revient en le rouvrant).
+- **Zoom du repère** (`lib/projection/vue.ts` PUR) : `PageBlanche.vue` = `{ ex, ey, cx, cy }` (unités pour 40 px
+  d'écran par axe, point du repère au centre de l'écran ; absente = vue de départ `{ page.ex, page.ey, 0, 0 }`).
+  Trois repères : ÉCRAN (px logiques), PAGE (px de la page à sa vue de départ — les traits, arcs et résultats
+  épinglés y sont STOCKÉS : `versPage` à la saisie, `transfoPage` / `versEcran` à l'affichage, à l'export, dans
+  l'autre fenêtre) et REPÈRE (courbes, points, graduations : `repereVue`, `Repere.cx / cy` de `traceur.ts`). Une
+  flèche dessinée vers un sommet le suit donc au zoom, au déplacement et au réglage « 1 carreau = » ; les marqueurs
+  (zéros, sommet, intersections) et étiquettes sont recalculés pour la fenêtre visible ; les courbes sont
+  ré-échantillonnées (nettes, jamais une image agrandie). Épaisseurs des annotations × racine carrée du zoom
+  (`Transfo.s` : ×2 → ×1,41 ; la gomme suit le même facteur) ; épaisseur des courbes fixe. Arc tracé sur des axes
+  d'échelles différentes : `Arc.ry` (ellipse dans la page, cercle à l'écran). Droite tracée à l'équerre :
+  `Trait.droite`, prolongée jusqu'aux bords de l'écran à l'affichage. Gestes : pincer / glisser à DEUX doigts
+  (écouteurs `pointer*` en capture sur la fenêtre : le deuxième doigt ANNULE ce que le premier écrivait et n'écrit
+  rien) ; molette SEULE = zoom autour du pointeur (comme GeoGebra / Desmos ; Ctrl + molette = pincer au pavé tactile,
+  pas plus fin) ; glisser à la souris ou à un doigt SANS outil = déplacer la vue (calque `.projection-vue`,
+  `projection-interactif` : sur une page repère, un clic ne passe plus à la diapo suivante — les flèches et la barre,
+  si) ; un doigt / la souris AVEC un outil écrit toujours ; boutons −, + (×1,5) et recentrer (vue de départ, grisé
+  quand on y est). Graduations (`graduations`, `pasGraduation`) : plus petit pas 1 / 2 / 5 × 10ᵏ à ≥ 40 px dont les
+  étiquettes (mono 14 px, 8,5 px par caractère + 4) ne se touchent pas, quadrillage aux graduations, nombre coupé par
+  le bord non écrit, axe hors écran → ses nombres au bord ; zoom borné (`ECHELLE_MIN` 0,002 – `ECHELLE_MAX` 5 000
+  unités / 40 px, même facteur sur les deux axes). « 1 carreau = » (traceur) : PILOTE la vue (`avecEchelle`, centre
+  gardé), bouton coché seulement si la vue vaut exactement cette échelle — le plus simple pour le professeur : un seul
+  état (la vue), pas de deuxième échelle cachée. Vue PARTAGÉE (deux écrans : `majVue` l'applique tout de suite et la
+  diffuse au plus une fois par image), gardée par page (conservation, `valider`), exportée telle qu'elle est vue.
+  « + » (nouvelle page) : même échelle que la vue, origine au centre. Instruments jamais zoomés ; compas sur un repère
+  aux axes de même échelle : « r = 1,5 unités » (rayon en unités du repère, centre aimanté aux nœuds de la VUE, rayon
+  à la demi-graduation), sinon comme avant ; équerre : « carreaux » seulement si la grille fait 40 px.
+- Vérifications (27/11/2026, `projection-pastilles/verif.mjs` + `verif-ancien.mjs` = `verif.mjs` de
+  `projection-annotee/` adapté à la nouvelle interface — mêmes 77 vérifications) : Vite de développement + faux client
+  connecté, 4e ch. 6 — pastille seule à la prise du stylo, colonne (154 px, cibles 44 px), repli au premier trait / à
+  Échap / à la pastille, barre masquée et pastille restante, nuancier (24 teintes au contraste ≥ 3, jaune clair
+  assombri, pastel → fluo, pastille et trait de la couleur choisie, couleurs gardées après rechargement), équerre et
+  ses boutons (suivent le déplacement, la rotation à −90°, recalés au bord, Droite / cadenas), écran blanc 3 pages
+  (‹ ›, menu du fond, suppression confirmée), repère + 2 courbes + flèche vers le sommet, deux doigts stylo en main
+  (aucun trait), pincer ×2 + glisser (sommet et flèche suivis au pixel, pas 1 → 0,5, aucun chevauchement, courbe de
+  6 px), molette, glisser sans outil, +, recentrer, « 1 carreau = 2 » (flèche suivie), compas « r = 1 unité »,
+  rechargement (vue revenue), PowerPoint et PDF de la page zoomée (relus), 1 280 × 720 / 1 024 × 768 / 1 920 × 1 080 /
+  870 × 400 (téléphone paysage : colonne et traceur défilent, rien coupé), thème sombre (palettes claires), deux
+  écrans (pastille et barre posées sur la diapo du professeur, rien chez la classe, trait reçu, boutons de l'équerre
+  ≥ 44 px réels, zoom du professeur reçu au tableau, molette au tableau reçue chez le professeur) — 109 + 77
+  vérifications, 0 erreur console.
 
 **Vérifications** (24/11/2026, dossier de travail `projection/` : `verif.mjs`, `verif-prod.mjs`,
 `compter_pptx.py`, `comparer_prerendu.py`) : build de test (`NODE_ENV=development vite build --mode test`

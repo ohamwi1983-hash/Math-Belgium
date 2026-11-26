@@ -410,7 +410,8 @@ const OUTILS_DEPART: OutilsLocaux = {
   ensemble: false,
   menuMinuteur: false,
   menuExport: false,
-  traceur: true,
+  // Replié au départ (rien sur l'écran de la classe) ; déplié quand on choisit le fond « repère » ou au bouton f(x).
+  traceur: false,
   pleinEcran: false,
   palette: false,
   nuancier: false,

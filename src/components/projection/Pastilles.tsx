@@ -261,7 +261,7 @@ function Nuancier({ id, outils, choisir, fermer }: { id: string; outils: OutilsL
 
 /**
  * Dessin : pastille (si un outil de dessin est actif) + colonne (si ouverte). Vue du professeur : mêmes composants,
- * posés sur la diapo projetée (`dansProf`).
+ * posés sur la diapo projetée (`.prof-scene-zone`, positions du CSS).
  */
 export function OutilsDessin({ outils, setOutils }: { outils: OutilsLocaux; setOutils: SetOutils }) {
   const id = useId().replace(/:/g, '')
