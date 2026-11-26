@@ -254,9 +254,9 @@ export function messageIllisible(_e: E, p: P): string {
 
 export function explicationChoix(e: E, p: P): string {
   if (p === "moment") return "Après le dernier versement, le capital reste placé un an : il est multiplié par 1 + i.";
-  if (e.variante === "valeurActuelle") return "La valeur actuelle est Vₙ(1 + i)⁻ⁿ, soit a(1 − (1 + i)⁻ⁿ)/i.";
-  if (e.variante === "versement") return e.apres ? "La valeur un an après le dernier versement est a·((1 + i)ⁿ − 1)/i·(1 + i) : on isole a." : "La valeur au dernier versement est a·((1 + i)ⁿ − 1)/i : on isole a.";
-  return "Somme géométrique de premier terme a et de raison 1 + i : Vₙ = a((1 + i)ⁿ − 1)/i.";
+  if (e.variante === "valeurActuelle") return "La valeur actuelle est la valeur acquise Vₙ multipliée par (1 + i)⁻ⁿ : on obtient la formule de V₀ du cours.";
+  if (e.variante === "versement") return e.apres ? "On écrit que la valeur acquise, multipliée encore par 1 + i (un an après le dernier versement), vaut la somme visée, puis on isole a." : "On écrit que la valeur acquise au dernier versement vaut la somme visée, puis on isole a.";
+  return "C'est la somme des termes d'une suite géométrique de premier terme a et de raison 1 + i.";
 }
 
 /* ----------------------------------------------------------------------------------------------

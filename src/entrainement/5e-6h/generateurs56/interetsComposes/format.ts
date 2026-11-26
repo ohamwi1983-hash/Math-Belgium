@@ -314,7 +314,7 @@ export function messageIllisible(_e: E, p: P): string {
 export function explicationChoix(e: E, p: P): string {
   if (p === "suite") return "Chaque année, le capital est multiplié par 1 + i : c'est une suite géométrique.";
   if (p === "inequation") return "La valeur acquise après n années est C₀(1 + i)ⁿ ; elle doit atteindre au moins le montant visé.";
-  return e.variante === "taux" ? "De Cₙ = C₀(1 + i)ⁿ : (1 + i)ⁿ = Cₙ / C₀, donc 1 + i est la racine n-ième de ce quotient." : "On divise Cₙ par (1 + i)ⁿ, c'est-à-dire qu'on le multiplie par (1 + i)⁻ⁿ.";
+  return e.variante === "taux" ? "De Cₙ = C₀(1 + i)ⁿ : on divise par C₀, puis 1 + i est la racine n-ième du quotient de Cₙ par C₀." : "On divise Cₙ par (1 + i)ⁿ, c'est-à-dire qu'on le multiplie par (1 + i)⁻ⁿ.";
 }
 
 /* ----------------------------------------------------------------------------------------------
