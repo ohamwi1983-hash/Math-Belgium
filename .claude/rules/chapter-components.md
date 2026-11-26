@@ -214,7 +214,7 @@ passe au-dessus du texte ; PAS de `text-transform: uppercase` sur les étiquette
   venir — titre » comme le cours. Vue d'ensemble / diapo suivante : simple image (jamais un bouton dans
   le bouton de la vignette).
 
-**Projection** (`ProjectionPage.tsx`) : `useProjection` = état `{ index, pas, blanc, debut, minuteur }`
+**Projection** (`ProjectionPage.tsx`) : `useProjection` = état `{ index, pas, blanc, debut, minuteur, fond, blanches, vues, atelierPlein }`
 partagé par `BroadcastChannel` (`math-belgium-projection:{niveau}/{slug}`) : chaque changement local est
 diffusé, un état reçu appliqué sans rediffusion ; une fenêtre qui s'ouvre demande l'état, seule une
 fenêtre « active » répond. Avancer = étape de révélation suivante, puis diapo suivante (reculer : la
@@ -227,7 +227,8 @@ de ces lettres n'était prise). Une touche dans un champ ou un atelier (Shadow D
 glisser au doigt = suivant / précédent.
 - Barre du bas (`BarreOutils`) : fil « chapitre · § n titre court », stylo, équerre, compas,
   calculatrice, minuteur (1/2/3/5/10 min, affiché en haut à droite, rouge clignotant à 0), écran blanc,
-  vue d'ensemble (grille de vignettes `mode="vignette"`, atelier non monté), plein écran (Fullscreen
+  vue d'ensemble (grille de vignettes `mode="vignette"`, atelier non monté), télécharger (palette
+  PowerPoint / PDF annotés, nouvelle séance — « Projection annotée »), plein écran (Fullscreen
   API, refus ou absence → message « utilise F11 »), ‹ n / N ›, quitter (→ `#projeter`). Masquée (et le
   curseur) après 3 s sans mouvement. Palettes centrées au-dessus (`.projection-palettes`) : fond de
   l'écran blanc, dessin, minuteur. Infobulles = nom + raccourci.
@@ -242,16 +243,19 @@ interactif ; `touch-action: none` sur ce qui se manipule, classe `.projection-in
   gomme (44 px, `destination-out`) passe sur les deux. Palette `PaletteDessin` (`BarreOutils.tsx`) :
   stylo 4 couleurs, fluo 4 couleurs pastel (jaune, vert, rose, bleu ; trait 22 px, bouts plats), 3
   épaisseurs (`EPAISSEURS` : 3 / 5 / 9 px, aussi pour les arcs), gomme, annuler, tout effacer.
-- **Gardées par diapo** : `Map<index, ElementAnnotation[]>` (traits, arcs, résultats épinglés) en
-  mémoire de la page SEULEMENT (rien en base, rien hors du navigateur) ; on les retrouve en revenant sur
-  la diapo. L'écran blanc est une page à part (clé −1). « Annuler » (bouton, Ctrl/Cmd+Z hors champ)
+- **Gardées par PAGE, dans le navigateur** (depuis le 27/11/2026, voir « Projection annotée » plus bas) :
+  `MagasinAnnotations` (`magasinAnnotations.ts`) = `Map<clé de page, ElementAnnotation[]>` (traits, arcs,
+  résultats épinglés, courbes) ; clé STABLE `d:<clé de diapo>` / `b:<id de page blanche>` (jamais l'index) ;
+  conservée en IndexedDB (rien en base, rien hors du navigateur) ; on la retrouve en revenant sur la diapo,
+  après un rechargement ou le lendemain. « Annuler » (bouton, Ctrl/Cmd+Z hors champ)
   retire le dernier élément de la page courante (un trait de gomme annulé fait réapparaître ce qu'il
   effaçait) ; « Tout effacer » vaut pour la page courante.
 - **Synchronisation** (deux écrans, même `BroadcastChannel`) : `trait` + `point` (tracé libre), `element`
   (ajout OU remplacement par id : trait à l'équerre, arc en cours, étiquette déplacée), `retirer`, `effacer`,
   `annotations` (tout, en réponse à la `demande` d'une fenêtre qui s'ouvre ou se recharge : la fenêtre
-  des diapos ouverte après coup reçoit ce qui était déjà écrit), `instruments`. Fond de l'écran blanc
-  dans `EtatProjection.fond`.
+  des diapos ouverte après coup reçoit ce qui était déjà écrit ; toujours envoyée, même vide), `instruments`.
+  Chaque message d'annotation porte la clé `page` (texte). Pages de l'écran blanc dans `EtatProjection`
+  (`blanches`, `vues`, `fond` = fond proposé pour une nouvelle page).
 - **Instruments** (`instruments.ts`, magasin externe `useSyncExternalStore` partagé entre fenêtres :
   un déplacement ne redessine que l'instrument, jamais la diapo ; indépendants de la diapo, comme un
   instrument posé au tableau) :
@@ -326,9 +330,10 @@ interactif ; `touch-action: none` sur ce qui se manipule, classe `.projection-in
     Ctrl/Cmd+Z / « Annuler » le remet (diffusé en `element`) si rien n'a été ajouté depuis, sinon retire
     d'abord ces ajouts. Écran de la CLASSE (deux écrans, `role=diapos`) : pas de × (affichage seulement),
     sauf avec la gomme comme avant.
-- **Écran blanc** : choix « uni / quadrillé / repère » (palette au-dessus de la barre ; boutons à côté
-  d'« Écran blanc » dans la vue du professeur), partagé ; quadrillage de 40 px, repère = axes gradués,
-  origine au centre (`FondBlancTableau`). Les instruments marchent dessus.
+- **Écran blanc** : PLUSIEURS pages par diapo (voir « Projection annotée »), chacune son fond « uni /
+  quadrillé / repère » (palette au-dessus de la barre ; dans la vue du professeur, palette au-dessus de la
+  diapo projetée), partagé ; quadrillage de 40 px, repère = axes gradués à l'échelle de la page (0,5 / 1 /
+  2 / 5 / 10 par carreau), origine au centre (`FondBlancTableau`). Les instruments marchent dessus.
 - Vue du professeur : stylo + équerre / compas / calculatrice au-dessus de la diapo projetée, palette
   en dessous (sans les intitulés) ; tout ce qui y est fait apparaît au tableau, et inversement.
 - **Un écran** : « Lancer » demande le plein écran DANS le clic (la navigation interne le garde).
@@ -349,7 +354,88 @@ leur place mesurée) ; le reste = image de fond 1 920 × 1 080 (SVG `<foreignObj
 site + polices Fraunces / Work Sans / Plex Mono — lues depuis la feuille Google Fonts — et KaTeX en
 `data:`, woff2 latin / latin-ext seulement ; Shadow DOM des ateliers aplati) ; notes = `notes` en texte
 (`texteBrut` / `latexEnTexte`). Une diapo par diapo finale, jamais une par étape de révélation.
-Les annotations, instruments et résultats épinglés ne sont PAS exportés (état de classe, non gardé).
+Les instruments ne sont jamais exportés. Avec annotations (27/11/2026) : voir « Projection annotée » ;
+nom du fichier « Titre.pptx » (ASCII, voir plus bas), PDF au même rendu.
+
+**Projection annotée** (décision du professeur du 27/11/2026 : « oui » à PowerPoint / PDF annotés, pages
+blanches multiples, traceur de fonctions ; dossier de travail `projection-annotee/`).
+- **Clés stables** (`lib/projection/annotations.ts`) : une diapo = `d:<cle>` ; la clé d'une diapo
+  (`diapos.ts`) est `<id étape>:titre`, `:essentiel`, `:<rang du bloc dans l'étape>`, `:carte<n>`, plus
+  `~<n° de page>` pour un exemple découpé — elle ne dépend que du contenu, pas des étapes / inclusions
+  choisies. Une sélection différente au lancement ne perd rien : les annotations d'une diapo absente
+  restent dans le magasin et dans le navigateur, et réapparaissent quand elle revient (l'export ne prend
+  que les diapos choisies ; le lanceur résume « … dans ces étapes » via `resumeDansSelection`, qui couvre
+  aussi les pages `~n`).
+- **Conservation** (`useConservation`) : IndexedDB `math-belgium-projection` / `annotations`, clé
+  `<niveau>/<slug>` → `DonneesAnnotations` (`pages` non vides, `blanches`, `vues`, `fond`) ; repli
+  `localStorage` `projection-annotations:<niveau>/<slug>` ; try/catch partout, lecture tolérante
+  (`valider`). Enregistrée 600 ms après le dernier changement et tout de suite à `pagehide` /
+  page cachée ; lue PENDANT le découpage des diapos (`Projection` attend les deux). Deux fenêtres :
+  chacune enregistre la même chose ; une fenêtre qui s'ouvre lit la conservation PUIS reçoit
+  `annotations` + `etat` de la fenêtre active (plus récents). Rien sur le serveur.
+- **« Nouvelle séance »** (palette Télécharger) : confirmation DANS la palette (« Tout effacer » /
+  « Annuler ») → `toutEffacer` (diffusé) + `oublierPagesBlanches` + enregistrement immédiat (entrée
+  supprimée).
+- **Pages de l'écran blanc** (`EtatProjection.blanches[cléDiapo]`, `vues[cléDiapo]`, `PageBlanche` :
+  `id`, `fond`, `ex`, `ey`, `angle`, `marques`) : B ouvre la DERNIÈRE page vue de la diapo, ou en crée
+  une (fond = le dernier choisi) ; barre « Page 2 / 3 » ‹ › (`allerPage`), « + Nouvelle page » (vierge,
+  même fond / échelle, insérée après la page affichée), supprimer (confirmation dans la palette ; la
+  dernière page est remplacée par une page vierge ; ses annotations partent : `oublierPage`). Chaque page
+  a ses annotations, son annulation, son « Tout effacer ». Clavier : → ← et B gardent leur rôle ; quitter
+  la diapo (→ ←, vignette) REFERME l'écran blanc (ses pages sont rattachées à la diapo) ; Page préc. /
+  Page suiv. passent d'une page blanche à l'autre tant que l'écran blanc est affiché (sur la dernière :
+  rien), sinon leur rôle d'avant. La calculatrice (sans punaise) ne se ferme pas en passant d'une page
+  blanche à l'autre.
+- **Traceur** (`Traceur.tsx` + `lib/projection/traceur.ts` PUR ; bouton « f(x) Traceur » de la palette
+  des pages pour replier / déplier — `OutilsLocaux.traceur`, déplié d'office) : « f(x) = » (nom suivant
+  libre : f, g, h, k, m, p…) en saisie libre jamais bloquée (`type="text"`, seul `normaliserSigneMoins`),
+  aperçu KaTeX en direct, « Tracer » ou Entrée ; erreurs du parseur en clair, rien effacé. Parseur de la
+  calculatrice étendu (`analyser(s, { variable: true })` : jeton x, `|…|` — une barre FERME à
+  l'intérieur d'une valeur absolue — et `abs(…)` ; `evaluer` refuse x ; `enLatex(…, { fractions: true })` :
+  a/b en `\dfrac`, `rac` en exposant) ; « f(x) = » / « y = » en tête acceptés. Angles en RADIANS par
+  défaut (choix de l'élève de 4e–6e en analyse ; DEG / RAD visibles, par page, les courbes sont
+  recalculées). Couleurs = stylo (bleu, rouge, vert, noir, la première libre), épaisseur = stylo (≥ 4 px).
+  Une courbe est un ÉLÉMENT de la page (`Courbe` : expression, jamais les pixels) : annuler, ×, tout
+  effacer, deux écrans, export, conservation. Échelle par axe (`ECHELLES`) : graduations et courbes
+  recalculées. Tracé (`echantillonner`) : un échantillon par pixel logique, bissection (14 niveaux) là où
+  l'écart dépasse 6 px ; écart qui ne se résorbe pas (> 30 px) = discontinuité → polyligne coupée (1/x,
+  tan x) ; NaN / hors domaine → bord approché par bissection (√x part de l'origine) ; canvas découpé au
+  cadre, ordonnées bornées ; tracés mémorisés (`traceMemorise`). Dessin : canvas `--courbes` SOUS le fluo
+  et le stylo (on écrit par-dessus) ; la gomme ne touche pas les courbes. Étiquettes (`EtiquettesCourbes`,
+  même composant à l'écran et à l'export) : nom près de la courbe (`placeEtiquette`), points cochés —
+  Zéros, Sommet / extremums, Intersections — avec coordonnées KaTeX : décimal exact court (≤ 3
+  décimales) tel quel, sinon forme reconnue comme la calculatrice (`formeExacte` : fraction, multiple de π,
+  a√b/q ; extremums « aimantés » sur une fraction de dénominateur ≤ 12 ou un multiple de π/12 s'ils sont
+  au moins aussi extrêmes), sinon « ≈ » et 0,01 ; zéro double = extremum nul ; 12 points au plus par genre
+  et par courbe ; étiquettes placées sans se chevaucher ni sortir du cadre.
+- **Télécharger** : bouton de la barre (pictogramme « télécharger », infobulle) → palette « PowerPoint
+  annoté · PDF annoté · résumé · Nouvelle séance » (absente de la fenêtre de la classe en deux écrans) ;
+  vue du professeur : bouton « Télécharger » de l'en-tête. **Quitter** avec des annotations (au moins une
+  diapo annotée ou une page blanche écrite ; pas sur l'écran de la classe) : boîte « Télécharger tes
+  annotations ? PowerPoint · PDF · Quitter sans télécharger · Rester » (Échap = rester ; après un
+  téléchargement réussi, on quitte ; « elles restent gardées dans ce navigateur »). Lanceur : « Télécharger
+  en PowerPoint » / « en PDF » + case « Avec mes annotations » (cochée d'office, seulement s'il y en a) —
+  l'export « sans annotations » d'avant reste (case décochée ou rien de gardé).
+- **Export annoté** (`telechargerProjection(chapter, choix, { format, annotations, diapos, progression })`,
+  `telechargerPptx` gardé) : mêmes diapos (depuis la projection : les diapos déjà découpées), et juste
+  après chaque diapo ses pages blanches ÉCRITES (une page vierge — écran blanc ouvert pour masquer — n'est
+  pas exportée), dans l'ordre, fond rendu par `FondBlancTableau` (échelle comprise). Calques à 1 920 ×
+  1 080 (`calques`, peinture commune `lib/projection/peinture.ts`) : **fluo** = le fond MULTIPLIÉ par le
+  surligneur dans les zones surlignées (rendu exact du `multiply`), transparent ailleurs, posé SOUS les
+  zones de texte PowerPoint (texte noir et modifiable par-dessus) — une image transparente « normale » ne
+  peut pas reproduire un multiply ; **stylo** = courbes + traits + arcs + étiquettes KaTeX (calque
+  `.pptx-calque` rastérisé sans fond), image transparente par-dessus. Ordre des objets d'une diapo :
+  fond, fluo, zones de texte, stylo — chaque annotation est un objet à part que le professeur peut
+  supprimer (`altText` « Annotations du professeur (surligneur) » / « Annotations du professeur »).
+  Notes d'une page blanche : « Page blanche n (repère) — après « titre » » + `f(x) = …` en texte.
+  **PDF** (`jspdf` déjà présent, chargé à la demande, jamais dans le paquet principal) : 720 × 405 pt
+  (16:9), une page par diapo, fond JPEG (qualité 0,88, textes compris), UNE image PNG transparente
+  d'annotation (fluo cuit sur le fond avec son texte + stylo), textes simples (ceux des zones de texte
+  PowerPoint) en texte INVISIBLE Helvetica par-dessus : sélectionnables et cherchables, ramenés au
+  Latin-1 (’ → ', — → -, œ → oe ; les polices standard de jsPDF perdent le reste) — sans police
+  embarquée (≈ 100 ko par page). Noms : « Chapitre 3 - Titre - annote.pptx » / « Titre.pdf » = `libelleChapitre`
+  (numéro du professeur, jamais celui du site) + « — annoté », écrits en ASCII (`nomFichier` : un accent
+  ou un tiret long dans `download` fait perdre le nom dans Chromium — le fichier s'appelait « download »).
 
 **Vérifications** (24/11/2026, dossier de travail `projection/` : `verif.mjs`, `verif-prod.mjs`,
 `compter_pptx.py`, `comparer_prerendu.py`) : build de test (`NODE_ENV=development vite build --mode test`
@@ -392,6 +478,23 @@ sans glisser = rien, jamais de diapo suivante. Deux fenêtres : repère et longu
 le tracé du professeur, trait reçu, Droite / cadenas partagés, droite du tableau reçue chez le
 professeur, Ctrl+Z — 63 vérifications, 0 erreur console ; `verif-outils.mjs` repassé (77 + 1 : son
 repère d'écran du professeur, pris avant l'ouverture de la palette de l'équerre, est à recalculer).
+
+Projection annotée (27/11/2026, dossier de travail `projection-annotee/` : `verif.mjs`, `lanceur.mjs`,
+`sombre.mjs`, `test-traceur.ts`, `info_pptx.py`) : Vite de développement + faux client connecté, 4e ch. 6
+(§ 6 et 11, 24 diapos), 1 280 × 720 — un écran : 3 diapos annotées (stylo, fluo, résultat épinglé), 3 pages
+blanches (uni, quadrillé, repère avec x² − 2x − 3 et 1/(x − 2) : asymptote non reliée, zéros exacts, 3
+intersections « ≈ »), saisie illisible gardée, échelle x = 2 (graduations, courbes recalculées), Ctrl+Z, ×,
+Page préc. / suiv., suppression confirmée, B → dernière page vue, → referme, rechargement → TOUT revient,
+palette et résumé, PowerPoint (27 diapos : pages blanches après la diapo 2, fond / fluo / textes / stylo)
+et PDF (27 pages 720 × 405, texte sélectionnable, ≈ 2,8 Mo) relus (LibreOffice + `pdftoppm`), Quitter →
+boîte, Nouvelle séance → tout part (après rechargement aussi), lanceur ; deux écrans : trait, pages,
+courbe et extremums (π/2 ; 1) reçus au tableau, trait du tableau reçu, troisième fenêtre qui reçoit tout,
+Page préc. du professeur, Télécharger et Quitter de la vue du professeur — 77 vérifications, palettes dans
+l'écran, cibles ≥ 44 px (nouveaux contrôles), 0 erreur console ; export SANS annotations depuis le lanceur
+(4e ch. 1 § 1 : 25 diapos comme avant, une image chacune, PDF 25 pages) ; thème sombre (palettes et boîte
+claires) ; `verif-p3.mjs` de `projection-3/` repassé (111 / 112 : l'échec restant est une course du
+curseur de la calculatrice déjà présente — touche à l'écran puis frappe immédiate, caret replacé dans un
+`requestAnimationFrame` — reproduite 1 fois sur 3, sans lien avec ce chantier).
 
 Retouches du 25/11/2026 (dossier de travail `projection-3/` : `repro-calc.mjs`, `repro2.mjs`,
 `ateliers.mjs`, `verif-p3.mjs`, `pptx.mjs`, `lire_pptx.py`) : Vite de développement + faux client
