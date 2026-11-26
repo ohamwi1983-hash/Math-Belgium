@@ -36,9 +36,11 @@ function corrigeQuantifies(e: E): EtapeCorrection[] {
   const premier = e.aNier.startsWith("\\forall") ? "\\forall" : "\\exists";
   r.push(
     calcul("c", [
-      ligne(`\\text{non}\\,\\big(${premier}\\big)\\ \\Longleftrightarrow\\ ${premier === "\\forall" ? "\\exists" : "\\forall"}`, "premier quantificateur remplacé"),
-      ligne(`\\text{non}\\,\\big(${premier === "\\forall" ? "\\exists" : "\\forall"}\\big)\\ \\Longleftrightarrow\\ ${premier}`, "second quantificateur remplacé, même ordre"),
-      ligne(`\\text{non}\\,\\big({${e.predicat}}\\big)\\ \\Longleftrightarrow\\ {${e.predicatNie}}`, "condition niée"),
+      // Pas de « \ » (espace) juste avant la relation : l'écran coupe la ligne à « \Longleftrightarrow » et le
+      // membre de gauche finirait par une barre oblique isolée (.katex-error).
+      ligne(`\\text{non}\\,\\big(${premier}\\big)\\Longleftrightarrow ${premier === "\\forall" ? "\\exists" : "\\forall"}`, "premier quantificateur remplacé"),
+      ligne(`\\text{non}\\,\\big(${premier === "\\forall" ? "\\exists" : "\\forall"}\\big)\\Longleftrightarrow ${premier}`, "second quantificateur remplacé, même ordre"),
+      ligne(`\\text{non}\\,\\big({${e.predicat}}\\big)\\Longleftrightarrow {${e.predicatNie}}`, "condition niée"),
     ]),
   );
   r.push(resultat("c", reponse(e, "negation")));
