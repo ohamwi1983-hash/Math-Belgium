@@ -53,7 +53,7 @@ export function situation(e: E): Frag[] {
     tx("Pour approcher "),
     lx(`\\sqrt{${e.P}}`),
     tx(" par une fraction, on utilise la méthode des puissances. On sait que "),
-    lx(`0<${baseL(e)}<1`),
+    lx(`{0<${baseL(e)}<1}`),
     tx(" : les puissances successives de ce nombre sont de plus en plus proches de 0."),
   ];
 }

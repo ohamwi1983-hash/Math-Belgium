@@ -1203,3 +1203,25 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
 REGROUPEMENTS["56gen5"] = REGROUPEMENTS["5gen46"];
 REGROUPEMENTS["56gen6"] = REGROUPEMENTS["5gen16"];
 
+// 5e (6h), nouveaux (chantier E2) : 56gen21 — la somme est la ligne, une consigne par variante (calculer,
+// développer, en fonction de n ; « écrire avec Σ » et « changement d'indice » restent seuls) ; 56gen22 —
+// la suite et ε sont la ligne (rationnelle et géométrique ; Fibonacci a deux vraies questions).
+REGROUPEMENTS["56gen21"] = {
+  formes: [
+    { motif: re(String.raw`On considère la somme (?<ligne>${M})\.\nCalcule cette somme\.`), consigne: "Calcule chaque somme." },
+    { motif: re(String.raw`On considère la somme (?<ligne>${M})\.\nDéveloppe cette somme, puis calcule-la\.`), consigne: "Développe chaque somme, puis calcule-la." },
+    {
+      motif: re(String.raw`On considère la somme (?<ligne>${M}), où \$n\$ est un naturel non nul\.\nCalcule \$S_n\$ en fonction de \$n\$\.`),
+      consigne: "Calcule chaque somme en fonction du naturel non nul $n$.",
+    },
+  ],
+};
+REGROUPEMENTS["56gen22"] = {
+  formes: [
+    {
+      motif: re(String.raw`On considère la suite définie par (?<u>${M}) pour \$\{n\\in\\mathbb\{N\}_0\}\$, et le réel (?<eps>${M})\.\nDétermine la limite \$\\ell\$ de cette suite, puis (?<q>le plus petit rang .+)`),
+      consigne: (g) => `Pour chaque suite, définie pour $n\\in\\mathbb{N}_0$, détermine la limite $\\ell$, puis ${g.q}`,
+      ligne: (g) => `${g.u} ; ${g.eps}`,
+    },
+  ],
+};

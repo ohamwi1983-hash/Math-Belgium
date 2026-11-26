@@ -69,6 +69,15 @@ export function tronqueL(x: number, dec: number): string {
   return `${nbL(t, dec, true)}\\ldots`;
 }
 
+/** a·v + b en LaTeX (« 3n+2 », « 2-n », « -4n-1 », « n ») — a et b entiers. */
+export function affineVarL(a: number, b: number, v: string): string {
+  const mono = a === 1 ? v : a === -1 ? `-${v}` : `${a}${v}`;
+  if (a === 0) return `${b}`;
+  if (b === 0) return mono;
+  if (a < 0 && b > 0) return `${b}-${a === -1 ? v : `${-a}${v}`}`;
+  return `${mono}${b < 0 ? `-${-b}` : `+${b}`}`;
+}
+
 /** Rationnel n/d en LaTeX (« \dfrac{4}{3} », « -\dfrac{1}{2} », « 5 ») — n et d entiers, d > 0. */
 export function fractionL(n: number, d: number): string {
   if (d === 1) return `${n}`;

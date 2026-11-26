@@ -2,7 +2,7 @@ import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuill
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExerciceSigma } from "./index";
 import { nombreTermes, partieGeo, sommeDe, termesDe, totalMixte, valeurTerme } from "./index";
-import { COURS_GEO, COURS_SIGMA, geoL, nouveauTermeL, parL, reponse, sigmaL, sommeNL, termeAvecL, termeL, uL } from "./ui/formatSigma";
+import { affineL, COURS_GEO, COURS_SIGMA, geoL, nouveauTermeL, parL, reponse, sigmaL, sommeNL, termeAvecL, termeL, termeSousSigmaL, uL } from "./ui/formatSigma";
 
 /**
  * Corrigé détaillé « comme au tableau » de `56gen21` (cours, étapes 7 et 8), une lettre par écran.
@@ -152,7 +152,7 @@ function corrigeUneSuite(e: E): EtapeCorrection[] {
     utilise("b", [t("On remplace i par les bornes ; de "), f(`i=${e.k}`), t(" à "), f(`i=${e.m}`), t(", il y a "), f("m-k+1"), t(" termes.")]),
     calcul("b", lignesB),
     resultat("b", reponse(e, "elements")),
-    piege("b", [t("Prendre "), f(`${uL(1)}=${valeurTerme(e.terme, 1)}`), t(" comme premier terme alors que la somme commence à "), f(`i=${e.k}`), t(".")]),
+    piege("b", e.k === 1 ? [t("Compter "), f(`${e.m}-${e.k}`), t(" termes en oubliant une borne.")] : [t("Prendre "), f(`${uL(1)}=${valeurTerme(e.terme, 1)}`), t(" comme premier terme alors que la somme commence à "), f(`i=${e.k}`), t(".")]),
   ];
   return [...etapeA, ...etapeB, ...etapesValeur(e, "c")];
 }
@@ -162,12 +162,12 @@ function corrigeMixte(e: E): EtapeCorrection[] {
   const N = e.m;
   const tt = termesDe(e);
   return [
-    utilise("a", [t("Linéarité : "), f(`${sigmaL(1, N, "(a_i+b_i)")}=${sigmaL(1, N, "a_i")}+${sigmaL(1, N, "b_i")}`), t(` ; la partie géométrique a pour premier terme ${c}·${q} et pour raison ${q} ${COURS_GEO}.`)]),
+    utilise("a", [t("Linéarité : "), f(`${sigmaL(1, N, "(a_i+b_i)")}=${sigmaL(1, N, "a_i")}+${sigmaL(1, N, "b_i")}`), t(` ; la partie géométrique a pour premier terme ${c * q} (pour i = 1) et pour raison ${q} ${COURS_GEO}.`)]),
     calcul("a", [ligne(`${sigmaL(1, N, geoL(c, q, "i"))}=${geoL(c, q, "1")}+${geoL(c, q, "2")}+\\cdots+${geoL(c, q, `${N}`)}`, "on développe"), ...lignesGeo(N, c * q, q, "")]),
     resultat("a", reponse(e, "partieGeo")),
     piege("a", [t("Prendre "), f(`${c}`), t(" comme premier terme : la somme commence à "), f("i=1"), t(", donc par "), f(`${c * q}`), t(".")]),
     utilise("b", [t(`Partie arithmétique : ${N} termes, de raison ${(e.terme as { a: number }).a} ${COURS_SIGMA}.`)]),
-    calcul("b", [ligne(`\\text{premier}=${termeAvecL(e.terme, 1)}=${tt[0]}`, "i = 1"), ligne(`\\text{dernier}=${termeAvecL(e.terme, N)}=${tt[N - 1]}`, `i = ${N}`), ...lignesArith(N, tt[0], tt[N - 1], "")]),
+    calcul("b", [ligne(`\\text{premier}=${termeAvecL(e.terme, 1)}=${tt[0]}`, "i = 1"), ligne(`\\text{dernier}=${termeAvecL(e.terme, N)}=${tt[N - 1]}`, `i = ${N}`), ...lignesArith(N, tt[0], tt[N - 1], sigmaL(1, N, termeSousSigmaL(e.terme)))]),
     resultat("b", reponse(e, "partieArith")),
     piege("b", [t("Oublier le terme constant à chaque rang : il compte "), f(`${N}`), t(" fois.")]),
     utilise("c", [t("La somme cherchée est la somme des deux parties.")]),
@@ -194,8 +194,8 @@ function corrigeLitteral(e: E): EtapeCorrection[] {
       utilise("b", [t(`Suite arithmétique de raison ${T.a < 0 ? "−" : ""}${Math.abs(T.a)}, n termes ${COURS_SIGMA} : `), f("S_n=\\dfrac{n(u_1+u_n)}{2}"), t(".")]),
       calcul("b", [
         ligne(`S_n=\\dfrac{n\\left(${u1}+${termeL(T, "n").startsWith("-") ? `(${termeL(T, "n")})` : termeL(T, "n")}\\right)}{2}`, "on remplace"),
-        ligne(`=\\dfrac{n\\left(${T.a === 1 ? "" : T.a === -1 ? "-" : T.a}n${c < 0 ? `-${-c}` : `+${c}`}\\right)}{2}`, "on réduit la parenthèse"),
-        ligne(`=${sommeNL(T)}`, "écriture simplifiée"),
+        ligne(`=\\dfrac{n\\left(${affineL(T.a, c, "n")}\\right)}{2}`, "on réduit la parenthèse"),
+        ...(sommeNL(T) === `\\dfrac{n\\left(${affineL(T.a, c, "n")}\\right)}{2}` ? [] : [ligne(`=${sommeNL(T)}`, "écriture simplifiée")]),
       ]),
       resultat("b", reponse(e, "sommeN")),
       verification("b", [t("Pour "), f("n=2"), t(" : "), f(`S_2=${u1}+${parL(valeurTerme(T, 2))}=${u1 + valeurTerme(T, 2)}`), t(", comme la formule.")]),

@@ -2,7 +2,7 @@ import type { EtapeCorrection, LigneCalcul } from "../../../export/genererFeuill
 import { calcul, latex, ligne, piege, resultat, texte, utilise, verification } from "../../../export/corrigeTableau";
 import type { ExerciceHeron, ExerciceHeronRectangles, ExercicePuissances } from "./index";
 import { ecartDe, ecartFraction, largeurDe, longueurDe } from "./index";
-import { baseL, COURS_HERON, decimalesHeron, encadrementL, formeL, racineL, reponse, valeurApprocheeL } from "./ui/formatHeron";
+import { baseL, COURS_HERON, decimalesHeron, formeL, racineL, reponse, valeurApprocheeL } from "./ui/formatHeron";
 import { dixMoinsL, egalOuEnvironL, fractionL, nbL, parDefautA, parExcesA, scientifiqueL, tronqueL } from "../nombres56";
 
 /**
@@ -40,7 +40,7 @@ function corrigeRectangles(e: ExerciceHeronRectangles): EtapeCorrection[] {
   ];
 
   const etapeB: EtapeCorrection[] = [
-    utilise("b", [t("Même calcul à partir du deuxième rectangle ; dès le deuxième rectangle, "), f(`\\dfrac{A}{a_n}\\leq\\sqrt{A}\\leq a_n`), t(` ${COURS_HERON}.`)]),
+    utilise("b", [t("Même calcul à partir du deuxième rectangle ; dès le deuxième rectangle, "), f(`{\\dfrac{A}{a_n}\\leq\\sqrt{A}\\leq a_n}`), t(` ${COURS_HERON}.`)]),
     calcul("b", [
       ligne(`a_3=\\dfrac{1}{2}\\left(${tronqueL(a2, d)}+${tronqueL(largeurDe(e, 2), d)}\\right)\\approx ${nbL(a3, d, true)}`, "on garde les décimales en mémoire"),
       ligne(`\\dfrac{${A}}{a_3}\\approx ${nbL(largeurDe(e, 3), d, true)}`, "largeur du troisième rectangle"),
@@ -72,7 +72,7 @@ function corrigeRectangles(e: ExerciceHeronRectangles): EtapeCorrection[] {
   const n = e.nPrecision;
   const etapeD: EtapeCorrection[] = [
     utilise("d", [t("Au rectangle "), f(`${n}`), t(", la racine est entre la largeur et la longueur, qui diffèrent de moins de "), f(dixMoinsL(e.k)), t(" : tout nombre de cet intervalle convient.")]),
-    calcul("d", [ligne(`${nbL(largeurDe(e, n), e.k + 2, true)}\\leq ${racineL(e)}\\leq ${nbL(longueurDe(e, n), e.k + 2, true)}`, `largeur et longueur du rectangle ${n}`)]),
+    calcul("d", [ligne(`${nbL(parDefautA(largeurDe(e, n), e.k + 2), e.k + 2, true)}\\leq ${racineL(e)}\\leq ${nbL(parExcesA(longueurDe(e, n), e.k + 2), e.k + 2, true)}`, `largeur (par défaut) et longueur (par excès) du rectangle ${n}`)]),
     resultat("d", reponse(e, "valeur")),
     verification("d", [t("La touche racine de la calculatrice donne "), f(`${racineL(e)}\\approx ${nbL(Math.sqrt(A), e.k + 3, true)}`), t(", qui arrondi à "), f(dixMoinsL(e.k)), t(" donne bien "), f(valeurApprocheeL(e)), t(".")]),
     piege("d", [t(`Garder trop peu de décimales : à ${e.k - 1} décimales, la précision n'est plus que de `), f(dixMoinsL(e.k - 1)), t(".")]),
@@ -113,7 +113,7 @@ function corrigePuissances(e: ExercicePuissances): EtapeCorrection[] {
   const ec = ecartFraction(e);
   const etapeD: EtapeCorrection[] = [
     utilise("d", [t("La fraction moins la racine, à la calculatrice ; d'après l'étape b, cet écart vaut "), f(`\\dfrac{(${b})^4}{${e.v2}}`), t(", un nombre positif.")]),
-    calcul("d", [ligne(`${fractionL(e.num, e.den)}\\approx ${nbL(e.num / e.den, 9, true)}`, "valeur de la fraction"), ligne(`\\sqrt{${P}}\\approx ${nbL(Math.sqrt(P), 9, true)}`, "touche racine"), ligne(`${fractionL(e.num, e.den)}-\\sqrt{${P}}\\approx ${scientifiqueL(ec)}`, "deux chiffres significatifs")]),
+    calcul("d", [ligne(`${fractionL(e.num, e.den)}${egalOuEnvironL(e.num / e.den, 9)}`, "valeur de la fraction"), ligne(`\\sqrt{${P}}\\approx ${nbL(Math.sqrt(P), 9, true)}`, "touche racine"), ligne(`${fractionL(e.num, e.den)}-\\sqrt{${P}}\\approx ${scientifiqueL(ec)}`, "deux chiffres significatifs")]),
     resultat("d", reponse(e, "ecart")),
     verification("d", [t("L'écart est positif : la fraction est une valeur approchée par excès de "), f(`\\sqrt{${P}}`), t(".")]),
     piege("d", [t("Calculer la racine moins la fraction : l'écart demandé serait négatif.")]),
