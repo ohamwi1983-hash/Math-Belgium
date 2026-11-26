@@ -90,8 +90,8 @@ export function Bouton({ label, picto, actif, onClick, raccourci }: { label: str
 
 /** Outil de dessin rangé : pastille, colonne et nuancier disparaissent. */
 const range = (o: OutilsLocaux): OutilsLocaux => ({ ...o, stylo: false, palette: false, nuancier: false })
-/** Outil de dessin pris (il ne l'était pas) : la colonne s'ouvre (premier usage évident ; repliée au premier trait). */
-const pris = (o: OutilsLocaux, outil: OutilDessin): OutilsLocaux => ({ ...o, stylo: true, outil, menuMinuteur: false, palette: o.stylo ? o.palette : true, traceur: false, menuFond: false })
+/** Outil de dessin pris : seule la pastille apparaît (maquette 1 : « toute la diapo est libre ») ; la toucher ouvre la colonne. */
+const pris = (o: OutilsLocaux, outil: OutilDessin): OutilsLocaux => ({ ...o, stylo: true, outil, menuMinuteur: false, traceur: false, menuFond: false })
 /** Stylo (S) : prend / range le stylo ; depuis le compas, revient au stylo. */
 export const basculerStylo = (o: OutilsLocaux): OutilsLocaux =>
   o.stylo && o.outil !== 'compas' ? { ...range(o), menuMinuteur: false } : pris(o, o.outil === 'compas' ? 'stylo' : o.outil)

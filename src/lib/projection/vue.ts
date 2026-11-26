@@ -24,7 +24,9 @@ const C = 40
 export const ECHELLE_MIN = 0.002
 export const ECHELLE_MAX = 5000
 
-/** Transformation page → écran : `écran = page × z + t` (par axe). `s` : facteur des épaisseurs (moyenne géométrique). */
+/** Transformation page → écran : `écran = page × z + t` (par axe). `s` : facteur des épaisseurs des annotations — racine
+ * carrée du zoom (moyenne géométrique des deux axes) : un trait suit le zoom sans devenir énorme (×2 → ×1,41) ni
+ * disparaître ; le même facteur pour la gomme (ce qu'elle effaçait reste effacé, au bord près). */
 export interface Transfo {
   zx: number
   zy: number
@@ -54,7 +56,7 @@ export function transfoPage(page: Pick<PageBlanche, 'fond' | 'ex' | 'ey' | 'vue'
   // x_repère = (Px − 640) / 40 × ex ; Sx = 640 + (x_repère − cx) / ex_vue × 40.
   const tx = L / 2 - (L / 2) * zx - (v.cx * C) / v.ex
   const ty = H / 2 - (H / 2) * zy + (v.cy * C) / v.ey
-  return { zx, zy, tx, ty, s: Math.sqrt(zx * zy) }
+  return { zx, zy, tx, ty, s: Math.pow(zx * zy, 0.25) }
 }
 
 export const estIdentite = (t: Transfo) => t.zx === 1 && t.zy === 1 && t.tx === 0 && t.ty === 0
@@ -114,7 +116,7 @@ export function texteGraduationPas(v: number, pas: number): string {
 }
 
 /** Largeur (px logiques) d'une étiquette de graduation en police mono 14 px. */
-const largeurTexte = (t: string) => t.length * 8.6
+const largeurTexte = (t: string) => t.length * 8.5
 
 /**
  * Pas des graduations d'un axe : le plus petit pas « joli » (0,1 / 0,2 / 0,5 / 1 / 2 / 5 / 10…) dont deux
@@ -131,7 +133,7 @@ export function pasGraduation(unitesPar40: number, bornes: [number, number], hor
       if (ecart < C - 1e-6) continue
       if (!horizontal) return pas
       const plusLarge = Math.max(largeurTexte(texteGraduationPas(Math.floor(bornes[0] / pas) * pas, pas)), largeurTexte(texteGraduationPas(Math.ceil(bornes[1] / pas) * pas, pas)))
-      if (ecart >= plusLarge + 6) return pas
+      if (ecart >= plusLarge + 4) return pas
     }
   }
   return Math.pow(10, k0 + 6)
