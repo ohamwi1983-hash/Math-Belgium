@@ -15,6 +15,13 @@ export const sectionsSuites: ChapterSection[] = [
     partie: 'Les suites',
     blocks: [
       { kind: 'para', text: 'Étape en cours de rédaction.' },
+      {
+        kind: 'atelier',
+        tag: 'calculatrice-prudence-widget',
+        label: 'Manipule toi-même : calculatrice… prudence !',
+        caption:
+          'La suite définie par u₁ = 1⁄7 et uₙ₊₁ = 29uₙ − 4 est constante : 29 · 1⁄7 − 4 = 1⁄7. Mais si on tape u₁ arrondi à k décimales, l’écart avec 1⁄7 est multiplié par 29 à chaque pas, et les termes calculés finissent par s’envoler, même avec quinze décimales.',
+      },
       // ⟨fin-etape definir-suite⟩
     ],
   },

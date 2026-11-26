@@ -254,6 +254,7 @@ export type InteractiveWidgetTag =
   | 'heron-rectangles-widget'
   | 'valeur-absolue-distance-widget'
   | 'phi-intervalles-widget'
+  | 'calculatrice-prudence-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }
