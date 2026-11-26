@@ -615,7 +615,7 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
 /* Étiquettes des courbes et points remarquables (sur le repère, sous le stylo) */
 .traceur-calque { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; pointer-events: none; color: #182430; }
 .traceur-points { position: absolute; left: 0; top: 0; }
-.traceur-nom { position: absolute; padding: 0 6px; border-radius: 4px; background: rgb(255 255 255 / 0.85); font: 400 34px/1.15 var(--serif); }
+.traceur-nom { position: absolute; padding: 0 6px; font: 400 34px/1.15 var(--serif); text-shadow: 0 0 3px #fff, 0 0 6px #fff, 0 0 8px #fff; }
 .traceur-nom .katex { font-size: 1em; }
 .traceur-point { position: absolute; padding: 3px 8px; border: 2px solid; border-radius: 6px; background: #fff; font: 400 20px/1.2 var(--serif); white-space: nowrap; }
 .traceur-calque .math-inline { overflow: visible; white-space: nowrap; }
@@ -632,3 +632,5 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
 .prof-export { display: flex; justify-content: center; padding: 10px 18px 0; }
 .prof-palette .projection-palette--traceur { padding: 6px 8px; }
 .prof-palette .traceur-saisie { width: 200px; }
+.pages-traceur { display: inline-flex; align-items: center; gap: 6px; }
+.pages-traceur .katex { font-size: 1.05em; }

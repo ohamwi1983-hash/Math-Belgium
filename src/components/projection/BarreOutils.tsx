@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { clePageBlanche } from '../../lib/projection/annotations'
 import type { MagasinAnnotations } from './magasinAnnotations'
 import { PaletteTraceur } from './Traceur'
+import { MathInline } from '../Math'
 import { Pictogramme } from './Pictogrammes'
 import type { NomPictogramme } from './Pictogrammes'
 import { useInstrument } from './instruments'
@@ -49,6 +50,8 @@ export interface OutilsLocaux {
   menuMinuteur: boolean
   /** Palette « Télécharger » (PowerPoint / PDF annotés, nouvelle séance). */
   menuExport: boolean
+  /** Palette du traceur (page « repère ») dépliée ; repliée, la page reste libre pour écrire. */
+  traceur: boolean
   pleinEcran: boolean
 }
 
@@ -160,7 +163,18 @@ export function PaletteDessin({ outils, setOutils }: { outils: OutilsLocaux; set
  * Écran blanc : pages de la diapo (« Page 2 / 3 », ‹ ›, « + Nouvelle page », supprimer après confirmation) et fond
  * de la page affichée (uni, quadrillé, repère) — partagés avec l'autre écran. `compacte` : vue du professeur.
  */
-export function PaletteFond({ projection, annotations, compacte = false }: { projection: Projection; annotations: MagasinAnnotations; compacte?: boolean }) {
+export function PaletteFond({
+  projection,
+  annotations,
+  compacte = false,
+  traceur,
+}: {
+  projection: Projection
+  annotations: MagasinAnnotations
+  compacte?: boolean
+  /** Bouton « Traceur f(x) » (page « repère ») : déplie / replie la palette du traceur. */
+  traceur?: { ouvert: boolean; basculer: () => void }
+}) {
   const [confirmer, setConfirmer] = useState(false)
   const page = projection.pageBlanche()
   const liste = projection.pagesBlanches()
@@ -217,18 +231,38 @@ export function PaletteFond({ projection, annotations, compacte = false }: { pro
           {f.nom}
         </button>
       ))}
+      {traceur && page.fond === 'repere' && (
+        <>
+          <span className="projection-separateur" aria-hidden="true" />
+          <button type="button" className="projection-duree pages-traceur" aria-pressed={traceur.ouvert} title={traceur.ouvert ? 'Replier le traceur de fonctions' : 'Tracer une fonction sur le repère'} onClick={traceur.basculer}>
+            <MathInline tex="f(x)" /> Traceur
+          </button>
+        </>
+      )}
     </div>
   )
 }
 
 /** Palettes de l'écran blanc : pages + fond, et le traceur de fonctions sur le repère. */
-export function PalettesBlanc({ projection, annotations, outils, compacte = false }: { projection: Projection; annotations: MagasinAnnotations; outils: OutilsLocaux; compacte?: boolean }) {
+export function PalettesBlanc({
+  projection,
+  annotations,
+  outils,
+  setOutils,
+  compacte = false,
+}: {
+  projection: Projection
+  annotations: MagasinAnnotations
+  outils: OutilsLocaux
+  setOutils: (f: (o: OutilsLocaux) => OutilsLocaux) => void
+  compacte?: boolean
+}) {
   const page = projection.pageBlanche()
   if (!page) return null
   return (
     <>
-      <PaletteFond projection={projection} annotations={annotations} compacte={compacte} />
-      {page.fond === 'repere' && <PaletteTraceur projection={projection} annotations={annotations} page={page} outils={outils} compacte={compacte} />}
+      <PaletteFond projection={projection} annotations={annotations} compacte={compacte} traceur={{ ouvert: outils.traceur, basculer: () => setOutils((o) => ({ ...o, traceur: !o.traceur })) }} />
+      {page.fond === 'repere' && outils.traceur && <PaletteTraceur projection={projection} annotations={annotations} page={page} outils={outils} compacte={compacte} />}
     </>
   )
 }
@@ -321,7 +355,7 @@ export function BarreOutils({
       <span className="projection-fil">{fil}</span>
       <div className="projection-palettes">
       {outils.menuExport && paletteExport}
-      {etat.blanc && <PalettesBlanc projection={projection} annotations={annotations} outils={outils} />}
+      {etat.blanc && <PalettesBlanc projection={projection} annotations={annotations} outils={outils} setOutils={setOutils} />}
       {outils.stylo && <PaletteDessin outils={outils} setOutils={setOutils} />}
       {equerre && <PaletteEquerre magasin={magasin} />}
       {outils.menuMinuteur && (

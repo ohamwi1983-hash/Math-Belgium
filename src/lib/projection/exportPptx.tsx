@@ -347,10 +347,24 @@ function versLatin1(t: string): string {
     .replace(/[^\u0000-ÿ]/g, '')
 }
 
-/** « Chapitre 3 — Titre — annoté.pptx » (numéro du PROFESSEUR s'il a rangé ses chapitres, jamais celui du site). */
-function nomFichier(chapter: ChapterContent, annote: boolean, extension: string): string {
-  const base = libelleChapitre(chapter, undefined, { titre: texteBrut(chapter.title) })
-  return `${base}${annote ? ' — annoté' : ''}.${extension}`.replace(/[\\/:*?"<>|]+/g, '-')
+/**
+ * « Chapitre 3 - Titre - annote.pptx » : « Chapitre n — titre — annoté » (numéro du PROFESSEUR s'il a rangé ses
+ * chapitres, jamais celui du site) écrit en ASCII — un accent ou un tiret long dans `download` fait perdre le nom
+ * dans Chromium (le fichier s'appellerait « download » ; même constat que le carnet, `nomFichierAgenda`).
+ */
+export function nomFichier(chapter: ChapterContent, annote: boolean, extension: string): string {
+  const base = `${libelleChapitre(chapter, undefined, { titre: texteBrut(chapter.title) })}${annote ? ' — annoté' : ''}`
+  const ascii = base
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[—–−]/g, '-')
+    .replace(/[’‘]/g, "'")
+    .replace(/œ/g, 'oe')
+    .replace(/[^\x20-\x7e]/g, '')
+    .replace(/[\\/:*?"<>|]+/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim()
+  return `${ascii || 'projection'}.${extension}`
 }
 
 export interface OptionsExport {

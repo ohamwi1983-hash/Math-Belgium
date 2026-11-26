@@ -49,7 +49,7 @@ export function EtiquettesCourbes({ courbes, page }: { courbes: Courbe[]; page: 
 
   // Étiquettes des points : en haut à droite du point, sinon un autre coin, sans se chevaucher ni sortir du cadre.
   const poses: { p: PointRemarquable; x: number; y: number; l: number; couleur: string }[] = []
-  const boites: [number, number, number, number][] = noms.map((n) => [n.x + 8, n.y - 40, 40, 36])
+  const boites: [number, number, number, number][] = noms.map((n) => [n.x + 8, n.y < 60 ? n.y + 8 : n.y - 44, 44, 42])
   for (const p of points) {
     const px = versPxX(p.x, page)
     const py = versPxY(p.y, page)
@@ -84,7 +84,7 @@ export function EtiquettesCourbes({ courbes, page }: { courbes: Courbe[]; page: 
         ))}
       </svg>
       {noms.map(({ c, x, y }) => (
-        <span key={c.id} className="traceur-nom" style={{ left: x + 10, top: y - 44, color: c.couleur }}>
+        <span key={c.id} className="traceur-nom" style={{ left: Math.min(x + 10, 1236), top: y < 60 ? y + 8 : y - 44, color: c.couleur }}>
           <MathInline tex={c.nom} />
         </span>
       ))}
@@ -198,6 +198,22 @@ export function PaletteTraceur({
             </button>
           ))}
         </span>
+        {courbes.length > 0 && (
+          <ul className="traceur-liste" aria-label="Courbes tracées">
+            {courbes.map((c) => {
+              const l = lireFonction(c.saisie, page.angle)
+              return (
+                <li key={c.id} className="traceur-courbe" style={{ ['--c' as string]: c.couleur }}>
+                  <span className="traceur-pastille" aria-hidden="true" />
+                  <MathInline tex={l.ok ? `${c.nom}(x) = ${l.latex}` : `${c.nom}`} />
+                  <button type="button" className="traceur-retirer" aria-label={`Retirer la courbe ${c.nom}`} title={`Retirer la courbe ${c.nom}`} onClick={() => annotations.retirer(cle, c.id)}>
+                    <Pictogramme nom="fermer" taille={16} />
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        )}
       </form>
       {erreur && (
         <p id={`${idChamp}-erreur`} className="traceur-erreur" role="alert">
@@ -231,22 +247,6 @@ export function PaletteTraceur({
           </label>
         ))}
       </div>
-      {courbes.length > 0 && (
-        <ul className="traceur-liste" aria-label="Courbes tracées">
-          {courbes.map((c) => {
-            const l = lireFonction(c.saisie, page.angle)
-            return (
-              <li key={c.id} className="traceur-courbe" style={{ ['--c' as string]: c.couleur }}>
-                <span className="traceur-pastille" aria-hidden="true" />
-                <MathInline tex={l.ok ? `${c.nom}(x) = ${l.latex}` : `${c.nom}`} />
-                <button type="button" className="traceur-retirer" aria-label={`Retirer la courbe ${c.nom}`} title={`Retirer la courbe ${c.nom}`} onClick={() => annotations.retirer(cle, c.id)}>
-                  <Pictogramme nom="fermer" taille={16} />
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-      )}
     </div>
   )
 }

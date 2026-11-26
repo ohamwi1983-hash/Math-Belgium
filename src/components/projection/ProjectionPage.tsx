@@ -400,7 +400,7 @@ function etiquette(d: DonneesDiapo): string {
   }
 }
 
-const OUTILS_DEPART: OutilsLocaux = { stylo: false, outil: 'stylo', couleur: COULEURS_STYLO[0].valeur, fluo: COULEURS_FLUO[0].valeur, epaisseur: 'moyen', ensemble: false, menuMinuteur: false, menuExport: false, pleinEcran: false }
+const OUTILS_DEPART: OutilsLocaux = { stylo: false, outil: 'stylo', couleur: COULEURS_STYLO[0].valeur, fluo: COULEURS_FLUO[0].valeur, epaisseur: 'moyen', ensemble: false, menuMinuteur: false, menuExport: false, traceur: true, pleinEcran: false }
 
 /**
  * Annotations de la page de projection : magasin (toutes les pages), conservation dans le navigateur, page
@@ -769,7 +769,7 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
           </div>
           {(outils.stylo || equerreVisible || etat.blanc) && (
             <div className="prof-palette">
-              {etat.blanc && <PalettesBlanc projection={projection} annotations={ann.annotations} outils={outils} compacte />}
+              {etat.blanc && <PalettesBlanc projection={projection} annotations={ann.annotations} outils={outils} setOutils={setOutils} compacte />}
               {outils.stylo && <PaletteDessin outils={outils} setOutils={setOutils} />}
               {equerreVisible && <PaletteEquerre magasin={magasin} />}
             </div>
