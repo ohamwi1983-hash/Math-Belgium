@@ -1,0 +1,127 @@
+// Copie 5e (6h) de `5e-4h/components5e/EtapeSuitesFinalesCombinees.tsx` (56gen8 ← 5gen17, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
+import { useState } from "react";
+import type { ExerciceSuitesCombinees } from "../core/suitesClassiques.types";
+import { labelsSuitesFinalesCombinees, consigneGenerale, consignePhase, formatTermesDonneesLatex, texteAideNiveau1 } from "../ui/formatSuiteClassique";
+import { Katex } from "../../../../5e-4h/components/Katex";
+import { TexteMathsClassique } from "./TexteMathsClassique";
+import { FigureSuiteClassique } from "./FigureSuiteClassique";
+import { ValidationEcran } from "../../../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../../../components/ValidationEcran";
+import { BoutonAide } from "../../../../5e-4h/components5e/BoutonAide";
+import { formatMessageErreur } from "../../../../5e-4h/ui/messageErreur";
+import type { StatutVerification } from "../../../../5e-4h/moteur/statutVerification";
+import { EnTeteExercice } from "../../../../5e-4h/components5e/EnTeteExercice";
+
+interface Props {
+  exercice: ExerciceSuitesCombinees;
+  tentativesUtilisees: number;
+  tentativesMax: number;
+  niveauAide: number;
+  niveauAideMax: number;
+  onActiverAide: () => void;
+  onValider: (reponse: { arithmetique: string[]; geometrique: string[] }) => void;
+  /** Statut à 3 valeurs — voir `EtapeChampSimpleClassique.tsx`, même motif (A.1). */
+  diagnostiquer?: (reponse: { arithmetique: string[]; geometrique: string[] }) => StatutVerification;
+  /** Statut à 3 valeurs d'UN SEUL champ (A.2 — highlight rouge indépendant par champ). */
+  diagnostiquerChamp?: (groupe: "arithmetique" | "geometrique", index: number, texte: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
+}
+
+/** Écran bespoke à 2 GROUPES de 3 champs (suite arithmétique m, y, z — m donné — puis suite géométrique y, x, z) —
+ * seul écran de 5gen17 qui ne rentre pas dans le patron "liste plate" générique. */
+export function EtapeSuitesFinalesCombinees({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerChamp, validation}: Props) {
+  const [arithmetique, setArithmetique] = useState<string[]>(() => [String(exercice.arithmetique[0]).replace("-", "−"), "", ""]);
+  const LABELS = labelsSuitesFinalesCombinees();
+  const [geometrique, setGeometrique] = useState<string[]>(["", "", ""]);
+  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const montrerErreurs = tentativesUtilisees > 0;
+  const complet = arithmetique.every((v) => v.trim() !== "") && geometrique.every((v) => v.trim() !== "");
+
+  const apresEchec = tentativesUtilisees > 0;
+  function champErronee(groupe: "arithmetique" | "geometrique", i: number): boolean {
+    const valeur = groupe === "arithmetique" ? arithmetique[i] : geometrique[i];
+    return apresEchec && !!diagnostiquerChamp && diagnostiquerChamp(groupe, i, valeur) !== "correct";
+  }
+
+  function valider() {
+    if (!complet) return;
+    const reponse = { arithmetique, geometrique };
+    if (diagnostiquer) setDernierStatut(diagnostiquer(reponse));
+    onValider(reponse);
+  }
+
+  return (
+    <div>
+      <EnTeteExercice
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <>
+            <div className="equation-box equation-box-donnees">
+              {formatTermesDonneesLatex(exercice, "suitesFinalesCombinees").map((frag, i) => (
+                <Katex key={i} expression={frag} />
+              ))}
+            </div>
+            <FigureSuiteClassique exercice={exercice} phase={"suitesFinalesCombinees"} />
+          </>
+        }
+      />
+      <p className="prompt-text">{consignePhase(exercice, "suitesFinalesCombinees")}</p>
+
+      <p>Suite arithmétique :</p>
+      {LABELS.arithmetique.map((label, i) => (
+        <div key={i} className="field field-inline">
+          <label className="field-label field-label-minuscule">
+            <Katex expression={label} />
+          </label>
+          <input
+            type="text"
+            className={`text-input${champErronee("arithmetique", i) ? " is-erronee" : ""}`}
+            value={arithmetique[i]}
+            disabled={i === 0}
+            onChange={(e) => setArithmetique((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
+          />
+        </div>
+      ))}
+
+      <p>Suite géométrique :</p>
+      {LABELS.geometrique.map((label, i) => (
+        <div key={i} className="field field-inline">
+          <label className="field-label field-label-minuscule">
+            <Katex expression={label} />
+          </label>
+          <input
+            type="text"
+            className={`text-input${champErronee("geometrique", i) ? " is-erronee" : ""}`}
+            value={geometrique[i]}
+            onChange={(e) => setGeometrique((arr) => arr.map((v, j) => (j === i ? e.target.value : v)))}
+          />
+        </div>
+      ))}
+
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>
+            <TexteMathsClassique texte={texteAideNiveau1(exercice, "suitesFinalesCombinees")} />
+          </p>
+        </div>
+      )}
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
+      )}
+      {validation && <ValidationEcran {...validation} />}
+    </div>
+  );
+}

@@ -1196,3 +1196,10 @@ export const REGROUPEMENTS: Record<string, SpecRegroupement> = {
     },
   ),
 };
+
+// 5e (6h), copies des générateurs de la 5e (4h) (chantier D, 26/11/2026) : mêmes énoncés papier que leurs
+// originaux, donc mêmes découpes (56gen5 ← 5gen46, 56gen6 ← 5gen16). Les variantes ajoutées en fin de catalogue
+// des copies ont leur propre forme quand elles se regroupent (voir chaque entrée).
+REGROUPEMENTS["56gen5"] = REGROUPEMENTS["5gen46"];
+REGROUPEMENTS["56gen6"] = REGROUPEMENTS["5gen16"];
+

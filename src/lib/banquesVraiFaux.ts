@@ -42,6 +42,8 @@ const CHARGEURS: Record<string, () => Promise<BanqueBrute>> = {
   'limites-asymptotes': () => import('../entrainement/5e-4h/generateurs5e/quizLimites5e/banque').then((m) => m.BANQUE_QUIZ_LIMITES_5E),
   'derivees-applications': () => import('../entrainement/5e-4h/generateurs5e/quizDerivees5e/banque').then((m) => m.BANQUE_QUIZ_DERIVEES_5E),
   'statistique-deux-variables': () => import('../entrainement/5e-4h/generateurs5e/quizStatDeuxVariables5e/banque').then((m) => m.BANQUE_QUIZ_STAT_DEUX_VARIABLES_5E),
+  // 5e (6h) — quiz 56gen13 (réels, suites, algèbre financière)
+  'nombres-reels-suites': () => import('../entrainement/5e-6h/generateurs56/quizNombresReelsSuites/banqueChapitre').then((m) => m.BANQUE_QUIZ_NOMBRES_REELS_SUITES),
   // 6e (6h)
   'fonctions-reciproques-cyclometriques': () => import('../entrainement/6e-6h/generateurs6e/quizFonctionsReciproquesCyclometriques/banque').then((m) => m.BANQUE_QUIZ_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES),
   'fonctions-exponentielles': () => import('../entrainement/6e-6h/generateurs6e/quizFonctionsExponentielles/banque').then((m) => m.BANQUE_QUIZ_FONCTIONS_EXPONENTIELLES),

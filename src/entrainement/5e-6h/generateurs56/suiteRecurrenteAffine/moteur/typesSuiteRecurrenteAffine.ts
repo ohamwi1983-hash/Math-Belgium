@@ -1,0 +1,57 @@
+// Copie 5e (6h) de `5e-4h/moteur5e/typesSuiteRecurrenteAffine.ts` (56gen12 ← 5gen19, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
+/**
+ * Couche B (5e) — types pour 5gen19 ("Suite récurrente affine et régime permanent"). Séquence FIXE
+ * à 3 écrans (`poserRecurrence → regimePermanent → termesSuccessifs`), identique pour les 2 régimes
+ * — le régime divergent ne saute jamais l'écran "regimePermanent", il y répond simplement
+ * "n'existe pas" plutôt qu'un calcul (même principe que "Équation d'un cercle depuis un graphe",
+ * séquence toujours complète).
+ */
+import type { ExerciceSuiteRecurrenteAffine } from "../../../../5e-4h/core5e/suiteRecurrenteAffine.types";
+import type { ReglagesSession5e } from "../../../../5e-4h/core5e/session5e.types";
+import type { EtatEtapeTentatives } from "../../../../5e-4h/moteur/etapeTentatives";
+
+export type PhaseSuiteRecurrenteAffine = "poserRecurrence" | "regimePermanent" | "termesSuccessifs";
+
+export function phaseInitiale(): PhaseSuiteRecurrenteAffine {
+  return "poserRecurrence";
+}
+
+export function phaseApres(phase: PhaseSuiteRecurrenteAffine): PhaseSuiteRecurrenteAffine | "termine" {
+  if (phase === "poserRecurrence") return "regimePermanent";
+  if (phase === "regimePermanent") return "termesSuccessifs";
+  return "termine";
+}
+
+export interface ResultatExerciceSuiteRecurrenteAffine {
+  exercice: ExerciceSuiteRecurrenteAffine;
+  scorePoserRecurrence: number;
+  scoreRegimePermanent: number;
+  scoreTermesSuccessifs: number;
+}
+
+export interface EtatSessionSuiteRecurrenteAffine {
+  reglages: ReglagesSession5e;
+  generateur: () => ExerciceSuiteRecurrenteAffine;
+  indexExercice: number;
+  exerciceCourant: ExerciceSuiteRecurrenteAffine;
+  phase: PhaseSuiteRecurrenteAffine;
+  etapeCourante: EtatEtapeTentatives;
+  niveauAide: number;
+  scorePoserRecurrencePartiel: number | null;
+  /** true si l'écran "poserRecurrence" a dû être révélé (tentatives épuisées) — jusqu'au 2025-10,
+   * déduit de `scorePoserRecurrencePartiel === 0`, une heuristique FAUSSE ici : la pénalité d'aide
+   * multi-niveaux (`PENALITE_PAR_NIVEAU_AIDE * niveauAide`, `sessionSuiteRecurrenteAffine.ts`) est
+   * soustraite APRÈS le score de tentatives puis plafonnée à 0 (`Math.max(0, ...)`), donc une
+   * RÉUSSITE fortement aidée pouvait légitimement tomber à 0 et s'afficher à tort comme "révélée"
+   * (point A, balayage générique). Peuplé depuis `etapeCourante.revelee`, jamais recalculé. */
+  poserRecurrenceRevele: boolean;
+  scoreRegimePermanentPartiel: number | null;
+  /** même principe que `poserRecurrenceRevele` ci-dessus, pour l'écran "regimePermanent". */
+  regimePermanentRevele: boolean;
+  resultats: ResultatExerciceSuiteRecurrenteAffine[];
+  terminee: boolean;
+  /** Capturé au moment précis où l'écran se ferme (post-soumission) — `etat.etapeCourante.revelee`
+   * côté `App5gen19.tsx` est structurellement toujours `false` (l'écran vient de démarrer), ce qui
+   * rendait le récap final systématiquement vert. */
+  derniereEtapeRevelee: boolean;
+}

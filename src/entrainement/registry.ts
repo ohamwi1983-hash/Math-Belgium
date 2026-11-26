@@ -48,7 +48,10 @@ const CH_5E_TRIGONOMETRIE: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'tr
 const CH_5E_SUITES: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'suites', chapitreTitle: 'Suites' }
 const CH_5E_LIMITES_ASYMPTOTES: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'limites-asymptotes', chapitreTitle: 'Limites et asymptotes' }
 const CH_5E_DERIVEES_APPLICATIONS: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'derivees-applications', chapitreTitle: 'Dérivées et applications' }
-// 5e (6h) : chapitre partagé par les générateurs 56genN (exporté tant qu'aucun n'est branché).
+// 5e (6h) : chapitre partagé par les générateurs 56genN. Convention de dossier (chantier D, 26/11/2026) :
+// appli `5e-6h/App56genN.tsx`, code propre au générateur dans `5e-6h/generateurs56/<nom>/` (générateur,
+// adaptateur papier, corrigé, profil, et sous-dossiers `core/`, `moteur/`, `ui/`, `composants/`, `export/`) ;
+// l'infrastructure partagée (composants communs, `5e-4h/ui5e` générique, utilitaires) est IMPORTÉE.
 export const CH_56_NOMBRES_REELS_SUITES: ChapitreInfo = { chantier: '5e-6h', chapitreSlug: 'nombres-reels-suites', chapitreTitle: 'Nombres réels et suites' }
 const CH_5E_STATISTIQUE_DEUX_VARIABLES: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'statistique-deux-variables', chapitreTitle: 'Statistique à deux variables' }
 const CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'fonctions-reciproques-cyclometriques', chapitreTitle: 'Fonctions réciproques & cyclométriques' }
@@ -487,4 +490,19 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '6gen141': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen141').then((m) => ({ default: m.App6gen141 }))),
   '6gen142': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen142').then((m) => ({ default: m.App6gen142 }))),
   '6gen143': entree(CH_6E_CONIQUES, () => import('./6e-6h/App6gen143').then((m) => ({ default: m.App6gen143 }))),
+
+  // --- 5e (6h), chapitre 1 : Nombres réels et suites (copies enrichies des générateurs 5e (4h), chantier D) ---
+  '56gen1': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen1').then((m) => ({ default: m.App56gen1 }))),
+  '56gen2': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen2').then((m) => ({ default: m.App56gen2 }))),
+  '56gen3': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen3').then((m) => ({ default: m.App56gen3 }))),
+  '56gen4': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen4').then((m) => ({ default: m.App56gen4 }))),
+  '56gen5': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen5').then((m) => ({ default: m.App56gen5 }))),
+  '56gen6': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen6').then((m) => ({ default: m.App56gen6 }))),
+  '56gen7': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen7').then((m) => ({ default: m.App56gen7 }))),
+  '56gen8': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen8').then((m) => ({ default: m.App56gen8 }))),
+  '56gen9': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen9').then((m) => ({ default: m.App56gen9 }))),
+  '56gen10': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen10').then((m) => ({ default: m.App56gen10 }))),
+  '56gen11': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen11').then((m) => ({ default: m.App56gen11 }))),
+  '56gen12': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen12').then((m) => ({ default: m.App56gen12 }))),
+  '56gen13': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen13').then((m) => ({ default: m.App56gen13 }))),
 }

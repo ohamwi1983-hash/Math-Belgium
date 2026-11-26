@@ -1,0 +1,224 @@
+// Copie 5e (6h) de `5e-4h/App5gen46.tsx` (56gen5 ← 5gen46, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
+import { useState } from "react";
+import type { PropsAncienne } from "./commun56/AppMixte56";
+import { AppMixte56 } from "./commun56/AppMixte56";
+import { CATALOGUE_TERMES56, DEFINITION_TERMES56, estTermes56, genererTermes56, varianteTermes56 } from "./generateurs56/troisTermes/nouvelles";
+import type { ExerciceTermes56, Phase56gen5 } from "./generateurs56/troisTermes/nouvelles";
+import type { ReactNode } from "react";
+import type { ReglagesSession5e } from "../5e-4h/core5e/session5e.types";
+import type { ExerciceTroisTermes } from "./generateurs56/troisTermes/core/troisTermes.types";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTroisTermes } from "./generateurs56/troisTermes";
+import type { IdVarianteTroisTermes } from "./generateurs56/troisTermes";
+import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionTroisTermes, soumettreReponseEcran } from "./generateurs56/troisTermes/moteur/sessionTroisTermes";
+import { REPONSE_AUCUNE, phasesJouees, tentativesMaxPhase } from "./generateurs56/troisTermes/moteur/typesTroisTermes";
+import type { EtatSessionTroisTermes, PhaseTroisTermes } from "./generateurs56/troisTermes/moteur/typesTroisTermes";
+import { diagnostiquerChamps, messageIllisible, messagePiege, refusFormat } from "./generateurs56/troisTermes/moteur/verificationTroisTermes";
+import { EtapeTroisTermes, FragmentsTroisTermes } from "./generateurs56/troisTermes/composants/EtapeTroisTermes";
+import { SelecteurVarianteDev } from "../5e-4h/components5e/SelecteurVarianteDev";
+import { RecapitulatifPanel } from "../5e-4h/components5e/RecapitulatifPanel";
+import { aideNiveau1, aideNiveau2, champsEcran, consigneEcran, consigneGenerale, libellePhase, relationLatex, relationTexte, reponseFragments } from "./generateurs56/troisTermes/ui/formatTroisTermes";
+import { calculerRecapitulatifTroisTermes, calculerSegmentsProgressionTroisTermes } from "./generateurs56/troisTermes/ui/recapitulatifTroisTermes";
+import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import { correctionDetailleeTroisTermes } from "./generateurs56/troisTermes/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+
+/**
+ * `5gen46` — « Trois termes consécutifs » (chapitre 3 de 5e « Suites », section
+ * `suites-geometriques`, processus 2 APPLIQUER). a, b, c dépendent de x : pour quelle(s) valeur(s)
+ * de x sont-ils trois termes consécutifs d'une suite arithmétique (2b = a + c) ou géométrique
+ * (b² = a·c, aucun terme nul) ? Relation (choix fermé, une tentative) → équation réduite → valeur(s)
+ * de x (0, 1 ou 2 en géométrique) → termes et raison. Même patron que `App5gen45.tsx` ; le `?code=`
+ * (QR code des feuilles) rejoue l'instance de `generateurs5e/troisTermes/exportEvaluation.ts` avec
+ * les MÊMES fonctions de génération.
+ */
+
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
+
+function nouvelleSession(): EtatSessionTroisTermes {
+  return demarrerSessionTroisTermes(REGLAGES_DEMO, genererExerciceTroisTermes);
+}
+
+/** Première session : le code d'un exercice imprimé (`?code=XXXXXX`) en fixe le PREMIER exercice. */
+function sessionInitiale(): EtatSessionTroisTermes {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionTroisTermes(REGLAGES_DEMO, () =>
+    genererAvecCode(code, CATALOGUE_VARIANTES, genererExerciceTroisTermes, (id) => construireAvecVarianteId(id as IdVarianteTroisTermes)),
+  );
+}
+
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionTroisTermes;
+  revele: boolean;
+}
+
+function reponseAttendue(e: ExerciceTroisTermes, phase: PhaseTroisTermes): ReactNode {
+  return (
+    <span className="prompt-text" style={{ overflowX: "auto", display: "block", maxWidth: "100%" }}>
+      <FragmentsTroisTermes fragments={reponseFragments(e, phase)} />
+    </span>
+  );
+}
+
+export function App56gen5Ancienne({ premier, controle }: PropsAncienne<ExerciceTroisTermes> = {}) {
+  const [etat, setEtat] = useState<EtatSessionTroisTermes>(() => (premier ? demarrerSessionTroisTermes(REGLAGES_DEMO, () => premier) : sessionInitiale()));
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseTroisTermes, boolean>>>({});
+  /** Compteur d'exercices affichés : entre dans la `key` de l'écran pour vider la saisie à chaque
+   * nouvel exercice (« Générer », « Nouvel exercice »), même quand la phase est la même. */
+  const [compteur, setCompteur] = useState(0);
+
+  const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
+  const champs = champsEcran(exercice, phase);
+
+  function votreReponse(valeurs: string[]): string {
+    if (phase === "relation") return relationTexte(valeurs[0]);
+    if (phase === "solutions") return valeurs[0] === REPONSE_AUCUNE ? "Aucune valeur ne convient" : valeurs.map((v) => `x = ${v}`).join(" ; ");
+    return champs.length === 1 ? valeurs[0] : champs.map((c, i) => `${c.label} : ${valeurs[i]}`).join(" ; ");
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionTroisTermes, valeurs: string[]) {
+    const transition = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee || nouvelEtat.exerciceCourant !== etat.exerciceCourant;
+    if (!transition) {
+      setEtat(nouvelEtat);
+      return;
+    }
+    const revele = nouvelEtat.derniereTransitionRevelee;
+    setAideParPhase((prev) => ({ ...prev, [phase]: etat.niveauAide > 0 }));
+    setHistorique((h) => [...h, { corrigeDetaille: corrigeDetailleEcranCourant(), titre: libellePhase(phase), votreReponse: votreReponse(valeurs), correcte: !revele, reponseAttendue: revele ? reponseAttendue(exercice, phase) : undefined }]);
+    setEnAttente({ etatSuivant: nouvelEtat, revele });
+  }
+
+  function reinitialiser(nouvelEtat: EtatSessionTroisTermes) {
+    setEtat(nouvelEtat);
+    setEnAttente(null);
+    setHistorique([]);
+    setAideParPhase({});
+    setFicheOuverteIndex(null);
+    setCompteur((c) => c + 1);
+  }
+
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) {
+      if (controle) {
+        controle.suivant();
+        return;
+      }
+      reinitialiser(nouvelleSession());
+      return;
+    }
+    setEtat(enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    if (controle) {
+      controle.variante(id);
+      return;
+    }
+    reinitialiser(demarrerSessionTroisTermes(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteTroisTermes)));
+  }
+
+  // Hook DEV-ONLY (même garde que `SelecteurVarianteDev`) : exercice tiré exposé pour Playwright.
+  const modeDevActif = import.meta.env.DEV || new URLSearchParams(window.location.search).get("dev") === "1";
+  if (modeDevActif) {
+    (window as unknown as { __debug56gen5?: unknown }).__debug56gen5 = { exercice, phase };
+  }
+
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeTroisTermes(exercice), lettreEtape(phasesJouees(exercice).indexOf(phase)))} />;
+  }
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttendue(exercice, phase),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+        // Corrigé détaillé « comme au tableau » de l'étape (même source que le papier,
+        // `generateurs5e/troisTermes/corrigeDetaille.ts`), affiché sous la réponse attendue quand elle est révélée.
+        corrigeDetaille: corrigeDetailleEcranCourant(),
+        messageRevele: phase === "relation" ? "Ce n'était pas la bonne relation (une seule tentative sur un choix)." : undefined,
+      }
+    : null;
+
+  return (
+    <div className="app-shell">
+      <header className="app-header">
+        <p className="app-eyebrow">5e (6h) — Entraînement</p>
+        <h1 className="app-title">Trois termes consécutifs</h1>
+        <p className="app-subtitle">Nombres réels et suites</p>
+        <ProgressionPuces segments={calculerSegmentsProgressionTroisTermes(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
+      </header>
+      <SelecteurVarianteDev options={controle?.catalogue ?? CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+      <main className="card">
+        <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifTroisTermes(etat)} />
+          <EtapeTroisTermes
+            key={`${compteur}-${phase}`}
+            mode={phase === "relation" ? "choix" : phase === "solutions" ? "solutions" : "champs"}
+            consigneGenerale={consigneGenerale(exercice)}
+            consigneEcran={consigneEcran(exercice, phase)}
+            champs={champs}
+            options={exercice.ordreRelations.map((id) => ({ id, latex: relationLatex(id) }))}
+            aideNiveau1={aideNiveau1(exercice, phase)}
+            aideNiveau2={aideNiveau2(exercice, phase)}
+            tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+            tentativesMax={tentativesMaxPhase(phase, etat.reglages.tentativesMax)}
+            niveauAide={etat.niveauAide}
+            niveauAideMax={NIVEAU_AIDE_MAX}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
+            validation={validation}
+            diagnostiquer={(valeurs) => diagnostiquerChamps(exercice, phase, valeurs)}
+            piege={(valeurs) => messagePiege(exercice, phase, valeurs)}
+            refusFormat={(valeurs) => refusFormat(exercice, phase, valeurs)}
+            messageIllisible={messageIllisible(phase)}
+            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs)}
+          />
+        </div>
+      </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
+    </div>
+  );
+}
+
+// --- 5e (6h) : « quatre termes » (somme, produit) et « triangle rectangle » en fin de catalogue (chantier D)
+const CATALOGUE_56GEN5 = [...CATALOGUE_VARIANTES, ...CATALOGUE_TERMES56];
+
+/** Tirage de l'appli : une des trois nouvelles variantes une fois sur trois, sinon le tirage d'origine
+ * (celui de l'adaptateur et des `?code=` libres, inchangé). */
+export function genererExercice56gen5Libre(): ExerciceTroisTermes | ExerciceTermes56 {
+  return Math.random() < 1 / 3 ? genererTermes56() : genererExerciceTroisTermes();
+}
+
+export function variante56gen5(id: string): ExerciceTroisTermes | ExerciceTermes56 {
+  return CATALOGUE_TERMES56.some((v) => v.id === id) ? varianteTermes56(id) : construireAvecVarianteId(id as IdVarianteTroisTermes);
+}
+
+export function App56gen5() {
+  return (
+    <AppMixte56<ExerciceTroisTermes, ExerciceTermes56, Phase56gen5>
+      catalogue={CATALOGUE_56GEN5}
+      genererLibreAdaptateur={genererExerciceTroisTermes}
+      genererLibre={genererExercice56gen5Libre}
+      genererVariante={variante56gen5}
+      estNouvelle={estTermes56}
+      genererLibreNouvelle={genererTermes56}
+      rendreAncienne={(p) => <App56gen5Ancienne key={p.key} premier={p.premier} controle={p.controle} />}
+      configNouvelle={{ id: "56gen5", titre: "Termes consécutifs d'une suite", eyebrow: "5e (6h) — Entraînement", sousTitre: "Nombres réels et suites", definition: DEFINITION_TERMES56 }}
+    />
+  );
+}

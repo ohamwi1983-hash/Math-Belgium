@@ -1,0 +1,112 @@
+// Copie 5e (6h) de `5e-4h/components5e/EtapeChampSimpleSuiteArithmetique.tsx` (56gen1 ← 5gen14, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
+import { useState } from "react";
+import type { ExerciceSuiteArithmetique } from "../../../../5e-4h/core5e/suitesArithmetiques.types";
+import type { PhaseSuiteArithmetique } from "../moteur/typesSuiteArithmetique";
+import { PHASES_AIDE1_LATEX, consigneGenerale, consignePhase, formatTermesDonneesLatex, labelPhase, texteAideNiveau1, texteAideNiveau2 } from "../ui/formatSuiteArithmetique";
+import { Katex } from "../../../../5e-4h/components/Katex";
+import { ValidationEcran } from "../../../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../../../components/ValidationEcran";
+import { BoutonAide } from "../../../../5e-4h/components5e/BoutonAide";
+import { formatMessageErreur } from "../../../../5e-4h/ui/messageErreur";
+import type { StatutVerification } from "../../../../5e-4h/moteur/statutVerification";
+import { EnTeteExercice } from "../../../../5e-4h/components5e/EnTeteExercice";
+import { TexteInsistance } from "../../../../components/TexteInsistance";
+
+type PhaseChampSimple = "trouverR" | "trouverU1" | "formuleGenerale" | "termeEloigne" | "sommeSn" | "calculerSn" | "resoudreXAlgebrique" | "resoudreRangN";
+
+interface Props {
+  exercice: ExerciceSuiteArithmetique;
+  phase: PhaseChampSimple;
+  tentativesUtilisees: number;
+  tentativesMax: number;
+  niveauAide: number;
+  niveauAideMax: number;
+  onActiverAide: () => void;
+  onValider: (texte: string) => void;
+  /** Statut à 3 valeurs (correct/not_equivalent/parse_error) calculé côté PRÉSENTATION uniquement,
+   * pour différencier le message affiché après une tentative échouée — jamais consommé par
+   * `etapeTentatives.ts`/le score, toujours piloté par le booléen historique via `onValider`.
+   * Optionnel : un appelant qui ne le fournit pas garde le message générique historique. */
+  diagnostiquer?: (texte: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
+}
+
+/** Écran à UN SEUL champ texte libre — réutilisé par 6 des 10 phases de 5gen14. `App5gen14.tsx`
+ * doit le rendre avec `key={phase}` (leçon retenue de tout le chantier 5e — sans cette clé, React
+ * réutilise la même instance entre deux écrans et le champ garde la réponse précédente). */
+export function EtapeChampSimpleSuiteArithmetique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+  const [texte, setTexte] = useState("");
+  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const montrerErreurs = tentativesUtilisees > 0;
+  const apresEchec = tentativesUtilisees > 0;
+  const texteErronee = apresEchec && !!diagnostiquer && diagnostiquer(texte) !== "correct";
+
+  function valider() {
+    if (texte.trim() === "") return;
+    if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
+    onValider(texte);
+  }
+
+  const aide2 = texteAideNiveau2(exercice, phase as PhaseSuiteArithmetique);
+  const aide1EnLatex = PHASES_AIDE1_LATEX.has(phase as PhaseSuiteArithmetique);
+  // "formuleGenerale" est le SEUL écran de ce composant dont la réponse est une expression en n
+  // (jamais une valeur numérique isolée) — placeholder dédié, jamais le générique "ex : 12, -3/2..."
+  // qui suggérerait à tort un simple nombre (`prompt5gen14corrections.md`). "resoudreRangN" attend
+  // TOUJOURS un entier positif (jamais de fraction/décimal, validation stricte côté
+  // `diagnostiquerRangEntierPositif`) — placeholder dédié pour ne pas suggérer une forme fractionnaire
+  // (`prompt5gen14remplacementvariante.md`).
+  // Exemples HORS de l'espace des tirages (|r| ≤ 9, u₁ entier, x de dénominateur 1, 2 ou 4, rang
+  // ≥ 50) : un exemple ne doit jamais être une réponse possible.
+  const placeholder = phase === "formuleGenerale" ? "ex : 7+(n−1)×12" : phase === "resoudreRangN" ? "ex : 12" : "ex : 13/7 ou 2,4";
+
+  return (
+    <div>
+      <EnTeteExercice
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
+      <p className="prompt-text">{consignePhase(exercice, phase as PhaseSuiteArithmetique)}</p>
+      <div className="field field-inline">
+        <label className="field-label field-label-minuscule">
+          <Katex expression={labelPhase(exercice, phase as PhaseSuiteArithmetique)} />
+        </label>
+        <input
+          type="text"
+          className={`text-input${texteErronee ? " is-erronee" : ""}`}
+          value={texte}
+          onChange={(e) => setTexte(e.target.value)}
+          placeholder={placeholder}
+        />
+      </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          {aide1EnLatex ? <Katex expression={texteAideNiveau1(exercice, phase as PhaseSuiteArithmetique)} block /> : <p><TexteInsistance texte={texteAideNiveau1(exercice, phase as PhaseSuiteArithmetique)} /></p>}
+          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+        </div>
+      )}
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
+      )}
+      {validation && <ValidationEcran {...validation} />}
+    </div>
+  );
+}

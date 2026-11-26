@@ -1,0 +1,318 @@
+// Copie 5e (6h) de `5e-4h/moteur5e/sessionSuiteClassique.ts` (56gen8 ← 5gen17, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
+/**
+ * Couche B (5e) — moteur de session pour 5gen17 ("Problèmes classiques sur les suites"). 26 écrans
+ * répartis en 7 scénarios disjoints, chacun TOUJOURS traversé dans sa séquence COMPLÈTE (seuls les
+ * nombres varient d'un tirage à l'autre, jamais la suite des écrans). N'importe jamais rien de
+ * `src/generateurs5e/`.
+ *
+ * Les écrans à CHOIX FERMÉ (QCM, 4 options) n'ont qu'UNE tentative (audit 5e ch. 3, point 3) :
+ * avec plusieurs essais, la bonne option se trouvait par élimination.
+ */
+import type {
+  ExerciceCarresEmboites,
+  ExerciceEchiquier,
+  ExerciceFibonacci,
+  ExercicePapyrusRhind,
+  ExerciceSuiteClassique,
+  ExerciceSuitesCombinees,
+  ExerciceTrianglesZigzag,
+  ExerciceVitesse,
+} from "../core/suitesClassiques.types";
+import type { ReglagesSession5e } from "../../../../5e-4h/core5e/session5e.types";
+import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../../../../5e-4h/moteur/etapeTentatives";
+import type { ReglagesEtape } from "../../../../5e-4h/moteur/etapeTentatives";
+import { phaseApres, phaseInitiale } from "./typesSuiteClassique";
+import type { EtatSessionSuiteClassique, PhaseSuiteClassique, ResultatExerciceSuiteClassique } from "./typesSuiteClassique";
+import {
+  diagnostiquerAiresB,
+  diagnostiquerAiresZigzag,
+  diagnostiquerAiresZigzagAC,
+  diagnostiquerCalculV5,
+  diagnostiquerDistance11,
+  diagnostiquerDixTermes,
+  diagnostiquerFormuleRecurrence,
+  diagnostiquerHauteursZigzag,
+  diagnostiquerLimitePuissanceA,
+  diagnostiquerLongueurZigzag,
+  diagnostiquerPoidsComparaison,
+  diagnostiquerPoserEquationCombinees,
+  diagnostiquerPoserSysteme,
+  diagnostiquerProprieteInverse,
+  diagnostiquerResoudrePhi,
+  diagnostiquerResoudreRCombinees,
+  diagnostiquerResoudreSysteme,
+  diagnostiquerSommeInfinieA,
+  diagnostiquerSommeInfinieB,
+  diagnostiquerSommePartielleA,
+  diagnostiquerSommeTotale11,
+  diagnostiquerSommeTotaleEchiquier,
+  diagnostiquerSuiteFinalePapyrus,
+  diagnostiquerSuitesFinalesCombinees,
+  diagnostiquerTroisMethodes,
+  diagnostiquerU64,
+} from "./verificationSuiteClassique";
+import type { ChoixEquationCombinees, ChoixFormuleRecurrence, ChoixLimitePuissanceA, ChoixProprieteInverse, ChoixSysteme } from "./verificationSuiteClassique";
+
+const POINTS_DE_BASE = 100;
+
+export const NIVEAU_AIDE_MAX_SUITE_CLASSIQUE = 2;
+
+function etatInitial(
+  exercice: ExerciceSuiteClassique,
+): Pick<EtatSessionSuiteClassique, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels"> {
+  return {
+    exerciceCourant: exercice,
+    phase: phaseInitiale(exercice),
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresPartiels: {},
+    revelesPartiels: {},
+  };
+}
+
+export function demarrerSessionSuiteClassique(reglages: ReglagesSession5e, generateur: () => ExerciceSuiteClassique): EtatSessionSuiteClassique {
+  return { reglages, generateur, indexExercice: 0, resultats: [], terminee: false, derniereEtapeRevelee: false, ...etatInitial(generateur()) };
+}
+
+/** Phases à choix fermé : une seule tentative. */
+export const PHASES_QCM_SUITE_CLASSIQUE = new Set<PhaseSuiteClassique>(["poserSysteme", "poserEquationCombinees", "formuleRecurrence", "proprieteInverse", "limitePuissanceA"]);
+
+/** Nombre de tentatives de l'écran `phase` — 1 pour un QCM, le réglage de session sinon. */
+export function tentativesMaxSuiteClassique(etat: EtatSessionSuiteClassique, phase: PhaseSuiteClassique): number {
+  return PHASES_QCM_SUITE_CLASSIQUE.has(phase) ? 1 : etat.reglages.tentativesMax;
+}
+
+function reglagesEtape(etat: EtatSessionSuiteClassique, phase: PhaseSuiteClassique): ReglagesEtape {
+  return { pointsDeBase: POINTS_DE_BASE, tentativesMax: tentativesMaxSuiteClassique(etat, phase) };
+}
+
+/** Plafond d'aide PAR PHASE : 2 niveaux là où `texteAideNiveau2()` (`ui5e/formatSuiteClassique.ts`)
+ * propose une forme substituée non résolue, 1 ailleurs (bouton masqué au-delà). Doit rester
+ * aligné sur `texteAideNiveau2` : une phase listée ici avec un niveau 2 vide afficherait un bouton
+ * d'aide sans effet. */
+export const PHASES_AVEC_AIDE_NIVEAU2 = new Set<PhaseSuiteClassique>([
+  "poidsComparaison",
+  "resoudreSysteme",
+  "resoudreRCombinees",
+  "distance11",
+  "sommeTotale11",
+  "troisMethodes",
+  "resoudrePhi",
+  "hauteursZigzag",
+  "longueurZigzag",
+  "airesZigzag",
+  "airesZigzagAC",
+  "sommePartielleA",
+  "sommeInfinieA",
+  "sommeInfinieB",
+]);
+
+export function niveauAideMaxSuiteClassique(phase: PhaseSuiteClassique): number {
+  return PHASES_AVEC_AIDE_NIVEAU2.has(phase) ? NIVEAU_AIDE_MAX_SUITE_CLASSIQUE : 1;
+}
+
+export function activerAideSuivante(etat: EtatSessionSuiteClassique): EtatSessionSuiteClassique {
+  if (etat.terminee) throw new Error("activerAideSuivante : la session est déjà terminée");
+  if (etat.niveauAide >= niveauAideMaxSuiteClassique(etat.phase)) throw new Error("activerAideSuivante : niveau d'aide maximal déjà atteint pour cet écran");
+  return { ...etat, niveauAide: etat.niveauAide + 1 };
+}
+
+function cloturerExerciceOuSuivant(etat: EtatSessionSuiteClassique, resultat: ResultatExerciceSuiteClassique, revele: boolean): EtatSessionSuiteClassique {
+  const resultats = [...etat.resultats, resultat];
+  const indexExercice = etat.indexExercice + 1;
+  if (indexExercice >= etat.reglages.nombreExercices) {
+    return { ...etat, resultats, indexExercice, terminee: true, derniereEtapeRevelee: revele };
+  }
+  return { ...etat, resultats, indexExercice, ...etatInitial(etat.generateur()), derniereEtapeRevelee: revele };
+}
+
+function soumettreEcran<T>(etat: EtatSessionSuiteClassique, phaseAttendue: PhaseSuiteClassique, reponse: T, verifier: (r: T) => boolean): EtatSessionSuiteClassique {
+  if (etat.terminee || etat.phase !== phaseAttendue) throw new Error(`soumettreEcran : la session n'est pas à l'étape ${phaseAttendue}`);
+
+  const etapeCourante = soumettreEtapeTentatives<T>(etat.etapeCourante, reponse, {
+    ...reglagesEtape(etat, phaseAttendue),
+    verifier,
+    revelerReponse: () => {},
+  });
+  if (!etapeCourante.terminee) return { ...etat, etapeCourante };
+
+  const revele = etapeCourante.revelee;
+  const score = etapeCourante.score as number;
+  const scoresPartiels = { ...etat.scoresPartiels, [phaseAttendue]: score };
+  const revelesPartiels = { ...etat.revelesPartiels, [phaseAttendue]: revele };
+  const phaseSuivante = phaseApres(etat.exerciceCourant, phaseAttendue);
+
+  if (phaseSuivante === "termine") {
+    return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels, revelesPartiels }, revele);
+  }
+  return {
+    ...etat,
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    phase: phaseSuivante,
+    scoresPartiels,
+    revelesPartiels,
+    derniereEtapeRevelee: revele,
+  };
+}
+
+function commeEchiquier(exercice: ExerciceSuiteClassique): ExerciceEchiquier {
+  if (exercice.scenario !== "echiquier") throw new Error("commeEchiquier : scénario hors 'echiquier'");
+  return exercice;
+}
+function commePapyrus(exercice: ExerciceSuiteClassique): ExercicePapyrusRhind {
+  if (exercice.scenario !== "papyrusRhind") throw new Error("commePapyrus : scénario hors 'papyrusRhind'");
+  return exercice;
+}
+function commeCombinees(exercice: ExerciceSuiteClassique): ExerciceSuitesCombinees {
+  if (exercice.scenario !== "suitesCombinees") throw new Error("commeCombinees : scénario hors 'suitesCombinees'");
+  return exercice;
+}
+function commeVitesse(exercice: ExerciceSuiteClassique): ExerciceVitesse {
+  if (exercice.scenario !== "vitesse") throw new Error("commeVitesse : scénario hors 'vitesse'");
+  return exercice;
+}
+function commeFibonacci(exercice: ExerciceSuiteClassique): ExerciceFibonacci {
+  if (exercice.scenario !== "fibonacci") throw new Error("commeFibonacci : scénario hors 'fibonacci'");
+  return exercice;
+}
+function commeZigzag(exercice: ExerciceSuiteClassique): ExerciceTrianglesZigzag {
+  if (exercice.scenario !== "trianglesZigzag") throw new Error("commeZigzag : scénario hors 'trianglesZigzag'");
+  return exercice;
+}
+function commeCarres(exercice: ExerciceSuiteClassique): ExerciceCarresEmboites {
+  if (exercice.scenario !== "carresEmboites") throw new Error("commeCarres : scénario hors 'carresEmboites'");
+  return exercice;
+}
+
+// ============================================================================
+// echiquier
+// ============================================================================
+export function soumettreReponseU64(etat: EtatSessionSuiteClassique, texte: string): EtatSessionSuiteClassique {
+  const exo = commeEchiquier(etat.exerciceCourant);
+  return soumettreEcran(etat, "u64", texte, (t) => diagnostiquerU64(t, exo) === "correct");
+}
+export function soumettreReponseSommeTotaleEchiquier(etat: EtatSessionSuiteClassique, texte: string): EtatSessionSuiteClassique {
+  const exo = commeEchiquier(etat.exerciceCourant);
+  return soumettreEcran(etat, "sommeTotaleEchiquier", texte, (t) => diagnostiquerSommeTotaleEchiquier(t, exo) === "correct");
+}
+export function soumettreReponsePoidsComparaison(etat: EtatSessionSuiteClassique, textes: string[]): EtatSessionSuiteClassique {
+  const exo = commeEchiquier(etat.exerciceCourant);
+  return soumettreEcran(etat, "poidsComparaison", textes, (t) => diagnostiquerPoidsComparaison(t, exo) === "correct");
+}
+
+// ============================================================================
+// papyrusRhind
+// ============================================================================
+export function soumettreReponsePoserSysteme(etat: EtatSessionSuiteClassique, choix: ChoixSysteme): EtatSessionSuiteClassique {
+  commePapyrus(etat.exerciceCourant);
+  return soumettreEcran(etat, "poserSysteme", choix, diagnostiquerPoserSysteme);
+}
+export function soumettreReponseResoudreSysteme(etat: EtatSessionSuiteClassique, textes: string[]): EtatSessionSuiteClassique {
+  const exo = commePapyrus(etat.exerciceCourant);
+  return soumettreEcran(etat, "resoudreSysteme", textes, (t) => diagnostiquerResoudreSysteme(t, exo) === "correct");
+}
+export function soumettreReponseSuiteFinalePapyrus(etat: EtatSessionSuiteClassique, textes: string[]): EtatSessionSuiteClassique {
+  const exo = commePapyrus(etat.exerciceCourant);
+  return soumettreEcran(etat, "suiteFinalePapyrus", textes, (t) => diagnostiquerSuiteFinalePapyrus(t, exo) === "correct");
+}
+
+// ============================================================================
+// suitesCombinees
+// ============================================================================
+export function soumettreReponsePoserEquationCombinees(etat: EtatSessionSuiteClassique, choix: ChoixEquationCombinees): EtatSessionSuiteClassique {
+  commeCombinees(etat.exerciceCourant);
+  return soumettreEcran(etat, "poserEquationCombinees", choix, diagnostiquerPoserEquationCombinees);
+}
+export function soumettreReponseResoudreRCombinees(etat: EtatSessionSuiteClassique, texte: string): EtatSessionSuiteClassique {
+  const exo = commeCombinees(etat.exerciceCourant);
+  return soumettreEcran(etat, "resoudreRCombinees", texte, (t) => diagnostiquerResoudreRCombinees(t, exo) === "correct");
+}
+export function soumettreReponseSuitesFinalesCombinees(etat: EtatSessionSuiteClassique, reponse: { arithmetique: string[]; geometrique: string[] }): EtatSessionSuiteClassique {
+  const exo = commeCombinees(etat.exerciceCourant);
+  return soumettreEcran(etat, "suitesFinalesCombinees", reponse, (r) => diagnostiquerSuitesFinalesCombinees(r, exo) === "correct");
+}
+
+// ============================================================================
+// vitesse
+// ============================================================================
+export function soumettreReponseDistance11(etat: EtatSessionSuiteClassique, texte: string): EtatSessionSuiteClassique {
+  const exo = commeVitesse(etat.exerciceCourant);
+  return soumettreEcran(etat, "distance11", texte, (t) => diagnostiquerDistance11(t, exo) === "correct");
+}
+export function soumettreReponseSommeTotale11(etat: EtatSessionSuiteClassique, texte: string): EtatSessionSuiteClassique {
+  const exo = commeVitesse(etat.exerciceCourant);
+  return soumettreEcran(etat, "sommeTotale11", texte, (t) => diagnostiquerSommeTotale11(t, exo) === "correct");
+}
+export function soumettreReponseTroisMethodes(etat: EtatSessionSuiteClassique, textes: string[]): EtatSessionSuiteClassique {
+  const exo = commeVitesse(etat.exerciceCourant);
+  return soumettreEcran(etat, "troisMethodes", textes, (t) => diagnostiquerTroisMethodes(t, exo) === "correct");
+}
+
+// ============================================================================
+// fibonacci
+// ============================================================================
+export function soumettreReponseDixTermes(etat: EtatSessionSuiteClassique, textes: string[]): EtatSessionSuiteClassique {
+  const exo = commeFibonacci(etat.exerciceCourant);
+  return soumettreEcran(etat, "dixTermes", textes, (t) => diagnostiquerDixTermes(t, exo) === "correct");
+}
+export function soumettreReponseFormuleRecurrence(etat: EtatSessionSuiteClassique, choix: ChoixFormuleRecurrence): EtatSessionSuiteClassique {
+  commeFibonacci(etat.exerciceCourant);
+  return soumettreEcran(etat, "formuleRecurrence", choix, diagnostiquerFormuleRecurrence);
+}
+export function soumettreReponseCalculV5(etat: EtatSessionSuiteClassique, texte: string): EtatSessionSuiteClassique {
+  const exo = commeFibonacci(etat.exerciceCourant);
+  return soumettreEcran(etat, "calculV5", texte, (t) => diagnostiquerCalculV5(t, exo) === "correct");
+}
+export function soumettreReponseResoudrePhi(etat: EtatSessionSuiteClassique, texte: string): EtatSessionSuiteClassique {
+  const exo = commeFibonacci(etat.exerciceCourant);
+  return soumettreEcran(etat, "resoudrePhi", texte, (t) => diagnostiquerResoudrePhi(t, exo) === "correct");
+}
+export function soumettreReponseProprieteInverse(etat: EtatSessionSuiteClassique, choix: ChoixProprieteInverse): EtatSessionSuiteClassique {
+  commeFibonacci(etat.exerciceCourant);
+  return soumettreEcran(etat, "proprieteInverse", choix, diagnostiquerProprieteInverse);
+}
+
+// ============================================================================
+// trianglesZigzag
+// ============================================================================
+export function soumettreReponseHauteursZigzag(etat: EtatSessionSuiteClassique, textes: string[]): EtatSessionSuiteClassique {
+  const exo = commeZigzag(etat.exerciceCourant);
+  return soumettreEcran(etat, "hauteursZigzag", textes, (t) => diagnostiquerHauteursZigzag(t, exo) === "correct");
+}
+export function soumettreReponseAiresZigzag(etat: EtatSessionSuiteClassique, textes: string[]): EtatSessionSuiteClassique {
+  const exo = commeZigzag(etat.exerciceCourant);
+  return soumettreEcran(etat, "airesZigzag", textes, (t) => diagnostiquerAiresZigzag(t, exo) === "correct");
+}
+export function soumettreReponseLongueurZigzag(etat: EtatSessionSuiteClassique, texte: string): EtatSessionSuiteClassique {
+  const exo = commeZigzag(etat.exerciceCourant);
+  return soumettreEcran(etat, "longueurZigzag", texte, (t) => diagnostiquerLongueurZigzag(t, exo) === "correct");
+}
+export function soumettreReponseAiresZigzagAC(etat: EtatSessionSuiteClassique, texte: string): EtatSessionSuiteClassique {
+  const exo = commeZigzag(etat.exerciceCourant);
+  return soumettreEcran(etat, "airesZigzagAC", texte, (t) => diagnostiquerAiresZigzagAC(t, exo) === "correct");
+}
+
+// ============================================================================
+// carresEmboites
+// ============================================================================
+export function soumettreReponseSommePartielleA(etat: EtatSessionSuiteClassique, texte: string): EtatSessionSuiteClassique {
+  const exo = commeCarres(etat.exerciceCourant);
+  return soumettreEcran(etat, "sommePartielleA", texte, (t) => diagnostiquerSommePartielleA(t, exo) === "correct");
+}
+export function soumettreReponseLimitePuissanceA(etat: EtatSessionSuiteClassique, choix: ChoixLimitePuissanceA): EtatSessionSuiteClassique {
+  commeCarres(etat.exerciceCourant);
+  return soumettreEcran(etat, "limitePuissanceA", choix, diagnostiquerLimitePuissanceA);
+}
+export function soumettreReponseSommeInfinieA(etat: EtatSessionSuiteClassique, texte: string): EtatSessionSuiteClassique {
+  const exo = commeCarres(etat.exerciceCourant);
+  return soumettreEcran(etat, "sommeInfinieA", texte, (t) => diagnostiquerSommeInfinieA(t, exo) === "correct");
+}
+export function soumettreReponseAiresB(etat: EtatSessionSuiteClassique, textes: string[]): EtatSessionSuiteClassique {
+  const exo = commeCarres(etat.exerciceCourant);
+  return soumettreEcran(etat, "airesB", textes, (t) => diagnostiquerAiresB(t, exo) === "correct");
+}
+export function soumettreReponseSommeInfinieB(etat: EtatSessionSuiteClassique, texte: string): EtatSessionSuiteClassique {
+  const exo = commeCarres(etat.exerciceCourant);
+  return soumettreEcran(etat, "sommeInfinieB", texte, (t) => diagnostiquerSommeInfinieB(t, exo) === "correct");
+}

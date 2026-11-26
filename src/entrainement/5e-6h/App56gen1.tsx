@@ -1,0 +1,450 @@
+// Copie 5e (6h) de `5e-4h/App5gen14.tsx` (56gen1 ← 5gen14, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
+import { useState } from "react";
+import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
+import type { ReglagesSession5e } from "../5e-4h/core5e/session5e.types";
+import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceSuiteArithmetique } from "./generateurs56/suitesArithmetiques";
+import type { FamilleSuiteArithmetiqueId } from "./generateurs56/suitesArithmetiques";
+import { SelecteurVarianteDev } from "../5e-4h/components5e/SelecteurVarianteDev";
+import {
+  niveauAideMaxSuiteArithmetique,
+  activerAideSuivante,
+  ciblesCalculerTermesAlgebrique,
+  demarrerSessionSuiteArithmetique,
+  soumettreReponseCalculerSn,
+  soumettreReponseCalculerTermesAlgebrique,
+  soumettreReponseCoherenceJugement,
+  soumettreReponseFormuleGenerale,
+  soumettreReponsePoserEquationAlgebrique,
+  soumettreReponsePoserEquationRangN,
+  soumettreReponseResoudreRangN,
+  soumettreReponseResoudreXAlgebrique,
+  soumettreReponseSommeSn,
+  soumettreReponseTermeEloigne,
+  soumettreReponseTermesProches,
+  soumettreReponseTrouverR,
+  soumettreReponseTrouverU1,
+  tentativesMaxSuiteArithmetique,
+} from "./generateurs56/suitesArithmetiques/moteur/sessionSuiteArithmetique";
+import type { ReponseEquation } from "./generateurs56/suitesArithmetiques/moteur/sessionSuiteArithmetique";
+import { ordreComplet } from "./generateurs56/suitesArithmetiques/moteur/typesSuiteArithmetique";
+import type { EtatSessionSuiteArithmetique, PhaseSuiteArithmetique } from "./generateurs56/suitesArithmetiques/moteur/typesSuiteArithmetique";
+import {
+  diagnostiquerEquationComplete,
+  diagnostiquerEquationCompleteEnN,
+  diagnostiquerFormuleGenerale,
+  diagnostiquerRangEntierPositif,
+} from "../5e-4h/moteur5e/verificationSuiteArithmetique";
+import { diagnostiquerNombre, diagnostiquerTermes, estSolutionDirecte } from "../5e-4h/moteur5e/saisieNombreSuites";
+import type { StatutVerification } from "../5e-4h/moteur/statutVerification";
+import type { ExerciceSuiteArithmetique } from "../5e-4h/core5e/suitesArithmetiques.types";
+import { CalculatriceScientifique } from "../5e-4h/components5e/CalculatriceScientifique";
+import { EtapeChampSimpleSuiteArithmetique } from "./generateurs56/suitesArithmetiques/composants/EtapeChampSimpleSuiteArithmetique";
+import { EtapeCoherenceJugement } from "./generateurs56/suitesArithmetiques/composants/EtapeCoherenceJugement";
+import { EtapePoserEquation } from "./generateurs56/suitesArithmetiques/composants/EtapePoserEquation";
+import { EtapeTermesMultiples } from "./generateurs56/suitesArithmetiques/composants/EtapeTermesMultiples";
+import { LIBELLE_PHASE_SUITE_ARITHMETIQUE, formatReponseAttenduePhaseLatex } from "./generateurs56/suitesArithmetiques/ui/formatSuiteArithmetique";
+import { calculerRecapitulatifSuiteArithmetique } from "./generateurs56/suitesArithmetiques/ui/recapitulatifSuiteArithmetique";
+import { RecapitulatifPanel } from "../5e-4h/components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { Katex } from "../5e-4h/components/Katex";
+import { correctionDetailleeSuiteArithmetique } from "./generateurs56/suitesArithmetiques/corrigeDetaille";
+import { CorrigeDetailleEcran } from "../components/CorrigeDetailleEcran";
+import { lettreEtape, lignesDeLEtape } from "../export/corrigeTableau";
+
+type PhaseChampSimple =
+  | "trouverR"
+  | "trouverU1"
+  | "formuleGenerale"
+  | "termeEloigne"
+  | "sommeSn"
+  | "calculerSn"
+  | "resoudreXAlgebrique"
+  | "resoudreRangN";
+type PhaseTermesMultiples = "termesProches" | "calculerTermesAlgebrique";
+type PhasePoserEquation = "poserEquationAlgebrique" | "poserEquationRangN";
+
+/**
+ * Statuts à 3 valeurs (A.1, `promptcorrectionsregroupees.md`) — wiring PRÉSENTATION uniquement,
+ * jamais consommé par le score/les tentatives (qui restent pilotés par `soumettreReponseXxx`, Couche
+ * B). Réutilise DIRECTEMENT (jamais recréées) les fonctions déjà exportées par
+ * `verificationSuiteArithmetique.ts` — les cibles numériques sont extraites ici avec EXACTEMENT la
+ * même logique que `moteur5e/sessionSuiteArithmetique.ts` (narrowing par `exercice.famille`, jamais
+ * atteint hors de ce cas en pratique puisque le moteur ne propose ces phases que pour les bonnes
+ * familles).
+ */
+function diagnostiquerChampSimple(exercice: ExerciceSuiteArithmetique, phase: PhaseChampSimple, texte: string): StatutVerification {
+  switch (phase) {
+    case "trouverR":
+      return exercice.famille !== "principal" && exercice.famille !== "coherence" ? "parse_error" : diagnostiquerNombre(texte, exercice.base.r);
+    case "trouverU1":
+      return exercice.famille !== "principal" && exercice.famille !== "coherence" ? "parse_error" : diagnostiquerNombre(texte, exercice.base.u1);
+    case "formuleGenerale":
+      return exercice.famille !== "principal" && exercice.famille !== "coherence"
+        ? "parse_error"
+        : diagnostiquerFormuleGenerale(exercice.base.u1, exercice.base.r, texte);
+    case "termeEloigne": {
+      if ((exercice.famille !== "principal" && exercice.famille !== "coherence") || exercice.indiceTermeEloigne === undefined) return "parse_error";
+      const n = exercice.indiceTermeEloigne;
+      return diagnostiquerNombre(texte, exercice.base.u1 + (n - 1) * exercice.base.r);
+    }
+    case "sommeSn": {
+      if ((exercice.famille !== "principal" && exercice.famille !== "coherence") || exercice.indiceSn === undefined) return "parse_error";
+      const n = exercice.indiceSn;
+      return diagnostiquerNombre(texte, (n / 2) * (2 * exercice.base.u1 + (n - 1) * exercice.base.r));
+    }
+    case "calculerSn":
+      return exercice.famille !== "algebriqueSommeSn" || exercice.sousCas !== "D" ? "parse_error" : diagnostiquerNombre(texte, exercice.k);
+    case "resoudreXAlgebrique":
+      return exercice.famille !== "algebriqueTermeGeneral" && exercice.famille !== "algebriqueSommeSn"
+        ? "parse_error"
+        : diagnostiquerNombre(texte, exercice.xReel);
+    case "resoudreRangN":
+      return exercice.famille !== "algebriqueRangN" ? "parse_error" : diagnostiquerRangEntierPositif(texte, exercice.n);
+  }
+}
+
+function diagnostiquerTermesMultiples(exercice: ExerciceSuiteArithmetique, phase: PhaseTermesMultiples, textes: string[]): StatutVerification {
+  if (phase === "calculerTermesAlgebrique") {
+    if (exercice.famille !== "algebriqueTermeGeneral" && exercice.famille !== "algebriqueSommeSn") return "parse_error";
+    return diagnostiquerTermes(textes, ciblesCalculerTermesAlgebrique(exercice));
+  }
+  if ((exercice.famille !== "principal" && exercice.famille !== "coherence") || !exercice.indicesTermesProches) return "parse_error";
+  const { u1, r } = exercice.base;
+  const cibles = exercice.indicesTermesProches.map((n) => u1 + (n - 1) * r);
+  return diagnostiquerTermes(textes, cibles);
+}
+
+/** Coefficients (pente, constante) de l'équation CIBLE — même calcul qu'`sessionSuiteArithmetique.ts`
+ * (petite duplication assumée, présentation pure, jamais un import moteur→générateur). */
+function diagnostiquerPoserEquation(exercice: ExerciceSuiteArithmetique, phase: PhasePoserEquation, reponse: ReponseEquation): StatutVerification {
+  if (estSolutionDirecte(reponse.texte, phase === "poserEquationRangN" ? "n" : "x")) return "not_equivalent";
+  if (phase === "poserEquationRangN") {
+    if (exercice.famille !== "algebriqueRangN") return "parse_error";
+    const pente = exercice.r;
+    const constante = exercice.u1 - exercice.r - exercice.k;
+    return diagnostiquerEquationCompleteEnN(reponse.texte, pente, constante);
+  }
+  if (exercice.famille !== "algebriqueTermeGeneral" && exercice.famille !== "algebriqueSommeSn") return "parse_error";
+  if (exercice.famille === "algebriqueTermeGeneral") {
+    const { up, un, p, n, r } = exercice;
+    const pente = un.a - up.a;
+    const constante = un.b - up.b - (n - p) * r;
+    return diagnostiquerEquationComplete(reponse.texte, pente, constante);
+  }
+  switch (exercice.sousCas) {
+    case "A": {
+      const { u1, r, n, k } = exercice;
+      return diagnostiquerEquationComplete(reponse.texte, n * u1.a, n * u1.b + (n / 2) * (n - 1) * r - k);
+    }
+    case "B": {
+      const { u1, r, n, k } = exercice;
+      return diagnostiquerEquationComplete(reponse.texte, (n / 2) * (n - 1) * r.a, n * u1 + (n / 2) * (n - 1) * r.b - k);
+    }
+    case "C": {
+      const { u1, r, n, k } = exercice;
+      const pente = (n / 2) * (2 * u1.a + (n - 1) * r.a);
+      const constante = (n / 2) * (2 * u1.b + (n - 1) * r.b) - k;
+      return diagnostiquerEquationComplete(reponse.texte, pente, constante);
+    }
+    case "D": {
+      const { sn, k } = exercice;
+      return diagnostiquerEquationComplete(reponse.texte, sn.a, sn.b - k);
+    }
+  }
+}
+
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
+
+const PHASES_CHAMP_SIMPLE = new Set<PhaseSuiteArithmetique>([
+  "trouverR",
+  "trouverU1",
+  "formuleGenerale",
+  "termeEloigne",
+  "sommeSn",
+  "calculerSn",
+  "resoudreXAlgebrique",
+  "resoudreRangN",
+]);
+const PHASES_TERMES_MULTIPLES = new Set<PhaseSuiteArithmetique>(["termesProches", "calculerTermesAlgebrique"]);
+const PHASES_POSER_EQUATION = new Set<PhaseSuiteArithmetique>(["poserEquationAlgebrique", "poserEquationRangN"]);
+/** Calculatrice — écrans "communs" (combos 1 à 4, `prompt5gen14corrections.md`) ET tous les écrans
+ * numériques des 3 familles "algebrique*" (`prompt5gen14remplacementvariante.md`/
+ * `prompt5gen14refontefamillesbonus.md` — "Calculatrice scientifique disponible sur tous les écrans
+ * de cette variante"), "calculerSn" (sous-cas D) compris. */
+const PHASES_CALCULATRICE_CHAMP_SIMPLE = new Set<PhaseSuiteArithmetique>([
+  "trouverR",
+  "trouverU1",
+  "formuleGenerale",
+  "termeEloigne",
+  "sommeSn",
+  "calculerSn",
+  "resoudreXAlgebrique",
+  "resoudreRangN",
+]);
+const PHASES_CALCULATRICE_TERMES_MULTIPLES = new Set<PhaseSuiteArithmetique>(["termesProches", "calculerTermesAlgebrique"]);
+const PHASES_CALCULATRICE_POSER_EQUATION = new Set<PhaseSuiteArithmetique>(["poserEquationAlgebrique", "poserEquationRangN"]);
+
+function nouvelleSession(): EtatSessionSuiteArithmetique {
+  return demarrerSessionSuiteArithmetique(REGLAGES_DEMO, genererExerciceSuiteArithmetique);
+}
+
+/** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER
+ * exercice est cette instance — tirée avec les MÊMES fonctions de génération que l'adaptateur
+ * d'export (`generateurs5e/suitesArithmetiques/exportEvaluation.ts`) ; la suite de la session reste un tirage normal. */
+function sessionInitiale(): EtatSessionSuiteArithmetique {
+  const code = lireCodeDepuisUrl();
+  if (!code) return nouvelleSession();
+  return demarrerSessionSuiteArithmetique(REGLAGES_DEMO, () => genererAvecCode(code, CATALOGUE_FAMILLES, genererExerciceSuiteArithmetique, (id) => construireAvecFamilleId(id as FamilleSuiteArithmetiqueId)));
+}
+
+/**
+ * Puces de progression — PAS de `ORDRE_PHASES` statique ici (contrairement à
+ * `AppAnalyseFonction.tsx`) : la séquence RÉELLE de phases dépend de `exercice.famille`/`combo`
+ * (5 familles structurellement disjointes, ordre parfois inversé — voir l'en-tête de
+ * `moteur5e/typesSuiteArithmetique.ts`), donc toujours recalculée via `ordreComplet(exercice)`,
+ * même principe que `App5gen4.tsx` (questions dynamiques). `scoresPartiels[phase]` (jamais
+ * undefined pour une phase déjà close) signale qu'une phase est close ; la révélation vient de
+ * `etat.revelesPartiels[phase]` (peuplé depuis `etapeCourante.revelee` à la clôture de chaque
+ * phase, `sessionSuiteArithmetique.ts::soumettreEcran`) — jamais `score === 0`, même correctif que
+ * `calculerRecapitulatifSuiteArithmetique` (point A, balayage générique).
+ */
+function calculerSegmentsProgression(
+  etat: EtatSessionSuiteArithmetique,
+  aideUtiliseeParPhase: Partial<Record<PhaseSuiteArithmetique, boolean>>,
+): EtatPuceProgression[] {
+  return ordreComplet(etat.exerciceCourant).map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = etat.scoresPartiels[phase];
+    if (score === undefined) return "a-venir";
+    if (etat.revelesPartiels[phase]) return "revele";
+    return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
+  });
+}
+
+/** Réponse attendue d'un écran (bloc de validation et fiche des puces) — même source que le
+ * récapitulatif final (`formatReponseAttenduePhaseLatex`). */
+function reponseAttendueFiche(exercice: ExerciceSuiteArithmetique, phase: PhaseSuiteArithmetique) {
+  if (phase === "coherenceJugement") return exercice.famille === "coherence" && exercice.coherent ? "Cohérentes" : "Incohérentes";
+  return (
+    <span className="equation-box-termes">
+      {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+        <Katex key={i} expression={frag} />
+      ))}
+    </span>
+  );
+}
+
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionSuiteArithmetique;
+  revele: boolean;
+}
+
+export function App56gen1() {
+  const [etat, setEtat] = useState<EtatSessionSuiteArithmetique>(sessionInitiale);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionSuiteArithmetique`, jamais dans le moteur. Remis à vide à
+   * chaque nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Capture locale de `etat.niveauAide > 0` pour chaque phase CLOSE — le moteur remet
+   * `niveauAide` à 0 à chaque transition de phase (même mécanique que les autres générateurs de
+   * ce chantier). */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseSuiteArithmetique, boolean>>>({});
+  /** Incrémenté à chaque nouvel exercice (« Générer », « Nouvel exercice ») : entre dans la clé des
+   * écrans, pour que les champs repartent vides même si le nouvel exercice commence par le même
+   * écran que le précédent (sinon React garde le composant et sa saisie). */
+  const [numeroSession, setNumeroSession] = useState(0);
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
+   * qu'`AppAnalyseFonction.tsx`). Réutilise `calculerRecapitulatifSuiteArithmetique` pour la
+   * réponse ATTENDUE. */
+  function terminerEtape(nouvelEtat: EtatSessionSuiteArithmetique, votreReponse?: string) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele = nouvelEtat.derniereEtapeRevelee;
+      setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      if (votreReponse !== undefined) {
+        // Fiche de la phase qui VIENT de se clore (`etat.phase`) — jamais la dernière ligne du
+        // récapitulatif, qui ne contient que les valeurs « confirmées » (r, u₁, formule…) : les
+        // écrans « termes », « somme » ouvraient sinon la fiche « Formule générale ».
+        const phaseClose = etat.phase;
+        const exerciceClos = etat.exerciceCourant;
+        setHistorique((h) => [
+          ...h,
+          {
+            corrigeDetaille: corrigeDetailleEcranCourant(),
+            titre: LIBELLE_PHASE_SUITE_ARITHMETIQUE[phaseClose],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? reponseAttendueFiche(exerciceClos, phaseClose) : undefined,
+          },
+        ]);
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
+    }
+    setEtat(nouvelEtat);
+  }
+
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+      setNumeroSession((n) => n + 1);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
+    setNumeroSession((n) => n + 1);
+    setEtat(demarrerSessionSuiteArithmetique(REGLAGES_DEMO, () => construireAvecFamilleId(id as FamilleSuiteArithmetiqueId)));
+  }
+
+  const exercice = etat.exerciceCourant;
+  const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
+  const tentativesMax = tentativesMaxSuiteArithmetique(etat, etat.phase);
+  const cleEcran = `${numeroSession}-${etat.indexExercice}-${etat.phase}`;
+  const phase = etat.phase;
+
+  /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
+   * (après la réponse) et pour l'entrée d'historique de l'étape (fiche de sa puce). */
+  function corrigeDetailleEcranCourant() {
+    return <CorrigeDetailleEcran etapes={lignesDeLEtape(correctionDetailleeSuiteArithmetique(exercice, ordreComplet(exercice)), lettreEtape(ordreComplet(exercice).indexOf(phase)))} />;
+  }
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttendueFiche(exercice, phase),
+        corrigeDetaille: corrigeDetailleEcranCourant(),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
+  return (
+    <div className="app-shell">
+      <header className="app-header">
+        <p className="app-eyebrow">5e (6h) — Entraînement</p>
+        <h1 className="app-title">Suites arithmétiques, formule générale et termes</h1>
+        <p className="app-subtitle">Nombres réels et suites</p>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
+      </header>
+      <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+      <main className="card">
+        <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifSuiteArithmetique(etat)} />
+          <>
+              {PHASES_CHAMP_SIMPLE.has(phase) && (
+                <EtapeChampSimpleSuiteArithmetique
+                  key={cleEcran}
+                  exercice={exercice}
+                  phase={phase as PhaseChampSimple}
+                  tentativesUtilisees={tentativesUtilisees}
+                  tentativesMax={tentativesMax}
+                  niveauAide={etat.niveauAide}
+                  niveauAideMax={niveauAideMaxSuiteArithmetique(etat.phase)}
+                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
+                  onValider={(texte) => {
+                    switch (phase) {
+                      case "trouverR":
+                        return terminerEtape(soumettreReponseTrouverR(etat, texte), texte);
+                      case "trouverU1":
+                        return terminerEtape(soumettreReponseTrouverU1(etat, texte), texte);
+                      case "formuleGenerale":
+                        return terminerEtape(soumettreReponseFormuleGenerale(etat, texte), texte);
+                      case "termeEloigne":
+                        return terminerEtape(soumettreReponseTermeEloigne(etat, texte), texte);
+                      case "sommeSn":
+                        return terminerEtape(soumettreReponseSommeSn(etat, texte), texte);
+                      case "calculerSn":
+                        return terminerEtape(soumettreReponseCalculerSn(etat, texte), texte);
+                      case "resoudreXAlgebrique":
+                        return terminerEtape(soumettreReponseResoudreXAlgebrique(etat, texte), texte);
+                      case "resoudreRangN":
+                        return terminerEtape(soumettreReponseResoudreRangN(etat, texte), texte);
+                      default:
+                        return;
+                    }
+                  }}
+                  diagnostiquer={(texte) => diagnostiquerChampSimple(exercice, phase as PhaseChampSimple, texte)}
+                  validation={validation}
+                />
+              )}
+              {PHASES_CALCULATRICE_CHAMP_SIMPLE.has(phase) && <CalculatriceScientifique />}
+
+              {PHASES_TERMES_MULTIPLES.has(phase) && (
+                <EtapeTermesMultiples
+                  key={cleEcran}
+                  exercice={exercice}
+                  phase={phase as PhaseTermesMultiples}
+                  tentativesUtilisees={tentativesUtilisees}
+                  tentativesMax={tentativesMax}
+                  niveauAide={etat.niveauAide}
+                  niveauAideMax={niveauAideMaxSuiteArithmetique(etat.phase)}
+                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
+                  onValider={(textes) => {
+                    if (phase === "termesProches") return terminerEtape(soumettreReponseTermesProches(etat, textes), textes.join(" ; "));
+                    return terminerEtape(soumettreReponseCalculerTermesAlgebrique(etat, textes), textes.join(" ; "));
+                  }}
+                  diagnostiquer={(textes) => diagnostiquerTermesMultiples(exercice, phase as PhaseTermesMultiples, textes)}
+                  validation={validation}
+                />
+              )}
+              {PHASES_CALCULATRICE_TERMES_MULTIPLES.has(phase) && <CalculatriceScientifique />}
+
+              {phase === "coherenceJugement" && (
+                <EtapeCoherenceJugement
+                  key={cleEcran}
+                  exercice={exercice}
+                  tentativesUtilisees={tentativesUtilisees}
+                  tentativesMax={tentativesMax}
+                  niveauAide={etat.niveauAide}
+                  niveauAideMax={niveauAideMaxSuiteArithmetique(etat.phase)}
+                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
+                  onValider={(choix) => terminerEtape(soumettreReponseCoherenceJugement(etat, choix), choix ? "Cohérentes" : "Incohérentes")}
+                  validation={validation}
+                />
+              )}
+
+              {PHASES_POSER_EQUATION.has(phase) && (
+                <EtapePoserEquation
+                  key={cleEcran}
+                  exercice={exercice}
+                  phase={phase as PhasePoserEquation}
+                  tentativesUtilisees={tentativesUtilisees}
+                  tentativesMax={tentativesMax}
+                  niveauAide={etat.niveauAide}
+                  niveauAideMax={niveauAideMaxSuiteArithmetique(etat.phase)}
+                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
+                  onValider={(reponse) => {
+                    if (phase === "poserEquationRangN") return terminerEtape(soumettreReponsePoserEquationRangN(etat, reponse), reponse.texte);
+                    return terminerEtape(soumettreReponsePoserEquationAlgebrique(etat, reponse), reponse.texte);
+                  }}
+                  diagnostiquer={(reponse) => diagnostiquerPoserEquation(exercice, phase as PhasePoserEquation, reponse)}
+                  validation={validation}
+                />
+              )}
+              {PHASES_CALCULATRICE_POSER_EQUATION.has(phase) && <CalculatriceScientifique />}
+            </>
+        </div>
+      </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
+    </div>
+  );
+}
