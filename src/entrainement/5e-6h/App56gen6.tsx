@@ -193,9 +193,9 @@ export function App56gen6() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <p className="app-eyebrow">5e — Entraînement</p>
+        <p className="app-eyebrow">5e (6h) — Entraînement</p>
         <h1 className="app-title">Convergence et divergence des suites</h1>
-        <p className="app-subtitle">Chapitre 3 — Suites</p>
+        <p className="app-subtitle">Nombres réels et suites</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />

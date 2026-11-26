@@ -124,7 +124,7 @@ export function App56gen3() {
   // Hook DEV-ONLY (même garde que `SelecteurVarianteDev`) : exercice tiré exposé pour Playwright.
   const modeDevActif = import.meta.env.DEV || new URLSearchParams(window.location.search).get("dev") === "1";
   if (modeDevActif) {
-    (window as unknown as { __debug5gen44?: unknown }).__debug5gen44 = { exercice, phase };
+    (window as unknown as { __debug56gen3?: unknown }).__debug56gen3 = { exercice, phase };
   }
 
   const choix = estPhaseChoix(phase);
@@ -151,9 +151,9 @@ export function App56gen3() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <p className="app-eyebrow">5e — Entraînement</p>
+        <p className="app-eyebrow">5e (6h) — Entraînement</p>
         <h1 className="app-title">Définir et reconnaître une suite</h1>
-        <p className="app-subtitle">Chapitre 3 — Suites</p>
+        <p className="app-subtitle">Nombres réels et suites</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={calculerSegmentsProgressionDefinirSuite(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>

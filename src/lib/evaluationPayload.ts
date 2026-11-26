@@ -757,6 +757,24 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'statistique-deux-variables', sectionId: 'moindres-carres', quizTheme: 'moindresCarres', label: '', quizChapitre: 6 },
   { chapitreSlug: 'statistique-deux-variables', sectionId: 'correlation', quizTheme: 'correlation', label: '', quizChapitre: 6 },
   { chapitreSlug: 'statistique-deux-variables', sectionId: 'interpreter', quizTheme: 'interpreter', label: '', quizChapitre: 6 },
+  // 5e (6h), « Nombres réels et suites » : quiz 56gen13 (banque `5e-6h/generateurs56/quizNombresReelsSuites/banqueChapitre.ts`),
+  // un thème par étape ; `quizChapitre` omis (aucune page d'évaluation distante pour la 5e (6h)).
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'irrationnels', quizTheme: 'irrationnels', label: '' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'ecritures-decimales', quizTheme: 'ecrituresDecimales', label: '' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'axiomes', quizTheme: 'quantificateursAxiomes', label: '' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'valeur-absolue', quizTheme: 'valeurAbsolue', label: '' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'approcher-densite', quizTheme: 'densiteApproximation', label: '' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'definir-suite', quizTheme: 'suiteRecurrenteAffine', label: '' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'suites-arithmetiques', quizTheme: 'suitesArithmetiques', label: '' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'suites-geometriques', quizTheme: 'suitesGeometriques', label: '' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'suites-geometriques', quizTheme: 'comparaisonNumerique', label: 'Comparaison numérique de deux suites' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'limite-suite', quizTheme: 'convergenceDivergence', label: '' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'sommes-infinies', quizTheme: 'problemesClassiques', label: 'Problèmes classiques sur les suites' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'sommes-infinies', quizTheme: 'transversal', label: 'Synthèse sur les suites' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'interets', quizTheme: 'interetsSimplesComposes', label: '' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'taux-equivalents', quizTheme: 'tauxEquivalents', label: '' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'annuites', quizTheme: 'annuites', label: '' },
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'credit', quizTheme: 'creditTaeg', label: '' },
 ]
 
 export function generateursPourSection(chapitreSlug: string, sectionId: string): GeneratorConfig[] {

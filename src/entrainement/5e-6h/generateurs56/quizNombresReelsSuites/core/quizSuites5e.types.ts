@@ -7,13 +7,22 @@
  * (4h)"), ni entre deux chapitres du même chantier.
  */
 export type VarianteQuizSuites5e =
+  | "irrationnels"
+  | "ecrituresDecimales"
+  | "quantificateursAxiomes"
+  | "valeurAbsolue"
+  | "densiteApproximation"
   | "suitesArithmetiques"
   | "suitesGeometriques"
   | "convergenceDivergence"
   | "problemesClassiques"
   | "comparaisonNumerique"
   | "suiteRecurrenteAffine"
-  | "transversal";
+  | "transversal"
+  | "interetsSimplesComposes"
+  | "tauxEquivalents"
+  | "annuites"
+  | "creditTaeg";
 
 export interface QuestionVraiFaux5e {
   enonce: string;

@@ -4,23 +4,22 @@ import type { VarianteQuizSuites5e } from "./generateurs56/quizNombresReelsSuite
 import type { ReglagesSession5e } from "../5e-4h/core5e/session5e.types";
 import { demarrerSessionQuizSuites5e, soumettreReponseQuizSuites5e } from "./generateurs56/quizNombresReelsSuites/moteur/sessionQuizSuites5e";
 import type { EtatSessionQuizSuites5e, ResultatExerciceQuizSuites5e } from "./generateurs56/quizNombresReelsSuites/moteur/typesQuizSuites5e";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs56/quizNombresReelsSuites";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition, nombreQuestions } from "./generateurs56/quizNombresReelsSuites";
 import { SelecteurVarianteDev } from "../5e-4h/components5e/SelecteurVarianteDev";
 import { EtapeQuestionQuizSuites5e } from "./generateurs56/quizNombresReelsSuites/composants/EtapeQuestionQuizSuites5e";
 import { ResultatPanelQuizSuites5e } from "./generateurs56/quizNombresReelsSuites/composants/ResultatPanelQuizSuites5e";
 import { ResumeSessionQuizSuites5e } from "./generateurs56/quizNombresReelsSuites/composants/ResumeSessionQuizSuites5e";
 import { useNoterEssai } from "../../lib/suiviContexte";
 
-/** `nombreExercices: 20` correspond exactement à la taille de la banque par thème (voir
- * `generateurs5e/quizSuites5e/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une
- * session parcourt donc les 20 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession5e = {
-  nombreExercices: 20,
-  tentativesMax: 1,
-};
+/** `nombreExercices` = taille RÉELLE de la banque du thème (14 à 20, `nombreQuestions`) : couplé à
+ * `creerGenerateurSansRepetition`, une session parcourt toutes les affirmations du thème sans en répéter
+ * une (règle de `.claude/rules/quiz-generators.md`). */
+function reglages(theme: VarianteQuizSuites5e): ReglagesSession5e {
+  return { nombreExercices: nombreQuestions(theme), tentativesMax: 1 };
+}
 
 function nouvelleSession(theme: VarianteQuizSuites5e): EtatSessionQuizSuites5e {
-  return demarrerSessionQuizSuites5e(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizSuites5e(reglages(theme), creerGenerateurSansRepetition(theme));
 }
 
 /** 5gen41 — "Suites" (quiz vrai/faux), chapitre 3, réplique mécanique du patron quiz vrai/faux déjà
@@ -56,7 +55,7 @@ export function App56gen13() {
     const theme = varianteId as VarianteQuizSuites5e;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizSuites5e(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizSuites5e(reglages(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
@@ -64,9 +63,9 @@ export function App56gen13() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <p className="app-eyebrow">5e — Entraînement</p>
-        <h1 className="app-title">Les suites — vrai ou faux</h1>
-        <p className="app-subtitle">Chapitre 3{themeChoisi ? ` — ${CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label}` : ""}</p>
+        <p className="app-eyebrow">5e (6h) — Entraînement</p>
+        <h1 className="app-title">Nombres réels et suites — vrai ou faux</h1>
+        <p className="app-subtitle">Nombres réels et suites{themeChoisi ? ` — ${CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label}` : ""}</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         {enCoursDeSession && etat && (
           <div className="progress">
@@ -87,7 +86,7 @@ export function App56gen13() {
           {!etat ? (
             <div>
               <h2 className="result-title">Choisis un thème</h2>
-              <p className="result-subtitle">7 thèmes, 20 affirmations vrai/faux chacun — révision complète du chapitre.</p>
+              <p className="result-subtitle">{CATALOGUE_VARIANTES.length} thèmes, de 14 à 20 affirmations vrai ou faux chacun — révision complète du chapitre.</p>
               <div className="accueil-choix">
                 {CATALOGUE_VARIANTES.map((variante, index) => (
                   <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

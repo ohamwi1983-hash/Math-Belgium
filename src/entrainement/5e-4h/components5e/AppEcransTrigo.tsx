@@ -46,6 +46,15 @@ export interface ConfigAppEcrans<E, P extends string> {
   /** La figure de l'énoncé reste visible sous le bandeau replié (opt-in, 6gen106 ; absent : rien ne
    * change). */
   figureToujoursVisible?: boolean;
+  /** Premier exercice imposé par une appli parente (5e (6h), `commun56/AppMixte56.tsx`) : remplace le
+   * tirage initial ET la lecture de `?code=` (absent : rien ne change). */
+  premierExercice?: E;
+  /** Clic sur « Nouvel exercice » : si la fonction rend `true`, l'appli parente prend la main (5e (6h),
+   * `AppMixte56` tire l'exercice suivant par la fonction `…Libre`) ; absent : rien ne change. */
+  auNouvelExercice?: () => boolean;
+  /** Variante choisie dans `SelecteurVarianteDev` : si la fonction rend `true`, l'appli parente prend la
+   * main (5e (6h), `AppMixte56`) ; absent : rien ne change. */
+  auChoixVariante?: (id: string) => boolean;
 }
 
 interface TransitionEnAttente<E, P extends string> {
@@ -118,6 +127,10 @@ function ReponseAttendue({ fragments }: { fragments: Frag[] }) {
 export function AppEcransTrigo<E, P extends string>({ config }: { config: ConfigAppEcrans<E, P> }) {
   const def = config.definition;
   const [etat, setEtat] = useState<EtatSessionEcrans<E, P>>(() => {
+    if (config.premierExercice !== undefined) {
+      const premier = config.premierExercice;
+      return demarrerSessionEcrans(def, REGLAGES, () => premier);
+    }
     const code = lireCodeDepuisUrl();
     if (!code) return demarrerSessionEcrans(def, REGLAGES, config.genererLibre);
     return demarrerSessionEcrans(def, REGLAGES, () => genererAvecCode(code, config.catalogue, config.genererLibre, config.genererVariante));
@@ -165,6 +178,7 @@ export function AppEcransTrigo<E, P extends string>({ config }: { config: Config
   function suivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
+      if (config.auNouvelExercice?.()) return;
       reinitialiser(demarrerSessionEcrans(def, REGLAGES, config.genererLibre));
       return;
     }
@@ -240,7 +254,7 @@ export function AppEcransTrigo<E, P extends string>({ config }: { config: Config
         <p className="app-eyebrow">{config.eyebrow ?? "5e — Entraînement"}</p>
         <h1 className="app-title">{config.titre}</h1>
         <p className="app-subtitle">{config.sousTitre ?? "Chapitre 2 — Trigonométrie"}</p>
-        <SelecteurVarianteDev options={config.catalogue} onGenerer={(id) => reinitialiser(demarrerSessionEcrans(def, REGLAGES, () => config.genererVariante(id)))} />
+        <SelecteurVarianteDev options={config.catalogue} onGenerer={(id) => (config.auChoixVariante?.(id) ? undefined : reinitialiser(demarrerSessionEcrans(def, REGLAGES, () => config.genererVariante(id))))} />
         <ProgressionPuces segments={segments} onSegmentClick={(i) => setFicheOuverte(i)} />
       </header>
       <main className="card">

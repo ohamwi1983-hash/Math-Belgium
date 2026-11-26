@@ -1,0 +1,77 @@
+/**
+ * Quiz vrai/faux du chapitre « Nombres réels et suites » (5e (6h), 56gen13, chantier D du 26/11/2026) —
+ * thèmes « algèbre financière » (étapes 11 à 14). Affirmations de VÉRIFICATION RAPIDE (règles de `.claude/rules/quiz-generators.md` :
+ * jamais de calcul à plusieurs étapes), autant de vraies que de fausses par thème, chaque valeur
+ * recalculée (script `verif_quiz.py` du dossier de travail `56-D`). Typographie : formules en KaTeX,
+ * virgule décimale, aucune notation clavier, pas de majuscules d'insistance.
+ */
+import type { QuestionVraiFaux5e } from "./core/quizSuites5e.types";
+
+export const BANQUE_QUIZ_FINANCE: Record<string, QuestionVraiFaux5e[]> = {
+  interetsSimplesComposes: [
+    { enonce: "À intérêt simple, les intérêts de chaque période sont calculés sur le capital de départ seulement.", reponse: true, justification: "C'est la définition : $I=C_{0}\\cdot i\\cdot t$, les intérêts ne produisent pas d'intérêts." },
+    { enonce: "À intérêts composés, les intérêts de chaque année sont calculés sur le capital de départ seulement.", reponse: false, justification: "Faux : ils sont calculés sur la valeur acquise de l'année précédente (les intérêts sont capitalisés et produisent à leur tour des intérêts)." },
+    { enonce: "À intérêt simple, les valeurs acquises d'année en année forment une suite arithmétique de raison $C_{0}\\cdot i$.", reponse: true, justification: "Chaque année, on ajoute le même intérêt $C_{0}\\cdot i$." },
+    { enonce: "À intérêts composés, les valeurs acquises d'année en année forment une suite arithmétique.", reponse: false, justification: "Faux : chaque année, on multiplie par $1+i$ : c'est une suite géométrique de raison $1+i$." },
+    { enonce: "1 000 € placés à intérêt simple au taux annuel de 3 % rapportent 30 € d'intérêts en un an.", reponse: true, justification: "$I=1\\,000\\cdot 0{,}03\\cdot 1=30$ €." },
+    { enonce: "1 000 € placés à intérêt simple au taux annuel de 3 % rapportent 60 € en six mois.", reponse: false, justification: "Faux : six mois, c'est une demi-année : $I=1\\,000\\cdot 0{,}03\\cdot\\dfrac{1}{2}=15$ €." },
+    { enonce: "À intérêts composés au taux annuel i, la valeur acquise après n années est $C_{n}=C_{0}(1+i)^{n}$.", reponse: true, justification: "On multiplie n fois le capital par $1+i$." },
+    { enonce: "À intérêts composés au taux annuel i, la valeur acquise après n années est $C_{n}=C_{0}(1+n\\cdot i)$.", reponse: false, justification: "Faux : c'est la formule de l'intérêt simple. À intérêts composés, $C_{n}=C_{0}(1+i)^{n}$." },
+    { enonce: "La valeur actuelle d'un capital $C_{n}$ disponible dans n années est $C_{0}=C_{n}(1+i)^{-n}$.", reponse: true, justification: "On actualise : on divise n fois par $1+i$." },
+    { enonce: "Pour savoir en combien d'années un capital placé à 3 % double, on résout $1{,}03^{n}=2$ en divisant 2 par $1{,}03$.", reponse: false, justification: "Faux : n est un exposant. On cherche dans la table de la calculatrice le premier n tel que $1{,}03^{n}\\ge 2$ : $n=24$." },
+    { enonce: "Règle de 72 : à 6 % par an, un capital double en environ 12 ans.", reponse: true, justification: "$72:6=12$ et en effet $1{,}06^{12}\\approx 2{,}01$." },
+    { enonce: "Sur une durée de moins d'un an, les intérêts composés rapportent plus que l'intérêt simple au même taux.", reponse: false, justification: "Faux : pour $0<t<1$, $(1+i)^{t}<1+i\\cdot t$ : c'est l'intérêt simple qui rapporte plus. Les deux sont égaux pour $t=1$." },
+    { enonce: "Au même taux, après exactement un an, intérêt simple et intérêts composés donnent la même valeur acquise.", reponse: true, justification: "Pour $t=1$ : $C_{0}(1+i)^{1}=C_{0}(1+i\\cdot 1)$." },
+    { enonce: "Du 15 mai au 22 juillet, il y a 66 jours.", reponse: false, justification: "Faux : 16 jours en mai (du 15 au 31), 30 en juin et 22 en juillet : 68 jours." },
+    { enonce: "Si un placement fait passer $C_{0}$ à $C_{n}$ en n années à intérêts composés, son taux annuel i vérifie $(1+i)^{n}=\\dfrac{C_{n}}{C_{0}}$.", reponse: true, justification: "On divise $C_{n}=C_{0}(1+i)^{n}$ par $C_{0}$ ; on trouve ensuite i par une racine n-ième." },
+    { enonce: "Un capital qui augmente de 3 % par an pendant 2 ans augmente de 6 % au total.", reponse: false, justification: "Faux : $1{,}03^{2}=1{,}0609$, soit une hausse de 6,09 % : la deuxième année, les intérêts portent aussi sur ceux de la première." },
+  ],
+  tauxEquivalents: [
+    { enonce: "Deux taux sont équivalents s'ils donnent la même valeur acquise pour un même capital placé pendant la même durée.", reponse: true, justification: "C'est la définition de deux taux équivalents." },
+    { enonce: "Le taux trimestriel équivalent à un taux annuel de 4 % est 1 %.", reponse: false, justification: "Faux : 1 % est le taux proportionnel. Le taux équivalent vérifie $(1+i_{t})^{4}=1{,}04$, soit $i_{t}\\approx 0{,}985\\,\\%$." },
+    { enonce: "Le taux mensuel $i_{m}$ et le taux annuel équivalent $i_{a}$ vérifient $(1+i_{m})^{12}=1+i_{a}$.", reponse: true, justification: "Un an compte 12 mois : on capitalise 12 fois au taux mensuel." },
+    { enonce: "Le taux trimestriel $i_{t}$ et le taux annuel équivalent $i_{a}$ vérifient $(1+i_{t})^{3}=1+i_{a}$.", reponse: false, justification: "Faux : un an compte 4 trimestres, donc $(1+i_{t})^{4}=1+i_{a}$." },
+    { enonce: "Un taux mensuel de 1 % est équivalent à un taux annuel supérieur à 12 %.", reponse: true, justification: "Les intérêts de chaque mois produisent eux-mêmes des intérêts : $1{,}01^{12}\\approx 1{,}1268$, soit environ 12,68 %." },
+    { enonce: "Un taux semestriel de 2 % est équivalent à un taux annuel de 4 %.", reponse: false, justification: "Faux : $1{,}02^{2}=1{,}0404$, soit un taux annuel de 4,04 %." },
+    { enonce: "Pour comparer des offres exprimées à des périodes différentes, on les convertit en taux annuels équivalents.", reponse: true, justification: "Des taux de périodes différentes ne se comparent pas directement ; leurs taux annuels équivalents, oui." },
+    { enonce: "Une offre à 1,4 % par trimestre est moins avantageuse qu'une offre à 5,6 % par an.", reponse: false, justification: "Faux : $1{,}014^{4}\\approx 1{,}0571$, soit environ 5,71 % par an, plus que 5,6 %." },
+    { enonce: "Diviser un taux annuel par 12 donne un taux mensuel un peu plus grand que le taux mensuel équivalent.", reponse: true, justification: "Le taux proportionnel, capitalisé 12 fois, donne plus que le taux annuel : $\\left(1+\\dfrac{i_{a}}{12}\\right)^{12}>1+i_{a}$." },
+    { enonce: "Une baisse de 2,4 % par mois correspond à une baisse de 28,8 % par an.", reponse: false, justification: "Faux : chaque mois on garde 97,6 % de la valeur, et $0{,}976^{12}\\approx 0{,}747$ : la baisse annuelle est d'environ 25,3 %." },
+    { enonce: "Si un précompte de 30 % est retenu sur les intérêts, un taux brut de 2 % donne un taux net de 1,4 %.", reponse: true, justification: "On garde 70 % des intérêts : $0{,}7\\cdot 2=1{,}4$." },
+    { enonce: "Un glacier qui perd 13 % de sa surface en 10 ans en perd 1,3 % par an.", reponse: false, justification: "Faux : la perte annuelle d vérifie $(1-d)^{10}=0{,}87$, soit $d\\approx 1{,}38\\,\\%$ : on ne divise pas un pourcentage composé par 10." },
+    { enonce: "Un glacier qui perd 3 % de sa surface par an en perd plus du quart en 10 ans.", reponse: true, justification: "$0{,}97^{10}\\approx 0{,}737$ : il reste environ 73,7 %, la perte est d'environ 26,3 %." },
+    { enonce: "Deux taux équivalents rapportent des intérêts différents sur un an.", reponse: false, justification: "Faux : par définition, ils donnent la même valeur acquise, donc les mêmes intérêts." },
+  ],
+  annuites: [
+    { enonce: "Des annuités constantes sont des montants identiques versés à intervalles réguliers.", reponse: true, justification: "C'est la définition (mensualités pour des versements mensuels)." },
+    { enonce: "La valeur acquise de n versements annuels a, au moment du dernier versement, vaut $n\\cdot a$.", reponse: false, justification: "Faux : chaque versement a produit des intérêts, sauf le dernier : $V_{n}=a\\cdot\\dfrac{(1+i)^{n}-1}{i}$, plus grand que $n\\cdot a$ quand $i>0$." },
+    { enonce: "La formule $V_{n}=a\\cdot\\dfrac{(1+i)^{n}-1}{i}$ s'obtient comme la somme des termes d'une suite géométrique de raison $1+i$.", reponse: true, justification: "$V_{n}=a+a(1+i)+\\ldots+a(1+i)^{n-1}$, somme de n termes géométriques." },
+    { enonce: "Dans $V_{n}=a\\cdot\\dfrac{(1+i)^{n}-1}{i}$, le premier versement a produit des intérêts pendant n années.", reponse: false, justification: "Faux : au moment du dernier versement, le premier a produit des intérêts pendant $n-1$ années (et le dernier pendant 0 année)." },
+    { enonce: "Pour connaître la valeur un an après le dernier versement, on multiplie $V_{n}$ par $1+i$.", reponse: true, justification: "Toute la somme acquise produit des intérêts pendant une année de plus." },
+    { enonce: "La valeur actuelle de n annuités est plus grande que la somme $n\\cdot a$ des versements.", reponse: false, justification: "Faux : chaque versement est actualisé, divisé par une puissance de $1+i>1$ : $V_{0}<n\\cdot a$." },
+    { enonce: "$V_{0}=V_{n}(1+i)^{-n}$ : la valeur actuelle s'obtient en actualisant la valeur acquise.", reponse: true, justification: "Les deux valeurs désignent la même suite de versements, regardée à deux dates séparées de n périodes." },
+    { enonce: "La valeur actuelle de n annuités est $V_{0}=a\\cdot\\dfrac{1-(1+i)^{n}}{i}$.", reponse: false, justification: "Faux : l'exposant est $-n$ : $V_{0}=a\\cdot\\dfrac{1-(1+i)^{-n}}{i}$ (avec l'exposant n, on trouverait une valeur négative)." },
+    { enonce: "1 200 € versés chaque année pendant 5 ans à 3 % valent plus de 6 000 € au moment du dernier versement.", reponse: true, justification: "Les versements font 6 000 € ; avec les intérêts, $V_{5}=1\\,200\\cdot\\dfrac{1{,}03^{5}-1}{0{,}03}\\approx 6\\,370{,}96$ €." },
+    { enonce: "Au même taux de 3 %, placer 6 000 € aujourd'hui ou verser 1 200 € chaque année pendant 5 ans (le premier dans un an) donne la même somme dans 5 ans.", reponse: false, justification: "Faux : les 6 000 € produisent des intérêts pendant 5 ans ($6\\,000\\cdot 1{,}03^{5}\\approx 6\\,955{,}64$ €), les versements moins longtemps ($\\approx 6\\,370{,}96$ €)." },
+    { enonce: "Pour un emprunt remboursé par annuités, le montant emprunté est égal à la valeur actuelle des annuités.", reponse: true, justification: "C'est l'équation qui permet de calculer l'annuité de remboursement." },
+    { enonce: "Avec des versements en début de période, la valeur acquise est la même qu'avec des versements en fin de période.", reponse: false, justification: "Faux : chaque versement produit des intérêts une période de plus ; la valeur acquise est multipliée par $1+i$." },
+    { enonce: "Une ligne du temps aide à compter, pour chaque versement, le nombre de périodes pendant lesquelles il est capitalisé ou actualisé.", reponse: true, justification: "On y place les dates des versements et la date d'évaluation." },
+    { enonce: "Pour trouver le nombre n de versements nécessaires, on isole n en divisant par $1+i$.", reponse: false, justification: "Faux : n est un exposant. On le trouve par essais, avec la table de la calculatrice (premier n qui convient)." },
+  ],
+  creditTaeg: [
+    { enonce: "Le TAEG d'un crédit à la consommation tient compte des intérêts et des frais du crédit.", reponse: true, justification: "Le taux annuel effectif global inclut tous les coûts du crédit : il permet de comparer des offres." },
+    { enonce: "Le TAEG ne tient compte que des intérêts, jamais des frais.", reponse: false, justification: "Faux : « effectif global » signifie qu'il comprend les intérêts et les frais." },
+    { enonce: "Le coût d'un crédit est le total payé diminué du montant emprunté.", reponse: true, justification: "C'est ce que le crédit coûte en plus de la somme empruntée." },
+    { enonce: "Le coût d'un crédit de 10 000 € remboursé en 12 mensualités de 861,67 € est de 861,67 €.", reponse: false, justification: "Faux : le total payé est $12\\cdot 861{,}67=10\\,340{,}04$ €, donc le coût est de 340,04 €." },
+    { enonce: "Le taux mensuel i équivalent à un TAEG t vérifie $(1+i)^{12}=1+t$.", reponse: true, justification: "Le TAEG est un taux annuel ; les mensualités se calculent avec le taux mensuel équivalent." },
+    { enonce: "Le taux mensuel équivalent à un TAEG de 6 % est 0,5 %.", reponse: false, justification: "Faux : 0,5 % est le taux proportionnel. L'équivalent vérifie $(1+i)^{12}=1{,}06$, soit $i\\approx 0{,}487\\,\\%$." },
+    { enonce: "La mensualité m d'un crédit de montant C sur n mois, au taux mensuel i, vérifie $C=m\\cdot\\dfrac{1-(1+i)^{-n}}{i}$.", reponse: true, justification: "Le montant emprunté est la valeur actuelle des n mensualités." },
+    { enonce: "Dans un tableau d'amortissement à mensualités constantes, la part de capital remboursée diminue de mois en mois.", reponse: false, justification: "Faux : elle augmente. Les intérêts, calculés sur le capital restant dû, diminuent, et la mensualité reste la même." },
+    { enonce: "Dans un tableau d'amortissement, l'intérêt d'un mois est calculé sur le capital restant dû au début de ce mois.", reponse: true, justification: "Intérêt du mois = capital restant dû × taux mensuel." },
+    { enonce: "Le crédit hypothécaire est une forme de crédit à la consommation.", reponse: false, justification: "Faux : le crédit hypothécaire (achat d'un bien immobilier) suit d'autres règles ; il ne fait pas partie des crédits à la consommation." },
+    { enonce: "Avec un amortissement constant, les mensualités forment une suite arithmétique décroissante.", reponse: true, justification: "La part de capital est la même chaque mois ; le capital restant dû baisse chaque mois du même montant, donc les intérêts aussi." },
+    { enonce: "Un scooter de 1 740 € payé en 24 mensualités de 75 € a un coût de crédit nul.", reponse: false, justification: "Faux : $24\\cdot 75=1\\,800$ €, donc le crédit coûte 60 €." },
+    { enonce: "Au même taux, plus un crédit dure longtemps, plus son coût total est élevé.", reponse: true, justification: "Le capital est remboursé plus lentement : il reste dû plus longtemps et produit plus d'intérêts." },
+    { enonce: "Arrondir la mensualité au centime ne change jamais le coût calculé du crédit.", reponse: false, justification: "Faux : pour 10 000 € à 6,4 % sur 12 mois, le coût vaut 340,04 € avec la mensualité arrondie (861,67 €) et 340,09 € avec sa valeur exacte." },
+  ],
+};

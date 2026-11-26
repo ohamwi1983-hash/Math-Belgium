@@ -148,7 +148,7 @@ export function App56gen10() {
   // Hook DEV-ONLY (même garde que `SelecteurVarianteDev`) : exercice tiré exposé pour Playwright.
   const modeDevActif = import.meta.env.DEV || new URLSearchParams(window.location.search).get("dev") === "1";
   if (modeDevActif) {
-    (window as unknown as { __debug5gen49?: unknown }).__debug5gen49 = { exercice: e, ecran };
+    (window as unknown as { __debug56gen10?: unknown }).__debug56gen10 = { exercice: e, ecran };
   }
 
   /** Corrigé détaillé « comme au tableau » de l'écran en cours — UNE seule source pour la validation
@@ -244,9 +244,9 @@ export function App56gen10() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <p className="app-eyebrow">5e — Entraînement</p>
+        <p className="app-eyebrow">5e (6h) — Entraînement</p>
         <h1 className="app-title">Détective d'erreurs : suites</h1>
-        <p className="app-subtitle">Chapitre 3 — Suites</p>
+        <p className="app-subtitle">Nombres réels et suites</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={(id) => recommencer(construireAvecVariante(id))} />
       </header>
 

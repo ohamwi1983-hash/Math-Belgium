@@ -23,6 +23,18 @@ export const nombresReelsSuites: ChapterContent = {
   formulaire: { groups: [...formulaireGroupesReels, ...formulaireGroupesSuites, ...formulaireGroupesFinance] },
   recap: {
     items: [...recapItemsReels, ...recapItemsSuites, ...recapItemsFinance],
-    // entrainement : quiz 56gen13 (posé par le chantier D).
+    entrainement: {
+      kind: 'entrainement',
+      title: 'Quiz vrai ou faux — tout le chapitre',
+      generatorId: '56gen13',
+      description: [
+        'Affirmations sur les nombres réels (irrationnels, écritures décimales, quantificateurs, valeur absolue, ' +
+          'densité), les suites (arithmétiques, géométriques, récurrentes, limites, sommes infinies) et l’algèbre ' +
+          'financière (intérêts, taux équivalents, annuités, crédit). Choisis un thème, réponds vrai ou faux : la ' +
+          'justification est toujours révélée.',
+      ],
+      chantier: '5e-6h',
+      whereLabel: '5e (6h) → « Nombres réels et suites — vrai ou faux »',
+    },
   },
 }
