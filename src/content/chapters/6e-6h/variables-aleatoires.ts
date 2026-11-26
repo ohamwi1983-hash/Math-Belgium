@@ -64,6 +64,10 @@ export const variablesAleatoires: ChapterContent = {
         { question: '« $X\\geq4$ » et « $X\\leq4$ » sont-ils contraires ?', reponse: 'Non : ils partagent la valeur $X=4$. Le contraire de « $X\\geq4$ » est « $X\\leq3$ ».' },
         { question: '$E(X)=3$ et $\\sigma(X)=2$. Que valent $E(0{,}5X-1)$ et $\\sigma(0{,}5X-1)$ ?', reponse: '$E=0{,}5\\times3-1=0{,}5$ et $\\sigma=0{,}5\\times2=1$.' },
       ],
+      utilise: [
+        { cible: '6e-6h/analyse-combinatoire#probabilitehypergeometrique', poids: 'indispensable', rappel: '$P(k) = \\dfrac{C_K^k \\times C_{N-K}^{n-k}}{C_N^n}$ pour un tirage **sans remise** ; le dénominateur est toujours $C_N^n$.' },
+        { cible: '6e-6h/probabilites#probabilitesensembles', poids: 'utile', rappel: '$P(A)$ mesure la chance que $A$ se réalise : $0 \\leq P(A) \\leq 1$ et $P(\\bar{A})=1-P(A)$. En situation d\'**équiprobabilité** : $P(A) = \\dfrac{\\text{nombre de cas favorables}}{\\text{nombre de cas possibles}}$ — toujours à vérifier avant de compter.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Variable aléatoire, loi de probabilité et espérance', youtubeId: '7i_g1bBza6g' },
         { kind: 'video', title: 'Variance, écart-type et événements contraires', youtubeId: '3qi0zTgRcdA' },
@@ -373,7 +377,7 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'intuition',
           label: 'Ce que tu sais déjà',
           text:
-            "Au chapitre 7 (§ 5), tu as calculé la probabilité d'obtenir exactement $k$ succès en tirant $n$ éléments **sans remise** dans une population de $N$ éléments dont $K$ sont des succès : $P(X=k)=\\dfrac{C_K^k\\times C_{N-K}^{n-k}}{C_N^n}$. Rien de neuf pour cette formule : ce qui est nouveau ici, c'est de voir $X$ comme une variable aléatoire, d'écrire **toute** sa loi et de calculer son **espérance**.",
+            "Dans [[6e-6h/analyse-combinatoire#probabilitehypergeometrique]], on calcule la probabilité d'obtenir exactement $k$ succès en tirant $n$ éléments **sans remise** dans une population de $N$ éléments dont $K$ sont des succès : $P(X=k)=\\dfrac{C_K^k\\times C_{N-K}^{n-k}}{C_N^n}$. Rien de neuf pour cette formule : ce qui est nouveau ici, c'est de voir $X$ comme une variable aléatoire, d'écrire **toute** sa loi et de calculer son **espérance**.",
         },
         {
           kind: 'para',
@@ -623,13 +627,20 @@ export const variablesAleatoires: ChapterContent = {
         { question: '$X\\sim\\mathcal{B}(5\\,;0{,}4)$ : que valent $E(X)$ et $V(X)$ ?', reponse: '$E(X)=2$ et $V(X)=5\\times0{,}4\\times0{,}6=1{,}2$.' },
         { question: "$p=0{,}1$ : combien d'épreuves au minimum pour que $P(\\text{au moins 1 succès})>0{,}9$ ?", reponse: '$n>\\dfrac{\\ln(0{,}1)}{\\ln(0{,}9)}\\approx21{,}85$, donc $n=22$.' },
       ],
+      utilise: [
+        { cible: '6e-6h/analyse-combinatoire#binomialesequence', poids: 'indispensable', rappel: '$P(X=k) = C_n^k \\times p^k \\times (1-p)^{n-k}$ pour $n$ épreuves **indépendantes** de même probabilité de succès $p$. « Exactement $k$ », « aucun » ou « tous » : un seul terme ; « au moins » ou « au plus » : une somme ou le complément, selon le nombre de termes.' },
+        { cible: '6e-6h/fonctions-logarithmes#inequations', poids: 'indispensable', rappel: '$\\ln(u) > 0 \\iff u > 1$ et $\\ln(u) < 0 \\iff 0 < u < 1$. Diviser par un logarithme négatif, comme $\\ln(0{,}8)$, inverse le sens.' },
+        { cible: '6e-6h/analyse-combinatoire#binomenewton', poids: 'utile', rappel: '$(a+b)^n = \\displaystyle\\sum_{k=0}^{n} C_n^k \\times a^{n-k} \\times b^k$, de terme général $T_{k+1} = C_n^k \\times a^{n-k} \\times b^k$.' },
+        { cible: '6e-6h/analyse-combinatoire#denombrementfondamental', poids: 'utile', rappel: 'Combinaisons : $C_n^k = \\dfrac{n!}{k!\\,(n-k)!}$, le nombre de façons de choisir k éléments parmi n sans ordre.' },
+        { cible: '6e-6h/probabilites#probabilitesproblemes', poids: 'utile', rappel: 'Pour trouver $P(X=k)$, il suffit de **compter** combien de chemins de l\'arbre contiennent $k$ succès, puis de multiplier ce nombre par la probabilité commune à chacun d\'eux : $P(X=k) = N_k \\times p^k(1-p)^{n-k}$. « Au moins un succès » se calcule par le complément de « aucun succès », **jamais** en additionnant des probabilités individuelles : $P(\\text{au moins 1}) = 1 - P(X=0) = 1-(1-p)^n$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'La loi binomiale', youtubeId: 'v5fGVg2Hco4' },
         {
           kind: 'intuition',
           label: 'Ce que tu sais déjà',
           text:
-            "La loi binomiale n'est pas nouvelle : au chapitre 6 (§ 4), tu as justifié les épreuves répétées en comptant les chemins de l'arbre ; au chapitre 7 (§ 6), tu as écrit $P(X=k)=C_n^k\\times p^k\\times(1-p)^{n-k}$ et choisi entre un terme unique, une somme ou le complément pour « exactement », « au moins » et « au plus ». Ce qui est **nouveau** ici : la loi **complète** de $X$, son **espérance**, sa **variance** et son **écart-type**, et la recherche du nombre d'épreuves $n$.",
+            "La loi binomiale n'est pas nouvelle : en probabilités ([[6e-6h/probabilites#probabilitesproblemes]]), on justifie les épreuves répétées en comptant les chemins de l'arbre ; en analyse combinatoire ([[6e-6h/analyse-combinatoire#binomialesequence]]), on écrit $P(X=k)=C_n^k\\times p^k\\times(1-p)^{n-k}$ et choisi entre un terme unique, une somme ou le complément pour « exactement », « au moins » et « au plus ». Ce qui est **nouveau** ici : la loi **complète** de $X$, son **espérance**, sa **variance** et son **écart-type**, et la recherche du nombre d'épreuves $n$.",
         },
         {
           kind: 'definition',
@@ -735,7 +746,7 @@ export const variablesAleatoires: ChapterContent = {
           tag: 'binomiale-positions-widget',
           label: 'Manipule toi-même : la loi binomiale complète',
           caption:
-            'Rappel du chapitre 6 : fais glisser n et p, choisis k, et compare le calcul juste aux ' +
+            'Rappel de [[6e-6h/probabilites#probabilitesproblemes]] : fais glisser n et p, choisis k, et compare le calcul juste aux ' +
             'deux pièges (oublier les positions, additionner les p). Règle n = 5 et p = 0,4 pour ' +
             'retrouver la loi de l’exemple ci-dessus, avec P(X = 2) = 0,3456.',
         },
@@ -749,7 +760,7 @@ export const variablesAleatoires: ChapterContent = {
             },
             {
               kind: 'para',
-              text: "C'est le développement de $(a+b)^n=\\displaystyle\\sum_{k=0}^{n}C_n^k\\,a^{n-k}b^k$ avec $a=1-p$ et $b=p$ — **binôme de Newton (chapitre 7)**.",
+              text: "C'est le développement de $(a+b)^n=\\displaystyle\\sum_{k=0}^{n}C_n^k\\,a^{n-k}b^k$ avec $a=1-p$ et $b=p$ — **binôme de Newton** ([[6e-6h/analyse-combinatoire#binomenewton]]).",
             },
             {
               kind: 'para',
@@ -785,7 +796,7 @@ export const variablesAleatoires: ChapterContent = {
           blocks: [
             {
               kind: 'para',
-              text: "Pour $1\\leq k\\leq n$ : $k\\,C_n^k=k\\times\\dfrac{n!}{k!\\,(n-k)!}$ $=n\\times\\dfrac{(n-1)!}{(k-1)!\\,(n-k)!}$ $=n\\,C_{n-1}^{k-1}$ — **définition de** $C_n^k$ **(chapitre 7)**.",
+              text: "Pour $1\\leq k\\leq n$ : $k\\,C_n^k=k\\times\\dfrac{n!}{k!\\,(n-k)!}$ $=n\\times\\dfrac{(n-1)!}{(k-1)!\\,(n-k)!}$ $=n\\,C_{n-1}^{k-1}$ — **définition de** $C_n^k$ ([[6e-6h/analyse-combinatoire#denombrementfondamental]]).",
             },
             {
               kind: 'para',
@@ -900,7 +911,7 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'astuce',
           label: 'Toujours vérifier n − 1 juste en dessous',
-          text: "Le calcul par logarithme donne une valeur décimale (ici $21{,}85$). Le bon réflexe : recalcule $P$ pour $n=22$ (doit dépasser le seuil) et pour $n=21$ (doit encore être en dessous), pour confirmer que 22 est vraiment le plus petit entier qui convient. Ce chapitre demande « **dépasse** le seuil » ($>$) ; au chapitre 6, on cherchait « **au moins** $0{,}95$ » ($\\geq$) : les deux donnent le même $n$, sauf si $\\dfrac{\\ln(1-s)}{\\ln(1-p)}$ tombe pile sur un entier.",
+          text: "Le calcul par logarithme donne une valeur décimale (ici $21{,}85$). Le bon réflexe : recalcule $P$ pour $n=22$ (doit dépasser le seuil) et pour $n=21$ (doit encore être en dessous), pour confirmer que 22 est vraiment le plus petit entier qui convient. Ce chapitre demande « **dépasse** le seuil » ($>$) ; en probabilités ([[6e-6h/probabilites#probabilitesproblemes]]), on cherche « **au moins** $0{,}95$ » ($\\geq$) : les deux donnent le même $n$, sauf si $\\dfrac{\\ln(1-s)}{\\ln(1-p)}$ tombe pile sur un entier.",
         },
         {
           kind: 'application',
@@ -972,6 +983,10 @@ export const variablesAleatoires: ChapterContent = {
         { question: '$f(t)=kt$ est une densité sur $[0\\,;2]$. Que vaut $k$ ?', reponse: '$\\displaystyle\\int_0^2 kt\\,dt=2k=1$, donc $k=\\dfrac{1}{2}$.' },
         { question: 'Que vaut $P(X=3)$ pour une variable continue ?', reponse: '$0$ : seule une probabilité sur un intervalle a un sens.' },
         { question: 'Quel lien entre la fonction de répartition $F$ et la densité $f$ ?', reponse: "$F'=f$, et $P(a<X\\leq b)=F(b)-F(a)$." },
+      ],
+      utilise: [
+        { cible: '6e-6h/primitives-integrales#integralesdefinies', poids: 'indispensable', rappel: 'Théorème fondamental : $\\int_a^b f(x)dx = [F(x)]_a^b = F(b) - F(a)$, quelle que soit la primitive F. La fonction aire $A(x) = \\int_a^x f(t)dt$ est la primitive de f qui s\'annule en a. L\'intégrale est une somme **signée** : les aires sous l\'axe comptent négativement. Échanger les bornes change le signe : $\\int_b^a f(x)dx = -\\int_a^b f(x)dx$.' },
+        { cible: '6e-6h/primitives-integrales#primitives', poids: 'indispensable', rappel: '$\\int x^n dx = \\dfrac{x^{n+1}}{n+1} + C$ si $n \\neq -1$, et $\\int \\dfrac{1}{x}dx = \\ln|x| + C$. Une primitive de $f(ax+b)$ est $\\dfrac{1}{a}F(ax+b)$.' },
       ],
       blocks: [
         { kind: 'video', title: 'Variable aléatoire continue et densité de probabilité', youtubeId: '8GrFoKV_Y_0' },
@@ -1215,6 +1230,9 @@ export const variablesAleatoires: ChapterContent = {
         { question: "Le nombre d'appels en une heure (sans maximum) est-il discret ?", reponse: 'Oui : ses valeurs 0, 1, 2, … se numérotent.' },
         { question: 'Quelle formule continue correspond à $E(X)=\\sum p_i x_i$ ?', reponse: '$E(X)=\\displaystyle\\int_u^v t\\,f(t)\\,dt$.' },
       ],
+      utilise: [
+        { cible: '6e-6h/primitives-integrales#integralesdefinies', poids: 'utile', rappel: 'Théorème fondamental : $\\int_a^b f(x)dx = [F(x)]_a^b = F(b) - F(a)$, quelle que soit la primitive F. La fonction aire $A(x) = \\int_a^x f(t)dt$ est la primitive de f qui s\'annule en a.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Discrète ou continue ? Loi uniforme continue', youtubeId: 'bmZ2Q-zl-F4' },
         {
@@ -1304,6 +1322,9 @@ export const variablesAleatoires: ChapterContent = {
         { question: "Un bus passe toutes les 20 minutes. Probabilité d'attendre au plus 5 minutes ?", reponse: '$\\dfrac{5}{20}=0{,}25$.' },
         { question: '$X$ uniforme sur $[0\\,;60]$ : que valent $E(X)$ et $V(X)$ ?', reponse: '$E(X)=30$ et $V(X)=\\dfrac{60^2}{12}=300$.' },
         { question: '$E(X)=8$ et $V(X)=3$ pour une loi uniforme : que valent $a$ et $b$ ?', reponse: '$a+b=16$ et $b-a=\\sqrt{36}=6$, donc $a=5$ et $b=11$.' },
+      ],
+      utilise: [
+        { cible: '6e-6h/primitives-integrales#integralesdefinies', poids: 'utile', rappel: 'Théorème fondamental : $\\int_a^b f(x)dx = [F(x)]_a^b = F(b) - F(a)$, quelle que soit la primitive F. La fonction aire $A(x) = \\int_a^x f(t)dt$ est la primitive de f qui s\'annule en a.' },
       ],
       blocks: [
         {
@@ -1444,6 +1465,9 @@ export const variablesAleatoires: ChapterContent = {
         { question: 'Que vaut $\\Phi(-1{,}5)$ ?', reponse: "$1-\\Phi(1{,}5)\\approx0{,}0668$ ($\\Phi$ n'est pas paire)." },
         { question: 'Quel $z$ vérifie $\\Phi(z)=0{,}95$ ?', reponse: 'Entre $1{,}64$ et $1{,}65$ (à égale distance) : $z\\approx1{,}645$.' },
         { question: "Quelle part d'une loi normale dépasse $\\mu+2\\sigma$ ?", reponse: 'Environ $2{,}3\\,\\%$ : la moitié des $4{,}6\\,\\%$ hors de $[\\mu-2\\sigma\\,;\\mu+2\\sigma]$.' },
+      ],
+      utilise: [
+        { cible: '6e-6h/primitives-integrales#integralesdefinies', poids: 'utile', rappel: 'L\'intégrale est une somme **signée** : les aires sous l\'axe comptent négativement. Échanger les bornes change le signe : $\\int_b^a f(x)dx = -\\int_a^b f(x)dx$.' },
       ],
       blocks: [
         { kind: 'video', title: 'Loi normale (1/2) : la cloche et la règle empirique', youtubeId: 'oRr2_t58-9A' },
@@ -1919,6 +1943,11 @@ export const variablesAleatoires: ChapterContent = {
         { question: 'Assurance : $P(S)=0{,}22$ et $P(C_3)\\,P(S\\mid C_3)=0{,}1$. Que vaut $P(C_3\\mid S)$ ?', reponse: '$\\dfrac{0{,}1}{0{,}22}\\approx0{,}4545$.' },
         { question: '$X\\sim\\mathcal{B}(100\\,;0{,}5)$ : quelle borne corrigée pour estimer $P(X\\leq55)$ ?', reponse: "$55{,}5$ : $z=\\dfrac{55{,}5-50}{5}=1{,}1$, d'où $\\Phi(1{,}1)\\approx0{,}8643$." },
       ],
+      utilise: [
+        { cible: '6e-6h/probabilites#independancebayes', poids: 'indispensable', rappel: 'Si $B_1,\\ldots,B_n$ forment une partition, la loi des probabilités totales donne, pour tout événement $A$ : $P(A) = \\displaystyle\\sum_{i=1}^{n} P(A|B_i) \\times P(B_i)$. Théorème de Bayes : $P(A|B) = \\dfrac{P(B|A) \\times P(A)}{P(B)}$. Bayes permet de **retourner** un conditionnement : tu connais $P(B|A)$, tu en déduis $P(A|B)$.' },
+        { cible: '6e-6h/probabilites#probabilitesensembles', poids: 'indispensable', rappel: 'La probabilité de $A$ **sachant** $B$ : $P(A|B) = \\dfrac{P(A \\cap B)}{P(B)}$, et $P(A|B) \\neq P(B|A)$ en général. $A$ et $B$ sont indépendants si $P(A \\cap B) = P(A) \\times P(B)$.' },
+        { cible: '6e-6h/fonctions-logarithmes#inequations', poids: 'utile', rappel: '$\\ln(u) > 0 \\iff u > 1$ et $\\ln(u) < 0 \\iff 0 < u < 1$. Diviser par un logarithme négatif, comme $\\ln(0{,}8)$, inverse le sens.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Extensions : épreuves composées, Bayes, approximation normale', youtubeId: 'EdM_I4B6wnA' },
         {
@@ -1967,7 +1996,7 @@ export const variablesAleatoires: ChapterContent = {
           tag: 'bayes-test-medical-widget',
           label: 'Manipule toi-même : Bayes à deux catégories (rappel)',
           caption:
-            'Rappel du chapitre 6 avant de passer à trois catégories : règle la proportion de malades ' +
+            'Rappel de [[6e-6h/probabilites#independancebayes]] avant de passer à trois catégories : règle la proportion de malades ' +
             'et les deux taux de tests positifs, puis compare « malade sachant que le test est ' +
             'positif » à « test positif sachant que la personne est malade ». Les fréquences ' +
             'naturelles sur 1 000 personnes suivent la formule des probabilités totales.',
@@ -1976,7 +2005,7 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'definition',
           label: 'Probabilités totales et formule de Bayes',
           items: [
-            'Une population se partage en 3 catégories $C_1$, $C_2$, $C_3$, de probabilités $P(C_1)$, $P(C_2)$, $P(C_3)$ (somme 1). Un critère $S$ survient avec la probabilité $P(S\\mid C_i)$ dans chaque catégorie — la notation $P(A\\mid B)$ du chapitre 6. **Formule des probabilités totales** (3 termes) :',
+            'Une population se partage en 3 catégories $C_1$, $C_2$, $C_3$, de probabilités $P(C_1)$, $P(C_2)$, $P(C_3)$ (somme 1). Un critère $S$ survient avec la probabilité $P(S\\mid C_i)$ dans chaque catégorie — la notation $P(A\\mid B)$ ([[6e-6h/probabilites#probabilitesensembles]]). **Formule des probabilités totales** (3 termes) :',
             '$P(S) = P(C_1)\\,P(S\\mid C_1)$ $+\\,P(C_2)\\,P(S\\mid C_2)$ $+\\,P(C_3)\\,P(S\\mid C_3)$',
             "Probabilité « inverse » — appartenir à la catégorie $C_j$ sachant que le critère est survenu (**théorème de Bayes**) :",
             '$P(C_j\\mid S) = \\dfrac{P(C_j)\\,P(S\\mid C_j)}{P(S)}$',
@@ -1991,8 +2020,8 @@ export const variablesAleatoires: ChapterContent = {
             "à la Royal Society de Londres en 1763, sous le titre An Essay towards solving a Problem " +
             "in the Doctrine of Chances. La question de Bayes était de remonter des effets observés " +
             "vers leurs causes probables — exactement ce que fait $P(C_j\\mid S)$. Laplace " +
-            "redécouvre la formule de façon indépendante en 1774 et lui donne sa forme générale. Le " +
-            "chapitre 6 l'a utilisée avec deux causes (un test médical) ; ici, elle en compte trois.",
+            "redécouvre la formule de façon indépendante en 1774 et lui donne sa forme générale. " +
+            "En probabilités ([[6e-6h/probabilites#independancebayes]]), elle sert avec deux causes (un test médical) ; ici, elle en compte trois.",
         },
         {
           kind: 'illustration',
@@ -2061,7 +2090,7 @@ export const variablesAleatoires: ChapterContent = {
             },
             {
               kind: 'para',
-              text: '$P(S)=P(S\\cap C_1)+P(S\\cap C_2)$ $+\\,P(S\\cap C_3)$ et $P(S\\cap C_i)=P(C_i)\\,P(S\\mid C_i)$ — **probabilité d\'une réunion d\'événements incompatibles, puis définition d\'une probabilité conditionnelle (chapitre 6)**.',
+              text: '$P(S)=P(S\\cap C_1)+P(S\\cap C_2)$ $+\\,P(S\\cap C_3)$ et $P(S\\cap C_i)=P(C_i)\\,P(S\\mid C_i)$ — **probabilité d\'une réunion d\'événements incompatibles, puis définition d\'une probabilité conditionnelle** ([[6e-6h/probabilites#probabilitesensembles]]).',
             },
             {
               kind: 'para',
@@ -2260,6 +2289,11 @@ export const variablesAleatoires: ChapterContent = {
         { question: '$\\lambda=4$ : comment obtenir $P(X=1)$ à partir de $P(X=0)$ ?', reponse: '$P(X=1)=P(X=0)\\times\\dfrac{4}{1}$.' },
         { question: '$P(X=0)=0{,}135$ pour une loi de Poisson : que vaut $\\lambda$ ?', reponse: '$\\lambda=-\\ln(0{,}135)\\approx2$.' },
         { question: 'Tirages sans remise dans une petite population : quelle loi ?', reponse: 'La loi hypergéométrique (pas la binomiale).' },
+      ],
+      utilise: [
+        { cible: '6e-6h/fonctions-logarithmes#equations', poids: 'utile', rappel: '$a^x = b$ (avec $b>0$) donne $x = \\log_a(b) = \\dfrac{\\ln(b)}{\\ln(a)}$ ; $\\log_a(u) = b$ donne $u = a^b$.' },
+        { cible: '6e-6h/probabilites#tiragesarbres', poids: 'utile', rappel: 'La probabilité d\'un **chemin**, c\'est le produit des probabilités des branches traversées ; la probabilité d\'un **événement**, c\'est la somme des probabilités des chemins qui y mènent.' },
+        { cible: '6e-6h/analyse-combinatoire#probabilitehypergeometrique', poids: 'utile', rappel: '$P(k) = \\dfrac{C_K^k \\times C_{N-K}^{n-k}}{C_N^n}$ pour un tirage **sans remise** ; le dénominateur est toujours $C_N^n$.' },
       ],
       blocks: [
         { kind: 'video', title: 'La loi de Poisson', youtubeId: 'E6SK3Awv1fQ' },
@@ -2587,7 +2621,7 @@ export const variablesAleatoires: ChapterContent = {
         },
         {
           kind: 'piege',
-          text: "Aucune loi du chapitre ne convient toujours : si la probabilité change d'une épreuve à l'autre sans que ce soit un tirage sans remise (un joueur qui progresse à chaque essai, par exemple), ce n'est ni binomial ni hypergéométrique. On construit alors la loi « à la main », avec un arbre (chapitre 6) et le § 1. Et une approximation (normale ou Poisson) remplace une binomiale **seulement** quand ses conditions sont vérifiées.",
+          text: "Aucune loi du chapitre ne convient toujours : si la probabilité change d'une épreuve à l'autre sans que ce soit un tirage sans remise (un joueur qui progresse à chaque essai, par exemple), ce n'est ni binomial ni hypergéométrique. On construit alors la loi « à la main », avec un arbre ([[6e-6h/probabilites#tiragesarbres]]) et le § 1. Et une approximation (normale ou Poisson) remplace une binomiale **seulement** quand ses conditions sont vérifiées.",
         },
         {
           kind: 'entrainement',

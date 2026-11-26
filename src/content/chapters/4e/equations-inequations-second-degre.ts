@@ -7,7 +7,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
   title: 'Équations et inéquations du second degré',
   slug: 'equations-inequations-second-degre',
   lede:
-    'Au chapitre 1, tu as appris à lire une parabole. Dans ce chapitre-ci, tu vas apprendre à ' +
+    'Lire une parabole ne suffit pas toujours. Dans ce chapitre, tu vas apprendre à ' +
     'résoudre — vite et sans te tromper. Tu vas reconnaître la bonne technique pour une ' +
     'équation $ax^2+bx+c=0$, en déduire le signe d\'un trinôme ou d\'un produit de facteurs, ' +
     'puis utiliser ces outils avec des fractions et des inéquations.',
@@ -20,8 +20,8 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         kind: 'para',
         text:
           'Résoudre $ax^2+bx+c=0$, c\'est trouver les valeurs de x qui donnent 0 quand on les ' +
-          'remplace dans l\'expression. Au chapitre 1, tu trouvais ces valeurs en lisant un ' +
-          'graphique — on les appelait les **zéros**. Ici, tu vas les calculer directement, ' +
+          'remplace dans l\'expression. Sur un graphique, ces valeurs se lisent là où la parabole ' +
+          'coupe l\'axe des x : ce sont ses **zéros** ([[4e/fonction-second-degre#etudier]]). Ici, tu vas les calculer directement, ' +
           'sans dessiner.',
       },
       {
@@ -64,6 +64,9 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         { question: 'Quelles sont les solutions de $ax^2 + bx + c = 0$ quand $\\Delta > 0$ ?', reponse: '$x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$, avec $\\Delta = b^2 - 4ac$.' },
         { question: 'Résous $3x^2 - 5x + 2 = 0$ sans calculer le discriminant.', reponse: '$3 - 5 + 2 = 0$, donc $x_1 = 1$ ; le produit donne $x_2 = \\dfrac{c}{a} = \\dfrac{2}{3}$.' },
         { question: 'Écris une équation de solutions 2 et 5 sous la forme $x^2 - Sx + P = 0$.', reponse: '$S = 7$ et $P = 10$ : $x^2 - 7x + 10 = 0$.' },
+      ],
+      utilise: [
+        { cible: '4e/fonction-second-degre#etudier', poids: 'utile', rappel: 'Les **zéros** de $f(x) = ax^2+bx+c$ sont les abscisses des points où la parabole coupe l\'axe des x : il y en a 0, 1 (au sommet) ou 2.' },
       ],
       blocks: [
         { kind: 'video', title: 'Résoudre une équation du second degré (1/3) : les raccourcis avant le discriminant', youtubeId: '6WDdAWpUZW8' },
@@ -162,9 +165,9 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         { kind: 'subheading', text: 'Le cas général — la formule du discriminant' },
         {
           kind: 'intuition',
-          label: 'Tu as déjà vu ça, au chapitre 1',
+          label: 'Lien avec la parabole',
           text:
-            'Au chapitre 1, tu lisais le nombre de zéros d\'une parabole sur son graphique : ' +
+            'Sur le graphique d\'une parabole ([[4e/fonction-second-degre#etudier]]), on lit son nombre de zéros : ' +
             'deux fois où elle coupe l\'axe des x, une seule (elle le touche du bout, au ' +
             'sommet), ou jamais. Le signe de $\\Delta$ te donne exactement cette information, ' +
             'mais par le calcul, sans dessiner : $\\Delta>0$ donne deux solutions, $\\Delta=0$ ' +
@@ -378,7 +381,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           kind: 'historique',
           titre: 'Un carré, dix racines, trente-neuf : la démonstration en dessin',
           text:
-            'Tu as rencontré **al-Khwārizmī** au chapitre 1. Voici comment il résolvait, vers 820, ' +
+            '**Al-Khwārizmī** apparaît aussi dans [[4e/fonction-second-degre#transformer]]. Voici comment il résolvait, vers 820, ' +
             '« un carré et dix racines égalent trente-neuf » ($x^2 + 10x = 39$), sans aucune lettre : ' +
             'il dessine un carré de côté x, lui accole deux rectangles de largeur 5, puis ajoute le ' +
             'petit carré manquant, d\'aire 25. Le grand carré obtenu a pour aire 39 + 25 = 64, donc ' +
@@ -871,6 +874,9 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         { question: 'Résous $x^2 + x + 1 < 0$.', reponse: '$\\Delta = -3 < 0$ et $a > 0$ : le trinôme est toujours positif, donc $S = \\varnothing$.' },
         { question: 'Dans $]-2;3]$, quelles bornes sont incluses ?', reponse: 'Seulement 3 : −2 est exclu (crochet ouvert vers l\'intérieur).' },
       ],
+      utilise: [
+        { cible: '4e/fonction-second-degre#etudier', poids: 'utile', rappel: 'Le signe de a donne l\'allure : si $a > 0$, la parabole est ouverte vers le haut et a un **minimum** ; si $a < 0$, elle est ouverte vers le bas et a un **maximum**. Le terme c est l\'ordonnée à l\'origine : $f(0) = c$. Tableau de signes : à l\'extérieur des zéros, f(x) a le signe de a ; entre les zéros, le signe opposé.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Étudier le signe d\'un trinôme', youtubeId: 'gZ82w5l4vWQ' },
         {
@@ -1179,7 +1185,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Au chapitre 1, tu lisais des valeurs sur une parabole. On peut aussi y lire la ' +
+                'Sur une parabole, on lit des valeurs ([[4e/fonction-second-degre#etudier]]). On peut aussi y lire la ' +
                 'solution d\'une inéquation. Soit $f(x) = -x^2+4x+1$ : pour quelles valeurs de x ' +
                 'a-t-on $f(x) \\geq 4$ ?',
             },
@@ -2035,12 +2041,15 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         { question: '$h(t) = -5(t-5)(t+1)$, avec $t \\geq 0$ : quand le ballon touche-t-il le sol ?', reponse: 'En $t = 5$ s ; $t = -1$ est rejeté, un temps négatif n\'existe pas.' },
         { question: 'Comment traduire « l\'aire $A(x) = x(20-x)$ vaut au moins 96 m² » ?', reponse: 'Par l\'inéquation $x(20-x) \\geq 96$ ; ici $x \\in [8;12]$.' },
       ],
+      utilise: [
+        { cible: '4e/fonction-second-degre#utiliser', poids: 'utile', rappel: 'Modéliser, toujours en 3 étapes : choisir la variable x, exprimer la grandeur à étudier avec cette seule variable, définir le **domaine de validité**.' },
+      ],
       blocks: [
         {
           kind: 'para',
           text:
-            'Au chapitre 1, tu as modélisé une situation concrète par une fonction du second ' +
-            'degré pour en trouver l\'optimum. Avec les méthodes de ce chapitre, tu peux ' +
+            'Une situation concrète se modélise par une fonction du second degré pour en trouver ' +
+            'l\'optimum ([[4e/fonction-second-degre#utiliser]]). Avec les méthodes de ce chapitre, tu peux ' +
             'maintenant répondre à une autre question : **quand** la grandeur atteint-elle, ou ' +
             'dépasse-t-elle, une valeur donnée ?',
         },
@@ -2208,12 +2217,12 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         },
         {
           kind: 'astuce',
-          label: 'Astuce — nouveau depuis le chapitre 1',
+          label: 'Astuce — nouveau dans ce quiz',
           text:
             'Ce quiz utilise beaucoup le discriminant $\\Delta = b^2-4ac$, sa formule ' +
             '$x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$, et les relations de Viète ' +
-            '($S = -b/a$, $P = c/a$). Le quiz du chapitre 1 ne les utilisait pas : c\'est le ' +
-            'premier quiz qui les utilise.',
+            '($S = -b/a$, $P = c/a$). Le quiz de la fonction ' +
+            'du second degré ([[4e/fonction-second-degre#revision]]) ne les utilise pas ; celui-ci, oui.',
         },
         {
           kind: 'entrainement',
@@ -2357,7 +2366,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       ],
     },
     forward:
-      'Au chapitre 3 (fonctions de référence), tu résoudras des équations comme ' +
+      'Avec les fonctions de référence ([[4e/caracteristiques-fonctions-reference#algebrique]]), tu résoudras des équations comme ' +
       '$\\sqrt{x+2} = x$ : en élevant au carré, une équation du second degré apparaît, avec ses ' +
       'solutions étrangères — la même vigilance que pour l\'inconnue au dénominateur.',
   },

@@ -27,10 +27,10 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       },
       {
         kind: 'intuition',
-        label: 'Tu connais déjà ça',
+        label: 'La parabole, point de départ',
         text:
-          'Au chapitre 1, tu as déjà appris à connaître $x^2$ à fond : domaine, sommet, ' +
-          'transformations. Ici, tu vas faire exactement la même chose, mais avec cinq ' +
+          'La fonction $x^2$ — domaine, sommet, transformations — est étudiée à fond dans ' +
+          '[[4e/fonction-second-degre#transformer]]. Ici, tu vas faire exactement la même chose, mais avec cinq ' +
           'nouvelles courbes en plus de la parabole. Une fois que tu sais « lire » une famille ' +
           'de référence, tu sais les lire toutes — c\'est la même grille de lecture à chaque fois.',
       },
@@ -680,6 +680,9 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         { question: 'Quels sont les zéros de $f(x) = |2x-3| - 5$ ?', reponse: '$2x - 3 = 5$ ou $2x - 3 = -5$ : $x = 4$ et $x = -1$.' },
         { question: '$\\sqrt{x+2} = x$ : quelle condition de validité, et quelle solution ?', reponse: '$x \\geq 0$ : des candidates 2 et −1, seule $x = 2$ est gardée.' },
       ],
+      utilise: [
+        { cible: '4e/equations-inequations-second-degre#resoudre', poids: 'indispensable', rappel: 'Pour $ax^2+bx+c=0$ : $\\Delta = b^2-4ac$. Si $\\Delta>0$, deux solutions $x = \\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}$ ; si $\\Delta=0$, une racine double ; si $\\Delta<0$, aucune solution réelle.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Étudier algébriquement une fonction de référence', youtubeId: '0CERKsS8qiA' },
         {
@@ -880,13 +883,16 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         { question: 'Quel est l\'effet de $f(2x)$ sur la courbe de f ?', reponse: 'Une compression horizontale de facteur $\\dfrac{1}{2}$ — pas un étirement.' },
         { question: 'Après une SOX, que devient l\'ensemble image $[-2\\,;\\,+\\infty[$ ?', reponse: '$]-\\infty\\,;\\,2]$ : les bornes changent de signe et s\'échangent.' },
       ],
+      utilise: [
+        { cible: '4e/fonction-second-degre#transformer', poids: 'indispensable', rappel: 'Toute parabole vient de $y = x^2$ : $y = (x-p)^2$ la translate de p à l\'horizontale (attention au signe : $(x-3)^2$ va vers la **droite**), $y = x^2 + q$ de q à la verticale ; a l\'étire si $|a| > 1$, la comprime si $0 < |a| < 1$, la retourne si $a < 0$. La **forme canonique** $f(x) = a(x-x_S)^2+y_S$ affiche le sommet $S(x_S\\,;\\,y_S)$ ; on l\'obtient en complétant le carré, après avoir mis a en évidence si $a \\neq 1$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Transformer une fonction de référence (1/2) : la formule unifiée et les 8 paramètres', youtubeId: 'jTuYvEEo8I8' },
         { kind: 'video', title: 'Transformer une fonction de référence (2/2) : exemples, pièges et forme canonique', youtubeId: 'OuKRjDttAXs' },
         {
           kind: 'para',
           text:
-            'Comme au chapitre 1 pour la parabole, tu peux translater, étirer, comprimer et ' +
+            'Comme pour la parabole ([[4e/fonction-second-degre#transformer]]), tu peux translater, étirer, comprimer et ' +
             'réfléchir n\'importe laquelle des 6 fonctions de référence. Cette fois, il y a deux ' +
             'transformations en plus (horizontales). Pour une parabole seule, elles n\'avaient ' +
             'pas besoin d\'être distinguées.',
@@ -956,7 +962,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         },
         {
           kind: 'attention',
-          label: 'Le piège du signe — toujours le même qu\'au chapitre 1',
+          label: 'Le piège du signe — le même que pour la parabole',
           text:
             '$f(x) = (x+3)^3$ se lit $g(x-TH)$ avec $x-TH = x+3$, donc $TH = -3$. C\'est une ' +
             'translation de 3 vers la **gauche**, pas vers la droite ! Le signe à l\'intérieur ' +

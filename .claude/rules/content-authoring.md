@@ -7,6 +7,9 @@ paths:
   - "src/lib/katexAccessible.ts"
   - "src/entrainement/components/KatexAccessible.tsx"
   - "scripts/*lecture-formules*"
+  - "src/lib/lienChapitre.ts"
+  - "src/lib/prerequisChapitre.ts"
+  - "scripts/verifier-liens-chapitres.mjs"
 ---
 
 # Conventions de rédaction du contenu (`ChapterContent`)
@@ -155,6 +158,49 @@ Les `label` de callout, `badge` et `tag` d'exemple, `kicker` de section, `descri
 `entrainement` et en-têtes de `featureTable` (sauf `recap.table`, voir « Synthèses en KaTeX ») sont rendus en texte BRUT — y écrire `$...$` affiche
 les dollars littéralement (détecté uniquement au rendu navigateur, jamais par `tsc`). Y mettre des
 caractères Unicode (2ⁿ, x², ×, −), jamais du LaTeX.
+
+## Chapitres autonomes : jamais de numéro de chapitre, liens nommés, champ `utilise`
+
+Décision du professeur (25/11/2026, carte des prérequis validée) : les professeurs ne suivent pas tous
+l'ordre des chapitres du site — chaque chapitre doit se lire seul, quel que soit l'ordre suivi.
+
+- **Aucun numéro de chapitre dans le texte** (cours, synthèses, quiz, corrigés, énoncés, questions
+  « Formule », énoncés de démonstration) : ni « au chapitre 2 », ni « ch. 3 », ni « chapitre précédent /
+  suivant / prochain ». On NOMME ce qu'on cite. Les numéros internes au même chapitre (« § 3 », « étape 3 »,
+  « section 3 ») restent permis. Les annonces vers la suite (« tu le retrouveras… ») sont gardées, en lien
+  nommé. Contrôle au build : `scripts/verifier-liens-chapitres.mjs` (chapitres + questions « Formule ») ;
+  générateurs et `evaluationPayload.ts` : recherche `chapitre [0-9]` / `ch\. ?[0-9]` / « chapitre
+  précédent… » hors commentaires (les sous-titres « Chapitre n — Titre » des pages de générateurs relèvent
+  de « Mon ordre des chapitres »).
+- **Lien nommé** (champs RichText seulement : `text`, `items`, `formula`, `caption`, `forward`, `essentiel`,
+  `cartes`, `rappel`…) :
+  - `[[4e/equations-inequations-second-degre#resoudre]]` → « « Équations et inéquations du second degré »,
+    étape 1 » (lien interne, info-bulle = titre court de l'étape) ;
+  - `[[4e/geometrie-analytique-plane]]` → « « Géométrie analytique plane » » (carte du chapitre) ;
+  - `[[4e/calcul-vectoriel#norme|la norme]]` → « la norme » (texte choisi, en clair : utile en début de
+    phrase, où « « Titre », étape n » se lit mal — préférer « En probabilités ([[…]]), … »).
+  Résolution par `chaptersIndex.ts` (`lib/lienChapitre.ts`) ; lien cassé = ÉCHEC du build. Jamais dans
+  un `**gras**` (non reparsé : `**binôme de Newton** ([[…]])`, pas `**… [[…]]**`), jamais dans un champ en
+  texte BRUT (`label`, `kicker`, `badge`, `tag`, `titreCourt`, `partie`, titres, `description` de carte) :
+  là, le nom du chapitre en clair (« Pour la suite — la géométrie analytique ») ou rien. Même règle dans les
+  générateurs, quiz, corrigés et énoncés : nom en clair, sans lien (« (voir « Équations et inéquations du
+  second degré », étape 1) », « via la formule des exponentielles »). Rendu : `Math.tsx::LienChapitre`
+  (React Router `Link`, même onglet ; nouvel onglet dans « Je bloque », texte seul dans les diapos de
+  projection — contexte `ModeLiensChapitre`) ; à l'impression le texte seul (`.lien-chapitre` sans couleur
+  ni soulignement), dans l'export HTML le lien est remplacé par son texte (`buildHtml.ts`) ; texte brut
+  (méta, notes de projection, carnet, recherche, questions reprises des exemples) : `texteSansLiens`.
+- **Champ `utilise` d'une section** (étapes d'AUTRES chapitres dont elle se sert) :
+  `utilise: [{ cible: '4e/calcul-vectoriel#norme', poids: 'indispensable', rappel: '…' }, …]` — `poids`
+  `indispensable` (l'étape ne se comprend pas sans) ou `utile` ; `rappel` RichText, 1 à 3 phrases reprises
+  du cours cité (absent : « L'essentiel » de l'étape citée) ; `jeBloque: ['gen24']` = générateurs de
+  l'étape pour lesquels « Je bloque » montre ce prérequis même s'il n'est qu'utile. Rendu
+  (`components/chapter/Prerequis.tsx`) : encadré replié « Ce chapitre utilise… » sur la carte (toutes les
+  entrées, par chapitre), « Cette étape utilise » en tête d'étape (indispensables, rappel dépliable),
+  « Tu as besoin de… » dans « Je bloque ». Jamais imprimé ni exporté. Contrôle au build : cible connue,
+  autre chapitre, pas de doublon, générateur `jeBloque` présent dans l'étape. Limité à la MÊME année
+  (décision 5 : les acquis des années précédentes ne sont pas listés pour l'instant). Source : carte des
+  prérequis du 25/11/2026 (99 entrées dans 65 étapes de 15 chapitres, 44 indispensables), voir
+  `.claude/rules/content-history.md`, « Chapitres autonomes ».
 
 ## Lecture en mots des formules (`aria-label`, future lecture à voix haute)
 

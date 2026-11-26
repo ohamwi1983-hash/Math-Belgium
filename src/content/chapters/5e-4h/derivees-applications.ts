@@ -8,7 +8,7 @@ export const deriveesApplications: ChapterContent = {
   slug: 'derivees-applications',
   lede:
     "La **dérivée** d'une fonction en un point, c'est sa pente exacte à cet instant précis — la " +
-    "suite directe des limites du chapitre précédent (la dérivée EST une limite !). Dans ce " +
+    "suite directe des limites (la dérivée EST une limite !). Dans ce " +
     "chapitre, tu pars de sa définition, tu t'en sers pour tracer une tangente, puis tu " +
     "apprends à calculer n'importe quelle dérivée avec des règles simples. Ensuite, tu étudies " +
     "les variations et les extremums d'une fonction, tu mènes une étude complète, et tu lis " +
@@ -33,6 +33,9 @@ export const deriveesApplications: ChapterContent = {
         { question: 'Où est l\'erreur ? « En $h = 0$, le taux d\'accroissement vaut $\\frac{0}{0}$, donc $f\'(2)$ n\'existe pas. »', reponse: '$\\frac{0}{0}$ est une forme indéterminée : on simplifie d\'abord par h, puis on passe à la limite.' },
         { question: '$f(x) = \\sqrt{x}$ : comment simplifier le taux d\'accroissement par h ?', reponse: 'On multiplie par l\'expression conjuguée $\\sqrt{x+h}+\\sqrt{x}$ : il reste $\\dfrac{1}{\\sqrt{x+h}+\\sqrt{x}}$.' },
       ],
+      utilise: [
+        { cible: '5e-4h/limites-asymptotes#limites-calcul', poids: 'indispensable', rappel: '$\\lim\\limits_{x \\to a} f(x) = L$ : f(x) se rapproche d\'autant plus de L que x se rapproche de a. Si la limite à gauche et la limite à droite diffèrent, la limite en a n\'existe pas. Trois formes indéterminées : $\\dfrac{0}{0}$, on factorise et on simplifie ; $\\dfrac{\\infty}{\\infty}$, on met en évidence le terme de plus haut degré ; $\\infty-\\infty$, terme dominant ou expression conjuguée s\'il y a des racines.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Calculer f′(a) par la définition : taux d\'accroissement, sécante et tangente', youtubeId: 'H1pEUBMk200' },
         {
@@ -52,7 +55,7 @@ export const deriveesApplications: ChapterContent = {
           items: [
             'Le **taux d\'accroissement** de f entre a et a+h, c\'est $\\dfrac{f(a+h)-f(a)}{h}$. ' +
               'C\'est la pente de la **sécante** — la droite qui relie les points (a;f(a)) et ' +
-              '(a+h;f(a+h)). Fais tendre h vers 0, comme au chapitre précédent : la limite de ce ' +
+              '(a+h;f(a+h)). Fais tendre h vers 0, comme pour une limite ([[5e-4h/limites-asymptotes#limites-calcul]]) : la limite de ce ' +
               'taux, c\'est le **nombre dérivé** f′(a). $f\'(a) = \\displaystyle\\lim_{h \\to 0} \\dfrac{f(a+h)-f(a)}{h}$.',
           ],
         },
@@ -147,7 +150,7 @@ export const deriveesApplications: ChapterContent = {
           label: 'Ne jamais remplacer h par 0 AVANT d\'avoir simplifié',
           text:
             'Le taux d\'accroissement brut $\\dfrac{f(a+h)-f(a)}{h}$ vaut toujours $\\frac{0}{0}$ en $h=0$ — ' +
-            'une forme indéterminée, comme au chapitre précédent. C\'est exactement pourquoi il ' +
+            'une forme indéterminée ([[5e-4h/limites-asymptotes#limites-calcul]]). C\'est exactement pourquoi il ' +
             'faut d\'abord SIMPLIFIER par h (factorisation, ou technique du conjugué pour une ' +
             'racine) avant de faire tendre h vers 0. Jamais l\'inverse !',
         },
@@ -156,7 +159,7 @@ export const deriveesApplications: ChapterContent = {
           label: 'La même méthode, même avec une racine',
           text:
             'Pour $f(x)=\\sqrt{x}$, le taux d\'accroissement brut donne lui aussi la forme $\\frac{0}{0}$ ; ' +
-            'il se simplifie avec l\'expression conjuguée — comme au chapitre précédent. La ' +
+            'il se simplifie avec l\'expression conjuguée ([[5e-4h/limites-asymptotes#limites-calcul]]). La ' +
             'méthode générale ne change jamais. Seule la technique de simplification s\'adapte ' +
             'à la forme de f.',
         },
@@ -235,6 +238,9 @@ export const deriveesApplications: ChapterContent = {
         { question: 'Quels sont les deux contrôles d\'une équation de tangente ?', reponse: 'Elle passe par $(a\\,;f(a))$, et le coefficient de x vaut $f\'(a)$.' },
         { question: 'Où est l\'erreur ? « La droite $y = 3x-2$ recoupe $y = x^3$ en $x = -2$ : elle n\'est donc pas tangente en 1. »', reponse: 'Une tangente ne touche la courbe qu\'en un point LOCALEMENT ; plus loin, elle peut très bien la recouper.' },
         { question: 'Estime $1{,}02^3$ grâce à la tangente à $y = x^3$ en 1.', reponse: '$f(1) + f\'(1)\\cdot 0{,}02 = 1 + 3 \\cdot 0{,}02 = 1{,}06$ (valeur exacte : $1{,}061\\,208$).' },
+      ],
+      utilise: [
+        { cible: '5e-4h/trigonometrie#arcs-secteurs', poids: 'utile', rappel: '1 radian intercepte un arc de longueur égale au rayon ; 360° correspondent à $2\\pi$ radians. $\\text{angle}_{rad} = \\text{angle}_{deg} \\times \\dfrac{\\pi}{180}$.' },
       ],
       blocks: [
         { kind: 'video', title: 'Équation d\'une tangente : y = f(a) + f′(a)(x − a), tangente horizontale, tangente ≠ sécante', youtubeId: 'fD-HtssXw2w' },
@@ -554,6 +560,10 @@ export const deriveesApplications: ChapterContent = {
         { question: 'Où est l\'erreur ? « $f(x) = (2x+1)(x^2-3)$, donc $f\'(x) = 2 \\cdot 2x = 4x$. »', reponse: 'Le produit des dérivées : $(uv)\' = u\'v+uv\'$, ici $f\'(x) = 6x^2+2x-6$.' },
         { question: '$f(x) = (2x-1)^3$ : que vaut $f\'(x)$ ?', reponse: '$f\'(x) = 2 \\cdot 3(2x-1)^2 = 6(2x-1)^2$ : sans oublier le facteur $u\'(x) = 2$.' },
         { question: 'Une température (en °C) dépend du temps (en h) : dans quelle unité s\'exprime $f\'(a)$ ?', reponse: 'En °C/h : unité de f par unité de la variable.' },
+      ],
+      utilise: [
+        { cible: '5e-4h/fonctions-composees#decomposer', poids: 'indispensable', rappel: '$(f\\circ g)(x) = f(g(x))$ se lit « f rond g » et se calcule de droite à gauche : d\'abord g, ensuite f. En général, $f\\circ g \\ne g\\circ f$. Décomposer : repère la toute dernière opération effectuée (la fonction la plus extérieure), enlève-la, recommence. Recompose ta chaîne à la fin : tu dois retrouver h(x) exactement.' },
+        { cible: '5e-4h/trigonometrie#arcs-secteurs', poids: 'utile', rappel: '1 radian intercepte un arc de longueur égale au rayon ; 360° correspondent à $2\\pi$ radians. $\\text{angle}_{rad} = \\text{angle}_{deg} \\times \\dfrac{\\pi}{180}$.' },
       ],
       blocks: [
         { kind: 'video', title: 'La fonction dérivée : dérivabilité, taux de variation, dérivées de référence', youtubeId: 'ln0Bj-SX6K0' },
@@ -950,6 +960,9 @@ export const deriveesApplications: ChapterContent = {
         { question: '$f(x) = |x|$ : que vaut $f\'(0)$ ?', reponse: 'Il n\'existe pas : point anguleux (pentes −1 et 1), même si f a un minimum en 0.' },
         { question: 'La tangente en a est verticale : a-t-on $f\'(a) = 0$ ?', reponse: 'Non : le taux d\'accroissement tend vers $\\pm\\infty$, f′(a) n\'existe pas. $f\'(a) = 0$ donne une tangente horizontale.' },
       ],
+      utilise: [
+        { cible: '5e-4h/limites-asymptotes#limites-calcul', poids: 'utile', rappel: '$\\lim\\limits_{x \\to a} f(x) = L$ : f(x) se rapproche d\'autant plus de L que x se rapproche de a. Si la limite à gauche et la limite à droite diffèrent, la limite en a n\'existe pas.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Signe de f′ et de f″ : variations, extremums, concavité, point d\'inflexion', youtubeId: 'oSM5X-KVRrk' },
         {
@@ -1256,6 +1269,9 @@ export const deriveesApplications: ChapterContent = {
         { question: 'Où est l\'erreur ? « $f\'(0) = 0$, donc $f(x) = x^3+2$ admet un extremum en 0. »', reponse: '$f\'(x) = 3x^2 \\geq 0$ ne change pas de signe : pas d\'extremum en 0.' },
         { question: 'Zéros de $f\'(x) = 3x^2-6x-3$ ?', reponse: '$\\Delta = 72$ : $x = 1 \\pm \\sqrt{2}$, en valeurs exactes.' },
         { question: 'Comment conclure sur un zéro a de f′ ?', reponse: 'Une valeur test de chaque côté : même signe des deux côtés → « pas d\'extremum ».' },
+      ],
+      utilise: [
+        { cible: '5e-4h/fonctions-composees#domaine', poids: 'utile', rappel: 'dom f est l\'ensemble des x pour lesquels f(x) peut être calculé. Un dénominateur doit être $\\ne 0$, le radicande d\'une racine d\'indice pair doit être $\\ge 0$ ; une racine impaire ou une valeur absolue n\'impose aucune condition.' },
       ],
       blocks: [
         { kind: 'video', title: 'Étude locale : tableau de signes de f′, extremums et points critiques', youtubeId: 'MqocKqLTkqY' },
@@ -1647,6 +1663,9 @@ export const deriveesApplications: ChapterContent = {
         { question: 'Le graphique de f′ atteint son minimum en $x = \\frac{1}{2}$. Qu\'en déduis-tu pour f ?', reponse: 'Un point d\'inflexion en $x = \\frac{1}{2}$ : f′ décroît puis croît, f passe de concave à convexe.' },
         { question: 'Tangente horizontale en C, courbe croissante des deux côtés : C est-il un extremum ?', reponse: 'Non : $f\'(C) = 0$, mais f′ ne change pas de signe.' },
       ],
+      utilise: [
+        { cible: '5e-4h/limites-asymptotes#lecture-graphique', poids: 'utile', rappel: 'Sur un graphique : une verticale le long de laquelle la courbe part vers ±∞ (un seul côté suffit), une horizontale ou une oblique que la courbe rejoint aux extrémités.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Lecture graphique : variations, extremums, concavité et points d\'inflexion sans calcul', youtubeId: '3OzjZmJUmCU' },
         {
@@ -1851,21 +1870,25 @@ export const deriveesApplications: ChapterContent = {
         { question: 'Où est l\'erreur ? « f″ change de signe en 1, valeur exclue du domaine : point d\'inflexion en 1. »', reponse: 'f n\'est pas définie en 1 : il n\'y a pas de point d\'inflexion.' },
         { question: 'Extremums de $f(x) = x^3-3x^2+4$ ?', reponse: '$f\'(x) = 3x(x-2)$ : maximum local $(0\\,;4)$, minimum local $(2\\,;0)$.' },
       ],
+      utilise: [
+        { cible: '5e-4h/limites-asymptotes#etude-complete', poids: 'indispensable', rappel: 'Dans l\'ordre : domaine ; pour chaque valeur exclue, teste le numérateur ; degrés ; limites à chaque borne ; recoupement ; synthèse. Un point vide n\'est **pas** une asymptote verticale : si le numérateur s\'annule aussi, on simplifie et la limite est finie.' },
+        { cible: '5e-4h/limites-asymptotes#asymptote-oblique', poids: 'indispensable', rappel: '$a = \\lim\\limits_{x \\to \\pm\\infty} \\dfrac{f(x)}{x}$, puis $b = \\lim\\limits_{x \\to \\pm\\infty} [f(x) - ax]$ ; ou la division euclidienne : l\'asymptote est le quotient, jamais le reste.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Étudier une fonction : démarche complète, tableau de variations, asymptotes et synthèse', youtubeId: 'R-cGVkXmkxI' },
         {
           kind: 'para',
           text:
             'L\'étude complète d\'une fonction réunit TOUT ce qui précède, dans un ordre fixe. ' +
-            'Elle reconvoque directement les techniques du chapitre précédent pour les limites ' +
-            'et les asymptotes.',
+            'Elle reconvoque directement les techniques de [[5e-4h/limites-asymptotes#etude-complete]] ' +
+            'pour les limites et les asymptotes.',
         },
         {
           kind: 'methode',
           label: 'La démarche complète, dans l\'ordre',
           items: [
             '**Domaine** — exclus les valeurs interdites (dénominateur nul, etc.).',
-            '**Limites aux bornes du domaine et asymptotes** — techniques du chapitre précédent.',
+            '**Limites aux bornes du domaine et asymptotes** — techniques de [[5e-4h/limites-asymptotes#etude-complete]].',
             '**Dérivée** f′(x) et son **signe** — tableau de signes complet, y compris les colonnes ∄.',
             '**Variations et extremums** — lus directement sur le tableau de signes de f′.',
             '**Dérivée seconde** f″(x) et son signe — concavité (∪ convexe, ∩ concave) et points ' +
@@ -1940,11 +1963,11 @@ export const deriveesApplications: ChapterContent = {
         },
         {
           kind: 'astuce',
-          label: 'Réutilise le chapitre précédent sans le refaire',
+          label: 'Réutilise l\'étude des limites sans la refaire',
           text:
             'Le domaine, la nature de l\'asymptote verticale (vraie asymptote ou point vide, ' +
             'test du numérateur), et l\'asymptote oblique (division euclidienne ou méthode des ' +
-            'limites) : tout ça suit EXACTEMENT les techniques du chapitre 4. L\'étude complète ' +
+            'limites) : tout ça suit EXACTEMENT les techniques de [[5e-4h/limites-asymptotes#etude-complete]] (asymptote oblique : [[5e-4h/limites-asymptotes#asymptote-oblique]]). L\'étude complète ' +
             'n\'ajoute que f′, f″ et leurs tableaux de signes, par-dessus ce que tu sais déjà.',
         },
         {
@@ -2045,6 +2068,9 @@ export const deriveesApplications: ChapterContent = {
         { question: 'Où est l\'erreur ? « L\'aire vaut $A = xy$ : je la dérive par rapport à x. »', reponse: 'Il faut d\'abord éliminer une variable avec la contrainte ($y = 20-x$), AVANT de dériver.' },
         { question: 'Boîte du carton de 30 cm : $V\'(x) = (30-2x)(30-6x)$. Quelle racine garder ?', reponse: '$x = 5$ : la racine $x = 15$ sort du domaine $]0\\,;15[$.' },
         { question: 'Pourquoi minimiser $AM^2$ plutôt que AM ?', reponse: 'Le point optimal est le même, et il n\'y a plus de racine à dériver.' },
+      ],
+      utilise: [
+        { cible: '5e-4h/fonctions-composees#contexte', poids: 'utile', rappel: 'Écris d\'abord la relation de l\'énoncé, isole ensuite la grandeur demandée, puis réinjecte-la : avec $V = \\pi r^2 h$, on obtient $h(r) = \\dfrac{V}{\\pi r^2}$. Le domaine du modèle est souvent plus restrictif que le domaine mathématique : un rayon vérifie $r > 0$.' },
       ],
       blocks: [
         { kind: 'video', title: 'Optimisation géométrique : maximiser une aire sous contrainte avec la dérivée', youtubeId: 'rFeq-NezwlM' },
@@ -2297,6 +2323,9 @@ export const deriveesApplications: ChapterContent = {
         { question: 'Où est l\'erreur ? « $R\'(x) = 0$ donne la quantité qui maximise le bénéfice. »', reponse: '$R\'(x) = 0$ maximise la recette seule ; le bénéfice demande $R\'(x) = C\'(x)$.' },
         { question: 'Où le coût marginal est-il minimal ?', reponse: 'Là où $C\'\'(q) = 0$, avec C″ qui passe de − à +.' },
         { question: 'Dichotomie partie d\'un intervalle de largeur 1 : largeur après 4 étapes ?', reponse: '$\\dfrac{1}{16} = 0{,}0625$ : le milieu est à moins de $0{,}04$ de la racine.' },
+      ],
+      utilise: [
+        { cible: '5e-4h/fonctions-composees#contexte', poids: 'utile', rappel: 'Le coût unitaire $c(x) = \\dfrac{C(x)}{x}$ est un quotient, pas une composition. L\'entreprise est rentable quand le bénéfice $B(x) = CA(x) - C(x)$ est positif.' },
       ],
       blocks: [
         { kind: 'video', title: 'Contexte économique : coût marginal, recette marginale et bénéfice maximal', youtubeId: 'viSlSAGAl10' },
@@ -2932,7 +2961,7 @@ export const deriveesApplications: ChapterContent = {
   recap: {
     items: [
       '**Définition de** $\\boldsymbol{f\'(a)}$ — la limite du taux d\'accroissement ' +
-        '$\\dfrac{f(a+h)-f(a)}{h}$ quand $h \\to 0$ (chapitre précédent). C\'est la pente de la tangente ' +
+        '$\\dfrac{f(a+h)-f(a)}{h}$ quand $h \\to 0$ ([[5e-4h/limites-asymptotes#limites-calcul]]). C\'est la pente de la tangente ' +
         'en $a$.',
       '**Tangente** — $y=f(a)+f\'(a)(x-a)$. Horizontale ⟺ $f\'(a)=0$. Localement, elle ne touche la ' +
         'courbe qu\'au point de contact, mais elle peut la recouper plus loin — et une même droite ' +
@@ -2949,7 +2978,7 @@ export const deriveesApplications: ChapterContent = {
       '**Étude locale** — le tableau de signes de $f\'$ (avec les colonnes $\\nexists$ des valeurs ' +
         'exclues) donne les variations et les extremums, en valeurs exactes. Un point critique ' +
         '($f\'(a)=0$) n\'est un extremum QUE si $f\'$ change réellement de signe.',
-      '**Étude complète** — domaine → limites et asymptotes (chapitre précédent) → $f\'$ et ' +
+      '**Étude complète** — domaine → limites et asymptotes ([[5e-4h/limites-asymptotes#etude-complete]]) → $f\'$ et ' +
         'variations → $f\'\'$ et concavité → coordonnées des points remarquables → graphique.',
       '**Applications en contexte** — optimisation géométrique (dérivée nulle, nature par le ' +
         'tableau de signes), coût marginal $C\'(q)$ et écart en %, bénéfice maximal ⟺ $\\text{Rm} = ' +

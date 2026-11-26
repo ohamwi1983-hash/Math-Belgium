@@ -823,6 +823,10 @@ export const nombresComplexes: ChapterContent = {
         { question: 'Calcule $2e^{i\\pi/3} \\cdot 3e^{i\\pi/6}$.', reponse: '$6e^{i\\pi/2} = 6i$ : modules multipliés, arguments additionnés.' },
         { question: 'Module et argument de $\\bar{z}$ ?', reponse: '$|\\bar{z}| = |z|$ et $\\arg(\\bar{z}) = -\\arg(z)$.' },
       ],
+      utilise: [
+        { cible: '6e-6h/fonctions-reciproques-cyclometriques#cyclometriques', poids: 'indispensable', rappel: 'arcsin : $[-1 ; 1] \\to [-\\pi/2 ; \\pi/2]$ ; arccos : $[-1 ; 1] \\to [0 ; \\pi]$ ; arctan : $\\mathbb{R} \\to \\; ]-\\pi/2 ; \\pi/2[$. arcsin(x) est l\'**unique** angle de son image dont le sinus vaut x.' },
+        { cible: '6e-6h/fonctions-exponentielles#limites', poids: 'utile', rappel: 'Pour $a>0$ : $a^p \\cdot a^q = a^{p+q}$ et $(a^p)^r = a^{pr}$ — la forme $re^{i\\theta}$ suit les mêmes règles.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Forme trigonométrique, module, argument, produit et quotient', youtubeId: 'vu9w4a5RF20' },
         {
@@ -1232,6 +1236,10 @@ export const nombresComplexes: ChapterContent = {
         { question: 'Linéarise $\\cos^3x$.', reponse: '$\\dfrac{3\\cos x+\\cos(3x)}{4}$.' },
         { question: 'Comment s\'écrit $\\sin x$ avec les formules d\'Euler ?', reponse: '$\\sin x = \\dfrac{e^{ix}-e^{-ix}}{2i}$.' },
       ],
+      utilise: [
+        { cible: '6e-6h/analyse-combinatoire#binomenewton', poids: 'indispensable', rappel: '$(a+b)^n = \\displaystyle\\sum_{k=0}^{n} C_n^k \\times a^{n-k} \\times b^k$, de terme général $T_{k+1} = C_n^k \\times a^{n-k} \\times b^k$. Relation de Pascal $C_n^k = C_{n-1}^{k-1}+C_{n-1}^k$ ; symétrie $C_n^k = C_n^{n-k}$ ; la somme d\'une ligne vaut $2^n$.' },
+        { cible: '6e-6h/primitives-integrales#primitives', poids: 'utile', rappel: 'Une primitive de $f(ax+b)$ est $\\dfrac{1}{a}F(ax+b)$ : $\\int \\cos(2x)\\,dx = \\dfrac{\\sin(2x)}{2} + C$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Formule de Moivre', youtubeId: 'u4Zek-B6nnk' },
         {
@@ -1413,7 +1421,7 @@ export const nombresComplexes: ChapterContent = {
                 '\\dfrac{3\\cos x+\\cos(3x)}{4}$',
             },
             {
-              tag: 'intégrer cos²x (chapitre 4)',
+              tag: 'intégrer cos²x',
               text: '$\\displaystyle\\int\\cos^2x\\,dx=\\int\\dfrac{1+\\cos(2x)}{2}\\,dx=\\dfrac{x}{2}+\\dfrac{\\sin(2x)}{4}+C$',
             },
           ],
@@ -2265,6 +2273,9 @@ export const nombresComplexes: ChapterContent = {
         { question: 'Lieu des points tels que $|z-1| = |z+i|$ ?', reponse: 'La médiatrice de [AB], avec $A(1)$ et $B(-i)$ : la droite $y=-x$.' },
         { question: '$|3+4i|$ vaut-il $|3|+|4i|$ ?', reponse: 'Non : $|3+4i| = 5$, alors que $|3|+|4i| = 7$.' },
         { question: 'Circuit RLC série : $Z = 40+30j$ sous 230 V. Module et intensité ?', reponse: '$|Z| = 50$ Ω et $I = \\dfrac{230}{50} = 4{,}6$ A.' },
+      ],
+      utilise: [
+        { cible: '6e-6h/fonctions-reciproques-cyclometriques#cyclometriques', poids: 'utile', rappel: 'arcsin : $[-1 ; 1] \\to [-\\pi/2 ; \\pi/2]$ ; arccos : $[-1 ; 1] \\to [0 ; \\pi]$ ; arctan : $\\mathbb{R} \\to \\; ]-\\pi/2 ; \\pi/2[$. arcsin(x) est l\'**unique** angle de son image dont le sinus vaut x.' },
       ],
       blocks: [
         { kind: 'video', title: 'Problèmes avancés et synthèse du chapitre', youtubeId: 'QEzQJzT83TQ' },

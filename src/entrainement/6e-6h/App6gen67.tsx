@@ -82,7 +82,7 @@ export function App6gen67() {
         {!etat ? (
           <div>
             <h2 className="result-title">Choisis un thème</h2>
-            <p className="result-subtitle">7 thèmes, 35 affirmations vrai/faux chacun — révision complète du chapitre 4.</p>
+            <p className="result-subtitle">7 thèmes, 35 affirmations vrai/faux chacun — révision complète du chapitre « Intégrales et primitives ».</p>
             <div className="accueil-choix">
               {CATALOGUE_VARIANTES.map((variante, index) => (
                 <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

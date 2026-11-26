@@ -181,7 +181,7 @@ export const BANQUE_QUIZ_FONCTIONS_LOGARITHMES: Record<VarianteQuizFonctionsLoga
     {
       enonce: [texte("Pour tout "), latex("a>0"), texte(", "), latex("\\ln(a)=\\log_e(a)"), texte(" — ces deux fonctions, pourtant introduites indépendamment l'une de l'autre, sont en fait la même.")],
       reponse: true,
-      justification: [texte("On dérive "), latex("a^x"), texte(" de deux façons : via le changement de base, "), latex("(a^x)'=a^x\\cdot\\log_e(a)"), texte(", et via la formule du chapitre 2, "), latex("(a^x)'=a^x\\cdot\\ln(a)"), texte(". En divisant les deux résultats par "), latex("a^x>0"), texte(", il reste "), latex("\\log_e(a)=\\ln(a)"), texte(".")],
+      justification: [texte("On dérive "), latex("a^x"), texte(" de deux façons : via le changement de base, "), latex("(a^x)'=a^x\\cdot\\log_e(a)"), texte(", et via la formule des exponentielles, "), latex("(a^x)'=a^x\\cdot\\ln(a)"), texte(". En divisant les deux résultats par "), latex("a^x>0"), texte(", il reste "), latex("\\log_e(a)=\\ln(a)"), texte(".")],
     },
     {
       enonce: [texte("Les graphiques de "), latex("\\exp_a"), texte(" et "), latex("\\log_a"), texte(" sont symétriques par rapport à la droite "), latex("y=x"), texte(" : si "), latex("(r;s)"), texte(" appartient au premier, alors "), latex("(s;r)"), texte(" appartient au second.")],
@@ -357,7 +357,7 @@ export const BANQUE_QUIZ_FONCTIONS_LOGARITHMES: Record<VarianteQuizFonctionsLoga
     {
       enonce: [texte("La substitution "), latex("t=\\log_a(x)"), texte(" impose, comme "), latex("t=a^x"), texte(", de rejeter les racines "), latex("t\\leq0"), texte(".")],
       reponse: false,
-      justification: [latex("\\log_a(x)"), texte(" peut prendre n'importe quelle valeur réelle : AUCUNE racine "), latex("t"), texte(" n'est à rejeter ici, et "), latex("x=a^t"), texte(" reste strictement positif quel que soit "), latex("t"), texte(". C'est bien la différence avec la substitution "), latex("t=a^x"), texte(" du chapitre 2.")],
+      justification: [latex("\\log_a(x)"), texte(" peut prendre n'importe quelle valeur réelle : AUCUNE racine "), latex("t"), texte(" n'est à rejeter ici, et "), latex("x=a^t"), texte(" reste strictement positif quel que soit "), latex("t"), texte(". C'est bien la différence avec la substitution "), latex("t=a^x"), texte(" des équations exponentielles.")],
     },
     {
       enonce: [texte("Une équation logarithmique peut n'avoir AUCUNE solution alors que l'équation algébrique obtenue après suppression des logarithmes en a deux.")],

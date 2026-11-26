@@ -32,6 +32,11 @@ export const primitivesIntegrales: ChapterContent = {
         { question: 'Calcule $\\int x \\cdot e^{x^2} dx$.', reponse: '$\\dfrac{1}{2}e^{x^2} + C$ : il manque le facteur 2 de $u\'(x) = 2x$.' },
         { question: 'Calcule $\\int x \\cdot e^x dx$.', reponse: 'Par parties, avec $f(x) = x$ et $g\'(x) = e^x$ : $(x-1)e^x + C$.' },
       ],
+      utilise: [
+        { cible: '6e-6h/fonctions-exponentielles#derivee', poids: 'indispensable', rappel: '$(a^x)\' = \\ln(a) \\cdot a^x$ ; comme $\\ln(e) = 1$, $(e^x)\' = e^x$. Exposant composé : $\\left(a^{f(x)}\\right)\' = f\'(x) \\cdot a^{f(x)} \\cdot \\ln(a)$.' },
+        { cible: '6e-6h/fonctions-logarithmes#derivee', poids: 'indispensable', rappel: '$(\\ln(x))\' = \\dfrac{1}{x}$ et $(\\log_a(x))\' = \\dfrac{1}{x \\cdot \\ln(a)}$, pour $x > 0$. $(\\ln(u(x)))\' = \\dfrac{u\'(x)}{u(x)}$ là où $u(x) > 0$ ; $(\\ln|u(x)|)\' = \\dfrac{u\'(x)}{u(x)}$ là où $u(x) \\neq 0$.' },
+        { cible: '6e-6h/fonctions-reciproques-cyclometriques#derivees', poids: 'indispensable', rappel: '$(\\arcsin u)\' = \\dfrac{u\'}{\\sqrt{1-u^2}}$, $(\\arccos u)\' = -\\dfrac{u\'}{\\sqrt{1-u^2}}$ et $(\\arctan u)\' = \\dfrac{u\'}{1+u^2}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Calcul de primitives (1/2) : famille et tableau', youtubeId: '_g-hpY4PFSk' },
         { kind: 'video', title: 'Calcul de primitives (2/2) : substitution et intégration par parties', youtubeId: 'L2k06qFYtc8' },
@@ -328,7 +333,7 @@ export const primitivesIntegrales: ChapterContent = {
           result: {
             tag: 'résultat',
             text:
-              '$\\int \\ln(x)dx = x\\ln(x) - x + C$ — tu retrouves la fonction $x\\ln(x) - x$ du chapitre 3, ' +
+              '$\\int \\ln(x)dx = x\\ln(x) - x + C$ — tu retrouves la fonction $x\\ln(x) - x$ ([[6e-6h/fonctions-logarithmes#derivee]]), ' +
               'dont la dérivée était justement $\\ln(x)$.',
           },
         },
@@ -460,6 +465,9 @@ export const primitivesIntegrales: ChapterContent = {
         { question: 'Primitive de $3x^2 - 4x + 1$ telle que $F(2) = 3$ ?', reponse: '$F(2) = 2 + C = 3$, donc $F(x) = x^3 - 2x^2 + x + 1$.' },
         { question: 'Primitive de $\\cos(x)$ telle que $F(\\pi) = 1$ ?', reponse: '$F(x) = \\sin(x) + 1$.' },
         { question: 'Vitesse $v(t) = 6t$ et position $x(0) = 10$ : que vaut x(t) ?', reponse: '$x(t) = 3t^2 + 10$.' },
+      ],
+      utilise: [
+        { cible: '6e-6h/fonctions-logarithmes#proprietes', poids: 'utile', rappel: 'Pour $a>0$, $a\\neq1$ : $\\log_a(1) = 0$ et $\\log_a(a) = 1$ ; en particulier $\\ln 1 = 0$ et $\\ln e = 1$.' },
       ],
       blocks: [
         { kind: 'video', title: 'Quelle primitive ? Condition initiale', youtubeId: '8XP9SUOn69c' },
@@ -676,6 +684,9 @@ export const primitivesIntegrales: ChapterContent = {
         { question: 'Calcule $\\int_{-2}^{2}\\left(x^3 - 5x\\right)dx$.', reponse: '0, sans calcul : la fonction est impaire.' },
         { question: 'f vaut 2 sur [0;3] et −1 sur [3;5] : intégrale et aire ?', reponse: '$\\int_0^5 f(x)dx = 6 - 2 = 4$, mais l\'aire vaut $6 + 2 = 8$ u.a.' },
         { question: 'Approche $\\int_0^4 x^2 dx$ par 4 trapèzes.', reponse: '$\\dfrac{1}{2}[0+16+2(1+4+9)] = 22$, pour une valeur exacte de $\\dfrac{64}{3}$.' },
+      ],
+      utilise: [
+        { cible: '6e-6h/fonctions-logarithmes#proprietes', poids: 'utile', rappel: '$\\log_a(xy) = \\log_a(x) + \\log_a(y)$, $\\log_a(x/y) = \\log_a(x) - \\log_a(y)$ et $\\log_a(x^r) = r \\cdot \\log_a(x)$ ; mais $\\log_a(x+y)$ ne se sépare jamais.' },
       ],
       blocks: [
         { kind: 'video', title: 'Intégrales définies (1/2) : de l\'aire à l\'intégrale, théorème fondamental', youtubeId: 'VcBrwzQ86wc' },
@@ -1211,6 +1222,9 @@ export const primitivesIntegrales: ChapterContent = {
         { question: 'Aire entre $y = x^2$ et $y = 4$ ?', reponse: '$\\int_{-2}^{2}(4-x^2)dx = \\dfrac{32}{3}$.' },
         { question: 'Aire entre les courbes de $x^3$ et de $x$ ?', reponse: '$\\dfrac{1}{4} + \\dfrac{1}{4} = \\dfrac{1}{2}$, alors que $\\int_{-1}^{1}\\left(x^3 - x\\right)dx = 0$.' },
         { question: 'Aire sous la courbe de ln entre $x = 1$ et $x = e$ ?', reponse: '$[x\\ln(x) - x]_1^e = 1$.' },
+      ],
+      utilise: [
+        { cible: '6e-6h/fonctions-logarithmes#derivee', poids: 'utile', rappel: 'Une primitive de $\\ln x$ est $x\\ln x - x$ (dérive-la : tu retrouves $\\ln x$).' },
       ],
       blocks: [
         { kind: 'video', title: 'Calcul d\'aires par intégrale', youtubeId: '0LDrwlZLcoY' },
@@ -1925,6 +1939,10 @@ export const primitivesIntegrales: ChapterContent = {
         { question: 'D\'où vient la formule de la longueur d\'un arc ?', reponse: '$ds = \\sqrt{dx^2+dy^2} = \\sqrt{1+[f\'(x)]^2} \\, dx$, puis on somme sur [a;b].' },
         { question: 'Le signe de f′(x) compte-t-il dans la formule ?', reponse: 'Non : f′(x) est élevé au carré.' },
       ],
+      utilise: [
+        { cible: '6e-6h/fonctions-logarithmes#hyperboliques', poids: 'indispensable', rappel: '$\\text{ch}(x) = \\dfrac{e^x+e^{-x}}{2}$, paire, toujours $\\ge 1$ ; $\\text{sh}(x) = \\dfrac{e^x-e^{-x}}{2}$, impaire. $\\text{ch}^2(x) - \\text{sh}^2(x) = 1$ : un signe moins, contrairement à $\\cos^2+\\sin^2=1$. Dérivées croisées : $\\text{sh}\' = \\text{ch}$ et $\\text{ch}\' = \\text{sh}$.' },
+        { cible: '6e-6h/fonctions-reciproques-cyclometriques#derivees', poids: 'utile', rappel: '$(\\arcsin u)\' = \\dfrac{u\'}{\\sqrt{1-u^2}}$, $(\\arccos u)\' = -\\dfrac{u\'}{\\sqrt{1-u^2}}$ et $(\\arctan u)\' = \\dfrac{u\'}{1+u^2}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Longueur d\'un arc de courbe', youtubeId: 'xFPokTBlOU8' },
         {
@@ -2042,7 +2060,7 @@ export const primitivesIntegrales: ChapterContent = {
               kind: 'para',
               text:
                 'f(x) = ch(x) sur [0;a] : f\'(x) = sh(x), et l\'identité $\\text{ch}^2-\\text{sh}^2=1$ ' +
-                '(chapitre 3) donne $1+\\text{sh}^2(x) = \\text{ch}^2(x)$ — un carré parfait. ' +
+                '([[6e-6h/fonctions-logarithmes#hyperboliques]]) donne $1+\\text{sh}^2(x) = \\text{ch}^2(x)$ — un carré parfait. ' +
                 'Comme ch(x) > 0 toujours, la racine se simplifie directement :',
             },
             { kind: 'para', text: '$L = \\int_0^a \\text{ch}(x) dx = [\\text{sh}(x)]_0^a = \\text{sh}(a)$' },
@@ -2050,7 +2068,7 @@ export const primitivesIntegrales: ChapterContent = {
               kind: 'para',
               text:
                 'C\'est la longueur d\'une chaîne suspendue : la courbe de ch est une chaînette ' +
-                '(chapitre 3).',
+                '([[6e-6h/fonctions-logarithmes#hyperboliques]]).',
             },
           ],
         },
@@ -2573,7 +2591,7 @@ export const primitivesIntegrales: ChapterContent = {
     forward:
       'Un seul théorème — $\\int_a^b f(x)\\,dx = F(b)-F(a)$, démontré grâce à la fonction aire — porte ' +
       'toutes les applications de ce chapitre : aires, volumes, longueurs, valeur moyenne, ' +
-      'cinématique. Tu le retrouveras au chapitre 8 : une probabilité y devient une aire sous une ' +
+      'cinématique. Tu le retrouveras avec les variables continues ([[6e-6h/variables-aleatoires#variablecontinue]]) : une probabilité y devient une aire sous une ' +
       'courbe de densité.',
     entrainement: {
       kind: 'entrainement',

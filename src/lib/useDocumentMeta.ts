@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { texteSansLiens } from './lienChapitre'
 
 const BASE_URL = 'https://math-belgium.vercel.app'
 
@@ -13,7 +14,7 @@ const IMAGE_DEFAUT = `${BASE_URL}/icons/icon-512.png`
  * Google. Volontairement sommaire (garde le contenu, jette juste les délimiteurs) : une
  * description n'a pas besoin d'un vrai rendu KaTeX. */
 export function stripRichText(text: string): string {
-  return text.replace(/\$([^$]+)\$/g, '$1').replace(/\*\*([^*]+)\*\*/g, '$1')
+  return texteSansLiens(text).replace(/\$([^$]+)\$/g, '$1').replace(/\*\*([^*]+)\*\*/g, '$1')
 }
 
 function upsertMeta(attribut: 'name' | 'property', cle: string, content: string) {

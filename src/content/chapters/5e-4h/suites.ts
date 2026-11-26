@@ -70,7 +70,7 @@ export const suites: ChapterContent = {
           kind: 'intuition',
           label: 'Ça te rappelle quelque chose ?',
           text:
-            'Tu connais déjà les fonctions $f(x)$ depuis le chapitre 1 : tu entres un nombre, il ' +
+            'Tu connais déjà les fonctions $f(x)$ : tu entres un nombre, il ' +
             'en ressort un autre. Une suite, c\'est une fonction très particulière — elle ' +
             'n\'accepte que des indices entiers ($1, 2, 3, ...$), jamais de virgule. $u_n$, ' +
             'c\'est un peu comme $f(n)$, sauf qu\'on écrit l\'indice n en bas plutôt qu\'entre ' +
@@ -862,6 +862,9 @@ export const suites: ChapterContent = {
         { question: 'Somme infinie de $6 + 2 + \\dfrac{2}{3} + \\ldots$ ?', reponse: '$q = \\dfrac{1}{3}$, donc $S_\\infty = \\dfrac{6}{1-\\frac{1}{3}} = 9$.' },
         { question: '$\\lim_{n\\to+\\infty} \\dfrac{3n-1}{2n+5}$ ?', reponse: '$\\dfrac{3}{2}$ : même degré, rapport des coefficients dominants.' },
         { question: 'Pourquoi $0{,}999\\ldots = 1$ ?', reponse: 'C\'est une somme infinie avec $u_1 = 0{,}9$ et $q = 0{,}1$ : $S_\\infty = \\dfrac{0{,}9}{1 - 0{,}1} = 1$.' },
+      ],
+      utilise: [
+        { cible: '5e-4h/limites-asymptotes#limites-calcul', poids: 'utile', rappel: 'Trois formes indéterminées : $\\dfrac{0}{0}$, on factorise et on simplifie ; $\\dfrac{\\infty}{\\infty}$, on met en évidence le terme de plus haut degré ; $\\infty-\\infty$, terme dominant ou expression conjuguée s\'il y a des racines.' },
       ],
       blocks: [
         { kind: 'video', title: 'Convergence et divergence des suites : limites, q = −1 et comparaison des degrés', youtubeId: '52jNqfKWQ_8' },
@@ -1984,7 +1987,7 @@ export const suites: ChapterContent = {
       ],
     },
     forward:
-      'Le prochain chapitre relie les suites aux limites de fonctions. La notion de convergence vue ' +
+      'Les limites de fonctions ([[5e-4h/limites-asymptotes]]) prolongent cette idée de convergence. La notion de convergence vue ' +
       'ici, pour un indice entier $n$ qui tend vers l\'infini, se généralise à une variable réelle $x$ ' +
       '— qui tend vers l\'infini, ou vers une valeur précise.',
     entrainement: {

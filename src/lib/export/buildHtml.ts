@@ -181,6 +181,8 @@ export async function buildHtmlBlob(chapter: ChapterContent, amenage = false): P
   // Numéro du site (repère d'écran) retiré ; le texte prévu pour l'impression s'affiche aussi à l'écran.
   clone.querySelectorAll('.ecran-seul').forEach((el) => el.remove())
   clone.querySelectorAll('.impression-seule').forEach((el) => el.classList.remove('impression-seule'))
+  // Lien nommé vers un autre chapitre (`[[…]]`) : son texte seul (l'adresse interne ne mènerait nulle part hors du site).
+  clone.querySelectorAll('a.lien-chapitre').forEach((el) => el.replaceWith(...Array.from(el.childNodes)))
 
   const css = await inlinerPolices(retirerPreferenceSombre(toutesLesReglesCss()))
   const titre = echapperHtml(chapter.title)

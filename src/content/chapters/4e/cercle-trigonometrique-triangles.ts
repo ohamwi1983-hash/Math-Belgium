@@ -2072,6 +2072,9 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         { question: 'Un sommet est vu sous l\'élévation α depuis A (loin), puis β depuis B (près) : quel angle au sommet ?', reponse: '$\\beta - \\alpha$.' },
         { question: 'Cap 40° de A à B, puis cap 120° de B à C : quel angle intérieur en B ?', reponse: 'L\'écart des caps vaut 80°, donc l\'angle en B vaut 180° − 80° = 100°.' },
       ],
+      utilise: [
+        { cible: '4e/calcul-vectoriel#additionGeometrique', poids: 'utile', rappel: '**Même origine** (méthode du parallélogramme) : $\\vec{u} + \\vec{v}$ est la diagonale du parallélogramme construit sur $\\vec{u}$ et $\\vec{v}$.' },
+      ],
       blocks: [
         { kind: 'video', title: 'Triangulation — mesurer une hauteur inaccessible avec deux triangles liés', youtubeId: 'fGwjUxVHL5s' },
         {
@@ -2336,8 +2339,8 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           text:
             'Les mêmes outils servent en physique. Deux forces (ou deux vitesses : la vitesse ' +
             'propre d\'un bateau et le courant, celle d\'un avion et le vent) qui partent d\'un même ' +
-            'point O s\'additionnent par la **règle du parallélogramme**, que le chapitre 6 reprend ' +
-            'en détail : la résultante $\\vec{F_R} = \\vec{F_1} + \\vec{F_2}$ est la diagonale [OC] ' +
+            'point O s\'additionnent par la **règle du parallélogramme**, que ' +
+            '[[4e/calcul-vectoriel#additionGeometrique]] reprend en détail : la résultante $\\vec{F_R} = \\vec{F_1} + \\vec{F_2}$ est la diagonale [OC] ' +
             'du parallélogramme construit sur $\\vec{F_1}$ et $\\vec{F_2}$. En reportant ' +
             '$\\vec{F_2}$ à l\'extrémité de $\\vec{F_1}$, on obtient le triangle OAC, de côtés ' +
             '$F_1$, $F_2$ et $F_R$ : c\'est lui qu\'on résout, avec Al-Kashi ou la loi des sinus.',

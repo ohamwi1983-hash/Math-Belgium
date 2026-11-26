@@ -92,7 +92,7 @@ export function App6gen72() {
             <p className="result-subtitle">
               {CATALOGUE_VARIANTES.length} thèmes,{" "}
               {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max ? ETENDUE_QUESTIONS.min : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max}`} affirmations vrai/faux
-              chacun — révision complète du chapitre 9.
+              chacun — révision complète du chapitre « Lieux géométriques ».
             </p>
             <div className="accueil-choix">
               {CATALOGUE_VARIANTES.map((variante, index) => (

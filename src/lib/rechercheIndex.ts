@@ -1,4 +1,5 @@
 import { LEVELS } from '../content/chaptersIndex'
+import { texteSansLiens } from './lienChapitre'
 
 /**
  * Recherche du site (champ de l'en-tête, `components/RechercheSite.tsx`) : index LÉGER des titres
@@ -45,7 +46,7 @@ export interface ResultatRecherche {
 
 /** Mini-syntaxe RichText → texte lisible (« $1^{\infty}$ » → « 1^∞ »), sans gras. */
 function texteBrut(t: string): string {
-  return t
+  return texteSansLiens(t)
     .replace(/\$([^$]+)\$/g, (_, f: string) =>
       f
         .replace(/\\infty/g, '∞')

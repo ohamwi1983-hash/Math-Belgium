@@ -159,7 +159,7 @@ function etapesParametre(e: ExerciceParametreNorme): EtapeCorrection[] {
     calcul("a", lignesA),
     resultat("a", [latex(equation)]),
     piege("a", [texte("Le carré d'un binôme a trois termes : "), latex("(x-a)^2=x^2-2ax+a^2"), texte(" ; oublier le double produit fausse toute la suite.")]),
-    utilise("b", [texte("Équation du second degré : discriminant "), latex("\\Delta=b^2-4ac"), texte(" ; si Δ > 0 deux solutions "), latex("\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}"), texte(", si Δ = 0 une seule, si Δ < 0 aucune (chapitre 2).")]),
+    utilise("b", [texte("Équation du second degré : discriminant "), latex("\\Delta=b^2-4ac"), texte(" ; si Δ > 0 deux solutions "), latex("\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}"), texte(", si Δ = 0 une seule, si Δ < 0 aucune (voir « Équations et inéquations du second degré », étape 1).")]),
     calcul("b", lignesB),
     resultat("b", resB),
     ...verif,

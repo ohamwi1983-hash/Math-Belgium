@@ -548,6 +548,14 @@ personnel), grille `44px 1fr auto auto` (écart 8 px sous 400 px) : la barre res
   chapitre hors de toute section (pas de bouton).
 - **Mon suivi** : l'ouverture n'est PAS notée comme une aide — le suivi recopie les puces (« juste avec aide »
   = bouton « Aide » de l'écran) et revoir le cours n'est pas l'aide de l'écran.
+- **« Tu as besoin de… »** (chapitres autonomes, 25/11/2026) : `cibleJeBloque` renvoie aussi `prerequis` =
+  les entrées `utilise` de l'étape (`lib/prerequisChapitre.ts::prerequisJeBloque`) : les `indispensable`, plus
+  les `utile` dont `jeBloque` cite le générateur (décision 4 : gen24, gen25, gen26 — certaines variantes
+  demandent une équation du second degré, pas d'option pour les éviter). Bloc sous l'exemple (ou
+  l'essentiel) : par prérequis, titre court de l'étape, « « Chapitre », étape n », le rappel (`rappel`, sinon
+  « L'essentiel » de l'étape citée) et « Revoir l'étape (nouvel onglet) » (≥ 44 px). Les liens nommés du
+  panneau s'ouvrent en nouvel onglet (`ModeLiensChapitre` « nouvel-onglet ») : l'exercice reste ouvert.
+  Couverture : 68 générateurs (65 par un prérequis indispensable + gen24–26).
 
 ### Plus de majuscules d'insistance à l'écran (point 8 « fait d'office »)
 

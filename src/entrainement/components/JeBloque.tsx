@@ -145,6 +145,7 @@ export function JeBloque({ racineRef, generatorId, chantier, chapitreSlug }: { r
             section={cible.section}
             numero={cible.numero}
             bloc={cible.bloc}
+            prerequis={cible.prerequis}
           />
         </Suspense>
       )}

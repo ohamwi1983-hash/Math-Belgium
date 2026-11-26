@@ -99,7 +99,7 @@ export function App6gen64() {
             <div>
               <h2 className="result-title">Choisis un thème</h2>
               <p className="result-subtitle">
-                {CATALOGUE_VARIANTES.length} thèmes, {TEXTE_NOMBRE} affirmations vrai/faux chacun — révision complète du chapitre 1.
+                {CATALOGUE_VARIANTES.length} thèmes, {TEXTE_NOMBRE} affirmations vrai/faux chacun — révision complète du chapitre « Fonctions réciproques &amp; cyclométriques ».
               </p>
               <div className="accueil-choix">
                 {CATALOGUE_VARIANTES.map((variante, index) => (
