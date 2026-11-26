@@ -97,7 +97,7 @@ function etape(e: E, p: PhaseTauxEquivalents, l: string): EtapeCorrection[] {
             ligne(`t\\approx ${nL(Math.abs(F - 1), 6, true)}\\approx ${pourcentFixeL(tauxMoyen(e), 2)}`, "en %, au centième"),
           ]),
           resultat(l, [t(`${e.baisse ? "Baisse" : "Hausse"} annuelle moyenne : `), ...fr(reponse(e, "taux")), t(".")]),
-          verification(l, [t("C'est moins que "), f(`\\dfrac{${nL(e.taux, 4)}}{${N}}\\approx ${nL(e.taux / N, 2)}`), t(e.baisse ? " : en baisse aussi, les pourcentages se composent." : " : les hausses successives se composent.")]),
+          verification(l, [t(e.baisse ? "C'est plus que " : "C'est moins que "), f(`\\dfrac{${nL(e.taux, 4)}}{${N}}\\approx ${nL(e.taux / N, 2)}`), t(e.baisse ? " : chaque baisse porte sur une valeur déjà diminuée, il faut donc un taux annuel un peu plus fort." : " : chaque hausse porte sur une valeur déjà augmentée, un taux annuel un peu plus faible suffit.")]),
         ];
       }
     case "tauxA":
