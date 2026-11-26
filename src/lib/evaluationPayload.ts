@@ -2208,6 +2208,50 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, EntreeEnonceDemonstra
       { cle: "λ inconnu, puis le seuil d'alerte", enonce: "Dans une région, la probabilité qu'aucun cas d'une maladie rare ne soit signalé un mois donné vaut $0{,}135$ ; le nombre de cas par mois suit une loi de Poisson. Détermine son paramètre, la valeur la plus probable, puis le plus petit nombre de cas $k$ tel que $P(X\\geq k)<0{,}05$." },
     ],
   },
+  // 5e (6h), « Nombres réels et suites » — partie « Algèbre financière » (chantier C) : clé = badge ou label du bloc
+  // (`src/content/chapters/5e-6h/nombres-reels-suites/partie-finance.ts`). Les parties « réels » et « suites » ajoutent
+  // leurs sections à cette même entrée.
+  'nombres-reels-suites': {
+    interets: [
+      { cle: 'valeur acquise après un an, puis après sept mois', enonce: "On place $3\\,600$ € à intérêt simple au taux annuel de $2{,}5\\,\\%$. Calcule la valeur acquise après un an, puis après sept mois." },
+      { cle: 'placement du 15 mai au 22 juillet', enonce: "Un capital de $1\\,500$ € est placé à intérêt simple au taux annuel de $2{,}8\\,\\%$, du 15 mai au 22 juillet. Calcule la valeur acquise." },
+      { cle: 'la suite des valeurs acquises jour après jour', enonce: "Un capital de $1\\,500$ € est placé à intérêt simple au taux annuel de $2{,}8\\,\\%$. Montre que les valeurs acquises jour après jour forment une suite arithmétique, donne son premier terme, sa raison et son terme général, puis calcule la valeur acquise au bout de $68$ jours." },
+      { cle: 'retrouver la durée, le taux ou le capital', enonce: "À intérêt simple : a) $1\\,800$ € placés à $2{,}4\\,\\%$ ont rapporté $25{,}20$ € ; pendant combien de mois ? b) $3\\,000$ € empruntés sont remboursés $3\\,045$ € quatre mois plus tard ; quel est le taux annuel ? c) Un placement de huit mois à $2{,}1\\,\\%$ a rapporté $42$ € ; quel capital avait été placé ?" },
+      { cle: 'la valeur acquise à intérêts composés vaut', enonce: "Démontre qu'un capital $C_0$ placé à intérêts composés au taux $i$ par période a, après $n$ périodes, la valeur acquise $C_n = C_0(1+i)^n$." },
+      { cle: 'valeur acquise au bout de quatre ans', enonce: "On place $15\\,000$ € à intérêts composés au taux annuel de $2{,}5\\,\\%$ pendant quatre ans. Calcule la valeur acquise au terme du placement." },
+      { cle: 'capitalisation semestrielle', enonce: "Un capital de $25\\,000$ € est placé pendant cinq ans au taux semestriel de $1{,}25\\,\\%$, les intérêts étant capitalisés chaque semestre. Calcule la valeur acquise." },
+      { cle: 'valeur actuelle d’un capital futur', enonce: "Quel montant faut-il placer aujourd'hui, à intérêts composés au taux annuel de $2{,}5\\,\\%$, pour disposer de $30\\,000$ € dans quinze ans ?" },
+      { cle: 'retrouver le taux', enonce: "Un capital de $4\\,000$ € placé à intérêts composés est devenu $4\\,370$ € en trois ans. Calcule le taux annuel du placement." },
+      { cle: 'en combien d’années un capital double-t-il ?', enonce: "On place $1\\,000$ € à intérêts composés au taux annuel de $3\\,\\%$. Au bout de combien d'années le capital aura-t-il doublé ?" },
+      { cle: 'deux ans et un trimestre', enonce: "Un capital de $2\\,000$ € est placé au taux annuel de $3\\,\\%$ pendant deux ans et un trimestre, avec la convention des banques pour une durée non entière. Calcule l'intérêt produit." },
+      { cle: 'sur une fraction d’année, l’intérêt simple rapporte plus', enonce: "Soit un taux annuel $i > 0$ et un entier $k \\geq 2$. Démontre que $1 + \\dfrac{i}{k} > (1+i)^{\\frac{1}{k}}$ : sur $\\frac{1}{k}$ d'année, l'intérêt simple rapporte plus que l'intérêt composé." },
+    ],
+    'taux-equivalents': [
+      { cle: 'les relations entre taux équivalents', enonce: "Démontre que des taux équivalents annuel, semestriel, trimestriel et mensuel vérifient $(1+i_{\\text{semestriel}})^2 = (1+i_{\\text{trimestriel}})^4 = (1+i_{\\text{mensuel}})^{12} = 1+i_{\\text{annuel}}$." },
+      { cle: 'comparer trois offres de placement', enonce: "Pour placer $1\\,000$ € pendant un an, on te propose, à intérêts composés : A, $0{,}6\\,\\%$ par trimestre ; B, $0{,}19\\,\\%$ par mois ; C, $2{,}4\\,\\%$ par an. Quelle offre est la plus intéressante ? Justifie." },
+      { cle: 'taux semestriel équivalent à 6 % par an', enonce: "Calcule le taux semestriel équivalent au taux annuel de $6\\,\\%$." },
+      { cle: 'taux réel d’un taux mensuel', enonce: "Calcule le taux réel correspondant à un taux mensuel de $0{,}25\\,\\%$." },
+      { cle: 'montant remboursé et taux réel d’un bon de caisse', enonce: "Un bon de caisse de $500$ € est placé cinq ans au taux annuel de $2{,}1\\,\\%$, intérêts capitalisés chaque année. Au terme, la banque retient un précompte de $30\\,\\%$ sur le total des intérêts. Calcule le montant remboursé et le taux réel net du placement." },
+      { cle: 'dépréciation mensuelle, dépréciation annuelle', enonce: "Une voiture perd $2{,}4\\,\\%$ de sa valeur chaque mois. Quel pourcentage de sa valeur perd-elle en un an ?" },
+      { cle: 'un glacier qui fond', enonce: "a) Un glacier perd $3\\,\\%$ de son volume chaque année : quel pourcentage de son volume perd-il en dix ans ? b) Un autre glacier a perdu $13\\,\\%$ de son volume en dix ans : quelle est sa perte annuelle moyenne, si elle est la même chaque année ?" },
+    ],
+    annuites: [
+      { cle: 'cinq versements de 1 200 €', enonce: "On dépose $1\\,200$ € sur un compte d'épargne chaque 1er janvier, de 2027 à 2031, au taux annuel de $3\\,\\%$ (intérêts capitalisés). Calcule le montant disponible le 1er janvier 2031, juste après le cinquième versement, en capitalisant chaque versement." },
+      { cle: 'la valeur acquise de n annuités constantes', enonce: "Démontre que la valeur acquise par $n$ versements de montant $a$, au taux $i$ par période, au moment du dernier versement, vaut $V_n = a\\cdot\\dfrac{(1+i)^n - 1}{i}$." },
+      { cle: 'quinze versements de 900 €', enonce: "On verse $900$ € par an pendant quinze ans sur un compte rémunéré à $3{,}2\\,\\%$ par an (intérêts capitalisés). Calcule la valeur acquise au moment du dernier versement et les intérêts gagnés." },
+      { cle: 'retrouver le montant des versements', enonce: "On veut disposer de $10\\,000$ € un an après le dernier de dix versements annuels égaux, au taux annuel de $2{,}5\\,\\%$. Quel montant faut-il verser chaque année ?" },
+      { cle: 'quel budget pour des travaux ?', enonce: "Un couple peut rembourser $2\\,000$ € par an pendant quatre ans, au taux annuel de $4\\,\\%$, le premier remboursement ayant lieu un an après l'emprunt. Quel montant peut-il emprunter ?" },
+      { cle: 'la valeur actuelle de n annuités constantes', enonce: "Démontre que la valeur actuelle de $n$ versements de montant $a$, au taux $i$ par période, une période avant le premier versement, vaut $V_0 = V_n(1+i)^{-n} = a\\cdot\\dfrac{1-(1+i)^{-n}}{i}$." },
+      { cle: 'versements réguliers ou placement unique ?', enonce: "Le premier de deux amis verse $90$ € au début de chaque mois pendant dix ans sur un compte rémunéré à $2{,}3\\,\\%$ par an (intérêts composés) ; le second place aujourd'hui une seule somme, aux mêmes conditions, pour disposer du même capital dans dix ans. Quel montant le second doit-il placer, et de quel capital disposeront-ils ?" },
+    ],
+    credit: [
+      { cle: 'la formule de la mensualité', enonce: "Un capital $C$ est emprunté et remboursé par $n$ mensualités égales $m$, la première un mois après l'emprunt, au taux mensuel $i$ équivalent au TAEG. Démontre que $m = \\dfrac{C\\cdot i}{1-(1+i)^{-n}}$." },
+      { cle: 'mensualité et coût d’un prêt de 10 000 €', enonce: "Un prêt de $10\\,000$ €, accordé au TAEG de $6{,}4\\,\\%$, est remboursé en $12$ mensualités. Calcule la mensualité et le coût du crédit." },
+      { cle: 'un scooter financé en 24 mensualités', enonce: "Un scooter de $1\\,740$ € est financé, sans acompte, par $24$ mensualités de $75$ €. Calcule le coût du financement, vérifie que le taux mensuel vaut environ $0{,}273\\,\\%$, puis déduis-en le TAEG." },
+      { cle: 'les premières lignes du tableau du scooter', enonce: "Un financement de $1\\,740$ € est remboursé par $24$ mensualités de $75$ € au taux mensuel de $0{,}273\\,\\%$. Complète les trois premières lignes du tableau d'amortissement (intérêts, amortissement, capital restant dû)." },
+      { cle: 'un prêt à amortissement constant', enonce: "Un prêt de $12\\,000$ € est remboursé en $60$ mois : chaque mois, la même part du capital, plus un intérêt de $0{,}4\\,\\%$ sur le capital restant dû. Quelles suites forment l'amortissement, le capital restant dû, les intérêts et les mensualités ? Calcule le total des intérêts et compare-le à celui de $60$ mensualités constantes au même taux." },
+    ],
+  },
 }
 
 /**
