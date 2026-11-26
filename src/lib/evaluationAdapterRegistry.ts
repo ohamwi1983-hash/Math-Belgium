@@ -348,6 +348,7 @@ import { adaptateurEvaluationDetectiveStatDeuxVariables } from '../entrainement/
 import { adaptateurEvaluationInteretSimple56 } from '../entrainement/5e-6h/generateurs56/interetSimple/exportEvaluation'
 import { adaptateurEvaluationInteretsComposes56 } from '../entrainement/5e-6h/generateurs56/interetsComposes/exportEvaluation'
 import { adaptateurEvaluationTauxEquivalents56 } from '../entrainement/5e-6h/generateurs56/tauxEquivalents/exportEvaluation'
+import { adaptateurEvaluationAnnuites56 } from '../entrainement/5e-6h/generateurs56/annuites/exportEvaluation'
 import { adaptateurEvaluationLireNuage } from '../entrainement/5e-4h/generateurs5e/lireNuage/exportEvaluation'
 import { adaptateurEvaluationPointMoyen } from '../entrainement/5e-4h/generateurs5e/pointMoyenStat/exportEvaluation'
 import { adaptateurEvaluationDroiteMayer } from '../entrainement/5e-4h/generateurs5e/droiteMayer/exportEvaluation'
@@ -435,6 +436,7 @@ export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExe
   '56gen24': versionPapier(adaptateurEvaluationInteretSimple56) as unknown as AdaptateurFeuilleExercices<never>,
   '56gen25': versionPapier(adaptateurEvaluationInteretsComposes56) as unknown as AdaptateurFeuilleExercices<never>,
   '56gen26': versionPapier(adaptateurEvaluationTauxEquivalents56) as unknown as AdaptateurFeuilleExercices<never>,
+  '56gen27': versionPapier(adaptateurEvaluationAnnuites56) as unknown as AdaptateurFeuilleExercices<never>,
 }
 
 import { adaptateurEvaluationDenombrementFondamental } from '../entrainement/6e-6h/generateurs6e/denombrementFondamental/exportEvaluation'
