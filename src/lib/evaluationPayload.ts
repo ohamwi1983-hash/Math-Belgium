@@ -136,6 +136,7 @@ export type IdGenerateurPilote =
   | '5gen78' | '5gen79' | '5gen80' | '5gen81'
   | '5gen76' | '5gen77' | '5gen36' | '5gen37' | '5gen38'
   | '56gen1' | '56gen2' | '56gen3' | '56gen4' | '56gen5' | '56gen6' | '56gen7' | '56gen8' | '56gen9' | '56gen10' | '56gen11' | '56gen12'
+  | '56gen14' | '56gen15' | '56gen16' | '56gen17' | '56gen18' | '56gen19'
 
 export interface GeneratorConfig {
   chapitreSlug: string
@@ -541,6 +542,8 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'sommes-infinies', generatorId: '56gen10', label: "Détective d'erreurs : suites (56gen10)", processus: 3 },
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'suites-geometriques', generatorId: '56gen11', label: 'Comparaison de deux suites (56gen11)' },
   { chapitreSlug: 'nombres-reels-suites', sectionId: 'definir-suite', generatorId: '56gen12', label: 'Suite récurrente affine (56gen12)' },
+  // 5e (6h), « Nombres réels et suites » : nouveaux générateurs de la partie « Les nombres réels » (chantier E1, 26/11/2026).
+  { chapitreSlug: 'nombres-reels-suites', sectionId: 'irrationnels', generatorId: '56gen14', label: 'Rationnel ou irrationnel ? (56gen14)', processus: 1 },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même

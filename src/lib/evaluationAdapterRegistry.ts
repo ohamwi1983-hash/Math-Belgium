@@ -777,6 +777,12 @@ export const EVALUATION_ADAPTER_REGISTRY_56: Record<string, AdaptateurFeuilleExe
   '56gen12': versionPapier(adaptateur56gen12) as unknown as AdaptateurFeuilleExercices<never>,
 }
 
+/** 5e (6h) — « Nombres réels et suites », partie « Les nombres réels » : nouveaux générateurs 56gen14–56gen19
+ * (chantier E1, 26/11/2026), code dans `5e-6h/generateurs56/`. */
+import { adaptateurEvaluationRationnel as adaptateur56gen14 } from '../entrainement/5e-6h/generateurs56/rationnelIrrationnel/exportEvaluation'
+
+EVALUATION_ADAPTER_REGISTRY_56['56gen14'] = versionPapier(adaptateur56gen14) as unknown as AdaptateurFeuilleExercices<never>
+
 /** Lookup unique par `generatorId`, tous chantiers portés confondus — `evaluationLocal.ts` n'a pas
  * à savoir quel chantier a produit quel générateur. Chaque adaptateur reçoit ici son
  * `regroupement` a), b), c) (`export/regroupementsPapier.ts`, découpe de son énoncé papier — déjà
