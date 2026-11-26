@@ -1,7 +1,7 @@
 // Copie 5e (6h) de `5e-4h/App5gen18.tsx` (56gen11 ← 5gen18, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
 import { useState } from "react";
 import type { ReglagesSession5e } from "../5e-4h/core5e/session5e.types";
-import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceComparaisonSuites } from "./generateurs56/comparaisonSuites";
+import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExercice56gen11Libre, genererExerciceComparaisonSuites } from "./generateurs56/comparaisonSuites";
 import type { FamilleComparaisonSuites } from "./generateurs56/comparaisonSuites/core/comparaisonSuites.types";
 import { SelecteurVarianteDev } from "../5e-4h/components5e/SelecteurVarianteDev";
 import {
@@ -37,7 +37,8 @@ import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3 };
 
 function nouvelleSession(): EtatSessionComparaisonSuites {
-  return demarrerSessionComparaisonSuites(REGLAGES_DEMO, genererExerciceComparaisonSuites);
+  // 5e (6h) : tirage de l'appli (« Malthus » une fois sur quatre) ; le `?code=` libre garde le tirage d'origine.
+  return demarrerSessionComparaisonSuites(REGLAGES_DEMO, genererExercice56gen11Libre);
 }
 
 /** Première session : si l'URL porte le code d'un exercice imprimé (`?code=XXXXXX`), son PREMIER

@@ -79,8 +79,13 @@ export function consigneGenerale(exercice: ExerciceComparaisonSuites): string {
       break;
   }
   const { qui, depasse } = nomsDepassement(exercice);
+  const intro =
+    exercice.famille === "villesCroissance" && exercice.malthus
+      ? "Selon Malthus (1798), une population croît de façon géométrique, alors que les moyens de la nourrir ne croissent que de façon arithmétique. "
+      : "";
   if (contexte.periode === "an") {
     return (
+      intro +
       `En ${exercice.anneeDepart}, ${clauseA}. ${capitaliser(clauseB)}. ` +
       `On note Aₙ et Bₙ ces deux grandeurs au rang n (n = 1 correspond à ${exercice.anneeDepart}). ` +
       `Détermine à partir de quelle année ${qui} dépasse ${depasse}.`

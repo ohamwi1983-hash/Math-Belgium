@@ -1,5 +1,9 @@
 // Copie 5e (6h) de `5e-4h/App5gen15.tsx` (56gen2 ← 5gen15, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
 import { useState } from "react";
+import type { PropsAncienne } from "./commun56/AppMixte56";
+import { AppMixte56 } from "./commun56/AppMixte56";
+import { CATALOGUE_INSERER, DEFINITION_INSERER, estInserer, genererInserer } from "./generateurs56/suitesGeometriques/inserer";
+import type { ExerciceInserer, PhaseInserer } from "./generateurs56/suitesGeometriques/inserer";
 import { genererAvecCode, lireCodeDepuisUrl } from "../export/codeExercice";
 import type { ReglagesSession5e } from "../5e-4h/core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceSuiteGeometrique } from "./generateurs56/suitesGeometriques";
@@ -384,8 +388,8 @@ function soumettrePoserEquation(
   return soumettreReponsePoserEquationAlgebrique(etat, reponse);
 }
 
-export function App56gen2() {
-  const [etat, setEtat] = useState<EtatSessionSuiteGeometrique>(sessionInitiale);
+export function App56gen2Ancienne({ premier, controle }: PropsAncienne<ExerciceSuiteGeometrique> = {}) {
+  const [etat, setEtat] = useState<EtatSessionSuiteGeometrique>(() => (premier ? demarrerSessionSuiteGeometrique(REGLAGES_DEMO, () => premier) : sessionInitiale()));
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionSuiteGeometrique`, jamais dans le moteur. Remis à vide à chaque
@@ -436,6 +440,10 @@ export function App56gen2() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
+      if (controle) {
+        controle.suivant();
+        return;
+      }
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideUtiliseeParPhase({});
@@ -447,6 +455,10 @@ export function App56gen2() {
   }
 
   function forcerVariante(id: string) {
+    if (controle) {
+      controle.variante(id);
+      return;
+    }
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeParPhase({});
@@ -484,7 +496,7 @@ export function App56gen2() {
         <p className="app-subtitle">Nombres réels et suites</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
-      <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+      <SelecteurVarianteDev options={controle?.catalogue ?? CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
           <RecapitulatifPanel entrees={calculerRecapitulatifSuiteGeometrique(etat)} />
@@ -586,5 +598,33 @@ export function App56gen2() {
         <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
       )}
     </div>
+  );
+}
+
+// --- 5e (6h) : variante « insérer k termes » ajoutée en fin de catalogue (chantier D) ---------------
+const CATALOGUE_56GEN2 = [...CATALOGUE_FAMILLES, ...CATALOGUE_INSERER];
+
+/** Tirage de l'appli : « insérer k termes » une fois sur cinq, sinon le tirage d'origine (celui de
+ * l'adaptateur et des `?code=` libres, inchangé). */
+export function genererExercice56gen2Libre(): ExerciceSuiteGeometrique | ExerciceInserer {
+  return Math.random() < 0.2 ? genererInserer() : genererExerciceSuiteGeometrique();
+}
+
+export function variante56gen2(id: string): ExerciceSuiteGeometrique | ExerciceInserer {
+  return id === "inserer" ? genererInserer() : construireAvecFamilleId(id as FamilleSuiteGeometriqueId);
+}
+
+export function App56gen2() {
+  return (
+    <AppMixte56<ExerciceSuiteGeometrique, ExerciceInserer, PhaseInserer>
+      catalogue={CATALOGUE_56GEN2}
+      genererLibreAdaptateur={genererExerciceSuiteGeometrique}
+      genererLibre={genererExercice56gen2Libre}
+      genererVariante={variante56gen2}
+      estNouvelle={estInserer}
+      genererLibreNouvelle={genererInserer}
+      rendreAncienne={(p) => <App56gen2Ancienne key={p.key} premier={p.premier} controle={p.controle} />}
+      configNouvelle={{ id: "56gen2", titre: "Suites géométriques, formule générale et termes", eyebrow: "5e (6h) — Entraînement", sousTitre: "Nombres réels et suites", definition: DEFINITION_INSERER }}
+    />
   );
 }

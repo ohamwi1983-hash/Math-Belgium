@@ -1,5 +1,10 @@
 // Copie 5e (6h) de `5e-4h/App5gen19.tsx` (56gen12 ← 5gen19, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
 import { useState } from "react";
+import type { PropsAncienne } from "./commun56/AppMixte56";
+import { AppMixte56 } from "./commun56/AppMixte56";
+import { CATALOGUE_INSTABLE, DEFINITION_INSTABLE, estInstable, genererInstable } from "./generateurs56/suiteRecurrenteAffine/instable";
+import type { ExerciceInstable, PhaseInstable } from "./generateurs56/suiteRecurrenteAffine/instable";
+import type { ExerciceSuiteRecurrenteAffine } from "../5e-4h/core5e/suiteRecurrenteAffine.types";
 import type { ReglagesSession5e } from "../5e-4h/core5e/session5e.types";
 import { CATALOGUE_REGIMES_SUITE_RECURRENTE_AFFINE, construireAvecRegime, genererExerciceSuiteRecurrenteAffine } from "./generateurs56/suiteRecurrenteAffine";
 import type { RegimeSuiteRecurrenteAffine } from "../5e-4h/core5e/suiteRecurrenteAffine.types";
@@ -89,8 +94,8 @@ function formatReponseRegimePermanent(reponse: { existe: boolean; L: string }): 
   return reponse.existe ? `L = ${reponse.L}` : "N'existe pas";
 }
 
-export function App56gen12() {
-  const [etat, setEtat] = useState<EtatSessionSuiteRecurrenteAffine>(sessionInitiale);
+export function App56gen12Ancienne({ premier, controle }: PropsAncienne<ExerciceSuiteRecurrenteAffine> = {}) {
+  const [etat, setEtat] = useState<EtatSessionSuiteRecurrenteAffine>(() => (premier ? demarrerSessionSuiteRecurrenteAffine(REGLAGES_DEMO, () => premier) : sessionInitiale()));
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionSuiteRecurrenteAffine`, jamais dans le moteur. Remis à vide à
@@ -141,6 +146,10 @@ export function App56gen12() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
+      if (controle) {
+        controle.suivant();
+        return;
+      }
       setEtat(nouvelleSession());
       setHistorique([]);
       setAideUtiliseeParPhase({});
@@ -152,6 +161,10 @@ export function App56gen12() {
   }
 
   function forcerVariante(id: string) {
+    if (controle) {
+      controle.variante(id);
+      return;
+    }
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeParPhase({});
@@ -194,7 +207,7 @@ export function App56gen12() {
         <p className="app-subtitle">Nombres réels et suites</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
-      <SelecteurVarianteDev options={OPTIONS_REGIME} onGenerer={forcerVariante} />
+      <SelecteurVarianteDev options={controle?.catalogue ?? OPTIONS_REGIME} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
           <EnTeteExercice consigneGenerale={consigneGenerale(exercice)} blocDonnees={null} />
@@ -254,5 +267,33 @@ export function App56gen12() {
         <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
       )}
     </div>
+  );
+}
+
+// --- 5e (6h) : variante « point fixe et erreur d'arrondi » ajoutée en fin de catalogue (chantier D) -----
+const CATALOGUE_56GEN12 = [...CATALOGUE_REGIMES_SUITE_RECURRENTE_AFFINE, ...CATALOGUE_INSTABLE];
+
+/** Tirage de l'appli : « point fixe et erreur d'arrondi » une fois sur quatre, sinon le tirage d'origine
+ * (celui de l'adaptateur et des `?code=` libres, inchangé). */
+export function genererExercice56gen12Libre(): ExerciceSuiteRecurrenteAffine | ExerciceInstable {
+  return Math.random() < 0.25 ? genererInstable() : genererExerciceSuiteRecurrenteAffine();
+}
+
+export function variante56gen12(id: string): ExerciceSuiteRecurrenteAffine | ExerciceInstable {
+  return id === "instable" ? genererInstable() : construireAvecRegime(id as RegimeSuiteRecurrenteAffine);
+}
+
+export function App56gen12() {
+  return (
+    <AppMixte56<ExerciceSuiteRecurrenteAffine, ExerciceInstable, PhaseInstable>
+      catalogue={CATALOGUE_56GEN12}
+      genererLibreAdaptateur={genererExerciceSuiteRecurrenteAffine}
+      genererLibre={genererExercice56gen12Libre}
+      genererVariante={variante56gen12}
+      estNouvelle={estInstable}
+      genererLibreNouvelle={genererInstable}
+      rendreAncienne={(p) => <App56gen12Ancienne key={p.key} premier={p.premier} controle={p.controle} />}
+      configNouvelle={{ id: "56gen12", titre: "Suite récurrente affine et point fixe", eyebrow: "5e (6h) — Entraînement", sousTitre: "Nombres réels et suites", definition: DEFINITION_INSTABLE }}
+    />
   );
 }

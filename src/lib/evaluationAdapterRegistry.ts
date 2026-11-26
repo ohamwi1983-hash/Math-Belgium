@@ -750,17 +750,17 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
  * (56gen1–56gen12, chantier D ; adaptateurs COPIÉS dans `5e-6h/generateurs56/`, les deux années peuvent
  * diverger). Le quiz 56gen13 n'a pas d'adaptateur : ses vrai/faux viennent de `lib/banquesVraiFaux.ts`. */
 import { adaptateurEvaluationSuitesArithmetiques as adaptateur56gen1 } from '../entrainement/5e-6h/generateurs56/suitesArithmetiques/exportEvaluation'
-import { adaptateurEvaluationSuitesGeometriques as adaptateur56gen2 } from '../entrainement/5e-6h/generateurs56/suitesGeometriques/exportEvaluation'
-import { adaptateurEvaluationDefinirSuite as adaptateur56gen3 } from '../entrainement/5e-6h/generateurs56/definirSuite/exportEvaluation'
+import { adaptateurEvaluation56gen2 as adaptateur56gen2 } from '../entrainement/5e-6h/generateurs56/suitesGeometriques/exportEvaluation56'
+import { adaptateurEvaluation56gen3 as adaptateur56gen3 } from '../entrainement/5e-6h/generateurs56/definirSuite/exportEvaluation56'
 import { adaptateurEvaluationSommesTermes as adaptateur56gen4 } from '../entrainement/5e-6h/generateurs56/sommesTermes/exportEvaluation'
-import { adaptateurEvaluationTroisTermes as adaptateur56gen5 } from '../entrainement/5e-6h/generateurs56/troisTermes/exportEvaluation'
+import { adaptateurEvaluation56gen5 as adaptateur56gen5 } from '../entrainement/5e-6h/generateurs56/troisTermes/exportEvaluation56'
 import { adaptateurEvaluationConvergenceSuites as adaptateur56gen6 } from '../entrainement/5e-6h/generateurs56/convergenceSuites/exportEvaluation'
 import { adaptateurEvaluationSommeInfinie as adaptateur56gen7 } from '../entrainement/5e-6h/generateurs56/sommeInfinieSituation/exportEvaluation'
-import { adaptateurEvaluationSuitesClassiques as adaptateur56gen8 } from '../entrainement/5e-6h/generateurs56/suitesClassiques/exportEvaluation'
+import { adaptateurEvaluation56gen8 as adaptateur56gen8 } from '../entrainement/5e-6h/generateurs56/suitesClassiques/exportEvaluation56'
 import { adaptateurEvaluationModeliserSuite as adaptateur56gen9 } from '../entrainement/5e-6h/generateurs56/modeliserSuite/exportEvaluation'
 import { adaptateurEvaluationDetectiveSuites as adaptateur56gen10 } from '../entrainement/5e-6h/generateurs56/detectiveSuites/exportEvaluation'
 import { adaptateurEvaluationComparaisonSuites as adaptateur56gen11 } from '../entrainement/5e-6h/generateurs56/comparaisonSuites/exportEvaluation'
-import { adaptateurEvaluationSuiteRecurrenteAffine as adaptateur56gen12 } from '../entrainement/5e-6h/generateurs56/suiteRecurrenteAffine/exportEvaluation'
+import { adaptateurEvaluation56gen12 as adaptateur56gen12 } from '../entrainement/5e-6h/generateurs56/suiteRecurrenteAffine/exportEvaluation56'
 
 export const EVALUATION_ADAPTER_REGISTRY_56: Record<string, AdaptateurFeuilleExercices<never>> = {
   '56gen1': versionPapier(adaptateur56gen1) as unknown as AdaptateurFeuilleExercices<never>,

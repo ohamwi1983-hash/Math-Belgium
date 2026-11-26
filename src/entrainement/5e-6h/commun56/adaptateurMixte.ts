@@ -25,7 +25,8 @@ export function adaptateurMixte<A, N>(
   const calculatriceIndispensable = [...calcAncien, ...calcNouveau];
   const besoinPhi = ancien.besoinTablePhi || nouveau.besoinTablePhi;
   return {
-    ...ancien,
+    ...(ancien as unknown as AdaptateurFeuilleExercices<A | N>),
+    difficulte: undefined,
     genererInstance: ancien.genererInstance,
     catalogueVariantes: [...(ancien.catalogueVariantes ?? []), ...(nouveau.catalogueVariantes ?? [])],
     genererInstanceAvecVariante: (id: string) => (idsNouveaux.has(id) ? nouveau.genererInstanceAvecVariante!(id) : ancien.genererInstanceAvecVariante!(id)),

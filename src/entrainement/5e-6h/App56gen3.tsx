@@ -1,5 +1,9 @@
 // Copie 5e (6h) de `5e-4h/App5gen44.tsx` (56gen3 ← 5gen44, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
 import { useState } from "react";
+import type { PropsAncienne } from "./commun56/AppMixte56";
+import { AppMixte56 } from "./commun56/AppMixte56";
+import { CATALOGUE_ARRONDIES, DEFINITION_ARRONDIES, estArrondies, genererArrondies } from "./generateurs56/definirSuite/arrondies";
+import type { ExerciceArrondies, PhaseArrondies } from "./generateurs56/definirSuite/arrondies";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "../5e-4h/core5e/session5e.types";
 import type { ExerciceDefinirSuite } from "./generateurs56/definirSuite/core/definirSuite";
@@ -66,8 +70,8 @@ function reponseAttendue(e: ExerciceDefinirSuite, phase: PhaseDefinirSuite): Rea
   );
 }
 
-export function App56gen3() {
-  const [etat, setEtat] = useState<EtatSessionDefinirSuite>(sessionInitiale);
+export function App56gen3Ancienne({ premier, controle }: PropsAncienne<ExerciceDefinirSuite> = {}) {
+  const [etat, setEtat] = useState<EtatSessionDefinirSuite>(() => (premier ? demarrerSessionDefinirSuite(REGLAGES_DEMO, () => premier) : sessionInitiale()));
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
@@ -110,6 +114,10 @@ export function App56gen3() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
+      if (controle) {
+        controle.suivant();
+        return;
+      }
       reinitialiser(nouvelleSession());
       return;
     }
@@ -118,6 +126,10 @@ export function App56gen3() {
   }
 
   function forcerVariante(id: string) {
+    if (controle) {
+      controle.variante(id);
+      return;
+    }
     reinitialiser(demarrerSessionDefinirSuite(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteDefinirSuite)));
   }
 
@@ -154,7 +166,7 @@ export function App56gen3() {
         <p className="app-eyebrow">5e (6h) — Entraînement</p>
         <h1 className="app-title">Définir et reconnaître une suite</h1>
         <p className="app-subtitle">Nombres réels et suites</p>
-        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <SelecteurVarianteDev options={controle?.catalogue ?? CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
         <ProgressionPuces segments={calculerSegmentsProgressionDefinirSuite(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
@@ -183,5 +195,33 @@ export function App56gen3() {
         <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
       )}
     </div>
+  );
+}
+
+// --- 5e (6h) : variante « données arrondies » ajoutée en fin de catalogue (chantier D) ---------------
+const CATALOGUE_56GEN3 = [...CATALOGUE_VARIANTES, ...CATALOGUE_ARRONDIES];
+
+/** Tirage de l'appli : « données arrondies » une fois sur cinq, sinon le tirage d'origine (celui de
+ * l'adaptateur et des `?code=` libres, inchangé). */
+export function genererExercice56gen3Libre(): ExerciceDefinirSuite | ExerciceArrondies {
+  return Math.random() < 0.2 ? genererArrondies() : genererExerciceDefinirSuite();
+}
+
+export function variante56gen3(id: string): ExerciceDefinirSuite | ExerciceArrondies {
+  return id === "arrondies" ? genererArrondies() : construireAvecVarianteId(id as IdVarianteDefinirSuite);
+}
+
+export function App56gen3() {
+  return (
+    <AppMixte56<ExerciceDefinirSuite, ExerciceArrondies, PhaseArrondies>
+      catalogue={CATALOGUE_56GEN3}
+      genererLibreAdaptateur={genererExerciceDefinirSuite}
+      genererLibre={genererExercice56gen3Libre}
+      genererVariante={variante56gen3}
+      estNouvelle={estArrondies}
+      genererLibreNouvelle={genererArrondies}
+      rendreAncienne={(p) => <App56gen3Ancienne key={p.key} premier={p.premier} controle={p.controle} />}
+      configNouvelle={{ id: "56gen3", titre: "Définir et reconnaître une suite", eyebrow: "5e (6h) — Entraînement", sousTitre: "Nombres réels et suites", definition: DEFINITION_ARRONDIES }}
+    />
   );
 }

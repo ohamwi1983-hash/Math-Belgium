@@ -1,5 +1,9 @@
 // Copie 5e (6h) de `5e-4h/App5gen46.tsx` (56gen5 ← 5gen46, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
 import { useState } from "react";
+import type { PropsAncienne } from "./commun56/AppMixte56";
+import { AppMixte56 } from "./commun56/AppMixte56";
+import { CATALOGUE_TERMES56, DEFINITION_TERMES56, estTermes56, genererTermes56, varianteTermes56 } from "./generateurs56/troisTermes/nouvelles";
+import type { ExerciceTermes56, Phase56gen5 } from "./generateurs56/troisTermes/nouvelles";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "../5e-4h/core5e/session5e.types";
 import type { ExerciceTroisTermes } from "./generateurs56/troisTermes/core/troisTermes.types";
@@ -60,8 +64,8 @@ function reponseAttendue(e: ExerciceTroisTermes, phase: PhaseTroisTermes): React
   );
 }
 
-export function App56gen5() {
-  const [etat, setEtat] = useState<EtatSessionTroisTermes>(sessionInitiale);
+export function App56gen5Ancienne({ premier, controle }: PropsAncienne<ExerciceTroisTermes> = {}) {
+  const [etat, setEtat] = useState<EtatSessionTroisTermes>(() => (premier ? demarrerSessionTroisTermes(REGLAGES_DEMO, () => premier) : sessionInitiale()));
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
@@ -104,6 +108,10 @@ export function App56gen5() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
+      if (controle) {
+        controle.suivant();
+        return;
+      }
       reinitialiser(nouvelleSession());
       return;
     }
@@ -112,6 +120,10 @@ export function App56gen5() {
   }
 
   function forcerVariante(id: string) {
+    if (controle) {
+      controle.variante(id);
+      return;
+    }
     reinitialiser(demarrerSessionTroisTermes(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteTroisTermes)));
   }
 
@@ -148,7 +160,7 @@ export function App56gen5() {
         <p className="app-subtitle">Nombres réels et suites</p>
         <ProgressionPuces segments={calculerSegmentsProgressionTroisTermes(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
-      <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+      <SelecteurVarianteDev options={controle?.catalogue ?? CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
           <RecapitulatifPanel entrees={calculerRecapitulatifTroisTermes(etat)} />
@@ -180,5 +192,33 @@ export function App56gen5() {
         <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
       )}
     </div>
+  );
+}
+
+// --- 5e (6h) : « quatre termes » (somme, produit) et « triangle rectangle » en fin de catalogue (chantier D)
+const CATALOGUE_56GEN5 = [...CATALOGUE_VARIANTES, ...CATALOGUE_TERMES56];
+
+/** Tirage de l'appli : une des trois nouvelles variantes une fois sur trois, sinon le tirage d'origine
+ * (celui de l'adaptateur et des `?code=` libres, inchangé). */
+export function genererExercice56gen5Libre(): ExerciceTroisTermes | ExerciceTermes56 {
+  return Math.random() < 1 / 3 ? genererTermes56() : genererExerciceTroisTermes();
+}
+
+export function variante56gen5(id: string): ExerciceTroisTermes | ExerciceTermes56 {
+  return CATALOGUE_TERMES56.some((v) => v.id === id) ? varianteTermes56(id) : construireAvecVarianteId(id as IdVarianteTroisTermes);
+}
+
+export function App56gen5() {
+  return (
+    <AppMixte56<ExerciceTroisTermes, ExerciceTermes56, Phase56gen5>
+      catalogue={CATALOGUE_56GEN5}
+      genererLibreAdaptateur={genererExerciceTroisTermes}
+      genererLibre={genererExercice56gen5Libre}
+      genererVariante={variante56gen5}
+      estNouvelle={estTermes56}
+      genererLibreNouvelle={genererTermes56}
+      rendreAncienne={(p) => <App56gen5Ancienne key={p.key} premier={p.premier} controle={p.controle} />}
+      configNouvelle={{ id: "56gen5", titre: "Termes consécutifs d'une suite", eyebrow: "5e (6h) — Entraînement", sousTitre: "Nombres réels et suites", definition: DEFINITION_TERMES56 }}
+    />
   );
 }

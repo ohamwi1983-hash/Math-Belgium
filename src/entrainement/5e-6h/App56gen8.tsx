@@ -1,5 +1,9 @@
 // Copie 5e (6h) de `5e-4h/App5gen17.tsx` (56gen8 ← 5gen17, chantier D du 26/11/2026) — copiée pour que les deux années puissent diverger.
 import { useState } from "react";
+import type { PropsAncienne } from "./commun56/AppMixte56";
+import { AppMixte56 } from "./commun56/AppMixte56";
+import { CATALOGUE_FRACTALES, DEFINITION_FRACTALES, estFractale, genererFractale, varianteFractale } from "./generateurs56/suitesClassiques/fractales";
+import type { ExerciceFractale, PhaseFractale } from "./generateurs56/suitesClassiques/fractales";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "../5e-4h/core5e/session5e.types";
 import { CATALOGUE_SCENARIOS, construireAvecScenarioId, genererExerciceSuiteClassique } from "./generateurs56/suitesClassiques";
@@ -376,8 +380,8 @@ function diagnostiquerListe(exercice: ExerciceSuiteClassique, phase: PhaseSuiteC
   }
 }
 
-export function App56gen8() {
-  const [etat, setEtat] = useState<EtatSessionSuiteClassique>(sessionInitiale);
+export function App56gen8Ancienne({ premier, controle }: PropsAncienne<ExerciceSuiteClassique> = {}) {
+  const [etat, setEtat] = useState<EtatSessionSuiteClassique>(() => (premier ? demarrerSessionSuiteClassique(REGLAGES_DEMO, () => premier) : sessionInitiale()));
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
   /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
    * tenu ICI, à part de `EtatSessionSuiteClassique`, jamais dans le moteur. Remis à vide à chaque
@@ -428,6 +432,10 @@ export function App56gen8() {
   function passerEcranSuivant() {
     if (!enAttente) return;
     if (enAttente.etatSuivant.terminee) {
+      if (controle) {
+        controle.suivant();
+        return;
+      }
       setEtat(nouvelleSession());
       setNumeroSession((n) => n + 1);
       setHistorique([]);
@@ -439,6 +447,10 @@ export function App56gen8() {
   }
 
   function forcerVariante(id: string) {
+    if (controle) {
+      controle.variante(id);
+      return;
+    }
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeParPhase({});
@@ -476,7 +488,7 @@ export function App56gen8() {
         <p className="app-subtitle">Nombres réels et suites</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
-      <SelecteurVarianteDev options={CATALOGUE_SCENARIOS} onGenerer={forcerVariante} />
+      <SelecteurVarianteDev options={controle?.catalogue ?? CATALOGUE_SCENARIOS} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
           <RecapitulatifPanel entrees={calculerRecapitulatifSuiteClassique(etat)} />
@@ -556,5 +568,33 @@ export function App56gen8() {
         <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
       )}
     </div>
+  );
+}
+
+// --- 5e (6h) : famille « fractales » (von Koch, Sierpinski) ajoutée en fin de catalogue (chantier D) ---
+const CATALOGUE_56GEN8 = [...CATALOGUE_SCENARIOS, ...CATALOGUE_FRACTALES];
+
+/** Tirage de l'appli : une fractale une fois sur quatre, sinon le tirage d'origine (celui de
+ * l'adaptateur et des `?code=` libres, inchangé). */
+export function genererExercice56gen8Libre(): ExerciceSuiteClassique | ExerciceFractale {
+  return Math.random() < 0.25 ? genererFractale() : genererExerciceSuiteClassique();
+}
+
+export function variante56gen8(id: string): ExerciceSuiteClassique | ExerciceFractale {
+  return id === "koch" || id === "sierpinski" ? varianteFractale(id) : construireAvecScenarioId(id as ScenarioSuiteClassique);
+}
+
+export function App56gen8() {
+  return (
+    <AppMixte56<ExerciceSuiteClassique, ExerciceFractale, PhaseFractale>
+      catalogue={CATALOGUE_56GEN8}
+      genererLibreAdaptateur={genererExerciceSuiteClassique}
+      genererLibre={genererExercice56gen8Libre}
+      genererVariante={variante56gen8}
+      estNouvelle={estFractale}
+      genererLibreNouvelle={genererFractale}
+      rendreAncienne={(p) => <App56gen8Ancienne key={p.key} premier={p.premier} controle={p.controle} />}
+      configNouvelle={{ id: "56gen8", titre: "Problèmes classiques sur les suites", eyebrow: "5e (6h) — Entraînement", sousTitre: "Nombres réels et suites", definition: DEFINITION_FRACTALES, largeurFigure: 345 }}
+    />
   );
 }

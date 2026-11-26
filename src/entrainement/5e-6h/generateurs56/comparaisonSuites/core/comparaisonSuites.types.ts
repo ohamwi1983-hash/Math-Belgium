@@ -72,6 +72,8 @@ export interface ExerciceVillesCroissance extends ExerciceComparaisonSuitesCommu
   tauxPct: number;
   v1: number;
   d: number;
+  /** 5e (6h), variante « Malthus » (`malthus.ts`) : phrase d'introduction de l'énoncé. */
+  malthus?: true;
 }
 
 /** Côté A (arithmétique décroissant) vs côté B (arithmétique croissant) — B finit toujours par
