@@ -1485,6 +1485,11 @@ schéma `auth`, 0001 → 0010 + données, 0011 ×3, 0001 → 0010 relancés, 001
 8 niveaux, slug de 80 car., objet vide, NULL —, 23 valeurs invalides refusées — 23514, superutilisateur compris —, NULL du
 booléen — 23502 —, RLS croisé, insertion au nom d'un autre — 42501 —, `anon` — 42501 —, compte désactivé, suppression).
 
+**5e (6h), 26/11/2026 — aucune migration** : la clé `"5e-6h"` respecte déjà la contrainte (format d'un niveau, 4
+années ≤ 8 clés) ; la carte « Mon ordre » a un onglet par année de `LEVELS` (4 onglets), le carnet propose le niveau
+aux classes (`classes.niveau` / `seances.niveau` : `^[a-z0-9-]{1,20}$`, 0002). Le commentaire d'en-tête de 0011
+(« 4e, 5e 4h, 6e 6h ») n'est qu'un exemple : fichier inchangé, rien à recoller.
+
 **0011 pas appliquée** : `compteDonnees.ts::lireOrdreChapitres` → `{ actif: false }` (42703 / PGRST204 mentionnant
 `ordre_chapitres` / `ordre_sans_numero`, ou table absente) ; le site garde l'ordre du site et imprime le titre seul ; la carte
 du profil dit « Applique la migration 0011… » (boutons désactivés) ; rien n'est écrit.

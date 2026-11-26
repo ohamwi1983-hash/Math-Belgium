@@ -40,13 +40,21 @@ cherchant le chapitre correspondant dans `chaptersIndex.ts`.
 
 ## Structure de navigation
 
+- Années (`LEVELS` de `chaptersIndex.ts`, ordre des onglets partout) : `4e`, `5e-4h` « 5e (4h) », `5e-6h`
+  « 5e (6h) » (ajoutée le 26/11/2026 ; propre à ce dépôt : aucun générateur ni page d'évaluation chez
+  `plateforme-maths`, feuilles et évaluations générées localement, clé `5e|6H` du panneau, calculatrice
+  Casio Graph Math+), `6e-6h` « 6e (6h) ». Tout ce qui énumère les années lit `LEVELS` / `LEVEL_LABELS`
+  (accueil, recherche, Mon suivi, plan, carnet, coffre, « Mon ordre ») ; seuls endroits à compléter pour une
+  année de plus : `LEVEL_LABELS` (`entrainement/registry.ts`), `chapitresFonctionnels.ts` (+ `LEVELSLUGS_GENERATION_LOCALE`
+  d'`evaluationLocal.ts`), `NIVEAU_HEURES_VERS_LEVELSLUG` d'`evaluationPayload.ts`, `questionsFormules/index.ts`,
+  `LEVEL_TONE` d'`HomePage.tsx` (couleur par slug).
 - `/` — page d'accueil « Mon année d'abord » (`routes/HomePage.tsx`, maquettes A du 22/11/2026) :
   onglets d'année (`LEVELS`), choix mémorisé dans le navigateur (`lib/anneeAccueil.ts`, clé
   `accueil:annee` ; première visite sans choix ni historique : cartes « Tu es en… »), bandeau
   « Reprendre » (dernière étape ouverte DE CETTE ANNÉE, clé `parcours:derniere-etape`), « Préparer mon
   interro » (`/{niveau}/{chapitre}/exercices` du chapitre en cours, sinon `/exercice`), chapitres de
-  l'année avec leur progression (celle des pages de chapitre, jamais envoyée). Les trois années restent
-  dans le DOM (24 liens dans la page pré-rendue) : ce qui est montré dépend de `<html
+  l'année avec leur progression (celle des pages de chapitre, jamais envoyée). Les quatre années restent
+  dans le DOM (25 liens de chapitres dans la page pré-rendue, 26 pages pré-rendues) : ce qui est montré dépend de `<html
   data-annee-accueil>`, posé avant le JS par le script en ligne d'`index.html` (même logique que
   `anneeDeDepart`, à garder en accord). Recherche dans l'en-tête (`components/RechercheSite.tsx`, toutes
   les pages à `SiteHeader`) : titres de chapitres, d'étapes (`title`, `titreCourt`, `kicker`) et

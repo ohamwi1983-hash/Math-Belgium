@@ -330,7 +330,7 @@ export function HomePage() {
                 <CarteSuivi niveau={l.slug} />
               </div>
               <h2 className="accueil-liste-titre">
-                Les {pluriel(l.chapters.length, 'chapitre')} de {l.label}
+                {l.chapters.length === 1 ? `Le chapitre de ${l.label}` : `Les ${pluriel(l.chapters.length, 'chapitre')} de ${l.label}`}
               </h2>
               {/* Numéros du site = simple repère (décision du 25/11/2026) : le professeur peut suivre un autre ordre. */}
               <p className="accueil-ordre-note">Numérotés dans l'ordre du site : ton professeur peut les voir dans un autre ordre.</p>

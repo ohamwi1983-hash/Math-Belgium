@@ -38,5 +38,9 @@
 @media (max-width: 560px) {
   .ordre-fleche-texte { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .ordre-onglet { flex: 1 1 0; align-items: center; padding: 8px 6px; }
+  /* Quatre années (5e (6h), 26/11/2026) : les onglets se partagent la largeur, « ordre du site » passe
+     sur deux lignes au besoin — sinon le quatrième sortait de l'écran (défilement de la rangée). */
+  .ordre-onglet { min-width: 0; padding: 8px 4px; }
+  .ordre-onglet-etat { white-space: normal; text-align: center; line-height: 1.2; }
   .ordre-ligne { padding-left: 8px; gap: 8px; }
 }
