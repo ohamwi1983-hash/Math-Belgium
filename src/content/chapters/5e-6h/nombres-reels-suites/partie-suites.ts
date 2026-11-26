@@ -77,6 +77,13 @@ export const sectionsSuites: ChapterSection[] = [
         caption:
           'Groupe les termes 1⁄n par paquets de 1, 2, 4, 8… termes : chaque paquet vaut au moins 1⁄2 (Oresme). Les sommes partielles dépassent donc n’importe quel nombre, très lentement : il faut 12 367 termes pour dépasser 10.',
       },
+      {
+        kind: 'atelier',
+        tag: 'fractales-widget',
+        label: 'Manipule toi-même : flocon de von Koch et triangle de Sierpinski',
+        caption:
+          'Avance étape par étape. Le flocon de von Koch a une aire qui tend vers 2√3⁄5 (pour un triangle de départ de côté 1) et un périmètre qui tend vers +∞ ; le triangle de Sierpinski a une aire qui tend vers 0 et un périmètre total qui tend vers +∞. Le panneau écrit les suites géométriques qui le prouvent.',
+      },
       // ⟨fin-etape sommes-infinies⟩
     ],
   },

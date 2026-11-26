@@ -256,6 +256,7 @@ export type InteractiveWidgetTag =
   | 'phi-intervalles-widget'
   | 'calculatrice-prudence-widget'
   | 'serie-harmonique-widget'
+  | 'fractales-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }
