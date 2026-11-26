@@ -541,12 +541,9 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
 .prof-etiquette { margin: 0; display: flex; align-items: center; gap: 10px; font: 600 12px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); min-height: 44px; }
 .prof-pas { color: var(--accent-ink); }
 .prof-stylo { margin-left: auto; display: flex; align-items: center; gap: 4px; }
-.prof-palette { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
-.prof-palette .projection-palette { box-shadow: none; gap: 4px; padding: 4px 8px; }
-.prof-palette .projection-palette-nom { display: none; }
 .prof-stylo .projection-outil { color: var(--ink-soft); }
 .prof-stylo .projection-outil.actif { background: var(--ink); color: var(--surface); }
-.prof-scene { position: relative; flex: 1; min-height: 240px; background: #11171d; border-radius: 6px; }
+.prof-scene-zone { position: relative; flex: 1; min-height: 240px; background: #11171d; border-radius: 6px; overflow: hidden; }
 .prof-navigation { display: flex; gap: 10px; }
 .prof-nav { flex: 1; min-height: 56px; font-size: 17px; }
 .prof-cote { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
@@ -558,7 +555,7 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
 .prof-durees { display: flex; flex-wrap: wrap; gap: 6px; }
 @media (max-width: 900px) {
   .prof-corps { grid-template-columns: 1fr; }
-  .prof-scene { min-height: 200px; aspect-ratio: 16 / 9; flex: none; }
+  .prof-scene-zone { min-height: 200px; aspect-ratio: 16 / 9; flex: none; }
 }
 
 /* Atelier en plein écran : bouton de sortie flottant (en haut à gauche ; le minuteur occupe la droite),
@@ -631,11 +628,155 @@ body:has(.projection) { background: #11171d; overflow: hidden; }
 .projection-dialogue-etat { margin: 0; min-height: 1.4em; font: 500 14px/1.4 var(--sans); color: #51626f; }
 .projection-dialogue-etat.erreur { color: #b23a3a; }
 .prof-export { display: flex; justify-content: center; padding: 10px 18px 0; }
-.prof-palette .projection-palette--traceur { padding: 6px 8px; }
-.prof-palette .traceur-saisie { width: 200px; }
 .pages-traceur { display: inline-flex; align-items: center; gap: 6px; }
 .pages-traceur .katex { font-size: 1.05em; }
 .traceur-saisie { user-select: text; }
 /* Palettes et boîtes toujours claires (thème sombre du système compris) : cases à cocher et titres lisibles. */
 .projection-palette, .projection-accueil > div { color-scheme: light; }
 .projection-accueil h2 { color: #182430; }
+
+/* ---------- Palettes repliées en pastilles, zoom du repère, nuancier (décision du professeur du 27/11/2026) ----------
+   Tout est à GAUCHE : pastille du dessin en bas (au-dessus de la barre), colonne étroite au-dessus d'elle, nuancier à
+   côté ; petite barre de l'écran blanc en haut, traceur dessous. Toujours clairs (thème sombre du système compris), la
+   diapo reste claire. Cibles de 44 px (hors de la scène : pas mises à l'échelle). Vue du professeur : mêmes éléments,
+   posés sur la diapo projetée (`.prof-scene-zone`). */
+.projection-pastille, .projection-colonne, .projection-nuancier, .projection-blanc-barre, .projection-menu-fond, .eq-boutons { color-scheme: light; }
+.projection-pastille {
+  --bas: 68px;
+  position: absolute; left: 12px; bottom: var(--bas); z-index: 6; height: 56px; padding: 0 12px 0 8px; display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid #dfe7ec; border-radius: 999px; background: #fff; box-shadow: 0 6px 18px rgb(0 0 0 / 0.16); cursor: pointer;
+}
+.projection-pastille:hover { background: #f4f7f9; }
+.projection-pastille.ouverte { box-shadow: 0 0 0 3px #182430, 0 6px 18px rgb(0 0 0 / 0.16); }
+.projection-pastille:focus-visible { outline: 3px solid #b65c1f; outline-offset: 3px; }
+.pastille-encre {
+  position: relative; width: 38px; height: 38px; border-radius: 50%; border: 3px solid #fff; background: var(--c); box-shadow: 0 0 0 1px #ccd8e0; flex: none;
+  display: inline-flex; align-items: center; justify-content: center; color: #33434f;
+}
+.pastille-encre.fluo { border-radius: 8px; height: 30px; }
+.pastille-encre.gomme { background: #f2f5f7; }
+.pastille-trait { width: 18px; height: var(--e); border-radius: 999px; background: var(--c); flex: none; }
+.pastille-outil {
+  position: absolute; left: 34px; top: 30px; width: 22px; height: 22px; border-radius: 50%; background: #182430; color: #fff;
+  display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px #fff;
+}
+.projection-colonne {
+  position: absolute; left: 12px; bottom: calc(var(--bas, 68px) + 64px); z-index: 6; width: max-content; max-height: calc(100% - var(--bas, 68px) - 72px);
+  overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: thin;
+  display: flex; flex-direction: column; gap: 4px; padding: 6px 6px 8px; background: #fff; border: 1px solid #dfe7ec; border-radius: 12px;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.18); user-select: none;
+}
+.colonne-nom { margin: 4px 0 0; text-align: center; font: 500 11px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: #6b7a86; }
+.colonne-grille { display: grid; grid-template-columns: repeat(3, 44px); gap: 4px; justify-content: center; }
+.projection-colonne .projection-couleur { width: 44px; height: 44px; border-width: 4px; }
+.projection-colonne .projection-fluo { width: 44px; height: 44px; border-radius: 9px; border-width: 7px 3px; }
+.projection-colonne .projection-epaisseur, .projection-colonne .projection-outil { width: 44px; min-width: 44px; height: 44px; padding: 0; }
+.projection-colonne .projection-outil { border-radius: 6px; }
+.colonne-nuancier {
+  margin-top: 6px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 10px;
+  border: 1px solid #ccd8e0; border-radius: 999px; background: #fff; color: #182430; font: 600 14px var(--sans); cursor: pointer;
+}
+.colonne-nuancier:hover { background: #eef2f5; }
+.colonne-nuancier.actif { background: #182430; border-color: #182430; color: #fff; }
+.colonne-nuancier:focus-visible, .nuancier-case:focus-visible, .menu-fond-choix:focus-visible, .eq-bouton:focus-visible { outline: 3px solid #b65c1f; outline-offset: 2px; }
+.projection-nuancier {
+  position: absolute; left: 176px; bottom: calc(var(--bas, 68px) + 64px); z-index: 6; width: max-content; max-width: calc(100% - 184px);
+  max-height: calc(100% - var(--bas, 68px) - 72px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin;
+  display: flex; flex-direction: column; gap: 8px; padding: 8px 10px 10px; background: #fff; border: 1px solid #dfe7ec; border-radius: 12px;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.18); color: #182430; user-select: none;
+}
+.nuancier-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.nuancier-onglets { display: flex; gap: 4px; }
+.nuancier-onglets .projection-duree { min-height: 44px; }
+.nuancier-onglets .projection-duree[aria-checked="true"] { background: #182430; border-color: #182430; color: #fff; }
+.nuancier-grille { display: grid; grid-template-columns: repeat(6, 44px); gap: 4px; }
+.nuancier-case { width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 4px solid #fff; background: var(--c); box-shadow: 0 0 0 1px #ccd8e0; cursor: pointer; }
+.nuancier-grille.fluo .nuancier-case { border-radius: 9px; border-width: 7px 3px; }
+.nuancier-case.actif { box-shadow: 0 0 0 3px #182430; }
+.nuancier-titre { margin: 2px 0 0; font: 500 11px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: #6b7a86; }
+.nuancier-reglage { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 2px 10px; }
+.nuancier-reglage label { font: 600 14px var(--sans); color: #33434f; }
+.nuancier-curseur { -webkit-appearance: none; appearance: none; width: 100%; height: 44px; margin: 0; background: transparent; cursor: pointer; }
+.nuancier-curseur:focus-visible { outline: 3px solid #b65c1f; outline-offset: 2px; border-radius: 8px; }
+.nuancier-curseur::-webkit-slider-runnable-track { height: 18px; border-radius: 9px; border: 1px solid #ccd8e0; background: var(--piste); }
+.nuancier-curseur::-moz-range-track { height: 18px; border-radius: 9px; border: 1px solid #ccd8e0; background: var(--piste); }
+.nuancier-curseur::-webkit-slider-thumb { -webkit-appearance: none; width: 32px; height: 32px; margin-top: -8px; border-radius: 50%; border: 3px solid #182430; background: #fff; box-shadow: 0 2px 6px rgb(0 0 0 / 0.25); }
+.nuancier-curseur::-moz-range-thumb { width: 28px; height: 28px; border-radius: 50%; border: 3px solid #182430; background: #fff; }
+.nuancier-curseur.teinte { --piste: linear-gradient(to right, hsl(0 72% 40%), hsl(60 85% 32%), hsl(120 72% 32%), hsl(180 72% 32%), hsl(240 72% 45%), hsl(300 72% 40%), hsl(360 72% 40%)); }
+.nuancier-curseur.teinte.fluo { --piste: linear-gradient(to right, hsl(0 100% 76%), hsl(60 100% 76%), hsl(120 100% 76%), hsl(180 100% 76%), hsl(240 100% 76%), hsl(300 100% 76%), hsl(360 100% 76%)); }
+.nuancier-curseur.clarte { --piste: linear-gradient(to right, hsl(var(--h) 70% 15%), hsl(var(--h) 70% 50%)); }
+.nuancier-choix { display: flex; align-items: center; gap: 10px; }
+.nuancier-apercu { width: 44px; height: 44px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1px #ccd8e0; flex: none; }
+.nuancier-apercu.fluo { border-radius: 9px; }
+.nuancier-prendre { flex: 1; min-height: 44px; }
+
+/* Écran blanc : petite barre en haut à gauche (masquée avec la barre du bas, sauf menu / traceur dépliés) */
+.projection-blanc-outils {
+  --bas-outils: 140px;
+  position: absolute; left: 8px; top: 8px; z-index: 6; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  max-height: calc(100% - 8px - var(--bas-outils)); max-width: calc(100% - 16px); pointer-events: none; transition: opacity 0.25s;
+}
+.projection-blanc-outils > * { pointer-events: auto; }
+.projection-blanc-outils.masquee { opacity: 0; }
+.projection-blanc-outils.masquee > * { pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .projection-blanc-outils { transition: none; } }
+.projection-blanc-barre {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 4px; background: rgb(255 255 255 / 0.96); border: 1px solid #dfe7ec;
+  border-radius: 10px; box-shadow: 0 6px 18px rgb(0 0 0 / 0.14); color: #51626f; flex: none;
+}
+.projection-blanc-barre .projection-outil { padding: 0 8px; border-radius: 6px; }
+.projection-blanc-barre .projection-outil:disabled { opacity: 0.35; cursor: default; background: transparent; }
+.projection-blanc-barre .projection-separateur { margin: 0 3px; }
+.projection-blanc-barre .pages-compteur { min-width: 56px; }
+.blanc-fond { gap: 0; }
+.blanc-traceur { font-size: 17px; }
+.blanc-traceur .math-inline { overflow: visible; white-space: nowrap; }
+.projection-menu-fond {
+  display: flex; flex-direction: column; gap: 2px; min-width: 230px; padding: 6px; background: #fff; border: 1px solid #dfe7ec; border-radius: 10px;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.18); flex: none;
+}
+.menu-fond-choix {
+  display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: #182430;
+  font: 600 15px var(--sans); cursor: pointer; text-align: left;
+}
+.menu-fond-choix:hover, .menu-fond-choix[aria-checked="true"] { background: #eef2f5; }
+.menu-fond-choix > svg + svg { margin-left: auto; color: #2f7a4f; }
+.menu-supprimer { color: #b23a3a; }
+.menu-separateur { height: 1px; margin: 4px 6px; background: #e4eaee; }
+.menu-confirmer p { margin: 6px 8px; max-width: 260px; font: 600 15px/1.35 var(--sans); color: #182430; }
+.menu-confirmer > div { display: flex; gap: 8px; padding: 4px 8px 6px; }
+/* Traceur : panneau étroit sous la barre */
+.projection-blanc-outils .projection-palette--traceur {
+  width: 300px; max-width: 100%; box-sizing: border-box; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin;
+  flex-wrap: nowrap; align-items: stretch; justify-content: flex-start; padding: 8px 10px 10px; gap: 8px; border-radius: 12px;
+}
+.projection-blanc-outils .traceur-ligne { justify-content: flex-start; }
+.projection-blanc-outils .traceur-saisie { flex: 1 1 160px; width: auto; min-width: 0; }
+.projection-blanc-outils .traceur-apercu { flex: 1 0 100%; max-width: 100%; }
+.projection-blanc-outils .traceur-liste { flex: 1 0 100%; flex-direction: column; justify-content: flex-start; }
+.projection-blanc-outils .traceur-courbe { justify-content: space-between; }
+.projection-blanc-outils .traceur-groupe { flex-wrap: wrap; }
+.projection-blanc-outils .traceur-axe { flex: 1 0 100%; margin: 4px 0 0; }
+.projection-blanc-outils .projection-separateur { display: none; }
+
+/* Vue du professeur : posés sur la diapo projetée */
+.prof-scene-zone .projection-pastille { --bas: 8px; left: 8px; }
+.prof-scene-zone .projection-colonne { left: 8px; }
+.prof-scene-zone .projection-nuancier { left: 172px; }
+.prof-scene-zone .projection-blanc-outils { --bas-outils: 76px; }
+
+/* Repère, sans outil : glisser = déplacer la vue */
+.projection-vue { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; pointer-events: auto; touch-action: none; cursor: grab; }
+.projection-vue:active { cursor: grabbing; }
+
+/* Réglages de l'équerre collés à elle (px logiques de la scène ; `--cible` = 44 px RÉELS) */
+.eq-boutons {
+  position: absolute; display: flex; align-items: center; background: #fff; border: 1px solid #ccd8e0; border-radius: calc(var(--cible) * 0.28);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.14); pointer-events: auto; touch-action: manipulation;
+}
+.eq-bouton {
+  width: var(--cible); height: var(--cible); padding: 0; border: 1px solid #ccd8e0; border-radius: calc(var(--cible) * 0.2); background: #fff; color: #1f4e7d;
+  display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.eq-bouton:hover { background: #eef2f5; }
+.eq-bouton.actif { background: #182430; border-color: #182430; color: #fff; }

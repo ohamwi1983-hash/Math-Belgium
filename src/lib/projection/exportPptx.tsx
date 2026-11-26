@@ -14,6 +14,7 @@ import { libelleChapitre, surtitreChapitre } from '../ordreChapitres'
 import { cleDiapo, clePageBlanche, pageBlancheUtile } from './annotations'
 import type { Courbe, DonneesAnnotations, ElementAnnotation, Epingle, PageBlanche } from './annotations'
 import { peindreCourbes, peindreTraits } from './peinture'
+import { transfoPage, versEcran } from './vue'
 import { lireFonction } from './traceur'
 
 /**
@@ -246,16 +247,21 @@ function toile(): [HTMLCanvasElement, CanvasRenderingContext2D] {
 /** Étiquettes KaTeX d'une page (résultats épinglés, noms des courbes, points remarquables) : calque transparent. */
 function CalqueEtiquettes({ elements, page }: { elements: ElementAnnotation[]; page: PageBlanche | null }) {
   const courbes = elements.filter((e): e is Courbe => e.genre === 'courbe')
+  // Page « repère » zoomée : exportée telle qu'elle est vue (dernière vue), résultats épinglés compris.
+  const t = transfoPage(page)
   return (
     <>
       {page?.fond === 'repere' && courbes.length > 0 && <EtiquettesCourbes courbes={courbes} page={page} />}
       {elements
         .filter((e): e is Epingle => e.genre === 'epingle')
-        .map((e) => (
-          <div key={e.id} className="projection-epingle" style={{ left: e.x, top: e.y }}>
-            <MathInline tex={e.latex} />
-          </div>
-        ))}
+        .map((e) => {
+          const [x, y] = versEcran(t, [e.x, e.y])
+          return (
+            <div key={e.id} className="projection-epingle" style={{ left: x, top: y }}>
+              <MathInline tex={e.latex} />
+            </div>
+          )
+        })}
     </>
   )
 }
@@ -279,7 +285,7 @@ function Planche({ elements, pages, chapter, pret }: { elements: Element[]; page
         return (
           <div key={`${e.page}-${i}`} data-i={i}>
             <div className="pptx-diapo" style={taille}>
-              {e.genre === 'diapo' ? <Diapo diapo={e.d} chapter={chapter} pas={e.d.pas} mode="export" /> : <FondBlancTableau fond={e.p.fond} ex={e.p.ex} ey={e.p.ey} />}
+              {e.genre === 'diapo' ? <Diapo diapo={e.d} chapter={chapter} pas={e.d.pas} mode="export" /> : <FondBlancTableau fond={e.p.fond} ex={e.p.ex} ey={e.p.ey} vue={e.p.vue} />}
             </div>
             {aDesEtiquettes(liste, blanche) && (
               <div className="pptx-calque" style={taille}>
@@ -304,7 +310,7 @@ function Planche({ elements, pages, chapter, pret }: { elements: Element[]; page
 async function calques(elements: ElementAnnotation[], page: PageBlanche | null, fond: HTMLCanvasElement, etiquettes: HTMLElement | null, css: string): Promise<{ fluo: HTMLCanvasElement | null; stylo: HTMLCanvasElement | null }> {
   const [cf, xf] = toile()
   const [cs, xs] = toile()
-  peindreTraits(xf, xs, elements, ECHELLE_IMAGE)
+  peindreTraits(xf, xs, elements, ECHELLE_IMAGE, transfoPage(page))
   const avecFluo = elements.some((e) => (e.genre === undefined || e.genre === 'trait') && e.fluo && !e.gomme)
   const avecStylo = elements.some((e) => e.genre === 'arc' || e.genre === 'epingle' || e.genre === 'courbe' || ((e.genre === undefined || e.genre === 'trait') && !e.fluo && !e.gomme))
   let fluo: HTMLCanvasElement | null = null

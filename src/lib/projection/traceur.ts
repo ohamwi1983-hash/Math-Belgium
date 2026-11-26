@@ -25,9 +25,12 @@ const OY = HAUTEUR_REPERE / 2
 export const ECHELLES = [0.5, 1, 2, 5, 10] as const
 
 export interface Repere {
-  /** Unités par carreau en abscisse / en ordonnée. */
+  /** Unités par carreau (40 px d'écran) en abscisse / en ordonnée. */
   ex: number
   ey: number
+  /** Point du repère au centre de l'écran (vue zoomée / déplacée, voir `vue.ts`) ; absent = l'origine. */
+  cx?: number
+  cy?: number
 }
 
 export type Fonction = (x: number) => number
@@ -152,9 +155,9 @@ export function lireFonction(saisie: string, mode: ModeAngle): LectureFonction {
 
 // ---------- repère : unités ↔ pixels logiques ----------
 
-export const versPxX = (x: number, r: Repere) => OX + (x / r.ex) * CARREAU_REPERE
-export const versPxY = (y: number, r: Repere) => OY - (y / r.ey) * CARREAU_REPERE
-export const depuisPxX = (px: number, r: Repere) => ((px - OX) / CARREAU_REPERE) * r.ex
+export const versPxX = (x: number, r: Repere) => OX + ((x - (r.cx ?? 0)) / r.ex) * CARREAU_REPERE
+export const versPxY = (y: number, r: Repere) => OY - ((y - (r.cy ?? 0)) / r.ey) * CARREAU_REPERE
+export const depuisPxX = (px: number, r: Repere) => (r.cx ?? 0) + ((px - OX) / CARREAU_REPERE) * r.ex
 export const xMin = (r: Repere) => depuisPxX(0, r)
 export const xMax = (r: Repere) => depuisPxX(LARGEUR_REPERE, r)
 
@@ -464,7 +467,7 @@ export const NOMS_COURBES = ['f', 'g', 'h', 'k', 'm', 'p', 'q', 'r', 's', 'u', '
 const memoire = new Map<string, { f: Fonction | null; polylignes: Polyligne[] }>()
 
 export function traceMemorise(saisie: string, mode: ModeAngle, r: Repere): { f: Fonction | null; polylignes: Polyligne[] } {
-  const cle = `${mode}|${r.ex}|${r.ey}|${saisie}`
+  const cle = `${mode}|${r.ex}|${r.ey}|${r.cx ?? 0}|${r.cy ?? 0}|${saisie}`
   let m = memoire.get(cle)
   if (!m) {
     const l = lireFonction(saisie, mode)

@@ -11,7 +11,8 @@ import { HAUTEUR, LARGEUR } from './Scene'
 import type { Arc, Epingle, FondBlanc, PageBlanche, Projection, Trait } from './useProjection'
 import type { MagasinAnnotations } from './magasinAnnotations'
 import { peindreCourbes, peindreTraits } from '../../lib/projection/peinture'
-import { texteGraduation } from '../../lib/projection/traceur'
+import { decimalesPas, deplacer, graduations, texteGraduationPas, transfoPage, versEcran, versPage, vueDe, zoomer } from '../../lib/projection/vue'
+import type { Transfo, VueRepere } from '../../lib/projection/vue'
 import { EtiquettesCourbes } from './Traceur'
 
 /** Unité commune du quadrillage, des graduations de l'équerre et du rayon du compas : 1 carreau = 40 px logiques
@@ -121,6 +122,37 @@ function texteLongueur(px: number, grille: boolean) {
 }
 const texteRayon = (r: number, grille: boolean) => `r = ${texteLongueur(r, grille)}`
 
+/**
+ * Grille de la page affichée (aimant du compas, unité affichée) : quadrillé = carreaux de 40 px ; repère = graduations
+ * de la VUE (zoom compris). `carreaux40` : la grille fait 40 px (le compas et l'équerre parlent en « carreaux ») ;
+ * `unite` : unités du repère par px d'écran quand les deux axes ont la même échelle (rayon du compas en unités).
+ */
+interface Grille {
+  pasX: number
+  pasY: number
+  ox: number
+  oy: number
+  carreaux40: boolean
+  unite: number | null
+  pas: number
+}
+function grilleDe(blanche: PageBlanche | null): Grille | null {
+  if (!blanche || blanche.fond === 'uni') return null
+  if (blanche.fond === 'quadrille') return { pasX: CARREAU, pasY: CARREAU, ox: 0, oy: 0, carreaux40: true, unite: null, pas: 1 }
+  const v = vueDe(blanche)
+  const g = graduations(v)
+  const pasX = (g.pasX / v.ex) * CARREAU
+  const pasY = (g.pasY / v.ey) * CARREAU
+  return { pasX, pasY, ox: g.axeX, oy: g.axeY, carreaux40: Math.abs(pasX - CARREAU) < 0.01 && Math.abs(pasY - CARREAU) < 0.01, unite: v.ex === v.ey ? v.ex / CARREAU : null, pas: g.pasX }
+}
+/** Rayon du compas : en unités du repère (repère aux axes de même échelle), sinon en carreaux / « u » de 40 px. */
+function texteRayonGrille(r: number, g: Grille | null): string {
+  if (g?.unite == null) return texteRayon(r, !!g?.carreaux40)
+  const d = Math.min(4, decimalesPas(g.pas) + 1)
+  const n = Number((r * g.unite).toFixed(d))
+  return `r = ${String(n).replace('.', ',')} ${n <= 1 ? 'unité' : 'unités'}`
+}
+
 type Geste =
   | { g: 'trait'; trait: Trait }
   /** Tracé le long d'un bord de l'équerre (repère de l'équerre figé au départ ; `ajoute` après 4 px réels de mouvement). */
@@ -130,6 +162,8 @@ type Geste =
   | { g: 'deplacer'; dx: number; dy: number }
   | { g: 'tourner' }
   | { g: 'epingle'; el: Epingle; dx: number; dy: number }
+  /** Déplacement de la vue d'une page « repère » (souris sans outil, un doigt sans outil). */
+  | { g: 'vue'; depart: P; vue0: VueRepere; bouge: boolean }
 
 /**
  * Tableau du mode projection, par-dessus la diapo, en coordonnées de la diapo (1 280 × 720) :
@@ -152,7 +186,7 @@ export function Annotations({
   outils,
   echelle,
   role,
-  grille,
+  surEcrire,
 }: {
   projection: Projection
   magasin: MagasinInstruments
@@ -165,7 +199,8 @@ export function Annotations({
   outils: OutilsLocaux
   echelle: number
   role: Role
-  grille: boolean
+  /** Appelé dès qu'on pose le stylo / le doigt pour écrire (trait, règle, compas) : les palettes se replient. */
+  surEcrire?: () => void
 }) {
   const canvasCourbes = useRef<HTMLCanvasElement>(null)
   const canvasFluo = useRef<HTMLCanvasElement>(null)
@@ -179,8 +214,16 @@ export function Annotations({
   blancheRef.current = blanche
   const outilsRef = useRef(outils)
   outilsRef.current = outils
+  const grille = grilleDe(blanche)
   const grilleRef = useRef(grille)
   grilleRef.current = grille
+  // Page « repère » zoomée : annotations stockées dans la page, affichées par cette transformation (`vue.ts`).
+  const transfo = transfoPage(blanche)
+  const transfoRef = useRef<Transfo>(transfo)
+  transfoRef.current = transfo
+  const surEcrireRef = useRef(surEcrire)
+  surEcrireRef.current = surEcrire
+  const repere = blanche?.fond === 'repere'
   const echelleRef = useRef(echelle)
   echelleRef.current = echelle
   const geste = useRef<Geste | null>(null)
@@ -195,7 +238,7 @@ export function Annotations({
     const xf = canvasFluo.current?.getContext('2d')
     const xs = canvasStylo.current?.getContext('2d')
     if (!xf || !xs) return
-    peindreTraits(xf, xs, annotations.liste(pageRef.current), xs.canvas.width / LARGEUR)
+    peindreTraits(xf, xs, annotations.liste(pageRef.current), xs.canvas.width / LARGEUR, transfoRef.current)
   }, [annotations])
 
   const dessinerCourbes = useCallback(() => {
@@ -223,10 +266,12 @@ export function Annotations({
     dessiner()
     setVersion((v) => v + 1)
   }, [page, dessiner])
-  // Changement de page ou de repère (échelle, angles, fond) : les courbes sont recalculées depuis leur expression.
+  // Changement de page ou de repère (échelle, vue, angles, fond) : les courbes sont recalculées depuis leur expression,
+  // les traits suivent le graphique.
   useEffect(() => {
     dessinerCourbes()
-  }, [page, blanche, dessinerCourbes])
+    dessiner()
+  }, [page, blanche, dessinerCourbes, dessiner])
 
   // Tout changement (ici ou reçu de l'autre fenêtre) sur la page affichée : repeindre ; élément ajouté ou retiré : re-rendu.
   useEffect(
@@ -299,15 +344,15 @@ export function Annotations({
     const o = outilsRef.current
     switch (g.g) {
       case 'trait':
-        annotations.point(pageRef.current, g.trait, p)
+        annotations.point(pageRef.current, g.trait, versPage(transfoRef.current, p))
         return
       case 'regle': {
         if (!g.ajoute && Math.hypot(p[0] - g.p0[0], p[1] - g.p0[1]) * Math.max(echelleRef.current, 0.01) < 4) return
         let { q } = projeter(versEquerre(g.eq, p), g.a, g.b)
         if (g.hyp && !g.droite) q = [surGraduation(q[0]), 0]
-        const points: P[] = g.droite
-          ? droiteDansDiapo(depuisEquerre(g.eq, g.a), depuisEquerre(g.eq, g.b))
-          : [depuisEquerre(g.eq, g.depart), depuisEquerre(g.eq, q)]
+        const points: P[] = (g.droite ? droiteDansDiapo(depuisEquerre(g.eq, g.a), depuisEquerre(g.eq, g.b)) : [depuisEquerre(g.eq, g.depart), depuisEquerre(g.eq, q)]).map((x) =>
+          versPage(transfoRef.current, x),
+        )
         g.trait = { ...g.trait, points }
         if (!g.ajoute) {
           g.ajoute = true
@@ -321,9 +366,12 @@ export function Annotations({
         if (!c) return
         const d = Math.hypot(p[0] - c.cx, p[1] - c.cy)
         let r = d
-        if (grilleRef.current) {
-          const demi = Math.round((d / CARREAU) * 2) / 2
-          if (Math.abs(d - demi * CARREAU) <= 4) r = demi * CARREAU
+        const gr = grilleRef.current
+        if (gr) {
+          // Aimant sur le demi-carreau (quadrillé) / la demi-graduation (repère aux axes de même échelle).
+          const pas = gr.pasX === gr.pasY ? gr.pasX : CARREAU
+          const demi = Math.round((d / pas) * 2) / 2
+          if (Math.abs(d - demi * pas) <= 4) r = demi * pas
         }
         magasin.compas({ ...c, r: arrondi(r), angle: d > 0.5 ? Math.atan2(p[1] - c.cy, p[0] - c.cx) : c.angle })
         return
@@ -353,10 +401,19 @@ export function Annotations({
         magasin.equerre({ angle: cranRotation(brut) })
         return
       }
-      case 'epingle':
-        g.el = { ...g.el, x: arrondi(borne(p[0] - g.dx, 0, LARGEUR - 40)), y: arrondi(borne(p[1] - g.dy, 0, HAUTEUR - 30)) }
+      case 'epingle': {
+        const [x, y] = versPage(transfoRef.current, [arrondi(borne(p[0] - g.dx, 0, LARGEUR - 40)), arrondi(borne(p[1] - g.dy, 0, HAUTEUR - 30))])
+        g.el = { ...g.el, x, y }
         remplacer(g.el)
         return
+      }
+      case 'vue': {
+        const [dx, dy] = [p[0] - g.depart[0], p[1] - g.depart[1]]
+        if (!g.bouge && Math.hypot(dx, dy) * Math.max(echelleRef.current, 0.01) < 4) return
+        g.bouge = true
+        projection.majVue(deplacer(g.vue0, dx, dy))
+        return
+      }
     }
   }
 
@@ -404,23 +461,44 @@ export function Annotations({
   }
 
   const couleurTrait = (o: OutilsLocaux) => (o.outil === 'fluo' ? o.fluo : o.couleur)
-  const epaisseur = (o: OutilsLocaux) => (o.outil === 'fluo' ? 22 : o.outil === 'gomme' ? 44 : EPAISSEURS[o.epaisseur])
+  /** Épaisseur stockée dans la page : celle de l'écran ramenée au zoom (elle suit ensuite le graphique). */
+  const epaisseur = (o: OutilsLocaux) => (o.outil === 'fluo' ? 22 : o.outil === 'gomme' ? 44 : EPAISSEURS[o.epaisseur]) / transfoRef.current.s
+
+  /** Abandon du geste en cours (deuxième doigt posé : on pince) — ce qu'il avait commencé à écrire part. */
+  const abandonnerGeste = () => {
+    const g = geste.current
+    geste.current = null
+    if (!g) return
+    if (g.g === 'trait') retirer(g.trait.id)
+    else if (g.g === 'regle' && g.ajoute) {
+      retirer(g.trait.id)
+      magasin.equerre({ mesure: null })
+    } else if (g.g === 'arc' && g.ajoute) retirer(g.arc.id)
+    else if (g.g === 'rayon') magasin.compas(null)
+    else if (g.g === 'tourner') setTourne(false)
+  }
 
   const debutCompas = (e: React.PointerEvent, p: P) => {
     const o = outilsRef.current
     const c = magasin.lire().compas
+    surEcrireRef.current?.()
     if (c && c.phase === 'arc' && Math.hypot(p[0] - c.cx, p[1] - c.cy) > Math.max(24, 0.35 * c.r)) {
       const a = Math.atan2(p[1] - c.cy, p[0] - c.cx)
-      const arc: Arc = { genre: 'arc', id: nouvelId(id), couleur: o.couleur, epaisseur: EPAISSEURS[o.epaisseur], cx: c.cx, cy: c.cy, r: c.r, a0: a, a1: a }
+      // Arc stocké dans la page (repère zoomé : centre et rayons ramenés ; axes d'échelles différentes : ellipse dans
+      // la page, cercle à l'écran).
+      const t = transfoRef.current
+      const [pcx, pcy] = versPage(t, [c.cx, c.cy])
+      const arc: Arc = { genre: 'arc', id: nouvelId(id), couleur: o.couleur, epaisseur: EPAISSEURS[o.epaisseur] / t.s, cx: pcx, cy: pcy, r: c.r / t.zx, ...(t.zx !== t.zy ? { ry: c.r / t.zy } : {}), a0: a, a1: a }
       magasin.compas({ ...c, angle: a })
       commencer(e, { g: 'arc', arc, dernier: a, ajoute: false })
       return
     }
     // Nouveau centre (aimanté sur un nœud du quadrillage à moins de 10 px).
     let centre = p
-    if (grilleRef.current) {
-      const n: P = [Math.round(p[0] / CARREAU) * CARREAU, Math.round(p[1] / CARREAU) * CARREAU]
-      if (Math.hypot(n[0] - p[0], n[1] - p[1]) <= 10) centre = n
+    const gr = grilleRef.current
+    if (gr) {
+      const n: P = [gr.ox + Math.round((p[0] - gr.ox) / gr.pasX) * gr.pasX, gr.oy + Math.round((p[1] - gr.oy) / gr.pasY) * gr.pasY]
+      if (Math.hypot(n[0] - p[0], n[1] - p[1]) <= 10) centre = [arrondi(n[0]), arrondi(n[1])]
     }
     magasin.compas({ cx: centre[0], cy: centre[1], r: 0, angle: -Math.PI / 4, phase: 'rayon' })
     commencer(e, { g: 'rayon' })
@@ -430,7 +508,8 @@ export function Annotations({
   const debutOutil = (e: React.PointerEvent, p: P) => {
     const o = outilsRef.current
     if (o.outil === 'compas') return debutCompas(e, p)
-    const trait: Trait = { id: nouvelId(id), couleur: couleurTrait(o), gomme: o.outil === 'gomme', fluo: o.outil === 'fluo', epaisseur: epaisseur(o), points: [p] }
+    surEcrireRef.current?.()
+    const trait: Trait = { id: nouvelId(id), couleur: couleurTrait(o), gomme: o.outil === 'gomme', fluo: o.outil === 'fluo', epaisseur: epaisseur(o), points: [versPage(transfoRef.current, p)] }
     commencer(e, { g: 'trait', trait })
     annotations.commencerTrait(pageRef.current, trait)
   }
@@ -459,7 +538,8 @@ export function Annotations({
       let depart = projeter(l, a, b).q
       if (hyp && !droite) depart = [surGraduation(depart[0]), 0]
       const fluo = o.stylo && o.outil === 'fluo'
-      const trait: Trait = { id: nouvelId(id), couleur: fluo ? o.fluo : o.couleur, gomme: false, fluo, epaisseur: fluo ? 22 : EPAISSEURS[o.epaisseur], points: [] }
+      surEcrireRef.current?.()
+      const trait: Trait = { id: nouvelId(id), couleur: fluo ? o.fluo : o.couleur, gomme: false, fluo, epaisseur: (fluo ? 22 : EPAISSEURS[o.epaisseur]) / transfoRef.current.s, points: [], ...(droite ? { droite: true } : {}) }
       commencer(e, { g: 'regle', trait, eq, a, b, depart, p0: p, hyp, droite, ajoute: false })
       return
     }
@@ -480,6 +560,84 @@ export function Annotations({
     e.currentTarget.dataset.bord = pres ? 'oui' : 'non'
   }
 
+  /** Page « repère », sans outil : glisser (souris, un doigt) = déplacer la vue. */
+  const surVue = (e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return
+    const b = blancheRef.current
+    if (!b) return
+    commencer(e, { g: 'vue', depart: versDiapo(e.clientX, e.clientY), vue0: vueDe(b), bouge: false })
+  }
+
+  // ---------- zoom du repère : pincer à deux doigts (et glisser à deux doigts), molette ----------
+  const touches = useRef(new Map<number, P>())
+  const pince = useRef<{ a: number; b: number; d0: number; m0: P; vue0: VueRepere } | null>(null)
+  useEffect(() => {
+    if (!repere) return
+    const exclus = '.projection-barre, .projection-blanc-outils, .projection-colonne, .projection-nuancier, .projection-pastille, .projection-calc, .eq-boutons, .projection-palettes, .projection-ensemble, .prof-cote, .prof-tete'
+    const dansScene = (x: number, y: number) => {
+      const r = racine.current?.getBoundingClientRect()
+      return !!r && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom
+    }
+    const surDown = (e: PointerEvent) => {
+      if (e.pointerType !== 'touch' || !dansScene(e.clientX, e.clientY) || (e.target as Element | null)?.closest?.(exclus)) return
+      touches.current.set(e.pointerId, versDiapo(e.clientX, e.clientY))
+      if (touches.current.size >= 2) {
+        // Deuxième doigt : ce que le premier écrivait part, on pince (le deuxième appui n'écrit rien).
+        e.stopPropagation()
+        e.preventDefault()
+        if (pince.current) return
+        const b = projection.pageBlancheActuelle()
+        if (!b) return
+        abandonnerGeste()
+        const [[ia, pa], [ib, pb]] = [...touches.current]
+        pince.current = { a: ia, b: ib, d0: Math.max(1, Math.hypot(pb[0] - pa[0], pb[1] - pa[1])), m0: [(pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2], vue0: vueDe(b) }
+      }
+    }
+    const surMove = (e: PointerEvent) => {
+      if (!touches.current.has(e.pointerId)) return
+      touches.current.set(e.pointerId, versDiapo(e.clientX, e.clientY))
+      const pc = pince.current
+      if (!pc) return
+      e.preventDefault()
+      const pa = touches.current.get(pc.a)
+      const pb = touches.current.get(pc.b)
+      if (!pa || !pb) return
+      const d = Math.max(1, Math.hypot(pb[0] - pa[0], pb[1] - pa[1]))
+      const m: P = [(pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2]
+      projection.majVue(deplacer(zoomer(pc.vue0, d / pc.d0, pc.m0), m[0] - pc.m0[0], m[1] - pc.m0[1]))
+    }
+    const surUp = (e: PointerEvent) => {
+      if (!touches.current.delete(e.pointerId)) return
+      const pc = pince.current
+      if (pc && (e.pointerId === pc.a || e.pointerId === pc.b)) pince.current = null
+    }
+    const surRoue = (e: WheelEvent) => {
+      if (!dansScene(e.clientX, e.clientY) || (e.target as Element | null)?.closest?.(exclus)) return
+      const b = projection.pageBlancheActuelle()
+      if (!b || b.fond !== 'repere') return
+      e.preventDefault()
+      // Molette : zoom autour du pointeur (pincer au pavé tactile = molette + Ctrl, pas plus fin).
+      const dy = e.deltaMode === 1 ? e.deltaY * 40 : e.deltaMode === 2 ? e.deltaY * 800 : e.deltaY
+      const f = Math.exp(-Math.max(-600, Math.min(600, dy)) * (e.ctrlKey ? 0.01 : 0.0015))
+      projection.majVue(zoomer(vueDe(b), f, versDiapo(e.clientX, e.clientY)))
+    }
+    window.addEventListener('pointerdown', surDown, true)
+    window.addEventListener('pointermove', surMove, { capture: true, passive: false })
+    window.addEventListener('pointerup', surUp, true)
+    window.addEventListener('pointercancel', surUp, true)
+    window.addEventListener('wheel', surRoue, { passive: false })
+    return () => {
+      touches.current.clear()
+      pince.current = null
+      window.removeEventListener('pointerdown', surDown, true)
+      window.removeEventListener('pointermove', surMove, true)
+      window.removeEventListener('pointerup', surUp, true)
+      window.removeEventListener('pointercancel', surUp, true)
+      window.removeEventListener('wheel', surRoue)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [repere, projection.majVue, projection.pageBlancheActuelle])
+
   const elementsPage = annotations.pages.get(page) ?? []
   const epingles = elementsPage.filter((el): el is Epingle => el.genre === 'epingle')
   const courbes = annotations.courbes(page)
@@ -488,6 +646,8 @@ export function Annotations({
   return (
     <div ref={racine} className="projection-tableau" style={{ '--cible': `${Math.round(Math.max(44, echelle > 0 ? 44 / echelle : 44))}px` } as React.CSSProperties}>
       {/* Courbes du traceur SOUS le surligneur et le stylo (on écrit par-dessus), puis leurs étiquettes. */}
+      {/* Repère, sans outil : glisser = déplacer la vue (un clic ne passe pas à la diapo suivante). */}
+      {repere && !actif && <div className="projection-vue projection-interactif" aria-hidden="true" onPointerDown={surVue} onClick={(e) => e.stopPropagation()} />}
       <canvas ref={canvasCourbes} className="projection-annotations projection-annotations--courbes" aria-hidden="true" />
       {blanche?.fond === 'repere' && courbes.length > 0 && <EtiquettesCourbes courbes={courbes} page={blanche} />}
       <canvas ref={canvasFluo} className="projection-annotations projection-annotations--fluo" aria-hidden="true" />
@@ -498,15 +658,17 @@ export function Annotations({
         onPointerDown={surCanvas}
         onClick={(e) => actif && e.stopPropagation()}
       />
-      {epingles.map((el) => (
+      {epingles.map((el) => {
+        const [ex, ey] = versEcran(transfo, [el.x, el.y])
+        return (
         <div
           key={el.id}
           className="projection-epingle projection-interactif"
-          style={{ left: el.x, top: el.y }}
+          style={{ left: ex, top: ey }}
           onPointerDown={(e) => {
             if ((e.target as HTMLElement).closest('button')) return
             const p = versDiapo(e.clientX, e.clientY)
-            commencer(e, { g: 'epingle', el, dx: p[0] - el.x, dy: p[1] - el.y })
+            commencer(e, { g: 'epingle', el, dx: p[0] - ex, dy: p[1] - ey })
           }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -530,13 +692,14 @@ export function Annotations({
             </button>
           )}
         </div>
-      ))}
-      {compas && <DessinCompas compas={compas} grille={grille} />}
+        )
+      })}
+      {compas && <DessinCompas compas={compas} texte={texteRayonGrille(compas.r, grille)} />}
       {equerre.visible && (
         <DessinEquerre
           equerre={equerre}
           tourne={tourne}
-          grille={grille}
+          grille={!!grille?.carreaux40}
           zone={seuilBord('touch', echelle)}
           surCorps={surEquerre}
           survol={survolEquerre}
@@ -547,6 +710,7 @@ export function Annotations({
           }}
         />
       )}
+      {equerre.visible && <BoutonsEquerre equerre={equerre} magasin={magasin} cible={Math.max(44, echelle > 0 ? 44 / echelle : 44)} />}
       <Calculatrice
         magasin={magasin}
         role={role}
@@ -558,10 +722,15 @@ export function Annotations({
           // En bas de la zone de contenu, du côté opposé à la calculatrice (au-dessus de la barre) : à déplacer
           // ensuite. Plusieurs résultats : empilés vers le haut, jamais posés l'un sur l'autre.
           const x = c.x < 560 ? 680 : 96
-          const pris = liste().filter((e): e is Epingle => e.genre === 'epingle' && Math.abs(e.x - x) < 40)
+          const t = transfoRef.current
+          const pris = liste()
+            .filter((e): e is Epingle => e.genre === 'epingle')
+            .map((e) => versEcran(t, [e.x, e.y]))
+            .filter(([ex]) => Math.abs(ex - x) < 40)
           let y = 560
-          while (y > 80 && pris.some((e) => Math.abs(e.y - y) < 56)) y -= 64
-          ajouter({ genre: 'epingle', id: nouvelId(id), x, y, latex })
+          while (y > 80 && pris.some(([, ey]) => Math.abs(ey - y) < 56)) y -= 64
+          const [px, py] = versPage(t, [x, y])
+          ajouter({ genre: 'epingle', id: nouvelId(id), x: px, y: py, latex })
         }}
       />
     </div>
@@ -687,7 +856,7 @@ function DessinEquerre({
 }
 
 /** Compas : pointe au centre, mine sur le cercle, rayon affiché (carreaux du quadrillage, sinon unités « u » de 40 px). */
-function DessinCompas({ compas, grille }: { compas: EtatCompas; grille: boolean }) {
+function DessinCompas({ compas, texte }: { compas: EtatCompas; texte: string }) {
   const { cx, cy, r, angle, phase } = compas
   const mx = cx + r * Math.cos(angle)
   const my = cy + r * Math.sin(angle)
@@ -712,9 +881,9 @@ function DessinCompas({ compas, grille }: { compas: EtatCompas; grille: boolean 
       <circle className="cp-pointe" cx={cx} cy={cy} r={6} />
       {r > 0 && (
         <g className={`cp-etiquette${phase === 'rayon' ? ' vive' : ''}`} transform={`translate(${lx} ${ly})`}>
-          <rect x={-78} y={-18} width={156} height={36} rx={6} />
+          <rect x={-Math.max(78, texte.length * 5.6 + 14)} y={-18} width={2 * Math.max(78, texte.length * 5.6 + 14)} height={36} rx={6} />
           <text x={0} y={7}>
-            {texteRayon(r, grille)}
+            {texte}
           </text>
         </g>
       )}
@@ -722,62 +891,148 @@ function DessinCompas({ compas, grille }: { compas: EtatCompas; grille: boolean 
   )
 }
 
-/** Écran blanc : uni, quadrillé (carreaux de 40 px logiques) ou repère gradué (origine au centre, 1 graduation = 1 carreau
- * = `ex` unités en abscisse, `ey` en ordonnée : 0,5 / 1 / 2 / 5 / 10, choisis dans le traceur). */
-export function FondBlancTableau({ fond, ex = 1, ey = 1 }: { fond: FondBlanc; ex?: number; ey?: number }) {
+/**
+ * Réglages de l'équerre collés à elle (décision du 27/11/2026, maquette 3) : Segment, Droite, cadenas — trois boutons
+ * (≥ 44 px RÉELS : `cible` en px logiques), qui la suivent quand on la déplace ou la tourne, toujours à l'endroit et
+ * recalés dans la diapo : au-delà du coin droit, sinon du coin gauche, sinon sous l'hypoténuse.
+ */
+function BoutonsEquerre({ equerre, magasin, cible }: { equerre: EtatEquerre; magasin: MagasinInstruments; cible: number }) {
+  const ecart = Math.round(cible * 0.14)
+  const w = 3 * cible + 4 * ecart
+  const h = cible + 2 * ecart
+  const t = equerre.angle * DEG
+  const tourner = ([u, v]: P): P => [u * Math.cos(t) - v * Math.sin(t), u * Math.sin(t) + v * Math.cos(t)]
+  const R = Math.hypot(w, h) / 2 + 10
+  const essais: { coin: P; dir: P }[] = [
+    { coin: [DEMI, 0], dir: [DEMI, DEMI / 3] },
+    { coin: [-DEMI, 0], dir: [-DEMI, DEMI / 3] },
+    { coin: [0, 0], dir: [0, 1] },
+  ]
+  const boites = essais.map(({ coin, dir }) => {
+    const c = depuisEquerre(equerre, coin)
+    const [dx, dy] = tourner(dir)
+    const n = Math.hypot(dx, dy) || 1
+    return [c[0] + (dx / n) * R - w / 2, c[1] + (dy / n) * R - h / 2] as P
+  })
+  const dedans = ([x, y]: P) => x >= 4 && y >= 4 && x + w <= LARGEUR - 4 && y + h <= HAUTEUR - 4
+  const [bx, by] = boites.find(dedans) ?? boites[0]
+  const [x, y] = [borne(bx, 4, LARGEUR - 4 - w), borne(by, 4, HAUTEUR - 4 - h)]
+  const { trace, verrou } = equerre
+  return (
+    <div
+      className="eq-boutons projection-interactif"
+      role="toolbar"
+      aria-label="Équerre : tracer le long d'un bord"
+      style={{ left: x, top: y, padding: ecart, gap: ecart, ['--cible' as string]: `${cible}px` }}
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+    >
+      {(
+        [
+          ['segment', 'Segment', "Segment : trait borné au bord de l'équerre"],
+          ['droite', 'Droite', "Droite : trait prolongé jusqu'aux bords de la diapo"],
+        ] as const
+      ).map(([valeur, nom, aide]) => (
+        <button key={valeur} type="button" className={`eq-bouton${trace === valeur ? ' actif' : ''}`} aria-pressed={trace === valeur} aria-label={nom} title={aide} onClick={() => magasin.equerre({ trace: valeur })}>
+          <Pictogramme nom={valeur} taille={Math.round(cible * 0.5)} />
+        </button>
+      ))}
+      <button
+        type="button"
+        className={`eq-bouton${verrou ? ' actif' : ''}`}
+        aria-pressed={verrou}
+        aria-label="Verrouiller la rotation (parallèles)"
+        title={verrou ? 'Rotation verrouillée : glisser l’équerre trace des parallèles (toucher pour déverrouiller)' : 'Verrouiller la rotation (parallèles)'}
+        onClick={() => magasin.equerre({ verrou: !verrou })}
+      >
+        <Pictogramme nom={verrou ? 'cadenas' : 'cadenas-ouvert'} taille={Math.round(cible * 0.5)} />
+      </button>
+    </div>
+  )
+}
+
+/**
+ * Écran blanc : uni, quadrillé (carreaux de 40 px logiques) ou repère gradué. Repère : graduations de la VUE (zoom,
+ * déplacement : `vue.ts`) — pas lisibles 0,1 / 0,2 / 0,5 / 1 / 2 / 5 / 10…, jamais deux étiquettes qui se touchent,
+ * quadrillage aux graduations ; axe hors de l'écran : ses nombres restent au bord. Sans vue : la vue de départ (origine au
+ * centre, 1 carreau = `ex` / `ey` unités).
+ */
+export function FondBlancTableau({ fond, ex = 1, ey = 1, vue }: { fond: FondBlanc; ex?: number; ey?: number; vue?: VueRepere }) {
   if (fond === 'uni') return <div className="projection-blanc" aria-label="Écran blanc" />
-  const verticales = []
-  const horizontales = []
-  for (let x = CARREAU; x < LARGEUR; x += CARREAU) verticales.push(<line key={x} x1={x} y1={0} x2={x} y2={HAUTEUR} />)
-  for (let y = CARREAU; y < HAUTEUR; y += CARREAU) horizontales.push(<line key={y} x1={0} y1={y} x2={LARGEUR} y2={y} />)
-  const [ox, oy] = [LARGEUR / 2, HAUTEUR / 2]
-  const graduations = []
-  if (fond === 'repere') {
-    for (let x = CARREAU; x < LARGEUR - CARREAU / 2; x += CARREAU) {
-      const n = (x - ox) / CARREAU
-      if (n === 0) continue
-      graduations.push(<line key={`gx${x}`} className="rp-trait" x1={x} y1={oy - 5} x2={x} y2={oy + 5} />)
-      graduations.push(
-        <text key={`tx${x}`} className="rp-nombre" x={x} y={oy + 22} textAnchor="middle">
-          {texteGraduation(n * ex)}
-        </text>,
-      )
-    }
-    for (let y = CARREAU; y < HAUTEUR - CARREAU / 2; y += CARREAU) {
-      const n = (oy - y) / CARREAU
-      if (n === 0) continue
-      graduations.push(<line key={`gy${y}`} className="rp-trait" x1={ox - 5} y1={y} x2={ox + 5} y2={y} />)
-      graduations.push(
-        <text key={`ty${y}`} className="rp-nombre" x={ox - 10} y={y + 5} textAnchor="end">
-          {texteGraduation(n * ey)}
-        </text>,
-      )
-    }
+  if (fond === 'quadrille') {
+    const lignes = []
+    for (let x = CARREAU; x < LARGEUR; x += CARREAU) lignes.push(<line key={`v${x}`} x1={x} y1={0} x2={x} y2={HAUTEUR} />)
+    for (let y = CARREAU; y < HAUTEUR; y += CARREAU) lignes.push(<line key={`h${y}`} x1={0} y1={y} x2={LARGEUR} y2={y} />)
+    return (
+      <div className="projection-blanc" aria-label="Écran blanc quadrillé">
+        <svg width={LARGEUR} height={HAUTEUR} viewBox={`0 0 ${LARGEUR} ${HAUTEUR}`} aria-hidden="true" className="projection-blanc-grille">
+          <g className="rp-grille">{lignes}</g>
+        </svg>
+      </div>
+    )
+  }
+  const v = vue ?? { ex, ey, cx: 0, cy: 0 }
+  const g = graduations(v)
+  const { axeX: ox, axeY: oy } = g
+  const axeXVisible = oy >= 0 && oy <= HAUTEUR
+  const axeYVisible = ox >= 0 && ox <= LARGEUR
+  const origine = axeXVisible && axeYVisible
+  // Ligne des nombres des abscisses : sous l'axe ; axe hors de l'écran ou au ras du bas : au bord.
+  const yNombres = oy < 0 ? 20 : oy > HAUTEUR ? HAUTEUR - 10 : oy + 22 <= HAUTEUR - 6 ? oy + 22 : oy - 10
+  const [xNombres, ancreY]: [number, 'start' | 'end'] = ox < 0 ? [8, 'start'] : ox > LARGEUR ? [LARGEUR - 8, 'end'] : ox - 10 >= 34 ? [ox - 10, 'end'] : [ox + 10, 'start']
+  const lignes = []
+  for (const { v: val, s } of g.xs) if (s > 0.5 && s < LARGEUR - 0.5) lignes.push(<line key={`v${val}`} x1={s} y1={0} x2={s} y2={HAUTEUR} />)
+  for (const { v: val, s } of g.ys) if (s > 0.5 && s < HAUTEUR - 0.5) lignes.push(<line key={`h${val}`} x1={0} y1={s} x2={LARGEUR} y2={s} />)
+  const nombres = []
+  for (const { v: val, s } of g.xs) {
+    if (s < 8 || s > LARGEUR - 24 || (origine && Math.abs(val) < g.pasX / 2)) continue
+    if (axeXVisible) nombres.push(<line key={`gx${val}`} className="rp-trait" x1={s} y1={oy - 5} x2={s} y2={oy + 5} />)
+    const texte = texteGraduationPas(val, g.pasX)
+    // Nombre coupé par le bord de l'écran : on ne l'écrit pas (le trait reste).
+    const demi = (texte.length * 8.6) / 2
+    if (s - demi < 2 || s + demi > LARGEUR - 18) continue
+    nombres.push(
+      <text key={`tx${val}`} className="rp-nombre" x={s} y={yNombres} textAnchor="middle">
+        {texte}
+      </text>,
+    )
+  }
+  for (const { v: val, s } of g.ys) {
+    if (s < 24 || s > HAUTEUR - 8 || (origine && Math.abs(val) < g.pasY / 2)) continue
+    if (axeYVisible) nombres.push(<line key={`gy${val}`} className="rp-trait" x1={ox - 5} y1={s} x2={ox + 5} y2={s} />)
+    nombres.push(
+      <text key={`ty${val}`} className="rp-nombre" x={xNombres} y={s + 5} textAnchor={ancreY}>
+        {texteGraduationPas(val, g.pasY)}
+      </text>,
+    )
   }
   return (
-    <div className="projection-blanc" aria-label={fond === 'repere' ? 'Écran blanc avec repère' : 'Écran blanc quadrillé'}>
+    <div className="projection-blanc" aria-label="Écran blanc avec repère">
       <svg width={LARGEUR} height={HAUTEUR} viewBox={`0 0 ${LARGEUR} ${HAUTEUR}`} aria-hidden="true" className="projection-blanc-grille">
-        <g className="rp-grille">
-          {verticales}
-          {horizontales}
-        </g>
-        {fond === 'repere' && (
+        <g className="rp-grille">{lignes}</g>
+        {axeXVisible && (
           <>
             <line className="rp-axe" x1={8} y1={oy} x2={LARGEUR - 12} y2={oy} />
-            <line className="rp-axe" x1={ox} y1={HAUTEUR - 8} x2={ox} y2={12} />
             <path className="rp-fleche" d={`M ${LARGEUR - 8} ${oy} l -14 -6 v 12 z`} />
-            <path className="rp-fleche" d={`M ${ox} 8 l -6 14 h 12 z`} />
-            {graduations}
-            <text className="rp-nombre" x={ox - 10} y={oy + 22} textAnchor="end">
-              0
-            </text>
-            <text className="rp-nom" x={LARGEUR - 14} y={oy - 14} textAnchor="end">
+            <text className="rp-nom" x={LARGEUR - 14} y={oy > 40 ? oy - 14 : oy + 30} textAnchor="end">
               x
             </text>
-            <text className="rp-nom" x={ox + 14} y={24}>
+          </>
+        )}
+        {axeYVisible && (
+          <>
+            <line className="rp-axe" x1={ox} y1={HAUTEUR - 8} x2={ox} y2={12} />
+            <path className="rp-fleche" d={`M ${ox} 8 l -6 14 h 12 z`} />
+            <text className="rp-nom" x={ox < LARGEUR - 40 ? ox + 14 : ox - 26} y={24}>
               y
             </text>
           </>
+        )}
+        {nombres}
+        {origine && (
+          <text className="rp-nombre" x={ox - 10} y={oy + 22} textAnchor="end">
+            0
+          </text>
         )}
       </svg>
     </div>

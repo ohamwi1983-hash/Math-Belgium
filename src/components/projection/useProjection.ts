@@ -3,7 +3,8 @@ import type { ChapterContent } from '../../content/types'
 import type { Diapo, Role } from '../../lib/projection/diapos'
 import type { EtatInstruments } from './instruments'
 import { cleDiapo, clePageBlanche, nouvellePageBlanche } from '../../lib/projection/annotations'
-import type { ElementAnnotation, FondBlanc, PageBlanche, Trait } from '../../lib/projection/annotations'
+import type { ElementAnnotation, FondBlanc, PageBlanche, Trait, VueRepere } from '../../lib/projection/annotations'
+import { vueDe } from '../../lib/projection/vue'
 
 /** État PARTAGÉ entre la fenêtre des diapos et celle du professeur (mode deux écrans). */
 export interface EtatProjection {
@@ -129,8 +130,13 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
     }
   }, [nomCanal, id, envoyer, diapos.length])
 
+  // Vue du repère (pincer, molette, glisser) : appliquée ici tout de suite, diffusée au plus une fois par image.
+  const envoiDiffere = useRef<number | null>(null)
+  useEffect(() => () => {
+    if (envoiDiffere.current !== null) cancelAnimationFrame(envoiDiffere.current)
+  }, [])
   const appliquer = useCallback(
-    (f: (e: EtatProjection) => EtatProjection) => {
+    (f: (e: EtatProjection) => EtatProjection, differe = false) => {
       const avant = etatRef.current
       let apres = f(avant)
       if (apres === avant) return
@@ -141,7 +147,15 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
       actif.current = true
       etatRef.current = apres
       setEtat(apres)
-      envoyer({ type: 'etat', de: id, etat: apres })
+      if (!differe) {
+        envoyer({ type: 'etat', de: id, etat: apres })
+        return
+      }
+      if (envoiDiffere.current !== null) return
+      envoiDiffere.current = requestAnimationFrame(() => {
+        envoiDiffere.current = null
+        envoyer({ type: 'etat', de: id, etat: etatRef.current })
+      })
     },
     [envoyer, id],
   )
@@ -196,6 +210,19 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
     [appliquer, diapos],
   )
   const choisirFond = useCallback((fond: FondBlanc) => majPage({ fond }), [majPage])
+  /** Vue du repère de la page affichée (zoom, déplacement ; `undefined` = vue de départ), partagée avec l'autre écran. */
+  const majVue = useCallback(
+    (vue: VueRepere | undefined) =>
+      appliquer((e) => {
+        const cle = diapos[e.index]?.cle
+        const courante = pageBlanche(e)
+        if (!cle || !courante) return e
+        return { ...e, blanches: { ...e.blanches, [cle]: (e.blanches[cle] ?? []).map((x) => (x.id === courante.id ? { ...courante, vue } : x)) } }
+      }, true),
+    [appliquer, diapos],
+  )
+  /** Page blanche affichée, lue dans l'état le plus récent (gestes rapides : sans attendre le rendu). */
+  const pageBlancheActuelle = useCallback(() => pageBlancheCourante(etatRef.current, diapos), [diapos])
   /** « + Nouvelle page » : la page remplie est gardée, une page vierge (même fond, même échelle) vient juste après. */
   const nouvellePage = useCallback(
     () =>
@@ -203,7 +230,9 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
         const cle = diapos[e.index]?.cle
         const courante = pageBlanche(e)
         if (!cle || !courante) return e
-        const p = nouvellePageBlanche({ fond: courante.fond, ex: courante.ex, ey: courante.ey, angle: courante.angle, marques: courante.marques })
+        // Même échelle que la page affichée (celle de sa vue), origine au centre.
+        const v = vueDe(courante)
+        const p = nouvellePageBlanche({ fond: courante.fond, ex: v.ex, ey: v.ey, angle: courante.angle, marques: courante.marques })
         const liste = [...(e.blanches[cle] ?? [])]
         liste.splice(liste.findIndex((x) => x.id === courante.id) + 1, 0, p)
         return { ...e, blanches: { ...e.blanches, [cle]: liste }, vues: { ...e.vues, [cle]: p.id } }
@@ -266,6 +295,8 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
     basculerBlanc,
     choisirFond,
     majPage,
+    majVue,
+    pageBlancheActuelle,
     nouvellePage,
     allerPage,
     supprimerPage,

@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { clePageBlanche } from '../../lib/projection/annotations'
-import type { MagasinAnnotations } from './magasinAnnotations'
-import { PaletteTraceur } from './Traceur'
-import { MathInline } from '../Math'
 import { Pictogramme } from './Pictogrammes'
 import type { NomPictogramme } from './Pictogrammes'
 import { useInstrument } from './instruments'
@@ -50,9 +46,15 @@ export interface OutilsLocaux {
   menuMinuteur: boolean
   /** Palette « Télécharger » (PowerPoint / PDF annotés, nouvelle séance). */
   menuExport: boolean
-  /** Palette du traceur (page « repère ») dépliée ; repliée, la page reste libre pour écrire. */
+  /** Traceur (page « repère ») déplié sous la barre de l'écran blanc ; replié dès qu'une courbe est tracée ou qu'on écrit. */
   traceur: boolean
   pleinEcran: boolean
+  /** Colonne du dessin ouverte (pastille touchée) ; repliée dès qu'on écrit, à Échap ou en re-touchant la pastille. LOCAL. */
+  palette: boolean
+  /** Nuancier ouvert à côté de la colonne. */
+  nuancier: boolean
+  /** Menu « fond ▾ » de l'écran blanc ouvert. */
+  menuFond: boolean
 }
 
 export function formatDuree(s: number): string {
@@ -86,221 +88,17 @@ export function Bouton({ label, picto, actif, onClick, raccourci }: { label: str
   )
 }
 
-/** Stylo (S) : ouvre / range la palette ; depuis le compas, revient au stylo. */
+/** Outil de dessin rangé : pastille, colonne et nuancier disparaissent. */
+const range = (o: OutilsLocaux): OutilsLocaux => ({ ...o, stylo: false, palette: false, nuancier: false })
+/** Outil de dessin pris (il ne l'était pas) : la colonne s'ouvre (premier usage évident ; repliée au premier trait). */
+const pris = (o: OutilsLocaux, outil: OutilDessin): OutilsLocaux => ({ ...o, stylo: true, outil, menuMinuteur: false, palette: o.stylo ? o.palette : true, traceur: false, menuFond: false })
+/** Stylo (S) : prend / range le stylo ; depuis le compas, revient au stylo. */
 export const basculerStylo = (o: OutilsLocaux): OutilsLocaux =>
-  o.stylo && o.outil !== 'compas' ? { ...o, stylo: false, menuMinuteur: false } : { ...o, stylo: true, outil: o.outil === 'compas' ? 'stylo' : o.outil, menuMinuteur: false }
+  o.stylo && o.outil !== 'compas' ? { ...range(o), menuMinuteur: false } : pris(o, o.outil === 'compas' ? 'stylo' : o.outil)
 /** Compas (C). */
-export const basculerCompas = (o: OutilsLocaux): OutilsLocaux =>
-  o.stylo && o.outil === 'compas' ? { ...o, stylo: false, outil: 'stylo' } : { ...o, stylo: true, outil: 'compas', menuMinuteur: false }
+export const basculerCompas = (o: OutilsLocaux): OutilsLocaux => (o.stylo && o.outil === 'compas' ? { ...range(o), outil: 'stylo' } : pris(o, 'compas'))
 /** Surligneur (H). */
-export const basculerFluo = (o: OutilsLocaux): OutilsLocaux => (o.stylo && o.outil === 'fluo' ? { ...o, outil: 'stylo' } : { ...o, stylo: true, outil: 'fluo', menuMinuteur: false })
-
-const NOMS_EPAISSEUR: Record<Epaisseur, string> = { fin: 'fin', moyen: 'moyen', epais: 'épais' }
-
-/** Palette de dessin (maquette D1) : stylo 4 couleurs, fluo 4 couleurs, 3 épaisseurs, gomme, annuler, tout effacer. */
-export function PaletteDessin({ outils, setOutils }: { outils: OutilsLocaux; setOutils: (f: (o: OutilsLocaux) => OutilsLocaux) => void }) {
-  const traitActif = outils.outil === 'stylo' || outils.outil === 'compas'
-  return (
-    <div className="projection-palette projection-palette--dessin" role="group" aria-label="Stylo, surligneur et gomme">
-      <span className="projection-palette-nom" aria-hidden="true">
-        {outils.outil === 'compas' ? 'Compas' : 'Stylo'}
-      </span>
-      {COULEURS_STYLO.map((c) => (
-        <button
-          key={c.valeur}
-          type="button"
-          className={`projection-couleur${traitActif && outils.couleur === c.valeur ? ' actif' : ''}`}
-          style={{ ['--c' as string]: c.valeur }}
-          aria-label={`Stylo ${c.nom.toLowerCase()}`}
-          aria-pressed={traitActif && outils.couleur === c.valeur}
-          title={`Stylo ${c.nom.toLowerCase()} (S)`}
-          onClick={() => setOutils((o) => ({ ...o, outil: o.outil === 'compas' ? 'compas' : 'stylo', couleur: c.valeur }))}
-        />
-      ))}
-      <span className="projection-separateur" aria-hidden="true" />
-      <span className="projection-palette-nom" aria-hidden="true">
-        Fluo
-      </span>
-      {COULEURS_FLUO.map((c) => (
-        <button
-          key={c.valeur}
-          type="button"
-          className={`projection-fluo${outils.outil === 'fluo' && outils.fluo === c.valeur ? ' actif' : ''}`}
-          style={{ ['--c' as string]: c.valeur }}
-          aria-label={`Surligneur ${c.nom.toLowerCase()}`}
-          aria-pressed={outils.outil === 'fluo' && outils.fluo === c.valeur}
-          title={`Surligneur ${c.nom.toLowerCase()} (H)`}
-          onClick={() => setOutils((o) => ({ ...o, outil: 'fluo', fluo: c.valeur }))}
-        />
-      ))}
-      <span className="projection-separateur" aria-hidden="true" />
-      <span className="projection-palette-nom" aria-hidden="true">
-        Trait
-      </span>
-      {(Object.keys(EPAISSEURS) as Epaisseur[]).map((e) => (
-        <button
-          key={e}
-          type="button"
-          className={`projection-epaisseur${outils.epaisseur === e ? ' actif' : ''}`}
-          style={{ ['--e' as string]: `${EPAISSEURS[e] + 1}px` }}
-          aria-label={`Trait ${NOMS_EPAISSEUR[e]}`}
-          aria-pressed={outils.epaisseur === e}
-          title={`Trait ${NOMS_EPAISSEUR[e]}`}
-          onClick={() => setOutils((o) => ({ ...o, epaisseur: e, outil: o.outil === 'fluo' || o.outil === 'gomme' ? 'stylo' : o.outil }))}
-        >
-          <span />
-        </button>
-      ))}
-      <span className="projection-separateur" aria-hidden="true" />
-      <Bouton label="Gomme" picto="gomme" actif={outils.outil === 'gomme'} onClick={() => setOutils((o) => ({ ...o, outil: o.outil === 'gomme' ? 'stylo' : 'gomme' }))} />
-      <Bouton label="Annuler le dernier trait" picto="annuler" raccourci="Ctrl+Z" onClick={() => window.dispatchEvent(new Event('projection:annuler'))} />
-      <Bouton label="Tout effacer sur cette diapo" picto="effacer" onClick={() => window.dispatchEvent(new Event('projection:effacer'))} />
-    </div>
-  )
-}
-
-/**
- * Écran blanc : pages de la diapo (« Page 2 / 3 », ‹ ›, « + Nouvelle page », supprimer après confirmation) et fond
- * de la page affichée (uni, quadrillé, repère) — partagés avec l'autre écran. `compacte` : vue du professeur.
- */
-export function PaletteFond({
-  projection,
-  annotations,
-  compacte = false,
-  traceur,
-}: {
-  projection: Projection
-  annotations: MagasinAnnotations
-  compacte?: boolean
-  /** Bouton « Traceur f(x) » (page « repère ») : déplie / replie la palette du traceur. */
-  traceur?: { ouvert: boolean; basculer: () => void }
-}) {
-  const [confirmer, setConfirmer] = useState(false)
-  const page = projection.pageBlanche()
-  const liste = projection.pagesBlanches()
-  const rang = page ? liste.findIndex((p) => p.id === page.id) + 1 : 0
-  useEffect(() => setConfirmer(false), [page?.id])
-  if (!page) return null
-  return (
-    <div className={`projection-palette projection-palette--fond${compacte ? ' compacte' : ''}`} role="group" aria-label="Écran blanc : pages et fond">
-      {confirmer ? (
-        <span className="pages-confirmer" role="alertdialog" aria-label={`Supprimer la page ${rang}`}>
-          <span className="pages-question">Supprimer la page {rang} et ce qui y est écrit ?</span>
-          <button
-            type="button"
-            className="projection-duree projection-duree--stop"
-            autoFocus
-            onClick={() => {
-              const id = projection.supprimerPage()
-              if (id) annotations.oublierPage(clePageBlanche(id))
-              setConfirmer(false)
-            }}
-          >
-            Supprimer
-          </button>
-          <button type="button" className="projection-duree" onClick={() => setConfirmer(false)}>
-            Annuler
-          </button>
-        </span>
-      ) : (
-        <>
-          {!compacte && (
-            <span className="projection-palette-nom" aria-hidden="true">
-              Page
-            </span>
-          )}
-          <Bouton label="Page blanche précédente" picto="precedent" raccourci="Page préc." onClick={() => projection.allerPage(-1)} />
-          <span className="pages-compteur" aria-live="polite">
-            Page {rang} / {liste.length}
-          </span>
-          <Bouton label="Page blanche suivante" picto="suivant" raccourci="Page suiv." onClick={() => projection.allerPage(1)} />
-          <button type="button" className="projection-duree pages-nouvelle" title="Garder cette page et passer à une page vierge" onClick={() => projection.nouvellePage()}>
-            + Nouvelle page
-          </button>
-          <Bouton label="Supprimer cette page" picto="effacer" onClick={() => setConfirmer(true)} />
-          <span className="projection-separateur" aria-hidden="true" />
-        </>
-      )}
-      {!compacte && (
-        <span className="projection-palette-nom" aria-hidden="true">
-          Fond
-        </span>
-      )}
-      {FONDS.map((f) => (
-        <button key={f.valeur} type="button" className="projection-duree" aria-pressed={page.fond === f.valeur} onClick={() => projection.choisirFond(f.valeur)}>
-          {f.nom}
-        </button>
-      ))}
-      {traceur && page.fond === 'repere' && (
-        <>
-          <span className="projection-separateur" aria-hidden="true" />
-          <button type="button" className="projection-duree pages-traceur" aria-pressed={traceur.ouvert} title={traceur.ouvert ? 'Replier le traceur de fonctions' : 'Tracer une fonction sur le repère'} onClick={traceur.basculer}>
-            <MathInline tex="f(x)" /> Traceur
-          </button>
-        </>
-      )}
-    </div>
-  )
-}
-
-/** Palettes de l'écran blanc : pages + fond, et le traceur de fonctions sur le repère. */
-export function PalettesBlanc({
-  projection,
-  annotations,
-  outils,
-  setOutils,
-  compacte = false,
-}: {
-  projection: Projection
-  annotations: MagasinAnnotations
-  outils: OutilsLocaux
-  setOutils: (f: (o: OutilsLocaux) => OutilsLocaux) => void
-  compacte?: boolean
-}) {
-  const page = projection.pageBlanche()
-  if (!page) return null
-  return (
-    <>
-      <PaletteFond projection={projection} annotations={annotations} compacte={compacte} traceur={{ ouvert: outils.traceur, basculer: () => setOutils((o) => ({ ...o, traceur: !o.traceur })) }} />
-      {page.fond === 'repere' && outils.traceur && <PaletteTraceur projection={projection} annotations={annotations} page={page} outils={outils} compacte={compacte} />}
-    </>
-  )
-}
-
-/**
- * Palette de l'équerre (affichée tant qu'elle est posée, partagée avec l'autre écran) : trait tracé le long d'un bord
- * en segment (borné au bord) ou en droite (prolongée jusqu'aux bords de la diapo) ; cadenas = rotation verrouillée
- * (on fait glisser l'équerre sans la tourner : parallèles).
- */
-export function PaletteEquerre({ magasin }: { magasin: MagasinInstruments }) {
-  const trace = useInstrument(magasin, (e) => e.equerre.trace)
-  const verrou = useInstrument(magasin, (e) => e.equerre.verrou)
-  return (
-    <div className="projection-palette projection-palette--equerre" role="group" aria-label="Équerre : tracer le long d'un bord">
-      <span className="projection-palette-nom" aria-hidden="true">
-        Équerre
-      </span>
-      {(
-        [
-          ['segment', 'Segment', 'Trait borné au bord de l\'équerre'],
-          ['droite', 'Droite', 'Trait prolongé jusqu\'aux bords de la diapo'],
-        ] as const
-      ).map(([valeur, nom, aide]) => (
-        <button key={valeur} type="button" className="projection-duree projection-trace" aria-pressed={trace === valeur} title={aide} onClick={() => magasin.equerre({ trace: valeur })}>
-          <Pictogramme nom={valeur} taille={18} />
-          {nom}
-        </button>
-      ))}
-      <span className="projection-separateur" aria-hidden="true" />
-      <Bouton
-        label="Verrouiller la rotation (parallèles)"
-        picto={verrou ? 'cadenas' : 'cadenas-ouvert'}
-        actif={verrou}
-        onClick={() => magasin.equerre({ verrou: !verrou })}
-      />
-    </div>
-  )
-}
+export const basculerFluo = (o: OutilsLocaux): OutilsLocaux => (o.stylo && o.outil === 'fluo' ? { ...o, outil: 'stylo' } : pris(o, 'fluo'))
 
 /** Équerre (Q), compas (C), calculatrice (K) : équerre et calculatrice sont partagées avec l'autre écran. */
 export function BoutonsInstruments({ outils, setOutils, magasin }: { outils: OutilsLocaux; setOutils: (f: (o: OutilsLocaux) => OutilsLocaux) => void; magasin: MagasinInstruments }) {
@@ -331,11 +129,9 @@ export function BarreOutils({
   basculerPleinEcran,
   quitter,
   magasin,
-  annotations,
   paletteExport,
 }: {
   magasin: MagasinInstruments
-  annotations: MagasinAnnotations
   /** Palette « Télécharger » (absente sur l'écran de la classe en deux écrans). */
   paletteExport?: ReactNode
   projection: Projection
@@ -349,15 +145,11 @@ export function BarreOutils({
 }) {
   const { etat, suivant, precedent, basculerBlanc, lancerMinuteur, arreterMinuteur } = projection
   const reste = useResteMinuteur(etat.minuteur.fin)
-  const equerre = useInstrument(magasin, (e) => e.equerre.visible)
   return (
     <div className={`projection-barre${visible ? '' : ' masquee'}`} role="toolbar" aria-label="Outils de projection" onClick={(e) => e.stopPropagation()}>
       <span className="projection-fil">{fil}</span>
       <div className="projection-palettes">
       {outils.menuExport && paletteExport}
-      {etat.blanc && <PalettesBlanc projection={projection} annotations={annotations} outils={outils} setOutils={setOutils} />}
-      {outils.stylo && <PaletteDessin outils={outils} setOutils={setOutils} />}
-      {equerre && <PaletteEquerre magasin={magasin} />}
       {outils.menuMinuteur && (
         <div className="projection-palette" role="group" aria-label="Minuteur">
           {DUREES_MINUTEUR.map((m) => (
@@ -397,7 +189,7 @@ export function BarreOutils({
         aria-label={reste !== null ? `Minuteur : ${formatDuree(reste)} restantes` : 'Minuteur'}
         title="Minuteur"
         aria-expanded={outils.menuMinuteur}
-        onClick={() => setOutils((o) => ({ ...o, menuMinuteur: !o.menuMinuteur, menuExport: false, stylo: false }))}
+        onClick={() => setOutils((o) => ({ ...o, menuMinuteur: !o.menuMinuteur, menuExport: false, palette: false, nuancier: false }))}
       >
         <Pictogramme nom="minuteur" />
         {reste !== null && <span className="projection-temps">{formatDuree(reste)}</span>}
@@ -411,7 +203,7 @@ export function BarreOutils({
           aria-label="Télécharger le PowerPoint ou le PDF annoté"
           title="Télécharger le PowerPoint ou le PDF annoté · Nouvelle séance"
           aria-expanded={outils.menuExport}
-          onClick={() => setOutils((o) => ({ ...o, menuExport: !o.menuExport, menuMinuteur: false }))}
+          onClick={() => setOutils((o) => ({ ...o, menuExport: !o.menuExport, menuMinuteur: false, palette: false, nuancier: false }))}
         >
           <Pictogramme nom="telecharger" />
         </button>

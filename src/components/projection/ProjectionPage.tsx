@@ -13,8 +13,9 @@ import { Diapo } from './Diapo'
 import { Paginateur } from './Paginateur'
 import { Scene } from './Scene'
 import { Annotations, FondBlancTableau } from './Tableau'
-import { BarreOutils, basculerCompas, basculerFluo, basculerStylo, BoutonsInstruments, COULEURS_FLUO, COULEURS_STYLO, DUREES_MINUTEUR, formatDuree, PaletteDessin, PaletteEquerre, PalettesBlanc, useResteMinuteur } from './BarreOutils'
-import { useInstrument, useMagasinInstruments } from './instruments'
+import { BarreOutils, basculerCompas, basculerFluo, basculerStylo, BoutonsInstruments, COULEURS_FLUO, COULEURS_STYLO, DUREES_MINUTEUR, formatDuree, useResteMinuteur } from './BarreOutils'
+import { useMagasinInstruments } from './instruments'
+import { OutilsBlanc, OutilsDessin } from './Pastilles'
 import type { OutilsLocaux } from './BarreOutils'
 import { GardeProfesseur } from './GardeProfesseur'
 import { Pictogramme } from './Pictogrammes'
@@ -283,7 +284,7 @@ function useInactivite(gele: boolean): [boolean, () => void] {
     window.clearTimeout(t.current)
     const masquer = () => {
       // Champ de la barre en cours de saisie (traceur f(x)) : la barre reste.
-      if (document.activeElement?.closest('.projection-barre, .projection-palettes') && document.activeElement.matches('input, textarea')) {
+      if (document.activeElement?.closest('.projection-barre, .projection-palettes, .projection-blanc-outils, .projection-nuancier') && document.activeElement.matches('input, textarea')) {
         t.current = window.setTimeout(masquer, 3000)
         return
       }
@@ -400,7 +401,26 @@ function etiquette(d: DonneesDiapo): string {
   }
 }
 
-const OUTILS_DEPART: OutilsLocaux = { stylo: false, outil: 'stylo', couleur: COULEURS_STYLO[0].valeur, fluo: COULEURS_FLUO[0].valeur, epaisseur: 'moyen', ensemble: false, menuMinuteur: false, menuExport: false, traceur: true, pleinEcran: false }
+const OUTILS_DEPART: OutilsLocaux = {
+  stylo: false,
+  outil: 'stylo',
+  couleur: COULEURS_STYLO[0].valeur,
+  fluo: COULEURS_FLUO[0].valeur,
+  epaisseur: 'moyen',
+  ensemble: false,
+  menuMinuteur: false,
+  menuExport: false,
+  traceur: true,
+  pleinEcran: false,
+  palette: false,
+  nuancier: false,
+  menuFond: false,
+}
+
+/** Palettes repliées dès qu'on écrit sur la diapo (colonne du dessin, nuancier, traceur, menu du fond). */
+const replierPalettes = (o: OutilsLocaux): OutilsLocaux => (o.palette || o.nuancier || o.traceur || o.menuFond ? { ...o, palette: false, nuancier: false, traceur: false, menuFond: false } : o)
+/** Échap : d'abord ce qui est déplié (nuancier, puis colonne / menu / traceur) ; null s'il n'y a rien. */
+const echapPalettes = (o: OutilsLocaux): OutilsLocaux | null => (o.nuancier ? { ...o, nuancier: false } : o.palette || o.menuFond ? { ...o, palette: false, menuFond: false } : null)
 
 /**
  * Annotations de la page de projection : magasin (toutes les pages), conservation dans le navigateur, page
@@ -425,7 +445,7 @@ function useAnnotationsProjection(chapter: ChapterContent, diapos: DonneesDiapo[
 function FondPage({ projection }: { projection: Projection }) {
   const p = projection.pageBlanche()
   if (!projection.etat.blanc) return null
-  return <FondBlancTableau fond={p?.fond ?? projection.etat.fond} ex={p?.ex} ey={p?.ey} />
+  return <FondBlancTableau fond={p?.fond ?? projection.etat.fond} ex={p?.ex} ey={p?.ey} vue={p?.vue} />
 }
 
 /** Sélecteur des éléments qui gardent leurs clics (jamais « diapo suivante »). */
@@ -458,7 +478,9 @@ function VueDiapos({
   const { plein, basculer } = usePleinEcran(signaler)
   const [outils, setOutils] = useState<OutilsLocaux>(OUTILS_DEPART)
   const [accueil, setAccueil] = useState(role === 'diapos')
-  const [barreActive] = useInactivite(outils.stylo || outils.menuMinuteur || outils.menuExport || outils.ensemble || demandeQuitter)
+  // La barre se masque après 3 s même stylo en main (la pastille, elle, reste) ; pas tant qu'une palette est dépliée.
+  const [barreActive] = useInactivite(outils.palette || outils.nuancier || outils.menuFond || outils.menuMinuteur || outils.menuExport || outils.ensemble || demandeQuitter)
+  const surEcrire = useCallback(() => setOutils(replierPalettes), [])
   const atelierPlein = useAtelierPlein(projection)
   const pleinIci = atelierPlein.plein && diapos[etat.index]?.type === 'atelier'
   const presDuBas = usePresDuBas(pleinIci)
@@ -504,6 +526,7 @@ function VueDiapos({
       if (accueil) setAccueil(false)
       else if (pleinIci) atelierPlein.sortir()
       else if (outils.ensemble) setOutils((o) => ({ ...o, ensemble: false }))
+      else if (echapPalettes(outils)) setOutils((o) => echapPalettes(o) ?? o)
       else if (outils.stylo || outils.menuMinuteur || outils.menuExport) setOutils((o) => ({ ...o, stylo: false, menuMinuteur: false, menuExport: false }))
       else setOutils((o) => ({ ...o, ensemble: true }))
     },
@@ -537,11 +560,13 @@ function VueDiapos({
           <>
             {d && <Diapo key={d.cle} diapo={d} chapter={chapter} pas={etat.pas} mode="direct" debut={etat.debut} atelier={{ plein: atelierPlein.plein, basculerPlein: atelierPlein.basculer }} />}
             <FondPage projection={projection} />
-            <Annotations projection={projection} magasin={magasin} annotations={ann.annotations} page={ann.page} blanche={ann.blanche} outils={outils} echelle={echelle} role={role} grille={!!ann.blanche && ann.blanche.fond !== 'uni'} />
+            <Annotations projection={projection} magasin={magasin} annotations={ann.annotations} page={ann.page} blanche={ann.blanche} outils={outils} echelle={echelle} role={role} surEcrire={surEcrire} />
           </>
         )}
       </Scene>
       <MinuteurAffiche projection={projection} />
+      {etat.blanc && <OutilsBlanc projection={projection} annotations={ann.annotations} outils={outils} setOutils={setOutils} visible={barreVisible} />}
+      <OutilsDessin outils={outils} setOutils={setOutils} />
       {pleinIci && (
         <button
           type="button"
@@ -565,7 +590,6 @@ function VueDiapos({
         basculerPleinEcran={basculer}
         quitter={quitter}
         magasin={magasin}
-        annotations={ann.annotations}
         paletteExport={role === 'diapos' ? undefined : <PaletteExport exp={ann.exp} resume={ann.resume} nouvelleSeance={ann.nouvelleSeance} />}
       />
       {outils.ensemble && <VueEnsemble chapter={chapter} diapos={diapos} projection={projection} fermer={() => setOutils((o) => ({ ...o, ensemble: false }))} />}
@@ -613,11 +637,11 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
   const magasin = useMagasinInstruments(projection)
   const ann = useAnnotationsProjection(chapter, diapos, choix, projection, gardees)
   const [demandeQuitter, setDemandeQuitter] = useState(false)
-  const equerreVisible = useInstrument(magasin, (e) => e.equerre.visible)
   const { etat, suivant, precedent, aller, basculerBlanc, lancerMinuteur, arreterMinuteur, basculerAtelierPlein } = projection
   const [message, signaler] = useMessage()
   const { plein, basculer } = usePleinEcran(signaler)
   const [outils, setOutils] = useState<OutilsLocaux>(OUTILS_DEPART)
+  const surEcrire = useCallback(() => setOutils(replierPalettes), [])
   const [fenetreOuverte, setFenetreOuverte] = useState(() => !!fenetreDiapos() && !fenetreDiapos()!.closed)
   const [depart] = useState(() => Date.now())
   const [maintenant, setMaintenant] = useState(() => Date.now())
@@ -676,7 +700,8 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
     echap: () => {
       if (etat.atelierPlein) basculerAtelierPlein(false)
       else if (outils.menuExport) setOutils((o) => ({ ...o, menuExport: false }))
-      else setOutils((o) => (o.ensemble ? { ...o, ensemble: false } : o.stylo ? { ...o, stylo: false } : { ...o, ensemble: true }))
+      else if (!outils.ensemble && echapPalettes(outils)) setOutils((o) => echapPalettes(o) ?? o)
+      else setOutils((o) => (o.ensemble ? { ...o, ensemble: false } : o.stylo ? { ...o, stylo: false, palette: false, nuancier: false } : { ...o, ensemble: true }))
     },
   })
 
@@ -767,22 +792,21 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
               <BoutonsInstruments outils={outils} setOutils={setOutils} magasin={magasin} />
             </span>
           </div>
-          {(outils.stylo || equerreVisible || etat.blanc) && (
-            <div className="prof-palette">
-              {etat.blanc && <PalettesBlanc projection={projection} annotations={ann.annotations} outils={outils} setOutils={setOutils} compacte />}
-              {outils.stylo && <PaletteDessin outils={outils} setOutils={setOutils} />}
-              {equerreVisible && <PaletteEquerre magasin={magasin} />}
-            </div>
-          )}
-          <Scene className="prof-scene">
-            {(echelle) => (
-              <>
-                {d && (d.type === 'atelier' ? <DiapoAtelierProf diapo={d} chapter={chapter} /> : <Diapo key={d.cle} diapo={d} chapter={chapter} pas={etat.pas} mode="direct" debut={etat.debut} />)}
-                <FondPage projection={projection} />
-                <Annotations projection={projection} magasin={magasin} annotations={ann.annotations} page={ann.page} blanche={ann.blanche} outils={outils} echelle={echelle} role="prof" grille={!!ann.blanche && ann.blanche.fond !== 'uni'} />
-              </>
-            )}
-          </Scene>
+          {/* Même principe qu'à l'écran de la classe : pastille + colonne à gauche, petite barre de l'écran blanc en haut à
+              gauche, posées sur la diapo projetée (rien au-dessus ni en dessous : elle garde toute la place). */}
+          <div className="prof-scene-zone">
+            <Scene className="prof-scene">
+              {(echelle) => (
+                <>
+                  {d && (d.type === 'atelier' ? <DiapoAtelierProf diapo={d} chapter={chapter} /> : <Diapo key={d.cle} diapo={d} chapter={chapter} pas={etat.pas} mode="direct" debut={etat.debut} />)}
+                  <FondPage projection={projection} />
+                  <Annotations projection={projection} magasin={magasin} annotations={ann.annotations} page={ann.page} blanche={ann.blanche} outils={outils} echelle={echelle} role="prof" surEcrire={surEcrire} />
+                </>
+              )}
+            </Scene>
+            {etat.blanc && <OutilsBlanc projection={projection} annotations={ann.annotations} outils={outils} setOutils={setOutils} />}
+            <OutilsDessin outils={outils} setOutils={setOutils} />
+          </div>
           <div className="prof-navigation">
             <button type="button" className="projection-bouton prof-nav" onClick={precedent} disabled={etat.index === 0 && etat.pas === 0}>
               <Pictogramme nom="precedent" /> Précédent

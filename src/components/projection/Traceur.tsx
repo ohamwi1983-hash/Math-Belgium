@@ -5,6 +5,7 @@ import { ECHELLES, lireFonction, NOMS_COURBES, placeEtiquette, pointsRemarquable
 import type { CourbeACalculer, Fonction, PointRemarquable } from '../../lib/projection/traceur'
 import type { Courbe, PageBlanche } from '../../lib/projection/annotations'
 import { clePageBlanche } from '../../lib/projection/annotations'
+import { avecEchelle, repereVue, vueDe } from '../../lib/projection/vue'
 import { COULEURS_STYLO, EPAISSEURS } from './BarreOutils'
 import type { OutilsLocaux } from './BarreOutils'
 import type { MagasinAnnotations } from './magasinAnnotations'
@@ -28,12 +29,14 @@ function largeurEtiquette(latex: string): number {
  * l'écran et dans l'export annoté (même composant).
  */
 export function EtiquettesCourbes({ courbes, page }: { courbes: Courbe[]; page: PageBlanche }) {
+  // Repère de la VUE (zoom, déplacement) : noms, points et coordonnées d'écran suivent le graphique.
+  const r = useMemo(() => repereVue(page), [page])
   const { noms, points } = useMemo(() => {
     const calculables: (CourbeACalculer & { courbe: Courbe })[] = []
     const noms: { c: Courbe; x: number; y: number }[] = []
     const prises: [number, number][] = []
     for (const c of courbes) {
-      const t = traceMemorise(c.saisie, page.angle, page)
+      const t = traceMemorise(c.saisie, page.angle, r)
       if (!t.f) continue
       calculables.push({ id: c.id, f: t.f as Fonction, courbe: c })
       const p = placeEtiquette(t.polylignes, prises)
@@ -43,16 +46,16 @@ export function EtiquettesCourbes({ courbes, page }: { courbes: Courbe[]; page: 
       }
     }
     const m = page.marques
-    const points = m.zeros || m.extremums || m.intersections ? pointsRemarquables(calculables, page, m) : []
+    const points = m.zeros || m.extremums || m.intersections ? pointsRemarquables(calculables, r, m) : []
     return { noms, points }
-  }, [courbes, page])
+  }, [courbes, page, r])
 
   // Étiquettes des points : en haut à droite du point, sinon un autre coin, sans se chevaucher ni sortir du cadre.
   const poses: { p: PointRemarquable; x: number; y: number; l: number; couleur: string }[] = []
   const boites: [number, number, number, number][] = noms.map((n) => [n.x + 8, n.y < 60 ? n.y + 8 : n.y - 44, 44, 42])
   for (const p of points) {
-    const px = versPxX(p.x, page)
-    const py = versPxY(p.y, page)
+    const px = versPxX(p.x, r)
+    const py = versPxY(p.y, r)
     const l = largeurEtiquette(p.latex)
     const h = 34
     const essais: [number, number][] = [
@@ -80,7 +83,7 @@ export function EtiquettesCourbes({ courbes, page }: { courbes: Courbe[]; page: 
     <div className="traceur-calque" aria-hidden="true">
       <svg width={1280} height={720} viewBox="0 0 1280 720" className="traceur-points">
         {poses.map(({ p, couleur }, i) => (
-          <circle key={i} cx={versPxX(p.x, page)} cy={versPxY(p.y, page)} r={7} fill="#fff" stroke={couleur} strokeWidth={4} />
+          <circle key={i} cx={versPxX(p.x, r)} cy={versPxY(p.y, r)} r={7} fill="#fff" stroke={couleur} strokeWidth={4} />
         ))}
       </svg>
       {noms.map(({ c, x, y }) => (
@@ -111,17 +114,20 @@ function couleurLibre(courbes: Courbe[]): string {
  * écrans, export, conservation).
  */
 export function PaletteTraceur({
+  id,
   projection,
   annotations,
   page,
   outils,
-  compacte = false,
+  replier,
 }: {
+  id?: string
   projection: Projection
   annotations: MagasinAnnotations
   page: PageBlanche
   outils: OutilsLocaux
-  compacte?: boolean
+  /** Replié sur le bouton f(x) dès qu'une courbe est tracée (la liste reste accessible en rouvrant). */
+  replier?: () => void
 }) {
   useVersionAnnotations(annotations)
   const cle = clePageBlanche(page.id)
@@ -149,10 +155,12 @@ export function PaletteTraceur({
     }
     annotations.ajouter(cle, courbe)
     setSaisie('')
+    replier?.()
   }
+  const vue = vueDe(page)
 
   return (
-    <div className={`projection-palette projection-palette--traceur${compacte ? ' compacte' : ''}`} role="group" aria-label="Traceur de fonctions sur le repère">
+    <div id={id} className="projection-palette projection-palette--traceur projection-interactif" role="group" aria-label="Traceur de fonctions sur le repère">
       <form
         className="traceur-ligne"
         onSubmit={(e) => {
@@ -227,7 +235,7 @@ export function PaletteTraceur({
               <MathInline tex={axe === 'ex' ? 'x' : 'y'} /> : 1 carreau =
             </span>
             {ECHELLES.map((v) => (
-              <button key={v} type="button" className="projection-duree traceur-choix" aria-pressed={page[axe] === v} onClick={() => projection.majPage({ [axe]: v })}>
+              <button key={v} type="button" className="projection-duree traceur-choix" aria-pressed={vue[axe] === v} onClick={() => projection.majPage({ vue: avecEchelle(vue, axe, v) })}>
                 {texteGraduation(v)}
               </button>
             ))}

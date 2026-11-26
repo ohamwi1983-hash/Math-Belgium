@@ -30,6 +30,14 @@ export type NomPictogramme =
   | 'punaise'
   | 'lecture'
   | 'qr'
+  | 'plus'
+  | 'moins'
+  | 'recentrer'
+  | 'nuancier'
+  | 'chevron-bas'
+  | 'fond-uni'
+  | 'fond-quadrille'
+  | 'fond-repere'
 
 export function Pictogramme({ nom, taille = 20 }: { nom: NomPictogramme; taille?: number }) {
   return (
@@ -202,6 +210,39 @@ function trace(nom: NomPictogramme) {
       return <path d="M5 17L19 7M4 14.5l2 3.5M18 6l2 3.5" />
     case 'droite':
       return <path d="M2 19L22 5" />
+    case 'plus':
+      return <path d="M12 5v14M5 12h14" />
+    case 'moins':
+      return <path d="M5 12h14" />
+    case 'recentrer':
+      return (
+        <>
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
+        </>
+      )
+    case 'nuancier':
+      return (
+        <>
+          <path d="M12 3a9 9 0 1 0 0 18c1.3 0 2-.8 2-1.8 0-1.4-1.2-1.6-1.2-2.8 0-.9.7-1.4 1.7-1.4H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z" />
+          <circle cx="7.5" cy="11" r="1.2" />
+          <circle cx="10" cy="7" r="1.2" />
+          <circle cx="14.5" cy="7" r="1.2" />
+        </>
+      )
+    case 'chevron-bas':
+      return <path d="M7 10l5 5 5-5" />
+    case 'fond-uni':
+      return <rect x="4" y="5" width="16" height="14" rx="1.5" />
+    case 'fond-quadrille':
+      return (
+        <>
+          <rect x="4" y="5" width="16" height="14" rx="1.5" />
+          <path d="M9.3 5v14M14.7 5v14M4 9.7h16M4 14.3h16" strokeWidth="1.2" />
+        </>
+      )
+    case 'fond-repere':
+      return <path d="M3 13h18M12 21V3M19 11l2 2-2 2M10 5l2-2 2 2" />
     case 'masquer':
       return (
         <>

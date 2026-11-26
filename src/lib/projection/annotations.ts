@@ -24,6 +24,8 @@ export interface Trait {
   /** Épaisseur en px logiques (défaut : 5 au stylo, 22 au surligneur, 44 à la gomme). */
   epaisseur?: number
   points: [number, number][]
+  /** Droite tracée à l'équerre : prolongée jusqu'aux bords de l'écran à l'affichage (page « repère » zoomée). */
+  droite?: boolean
 }
 
 /** Arc tracé au compas : centre, rayon, angles de départ et d'arrivée (radians, non ramenés à 2π). */
@@ -35,6 +37,9 @@ export interface Arc {
   cx: number
   cy: number
   r: number
+  /** Rayon vertical (en px de la page) si différent de `r` : arc tracé sur un repère aux axes d'échelles différentes
+   * (cercle à l'écran, ellipse dans la page). */
+  ry?: number
   a0: number
   a1: number
 }
@@ -64,6 +69,15 @@ export type ElementAnnotation = Trait | Arc | Epingle | Courbe
 
 export type FondBlanc = 'uni' | 'quadrille' | 'repere'
 
+/** Vue d'une page « repère » (zoom, déplacement ; voir `vue.ts`) : unités pour 40 px d'écran par axe, point du
+ * repère au centre de l'écran. */
+export interface VueRepere {
+  ex: number
+  ey: number
+  cx: number
+  cy: number
+}
+
 /** Page de l'écran blanc : son fond, l'échelle du repère, le mode des angles et les points à marquer. */
 export interface PageBlanche {
   id: string
@@ -73,6 +87,9 @@ export interface PageBlanche {
   ey: number
   angle: ModeAngle
   marques: { zeros: boolean; extremums: boolean; intersections: boolean }
+  /** Vue du repère (zoom, déplacement), gardée par page ; absente = vue de départ. Les annotations sont stockées en
+   * coordonnées de la page à sa vue de départ (`ex`, `ey`, origine au centre) et suivent le graphique. */
+  vue?: VueRepere
 }
 
 export const cleDiapo = (cle: string) => `d:${cle}`
@@ -199,7 +216,11 @@ function valider(brut: unknown): DonneesAnnotations | null {
 
 function nouvellePageBlancheDepuis(p: Partial<PageBlanche>): PageBlanche {
   const ech = (v: unknown) => (typeof v === 'number' && v > 0 && v <= 100 ? v : 1)
+  const fini = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
+  const v = p.vue
+  const vue = v && fini(v.ex) && fini(v.ey) && fini(v.cx) && fini(v.cy) && v.ex > 0 && v.ey > 0 ? { ex: v.ex, ey: v.ey, cx: v.cx, cy: v.cy } : undefined
   return {
+    ...(vue ? { vue } : {}),
     id: String(p.id),
     fond: p.fond === 'quadrille' || p.fond === 'repere' ? p.fond : 'uni',
     ex: ech(p.ex),
