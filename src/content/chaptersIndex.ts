@@ -23,6 +23,7 @@ import { analyseCombinatoire } from './chapters/6e-6h/analyse-combinatoire'
 import { variablesAleatoires } from './chapters/6e-6h/variables-aleatoires'
 import { lieuxGeometriques } from './chapters/6e-6h/lieux-geometriques'
 import { coniques } from './chapters/6e-6h/coniques'
+import { nombresReelsSuites } from './chapters/5e-6h/nombres-reels-suites'
 
 export interface LevelEntry {
   slug: string
@@ -31,12 +32,13 @@ export interface LevelEntry {
 }
 
 /**
- * Registre de navigation : un niveau (4e / 5e-4h / 6e-6h) et la liste de ses chapitres.
+ * Registre de navigation : un niveau (4e / 5e-4h / 5e-6h / 6e-6h) et la liste de ses chapitres.
  * Ajouter un chapitre = ajouter son fichier de données ici, jamais une nouvelle route codée à la main.
  */
 export const LEVELS: LevelEntry[] = [
   { slug: '4e', label: '4e', chapters: [fonctionSecondDegre, equationsInequationsSecondDegre, caracteristiquesFonctionsReference, statistiqueDescriptive, cercleTrigonometriqueTriangles, calculVectoriel, geometrieAnalytiquePlane, geometrieDansEspace] },
   { slug: '5e-4h', label: '5e (4h)', chapters: [fonctionsComposees, trigonometrie, suites, limitesAsymptotes, deriveesApplications, statistiqueDeuxVariables] },
+  { slug: '5e-6h', label: '5e (6h)', chapters: [nombresReelsSuites] },
   { slug: '6e-6h', label: '6e (6h)', chapters: [fonctionsReciproquesCyclometriques, fonctionsExponentielles, fonctionsLogarithmes, primitivesIntegrales, nombresComplexes, probabilites, analyseCombinatoire, variablesAleatoires, lieuxGeometriques, coniques] },
 ]
 

@@ -27,6 +27,7 @@ export interface EntrainementEntry {
 export const LEVEL_LABELS: Record<string, string> = {
   '4e': '4e',
   '5e-4h': '5e (4h)',
+  '5e-6h': '5e (6h)',
   '6e-6h': '6e (6h)',
 }
 
@@ -47,6 +48,8 @@ const CH_5E_TRIGONOMETRIE: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'tr
 const CH_5E_SUITES: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'suites', chapitreTitle: 'Suites' }
 const CH_5E_LIMITES_ASYMPTOTES: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'limites-asymptotes', chapitreTitle: 'Limites et asymptotes' }
 const CH_5E_DERIVEES_APPLICATIONS: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'derivees-applications', chapitreTitle: 'Dérivées et applications' }
+// 5e (6h) : chapitre partagé par les générateurs 56genN (exporté tant qu'aucun n'est branché).
+export const CH_56_NOMBRES_REELS_SUITES: ChapitreInfo = { chantier: '5e-6h', chapitreSlug: 'nombres-reels-suites', chapitreTitle: 'Nombres réels et suites' }
 const CH_5E_STATISTIQUE_DEUX_VARIABLES: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'statistique-deux-variables', chapitreTitle: 'Statistique à deux variables' }
 const CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'fonctions-reciproques-cyclometriques', chapitreTitle: 'Fonctions réciproques & cyclométriques' }
 const CH_6E_FONCTIONS_EXPONENTIELLES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'fonctions-exponentielles', chapitreTitle: 'Fonctions exponentielles' }

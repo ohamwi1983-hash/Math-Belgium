@@ -1,0 +1,69 @@
+import type { ChapterSection } from '../../../types'
+
+/**
+ * 5e (6h) — Nombres réels et suites, partie « Les nombres réels ».
+ * Squelette posé par le coordinateur (26/11/2026) : ids, numéros, titres FIXES (les agents de générateurs et
+ * d'ateliers y accrochent leurs blocs). Garder le marqueur `// ⟨fin-etape …⟩` en dernière ligne de chaque `blocks`.
+ */
+export const sectionsReels: ChapterSection[] = [
+  {
+    id: 'irrationnels',
+    number: 1,
+    title: 'Des nombres qui ne sont pas des fractions',
+    kicker: '√2 irrationnel, ensembles ℕ, ℤ, ℚ, ℝ',
+    titreCourt: 'Irrationnels',
+    partie: 'Les nombres réels',
+    blocks: [
+      { kind: 'para', text: 'Étape en cours de rédaction.' },
+      // ⟨fin-etape irrationnels⟩
+    ],
+  },
+  {
+    id: 'ecritures-decimales',
+    number: 2,
+    title: 'Écritures décimales des rationnels et des irrationnels',
+    kicker: 'limitée, périodique ou illimitée non périodique',
+    titreCourt: 'Écritures décimales',
+    partie: 'Les nombres réels',
+    blocks: [
+      { kind: 'para', text: 'Étape en cours de rédaction.' },
+      // ⟨fin-etape ecritures-decimales⟩
+    ],
+  },
+  {
+    id: 'axiomes',
+    number: 3,
+    title: 'Les axiomes des nombres réels',
+    kicker: 'quantificateurs, axiomes, Archimède, intervalles emboîtés',
+    titreCourt: 'Axiomes de ℝ',
+    partie: 'Les nombres réels',
+    blocks: [
+      { kind: 'para', text: 'Étape en cours de rédaction.' },
+      // ⟨fin-etape axiomes⟩
+    ],
+  },
+  {
+    id: 'valeur-absolue',
+    number: 4,
+    title: 'Valeur absolue et distance',
+    kicker: '|x − y| est la distance entre x et y',
+    titreCourt: 'Valeur absolue',
+    partie: 'Les nombres réels',
+    blocks: [
+      { kind: 'para', text: 'Étape en cours de rédaction.' },
+      // ⟨fin-etape valeur-absolue⟩
+    ],
+  },
+  {
+    id: 'approcher-densite',
+    number: 5,
+    title: 'Encadrer, approcher, densité',
+    kicker: 'erreurs, algorithme de Héron, dénombrable ou continu',
+    titreCourt: 'Approcher un réel',
+    partie: 'Les nombres réels',
+    blocks: [
+      { kind: 'para', text: 'Étape en cours de rédaction.' },
+      // ⟨fin-etape approcher-densite⟩
+    ],
+  },
+]

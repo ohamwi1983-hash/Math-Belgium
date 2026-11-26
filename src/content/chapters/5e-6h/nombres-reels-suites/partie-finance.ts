@@ -1,0 +1,57 @@
+import type { ChapterSection } from '../../../types'
+
+/**
+ * 5e (6h) — Nombres réels et suites, partie « Algèbre financière ».
+ * Squelette posé par le coordinateur (26/11/2026) : ids, numéros, titres FIXES (les agents de générateurs et
+ * d'ateliers y accrochent leurs blocs). Garder le marqueur `// ⟨fin-etape …⟩` en dernière ligne de chaque `blocks`.
+ */
+export const sectionsFinance: ChapterSection[] = [
+  {
+    id: 'interets',
+    number: 11,
+    title: 'Intérêt simple, intérêts composés',
+    kicker: 'I = C₀·i·t et Cₙ = C₀(1 + i)ⁿ',
+    titreCourt: 'Intérêts',
+    partie: 'Algèbre financière',
+    blocks: [
+      { kind: 'para', text: 'Étape en cours de rédaction.' },
+      // ⟨fin-etape interets⟩
+    ],
+  },
+  {
+    id: 'taux-equivalents',
+    number: 12,
+    title: 'Taux équivalents et taux réel',
+    kicker: '(1 + i_mensuel)¹² = 1 + i_annuel',
+    titreCourt: 'Taux équivalents',
+    partie: 'Algèbre financière',
+    blocks: [
+      { kind: 'para', text: 'Étape en cours de rédaction.' },
+      // ⟨fin-etape taux-equivalents⟩
+    ],
+  },
+  {
+    id: 'annuites',
+    number: 13,
+    title: 'Annuités : placer et rembourser',
+    kicker: 'valeur acquise Vₙ, valeur actuelle V₀',
+    titreCourt: 'Annuités',
+    partie: 'Algèbre financière',
+    blocks: [
+      { kind: 'para', text: 'Étape en cours de rédaction.' },
+      // ⟨fin-etape annuites⟩
+    ],
+  },
+  {
+    id: 'credit',
+    number: 14,
+    title: 'Crédit à la consommation',
+    kicker: 'TAEG, mensualité, tableau d’amortissement',
+    titreCourt: 'Crédit',
+    partie: 'Algèbre financière',
+    blocks: [
+      { kind: 'para', text: 'Étape en cours de rédaction.' },
+      // ⟨fin-etape credit⟩
+    ],
+  },
+]
