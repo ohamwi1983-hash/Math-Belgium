@@ -505,4 +505,8 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '56gen11': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen11').then((m) => ({ default: m.App56gen11 }))),
   '56gen12': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen12').then((m) => ({ default: m.App56gen12 }))),
   '56gen13': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen13').then((m) => ({ default: m.App56gen13 }))),
+  // Nouveaux générateurs réels et suites (chantier E2) : Héron, symbole Σ, rang pour ε.
+  '56gen20': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen20').then((m) => ({ default: m.App56gen20 }))),
+  '56gen21': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen21').then((m) => ({ default: m.App56gen21 }))),
+  '56gen22': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen22').then((m) => ({ default: m.App56gen22 }))),
 }

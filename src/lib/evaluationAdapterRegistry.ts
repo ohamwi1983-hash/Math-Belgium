@@ -761,6 +761,10 @@ import { adaptateurEvaluationModeliserSuite as adaptateur56gen9 } from '../entra
 import { adaptateurEvaluationDetectiveSuites as adaptateur56gen10 } from '../entrainement/5e-6h/generateurs56/detectiveSuites/exportEvaluation'
 import { adaptateurEvaluationComparaisonSuites as adaptateur56gen11 } from '../entrainement/5e-6h/generateurs56/comparaisonSuites/exportEvaluation'
 import { adaptateurEvaluation56gen12 as adaptateur56gen12 } from '../entrainement/5e-6h/generateurs56/suiteRecurrenteAffine/exportEvaluation56'
+// Nouveaux (chantier E2) : 56gen20 Héron, 56gen21 symbole Σ, 56gen22 rang pour ε.
+import { adaptateurEvaluationHeron as adaptateur56gen20 } from '../entrainement/5e-6h/generateurs56/heron/exportEvaluation'
+import { adaptateurEvaluationSigma as adaptateur56gen21 } from '../entrainement/5e-6h/generateurs56/sommeSigma/exportEvaluation'
+import { adaptateurEvaluationRang as adaptateur56gen22 } from '../entrainement/5e-6h/generateurs56/rangEpsilon/exportEvaluation'
 
 export const EVALUATION_ADAPTER_REGISTRY_56: Record<string, AdaptateurFeuilleExercices<never>> = {
   '56gen1': versionPapier(adaptateur56gen1) as unknown as AdaptateurFeuilleExercices<never>,
@@ -775,6 +779,9 @@ export const EVALUATION_ADAPTER_REGISTRY_56: Record<string, AdaptateurFeuilleExe
   '56gen10': versionPapier(adaptateur56gen10) as unknown as AdaptateurFeuilleExercices<never>,
   '56gen11': versionPapier(adaptateur56gen11) as unknown as AdaptateurFeuilleExercices<never>,
   '56gen12': versionPapier(adaptateur56gen12) as unknown as AdaptateurFeuilleExercices<never>,
+  '56gen20': versionPapier(adaptateur56gen20) as unknown as AdaptateurFeuilleExercices<never>,
+  '56gen21': versionPapier(adaptateur56gen21) as unknown as AdaptateurFeuilleExercices<never>,
+  '56gen22': versionPapier(adaptateur56gen22) as unknown as AdaptateurFeuilleExercices<never>,
 }
 
 /** Lookup unique par `generatorId`, tous chantiers portés confondus — `evaluationLocal.ts` n'a pas
