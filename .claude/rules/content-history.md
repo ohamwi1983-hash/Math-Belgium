@@ -6535,3 +6535,60 @@ Mécanismes : `content-authoring.md`, « Chapitres autonomes » ; composants : `
   `verifier-enonces-evaluation.mjs`) : liens résolus, aucun lien dans un champ brut ni dans un gras, entrées `utilise`
   valides, aucun renvoi chiffré dans les chapitres et les questions « Formule ». Avant réécriture : 99 textes en
   défaut ; après : 0.
+
+## 5e (6h), Chapitre 1 — Nombres réels et suites : partie « Les suites », étapes 6–10 (chantier B du cours, 26/11/2026)
+
+Fichier `src/content/chapters/5e-6h/nombres-reels-suites/partie-suites.ts` (squelette du coordinateur : ids, numéros,
+titres, `partie` gardés ; marqueurs `// ⟨fin-etape …⟩` en dernière ligne). Sources : manuel (synthèses 7 à 18,
+explorations 7 à 19, exercices 12 à 35) et le chapitre « Suites » de la 5e (4h), réécrit pour la 6h (aucun renvoi
+« section n » de la 4h repris). Nombres recalculés (`scratchpad/56-B/calc.py`).
+
+**Contenu** — § 6 : suite = fonction sur ℕ₀, explicite / récurrence, conjecture u₁ = 2, uₙ₊₁ = uₙ/(1 + uₙ) → 2/(2n − 1)
+contrôlée sur u₅ (aucun raisonnement par récurrence ; attention « quelques termes ne prouvent pas »), uₙ₊₁ ≠ uₙ + 1,
+représentation, suites figurées (carrés creux pₙ = 4n, `illustrationGroup` de `vectorPlane` sans axes ; tableau croix /
+triangles / rectangles), menu Récurrence et Table de la Casio Graph Math+ (écrit prudemment), reconnaître la nature
+(mesures arrondies de rayons X : raison environ 0,78), récurrente affine et point fixe (écart multiplié par a,
+démonstration directe), aquarium, application « dose de médicament » (q = 533,3 mg), « Calculatrice… prudence ! »
+(u₁ = 1/7, uₙ₊₁ = 29uₙ − 4 : table depuis 0,142 857, u₇ ≈ −84,83 ; dix décimales : 0,168 au rang 7), « Le sais-tu ? »
+2, 3, 5… (premiers, Fibonacci, +1 +2 +3, polynôme (n − 1)³/6 + 5(n − 1)/6 + 2 → 2, 3, 5, 9, 16, 27). § 7 : définition
+manuel, trois formules démontrées (somme télescopique des différences, pas de récurrence), u₇ = 25 / u₁₂ = 45, quatre
+termes de somme 35 (3,5 ; 7 ; 10,5 ; 14), double échelle générale + version Σ, Gauss, S₁₂ = 150, échelle (300 cm),
+économies de Vincent (631,20 €), symbole Σ (lecture, couper, facteur, Σc = nc, Σi, changement d'indice),
+Σ(1 − 2i) = −144, Σ(3i − 2) = n(3n − 1)/2. § 8 : définition, tableau de monotonie (q, signe de u₁), deux graphiques,
+formules démontrées (produit télescopique), u₂ = 392 / u₅ = 49, insérer cinq termes entre 2 et 31 250 (q = ±5), S − qS
+avec Σ, forage (S₂₅ ≈ 4 164,59 UM, 31 m pour 6 000 UM par la table), échiquier, 35 ; m ; 875 (455 ou ±175), quatre termes
+de produit 256 (2 ; 2∛4 ; 4∛2 ; 8 ou opposés), triangle de Kepler (q² = Φ, attribution « on attribue… lettre de 1597 à
+Mästlin »), pourcentages, Malthus (1900 : 57,96 contre 60 millions ; bascule en 1903, 61,505 > 61,5), historique Malthus.
+§ 9 : tableau de l'exploration 8, définitions ε / r du manuel (écrites « ∀ε ∈ ℝ₀⁺, ∃m ∈ ℕ₀ : … » pour la lecture à voix
+haute), bande autour de ℓ (curvePlot, `shadedRegions`), rang m (2n + 3)/(n + 1) pour 10⁻³ → 999 et 3 + 5·0,8ⁿ par la
+table → 27, tableaux des limites, quatre démonstrations (arithmétique par Archimède ; (1 + h)ⁿ ≥ 1 + nh en distribuant ;
+0 < |q| < 1 ; q ≤ −1 sans limite par la distance de deux termes consécutifs), quotient de polynômes (pour 56gen6),
+Fibonacci → Φ (vₙ₊₁ = 1 + 1/vₙ, convergence admise), |vₙ₊₁ − vₙ| < 10⁻⁴ dès n = 11, Φⁿ = FₙΦ + Fₙ₋₁. § 10 : définition par
+les sommes partielles, carré coupé en deux, démonstration u₁/(1 − q), 6 + 2 + … = 9, Zénon, 0,999… = 1 et 7,0799… = 7,08
+(renvoi à l'étape 2), balle (h₃ = 0,84 m, h₉ ≈ 0,1502 m encore au-dessus de 15 cm → dixième rebond, 14 m), vagues
+(longueur π constante, aires → π/2, [AB] de longueur 2), pieu (10 m), série harmonique (paquets, S_{2^k} ≥ 1 + k/2 ;
+12 367 termes pour dépasser 10), Oresme, von Koch (aire → 2√3/5, périmètre → +∞, 1904), Sierpinski (3ⁿ triangles, aire
+→ 0, périmètre 30·(3/2)ⁿ, 1915, « fractale » : Mandelbrot 1975), carré tournant (cₙ₊₁ = √(1 + (cₙ − 1)²), aire → 1 cm² ;
+convergence d'une suite décroissante minorée admise).
+
+**Erreurs du manuel non reprises** : Malthus né en 1766 (le manuel écrit 1755), « fractale » créé en 1975 (1974),
+aire du carré tournant → 1 cm², renvois « chapitre n », « □ » pour « − ».
+
+**Champs** : 2 intuitions (« Pour visualiser » § 6, « un couloir autour de ℓ » § 9), 7 « Le sais-tu ? » (2, 3, 5… ;
+Gauss ; Kepler ; Malthus ; Fibonacci ; Zénon ; Oresme), 1 « À quoi ça sert ? » (médicament),
+46 exemples / démonstrations, tous appariés par clé dans `ENONCES_DEMONSTRATION` (`'nombres-reels-suites'`, à fusionner
+avec les sections des chantiers A et C dans le même objet), 15 phrases d'`essentiel`, 20 cartes, cartes « S'entraîner »
+56gen3, 56gen12 (§ 6), 56gen1, 56gen21 (§ 7), 56gen2, 56gen4, 56gen5, 56gen9, 56gen11 (§ 8), 56gen6, 56gen22 (§ 9),
+56gen7, 56gen8, 56gen10 (§ 10), ateliers repris suite-recurrente-affine, gauss-double-echelle, arithmetique-ou-geometrique,
+echiquier, comparaison-suites, convergence-suite, fibonacci-nombre-d-or, somme-infinie-zenon. 5 puces de synthèse,
+6 groupes de formulaire.
+
+**Pièges relevés au rendu** : la `caption` d'un `featureTable` ne passe PAS par `RichText` (dollars affichés) : texte
+brut Unicode ; étiquette de `referenceLine` longue (« Φ ≈ 1,618 », « 533,3 », « 1 cm² ») rognée au bord droit d'un
+`sequencePlot` : étiquette courte ; étiquette du premier point d'un `sequencePlot` posée sur l'axe vertical : vidée,
+`yTicks` à la place ; deux `curvePlot` en `illustrationGroup` illisibles à 390 px : figures séparées.
+
+**Vérifié** : `tsc` ; `verifier-enonces-evaluation` (46 / 46 appariés, 0 orphelin) ; `verifier-liens-chapitres` ;
+`controle:lecture` ; page (Vite de développement) à 390 / 1 280 px, clair / sombre, carte, étapes 6–10 tiroirs ouverts
+et Réviser : 0 `$`, 0 `[[`, 0 astérisque, 0 notation clavier, 0 `.katex-error`, 0 débordement, 0 formule qui défile,
+0 erreur console ; figures capturées et relues (`scratchpad/56-B/figs/`).

@@ -131,7 +131,7 @@ export const sectionsSuites: ChapterSection[] = [
         illustration: {
           kind: 'sequencePlot',
           points: [
-            { n: 1, value: 2, label: '2' },
+            { n: 1, value: 2, label: '' },
             { n: 2, value: 2 / 3, label: '0,67' },
             { n: 3, value: 0.4, label: '0,4' },
             { n: 4, value: 2 / 7, label: '0,29' },
@@ -141,6 +141,7 @@ export const sectionsSuites: ChapterSection[] = [
             { n: 8, value: 2 / 15, label: '0,13' },
           ],
           connector: 'none',
+          yTicks: [1, 2],
           xAxisLabel: 'n',
           yAxisLabel: 'u_n',
           caption: R`La suite $u_n = \dfrac{2}{2n-1}$ : des points isolés, qui se rapprochent de $0$ sans jamais l'atteindre.`,
@@ -168,9 +169,9 @@ export const sectionsSuites: ChapterSection[] = [
         caption: R`D'autres suites figurées : la règle de passage et la formule explicite.`,
         headers: ['figures', 'premiers termes', 'pour passer à la suivante', 'formule'],
         rows: [
-          ['croix : une branche s’allonge de 1 point dans chaque direction', R`$1$ ; $4$ ; $7$ ; $10$`, R`$+3$`, R`$p_n = 3n - 2$`],
-          ['triangles : une rangée de plus en bas', R`$1$ ; $4$ ; $9$ ; $16$`, R`$+3$, $+5$, $+7$…`, R`$p_n = n^2$`],
-          ['rectangles de n rangées de n + 2 points', R`$3$ ; $8$ ; $15$ ; $24$`, R`$+5$, $+7$, $+9$…`, R`$p_n = n(n+2)$`],
+          ['croix (+1 point par branche)', R`$1$ ; $4$ ; $7$ ; $10$`, R`$+3$`, R`$p_n = 3n - 2$`],
+          ['triangles (+1 rangée)', R`$1$ ; $4$ ; $9$ ; $16$`, R`$+3$, $+5$, $+7$…`, R`$p_n = n^2$`],
+          ['rectangles n × (n + 2)', R`$3$ ; $8$ ; $15$ ; $24$`, R`$+5$, $+7$, $+9$…`, R`$p_n = n(n+2)$`],
         ],
       },
       { kind: 'subheading', text: 'Calculer des termes avec la calculatrice' },
@@ -248,7 +249,7 @@ export const sectionsSuites: ChapterSection[] = [
         illustration: {
           kind: 'sequencePlot',
           points: [
-            { n: 1, value: 1, label: '1' },
+            { n: 1, value: 1, label: '' },
             { n: 2, value: 3.7, label: '3,7' },
             { n: 3, value: 5.59, label: '5,59' },
             { n: 4, value: 6.913, label: '6,91' },
@@ -259,6 +260,7 @@ export const sectionsSuites: ChapterSection[] = [
             { n: 9, value: 9.48116791, label: '9,48' },
           ],
           connector: 'none',
+          yTicks: [1, 5, 10],
           referenceLine: { value: 10, label: 'L=10' },
           xAxisLabel: 'n',
           yAxisLabel: 'u_n',
@@ -298,7 +300,7 @@ export const sectionsSuites: ChapterSection[] = [
               { n: 6, value: 533.203125, label: '533' },
             ],
             connector: 'none',
-            referenceLine: { value: 1600 / 3, label: '533,3' },
+            referenceLine: { value: 1600 / 3, label: 'L' },
             xAxisLabel: 'prise n',
             yAxisLabel: 'q_n (mg)',
             caption: R`Quantité juste après chaque prise : $q_{n+1} = 0{,}25\,q_n + 400$ se stabilise près de $533{,}3$ mg.`,
@@ -430,7 +432,7 @@ export const sectionsSuites: ChapterSection[] = [
         label: 'Démonstration — les trois formules d’une suite arithmétique',
         blocks: [
           { kind: 'para', text: R`**Terme général.** Écris la définition pour les indices $1$ à $n - 1$ : $u_2 - u_1 = r$, $u_3 - u_2 = r$, …, $u_n - u_{n-1} = r$. Additionne ces $n - 1$ égalités membre à membre. À gauche, chaque terme intermédiaire apparaît une fois avec le signe $+$ et une fois avec le signe $-$ : il disparaît, et il reste $u_n - u_1$. À droite, on obtient $n - 1$ fois $r$. Donc $u_n = u_1 + (n-1)r$.` },
-          { kind: 'para', text: R`**Écart entre deux termes.** $u_m - u_n = [u_1 + (m-1)r] - [u_1 + (n-1)r]$, et les $u_1$ s'annulent : $u_m - u_n = (m - 1 - n + 1)r = (m-n)r$.` },
+          { kind: 'para', text: R`**Écart entre deux termes.** $u_m = u_1 + (m-1)r$ et $u_n = u_1 + (n-1)r$. En soustrayant, les $u_1$ s'annulent et il reste $(m - 1 - n + 1)r$ : $u_m - u_n = (m-n)r$.` },
           { kind: 'para', text: R`**Moyenne arithmétique.** Pour $n \geq 2$ : $u_n - u_{n-1} = r$ et $u_{n+1} - u_n = r$. Donc $u_n - u_{n-1} = u_{n+1} - u_n$, d'où $2u_n = u_{n-1} + u_{n+1}$ et $u_n = \dfrac{u_{n-1}+u_{n+1}}{2}$.` },
         ],
       },
@@ -510,7 +512,7 @@ export const sectionsSuites: ChapterSection[] = [
           { tag: 'le dernier terme de la somme', text: R`$u_{12} = -4 + 11 \times 3 = 29$` },
           { tag: 'appliquer la formule', text: R`$S_{12} = \dfrac{12 \times (-4 + 29)}{2} = 6 \times 25$` },
         ],
-        result: { tag: 'résultat', text: R`$S_{12} = 150$ (contrôle : $\dfrac{12 \times (2 \times (-4) + 11 \times 3)}{2} = 6 \times 25 = 150$).` },
+        result: { tag: 'résultat', text: R`$S_{12} = 150$ (contrôle avec $u_1$ et $r$ : $\dfrac{12\big(2 \times (-4) + 11 \times 3\big)}{2}$ $= 6 \times 25 = 150$).` },
       },
       {
         kind: 'exemple',
@@ -535,7 +537,7 @@ export const sectionsSuites: ChapterSection[] = [
         steps: [
           { tag: 'le rang du mois cherché', text: R`Janvier 2010 a le rang $1$ ; décembre 2011 a le rang $12 + 12 = 24$. Économie du mois de rang $n$ : $u_n = 12{,}50 + (n-1) \times 1{,}20$.` },
           { tag: 'décembre 2011', text: R`$u_{24} = 12{,}50 + 23 \times 1{,}20 = 40{,}10$` },
-          { tag: 'le total sur 24 mois', text: R`$S_{24} = \dfrac{24 \times (12{,}50 + 40{,}10)}{2} = 12 \times 52{,}60$` },
+          { tag: 'le total sur 24 mois', text: R`$S_{24} = \dfrac{24 \times (12{,}50 + 40{,}10)}{2}$ $= 12 \times 52{,}60$` },
         ],
         result: { tag: 'résultat', text: R`$40{,}10$ € en décembre 2011 et $631{,}20$ € au total.` },
       },
@@ -571,7 +573,7 @@ export const sectionsSuites: ChapterSection[] = [
         formula: R`Exprime $\sum\limits_{i=1}^{n} (3i - 2)$ en fonction de $n$.`,
         steps: [
           { tag: 'couper et sortir les facteurs', text: R`$3\sum\limits_{i=1}^{n} i - \sum\limits_{i=1}^{n} 2 = 3 \times \dfrac{n(n+1)}{2} - 2n$` },
-          { tag: 'réduire', text: R`$\dfrac{3n^2 + 3n - 4n}{2} = \dfrac{3n^2 - n}{2} = \dfrac{n(3n-1)}{2}$` },
+          { tag: 'réduire', text: R`$\dfrac{3n^2 + 3n - 4n}{2}$ $= \dfrac{3n^2 - n}{2} = \dfrac{n(3n-1)}{2}$` },
           { tag: 'contrôler pour n = 3', text: R`$1 + 4 + 7 = 12$ et $\dfrac{3 \times 8}{2} = 12$` },
         ],
         result: { tag: 'résultat', text: R`$\sum\limits_{i=1}^{n} (3i - 2) = \dfrac{n(3n-1)}{2}$` },
@@ -637,7 +639,7 @@ export const sectionsSuites: ChapterSection[] = [
       },
       {
         kind: 'featureTable',
-        caption: R`Le sens de variation d'une suite géométrique dépend de $q$ et du signe de $u_1$.`,
+        caption: 'Le sens de variation d’une suite géométrique dépend de q et du signe de u₁.',
         headers: ['', 'q < 0', '0 < q < 1', 'q = 1', 'q > 1'],
         rows: [
           ['u₁ > 0', 'ni croissante ni décroissante', 'strictement décroissante', 'constante', 'strictement croissante'],
@@ -649,8 +651,8 @@ export const sectionsSuites: ChapterSection[] = [
         text: R`Avec $q < 0$, les termes changent de signe à chaque pas. Une raison égale à $1$ n'a guère d'intérêt : tous les termes sont égaux. Quand $q > 1$ et $u_1 > 0$, la croissance est dite **exponentielle** : les points restent isolés, mais s'écartent de plus en plus vite de l'axe horizontal, alors que ceux d'une suite arithmétique restent alignés.`,
       },
       {
-        kind: 'illustrationGroup',
-        items: [
+        kind: 'illustration',
+        illustration:
           {
             kind: 'curvePlot',
             curves: [],
@@ -667,6 +669,10 @@ export const sectionsSuites: ChapterSection[] = [
             yAxisLabel: '',
             caption: R`Premier terme positif : $u_n = 1{,}2^{\,n-1}$ croît, $v_n = 6 \times 0{,}6^{\,n-1}$ décroît vers $0$.`,
           },
+      },
+      {
+        kind: 'illustration',
+        illustration:
           {
             kind: 'curvePlot',
             curves: [],
@@ -683,7 +689,6 @@ export const sectionsSuites: ChapterSection[] = [
             yAxisLabel: '',
             caption: R`Premier terme négatif : $u_n = -1{,}2^{\,n-1}$ décroît, $v_n = -6 \times 0{,}6^{\,n-1}$ croît vers $0$.`,
           },
-        ],
       },
       {
         kind: 'atelier',
@@ -883,7 +888,7 @@ export const sectionsSuites: ChapterSection[] = [
           { kind: 'para', text: R`**En 1900** (rang $101$) : $p_{101} = 8 \times 1{,}02^{100} \approx 57{,}96$ millions et $a_{101} = 10 + 0{,}5 \times 100 = 60$ millions : l'agriculture suffit encore.` },
           {
             kind: 'featureTable',
-            headers: ['année', 'rang n', 'population (millions)', 'nourris (millions)', 'assez ?'],
+            headers: ['année', 'rang n', 'population (millions)', 'nourris (millions)', 'assez'],
             rows: [
               ['1800', '1', R`$8$`, R`$10$`, 'oui'],
               ['1850', '51', R`$21{,}53$`, R`$35$`, 'oui'],
@@ -1030,9 +1035,9 @@ export const sectionsSuites: ChapterSection[] = [
         kind: 'definition',
         label: 'Définitions — limite d’une suite, suite convergente',
         items: [
-          R`Soit $(u_n)_{n\in\mathbb{N}_0}$ une suite et $\ell$ un réel. On dit que $\ell$ est la **limite** de la suite, et on note $\lim\limits_{n\to+\infty} u_n = \ell$, si et seulement si $(\forall \varepsilon \in \mathbb{R}_0^+)(\exists m \in \mathbb{N}_0) : n > m \Rightarrow |u_n - \ell| < \varepsilon$.`,
-          R`On dit que $\lim\limits_{n\to+\infty} u_n = +\infty$ si et seulement si $(\forall r \in \mathbb{R}_0^+)(\exists m \in \mathbb{N}_0) : n > m \Rightarrow u_n > r$.`,
-          R`On dit que $\lim\limits_{n\to+\infty} u_n = -\infty$ si et seulement si $(\forall r \in \mathbb{R}_0^-)(\exists m \in \mathbb{N}_0) : n > m \Rightarrow u_n < r$.`,
+          R`Soit $(u_n)_{n\in\mathbb{N}_0}$ une suite et $\ell$ un réel. On dit que $\ell$ est la **limite** de la suite, et on note $\lim\limits_{n\to+\infty} u_n = \ell$, si et seulement si $\forall \varepsilon \in \mathbb{R}_0^+$, $\exists m \in \mathbb{N}_0$ : $n > m \Rightarrow |u_n - \ell| < \varepsilon$.`,
+          R`On dit que $\lim\limits_{n\to+\infty} u_n = +\infty$ si et seulement si $\forall r \in \mathbb{R}_0^+$, $\exists m \in \mathbb{N}_0$ : $n > m \Rightarrow u_n > r$.`,
+          R`On dit que $\lim\limits_{n\to+\infty} u_n = -\infty$ si et seulement si $\forall r \in \mathbb{R}_0^-$, $\exists m \in \mathbb{N}_0$ : $n > m \Rightarrow u_n < r$.`,
           R`Une suite dont la limite est un **réel** est dite **convergente**. Une suite qui n'est pas convergente (limite infinie, ou pas de limite du tout) est dite **divergente**.`,
         ],
       },
@@ -1070,8 +1075,8 @@ export const sectionsSuites: ChapterSection[] = [
         badge: 'trouver le rang m pour un ε donné : forme rationnelle',
         formula: R`On considère la suite $u_n = \dfrac{2n+3}{n+1}$. Trouve un rang $m$ au-delà duquel $|u_n - 2| < 10^{-3}$, puis montre qu'un tel rang existe pour tout $\varepsilon > 0$.`,
         steps: [
-          { tag: 'simplifier l’écart', text: R`$u_n - 2 = \dfrac{2n + 3 - 2(n+1)}{n+1} = \dfrac{1}{n+1}$, qui est positif` },
-          { tag: 'résoudre l’inéquation', text: R`$\dfrac{1}{n+1} < 10^{-3} \iff n + 1 > 1\,000 \iff n > 999$ : $m = 999$ convient.` },
+          { tag: 'simplifier l’écart', text: R`$u_n - 2 = \dfrac{2n + 3 - 2(n+1)}{n+1}$, donc $u_n - 2 = \dfrac{1}{n+1}$, qui est positif` },
+          { tag: 'résoudre l’inéquation', text: R`$\dfrac{1}{n+1} < 10^{-3} \iff n + 1 > 1\,000$, c'est-à-dire $n > 999$ : $m = 999$ convient.` },
           { tag: 'pour un ε quelconque', text: R`$\dfrac{1}{n+1} < \varepsilon \iff n > \dfrac{1}{\varepsilon} - 1$ : tout naturel $m \geq \dfrac{1}{\varepsilon} - 1$ convient, et il en existe (axiome d'Archimède, étape 3).` },
         ],
         result: { tag: 'résultat', text: R`Pour $\varepsilon = 10^{-3}$, $m = 999$ ; un tel rang existe pour tout $\varepsilon > 0$, donc $\lim\limits_{n\to+\infty} \dfrac{2n+3}{n+1} = 2$.` },
@@ -1090,7 +1095,7 @@ export const sectionsSuites: ChapterSection[] = [
       { kind: 'subheading', text: 'Limites des suites arithmétiques et géométriques' },
       {
         kind: 'featureTable',
-        caption: R`Suite arithmétique de raison $r$.`,
+        caption: 'Suite arithmétique de raison r.',
         headers: ['raison r', 'comportement', 'limite'],
         rows: [
           ['r > 0', 'strictement croissante', R`$\lim\limits_{n\to+\infty} u_n = +\infty$`],
@@ -1100,7 +1105,7 @@ export const sectionsSuites: ChapterSection[] = [
       },
       {
         kind: 'featureTable',
-        caption: R`Suite géométrique de raison $q \neq 0$.`,
+        caption: 'Suite géométrique de raison q ≠ 0.',
         headers: ['raison q', 'comportement', 'limite'],
         rows: [
           ['q ≤ −1', 'signes alternés, |uₙ| ne diminue pas', 'pas de limite'],
@@ -1115,7 +1120,7 @@ export const sectionsSuites: ChapterSection[] = [
         label: 'Démonstration — une suite arithmétique de raison r > 0 tend vers +∞',
         blocks: [
           { kind: 'para', text: R`Soit $(u_n)$ une suite arithmétique de raison $r > 0$, et soit un réel $A > 0$ (il joue le rôle du $r$ de la définition ; on le renomme pour ne pas le confondre avec la raison). Il faut trouver un rang $m$ au-delà duquel $u_n > A$.` },
-          { kind: 'para', text: R`$u_n > A \iff u_1 + (n-1)r > A \iff n > 1 + \dfrac{A - u_1}{r}$ (on divise par $r > 0$ : le sens ne change pas).` },
+          { kind: 'para', text: R`$u_n > A \iff u_1 + (n-1)r > A$, c'est-à-dire $n > 1 + \dfrac{A - u_1}{r}$ (on divise par $r > 0$ : le sens ne change pas).` },
           { kind: 'para', text: R`Par l'axiome d'Archimède (étape 3), il existe un naturel $m$ supérieur au réel $1 + \dfrac{A - u_1}{r}$. Alors, pour tout $n > m$, on a $u_n > A$.` },
           { kind: 'para', text: R`**Conclusion.** $\lim\limits_{n\to+\infty} u_n = +\infty$. Pour $r < 0$, le même raisonnement, avec un réel $A < 0$ et en changeant le sens de l'inégalité quand on divise par $r$, donne $-\infty$.` },
         ],
@@ -1206,7 +1211,7 @@ export const sectionsSuites: ChapterSection[] = [
         illustration: {
           kind: 'sequencePlot',
           points: [
-            { n: 1, value: 1, label: '1' },
+            { n: 1, value: 1, label: '' },
             { n: 2, value: 2, label: '2' },
             { n: 3, value: 1.5, label: '1,5' },
             { n: 4, value: 5 / 3, label: '1,667' },
@@ -1218,7 +1223,8 @@ export const sectionsSuites: ChapterSection[] = [
             { n: 10, value: 89 / 55, label: '' },
           ],
           connector: 'none',
-          referenceLine: { value: (1 + Math.sqrt(5)) / 2, label: 'Φ ≈ 1,618' },
+          yTicks: [1, 1.5, 2],
+          referenceLine: { value: (1 + Math.sqrt(5)) / 2, label: 'Φ' },
           xAxisLabel: 'n',
           yAxisLabel: 'v_n',
           caption: R`Les rapports $v_n = \dfrac{F_{n+1}}{F_n}$ oscillent autour de $\Phi \approx 1{,}618$ et s'en rapprochent.`,
@@ -1230,8 +1236,8 @@ export const sectionsSuites: ChapterSection[] = [
         formula: R`À l'aide de la table des nombres de Fibonacci, détermine un rang à partir duquel $|v_{n+1} - v_n| < 10^{-4}$.`,
         steps: [
           { tag: 'les nombres utiles', text: R`$F_{10} = 55$, $F_{11} = 89$, $F_{12} = 144$, $F_{13} = 233$` },
-          { tag: 'au rang 10', text: R`$|v_{11} - v_{10}| = \left|\dfrac{144}{89} - \dfrac{89}{55}\right| = \dfrac{1}{4\,895} \approx 2{,}0 \times 10^{-4}$ : trop grand` },
-          { tag: 'au rang 11', text: R`$|v_{12} - v_{11}| = \left|\dfrac{233}{144} - \dfrac{144}{89}\right| = \dfrac{1}{12\,816} \approx 7{,}8 \times 10^{-5}$` },
+          { tag: 'au rang 10', text: R`$|v_{11} - v_{10}| = \left|\dfrac{144}{89} - \dfrac{89}{55}\right|$ $= \dfrac{1}{4\,895} \approx 2{,}0 \times 10^{-4}$ : trop grand` },
+          { tag: 'au rang 11', text: R`$|v_{12} - v_{11}| = \left|\dfrac{233}{144} - \dfrac{144}{89}\right|$ $= \dfrac{1}{12\,816} \approx 7{,}8 \times 10^{-5}$` },
           { tag: 'la suite de la table', text: R`Les écarts suivants sont encore plus petits (le dénominateur grandit à chaque rang).` },
         ],
         result: { tag: 'résultat', text: R`$|v_{n+1} - v_n| < 10^{-4}$ dès $n = 11$.` },
@@ -1241,7 +1247,7 @@ export const sectionsSuites: ChapterSection[] = [
         label: 'Exemple résolu — les puissances du nombre d’or',
         blocks: [
           { kind: 'para', text: R`Sachant que $\Phi^2 = \Phi + 1$, écris $\Phi^3$, $\Phi^4$, $\Phi^5$ et $\Phi^6$ sous la forme $a\Phi + b$. Que remarques-tu ?` },
-          { kind: 'para', text: R`**La règle de calcul.** Si $\Phi^n = a\Phi + b$, alors $\Phi^{n+1} = a\Phi^2 + b\Phi = a(\Phi + 1) + b\Phi = (a + b)\Phi + a$.` },
+          { kind: 'para', text: R`**La règle de calcul.** Si $\Phi^n = a\Phi + b$, alors $\Phi^{n+1} = a\Phi^2 + b\Phi$, donc $\Phi^{n+1} = a(\Phi + 1) + b\Phi = (a + b)\Phi + a$.` },
           { kind: 'para', text: R`**Les puissances.** $\Phi^2 = \Phi + 1$, $\Phi^3 = 2\Phi + 1$, $\Phi^4 = 3\Phi + 2$, $\Phi^5 = 5\Phi + 3$, $\Phi^6 = 8\Phi + 5$.` },
           { kind: 'para', text: R`**Constat.** Les coefficients sont des nombres de Fibonacci consécutifs : $\Phi^n = F_n\,\Phi + F_{n-1}$ pour $n \geq 2$. C'est la règle de calcul (nouveau coefficient de $\Phi$ : $a + b$ ; nouveau terme constant : $a$) qui les fabrique, comme la règle de Fibonacci. Contrôle numérique : $8\Phi + 5 \approx 17{,}944$ et $\Phi^6 \approx 17{,}944$.` },
         ],
@@ -1337,7 +1343,7 @@ export const sectionsSuites: ChapterSection[] = [
             illustration: {
               kind: 'sequencePlot',
               points: [
-                { n: 1, value: 0.5, label: '0,5' },
+                { n: 1, value: 0.5, label: '' },
                 { n: 2, value: 0.75, label: '0,75' },
                 { n: 3, value: 0.875, label: '0,875' },
                 { n: 4, value: 0.9375, label: '' },
@@ -1347,6 +1353,7 @@ export const sectionsSuites: ChapterSection[] = [
                 { n: 8, value: 0.99609375, label: '' },
               ],
               connector: 'none',
+              yTicks: [0.5, 1],
               referenceLine: { value: 1, label: '1' },
               xAxisLabel: 'n',
               yAxisLabel: 'S_n',
@@ -1419,7 +1426,7 @@ export const sectionsSuites: ChapterSection[] = [
         steps: [
           { tag: 'découper en termes', text: R`$0{,}999\ldots = 0{,}9 + 0{,}09 + 0{,}009 + \ldots$ : géométrique, $u_1 = 0{,}9$ et $q = 0{,}1$` },
           { tag: 'appliquer la formule', text: R`$\dfrac{0{,}9}{1 - 0{,}1} = \dfrac{0{,}9}{0{,}9} = 1$` },
-          { tag: 'une partie qui ne se répète pas', text: R`$7{,}079\,99\ldots = 7{,}07 + (0{,}009 + 0{,}000\,9 + \ldots) = 7{,}07 + \dfrac{0{,}009}{1 - 0{,}1} = 7{,}07 + 0{,}01$` },
+          { tag: 'une partie qui ne se répète pas', text: R`$7{,}079\,99\ldots = 7{,}07 + 0{,}009\,99\ldots$, et $0{,}009 + 0{,}000\,9 + \ldots$ est géométrique ($u_1 = 0{,}009$, $q = 0{,}1$), de somme $\dfrac{0{,}009}{1 - 0{,}1} = 0{,}01$` },
         ],
         result: { tag: 'résultat', text: R`$0{,}999\ldots = 1$ et $7{,}079\,99\ldots = 7{,}08$ : deux écritures décimales d'un même nombre, comme annoncé à l'étape 2.` },
       },
@@ -1535,7 +1542,7 @@ export const sectionsSuites: ChapterSection[] = [
             illustration: {
               kind: 'sequencePlot',
               points: [
-                { n: 1, value: 100, label: '100' },
+                { n: 1, value: 100, label: '' },
                 { n: 2, value: 82, label: '82' },
                 { n: 3, value: 65.8892, label: '' },
                 { n: 4, value: 51.6548, label: '51,7' },
@@ -1551,7 +1558,8 @@ export const sectionsSuites: ChapterSection[] = [
                 { n: 14, value: 1.0, label: '1,00' },
               ],
               connector: 'none',
-              referenceLine: { value: 1, label: '1 cm²' },
+              referenceLine: { value: 1, label: '1' },
+              yTicks: [20, 40, 60, 80, 100],
               xAxisLabel: 'n',
               yAxisLabel: 'aire (cm²)',
               caption: R`Les aires $c_n^2$ des carrés tournants diminuent, mais tendent vers $1$ cm², pas vers $0$.`,
