@@ -252,6 +252,7 @@ export type InteractiveWidgetTag =
   | 'jusqu-ou-prevoir-widget'
   | 'changer-unites-widget'
   | 'heron-rectangles-widget'
+  | 'valeur-absolue-distance-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

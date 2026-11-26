@@ -51,6 +51,13 @@ export const sectionsReels: ChapterSection[] = [
     partie: 'Les nombres réels',
     blocks: [
       { kind: 'para', text: 'Étape en cours de rédaction.' },
+      {
+        kind: 'atelier',
+        tag: 'valeur-absolue-distance-widget',
+        label: 'Manipule toi-même : valeur absolue et distance sur la droite',
+        caption:
+          'Règle a et r, choisis le symbole (<, ≤, >, ≥ ou =) : les solutions de |x − a| ◇ r s’allument sur la droite et s’écrivent en intervalles. Fais glisser le point x pour lire sa distance à a. Essaie aussi r = 0 et r négatif : une distance n’est jamais négative.',
+      },
       // ⟨fin-etape valeur-absolue⟩
     ],
   },
