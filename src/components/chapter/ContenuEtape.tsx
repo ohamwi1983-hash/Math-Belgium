@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useId, useRef, useState } from 'react'
+import { PastillesCompetences } from '../PastillesCompetences'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { Block } from '../../content/types'
@@ -494,7 +495,7 @@ function CarteVideo({ bloc, ouvrir }: { bloc: BlocVideo; ouvrir: () => void }) {
 }
 
 /** Carte « À toi » : renvoie vers le générateur d'exercices de l'étape. */
-export function CarteAToi({ bloc, compacte }: { bloc: BlocEntrainement; compacte?: boolean }) {
+export function CarteAToi({ bloc, compacte, avecCompetences }: { bloc: BlocEntrainement; compacte?: boolean; avecCompetences?: boolean }) {
   const href = generatorLink(bloc.chantier, bloc.generatorId)
   const migre = estGenerateurMigre(bloc.chantier, bloc.generatorId)
   const libelle = (
@@ -510,6 +511,7 @@ export function CarteAToi({ bloc, compacte }: { bloc: BlocEntrainement; compacte
         <span className="carte-atoi-id">{bloc.generatorId}</span>
       </p>
       <p className="carte-titre">{bloc.title}</p>
+      {avecCompetences && <PastillesCompetences generatorId={bloc.generatorId} titre={bloc.title} />}
       {!compacte && bloc.description.map((d, i) => <p key={i} className="carte-desc">{d}</p>)}
       {migre ? (
         <Link className="btn-parcours btn-atoi" to={href} aria-label={`S'entraîner : ${bloc.title}`}>

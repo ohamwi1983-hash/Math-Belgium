@@ -149,7 +149,8 @@ function texteOffre(d: DisponibiliteCompetence, calculatrice: CalculatriceEleve)
 
 /** Nom d'un type d'exercice (texte simple, pour les noms accessibles des compteurs). */
 function nomType(c: Candidat): string {
-  return ([c.titre, c.variante].filter(Boolean).join(' — ') || 'Exercice').replace(/\$/g, '')
+  const nom = ([c.titre, c.variante].filter(Boolean).join(' — ') || 'Exercice').replace(/\$/g, '')
+  return c.sorte === 'exercice' ? `${nom} (${c.generatorId})` : nom
 }
 
 function nomFichier(chapitre: ChapterContent, type: TypeEleve, doc: DocumentGenere): string {
@@ -969,6 +970,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
                                       )}
                                     </span>
                                     <span className="eleve-type-meta">
+                                      {c.sorte === 'exercice' && <span className="eleve-type-gen">{c.generatorId}</span>}
                                       {LIBELLE_COMPETENCE[c.processus]}
                                       {niv ? ` · niv. ${niv}` : ''}
                                       {demandeCalc && <span className="eleve-type-calc"> · {calculatrice === 'interdite' ? 'demande une calculatrice' : 'se fait sans calculatrice'}</span>}

@@ -2286,6 +2286,7 @@ fieldset.eleve-demos { border: 0; margin: 0; padding: 0; }
 .eleve-type:first-child { border-top: 0; }
 .eleve-type-nom { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 0.95rem; overflow-wrap: anywhere; }
 .eleve-type-meta { font-size: 0.78rem; color: var(--ink-faint); }
+.eleve-type-gen { font: 600 0.78rem/1 var(--mono); color: var(--ink-soft); background: var(--surface-2, var(--line-soft, rgba(127,127,127,.12))); border-radius: 4px; padding: 1px 5px; margin-right: 6px; }
 .eleve-type-grise .eleve-type-nom { color: var(--ink-faint); }
 .eleve-type-calc { font-weight: 600; }
 .eleve-types-pied { display: flex; gap: 8px 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
@@ -2963,3 +2964,15 @@ body:has(.accueil) { background: var(--paper); }
     transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   }
 }
+
+/* Pastilles de compétences des générateurs (onglet « S'entraîner », feuille d'exercices) : jetons --procN. */
+.pastilles-competences { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.pastille-competence { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 3px; border-radius: 999px; font: 600 12.5px/1.2 var(--sans); letter-spacing: 0; text-transform: none; border: 1.5px solid currentColor; background: var(--surface); }
+.pastille-competence-num { display: inline-grid; place-items: center; min-width: 20px; height: 20px; border-radius: 999px; font-size: 12px; }
+.pastille-competence-1 { color: var(--proc1-ink); }
+.pastille-competence-1 .pastille-competence-num { background: var(--proc1); color: var(--on-proc1); }
+.pastille-competence-2 { color: var(--proc2-ink); }
+.pastille-competence-2 .pastille-competence-num { background: var(--proc2); color: var(--on-proc2); }
+.pastille-competence-3 { color: var(--proc3-ink); }
+.pastille-competence-3 .pastille-competence-num { background: var(--proc3); color: var(--on-proc3); }
+.carte-atoi .pastilles-competences { margin-top: -2px; }

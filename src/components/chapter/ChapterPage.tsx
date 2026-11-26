@@ -399,14 +399,14 @@ function EntrainerVue({ chapter, aller }: { chapter: ChapterContent; aller: Alle
                 </LienVue>
               </p>
               {cartes.map((b, i) => (
-                <CarteAToi key={i} bloc={b} compacte />
+                <CarteAToi key={i} bloc={b} compacte avecCompetences />
               ))}
             </div>
           ))}
           {chapter.recap.entrainement && (
             <div className="entrainer-groupe">
               <p className="entrainer-etape">Tout le chapitre</p>
-              <CarteAToi bloc={chapter.recap.entrainement} compacte />
+              <CarteAToi bloc={chapter.recap.entrainement} compacte avecCompetences />
             </div>
           )}
         </section>

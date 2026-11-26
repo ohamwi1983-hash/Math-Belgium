@@ -1672,6 +1672,12 @@ compétence est toujours écrit.
   élève qui réutilise `ReglageCompetences`), `.coffre-pN` (fiche du coffre). Le texte posé sur une
   pastille ou un segment vient de `--on-procN` (l'assistant élève, hors `.conc`, n'avait pas de couleur
   de texte : l'ancien `--conc-on-pc` a disparu).
+- **Onglet « S'entraîner » du chapitre** (27/11/2026) : chaque carte porte ses pastilles « 1 · Connaître » / « 2 · Appliquer » /
+  « 3 · Transférer » (`components/PastillesCompetences.tsx`, `.pastille-competence-N`, jetons `--procN`), lues dans
+  `lib/competencesGenerateur.ts` depuis `lib/generateursPilote.ts` (table `GENERATEURS_EVALUATION_PILOTE` sortie
+  d'`evaluationPayload.ts`, qui la réexporte, pour ne pas charger le registre des évaluations dans la page de chapitre ;
+  processus absent = 2 ; un quiz vrai / faux hors table = Connaître). La feuille de l'élève (« exercice par exercice »)
+  affiche le code du générateur (`.eleve-type-gen`, ex. « 5gen14 ») devant la compétence.
 - **Documents** : seule source `export/couleursProcessus.ts` (valeurs CLAIRES du site, `trait` / `encre`,
   `CSS_VARIABLES_PROCESSUS` pour le HTML, `couleurProcessusDocx` pour le Word). Couleur seule, textes et
   mises en page inchangés : bandeau « Processus n — … » (filet + titre ; copie, corrigé, blanche), en-têtes
