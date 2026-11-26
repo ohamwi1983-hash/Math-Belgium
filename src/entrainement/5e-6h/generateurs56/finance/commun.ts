@@ -294,12 +294,12 @@ export function ligneTempsSvg(spec: SpecLigneTemps): string {
   });
   const L = spec.largeur ?? 380;
   const g = 24;
-  const d = 40;
+  const d = 62;
   const pas = (L - g - d) / Math.max(1, slots.length - 1);
   const X = (k: number) => g + pas * slots.indexOf(k);
   const yAxe = 46;
   const nbFleches = spec.fleches?.length ?? 0;
-  const H = yAxe + 40 + (spec.marques?.length ? 18 : 0) + nbFleches * 30 + 6;
+  const H = yAxe + 40 + (spec.marques?.length ? 18 : 0) + nbFleches * 30 + 18;
   const o: string[] = [`<rect x="0" y="0" width="${L}" height="${H}" fill="#ffffff"/>`];
   o.push(`<line x1="${g - 12}" y1="${yAxe}" x2="${L - 14}" y2="${yAxe}" stroke="${COUL_AXE}" stroke-width="1.5"/>`);
   o.push(`<polygon points="${L - 6},${yAxe} ${L - 15},${yAxe - 4.5} ${L - 15},${yAxe + 4.5}" fill="${COUL_AXE}"/>`);
@@ -321,25 +321,27 @@ export function ligneTempsSvg(spec: SpecLigneTemps): string {
     o.push(`<polygon points="${x.toFixed(1)},${yAxe - 6} ${(x - 3.5).toFixed(1)},${yAxe - 12} ${(x + 3.5).toFixed(1)},${yAxe - 12}" fill="${COUL_VERS}"/>`);
     o.push(`<text x="${x.toFixed(1)}" y="${yAxe - 28}" text-anchor="middle" font-size="11" ${POLICE} fill="${COUL_VERS}" font-weight="600">${esc(v.texte)}</text>`);
   }
-  let y = yAxe + 34;
-  for (const m of spec.marques ?? []) {
-    if (!slots.includes(m.k)) continue;
-    const x = X(m.k);
-    o.push(`<circle cx="${x.toFixed(1)}" cy="${yAxe}" r="4" fill="${m.couleur ?? COUL_FLECHE}"/>`);
-    const ancre = x < g + 30 ? "start" : x > L - d - 10 ? "end" : "middle";
-    o.push(`<text x="${x.toFixed(1)}" y="${y}" text-anchor="${ancre}" font-size="11.5" ${POLICE} fill="${m.couleur ?? COUL_FLECHE}" font-weight="600">${esc(m.texte)}</text>`);
-  }
-  if (spec.marques?.length) y += 18;
+  // Flèches d'abord (une rangée chacune), puis les étiquettes des points marqués, sous les flèches :
+  // aucune étiquette ne croise une courbe ni une graduation.
+  let y = yAxe + 50;
+  const marques = (spec.marques ?? []).filter((m) => slots.includes(m.k));
+  for (const m of marques) o.push(`<circle cx="${X(m.k).toFixed(1)}" cy="${yAxe}" r="4" fill="${m.couleur ?? COUL_FLECHE}"/>`);
   for (const f of spec.fleches ?? []) {
     if (!slots.includes(f.de) || !slots.includes(f.a)) continue;
     const x1 = X(f.de);
     const x2 = X(f.a);
     const c = f.couleur ?? COUL_FLECHE;
     const yb = y - 4;
-    o.push(`<path d="M ${x1.toFixed(1)} ${yAxe + 7} Q ${x1.toFixed(1)} ${yb} ${((x1 + x2) / 2).toFixed(1)} ${yb} Q ${x2.toFixed(1)} ${yb} ${x2.toFixed(1)} ${yAxe + 9}" fill="none" stroke="${c}" stroke-width="1.4"/>`);
-    o.push(`<polygon points="${x2.toFixed(1)},${yAxe + 6} ${(x2 - 3.5).toFixed(1)},${yAxe + 13} ${(x2 + 3.5).toFixed(1)},${yAxe + 13}" fill="${c}"/>`);
+    o.push(`<path d="M ${x1.toFixed(1)} ${yAxe + 25} Q ${x1.toFixed(1)} ${yb} ${((x1 + x2) / 2).toFixed(1)} ${yb} Q ${x2.toFixed(1)} ${yb} ${x2.toFixed(1)} ${yAxe + 27}" fill="none" stroke="${c}" stroke-width="1.4"/>`);
+    o.push(`<polygon points="${x2.toFixed(1)},${yAxe + 24} ${(x2 - 3.5).toFixed(1)},${yAxe + 31} ${(x2 + 3.5).toFixed(1)},${yAxe + 31}" fill="${c}"/>`);
     o.push(`<text x="${((x1 + x2) / 2).toFixed(1)}" y="${yb + 14}" text-anchor="middle" font-size="11" ${POLICE} fill="${c}">${esc(f.texte)}</text>`);
     y += 30;
+  }
+  for (const m of marques) {
+    const x = X(m.k);
+    const ancre = x < g + 40 ? "start" : x > L - d - 30 ? "end" : "middle";
+    const xt = ancre === "start" ? Math.max(4, x - 6) : ancre === "end" ? Math.min(L - 4, x + 6) : x;
+    o.push(`<text x="${xt.toFixed(1)}" y="${y - 2}" text-anchor="${ancre}" font-size="11.5" ${POLICE} fill="${m.couleur ?? COUL_FLECHE}" font-weight="600">${esc(m.texte)}</text>`);
   }
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${L}" height="${H}" viewBox="0 0 ${L} ${H}" role="img" aria-label="Ligne du temps">${o.join("")}</svg>`;
 }
