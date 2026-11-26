@@ -165,6 +165,9 @@ export function melanger<T>(t: readonly T[]): T[] {
 /** Taux en % tiré dans [a ; b] par pas de `pas` (évite les flottants : arrondi à 4 décimales). */
 export const tauxEntre = (a: number, b: number, pas: number) => arrondi(a + pas * entier(0, Math.round((b - a) / pas)), 4);
 
+const FEMININS = new Set(["Inès", "Amina", "Lina", "Chloé", "Sarah", "Élise", "Zoé", "Julie"]);
+/** « il » ou « elle » selon le prénom (énoncés à la troisième personne). */
+export const pronom = (prenom: string) => (FEMININS.has(prenom) ? "elle" : "il");
 export const PRENOMS = ["Inès", "Lucas", "Amina", "Hugo", "Lina", "Noah", "Chloé", "Yanis", "Sarah", "Mehdi", "Élise", "Arthur", "Zoé", "Karim", "Julie", "Tom"] as const;
 
 /* ----------------------------------------------------------------------------------------------

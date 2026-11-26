@@ -131,7 +131,7 @@ export function consigne(e: E, p: P): Frag[] {
   }
 }
 
-export function champs(e: E, p: P): ChampEcran[] {
+export function champs(_e: E, p: P): ChampEcran[] {
   switch (p) {
     case "jours":
       return [{ label: "nombre de jours", labelLatex: "n=", unite: "jours", placeholder: "ex. : 68" }];

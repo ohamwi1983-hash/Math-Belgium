@@ -492,4 +492,5 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '56gen25': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen25').then((m) => ({ default: m.App56gen25 }))),
   '56gen26': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen26').then((m) => ({ default: m.App56gen26 }))),
   '56gen27': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen27').then((m) => ({ default: m.App56gen27 }))),
+  '56gen28': entree(CH_56_NOMBRES_REELS_SUITES, () => import('./5e-6h/App56gen28').then((m) => ({ default: m.App56gen28 }))),
 }

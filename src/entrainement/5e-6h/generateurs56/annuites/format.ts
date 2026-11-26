@@ -1,7 +1,7 @@
 import type { StatutVerification } from "../../../5e-4h/moteur/statutVerification";
 import type { AideEcran, ChampEcran, Frag, OptionEcran } from "../../../5e-4h/ui5e/ecransTrigo.types";
 import { lx, tx } from "../../../5e-4h/ui5e/ecransTrigo.types";
-import { centL, decimalL, eurT, lireNombre, MESSAGE_MONTANT, MESSAGE_TAUX, montantL, pourcentFixeL, pourcentT, statutMontant, statutTaux, TOL_CENTIME, tropArrondi } from "../finance/commun";
+import { centL, decimalL, eurT, pronom, lireNombre, MESSAGE_MONTANT, MESSAGE_TAUX, montantL, pourcentFixeL, pourcentT, statutMontant, statutTaux, TOL_CENTIME, tropArrondi } from "../finance/commun";
 import type { ExerciceAnnuites, PhaseAnnuites } from "./index";
 import { facteurVn, iDe, iPeriode, nbVersements, V0, Vn, VnApres, versementCherche } from "./index";
 
@@ -37,8 +37,8 @@ export function situation(e: E): Frag[] {
       return [tx(`Pour financer des travaux, ${p} peut rembourser ${eurT(e.a)} par an pendant ${ans(e.n)}, le premier remboursement ayant lieu un an après la remise des fonds. Le taux est de ${pourcentT(e.tauxPct)} par an (intérêts composés).`)];
     case "versement":
       return e.apres
-        ? [tx(`${p} veut disposer de ${eurT(e.cible)} un an après son dernier versement. Pour cela, il versera la même somme chaque année pendant ${ans(e.n)} sur un compte rémunéré à ${pourcentT(e.tauxPct)} par an (intérêts composés).`)]
-        : [tx(`${p} veut disposer de ${eurT(e.cible)} au moment de son dernier versement. Pour cela, il versera la même somme chaque année pendant ${ans(e.n)} sur un compte rémunéré à ${pourcentT(e.tauxPct)} par an (intérêts composés).`)];
+        ? [tx(`${p} veut disposer de ${eurT(e.cible)} un an après son dernier versement. Pour cela, ${pronom(p)} versera la même somme chaque année pendant ${ans(e.n)} sur un compte rémunéré à ${pourcentT(e.tauxPct)} par an (intérêts composés).`)]
+        : [tx(`${p} veut disposer de ${eurT(e.cible)} au moment de son dernier versement. Pour cela, ${pronom(p)} versera la même somme chaque année pendant ${ans(e.n)} sur un compte rémunéré à ${pourcentT(e.tauxPct)} par an (intérêts composés).`)];
     case "mensuel":
       return [tx(`${p} verse ${eurT(e.a)} à la fin de chaque mois, pendant ${ans(e.n)}, sur un compte rémunéré à ${pourcentT(e.tauxPct)} par an. Les intérêts sont capitalisés chaque mois, au taux mensuel équivalent.`)];
   }
@@ -47,15 +47,15 @@ export function situation(e: E): Frag[] {
 export function question(e: E): Frag[] {
   switch (e.variante) {
     case "placementDernier":
-      return [tx(`De quel capital disposera-t-il juste après son dernier versement ? Quels intérêts ses versements auront-ils rapportés ?`)];
+      return [tx(`De quel capital disposera-t-${pronom(e.prenom)} juste après son dernier versement ? Quels intérêts ses versements auront-ils rapportés ?`)];
     case "placementApres":
-      return [tx(`De quel capital disposera-t-il le 31 décembre ${e.annee + e.n - 1} ?`)];
+      return [tx(`De quel capital disposera-t-${pronom(e.prenom)} le 31 décembre ${e.annee + e.n - 1} ?`)];
     case "valeurActuelle":
-      return [tx("Quel montant peut-il emprunter aujourd'hui ? Combien d'intérêts paiera-t-il en tout ?")];
+      return [tx(`Quel montant peut-${pronom(e.prenom)} emprunter aujourd'hui ? Combien d'intérêts paiera-t-${pronom(e.prenom)} en tout ?`)];
     case "versement":
-      return [tx("Quel montant doit-il verser chaque année ?")];
+      return [tx(`Quel montant doit-${pronom(e.prenom)} verser chaque année ?`)];
     case "mensuel":
-      return [tx("De quel capital disposera-t-il juste après le dernier versement ? Quels intérêts ses versements auront-ils rapportés ?")];
+      return [tx(`De quel capital disposera-t-${pronom(e.prenom)} juste après le dernier versement ? Quels intérêts ses versements auront-ils rapportés ?`)];
   }
 }
 
@@ -94,7 +94,7 @@ export function consigne(e: E, p: P): Frag[] {
       return [tx(`Calcule le capital disponible le 31 décembre ${e.annee + e.n - 1} (au centime).`)];
     case "interets":
       return e.variante === "valeurActuelle"
-        ? [tx("Combien d'intérêts paiera-t-il en tout (total des remboursements moins le montant emprunté) ?")]
+        ? [tx(`Combien d'intérêts paiera-t-${pronom(e.prenom)} en tout (total des remboursements moins le montant emprunté) ?`)]
         : e.variante === "versement"
           ? [tx("Quelle part du capital visé proviendra des intérêts (au centime) ?")]
           : [tx("Calcule le montant des intérêts rapportés (au centime).")];
