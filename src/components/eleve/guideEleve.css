@@ -237,3 +237,5 @@ body:has(.ge-ent) { background: var(--paper); }
   .ge-ent { padding: 28px 24px 72px; gap: 18px; }
   .ge-ent h1 { font-size: 40px; }
 }
+.ge-fin-ex-puces { display: flex; gap: 8px; }
+.ge-fin-ex-puces span { flex: 1; height: 8px; border-radius: 999px; }
