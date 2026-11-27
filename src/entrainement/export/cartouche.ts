@@ -20,6 +20,11 @@ export interface CartoucheEcole {
   ecoleAdresse: string;
   /** « M. Hamwi » — vide : rien n'est imprimé à sa place. */
   professeur: string;
+  /** Logo FACULTATIF de l'école (0012, Réglages → En-tête des copies) : image en data URL
+   * (`data:image/png|jpeg|webp;base64,…`, ≈ 150 Ko au plus). Absent (ou invalide) : rien à sa place,
+   * documents IDENTIQUES octet pour octet à ceux d'avant. Jamais enregistré dans un plan (coffre,
+   * partage) : il est remis au rendu depuis l'école choisie (`lib/logoEcole.ts::planSansLogo`). */
+  logo?: string;
 }
 
 /** Valeurs historiques (repli sans session ni profil : rendu inchangé). */
@@ -29,12 +34,28 @@ export const CARTOUCHE_DEFAUT: CartoucheEcole = {
   professeur: "M. Hamwi",
 };
 
+/** Forme exacte d'un logo accepté (même règle que la contrainte SQL `ecoles_logo_valide` de 0012) :
+ * PNG, JPEG ou WEBP en base64, rien d'autre (le texte est inséré tel quel dans un `src`). */
+export const MOTIF_LOGO = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+/** Longueur maximale du data URL (≈ 150 Ko d'image encodée en base64, avec de la marge). */
+export const LOGO_MAX_CARACTERES = 210000;
+
+export function logoValide(logo: unknown): logo is string {
+  return typeof logo === "string" && logo.length <= LOGO_MAX_CARACTERES && MOTIF_LOGO.test(logo);
+}
+
+/** Logo à imprimer (validé), ou `null`. */
+export function logoCartouche(cartouche: CartoucheEcole | undefined): string | null {
+  return cartouche && logoValide(cartouche.logo) ? cartouche.logo : null;
+}
+
 /** Cartouche effectif : celui de l'en-tête s'il existe, sinon les valeurs historiques. Les textes
  * sont ramenés sur une ligne (un retour à la ligne saisi casserait le cartouche). */
 export function cartoucheEffectif(cartouche: CartoucheEcole | undefined): CartoucheEcole {
   if (!cartouche) return CARTOUCHE_DEFAUT;
   const uneLigne = (t: string | undefined) => (t ?? "").replace(/\s+/g, " ").trim();
-  return { ecoleNom: uneLigne(cartouche.ecoleNom), ecoleAdresse: uneLigne(cartouche.ecoleAdresse), professeur: uneLigne(cartouche.professeur) };
+  const logo = logoCartouche(cartouche);
+  return { ecoleNom: uneLigne(cartouche.ecoleNom), ecoleAdresse: uneLigne(cartouche.ecoleAdresse), professeur: uneLigne(cartouche.professeur), ...(logo ? { logo } : {}) };
 }
 
 /** Morceaux du surtitre « École · Mathématiques 4h/sem · Professeur » (textes bruts, morceaux

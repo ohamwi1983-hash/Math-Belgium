@@ -174,3 +174,38 @@
   /* Conception : la barre « Ma feuille · Générer » du panneau passe au-dessus de la barre du menu. */
   .espace-conception .conc-barre-mobile { bottom: calc(var(--ep-barre, 57px) + env(safe-area-inset-bottom, 0px)); padding-bottom: 10px; }
 }
+
+/* ---------- logo FACULTATIF de l'école (0012, 27/11/2026) : aperçu sur la feuille + réglage sous la feuille ---------- */
+/* Même proportion que sur la copie (1,5 cm de haut, 4 cm de large au plus, sur une feuille de 18 cm). */
+.profil-cartouche-logo { flex: none; display: flex; align-items: center; justify-content: center; padding: 4px 6px; border-right: 1.5px solid var(--profil-encre-papier); }
+.profil-cartouche-logo img { display: block; height: 24px; width: auto; max-width: 58px; object-fit: contain; }
+.profil-logo { display: flex; flex-direction: column; gap: 8px; padding-top: 4px; border-top: 1px solid var(--profil-sombre-2); }
+.profil-logo-titre { margin: 8px 0 0; font: 600 0.95rem var(--sans); color: var(--profil-sur-sombre); }
+.profil-logo-facultatif { font-weight: 500; color: var(--profil-sur-sombre-doux); }
+.profil-logo-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.profil-logo-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.profil-logo-vignette {
+  flex: none; width: 76px; height: 48px; display: grid; place-items: center; padding: 4px; border-radius: 6px;
+  background: var(--profil-papier); color: #777;
+}
+.profil-logo-vignette.vide { background: transparent; border: 1px dashed var(--profil-sur-sombre-doux); color: var(--profil-sur-sombre-doux); }
+.profil-logo-vignette img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+.profil-logo-texte { flex: 1 1 120px; min-width: 0; display: flex; flex-direction: column; font-size: 0.85rem; color: var(--profil-sur-sombre-doux); overflow-wrap: anywhere; }
+.profil-logo-texte strong { color: var(--profil-sur-sombre); font-weight: 600; }
+.profil-logo-actions { display: flex; flex-wrap: wrap; gap: 6px; flex: 1 1 100%; }
+.profil-logo-bouton {
+  min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--profil-sur-sombre-accent);
+  background: var(--profil-sur-sombre-accent); color: var(--profil-sombre); font: 600 0.88rem var(--sans); cursor: pointer; text-align: left;
+}
+.profil-logo-bouton.discret { background: transparent; color: var(--profil-sur-sombre); border-color: var(--profil-sur-sombre-doux); }
+.profil-logo-bouton:hover:not(:disabled) { filter: brightness(1.08); }
+.profil-logo-bouton:disabled { opacity: 0.6; cursor: not-allowed; }
+.profil-logo-bouton:focus-visible { outline: 2px solid var(--profil-sur-sombre); outline-offset: 2px; }
+.profil-logo-aide { margin: 0; font-size: 0.8rem; color: var(--profil-sur-sombre-doux); }
+.profil-logo-aide code { font-size: 0.78rem; overflow-wrap: anywhere; color: var(--profil-sur-sombre); }
+.profil-logo-message { margin: 0; font-size: 0.85rem; color: var(--profil-sur-sombre); }
+.profil-logo-message:empty { display: none; }
+.profil-logo-message.erreur { color: #ffb4a8; }
+@container (max-width: 757px) {
+  .profil-cartouche-logo img { height: 30px; max-width: 80px; }
+}
