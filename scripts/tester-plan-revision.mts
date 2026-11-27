@@ -10,6 +10,9 @@ import {
   ecartJours,
   estJour,
   jourSemaine,
+  cochesAutomatiques,
+  grouperTaches,
+  MAX_TACHES_JOUR,
   planDeBase,
   SURPLUS_MAX,
   type EtapePlan,
@@ -215,6 +218,54 @@ test('identifiants stables et uniques', () => {
   const ids = base.flatMap((j) => j.taches.map((t) => t.id))
   assert.equal(new Set(ids).size, ids.length)
   assert.deepEqual(planDeBase(reglages({ interro: '2026-12-12', etapes: [etape(1), etape(2), etape(3)] })).flatMap((j) => j.taches.map((t) => t.id)), ids)
+})
+
+
+test('trois tâches concrètes au plus par jour, aucune tâche perdue', () => {
+  // Beaucoup d'étapes, peu de jours : plusieurs étapes et générateurs le même jour.
+  const etapes = [1, 2, 3, 4, 5, 6].map((i) => etape(i))
+  const plan = construirePlan(reglages({ etapes, interro: '2026-11-30', minutesParJour: 30 }), '2026-11-25', [])
+  for (const j of plan.jours) {
+    const g = grouperTaches(j.taches)
+    assert.ok(g.length <= MAX_TACHES_JOUR, `${j.jour} : ${g.length} tâches`)
+    assert.deepEqual(g.flatMap((x) => x.ids).sort(), j.taches.map((t) => t.id).sort(), 'aucune tâche perdue')
+    assert.equal(g.reduce((s, x) => s + x.minutes, 0), minutes(j))
+  }
+  // Un jour d'apprentissage d'une étape : relire, exercices, cartes — dans cet ordre.
+  const simple = construirePlan(reglages(), '2026-11-25', [])
+  const g = grouperTaches(simple.jours[0].taches)
+  assert.deepEqual(g.map((x) => x.type), ['relire', 'exercices', 'cartes'])
+  assert.equal(g[1].exercices[0].generateur?.id, '5gen14')
+})
+
+test('tâche groupée faite quand toutes ses tâches le sont', () => {
+  const r = reglages()
+  const p0 = construirePlan(r, '2026-11-25', [])
+  const g0 = grouperTaches(p0.jours[0].taches)
+  const ids = g0.find((x) => x.type === 'exercices')!.ids
+  const p1 = construirePlan(r, '2026-11-25', ids)
+  const g1 = grouperTaches(p1.jours[0].taches)
+  assert.ok(g1.find((x) => x.type === 'exercices')!.faite)
+  assert.ok(!g1.find((x) => x.type === 'relire')!.faite)
+})
+
+test('cases cochées d’office d’après les exercices terminés ce jour-là', () => {
+  const r = reglages({ etapes: [etape(1, { aRetravailler: true }), etape(2)] })
+  const p = construirePlan(r, '2026-11-25', [])
+  const ex = p.jours[0].taches.find((t) => t.type === 'exercices')!
+  assert.equal(ex.nombre, 3)
+  // 2 exercices de 5gen14 faits aujourd'hui : 2 sur 3 cochés ; un autre générateur ne compte pas.
+  const deux = cochesAutomatiques(p, '2026-11-25', [], (j, g) => (j === '2026-11-25' && g === '5gen14' ? 2 : g === '5gen99' ? 9 : 0))
+  assert.deepEqual(deux, [`${ex.id}#0`, `${ex.id}#1`])
+  // 3 faits : la tâche entière.
+  const trois = cochesAutomatiques(p, '2026-11-25', [], (_j, g) => (g === '5gen14' ? 3 : 0))
+  assert.deepEqual(trois, [ex.id])
+  // Déjà cochée : rien de plus.
+  assert.deepEqual(cochesAutomatiques(p, '2026-11-25', [ex.id], () => 5), [])
+  // Exercices d'hier (jour pas coché) : ils comptent pour hier.
+  const p2 = construirePlan(r, '2026-11-26', [])
+  const hier = cochesAutomatiques(p2, '2026-11-26', [], (j, g) => (j === '2026-11-25' && g === '5gen14' ? 3 : 0))
+  assert.ok(hier.includes(ex.id))
 })
 
 console.log(`\n${n} tests réussis.`)

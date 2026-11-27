@@ -23,10 +23,18 @@ export interface PlanGarde {
   etapes: string[]
   /** Identifiants des tâches cochées. */
   faites: string[]
+  /** Interro annoncée par le professeur (page de classe, « Je prépare mon interro ») : facultatif. */
+  annonce?: boolean
+  /** Contrôle-bilan (sinon interro). */
+  bilan?: boolean
+  /** Générateurs retenus par le professeur pour cette interro (ils passent en premier dans le plan). */
+  gens?: string[]
 }
 
 export const CLE_PLAN = 'suivi:plan:v1'
-export const MINUTES_POSSIBLES = [10, 20, 30] as const
+/** Minutes par jour proposées (15 : la maquette « plan-eleve » du 27/11/2026, choix par défaut). */
+export const MINUTES_POSSIBLES = [10, 15, 20, 30] as const
+export const MINUTES_DEFAUT = 15
 
 export function lirePlan(): PlanGarde | null {
   let v: unknown
@@ -44,7 +52,19 @@ export function lirePlan(): PlanGarde | null {
   const jourLibre = typeof p.jourLibre === 'number' && p.jourLibre >= 0 && p.jourLibre <= 6 ? p.jourLibre : null
   const etapes = Array.isArray(p.etapes) ? p.etapes.filter((x): x is string => typeof x === 'string') : []
   const faites = Array.isArray(p.faites) ? p.faites.filter((x): x is string => typeof x === 'string').slice(-2000) : []
-  return { debut: p.debut, interro: p.interro, minutes, jourLibre, niveau: p.niveau, etapes, faites }
+  const gens = Array.isArray(p.gens) ? p.gens.filter((x): x is string => typeof x === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(x)).slice(0, 20) : []
+  return {
+    debut: p.debut,
+    interro: p.interro,
+    minutes,
+    jourLibre,
+    niveau: p.niveau,
+    etapes,
+    faites,
+    ...(p.annonce === true ? { annonce: true } : {}),
+    ...(p.bilan === true ? { bilan: true } : {}),
+    ...(gens.length > 0 ? { gens } : {}),
+  }
 }
 
 /** `false` si le stockage est indisponible (le plan vaut alors pour la visite seulement). */

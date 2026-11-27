@@ -1,4 +1,4 @@
-/* « Mon suivi » et « Mon plan de révision » (`routes/SuiviPage.tsx`, `routes/PlanRevisionPage.tsx`) —
+/* « Ma progression » (ex-« Mon suivi ») et « Mon plan de révision » (`routes/SuiviPage.tsx`, `routes/PlanRevisionPage.tsx`) —
    maquettes « côté élève » `suivi.html` / `plan.html`, planche 13. Chargé avec ces pages seulement
    (routes à la demande). Tout est dérivé des jetons du site (`index.css`) : clair, sombre et tout thème
    qui redéfinit ces jetons. Classes préfixées `suivi-` / `plan-` pour ne rien heurter ailleurs.
@@ -204,56 +204,74 @@ body:has(.suivi-page) { background: var(--paper); }
 .plan-segment.choisi span { background: var(--ink); color: var(--surface); font-weight: 600; }
 .plan-segment input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.plan-resume { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 16px; }
-.plan-resume .suivi-ton { min-height: 36px; padding: 4px 12px; font-size: 14px; }
-.plan-resume .bouton { cursor: pointer; color: var(--accent-ink); border-color: var(--line); }
-.plan-resume .bouton:hover { border-color: var(--accent); }
 .plan-alerte { margin: 0 0 14px; padding: 10px 12px; border-radius: var(--radius); background: var(--attn-soft); color: var(--ink); }
 
-/* Ligne du temps : un point par jour, reliés par un trait. */
-.plan-jours { list-style: none; margin: 0 0 8px; padding: 0; }
-.plan-jour { position: relative; padding: 0 0 16px 38px; }
-.plan-jour::before { content: ""; position: absolute; left: 12px; top: 28px; bottom: 0; width: 2px; background: var(--line); }
-.plan-jour:last-child::before { display: none; }
-.plan-point {
-  position: absolute; left: 0; top: 1px; width: 26px; height: 26px; box-sizing: border-box; border-radius: 50%;
-  border: 2px solid var(--line); background: var(--surface); display: flex; align-items: center; justify-content: center;
-  font: 700 13px/1 var(--sans); color: var(--surface);
+/* Plan refait (maquette « plan-eleve » du 27/11/2026) : en-tête, rangée des jours, « Aujourd'hui » et
+   ses trois tâches avec « Go », jours suivants en une ligne. */
+.plan-entete { margin: 0 0 14px; }
+.plan-surtitre { margin: 0 0 4px; font: 600 12.5px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.plan-entete h1 { margin: 0 0 6px; }
+.plan-sujet { margin: 0; font: 400 16px/1.5 var(--lecture); color: var(--ink-soft); }
+.plan-num {
+  display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; margin-right: 8px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent-ink); font: 700 14px/1 var(--sans); vertical-align: 1px;
 }
-.plan-jour.fait .plan-point { background: var(--good); border-color: var(--good); }
-.plan-jour.rate .plan-point { border-style: dashed; border-color: var(--ink-soft); color: var(--ink-soft); }
-.plan-jour.aujourdhui .plan-point { background: var(--accent); border-color: var(--accent); }
-.plan-jour.role-interro .plan-point { background: var(--ink); border-color: var(--ink); }
-.plan-jour.role-libre .plan-point { border-style: dotted; }
-.plan-date { margin: 0; font: 600 14px/1.4 var(--sans); color: var(--ink-soft); }
-.plan-jour.aujourdhui .plan-date { color: var(--accent-ink); }
-.plan-titre { margin: 2px 0 6px; font: 600 16.5px/1.4 var(--sans); color: var(--ink); }
-.plan-jour.passe .plan-titre { color: var(--ink-soft); font-weight: 500; }
-.plan-details > summary { cursor: pointer; list-style: none; }
-.plan-details > summary::-webkit-details-marker { display: none; }
-.plan-voir { color: var(--accent-ink); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
-.plan-voir-sep { color: var(--ink-soft); font-weight: 500; }
-.plan-details[open] .plan-voir, .plan-details[open] .plan-voir-sep { display: none; }
-.plan-report { margin: 4px 0 0; font: 400 15px/1.5 var(--lecture); color: var(--ink-soft); }
+.plan-ligne-choix { display: flex; flex-wrap: wrap; gap: 8px; }
+.plan-ligne-choix select { min-width: 0; }
+.plan-ligne-choix select:last-child { flex: 1 1 260px; }
+.plan-option > summary { display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; font: 500 15.5px/1.3 var(--sans); color: var(--accent-ink); }
 
-.plan-carte { list-style: none; margin: 0; padding: 4px 12px; background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--radius); }
-.plan-jour.aujourdhui .plan-carte { border: 2px solid var(--accent); padding: 3px 11px; }
-.plan-tache { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-top: 1px solid var(--line-soft); }
-.plan-tache:first-child { border-top: 0; }
-.plan-coche { flex: none; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: -4px 0 -4px -10px; cursor: pointer; }
-.plan-coche input { width: 24px; height: 24px; margin: 0; accent-color: var(--good); cursor: pointer; }
-.plan-tache-texte { flex: 1; min-width: 0; padding-top: 6px; }
-.plan-tache-nom { display: block; font: 500 16px/1.4 var(--sans); cursor: pointer; }
-.plan-tache.faite .plan-tache-nom { color: var(--ink-soft); }
-.plan-fait { color: var(--good); font-weight: 600; }
-.plan-tache-sous { display: flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 2px; font: 400 14.5px/1.45 var(--sans); color: var(--ink-soft); }
-.plan-tache-sous a { display: inline-flex; align-items: center; min-height: 32px; color: var(--accent-ink); font-weight: 500; }
-.plan-duree { flex: none; padding-top: 8px; font: 500 14px/1.4 var(--mono); color: var(--ink-soft); white-space: nowrap; }
-.plan-rappel {
-  display: inline-block; margin-left: 8px; padding: 0 7px; border-radius: 3px; vertical-align: 1px;
-  background: var(--plan-soft); color: var(--plan-ink); font: 600 13px/1.6 var(--sans); white-space: nowrap;
+.plan-rangee {
+  position: relative; display: flex; gap: 6px; list-style: none; margin: 0 -16px 14px; padding: 2px 16px 4px; overflow-x: auto; scrollbar-width: thin;
 }
-.plan-rappel.reporte { background: var(--attn-soft); color: var(--suivi-ambre); }
+.plan-puce {
+  position: relative; flex: 1 0 48px; display: flex; flex-direction: column; align-items: center; gap: 2px; max-width: 72px; padding: 8px 4px; box-sizing: border-box;
+  border: 1px solid var(--line-soft); border-radius: 12px; background: var(--surface); color: var(--ink-soft); font: 600 12.5px/1.2 var(--sans);
+}
+.plan-puce b { font: 700 17px/1.1 var(--sans); color: var(--ink); }
+.plan-puce.passe, .plan-puce.fait { background: transparent; }
+.plan-puce.passe b { color: var(--ink-soft); }
+.plan-puce.libre { border-style: dashed; }
+.plan-puce.aujourdhui { background: var(--suivi-plein); border-color: var(--suivi-plein); color: var(--on-accent); }
+.plan-puce.aujourdhui b { color: var(--on-accent); }
+.plan-puce.interro { background: color-mix(in srgb, var(--rose) 14%, var(--surface)); border-color: color-mix(in srgb, var(--rose) 30%, var(--surface)); color: var(--rose); }
+.plan-puce.interro b { color: var(--rose); }
+.plan-puce-ok {
+  position: absolute; top: -6px; right: -4px; width: 18px; height: 18px; border-radius: 50%; background: var(--good); color: var(--surface);
+  font: 700 11px/18px var(--sans); text-align: center; font-style: normal;
+}
+
+.plan-jour-carte { margin: 0 0 10px; padding: 14px 16px; border: 1px solid var(--line-soft); border-radius: 14px; background: var(--surface-2, var(--paper)); }
+.plan-jour-carte.aujourdhui { background: var(--surface); padding: 16px 16px 6px; }
+.plan-jour-carte.libre { border-style: dashed; }
+.plan-jour-carte.interro { background: color-mix(in srgb, var(--rose) 8%, var(--surface)); border-color: color-mix(in srgb, var(--rose) 25%, var(--surface)); }
+.plan-jour-tete { display: flex; align-items: center; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--line-soft); }
+.plan-jour-tete h2 { flex: 1; margin: 0; font-size: 1.3rem; }
+.plan-compte { flex: none; padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; font: 600 13.5px/1.4 var(--sans); color: var(--ink-soft); white-space: nowrap; }
+.plan-jour-titre { margin: 0; font: 700 15.5px/1.4 var(--sans); color: var(--ink); }
+.plan-jour-ligne { margin: 4px 0 0; font: 400 15px/1.5 var(--lecture); color: var(--ink-soft); }
+.plan-jour-carte.aujourdhui > .plan-jour-ligne { margin: 10px 0 10px; }
+.plan-suite { list-style: none; margin: 0; padding: 0; }
+.plan-taches { list-style: none; margin: 0; padding: 0; }
+.plan-t { display: flex; align-items: center; gap: 6px; min-height: 60px; padding: 6px 0; border-top: 1px solid var(--line-soft); }
+.plan-t:first-child { border-top: 0; }
+.plan-t-coche { flex: none; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-left: -8px; cursor: pointer; }
+.plan-t-coche input { width: 24px; height: 24px; margin: 0; accent-color: var(--good); cursor: pointer; }
+.plan-t-texte { flex: 1; min-width: 0; }
+.plan-t-nom { display: block; font: 500 16px/1.4 var(--sans); color: var(--ink); cursor: pointer; }
+.plan-t-nom b { font-weight: 700; }
+.plan-t.faite .plan-t-nom { color: var(--ink-soft); text-decoration: line-through; text-decoration-thickness: 1.5px; }
+.plan-t-sous { display: block; margin-top: 2px; font: 400 14px/1.4 var(--sans); color: var(--ink-soft); }
+.plan-go {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; min-width: 56px; min-height: 44px; padding: 0 14px; box-sizing: border-box;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: 700 16px/1 var(--sans); text-decoration: none;
+}
+.plan-go:hover { border-color: var(--ink-soft); }
+.plan-go.plein { background: var(--suivi-plein); border-color: var(--suivi-plein); color: var(--on-accent); }
+.plan-go.plein:hover { background: var(--accent-ink); border-color: var(--accent-ink); color: var(--surface); }
+.plan-go:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.plan-bravo { margin: 4px 0 10px; font: 600 15.5px/1.4 var(--sans); color: var(--good); }
+.plan-decale { margin: 4px 0 14px; font: 400 14.5px/1.5 var(--lecture); color: var(--ink-soft); }
 
 @media (min-width: 760px) {
   .suivi-page { padding-top: 32px; }

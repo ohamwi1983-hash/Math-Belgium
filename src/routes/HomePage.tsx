@@ -141,7 +141,7 @@ function CartePreparer({ reprise, niveau }: { reprise: Reprise | null; niveau: s
   )
 }
 
-/** « Mon suivi » (`/suivi`, planche 13) : étapes comprises, essais des générateurs, cartes et plan de
+/** « Ma progression » (ex-« Mon suivi », `/suivi`, planche 13) : étapes comprises, essais des générateurs, cartes et plan de
  * révision de l'année — tout lu dans ce navigateur, rien d'envoyé. */
 function CarteSuivi({ niveau }: { niveau: string }) {
   return (
@@ -150,7 +150,7 @@ function CarteSuivi({ niveau }: { niveau: string }) {
         <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
       </svg>
       <span className="preparer-corps">
-        <span className="preparer-titre">Mon suivi</span>
+        <span className="preparer-titre">Ma progression</span>
         <span className="preparer-desc">Ce que tu as compris, tes exercices, ton plan de révision. Gardé sur cet appareil.</span>
       </span>
       <span className="accueil-chevron" aria-hidden="true">

@@ -13,7 +13,7 @@ import { BoucleConfiance, IconeLivre } from '../components/suivi/communs'
 import '../components/suivi/suivi.css'
 
 /**
- * « Mon suivi » (`/suivi`, planche 13) — public, sans compte, non indexé, jamais pré-rendu. Tout est lu
+ * « Ma progression » (ex-« Mon suivi », `/suivi`, planche 13) — public, sans compte, non indexé, jamais pré-rendu. Tout est lu
  * dans CE navigateur : progression des pages de chapitre, cartes « Teste-toi », essais des générateurs
  * (`lib/suiviEssais.ts`). Rien n'est envoyé ; le professeur ne voit rien.
  *
@@ -224,7 +224,7 @@ function Effacer({ onEfface }: { onEfface: () => void }) {
             setFait(false)
             setOuvert(true)
           }} aria-expanded={false}>
-          Effacer mon suivi…
+          Effacer ma progression…
         </button>
       )}
       {fait && !ouvert && (
@@ -270,7 +270,7 @@ function Effacer({ onEfface }: { onEfface: () => void }) {
 }
 
 export function SuiviPage() {
-  usePageNonIndexee('Mon suivi')
+  usePageNonIndexee('Ma progression')
   const [params, setParams] = useSearchParams()
   const [donnees, setDonnees] = useState<Donnees>(lireDonnees)
   const relire = useCallback(() => setDonnees(lireDonnees()), [])
@@ -323,7 +323,7 @@ export function SuiviPage() {
         <div className="suivi-tete">
           <div>
             <p className="suivi-eyebrow">{level.label}</p>
-            <h1>Mon suivi</h1>
+            <h1>Ma progression</h1>
           </div>
           <nav className="suivi-annees" aria-label="Année">
             {LEVELS.map((l) => (
@@ -412,8 +412,8 @@ export function SuiviPage() {
           <h2 id="titre-plan">Plan de révision</h2>
           <p>
             {plan
-              ? "Ton plan jour par jour jusqu'à l'interro : un peu chaque jour, les cartes qui reviennent, et un jour raté ne s'accumule pas."
-              : 'Une interro qui approche ? Choisis la date et les étapes : le plan répartit le travail jour par jour, un peu chaque jour.'}
+              ? "Ton plan jour par jour jusqu'à l'interro : trois tâches par jour, et un jour raté se décale tout seul."
+              : 'Une interro qui approche ? Trois questions (quand, quel chapitre, combien de minutes par jour) et le plan répartit le travail, un peu chaque jour.'}
           </p>
           <Link className="suivi-btn plein" to={plan ? '/suivi/plan' : `/suivi/plan?niveau=${encodeURIComponent(niveau)}${slug ? `&chapitre=${encodeURIComponent(slug)}` : ''}`}>
             {plan ? 'Voir mon plan de révision' : 'Faire mon plan de révision'} <span aria-hidden="true">›</span>

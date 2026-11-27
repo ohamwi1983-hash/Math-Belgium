@@ -34,7 +34,7 @@ const CarnetPage = lazy(() => import('./routes/CarnetPage').then((m) => ({ defau
 const PartagePage = lazy(() => import('./routes/PartagePage').then((m) => ({ default: m.PartagePage })))
 /** Page de classe à code (élèves SANS compte, 0010) : publique, `noindex`, jamais pré-rendue. */
 const ClassePage = lazy(() => import('./routes/ClassePage').then((m) => ({ default: m.ClassePage })))
-/** « Mon suivi » et le plan de révision (élève, sans compte, planche 13) : tout reste dans le navigateur,
+/** « Ma progression » (ex-« Mon suivi ») et le plan de révision (élève, sans compte, planche 13) : tout reste dans le navigateur,
  * chargés à la demande, jamais pré-rendus ni indexés — voir `.claude/rules/cote-eleve.md`. */
 const SuiviPage = lazy(() => import('./routes/SuiviPage').then((m) => ({ default: m.SuiviPage })))
 const PlanRevisionPage = lazy(() => import('./routes/PlanRevisionPage').then((m) => ({ default: m.PlanRevisionPage })))

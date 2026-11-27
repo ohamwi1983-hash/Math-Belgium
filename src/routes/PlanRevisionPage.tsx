@@ -1,42 +1,92 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { SiteHeader } from '../components/SiteHeader'
+import { RichText } from '../components/Math'
 import { LEVELS, type LevelEntry } from '../content/chaptersIndex'
 import type { ChapterContent } from '../content/types'
 import { usePageNonIndexee } from '../lib/useDocumentMeta'
 import { lireEtatsCartes, lireParcours, titreCourt } from '../lib/parcoursChapitre'
 import { anneeDeDepart } from '../lib/anneeAccueil'
-import { lireEssais } from '../lib/suiviEssais'
+import { EVENEMENT_SUIVI, lireEssais, verdict } from '../lib/suiviEssais'
 import { suiviChapitre, type SuiviChapitre } from '../lib/suiviChapitres'
-import { ajouterJours, construirePlan, ecartJours, estJour, jourLocal, jourSemaine, type EtapePlan, type Jour, type JourPlan, type Plan, type Tache } from '../lib/planRevision'
-import { ecrirePlan, effacerPlan, lirePlan, MINUTES_POSSIBLES, type PlanGarde } from '../lib/planRevisionStockage'
+import {
+  ajouterJours,
+  cochesAutomatiques,
+  construirePlan,
+  ecartJours,
+  estJour,
+  grouperTaches,
+  jourLocal,
+  jourSemaine,
+  type EtapePlan,
+  type Jour,
+  type JourPlan,
+  type Plan,
+  type TacheGroupee,
+} from '../lib/planRevision'
+import { ecrirePlan, effacerPlan, lirePlan, MINUTES_DEFAUT, MINUTES_POSSIBLES, type PlanGarde } from '../lib/planRevisionStockage'
 import { estGenerateurMigre, generatorLink } from '../lib/generatorLink'
+import { urlEntrainementEleve } from '../lib/carnetMatiere'
 import { BoucleConfiance } from '../components/suivi/communs'
 import '../components/suivi/suivi.css'
 
 /**
- * « Mon plan de révision » (`/suivi/plan`, planche 13, rapport § 4) — public, sans compte, non indexé,
- * jamais pré-rendu. L'élève choisit la date de l'interro, les étapes (préremplies par « À retravailler »),
- * le temps par jour et un jour libre ; le plan (`lib/planRevision.ts`, logique pure) répartit le travail
- * jour par jour, fait revenir les cartes et reporte un jour raté sans rien accumuler. Réglages et cases
- * cochées : `localStorage` seulement (`lib/planRevisionStockage.ts`).
- *
- * Point d'accroche pour la page de classe : `?date=AAAA-MM-JJ` (ou `?interro=`), `&niveau=`, `&chapitre=`,
- * `&etapes=id1,id2` (identifiants de sections du chapitre) ouvrent le formulaire prérempli — voir
- * `lienPlanRevision()`.
+ * « Mon plan de révision » (`/suivi/plan`) — public, sans compte, non indexé, jamais pré-rendu. Refait
+ * le 27/11/2026 (maquette « plan-eleve ») :
+ * - prérempli depuis une interro annoncée par le professeur (« Je prépare mon interro » de la page de
+ *   classe ou de l'accueil) : `?date=AAAA-MM-JJ&niveau=…&chapitre=…&etapes=id1,id2&gen=g1,g2&type=bilan`
+ *   (`?interro=` vaut `?date=`) — l'élève ne choisit plus que ses minutes par jour ;
+ * - sinon trois questions : quand, quel chapitre (étapes ajustables), combien de minutes par jour ;
+ * - le plan : rangée des jours jusqu'à l'interro, « Aujourd'hui · n min » avec au plus trois tâches
+ *   concrètes et leur bouton « Go » (relire « L'essentiel », k exercices d'un générateur — ceux à
+ *   retravailler d'abord —, cartes « Teste-toi », évaluation blanche l'avant-veille), puis « Demain » et
+ *   les jours suivants en une ligne. Un jour raté se décale tout seul (`planRevision.ts`), sans jargon.
+ * Les exercices terminés (« Ma progression », `suiviEssais.ts`) cochent d'office les tâches d'exercices
+ * du jour. Tout reste dans le navigateur (`planRevisionStockage.ts`).
  */
 
 const JOURS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi']
+const JOURS_COURTS = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam']
 const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']
 const majuscule = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 const nomJour = (j: Jour) => JOURS[jourSemaine(j)]
-function dateLongue(j: Jour, avecJour = true): string {
-  const [, m, d] = j.split('-').map(Number)
-  const quantieme = d === 1 ? '1er' : String(d)
-  return `${avecJour ? `${nomJour(j)} ` : ''}${quantieme} ${MOIS[m - 1]}`
+const numeroJour = (j: Jour) => Number(j.slice(8, 10))
+/** « mardi 2/12 ». */
+const dateCourte = (j: Jour) => `${nomJour(j)} ${numeroJour(j)}/${Number(j.slice(5, 7))}`
+/** « mardi 2 décembre ». */
+function dateLongue(j: Jour): string {
+  const d = numeroJour(j)
+  return `${nomJour(j)} ${d === 1 ? '1er' : d} ${MOIS[Number(j.slice(5, 7)) - 1]}`
 }
 const pluriel = (n: number, un: string, plusieurs = `${un}s`) => `${n} ${n > 1 ? plusieurs : un}`
 const listeEt = (l: string[]) => (l.length <= 1 ? l.join('') : `${l.slice(0, -1).join(', ')} et ${l[l.length - 1]}`)
+
+/** « étape 2 », « étapes 1 à 3 », « étapes 1, 2 et 4 ». */
+function texteEtapes(numeros: number[]): string {
+  const n = [...new Set(numeros)].sort((a, b) => a - b)
+  if (n.length === 0) return ''
+  if (n.length === 1) return `étape ${n[0]}`
+  const suite = n.every((x, i) => i === 0 || x === n[i - 1] + 1)
+  return suite && n.length >= 3 ? `étapes ${n[0]} à ${n[n.length - 1]}` : `étapes ${listeEt(n.map(String))}`
+}
+
+/** « Aujourd'hui », « Demain », « Lundi » (dans la semaine), « Lundi 7/12 » (plus loin). */
+function libelleJour(j: Jour, aujourdhui: Jour): string {
+  const ecart = ecartJours(aujourdhui, j)
+  if (ecart === 0) return "Aujourd'hui"
+  if (ecart === 1) return 'Demain'
+  if (ecart > 1 && ecart < 7) return majuscule(nomJour(j))
+  return majuscule(dateCourte(j))
+}
+
+/** Quand, en mots d'élève : « aujourd'hui », « hier », « mercredi », « le 12/11 ». */
+function quandRelatif(j: Jour, aujourdhui: Jour): string {
+  const ecart = ecartJours(j, aujourdhui)
+  if (ecart <= 0) return 'aujourd’hui'
+  if (ecart === 1) return 'hier'
+  if (ecart < 7) return nomJour(j)
+  return `le ${numeroJour(j)}/${Number(j.slice(5, 7))}`
+}
 
 interface InfoEtape extends EtapePlan {
   chapter: ChapterContent
@@ -49,8 +99,10 @@ function suiviAnnee(level: LevelEntry): SuiviChapitre[] {
   return level.chapters.map((c) => suiviChapitre(c, essais, lireParcours(c), lireEtatsCartes(c), titreCourt))
 }
 
-/** Étapes du plan à partir des clés gardées (`{chapitre}#{section}`), avec l'état actuel du suivi. */
-function etapesDuPlan(cles: string[], suivi: SuiviChapitre[]): InfoEtape[] {
+/** Étapes du plan (clés `{chapitre}#{section}`) avec l'état actuel de « Ma progression ». Générateurs :
+ * celui à retravailler d'abord ; si le professeur en a retenu pour l'interro (`gens`), seulement ceux-là
+ * dans les étapes qui en ont. */
+function etapesDuPlan(cles: string[], suivi: SuiviChapitre[], gens: string[] = []): InfoEtape[] {
   const plusieursChapitres = new Set(cles.map((k) => k.split('#')[0])).size > 1
   const res: InfoEtape[] = []
   for (const c of suivi) {
@@ -58,14 +110,17 @@ function etapesDuPlan(cles: string[], suivi: SuiviChapitre[]): InfoEtape[] {
       if (!e.section) continue
       const cle = `${c.chapter.slug}#${e.section.id}`
       if (!cles.includes(cle)) continue
-      const gens = e.generateurs.map((g) => ({ id: g.id, titre: g.titre }))
-      if (e.generateurConseille) gens.sort((a, b) => (a.id === e.generateurConseille!.id ? -1 : b.id === e.generateurConseille!.id ? 1 : 0))
+      let liste = e.generateurs.map((g) => ({ id: g.id, titre: g.titre }))
+      const retenus = liste.filter((g) => gens.includes(g.id))
+      if (retenus.length > 0) liste = retenus
+      const conseille = e.ton === 'retravailler' ? e.generateurConseille?.id : undefined
+      if (conseille) liste.sort((a, b) => (a.id === conseille ? -1 : b.id === conseille ? 1 : 0))
       res.push({
         cle,
         numero: e.section.number,
         titre: plusieursChapitres ? `Ch. ${c.chapter.chapterNumber}, étape ${e.section.number}` : `Étape ${e.section.number}`,
         titreCourt: e.titre,
-        generateurs: gens,
+        generateurs: liste,
         cartes: e.cartesTotal,
         cartesARevoir: e.cartesRevoir,
         aRetravailler: e.ton === 'retravailler',
@@ -77,358 +132,201 @@ function etapesDuPlan(cles: string[], suivi: SuiviChapitre[]): InfoEtape[] {
   return res
 }
 
-// --------------------------------------------------------------------------------------------
-// Formulaire
-// --------------------------------------------------------------------------------------------
-
-interface Brouillon {
-  niveau: string
-  interro: string
-  etapes: string[]
-  minutes: number
-  jourLibre: number | null
-}
-
-function FormulairePlan({
-  initial,
-  aujourdhui,
-  depuisClasse,
-  existe,
-  onValider,
-  onAnnuler,
-}: {
-  initial: Brouillon
-  aujourdhui: Jour
-  depuisClasse: boolean
-  existe: boolean
-  onValider: (b: Brouillon) => void
-  onAnnuler?: () => void
-}) {
-  const [b, setB] = useState<Brouillon>(initial)
-  const [erreurs, setErreurs] = useState<{ date?: string; etapes?: string }>({})
-  const id = useId()
-  const level = LEVELS.find((l) => l.slug === b.niveau) ?? LEVELS[0]
-  const suivi = useMemo(() => suiviAnnee(level), [level])
-  const demain = ajouterJours(aujourdhui, 1)
-  const dateRef = useRef<HTMLInputElement>(null)
-  const etapesRef = useRef<HTMLFieldSetElement>(null)
-
-  function basculer(cle: string, oui: boolean) {
-    setB((x) => ({ ...x, etapes: oui ? [...x.etapes.filter((k) => k !== cle), cle] : x.etapes.filter((k) => k !== cle) }))
-  }
-
-  function valider(e: React.FormEvent) {
-    e.preventDefault()
-    const err: typeof erreurs = {}
-    if (!estJour(b.interro)) err.date = 'Choisis la date de ton interro.'
-    else if (b.interro <= aujourdhui) err.date = `L'interro doit être au plus tôt demain, ${dateLongue(demain)}.`
-    else if (ecartJours(aujourdhui, b.interro) > 60) err.date = 'Choisis une interro dans les deux mois qui viennent.'
-    if (!b.etapes.length) err.etapes = 'Coche au moins une étape.'
-    setErreurs(err)
-    if (err.date) dateRef.current?.focus()
-    else if (err.etapes) etapesRef.current?.querySelector<HTMLInputElement>('input')?.focus()
-    else {
-      // Étapes dans l'ordre du cours, quel que soit l'ordre des clics.
-      const ordre = suivi.flatMap((c) => c.chapter.sections.map((s) => `${c.chapter.slug}#${s.id}`))
-      onValider({ ...b, etapes: ordre.filter((k) => b.etapes.includes(k)) })
+/** Nombre d'exercices de ce générateur terminés ce jour-là (« Ma progression »). */
+function compteurEssais(): (jour: Jour, generateur: string) => number {
+  const stock = lireEssais()
+  const cache = new Map<string, Map<Jour, number>>()
+  return (jour, g) => {
+    let parJour = cache.get(g)
+    if (!parJour) {
+      parJour = new Map()
+      for (const e of stock[g] ?? []) {
+        const j = jourLocal(new Date(e.t))
+        parJour.set(j, (parJour.get(j) ?? 0) + 1)
+      }
+      cache.set(g, parJour)
     }
-  }
-
-  const ouverts = new Set(b.etapes.map((k) => k.split('#')[0]))
-
-  return (
-    <form className="suivi-bloc plan-formulaire" onSubmit={valider} noValidate aria-labelledby={`${id}-titre`}>
-      <h2 id={`${id}-titre`}>{existe ? 'Modifier mon plan' : 'Préparer mon plan'}</h2>
-      {depuisClasse && <p className="suivi-note">Date et étapes reprises de la page de ta classe. Vérifie, puis valide.</p>}
-
-      <div className="plan-champ">
-        <label htmlFor={`${id}-date`}>Date de l'interro</label>
-        <input
-          ref={dateRef}
-          id={`${id}-date`}
-          type="date"
-          min={demain}
-          value={b.interro}
-          onChange={(e) => setB((x) => ({ ...x, interro: e.target.value }))}
-          aria-invalid={!!erreurs.date}
-          aria-describedby={erreurs.date ? `${id}-date-err` : undefined}
-        />
-        {erreurs.date && (
-          <p id={`${id}-date-err`} className="plan-erreur">
-            {erreurs.date}
-          </p>
-        )}
-      </div>
-
-      <div className="plan-champ">
-        <label htmlFor={`${id}-niveau`}>Année</label>
-        <select id={`${id}-niveau`} value={b.niveau} onChange={(e) => setB((x) => ({ ...x, niveau: e.target.value, etapes: [] }))}>
-          {LEVELS.map((l) => (
-            <option key={l.slug} value={l.slug}>
-              {l.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <fieldset ref={etapesRef} className="plan-champ plan-etapes" aria-describedby={erreurs.etapes ? `${id}-etapes-err` : `${id}-etapes-aide`}>
-        <legend>Ce que l'interro couvre</legend>
-        <p id={`${id}-etapes-aide`} className="suivi-note">
-          Coche les étapes annoncées. Celles «&nbsp;À retravailler&nbsp;» sont déjà cochées.
-        </p>
-        {erreurs.etapes && (
-          <p id={`${id}-etapes-err`} className="plan-erreur">
-            {erreurs.etapes}
-          </p>
-        )}
-        {suivi.map((c) => {
-          const cles = c.chapter.sections.map((s) => `${c.chapter.slug}#${s.id}`)
-          const cochees = cles.filter((k) => b.etapes.includes(k)).length
-          return (
-            <details key={c.chapter.slug} className="plan-chapitre" open={ouverts.has(c.chapter.slug) || undefined}>
-              <summary>
-                <span className="plan-chapitre-num">{c.chapter.chapterNumber}</span>
-                <span className="plan-chapitre-titre">{c.chapter.title}</span>
-                {cochees > 0 && <span className="suivi-ton neutre">{pluriel(cochees, 'étape')}</span>}
-              </summary>
-              <label className="suivi-case-a-cocher tout">
-                <input
-                  type="checkbox"
-                  checked={cochees === cles.length}
-                  ref={(el) => {
-                    if (el) el.indeterminate = cochees > 0 && cochees < cles.length
-                  }}
-                  onChange={(e) => setB((x) => ({ ...x, etapes: e.target.checked ? [...x.etapes.filter((k) => !cles.includes(k)), ...cles] : x.etapes.filter((k) => !cles.includes(k)) }))}
-                />
-                <span>Tout le chapitre</span>
-              </label>
-              {c.etapes
-                .filter((e) => e.section)
-                .map((e) => {
-                  const cle = `${c.chapter.slug}#${e.section!.id}`
-                  return (
-                    <label key={cle} className="suivi-case-a-cocher">
-                      <input type="checkbox" checked={b.etapes.includes(cle)} onChange={(ev) => basculer(cle, ev.target.checked)} />
-                      <span>
-                        Étape {e.numero} · {e.titre}
-                        {e.ton === 'retravailler' && <span className="suivi-ton revoir">À retravailler</span>}
-                        {e.lue && e.ton !== 'retravailler' && <span className="suivi-sous"> · comprise</span>}
-                      </span>
-                    </label>
-                  )
-                })}
-            </details>
-          )
-        })}
-      </fieldset>
-
-      <fieldset className="plan-champ">
-        <legend>Temps par jour</legend>
-        <div className="plan-segments">
-          {MINUTES_POSSIBLES.map((m) => (
-            <label key={m} className={`plan-segment${b.minutes === m ? ' choisi' : ''}`}>
-              <input type="radio" name={`${id}-minutes`} value={m} checked={b.minutes === m} onChange={() => setB((x) => ({ ...x, minutes: m }))} />
-              <span>{m}&nbsp;min</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      <div className="plan-champ">
-        <label htmlFor={`${id}-libre`}>Un jour sans révision</label>
-        <select id={`${id}-libre`} value={b.jourLibre ?? ''} onChange={(e) => setB((x) => ({ ...x, jourLibre: e.target.value === '' ? null : Number(e.target.value) }))}>
-          <option value="">Aucun</option>
-          {[1, 2, 3, 4, 5, 6, 0].map((d) => (
-            <option key={d} value={d}>
-              {majuscule(JOURS[d])}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="suivi-boutons">
-        <button type="submit" className="suivi-btn plein">
-          {existe ? 'Refaire mon plan' : 'Faire mon plan'}
-        </button>
-        {onAnnuler && (
-          <button type="button" className="suivi-btn" onClick={onAnnuler}>
-            Annuler
-          </button>
-        )}
-      </div>
-      {existe && <p className="suivi-note">Refaire le plan repart d'aujourd'hui ; les cases déjà cochées restent cochées.</p>}
-    </form>
-  )
-}
-
-// --------------------------------------------------------------------------------------------
-// Affichage du plan
-// --------------------------------------------------------------------------------------------
-
-function compter(taches: Tache[]): string {
-  const ex = taches.filter((t) => t.type === 'exercices').reduce((s, t) => s + t.nombre, 0)
-  const exemples = taches.filter((t) => t.type === 'exemple').length
-  const cartes = taches.filter((t) => t.type === 'cartes' || t.type === 'cartesRevoir').reduce((s, t) => s + t.nombre, 0)
-  const morceaux: string[] = []
-  if (ex) morceaux.push(pluriel(ex, 'exercice'))
-  if (exemples) morceaux.push(pluriel(exemples, 'exemple'))
-  if (cartes) morceaux.push(pluriel(cartes, 'carte'))
-  return morceaux.join(' + ')
-}
-
-function titreJour(j: JourPlan, infos: Map<string, InfoEtape>): string {
-  const noms = j.etapes.map((k) => infos.get(k)).filter((x): x is InfoEtape => !!x)
-  const compte = compter(j.taches)
-  const suite = compte ? ` · ${compte}` : ''
-  switch (j.role) {
-    case 'apprendre': {
-      if (noms.length === 1) return `${noms[0].titre}\u00a0: ${noms[0].titreCourt}${suite}`
-      const memeChapitre = noms.every((n) => n.titre.startsWith('Étape'))
-      return `${memeChapitre ? `Étapes ${listeEt(noms.map((n) => String(n.numero)))}` : listeEt(noms.map((n) => n.titre))}${suite}`
-    }
-    case 'melange': {
-      const memeChapitre = noms.every((n) => n.titre.startsWith('Étape'))
-      if (noms.length === 1) return `Encore ${noms[0].titre.replace(/^Étape/, "l'étape")}${suite}`
-      return `Mélange des étapes${memeChapitre && noms.length <= 5 ? ` ${listeEt(noms.map((n) => String(n.numero)))}` : ''}${suite}`
-    }
-    case 'blanche':
-      return `Évaluation blanche (20 min)${j.taches.some((t) => t.type === 'cartes') ? ' + cartes' : ''}`
-    case 'veille':
-      return j.taches.some((t) => t.type === 'cartesRevoir') ? `Seulement les cartes « À revoir » · 10 min` : `Un dernier tour, léger · 10 min`
-    case 'essentiel':
-      return `L'essentiel : les cartes et un exercice par étape`
-    case 'libre':
-      return 'Libre'
-    case 'interro':
-      return 'Interro — bonne chance !'
+    return parJour.get(jour) ?? 0
   }
 }
 
-function LienTache({ t, infos }: { t: Tache; infos: Map<string, InfoEtape> }) {
-  const info = t.etape ? infos.get(t.etape) : undefined
-  const premier = [...infos.values()][0]
-  if (t.type === 'exercices' && t.generateur && info) {
-    const href = generatorLink(info.chapter.levelSlug, t.generateur.id)
-    return estGenerateurMigre(info.chapter.levelSlug, t.generateur.id) ? (
-      <Link to={href}>Ouvrir {t.generateur.id} ›</Link>
-    ) : (
-      <a href={href} target="_blank" rel="noopener noreferrer">
-        Ouvrir {t.generateur.id} ›<span className="sr-only"> (nouvel onglet)</span>
-      </a>
-    )
+/** Dernier jour (14 derniers jours) où un essai de ce générateur a été raté, sinon `null`. */
+function derniereDifficulte(generateur: string, aujourdhui: Jour): Jour | null {
+  const essais = lireEssais()[generateur] ?? []
+  for (let i = essais.length - 1; i >= 0; i--) {
+    const j = jourLocal(new Date(essais[i].t))
+    if (ecartJours(j, aujourdhui) > 14) break
+    if (verdict(essais[i].e) === 'rate') return j
   }
-  if ((t.type === 'relire' || t.type === 'exemple') && info) return <Link to={`/${info.chapter.levelSlug}/${info.chapter.slug}#${encodeURIComponent(info.sectionId)}`}>Ouvrir l'étape ›</Link>
-  if (t.type === 'cartes' && info) return <Link to={`/${info.chapter.levelSlug}/${info.chapter.slug}#reviser`}>Ouvrir les cartes ›</Link>
-  if (t.type === 'cartesRevoir' && premier) return <Link to={`/${premier.chapter.levelSlug}/${premier.chapter.slug}#reviser`}>Ouvrir les cartes ›</Link>
-  if (t.type === 'blanche' && premier) return <Link to={`/${premier.chapter.levelSlug}/${premier.chapter.slug}/exercices`}>Préparer l'évaluation blanche ›</Link>
   return null
 }
 
-function TexteTache({ t, infos }: { t: Tache; infos: Map<string, InfoEtape> }) {
-  const info = t.etape ? infos.get(t.etape) : undefined
-  const etape = info ? `${info.titre} · ${info.titreCourt}` : ''
-  switch (t.type) {
-    case 'relire':
-      return { nom: `Relire « L'essentiel » de l'${info ? info.titre.replace(/^Étape/, 'étape') : 'étape'}`, sous: info?.titreCourt ?? '' }
-    case 'exercices':
-      return { nom: `${pluriel(t.nombre, 'exercice')} : ${t.generateur?.titre ?? ''}`, sous: `${t.generateur?.id ?? ''} · ${etape}` }
-    case 'exemple':
-      return { nom: 'Refaire un exemple résolu sans regarder, puis comparer', sous: etape }
-    case 'cartes':
-      return { nom: `${pluriel(t.nombre, 'carte')} « Teste-toi »`, sous: etape }
-    case 'cartesRevoir':
-      return { nom: `Les cartes « À revoir » (${t.nombre})`, sous: "Toutes les étapes de l'interro" }
-    case 'blanche':
-      return { nom: 'Évaluation blanche', sous: '20 minutes, comme un vrai contrôle, puis le corrigé' }
-  }
+// --------------------------------------------------------------------------------------------
+// Ce que dit une tâche, et où mène « Go »
+// --------------------------------------------------------------------------------------------
+
+interface Contexte {
+  infos: Map<string, InfoEtape>
+  aujourdhui: Jour
+  gensProf: string[]
 }
 
-function LigneTache({ t, infos, onCocher }: { t: Tache; infos: Map<string, InfoEtape>; onCocher: (id: string, oui: boolean) => void }) {
-  const id = useId()
-  const { nom, sous } = TexteTache({ t, infos }) as { nom: string; sous: string }
-  return (
-    <li className={`plan-tache${t.faite ? ' faite' : ''}`}>
-      <label className="plan-coche">
-        <input id={id} type="checkbox" checked={!!t.faite} onChange={(e) => onCocher(t.id, e.target.checked)} />
-      </label>
-      <span className="plan-tache-texte">
-        <label htmlFor={id} className="plan-tache-nom">
-          {nom}
-          {t.revue && t.revue >= 2 && <span className="plan-rappel">revue n° {t.revue}</span>}
-          {t.reporteeDe && <span className="plan-rappel reporte">reporté de {nomJour(t.reporteeDe)}</span>}
-          {t.faite && <span className="plan-fait"> · fait</span>}
-        </label>
-        <span className="plan-tache-sous">
-          {sous && <span>{sous}</span>} <LienTache t={t} infos={infos} />
-        </span>
-      </span>
-      <span className="plan-duree">{t.minutes}&nbsp;min</span>
-    </li>
-  )
+function numerosDe(etapes: string[], ctx: Contexte): number[] {
+  return etapes.map((k) => ctx.infos.get(k)?.numero).filter((n): n is number => n !== undefined)
 }
 
-function resumeReports(j: JourPlan): string {
-  const parType = (types: Tache['type'][]) => j.reports.filter((r) => types.includes(r.tache.type))
-  const morceaux: string[] = []
-  const ex = parType(['exercices', 'exemple'])
-  if (ex.length) {
-    const vers = new Map<string, number>()
-    let abandon = 0
-    for (const r of ex) {
-      if (r.vers) vers.set(r.vers, (vers.get(r.vers) ?? 0) + 1)
-      else abandon++
+/** Libellé principal (avec le code du générateur en gras) et sous-titre. */
+function texteTache(g: TacheGroupee, ctx: Contexte): { nom: ReactNode; texte: string; sous: ReactNode } {
+  switch (g.type) {
+    case 'relire': {
+      const e = texteEtapes(numerosDe(g.etapes, ctx))
+      const seule = g.etapes.length === 1 ? ctx.infos.get(g.etapes[0]) : undefined
+      const t = `Relire « L'essentiel » de l'${e}`
+      return { nom: t, texte: t, sous: seule ? <RichText text={seule.titreCourt} /> : '' }
     }
-    const ou = [...vers.entries()].map(([d, n]) => `${n} ${nomJour(d)}`)
-    morceaux.push(`${pluriel(ex.length, 'exercice')} → ${ou.length ? `reporté${ex.length - abandon > 1 ? 's' : ''} : ${listeEt(ou)}` : ''}${abandon ? `${ou.length ? ', ' : ''}${abandon} laissé${abandon > 1 ? 's' : ''} de côté` : ''}`)
+    case 'blanche':
+      return { nom: 'Évaluation blanche (20 min) puis corrigé', texte: 'Évaluation blanche (20 min) puis corrigé', sous: 'Comme un vrai contrôle, sans regarder le cours.' }
+    case 'cartes': {
+      if (g.aRevoir) {
+        const t = `Teste-toi : tes ${pluriel(g.cartes, 'carte')} « À revoir »`
+        return { nom: t, texte: t, sous: 'Toutes les étapes de l’interro.' }
+      }
+      const t = `Teste-toi : ${pluriel(g.cartes, 'carte')} de l'${texteEtapes(numerosDe(g.etapes, ctx))}`
+      return { nom: t, texte: t, sous: '' }
+    }
+    case 'exercices': {
+      if (g.exercices.length === 1) {
+        const x = g.exercices[0]
+        if (!x.generateur) {
+          const info = x.etape ? ctx.infos.get(x.etape) : undefined
+          const t = `Refaire un exemple résolu de l'${info ? `étape ${info.numero}` : 'étape'} sans regarder`
+          return { nom: t, texte: t, sous: 'Puis compare avec le cours.' }
+        }
+        const gen = x.generateur
+        const difficile = derniereDifficulte(gen.id, ctx.aujourdhui)
+        const quoi = x.nombre > 1 ? `Faire ${x.nombre} exercices de` : 'Faire 1 exercice de'
+        return {
+          nom: (
+            <>
+              {quoi} <b>{gen.id}</b>
+            </>
+          ),
+          texte: `${quoi} ${gen.id}`,
+          sous: difficile ? `tu y as eu des difficultés ${quandRelatif(difficile, ctx.aujourdhui)}` : ctx.gensProf.includes(gen.id) ? 'proposé par ton professeur' : <RichText text={gen.titre} />,
+        }
+      }
+      const morceaux = g.exercices.map((x) => (x.generateur ? `${x.nombre} de ${x.generateur.id}` : 'un exemple résolu'))
+      const t = `Faire des exercices : ${listeEt(morceaux)}`
+      return { nom: t, texte: t, sous: '' }
+    }
   }
-  const cartes = parType(['cartes', 'cartesRevoir'])
-  if (cartes.length) {
-    const n = cartes.reduce((s, r) => s + r.tache.nombre, 0)
-    const ou = [...new Set(cartes.filter((r) => r.vers).map((r) => nomJour(r.vers!)))]
-    morceaux.push(`${pluriel(n, 'carte')} → ${ou.length ? listeEt(ou) : 'laissées de côté'}`)
-  }
-  if (parType(['relire']).some((r) => r.vers)) morceaux.push('la relecture aussi')
-  if (parType(['blanche']).length) morceaux.push('évaluation blanche pas faite : tu peux la faire quand tu as 20 minutes')
-  return morceaux.length ? `${majuscule(morceaux.join(' ; '))}.` : ''
 }
 
-function JourLigne({ j, infos, ouvert, onCocher }: { j: JourPlan; infos: Map<string, InfoEtape>; ouvert: boolean; onCocher: (id: string, oui: boolean) => void }) {
-  const passe = j.statut === 'fait' || j.statut === 'partiel' || j.statut === 'rate' || j.statut === 'passe'
-  const etat = j.statut === 'fait' ? 'fait' : j.statut === 'partiel' ? 'en partie' : j.statut === 'rate' ? 'pas fait' : ''
-  const classes = ['plan-jour', `role-${j.role}`, j.statut === 'aujourdhui' ? 'aujourdhui' : '', j.statut === 'fait' ? 'fait' : '', j.statut === 'rate' || j.statut === 'partiel' ? 'rate' : '', passe ? 'passe' : ''].filter(Boolean).join(' ')
-  const point = j.statut === 'fait' ? '✓' : j.statut === 'rate' ? '–' : j.statut === 'partiel' ? '½' : ''
-  const date = `${j.statut === 'aujourdhui' ? "Aujourd'hui · " : ''}${j.statut === 'aujourdhui' ? dateLongue(j.jour) : majuscule(dateLongue(j.jour))}${etat ? ` · ${etat}` : ''}`
-  const titre = titreJour(j, infos)
-  const avecTaches = j.taches.length > 0 && !passe
-  const corps = (
-    <ul className="plan-carte">
-      {j.taches.map((t) => (
-        <LigneTache key={t.id} t={t} infos={infos} onCocher={onCocher} />
-      ))}
-    </ul>
-  )
+/** Adresse du bouton « Go » (lien interne, ou générateur pas encore migré : nouvel onglet). */
+function cibleGo(g: TacheGroupee, ctx: Contexte, garde: PlanGarde): { href: string; externe: boolean } | null {
+  const infos = [...ctx.infos.values()]
+  const premier = infos[0]
+  const info = g.etapes.length > 0 ? ctx.infos.get(g.etapes[0]) : premier
+  if (!info) return null
+  const base = `/${info.chapter.levelSlug}/${info.chapter.slug}`
+  if (g.type === 'relire') return { href: `${base}#${encodeURIComponent(info.sectionId)}`, externe: false }
+  if (g.type === 'cartes') return { href: `${base}#reviser`, externe: false }
+  if (g.type === 'blanche') {
+    const memeChapitre = infos.filter((i) => i.chapter.slug === premier.chapter.slug)
+    return { href: urlEntrainementEleve(premier.chapter.levelSlug, premier.chapter.slug, memeChapitre.map((i) => i.sectionId), garde.gens ?? []), externe: false }
+  }
+  // Exercices : le premier générateur pas encore fait (sinon le premier).
+  const x = g.exercices.find((e) => e.generateur && !g.taches.every((t) => t.faite || t.generateur?.id !== e.generateur?.id)) ?? g.exercices[0]
+  if (!x?.generateur) {
+    const e = x?.etape ? ctx.infos.get(x.etape) : info
+    return e ? { href: `/${e.chapter.levelSlug}/${e.chapter.slug}#${encodeURIComponent(e.sectionId)}`, externe: false } : null
+  }
+  const e = (x.etape && ctx.infos.get(x.etape)) || info
+  const href = generatorLink(e.chapter.levelSlug, x.generateur.id)
+  return { href, externe: !estGenerateurMigre(e.chapter.levelSlug, x.generateur.id) }
+}
+
+/** « Étape 3 : relire + 3 exercices de 6gen59 » — un jour à venir en une ligne. */
+function resumeJour(j: JourPlan, ctx: Contexte): string {
+  if (j.role === 'libre') return 'Repos : pas de révision ce jour-là.'
+  const groupes = grouperTaches(j.taches)
+  if (groupes.length === 0) return 'Rien de prévu.'
+  const etapes = [...new Set(groupes.flatMap((g) => (g.type === 'blanche' || g.aRevoir ? [] : g.etapes)))]
+  const uneSeule = etapes.length >= 1 && groupes.every((g) => g.type === 'blanche' || g.aRevoir || (g.etapes.length > 0 && g.etapes.every((e) => etapes.includes(e))))
+  const morceaux = groupes.map((g) => {
+    switch (g.type) {
+      case 'blanche':
+        return 'évaluation blanche (20 min) puis corrigé'
+      case 'relire':
+        return 'relire'
+      case 'cartes':
+        return g.aRevoir ? `tes cartes « À revoir »` : pluriel(g.cartes, 'carte')
+      case 'exercices':
+        return listeEt(g.exercices.map((x) => (x.generateur ? `${pluriel(x.nombre, 'exercice')} de ${x.generateur.id}` : 'un exemple à refaire')))
+    }
+  })
+  const prefixe = uneSeule && etapes.length > 0 && !groupes.some((g) => g.type === 'blanche') ? `${majuscule(texteEtapes(numerosDe(etapes, ctx)))} : ` : ''
+  const phrase = morceaux.join(' + ')
+  return prefixe ? `${prefixe}${phrase}` : majuscule(phrase)
+}
+
+// --------------------------------------------------------------------------------------------
+// Vue du plan
+// --------------------------------------------------------------------------------------------
+
+function LigneTache({ g, ctx, garde, principal, onCocher }: { g: TacheGroupee; ctx: Contexte; garde: PlanGarde; principal: boolean; onCocher: (ids: string[], oui: boolean) => void }) {
+  const id = useId()
+  const { nom, texte, sous } = texteTache(g, ctx)
+  const cible = cibleGo(g, ctx, garde)
+  const etiquette = `Go — ${texte.charAt(0).toLowerCase()}${texte.slice(1)}`
   return (
-    <li className={classes} aria-current={j.statut === 'aujourdhui' ? 'date' : undefined}>
-      <span className="plan-point" aria-hidden="true">
-        {point}
-      </span>
-      <p className="plan-date">{date}</p>
-      {avecTaches && !ouvert ? (
-        <details className="plan-details">
-          <summary className="plan-titre">
-            {titre}
-            <span className="plan-voir-sep"> · </span>
-            <span className="plan-voir">voir les tâches</span>
-          </summary>
-          {corps}
-        </details>
-      ) : (
-        <p className="plan-titre">{titre}</p>
-      )}
-      {avecTaches && ouvert && corps}
-      {passe && j.statut === 'fait' && j.taches.length > 0 && <p className="plan-report">Fait&nbsp;: {compter(j.taches) || 'tout'}.</p>}
-      {passe && j.reports.length > 0 && <p className="plan-report">{resumeReports(j)}</p>}
+    <li className={`plan-t${g.faite ? ' faite' : ''}`}>
+      <label className="plan-t-coche" htmlFor={id}>
+        <input id={id} type="checkbox" checked={g.faite} onChange={(e) => onCocher(g.ids, e.target.checked)} />
+        <span className="sr-only">{g.faite ? 'Fait : ' : ''}</span>
+      </label>
+      <div className="plan-t-texte">
+        <label htmlFor={id} className="plan-t-nom">
+          {nom}
+        </label>
+        {sous && !g.faite && <span className="plan-t-sous">{sous}</span>}
+      </div>
+      {cible &&
+        !g.faite &&
+        (cible.externe ? (
+          <a className={`plan-go${principal ? ' plein' : ''}`} href={cible.href} target="_blank" rel="noopener noreferrer" aria-label={`${etiquette} (nouvel onglet)`}>
+            Go
+          </a>
+        ) : (
+          <Link className={`plan-go${principal ? ' plein' : ''}`} to={cible.href} aria-label={etiquette}>
+            Go
+          </Link>
+        ))}
     </li>
+  )
+}
+
+function RangeeJours({ plan, aujourdhui, debut }: { plan: Plan; aujourdhui: Jour; debut: Jour }) {
+  const depart = debut < ajouterJours(aujourdhui, -2) ? ajouterJours(aujourdhui, -2) : debut
+  const jours = plan.jours.filter((j) => j.jour >= depart)
+  return (
+    <ol className="plan-rangee" aria-label="Les jours jusqu’à l’interro">
+      {jours.map((j) => {
+        const etat = j.role === 'interro' ? 'interro' : j.jour === aujourdhui ? 'aujourdhui' : j.jour < aujourdhui ? (j.statut === 'fait' ? 'fait' : 'passe') : j.role === 'libre' ? 'libre' : 'avenir'
+        const lu = `${majuscule(dateLongue(j.jour))}${etat === 'interro' ? ' : interro' : etat === 'aujourdhui' ? " : aujourd'hui" : etat === 'fait' ? ' : fait' : etat === 'libre' ? ' : repos' : ''}`
+        return (
+          <li key={j.jour} className={`plan-puce ${etat}`} aria-label={lu} aria-current={etat === 'aujourdhui' ? 'date' : undefined}>
+            <span aria-hidden="true">{JOURS_COURTS[jourSemaine(j.jour)]}</span>
+            <b aria-hidden="true">{numeroJour(j.jour)}</b>
+            {etat === 'fait' && (
+              <i className="plan-puce-ok" aria-hidden="true">
+                ✓
+              </i>
+            )}
+          </li>
+        )
+      })}
+    </ol>
   )
 }
 
@@ -446,56 +344,93 @@ function VuePlan({
   plan: Plan
   infos: Map<string, InfoEtape>
   aujourdhui: Jour
-  onCocher: (id: string, oui: boolean) => void
+  onCocher: (ids: string[], oui: boolean) => void
   onModifier: () => void
   onSupprimer: () => void
   stockageOk: boolean
 }) {
   const [confirmer, setConfirmer] = useState(false)
+  const ctx: Contexte = { infos, aujourdhui, gensProf: garde.gens ?? [] }
   const listeInfos = [...infos.values()]
-  const parChapitre = new Map<string, number[]>()
-  for (const i of listeInfos) parChapitre.set(i.chapter.title, [...(parChapitre.get(i.chapter.title) ?? []), i.numero])
-  const sujet = [...parChapitre.entries()].map(([t, n]) => `${t}, ${n.length > 1 ? 'étapes' : 'étape'} ${listeEt(n.map(String))}`).join(' · ')
-  const restants = Math.max(0, ecartJours(aujourdhui, garde.interro))
-  const demain = ajouterJours(aujourdhui, 1)
-  const premier = listeInfos[0]
+  const aujourdhuiPlan = plan.jours.find((j) => j.jour === aujourdhui)
+  const groupes = aujourdhuiPlan ? grouperTaches(aujourdhuiPlan.taches) : []
+  const faites = groupes.filter((g) => g.faite).length
+  const indexPrincipal = groupes.findIndex((g) => !g.faite)
+  const suivants = plan.jours.filter((j) => j.jour > aujourdhui && j.role !== 'interro')
+  const nature = garde.bilan ? 'Contrôle-bilan' : 'Interro'
 
   return (
     <>
-      <p className="suivi-eyebrow">
-        Interro du {dateLongue(garde.interro)}
-        {sujet ? ` · ${sujet}` : ''}
-      </p>
-      <h1 tabIndex={-1}>Mon plan de révision</h1>
+      <EnTetePlan garde={garde} infos={listeInfos} />
       {plan.termine ? (
         <section className="suivi-bloc">
-          <h2>{garde.interro === aujourdhui ? "C'est aujourd'hui : bonne chance\u00a0!" : `L'interro du ${dateLongue(garde.interro)} est passée.`}</h2>
+          <h2>{garde.interro === aujourdhui ? "C'est aujourd'hui : bonne chance !" : `L'interro du ${dateLongue(garde.interro)} est passée.`}</h2>
           <p className="suivi-chapeau">Une autre interro en vue&nbsp;? Fais un nouveau plan.</p>
           <div className="suivi-boutons">
             <button type="button" className="suivi-btn plein" onClick={onModifier}>
               Faire un nouveau plan
             </button>
             <Link className="suivi-btn" to="/suivi">
-              Mon suivi
+              Ma progression
             </Link>
           </div>
         </section>
       ) : (
         <>
-          <p className="suivi-chapeau">
-            Un peu chaque jour plutôt que tout la veille. Les cartes reviennent quand tu commences à les oublier&nbsp;: le lendemain, puis 3 jours après, puis une semaine.
-          </p>
-          <div className="plan-resume">
-            <span className="suivi-ton neutre">{restants === 1 ? 'Interro demain' : `Encore ${pluriel(restants, 'jour')}`}</span>
-            <span className="suivi-ton neutre">≈ {plan.minutesMoyennes}&nbsp;min par jour</span>
-            {garde.jourLibre !== null && <span className="suivi-ton neutre">{JOURS[garde.jourLibre]} libre</span>}
-            <button type="button" className="suivi-ton neutre bouton" onClick={onModifier}>
-              Modifier <span aria-hidden="true">›</span>
-            </button>
-          </div>
+          <RangeeJours plan={plan} aujourdhui={aujourdhui} debut={garde.debut} />
+          <section className="plan-jour-carte aujourdhui" aria-labelledby="plan-aujourdhui">
+            <div className="plan-jour-tete">
+              <h2 id="plan-aujourdhui">
+                Aujourd'hui{aujourdhuiPlan && aujourdhuiPlan.role !== 'libre' && groupes.length > 0 ? ` · ${aujourdhuiPlan.minutes} min` : ''}
+              </h2>
+              {groupes.length > 0 && (
+                <span className="plan-compte" aria-label={`${faites} tâche${faites > 1 ? 's' : ''} faite${faites > 1 ? 's' : ''} sur ${groupes.length}`}>
+                  {faites} sur {groupes.length}
+                </span>
+              )}
+            </div>
+            {!aujourdhuiPlan || aujourdhuiPlan.role === 'libre' || groupes.length === 0 ? (
+              <p className="plan-jour-ligne">{aujourdhuiPlan?.role === 'libre' ? 'C’est ton jour de repos : pas de révision aujourd’hui.' : 'Rien de prévu aujourd’hui.'}</p>
+            ) : (
+              <>
+                <ul className="plan-taches">
+                  {groupes.map((g, i) => (
+                    <LigneTache key={g.cle} g={g} ctx={ctx} garde={garde} principal={i === indexPrincipal} onCocher={onCocher} />
+                  ))}
+                </ul>
+                {faites === groupes.length && (
+                  <p className="plan-bravo" role="status">
+                    Bravo, c'est fait pour aujourd'hui&nbsp;!
+                  </p>
+                )}
+              </>
+            )}
+          </section>
+
+          {suivants.length > 0 && (
+            <ol className="plan-suite" aria-label="Les jours suivants">
+              {suivants.map((j) => (
+                <li key={j.jour} className={`plan-jour-carte${j.role === 'libre' ? ' libre' : ''}`}>
+                  <p className="plan-jour-titre">
+                    {libelleJour(j.jour, aujourdhui)}
+                    {j.role !== 'libre' && j.minutes > 0 ? ` · ${j.minutes} min` : ''}
+                  </p>
+                  <p className="plan-jour-ligne">{resumeJour(j, ctx)}</p>
+                </li>
+              ))}
+              <li className="plan-jour-carte interro">
+                <p className="plan-jour-titre">
+                  {majuscule(dateCourte(garde.interro))} · {nature.toLowerCase()}
+                </p>
+                <p className="plan-jour-ligne">Bonne chance&nbsp;: tu t'es préparé·e&nbsp;!</p>
+              </li>
+            </ol>
+          )}
+
+          <p className="plan-decale">Un jour raté&nbsp;? Le plan se décale tout seul, rien n'est perdu.</p>
           {plan.essentielSeulement && (
             <p className="suivi-note plan-alerte" role="status">
-              Il ne reste pas assez de jours pour tout rattraper&nbsp;: le plan garde l'essentiel, les cartes et un exercice par étape. Ce qui est laissé de côté n'est pas grave.
+              Il reste peu de jours&nbsp;: le plan garde l'essentiel (les cartes et un exercice par étape).
             </p>
           )}
           {!stockageOk && (
@@ -506,41 +441,19 @@ function VuePlan({
         </>
       )}
 
-      <ol className="plan-jours" aria-label="Jour par jour">
-        {plan.jours.map((j) => (
-          <JourLigne key={j.jour} j={j} infos={infos} ouvert={j.jour === aujourdhui || j.jour === demain} onCocher={onCocher} />
-        ))}
-      </ol>
-
-      {!plan.termine && (
-        <section className="suivi-bloc">
-          <h2>Et si je rate un jour&nbsp;?</h2>
-          <p className="suivi-chapeau">
-            Rien ne s'accumule. Ce qui n'a pas été fait est réparti sur les jours suivants, jamais plus de 10&nbsp;minutes en plus par jour. S'il ne reste plus assez de temps, le
-            plan garde l'essentiel&nbsp;: les cartes «&nbsp;À revoir&nbsp;» et un exercice par étape.
-          </p>
-          {premier && (
-            <p className="suivi-chapeau">
-              L'évaluation blanche est prévue l'avant-veille. Tu peux aussi la faire quand tu veux&nbsp;:{' '}
-              <Link to={`/${premier.chapter.levelSlug}/${premier.chapter.slug}/exercices`}>préparer une évaluation blanche</Link>.
-            </p>
-          )}
-        </section>
-      )}
-
       <BoucleConfiance>
         <b>Ton plan reste sur cet appareil.</b> Les cases cochées ne sont envoyées à personne.
       </BoucleConfiance>
 
       <div className="suivi-boutons">
-        <Link className="suivi-btn" to={`/suivi?niveau=${encodeURIComponent(garde.niveau)}`}>
-          ‹ Mon suivi
-        </Link>
         {!plan.termine && (
           <button type="button" className="suivi-btn" onClick={onModifier}>
             Modifier mon plan
           </button>
         )}
+        <Link className="suivi-btn" to={`/suivi?niveau=${encodeURIComponent(garde.niveau)}`}>
+          Ma progression
+        </Link>
         {!confirmer ? (
           <button type="button" className="suivi-btn danger" onClick={() => setConfirmer(true)}>
             Supprimer ce plan…
@@ -561,6 +474,296 @@ function VuePlan({
   )
 }
 
+/** « MON PLAN DE RÉVISION » / « Interro mardi 2/12 » / « Les coniques · étapes 1 à 3 · annoncée par ton professeur ». */
+function EnTetePlan({ garde, infos }: { garde: Pick<PlanGarde, 'interro' | 'bilan' | 'annonce'>; infos: Pick<InfoEtape, 'chapter' | 'numero'>[] }) {
+  const parChapitre = new Map<string, { titre: string; numeros: number[] }>()
+  for (const i of infos) {
+    const x = parChapitre.get(i.chapter.slug) ?? { titre: i.chapter.title, numeros: [] }
+    x.numeros.push(i.numero)
+    parChapitre.set(i.chapter.slug, x)
+  }
+  const sujets = [...parChapitre.values()]
+  return (
+    <div className="plan-entete">
+      <p className="plan-surtitre">Mon plan de révision</p>
+      <h1 tabIndex={-1}>
+        {garde.bilan ? 'Contrôle-bilan' : 'Interro'} {dateCourte(garde.interro)}
+      </h1>
+      {(sujets.length > 0 || garde.annonce) && (
+        <p className="plan-sujet">
+          {sujets.map((s, k) => (
+            <span key={s.titre}>
+              {k > 0 ? ' · ' : ''}
+              <RichText text={s.titre} />
+              {` · ${texteEtapes(s.numeros)}`}
+            </span>
+          ))}
+          {garde.annonce ? `${sujets.length > 0 ? ' · ' : ''}annoncée par ton professeur` : ''}
+        </p>
+      )}
+    </div>
+  )
+}
+
+// --------------------------------------------------------------------------------------------
+// Préparer le plan : prérempli (interro annoncée) ou trois questions
+// --------------------------------------------------------------------------------------------
+
+interface Brouillon {
+  niveau: string
+  chapitre: string
+  interro: string
+  /** Clés `{chapitre}#{section}`. */
+  etapes: string[]
+  minutes: number
+  jourLibre: number | null
+}
+
+function ChoixMinutes({ valeur, onChange, legende }: { valeur: number; onChange: (m: number) => void; legende: string }) {
+  const id = useId()
+  return (
+    <fieldset className="plan-champ">
+      <legend>{legende}</legend>
+      <div className="plan-segments">
+        {MINUTES_POSSIBLES.map((m) => (
+          <label key={m} className={`plan-segment${valeur === m ? ' choisi' : ''}`}>
+            <input type="radio" name={`${id}-minutes`} value={m} checked={valeur === m} onChange={() => onChange(m)} />
+            <span>{m}&nbsp;min</span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  )
+}
+
+/** Interro annoncée par le professeur : tout est prêt, l'élève choisit ses minutes par jour. */
+function PlanAnnonce({
+  brouillon,
+  bilan,
+  infos,
+  ancien,
+  aujourdhui,
+  onValider,
+  onChanger,
+}: {
+  brouillon: Brouillon
+  bilan: boolean
+  infos: InfoEtape[]
+  ancien: PlanGarde | null
+  aujourdhui: Jour
+  onValider: (minutes: number) => void
+  onChanger: () => void
+}) {
+  const [minutes, setMinutes] = useState(brouillon.minutes)
+  const passee = brouillon.interro <= aujourdhui
+  return (
+    <>
+      <EnTetePlan garde={{ interro: brouillon.interro, bilan, annonce: true }} infos={infos} />
+      <section className="suivi-bloc plan-formulaire" aria-labelledby="plan-annonce-titre">
+        <h2 id="plan-annonce-titre">{passee ? 'Cette interro est déjà là' : 'Ton plan est presque prêt'}</h2>
+        {passee ? (
+          <p className="suivi-note">L'interro annoncée tombe aujourd'hui ou est passée&nbsp;: il n'y a plus de jours à préparer. Bonne chance&nbsp;!</p>
+        ) : (
+          <>
+            <p className="suivi-note">
+              Date, étapes et exercices viennent de ton professeur. Il te reste {pluriel(Math.max(1, ecartJours(aujourdhui, brouillon.interro)), 'jour')}&nbsp;: un peu chaque jour plutôt que tout la veille.
+            </p>
+            <ChoixMinutes legende="Combien de minutes par jour ?" valeur={minutes} onChange={setMinutes} />
+            {ancien && ancien.interro !== brouillon.interro && ancien.interro > aujourdhui && (
+              <p className="suivi-note">Ton plan actuel (interro du {dateLongue(ancien.interro)}) sera remplacé.</p>
+            )}
+            <div className="suivi-boutons">
+              <button type="button" className="suivi-btn plein" onClick={() => onValider(minutes)} disabled={infos.length === 0}>
+                Faire mon plan
+              </button>
+              <button type="button" className="suivi-btn" onClick={onChanger}>
+                Changer la date ou les étapes
+              </button>
+            </div>
+          </>
+        )}
+      </section>
+    </>
+  )
+}
+
+function FormulaireQuestions({
+  initial,
+  aujourdhui,
+  existe,
+  onValider,
+  onAnnuler,
+}: {
+  initial: Brouillon
+  aujourdhui: Jour
+  existe: boolean
+  onValider: (b: Brouillon) => void
+  onAnnuler?: () => void
+}) {
+  const [b, setB] = useState<Brouillon>(initial)
+  const [erreurs, setErreurs] = useState<{ date?: string; etapes?: string }>({})
+  const id = useId()
+  const level = LEVELS.find((l) => l.slug === b.niveau) ?? LEVELS[0]
+  const suivi = useMemo(() => suiviAnnee(level), [level])
+  const chapitre = suivi.find((c) => c.chapter.slug === b.chapitre) ?? suivi[0]
+  const cles = chapitre ? chapitre.chapter.sections.map((s) => `${chapitre.chapter.slug}#${s.id}`) : []
+  const cochees = cles.filter((k) => b.etapes.includes(k))
+  const demain = ajouterJours(aujourdhui, 1)
+  const dateRef = useRef<HTMLInputElement>(null)
+  const etapesRef = useRef<HTMLDetailsElement>(null)
+
+  function choisirChapitre(slug: string, niveau = b.niveau) {
+    const lv = LEVELS.find((l) => l.slug === niveau) ?? LEVELS[0]
+    const c = lv.chapters.find((x) => x.slug === slug) ?? lv.chapters[0]
+    setB((x) => ({ ...x, niveau: lv.slug, chapitre: c?.slug ?? '', etapes: c ? c.sections.map((s) => `${c.slug}#${s.id}`) : [] }))
+  }
+
+  function valider(e: FormEvent) {
+    e.preventDefault()
+    const err: typeof erreurs = {}
+    if (!estJour(b.interro)) err.date = 'Choisis la date de ton interro.'
+    else if (b.interro <= aujourdhui) err.date = `L'interro doit être au plus tôt demain, ${dateLongue(demain)}.`
+    else if (ecartJours(aujourdhui, b.interro) > 60) err.date = 'Choisis une interro dans les deux mois qui viennent.'
+    if (cochees.length === 0) err.etapes = 'Garde au moins une étape.'
+    setErreurs(err)
+    if (err.date) dateRef.current?.focus()
+    else if (err.etapes) {
+      if (etapesRef.current) etapesRef.current.open = true
+      etapesRef.current?.querySelector<HTMLInputElement>('input')?.focus()
+    } else onValider({ ...b, etapes: cles.filter((k) => b.etapes.includes(k)) })
+  }
+
+  return (
+    <form className="suivi-bloc plan-formulaire" onSubmit={valider} noValidate aria-labelledby={`${id}-titre`}>
+      <h2 id={`${id}-titre`}>{existe ? 'Modifier mon plan' : 'Trois questions, et ton plan est prêt'}</h2>
+
+      <div className="plan-champ">
+        <label htmlFor={`${id}-date`}>
+          <span className="plan-num" aria-hidden="true">
+            1
+          </span>
+          Quand est ton interro&nbsp;?
+        </label>
+        <input
+          ref={dateRef}
+          id={`${id}-date`}
+          type="date"
+          min={demain}
+          value={b.interro}
+          onChange={(e) => setB((x) => ({ ...x, interro: e.target.value }))}
+          aria-invalid={!!erreurs.date}
+          aria-describedby={erreurs.date ? `${id}-date-err` : undefined}
+        />
+        {erreurs.date && (
+          <p id={`${id}-date-err`} className="plan-erreur">
+            {erreurs.date}
+          </p>
+        )}
+      </div>
+
+      <fieldset className="plan-champ">
+        <legend>
+          <span className="plan-num" aria-hidden="true">
+            2
+          </span>
+          Sur quel chapitre&nbsp;?
+        </legend>
+        <div className="plan-ligne-choix">
+          <label className="sr-only" htmlFor={`${id}-niveau`}>
+            Année
+          </label>
+          <select id={`${id}-niveau`} value={b.niveau} onChange={(e) => choisirChapitre('', e.target.value)}>
+            {LEVELS.map((l) => (
+              <option key={l.slug} value={l.slug}>
+                {l.label}
+              </option>
+            ))}
+          </select>
+          <label className="sr-only" htmlFor={`${id}-chapitre`}>
+            Chapitre
+          </label>
+          <select id={`${id}-chapitre`} value={chapitre?.chapter.slug ?? ''} onChange={(e) => choisirChapitre(e.target.value)}>
+            {level.chapters.map((c) => (
+              <option key={c.slug} value={c.slug}>
+                {c.chapterNumber}. {c.title.replace(/\$/g, '')}
+              </option>
+            ))}
+          </select>
+        </div>
+        {chapitre && (
+          <details ref={etapesRef} className="plan-chapitre" open={cochees.length < cles.length || !!erreurs.etapes || undefined}>
+            <summary>
+              <span className="plan-chapitre-titre">{cochees.length === cles.length ? 'Toutes les étapes' : `${pluriel(cochees.length, 'étape')} sur ${cles.length}`}</span>
+              <span className="suivi-sous">· choisir</span>
+            </summary>
+            {erreurs.etapes && <p className="plan-erreur">{erreurs.etapes}</p>}
+            {chapitre.etapes
+              .filter((e) => e.section)
+              .map((e) => {
+                const cle = `${chapitre.chapter.slug}#${e.section!.id}`
+                return (
+                  <label key={cle} className="suivi-case-a-cocher">
+                    <input
+                      type="checkbox"
+                      checked={b.etapes.includes(cle)}
+                      onChange={(ev) => setB((x) => ({ ...x, etapes: ev.target.checked ? [...x.etapes.filter((k) => k !== cle), cle] : x.etapes.filter((k) => k !== cle) }))}
+                    />
+                    <span>
+                      Étape {e.numero} · <RichText text={e.titre} />
+                      {e.ton === 'retravailler' && <span className="suivi-ton revoir">À retravailler</span>}
+                    </span>
+                  </label>
+                )
+              })}
+          </details>
+        )}
+      </fieldset>
+
+      <ChoixMinutes
+        legende="Combien de minutes par jour ?"
+        valeur={b.minutes}
+        onChange={(m) => setB((x) => ({ ...x, minutes: m }))}
+      />
+
+      <details className="plan-option">
+        <summary>Un jour sans révision&nbsp;?</summary>
+        <div className="plan-champ">
+          <label htmlFor={`${id}-libre`}>Jour de repos</label>
+          <select id={`${id}-libre`} value={b.jourLibre ?? ''} onChange={(e) => setB((x) => ({ ...x, jourLibre: e.target.value === '' ? null : Number(e.target.value) }))}>
+            <option value="">Aucun</option>
+            {[1, 2, 3, 4, 5, 6, 0].map((d) => (
+              <option key={d} value={d}>
+                {majuscule(JOURS[d])}
+              </option>
+            ))}
+          </select>
+        </div>
+      </details>
+
+      <div className="suivi-boutons">
+        <button type="submit" className="suivi-btn plein">
+          {existe ? 'Refaire mon plan' : 'Faire mon plan'}
+        </button>
+        {onAnnuler && (
+          <button type="button" className="suivi-btn" onClick={onAnnuler}>
+            Annuler
+          </button>
+        )}
+      </div>
+      {existe && <p className="suivi-note">Refaire le plan repart d'aujourd'hui.</p>}
+    </form>
+  )
+}
+
+// --------------------------------------------------------------------------------------------
+// Page
+// --------------------------------------------------------------------------------------------
+
+const ID_LIEN = /^[A-Za-z0-9_-]{1,80}$/
+const listeLien = (v: string | null) => (v ?? '').split(',').map((s) => s.trim()).filter((s) => ID_LIEN.test(s))
+
+type Mode = 'plan' | 'annonce' | 'questions'
+
 export function PlanRevisionPage() {
   usePageNonIndexee('Mon plan de révision')
   const [params, setParams] = useSearchParams()
@@ -568,104 +771,148 @@ export function PlanRevisionPage() {
   const [garde, setGarde] = useState<PlanGarde | null>(lirePlan)
   const [stockageOk, setStockageOk] = useState(true)
 
-  // Préremplissage venu d'ailleurs (page de classe, Mon suivi) : `?date=` / `?interro=`, `?niveau=`,
-  // `?chapitre=`, `?etapes=`.
-  const dateDemandee = params.get('date') ?? params.get('interro')
-  const niveauDemande = params.get('niveau')
-  const chapitreDemande = params.get('chapitre')
-  const etapesDemandees = params.get('etapes')
-  const depuisLien = !!(dateDemandee || etapesDemandees)
-  const [edition, setEdition] = useState<boolean>(() => !garde || depuisLien)
-
-  const initial = useMemo<Brouillon>(() => {
-    const niveau = LEVELS.some((l) => l.slug === niveauDemande) ? niveauDemande! : (garde?.niveau ?? anneeDeDepart() ?? LEVELS[0].slug)
-    const level = LEVELS.find((l) => l.slug === niveau)!
-    const suivi = suiviAnnee(level)
-    let etapes: string[] = []
-    const chap = level.chapters.find((c) => c.slug === chapitreDemande)
-    if (chap && etapesDemandees) {
-      const ids = etapesDemandees.split(',').map((s) => s.trim())
-      etapes = chap.sections.filter((s) => ids.includes(s.id)).map((s) => `${chap.slug}#${s.id}`)
-    } else if (garde && garde.niveau === niveau && !chap) etapes = garde.etapes
-    if (!etapes.length) {
-      // « À retravailler » de l'année (du chapitre demandé s'il y en a un), sinon les étapes travaillées du chapitre.
-      const chapitres = chap ? suivi.filter((c) => c.chapter.slug === chap.slug) : suivi
-      etapes = chapitres.flatMap((c) => c.etapes.filter((e) => e.section && e.ton === 'retravailler').map((e) => `${c.chapter.slug}#${e.section!.id}`))
-      if (!etapes.length) {
-        const cible = chap ? suivi.find((c) => c.chapter.slug === chap.slug) : [...suivi].sort((a, b) => b.derniereActivite - a.derniereActivite).find((c) => c.actif)
-        if (cible) etapes = cible.etapes.filter((e) => e.section && (e.lue || e.essais.length > 0)).map((e) => `${cible.chapter.slug}#${e.section!.id}`)
-      }
+  // Interro annoncée (page de classe, accueil) ou lien de « Ma progression » : lus une fois.
+  const lien = useMemo(() => {
+    const date = params.get('date') ?? params.get('interro')
+    const niveau = params.get('niveau')
+    const chapitre = params.get('chapitre')
+    const level = LEVELS.find((l) => l.slug === niveau)
+    const chap = level?.chapters.find((c) => c.slug === chapitre)
+    const ids = listeLien(params.get('etapes'))
+    return {
+      date: estJour(date) ? date : null,
+      level,
+      chap,
+      etapes: chap ? chap.sections.filter((s) => ids.includes(s.id)).map((s) => `${chap.slug}#${s.id}`) : [],
+      gens: listeLien(params.get('gen')),
+      bilan: params.get('type') === 'bilan',
     }
-    const interro = estJour(dateDemandee) ? dateDemandee : garde && garde.interro > aujourdhui ? garde.interro : ''
-    return { niveau, interro, etapes, minutes: garde?.minutes ?? 20, jourLibre: garde?.jourLibre ?? null }
-  }, [garde, niveauDemande, chapitreDemande, etapesDemandees, dateDemandee, aujourdhui])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- adresse d'arrivée seulement
+  }, [])
+  const annonceComplete = !!(lien.date && lien.chap)
+  // Le même plan existe déjà (même date, mêmes étapes) : on l'ouvre, sans rien redemander.
+  const dejaFait = annonceComplete && garde !== null && garde.interro === lien.date && (lien.etapes.length === 0 || lien.etapes.every((k) => garde.etapes.includes(k)))
+  const [mode, setMode] = useState<Mode>(() => (annonceComplete && !dejaFait ? 'annonce' : garde ? 'plan' : 'questions'))
 
-  const level = LEVELS.find((l) => l.slug === garde?.niveau)
-  const infosListe = useMemo(() => (garde && level ? etapesDuPlan(garde.etapes, suiviAnnee(level)) : []), [garde, level])
+  // L'adresse est nettoyée une fois lue (un rechargement ne repropose pas l'annonce déjà traitée).
+  useEffect(() => {
+    if ([...params.keys()].length > 0 && (dejaFait || !annonceComplete)) setParams(new URLSearchParams(), { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- une fois
+  }, [])
+
+  const brouillonInitial = useMemo<Brouillon>(() => {
+    const niveau = lien.level?.slug ?? garde?.niveau ?? anneeDeDepart() ?? LEVELS[0].slug
+    const level = LEVELS.find((l) => l.slug === niveau) ?? LEVELS[0]
+    let chapitre = lien.chap?.slug ?? (garde && garde.niveau === level.slug ? garde.etapes[0]?.split('#')[0] : undefined)
+    if (!chapitre || !level.chapters.some((c) => c.slug === chapitre)) {
+      const suivi = suiviAnnee(level)
+      chapitre = ([...suivi].sort((a, b) => b.derniereActivite - a.derniereActivite).find((c) => c.actif) ?? suivi[0])?.chapter.slug ?? ''
+    }
+    const c = level.chapters.find((x) => x.slug === chapitre)
+    const toutes = c ? c.sections.map((s) => `${c.slug}#${s.id}`) : []
+    const etapes = lien.etapes.length > 0 ? lien.etapes : garde && garde.etapes.every((k) => k.startsWith(`${chapitre}#`)) && garde.etapes.length > 0 && !lien.chap ? garde.etapes : toutes
+    const interro = lien.date ?? (garde && garde.interro > aujourdhui ? garde.interro : '')
+    return { niveau: level.slug, chapitre: chapitre ?? '', interro, etapes, minutes: garde?.minutes ?? MINUTES_DEFAUT, jourLibre: garde?.jourLibre ?? null }
+  }, [garde, lien, aujourdhui])
+
+  const levelGarde = LEVELS.find((l) => l.slug === garde?.niveau)
+  const infosListe = useMemo(() => (garde && levelGarde ? etapesDuPlan(garde.etapes, suiviAnnee(levelGarde), garde.gens) : []), [garde, levelGarde])
   const infos = useMemo(() => new Map(infosListe.map((i) => [i.cle, i])), [infosListe])
   const plan = useMemo(
     () => (garde ? construirePlan({ debut: garde.debut, interro: garde.interro, minutesParJour: garde.minutes, jourLibre: garde.jourLibre, etapes: infosListe }, aujourdhui, garde.faites) : null),
     [garde, infosListe, aujourdhui],
   )
+  const infosAnnonce = useMemo(() => (lien.level && annonceComplete ? etapesDuPlan(lien.etapes.length > 0 ? lien.etapes : brouillonInitial.etapes, suiviAnnee(lien.level), lien.gens) : []), [lien, annonceComplete, brouillonInitial])
 
-  function enregistrer(p: PlanGarde) {
+  const enregistrer = useCallback((p: PlanGarde) => {
     setGarde(p)
     setStockageOk(ecrirePlan(p))
-  }
+  }, [])
 
-  function valider(b: Brouillon) {
-    enregistrer({ debut: aujourdhui, interro: b.interro, minutes: b.minutes, jourLibre: b.jourLibre, niveau: b.niveau, etapes: b.etapes, faites: garde?.faites ?? [] })
-    setEdition(false)
-    if (depuisLien) setParams(new URLSearchParams(), { replace: true })
+  function creer(b: Brouillon, annonce: { gens: string[]; bilan: boolean } | null) {
+    const memeInterro = garde && garde.interro === b.interro
+    enregistrer({
+      debut: aujourdhui,
+      interro: b.interro,
+      minutes: b.minutes,
+      jourLibre: b.jourLibre,
+      niveau: b.niveau,
+      etapes: b.etapes,
+      faites: memeInterro ? garde.faites : [],
+      ...(annonce ? { annonce: true, ...(annonce.bilan ? { bilan: true } : {}), ...(annonce.gens.length > 0 ? { gens: annonce.gens } : {}) } : {}),
+    })
+    setMode('plan')
+    if ([...params.keys()].length > 0) setParams(new URLSearchParams(), { replace: true })
     requestAnimationFrame(() => document.querySelector<HTMLElement>('.suivi-page h1')?.focus())
   }
 
-  function cocher(id: string, oui: boolean) {
+  function cocher(ids: string[], oui: boolean) {
     if (!garde) return
-    const faites = oui ? [...garde.faites.filter((x) => x !== id), id] : garde.faites.filter((x) => x !== id && !x.startsWith(`${id}#`))
+    const enlever = (x: string) => ids.some((id) => x === id || x.startsWith(`${id}#`))
+    const faites = oui ? [...garde.faites.filter((x) => !ids.includes(x)), ...ids] : garde.faites.filter((x) => !enlever(x))
     enregistrer({ ...garde, faites })
   }
 
-  // Une page ouverte dans un autre onglet garde le même plan.
+  // Exercices terminés (« Ma progression ») : cases d'exercices du jour cochées d'office.
+  const [tic, setTic] = useState(0)
   useEffect(() => {
-    const relire = () => setGarde(lirePlan())
+    if (!garde || !plan || plan.termine) return
+    const ajout = cochesAutomatiques(plan, aujourdhui, garde.faites, compteurEssais())
+    if (ajout.length > 0) enregistrer({ ...garde, faites: [...garde.faites, ...ajout] })
+  }, [garde, plan, aujourdhui, enregistrer, tic])
+
+  // Un autre onglet (générateur ouvert par « Go »), un retour sur la page : plan et essais relus.
+  useEffect(() => {
+    const relire = () => {
+      setGarde(lirePlan())
+      setTic((n) => n + 1)
+    }
+    const visible = () => document.visibilityState === 'visible' && relire()
     window.addEventListener('storage', relire)
-    return () => window.removeEventListener('storage', relire)
+    window.addEventListener(EVENEMENT_SUIVI, relire)
+    document.addEventListener('visibilitychange', visible)
+    return () => {
+      window.removeEventListener('storage', relire)
+      window.removeEventListener(EVENEMENT_SUIVI, relire)
+      document.removeEventListener('visibilitychange', visible)
+    }
   }, [])
 
   return (
     <>
       <SiteHeader />
       <main className="suivi-page plan-page">
-        {edition || !garde || !plan ? (
+        {mode === 'annonce' && annonceComplete ? (
+          <PlanAnnonce
+            brouillon={brouillonInitial}
+            bilan={lien.bilan}
+            infos={infosAnnonce}
+            ancien={garde}
+            aujourdhui={aujourdhui}
+            onValider={(minutes) => creer({ ...brouillonInitial, minutes, etapes: infosAnnonce.map((i) => i.cle) }, { gens: lien.gens, bilan: lien.bilan })}
+            onChanger={() => setMode('questions')}
+          />
+        ) : mode === 'questions' || !garde || !plan ? (
           <>
-            <p className="suivi-eyebrow">Plan de révision</p>
-            <h1 tabIndex={-1}>Mon plan de révision</h1>
-            <p className="suivi-chapeau">
-              Un peu chaque jour plutôt que tout la veille&nbsp;: dis quand tombe l'interro et ce qu'elle couvre, le plan répartit le travail jusque-là.
-            </p>
-            <FormulairePlan
-              key={`${initial.niveau}-${initial.interro}-${initial.etapes.join(',')}`}
-              initial={initial}
+            <div className="plan-entete">
+              <p className="plan-surtitre">Mon plan de révision</p>
+              <h1 tabIndex={-1}>Préparer mon interro</h1>
+              <p className="plan-sujet">Un peu chaque jour plutôt que tout la veille&nbsp;: le plan répartit le travail jusqu'à l'interro.</p>
+            </div>
+            <FormulaireQuestions
+              key={`${brouillonInitial.niveau}-${brouillonInitial.chapitre}-${brouillonInitial.interro}`}
+              initial={brouillonInitial}
               aujourdhui={aujourdhui}
-              depuisClasse={!!dateDemandee}
               existe={!!garde}
-              onValider={valider}
-              onAnnuler={
-                garde
-                  ? () => {
-                      setEdition(false)
-                      if (depuisLien) setParams(new URLSearchParams(), { replace: true })
-                    }
-                  : undefined
-              }
+              onValider={(b) => creer(b, annonceComplete && b.interro === lien.date && b.chapitre === lien.chap?.slug ? { gens: lien.gens, bilan: lien.bilan } : garde?.annonce && b.interro === garde.interro ? { gens: garde.gens ?? [], bilan: !!garde.bilan } : null)}
+              onAnnuler={garde ? () => setMode('plan') : undefined}
             />
             <BoucleConfiance>
               <b>Ton plan reste sur cet appareil.</b> Rien n'est envoyé, à personne.
             </BoucleConfiance>
             <p>
               <Link className="suivi-btn" to="/suivi">
-                ‹ Mon suivi
+                Ma progression
               </Link>
             </p>
           </>
@@ -676,11 +923,11 @@ export function PlanRevisionPage() {
             infos={infos}
             aujourdhui={aujourdhui}
             onCocher={cocher}
-            onModifier={() => setEdition(true)}
+            onModifier={() => setMode('questions')}
             onSupprimer={() => {
               effacerPlan()
               setGarde(null)
-              setEdition(true)
+              setMode('questions')
             }}
             stockageOk={stockageOk}
           />

@@ -492,3 +492,133 @@ export function construirePlan(r: ReglagesPlan, aujourdhui: Jour, faitesListe: I
   for (const j of jours) for (const t of j.taches) t.faite = resteAFaire(t, coches).length === 0
   return { jours, minutesMoyennes, essentielSeulement, termine }
 }
+
+// --------------------------------------------------------------------------------------------
+// Affichage : trois tâches concrètes par jour (maquette « plan-eleve » du 27/11/2026)
+// --------------------------------------------------------------------------------------------
+
+/** Au plus trois tâches montrées par jour (« Aujourd'hui · 15 min » + trois cases et « Go »). */
+export const MAX_TACHES_JOUR = 3
+
+export type TypeGroupe = 'blanche' | 'relire' | 'exercices' | 'cartes'
+
+/** Une tâche CONCRÈTE montrée à l'élève : une ou plusieurs tâches du plan regroupées (toutes les
+ * relectures du jour, les exercices d'un même générateur, toutes les cartes du jour…). La cocher coche
+ * toutes ses tâches ; elle est faite quand elles le sont toutes. */
+export interface TacheGroupee {
+  /** Identifiant stable du groupe (premier identifiant de ses tâches). */
+  cle: string
+  type: TypeGroupe
+  taches: Tache[]
+  /** Identifiants des tâches regroupées (ceux qu'on coche). */
+  ids: string[]
+  minutes: number
+  /** Étapes concernées, dans l'ordre d'apparition. */
+  etapes: string[]
+  /** Exercices : nombre par générateur, dans l'ordre (un exemple résolu à refaire : générateur absent). */
+  exercices: { generateur?: GenerateurPlan; etape?: string; nombre: number }[]
+  /** Cartes : nombre total, et vrai si ce sont les cartes « À revoir » de la veille. */
+  cartes: number
+  aRevoir: boolean
+  faite: boolean
+}
+
+const ORDRE_GROUPE: Record<TypeGroupe, number> = { blanche: 0, relire: 1, exercices: 2, cartes: 3 }
+
+function nouveauGroupe(type: TypeGroupe, t: Tache): TacheGroupee {
+  return { cle: t.id, type, taches: [], ids: [], minutes: 0, etapes: [], exercices: [], cartes: 0, aRevoir: false, faite: true }
+}
+
+function ajouterAuGroupe(g: TacheGroupee, t: Tache): void {
+  g.taches.push(t)
+  g.ids.push(t.id)
+  g.minutes += t.minutes
+  if (t.etape && !g.etapes.includes(t.etape)) g.etapes.push(t.etape)
+  if (t.type === 'exercices' || t.type === 'exemple') {
+    const meme = g.exercices.find((x) => (t.generateur ? x.generateur?.id === t.generateur.id : !x.generateur && x.etape === t.etape))
+    if (meme) meme.nombre += t.nombre
+    else g.exercices.push({ generateur: t.generateur, etape: t.etape, nombre: t.nombre })
+  }
+  if (t.type === 'cartes' || t.type === 'cartesRevoir') {
+    g.cartes += t.nombre
+    if (t.type === 'cartesRevoir') g.aRevoir = true
+  }
+  g.faite = g.faite && !!t.faite
+}
+
+/**
+ * Tâches d'un jour regroupées en tâches concrètes, au plus `max` : l'évaluation blanche, « relire »
+ * (toutes les étapes du jour), les exercices d'un générateur (un groupe par générateur ; un exemple
+ * résolu à refaire compte comme un exercice), les cartes (toutes). S'il y a trop de générateurs, les
+ * derniers sont réunis dans un seul groupe « exercices ». Aucune tâche n'est perdue.
+ */
+export function grouperTaches(taches: Tache[], max = MAX_TACHES_JOUR): TacheGroupee[] {
+  const fixes = new Map<'blanche' | 'relire' | 'cartes', TacheGroupee>()
+  const exercices = new Map<string, TacheGroupee>()
+  for (const t of taches) {
+    if (t.type === 'exercices' || t.type === 'exemple') {
+      const cle = t.generateur ? `g:${t.generateur.id}` : `e:${t.etape ?? ''}`
+      let g = exercices.get(cle)
+      if (!g) exercices.set(cle, (g = nouveauGroupe('exercices', t)))
+      ajouterAuGroupe(g, t)
+      continue
+    }
+    const type = t.type === 'blanche' ? 'blanche' : t.type === 'relire' ? 'relire' : 'cartes'
+    let g = fixes.get(type)
+    if (!g) fixes.set(type, (g = nouveauGroupe(type, t)))
+    ajouterAuGroupe(g, t)
+  }
+  const autres = [...fixes.values()]
+  let ex = [...exercices.values()]
+  const places = Math.max(1, max - autres.length)
+  if (ex.length > places) {
+    const garde = ex.slice(0, places - 1)
+    const reunis = nouveauGroupe('exercices', ex[places - 1].taches[0])
+    for (const g of ex.slice(places - 1)) for (const t of g.taches) ajouterAuGroupe(reunis, t)
+    ex = [...garde, reunis]
+  }
+  return [...autres, ...ex].sort((a, b) => ORDRE_GROUPE[a.type] - ORDRE_GROUPE[b.type])
+}
+
+/**
+ * Cases cochées D'OFFICE d'après « Ma progression » : un exercice d'un générateur terminé un jour du
+ * plan (jusqu'à aujourd'hui) coche un exercice de ce générateur prévu CE jour-là (tâches du jour, reports
+ * compris). `essaisDuJour(jour, generateur)` = nombre d'exercices terminés ce jour-là. Renvoie les
+ * identifiants à ajouter (ceux déjà cochés n'y sont pas). Ni relecture ni cartes : l'élève les coche.
+ */
+export function cochesAutomatiques(plan: Plan, aujourdhui: Jour, dejaFaites: Iterable<string>, essaisDuJour: (jour: Jour, generateur: string) => number): string[] {
+  const faites = new Set(dejaFaites)
+  const ajout: string[] = []
+  const cocher = (id: string) => {
+    if (!faites.has(id)) {
+      faites.add(id)
+      ajout.push(id)
+    }
+  }
+  for (const j of plan.jours) {
+    if (j.jour > aujourdhui || j.role === 'interro' || j.role === 'libre') continue
+    const reste = new Map<string, number>()
+    for (const t of j.taches) {
+      if (t.type !== 'exercices' || !t.generateur) continue
+      const g = t.generateur.id
+      if (!reste.has(g)) reste.set(g, essaisDuJour(j.jour, g))
+      let dispo = reste.get(g) ?? 0
+      if (dispo <= 0) continue
+      // Une tâche déjà cochée « consomme » d'abord les exercices faits ce jour-là (jamais deux fois).
+      if (t.nombre <= 1 || /#\d+$/.test(t.id)) {
+        if (!faites.has(t.id)) cocher(t.id)
+        dispo -= 1
+      } else if (faites.has(t.id)) dispo -= t.nombre
+      else {
+        const manquants = Array.from({ length: t.nombre }, (_, i) => `${t.id}#${i}`).filter((id) => !faites.has(id))
+        dispo -= t.nombre - manquants.length
+        const n = Math.max(0, Math.min(dispo, manquants.length))
+        if (n > 0 && n === manquants.length) cocher(t.id)
+        else manquants.slice(0, n).forEach(cocher)
+        dispo -= n
+      }
+      reste.set(g, dispo)
+    }
+  }
+  return ajout
+}
