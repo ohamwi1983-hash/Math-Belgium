@@ -7,6 +7,7 @@ import { BarreGenerateur } from '../entrainement/components/BarreGenerateur'
 import { CadreActions } from '../entrainement/components/CadreActions'
 import { JeBloque } from '../entrainement/components/JeBloque'
 import { EcouterAides } from '../entrainement/components/EcouterAides'
+import { FinExercice } from '../entrainement/components/FinExercice'
 import { CadreGenerateurContext, creerStoreCadre } from '../entrainement/components/cadreGenerateur'
 import { noterEssai, ecransDepuisPuces, observerProgression } from '../lib/suiviEssais'
 import { SuiviEssaiContext, SuiviVerdictContext, type NoterEssai } from '../lib/suiviContexte'
@@ -44,7 +45,21 @@ export function EntrainementPage() {
   // « Mon suivi » (`lib/suiviEssais.ts`) : chaque exercice terminé (tous les écrans clos dans les puces
   // publiées) est noté dans CE navigateur seulement. Les générateurs sans puces notent eux-mêmes via
   // `SuiviEssaiContext`. Aucun effet visible sur le générateur.
-  const observateur = useMemo(() => (generatorId && entry ? observerProgression((ecrans) => noterEssai(generatorId, ecrans)) : null), [generatorId, entry])
+  // Fin d'exercice (chantier E) : la carte « Exercice terminé » apparaît quand un essai est noté.
+  const [fin, setFin] = useState<string | null>(null)
+  const [tour, setTour] = useState(0)
+  const fermerFin = useCallback(() => setFin(null), [])
+  const observateur = useMemo(
+    () =>
+      generatorId && entry
+        ? observerProgression((ecrans) => {
+            noterEssai(generatorId, ecrans)
+            setFin(ecrans)
+          })
+        : null,
+    [generatorId, entry],
+  )
+  useEffect(() => setFin(null), [generatorId])
   useEffect(() => {
     if (!observateur) return
     observateur.segments(store.lire().segments)
@@ -101,7 +116,8 @@ export function EntrainementPage() {
   const section = useMemo(() => {
     if (!entry || !generatorId) return undefined
     const chapter = findChapter(entry.chantier, entry.chapitreSlug)
-    return chapter ? trouverSectionGenerateur(chapter, generatorId) : undefined
+    const trouvee = chapter ? trouverSectionGenerateur(chapter, generatorId) : undefined
+    return trouvee && chapter ? { ...trouvee, number: chapter.sections.find((s) => s.id === trouvee.id)?.number ?? null } : undefined
   }, [entry, generatorId])
 
   if (!entry || entry.chantier !== chantier) return <Navigate to="/" replace />
@@ -129,7 +145,21 @@ export function EntrainementPage() {
           </div>
         )}
         {generatorId && <LienVideoGenerateur generatorId={generatorId} />}
-        <Suspense fallback={null}>{Component && <Component />}</Suspense>
+        <Suspense fallback={null}>{Component && <Component key={tour} />}</Suspense>
+        {fin && generatorId && (
+          <FinExercice
+            ecrans={fin}
+            fermer={fermerFin}
+            racineRef={racineRef}
+            store={store}
+            generatorId={generatorId}
+            titre=""
+            etape={section?.number ?? null}
+            lienCours={lienChapitre}
+            lienProgression={`/suivi?niveau=${encodeURIComponent(entry.chantier)}&chapitre=${encodeURIComponent(entry.chapitreSlug)}`}
+            relancer={() => setTour((t) => t + 1)}
+          />
+        )}
         <CadreActions racineRef={racineRef} />
         {/* Lecture à voix haute : « Écouter l'aide » ajouté aux aides de l'écran (aucun générateur réécrit). */}
         <EcouterAides racineRef={racineRef} />

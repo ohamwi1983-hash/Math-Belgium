@@ -27,6 +27,12 @@ paths:
   - "src/entrainement/components/EcouterAides.tsx"
   - "src/entrainement/components/CadreActions.tsx"
   - "src/entrainement/*/components*/EnTeteExercice.tsx"
+  - "src/lib/guideEleve.ts"
+  - "src/components/eleve/{BarreEleve,AidePage,VisiteAccueil,AccueilEleve,IconesEleve}.tsx"
+  - "src/components/eleve/guideEleve.css"
+  - "src/routes/{HomePage,EntrainerPage}.tsx"
+  - "src/entrainement/components/FinExercice.tsx"
+  - "src/components/chapter/{FinEtape,CarteChapitre}.tsx"
 ---
 
 # Côté élève, sans compte
@@ -359,7 +365,7 @@ l'onglet, `<h1>`, carte de l'accueil, liens du plan, « Effacer ma progression�
   du dernier essai), `?chapitre=` (sinon le dernier chapitre travaillé). Onglets des chapitres de
   l'année ; « À retravailler » en tête (pourquoi + « Revoir : étape n, « … » » + « M'entraîner : id ·
   titre ») ; puis chaque étape : comprise (pastille ✓), 5 derniers essais en cases, « 9 réussis sur 11,
-  dont 2 avec aide », cartes « n / N « Je savais » ». « Effacer mon suivi… » : confirmation DANS la page
+  dont 2 avec aide », cartes « n / N « Je savais » ». « Effacer ma progression… » : confirmation DANS la page
   (jamais `confirm()`), cases « essais » / « plan » cochées, « étapes comprises et cartes de toutes les
   années » décochée. Pas de « bilan à montrer » ni d'« emporter » (planche 14 en suspens).
 - `/suivi/plan` — `routes/PlanRevisionPage.tsx`, refait le 27/11/2026 (maquette `maquette-espace/plan-eleve.png`) :
@@ -392,9 +398,10 @@ l'onglet, `<h1>`, carte de l'accueil, liens du plan, « Effacer ma progression�
     autre onglet).
   - Générateurs d'une étape : celui « à retravailler » d'abord ; si le professeur en a retenu (`gen`), seulement eux
     dans les étapes qui en ont.
-- Accès : carte « Ma progression » de l'accueil (`HomePage.tsx`, `CarteSuivi`, à côté de « Préparer mon
-  interro ») ; le plan depuis Ma progression, la page de classe et l'accueil (« Je prépare mon interro »). La maquette ne met pas de lien dans l'en-tête ni dans la page de
-  chapitre : rien n'y a été ajouté.
+- Accès : depuis le 27/11/2026 (chantier E, section « Côté élève plus clair » en fin de fichier), porte
+  « Préparer mon interro » de l'accueil et « Mon interro » de la barre du bas (→ `/suivi/plan`), « Voir ma
+  progression » de la fin d'exercice et de « M'entraîner » (→ `/suivi`) ; les cartes « Mon suivi » /
+  « Préparer mon interro » de l'accueil (`CarteSuivi`, `CartePreparer`) ont disparu.
 
 ### Enregistrer les essais des générateurs (`lib/suiviEssais.ts`)
 
@@ -657,3 +664,78 @@ personnel), grille `44px 1fr auto auto` (écart 8 px sous 400 px) : la barre res
   « Ligne suivante » et « Retour à l'exercice » sur `--accent-ink` : 8,0:1 en clair au lieu de 4,4:1 sur
   `--accent`) — 103 vérifications, 0 échec.
 - `couverture-jebloque.ts` (esbuild + node) : exemple choisi pour chaque générateur du registre.
+
+## Côté élève plus clair (chantier E, 27/11/2026 : maquettes `maquette-eleve/{accueil,chapitre,fin-etape,fin-exercice,entrainer}`)
+
+Décision du professeur (point 5 des décisions du 27/11/2026). Tout se lit dans le navigateur ; rien n'est envoyé
+(seule requête : la relecture de la page de classe PAR SON CODE, comme `/classe`). Logique PURE : `lib/guideEleve.ts`
+(bilan d'un exercice, état d'un générateur, carte « Ma classe », aide « ? », explication des compétences) ; styles
+`components/eleve/guideEleve.css` (classes `ge-*`, jetons du site : clair, sombre et thèmes « Aa »). Tests de la
+logique : `tests/purs.test.ts` du dossier de travail `suite-E/` (esbuild + node).
+
+- **Accueil** (`HomePage.tsx` + `components/eleve/AccueilEleve.tsx`) : onglets d'année gardés (`data-visite="annees"`) ;
+  carte **« Ma classe »** (`CarteMaClasse`) si un code est gardé (`classe:code`) — version gardée (`classe:derniere`,
+  refiltrée par `pageAuJour`) affichée tout de suite, relue en tâche de fond 0,9 s après (import de
+  `pageClasseDonnees.ts`, jamais au pré-rendu) ; prochaine interro « Interro mardi 1/12 · dans 4 jours », « Suites —
+  étapes 6 à 8 » (`texteEtapes` : suites de 3 et plus regroupées), devoir le plus proche, bouton **« Je prépare mon
+  interro »** = `pageClasse.ts::lienPlanRevision` (`/suivi/plan?date=…&niveau=…&chapitre=…&etapes=…`, format du point
+  d'accroche existant, lu par le plan de révision) ; code devenu inconnu → « Ton code de classe ne marche plus » +
+  « Entrer le nouveau code » (rien n'est effacé ici, `/classe` s'en charge). **Trois portes** (`PortesAccueil`,
+  `data-visite="portes"`) : Mon cours (« Reprendre : chapitre, étape n » = dernière étape ouverte de l'année, sinon
+  `/#chapitres`), M'entraîner (`/entrainer?niveau=&chapitre=`), Préparer mon interro (`/suivi/plan`). Ligne « Pas
+  encore de classe ? Entre le code donné par ton professeur » (→ `/classe`) sans code gardé. La liste des chapitres
+  de l'année reste dessous (`id="chapitres-<niveau>"`, `/#chapitres` y fait défiler) : le pré-rendu garde les liens
+  de TOUS les chapitres et le script en ligne d'`index.html` est inchangé (même logique qu'`anneeDeDepart`). Le
+  bandeau sombre « Reprendre » (`.accueil-reprendre`) n'est plus rendu (son CSS d'`index.css` est laissé en place).
+- **Barre du bas** (`components/eleve/BarreEleve.tsx`, `HoteBarreEleve` monté UNE fois dans `App.tsx`) : téléphone
+  (< 760 px) seulement — Accueil, Cours (le chapitre affiché, sinon le dernier ouvert de l'année, sinon
+  `/#chapitres`), M'entraîner, Mon interro ; `aria-current="page"`, 56 px, `--l-echelle-ui`. Pages : `/`, `/entrainer`,
+  `/suivi`, `/suivi/plan`, `/classe`, carte / Réviser / Exercices d'un chapitre (`ongletBarreEleve`) ; JAMAIS dans une
+  étape (barre « J'ai compris »), un générateur (barre [Aide][Valider]), le lanceur de projection, les pages du
+  professeur. `<html data-barre-eleve>` réserve 68 px en bas de page. Rien au pré-rendu (`window.__prerendu`).
+- **Aide « ? »** (`components/eleve/AidePage.tsx`, dans `SiteHeader` entre la recherche et « Aa ») : deux phrases
+  par page (`aideDePage` : accueil, M'entraîner, plan, Ma progression, classe, carte / Réviser / Exercices / étape d'un
+  chapitre ; rien sur les pages du professeur ni les générateurs) ; bulle non modale (`role="dialog"`, Échap / clic à
+  côté / « Fermer », focus rendu au bouton) ; sur l'accueil, « Revoir la visite guidée ». En-tête : marque · loupe · ? ·
+  Aa · Professeur sur UNE ligne — marque en 14 px sous 440 px, logo seul sous 390 px (nom gardé pour les lecteurs
+  d'écran). Présent dans les pages pré-rendues (bouton seul, la bulle n'existe qu'ouverte).
+- **Visite facultative** (`components/eleve/VisiteAccueil.tsx`) : trois bulles (année, trois portes, « ? »), à la
+  première venue une fois l'année choisie, « Passer » / Échap, « Suivant » / « C'est parti » ; clé `accueil:visite`
+  = `1` ; bulle fixe sans voile (la page reste utilisable), cible entourée, placée sous / au-dessus de la cible et
+  tenue dans l'écran au-dessus de la barre du bas ; jamais au pré-rendu.
+- **M'entraîner** (`routes/EntrainerPage.tsx`, `/entrainer`, `lazy`, `noindex`, absente de `scripts/routes.mjs`) :
+  chapitre (liste par année, `?niveau=&chapitre=` suivis dans l'adresse), feuille à imprimer **Rapide** (≈ 10 min, 4
+  exercices → `/{niveau}/{chapitre}/exercices?type=feuille&nombre=4`), **Tout le chapitre** (`&nombre=10`), **Sur
+  mesure** (l'assistant sans préréglage) — cartes en `radiogroup` (flèches) ; exercices corrigés tout de suite (cartes
+  « S'entraîner » des étapes + quiz de fin) avec leur état **à revoir / nouveau / réussi** (`etatGenerateur` : même
+  règle que « À retravailler » — dernier essai raté ou ≥ 2 ratés sur 3), à revoir d'abord, 6 puis « Voir les n
+  autres » ; **Interro blanche (20 min)** (`?type=blanche&duree=20`) ; « Voir ma progression ». Préréglages lus par
+  `AssistantEleve` (`?type=feuille|blanche`, `?nombre=` 1–30, `?duree=` 20 / 30 / 50 ; valeur inconnue ignorée, rien
+  d'autre ne change).
+- **Page de chapitre** (`CarteChapitre.tsx`, `ChapterPage.tsx`) : onglets sous-titrés « Le cours · étape par étape »,
+  « Réviser · teste-toi », « Exercices · corrigés » (mêmes ids `apprendre` / `reviser` / `entrainer`, sous-titre lu
+  après « : ») ; `BlocReprendre` = « Tu en es à l'étape n sur N » (dernière ouverte) + « ≈ m min » + barre de position +
+  « Continuer : titre › » (« Commencer » sinon) + « k / N étapes comprises » ; `ListeEtapes` : ✓ (lue), pastille « en
+  cours », **« à revoir »** (`aRevoir` = étapes au ton `retravailler` de `suiviChapitres.ts`, relues à
+  `suivi:modifie` / `storage`), légende sous la liste. **Fin d'étape** (`FinEtape.tsx`, étape affichée seulement,
+  `no-export`, jamais pré-rendue) : « Tu as fini l'étape n », « M'entraîner sur cette étape » (première carte
+  « S'entraîner » de l'étape ; sans générateur : « Si tout est clair, touche J'ai compris ») et « Étape suivante :
+  titre › » (« Réviser le chapitre » à la fin), « ou revenir à la liste des étapes » ; hors du corps de l'étape (ni
+  « Écouter l'étape » ni « un bloc à la fois » ne la prennent).
+- **Fin d'exercice** (`entrainement/components/FinExercice.tsx`, montée par `EntrainementPage` sous l'appli — aucun
+  générateur touché, `SelecteurVarianteDev` intact) : apparaît quand l'observateur de Ma progression note un essai
+  (`observerProgression`, donc pour les générateurs à puces ; pas pour les quiz vrai / faux : une affirmation = un
+  essai), disparaît quand un nouvel exercice commence (puces sans écran clos, ou clic sur un bouton « Nouvel
+  exercice »…). « N questions faites · cours : étape k » (étape du cours de la carte ; jamais « Question n sur N · étape k » : l'en-tête du générateur dit déjà « Étape 3 / 3 » pour ses écrans, le même mot prêtait à confusion), puces colorées (`role="img"` en mots),
+  « Exercice terminé » + bilan en une phrase (`bilanExercice` : « 3 réponses justes du premier coup, 1 avec une
+  aide. »), **Un autre exercice** (clique le bouton « Nouvel exercice » du générateur, sinon remonte l'appli —
+  `key`), **Revoir le cours de l'étape k** (lien de retour de la barre), **Voir ma progression** (`/suivi?niveau=&
+  chapitre=`) ; pastilles de compétence (`competencesGenerateur`) en boutons qui s'expliquent en une ligne
+  (`EXPLICATION_COMPETENCE`). Pas de défilement automatique (le corrigé reste sous les yeux), aucun `.btn-primary`
+  (sinon `CadreActions` le prendrait pour le bouton principal).
+- **Pas fait / choix** : pas de barre du bas dans les générateurs ni les étapes (barres fixes déjà là) ; pastille de
+  NIVEAU non expliquée (le niveau 1–7 n'est pas affiché à l'écran des générateurs) ; « ? » absent des générateurs
+  (leur barre d'une ligne a « Aa » et « Je bloque »).
+- **Vérifications** (dossier de travail `suite-E/` : `cap.mjs`, `cap2.mjs`, `tests/purs.test.ts`, captures dans
+  `captures/`) : build de production servi en local, iPhone 13 et 1 280 px, clair et sombre, `lire_page_classe` simulé
+  (`page.route`).

@@ -55,10 +55,14 @@ une règle de masquage sans `@media screen` + `.parcours` ; tout élément propr
 `imprimer.ts::chargerPolicesImpression` les charge toutes avant l'impression (et en tâche de fond).
 
 Composants :
-- `CarteChapitre.tsx` — `OngletsChapitre` (`tablist`, flèches/Début/Fin), `BlocReprendre`
-  (progression « n / N étapes » + « Reprendre : n. titre » / « Commencer »), `ListeEtapes` (parties,
-  pastille lue ✓ / en cours / numéro, `aria-current="step"`, durée ; variante `cote` pour la colonne
-  de gauche d'une étape sur ordinateur), `LienVue` (vrai `<a href="#…">` intercepté).
+- `CarteChapitre.tsx` — `OngletsChapitre` (`tablist`, flèches/Début/Fin ; depuis le 27/11/2026 sous-titrés « Le
+  cours · étape par étape », « Réviser · teste-toi », « Exercices · corrigés »), `BlocReprendre` (« Tu en es à l'étape
+  n sur N » + durée + barre de position + « Continuer : titre › » / « Commencer », « k / N étapes comprises »),
+  `ListeEtapes` (parties, pastille lue ✓ / en cours / numéro, pastilles « en cours » et « à revoir » — prop `aRevoir`,
+  calculée par `ChapterPage` depuis `suiviChapitres.ts` —, `aria-current="step"`, durée ; variante `cote` pour la
+  colonne de gauche d'une étape sur ordinateur), `LienVue` (vrai `<a href="#…">` intercepté). `FinEtape.tsx` : fin de
+  l'étape affichée (« Tu as fini l'étape n », M'entraîner sur cette étape, Étape suivante). Détail : `cote-eleve.md`,
+  « Côté élève plus clair ».
 - `ContenuEtape.tsx` — contenu d'une étape (et de l'intro « Avant de commencer », repliée sur la
   carte). Blocs dans l'ordre écrit ; les exemples sont rendus à leur place avec `en-tiroir` (imprimés,
   masqués à l'écran) et relus dans un **tiroir** (`button` + `aria-expanded`) pas à pas (« Montrer

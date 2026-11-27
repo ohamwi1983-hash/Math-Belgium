@@ -1,11 +1,14 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { SiteHeader } from '../components/SiteHeader'
 import { LEVELS, type LevelEntry } from '../content/chaptersIndex'
 import type { ChapterContent } from '../content/types'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
 import { lireDernieresEtapes, lireParcours, titreCourt, type DerniereEtape, type EtatParcours } from '../lib/parcoursChapitre'
 import { ATTRIBUT_ANNEE, anneeDeDepart, ecrireAnneeChoisie } from '../lib/anneeAccueil'
+import { CarteMaClasse, LigneCodeClasse, PortesAccueil } from '../components/eleve/AccueilEleve'
+import { VisiteAccueil } from '../components/eleve/VisiteAccueil'
+import { lireCodeGarde } from '../lib/pageClasse'
 
 /** Teinte par niveau — réutilise les jetons déjà dédiés au codage couleur des diagrammes
  * (`--accent`/`--sky`/`--good`/`--plan`, voir `index.css`), jamais une couleur inventée pour l'occasion.
@@ -92,74 +95,6 @@ const Coche = () => (
   </svg>
 )
 
-/** Bandeau sombre « Reprendre » : dernière étape ouverte de l'année. */
-function BandeauReprendre({ reprise }: { reprise: Reprise }) {
-  return (
-    <Link className="accueil-reprendre" to={reprise.href}>
-      <span className="reprendre-corps">
-        <span className="reprendre-sur">Reprendre</span>
-        <span className="reprendre-chapitre">{reprise.chapter.title}</span>
-        <span className="reprendre-etape">
-          Étape {reprise.numero} · {reprise.titre}
-        </span>
-        <span className="reprendre-progression">
-          <Barre valeur={reprise.lues} total={reprise.total} ton="courant" />
-          <span>
-            {reprise.lues} / {reprise.total}
-            <span className="sr-only"> étapes comprises</span>
-          </span>
-        </span>
-      </span>
-      <span className="reprendre-bouton" aria-hidden="true">
-        Continuer ›
-      </span>
-    </Link>
-  )
-}
-
-/** « Préparer mon interro » : l'assistant élève, sur le chapitre en cours s'il y en a un
- * (`/{niveau}/{chapitre}/exercices`, page verrouillée sur ce chapitre), sinon `/exercice?niveau=…`
- * (l'assistant présélectionne l'année de l'onglet). */
-function CartePreparer({ reprise, niveau }: { reprise: Reprise | null; niveau: string }) {
-  const href = reprise ? `/${reprise.chapter.levelSlug}/${reprise.chapter.slug}/exercices` : `/exercice?niveau=${encodeURIComponent(niveau)}`
-  return (
-    <Link className="accueil-preparer" to={href}>
-      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 11l2 2 4-4" />
-        <rect x="4" y="3" width="16" height="18" rx="2" />
-      </svg>
-      <span className="preparer-corps">
-        <span className="preparer-titre">Préparer mon interro</span>
-        <span className="preparer-desc">
-          {reprise ? <>Feuille d'exercices ou évaluation blanche sur « {reprise.chapter.title} ».</> : <>Feuille d'exercices ou évaluation blanche, sur le chapitre et les notions annoncés.</>}
-        </span>
-      </span>
-      <span className="accueil-chevron" aria-hidden="true">
-        ›
-      </span>
-    </Link>
-  )
-}
-
-/** « Ma progression » (ex-« Mon suivi », `/suivi`, planche 13) : étapes comprises, essais des générateurs, cartes et plan de
- * révision de l'année — tout lu dans ce navigateur, rien d'envoyé. */
-function CarteSuivi({ niveau }: { niveau: string }) {
-  return (
-    <Link className="accueil-preparer accueil-suivi" to={`/suivi?niveau=${encodeURIComponent(niveau)}`}>
-      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
-      </svg>
-      <span className="preparer-corps">
-        <span className="preparer-titre">Ma progression</span>
-        <span className="preparer-desc">Ce que tu as compris, tes exercices, ton plan de révision. Gardé sur cet appareil.</span>
-      </span>
-      <span className="accueil-chevron" aria-hidden="true">
-        ›
-      </span>
-    </Link>
-  )
-}
-
 function ListeChapitres({ level, etats }: { level: LevelEntry; etats: EtatChapitre[] }) {
   return (
     <ul className="accueil-chapitres">
@@ -208,6 +143,9 @@ function ListeChapitres({ level, etats }: { level: LevelEntry; etats: EtatChapit
  * l'élève choisit son année une fois (mémorisée dans son navigateur), puis voit « Reprendre »
  * (dernière étape ouverte de cette année), « Préparer mon interro » et SES chapitres avec leur
  * progression — celle des pages de chapitre (`lib/parcoursChapitre.ts`), jamais envoyée.
+ * Depuis le 27/11/2026 (chantier E, maquette « accueil ») : carte « Ma classe » (code de classe gardé),
+ * trois portes Mon cours (avec « Reprendre ») / M'entraîner / Préparer mon interro, ligne « Entre le code
+ * donné par ton professeur », visite facultative — voir `.claude/rules/cote-eleve.md`, « Côté élève plus clair ».
  */
 export function HomePage() {
   useDocumentMeta({
@@ -229,6 +167,16 @@ export function HomePage() {
 
   const [annee, setAnnee] = useState<string | null>(anneeDeDepart)
   const { chapitres, reprises } = useMemo(lireProgression, [])
+  // Code de classe gardé sur l'appareil (page `/classe`) : carte « Ma classe » ; sinon la ligne « Entre le code ».
+  const [codeClasse] = useState(lireCodeGarde)
+  const { hash } = useLocation()
+
+  // `/#chapitres` (« Cours » de la barre du bas sans chapitre en cours) : la liste des chapitres de l'année.
+  useEffect(() => {
+    if (hash !== '#chapitres') return
+    const cible = document.getElementById(`chapitres-${annee ?? ''}`)
+    cible?.scrollIntoView({ block: 'start' })
+  }, [hash, annee])
   const onglets = useRef<(HTMLButtonElement | null)[]>([])
   const ongletAFocaliser = useRef<number>(-1)
 
@@ -276,7 +224,7 @@ export function HomePage() {
               ))}
             </h1>
           </div>
-          <div className="annees-onglets accueil-avec-annee" role="tablist" aria-label="Mon année">
+          <div className="annees-onglets accueil-avec-annee" role="tablist" aria-label="Mon année" data-visite="annees">
             {LEVELS.map((l, i) => (
               <button
                 key={l.slug}
@@ -301,6 +249,8 @@ export function HomePage() {
           </div>
         </div>
 
+        {codeClasse && <CarteMaClasse code={codeClasse} />}
+
         <section className="annees-choix" aria-labelledby="titre-choix-annee">
           <h2 id="titre-choix-annee">Tu es en…</h2>
           <p className="choix-aide">Choisis ton année : tu verras tes chapitres et où tu en es. Tu pourras en changer quand tu veux.</p>
@@ -324,12 +274,10 @@ export function HomePage() {
           const reprise = reprises[l.slug]
           return (
             <div key={l.slug} className="accueil-annee" id={`annee-${l.slug}`} role="tabpanel" aria-labelledby={`onglet-annee-${l.slug}`} data-annee-bloc={l.slug}>
-              <div className="accueil-actions">
-                {reprise && <BandeauReprendre reprise={reprise} />}
-                <CartePreparer reprise={reprise} niveau={l.slug} />
-                <CarteSuivi niveau={l.slug} />
-              </div>
-              <h2 className="accueil-liste-titre">
+              {/* Trois portes (maquette « accueil » du 27/11/2026) : Mon cours (avec « Reprendre »), M'entraîner, Préparer mon interro. */}
+              <PortesAccueil niveau={l.slug} reprise={reprise ? { chapitre: reprise.chapter.title, slug: reprise.chapter.slug, numero: reprise.numero, href: reprise.href } : null} />
+              {!codeClasse && <LigneCodeClasse />}
+              <h2 className="accueil-liste-titre" id={`chapitres-${l.slug}`}>
                 {l.chapters.length === 1 ? `Le chapitre de ${l.label}` : `Les ${pluriel(l.chapters.length, 'chapitre')} de ${l.label}`}
               </h2>
               {/* Numéros du site = simple repère (décision du 25/11/2026) : le professeur peut suivre un autre ordre. */}
@@ -341,6 +289,7 @@ export function HomePage() {
 
         <p className="accueil-appareil accueil-avec-annee">Ta progression reste sur cet appareil : rien n'est envoyé.</p>
       </main>
+      <VisiteAccueil />
     </>
   )
 }

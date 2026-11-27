@@ -68,7 +68,7 @@ function hautLibre(): number {
 function basLibre(): number {
   const h = window.innerHeight
   let bas = 0
-  for (const el of document.querySelectorAll<HTMLElement>('.etape-nav, .gen-barre-fond, .gen-tiroir, .corrige-pas-boutons')) {
+  for (const el of document.querySelectorAll<HTMLElement>('.etape-nav, .gen-barre-fond, .gen-tiroir, .corrige-pas-boutons, .ge-barre')) {
     const pos = getComputedStyle(el).position
     if (pos !== 'fixed' && pos !== 'sticky') continue
     const r = el.getBoundingClientRect()

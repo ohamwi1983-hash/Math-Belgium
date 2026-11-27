@@ -3,6 +3,7 @@ import { MenuCompte } from './compte/MenuCompte'
 import { RechercheSite } from './RechercheSite'
 import { supabaseConfigure } from '../lib/supabase'
 import { BoutonLecture } from './lecture/BoutonLecture'
+import { AidePage } from './eleve/AidePage'
 
 /** En-tête du site (bannière claire, maquette « A » du 22/11/2026) : petit logo + marque, recherche
  * (chapitres, étapes, sous-titres — `RechercheSite`), puis « Professeur » / « Mon compte »
@@ -33,6 +34,8 @@ export function SiteHeader({ breadcrumb }: { breadcrumb?: { label: string; to?: 
           </nav>
         )}
         <RechercheSite />
+        {/* Aide « ? » des pages côté élève (deux phrases ; rien sur les pages du professeur). */}
+        <AidePage />
         <BoutonLecture variante="entete" />
         {avecCompte && <MenuCompte />}
       </div>

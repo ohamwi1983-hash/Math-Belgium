@@ -50,9 +50,9 @@ cherchant le chapitre correspondant dans `chaptersIndex.ts`.
   `LEVEL_TONE` d'`HomePage.tsx` (couleur par slug).
 - `/` — page d'accueil « Mon année d'abord » (`routes/HomePage.tsx`, maquettes A du 22/11/2026) :
   onglets d'année (`LEVELS`), choix mémorisé dans le navigateur (`lib/anneeAccueil.ts`, clé
-  `accueil:annee` ; première visite sans choix ni historique : cartes « Tu es en… »), bandeau
-  « Reprendre » (dernière étape ouverte DE CETTE ANNÉE, clé `parcours:derniere-etape`), « Préparer mon
-  interro » (`/{niveau}/{chapitre}/exercices` du chapitre en cours, sinon `/exercice`), chapitres de
+  `accueil:annee` ; première visite sans choix ni historique : cartes « Tu es en… »), depuis le 27/11/2026
+  carte « Ma classe » et trois portes — Mon cours avec « Reprendre » (dernière étape ouverte DE CETTE ANNÉE,
+  clé `parcours:derniere-etape`), M'entraîner (`/entrainer`), Préparer mon interro (`/suivi/plan`) —, chapitres de
   l'année avec leur progression (celle des pages de chapitre, jamais envoyée). Les quatre années restent
   dans le DOM (25 liens de chapitres dans la page pré-rendue, 26 pages pré-rendues) : ce qui est montré dépend de `<html
   data-annee-accueil>`, posé avant le JS par le script en ligne d'`index.html` (même logique que
@@ -79,6 +79,10 @@ cherchant le chapitre correspondant dans `chaptersIndex.ts`.
   `pageClasse.ts::lienPlanRevision`) — publics, non indexés, non pré-rendus, tout reste dans le navigateur.
 - « Annoncer une évaluation » / « Donner un devoir » (professeur) : `/carnet/annoncer?classe=&quoi=devoir&chapitre=`, sans
   migration (événement 0006 + séance d'annonce 0007/0008) — voir `.claude/rules/comptes.md`, section du même nom.
+- Côté élève plus clair (27/11/2026, `.claude/rules/cote-eleve.md`, « Côté élève plus clair ») : accueil à trois portes
+  (Mon cours / M'entraîner / Préparer mon interro) + carte « Ma classe » (code gardé) ; `/entrainer` (« M'entraîner »,
+  publique, non indexée, non pré-rendue) ; barre du bas sur téléphone (`HoteBarreEleve`), aide « ? » dans l'en-tête,
+  visite de 3 bulles ; page de chapitre guidée, fin d'étape, fin d'exercice des générateurs (`FinExercice`).
 
 ## Règles détaillées (chargées seulement quand pertinentes)
 

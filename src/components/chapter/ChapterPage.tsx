@@ -15,7 +15,10 @@ import { ReviserVue } from './ReviserVue'
 import { CeChapitreUtilise, EtapeUtilise } from './Prerequis'
 import { PanneauModal } from './PanneauModal'
 import { Icone } from './Icones'
-import { dureeEtape, insecables, minusculeInitiale, titreCourt, useParcours } from '../../lib/parcoursChapitre'
+import { dureeEtape, insecables, lireEtatsCartes, minusculeInitiale, titreCourt, useParcours } from '../../lib/parcoursChapitre'
+import { EVENEMENT_SUIVI, lireEssais } from '../../lib/suiviEssais'
+import { suiviChapitre } from '../../lib/suiviChapitres'
+import { FinEtape } from './FinEtape'
 import { useMediaQuery } from '../../lib/useMediaQuery'
 import { numeroAffiche, useOrdreChapitres } from '../../lib/ordreChapitres'
 import { BoutonLecture } from '../lecture/BoutonLecture'
@@ -77,6 +80,23 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
   const [introOuverte, setIntroOuverte] = useState(false)
   const [panneau, setPanneau] = useState<Panneau | null>(null)
   const durees = useMemo(() => Object.fromEntries(sections.map((s) => [s.id, dureeEtape(s.blocks)])), [sections])
+  // Étapes « à revoir » (même règle que Ma progression : essais des générateurs et cartes « À revoir »),
+  // relues quand un essai est noté (autre onglet compris). Rien au pré-rendu (aucun essai).
+  const [versionSuivi, setVersionSuivi] = useState(0)
+  useEffect(() => {
+    const relire = () => setVersionSuivi((v) => v + 1)
+    window.addEventListener(EVENEMENT_SUIVI, relire)
+    window.addEventListener('storage', relire)
+    return () => {
+      window.removeEventListener(EVENEMENT_SUIVI, relire)
+      window.removeEventListener('storage', relire)
+    }
+  }, [])
+  const aRevoir = useMemo(
+    () => new Set(suiviChapitre(chapter, lireEssais(), etat, lireEtatsCartes(chapter), titreCourt).etapes.flatMap((e) => (e.section && e.ton === 'retravailler' ? [e.section.id] : []))),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [chapter, etat, versionSuivi, fragment],
+  )
 
   const aller: Aller = useCallback(
     (cible) => {
@@ -115,7 +135,7 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
           </LienVue>
           <OngletsChapitre vue={vue} aller={aller} prefixe="cote" />
           <BarreProgression lues={etat.lues.length} total={sections.length} />
-          <ListeEtapes chapter={chapter} etat={etat} courante={etape.id} durees={durees} aller={aller} variante="cote" />
+          <ListeEtapes chapter={chapter} etat={etat} courante={etape.id} durees={durees} aller={aller} variante="cote" aRevoir={aRevoir} />
           <OutilsChapitre chapter={chapter} />
         </aside>
       )}
@@ -142,7 +162,7 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
           </Suspense>
         )}
 
-        <BlocReprendre chapter={chapter} etat={etat} aller={aller} />
+        <BlocReprendre chapter={chapter} etat={etat} aller={aller} durees={durees} />
         <OngletsChapitre vue={vue} aller={aller} prefixe="page" className="onglets-page" />
         <CeChapitreUtilise chapter={chapter} />
 
@@ -165,7 +185,10 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
         )}
 
         <div id="panneau-apprendre" className="parcours-carte no-export" role="tabpanel" aria-labelledby="page-onglet-apprendre">
-          <ListeEtapes chapter={chapter} etat={etat} courante={etat.derniere} durees={durees} aller={aller} variante="carte" />
+          <ListeEtapes chapter={chapter} etat={etat} courante={etat.derniere} durees={durees} aller={aller} variante="carte" aRevoir={aRevoir} />
+          <p className="ge-legende">
+            <span aria-hidden="true">✓</span> = étape marquée « J’ai compris ». Les étapes « à revoir » d’après tes exercices ou tes cartes « Teste-toi » sont marquées en orange.
+          </p>
           <div className="carte-outils">
             <OutilsChapitre chapter={chapter} />
           </div>
@@ -268,6 +291,7 @@ function EtapeSection({
         <EtapeUtilise section={section} />
         <ContenuEtape blocks={section.blocks} actif={actif} colonneDroite={colonneDroite && actif} ouvrirPanneau={ouvrirPanneau} />
       </div>
+      {actif && <FinEtape section={section} suivante={suivante} aller={aller} />}
       {actif && <NavEtape section={section} precedente={precedente} suivante={suivante} lue={lue} marquer={marquer} aller={aller} />}
     </section>
   )
