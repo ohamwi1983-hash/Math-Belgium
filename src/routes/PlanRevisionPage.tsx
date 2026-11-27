@@ -422,7 +422,7 @@ function VuePlan({
                 <p className="plan-jour-titre">
                   {majuscule(dateCourte(garde.interro))} · {nature.toLowerCase()}
                 </p>
-                <p className="plan-jour-ligne">Bonne chance&nbsp;: tu t'es préparé·e&nbsp;!</p>
+                <p className="plan-jour-ligne">Bonne chance, tu as tout préparé&nbsp;!</p>
               </li>
             </ol>
           )}
@@ -519,11 +519,18 @@ interface Brouillon {
   jourLibre: number | null
 }
 
-function ChoixMinutes({ valeur, onChange, legende }: { valeur: number; onChange: (m: number) => void; legende: string }) {
+function ChoixMinutes({ valeur, onChange, legende, numero }: { valeur: number; onChange: (m: number) => void; legende: string; numero?: number }) {
   const id = useId()
   return (
     <fieldset className="plan-champ">
-      <legend>{legende}</legend>
+      <legend>
+        {numero !== undefined && (
+          <span className="plan-num" aria-hidden="true">
+            {numero}
+          </span>
+        )}
+        {legende}
+      </legend>
       <div className="plan-segments">
         {MINUTES_POSSIBLES.map((m) => (
           <label key={m} className={`plan-segment${valeur === m ? ' choisi' : ''}`}>
@@ -720,6 +727,7 @@ function FormulaireQuestions({
       </fieldset>
 
       <ChoixMinutes
+        numero={3}
         legende="Combien de minutes par jour ?"
         valeur={b.minutes}
         onChange={(m) => setB((x) => ({ ...x, minutes: m }))}

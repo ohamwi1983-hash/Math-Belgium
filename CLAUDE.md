@@ -74,8 +74,11 @@ cherchant le chapitre correspondant dans `chaptersIndex.ts`.
 - `/classe` — page de classe à code des élèves, SANS compte (`routes/ClassePage.tsx`, publique, `noindex`, non
   pré-rendue ; `?code=` du QR retiré de l'adresse) : ce que le professeur publie depuis le carnet
   (`/carnet/classe/:id/eleves`, migration `0010_page_classe.sql`) — voir `.claude/rules/comptes.md`, « Page de classe ».
-- Côté élève sans compte (`.claude/rules/cote-eleve.md`) : `/suivi` (« Mon suivi », carte de l'accueil) et
-  `/suivi/plan` (plan de révision) — publics, non indexés, non pré-rendus, tout reste dans le navigateur.
+- Côté élève sans compte (`.claude/rules/cote-eleve.md`) : `/suivi` (« Ma progression », ex-« Mon suivi », carte de l'accueil) et
+  `/suivi/plan` (plan de révision ; prérempli par « Je prépare mon interro » : `?date=&niveau=&chapitre=&etapes=&gen=&type=bilan`,
+  `pageClasse.ts::lienPlanRevision`) — publics, non indexés, non pré-rendus, tout reste dans le navigateur.
+- « Annoncer une évaluation » / « Donner un devoir » (professeur) : `/carnet/annoncer?classe=&quoi=devoir&chapitre=`, sans
+  migration (événement 0006 + séance d'annonce 0007/0008) — voir `.claude/rules/comptes.md`, section du même nom.
 
 ## Règles détaillées (chargées seulement quand pertinentes)
 

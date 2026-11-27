@@ -6,6 +6,7 @@ paths:
   - "src/components/compte/**"
   - "src/routes/{Connexion,Inscription,Profil,Coffre,Admin,MotDePasse,Evaluation,Carnet,Exercice,ChapterExercice,Partage,Espace,Preparer}*"
   - "src/lib/espaceProfesseur.ts"
+  - "src/lib/annonceClasse.ts"
   - "src/lib/partage*"
   - "src/lib/carnet*"
   - "src/lib/horaire.ts"
@@ -1677,3 +1678,85 @@ chapitre choisi), Mes documents (partagé par moi, projection annotée), Réglag
 sous-entrée active), 15 anciennes adresses (même menu, bonne porte, `/espace/reglages` → `/profil`, `/evaluation#remediation`
 ouvert), menu du compte (prof / admin), connexion → `/espace`, `?retour=/coffre` prioritaire, professeur neuf, cibles ≥ 44 px,
 `scrollWidth` = largeur, 0 erreur console. Captures dans `espace-prof/captures/`.
+
+## Annoncer une évaluation / Donner un devoir (27/11/2026 : maquette « annonce » validée, AUCUNE migration)
+
+Décision du professeur : UN composant « Annoncer une évaluation » (et « Donner un devoir », même modèle), en trois étapes,
+présent sur le tableau de bord, la carte de chaque classe, la page de la classe (et la fin de projection, chantier M : il
+suffit d'un lien).
+
+**Adresse** : `/carnet/annoncer?classe=<id>&quoi=devoir&chapitre=<niveau>/<slug>` (tout facultatif ; `quoi` absent =
+évaluation ; sans classe : la classe active, liste « Classe » s'il y en a plusieurs ; sans chapitre : celui en cours de la
+classe). Sous-page du carnet (`CarnetPage`, route `annoncer`) : elle profite du contexte du carnet ET de la publication
+automatique de la page des élèves (`synchroniserPages` après `charger()`). Sans classe : invitation à en ajouter une.
+
+**Écran** (`components/carnet/AnnoncerEvaluation.tsx` + `annonce.css`) : en-tête clair (`BandeauEspace`, surtitre « Mes
+classes › 6e B », h1 « Annoncer une évaluation » / « Donner un devoir », lien « Plutôt donner un devoir › », repère des
+trois étapes Quand · Sur quoi · Publier — `aria-current="step"` sur la première incomplète) ; carte de gauche :
+- **Quand ?** — puces des trois prochains cours EFFECTIFS de la classe (`carnetDevoirs.ts::prochainsCours` : horaire,
+  congés FWB, heures supprimées par l'agenda), « lun. 30/11 · 4e h » (`annonceClasse.ts::heureCourteCreneau`), + « autre
+  date… » (date + heure facultative parmi les créneaux de la classe ce jour-là) ; évaluation : la première puce à ≥ 5 jours
+  est choisie d'office ; devoir : le prochain cours. « Proposés d'après ton horaire de la 6e B. » ; avertissements de
+  remise des points (`AvertissementsInterro`, 0006) ;
+- **Sur quoi ?** — Interro / Contrôle-bilan (évaluation), chapitre (ordre du professeur, `numeroRepere`), étapes à cocher
+  avec « vue jeudi » / « vue le 12/11 » / « commencée … » / « pas encore vue » (`etatsEtapes`, d'après les séances de la
+  classe) — évaluation : étapes vues ou commencées cochées d'office ; devoir : la dernière touchée ; puis « Exercices pour
+  se préparer — proposés d'après les étapes cochées » : évaluation = générateurs de la table du panneau
+  (`GENERATEURS_EVALUATION_PILOTE` via `processusCarnet.ts::generateursEvaluation`, chargée à part), tous retenus, le
+  professeur décoche (`aria-pressed`) ; devoir = cartes « S'entraîner » des étapes, toutes jointes ; devoir : consigne
+  (texte libre, telle quelle sur la page des élèves) ;
+- à droite **« Ce que verront tes élèves »** (« Interro vendredi 4/12 (dans 7 jours) », « Coniques — étapes 1, 2 »,
+  « Je prépare mon interro › » = VRAI lien vers le plan prérempli des élèves, nouvel onglet) et **Publier** : page des
+  élèves (✓ si elle est publiée et montre les évaluations / devoirs ; sinon une phrase et le lien vers « Page des élèves ») ;
+  agenda (✓ ; « rappel 7 jours et 2 jours avant, sur ton tableau de bord ») ; case « Copier le texte pour le journal de
+  classe / Smartschool » (« Voir le texte copié ») ; « Annoncer » / « Donner le devoir » et « Annoncer et préparer
+  l'évaluation › » (→ `urlEvaluationMatiere` : `/evaluation?matiere=…|gen,…&classe=…&cid=…`, panneau prérempli).
+  Choix assumés : la page des élèves et l'agenda sont des ÉTATS (cases vertes non cliquables) — la publication de la page
+  est automatique pour tout le carnet et une évaluation n'existe que par son événement d'agenda ; un « non » par annonce
+  demanderait une colonne (migration) que rien d'autre n'utiliserait.
+
+**Écritures** (`CarnetPage::annoncer`, mêmes fonctions que « Noter la séance ») — logique pure `lib/annonceClasse.ts` :
+- évaluation : `ajouterEvenement` (« Interrogation », date, heure ou journée, classe, `niveau/chapitre`, intitulé
+  « Contrôle-bilan » pour un bilan), puis la **séance d'annonce** reçoit `evaluation_type` (`annonce` / `bilan`),
+  `evaluation_parties` (étapes), `evaluation_evenement`, `evaluation_generateurs` (retenus ; tout retenu = liste VIDE,
+  règle de 0008) ; échec de la séance → l'événement créé est retiré ; sans 0007 : l'événement seul ;
+- devoir : la séance d'annonce reçoit `devoir` (consigne), `devoir_pour`, `devoir_generateurs` ; sans 0007 : consigne
+  seule, précédée de « Pour le jeudi 3/12 : » ;
+- **séance d'annonce** (`seanceSupport`) : la séance D'AUJOURD'HUI de la classe sur le même chapitre et encore libre (pas
+  d'évaluation / pas de devoir) est COMPLÉTÉE (`saisieDepuisSeance` : rien n'est perdu — matière, horaire, objectif…) ;
+  sinon `nouvelleSeanceSupport` : séance du jour SANS matière vue, à l'heure du cours de la classe EN COURS s'il y en a un
+  (elle est alors la séance de ce cours, que le professeur complètera), sinon `heure_debut` = heure de l'annonce (arrondie
+  aux 5 min), sans numéro : hors cours, elle ne couvre aucun créneau (`seanceDuCreneau`) — rien ne disparaît des séances
+  « à noter » ;
+- la page des élèves (`pageClasseContenu.ts`) n'affiche pas une séance sans matière vue parmi les « dernières séances » ;
+  l'interro y apparaît avec ses étapes et ses exercices, le devoir avec sa consigne ;
+- copie : texte du carnet (`donneesTexte` + `texteAgenda` / `htmlAgenda`, rubriques du professeur) réduit à l'annonce
+  (`DonneesTexteAgenda.sansVu` : pas de rubrique « Vu en classe » de repli), lancée AVANT l'écriture (geste de
+  l'utilisateur) ; repli : texte à copier à la main ;
+- après : message « Interro du vendredi 4/12 annoncée à la 6e B… » sur la page de la classe (ou `/evaluation`).
+
+**Rappels J−7 / J−2** (`espaceProfesseur.ts::rappelEvaluation`, pur) : de J−7 à J−3 « J−n : à préparer », J−2 / J−1 « J−n :
+copies prêtes ? », le jour même « aujourd'hui » — pastille `.ep-rappel` sur la ligne de l'évaluation dans « À venir » du
+tableau de bord et sur la carte de la classe (Mes classes). Boutons : « À venir » du tableau de bord (Annoncer une
+évaluation · Donner un devoir), chaque carte de « Mes classes », la page de la classe.
+
+**Plan des élèves** : « Je prépare mon interro » (page de classe, accueil) ouvre
+`/suivi/plan?date=…&niveau=…&chapitre=…&etapes=…&gen=…&type=bilan` (`pageClasse.ts::lienPlanRevision(interro)`) — voir
+`.claude/rules/cote-eleve.md`, « Ma progression et plan de révision ».
+
+**Vérifications** (dossier de travail `suite-A/` : `verif-A.mjs`, `faux-supabase.js` et `donnees.mjs` du chantier
+précédent, build `NODE_ENV=development vite build --mode test`, heure figée au vendredi 27/11/2026 10h00, 1 280 px et
+iPhone 13, clair et sombre) : 352 vérifications Playwright, 0 échec — tableau de bord
+(boutons, rappel « J−4 : à préparer », contraste ≥ 4,5), cartes de « Mes classes » et page de la classe (boutons, rappel),
+annonce 6e B (fil, trois étapes, puces « lun. 30/11 · 4e h » / « mar. 1/12 · 1re h » / « ven. 4/12 · 3e h » + autre date,
+ven. 4/12 choisi d'office, « vue lundi » / « vue mardi » / « pas encore vue », exercices de la table, aperçu « Interro
+vendredi 4/12 (dans 7 jours) », lien du plan prérempli, page des élèves et agenda ✓, erreur sans étape + focus + rien
+d'écrit, exercice décoché, texte copié sans « Vu en classe », événement H3 créé, séance d'annonce à 10h00 sans matière ni
+numéro, page des élèves republiée avec étapes et exercices — sans la séance d'annonce parmi les dernières séances —, le
+cours de 10h45 reste à noter, « À venir » avec « J−7 »), 5e A (séance du jour H1 complétée, matière gardée) + « Annoncer et
+préparer » → `/evaluation?matiere=…&cid=…`, devoir 4e C (prochain cours d'office, exercices joints d'office, erreur sans
+consigne ni exercice, devoir pour le 1/12 avec l'exercice choisi), 0006 absente (bouton désactivé, message), 0007 absente
+(événement seul), page de classe → lien du plan avec `gen` ; côté élève (plan prérempli, trois questions, cases cochées
+d'office, « tu y as eu des difficultés mercredi », jour raté sans jargon, « Ma progression ») ; cibles ≥ 44 px, aucun
+champ numérique, `scrollWidth` = largeur, 0 erreur console. `npm run build` : 26 pages pré-rendues, identiques à la
+référence sauf « Ma progression » dans la carte de l'accueil. Captures dans `suite-A/captures/`.

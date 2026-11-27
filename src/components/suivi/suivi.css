@@ -197,10 +197,10 @@ body:has(.suivi-page) { background: var(--paper); }
 .plan-chapitre .suivi-case-a-cocher.tout { font-weight: 600; }
 .plan-chapitre > :last-child { margin-bottom: 8px; }
 
-.plan-segments { display: inline-flex; gap: 4px; padding: 4px; align-self: flex-start; background: var(--line-soft); border-radius: 999px; }
+.plan-segments { display: inline-flex; flex-wrap: wrap; gap: 4px; max-width: 100%; box-sizing: border-box; padding: 4px; align-self: flex-start; background: var(--line-soft); border-radius: 26px; }
 .plan-segment { position: relative; display: inline-flex; }
 .plan-segment input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
-.plan-segment span { display: inline-flex; align-items: center; min-height: 44px; padding: 6px 18px; border-radius: 999px; font: 500 16px/1 var(--sans); }
+.plan-segment span { display: inline-flex; align-items: center; min-height: 44px; padding: 6px 15px; border-radius: 999px; font: 500 16px/1 var(--sans); }
 .plan-segment.choisi span { background: var(--ink); color: var(--surface); font-weight: 600; }
 .plan-segment input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
 
@@ -234,8 +234,8 @@ body:has(.suivi-page) { background: var(--paper); }
 .plan-puce.libre { border-style: dashed; }
 .plan-puce.aujourdhui { background: var(--suivi-plein); border-color: var(--suivi-plein); color: var(--on-accent); }
 .plan-puce.aujourdhui b { color: var(--on-accent); }
-.plan-puce.interro { background: color-mix(in srgb, var(--rose) 14%, var(--surface)); border-color: color-mix(in srgb, var(--rose) 30%, var(--surface)); color: var(--rose); }
-.plan-puce.interro b { color: var(--rose); }
+.plan-puce.interro { --plan-rose: color-mix(in srgb, var(--rose) 78%, var(--ink)); background: color-mix(in srgb, var(--rose) 14%, var(--surface)); border-color: color-mix(in srgb, var(--rose) 30%, var(--surface)); color: var(--plan-rose); }
+.plan-puce.interro b { color: var(--plan-rose); }
 .plan-puce-ok {
   position: absolute; top: -6px; right: -4px; width: 18px; height: 18px; border-radius: 50%; background: var(--good); color: var(--surface);
   font: 700 11px/18px var(--sans); text-align: center; font-style: normal;
@@ -272,6 +272,13 @@ body:has(.suivi-page) { background: var(--paper); }
 .plan-go:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .plan-bravo { margin: 4px 0 10px; font: 600 15.5px/1.4 var(--sans); color: var(--good); }
 .plan-decale { margin: 4px 0 14px; font: 400 14.5px/1.5 var(--lecture); color: var(--ink-soft); }
+
+/* Quatre durées sur une ligne, même à 320 px. */
+@media (max-width: 480px) {
+  .plan-segments { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); width: 100%; border-radius: 999px; }
+  .plan-segment { display: flex; }
+  .plan-segment span { flex: 1; justify-content: center; padding: 6px 4px; font-size: 15px; white-space: nowrap; }
+}
 
 @media (min-width: 760px) {
   .suivi-page { padding-top: 32px; }

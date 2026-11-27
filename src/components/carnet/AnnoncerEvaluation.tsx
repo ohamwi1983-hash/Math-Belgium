@@ -142,7 +142,6 @@ export function AnnoncerEvaluation({
   const [bilan, setBilan] = useState(false)
   const [consigne, setConsigne] = useState('')
   const [copier, setCopier] = useState(false)
-  const [erreurs, setErreurs] = useState<ReturnType<typeof erreursAnnonce>>({})
   const [tentative, setTentative] = useState(0)
   const racine = useRef<HTMLDivElement>(null)
 
@@ -209,6 +208,8 @@ export function AnnoncerEvaluation({
     generateurs: evaluation ? (proposes && retenus.length < proposes.length ? retenus : []) : retenus,
     consigne,
   }
+  // Erreurs montrées après une première tentative, puis tenues à jour pendant la correction.
+  const erreurs: ReturnType<typeof erreursAnnonce> = tentative > 0 ? erreursAnnonce(saisie, aujourdhui) : {}
   const numerosChoisis = structure.filter((s) => etapes.has(s.id)).map((s) => s.numero)
   const titreChapitre = chapitre ? titreCourtChapitre(chapitre.slug, texteBrut(chapitre.title)) : ''
   const nature = evaluation ? (bilan ? 'Contrôle-bilan' : 'Interro') : 'Devoir'
@@ -239,7 +240,6 @@ export function AnnoncerEvaluation({
 
   function envoyer(preparer: boolean) {
     const e = erreursAnnonce(saisie, aujourdhui)
-    setErreurs(e)
     setTentative((n) => n + 1)
     if (Object.keys(e).length > 0 || bloque || !classe || !chapitre) return
     onAnnoncer(saisie, { textes: copier ? textes : null, preparer })

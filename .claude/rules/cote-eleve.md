@@ -346,10 +346,14 @@ posés), impression identique avec / sans réglages, projection (`.projection` p
 l'appareil), OpenDyslexic absente des feuilles et non téléchargée sans choix, générateurs (gen7,
 5gen14, 6gen47 `AppCombinatoire`, 6gen100 `AppEcransTrigo`) et widgets suivent les jetons.
 
-## Mon suivi et plan de révision (planche 13)
+## Ma progression (ex-« Mon suivi ») et plan de révision (planche 13, plan refait le 27/11/2026)
 
 Routes publiques, `noindex` (`usePageNonIndexee`), **jamais pré-rendues** (absentes de
 `scripts/routes.mjs`), chargées à la demande (`App.tsx`) :
+
+**Nom** (décision du 27/11/2026) : « Mon suivi » s'appelle **« Ma progression »** partout où l'élève le lit (titre de
+l'onglet, `<h1>`, carte de l'accueil, liens du plan, « Effacer ma progression… ») ; l'adresse reste `/suivi`, les clés
+`suivi:*` et les noms de code (`suiviEssais.ts`, `SuiviPage`…) ne changent pas.
 
 - `/suivi` — `routes/SuiviPage.tsx`. `?niveau=` (sinon année de l'accueil `anneeDeDepart`, sinon celle
   du dernier essai), `?chapitre=` (sinon le dernier chapitre travaillé). Onglets des chapitres de
@@ -358,12 +362,38 @@ Routes publiques, `noindex` (`usePageNonIndexee`), **jamais pré-rendues** (abse
   dont 2 avec aide », cartes « n / N « Je savais » ». « Effacer mon suivi… » : confirmation DANS la page
   (jamais `confirm()`), cases « essais » / « plan » cochées, « étapes comprises et cartes de toutes les
   années » décochée. Pas de « bilan à montrer » ni d'« emporter » (planche 14 en suspens).
-- `/suivi/plan` — `routes/PlanRevisionPage.tsx`. Formulaire (date de l'interro `input type="date"`,
-  année, étapes par chapitre en `<details>` préremplies par « À retravailler », 10 / 20 / 30 min, jour
-  libre), puis le plan jour par jour (cases cochables, durées, « revue n° k », « reporté de lundi »,
-  résumé des reports d'un jour raté, évaluation blanche l'avant-veille → `/{niveau}/{chapitre}/exercices`).
-- Accès : carte « Mon suivi » de l'accueil (`HomePage.tsx`, `CarteSuivi`, à côté de « Préparer mon
-  interro ») ; le plan depuis Mon suivi. La maquette ne met pas de lien dans l'en-tête ni dans la page de
+- `/suivi/plan` — `routes/PlanRevisionPage.tsx`, refait le 27/11/2026 (maquette `maquette-espace/plan-eleve.png`) :
+  - **prérempli depuis une interro annoncée** (bouton « Je prépare mon interro » de la page de classe, de l'accueil,
+    aperçu « Ce que verront tes élèves » du professeur ; format d'adresse plus bas) : en-tête « Interro mercredi 2/12 »
+    (« Contrôle-bilan … » si `type=bilan`), « Les coniques · étapes 1 à 3 · annoncée par ton professeur », une seule
+    question « Combien de minutes par jour ? » (10 / 15 / 20 / 30, **15 d'office**), « Faire mon plan », « Changer la
+    date ou les étapes ». Un plan déjà fait pour la même date et les mêmes étapes s'ouvre directement ; un autre plan
+    en cours est annoncé « sera remplacé ». L'adresse est nettoyée une fois lue ;
+  - **sinon trois questions** numérotées : quand (`input type="date"`), quel chapitre (année + chapitre ; étapes
+    « Toutes les étapes » repliées en `<details>`, toutes cochées, « À retravailler » signalé), combien de minutes par
+    jour ; « Un jour sans révision ? » replié ;
+  - **le plan** : rangée des jours (puces « ven 27 » … jusqu'à l'interro, en rose ; aujourd'hui plein ; à partir
+    d'avant-hier ; un jour passé fait porte ✓ ; défile seule sur téléphone), carte « Aujourd'hui · n min » avec « k sur
+    N » et **au plus trois tâches concrètes** (`grouperTaches`) — case à cocher (zone 44 px, barrée une fois faite),
+    libellé (« Relire « L'essentiel » de l'étape 1 », « Faire 3 exercices de **6gen58** », « Teste-toi : 5 cartes de
+    l'étape 2 », « Évaluation blanche (20 min) puis corrigé »), sous-titre (« tu y as eu des difficultés mercredi » =
+    dernier essai raté de ce générateur dans les 14 jours, sinon « proposé par ton professeur », sinon le titre de la
+    carte) et **« Go »** (le premier « Go » non fait est plein ; nom accessible « Go — faire 3 exercices de 6gen58 ») →
+    l'étape (`#section`), le générateur (`generatorLink`, nouvel onglet s'il n'est pas migré), les cartes (`#reviser`),
+    l'évaluation blanche (`urlEntrainementEleve` : `/{niveau}/{chapitre}/exercices?notions=…&exos=…`, exercices du
+    professeur) ; puis « Demain · n min » et les jours suivants en UNE ligne (« Étape 3 : relire + 3 exercices de
+    6gen59 »), la carte rose du jour de l'interro, « Un jour raté ? Le plan se décale tout seul, rien n'est perdu. ».
+    **Plus de « revue n° k » ni de « reporté de »** : l'algorithme ci-dessous ne change pas, seul l'affichage se tait ;
+    « le plan garde l'essentiel » devient « Il reste peu de jours : le plan garde l'essentiel… ».
+  - **Cases cochées d'office** (`cochesAutomatiques`, pur) : un exercice terminé d'un générateur (« Ma progression »,
+    `suivi:essais:v1`) un jour du plan coche un exercice de ce générateur prévu CE jour-là (d'abord les tâches déjà
+    cochées « consomment » les essais, jamais deux fois) ; relecture et cartes restent à cocher par l'élève. Relu au
+    retour sur la page (`visibilitychange`), à `suivi:modifie` et à `storage` (générateur ouvert par « Go » dans un
+    autre onglet).
+  - Générateurs d'une étape : celui « à retravailler » d'abord ; si le professeur en a retenu (`gen`), seulement eux
+    dans les étapes qui en ont.
+- Accès : carte « Ma progression » de l'accueil (`HomePage.tsx`, `CarteSuivi`, à côté de « Préparer mon
+  interro ») ; le plan depuis Ma progression, la page de classe et l'accueil (« Je prépare mon interro »). La maquette ne met pas de lien dans l'en-tête ni dans la page de
   chapitre : rien n'y a été ajouté.
 
 ### Enregistrer les essais des générateurs (`lib/suiviEssais.ts`)
@@ -421,11 +451,15 @@ sous le chapitre.
 
 ### Plan de révision (`lib/planRevision.ts`, pur ; stockage `lib/planRevisionStockage.ts`)
 
-Clé `suivi:plan:v1` : `{ debut, interro, minutes, jourLibre, niveau, etapes: ['chapitre#section'], faites: [idTâche] }`.
+Clé `suivi:plan:v1` : `{ debut, interro, minutes, jourLibre, niveau, etapes: ['chapitre#section'], faites: [idTâche] }`,
+plus, facultatifs (27/11/2026, lecture tolérante, anciens plans intacts) : `annonce: true` (interro annoncée par le
+professeur), `bilan: true`, `gens: [id]` (générateurs retenus). `MINUTES_POSSIBLES` = 10 / 15 / 20 / 30 (`MINUTES_DEFAUT`
+15).
 
-Algorithme (testé seul : `node --experimental-strip-types scripts/tester-plan-revision.mts`, 16 tests —
+Algorithme (testé seul : `node --experimental-strip-types scripts/tester-plan-revision.mts`, 19 tests —
 dates/heure d'été, 7 jours, jour libre, jours ratés, rattrapage, peu de temps, 12 étapes, interro
-demain, interro passée, essentiel) :
+demain, interro passée, essentiel ; depuis le 27/11/2026 : trois tâches concrètes au plus sans en perdre aucune, tâche
+groupée faite quand toutes ses tâches le sont, cases cochées d'office) :
 
 1. **Plan de base** (ne dépend ni du jour courant ni des coches, donc stable) : jours `debut` → veille de
    l'interro ; jour libre sans tâche (jamais tous) ; dernier jour de travail = veille (cartes « À revoir »,
@@ -457,9 +491,17 @@ construire avec `pageClasse.ts::lienPlanRevision(interroPubliee)` (une `InterroP
 quelle) ou `planRevisionStockage.ts::lienPlanRevision({ date, niveau, chapitre, etapes, generateurs, bilan })`. Le
 plan s'ouvre prérempli « annoncée par ton professeur » ; rien n'est remplacé sans que l'élève valide.
 
+**Trois tâches concrètes** (`grouperTaches`, pur) : toutes les relectures du jour = une tâche, les exercices d'un même
+générateur = une tâche (un exemple résolu à refaire compte comme un exercice), toutes les cartes du jour (revues
+comprises, ou les cartes « À revoir » de la veille) = une tâche, l'évaluation blanche = une tâche ; s'il reste trop de
+générateurs, les derniers sont réunis en une tâche « Faire des exercices : 2 de 6gen58, 1 de 6gen60 ». Cocher une tâche
+groupée coche ses identifiants d'origine (`#i` compris au décochage) : la logique des reports est inchangée.
+
 ### Mise en page
 
-`components/suivi/suivi.css` (chargé avec ces pages), classes `suivi-*` / `plan-*`, jetons du site
+`components/suivi/suivi.css` (chargé avec ces pages), classes `suivi-*` / `plan-*` (plan refait : `plan-entete`,
+`plan-rangee` / `plan-puce`, `plan-jour-carte`, `plan-t*`, `plan-go` ; l'ancienne ligne du temps `plan-jour` / `plan-tache`
+est retirée ; rose de l'interro = `color-mix` de `--rose` vers `--ink`, ≥ 4,5:1 clair et sombre), jetons du site
 uniquement (clair, sombre, tout thème qui les redéfinit) ; police de lecture `var(--l-police, Andika…)`.
 Cibles ≥ 44 px (cases du plan dans une zone de 44 px, liens, onglets), onglets des chapitres au clavier
 (flèches, Début, Fin), focus visible, la rangée d'onglets défile seule sur téléphone (jamais la page).
