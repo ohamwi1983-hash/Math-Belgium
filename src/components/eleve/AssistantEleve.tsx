@@ -174,7 +174,20 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   const chapitre = findChapter(levelSlug, chapitreSlug)
   const notions = useMemo(() => (chapitre ? notionsDuChapitre(chapitre) : []), [chapitre])
 
-  const [type, setType] = useState<TypeEleve>('blanche')
+  // Préréglages de la page « M'entraîner » (`/entrainer`, chantier E) : `?type=feuille|blanche`, `&nombre=4`
+  // (feuille), `&duree=20` (blanche). Valeur inconnue ignorée ; rien d'autre ne change.
+  const [prereglage] = useState(() => {
+    const q = new URLSearchParams(location.search)
+    const t = q.get('type')
+    const n = Number(q.get('nombre'))
+    const d = Number(q.get('duree'))
+    return {
+      type: t === 'feuille' || t === 'blanche' ? (t as TypeEleve) : null,
+      nombre: Number.isInteger(n) && n >= NOMBRE_FEUILLE_MIN && n <= NOMBRE_FEUILLE_MAX ? n : null,
+      duree: (DUREES_ELEVE as readonly number[]).includes(d) ? d : null,
+    }
+  })
+  const [type, setType] = useState<TypeEleve>(prereglage.type ?? 'blanche')
   // Lien du professeur (carnet : interro annoncée) : `?notions=` et `?exos=`, page d'un chapitre seulement.
   const [annonceUrl] = useState(() => {
     const q = new URLSearchParams(location.search)
@@ -190,7 +203,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   const [notionsDepliees, setNotionsDepliees] = useState(() => annonceUrl.notions.some((id) => notions.slice(3).some((n) => n.sectionId === id)))
   /** Case « Seulement les exercices annoncés par ton professeur » (`?exos=`), cochée d'office. */
   const [seulementAnnonces, setSeulementAnnonces] = useState(true)
-  const [duree, setDuree] = useState<number>(30)
+  const [duree, setDuree] = useState<number>(prereglage.duree ?? 30)
   /** Niveaux cochés (intention de l'élève) : tous par défaut, niveaux mélangés. */
   const [niveauxCoches, setNiveauxCoches] = useState<Set<CategorieNiveau>>(() => new Set(CATEGORIES_NIVEAU))
   /** Compétences cochées : les trois par défaut. */
@@ -221,7 +234,7 @@ export function AssistantEleve({ verrouille }: { verrouille?: { levelSlug: strin
   const [demosCochees, setDemosCochees] = useState<Set<string>>(() => new Set())
   /** FEUILLE d'exercices (décision de l'utilisateur, 22/11/2026) : ni durée ni points — un nombre
    * d'exercices global (10 par défaut), ou choisi exercice par exercice. Rien n'est mémorisé. */
-  const [nombreExercices, setNombreExercices] = useState(NOMBRE_FEUILLE_DEFAUT)
+  const [nombreExercices, setNombreExercices] = useState(prereglage.nombre ?? NOMBRE_FEUILLE_DEFAUT)
   const [modeNombre, setModeNombre] = useState<'global' | 'carte'>('global')
   const [parType, setParType] = useState<Record<string, number>>({})
 

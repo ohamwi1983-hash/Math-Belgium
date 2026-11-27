@@ -7,6 +7,7 @@ import { CompteProvider } from './lib/compteContexte'
 import { HotePanneauLecture } from './components/lecture/BoutonLecture'
 import { HoteAidesLecture } from './components/lecture/HoteAidesLecture'
 import { HoteLecteurVoix } from './components/lecture/BoutonEcouter'
+import { HoteBarreEleve } from './components/eleve/BarreEleve'
 
 /** `AdminPage`/`ExercicePage`/`ChapterExercicePage` rendent toutes trois `EvaluationGeneratorPanel`,
  * qui embarque désormais `EVALUATION_ADAPTER_REGISTRY_4E` (55 adaptateurs + tout le pipeline
@@ -40,6 +41,9 @@ const SuiviPage = lazy(() => import('./routes/SuiviPage').then((m) => ({ default
 const PlanRevisionPage = lazy(() => import('./routes/PlanRevisionPage').then((m) => ({ default: m.PlanRevisionPage })))
 /** Mode « Projeter en classe » (professeur connecté) : diapos plein écran, chargé à la demande, jamais
  * pré-rendu ni indexé — voir `.claude/rules/chapter-components.md`, « Mode projection ». */
+/** « M'entraîner » (élève, chantier E du 27/11/2026) : publique, non indexée, jamais pré-rendue (elle lit les
+ * essais gardés dans le navigateur). */
+const EntrainerPage = lazy(() => import('./routes/EntrainerPage').then((m) => ({ default: m.EntrainerPage })))
 const ProjectionPage = lazy(() => import('./components/projection/ProjectionPage').then((m) => ({ default: m.ProjectionPage })))
 
 function App() {
@@ -69,6 +73,7 @@ function App() {
           <Route path="/carnet/*" element={<CarnetPage />} />
           <Route path="/suivi" element={<SuiviPage />} />
           <Route path="/suivi/plan" element={<PlanRevisionPage />} />
+          <Route path="/entrainer" element={<EntrainerPage />} />
           {/* Un seul générateur rapatrié depuis plateforme-maths = une entrée dans
            * `ENTRAINEMENT_REGISTRY` (voir `src/entrainement/registry.ts`), jamais une nouvelle route
            * ici — `EntrainementPage` charge le bon composant à la demande (`React.lazy`), lu depuis
@@ -89,6 +94,8 @@ function App() {
       <HoteAidesLecture />
       {/* Lecture à voix haute : barre de lecture, seulement pendant une lecture lancée par « Écouter ». */}
       <HoteLecteurVoix />
+      {/* Barre du bas du côté élève (téléphone) : Accueil · Cours · M'entraîner · Mon interro, selon la page. */}
+      <HoteBarreEleve />
       </CompteProvider>
     </BrowserRouter>
   )
