@@ -49,7 +49,8 @@
   .ep-carte.pp { padding: 14px 14px 16px; }
   .pp-tete h2 { font-size: 1.2rem; }
   .pp-barre { order: 3; flex: 1 1 100%; }
-  .pp-compte { order: 2; }
+  .pp-compte { order: 1; }
+  .pp-masquer { order: 2; }
   .pp-compte-detail { display: none; }
   .pp-etapes { grid-template-columns: minmax(0, 1fr); gap: 8px; }
   .pp-etape { padding: 10px 12px; }

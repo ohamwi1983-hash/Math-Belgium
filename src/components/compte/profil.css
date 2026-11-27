@@ -176,8 +176,9 @@
 }
 
 /* ---------- logo FACULTATIF de l'école (0012, 27/11/2026) : aperçu sur la feuille + réglage sous la feuille ---------- */
-.profil-cartouche-logo { flex: none; display: flex; align-items: center; justify-content: center; padding: 6px 8px; border-right: 1.5px solid var(--profil-encre-papier); }
-.profil-cartouche-logo img { display: block; height: 38px; width: auto; max-width: 96px; object-fit: contain; }
+/* Même proportion que sur la copie (1,5 cm de haut, 4 cm de large au plus, sur une feuille de 18 cm). */
+.profil-cartouche-logo { flex: none; display: flex; align-items: center; justify-content: center; padding: 4px 6px; border-right: 1.5px solid var(--profil-encre-papier); }
+.profil-cartouche-logo img { display: block; height: 24px; width: auto; max-width: 58px; object-fit: contain; }
 .profil-logo { display: flex; flex-direction: column; gap: 8px; padding-top: 4px; border-top: 1px solid var(--profil-sombre-2); }
 .profil-logo-titre { margin: 8px 0 0; font: 600 0.95rem var(--sans); color: var(--profil-sur-sombre); }
 .profil-logo-facultatif { font-weight: 500; color: var(--profil-sur-sombre-doux); }
@@ -206,5 +207,5 @@
 .profil-logo-message:empty { display: none; }
 .profil-logo-message.erreur { color: #ffb4a8; }
 @container (max-width: 757px) {
-  .profil-cartouche-logo img { height: 30px; max-width: 72px; }
+  .profil-cartouche-logo img { height: 30px; max-width: 80px; }
 }
