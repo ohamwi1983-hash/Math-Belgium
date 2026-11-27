@@ -81,7 +81,17 @@ export function VueEnsembleClasses({
                   {reperes.prochainCours ? ` ${reperes.prochainCours.charAt(0).toUpperCase()}${reperes.prochainCours.slice(1)}.` : ''}
                 </p>
               )}
-              {reperes.evaluation && <p className="ep-classe-alerte">{reperes.evaluation}</p>}
+              {reperes.evaluation && (
+                <p className="ep-classe-alerte">
+                  {reperes.evaluation}
+                  {reperes.rappel && (
+                    <>
+                      {' '}
+                      <span className="ep-rappel">{reperes.rappel}</span>
+                    </>
+                  )}
+                </p>
+              )}
               {reperes.aNoter && <p>{reperes.aNoter}</p>}
               <div className="ep-classe-actions">
                 <Link className="ep-bouton" to={`/carnet/classe/${c.id}`}>
@@ -92,6 +102,12 @@ export function VueEnsembleClasses({
                 </Link>
                 <Link className="ep-bouton" to={`/carnet/classe/${c.id}/eleves`}>
                   Page des élèves<span className="carnet-sr"> — {c.nom}{etatPage === 'publiee' ? ' (publiée)' : etatPage === 'coupee' ? ' (code coupé)' : ''}</span>
+                </Link>
+                <Link className="ep-bouton" to={`/carnet/annoncer?classe=${encodeURIComponent(c.id)}`}>
+                  Annoncer une évaluation<span className="carnet-sr"> — {c.nom}</span>
+                </Link>
+                <Link className="ep-bouton" to={`/carnet/annoncer?classe=${encodeURIComponent(c.id)}&quoi=devoir`}>
+                  Donner un devoir<span className="carnet-sr"> — {c.nom}</span>
                 </Link>
               </div>
             </article>

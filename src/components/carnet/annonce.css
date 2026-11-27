@@ -1,0 +1,87 @@
+/* « Annoncer une évaluation » / « Donner un devoir » (`AnnoncerEvaluation.tsx`, maquette « annonce » du
+   27/11/2026). Classes `annonce-*`, jetons du site (clair et sombre), téléphone d'abord ; cibles ≥ 44 px. */
+
+.annonce { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.annonce .profil-bandeau { flex-wrap: wrap; }
+
+.annonce-etapes { display: flex; flex-wrap: wrap; gap: 6px 18px; list-style: none; margin: 0 0 0 auto; padding: 0; align-self: flex-end; }
+.annonce-etapes li { display: inline-flex; align-items: center; gap: 8px; font: 600 0.95rem var(--sans); color: var(--ink-soft); }
+.annonce-etape-num {
+  display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%;
+  background: var(--surface-2); border: 1px solid var(--line-soft); color: var(--ink-soft); font: 700 0.9rem var(--sans);
+}
+.annonce-etapes li.actuelle { color: var(--ink); }
+.annonce-etapes li.actuelle .annonce-etape-num { background: var(--accent-ink); border-color: var(--accent-ink); color: var(--surface); }
+.annonce-etapes li.faite .annonce-etape-num { background: var(--good-soft); border-color: transparent; color: var(--good); }
+
+.annonce-grille { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.annonce-droite { display: flex; flex-direction: column; gap: 18px; min-width: 0; position: sticky; top: 16px; }
+.annonce-carte { display: flex; flex-direction: column; gap: 20px; }
+
+.annonce-classe select, .annonce-carte select { min-height: 44px; max-width: 100%; }
+.annonce-groupe { margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.annonce-question { padding: 0; margin: 0 0 2px; font: 700 1.05rem var(--sans); color: var(--ink); }
+.annonce-question-suite { font-weight: 500; color: var(--ink-soft); }
+.annonce-sous-question { margin: 6px 0 8px; font: 700 0.98rem var(--sans); color: var(--ink); }
+.annonce-aide { margin: 0; font: 400 0.92rem/1.45 var(--sans); color: var(--ink-soft); }
+.annonce-erreur:focus { outline: 2px solid var(--bad); outline-offset: 2px; }
+
+.annonce-puces { display: flex; flex-wrap: wrap; gap: 10px; }
+.annonce-puce {
+  position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 16px; box-sizing: border-box;
+  border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink);
+  font: 600 0.98rem var(--sans); cursor: pointer; text-align: left;
+}
+.annonce-puce.petite { min-height: 44px; padding: 0 14px; font-size: 0.92rem; }
+.annonce-puce:hover { border-color: var(--accent); }
+.annonce-puce.actif { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
+.annonce-puce:has(input:focus-visible), .annonce-puce:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.annonce-puce.exo { font-weight: 500; }
+.annonce-code { font: 700 0.92rem var(--sans); }
+.annonce-autre { display: flex; flex-wrap: wrap; gap: 10px 16px; }
+.annonce-autre input[type="date"] { min-height: 44px; }
+
+.annonce-etapes-liste { display: flex; flex-direction: column; gap: 2px; }
+.annonce-case { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; padding: 8px 0; box-sizing: border-box; font: 400 1rem/1.45 var(--sans); color: var(--ink); cursor: pointer; }
+.annonce-case input { flex: none; width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--good); }
+.annonce-etat {
+  display: inline-block; margin-left: 6px; padding: 1px 9px; border-radius: 999px; border: 1px solid var(--line-soft);
+  background: var(--surface-2); color: var(--ink-soft); font: 600 0.8rem/1.6 var(--sans); white-space: nowrap; vertical-align: 1px;
+}
+.annonce-etat.vue { background: var(--good-soft); border-color: transparent; color: var(--good); }
+.annonce-etat.commencee { background: var(--attn-soft); border-color: transparent; color: color-mix(in srgb, var(--attn) 70%, var(--ink)); }
+
+.annonce-surtitre { margin: 0 0 6px; font: 600 0.78rem/1.3 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.annonce-apercu-titre { margin: 0 0 4px; font: 600 1.35rem/1.25 var(--serif); color: var(--ink); }
+.annonce-apercu-sujet { margin: 0 0 12px; color: var(--ink-soft); font: 400 1rem/1.45 var(--sans); }
+.annonce-apercu-consigne { margin: 0 0 12px; white-space: pre-line; color: var(--ink); }
+.annonce-faux-bouton { margin: 2px 0 8px; }
+.annonce-faux-bouton.desactive { opacity: 0.55; cursor: default; }
+
+.annonce-canaux { list-style: none; margin: 8px 0 14px; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.annonce-canal { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; padding: 8px 0; box-sizing: border-box; color: var(--ink-soft); }
+.annonce-canal.ok { color: var(--ink); }
+.annonce-canal a { color: var(--accent-ink); }
+.annonce-canal-marque {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; box-sizing: border-box; margin-top: 1px;
+  border: 2px solid var(--line); border-radius: 5px; color: var(--surface); font: 700 0.8rem/1 var(--sans);
+}
+.annonce-canal.ok .annonce-canal-marque { background: var(--good); border-color: var(--good); }
+.annonce-texte { margin: 2px 0 0 34px; }
+.annonce-texte summary { display: inline-flex; align-items: center; min-height: 40px; cursor: pointer; color: var(--accent-ink); font-weight: 600; }
+.annonce-texte pre {
+  margin: 6px 0 0; padding: 10px 12px; max-height: 240px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere;
+  background: var(--paper); border: 1px solid var(--line-soft); border-radius: 8px; font: 400 0.85rem/1.45 var(--mono); color: var(--ink);
+}
+.annonce-boutons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+
+@media (max-width: 999px) {
+  .annonce-grille { grid-template-columns: minmax(0, 1fr); }
+  .annonce-droite { position: static; }
+  .annonce-etapes { margin: 0; align-self: flex-start; }
+}
+@media (max-width: 480px) {
+  .annonce-puce { flex: 1 1 calc(50% - 10px); justify-content: center; text-align: center; }
+  .annonce-puce.exo { flex-basis: 100%; justify-content: flex-start; text-align: left; }
+  .annonce-boutons .ep-bouton { flex: 1 1 100%; white-space: normal; text-align: center; }
+}

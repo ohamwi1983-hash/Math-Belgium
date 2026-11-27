@@ -164,7 +164,9 @@ function devoirsPublies(d: DonneesPublication, seancesClasse: Seance[]): DevoirP
 
 function seancesPubliees(d: DonneesPublication, seancesClasse: Seance[]): SeancePubliee[] {
   return seancesClasse
-    .filter((s) => s.date_seance <= d.aujourdhui)
+    // Une séance sans matière vue (annonce d'une évaluation ou d'un devoir faite hors cours, « Annoncer une
+    // évaluation ») n'a rien à montrer parmi les dernières séances.
+    .filter((s) => s.date_seance <= d.aujourdhui && (s.parties.length > 0 || s.generateurs.length > 0))
     .sort((a, b) => (a.date_seance > b.date_seance ? -1 : a.date_seance < b.date_seance ? 1 : (b.numero_heure ?? 0) - (a.numero_heure ?? 0) || (a.cree_le > b.cree_le ? -1 : 1)))
     .slice(0, MAX_SEANCES)
     .map((s) => {

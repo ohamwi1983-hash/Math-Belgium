@@ -110,6 +110,16 @@ function TableauDeBord() {
           <section className="ep-carte ep-avenir" aria-labelledby={`${id}-avenir`}>
             <div className="ep-carte-tete">
               <h2 id={`${id}-avenir`}>À venir</h2>
+              {donnees && donnees.classes.length > 0 && (
+                <span className="ep-carte-tete-actions">
+                  <Link className="ep-bouton" to="/carnet/annoncer">
+                    Annoncer une évaluation
+                  </Link>
+                  <Link className="ep-bouton" to="/carnet/annoncer?quoi=devoir">
+                    Donner un devoir
+                  </Link>
+                </span>
+              )}
             </div>
             {donnees === null ? (
               <p className="ep-vide">{erreur ? '—' : 'Chargement…'}</p>
@@ -121,7 +131,15 @@ function TableauDeBord() {
                   <li key={a.cle}>
                     <Link to={a.lien} className="ep-avenir-ligne">
                       <span className={`ep-chip${a.sorte === 'evaluation' ? ' evaluation' : ''}`}>{a.dateTexte}</span>
-                      <span className="ep-avenir-texte">{a.texte}</span>
+                      <span className="ep-avenir-texte">
+                        {a.texte}
+                        {a.rappel && (
+                          <>
+                            {' '}
+                            <span className="ep-rappel">{a.rappel}</span>
+                          </>
+                        )}
+                      </span>
                     </Link>
                   </li>
                 ))}

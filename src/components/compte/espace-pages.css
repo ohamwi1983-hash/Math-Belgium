@@ -139,3 +139,8 @@
 .ep-progres > span { display: block; height: 100%; border-radius: 999px; background: var(--good); }
 .ep-classe-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 .ep-classe-alerte { color: var(--bad) !important; }
+
+/* Rappels J−7 / J−2 (tableau de bord, carte de la classe), « Annoncer une évaluation » (27/11/2026). */
+.ep-rappel { display: inline-flex; align-items: center; padding: 1px 8px; border-radius: 999px; background: var(--attn-soft); color: color-mix(in srgb, var(--attn) 70%, var(--ink)); font: 600 0.78rem/1.6 var(--sans); white-space: nowrap; }
+
+.ep-carte-tete-actions { display: flex; flex-wrap: wrap; gap: 8px; }

@@ -118,6 +118,12 @@ export function PageClasse({
             Page des élèves
             {pageEleves === 'publiee' ? <span className="carnet-pastille-eleves">publiée</span> : pageEleves === 'coupee' ? <span className="carnet-pastille-eleves coupee">code coupé</span> : null}
           </Link>
+          <Link className="carnet-bouton" to={`/carnet/annoncer?classe=${encodeURIComponent(classe.id)}`}>
+            Annoncer une évaluation
+          </Link>
+          <Link className="carnet-bouton" to={`/carnet/annoncer?classe=${encodeURIComponent(classe.id)}&quoi=devoir`}>
+            Donner un devoir
+          </Link>
           <button type="button" className="carnet-bouton principal" onClick={() => onNoter(classe.id)}>
             Noter une séance
           </button>

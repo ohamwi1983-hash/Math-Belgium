@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
-import { Link, Navigate, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { BandeauEspace } from '../components/compte/BandeauEspace'
 import { MenuEspace } from '../components/compte/MenuEspace'
 import { EnTeteCompte, PageCompte, PageReservee } from '../components/compte/PageReservee'
@@ -16,6 +16,7 @@ import { MessageHoraireInactif, MonHoraire } from '../components/carnet/MonHorai
 import { PageClasse } from '../components/carnet/PageClasse'
 import { PageClasseEleves } from '../components/carnet/PageClasseEleves'
 import { VueEnsembleClasses } from '../components/carnet/VueEnsembleClasses'
+import { AnnoncerEvaluation, type EtatPageEleves, type TextesAnnonce } from '../components/carnet/AnnoncerEvaluation'
 import { PanneauLateral } from '../components/carnet/PanneauLateral'
 import { FormulaireEvenement } from '../components/carnet/FormulaireEvenement'
 import { ReglagesAgenda } from '../components/carnet/ReglagesAgenda'
@@ -59,6 +60,8 @@ import { messageErreur } from '../lib/compteValidation'
 import { construireContenuPage, memeContenu } from '../lib/pageClasseContenu'
 import type { ReglagesPageClasse } from '../lib/pageClasse'
 import { chargerPagesClasse, couperCode, enregistrerReglagesPage, nouveauCode, publierContenu, type PagesClasse } from '../lib/pageClasseDonnees'
+import { nouvelleSeanceSupport, saisieDepuisSeance, seanceAvecAnnonce, seanceSupport, type QuoiAnnonce, type SaisieAnnonce } from '../lib/annonceClasse'
+import { urlEvaluationMatiere } from '../lib/carnetMatiere'
 
 const DUREES = [40, 45, 50, 55, 60, 90, 100, 110]
 const TEXTE_DEFAUT = { rubriques: lireRubriques(null), competences: lireCompetences(null) }
@@ -138,6 +141,7 @@ function Carnet() {
   // professeur ; re-rendu et nouvelle vérification de la page de classe quand il arrive ou change.
   const etatOrdre = useOrdreChapitres()
   const [params, setParams] = useSearchParams()
+  const naviguer = useNavigate()
   const chemin = useLocation().pathname.replace(/\/+$/, '') || '/'
   const [donnees, setDonnees] = useState<Donnees | null>(null)
   const [absent, setAbsent] = useState(false)
@@ -354,11 +358,13 @@ function Carnet() {
     const classes = donnees?.classes
     const reperes = texteReperes(dateIso(maintenant))
     const surReglages = chemin === '/carnet/reglages'
+    // « Annoncer une évaluation » / « Donner un devoir » porte son propre en-tête (titre et trois étapes).
+    const surAnnonce = chemin === '/carnet/annoncer'
     const phraseClasses = 'Ce que tu vois avec chaque classe, quand, et ce qui l’attend.'
     return (
       <div className="carnet">
         <MenuEspace carnet={donnees ? { classes: donnees.classes, nombreSeances: (k) => donnees.seances.filter((s) => s.classe_id === k).length, aNoter } : undefined}>
-          {surReglages ? (
+          {surAnnonce ? null : surReglages ? (
             <BandeauEspace
               titreId={`${idBandeau}-titre`}
               surtitre="Réglages"
@@ -539,6 +545,86 @@ function Carnet() {
         setTexteACopier(textes.texte)
       }
     } else if (interro) setMessage(`${base}.${interro}`)
+  }
+
+  /** « Annoncer une évaluation » / « Donner un devoir » : l'événement « Interrogation » (0006) et / ou la séance
+   * d'annonce (séance du jour complétée, sinon nouvelle séance sans matière vue — `lib/annonceClasse.ts`). Aucune
+   * migration. La page des élèves se republie seule (`synchroniserPages`, au rechargement des données). */
+  async function annoncer(a: SaisieAnnonce, o: { textes: TextesAnnonce | null; preparer: boolean }) {
+    if (!client || !donnees) return
+    const classe = donnees.classes.find((c) => c.id === a.classeId)
+    if (!classe) return
+    const { devoirs, generateursEval, agenda } = donnees
+    const actif = donnees.horaire.actif
+    const evaluation = a.quoi === 'evaluation'
+    if (evaluation && !agenda.actif) return
+    // Copie AVANT l'enregistrement (le geste de l'utilisateur vaut encore pour le presse-papiers).
+    const copie = o.textes ? copierTexte(o.textes.texte, o.textes.html) : null
+    const maintenantCourant = new Date()
+    const aujourdhui = dateIso(maintenantCourant)
+    const minutes = maintenantCourant.getHours() * 60 + maintenantCourant.getMinutes()
+    const support = devoirs ? seanceSupport(donnees.seances, a, aujourdhui) : null
+    // Nouvelle séance d'annonce : à l'heure du cours en cours de la classe s'il y en a un.
+    const enCours = actif ? (creneauxDuJour(aujourdhui, donnees.horaire.grilles, donnees.horaire.cases.filter((c) => c.classe_id === classe.id)).creneaux.find((c) => c.debut <= minutes && minutes < c.fin) ?? null) : null
+    const base = support ? saisieDepuisSeance(support) : nouvelleSeanceSupport(a, aujourdhui, minutes, enCours)
+    // Sans 0007 : la date de remise ne peut pas être gardée, elle va dans la consigne.
+    const annonceFinale: SaisieAnnonce = !evaluation && !devoirs && a.date ? { ...a, consigne: `Pour le ${dateJourLong(a.date)} : ${a.consigne.trim()}` } : a
+    const saisieEv: SaisieEvenement | null = evaluation
+      ? {
+          ecole_id: classe.ecole_id,
+          type: 'interrogation',
+          intitule: a.bilan ? INTITULE_BILAN : '',
+          du: a.date,
+          au: a.date,
+          journee_entiere: a.heureDebut === null,
+          heure_debut: a.heureDebut,
+          heure_fin: a.heureFin,
+          toutes_classes: false,
+          accompagne: false,
+          classe_id: classe.id,
+          chapitre: `${a.niveau}/${a.chapitre}`,
+          classes: [],
+        }
+      : null
+    const nature = a.bilan ? 'Contrôle-bilan' : 'Interro'
+    const fait = evaluation ? `${nature} du ${dateJourLong(a.date)} annoncé${a.bilan ? '' : 'e'} à la ${classe.nom}` : `Devoir donné à la ${classe.nom}${a.date ? ` pour le ${dateJourLong(a.date)}` : ''}`
+    const ok = await agir(async () => {
+      let evId: string | null = null
+      if (saisieEv) evId = await ajouterEvenement(client, saisieEv)
+      // Sans 0007, une évaluation n'est que l'événement de l'agenda (date et chapitre).
+      if (evaluation && !devoirs) return
+      const finale = seanceAvecAnnonce(base, annonceFinale, evId)
+      try {
+        if (support) await modifierSeance(client, support.id, finale, actif, devoirs, generateursEval)
+        else await ajouterSeance(client, finale, actif, devoirs, generateursEval)
+      } catch (ex) {
+        // Pas d'interro orpheline : celle qu'on vient de créer est retirée.
+        if (evId) await supprimerEvenement(client, evId).catch(() => undefined)
+        throw ex
+      }
+    }, `${fait}.`)
+    if (!ok) return
+    choisirClasse(classe.id)
+    if (copie && o.textes) {
+      if (await copie) setMessage(`${fait}, et texte copié : colle-le dans le journal de classe ou Smartschool.`)
+      else {
+        setMessage(`${fait}. Copie automatique impossible sur cet appareil : sélectionne le texte ci-dessous et copie-le.`)
+        setTexteACopier(o.textes.texte)
+      }
+    }
+    if (o.preparer && evaluation) {
+      naviguer(urlEvaluationMatiere({ levelSlug: a.niveau, chapitres: [{ slug: a.chapitre, sections: a.etapes, ...(a.generateurs.length > 0 ? { generateurs: a.generateurs } : {}) }] }, '', classe.nom, classe.id))
+      return
+    }
+    naviguer(`/carnet/classe/${classe.id}`)
+  }
+
+  /** État de la page des élèves d'une classe (0010) pour « Publier ». */
+  function etatPageEleves(classeId: string): EtatPageEleves {
+    if (!donnees || !donnees.pages.actif) return { etat: 'inactive', interros: false, devoirs: false }
+    const p = donnees.pages.pages.find((x) => x.classe_id === classeId)
+    if (!p) return { etat: 'aucune', interros: false, devoirs: false }
+    return { etat: p.code ? 'publiee' : 'coupee', interros: p.publier_interros, devoirs: p.publier_devoirs }
   }
 
   /** Rubriques du texte (panneau du texte ou réglages) : mémorisées si 0007 est appliqué. */
@@ -901,6 +987,28 @@ function Carnet() {
               }
             />
             <Route path="reglages" element={reglagesSection} />
+            <Route
+              path="annoncer"
+              element={avecClasses(
+                <RouteAnnonce>
+                  {(classeParam, quoi, chapitreParam) => (
+                    <AnnoncerEvaluation
+                      key={`${quoi}-${classeParam ?? ''}`}
+                      classes={donnees.classes}
+                      seances={donnees.seances}
+                      horaire={horaireFormulaire}
+                      quoi={quoi}
+                      classeInitiale={classeParam ?? classeMemo}
+                      chapitreInitial={chapitreParam}
+                      pageEleves={etatPageEleves}
+                      occupe={occupe}
+                      maintenant={maintenant}
+                      onAnnoncer={(a, o) => void annoncer(a, o)}
+                    />
+                  )}
+                </RouteAnnonce>,
+              )}
+            />
             <Route path="*" element={<Navigate to="/carnet" replace />} />
           </Routes>
         </>,
@@ -1012,6 +1120,14 @@ function RouteClasse({ classes, rendu, onVue }: { classes: Classe[]; rendu: (c: 
     )
   }
   return <>{rendu(classe)}</>
+}
+
+/** `/carnet/annoncer?classe=<id>&quoi=devoir&chapitre=<niveau>/<slug>` : « Annoncer une évaluation » (défaut) ou
+ * « Donner un devoir », classe et chapitre choisis d'avance (tableau de bord, carte et page de la classe, fin de
+ * projection). */
+function RouteAnnonce({ children }: { children: (classe: string | null, quoi: QuoiAnnonce, chapitre: string | null) => ReactNode }) {
+  const [params] = useSearchParams()
+  return <>{children(params.get('classe'), params.get('quoi') === 'devoir' ? 'devoir' : 'evaluation', params.get('chapitre'))}</>
 }
 
 /** `/carnet/agenda?classe=<id>` (bouton « Agenda de la classe ») : classe choisie d'avance. */

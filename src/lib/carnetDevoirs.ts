@@ -284,6 +284,9 @@ export interface DonneesTexteAgenda {
   entrainement: { titre: string; url: string }[]
   devoir: { pour: string | null; consigne: string; exercices: { titre: string; url: string }[] } | null
   evaluation: EvaluationTexte | null
+  /** Texte d'une annonce seule (« Annoncer une évaluation » / « Donner un devoir ») : pas de rubrique « Vu en
+   * classe » de repli (le lien du chapitre), puisque rien n'a été vu. Absent : comportement d'avant. */
+  sansVu?: boolean
 }
 
 /** Heure d'un événement : « H2 », « H1–H2 », « H0 » ; `null` pour une journée entière. */
@@ -387,7 +390,7 @@ function rubriques(d: DonneesTexteAgenda, o: Rubriques): Rubrique[] {
     vu.push(`• ${p.titre}`, ...p.sousParties.map((s) => `  – ${s}`))
     if (liens) vu.push(`  ${p.url}`)
   }
-  if (d.parties.length === 0 && d.chapitre && liens) vu.push(d.chapitre.url)
+  if (d.parties.length === 0 && d.chapitre && liens && !d.sansVu) vu.push(d.chapitre.url)
   if (vu.length > 0) r.push({ cle: 'vu', titre: titreRubrique(EMOJI.vu, 'Vu en classe', o.emojis), lignes: vu })
   const comp: string[] = []
   if (o.processus && d.processus.length > 0) comp.push(`• Processus : ${d.processus.map((p) => `${p.nom} (${p.exercices.join(', ')})`).join(' · ')}`)
