@@ -1748,7 +1748,7 @@ Classe supprimée depuis ou chapitre inconnu : ignorée. Rien s'il n'y a rien.
 **Vérifications** (dossier de travail `suite-M/` : `purs.test.ts` + `bundle.mjs` — esbuild avec résolution sensible à la
 casse, le disque de la machine ne l'est pas —, `verif.mjs`, `faux-supabase.js` et `donnees.mjs` du chantier « Espace
 professeur ») : build `NODE_ENV=development vite build --mode test`, heure figée (`page.clock`), 1 280 px et iPhone 13, clair
-et sombre — voir le rapport du chantier : proposition pendant la 3e heure de la 6e B (étapes, « vue en partie »,
+et sombre — 143 vérifications : proposition pendant la 3e heure de la 6e B (étapes, « vue en partie »,
 sous-parties, générateur, prochain cours), Échap, enregistrement (séance H3, parties, générateur, devoir, « Pour le »),
 relance = séance complétée sans doublon, séance existante de la 5e A complétée, « Plus tard » → cartes d'Aujourd'hui et du
 tableau de bord → panneau → « Changer de classe ou de date » → enregistré → retirée, « Oublier », hors heures / autre année
