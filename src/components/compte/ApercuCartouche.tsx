@@ -1,4 +1,5 @@
-import { cartoucheEffectif, type CartoucheEcole } from '../../entrainement/export/cartouche'
+import type { ReactNode } from 'react'
+import { cartoucheEffectif, logoCartouche, type CartoucheEcole } from '../../entrainement/export/cartouche'
 
 /** Parties du cartouche en cours de modification (surlignées dans l'aperçu). */
 export interface SurlignageCartouche {
@@ -17,8 +18,23 @@ const MATIERE_EXEMPLE = 'Mathématiques 4h/sem'
  * d'exercices (nom du professeur à gauche, « page n / N » à droite). Mis à jour pendant la frappe ;
  * ce qui est en cours de modification est surligné (`<mark>`). Le titre et la date sont un exemple.
  */
-export function ApercuCartouche({ cartouche, surligne, ecoleParDefaut, idTitre }: { cartouche: CartoucheEcole; surligne: SurlignageCartouche; ecoleParDefaut: string | null; idTitre: string }) {
+export function ApercuCartouche({
+  cartouche,
+  surligne,
+  ecoleParDefaut,
+  idTitre,
+  children,
+}: {
+  cartouche: CartoucheEcole
+  surligne: SurlignageCartouche
+  ecoleParDefaut: string | null
+  idTitre: string
+  /** Réglage du logo de l'école (0012), sous la feuille. */
+  children?: ReactNode
+}) {
   const c = cartoucheEffectif(cartouche)
+  // Logo facultatif (0012) : à gauche de la cartouche, comme sur les documents imprimés.
+  const logo = logoCartouche(cartouche)
   const morceaux = [
     { cle: 'ecole', texte: c.ecoleNom, marque: surligne.ecole },
     { cle: 'matiere', texte: MATIERE_EXEMPLE, marque: false },
@@ -37,6 +53,11 @@ export function ApercuCartouche({ cartouche, surligne, ecoleParDefaut, idTitre }
       </div>
       <div className="profil-feuille">
         <div className="profil-cartouche">
+          {logo && (
+            <div className="profil-cartouche-logo">
+              <img src={logo} alt={`Logo de ${c.ecoleNom || "l'école"}`} />
+            </div>
+          )}
           <div className="profil-cartouche-g">
             <span className="profil-cartouche-surtitre">
               {morceaux.map((m, i) => (
@@ -65,6 +86,7 @@ export function ApercuCartouche({ cartouche, surligne, ecoleParDefaut, idTitre }
           <span>page 1 / 3</span>
         </div>
       </div>
+      {children}
       <p className="profil-apercu-note">
         <span className="profil-apercu-note-detail">En haut : le cartouche des évaluations et des examens ; en bas : le pied de page des feuilles d'exercices. </span>
         Ce que tu modifies est surligné, pendant la frappe.{' '}

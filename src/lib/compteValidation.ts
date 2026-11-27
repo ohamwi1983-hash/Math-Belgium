@@ -5,7 +5,7 @@
  * Règle CLAUDE.md : un champ de saisie ne bloque JAMAIS la frappe. Ces fonctions jugent la saisie
  * à l'ENVOI du formulaire (message clair sous le champ), sans jamais la modifier pendant la frappe.
  */
-import type { CartoucheEcole } from '../entrainement/export/cartouche'
+import { logoValide, type CartoucheEcole } from '../entrainement/export/cartouche'
 import type { PlanDocument } from './evaluationLocal'
 
 export const MOT_DE_PASSE_MIN = 8
@@ -36,6 +36,9 @@ export interface Ecole {
   nom: string
   adresse: string
   par_defaut: boolean
+  /** Logo facultatif (0012) : lu À PART (`lib/logoEcole.ts`), jamais avec la liste des écoles du
+   * contexte (jusqu'à ≈ 200 Ko par école sur chaque page sinon). */
+  logo?: string | null
 }
 
 /** Code d'invitation tel que saisi → forme canonique (majuscules, sans espaces ni tirets). Même
@@ -190,8 +193,10 @@ export function ecoleParDefaut(ecoles: Ecole[]): Ecole | null {
 
 /** Cartouche des copies pour un professeur connecté : son nom et l'école choisie (aucune école :
  * rien à la place de l'école ni de l'adresse — jamais l'école historique d'un autre professeur). */
-export function cartoucheDepuisCompte(profil: Pick<Profil, 'nom_affiche'>, ecole: Pick<Ecole, 'nom' | 'adresse'> | null): CartoucheEcole {
-  return { ecoleNom: ecole?.nom.trim() ?? '', ecoleAdresse: ecole?.adresse.trim() ?? '', professeur: profil.nom_affiche.trim() }
+export function cartoucheDepuisCompte(profil: Pick<Profil, 'nom_affiche'>, ecole: (Pick<Ecole, 'nom' | 'adresse'> & { logo?: string | null }) | null): CartoucheEcole {
+  const base: CartoucheEcole = { ecoleNom: ecole?.nom.trim() ?? '', ecoleAdresse: ecole?.adresse.trim() ?? '', professeur: profil.nom_affiche.trim() }
+  // Logo facultatif (0012) : seulement s'il est valide — sinon le cartouche reste exactement celui d'avant.
+  return ecole?.logo && logoValide(ecole.logo) ? { ...base, logo: ecole.logo } : base
 }
 
 /** Adresse de retour sûre (chemin du site seulement, jamais une URL externe). */

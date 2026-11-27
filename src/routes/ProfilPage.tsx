@@ -4,6 +4,8 @@ import '../components/carnet/carnet.css'
 import { MenuActions } from '../components/carnet/MenuActions'
 import { ApercuCartouche, type SurlignageCartouche } from '../components/compte/ApercuCartouche'
 import { BandeauEspace } from '../components/compte/BandeauEspace'
+import { ReafficherPremiersPas } from '../components/compte/CartePremiersPas'
+import { LogoEcoleReglage } from '../components/compte/LogoEcoleReglage'
 import { Champ } from '../components/compte/Champ'
 import { MenuEspace } from '../components/compte/MenuEspace'
 import { OrdreChapitresCarte } from '../components/compte/OrdreChapitresCarte'
@@ -13,6 +15,7 @@ import { estConnecteActif, useCompte } from '../lib/compteContexte'
 import { ajouterEcole, definirEcoleParDefaut, majNomAffiche, modifierEcole, supprimerEcole, supprimerMonCompte } from '../lib/compteDonnees'
 import { cartoucheDepuisCompte, ecoleParDefaut, erreurEcole, erreurNomAffiche, messageErreur, type Ecole } from '../lib/compteValidation'
 import type { CaseHoraire, GrilleHoraire } from '../lib/horaire'
+import { useLogosEcoles } from '../lib/logoEcole'
 
 /** `/profil` — refonte du 21/11/2026 (maquettes « A, style du carnet » ordinateur et téléphone) :
  * menu « Mon espace » (`MenuEspace`), bandeau sombre (initiale, écoles), cartes « Sur les copies »
@@ -89,6 +92,9 @@ function Profil() {
     }
   }, [client])
 
+  // Logo facultatif de chaque école (0012) : lu à part (aperçu et réglage de l'en-tête des copies).
+  const etatLogos = useLogosEcoles(client, compte.profil?.id ?? null)
+
   if (!estConnecteActif(compte)) return null
   const { profil } = compte
   const ecoles = compte.ecoles
@@ -151,7 +157,8 @@ function Profil() {
   const editionDefaut = defaut !== null && edition === defaut.id && valeursEdition !== null
   const ajoutPremiere = defaut === null && ajoutOuvert && (nouvelle.nom.trim() !== '' || nouvelle.adresse.trim() !== '')
   const ecoleApercu = editionDefaut ? valeursEdition : ajoutPremiere ? nouvelle : defaut
-  const apercu = cartoucheDepuisCompte({ nom_affiche: nom }, ecoleApercu)
+  const logoApercu = defaut && !ajoutPremiere && etatLogos.etat === 'actif' ? (etatLogos.logos[defaut.id] ?? null) : null
+  const apercu = cartoucheDepuisCompte({ nom_affiche: nom }, ecoleApercu ? { ...ecoleApercu, logo: logoApercu } : null)
   const enregistre = cartoucheDepuisCompte(profil, defaut)
   const ecoleSuivie = editionDefaut || ajoutPremiere
   const surligne: SurlignageCartouche = {
@@ -412,6 +419,8 @@ function Profil() {
                 </div>
               </section>
 
+              <ReafficherPremiersPas uid={profil.id} />
+
               <section className="profil-carte ep-ancre" id="compte" aria-labelledby={`${id}-compte`}>
                 <div className="profil-carte-tete">
                   <h2 id={`${id}-compte`}>Mon compte</h2>
@@ -456,7 +465,9 @@ function Profil() {
               </section>
             </div>
 
-            <ApercuCartouche cartouche={apercu} surligne={surligne} ecoleParDefaut={ecoleApercu ? ecoleApercu.nom.trim() || null : null} idTitre={`${id}-apercu`} />
+            <ApercuCartouche cartouche={apercu} surligne={surligne} ecoleParDefaut={ecoleApercu ? ecoleApercu.nom.trim() || null : null} idTitre={`${id}-apercu`}>
+              <LogoEcoleReglage client={compte.client} proprietaire={profil.id} ecoles={ecoles} etat={etatLogos} />
+            </ApercuCartouche>
           </div>
         </div>
       </MenuEspace>

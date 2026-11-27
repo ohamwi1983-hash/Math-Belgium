@@ -423,6 +423,11 @@ blanches multiples, traceur de fonctions ; dossier de travail `projection-annote
   téléchargement réussi, on quitte ; « elles restent gardées dans ce navigateur »). Lanceur : « Télécharger
   en PowerPoint » / « en PDF » + case « Avec mes annotations » (cochée d'office, seulement s'il y en a) —
   l'export « sans annotations » d'avant reste (case décochée ou rien de gardé).
+  **Matière vue proposée** (chantier M, 27/11/2026) : pendant une heure de cours de l'horaire d'une classe de l'année du
+  chapitre, Quitter ouvre une boîte « Noter la matière vue de la 5e A ? » (étapes montrées, générateurs ouverts par « Ouvrir
+  le générateur » — `data-generateur` —, « vue en partie ») qui reprend aussi le téléchargement des annotations ; sinon la
+  boîte ci-dessus, inchangée. Vue du professeur seulement. Détail : `.claude/rules/comptes.md`, « Matière vue proposée en
+  fin de projection ».
 - **Export annoté** (`telechargerProjection(chapter, choix, { format, annotations, diapos, progression })`,
   `telechargerPptx` gardé) : mêmes diapos (depuis la projection : les diapos déjà découpées), et juste
   après chaque diapo ses pages blanches ÉCRITES (une page vierge — écran blanc ouvert pour masquer — n'est

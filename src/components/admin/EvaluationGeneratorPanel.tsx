@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import type { CartoucheEcole } from '../../entrainement/export/cartouche'
 import { estConnecteActif, useCompte } from '../../lib/compteContexte'
 import { chapitresDansMonOrdre, numeroRepere, surtitreChapitre, useOrdreChapitres } from '../../lib/ordreChapitres'
+import { ecolesAvecLogo, useLogosEcoles } from '../../lib/logoEcole'
 import { enregistrerPlanCoffre, importerPlansLocaux, lirePlanCoffre, listerPlans, supprimerPlanCoffre, type PlanCoffre } from '../../lib/compteDonnees'
 import { cartoucheDepuisCompte, ecoleParDefaut, messageErreur, plansLocauxAImporter } from '../../lib/compteValidation'
 import { LEVELS } from '../../content/chaptersIndex'
@@ -359,7 +360,10 @@ export function EvaluationGeneratorPanel({
   const compte = useCompte()
   const connecte = estConnecteActif(compte)
   const [ecoleId, setEcoleId] = useState<string | null>(null)
-  const ecoleChoisie = connecte ? (compte.ecoles.find((e) => e.id === ecoleId) ?? ecoleParDefaut(compte.ecoles)) : null
+  // Logo facultatif de chaque école (0012) : lu à part, ajouté au cartouche des documents s'il existe.
+  const etatLogos = useLogosEcoles(connecte ? compte.client : null, connecte ? compte.profil.id : null)
+  const ecolesCartouche = connecte ? ecolesAvecLogo(compte.ecoles, etatLogos) : []
+  const ecoleChoisie = connecte ? (ecolesCartouche.find((e) => e.id === ecoleId) ?? ecoleParDefaut(ecolesCartouche)) : null
   const cartouche: CartoucheEcole | undefined = connecte ? cartoucheDepuisCompte(compte.profil, ecoleChoisie) : undefined
   const [coffre, setCoffre] = useState<PlanCoffre[] | null>(null)
   const [params, setParams] = useSearchParams()
@@ -1010,7 +1014,7 @@ export function EvaluationGeneratorPanel({
     let cartoucheCharge: CartoucheEcole | undefined
     if (connecte) {
       const c = plan.entete.cartouche
-      const ecole = c ? compte.ecoles.find((e) => e.nom.trim() === c.ecoleNom && e.adresse.trim() === c.ecoleAdresse) : undefined
+      const ecole = c ? ecolesCartouche.find((e) => e.nom.trim() === c.ecoleNom && e.adresse.trim() === c.ecoleAdresse) : undefined
       if (ecole) setEcoleId(ecole.id)
       cartoucheCharge = cartoucheDepuisCompte(compte.profil, ecole ?? ecoleChoisie)
     }
@@ -1210,7 +1214,7 @@ export function EvaluationGeneratorPanel({
 
   function choisirEcole(id: string) {
     setEcoleId(id)
-    const ecole = compte.ecoles.find((e) => e.id === id) ?? null
+    const ecole = ecolesCartouche.find((e) => e.id === id) ?? null
     // Documents déjà générés : re-rendus avec la nouvelle école (mêmes exercices, mêmes graines).
     if (planCourant && connecte) void rendrePlan(planCourant, false, cartoucheDepuisCompte(compte.profil, ecole))
   }
