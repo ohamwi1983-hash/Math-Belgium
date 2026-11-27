@@ -1677,3 +1677,81 @@ chapitre choisi), Mes documents (partagé par moi, projection annotée), Réglag
 sous-entrée active), 15 anciennes adresses (même menu, bonne porte, `/espace/reglages` → `/profil`, `/evaluation#remediation`
 ouvert), menu du compte (prof / admin), connexion → `/espace`, `?retour=/coffre` prioritaire, professeur neuf, cibles ≥ 44 px,
 `scrollWidth` = largeur, 0 erreur console. Captures dans `espace-prof/captures/`.
+
+## Matière vue proposée en fin de projection (chantier M, 27/11/2026 : maquette « fin-projection » validée, AUCUNE migration)
+
+Décision du professeur : pendant une projection lancée par un professeur connecté, ce qui est MONTRÉ est repéré et, en
+quittant, SI la projection a eu lieu pendant une heure de cours de l'horaire d'une classe de l'année du chapitre, le site
+propose « Noter la matière vue de la 5e A ? » — étapes projetées et générateurs ouverts pré-cochés, « vue en partie »,
+devoir facultatif ; rien n'est écrit sans le clic « Enregistrer dans Mes classes ». Hors des heures de cours (préparation
+chez soi), week-end, congé, heure supprimée par l'agenda : rien (la sortie est celle d'avant). AUCUNE donnée d'élève.
+
+**Suivi** (`components/projection/MatiereFinProjection.tsx::useMatiereProjection`, seule la fenêtre qui pilote : un écran ou
+la vue du professeur ; jamais l'écran de la classe) — `lib/projection/suiviProjection.ts`, rien ne quitte le navigateur :
+- diapos atteintes (`etat.index`, clés stables de `diapos.ts`) et générateurs ouverts par le bouton « Ouvrir le générateur »
+  des cartes S'entraîner (`a[data-generateur]` de `Diapo.tsx`, `click` / `auxclick` en capture ; le QR code scanné ne laisse
+  aucune trace : pas compté). Deux écrans : la fenêtre des diapos signale le clic à la vue du professeur par
+  `BroadcastChannel` `math-belgium-projection-suivi:<niveau>/<slug>` ;
+- `sessionStorage` `projection-suivi:<niveau>/<slug>` = `{ id, debut, vues, generateurs, enregistre }` (par onglet : survit
+  au rechargement de la page, oublié en quittant la projection — `terminer` —, une nouvelle projection repart de zéro) ;
+- le carnet (classes, horaire 0003, agenda 0006 facultatif, séances avec 0007 / 0008 si présents) est lu en arrière-plan
+  1,2 s après l'ouverture (`lib/projection/matiereDonnees.ts::chargerDonneesMatiere`, mêmes fonctions que `CarnetPage`) ;
+  une panne ou un carnet absent : simplement rien à proposer.
+
+**Logique PURE** (`lib/projection/matiereProjetee.ts`, 74 vérifications esbuild + node, `suite-M/purs.test.ts`) :
+- `etapesMontrees(chapitre, diapos, vues)` : une étape figure dès qu'une de ses diapos a été atteinte (ordre du chapitre) ;
+  `vues` / `total` = diapos de l'étape DANS cette projection (« 14 diapos sur 14 montrées » / « 6 diapos sur 15 : vue en
+  partie ») ; sous-parties touchées : une diapo de bloc (`<id>:<rang>`, `~<page>` d'un exemple découpé) appartient au
+  dernier intertitre `subheading` de premier niveau qui la précède — même découpage que `carnet.ts::structureChapitre` ;
+  titre, L'essentiel et cartes Teste-toi ne sont rattachés à aucune sous-partie.
+- `unitesProposees` : étape montrée en entier (ou sans sous-partie) → l'étape entière ; en partie → les sous-parties
+  touchées, à défaut la première (l'étape a été COMMENCÉE). Les sous-parties ne sont affichées (cochables) que pour une
+  étape vue en partie ; la case de l'étape est indéterminée tant que toutes ne sont pas cochées.
+- `creneauDeLaProjection` : créneau (heure double comprise) d'AUJOURD'HUI d'une classe dont `niveau` = l'année du chapitre
+  (une classe sans niveau ne compte pas), commencé au plus tard à la fin de la projection et fini au plus tôt 10 min
+  (`TOLERANCE_FIN_MINUTES` : on quitte à la sonnerie) avant son début ; plusieurs → le plus long recouvrement. Heures
+  supprimées par l'agenda exclues (`predicatSuppression`), congés FWB et week-ends exclus (`creneauxDuJour`). Projection
+  commencée la veille : début = minuit.
+- `seanceACompleter` / `saisieMatiere` : la séance déjà notée pour ce créneau (`seanceDuCreneau` : même classe, même date,
+  heures qui se recouvrent ; sans créneau : la séance du jour) sur le MÊME chapitre est COMPLÉTÉE — parties réunies
+  (`unitesCouvertes` + `normaliserParties`, rien n'est retiré, ids inconnus gardés), générateurs ajoutés à la suite,
+  consigne ajoutée sur une nouvelle ligne (`devoirComplete`, rien si déjà présente), « Pour le » posé seulement s'il
+  manquait, tout le reste gardé (devoir joint, évaluation et son interro, objectif, compétences, remarque) ; idempotent
+  (enregistrer deux fois ne double rien). Une séance d'un AUTRE chapitre sur ce créneau : la nouvelle est ajoutée à côté
+  (dit dans la boîte). Nouvelle séance : horaire du créneau (`numero_heure`, `numero_heure_fin` d'une heure double,
+  `heure_debut` / `heure_fin`), colonnes 0007 neutres ; sans 0007, aucune colonne 0007 écrite.
+- `lirePropositions` (lecture tolérante, 14 jours au plus) / `avecProposition` (même id remplacé, 10 au plus).
+
+**Boîte de fin de projection** (`DialogueFinProjection`, `ProjectionPage.tsx` : `quitter` calcule la proposition) : la boîte
+« Télécharger tes annotations ? » d'avant GAGNE la proposition — une seule boîte : surtitre « Fin de la projection », titre
+« Noter la matière vue de la 6e B ? », « Vendredi 27/11, 3e heure (10h45) — d'après ton horaire. » + « Changer de classe
+ou de date » (classe — celles de l'année d'abord —, date `type="date"`, heure = créneaux de la classe ce jour-là ou « Sans
+heure précise » ; « — choisi par toi. »), « Étapes projetées », « Exercices ouverts pendant le cours » (« 6gen58 — titre de
+la carte »), « Devoir pour la prochaine fois » (case + consigne libre, jamais filtrée ; « pour le lun. 30/11 (prochain
+cours) » = `prochainsCours` avec 0007, sinon sans date), « ✓ Enregistrer dans Mes classes » (principal, focus d'office),
+avec des annotations « Télécharger le PowerPoint annoté » + « PDF annoté » dans la même rangée (le téléchargement ne quitte
+plus : la proposition reste à traiter) et « n diapos annotées : elles restent gardées dans ce navigateur », « Plus tard »,
+« Rester dans la projection » (Échap, sans ouvrir la vue d'ensemble). Après l'enregistrement : « Matière vue enregistrée »,
+« ✓ Matière vue enregistrée : 6e B, vendredi 27/11 (3e heure). » + « Quitter la projection » (focus), téléchargements,
+« Rester » ; la même séance de projection ne propose plus rien. Séances relues juste avant d'écrire (jamais de doublon).
+Sans proposition : l'ancienne boîte, inchangée. Boîte toujours claire (`.theme-clair`), voile fixe, défile si l'écran est
+bas (téléphone : tient à l'écran). Styles : `components/carnet/matiere-projetee.css` (préfixe `mv-`).
+
+**« Plus tard »** et page quittée sans répondre (onglet fermé, rechargement, retour arrière : `pagehide` / démontage) : la
+proposition est gardée dans `localStorage` `espace:matiere-a-noter` (même id : remplacée, jamais doublée). Carte « Matière
+vue à noter » (`components/carnet/MatiereProjetee.tsx::MatiereANoter`) en tête de « Aujourd'hui » de Mes classes
+(`/carnet/aujourdhui`) et du tableau de bord (`/espace`, au-dessus d'Aujourd'hui / À venir) : « 6e B · vendredi 27/11,
+3e heure — Projeté : Coniques, étape 1 », « Noter » (même formulaire `FormulaireMatiere` dans `PanneauLateral`, carnet relu à
+l'ouverture ; enregistré → message, la page se recharge) et « Oublier » (retirée de ce navigateur ; rien n'était écrit).
+Classe supprimée depuis ou chapitre inconnu : ignorée. Rien s'il n'y a rien.
+
+**Vérifications** (dossier de travail `suite-M/` : `purs.test.ts` + `bundle.mjs` — esbuild avec résolution sensible à la
+casse, le disque de la machine ne l'est pas —, `verif.mjs`, `faux-supabase.js` et `donnees.mjs` du chantier « Espace
+professeur ») : build `NODE_ENV=development vite build --mode test`, heure figée (`page.clock`), 1 280 px et iPhone 13, clair
+et sombre — voir le rapport du chantier : proposition pendant la 3e heure de la 6e B (étapes, « vue en partie »,
+sous-parties, générateur, prochain cours), Échap, enregistrement (séance H3, parties, générateur, devoir, « Pour le »),
+relance = séance complétée sans doublon, séance existante de la 5e A complétée, « Plus tard » → cartes d'Aujourd'hui et du
+tableau de bord → panneau → « Changer de classe ou de date » → enregistré → retirée, « Oublier », hors heures / autre année
+/ samedi : rien, annotations + proposition dans une seule boîte, le soir l'ancienne boîte, deux écrans (clic dans la
+fenêtre des diapos compté, proposition dans la vue du professeur seulement), rechargement et retour arrière, cibles ≥ 44 px,
+`scrollWidth` = largeur, 0 erreur console. `npm run build` : 26 pages pré-rendues identiques (hashes neutralisés).
