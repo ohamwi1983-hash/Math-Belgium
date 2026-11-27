@@ -4,7 +4,8 @@ paths:
   - "src/lib/compte*"
   - "src/lib/coffre*"
   - "src/components/compte/**"
-  - "src/routes/{Connexion,Inscription,Profil,Coffre,Admin,MotDePasse,Evaluation,Carnet,Exercice,ChapterExercice,Partage}*"
+  - "src/routes/{Connexion,Inscription,Profil,Coffre,Admin,MotDePasse,Evaluation,Carnet,Exercice,ChapterExercice,Partage,Espace,Preparer}*"
+  - "src/lib/espaceProfesseur.ts"
   - "src/lib/partage*"
   - "src/lib/carnet*"
   - "src/lib/horaire.ts"
@@ -497,7 +498,7 @@ Décision de l'utilisateur (maquettes A + B + C) : la longue page unique est rem
 vues ; RIEN n'a disparu (classes, écoles, horaire et grille avec H0, réglages, agenda, évaluation,
 progression, fiches, séances à rattraper, messages, cas sans école / sans classe / horaire vide).
 - Routes (`App.tsx` : `/carnet/*`, garde `PageReservee` inchangée, `PageCompte large`, jamais pré-rendues) :
-  `/carnet` Aujourd'hui · `/carnet/semaine` · `/carnet/classe/:id` (mémorisée comme classe active) ·
+  `/carnet` Aujourd'hui (depuis le 27/11/2026 : `/carnet/aujourdhui` ; `/carnet` = vue d'ensemble de « Mes classes », voir « Espace professeur » en fin de fichier) · `/carnet/semaine` · `/carnet/classe/:id` (mémorisée comme classe active) ·
   `/carnet/classes` (`GestionClasses`, « Ajouter une classe ») · `/carnet/agenda` (`?classe=` présélectionne)
   · `/carnet/horaire` (`MonHoraire`) · `/carnet/reglages` ; adresse inconnue → `/carnet`.
 - Menu : `MenuCarnet` a disparu le 22/11/2026, repris dans `MenuEspace` (voir « Harmonisation « Mon
@@ -1146,6 +1147,11 @@ professeurs, désactiver / réactiver — jamais soi-même —, liens `/evaluati
 
 ## Harmonisation « Mon espace » (22/11/2026 : bandeau sombre + menu unique, AUCUN SQL)
 
+> **Remplacée le 27/11/2026** par « Espace professeur : tableau de bord et quatre portes » (fin de fichier) : le menu
+> « Mon espace » ci-dessous (carnet dépliable, barre Carnet · Feuilles · Coffre · Profil · Plus) et le bandeau SOMBRE dans
+> l'espace n'existent plus. Ce qui suit reste l'historique (bandeau commun, pastilles du carnet, menu compact des pages
+> de conception, barre « Ma feuille · Générer » au-dessus de la barre du bas — toujours vrais).
+
 Décision de l'utilisateur : le carnet et les pages de conception (professeur connecté) prennent le bandeau
 sombre et le menu `MenuEspace` du profil, du coffre et de l'administration ; contenu et fonctionnement
 des pages inchangés.
@@ -1273,6 +1279,10 @@ rechargement (valeur relue), message « Répartition refusée » impossible depu
 produisent que des valeurs valides).
 
 ## Bannière, menu « Mon compte » et pages d'accès (22/11/2026 : maquettes « A », AUCUN SQL)
+
+> **27/11/2026** : le menu de la pastille ne garde plus que l'essentiel (nom et e-mail, « Espace professeur », « Retour au
+> site élève », Administration pour l'admin, « Se déconnecter ») — voir « Espace professeur : tableau de bord et quatre
+> portes ». Les groupes Préparer · Mes outils · Mon compte décrits ci-dessous ont disparu.
 
 Décision de l'utilisateur (« J'accepte tes recommandations ») : bannière A (claire), menu A (liste groupée),
 pages de compte telles que dessinées ; bannière B (sombre) et menu en tuiles NON retenus. Champs, libellés,
@@ -1556,3 +1566,114 @@ console) ; `generateurs.mjs` (25 : pages de générateurs imprimées, visiteur e
 **Mise en service** : SQL Editor → New query → coller TOUT `0011_ordre_chapitres.sql` → Run → « Success. No rows returned » ;
 recharger `/profil` → « Mon ordre des chapitres » → ranger → Enregistrer. À vérifier contre le vrai projet : enregistrement
 (ligne `carnet_reglages` créée si absente), rechargement, documents et page de classe avec le numéro du professeur.
+
+## Espace professeur : tableau de bord et quatre portes (27/11/2026 : maquettes « dashboard », « classes », « préparer », « téléphone » validées, AUCUNE migration)
+
+Demande du professeur : l'espace professeur était « trop alambiqué » (deux menus rangés différemment, fonctions là où on ne
+les attend pas, pas de point de départ, noms obscurs). Décision : « je valide tout ça » + « des noms plus clairs reflétant
+les réelles fonctionnalités ». Les FONCTIONS ne changent pas (carnet, coffre, profil, panneau, partage, page de classe,
+projection) ; les données Supabase et les migrations non plus ; le côté élève, la recherche et les pages pré-rendues non plus.
+
+**Noms** (menu, titres, `document.title`, boutons, aides ; côté ÉLÈVE inchangé ; documents IMPRIMÉS inchangés — la fiche A4
+et l'agenda gardent « Carnet de matière vue » en surtitre, non-régression octet pour octet des chantiers précédents) :
+
+| Avant | Maintenant | Adresse (inchangée) |
+| --- | --- | --- |
+| (rien) | **Tableau de bord** | `/espace` (nouvelle) |
+| Carnet de matière vue | **Mes classes** (h1 « Ton journal de classe ») | `/carnet` = vue d'ensemble ; l'ancien « Aujourd'hui » → `/carnet/aujourdhui` |
+| Page de classe (des élèves) | **Page des élèves** | `/carnet/classe/:id/eleves` |
+| (projection depuis un chapitre seulement) | **Préparer un cours** | `/espace/preparer` (nouvelle) |
+| Feuilles d'exercices | **Créer une feuille d'exercices** | `/exercice`, `/…/exercices` |
+| Évaluations et examens | **Créer une évaluation ou un examen** | `/evaluation` |
+| Remédiation | **Feuille de remédiation** | `/evaluation#remediation` (ouvre les enregistrements) |
+| Mon coffre | **Mes documents** (h1 « Ce que tu as enregistré ») | `/coffre`, `/partage/:jeton` |
+| Mon profil + ordre des chapitres + réglages du carnet | **Réglages** | `/profil` (ancres `#profil`, `#ecoles`, `#cartouche`, `#ordre-chapitres`, `#agenda`, `#compte`) ; « Réglages de l'agenda » = `/carnet/reglages` (même page qu'avant, rangée sous Réglages) |
+
+Alias : `/espace/classes` → `/carnet`, `/espace/documents` → `/coffre`, `/espace/reglages` → `/profil` (`Navigate replace`).
+Toutes les anciennes adresses répondent comme avant ; une adresse inconnue sous `/carnet/` → `/carnet`.
+
+**Menu UNIQUE** `components/compte/MenuEspace.tsx` (même API : `children`, `carnet`, `compact`) + `espace.css` (importé par
+lui, donc par TOUTES les pages professeur : tableau de bord, Mes classes, Préparer, conception, Mes documents, partage,
+Réglages, administration). `PORTES` (exporté) = Tableau de bord + quatre portes, chacune avec `sous` (sous-entrées),
+`phrase` (sous le titre), `court` (téléphone), `liens` (cartes du tableau de bord) ; `porteDe(chemin)` dit la porte active
+(`/carnet/reglages` et `/profil` → Réglages ; `/exercice`, `/evaluation`, `/…/exercices`, `/espace/preparer` → Préparer ;
+`/coffre`, `/partage/…` → Mes documents). Ordinateur (≥ 760 px) : colonne de gauche (carte blanche collante) « ESPACE
+PROFESSEUR », portes à pastille d'icône colorée (classes `--good`, préparer `--sky`, documents `--plan`), sous-entrées de la
+porte ACTIVE dépliées (sous-entrée active : `aria-current="page"`, filet orange ; une sous-entrée à ancre — `/profil#compte` —
+n'est active qu'avec son ancre), puis Administration (admin), Retour au site élève, Se déconnecter. `compact` (pages de
+conception) : colonne d'icônes de 760 à 1 359 px, libellés lus et en infobulle. Téléphone (< 760 px) : barre fixe Accueil ·
+Classes · Préparer · Documents · Réglages (`--ep-barre` = 62 px : le tiroir du coffre et la barre « Ma feuille · Générer » se
+posent au-dessus) et les sous-entrées de la porte active en onglets défilants (`.ep-onglets`, 44 px) en tête du contenu ;
+Administration et déconnexion : pastille du compte. Pastille « n à noter » sur Mes classes dans le carnet (prop `carnet`).
+Changement d'adresse : défilement vers l'ancre (huit essais espacés, le contenu arrive après) sinon en haut.
+
+**En-têtes clairs** : dans `.ep-cadre`, `BandeauEspace` (`profil-bandeau…`) devient l'en-tête de la maquette — surtitre =
+la porte (mono, majuscules, gris), grand titre Fraunces, phrase (`ep-phrase`), pastilles claires, action à droite (`fin`) ;
+l'initiale / l'icône ronde est masquée. Les pages d'accès (connexion…) et l'administration (`admin-bandeau`) gardent leur
+bandeau sombre. Surtitres : la date (tableau de bord), « Mes classes » / « Réglages » (`/carnet/reglages`), « Préparer un
+cours » (pages de conception, `EspaceConception`), « Mes documents », « Mes documents · document partagé ».
+
+**Tableau de bord** `routes/EspacePage.tsx` (réservé, `PageReservee`, ni pré-rendu ni indexé) = page d'arrivée après la
+connexion (`compteValidation.ts::retourSur`, défaut `/espace` ; un `?retour=` explicite reste prioritaire ; inscription avec
+session ouverte → `/espace` ; le lien de confirmation par e-mail mène toujours à `/profil`, où l'on ajoute son école).
+Données : `lib/espaceProfesseur.ts::chargerDonneesEspace` = mêmes lectures que le carnet (classes, horaire, agenda — panne
+tolérée —, séances ; 0002 absent → `carnetAbsent`).
+- « Aujourd'hui » (`coursDuJour`, sur `journeeCarnet.ts::lignesDuJour` : créneaux + heures supprimées par l'agenda) : heure,
+  classe, chapitre en cours (`resumeClasse` : chapitre de la DERNIÈRE séance, `titreCourtChapitre`) et étape
+  (`etapeEnCours` : dernière étape touchée si pas finie, sinon la suivante), « matière vue notée ✓ », puces « devoir à
+  rendre » / interro (jour même ou dans les 14 jours) ; action : **Projeter** (`lienProjection` →
+  `/{niveau}/{chapitre}?etape=<id>#projeter`) si un chapitre est en cours et le créneau n'est pas « à noter », sinon **Noter
+  la matière vue** (`/carnet/aujourdhui?noter=<classe>` : `CarnetPage` ouvre « Noter la séance » sur le premier créneau
+  d'aujourd'hui non noté de la classe, paramètre retiré de l'adresse) ; heure supprimée : « Pas cours — motif ». Téléphone :
+  texte court (« Suites, étape 7 ») et boutons icônes 48 px (`aria-label` complet). « Ma semaine › », « Voir la journée en
+  détail › » (`/carnet/aujourdhui`). Sans classe : « Pas encore de classe… » + Mes classes ; sans horaire : « … remplis-le »
+  + Mon horaire ; week-end / congé / été : une phrase.
+- « À venir » (`aVenir`, 21 jours, 6 au plus) : interrogations (« Évaluation 6e B — Coniques », puce rose), autres
+  événements (« Journée pédagogique — toutes les classes »), devoirs à rendre (« Devoir 5e A — Nombres réels »), remises du
+  bulletin (« Bulletin — remise des points P2 ») ; chaque ligne mène à la classe / la semaine / les réglages ; « Agenda
+  complet › » (`/carnet/agenda`).
+- Les quatre portes en cartes (titre lien, phrase, liens directs ; téléphone : carte cliquable avec le résumé `court`).
+- Emplacement `CartePremiersPas` (rend `null`) : future carte « Premiers pas », EN SUSPENS (ne pas la faire sans décision).
+
+**Mes classes** (`/carnet`, `components/carnet/VueEnsembleClasses.tsx`) : une carte par classe — nom (lien vers la classe),
+niveau, « En cours : <chapitre>, étape n », barre `role="progressbar"` des étapes touchées / étapes du chapitre, « n étapes
+sur m vues · prochain cours … » (`reperesClasse` : plus tard aujourd'hui, sinon `prochainsCours`), prochaine évaluation (rouge),
+séances à noter (`creneauxOublies`, 14 derniers jours de classe) ; boutons Matière vue (`/carnet/classe/:id`), Devoirs et
+évaluations (`#evaluation` de la page de classe), Page des élèves. En-tête « Ton journal de classe » + « + Ajouter une classe ».
+L'ancien « Aujourd'hui » vit sur `/carnet/aujourdhui` (lien depuis Ma semaine — « Aujourd'hui en détail » — et le tableau de
+bord ; la sous-entrée « Ma semaine » est active dessus). Plus de liste des classes dans le menu : la vue d'ensemble la remplace.
+
+**Préparer un cours** (`routes/PreparerPage.tsx`, `/espace/preparer`) : quatre cartes (`#projeter`, `#feuille`, `#evaluation`,
+`#remediation`), une phrase chacune. Projeter : année (`LEVELS`, celle de l'accueil par défaut) + chapitre dans l'ordre du
+professeur (`chapitresDansMonOrdre`, numéros `numeroRepere`) → « Choisir les étapes » = `/{niveau}/{chapitre}#projeter` ; le
+bouton Projeter des pages de chapitre reste. Feuille : `/exercice`. Évaluation : `/evaluation` + « Reprendre un document
+enregistré » (`/coffre`). Remédiation : elle part d'une évaluation enregistrée (elle n'existe que dans le panneau) — la carte
+le dit et « Commencer » ouvre `/evaluation#remediation` : `EvaluationGeneratorPanel` ouvre d'office les « Enregistrements,
+import et historique » (`<details id="remediation">`), où chaque évaluation a son bouton « Feuille de remédiation ».
+Lanceur de projection : `?etape=<id>` coche cette étape (les autres réglages mémorisés gardés ; `LanceurProjection.tsx`).
+
+**Mes documents** (`/coffre`) : liste et fiche inchangées, plus « Partagés » (`#partages` : « Par moi » = liens ACTIFS de
+`partages_plans`, titre → fiche, « ajouté par n collègue · expire le … » ; « Avec moi » = une phrase : la copie ajoutée par
+le lien d'un collègue arrive dans la liste, elle n'est pas marquée à part — 0009 ne garde aucune trace côté destinataire) et
+« Projections annotées » (`components/compte/ProjectionsAnnotees.tsx`, `#projections` : chapitres dont le navigateur garde des
+annotations — `lireAnnotations` de chaque chapitre, IndexedDB puis `localStorage` —, « n diapos annotées · n pages blanches »,
+« Ouvrir la projection » → `#projeter`, d'où l'on télécharge le PowerPoint / PDF annoté).
+
+**Réglages** (`/profil` réorganisé, titre « Réglages ») : Mon profil (nom sur les copies, `#profil`), Mes écoles (`#ecoles`),
+En-tête des copies (l'aperçu du cartouche, `#cartouche`), Mon ordre des chapitres (même composant, `#ordre-chapitres`),
+Réglages de l'agenda (`#agenda` : phrase + liens vers `/carnet/reglages` et Mon horaire ; la page du carnet n'est pas
+déplacée — elle a besoin de tout le contexte du carnet —, elle est rangée sous la porte Réglages), Mon compte (`#compte`).
+
+**Menu du compte** (`MenuCompte`, pastille de l'en-tête) : nom et e-mail, « Espace professeur » (`/espace`, « Tu es ici » sur
+toute page professeur), « Retour au site élève », Administration (admin), « Se déconnecter ».
+
+**Vérifications** (dossier de travail `espace-prof/` : `faux-supabase.js` étendu — `signInWithPassword`, session gardée au
+rechargement —, `donnees.mjs` — professeur à 3 classes, horaire, séances, interro et devoir à venir, journée pédagogique,
+remise P2 ; professeur tout neuf ; admin non connecté —, `verif.mjs`, `sonde.mjs`) : build `NODE_ENV=development vite build
+--mode test` (variables factices dans `.env.test.local`, non suivi), heure figée au vendredi 27/11/2026 10h00, 1 280 px et
+iPhone 13, clair et sombre — 486 vérifications : cours du jour et leurs actions (Projeter à l'étape en cours → lanceur, une
+étape cochée ; Noter → panneau de la bonne classe), À venir, quatre portes, cartes des classes, Préparer (projection d'un
+chapitre choisi), Mes documents (partagé par moi, projection annotée), Réglages (sections, ancre amenée à l'écran,
+sous-entrée active), 15 anciennes adresses (même menu, bonne porte, `/espace/reglages` → `/profil`, `/evaluation#remediation`
+ouvert), menu du compte (prof / admin), connexion → `/espace`, `?retour=/coffre` prioritaire, professeur neuf, cibles ≥ 44 px,
+`scrollWidth` = largeur, 0 erreur console. Captures dans `espace-prof/captures/`.
