@@ -22,7 +22,7 @@ import type { CaseHoraire, GrilleHoraire } from '../lib/horaire'
  * « Ce qui s'imprime » (aperçu du cartouche réel, mis à jour pendant la frappe). */
 export function ProfilPage() {
   return (
-    <PageCompte titre="Mon profil" large sansTete>
+    <PageCompte titre="Réglages" large sansTete>
       <TeteDeRepli />
       <PageReservee>
         <Profil />
@@ -35,7 +35,7 @@ export function ProfilPage() {
  * désactivé…) : le bandeau, qui porte le `<h1>`, n'apparaît qu'avec le profil. */
 function TeteDeRepli() {
   const compte = useCompte()
-  return estConnecteActif(compte) ? null : <EnTeteCompte titre="Mon profil" />
+  return estConnecteActif(compte) ? null : <EnTeteCompte titre="Réglages" />
 }
 
 /** Horaire du carnet par école (lecture seule, `carnetDonnees.ts::chargerHoraire`). */
@@ -169,7 +169,7 @@ function Profil() {
       return (
         <span className="profil-ecole-horaire">
           <span className="profil-pastille attention">Horaire à remplir</span>
-          <Link to={lien} aria-label={`Remplir l'horaire de ${ecole.nom} dans le carnet`}>
+          <Link to={lien} aria-label={`Remplir l'horaire de ${ecole.nom} dans Mes classes`}>
             le remplir
           </Link>
         </span>
@@ -179,8 +179,8 @@ function Profil() {
     return (
       <span className="profil-ecole-horaire">
         {remplie ? <span className="profil-pastille ok">✓ Horaire {heures}</span> : <span className="profil-pastille attention">Grille {heures} · semaine à remplir</span>}
-        <Link to={lien} aria-label={`${remplie ? 'Ouvrir' : 'Remplir'} l'horaire de ${ecole.nom} dans le carnet`}>
-          {remplie ? 'ouvrir dans le carnet' : 'la remplir'}
+        <Link to={lien} aria-label={`${remplie ? 'Ouvrir' : 'Remplir'} l'horaire de ${ecole.nom} dans Mes classes`}>
+          {remplie ? 'ouvrir dans Mes classes' : 'la remplir'}
         </Link>
       </span>
     )
@@ -192,8 +192,10 @@ function Profil() {
         <div className="profil-contenu">
           <BandeauEspace
             titreId={`${id}-titre`}
-            titre="Mon profil"
+            surtitre="Réglages"
+            titre="Réglages"
             icone={initiale(profil.nom_affiche)}
+            apresTitre={<p className="ep-phrase">À régler une fois, en début d'année : ton profil et tes écoles, l'en-tête des copies, l'ordre de tes chapitres, l'agenda et ton compte.</p>}
             etiquettePastilles="Mes écoles"
             pastilles={ecoles.map((e, i) => (
               <li key={e.id} className={`profil-bandeau-ecole ${couleur(i)}`}>
@@ -212,9 +214,9 @@ function Profil() {
 
           <div className="profil-grille">
             <div className="profil-colonne">
-              <section className="profil-carte" aria-labelledby={`${id}-copies`}>
+              <section className="profil-carte ep-ancre" id="profil" aria-labelledby={`${id}-copies`}>
                 <div className="profil-carte-tete">
-                  <h2 id={`${id}-copies`}>Sur les copies</h2>
+                  <h2 id={`${id}-copies`}>Mon profil : nom sur les copies</h2>
                   {nomEnregistre ? <span className="profil-pastille ok">✓ enregistré</span> : <span className="profil-pastille attention">non enregistré</span>}
                 </div>
                 <form className="profil-carte-corps profil-form-nom" onSubmit={enregistrerNom} noValidate>
@@ -248,7 +250,7 @@ function Profil() {
                 </form>
               </section>
 
-              <section className="profil-carte" aria-labelledby={`${id}-ecoles`}>
+              <section className="profil-carte ep-ancre" id="ecoles" aria-labelledby={`${id}-ecoles`}>
                 <div className="profil-carte-tete">
                   <h2 id={`${id}-ecoles`}>Mes écoles</h2>
                   <button type="button" className="carnet-bouton" aria-expanded={ajoutOuvert} aria-controls={`${id}-ajout`} onClick={() => setAjoutOuvert((o) => !o)}>
@@ -309,7 +311,7 @@ function Profil() {
                               {aSupprimer === ecole.id && (
                                 <ConfirmationSuppression
                                   titre={`Supprimer l'école « ${ecole.nom} » ?`}
-                                  texte="Ses classes, ses séances et son horaire dans le carnet seront aussi effacés. Cette action est irréversible."
+                                  texte="Ses classes, ses séances et son horaire dans Mes classes seront aussi effacés. Cette action est irréversible."
                                   confirmer="Supprimer l'école"
                                   occupe={occupe}
                                   onConfirmer={() => {
@@ -390,7 +392,27 @@ function Profil() {
 
               <OrdreChapitresCarte client={compte.client} proprietaire={profil.id} />
 
-              <section className="profil-carte" aria-labelledby={`${id}-compte`}>
+              <section className="profil-carte ep-ancre" id="agenda" aria-labelledby={`${id}-agenda`}>
+                <div className="profil-carte-tete">
+                  <h2 id={`${id}-agenda`}>Réglages de l'agenda</h2>
+                </div>
+                <div className="profil-carte-corps">
+                  <p className="profil-intro">
+                    Périodes du bulletin (dates de remise des points) et seuil d'avertissement, texte copié pour l'agenda scolaire (rubriques, compétences transversales),
+                    écriture de l'horaire des séances.
+                  </p>
+                  <div className="profil-actions">
+                    <Link className="carnet-bouton" to="/carnet/reglages">
+                      Ouvrir les réglages de l'agenda
+                    </Link>
+                    <Link className="carnet-bouton" to="/carnet/horaire">
+                      Mon horaire
+                    </Link>
+                  </div>
+                </div>
+              </section>
+
+              <section className="profil-carte ep-ancre" id="compte" aria-labelledby={`${id}-compte`}>
                 <div className="profil-carte-tete">
                   <h2 id={`${id}-compte`}>Mon compte</h2>
                 </div>
@@ -414,11 +436,11 @@ function Profil() {
                   </div>
                   <details className="profil-zone-danger" onToggle={(e) => !(e.currentTarget as HTMLDetailsElement).open && setConfirmerCompte(false)}>
                     <summary>Supprimer mon compte</summary>
-                    <p>Efface ton profil, tes écoles, ton carnet de matière vue et tous les enregistrements de ton coffre. Les documents déjà téléchargés restent sur ton appareil. Aucune donnée d'élève n'est stockée.</p>
+                    <p>Efface ton profil, tes écoles, tes classes (matière vue, horaire, agenda) et tous tes documents enregistrés. Les documents déjà téléchargés restent sur ton appareil. Aucune donnée d'élève n'est stockée.</p>
                     {confirmerCompte ? (
                       <ConfirmationSuppression
                         titre="Supprimer définitivement ton compte ?"
-                        texte="Tes enregistrements (coffre), ton carnet, tes écoles et ton profil seront effacés. Cette action est irréversible."
+                        texte="Tes documents enregistrés, tes classes, tes écoles et ton profil seront effacés. Cette action est irréversible."
                         confirmer="Oui, supprimer mon compte"
                         occupe={occupe}
                         onConfirmer={() => void supprimerCompte()}

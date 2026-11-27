@@ -63,6 +63,7 @@ export function EspaceConception({
         <div className="espace-conception-contenu">
           <BandeauEspace
             titreId={`${id}-titre`}
+            surtitre="Préparer un cours"
             titre={titre}
             classe="espace-bandeau-conception"
             classeIcone="espace-bandeau-icone"

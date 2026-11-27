@@ -28,9 +28,9 @@ export function ApercuCartouche({ cartouche, surligne, ecoleParDefaut, idTitre }
   const marque = (texte: string, actif: boolean) => (actif ? <mark className="profil-surligne">{texte}</mark> : texte)
 
   return (
-    <aside className="profil-apercu" aria-labelledby={idTitre}>
+    <aside className="profil-apercu" id="cartouche" aria-labelledby={idTitre}>
       <div className="profil-apercu-tete">
-        <h2 id={idTitre}>Ce qui s'imprime</h2>
+        <h2 id={idTitre}>En-tête des copies</h2>
         <span className="profil-apercu-direct" aria-hidden="true">
           EN DIRECT
         </span>

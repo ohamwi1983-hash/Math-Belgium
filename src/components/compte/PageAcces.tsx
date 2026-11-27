@@ -30,7 +30,7 @@ export function PageAcces({ titre, icone, sousTitre, eleve = false, children }: 
             apresTitre={
               <>
                 {sousTitre && <p className="acces-sous-titre">{sousTitre}</p>}
-                <p className="acces-presentation">Prépare tes feuilles, évaluations et examens, range-les dans ton coffre et tiens ton carnet de matière vue.</p>
+                <p className="acces-presentation">Prépare tes feuilles, évaluations et examens, range-les dans tes documents et tiens le journal de tes classes.</p>
               </>
             }
           />

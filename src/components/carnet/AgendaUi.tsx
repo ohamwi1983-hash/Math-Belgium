@@ -125,7 +125,7 @@ export function MessageAgendaInactif({ compact = false }: { compact?: boolean })
       <p>
         <strong>Agenda pas encore activé</strong>
         {compact ? ' : ' : '. '}colle le fichier <code>supabase/migrations/0006_agenda.sql</code> dans l'éditeur SQL de Supabase (SQL Editor → New query → coller → Run), puis
-        recharge cette page. Le reste du carnet fonctionne normalement en attendant.
+        recharge cette page. Le reste de « Mes classes » fonctionne normalement en attendant.
       </p>
     </div>
   )

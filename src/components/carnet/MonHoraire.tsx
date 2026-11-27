@@ -36,7 +36,7 @@ export function MessageHoraireInactif() {
         <strong>Horaire pas encore activé.</strong>
       </p>
       <p>
-        Colle le fichier <code>supabase/migrations/0003_horaire.sql</code> dans l'éditeur SQL de Supabase (SQL Editor → New query → coller → Run), puis recharge cette page. Le carnet
+        Colle le fichier <code>supabase/migrations/0003_horaire.sql</code> dans l'éditeur SQL de Supabase (SQL Editor → New query → coller → Run), puis recharge cette page. « Mes classes »
         fonctionne normalement en attendant, sans horaire.
       </p>
     </div>

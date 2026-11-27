@@ -1,8 +1,8 @@
 /**
  * Espace professeur réorganisé (27/11/2026) : ce que montrent le tableau de bord (`/espace`) et la vue
- * d'ensemble de « Mes classes » (`/carnet`). PUR sauf `chargerDonneesEspace` (lecture Supabase, client
+ * d'ensemble de « Mes classes » (`/carnet`). PUR sauf `chargerDonneesEspace` (lecture Supabase, client
  * injecté) : tout se déduit des données EXISTANTES du carnet (classes, séances, horaire, agenda) —
- * aucune donnée inventée, aucune migration. Les mêmes règles que le carnet : chapitre « en cours » =
+ * aucune donnée inventée, aucune migration. Les mêmes règles que le carnet : chapitre « en cours » =
  * celui de la dernière séance de la classe (`chapitreEnCours`), progression par `progressionClasse`,
  * créneaux du jour et heures supprimées par `lignesDuJour` (horaire 0003 + agenda 0006).
  */
@@ -51,9 +51,9 @@ function triees(seances: Seance[]): Seance[] {
 }
 
 /**
- * Étape « en cours » d'un chapitre pour une classe : la dernière étape touchée si elle n'est pas finie,
- * sinon la suivante (la prochaine à voir) ; rien de vu : `null`. Sert au « En cours : …, étape n » et au
- * bouton Projeter (« à l'étape suivante si connue »).
+ * Étape « en cours » d'un chapitre pour une classe : la dernière étape touchée si elle n'est pas finie,
+ * sinon la suivante (la prochaine à voir) ; rien de vu : `null`. Sert au « En cours : …, étape n » et au
+ * bouton Projeter (« à l'étape suivante si connue »).
  */
 export function etapeEnCours(p: ChapitreProgression): SectionProgression | null {
   let derniere = -1
@@ -102,12 +102,12 @@ export function lienProjection(chapitre: Pick<ChapterContent, 'levelSlug' | 'slu
   return `/${chapitre.levelSlug}/${chapitre.slug}${etapeId ? `?etape=${encodeURIComponent(etapeId)}` : ''}#projeter`
 }
 
-/** « Interro » / « Contrôle-bilan » : intitulé d'une interrogation de l'agenda. */
+/** « Interro » / « Contrôle-bilan » : intitulé d'une interrogation de l'agenda. */
 function nomInterro(e: Evenement): string {
   return e.intitule.trim() || 'Évaluation'
 }
 
-/** Titre court du chapitre d'une interrogation (« niveau/slug »), ou `''`. */
+/** Titre court du chapitre d'une interrogation (« niveau/slug »), ou `''`. */
 export function chapitreDeLInterro(e: Pick<Evenement, 'chapitre'>): string {
   if (!e.chapitre) return ''
   const [niveau, slug] = e.chapitre.split('/')
@@ -155,8 +155,8 @@ export interface CoursDuJour {
 
 /**
  * Les cours du jour (créneaux de l'horaire, heures supprimées par l'agenda comprises), dans l'ordre de
- * l'heure, avec ce qu'il faut pour proposer « Projeter » (chapitre et étape en cours de la classe) ou
- * « Noter la matière vue » (créneau commencé sans séance) — mêmes calculs qu'« Aujourd'hui » du carnet.
+ * l'heure, avec ce qu'il faut pour proposer « Projeter » (chapitre et étape en cours de la classe) ou
+ * « Noter la matière vue » (créneau commencé sans séance) — mêmes calculs qu'« Aujourd'hui » du carnet.
  */
 export function coursDuJour(d: DonneesEspace, aujourdhui: string, minutes: number): { sansHoraire: boolean; etat: EtatJour | null; cours: CoursDuJour[] } {
   if (!d.horaire.actif || !d.horaire.grilles.some((g) => d.horaire.cases.some((c) => c.ecole_id === g.ecole_id))) return { sansHoraire: true, etat: null, cours: [] }
@@ -261,15 +261,15 @@ function jourMois(iso: string): string {
 }
 
 export interface RepereClasse {
-  /** « prochain cours jeudi 4/12 à 08h25 » / « prochain cours aujourd'hui à 13h15 ». */
+  /** « prochain cours jeudi 4/12 à 08h25 » / « prochain cours aujourd'hui à 13h15 ». */
   prochainCours: string | null
-  /** « évaluation mardi 2/12 · Coniques ». */
+  /** « évaluation mardi 2/12 · Coniques ». */
   evaluation: string | null
-  /** « matière vue de jeudi 26/11 à noter » / « 3 séances à noter ». */
+  /** « matière vue de jeudi 26/11 à noter » / « 3 séances à noter ». */
   aNoter: string | null
 }
 
-/** Repères de la carte d'une classe (vue d'ensemble de « Mes classes ») : mêmes calculs que le carnet
+/** Repères de la carte d'une classe (vue d'ensemble de « Mes classes ») : mêmes calculs que le carnet
  * (prochaine interro de l'agenda, prochain cours effectif, séances oubliées des 14 derniers jours de classe). */
 export function reperesClasse(classeId: string, d: Pick<DonneesEspace, 'horaire' | 'agenda' | 'classes' | 'seances'>, aujourdhui: string, minutes: number): RepereClasse {
   const interro = d.agenda.actif ? prochaineInterro(classeId, d.agenda.evenements, aujourdhui) : null

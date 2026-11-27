@@ -1,6 +1,7 @@
 import { PuceARendre } from './DevoirsARendre'
 import { devoirsARendre } from '../../lib/carnetDevoirs'
 import { useId, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { ajouterJours } from '../../lib/calendrierFwb'
 import { dateCourte, dateIso, type Seance } from '../../lib/carnet'
 import { construireAgenda } from '../../lib/carnetAgenda'
@@ -283,6 +284,11 @@ export function MaSemaine({
             <button type="button" className="carnet-bouton" aria-label="Semaine suivante" onClick={() => setLundi(ajouterJours(lundi, 7))}>
               <span aria-hidden="true">›</span>
             </button>
+            {/* « Aujourd'hui » du carnet (heures du jour, à rattraper) : depuis la réorganisation de l'espace
+             * professeur, `/carnet` est la vue d'ensemble des classes ; la journée vit sur `/carnet/aujourdhui`. */}
+            <Link className="carnet-bouton" to="/carnet/aujourdhui">
+              Aujourd'hui en détail
+            </Link>
             <button type="button" className="carnet-bouton" disabled={!pret} onClick={imprimer} title={pret ? undefined : 'Aucune séance notée cette semaine'}>
               Imprimer la semaine
             </button>

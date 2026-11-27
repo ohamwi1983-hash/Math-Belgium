@@ -132,7 +132,7 @@ export function OrdreChapitresCarte({ client, proprietaire }: { client: Supabase
       definirEtatOrdreChapitres({ etat: 'active', ordre: vide ? null : ordre })
       setEnregistre({ brouillon, numeroter })
       setLecture({ etat: 'prete', ligneExiste: true })
-      setMessage('Enregistré. Tes documents, ton carnet et ton coffre suivent maintenant cet ordre.')
+      setMessage('Enregistré. Tes documents imprimés, Mes classes et Mes documents suivent maintenant cet ordre.')
     } catch (e) {
       setErreur(messageErreur(e))
     } finally {
@@ -174,7 +174,7 @@ export function OrdreChapitresCarte({ client, proprietaire }: { client: Supabase
       </div>
       <div className="profil-carte-corps">
         <p className="profil-intro">
-          Range les chapitres dans l'ordre où tu les donnes. Tes feuilles, évaluations, examens, ton carnet, ta page de classe et ton coffre suivent cet ordre et impriment <strong>ton</strong> numéro. Sans réglage, les documents des élèves portent le titre seul — jamais le numéro du site.
+          Range les chapitres dans l'ordre où tu les donnes. Tes feuilles, évaluations, examens, Mes classes, la page des élèves et Mes documents suivent cet ordre et impriment <strong>ton</strong> numéro. Sans réglage, les documents des élèves portent le titre seul — jamais le numéro du site.
         </p>
 
         {lecture.etat === 'chargement' && <p className="compte-vide">Chargement…</p>}
@@ -269,7 +269,7 @@ export function OrdreChapitresCarte({ client, proprietaire }: { client: Supabase
               <input type="checkbox" checked={!numeroter} disabled={desactive} onChange={(e) => (setNumeroter(!e.target.checked), setMessage(null))} />
               <span>
                 Ne pas numéroter mes documents
-                <span className="ordre-case-aide">Titre seul sur les documents des élèves, même avec ton ordre (ton carnet et ton coffre gardent tes numéros).</span>
+                <span className="ordre-case-aide">Titre seul sur les documents des élèves, même avec ton ordre (Mes classes et Mes documents gardent tes numéros).</span>
               </span>
             </label>
 

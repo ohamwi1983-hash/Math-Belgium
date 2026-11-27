@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, Navigate, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { BandeauEspace } from '../components/compte/BandeauEspace'
-import { MenuEspace, PORTES } from '../components/compte/MenuEspace'
+import { MenuEspace } from '../components/compte/MenuEspace'
 import { EnTeteCompte, PageCompte, PageReservee } from '../components/compte/PageReservee'
 import { AgendaPeriode } from '../components/carnet/AgendaPeriode'
 import { Aujourdhui } from '../components/carnet/Aujourdhui'
@@ -354,7 +354,7 @@ function Carnet() {
     const classes = donnees?.classes
     const reperes = texteReperes(dateIso(maintenant))
     const surReglages = chemin === '/carnet/reglages'
-    const phraseClasses = PORTES.find((p) => p.cle === 'classes')?.phrase ?? ''
+    const phraseClasses = 'Ce que tu vois avec chaque classe, quand, et ce qui l’attend.'
     return (
       <div className="carnet">
         <MenuEspace carnet={donnees ? { classes: donnees.classes, nombreSeances: (k) => donnees.seances.filter((s) => s.classe_id === k).length, aNoter } : undefined}>

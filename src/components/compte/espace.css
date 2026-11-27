@@ -52,7 +52,7 @@
   margin-left: auto; padding: 1px 8px; border-radius: 999px; background: var(--accent); color: var(--on-accent);
   font: 700 0.72rem var(--sans); white-space: nowrap;
 }
-.ep-sous { display: flex; flex-direction: column; gap: 1px; margin: 4px 0 8px 52px; }
+.ep-menu .ep-sous { display: flex; flex-direction: column; gap: 1px; margin: 4px 0 8px 52px; }
 .ep-sous-lien {
   display: flex; align-items: center; min-height: 36px; padding: 6px 10px; border-radius: 6px;
   color: var(--ink-soft); font: 500 0.9rem var(--sans); text-decoration: none;
@@ -164,4 +164,19 @@
 .ep-chip.evaluation { background: var(--bad-soft); border-color: transparent; color: var(--bad); }
 .ep-chip.devoir { background: var(--accent-soft); border-color: transparent; color: var(--accent-ink); }
 .ep-vide { margin: 6px 0 0; color: var(--ink-soft); }
+.ep-ancre, .ep-cadre .ordre-carte, .ep-cadre #cartouche { scroll-margin-top: 16px; }
+
+/* Mes documents : partagés, projections annotées. */
+.coffre-partages h3 { margin: 4px 0 6px; font: 600 1rem var(--sans); color: var(--ink); }
+.coffre-partages h3 + * { margin-top: 0; }
+.coffre-partages h3:not(:first-child) { margin-top: 18px; }
+.ep-partages, .ep-projections { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.ep-partages li, .ep-projections li {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 14px; padding: 10px 0; border-top: 1px solid var(--line-soft);
+}
+.ep-partages li:first-child, .ep-projections li:first-child { border-top: 0; }
+.ep-partage-detail, .ep-projection-detail { display: block; width: 100%; color: var(--ink-soft); font-size: 0.88rem; }
+.ep-projection-texte { min-width: 0; flex: 1 1 240px; overflow-wrap: anywhere; }
+.ep-projection-texte .ep-chip { margin-left: 4px; }
+.ep-partages .profil-lien-bouton { min-height: 44px; text-align: left; }
 .ep-lien-fleche { color: var(--accent-ink); font-weight: 600; }

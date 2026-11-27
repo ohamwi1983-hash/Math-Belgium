@@ -44,7 +44,11 @@ function Lanceur({ chapter, aller }: { chapter: ChapterContent; aller: Aller }) 
   const [choix, setChoix] = useState<ChoixProjection>(() => {
     const derniere = lireParcours(chapter).derniere
     const premiere = chapter.sections.find((s) => s.id === derniere) ?? chapter.sections[0]
-    return lireChoix(chapter, { etapes: premiere ? [premiere.id] : [], inclure: INCLUSIONS_DEFAUT, ecran: 'un' })
+    const memorise = lireChoix(chapter, { etapes: premiere ? [premiere.id] : [], inclure: INCLUSIONS_DEFAUT, ecran: 'un' })
+    // `?etape=<id>` (bouton « Projeter » du tableau de bord de l'espace professeur : l'étape en cours de la
+    // classe) : cette étape cochée d'office, les autres réglages mémorisés gardés.
+    const demandee = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('etape')
+    return demandee && chapter.sections.some((s) => s.id === demandee) ? { ...memorise, etapes: [demandee] } : memorise
   })
   const [export_, setExport] = useState<{ etat: 'pret' | 'encours' | 'erreur' | 'fait'; texte?: string }>({ etat: 'pret' })
   // Annotations gardées de la dernière projection de ce chapitre (navigateur seulement).

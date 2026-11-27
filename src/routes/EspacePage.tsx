@@ -17,10 +17,10 @@ import { aVenir, chapitreDeLInterro, chargerDonneesEspace, coursDuJour, lienProj
 import { useOrdreChapitres } from '../lib/ordreChapitres'
 
 /**
- * `/espace` — tableau de bord de l'espace professeur (maquettes « dashboard » et « téléphone » validées le
+ * `/espace` — tableau de bord de l'espace professeur (maquettes « dashboard » et « téléphone » validées le
  * 27/11/2026) : page d'arrivée après la connexion. Réservée (`PageReservee`), jamais pré-rendue ni
- * indexée. « Aujourd'hui » (cours du jour tirés de l'horaire et des séances du carnet : Projeter le
- * chapitre en cours, ou Noter la matière vue), « À venir » (évaluations, devoirs, événements, remises du
+ * indexée. « Aujourd'hui » (cours du jour tirés de l'horaire et des séances du carnet : Projeter le
+ * chapitre en cours, ou Noter la matière vue), « À venir » (évaluations, devoirs, événements, remises du
  * bulletin des trois semaines), puis les quatre portes. Aucune donnée inventée : tout vient du carnet.
  */
 export function EspacePage() {
@@ -39,7 +39,7 @@ function TeteDeRepli() {
   return estConnecteActif(compte) ? null : <EnTeteCompte titre="Tableau de bord" />
 }
 
-/** Emplacement réservé de la future carte « Premiers pas » (EN SUSPENS, décision du 27/11/2026 : ne pas
+/** Emplacement réservé de la future carte « Premiers pas » (EN SUSPENS, décision du 27/11/2026 : ne pas
  * la faire). Rien n'est rendu ; à remplir le jour où elle est décidée (professeur tout neuf : ajouter
  * une école, une classe, l'horaire…). */
 function CartePremiersPas(_: { donnees: DonneesEspace | null }) {
@@ -50,7 +50,7 @@ function TableauDeBord() {
   const compte = useCompte()
   const client = compte.client
   const id = useId()
-  // L'ordre du professeur (« Mon ordre des chapitres ») : re-rendu quand il arrive.
+  // L'ordre du professeur (« Mon ordre des chapitres ») : re-rendu quand il arrive.
   useOrdreChapitres()
   const [donnees, setDonnees] = useState<DonneesEspace | null>(null)
   const [erreur, setErreur] = useState<string | null>(null)
@@ -253,7 +253,7 @@ function LigneCours({ c }: { c: CoursDuJour }) {
                 <>
                   <span className="ep-cours-detail">{` — étape ${etape.numero}`}</span>
                   <span className="ep-cours-court">{`, étape ${etape.numero}`}</span>
-                  <span className="ep-cours-detail"> « {etape.titre} »</span>
+                  <span className="ep-cours-detail"> « {etape.titre} »</span>
                 </>
               )}
             </>

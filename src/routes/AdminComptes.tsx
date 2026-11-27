@@ -193,7 +193,7 @@ export function AdminComptes() {
             <div className="admin-bandeau-texte">
               <p className="admin-bandeau-surtitre">ESPACE ADMINISTRATEUR</p>
               <h1 id={`${id}-titre`}>Administration</h1>
-              <p className="admin-bandeau-sous-titre">Réservé à l’administrateur · tu ne vois ni les coffres, ni les écoles, ni les carnets de tes collègues</p>
+              <p className="admin-bandeau-sous-titre">Réservé à l’administrateur · tu ne vois ni les documents, ni les écoles, ni les classes de tes collègues</p>
               <p className="admin-bandeau-liens">
                 Concevoir : <Link to="/evaluation">évaluations et examens</Link> · <Link to="/exercice">feuilles d’exercices</Link>
               </p>
@@ -690,7 +690,7 @@ function FicheProfesseur({
           {pluriel(Number(p.nombre_plans), 'enregistrement')} · {pluriel(Number(p.nombre_ecoles), 'école')}
         </dd>
       </dl>
-      <p className="admin-meta admin-fiche-note">Tu vois des nombres, jamais le contenu de son coffre, de ses écoles ou de son carnet.</p>
+      <p className="admin-meta admin-fiche-note">Tu vois des nombres, jamais le contenu de ses documents, de ses écoles ou de ses classes.</p>
       <div className="admin-fiche-actions">
         {estMoi ? (
           <p className="admin-meta">C’est ton compte : tu ne peux pas le désactiver toi-même.</p>

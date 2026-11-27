@@ -6,6 +6,7 @@ import { copierTexte } from '../components/carnet/outilsCarnet'
 import { Champ } from '../components/compte/Champ'
 import { BandeauEspace } from '../components/compte/BandeauEspace'
 import { MenuEspace } from '../components/compte/MenuEspace'
+import { ProjectionsAnnotees } from '../components/compte/ProjectionsAnnotees'
 import { EnTeteCompte, PageCompte, PageReservee } from '../components/compte/PageReservee'
 import '../components/compte/profil.css'
 import '../components/compte/coffre.css'
@@ -39,7 +40,7 @@ import { arreterPartage, creerPartage, etatPartage, listerPartages, partageDuPla
 const CLE_ENREGISTREES = 'math-belgium-evaluations-enregistrees'
 /** 0009 pas appliquée : texte du bouton « Partager » (décision du 25/11/2026). */
 const MESSAGE_0009 =
-  'Applique la migration 0009 pour partager : dans Supabase, SQL Editor → New query → colle tout le fichier supabase/migrations/0009_partages_plans.sql → Run. Ton coffre marche comme avant en attendant.'
+  'Applique la migration 0009 pour partager : dans Supabase, SQL Editor → New query → colle tout le fichier supabase/migrations/0009_partages_plans.sql → Run. Tes documents restent utilisables en attendant.'
 const CLE_RANGEMENT = 'math-belgium-coffre-ranger'
 
 type Rangement = 'recents' | 'chapitre'
@@ -90,7 +91,7 @@ function useTelephone(): boolean {
  */
 export function CoffrePage() {
   return (
-    <PageCompte titre="Mon coffre" large sansTete>
+    <PageCompte titre="Mes documents" large sansTete>
       <TeteDeRepli />
       <PageReservee>
         <Coffre />
@@ -102,7 +103,7 @@ export function CoffrePage() {
 /** Titre habituel tant que la page n'est pas prête (le bandeau porte le `<h1>`). */
 function TeteDeRepli() {
   const compte = useCompte()
-  return estConnecteActif(compte) ? null : <EnTeteCompte titre="Mon coffre" />
+  return estConnecteActif(compte) ? null : <EnTeteCompte titre="Mes documents" />
 }
 
 const classeType = (t: TypePlan) => `coffre-t-${t}`
@@ -540,6 +541,7 @@ function Coffre() {
     )
 
   const nombre = plans?.length ?? 0
+  const partagesActifs = etatPartages === 'actif' ? partages.filter((x) => etatPartage(x) === 'actif') : []
 
   return (
     <div className="coffre" ref={racine}>
@@ -547,13 +549,14 @@ function Coffre() {
         <div className={`coffre-contenu${telephone && choisi ? ' avec-tiroir' : ''}`}>
           <BandeauEspace
             titreId={`${id}-titre`}
-            titre="Mon coffre"
+            surtitre="Mes documents"
+            titre="Ce que tu as enregistré"
             classe="coffre-bandeau"
             classeIcone="coffre-icone"
             icone={<IconeCoffre />}
             apresTitre={
               <p className="coffre-bandeau-sous-titre">
-                {plans === null ? 'Tes enregistrements suivent ton compte sur tous tes appareils' : `${nombre === 0 ? 'Aucun enregistrement' : pluriel(nombre, 'enregistrement')} · ${nombre > 1 ? 'suivent' : 'suit'} ton compte sur tous tes appareils`}
+                {plans === null ? 'Pour le réimprimer ou le partager : tes enregistrements suivent ton compte sur tous tes appareils' : `${nombre === 0 ? 'Aucun enregistrement' : pluriel(nombre, 'enregistrement')} · ${nombre > 1 ? 'suivent' : 'suit'} ton compte sur tous tes appareils`}
               </p>
             }
             etiquettePastilles="Enregistrements par type"
@@ -580,15 +583,15 @@ function Coffre() {
                 <strong>
                   {pluriel(aImporter.length, 'enregistrement')} de ce navigateur
                 </strong>{' '}
-                {aImporter.length > 1 ? 'ne sont' : "n'est"} pas encore dans ton coffre.<span className="coffre-large"> {aImporter.length > 1 ? 'Ils restent' : 'Il reste'} aussi dans le navigateur.</span>
+                {aImporter.length > 1 ? 'ne sont' : "n'est"} pas encore dans tes documents.<span className="coffre-large"> {aImporter.length > 1 ? 'Ils restent' : 'Il reste'} aussi dans le navigateur.</span>
               </p>
               <button
                 type="button"
                 className="carnet-bouton"
                 disabled={occupe || plans === null}
-                onClick={() => void agir(() => importerPlansLocaux(client, locaux, plans ?? []), `${aImporter.length} enregistrement${aImporter.length > 1 ? 's importés' : ' importé'} dans ton coffre.`)}
+                onClick={() => void agir(() => importerPlansLocaux(client, locaux, plans ?? []), `${aImporter.length} enregistrement${aImporter.length > 1 ? 's importés' : ' importé'} dans tes documents.`)}
               >
-                <span className="coffre-large">Importer dans mon coffre</span>
+                <span className="coffre-large">Importer dans mes documents</span>
                 <span className="coffre-court">Importer</span>
               </button>
             </section>
@@ -596,7 +599,7 @@ function Coffre() {
 
           {plans === null && !erreurChargement ? (
             <p className="compte-chargement" role="status" aria-live="polite">
-              Chargement du coffre…
+              Chargement de tes documents…
             </p>
           ) : plans === null ? (
             <div className="compte-encadre compte-erreur" role="alert">
@@ -610,17 +613,17 @@ function Coffre() {
           ) : plans.length === 0 ? (
             <section className="profil-carte coffre-vide" aria-labelledby={`${id}-vide`}>
               <div className="profil-carte-corps">
-                <h2 id={`${id}-vide`}>Ton coffre est vide</h2>
+                <h2 id={`${id}-vide`}>Aucun document enregistré pour l’instant</h2>
                 <p>
-                  Génère un document dans le panneau de conception, puis clique sur « Enregistrer dans mon coffre » : il suivra ton compte sur tous tes appareils et se
+                  Génère un document dans le panneau de conception, puis clique sur « Enregistrer dans mes documents » : il suivra ton compte sur tous tes appareils et se
                   rechargera à l'identique (mêmes exercices).
                 </p>
                 <div className="profil-actions">
                   <Link className="carnet-bouton principal" to="/exercice">
-                    Préparer une feuille d'exercices
+                    Créer une feuille d'exercices
                   </Link>
                   <Link className="carnet-bouton" to="/evaluation">
-                    Préparer une évaluation ou un examen
+                    Créer une évaluation ou un examen
                   </Link>
                 </div>
               </div>
@@ -677,7 +680,7 @@ function Coffre() {
                       type="search"
                       className="coffre-recherche"
                       placeholder={telephone ? 'Chercher un titre, un chapitre…' : 'Chercher…'}
-                      aria-label="Chercher dans le coffre (titre, chapitre)"
+                      aria-label="Chercher dans mes documents (titre, chapitre)"
                       value={recherche}
                       onChange={(e) => setRecherche(e.target.value)}
                       autoComplete="off"
@@ -725,6 +728,46 @@ function Coffre() {
               )}
             </>
           )}
+
+          <section className="profil-carte ep-ancre" id="partages" aria-labelledby={`${id}-partages`}>
+            <div className="profil-carte-tete">
+              <h2 id={`${id}-partages`}>Partagés</h2>
+            </div>
+            <div className="profil-carte-corps coffre-partages">
+              <h3>Par moi</h3>
+              {etatPartages === 'absent' ? (
+                <p className="profil-intro">{MESSAGE_0009}</p>
+              ) : etatPartages === 'chargement' ? (
+                <p className="compte-chargement">Chargement des partages…</p>
+              ) : partagesActifs.length === 0 ? (
+                <p className="compte-vide">Aucun lien de partage actif. Pour partager un document avec un collègue, choisis-le dans la liste, puis « Partager ».</p>
+              ) : (
+                <ul className="ep-partages">
+                  {partagesActifs.map((x) => (
+                    <li key={x.id}>
+                      {x.plan_id && plans?.some((pl) => pl.id === x.plan_id) ? (
+                        <button type="button" className="profil-lien-bouton" onClick={() => voir(x.plan_id as string)}>
+                          {x.titre}
+                        </button>
+                      ) : (
+                        <strong>{x.titre}</strong>
+                      )}
+                      <span className="ep-partage-detail">
+                        {texteAjouts(x.nombre_ajouts)} · expire le {dateLongue(x.expire_le)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <h3>Avec moi</h3>
+              <p className="profil-intro">
+                Quand un collègue te partage un document, tu l'ouvres par son lien et tu cliques « Ajouter à mes documents » : une copie arrive dans ta liste ci-dessus, avec tes
+                autres enregistrements (elle n'est pas marquée à part).
+              </p>
+            </div>
+          </section>
+
+          <ProjectionsAnnotees />
         </div>
       </MenuEspace>
     </div>
@@ -907,7 +950,7 @@ function Fiche(p: ProprietesFiche & { dansTiroir?: boolean }) {
               </LigneLiee>
             ) : (
               <LigneLiee type="evaluation">
-                Évaluation d'origine : <strong>{remediation.titreSource}</strong> (pas dans ton coffre)
+                Évaluation d'origine : <strong>{remediation.titreSource}</strong> (pas dans tes documents)
               </LigneLiee>
             ))}
           {p.remediations.map((r) => (
@@ -925,11 +968,11 @@ function Fiche(p: ProprietesFiche & { dansTiroir?: boolean }) {
         {p.confirmation ? (
           <div className="profil-confirmation coffre-confirmation" role="group" aria-labelledby={`${p.titreId}-conf`} onKeyDown={(e) => echapDans(e, p.onAnnulerSuppression)}>
             <p id={`${p.titreId}-conf`} className="profil-confirmation-titre">
-              Supprimer « {plan.titre} » de ton coffre ?
+              Supprimer « {plan.titre} » de tes documents ?
             </p>
             <p>
               Il disparaît de tous tes appareils ; les enregistrements de ce navigateur ne sont pas touchés.
-              {p.remediations.length > 0 ? ` ${p.remediations.length > 1 ? 'Les remédiations liées restent' : 'La remédiation liée reste'} dans ton coffre.` : ''}
+              {p.remediations.length > 0 ? ` ${p.remediations.length > 1 ? 'Les remédiations liées restent' : 'La remédiation liée reste'} dans tes documents.` : ''}
             </p>
             <div className="profil-actions">
               <button ref={annuler} type="button" className="carnet-bouton" onClick={p.onAnnulerSuppression}>
@@ -1016,7 +1059,7 @@ function BlocPartage(p: ProprietesFiche) {
       {p.partage && etat === 'actif' && (
         <>
           <p className="coffre-note">
-            Ton collègue doit être connecté à son compte professeur. Il ajoute une copie à son coffre (mêmes exercices ou nouveau tirage) : tes changements ne lui parviennent pas, et
+            Ton collègue doit être connecté à son compte professeur. Il ajoute une copie à ses documents (mêmes exercices ou nouveau tirage) : tes changements ne lui parviennent pas, et
             inversement. Ton école et ton nom ne sont pas transmis : il imprime avec les siens.
           </p>
           {p.confirmationArret ? (

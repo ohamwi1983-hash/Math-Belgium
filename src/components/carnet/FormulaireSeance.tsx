@@ -885,7 +885,7 @@ export function FormulaireSeance({
                     </button>
                   )}
                   <a className="carnet-bouton" href={lienCoffre} target="_blank" rel="noopener">
-                    Choisir dans mon coffre<span className="carnet-sr"> (nouvel onglet)</span>
+                    Choisir dans mes documents<span className="carnet-sr"> (nouvel onglet)</span>
                   </a>
                 </div>
               )}
@@ -945,7 +945,7 @@ export function MessageDevoirsInactif({ quoi }: { quoi: string }) {
     <div className="compte-encadre agenda-inactif carnet-devoirs-inactif" role="status">
       <p>
         <strong>Pas encore activé.</strong> {quoi} demandent le fichier <code>supabase/migrations/0007_devoirs_evaluations.sql</code> : colle-le dans l’éditeur SQL de Supabase
-        (SQL Editor → New query → coller → Run), puis recharge cette page. Le reste du carnet fonctionne normalement.
+        (SQL Editor → New query → coller → Run), puis recharge cette page. Le reste de « Mes classes » fonctionne normalement.
       </p>
     </div>
   )

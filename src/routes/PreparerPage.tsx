@@ -13,11 +13,11 @@ import { estConnecteActif, useCompte } from '../lib/compteContexte'
 import { chapitresDansMonOrdre, numeroRepere, useOrdreChapitres } from '../lib/ordreChapitres'
 
 /**
- * `/espace/preparer` — porte « Préparer un cours » (maquette « préparer » validée le 27/11/2026) : quatre
+ * `/espace/preparer` — porte « Préparer un cours » (maquette « préparer » validée le 27/11/2026) : quatre
  * outils en cartes, une phrase chacun. Les outils eux-mêmes ne changent pas : Projeter un chapitre (choix
  * de l'année et du chapitre → lanceur `#projeter` de la page du chapitre), Créer une feuille d'exercices
- * (`/exercice`, mode professeur), Créer une évaluation ou un examen (`/evaluation`, + « Reprendre un
- * document enregistré » → Mes documents), Feuille de remédiation (elle se crée depuis une évaluation
+ * (`/exercice`, mode professeur), Créer une évaluation ou un examen (`/evaluation`, + « Reprendre un
+ * document enregistré » → Mes documents), Feuille de remédiation (elle se crée depuis une évaluation
  * enregistrée, dans le panneau des évaluations : `/evaluation#remediation` ouvre ses enregistrements).
  * Réservée, jamais pré-rendue ni indexée.
  */
@@ -71,7 +71,7 @@ function Preparer() {
         <BandeauEspace
           titreId={`${id}-titre`}
           surtitre="Préparer un cours"
-          titre="Qu'est-ce que tu prépares ?"
+          titre="Qu'est-ce que tu prépares ?"
           icone={null}
           apresTitre={<p className="ep-phrase">Tout ce qui sert en classe ou sur papier : chaque outil dit en une phrase à quoi il sert.</p>}
         />
@@ -114,7 +114,7 @@ function Preparer() {
                   Choisir les étapes <span aria-hidden="true">›</span>
                 </button>
               </form>
-              <p className="ep-outil-note">Le bouton « Projeter » reste aussi sur chaque page de chapitre.</p>
+              <p className="ep-outil-note">Le bouton « Projeter » reste aussi sur chaque page de chapitre.</p>
             </div>
           </section>
 
@@ -167,7 +167,7 @@ function Preparer() {
                 </Link>
               </p>
               <p className="ep-outil-note">
-                Elle part d'une évaluation enregistrée : « Commencer » ouvre tes enregistrements dans le panneau des évaluations ; sous l'évaluation voulue, clique « Feuille de remédiation ».
+                Elle part d'une évaluation enregistrée : « Commencer » ouvre tes enregistrements dans le panneau des évaluations ; sous l'évaluation voulue, clique « Feuille de remédiation ».
               </p>
             </div>
           </section>

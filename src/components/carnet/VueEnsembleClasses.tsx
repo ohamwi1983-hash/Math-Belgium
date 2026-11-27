@@ -7,10 +7,10 @@ import { reperesClasse, resumeClasse } from '../../lib/espaceProfesseur'
 import { couleurClasse } from './contexteCarnet'
 
 /**
- * Vue d'ensemble de « Mes classes » (`/carnet`, maquette « classes » validée le 27/11/2026) : une carte
+ * Vue d'ensemble de « Mes classes » (`/carnet`, maquette « classes » validée le 27/11/2026) : une carte
  * par classe — niveau, chapitre en cours et étape, barre des étapes vues, prochain cours / évaluation /
  * séance à noter, et ses trois actions : Matière vue (page de la classe), Devoirs et évaluations (même
- * page, bloc « Évaluation sur la matière vue »), Page des élèves (l'ancienne page de classe à code).
+ * page, bloc « Évaluation sur la matière vue »), Page des élèves (l'ancienne page de classe à code).
  * Tout vient du carnet (aucune donnée nouvelle).
  */
 export function VueEnsembleClasses({

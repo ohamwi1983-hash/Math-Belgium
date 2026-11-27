@@ -114,7 +114,7 @@ function Partage() {
             classe="coffre-bandeau"
             classeIcone="coffre-icone"
             icone={<IconePartage />}
-            surtitre="ESPACE PROFESSEUR · DOCUMENT PARTAGÉ"
+            surtitre="Mes documents · document partagé"
             apresTitre={
               lecture?.statut === 'ok' ? (
                 <p className="coffre-bandeau-sous-titre partage-sous-titre">
@@ -196,13 +196,13 @@ function Partage() {
 
               <section className="profil-carte partage-carte partage-ajout" aria-labelledby={`${id}-ajout`}>
                 <div className="profil-carte-tete">
-                  <h2 id={`${id}-ajout`}>Ajouter à mon coffre</h2>
+                  <h2 id={`${id}-ajout`}>Ajouter à mes documents</h2>
                 </div>
                 <div className="profil-carte-corps">
                   {ajout.etape === 'fait' ? (
                     <div className="partage-fait">
                       <p id={`${id}-fait`} className="partage-fait-titre" role="status" tabIndex={-1}>
-                        <span className="profil-pastille ok">✓ Ajouté</span> Une copie est dans ton coffre{ajout.mode === 'nouveaux' ? ', avec de nouveaux exercices' : ', avec les mêmes exercices'}.
+                        <span className="profil-pastille ok">✓ Ajouté</span> Une copie est dans tes documents{ajout.mode === 'nouveaux' ? ', avec de nouveaux exercices' : ', avec les mêmes exercices'}.
                       </p>
                       <p className="coffre-note">Elle s’imprime avec ton école et ton nom. Les changements de {lecture.partagePar} ne lui parviennent pas, et inversement.</p>
                       <div className="profil-actions">
@@ -217,7 +217,7 @@ function Partage() {
                   ) : (
                     <>
                       {lecture.estProprietaire && (
-                        <p className="coffre-note partage-avis">C’est ton propre partage : l’ajouter en fait une copie dans ton coffre. Tu gères le lien (copier, arrêter) depuis « Mon coffre ».</p>
+                        <p className="coffre-note partage-avis">C’est ton propre partage : l’ajouter en fait une copie dans tes documents. Tu gères le lien (copier, arrêter) depuis « Mes documents ».</p>
                       )}
                       {lecture.dejaAjoute && !lecture.estProprietaire && (
                         <p className="coffre-note partage-avis">Tu as déjà ajouté ce document à ton coffre : un nouvel ajout en fera une seconde copie.</p>
@@ -265,7 +265,7 @@ function Partage() {
                       )}
                       <div className="profil-actions">
                         <button type="button" className="carnet-bouton principal partage-bouton" disabled={ajout.etape === 'en-cours'} onClick={() => void ajouter()}>
-                          {ajout.etape === 'en-cours' ? (ajout.mode === 'nouveaux' ? 'Nouveau tirage…' : 'Ajout…') : 'Ajouter à mon coffre'}
+                          {ajout.etape === 'en-cours' ? (ajout.mode === 'nouveaux' ? 'Nouveau tirage…' : 'Ajout…') : 'Ajouter à mes documents'}
                         </button>
                       </div>
                     </>
@@ -299,7 +299,7 @@ function LienRefuse({ lecture }: { lecture: Exclude<LecturePartage, { statut: 'o
         <p>{t.corps}</p>
         <div className="profil-actions">
           <Link className="carnet-bouton principal" to="/coffre">
-            Mon coffre
+            Mes documents
           </Link>
           <Link className="carnet-bouton" to="/evaluation">
             Préparer une évaluation

@@ -30,7 +30,7 @@ export function InvitationHoraire({ actif }: { actif: boolean }) {
       {actif ? (
         <>
           <p>
-            <strong>Remplis ton horaire de la semaine.</strong> Le carnet te montrera alors les heures du jour, proposera la séance du créneau en cours, rappellera les séances
+            <strong>Remplis ton horaire de la semaine.</strong> « Mes classes » te montrera alors les heures du jour, proposera la séance du créneau en cours, rappellera les séances
             oubliées et comptera les heures restantes avec chaque classe (congés de la Fédération Wallonie-Bruxelles exclus).
           </p>
           <Link className="compte-bouton" to="/carnet/horaire">

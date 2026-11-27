@@ -73,13 +73,13 @@ export function OutilsChapitre({ chapter, avantImpression }: { chapter: ChapterC
           <span>Feuilles</span>
         </Link>
         {professeur && (
-          <Link className="lecture-outil" to={`/carnet?chapitre=${chapter.levelSlug}/${chapter.slug}`} title="Noter dans le carnet de matière vue">
+          <Link className="lecture-outil" to={`/carnet?chapitre=${chapter.levelSlug}/${chapter.slug}`} title="Noter la matière vue (Mes classes)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M6 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z" />
               <path d="M6 3v18M4 7h4M4 12h4M4 17h4" />
               <path d="M11 9h5M11 13h5" />
             </svg>
-            <span>Carnet</span>
+            <span>Matière vue</span>
           </Link>
         )}
         {professeur && (

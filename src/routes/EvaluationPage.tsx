@@ -11,7 +11,7 @@ import { usePageNonIndexee } from '../lib/useDocumentMeta'
  * bandeau sombre qui porte le titre) ; sinon (chargement, redirection, configuration manquante) :
  * titre habituel au-dessus de la garde. */
 export function EvaluationPage() {
-  usePageNonIndexee('Évaluations et examens')
+  usePageNonIndexee('Créer une évaluation ou un examen')
   const compte = useCompte()
   return (
     <>
@@ -20,12 +20,12 @@ export function EvaluationPage() {
         {!estConnecteActif(compte) && (
           <header className="chapter-head">
             <p className="eyebrow">Espace professeur</p>
-            <h1 className="chapter-title">Évaluations et examens</h1>
+            <h1 className="chapter-title">Créer une évaluation ou un examen</h1>
           </header>
         )}
 
         <PageReservee>
-          <EspaceConception type="evaluation" titre="Évaluations et examens" panneau={(publier) => <EvaluationGeneratorPanel onResume={publier} />} />
+          <EspaceConception type="evaluation" titre="Créer une évaluation ou un examen" panneau={(publier) => <EvaluationGeneratorPanel onResume={publier} />} />
         </PageReservee>
       </div>
     </>

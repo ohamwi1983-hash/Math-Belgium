@@ -363,6 +363,15 @@ export function EvaluationGeneratorPanel({
   const cartouche: CartoucheEcole | undefined = connecte ? cartoucheDepuisCompte(compte.profil, ecoleChoisie) : undefined
   const [coffre, setCoffre] = useState<PlanCoffre[] | null>(null)
   const [params, setParams] = useSearchParams()
+  // « Feuille de remédiation » de la porte « Préparer un cours » (`/evaluation#remediation`) : la liste des
+  // enregistrements (où se crée la remédiation, sous chaque évaluation) s’ouvre d’office.
+  const detailsEnregistrements = useRef<HTMLDetailsElement>(null)
+  const remediationOuverte = useRef(false)
+  useEffect(() => {
+    if (remediationOuverte.current || window.location.hash !== '#remediation' || !detailsEnregistrements.current) return
+    detailsEnregistrements.current.open = true
+    remediationOuverte.current = true
+  })
   /** Répartition d'EXAMEN Connaître / Appliquer / Transférer de « Préparer l'examen » : celle du
    * profil (0005), sinon 25 / 50 / 25 ; réglable pour la session dans tous les cas. Les évaluations et
    * feuilles n'en ont pas (`reglageCompetences`, parts égales). */
@@ -1107,7 +1116,7 @@ export function EvaluationGeneratorPanel({
     lirePlanCoffre(clientCoffre, planDemande)
       .then((p) => {
         if (!p) {
-          setErreur('Enregistrement introuvable dans ton coffre.')
+          setErreur('Enregistrement introuvable dans tes documents.')
           return
         }
         chargerPlan(p.contenu)
@@ -1148,7 +1157,7 @@ export function EvaluationGeneratorPanel({
     ;['matiere', 'depuis', 'classe', 'cid'].forEach((k) => suivant.delete(k))
     setParams(suivant, { replace: true })
     if (!m || !nh || chapitresCarnet.length === 0) {
-      setErreur('Matière du carnet illisible : choisis les chapitres à la main.')
+      setErreur('Matière vue illisible : choisis les chapitres à la main.')
       return
     }
     const lignesCarnet: LigneSelection[] = []
@@ -1190,8 +1199,8 @@ export function EvaluationGeneratorPanel({
       `Matière vue${classe ? ` en ${classe}` : ''}${depuis ? ` depuis le ${depuis}` : ''} : ${sections} section${sections > 1 ? 's' : ''}, ` +
         (chapitresLimites.size > 0
           ? generateurs > 0
-            ? `${generateurs} générateur${generateurs > 1 ? 's' : ''} choisi${generateurs > 1 ? 's' : ''} dans le carnet (un exercice chacun ; les autres générateurs de ces sections ne sont pas pris). Ajuste les nombres, ou compose selon la durée avec ces seuls générateurs.`
-            : `aucun des ${choisis.size} générateur${choisis.size > 1 ? 's' : ''} choisis dans le carnet n'est disponible avec ces réglages : choisis les questions à la main.`
+            ? `${generateurs} générateur${generateurs > 1 ? 's' : ''} choisi${generateurs > 1 ? 's' : ''} dans Mes classes (un exercice chacun ; les autres générateurs de ces sections ne sont pas pris). Ajuste les nombres, ou compose selon la durée avec ces seuls générateurs.`
+            : `aucun des ${choisis.size} générateur${choisis.size > 1 ? 's' : ''} choisis dans Mes classes n'est disponible avec ces réglages : choisis les questions à la main.`
           : generateurs > 0
             ? `${generateurs} générateur${generateurs > 1 ? 's' : ''} pré-sélectionné${generateurs > 1 ? 's' : ''} (un exercice chacun). Ajuste les nombres et ajoute d'autres questions si besoin.`
             : 'aucun générateur dans ces sections : choisis les questions à la main.'),
@@ -2791,7 +2800,7 @@ export function EvaluationGeneratorPanel({
                     disabled={!planCourant}
                     title={planCourant ? 'Enregistre le dernier tirage (mêmes exercices au rechargement)' : 'Génère la feuille (ou garde un aperçu) d’abord : on enregistre un tirage précis.'}
                   >
-                    {connecte ? 'Enregistrer dans le coffre' : 'Enregistrer dans ce navigateur'}
+                    {connecte ? 'Enregistrer dans mes documents' : 'Enregistrer dans ce navigateur'}
                   </button>
                 </span>
                 {erreur && <p className="admin-gate-error">{erreur}</p>}
@@ -2868,7 +2877,7 @@ export function EvaluationGeneratorPanel({
                   Tout télécharger
                 </button>
                 <button type="button" onClick={enregistrerPlanCourant}>
-                  {connecte ? 'Enregistrer dans mon coffre' : 'Enregistrer dans ce navigateur'}
+                  {connecte ? 'Enregistrer dans mes documents' : 'Enregistrer dans ce navigateur'}
                 </button>
                 <button type="button" onClick={exporterPlanJson}>
                   Exporter la configuration (JSON)
@@ -2888,15 +2897,15 @@ export function EvaluationGeneratorPanel({
       )}
 
       {/* Enregistrements, import et historique (avec la feuille de remédiation). */}
-      <details className="admin-eval-enregistrees">
+      <details className="admin-eval-enregistrees" id="remediation" ref={detailsEnregistrements}>
         <summary>
           Enregistrements, import et historique ({listeEnregistrements.length} enregistrement{listeEnregistrements.length > 1 ? 's' : ''}
-          {connecte ? ' dans ton coffre' : ''})
+          {connecte ? ' dans tes documents' : ''})
         </summary>
         {connecte && locauxAImporter.length > 0 && (
           <p className="admin-eval-documents-pied">
             <button type="button" onClick={() => void importerLocaux()}>
-              Importer dans mon coffre les {locauxAImporter.length} enregistrement{locauxAImporter.length > 1 ? 's' : ''} de ce navigateur
+              Importer dans mes documents les {locauxAImporter.length} enregistrement{locauxAImporter.length > 1 ? 's' : ''} de ce navigateur
             </button>
           </p>
         )}
@@ -2980,7 +2989,7 @@ export function EvaluationGeneratorPanel({
             ))}
           </ul>
         ) : (
-          <p className="admin-eval-variante-label">{connecte ? (coffre === null ? 'Chargement du coffre…' : 'Aucun enregistrement dans ton coffre.') : 'Aucun enregistrement dans ce navigateur.'}</p>
+          <p className="admin-eval-variante-label">{connecte ? (coffre === null ? 'Chargement de tes documents…' : 'Aucun enregistrement dans tes documents.') : 'Aucun enregistrement dans ce navigateur.'}</p>
         )}
         <p className="admin-eval-documents-pied">
           <button type="button" onClick={() => entreeImport.current?.click()}>
@@ -3012,7 +3021,7 @@ export function EvaluationGeneratorPanel({
           {connecte && (
             <>
               {' '}
-              Gérer le coffre (renommer, dupliquer) : <Link to="/coffre">mon coffre</Link>.
+              Renommer, dupliquer, partager : <Link to="/coffre">Mes documents</Link>.
             </>
           )}
         </p>

@@ -426,7 +426,7 @@ export function FormulaireEvenement({
                     <strong>Heures supprimées :</strong>{' '}
                     {resume ? (
                       <>
-                        {resume.texte}. Rien n’est noté dans le carnet pour ces heures.
+                        {resume.texte}. Rien n’est noté dans Mes classes pour ces heures.
                       </>
                     ) : (
                       'aucune heure de ton horaire.'

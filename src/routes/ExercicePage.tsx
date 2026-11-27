@@ -19,7 +19,7 @@ export function ExercicePage() {
   // des élèves avec `?vue=eleve`, sans se déconnecter.
   const [params] = useSearchParams()
   const vueEleve = professeur && params.get('vue') === 'eleve'
-  usePageNonIndexee(professeur && !vueEleve ? "Feuilles d'exercices" : "Me préparer à l'évaluation")
+  usePageNonIndexee(professeur && !vueEleve ? "Créer une feuille d'exercices" : "Me préparer à l'évaluation")
   return (
     <>
       <SiteHeader />
@@ -34,7 +34,7 @@ export function ExercicePage() {
         ) : professeur ? (
           <EspaceConception
             type="feuille"
-            titre="Feuilles d'exercices"
+            titre="Créer une feuille d'exercices"
             lienEleve="/exercice?vue=eleve"
             panneau={(publier) => <EvaluationGeneratorPanel mode="exercice" onResume={publier} />}
           />

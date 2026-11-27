@@ -125,7 +125,7 @@
 
 /* ---------- Mes classes : vue d'ensemble ---------- */
 .ep-classes-tete { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
-.ep-classes-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+.ep-classes-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 16px; }
 .ep-classe { display: flex; flex-direction: column; gap: 10px; }
 .ep-classe-tete { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; }
 .ep-classe-tete h3 { margin: 0; font: 600 1.45rem/1.1 var(--serif); }

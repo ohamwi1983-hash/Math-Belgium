@@ -8,7 +8,7 @@ import './espace.css'
 export { IconeCarnet, IconeEvaluation, IconeFeuille }
 
 /** Ce que le carnet donne au menu (pages `/carnet/*` seulement) : classes, séances par classe,
- * créneaux d'aujourd'hui à noter (pastille « n à noter » de « Mes classes »). */
+ * créneaux d'aujourd'hui à noter (pastille « n à noter » de « Mes classes »). */
 export interface MenuCarnetDonnees {
   classes: Classe[]
   nombreSeances: (id: string) => number
@@ -43,8 +43,8 @@ export interface Porte {
 const pageExercicesChapitre = (chemin: string) => /^\/[^/]+\/[^/]+\/exercices$/.test(chemin)
 
 /**
- * Les portes de l'espace professeur (décision du 27/11/2026, maquettes « dashboard » / « classes » /
- * « préparer » / « téléphone ») : le tableau de bord puis les quatre portes, chacune avec ses
+ * Les portes de l'espace professeur (décision du 27/11/2026, maquettes « dashboard » / « classes » /
+ * « préparer » / « téléphone ») : le tableau de bord puis les quatre portes, chacune avec ses
  * sous-entrées (dépliées quand la porte est active). Les adresses d'avant restent celles des pages
  * (`/carnet`, `/coffre`, `/profil`, `/exercice`, `/evaluation`) : rien ne casse.
  */
@@ -165,11 +165,11 @@ function sousActive(s: SousEntree, soeurs: SousEntree[], chemin: string, ancre: 
 }
 
 /**
- * Menu UNIQUE « Espace professeur » de toutes les pages professeur (tableau de bord, Mes classes, Préparer
+ * Menu UNIQUE « Espace professeur » de toutes les pages professeur (tableau de bord, Mes classes, Préparer
  * un cours — feuilles d'exercices et panneau des évaluations compris —, Mes documents, partage, Réglages,
- * administration). Remplace l'ancien menu « Mon espace » et les groupes de liens du menu du compte.
+ * administration). Remplace l'ancien menu « Mon espace » et les groupes de liens du menu du compte.
  *
- * Ordinateur (≥ 760 px) : colonne de gauche — « ESPACE PROFESSEUR », Tableau de bord, Mes classes,
+ * Ordinateur (≥ 760 px) : colonne de gauche — « ESPACE PROFESSEUR », Tableau de bord, Mes classes,
  * Préparer un cours, Mes documents, Réglages (sous-entrées de la porte active dépliées), puis à part
  * Administration (admin), Retour au site élève, Se déconnecter. `compact` (pages de conception, qui ont
  * besoin de largeur) : de 760 à 1 359 px, colonne d'icônes (libellés lus et en infobulle).
@@ -191,7 +191,7 @@ export function MenuEspace({ children, carnet, compact = false }: { children: Re
   const aNoter = carnet?.aNoter ?? 0
 
   // `MenuCarnetDonnees.classes` / `nombreSeances` : gardés pour l'appel du carnet (la liste des classes
-  // est désormais la vue d'ensemble de « Mes classes », plus le menu).
+  // est désormais la vue d'ensemble de « Mes classes », plus le menu).
   // Changement de page ou d'ancre : vers l'ancre (le contenu peut arriver après : deux essais), sinon en haut.
   useEffect(() => {
     if (location.hash) {

@@ -66,7 +66,7 @@ export function PageClasseEleves({
       <p className="pce-surtitre">
         <Link to={`/carnet/classe/${classe.id}`}>Carnet · {classe.nom}</Link>
       </p>
-      <h2 className="carnet-titre-vue" id={`${id}-h`}>Page de classe des élèves</h2>
+      <h2 className="carnet-titre-vue" id={`${id}-h`}>Page des élèves</h2>
       <p className="pce-chapeau">Vos élèves l’ouvrent avec un code, sans compte. Ils voient uniquement ce que vous cochez ici ; ils ne vous envoient rien.</p>
     </header>
   )
@@ -77,8 +77,8 @@ export function PageClasseEleves({
         {tete}
         <div className="compte-encadre" role="status">
           <p>
-            <strong>Pour activer la page de classe, collez 0010.</strong> Copiez tout le fichier <code>supabase/migrations/0010_page_classe.sql</code> dans l’éditeur SQL de Supabase (SQL Editor →
-            New query → coller → Run), puis rechargez cette page. Le carnet fonctionne normalement en attendant.
+            <strong>Pour activer la page des élèves, collez 0010.</strong> Copiez tout le fichier <code>supabase/migrations/0010_page_classe.sql</code> dans l’éditeur SQL de Supabase (SQL Editor →
+            New query → coller → Run), puis rechargez cette page. « Mes classes » fonctionne normalement en attendant.
           </p>
         </div>
       </section>
@@ -92,7 +92,7 @@ export function PageClasseEleves({
       <section className="pce" aria-labelledby={`${id}-h`}>
         {tete}
         <div className="compte-encadre compte-erreur" role="alert">
-          <p>Page de classe illisible pour l’instant ({erreurChargement})</p>
+          <p>Page des élèves illisible pour l’instant ({erreurChargement})</p>
           <button type="button" className="compte-bouton-secondaire" disabled={occupe} onClick={onMettreAJour}>
             Réessayer
           </button>
@@ -134,7 +134,7 @@ export function PageClasseEleves({
           <div className="pce-code">
             {code ? (
               <>
-                <div className="pce-qr" dangerouslySetInnerHTML={{ __html: qrCodeSvg(url, 168, `QR code de la page de classe (${codeAffiche(code)})`) }} />
+                <div className="pce-qr" dangerouslySetInnerHTML={{ __html: qrCodeSvg(url, 168, `QR code de la page des élèves (${codeAffiche(code)})`) }} />
                 <p className="pce-code-texte" aria-label={`Code : ${code.split('').join(' ')}`}>
                   {codeAffiche(code)}
                 </p>
@@ -197,7 +197,7 @@ export function PageClasseEleves({
             <h3>Ce que les élèves voient</h3>
             <Interrupteur
               nom="Prochaines interros"
-              desc="Date, étapes du chapitre et générateurs « Pour t’entraîner » (repris de l’interro annoncée dans le carnet)."
+              desc="Date, étapes du chapitre et générateurs « Pour t’entraîner » (repris de l’interro annoncée dans Mes classes)."
               actif={reglages.publier_interros}
               desactive={occupe || !page}
               onChange={(v) => onReglages({ ...reglages, publier_interros: v })}
@@ -218,7 +218,7 @@ export function PageClasseEleves({
             />
             <Interrupteur
               nom="Heure des séances et des interros"
-              desc="« 2e heure » ou la plage horaire, selon votre réglage du carnet."
+              desc="« 2e heure » ou la plage horaire, selon votre réglage de l’agenda."
               actif={reglages.publier_heure}
               desactive={occupe || !page}
               onChange={(v) => onReglages({ ...reglages, publier_heure: v })}
@@ -232,7 +232,7 @@ export function PageClasseEleves({
             />
             <p className="pce-jamais">
               <strong>Jamais publié :</strong> les remarques de séance, les objectifs et compétences, les autres classes, le nom de l’école, votre nom (sauf si vous le cochez), les autres
-              événements de l’agenda. Une copie de ce qui est coché part sur le serveur à chaque changement du carnet ; le reste ne quitte pas votre compte. Les élèves n’envoient rien.
+              événements de l’agenda. Une copie de ce qui est coché part sur le serveur à chaque changement dans Mes classes ; le reste ne quitte pas votre compte. Les élèves n’envoient rien.
             </p>
             {page && (
               <div className="pce-etat-publication">
@@ -328,7 +328,7 @@ function Projection({ code, url, lienCourt, classe, onFermer }: { code: string; 
         Page de la classe {classe}
       </p>
       <div className="pce-proj-corps">
-        <div className="pce-proj-qr" dangerouslySetInnerHTML={{ __html: qrCodeSvg(url, 480, `QR code de la page de classe (${codeAffiche(code)})`) }} />
+        <div className="pce-proj-qr" dangerouslySetInnerHTML={{ __html: qrCodeSvg(url, 480, `QR code de la page des élèves (${codeAffiche(code)})`) }} />
         <div className="pce-proj-texte">
           <p className="pce-proj-consigne">Scanne le QR code, ou va sur</p>
           <p className="pce-proj-lien">{lienCourt}</p>
