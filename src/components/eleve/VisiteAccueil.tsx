@@ -98,15 +98,23 @@ export function VisiteAccueil() {
       return
     }
     const r0 = cible.getBoundingClientRect()
-    if (r0.top < 70 || r0.bottom > window.innerHeight - 160) cible.scrollIntoView({ block: 'center', behavior: 'auto' })
+    // Cible amenée vers le haut de l'écran (sous l'en-tête) pour laisser la place à la bulle dessous.
+    if (r0.top < 70 || r0.bottom > window.innerHeight - 200) window.scrollBy({ top: r0.top - 80, behavior: 'auto' })
     const placer = () => {
       const r = cible.getBoundingClientRect()
       const largeur = Math.min(340, window.innerWidth - 24)
-      const hauteur = bulle.current?.offsetHeight ?? 170
-      const dessous = r.bottom + 14 + hauteur < window.innerHeight - 8 || r.top < hauteur + 22
+      const hauteur = bulle.current?.offsetHeight ?? 200
+      // Bas libre : au-dessus de la barre du bas (téléphone) s'il y en a une.
+      const barre = document.querySelector<HTMLElement>('.ge-barre')
+      const bas = window.innerHeight - (barre && barre.getClientRects().length ? barre.offsetHeight : 0) - 8
+      const placeDessous = bas - (r.bottom + 12)
+      const placeDessus = r.top - 12 - 8
+      const dessous = placeDessous >= hauteur || placeDessous >= placeDessus
       const left = Math.max(12, Math.min(window.innerWidth - largeur - 12, r.left + r.width / 2 - largeur / 2))
-      const top = dessous ? r.bottom + 12 : r.top - 12 - hauteur
-      const fleche = Math.max(18, Math.min(largeur - 18, r.left + r.width / 2 - left))
+      const voulu = dessous ? r.bottom + 12 : r.top - 12 - hauteur
+      // Cible très haute (les trois portes sur téléphone) : la bulle chevauche son bas plutôt que de sortir de l'écran.
+      const top = Math.max(8, Math.min(bas - hauteur, voulu))
+      const fleche = top === voulu ? Math.max(18, Math.min(largeur - 18, r.left + r.width / 2 - left)) : -100
       setPlace({ top, left, largeur, fleche, dessous, cadre: { top: r.top - 6, left: r.left - 6, width: r.width + 12, height: r.height + 12 } })
     }
     placer()
@@ -141,7 +149,7 @@ export function VisiteAccueil() {
       {place && <div className="ge-visite-cadre" aria-hidden="true" style={place.cadre} />}
       <div
         ref={bulle}
-        className={`ge-visite${place?.dessous === false ? ' au-dessus' : ''}`}
+        className={`ge-visite${place?.dessous === false ? ' au-dessus' : ''}${place && place.fleche < 0 ? ' sans-fleche' : ''}`}
         role="dialog"
         aria-modal="false"
         aria-labelledby="ge-visite-titre"

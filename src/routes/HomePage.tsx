@@ -143,6 +143,9 @@ function ListeChapitres({ level, etats }: { level: LevelEntry; etats: EtatChapit
  * l'élève choisit son année une fois (mémorisée dans son navigateur), puis voit « Reprendre »
  * (dernière étape ouverte de cette année), « Préparer mon interro » et SES chapitres avec leur
  * progression — celle des pages de chapitre (`lib/parcoursChapitre.ts`), jamais envoyée.
+ * Depuis le 27/11/2026 (chantier E, maquette « accueil ») : carte « Ma classe » (code de classe gardé),
+ * trois portes Mon cours (avec « Reprendre ») / M'entraîner / Préparer mon interro, ligne « Entre le code
+ * donné par ton professeur », visite facultative — voir `.claude/rules/cote-eleve.md`, « Côté élève plus clair ».
  */
 export function HomePage() {
   useDocumentMeta({

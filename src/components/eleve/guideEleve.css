@@ -46,7 +46,7 @@
 .ge-aide { position: relative; display: inline-flex; }
 .ge-aide-bouton {
   flex: none; width: 44px; height: 44px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
-  border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink-soft); cursor: pointer;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink-soft); cursor: pointer;
 }
 .ge-aide-bouton:hover { color: var(--accent-ink); border-color: var(--accent-soft-line); background: var(--surface-2); }
 .ge-aide-bouton[aria-expanded="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
@@ -77,6 +77,7 @@
   background: inherit; transform: rotate(45deg); border-radius: 2px;
 }
 .ge-visite.au-dessus::before { top: auto; bottom: -7px; }
+.ge-visite.sans-fleche::before { display: none; }
 .ge-visite:focus { outline: none; }
 .ge-visite:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .ge-visite p { margin: 0; position: relative; }
@@ -127,7 +128,7 @@
 .ge-porte-texte { font: 400 15px/1.45 var(--lecture, var(--sans)); color: var(--ink-soft); }
 .ge-chevron { flex: none; font-size: 24px; line-height: 1; color: var(--ink-faint); }
 .ge-code { margin: 0; text-align: center; font: 400 15px/1.5 var(--sans); color: var(--ink-soft); }
-.ge-code a { color: var(--ink); text-underline-offset: 3px; display: inline-block; min-height: 24px; padding: 10px 0; }
+.ge-code a { color: var(--ink); text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 44px; }
 @media (min-width: 760px) {
   .ge-portes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   .ge-porte { flex-direction: column; align-items: flex-start; min-height: 168px; padding: 20px; gap: 12px; }
@@ -143,10 +144,11 @@
 /* ---------- page de chapitre guidée ---------- */
 @media screen {
   .onglets-chapitre .onglet.onglet-double {
-    flex-direction: column; gap: 2px; min-height: 60px; padding: 8px 6px; border-radius: 14px; white-space: normal; line-height: 1.15;
+    flex-direction: column; gap: 2px; min-height: 60px; padding: 8px 4px; border-radius: 14px; white-space: normal; line-height: 1.15;
   }
   .onglet-double .onglet-titre { font: 700 16px/1.15 var(--sans); }
-  .onglet-double .onglet-sous { font: 400 13.5px/1.2 var(--sans); color: var(--ink-soft); }
+  .onglet-double .onglet-sous { font: 400 13px/1.2 var(--sans); color: var(--ink-soft); }
+  @media (max-width: 400px) { .onglet-double .onglet-sous { font-size: 12px; } .onglets-chapitre { gap: 4px; } }
   .onglet-double.actif .onglet-sous { color: inherit; opacity: 0.85; }
   .parcours-cote .onglet.onglet-double { align-items: flex-start; min-height: 52px; padding: 6px 12px; border-radius: var(--radius); }
   .parcours-cote .onglet-double .onglet-titre { font-size: 14.5px; }
@@ -176,7 +178,7 @@
   .ge-fin-bravo p { margin: 0; font: 400 15.5px/1.5 var(--lecture, var(--sans)); color: var(--ink-soft); }
   .ge-fin-etape .ge-bouton-plein, .ge-fin-etape .ge-bouton-contour { min-height: 56px; font-size: 16.5px; border-radius: 12px; }
   .ge-fin-liste { margin: 0; text-align: center; font: 400 15px/1.5 var(--sans); color: var(--ink-soft); }
-  .ge-fin-liste a { color: var(--ink); text-underline-offset: 3px; display: inline-block; padding: 10px 0; }
+  .ge-fin-liste a { color: var(--ink); text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 44px; }
 }
 @media print { .ge-fin-etape, .ge-reprendre, .ge-legende { display: none !important; } }
 
@@ -239,3 +241,18 @@ body:has(.ge-ent) { background: var(--paper); }
 }
 .ge-fin-ex-puces { display: flex; gap: 8px; }
 .ge-fin-ex-puces span { flex: 1; height: 8px; border-radius: 999px; }
+/* En-tête du site sur téléphone avec le « ? » : marque · loupe · ? · Aa · Professeur sur UNE ligne. Sous 440 px
+   la marque passe en 14 px ; sous 390 px seul le logo reste visible (le nom reste lu : nom accessible du lien). */
+@media (max-width: 439.98px) {
+  .site-header:has(.ge-aide) .site-header-inner { column-gap: 4px; padding-left: 10px; padding-right: 10px; }
+  .site-header:has(.ge-aide) .brand-nom { font-size: 14px; }
+}
+@media (max-width: 389.98px) {
+  .site-header:has(.ge-aide) .brand-nom { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+/* Dans la page d'un générateur, le cadre (`cadre.css`, `theme.css`) stylise h2 et boutons : on reprend la main. */
+.entrainement .ge-fin-ex { padding: 0 16px; box-sizing: border-box; }
+.entrainement .ge-fin-ex-carte h2 { font: 700 22px/1.25 var(--sans); color: var(--ink); margin: 6px 0; }
+.entrainement .ge-fin-ex .ge-bouton-plein { color: var(--on-accent); }
+.entrainement .ge-fin-ex .ge-bouton-plein:hover { color: var(--surface); }
+.entrainement .ge-fin-ex .ge-bouton-contour { color: var(--ink); }
