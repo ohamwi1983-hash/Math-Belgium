@@ -5,7 +5,7 @@ import { LIBELLE_CATEGORIE, categorieDuNiveau, morceauxLegende, rangCategorie, t
 import { blocCorrectionHtml, echapperHtml, fragmentsEnteteHtml, fragmentsVersHtml, grillesLisiblesAImpression } from "./genererFeuilleExercicesHtml";
 import { obtenirCssKatexAutonome } from "./katexImage";
 import { qrCodeSvg } from "./qrSvg";
-import { cartoucheEffectif, morceauxSurtitre, type CartoucheEcole } from "./cartouche";
+import { cartoucheEffectif, logoCartouche, morceauxSurtitre, type CartoucheEcole } from "./cartouche";
 import { CSS_VARIABLES_PROCESSUS } from "./couleursProcessus";
 import { etiquetteQuestion, examenDeSession, fragmentsConsigne, lignePartie, partiesExamen, NOM_PROCESSUS_EXAMEN, type ChapitreExamen, type OrganisationExamen, type PartieExamen, type QuestionOrdonnable } from "./examen";
 
@@ -108,6 +108,31 @@ function adresseCartoucheHtml(entete: EnteteEvaluation): string {
   const adresse = cartoucheEffectif(entete.cartouche).ecoleAdresse;
   return adresse ? ` · ${echapperHtml(adresse)}` : "";
 }
+
+/** Logo FACULTATIF de l'école (0012), à gauche des en-têtes (cartouche, feuille, aménagée, grille) :
+ * `""` sans logo — le document reste alors IDENTIQUE octet pour octet à avant (ni balise, ni classe,
+ * ni CSS : `STYLE_LOGO` n'est ajouté par `documentHtml` que si le corps contient un logo). Le data URL
+ * est validé (`logoCartouche` : PNG / JPEG / WEBP base64 seulement) avant d'être écrit dans `src`. */
+function logoHtml(entete: EnteteEvaluation): string {
+  const logo = logoCartouche(entete.cartouche);
+  return logo ? `<div class="logo-ecole"><img src="${logo}" alt="Logo de l'école"></div>` : "";
+}
+
+/** ` avec-logo` (classe de l'en-tête qui reçoit un logo) ou `""`. */
+function classeLogo(entete: EnteteEvaluation): string {
+  return logoCartouche(entete.cartouche) ? " avec-logo" : "";
+}
+
+/** Hauteur fixe raisonnable (1,5 cm), largeur suivant l'image (4 cm au plus) ; cartouche en grille :
+ * une colonne de plus à gauche, séparée d'un filet ; en-têtes en flex : le texte prend la place. */
+const STYLE_LOGO = `
+.logo-ecole { flex: none; display: flex; align-items: center; justify-content: center; }
+.logo-ecole img { display: block; height: 1.5cm; width: auto; max-width: 4cm; object-fit: contain; }
+.avec-logo > .logo-ecole + div { flex: 1 1 auto; min-width: 0; }
+.cartouche.avec-logo { grid-template-columns: auto minmax(0, 1fr) 6.6cm; }
+.cartouche .logo-ecole { padding: 6px 10px; border-right: 1px solid var(--encre); }
+.tete-am .logo-ecole img { height: 1.7cm; }
+`;
 
 export interface EnteteEvaluation {
   numero?: string;
@@ -653,7 +678,7 @@ function documentHtml(titre: string, corps: string, css: string, cssKatex: strin
 <meta name="viewport" content="width=820">
 <title>${echapperHtml(titre)}</title>
 ${police === "amenagee" ? POLICE_AMENAGEE : POLICES_STANDARD}
-<style>${cssKatex}${STYLE_COMMUN}${css}${cssSupplementaire}</style>
+<style>${cssKatex}${STYLE_COMMUN}${css}${cssSupplementaire}${corps.includes('<div class="logo-ecole">') ? STYLE_LOGO : ""}</style>
 ${SCRIPT_IMPRESSION}
 </head>
 <body>
@@ -1096,8 +1121,8 @@ function professeurFeuille(entete: EnteteEvaluation): string {
 function enteteFeuilleHtml(entete: EnteteEvaluation, sousTitre: string): string {
   const surtitre = entete.surtitre ?? entete.niveauLabel;
   const prof = professeurFeuille(entete);
-  return `<header class="tete">
-  <div><span class="surtitre">${echapperHtml(surtitre)}</span><h1>${echapperHtml(titreNettoye(entete))}</h1><span class="sous">${echapperHtml(sousTitre)}</span></div>
+  return `<header class="tete${classeLogo(entete)}">
+  ${logoHtml(entete)}<div><span class="surtitre">${echapperHtml(surtitre)}</span><h1>${echapperHtml(titreNettoye(entete))}</h1><span class="sous">${echapperHtml(sousTitre)}</span></div>
   <div class="identite"><span>Nom</span><span class="champ"></span><span>Classe</span><span class="champ"></span><span>Date</span><span class="valeur">${echapperHtml(dateEnToutesLettres(entete.date))}</span>${prof ? `<span>Professeur</span><span class="valeur">${echapperHtml(prof)}</span>` : ""}</div>
 </header>`;
 }
@@ -1228,8 +1253,8 @@ export function titreEvaluation(entete: EnteteEvaluation): string {
 
 function cartoucheEvaluationHtml(entete: EnteteEvaluation, items: ItemEvaluation[], suffixe?: string): string {
   const duree = entete.afficherDuree ? ` · ${dureeEstimeeMinutes(items)} minutes` : "";
-  return `<div class="cartouche">
-  <div class="g"><span class="surtitre">${surtitreCartoucheHtml(entete)}</span>
+  return `<div class="cartouche${classeLogo(entete)}">
+  ${logoHtml(entete)}<div class="g"><span class="surtitre">${surtitreCartoucheHtml(entete)}</span>
     <h1>${echapperHtml(titreEvaluation(entete))}${suffixe ? ` — ${echapperHtml(suffixe)}` : ""}</h1>
     <span class="meta">${echapperHtml(dateEnToutesLettres(entete.date))} · Série <strong>${echapperHtml(entete.serieLettre)}</strong>${duree}${adresseCartoucheHtml(entete)}</span></div>
   <div class="d"><span>Nom</span><span class="champ"></span><span>Classe</span><span class="champ"></span><span>N°</span><span class="champ"></span></div>
@@ -1458,7 +1483,7 @@ function grilleHtml(entete: EnteteEvaluation, items: ItemEvaluation[]): string {
   const numerotes = itemsNumerotes(items);
   const blocs = numerotes.map(({ item, numero }) => blocGrilleHtml(item, numero, nomProcessusHtml(item.processus))).join("");
   const reponses = pageReponsesHtml(entete.serieLettre, [{ questions: numerotes }]);
-  return `<div class="grille"><div class="tete-grille"><div><span class="surtitre">Document professeur · Série <strong>${echapperHtml(entete.serieLettre)}</strong></span><h1>Grille de correction — ${echapperHtml(titreNettoye(entete))}</h1></div><span class="sans" style="font-size:8.5pt;color:#4a4f58">${resume}</span></div>${reponses}${blocs}
+  return `<div class="grille"><div class="tete-grille${classeLogo(entete)}">${logoHtml(entete)}<div><span class="surtitre">Document professeur · Série <strong>${echapperHtml(entete.serieLettre)}</strong></span><h1>Grille de correction — ${echapperHtml(titreNettoye(entete))}</h1></div><span class="sans" style="font-size:8.5pt;color:#4a4f58">${resume}</span></div>${reponses}${blocs}
 <div class="regle"><span class="sans">RÈGLE</span><span>Une erreur n'est pénalisée qu'une fois : si une valeur fausse est réutilisée correctement dans la suite, la suite rapporte ses points.</span></div>
 <div class="pied"><span>${echapperHtml(titreEvaluation(entete))} · ${echapperHtml(dateEnToutesLettres(entete.date))}</span><span>Ne pas distribuer aux élèves</span></div></div>`;
 }
@@ -1722,8 +1747,8 @@ function bandeHtml(examen: ExamenDocument): string {
 }
 
 function cartoucheExamenHtml(entete: EnteteEvaluation, examen: ExamenDocument, suffixe?: string): string {
-  return `${bandeHtml(examen)}<div class="cartouche examen">
-  <div class="g"><span class="surtitre">${surtitreCartoucheHtml(entete)}</span>
+  return `${bandeHtml(examen)}<div class="cartouche examen${classeLogo(entete)}">
+  ${logoHtml(entete)}<div class="g"><span class="surtitre">${surtitreCartoucheHtml(entete)}</span>
     <h1>${echapperHtml(titreExamen(entete))}${suffixe ? ` — ${echapperHtml(suffixe)}` : ""}</h1>
     <span class="meta">${echapperHtml(dateEnToutesLettres(entete.date))} · Série <strong>${echapperHtml(entete.serieLettre)}</strong>${adresseCartoucheHtml(entete)}</span></div>
   <div class="d"><span>Nom</span><span class="champ"></span><span>Classe</span><span class="champ"></span><span>N°</span><span class="champ"></span></div>
@@ -1810,7 +1835,7 @@ function grilleExamenHtml(entete: EnteteEvaluation, examen: ExamenDocument, item
     entete.serieLettre,
     parties.map((p) => ({ titre: `Partie ${p.romain} · ${p.titre}`, points: totalPartie(p), questions: p.questions.map(({ element, numero }) => ({ item: element, numero })) })),
   );
-  return `<div class="grille"><div class="tete-grille"><div><span class="surtitre">Document professeur · Examen · Série <strong>${echapperHtml(entete.serieLettre)}</strong></span><h1>Grille de correction — ${echapperHtml(titreExamen(entete))}</h1></div><span class="sans" style="font-size:8.5pt;color:#4a4f58">${resume}</span></div>${reponses}${blocs}
+  return `<div class="grille"><div class="tete-grille${classeLogo(entete)}">${logoHtml(entete)}<div><span class="surtitre">Document professeur · Examen · Série <strong>${echapperHtml(entete.serieLettre)}</strong></span><h1>Grille de correction — ${echapperHtml(titreExamen(entete))}</h1></div><span class="sans" style="font-size:8.5pt;color:#4a4f58">${resume}</span></div>${reponses}${blocs}
 <div class="regle"><span class="sans">RÈGLE</span><span>Une erreur n'est pénalisée qu'une fois : si une valeur fausse est réutilisée correctement dans la suite, la suite rapporte ses points.</span></div>
 <div class="pied"><span>${echapperHtml(examenDeSession(examen.session))} · ${echapperHtml(dateEnToutesLettres(entete.date))}</span><span>Ne pas distribuer aux élèves</span></div></div>`;
 }
@@ -1844,7 +1869,7 @@ async function genererExamenAmenage(entete: EnteteEvaluation, examen: ExamenDocu
   const cssKatex = await obtenirCssKatexAutonome();
   const titre = titreExamen(entete);
   // Session et horaire : dans le bandeau (pas répétés à droite du titre).
-  const tete = `${bandeHtml(examen)}<div class="tete-am"><div><span class="surtitre" style="color:#1d5b8f;font-weight:700">Version aménagée · Examen</span><h1>${echapperHtml(titre)}</h1></div><span class="droite">Série <strong>${echapperHtml(entete.serieLettre)}</strong><br>Mêmes questions, même barème</span></div>
+  const tete = `${bandeHtml(examen)}<div class="tete-am${classeLogo(entete)}">${logoHtml(entete)}<div><span class="surtitre" style="color:#1d5b8f;font-weight:700">Version aménagée · Examen</span><h1>${echapperHtml(titre)}</h1></div><span class="droite">Série <strong>${echapperHtml(entete.serieLettre)}</strong><br>Mêmes questions, même barème</span></div>
 <div class="identite-am"><span>Nom <span class="champ"></span></span><span>Classe <span class="champ" style="width:2.5cm"></span></span><span>N° <span class="champ" style="width:1.2cm"></span></span><span>${echapperHtml(dateEnToutesLettres(entete.date))}</span></div>
 ${consignesExamenHtml(entete, examen, items)}`;
   let i = 0;
@@ -1887,7 +1912,7 @@ export async function genererVersionAmenagee(entete: EnteteEvaluation, items: It
   const estExercice = entete.mode === "exercice";
   const titre = estExercice ? titreNettoye(entete) : titreEvaluation(entete);
   const droite = estExercice ? "Mêmes exercices,<br>mise en page adaptée" : `Série <strong>${echapperHtml(entete.serieLettre)}</strong><br>Mêmes questions, même barème`;
-  const tete = `<div class="tete-am"><div><span class="surtitre" style="color:#1d5b8f;font-weight:700">Version aménagée${estExercice ? " · Feuille d'exercices" : ""}</span><h1>${echapperHtml(titre)}</h1></div><span class="droite">${droite}</span></div>
+  const tete = `<div class="tete-am${classeLogo(entete)}">${logoHtml(entete)}<div><span class="surtitre" style="color:#1d5b8f;font-weight:700">Version aménagée${estExercice ? " · Feuille d'exercices" : ""}</span><h1>${echapperHtml(titre)}</h1></div><span class="droite">${droite}</span></div>
 <div class="identite-am"><span>Nom <span class="champ"></span></span><span>Classe <span class="champ" style="width:2.5cm"></span></span><span>N° <span class="champ" style="width:1.2cm"></span></span><span>${echapperHtml(dateEnToutesLettres(entete.date))}</span>${estExercice && professeurFeuille(entete) ? `<span>Professeur : ${echapperHtml(professeurFeuille(entete))}</span>` : ""}</div>
 ${estExercice ? "" : consignesHtml(entete, items)}`;
   const pages = itemsNumerotes(items)

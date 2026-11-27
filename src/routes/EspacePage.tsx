@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../components/carnet/carnet.css'
 import { BandeauEspace } from '../components/compte/BandeauEspace'
+import { CartePremiersPas as CartePremiersPasCarte } from '../components/compte/CartePremiersPas'
 import { IconeCoche, IconeProjeter } from '../components/compte/IconesEspace'
 import { MenuEspace, PORTES } from '../components/compte/MenuEspace'
 import { EnTeteCompte, PageCompte, PageReservee } from '../components/compte/PageReservee'
@@ -39,11 +40,13 @@ function TeteDeRepli() {
   return estConnecteActif(compte) ? null : <EnTeteCompte titre="Tableau de bord" />
 }
 
-/** Emplacement réservé de la future carte « Premiers pas » (EN SUSPENS, décision du 27/11/2026 : ne pas
- * la faire). Rien n'est rendu ; à remplir le jour où elle est décidée (professeur tout neuf : ajouter
- * une école, une classe, l'horaire…). */
-function CartePremiersPas(_: { donnees: DonneesEspace | null }) {
-  return null
+/** Carte « Premiers pas » (décidée le 27/11/2026, maquette « premiers ») : six étapes cochées d'après les
+ * données réelles, en tête du tableau de bord tant qu'il en reste une et qu'elle n'est pas masquée
+ * (`components/compte/CartePremiersPas.tsx`, `lib/premiersPas.ts`). */
+function CartePremiersPas({ donnees }: { donnees: DonneesEspace | null }) {
+  const compte = useCompte()
+  if (!compte.profil) return null
+  return <CartePremiersPasCarte donnees={donnees} ecoles={compte.ecoles.length} uid={compte.profil.id} />
 }
 
 function TableauDeBord() {
@@ -96,6 +99,8 @@ function TableauDeBord() {
           </div>
         )}
 
+        <CartePremiersPas donnees={donnees} />
+
         <div className="ep-tdb-haut">
           <section className="ep-carte ep-aujourdhui" aria-labelledby={`${id}-auj`}>
             <div className="ep-carte-tete">
@@ -134,8 +139,6 @@ function TableauDeBord() {
             </p>
           </section>
         </div>
-
-        <CartePremiersPas donnees={donnees} />
 
         <section aria-label="Les quatre portes de l'espace professeur" className="ep-portes-cartes">
           {PORTES.filter((p) => p.cle !== 'tableau').map((p) => (

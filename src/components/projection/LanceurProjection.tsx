@@ -9,6 +9,7 @@ import { ouvrirFenetreDiapos } from '../../lib/projection/fenetre'
 import { aDesAnnotations, lireAnnotations, resumeAnnotations, resumeDansSelection } from '../../lib/projection/annotations'
 import type { DonneesAnnotations } from '../../lib/projection/annotations'
 import { GardeProfesseur } from './GardeProfesseur'
+import { noterProjectionLancee } from '../../lib/premiersPas'
 import { Pictogramme } from './Pictogrammes'
 import './lanceur.css'
 
@@ -84,6 +85,8 @@ function Lanceur({ chapter, aller }: { chapter: ChapterContent; aller: Aller }) 
   function lancer() {
     if (choix.etapes.length === 0) return
     enregistrerChoix(chapter, choix)
+    // Carte « Premiers pas » du tableau de bord : repère local « une projection a été lancée » (rien n'est envoyé).
+    noterProjectionLancee()
     const pleinEcran = () => {
       const el = document.documentElement
       if (document.fullscreenEnabled && el.requestFullscreen && !document.fullscreenElement) el.requestFullscreen().catch(() => undefined)

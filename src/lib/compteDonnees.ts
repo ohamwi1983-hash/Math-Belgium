@@ -14,6 +14,7 @@ import type { PlanDocument } from './evaluationLocal'
 import { messageErreur, normaliserCodeInvitation, plansLocauxAImporter, typeDuPlan, type Ecole, type PlanLocal, type Profil, type TypePlan } from './compteValidation'
 import { estRepartitionDefaut, repartitionValide, type RepartitionPourcents } from './repartitionProcessus'
 import { lireRangement, type OrdreChapitres } from './ordreChapitres'
+import { planSansLogo } from './logoEcole'
 
 export class ErreurCompte extends Error {
   constructor(brute: unknown) {
@@ -224,7 +225,8 @@ export async function listerPlans(c: SupabaseClient): Promise<PlanCoffre[]> {
 }
 
 export async function enregistrerPlanCoffre(c: SupabaseClient, titre: string, plan: PlanDocument): Promise<PlanCoffre> {
-  return verifier(await c.from('plans').insert({ type: typeDuPlan(plan), titre: titre.trim(), contenu: plan }).select('id, type, titre, contenu, cree_le, modifie_le').single()) as PlanCoffre
+  // Logo de l'école (0012) jamais stocké dans un plan : il est remis au rendu depuis l'école choisie.
+  return verifier(await c.from('plans').insert({ type: typeDuPlan(plan), titre: titre.trim(), contenu: planSansLogo(plan) }).select('id, type, titre, contenu, cree_le, modifie_le').single()) as PlanCoffre
 }
 
 export async function lirePlanCoffre(c: SupabaseClient, id: string): Promise<PlanCoffre | null> {

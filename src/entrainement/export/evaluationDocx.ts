@@ -14,6 +14,7 @@ import {
   TableCell,
   TableRow,
   TextRun,
+  VerticalAlign,
   WidthType,
   type FileChild,
   type ParagraphChild,
@@ -48,7 +49,7 @@ import { etiquetteQuestion, fragmentsConsigne, lignePartie, NOM_PROCESSUS_EXAMEN
 import type { BlocCorrection, CritereBareme, EtapeCorrection, FragmentConsigne, LigneCalcul } from "./genererFeuilleExercices";
 import { blocsDeColonnes, colonnesReponses, largeurColonneTableau, largeurFragments, largeurLibelleBloc, largeurLibelleTableau, segmentsDuGroupe, type TableauGroupe } from "./grilleCorrection";
 import { decouperLigneCalcul, estLignePiege } from "./corrigeTableau";
-import { cartoucheEffectif, morceauxSurtitre } from "./cartouche";
+import { cartoucheEffectif, logoCartouche, morceauxSurtitre } from "./cartouche";
 import { annexeTablePhiDocx, copieDemandeTablePhi } from "./tablePhiDocx";
 
 /**
@@ -185,8 +186,92 @@ const BON = "2F6B3A";
 /** Largeur utile de la page en twips (A4 11 906 − marges 2 × 1 000). */
 const LARGEUR_UTILE = 9906;
 
+/** Logo FACULTATIF de l'école (0012) prêt pour Word : PNG / JPEG (un WEBP est redessiné en PNG — Word ne
+ * le lit pas), à 1,5 cm de haut (57 px), 4 cm de large au plus. `null` sans logo ou si l'image ne se
+ * lit pas : le document reste alors exactement celui d'avant. */
+interface LogoDocx {
+  type: "png" | "jpg";
+  donnees: Uint8Array;
+  largeur: number;
+  hauteur: number;
+}
+
+function base64VersOctets(b64: string): Uint8Array {
+  const brut = atob(b64);
+  const res = new Uint8Array(brut.length);
+  for (let i = 0; i < brut.length; i++) res[i] = brut.charCodeAt(i);
+  return res;
+}
+
+async function logoDocx(entete: EnteteEvaluation): Promise<LogoDocx | null> {
+  const logo = logoCartouche(entete.cartouche);
+  if (!logo || typeof Image === "undefined") return null;
+  try {
+    const img = new Image();
+    img.src = logo;
+    await img.decode();
+    const lN = img.naturalWidth || 1;
+    const hN = img.naturalHeight || 1;
+    let hauteur = 57;
+    let largeur = Math.round((hauteur * lN) / hN);
+    if (largeur > 151) {
+      largeur = 151;
+      hauteur = Math.max(1, Math.round((largeur * hN) / lN));
+    }
+    if (logo.startsWith("data:image/webp")) {
+      const canvas = document.createElement("canvas");
+      canvas.width = lN;
+      canvas.height = hN;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return null;
+      ctx.drawImage(img, 0, 0);
+      const png = canvas.toDataURL("image/png");
+      return { type: "png", donnees: base64VersOctets(png.slice(png.indexOf(",") + 1)), largeur, hauteur };
+    }
+    return { type: logo.startsWith("data:image/png") ? "png" : "jpg", donnees: base64VersOctets(logo.slice(logo.indexOf(",") + 1)), largeur, hauteur };
+  } catch {
+    return null;
+  }
+}
+
+/** Avec un logo : les paragraphes d'en-tête passent dans la colonne de droite d'un tableau sans bordure,
+ * le logo dans celle de gauche. Sans logo : les paragraphes tels quels (document inchangé). */
+function avecLogoDocx(paragraphes: Paragraph[], logo: LogoDocx | null): FileChild[] {
+  if (!logo) return paragraphes;
+  const gauche = logo.largeur * 15 + 240;
+  return [
+    new Table({
+      width: { size: LARGEUR_UTILE, type: WidthType.DXA },
+      columnWidths: [gauche, LARGEUR_UTILE - gauche],
+      borders: BORDS_INVISIBLES,
+      rows: [
+        new TableRow({
+          cantSplit: true,
+          children: [
+            new TableCell({
+              width: { size: gauche, type: WidthType.DXA },
+              borders: BORDS_INVISIBLES,
+              verticalAlign: VerticalAlign.CENTER,
+              children: [new Paragraph({ children: [new ImageRun({ type: logo.type, data: logo.donnees, transformation: { width: logo.largeur, height: logo.hauteur } })] })],
+            }),
+            new TableCell({ width: { size: LARGEUR_UTILE - gauche, type: WidthType.DXA }, borders: BORDS_INVISIBLES, verticalAlign: VerticalAlign.CENTER, children: paragraphes }),
+          ],
+        }),
+      ],
+    }),
+  ];
+}
+
 /** En-tête commun (école, titre, date · série en gras · durée, champs Nom/Classe/N°). */
-function enteteDocx(entete: EnteteEvaluation, items: ItemEvaluation[], suffixe?: string): FileChild[] {
+function enteteDocx(entete: EnteteEvaluation, items: ItemEvaluation[], suffixe?: string, logo: LogoDocx | null = null): FileChild[] {
+  return [
+    ...avecLogoDocx(enteteTexteDocx(entete, items, suffixe), logo),
+    new Paragraph({ children: [new TextRun({ text: "Nom : ________________________________    Classe : __________    N° : ____", size: 20 })], spacing: { after: 160 } }),
+  ];
+}
+
+/** Surtitre (école), titre, date · série · durée. */
+function enteteTexteDocx(entete: EnteteEvaluation, items: ItemEvaluation[], suffixe?: string): Paragraph[] {
   return [
     new Paragraph({ children: [new TextRun({ text: surtitreDocx(entete), size: 16, color: ACCENT })] }),
     new Paragraph({ children: [new TextRun({ text: `${titreEvaluation(entete)}${suffixe ? ` — ${suffixe}` : ""}`, bold: true, size: 32 })], spacing: { before: 60 } }),
@@ -199,7 +284,6 @@ function enteteDocx(entete: EnteteEvaluation, items: ItemEvaluation[], suffixe?:
       ],
       spacing: { after: 120 },
     }),
-    new Paragraph({ children: [new TextRun({ text: "Nom : ________________________________    Classe : __________    N° : ____", size: 20 })], spacing: { after: 160 } }),
   ];
 }
 
@@ -512,9 +596,12 @@ function bandeauExamenDocx(examen: ExamenDocument): Paragraph {
   });
 }
 
-function enteteExamenDocx(entete: EnteteEvaluation, examen: ExamenDocument, suffixe?: string): FileChild[] {
+function enteteExamenDocx(entete: EnteteEvaluation, examen: ExamenDocument, suffixe?: string, logo: LogoDocx | null = null): FileChild[] {
+  return [bandeauExamenDocx(examen), ...avecLogoDocx(enteteExamenTexteDocx(entete, suffixe), logo)];
+}
+
+function enteteExamenTexteDocx(entete: EnteteEvaluation, suffixe?: string): Paragraph[] {
   return [
-    bandeauExamenDocx(examen),
     new Paragraph({ children: [new TextRun({ text: surtitreDocx(entete), size: 16, color: ACCENT })] }),
     new Paragraph({ children: [new TextRun({ text: `${titreExamen(entete)}${suffixe ? ` — ${suffixe}` : ""}`, bold: true, size: 32 })], spacing: { before: 60 } }),
     new Paragraph({
@@ -621,7 +708,7 @@ function enteteCourantDocx(entete: EnteteEvaluation, examen: ExamenDocument): He
 }
 
 async function copieExamenDocx(entete: EnteteEvaluation, examen: ExamenDocument, items: ItemEvaluation[]): Promise<Blob> {
-  const enfants: FileChild[] = [...enteteExamenDocx(entete, examen), new Paragraph({ children: [new TextRun({ text: "Nom : ________________________________    Classe : __________    N° : ____", size: 20 })], spacing: { after: 160 } })];
+  const enfants: FileChild[] = [...enteteExamenDocx(entete, examen, undefined, await logoDocx(entete)), new Paragraph({ children: [new TextRun({ text: "Nom : ________________________________    Classe : __________    N° : ____", size: 20 })], spacing: { after: 160 } })];
   enfants.push(tableauPartiesDocx(partiesDuDocument(examen, items)));
   if (entete.calculatrice) {
     enfants.push(new Paragraph({ children: [new TextRun({ text: `Calculatrice ${entete.calculatrice === "interdite" ? "interdite" : "autorisée"}`, bold: true, color: entete.calculatrice === "interdite" ? ALERTE : BON })], spacing: { before: 120 } }));
@@ -633,7 +720,7 @@ async function copieExamenDocx(entete: EnteteEvaluation, examen: ExamenDocument,
 }
 
 async function corrigeExamenDocx(entete: EnteteEvaluation, examen: ExamenDocument, items: ItemEvaluation[]): Promise<Blob> {
-  const enfants: FileChild[] = [...enteteExamenDocx(entete, examen, "Corrigé"), ...(await questionsExamenDocx(entete, examen, items, true))];
+  const enfants: FileChild[] = [...enteteExamenDocx(entete, examen, "Corrigé", await logoDocx(entete)), ...(await questionsExamenDocx(entete, examen, items, true))];
   return documentDocx(enfants, piedDocx(entete.serieLettre, "Corrigé · document du professeur"), enteteCourantDocx(entete, examen));
 }
 
@@ -675,7 +762,7 @@ function documentDocx(enfants: FileChild[], pied: Footer, enteteCourant?: Header
 
 export async function genererCopieEvaluationDocx(entete: EnteteEvaluation, items: ItemEvaluation[]): Promise<Blob> {
   if (entete.examen) return copieExamenDocx(entete, entete.examen, items);
-  const enfants: FileChild[] = [...enteteDocx(entete, items), tableauResultats(items)];
+  const enfants: FileChild[] = [...enteteDocx(entete, items, undefined, await logoDocx(entete)), tableauResultats(items)];
   if (entete.calculatrice) {
     enfants.push(new Paragraph({ children: [new TextRun({ text: `Calculatrice ${entete.calculatrice === "interdite" ? "interdite" : "autorisée"}`, bold: true, color: entete.calculatrice === "interdite" ? ALERTE : BON })], spacing: { before: 120 } }));
   }
@@ -689,7 +776,7 @@ export async function genererCopieEvaluationDocx(entete: EnteteEvaluation, items
 /** Corrigé Word : même contenu que le corrigé HTML (énoncé de chaque question puis son corrigé détaillé). */
 export async function genererCorrigeEvaluationDocx(entete: EnteteEvaluation, items: ItemEvaluation[]): Promise<Blob> {
   if (entete.examen) return corrigeExamenDocx(entete, entete.examen, items);
-  const enfants: FileChild[] = [...enteteDocx(entete, items, "Corrigé").slice(0, 3), ...(await questionsDocx(entete, items, true))];
+  const enfants: FileChild[] = [...enteteDocx(entete, items, "Corrigé", await logoDocx(entete)).slice(0, -1), ...(await questionsDocx(entete, items, true))];
   return documentDocx(enfants, piedDocx(entete.serieLettre, "Corrigé · document du professeur"));
 }
 
@@ -850,7 +937,7 @@ export async function genererGrilleEvaluationDocx(entete: EnteteEvaluation, item
     new TextRun({ text: m.nom, size: 18, color: m.proc ? couleurProcessusDocx(m.proc) : GRIS }),
     new TextRun({ text: m.suite, size: 18, color: GRIS }),
   ]);
-  const enfants: FileChild[] = [
+  const enfants: FileChild[] = avecLogoDocx([
     new Paragraph({ children: [new TextRun({ text: `Document professeur · ${examen ? "Examen · " : ""}Série `, size: 16, color: ACCENT }), new TextRun({ text: entete.serieLettre, size: 16, color: ACCENT, bold: true })] }),
     new Paragraph({ children: [new TextRun({ text: `Grille de correction — ${examen ? titreExamen(entete) : titreNettoye(entete)}`, bold: true, size: 32 })], spacing: { before: 60 } }),
     new Paragraph({
@@ -858,7 +945,7 @@ export async function genererGrilleEvaluationDocx(entete: EnteteEvaluation, item
       border: { bottom: { style: BorderStyle.SINGLE, size: 12, color: "1B1D22", space: 4 } },
       spacing: { after: 160 },
     }),
-  ];
+  ], await logoDocx(entete));
   // Évaluation : questions par processus ; examen : partie par partie (ouverture de partie, libellé
   // processus · chapitre de chaque question).
   const groupes: { ouverture: Paragraph[]; questions: { item: ItemEvaluation; numero: number; libelle: string }[] }[] = [];
