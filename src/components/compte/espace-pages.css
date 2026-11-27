@@ -1,0 +1,141 @@
+/* ---------- Pages de l'espace professeur réorganisé (27/11/2026) : tableau de bord (`/espace`), « Préparer
+ * un cours » (`/espace/preparer`), vue d'ensemble de « Mes classes » (`/carnet`). Importé par ces pages
+ * (et par `CarnetPage`). Classes `ep-*` ; jetons du site, clair et sombre ; téléphone d'abord. */
+
+.page-tool:has(> .espace-tdb), .page-tool:has(> .espace-preparer) { padding-top: 24px; max-width: 1320px; }
+
+/* ---------- tableau de bord ---------- */
+.ep-tdb-haut { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 18px; align-items: stretch; }
+.ep-tdb-haut > .ep-carte { display: flex; flex-direction: column; }
+.ep-carte-pied { margin: auto 0 0; padding-top: 14px; }
+.ep-vide-bloc { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+.ep-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+
+.ep-cours-liste { list-style: none; margin: 4px 0 0; padding: 0; }
+.ep-cours {
+  display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  padding: 14px 0; border-top: 1px solid var(--line-soft);
+}
+.ep-cours-heure { font: 600 1rem var(--mono); color: var(--ink-soft); }
+.ep-cours-texte { min-width: 0; display: flex; flex-direction: column; gap: 6px; color: var(--ink); overflow-wrap: anywhere; }
+.ep-cours-ligne strong { font-weight: 700; }
+.ep-cours-court { display: none; }
+.ep-cours-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ep-cours.supprime { color: var(--ink-faint); }
+.ep-cours.supprime .ep-cours-texte { color: var(--ink-soft); }
+.ep-cours.supprime { grid-template-columns: 64px minmax(0, 1fr); }
+.ep-cours-action { flex: none; }
+.ep-cours-action svg { flex: none; }
+
+.ep-avenir-liste { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.ep-avenir-ligne {
+  display: flex; align-items: baseline; gap: 10px; min-height: 44px; padding: 8px 6px; border-radius: 8px;
+  color: var(--ink); text-decoration: none; overflow-wrap: anywhere;
+}
+.ep-avenir-ligne:hover { background: var(--surface-2); }
+.ep-avenir-ligne:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ep-avenir-ligne .ep-chip { flex: none; white-space: nowrap; }
+.ep-avenir-texte { min-width: 0; }
+
+/* Les quatre portes (cartes du tableau de bord). */
+.ep-portes-cartes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.ep-porte-carte {
+  --porte: var(--ink-soft);
+  display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 20px; background: var(--surface);
+  border: 1px solid var(--line-soft); border-top: 5px solid var(--porte); border-radius: var(--ep-rayon);
+}
+.ep-porte-carte.ep-porte-classes { --porte: var(--good); }
+.ep-porte-carte.ep-porte-preparer { --porte: var(--sky); }
+.ep-porte-carte.ep-porte-documents { --porte: var(--plan); }
+.ep-porte-carte .ep-porte-icone { width: 52px; height: 52px; border-radius: 12px; }
+.ep-porte-carte .ep-porte-icone svg { width: 26px; height: 26px; }
+.ep-porte-carte h2 { margin: 0; font: 600 1.35rem/1.15 var(--serif); }
+.ep-porte-carte h2 a { color: var(--ink); text-decoration: none; }
+.ep-porte-carte h2 a:hover { color: var(--accent-ink); text-decoration: underline; }
+.ep-porte-carte h2 a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ep-porte-phrase { margin: 6px 0 0; color: var(--ink-soft); }
+.ep-porte-court { display: none; margin: 4px 0 0; color: var(--ink-soft); }
+.ep-porte-liens { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.ep-porte-liens a {
+  display: inline-flex; gap: 6px; align-items: baseline; min-height: 36px; padding: 6px 0; color: var(--ink); text-decoration: none;
+}
+.ep-porte-liens a span { color: var(--porte); font-weight: 700; }
+.ep-porte-liens a:hover { color: var(--accent-ink); text-decoration: underline; }
+.ep-porte-liens a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (max-width: 1180px) {
+  .ep-portes-cartes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 980px) {
+  .ep-tdb-haut { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 759px) {
+  .page-tool:has(> .espace-tdb), .page-tool:has(> .espace-preparer) { padding-top: 12px; }
+  .ep-carte { padding: 16px; }
+  .ep-cours { grid-template-columns: 52px minmax(0, 1fr) auto; gap: 10px; padding: 12px 0; }
+  .ep-cours-detail { display: none; }
+  .ep-cours-court { display: inline; }
+  .ep-cours-action { width: 48px; min-height: 48px; padding: 0; }
+  .ep-cours-action .ep-cours-action-texte {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  .ep-cours-action svg { width: 20px; height: 20px; }
+  .ep-avenir { order: 3; }
+  .ep-portes-cartes { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .ep-porte-carte { flex-direction: row; align-items: center; gap: 16px; padding: 16px; border-top-width: 1px; border-left: 5px solid var(--porte); }
+  .ep-porte-carte .ep-porte-icone { width: 48px; height: 48px; }
+  .ep-porte-carte h2 { font: 700 1.1rem var(--sans); }
+  .ep-porte-phrase, .ep-porte-liens { display: none; }
+  .ep-porte-court { display: block; }
+  /* Toute la carte cliquable (le lien du titre s'étend). */
+  .ep-porte-carte { position: relative; }
+  .ep-porte-carte h2 a::after { content: ""; position: absolute; inset: 0; border-radius: var(--ep-rayon); }
+}
+
+/* ---------- Préparer un cours ---------- */
+.ep-outils { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.ep-outil { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 16px; align-items: start; scroll-margin-top: 16px; }
+.ep-outil-icone {
+  width: 60px; height: 60px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;
+  background: var(--sky-soft); color: var(--sky);
+}
+.ep-outil-icone svg { width: 28px; height: 28px; }
+.ep-outil h2 { margin: 2px 0 0; font: 600 1.3rem/1.2 var(--serif); color: var(--ink); }
+.ep-outil-phrase { margin: 6px 0 14px; color: var(--ink-soft); }
+.ep-outil .ep-actions { gap: 10px; }
+.ep-outil-note { margin: 12px 0 0; font-size: 0.88rem; color: var(--ink-soft); }
+.ep-projeter-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.ep-projeter-form label { display: flex; flex-direction: column; gap: 4px; font: 600 0.82rem var(--sans); color: var(--ink-soft); min-width: 0; }
+.ep-projeter-form select {
+  min-height: 44px; max-width: 100%; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--ep-rayon-bouton);
+  background: var(--surface); color: var(--ink); font: 500 0.95rem var(--sans);
+}
+.ep-projeter-form label.chapitre { flex: 1 1 220px; }
+.ep-projeter-form label.chapitre select { width: 100%; }
+.ep-projeter-form select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 1100px) {
+  .ep-outils { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 559px) {
+  .ep-outil { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .ep-outil-icone { width: 48px; height: 48px; }
+  .ep-projeter-form label, .ep-projeter-form .ep-bouton { flex: 1 1 100%; }
+  .ep-projeter-form select { width: 100%; }
+}
+
+/* ---------- Mes classes : vue d'ensemble ---------- */
+.ep-classes-tete { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.ep-classes-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+.ep-classe { display: flex; flex-direction: column; gap: 10px; }
+.ep-classe-tete { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; }
+.ep-classe-tete h3 { margin: 0; font: 600 1.45rem/1.1 var(--serif); }
+.ep-classe-tete h3 a { color: var(--ink); text-decoration: none; }
+.ep-classe-tete h3 a:hover { color: var(--accent-ink); text-decoration: underline; }
+.ep-classe-tete h3 a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ep-classe-niveau { font-family: var(--serif); }
+.ep-classe p { margin: 0; color: var(--ink-soft); overflow-wrap: anywhere; }
+.ep-classe .ep-classe-en-cours { color: var(--ink); }
+.ep-progres { display: block; height: 9px; border-radius: 999px; background: var(--line-soft); overflow: hidden; }
+.ep-progres > span { display: block; height: 100%; border-radius: 999px; background: var(--good); }
+.ep-classe-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.ep-classe-alerte { color: var(--bad) !important; }

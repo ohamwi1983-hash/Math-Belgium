@@ -209,5 +209,5 @@
   .page-tool:has(> .espace-conception) { padding-top: 0; }
   .espace-conception-contenu { gap: 12px; }
   /* Conception : la barre « Ma feuille · Générer » du panneau passe au-dessus de la barre du menu. */
-  .espace-conception .conc-barre-mobile { bottom: calc(57px + env(safe-area-inset-bottom, 0px)); padding-bottom: 10px; }
+  .espace-conception .conc-barre-mobile { bottom: calc(var(--ep-barre, 57px) + env(safe-area-inset-bottom, 0px)); padding-bottom: 10px; }
 }

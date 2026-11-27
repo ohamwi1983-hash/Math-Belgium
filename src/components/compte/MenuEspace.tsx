@@ -1,322 +1,310 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, type ReactNode } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import type { Classe } from '../../lib/carnet'
 import { useCompte } from '../../lib/compteContexte'
-import { couleurClasse } from '../carnet/contexteCarnet'
-import { IconeAdmin, IconeCarnet, IconeClasses, IconeCoffre, IconeEvaluation, IconeFeuille, IconeJour, IconePlus, IconeProfil, IconeSemaine, IconeSortie } from './IconesEspace'
+import { IconeAccueil, IconeAdmin, IconeCarnet, IconeDocuments, IconeEvaluation, IconeFeuille, IconeGroupe, IconePreparer, IconeReglages, IconeRetour, IconeSortie, type ModeIcone } from './IconesEspace'
+import './espace.css'
 
 export { IconeCarnet, IconeEvaluation, IconeFeuille }
 
 /** Ce que le carnet donne au menu (pages `/carnet/*` seulement) : classes, séances par classe,
- * créneaux d'aujourd'hui à noter. */
+ * créneaux d'aujourd'hui à noter (pastille « n à noter » de « Mes classes »). */
 export interface MenuCarnetDonnees {
   classes: Classe[]
   nombreSeances: (id: string) => number
   aNoter: number
 }
 
-const SOUS_PAGES_PLUS = ['/carnet/agenda', '/carnet/horaire', '/carnet/reglages']
+export type CleEspace = 'tableau' | 'classes' | 'preparer' | 'documents' | 'reglages' | 'admin'
+
+interface SousEntree {
+  to: string
+  libelle: string
+  /** Pages (sans fragment) où cette sous-entrée est active, en plus de son adresse. */
+  aussi?: (chemin: string) => boolean
+}
+
+export interface Porte {
+  cle: Exclude<CleEspace, 'admin'>
+  to: string
+  libelle: string
+  /** Libellé de la barre du bas (téléphone). */
+  barre: string
+  icone: (mode: ModeIcone) => ReactNode
+  sous: SousEntree[]
+  /** Phrase d'explication sous le titre de la porte (carte du tableau de bord, en-tête de la page). */
+  phrase: string
+  /** Résumé d'une ligne (cartes du tableau de bord sur téléphone). */
+  court: string
+  /** Liens directs de la carte du tableau de bord. */
+  liens: { to: string; libelle: string }[]
+}
+
+const pageExercicesChapitre = (chemin: string) => /^\/[^/]+\/[^/]+\/exercices$/.test(chemin)
 
 /**
- * Menu UNIQUE « Mon espace » des pages professeur : profil, coffre, administration, carnet de
- * matière vue (`/carnet/*`, qui n'a plus de second menu), feuilles d'exercices et évaluations
- * (professeur connecté). Classes CSS du carnet (`carnet.css`) + `espace-*` (`profil.css`), à
- * importer par la page. Lien actif : `aria-current="page"` (NavLink).
+ * Les portes de l'espace professeur (décision du 27/11/2026, maquettes « dashboard » / « classes » /
+ * « préparer » / « téléphone ») : le tableau de bord puis les quatre portes, chacune avec ses
+ * sous-entrées (dépliées quand la porte est active). Les adresses d'avant restent celles des pages
+ * (`/carnet`, `/coffre`, `/profil`, `/exercice`, `/evaluation`) : rien ne casse.
+ */
+export const PORTES: Porte[] = [
+  { cle: 'tableau', to: '/espace', libelle: 'Tableau de bord', barre: 'Accueil', icone: (m) => <IconeAccueil mode={m} />, sous: [], phrase: 'Ta journée de cours, ce qui arrive, et les quatre portes.', court: '', liens: [] },
+  {
+    cle: 'classes',
+    to: '/carnet',
+    libelle: 'Mes classes',
+    barre: 'Classes',
+    phrase: 'Ton journal de classe : ce que tu vois, quand, et avec qui.',
+    court: 'Matière vue, agenda, horaire, page des élèves',
+    liens: [
+      { to: '/carnet', libelle: 'Matière vue et agenda' },
+      { to: '/carnet/horaire', libelle: 'Mon horaire' },
+      { to: '/carnet/agenda', libelle: 'Devoirs et évaluations prévus' },
+      { to: '/carnet#page-des-eleves', libelle: 'Page des élèves (code de classe)' },
+    ],
+    icone: (m) => <IconeGroupe mode={m} />,
+    sous: [
+      { to: '/carnet', libelle: "Vue d'ensemble" },
+      { to: '/carnet/semaine', libelle: 'Ma semaine', aussi: (c) => c === '/carnet/aujourdhui' },
+      { to: '/carnet/agenda', libelle: 'Agenda' },
+      { to: '/carnet/horaire', libelle: 'Mon horaire' },
+      { to: '/carnet/classes', libelle: 'Ajouter une classe' },
+    ],
+  },
+  {
+    cle: 'preparer',
+    to: '/espace/preparer',
+    libelle: 'Préparer un cours',
+    barre: 'Préparer',
+    phrase: 'Tout ce qui sert en classe ou sur papier.',
+    court: "Projeter, feuilles d'exercices, évaluations",
+    liens: [
+      { to: '/espace/preparer#projeter', libelle: 'Projeter un chapitre' },
+      { to: '/exercice', libelle: "Créer une feuille d'exercices" },
+      { to: '/evaluation', libelle: 'Créer une évaluation ou un examen' },
+      { to: '/espace/preparer#remediation', libelle: 'Feuille de remédiation' },
+    ],
+    icone: (m) => <IconePreparer mode={m} />,
+    sous: [
+      { to: '/espace/preparer#projeter', libelle: 'Projeter un chapitre' },
+      { to: '/exercice', libelle: "Feuille d'exercices", aussi: pageExercicesChapitre },
+      { to: '/evaluation', libelle: 'Évaluation ou examen' },
+      { to: '/espace/preparer#remediation', libelle: 'Remédiation' },
+    ],
+  },
+  {
+    cle: 'documents',
+    to: '/coffre',
+    libelle: 'Mes documents',
+    barre: 'Documents',
+    phrase: 'Ce que tu as enregistré, pour le réimprimer ou le partager.',
+    court: 'Enregistrés, partagés, projections annotées',
+    liens: [
+      { to: '/coffre', libelle: 'Évaluations et feuilles enregistrées' },
+      { to: '/coffre#partages', libelle: 'Partagés avec moi / par moi' },
+      { to: '/coffre#projections', libelle: 'Projections annotées' },
+    ],
+    icone: (m) => <IconeDocuments mode={m} />,
+    sous: [
+      { to: '/coffre', libelle: 'Enregistrés', aussi: (c) => c.startsWith('/partage/') },
+      { to: '/coffre#partages', libelle: 'Partagés' },
+      { to: '/coffre#projections', libelle: 'Projections annotées' },
+    ],
+  },
+  {
+    cle: 'reglages',
+    to: '/profil',
+    libelle: 'Réglages',
+    barre: 'Réglages',
+    phrase: "À régler une fois, en début d'année.",
+    court: 'Profil, écoles, ordre des chapitres, agenda',
+    liens: [
+      { to: '/profil#profil', libelle: 'Mon profil et mes écoles' },
+      { to: '/profil#cartouche', libelle: 'En-tête des copies' },
+      { to: '/profil#ordre-chapitres', libelle: 'Mon ordre des chapitres' },
+      { to: '/carnet/reglages', libelle: "Réglages de l'agenda" },
+      { to: '/profil#compte', libelle: 'Mon compte' },
+    ],
+    icone: (m) => <IconeReglages mode={m} />,
+    sous: [
+      { to: '/profil#profil', libelle: 'Mon profil et mes écoles' },
+      { to: '/profil#cartouche', libelle: 'En-tête des copies' },
+      { to: '/profil#ordre-chapitres', libelle: 'Mon ordre des chapitres' },
+      { to: '/carnet/reglages', libelle: "Réglages de l'agenda" },
+      { to: '/profil#compte', libelle: 'Mon compte' },
+    ],
+  },
+]
+
+/** Porte de la page affichée (`null` : page hors de l'espace professeur). */
+export function porteDe(chemin: string): CleEspace | null {
+  const c = chemin.replace(/\/+$/, '') || '/'
+  if (c === '/espace') return 'tableau'
+  if (c === '/carnet/reglages' || c === '/profil') return 'reglages'
+  if (c === '/carnet' || c.startsWith('/carnet/')) return 'classes'
+  if (c === '/espace/preparer' || c === '/exercice' || c === '/evaluation' || pageExercicesChapitre(c)) return 'preparer'
+  if (c === '/coffre' || c.startsWith('/partage/')) return 'documents'
+  if (c === '/admin') return 'admin'
+  return null
+}
+
+function decouper(to: string): { chemin: string; ancre: string } {
+  const i = to.indexOf('#')
+  return i < 0 ? { chemin: to, ancre: '' } : { chemin: to.slice(0, i), ancre: to.slice(i) }
+}
+
+/** Sous-entrée active : même page, et même fragment quand elle en a un (sinon : aucun fragment d'une
+ * sœur de la même page). */
+function sousActive(s: SousEntree, soeurs: SousEntree[], chemin: string, ancre: string): boolean {
+  const { chemin: page, ancre: sonAncre } = decouper(s.to)
+  if (s.aussi?.(chemin)) return true
+  if (page !== chemin) return false
+  if (sonAncre) return ancre === sonAncre
+  return !soeurs.some((x) => x !== s && decouper(x.to).chemin === chemin && decouper(x.to).ancre !== '' && decouper(x.to).ancre === ancre)
+}
+
+/**
+ * Menu UNIQUE « Espace professeur » de toutes les pages professeur (tableau de bord, Mes classes, Préparer
+ * un cours — feuilles d'exercices et panneau des évaluations compris —, Mes documents, partage, Réglages,
+ * administration). Remplace l'ancien menu « Mon espace » et les groupes de liens du menu du compte.
  *
- * Ordinateur (≥ 760 px) : colonne de gauche — Mon profil · Carnet de matière vue · Feuilles
- * d'exercices · Évaluations et examens · Mon coffre, puis, à part, Administration (admin) et Se
- * déconnecter. « Carnet de matière vue » se DÉPLIE (bouton `aria-expanded`) : Aujourd'hui (« n à
- * noter ») · Ma semaine · Mes classes (une entrée par classe, couleur et nombre de séances, + Ajouter
- * une classe) · Agenda d'une période · Mon horaire · Réglages. Déplié d'office dans le carnet,
- * replié ailleurs (déplié à la main hors du carnet : « Mes classes » au lieu de la liste, que seule
- * la page du carnet charge). `compact` (pages de conception, qui ont besoin de largeur) : de 760 à
- * 1 359 px, colonne d'icônes (libellés lus par les lecteurs d'écran et en `title`).
+ * Ordinateur (≥ 760 px) : colonne de gauche — « ESPACE PROFESSEUR », Tableau de bord, Mes classes,
+ * Préparer un cours, Mes documents, Réglages (sous-entrées de la porte active dépliées), puis à part
+ * Administration (admin), Retour au site élève, Se déconnecter. `compact` (pages de conception, qui ont
+ * besoin de largeur) : de 760 à 1 359 px, colonne d'icônes (libellés lus et en infobulle).
  *
- * Téléphone (< 760 px) : UNE barre fixe en bas. Dans le carnet : Aujourd'hui · Semaine · Classes ·
- * Plus (« Plus » = Agenda, Mon horaire, Réglages, puis le reste de l'espace). Ailleurs : Carnet ·
- * Feuilles · Coffre · Profil · Plus (Évaluations et examens, Administration, Se déconnecter).
- * Les listes s'ouvrent au-dessus de la barre (Échap ou clic à côté pour fermer).
+ * Téléphone (< 760 px) : barre fixe en bas Accueil · Classes · Préparer · Documents · Réglages, et les
+ * sous-entrées de la porte active en onglets défilants en tête du contenu. Administration et
+ * déconnexion : menu du compte (pastille de l'en-tête).
+ *
+ * Changement de page : défilement en haut, ou vers l'ancre demandée (`/profil#compte`).
  */
 export function MenuEspace({ children, carnet, compact = false }: { children: ReactNode; carnet?: MenuCarnetDonnees; compact?: boolean }) {
-  const id = useId()
   const compte = useCompte()
   const navigate = useNavigate()
   const location = useLocation()
-  const chemin = location.pathname.replace(/\/+$/, '')
-  const dansCarnet = chemin === '/carnet' || chemin.startsWith('/carnet/')
-  const [feuille, setFeuille] = useState<'classes' | 'plus' | null>(null)
-  const [carnetOuvert, setCarnetOuvert] = useState(dansCarnet)
-  const barre = useRef<HTMLElement>(null)
+  const chemin = location.pathname.replace(/\/+$/, '') || '/'
+  const ancre = location.hash
+  const active = porteDe(chemin)
   const admin = compte.profil?.est_admin === true
+  const aNoter = carnet?.aNoter ?? 0
 
-  useEffect(() => setCarnetOuvert(dansCarnet), [dansCarnet])
-
-  // Changement de page : la liste du bas se referme. Dans le carnet (comme son ancien menu) :
-  // défilement en haut, ou vers l'ancre demandée.
+  // `MenuCarnetDonnees.classes` / `nombreSeances` : gardés pour l'appel du carnet (la liste des classes
+  // est désormais la vue d'ensemble de « Mes classes », plus le menu).
+  // Changement de page ou d'ancre : vers l'ancre (le contenu peut arriver après : deux essais), sinon en haut.
   useEffect(() => {
-    setFeuille(null)
-    if (!dansCarnet) return
     if (location.hash) {
-      const cible = document.getElementById(decodeURIComponent(location.hash.slice(1)))
-      if (cible) {
-        requestAnimationFrame(() => cible.scrollIntoView({ block: 'start' }))
-        return
+      const id = decodeURIComponent(location.hash.slice(1))
+      let essais = 0
+      const aller = () => {
+        const cible = document.getElementById(id)
+        if (cible) cible.scrollIntoView({ block: 'start' })
+        else if (++essais < 8) window.setTimeout(aller, 150)
       }
+      requestAnimationFrame(aller)
+      return
     }
     window.scrollTo({ top: 0 })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- seulement au changement d'adresse
   }, [location.pathname, location.hash])
 
-  useEffect(() => {
-    if (!feuille) return
-    const dehors = (e: PointerEvent) => {
-      if (!barre.current?.contains(e.target as Node)) setFeuille(null)
-    }
-    const echap = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setFeuille(null)
-        barre.current?.querySelector<HTMLButtonElement>(`[aria-controls="${id}-${feuille}"]`)?.focus()
-      }
-    }
-    document.addEventListener('pointerdown', dehors)
-    document.addEventListener('keydown', echap)
-    return () => {
-      document.removeEventListener('pointerdown', dehors)
-      document.removeEventListener('keydown', echap)
-    }
-  }, [feuille, id])
+  const seDeconnecter = () => void compte.seDeconnecter().then(() => navigate('/'))
+  const titre = (libelle: string) => (compact ? { title: libelle } : {})
+  const porteActive = PORTES.find((p) => p.cle === active)
 
-  const seDeconnecter = () => {
-    setFeuille(null)
-    void compte.seDeconnecter().then(() => navigate('/'))
+  const lienSous = (s: SousEntree, soeurs: SousEntree[], classe: string) => {
+    const ici = sousActive(s, soeurs, chemin, ancre)
+    return (
+      <Link to={s.to} className={`${classe}${ici ? ' ici' : ''}`} aria-current={ici ? 'page' : undefined}>
+        {s.libelle}
+      </Link>
+    )
   }
 
-  const titre = (libelle: string) => (compact ? { title: libelle } : {})
-  const lien = (to: string, libelle: string, icone: ReactNode, end = false) => (
-    <NavLink to={to} end={end} className="carnet-menu-lien" {...titre(libelle)}>
-      <span className="espace-menu-texte">
-        {icone}
-        <span className="espace-menu-libelle">{libelle}</span>
-      </span>
-    </NavLink>
-  )
-  const boutonDeconnexion = (
-    <button type="button" className="carnet-menu-lien espace-menu-bouton" onClick={seDeconnecter} disabled={!compte.client} {...titre('Se déconnecter')}>
-      <IconeSortie />
-      <span className="espace-menu-libelle">Se déconnecter</span>
-    </button>
-  )
-  const lienClasse = (c: Classe, classes: Classe[], nombre: number) => (
-    <NavLink to={`/carnet/classe/${c.id}`} className="carnet-menu-lien">
-      <span className="carnet-menu-classe">
-        <span className={`carnet-point carnet-c${couleurClasse(classes, c.id)}`} aria-hidden="true" />
-        {c.nom}
-      </span>
-      <span className="carnet-menu-compte">
-        {nombre}
-        <span className="carnet-sr"> séances</span>
-      </span>
-    </NavLink>
-  )
-  const ajouterClasse = (
-    <NavLink to="/carnet/classes" className="carnet-menu-lien carnet-menu-ajout">
-      + Ajouter une classe
-    </NavLink>
-  )
-  const aNoter = carnet?.aNoter ?? 0
-  const lienAujourdhui = (
-    <NavLink to="/carnet" end className="carnet-menu-lien">
-      Aujourd'hui
-      {aNoter > 0 && <span className="carnet-menu-compte">{aNoter} à noter</span>}
-    </NavLink>
-  )
-  const liensCarnetRares = (
-    <>
-      <li>
-        <NavLink to="/carnet/agenda" className="carnet-menu-lien">
-          Agenda d'une période
-        </NavLink>
-      </li>
-      <li>
-        <NavLink to="/carnet/horaire" className="carnet-menu-lien">
-          Mon horaire
-        </NavLink>
-      </li>
-      <li>
-        <NavLink to="/carnet/reglages" className="carnet-menu-lien">
-          Réglages
-        </NavLink>
-      </li>
-    </>
-  )
-
-  const sousMenuCarnet = (
-    <div className="espace-sous-menu" id={`${id}-carnet`}>
-      <ul>
-        <li>{lienAujourdhui}</li>
-        <li>
-          <NavLink to="/carnet/semaine" className="carnet-menu-lien">
-            Ma semaine
-          </NavLink>
-        </li>
-        {!carnet && (
-          <li>
-            <NavLink to="/carnet/classes" className="carnet-menu-lien">
-              Mes classes
-            </NavLink>
-          </li>
-        )}
-      </ul>
-      {carnet && (
-        <>
-          <p className="carnet-menu-groupe" id={`${id}-classes`}>
-            Mes classes
-          </p>
-          <ul aria-labelledby={`${id}-classes`}>
-            {carnet.classes.map((c) => (
-              <li key={c.id}>{lienClasse(c, carnet.classes, carnet.nombreSeances(c.id))}</li>
-            ))}
-            <li>{ajouterClasse}</li>
-          </ul>
-        </>
-      )}
-      <ul className="espace-sous-menu-rare">{liensCarnetRares}</ul>
-    </div>
-  )
-
-  const surClasse = chemin.startsWith('/carnet/classe')
-  const surPlus = SOUS_PAGES_PLUS.includes(chemin)
-  const boutonFeuille = (quoi: 'classes' | 'plus', libelle: string, icone: ReactNode, actif: boolean) => (
-    <button
-      type="button"
-      className={`carnet-barre-bouton${actif ? ' active' : ''}`}
-      aria-expanded={feuille === quoi}
-      aria-controls={`${id}-${quoi}`}
-      onClick={() => setFeuille(feuille === quoi ? null : quoi)}
-    >
-      {icone}
-      {libelle}
-    </button>
-  )
-
   return (
-    <div className={`carnet-cadre espace-cadre${compact ? ' compact' : ''}`}>
-      <nav className="carnet-menu espace-menu" aria-label="Mon espace">
-        <p className="espace-menu-titre">Mon espace</p>
-        <ul>
-          <li>{lien('/profil', 'Mon profil', <IconeProfil />, true)}</li>
-          <li className="espace-menu-carnet">
-            <div className="espace-menu-ligne">
-              <Link to="/carnet" className={`carnet-menu-lien espace-menu-parent${dansCarnet ? ' ouvert' : ''}`} {...titre('Carnet de matière vue')}>
-                <span className="espace-menu-texte">
-                  <IconeCarnet />
-                  <span className="espace-menu-libelle">Carnet de matière vue</span>
-                </span>
-              </Link>
-              <button
-                type="button"
-                className="espace-menu-deplier"
-                aria-expanded={carnetOuvert}
-                aria-controls={`${id}-carnet`}
-                aria-label={carnetOuvert ? 'Replier le carnet' : 'Déplier le carnet'}
-                onClick={() => setCarnetOuvert(!carnetOuvert)}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </button>
-            </div>
-            {carnetOuvert && sousMenuCarnet}
-          </li>
-          <li>{lien('/exercice', "Feuilles d'exercices", <IconeFeuille />)}</li>
-          <li>{lien('/evaluation', 'Évaluations et examens', <IconeEvaluation />)}</li>
-          <li>{lien('/coffre', 'Mon coffre', <IconeCoffre />)}</li>
+    <div className={`ep-cadre${compact ? ' compact' : ''}`}>
+      <nav className="ep-menu" aria-label="Espace professeur">
+        <p className="ep-menu-titre">Espace professeur</p>
+        <ul className="ep-portes">
+          {PORTES.map((p) => {
+            const ici = active === p.cle
+            const exact = chemin === p.to && (p.sous.length === 0 || sousActive(p.sous[0], p.sous, chemin, ancre))
+            return (
+              <li key={p.cle} className={`ep-porte ep-porte-${p.cle}${ici ? ' active' : ''}`}>
+                <Link to={p.to} className="ep-porte-lien" aria-current={exact ? 'page' : ici ? 'true' : undefined} {...titre(p.libelle)}>
+                  <span className="ep-porte-icone" aria-hidden="true">
+                    {p.icone('menu')}
+                  </span>
+                  <span className="ep-libelle">{p.libelle}</span>
+                  {p.cle === 'classes' && aNoter > 0 && (
+                    <span className="ep-pastille">
+                      {aNoter}
+                      <span className="ep-sr"> à noter aujourd'hui</span>
+                    </span>
+                  )}
+                </Link>
+                {ici && p.sous.length > 0 && (
+                  <ul className="ep-sous" aria-label={`${p.libelle} : sous-pages`}>
+                    {p.sous.map((s) => (
+                      <li key={s.to}>{lienSous(s, p.sous, 'ep-sous-lien')}</li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            )
+          })}
         </ul>
-        <ul className="carnet-menu-rare">
-          {admin && <li>{lien('/admin', 'Administration', <IconeAdmin />)}</li>}
-          <li>{boutonDeconnexion}</li>
+        <ul className="ep-rare">
+          {admin && (
+            <li>
+              <Link to="/admin" className="ep-rare-lien" aria-current={active === 'admin' ? 'page' : undefined} {...titre('Administration')}>
+                <IconeAdmin />
+                <span className="ep-libelle">Administration</span>
+              </Link>
+            </li>
+          )}
+          <li>
+            <Link to="/" className="ep-rare-lien" {...titre('Retour au site élève')}>
+              <IconeRetour />
+              <span className="ep-libelle">Retour au site élève</span>
+            </Link>
+          </li>
+          <li>
+            <button type="button" className="ep-rare-lien" onClick={seDeconnecter} disabled={!compte.client} {...titre('Se déconnecter')}>
+              <IconeSortie />
+              <span className="ep-libelle">Se déconnecter</span>
+            </button>
+          </li>
         </ul>
       </nav>
 
-      <div className="carnet-contenu">{children}</div>
+      <div className="carnet-contenu ep-contenu">
+        {porteActive && porteActive.sous.length > 0 && (
+          <nav className="ep-onglets" aria-label={`${porteActive.libelle} : sous-pages`}>
+            <ul>
+              {porteActive.sous.map((s) => (
+                <li key={s.to}>{lienSous(s, porteActive.sous, 'ep-onglet')}</li>
+              ))}
+            </ul>
+          </nav>
+        )}
+        {children}
+      </div>
 
-      <nav className="carnet-barre-bas" aria-label="Mon espace" ref={barre}>
-        {feuille === 'classes' && carnet && (
-          <ul className="carnet-feuille" id={`${id}-classes`}>
-            {carnet.classes.map((c) => (
-              <li key={c.id}>{lienClasse(c, carnet.classes, carnet.nombreSeances(c.id))}</li>
-            ))}
-            <li>{ajouterClasse}</li>
-          </ul>
-        )}
-        {feuille === 'plus' &&
-          (dansCarnet ? (
-            <ul className="carnet-feuille" id={`${id}-plus`}>
-              {liensCarnetRares}
-              <li className="espace-feuille-groupe" aria-hidden="true">
-                Mon espace
-              </li>
-              <li>{lien('/profil', 'Mon profil', <IconeProfil />, true)}</li>
-              <li>{lien('/coffre', 'Mon coffre', <IconeCoffre />)}</li>
-              <li>{lien('/exercice', "Feuilles d'exercices", <IconeFeuille />)}</li>
-              <li>{lien('/evaluation', 'Évaluations et examens', <IconeEvaluation />)}</li>
-              {admin && <li>{lien('/admin', 'Administration', <IconeAdmin />)}</li>}
-              <li>{boutonDeconnexion}</li>
-            </ul>
-          ) : (
-            <ul className="carnet-feuille" id={`${id}-plus`}>
-              <li>{lien('/evaluation', 'Évaluations et examens', <IconeEvaluation />)}</li>
-              {admin && <li>{lien('/admin', 'Administration', <IconeAdmin />)}</li>}
-              <li>{boutonDeconnexion}</li>
-            </ul>
-          ))}
-        {dansCarnet ? (
-          <div className="carnet-barre-onglets">
-            <NavLink to="/carnet" end className="carnet-barre-bouton">
-              <IconeJour />
-              Aujourd'hui
-              {aNoter > 0 && (
-                <span className="carnet-barre-pastille">
-                  {aNoter}
-                  <span className="carnet-sr"> à noter</span>
-                </span>
-              )}
-            </NavLink>
-            <NavLink to="/carnet/semaine" className="carnet-barre-bouton">
-              <IconeSemaine />
-              Semaine
-            </NavLink>
-            {carnet ? (
-              boutonFeuille('classes', 'Classes', <IconeClasses />, surClasse)
-            ) : (
-              <NavLink to="/carnet/classes" className="carnet-barre-bouton">
-                <IconeClasses />
-                Classes
-              </NavLink>
+      <nav className="ep-barre" aria-label="Espace professeur">
+        {PORTES.map((p) => (
+          <Link key={p.cle} to={p.to} className={`ep-barre-bouton${active === p.cle ? ' active' : ''}`} aria-current={active === p.cle ? (chemin === p.to ? 'page' : 'true') : undefined}>
+            {p.icone('barre')}
+            <span>{p.barre}</span>
+            {p.cle === 'classes' && aNoter > 0 && (
+              <span className="ep-barre-pastille">
+                {aNoter}
+                <span className="ep-sr"> à noter</span>
+              </span>
             )}
-            {boutonFeuille('plus', 'Plus', <IconePlus />, surPlus)}
-          </div>
-        ) : (
-          <div className="carnet-barre-onglets">
-            <NavLink to="/carnet" className="carnet-barre-bouton">
-              <IconeCarnet mode="barre" />
-              Carnet
-            </NavLink>
-            <NavLink to="/exercice" className="carnet-barre-bouton">
-              <IconeFeuille mode="barre" />
-              Feuilles
-            </NavLink>
-            <NavLink to="/coffre" className="carnet-barre-bouton">
-              <IconeCoffre mode="barre" />
-              Coffre
-            </NavLink>
-            <NavLink to="/profil" end className="carnet-barre-bouton">
-              <IconeProfil mode="barre" />
-              Profil
-            </NavLink>
-            {boutonFeuille('plus', 'Plus', <IconePlus />, false)}
-          </div>
-        )}
+          </Link>
+        ))}
       </nav>
     </div>
   )

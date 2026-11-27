@@ -58,7 +58,7 @@ export function MotDePassePage() {
   else if (fait)
     contenu = (
       <MessageAcces ton="succes" titre="Mot de passe modifié." role="status">
-        <Link to="/profil">Aller à mon profil</Link>
+        <Link to="/espace">Aller à mon espace professeur</Link>
       </MessageAcces>
     )
   else

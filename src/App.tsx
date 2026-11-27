@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom'
 import { HomePage } from './routes/HomePage'
 import { ChapterRoute } from './routes/ChapterRoute'
 import { EntrainementPage } from './routes/EntrainementPage'
@@ -25,6 +25,10 @@ const InscriptionPage = lazy(() => import('./routes/InscriptionPage').then((m) =
 const MotDePassePage = lazy(() => import('./routes/MotDePassePage').then((m) => ({ default: m.MotDePassePage })))
 const ProfilPage = lazy(() => import('./routes/ProfilPage').then((m) => ({ default: m.ProfilPage })))
 const CoffrePage = lazy(() => import('./routes/CoffrePage').then((m) => ({ default: m.CoffrePage })))
+/** Espace professeur réorganisé (27/11/2026) : tableau de bord (page d'arrivée après la connexion) et
+ * porte « Préparer un cours ». Réservés, jamais pré-rendus (absents de `scripts/routes.mjs`). */
+const EspacePage = lazy(() => import('./routes/EspacePage').then((m) => ({ default: m.EspacePage })))
+const PreparerPage = lazy(() => import('./routes/PreparerPage').then((m) => ({ default: m.PreparerPage })))
 const CarnetPage = lazy(() => import('./routes/CarnetPage').then((m) => ({ default: m.CarnetPage })))
 /** Lien de partage d'un enregistrement du coffre (0009) : professeur connecté seulement. */
 const PartagePage = lazy(() => import('./routes/PartagePage').then((m) => ({ default: m.PartagePage })))
@@ -51,6 +55,12 @@ function App() {
           <Route path="/connexion" element={<ConnexionPage />} />
           <Route path="/inscription" element={<InscriptionPage />} />
           <Route path="/mot-de-passe" element={<MotDePassePage />} />
+          <Route path="/espace" element={<EspacePage />} />
+          <Route path="/espace/preparer" element={<PreparerPage />} />
+          {/* Alias lisibles des portes (les pages gardent leur adresse d'avant). */}
+          <Route path="/espace/classes" element={<Navigate to="/carnet" replace />} />
+          <Route path="/espace/documents" element={<Navigate to="/coffre" replace />} />
+          <Route path="/espace/reglages" element={<Navigate to="/profil" replace />} />
           <Route path="/profil" element={<ProfilPage />} />
           <Route path="/coffre" element={<CoffrePage />} />
           <Route path="/partage/:jeton" element={<PartagePage />} />

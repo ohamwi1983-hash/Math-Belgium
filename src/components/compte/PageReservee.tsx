@@ -100,7 +100,7 @@ export function PageReservee({ children, admin = false }: { children: ReactNode;
       <div className="compte-encadre compte-erreur" role="alert">
         <p>Page réservée à l'administrateur du site.</p>
         <p>
-          <Link to="/profil">Retour à mon profil</Link>
+          <Link to="/espace">Retour au tableau de bord</Link>
         </p>
       </div>
     )

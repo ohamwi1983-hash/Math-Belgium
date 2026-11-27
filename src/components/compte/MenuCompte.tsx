@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useCompte } from '../../lib/compteContexte'
-import { IconeAdmin, IconeCarnet, IconeCoffre, IconeEvaluation, IconeFeuille, IconeProfil, IconeSortie } from './IconesEspace'
+import { IconeAccueil, IconeAdmin, IconeProfil, IconeRetour, IconeSortie } from './IconesEspace'
 
 /** Téléphone : tiroir par le bas (voile) ; au-delà, liste déroulante ancrée à droite. */
 const TELEPHONE = '(max-width: 759px)'
@@ -10,7 +10,7 @@ interface Destination {
   to: string
   libelle: string
   icone: ReactNode
-  /** Page en cours aussi sur ses sous-pages (`/carnet/semaine`…). */
+  /** « Tu es ici » sur toute page de l'espace professeur (carnet, documents, réglages…). */
   prefixe?: boolean
   badge?: string
 }
@@ -21,10 +21,10 @@ interface Destination {
  * page de cours, le menu s'affiche d'après la présence d'une session stockée.
  * - Visiteur : bouton bordé « Professeur » (icône personne) → `/connexion?retour=<page>` ; absent des
  *   pages de connexion / inscription / mot de passe (il y mènerait sur elles-mêmes).
- * - Connecté : pastille ronde (initiale du nom affiché) + ▾, `aria-label="Mon compte"`. Le menu : en-tête
- *   (initiale, nom, « Espace professeur »), trois groupes Préparer · Mes outils · Mon compte (les six
- *   liens d'avant, même ordre ; Administration pour l'admin seulement), « Tu es ici » +
- *   `aria-current` sur la page en cours, « Se déconnecter » à part. Téléphone : tiroir par le bas avec
+ * - Connecté : pastille ronde (initiale du nom affiché) + ▾, `aria-label="Mon compte"`. Le menu (réduit le
+ *   27/11/2026 : les outils sont dans le menu « Espace professeur » des pages professeur, `MenuEspace`) :
+ *   en-tête (initiale, nom), « Espace professeur » (`/espace`, « Tu es ici » sur toute page professeur),
+ *   « Retour au site élève », Administration (admin seulement), « Se déconnecter » à part. Téléphone : tiroir par le bas avec
  *   voile (voile, Échap, lien ou glisser vers le bas pour fermer) ; ordinateur : liste déroulante
  *   (clic à côté, Échap, Tab hors du menu). Ouvert : focus sur le premier lien ; fermé par Échap / voile :
  *   focus rendu au bouton.
@@ -91,28 +91,13 @@ export function MenuCompte() {
   const nom = compte.profil?.nom_affiche?.trim() ?? ''
   const initiale = initialeDe(nom)
   const chemin = location.pathname.replace(/\/+$/, '') || '/'
-  const groupes: { titre: string; liens: Destination[] }[] = [
-    {
-      titre: 'Préparer',
-      liens: [
-        { to: '/exercice', libelle: "Feuilles d'exercices", icone: <IconeFeuille mode="compte" /> },
-        { to: '/evaluation', libelle: 'Évaluations et examens', icone: <IconeEvaluation mode="compte" /> },
-      ],
-    },
-    {
-      titre: 'Mes outils',
-      liens: [
-        { to: '/coffre', libelle: 'Mon coffre', icone: <IconeCoffre mode="compte" /> },
-        { to: '/carnet', libelle: 'Carnet de matière vue', icone: <IconeCarnet mode="compte" />, prefixe: true },
-      ],
-    },
-    {
-      titre: 'Mon compte',
-      liens: [
-        { to: '/profil', libelle: 'Mon profil', icone: <IconeProfil mode="compte" /> },
-        ...(admin ? [{ to: '/admin', libelle: 'Administration', icone: <IconeAdmin mode="compte" />, badge: 'admin' }] : []),
-      ],
-    },
+  // Depuis la réorganisation de l'espace professeur (27/11/2026) : les outils sont dans le menu
+  // « Espace professeur » des pages professeur ; la pastille ne garde que l'essentiel.
+  const espaceIci = ['/espace', '/carnet', '/coffre', '/profil', '/exercice', '/evaluation', '/partage'].some((d) => chemin === d || chemin.startsWith(`${d}/`)) || /^\/[^/]+\/[^/]+\/exercices$/.test(chemin)
+  const liens: Destination[] = [
+    { to: '/espace', libelle: 'Espace professeur', icone: <IconeAccueil mode="compte" />, prefixe: true },
+    { to: '/', libelle: 'Retour au site élève', icone: <IconeRetour mode="compte" /> },
+    ...(admin ? [{ to: '/admin', libelle: 'Administration', icone: <IconeAdmin mode="compte" />, badge: 'admin' }] : []),
   ]
 
   const debutGlisse = (e: React.TouchEvent) => {
@@ -178,31 +163,29 @@ export function MenuCompte() {
               </span>
               <span className="menu-compte-identite">
                 {nom && <span className="menu-compte-nom">{nom}</span>}
-                <span className="menu-compte-role">Espace professeur</span>
+                <span className="menu-compte-role">{compte.utilisateur?.email ?? 'Professeur'}</span>
               </span>
             </div>
-            {groupes.map((g) => (
-              <div className="menu-compte-groupe" key={g.titre}>
-                <p className="menu-compte-groupe-titre" id={`${id}-${g.titre}`}>
-                  {g.titre}
-                </p>
-                <ul aria-labelledby={`${id}-${g.titre}`}>
-                  {g.liens.map((d) => {
-                    const exact = chemin === d.to
-                    const ici = exact || (d.prefixe === true && chemin.startsWith(`${d.to}/`))
-                    return (
-                      <li key={d.to}>
-                        <Link to={d.to} className={`menu-compte-lien-menu${ici ? ' ici' : ''}`} aria-current={exact ? 'page' : ici ? 'true' : undefined} onClick={() => setOuvert(false)}>
-                          {d.icone}
-                          <span className="menu-compte-libelle">{d.libelle}</span>
-                          {ici ? <span className="menu-compte-ici">Tu es ici</span> : d.badge && <span className="menu-compte-badge">{d.badge}</span>}
-                        </Link>
-                      </li>
-                    )
-                  })}
-                </ul>
-              </div>
-            ))}
+            <ul className="menu-compte-groupe menu-compte-liens" aria-label="Mon compte">
+              {liens.map((d) => {
+                const exact = chemin === d.to
+                const ici = exact || (d.prefixe === true && espaceIci)
+                return (
+                  <li key={d.to}>
+                    <Link
+                      to={d.to}
+                      className={`menu-compte-lien-menu${ici ? ' ici' : ''}`}
+                      aria-current={exact ? 'page' : ici ? 'true' : undefined}
+                      onClick={() => setOuvert(false)}
+                    >
+                      {d.icone}
+                      <span className="menu-compte-libelle">{d.libelle}</span>
+                      {ici ? <span className="menu-compte-ici">Tu es ici</span> : d.badge && <span className="menu-compte-badge">{d.badge}</span>}
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
             <button
               type="button"
               className="menu-compte-sortie"

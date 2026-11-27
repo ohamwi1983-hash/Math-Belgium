@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
-import { Link, Navigate, Route, Routes, useParams, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { BandeauEspace } from '../components/compte/BandeauEspace'
-import { IconeCarnet, MenuEspace } from '../components/compte/MenuEspace'
+import { MenuEspace, PORTES } from '../components/compte/MenuEspace'
 import { EnTeteCompte, PageCompte, PageReservee } from '../components/compte/PageReservee'
 import { AgendaPeriode } from '../components/carnet/AgendaPeriode'
 import { Aujourdhui } from '../components/carnet/Aujourdhui'
@@ -15,6 +15,7 @@ import { MaSemaine } from '../components/carnet/MaSemaine'
 import { MessageHoraireInactif, MonHoraire } from '../components/carnet/MonHoraire'
 import { PageClasse } from '../components/carnet/PageClasse'
 import { PageClasseEleves } from '../components/carnet/PageClasseEleves'
+import { VueEnsembleClasses } from '../components/carnet/VueEnsembleClasses'
 import { PanneauLateral } from '../components/carnet/PanneauLateral'
 import { FormulaireEvenement } from '../components/carnet/FormulaireEvenement'
 import { ReglagesAgenda } from '../components/carnet/ReglagesAgenda'
@@ -22,6 +23,7 @@ import { chapitreParDefaut, copierTexte, lireClasseMemorisee, memoriserClasse, t
 import '../components/carnet/carnet.css'
 import '../components/carnet/agenda.css'
 import '../components/compte/profil.css'
+import '../components/compte/espace-pages.css'
 import { findChapter } from '../content/chaptersIndex'
 import { dateIso, dateLongue, type Classe, type ReglagesCarnet, type SaisieSeance, type Seance } from '../lib/carnet'
 import { dateJourLong } from '../lib/agendaEvenements'
@@ -73,7 +75,7 @@ const TEXTE_DEFAUT = { rubriques: lireRubriques(null), competences: lireCompeten
  * n'est pré-rendue (`scripts/routes.mjs` ne liste que l'accueil et les chapitres). */
 export function CarnetPage() {
   return (
-    <PageCompte titre="Carnet de matière vue" large sansTete>
+    <PageCompte titre="Mes classes" large sansTete>
       <TeteDeRepli />
       <PageReservee>
         <Carnet />
@@ -85,7 +87,7 @@ export function CarnetPage() {
 /** Titre habituel tant que la page n'est pas prête (le bandeau porte le `<h1>`). */
 function TeteDeRepli() {
   const compte = useCompte()
-  return estConnecteActif(compte) ? null : <EnTeteCompte titre="Carnet de matière vue" />
+  return estConnecteActif(compte) ? null : <EnTeteCompte titre="Mes classes" />
 }
 
 interface Donnees {
@@ -136,6 +138,7 @@ function Carnet() {
   // professeur ; re-rendu et nouvelle vérification de la page de classe quand il arrive ou change.
   const etatOrdre = useOrdreChapitres()
   const [params, setParams] = useSearchParams()
+  const chemin = useLocation().pathname.replace(/\/+$/, '') || '/'
   const [donnees, setDonnees] = useState<Donnees | null>(null)
   const [absent, setAbsent] = useState(false)
   const [erreurChargement, setErreurChargement] = useState<string | null>(null)
@@ -225,6 +228,27 @@ function Carnet() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- une fois, dès que les données sont là
   }, [donnees !== null, chapitreDemande])
 
+  // « Noter la matière vue » du tableau de bord (`/espace`) : `?noter=<classe>` ouvre le panneau « Noter la
+  // séance » sur le créneau d'aujourd'hui de cette classe (le premier pas encore noté), comme « Noter » d'Aujourd'hui.
+  const noterDemande = params.get('noter')
+  useEffect(() => {
+    if (!donnees || !noterDemande) return
+    const suivant = new URLSearchParams(params)
+    suivant.delete('noter')
+    setParams(suivant, { replace: true })
+    const classe = donnees.classes.find((c) => c.id === noterDemande)
+    if (!classe) return
+    const h = donnees.horaire
+    const ctx = h.actif && donnees.agenda.actif ? { grilles: h.grilles, cases: h.cases, evenements: donnees.agenda.evenements, classes: donnees.classes } : null
+    const supprimee = ctx ? predicatSuppression(ctx) : undefined
+    const creneaux = h.actif ? creneauxDuJour(dateIso(new Date()), h.grilles, h.cases, { supprimee }).creneaux.filter((c) => c.classe_id === classe.id) : []
+    const creneau = creneaux.find((c) => !seanceDuCreneau(c, donnees.seances)) ?? null
+    setClasseActive(classe.id)
+    memoriserClasse(classe.id)
+    setPanneau({ type: 'noter', classeId: classe.id, chapitre: chapitreParDefaut(classe.id, donnees.classes, donnees.seances), creneau })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- une fois, dès que les données sont là
+  }, [donnees !== null, noterDemande])
+
   const ecoles = compte.ecoles
   const profil = compte.profil
   const seances = donnees?.seances
@@ -294,7 +318,7 @@ function Carnet() {
         return memeContenu(contenu, p.contenu) ? [] : [{ classeId: p.classe_id, contenu }]
       })
       if (aPublier.length === 0) {
-        if (forcerMessage) setEtatPublication({ message: 'La page de classe est déjà à jour : elle suit le carnet.', erreur: null })
+        if (forcerMessage) setEtatPublication({ message: 'La page des élèves est déjà à jour : elle suit ton journal de classe.', erreur: null })
         return
       }
       publicationEnCours.current = true
@@ -306,9 +330,9 @@ function Carnet() {
             ? { ...avant, pages: { actif: true, pages: avant.pages.pages.map((p) => { const f = faites.find((y) => y.classeId === p.classe_id); return f ? { ...p, contenu: f.contenu, publie_le: f.publieLe } : p }) } }
             : avant,
         )
-        setEtatPublication({ message: `Page de classe mise à jour${faites.length > 1 ? ` (${faites.length} classes)` : ''} : les élèves voient la nouvelle version.`, erreur: null })
+        setEtatPublication({ message: `Page des élèves mise à jour${faites.length > 1 ? ` (${faites.length} classes)` : ''} : les élèves voient la nouvelle version.`, erreur: null })
       } catch (ex) {
-        setEtatPublication({ message: null, erreur: `Page de classe pas mise à jour : ${messageErreur(ex)}` })
+        setEtatPublication({ message: null, erreur: `Page des élèves pas mise à jour : ${messageErreur(ex)}` })
       } finally {
         publicationEnCours.current = false
       }
@@ -329,34 +353,54 @@ function Carnet() {
   function cadre(contenu: ReactNode) {
     const classes = donnees?.classes
     const reperes = texteReperes(dateIso(maintenant))
+    const surReglages = chemin === '/carnet/reglages'
+    const phraseClasses = PORTES.find((p) => p.cle === 'classes')?.phrase ?? ''
     return (
       <div className="carnet">
         <MenuEspace carnet={donnees ? { classes: donnees.classes, nombreSeances: (k) => donnees.seances.filter((s) => s.classe_id === k).length, aNoter } : undefined}>
-          <BandeauEspace
-            titreId={`${idBandeau}-titre`}
-            titre="Carnet de matière vue"
-            classe="espace-bandeau-carnet"
-            classeIcone="espace-bandeau-icone"
-            icone={<IconeCarnet mode="bandeau" />}
-            etiquettePastilles="En bref"
-            pastilles={[
-              reperes ? (
-                <li key="reperes" className="profil-bandeau-ecole">
-                  {reperes}
-                </li>
-              ) : null,
-              aNoter > 0 ? (
-                <li key="a-noter" className="profil-bandeau-ecole espace-bandeau-pastille-forte">
-                  {aNoter} à noter<span className="carnet-sr"> aujourd'hui</span>
-                </li>
-              ) : null,
-              classes && classes.length > 0 ? (
-                <li key="classes" className="profil-bandeau-ecole">
-                  {classes.length} classe{classes.length > 1 ? 's' : ''}
-                </li>
-              ) : null,
-            ]}
-          />
+          {surReglages ? (
+            <BandeauEspace
+              titreId={`${idBandeau}-titre`}
+              surtitre="Réglages"
+              titre="Réglages de l'agenda"
+              icone={null}
+              apresTitre={<p className="ep-phrase">Périodes du bulletin, texte copié pour l'agenda scolaire et écriture de l'horaire des séances.</p>}
+            />
+          ) : (
+            <BandeauEspace
+              titreId={`${idBandeau}-titre`}
+              surtitre="Mes classes"
+              titre="Ton journal de classe"
+              classe="espace-bandeau-carnet"
+              icone={null}
+              apresTitre={<p className="ep-phrase">{phraseClasses}</p>}
+              etiquettePastilles="En bref"
+              pastilles={[
+                reperes ? (
+                  <li key="reperes" className="profil-bandeau-ecole">
+                    {reperes}
+                  </li>
+                ) : null,
+                aNoter > 0 ? (
+                  <li key="a-noter" className="profil-bandeau-ecole espace-bandeau-pastille-forte">
+                    {aNoter} à noter<span className="carnet-sr"> aujourd'hui</span>
+                  </li>
+                ) : null,
+                classes && classes.length > 0 ? (
+                  <li key="classes" className="profil-bandeau-ecole">
+                    {classes.length} classe{classes.length > 1 ? 's' : ''}
+                  </li>
+                ) : null,
+              ]}
+              fin={
+                classes && classes.length > 0 && chemin === '/carnet' ? (
+                  <Link className="ep-bouton" to="/carnet/classes">
+                    + Ajouter une classe
+                  </Link>
+                ) : undefined
+              }
+            />
+          )}
           {contenu}
         </MenuEspace>
       </div>
@@ -579,7 +623,7 @@ function Carnet() {
   const reglagesSection = (
     <section className="compte-section carnet-page-simple" aria-labelledby="carnet-reglages">
       <h2 id="carnet-reglages" className="carnet-titre-vue">
-        Réglages du carnet
+        Bulletin, texte de l'agenda scolaire et horaire des séances
       </h2>
       {reglagesAgenda}
       <ReglagesTexteAgenda
@@ -593,8 +637,8 @@ function Carnet() {
       <fieldset className="carnet-fieldset">
         <legend>Ordre des chapitres</legend>
         <p className="compte-aide">
-          Ton carnet, ta page de classe, ton coffre et tes documents suivent l'ordre où tu donnes les chapitres, avec tes numéros (jamais ceux du site).{' '}
-          <Link to="/profil#ordre-chapitres">Mon ordre des chapitres</Link>
+          Tes classes, la page des élèves, tes documents enregistrés et imprimés suivent l'ordre où tu donnes les chapitres, avec tes numéros (jamais ceux du site).{' '}
+          <Link to="/profil#ordre-chapitres">Mon ordre des chapitres (Réglages)</Link>
         </p>
       </fieldset>
       <fieldset className="carnet-fieldset">
@@ -643,8 +687,8 @@ function Carnet() {
         {messages}
         <div className="compte-encadre" role="status">
           <p>
-            <strong>Ajoute d'abord ton école.</strong> Chaque classe est rattachée à une de tes écoles : ajoute-la dans <Link to="/profil">ton profil</Link> (nom et adresse), puis
-            reviens ici.
+            <strong>Ajoute d'abord ton école.</strong> Chaque classe est rattachée à une de tes écoles : ajoute-la dans les <Link to="/profil#profil">Réglages (Mon profil et mes écoles)</Link> (nom
+            et adresse), puis reviens ici.
           </p>
         </div>
         {reglagesSection}
@@ -679,6 +723,19 @@ function Carnet() {
           <Routes>
             <Route
               index
+              element={avecClasses(
+                <VueEnsembleClasses
+                  classes={donnees.classes}
+                  seances={donnees.seances}
+                  horaire={horaire}
+                  agenda={donnees.agenda}
+                  maintenant={maintenant}
+                  pageEleves={(id) => (donnees.pages.actif ? (donnees.pages.pages.find((p) => p.classe_id === id)?.code ? 'publiee' : donnees.pages.pages.some((p) => p.classe_id === id) ? 'coupee' : 'aucune') : 'inactive')}
+                />,
+              )}
+            />
+            <Route
+              path="aujourdhui"
               element={avecClasses(
                 <Aujourdhui
                   grilles={grilles}
@@ -738,7 +795,7 @@ function Carnet() {
                       setEtatPublication({ message: null, erreur: null })
                       return agir(faire, succes)
                     }
-                    const creer = () => void action(() => nouveauCode(client, classe.id), page?.code ? 'Nouveau code créé : l’ancien ne marche plus.' : 'Code créé : la page de classe est publiée.')
+                    const creer = () => void action(() => nouveauCode(client, classe.id), page?.code ? 'Nouveau code créé : l’ancien ne marche plus.' : 'Code créé : la page des élèves est publiée.')
                     return (
                       <PageClasseEleves
                         classe={classe}
@@ -759,7 +816,7 @@ function Carnet() {
                         erreur={etatPublication.erreur}
                         onCreer={creer}
                         onNouveau={creer}
-                        onCouper={() => void action(() => couperCode(client, classe.id), 'Code coupé : la page de classe ne s’ouvre plus.')}
+                        onCouper={() => void action(() => couperCode(client, classe.id), 'Code coupé : la page des élèves ne s’ouvre plus.')}
                         onReglages={(r: ReglagesPageClasse) => void action(() => enregistrerReglagesPage(client, classe.id, r), 'Ce que voient les élèves : enregistré.')}
                         onMettreAJour={() => {
                           setEtatPublication({ message: null, erreur: null })

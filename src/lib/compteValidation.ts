@@ -195,7 +195,7 @@ export function cartoucheDepuisCompte(profil: Pick<Profil, 'nom_affiche'>, ecole
 }
 
 /** Adresse de retour sûre (chemin du site seulement, jamais une URL externe). */
-export function retourSur(brut: string | null | undefined, defaut = '/profil'): string {
+export function retourSur(brut: string | null | undefined, defaut = '/espace'): string {
   if (!brut || !brut.startsWith('/') || brut.startsWith('//') || brut.includes('\\')) return defaut
   return brut
 }

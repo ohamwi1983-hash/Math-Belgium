@@ -196,7 +196,7 @@
 
   .coffre-tiroir {
     display: flex; flex-direction: column; position: fixed; left: 0; right: 0; z-index: 35;
-    bottom: calc(57px + env(safe-area-inset-bottom, 0px)); max-height: calc(100dvh - 57px - 64px);
+    bottom: calc(var(--ep-barre, 57px) + env(safe-area-inset-bottom, 0px)); max-height: calc(100dvh - var(--ep-barre, 57px) - 64px);
     background: var(--surface); border-top: 1px solid var(--line); border-radius: 10px 10px 0 0; box-shadow: 0 -10px 24px rgba(24, 36, 48, 0.16);
   }
   .coffre-tiroir-barre { display: flex; align-items: center; gap: 4px; padding: 2px 6px 0 16px; }

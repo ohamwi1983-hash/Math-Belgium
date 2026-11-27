@@ -32,7 +32,7 @@ export function InscriptionPage() {
 
   const connecte = compte.etat === 'connecte'
   useEffect(() => {
-    if (connecte) navigate('/profil', { replace: true })
+    if (connecte) navigate('/espace', { replace: true })
   }, [connecte, navigate])
 
   async function sInscrire(e: FormEvent) {
@@ -53,7 +53,7 @@ export function InscriptionPage() {
         setConfirmationEnvoyee(email.trim())
         setEnvoi(false)
       }
-      // Session ouverte : redirection vers /profil quand le compte est lu (effet ci-dessus).
+      // Session ouverte : redirection vers /espace (tableau de bord) quand le compte est lu (effet ci-dessus). Le lien de confirmation par e-mail, lui, mène aux Réglages (/profil) : première chose à faire, ajouter son école.
     } catch (ex) {
       const message = messageErreur(ex)
       setErreurs(message.startsWith("Code d'invitation") ? { code: message } : { general: message })
