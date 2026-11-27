@@ -142,7 +142,8 @@ export type MatiereProjection = ReturnType<typeof useMatiereProjection>
  * Boîte de fin de projection avec la proposition (maquette « fin-projection ») : la boîte « Télécharger tes
  * annotations ? » d'avant gagne la proposition — s'il y a des annotations, « Télécharger le PowerPoint annoté »
  * (et le PDF) restent dans la rangée d'actions. « Enregistrer dans Mes classes » → confirmation, puis
- * « Quitter la projection » ; « Plus tard » garde la proposition et quitte ; « Rester » (Échap) referme.
+ * « Quitter la projection » ; « Plus tard » garde la proposition et quitte ; « Ne rien noter » quitte sans rien garder (`quitter` →
+ * `terminer`) ; « Rester » (Échap) referme.
  */
 export function DialogueFinProjection({
   proposition,
@@ -230,6 +231,7 @@ export function DialogueFinProjection({
                 matiere.plusTard(proposition)
                 quitter()
               }}
+              onRienNoter={quitter}
               onEnregistre={(r) => {
                 matiere.enregistree()
                 setFait(r.message)

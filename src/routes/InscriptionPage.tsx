@@ -48,12 +48,12 @@ export function InscriptionPage() {
         setEnvoi(false)
         return
       }
-      const sessionOuverte = await inscrire(compte.client, { code, nom, email, motDePasse, redirection: `${window.location.origin}/profil` })
+      const sessionOuverte = await inscrire(compte.client, { code, nom, email, motDePasse, redirection: `${window.location.origin}/espace` })
       if (!sessionOuverte) {
         setConfirmationEnvoyee(email.trim())
         setEnvoi(false)
       }
-      // Session ouverte : redirection vers /espace (tableau de bord) quand le compte est lu (effet ci-dessus). Le lien de confirmation par e-mail, lui, mène aux Réglages (/profil) : première chose à faire, ajouter son école.
+      // Session ouverte : redirection vers /espace (tableau de bord) quand le compte est lu (effet ci-dessus). Le lien de confirmation par e-mail mène aussi au tableau de bord (/espace), où la carte « Premiers pas » propose d'abord d'ajouter son école.
     } catch (ex) {
       const message = messageErreur(ex)
       setErreurs(message.startsWith("Code d'invitation") ? { code: message } : { general: message })

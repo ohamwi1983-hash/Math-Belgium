@@ -16,7 +16,7 @@ import { estConnecteActif, useCompte } from '../lib/compteContexte'
 import { messageErreur } from '../lib/compteValidation'
 import { aVenir, chapitreDeLInterro, chargerDonneesEspace, coursDuJour, lienProjection, type CoursDuJour, type DonneesEspace } from '../lib/espaceProfesseur'
 import { useOrdreChapitres } from '../lib/ordreChapitres'
-import { MatiereANoter } from '../components/carnet/MatiereProjetee'
+import { MatiereANoter, ouvrirProposition, usePropositionsGardees } from '../components/carnet/MatiereProjetee'
 
 /**
  * `/espace` — tableau de bord de l'espace professeur (maquettes « dashboard » et « téléphone » validées le
@@ -111,7 +111,7 @@ function TableauDeBord() {
                 Ma semaine <span aria-hidden="true">›</span>
               </Link>
             </div>
-            <Aujourdhui donnees={donnees} jour={jour} erreur={erreur !== null} />
+            <Aujourdhui donnees={donnees} jour={jour} erreur={erreur !== null} aujourdhui={aujourdhui} />
           </section>
 
           <section className="ep-carte ep-avenir" aria-labelledby={`${id}-avenir`}>
@@ -190,7 +190,7 @@ function TableauDeBord() {
   )
 }
 
-function Aujourdhui({ donnees, jour, erreur }: { donnees: DonneesEspace | null; jour: ReturnType<typeof coursDuJour> | null; erreur: boolean }) {
+function Aujourdhui({ donnees, jour, erreur, aujourdhui }: { donnees: DonneesEspace | null; jour: ReturnType<typeof coursDuJour> | null; erreur: boolean; aujourdhui: string }) {
   if (!donnees || !jour) return <p className="ep-vide">{erreur ? '—' : 'Chargement…'}</p>
   if (donnees.carnetAbsent || donnees.classes.length === 0) {
     return (
@@ -233,7 +233,7 @@ function Aujourdhui({ donnees, jour, erreur }: { donnees: DonneesEspace | null; 
     <>
       <ul className="ep-cours-liste">
         {jour.cours.map((c) => (
-          <LigneCours key={c.cle} c={c} />
+          <LigneCours key={c.cle} c={c} aujourdhui={aujourdhui} />
         ))}
       </ul>
       <p className="ep-carte-pied">
@@ -245,7 +245,11 @@ function Aujourdhui({ donnees, jour, erreur }: { donnees: DonneesEspace | null; 
   )
 }
 
-function LigneCours({ c }: { c: CoursDuJour }) {
+function LigneCours({ c, aujourdhui }: { c: CoursDuJour; aujourdhui: string }) {
+  // Projection faite pendant ce cours et gardée (« Plus tard », fenêtre fermée) : « Noter la matière vue » ouvre
+  // directement sa proposition préremplie (étapes et exercices montrés), sinon le panneau de Mes classes.
+  const gardees = usePropositionsGardees()
+  const gardee = c.classe ? gardees.find((p) => p.classeId === c.classe!.id && p.date === aujourdhui && p.creneau.debut === c.debut) : undefined
   const nom = c.classe?.nom ?? 'Classe'
   const r = c.resume
   const heure = heureCourte(c.debut)
@@ -308,12 +312,18 @@ function LigneCours({ c }: { c: CoursDuJour }) {
           <span className="ep-cours-action-texte">Projeter</span>
         </Link>
       ) : (
-        c.classe && (
+        c.classe &&
+        (gardee ? (
+          <button type="button" className="ep-bouton ep-cours-action" onClick={() => ouvrirProposition(gardee.id)} aria-label={`Noter la matière vue (${nom}) : proposition préremplie d'après ta projection`}>
+            <IconeCoche />
+            <span className="ep-cours-action-texte">Noter la matière vue</span>
+          </button>
+        ) : (
           <Link className="ep-bouton ep-cours-action" to={noterLien} aria-label={`Noter la matière vue (${nom})`}>
             <IconeCoche />
             <span className="ep-cours-action-texte">Noter la matière vue</span>
           </Link>
-        )
+        ))
       )}
     </li>
   )

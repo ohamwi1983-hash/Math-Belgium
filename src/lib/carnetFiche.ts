@@ -64,7 +64,7 @@ export function ficheSeanceHtml(r: SeanceResolue & { professeur: string }): stri
 </head>
 <body>
 <header>
-  <p class="surtitre">${e(['Carnet de matière vue', r.ecole, r.professeur].filter(Boolean).join(' · '))}</p>
+  <p class="surtitre">${e(['Matière vue', r.ecole, r.professeur].filter(Boolean).join(' · '))}</p>
   <h1>${e(r.classe)} — ${e(capitaleDate(r.date))}</h1>
   ${r.horaire ? `<p class="horaire">${e(r.horaire)}</p>` : ''}
   ${r.chapitre ? `<p class="chapitre">${e(r.chapitre.niveau)} — ${r.chapitre.numero !== null ? `Chapitre ${r.chapitre.numero} : ` : ''}${e(r.chapitre.titre)}</p>` : ''}
@@ -206,7 +206,7 @@ export function agendaPeriodeHtml(a: Agenda, options: OptionsSortieAgenda & { pr
 </head>
 <body>
 <header>
-  <p class="surtitre">${e(['Carnet de matière vue', ...a.ecoles, options.professeur].filter(Boolean).join(' · '))}</p>
+  <p class="surtitre">${e(['Mathématiques', ...a.ecoles, options.professeur].filter(Boolean).join(' · '))}</p>
   <h1>${e(titreAgenda(a))}</h1>
   <p class="periode">${e(periode.charAt(0).toUpperCase() + periode.slice(1))}</p>
   ${plusieurs && a.classes.length > 0 ? `<p class="note">Classes : ${e(a.classes.map((k) => k.nom.trim()).join(', '))}</p>` : ''}

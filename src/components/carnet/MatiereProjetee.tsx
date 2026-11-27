@@ -35,6 +35,7 @@ export function FormulaireMatiere({
   enPlus,
   plusTardLibelle = 'Plus tard',
   onPlusTard,
+  onRienNoter,
   onEnregistre,
 }: {
   proposition: PropositionMatiere
@@ -46,6 +47,8 @@ export function FormulaireMatiere({
   enPlus?: ReactNode
   plusTardLibelle?: string
   onPlusTard: () => void
+  /** « Ne rien noter » (fin de projection) : rien n'est écrit ni gardé pour plus tard. Absent : pas de bouton. */
+  onRienNoter?: () => void
   onEnregistre: (r: { message: string; classeId: string }) => void
 }) {
   const id = useId()
@@ -317,6 +320,11 @@ export function FormulaireMatiere({
         <button type="button" className="mv-bouton" disabled={envoi} onClick={onPlusTard}>
           {plusTardLibelle}
         </button>
+        {onRienNoter && (
+          <button type="button" className="mv-bouton" disabled={envoi} onClick={onRienNoter}>
+            Ne rien noter
+          </button>
+        )}
       </div>
       <p className="mv-aide">Rien n’est écrit sans ton clic : décoche ce qui n’a pas été vu.</p>
     </div>
@@ -335,6 +343,14 @@ export function resumeProposition(p: PropositionMatiere): string {
   const etapes = nums.length === 0 ? '' : nums.length === 1 ? `, étape ${nums[0]}` : `, étapes ${nums.slice(0, -1).join(', ')} et ${nums[nums.length - 1]}`
   const ex = p.generateurs.length ? ` · ${p.generateurs.length} exercice${p.generateurs.length > 1 ? 's' : ''}` : ''
   return `${titre}${etapes}${ex}`
+}
+
+/** Événement qui ouvre une proposition gardée dans la carte « Matière vue à noter » de la page (`detail` = id). */
+const EVENEMENT_OUVRIR = 'mv:ouvrir-proposition'
+
+/** Ouvre le formulaire prérempli d'une proposition gardée (bouton « Noter la matière vue » du tableau de bord). */
+export function ouvrirProposition(id: string): void {
+  window.dispatchEvent(new CustomEvent(EVENEMENT_OUVRIR, { detail: id }))
 }
 
 /** Propositions gardées pour plus tard, tenues à jour (autre onglet, « Plus tard », enregistrement). */
@@ -366,6 +382,18 @@ export function MatiereANoter({ client, classes, onEnregistre }: { client: Supab
   const [message, setMessage] = useState<string | null>(null)
   // Seulement les classes qui existent encore (une classe supprimée depuis : proposition ignorée).
   const visibles = liste.filter((p) => classes.some((c) => c.id === p.classeId) && findChapter(p.niveau, p.chapitre))
+
+  useEffect(() => {
+    const surOuvrir = (e: Event) => {
+      const p = lirePropositionsGardees().find((x) => x.id === (e as CustomEvent<string>).detail)
+      if (p) {
+        setMessage(null)
+        setOuverte(p)
+      }
+    }
+    window.addEventListener(EVENEMENT_OUVRIR, surOuvrir)
+    return () => window.removeEventListener(EVENEMENT_OUVRIR, surOuvrir)
+  }, [])
 
   useEffect(() => {
     if (!ouverte || !client) return

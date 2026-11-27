@@ -1620,7 +1620,7 @@ cours » (pages de conception, `EspaceConception`), « Mes documents », « Mes 
 
 **Tableau de bord** `routes/EspacePage.tsx` (réservé, `PageReservee`, ni pré-rendu ni indexé) = page d'arrivée après la
 connexion (`compteValidation.ts::retourSur`, défaut `/espace` ; un `?retour=` explicite reste prioritaire ; inscription avec
-session ouverte → `/espace` ; le lien de confirmation par e-mail mène toujours à `/profil`, où l'on ajoute son école).
+session ouverte → `/espace` ; le lien de confirmation par e-mail mène aussi à `/espace`, décision du 27/11/2026 : la carte « Premiers pas » y propose d’abord l’école ; couvert par la Redirect URL `https://math-belgium.vercel.app/**` de la mise en service).
 Données : `lib/espaceProfesseur.ts::chargerDonneesEspace` = mêmes lectures que le carnet (classes, horaire, agenda — panne
 tolérée —, séances ; 0002 absent → `carnetAbsent`).
 - « Aujourd'hui » (`coursDuJour`, sur `journeeCarnet.ts::lignesDuJour` : créneaux + heures supprimées par l'agenda) : heure,
@@ -1819,7 +1819,8 @@ la carte »), « Devoir pour la prochaine fois » (case + consigne libre, jamais
 cours) » = `prochainsCours` avec 0007, sinon sans date), « ✓ Enregistrer dans Mes classes » (principal, focus d'office),
 avec des annotations « Télécharger le PowerPoint annoté » + « PDF annoté » dans la même rangée (le téléchargement ne quitte
 plus : la proposition reste à traiter) et « n diapos annotées : elles restent gardées dans ce navigateur », « Plus tard »,
-« Rester dans la projection » (Échap, sans ouvrir la vue d'ensemble). Après l'enregistrement : « Matière vue enregistrée »,
+« Ne rien noter » (décision du 27/11/2026 : quitte sans rien écrire NI garder — `onRienNoter` de `FormulaireMatiere`,
+absent ailleurs ; `quitter` → `matiere.terminer()`), « Rester dans la projection » (Échap, sans ouvrir la vue d'ensemble). Après l'enregistrement : « Matière vue enregistrée »,
 « ✓ Matière vue enregistrée : 6e B, vendredi 27/11 (3e heure). » + « Quitter la projection » (focus), téléchargements,
 « Rester » ; la même séance de projection ne propose plus rien. Séances relues juste avant d'écrire (jamais de doublon).
 Sans proposition : l'ancienne boîte, inchangée. Boîte toujours claire (`.theme-clair`), voile fixe, défile si l'écran est
@@ -1831,7 +1832,12 @@ vue à noter » (`components/carnet/MatiereProjetee.tsx::MatiereANoter`) en têt
 (`/carnet/aujourdhui`) et du tableau de bord (`/espace`, au-dessus d'Aujourd'hui / À venir) : « 6e B · vendredi 27/11,
 3e heure — Projeté : Coniques, étape 1 », « Noter » (même formulaire `FormulaireMatiere` dans `PanneauLateral`, carnet relu à
 l'ouverture ; enregistré → message, la page se recharge) et « Oublier » (retirée de ce navigateur ; rien n'était écrit).
-Classe supprimée depuis ou chapitre inconnu : ignorée. Rien s'il n'y a rien.
+Classe supprimée depuis ou chapitre inconnu : ignorée. Rien s'il n'y a rien. Tableau de bord, « Aujourd'hui » (décision du
+27/11/2026) : le bouton « Noter la matière vue » d'un cours pour lequel une proposition est gardée (même classe, aujourd'hui,
+même `creneau.debut`) ouvre directement ce formulaire prérempli (`ouvrirProposition(id)` → événement
+`mv:ouvrir-proposition` écouté par `MatiereANoter`) ; sans proposition, le lien vers le panneau de Mes classes d'avant.
+Documents imprimés de Mes classes (`lib/carnetFiche.ts`) : surtitre « Matière vue · école · professeur » (fiche d'une séance)
+et « Mathématiques · école · professeur » (agenda), au lieu de « Carnet de matière vue ».
 
 **Vérifications** (dossier de travail `suite-M/` : `purs.test.ts` + `bundle.mjs` — esbuild avec résolution sensible à la
 casse, le disque de la machine ne l'est pas —, `verif.mjs`, `faux-supabase.js` et `donnees.mjs` du chantier « Espace
