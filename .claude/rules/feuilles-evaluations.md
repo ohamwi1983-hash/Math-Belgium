@@ -1608,6 +1608,17 @@ Décisions de l'utilisateur (maquettes validées, lots A1–A4) :
   (école choisie dans le panneau + nom du profil, comptes professeurs : `.claude/rules/comptes.md`),
   rendu par `export/cartouche.ts` (copie, corrigé, examen, Word ; textes échappés, morceau vide =
   rien). Absent → `CARTOUCHE_DEFAUT` (anciennes valeurs), documents identiques à avant.
+  **Logo FACULTATIF de l'école** (27/11/2026, migration 0012, `.claude/rules/comptes.md` « Premiers pas et logo de
+  l'école ») : `CartoucheEcole.logo` (data URL PNG / JPEG / WEBP validée par `cartouche.ts::logoCartouche`, même motif que
+  la contrainte SQL) → `assemblerEvaluationHtml.ts::logoHtml` / `classeLogo` à GAUCHE de l'en-tête de la copie et du corrigé
+  (`.cartouche.avec-logo` : une colonne de plus), de la feuille (`.tete`), des aménagées (`.tete-am`, 1,7 cm), des grilles
+  (`.tete-grille`) et de l'examen ; hauteur fixe 1,5 cm, 4 cm de large au plus ; CSS `STYLE_LOGO` ajoutée par `documentHtml`
+  SEULEMENT si le corps contient un logo. Word (`evaluationDocx.ts::logoDocx` / `avecLogoDocx`) : en-tête dans un tableau sans
+  bordure, logo dans la colonne de gauche (57 × ≤ 151 px ; un WEBP redessiné en PNG), copie, corrigé, grille, examen.
+  Évaluation blanche (élève) : jamais de logo (pas de cartouche). **Sans logo (ou logo invalide) : documents identiques
+  octet pour octet** — vérifié contre f88341d : 52 documents (évaluation 2 séries + aménagée + corrigé + grille, feuille +
+  aménagée, examen, remédiation ; avec et sans cartouche), HTML identiques (hors polices KaTeX inlinées par le Vite de
+  contrôle), Word identiques pièce par pièce hors `docProps/core.xml` (dossier de travail `suite-P/docs.cjs`).
 - **Points d'une sous-question / affirmation dans une colonne à droite** (`.sq-pts` : texte en
   `flex: 1`, points `white-space: nowrap` ; colonne `td.pts-col` dans un tableau regroupé), jamais en
   fin de phrase où ils passaient seuls à la ligne. Copie, aménagée et copie Word (taquet droit).

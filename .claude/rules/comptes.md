@@ -17,6 +17,9 @@ paths:
   - "src/routes/ClassePage.tsx"
   - "src/lib/pageClasse*"
   - "src/lib/ordreChapitres.ts"
+  - "src/lib/logoEcole.ts"
+  - "src/lib/logoImage.ts"
+  - "src/lib/premiersPas.ts"
   - "src/components/eleve/classe.css"
   - "supabase/**"
   - ".env*"
@@ -43,7 +46,8 @@ Partage d'un enregistrement du coffre avec un collègue par un lien : `0009_part
 entre collègues » après « Page « Mon coffre » refondue »). Plus tard (pas fait) : envoi direct par adresse, partage du carnet.
 Page de classe à code pour les élèves SANS compte (`/classe`), publiée depuis le carnet : `0010_page_classe.sql` (section
 « Page de classe » en fin de fichier). « Mon ordre des chapitres » du professeur (et plus jamais le numéro du site sur ce que
-voient les élèves) : `0011_ordre_chapitres.sql` (section « Mon ordre des chapitres (0011) » en fin de fichier).
+voient les élèves) : `0011_ordre_chapitres.sql` (section « Mon ordre des chapitres (0011) » en fin de fichier). Logo FACULTATIF de
+chaque école sur les documents : `0012_logo_ecole.sql` (section « Premiers pas et logo de l'école » en fin de fichier).
 
 ## Décisions de l'utilisateur
 
@@ -146,7 +150,7 @@ Partage (fait autrement, 0009) : PAS de politique ajoutée sur `plans` — un li
 - Cartouche : `entrainement/export/cartouche.ts` (`CARTOUCHE_DEFAUT` = anciennes constantes
   « Collège Saint-Pierre… M. Hamwi », repli sans cartouche → documents IDENTIQUES à avant) ; utilisé
   par la copie, le corrigé, l'examen (HTML) et le Word. L'aménagée, la grille et la feuille d'exercices
-  n'impriment pas d'école (inchangé) ; la feuille d'exercices et son aménagée impriment le NOM du
+  n'impriment pas d'école (inchangé ; depuis 0012 elles impriment le LOGO de l'école s'il existe) ; la feuille d'exercices et son aménagée impriment le NOM du
   professeur en en-tête et en pied de page (« M. Hamwi » sans session). Connecté sans école : rien à la place de l'école (jamais l'école
   d'un autre professeur).
 
@@ -1633,7 +1637,8 @@ tolérée —, séances ; 0002 absent → `carnetAbsent`).
   bulletin (« Bulletin — remise des points P2 ») ; chaque ligne mène à la classe / la semaine / les réglages ; « Agenda
   complet › » (`/carnet/agenda`).
 - Les quatre portes en cartes (titre lien, phrase, liens directs ; téléphone : carte cliquable avec le résumé `court`).
-- Emplacement `CartePremiersPas` (rend `null`) : future carte « Premiers pas », EN SUSPENS (ne pas la faire sans décision).
+- Carte « Premiers pas » EN TÊTE (avant « Aujourd'hui ») tant qu'il reste une étape et qu'elle n'est pas masquée : section
+  « Premiers pas et logo de l'école » en fin de fichier.
 
 **Mes classes** (`/carnet`, `components/carnet/VueEnsembleClasses.tsx`) : une carte par classe — nom (lien vers la classe),
 niveau, « En cours : <chapitre>, étape n », barre `role="progressbar"` des étapes touchées / étapes du chapitre, « n étapes
@@ -1677,3 +1682,89 @@ chapitre choisi), Mes documents (partagé par moi, projection annotée), Réglag
 sous-entrée active), 15 anciennes adresses (même menu, bonne porte, `/espace/reglages` → `/profil`, `/evaluation#remediation`
 ouvert), menu du compte (prof / admin), connexion → `/espace`, `?retour=/coffre` prioritaire, professeur neuf, cibles ≥ 44 px,
 `scrollWidth` = largeur, 0 erreur console. Captures dans `espace-prof/captures/`.
+
+## Premiers pas et logo de l'école (27/11/2026 : maquette « premiers » validée, `supabase/migrations/0012_logo_ecole.sql`)
+
+Décisions du professeur (suite de l'espace professeur, chantier P) : (1) une carte « Premiers pas » sur le tableau de bord,
+six étapes cochées AUTOMATIQUEMENT d'après les données réelles, « Masquer » mémorisé et réaffichable depuis Réglages, qui
+disparaît quand tout est fait ; (2) un logo FACULTATIF par école (Réglages → En-tête des copies), imprimé à gauche dans la
+cartouche de tous les documents du professeur. AUCUNE donnée d'élève.
+
+**Premiers pas** (`components/compte/CartePremiersPas.tsx` + `premiers-pas.css`, logique `lib/premiersPas.ts`) — dans
+`EspacePage`, EN TÊTE (avant « Aujourd'hui », comme la maquette), professeur connecté actif seulement (page réservée) ; rien
+tant que les données du tableau de bord et l'ordre des chapitres ne sont pas lus (pas de clignotement) :
+
+| Étape | Cochée quand | Bouton |
+| --- | --- | --- |
+| 1 Ton école | `compte.ecoles.length > 0` | Ajouter mon école → `/profil#ecoles` |
+| 2 Tes classes | une classe (0002 ; table absente = non) | Ajouter mes classes → `/carnet/classes` |
+| 3 Ton horaire | une grille d'école ET au moins une case de la semaine (0003 ; même test que `coursDuJour`) | Saisir mon horaire → `/carnet/horaire` |
+| 4 Ton ordre des chapitres (facultatif) | ordre enregistré (`useOrdreChapitres` : `active` et `ordre !== null`) OU « Passer cette étape » (repère du navigateur, par professeur) ; 0011 absente : seulement « Passer » | Ranger mes chapitres → `/profil#ordre-chapitres` |
+| 5 Projeter un premier chapitre | repère LOCAL `espace:premiere-projection` posé par `LanceurProjection` au clic « Lancer » (`noterProjectionLancee`, rien n'est envoyé) | Projeter un chapitre → `/espace/preparer#projeter` |
+| 6 Annoncer une évaluation | une interrogation dans l'agenda (0006, passée ou à venir) ou une séance `evaluation_type` « annonce » / « bilan » (0007) | Annoncer une évaluation → `lienAnnoncerEvaluation(1re classe)` = `/carnet/classe/:id` (« + Événement », Noter la séance → Évaluation), sinon `/carnet` — SEUL endroit à changer quand l'écran « Annoncer » dédié arrive |
+
+Barre `role="progressbar"` « n sur 6 · environ 10 minutes en tout », phrase de la maquette, grille de 3 cartes (2 sous
+1 100 px, 1 sur téléphone : étapes faites réduites à une ligne) ; étape faite : pastille verte ✓, titre barré, « — fait » lu ;
+première étape à faire = `aria-current="step"`, encadrée orange, bouton PRINCIPAL ; les autres étapes à faire gardent un bouton
+discret (« chacune avec un bouton vers le bon écran »). « Masquer » : repère `espace:premiers-pas:masque:<uid>` (navigateur),
+la carte part et une note (focus) dit « … réafficher dans Réglages » (lien `/profil#premiers-pas`) pour cette visite ;
+Réglages montre alors une carte « Premiers pas » (`ReafficherPremiersPas`, ancre `#premiers-pas`, avant « Mon compte »)
+avec « Réafficher sur le tableau de bord » — absente quand la carte est visible. Repères relus à chaud (événement maison
+`premiers-pas:change` + `storage` des autres onglets). Toute écriture locale en try/catch (navigation privée : la carte
+reste utilisable, le choix vaut pour la visite). Six sur six : plus rien.
+
+**Logo de l'école — schéma 0012** (idempotent, à coller APRÈS 0011, suppose 0001 ; « Success. No rows returned ») : colonne
+`ecoles.logo text` (NULL = pas de logo) + contrainte `ecoles_logo_valide` : NULL, ou ≤ 210 000 caractères ET
+`^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$` (rien d'autre qu'une image base64 ne peut y être écrit — le texte
+est inséré tel quel dans un `src`). RLS et droits INCHANGÉS (politique `ecoles_proprietaire` de 0001 : ses écoles, compte
+actif ; droits donnés à la TABLE, donc la colonne est couverte et relancer 0001 ne retire rien ; `anon` rien ; l'admin ne voit
+pas les écoles). **Pourquoi une colonne et pas Supabase Storage** : ≤ 150 Ko, un logo par école ; la colonne hérite du RLS sans
+rien ouvrir (pas de seau ni de politiques de stockage à garder justes), part avec l'école / le compte (cascade), se lit par une
+requête ordinaire. Vérifié sur Postgres 16 local (faux schéma `auth`, 0001 → 0011 + données, 0012 ×3, 0001 → 0011 relancés,
+0012 encore) : 76 vérifications (dossier de travail `suite-P/test_sql.py` : sortie vide, anciennes lignes à NULL et rien
+d'autre changé, sécurité identique hors droits hérités de la colonne, PNG / JPEG / WEBP / 210 000 car. acceptés, 15 valeurs
+refusées — 23514, superutilisateur compris : trop long, SVG, GIF, URL, `javascript:`, guillemet, espace, `=` au milieu,
+retour à la ligne… —, RLS croisé, `anon` 42501, admin, compte désactivé, logo gardé après les relances, suppressions).
+
+**0012 pas appliquée** : `logoEcole.ts::lireLogos` → `{ actif: false }` (42703 / PGRST204 mentionnant `logo`) ; Réglages :
+bouton DÉSACTIVÉ « Applique la migration 0012 pour ajouter un logo » + explication ; rien n'est écrit ; documents
+inchangés ; tout le reste comme avant.
+
+**Code** :
+- `lib/logoEcole.ts` : `lireLogos` (`select('id, logo')`, À PART de `lireEcoles` — la liste des écoles du contexte est chargée
+  sur chaque page, un logo ≈ 200 Ko n'y a pas sa place), `enregistrerLogo` (`null` = retirer ; `false` sans 0012 ; 23514 →
+  message), magasin par professeur (`useLogosEcoles(client, uid)` : une lecture par session, relue pour un autre compte ;
+  `majLogoLocal` après un enregistrement), `ecolesAvecLogo`, `planSansLogo` (appelé par `compteDonnees.ts::enregistrerPlanCoffre` :
+  un plan du coffre n'emporte JAMAIS le logo — il est remis au rendu depuis l'école choisie ; un partage retire déjà tout le
+  cartouche).
+- `lib/logoImage.ts::preparerLogo` (navigateur, avant tout envoi) : PNG / JPG / WEBP (≤ 15 Mo d'origine), redessiné sur un
+  canevas à 600 px de large et 300 px de haut au plus ; transparence détectée → PNG (fond transparent gardé), sinon JPEG
+  0,92 → 0,6 ; > 150 Ko → réduit × 0,8 (jusqu'à 120 px) ; dernier recours fond blanc + JPEG.
+- `compteValidation.ts` : `Ecole.logo?` (facultatif), `cartoucheDepuisCompte(profil, ecole)` ajoute `logo` s'il est valide ;
+  `entrainement/export/cartouche.ts` : `CartoucheEcole.logo?`, `MOTIF_LOGO`, `LOGO_MAX_CARACTERES`, `logoValide`,
+  `logoCartouche` ; `cartoucheEffectif` garde un logo valide et rien d'autre.
+- Panneau (`EvaluationGeneratorPanel`) : écoles enrichies par `ecolesAvecLogo` (école choisie, plan rechargé, changement
+  d'école) → le cartouche de TOUS les rendus porte le logo. Documents : `.claude/rules/feuilles-evaluations.md` (puce
+  « Cartouche »).
+- Réglages (`ProfilPage`) : `ApercuCartouche` montre le logo de l'école affichée à gauche de la cartouche (même proportion que
+  la copie) et reçoit en enfant `components/compte/LogoEcoleReglage.tsx` (« Logo de l'école (facultatif) », une ligne par école :
+  vignette sur fond blanc, « Ajouter le logo de l'école » / « Remplacer le logo » qui ouvre le sélecteur de fichier
+  `accept="image/png,image/jpeg,image/webp"`, « Retirer le logo », message `role=status` « Logo de « … » enregistré (11 Ko,
+  600 × 250 px, fond transparent gardé) » ou erreur ; boutons 44 px ; styles en fin de `profil.css`).
+
+**Vérifications** (dossier de travail `suite-P/`) : `test_sql.py` (76) ; `docs.cjs` (451 : non-régression contre f88341d sur
+52 documents, logo PNG et JPEG dans chaque document HTML — une fois, à gauche du texte, ≈ 57 px de haut, texte alternatif,
+rien ne dépasse à 680 (impression) / 820 / 1 280 px — et dans chaque Word — image dans `word/media`, première image du
+document dans le tableau d'en-tête, 1,5 cm —, logo invalide ignoré : documents = sans logo ; Word convertis en PDF et relus) ;
+`verif.mjs` (build `NODE_ENV=development vite build --mode test`, faux client `faux-supabase.js` étendu — option `logoAbsent`
+(42703 / PGRST204), contrainte imitée —, 1 280 px et iPhone 13, clair et sombre : 202 vérifications — professeur neuf 0 sur 6,
+liens des six boutons, un seul principal, clic → `/profil#ecoles`, données de la maquette 2 sur 6, professeur équipé 4 sur 6,
+« Passer » → 5, clic « Lancer » d'un chapitre → repère posé, 6 sur 6 → plus de carte, ordre enregistré, 0011 / 0002 absents,
+Masquer (note, focus, mémorisé, Réglages → Réafficher), PNG 1 200 × 500 transparent → PNG 600 × 250 ≤ 150 Ko, JPEG bruité
+3 000 × 2 000 → JPEG ≤ 150 Ko, relu au rechargement, fichier texte refusé sans écriture, Retirer, deux écoles, 0012 absente
+sans écriture, panneau : plan rouvert du coffre → copie HTML et Word avec le logo, enregistré dans le coffre SANS logo,
+cibles ≥ 44 px, `scrollWidth` = largeur, 0 erreur console). Captures dans `suite-P/captures/` et `suite-P/docs/logo/`.
+
+**Mise en service** : SQL Editor → New query → coller TOUT `0012_logo_ecole.sql` → Run → « Success. No rows returned » ;
+recharger `/profil` → « En-tête des copies » → « Ajouter le logo de l'école ». À vérifier contre le vrai projet :
+enregistrement (taille réelle acceptée par PostgREST), relecture, impression d'une copie et d'un Word avec le logo.
