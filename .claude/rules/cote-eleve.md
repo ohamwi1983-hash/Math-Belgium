@@ -449,10 +449,13 @@ demain, interro passée, essentiel) :
    cocher n'importe quel jour vaut pour le jour d'origine ; des cartes d'une étape revues un jour suivant
    valent pour les revues manquées avant.
 
-**Point d'accroche (page de classe, lot C)** : `lienPlanRevision({ date, niveau, chapitre, etapes })` →
-`/suivi/plan?date=AAAA-MM-JJ&niveau=5e-4h&chapitre=suites&etapes=idSection1,idSection2` (`?interro=` est
-aussi lu). Le formulaire s'ouvre prérempli (« Date et étapes reprises de la page de ta classe ») ; rien
-n'est remplacé sans que l'élève valide.
+**Point d'accroche (page de classe, accueil « Je prépare mon interro »)** — FORMAT DE L'ADRESSE (27/11/2026) :
+`/suivi/plan?date=AAAA-MM-JJ&niveau=6e-6h&chapitre=coniques&etapes=idSection1,idSection2&gen=6gen58,6gen59&type=bilan`
+— `date` (interro), `niveau` + `chapitre`, `etapes` (ids de sections), `gen` (générateurs retenus par le professeur,
+facultatif), `type=bilan` (contrôle-bilan ; absent = interro) ; `?interro=` est aussi lu à la place de `date`. À
+construire avec `pageClasse.ts::lienPlanRevision(interroPubliee)` (une `InterroPubliee` de la page de classe, telle
+quelle) ou `planRevisionStockage.ts::lienPlanRevision({ date, niveau, chapitre, etapes, generateurs, bilan })`. Le
+plan s'ouvre prérempli « annoncée par ton professeur » ; rien n'est remplacé sans que l'élève valide.
 
 ### Mise en page
 

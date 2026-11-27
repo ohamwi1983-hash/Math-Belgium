@@ -241,15 +241,20 @@ export function lienEtape(niveau: string, chapitre: string, sectionId: string): 
 }
 
 /**
- * Point d'accroche du **plan de révision** (lot S, « Mon suivi » + « Plan de révision ») : tant que
+ * Point d'accroche du **plan de révision** (« Ma progression » + « Plan de révision ») : tant que
  * cette constante vaut `null`, la page de classe n'affiche pas le bouton « Mon plan de révision ».
- * Quand la route du plan existe, y mettre son chemin (ex. `'/suivi/plan'`) : le bouton ouvre alors
- * `<route>?date=AAAA-MM-JJ&niveau=<niveau>&chapitre=<chapitre>&etapes=<id>,<id>` — la date de l'interro,
- * son chapitre et ses étapes, lus par `PlanRevisionPage` pour se pré-remplir (rien d'autre n'est transmis).
+ * FORMAT DE L'ADRESSE (à utiliser tel quel par tout bouton « Je prépare mon interro », accueil compris) :
+ * `<route>?date=AAAA-MM-JJ&niveau=<niveau>&chapitre=<chapitre>&etapes=<id>,<id>&gen=<id>,<id>&type=bilan`
+ * — la date de l'interro, son chapitre, ses étapes (ids de sections), les générateurs retenus par le
+ * professeur (`gen`, facultatif) et `type=bilan` pour un contrôle-bilan (absent = interro). Lus par
+ * `PlanRevisionPage`, qui ouvre le plan prérempli « annoncé par ton professeur » ; rien d'autre n'est transmis.
  */
 export const ROUTE_PLAN_REVISION: string | null = '/suivi/plan'
 
-export function lienPlanRevision(i: Pick<InterroPubliee, 'date' | 'niveau' | 'chapitre' | 'etapes'>, route: string | null = ROUTE_PLAN_REVISION): string | null {
+export function lienPlanRevision(
+  i: Pick<InterroPubliee, 'date' | 'niveau' | 'chapitre' | 'etapes'> & Partial<Pick<InterroPubliee, 'generateurs' | 'type'>>,
+  route: string | null = ROUTE_PLAN_REVISION,
+): string | null {
   if (!route) return null
   const p = new URLSearchParams({ date: i.date })
   if (i.niveau && i.chapitre) {
@@ -257,6 +262,8 @@ export function lienPlanRevision(i: Pick<InterroPubliee, 'date' | 'niveau' | 'ch
     p.set('chapitre', i.chapitre)
   }
   if (i.etapes.length > 0) p.set('etapes', i.etapes.map((e) => e.id).join(','))
+  if (i.generateurs && i.generateurs.length > 0) p.set('gen', i.generateurs.map((g) => g.id).join(','))
+  if (i.type === 'bilan') p.set('type', 'bilan')
   return `${route}?${p.toString().replace(/%2F/g, '/').replace(/%2C/g, ',')}`
 }
 

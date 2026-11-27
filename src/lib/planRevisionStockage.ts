@@ -5,10 +5,11 @@ import { estJour, type Jour } from './planRevision'
  * réglages choisis par l'élève et les cases cochées. Rien n'est envoyé. Le calcul du plan est dans
  * `planRevision.ts` (pur), l'affichage dans `routes/PlanRevisionPage.tsx`.
  *
- * Point d'accroche pour la page de classe (lot C) : `lienPlanRevision()` construit
- * `/suivi/plan?date=AAAA-MM-JJ&niveau=…&chapitre=…&etapes=id1,id2` — la page ouvre le formulaire
- * prérempli (date de l'interro publiée, étapes annoncées) ; l'élève confirme. Rien n'est remplacé sans
- * son accord.
+ * Point d'accroche pour la page de classe et l'accueil : `lienPlanRevision()` construit
+ * `/suivi/plan?date=AAAA-MM-JJ&niveau=…&chapitre=…&etapes=id1,id2&gen=g1,g2&type=bilan` (`gen` et
+ * `type` facultatifs ; même format que `pageClasse.ts::lienPlanRevision`) — la page ouvre le plan
+ * prérempli (date de l'interro publiée, étapes et exercices annoncés) ; l'élève confirme. Rien n'est
+ * remplacé sans son accord.
  */
 
 export interface PlanGarde {
@@ -64,13 +65,15 @@ export function effacerPlan(): void {
   }
 }
 
-/** Lien vers le plan de révision, prérempli (page de classe, « Mon plan de révision jusqu'au … »). */
-export function lienPlanRevision(o: { date?: Jour; niveau?: string; chapitre?: string; etapes?: string[] } = {}): string {
+/** Lien vers le plan de révision, prérempli (page de classe, accueil « Je prépare mon interro »). */
+export function lienPlanRevision(o: { date?: Jour; niveau?: string; chapitre?: string; etapes?: string[]; generateurs?: string[]; bilan?: boolean } = {}): string {
   const q = new URLSearchParams()
   if (o.date) q.set('date', o.date)
   if (o.niveau) q.set('niveau', o.niveau)
   if (o.chapitre) q.set('chapitre', o.chapitre)
   if (o.etapes?.length) q.set('etapes', o.etapes.join(','))
-  const s = q.toString()
+  if (o.generateurs?.length) q.set('gen', o.generateurs.join(','))
+  if (o.bilan) q.set('type', 'bilan')
+  const s = q.toString().replace(/%2C/g, ',')
   return `/suivi/plan${s ? `?${s}` : ''}`
 }
