@@ -21,7 +21,7 @@ const MOT_ECRAN: Record<string, string> = { o: 'juste du premier coup', a: 'just
  * générateur (`EntrainementPage`) — jamais générateur par générateur : elle apparaît sous l'exercice quand
  * « Ma progression » note un essai (tous les écrans clos, `observerProgression`), et disparaît dès qu'un
  * nouvel exercice commence (puces publiées remises à zéro, ou bouton « Nouvel exercice » du générateur).
- * « Question n sur N · étape k », bilan en une phrase (`bilanExercice`), trois choix (Un autre exercice —
+ * « n questions faites · cours : étape k », bilan en une phrase (`bilanExercice`), trois choix (Un autre exercice —
  * le bouton du générateur, sinon l'appli remontée —, Revoir le cours de l'étape, Voir ma progression),
  * pastilles de compétence qui s'expliquent en une ligne au toucher. `SelecteurVarianteDev` et l'appli ne
  * sont jamais touchés.
@@ -92,8 +92,8 @@ export function FinExercice({
     <section ref={carte} className="ge-fin-ex no-export" aria-labelledby="ge-fin-ex-titre" data-fin-exercice="">
       <div className="ge-fin-ex-tete">
         <p className="ge-fin-ex-repere">
-          {n > 1 ? `Question ${n} sur ${n}` : 'Exercice'}
-          {etape ? ` · étape ${etape}` : ''}
+          {n > 1 ? `${n} questions faites` : 'Exercice fait'}
+          {etape ? ` · cours : étape ${etape}` : ''}
         </p>
         {competences.length > 0 && (
           <div className="ge-pastilles">

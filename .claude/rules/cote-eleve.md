@@ -681,7 +681,7 @@ logique : `tests/purs.test.ts` du dossier de travail `suite-E/` (esbuild + node)
   générateur touché, `SelecteurVarianteDev` intact) : apparaît quand l'observateur de Ma progression note un essai
   (`observerProgression`, donc pour les générateurs à puces ; pas pour les quiz vrai / faux : une affirmation = un
   essai), disparaît quand un nouvel exercice commence (puces sans écran clos, ou clic sur un bouton « Nouvel
-  exercice »…). « Question N sur N · étape k » (étape du cours de la carte), puces colorées (`role="img"` en mots),
+  exercice »…). « N questions faites · cours : étape k » (étape du cours de la carte ; jamais « Question n sur N · étape k » : l'en-tête du générateur dit déjà « Étape 3 / 3 » pour ses écrans, le même mot prêtait à confusion), puces colorées (`role="img"` en mots),
   « Exercice terminé » + bilan en une phrase (`bilanExercice` : « 3 réponses justes du premier coup, 1 avec une
   aide. »), **Un autre exercice** (clique le bouton « Nouvel exercice » du générateur, sinon remonte l'appli —
   `key`), **Revoir le cours de l'étape k** (lien de retour de la barre), **Voir ma progression** (`/suivi?niveau=&
