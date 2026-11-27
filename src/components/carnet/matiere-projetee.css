@@ -1,0 +1,92 @@
+/* Matière vue proposée en fin de projection (chantier M, maquette « fin-projection » du 27/11/2026).
+   Jetons du site : clair ET sombre dans Mes classes et sur le tableau de bord ; dans la projection, la boîte
+   est posée dans `.theme-clair` (toujours claire, comme les autres boîtes de la projection). */
+.mv { display: flex; flex-direction: column; gap: 12px; color: var(--ink); font-family: var(--sans); }
+.mv-surtitre { margin: 0; font: 600 0.75rem var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
+.mv-titre { margin: 0; font: 600 1.5rem/1.2 var(--serif); color: var(--ink); }
+.mv-quand { margin: 0; color: var(--ink-soft); font-size: 0.98rem; line-height: 1.5; }
+.mv-lien {
+  display: inline; min-height: 0; padding: 0; border: 0; background: none; color: var(--accent-ink); font: inherit;
+  text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+}
+.mv-lien:focus-visible, .mv-bouton:focus-visible, .mv-case input:focus-visible, .mv-champ select:focus-visible, .mv-champ input:focus-visible, .mv-devoir-champ textarea:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+.mv-changer { display: flex; flex-wrap: wrap; gap: 10px 14px; padding: 12px 14px; border: 1px solid var(--line-soft); border-radius: 12px; background: var(--surface-2); }
+.mv-changer[hidden] { display: none; }
+.mv-champ { display: flex; flex-direction: column; gap: 4px; flex: 1 1 150px; min-width: 0; font-size: 0.85rem; color: var(--ink-soft); }
+.mv-champ select, .mv-champ input {
+  min-height: 44px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink);
+  font: 500 0.95rem var(--sans); max-width: 100%; box-sizing: border-box;
+}
+.mv-boite { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; border: 1px solid var(--line-soft); border-radius: 12px; background: var(--surface-2); }
+.mv-groupe { margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mv-groupe legend { padding: 0; margin-bottom: 4px; font: 700 0.9rem var(--sans); color: var(--ink); }
+.mv-case { display: flex; gap: 10px; align-items: flex-start; min-height: 44px; padding: 6px 0; cursor: pointer; font-size: 0.98rem; line-height: 1.35; }
+.mv-case input { flex: none; width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--good); cursor: pointer; }
+.mv-case-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.mv-case-texte small { color: var(--ink-soft); font-size: 0.84rem; }
+.mv-sous { list-style: none; margin: 0 0 4px 32px; padding: 0; }
+.mv-case--sous { font-size: 0.92rem; min-height: 44px; }
+.mv-devoir { border-top: 1px solid var(--line-soft); padding-top: 6px; }
+.mv-devoir-champ { display: flex; flex-direction: column; gap: 4px; margin-left: 32px; font-size: 0.85rem; color: var(--ink-soft); }
+.mv-devoir-champ[hidden] { display: none; }
+.mv-devoir-champ textarea {
+  width: 100%; box-sizing: border-box; min-height: 64px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--surface); color: var(--ink); font: 400 0.95rem/1.4 var(--sans); resize: vertical;
+}
+.mv-note { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--sky-soft); color: var(--ink); font-size: 0.9rem; line-height: 1.45; }
+.mv-erreur { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--bad-soft); color: var(--bad); font-size: 0.92rem; line-height: 1.45; }
+.mv-succes { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--good-soft); color: var(--ink); font-size: 0.95rem; line-height: 1.45; }
+.mv-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 4px; }
+.mv-espace { flex: 1 1 0; }
+.mv-bouton {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px 16px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink);
+  font: 600 0.95rem/1.25 var(--sans); cursor: pointer; text-align: center; text-decoration: none;
+}
+.mv-bouton:hover:not(:disabled) { border-color: var(--accent-soft-line); color: var(--accent-ink); }
+.mv-bouton.principal { background: var(--accent); border-color: var(--accent); color: var(--on-accent, #fff8f0); }
+.mv-bouton.principal:hover:not(:disabled) { background: var(--accent-ink); border-color: var(--accent-ink); color: var(--on-accent, #fff8f0); }
+.mv-bouton:disabled { opacity: 0.5; cursor: default; }
+.mv-aide { margin: 0; font-size: 0.82rem; color: var(--ink-faint); }
+
+/* Fin de projection : boîte posée sur la projection (toujours claire), défilante si l'écran est bas. */
+.mv-voile { position: fixed; inset: 0; z-index: 9; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgb(17 23 29 / 0.72); }
+.mv-dialogue {
+  display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 680px; max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px);
+  overflow-y: auto; box-sizing: border-box; padding: 24px 26px; border-radius: 16px; background: var(--surface); color: var(--ink);
+  box-shadow: 0 20px 60px rgb(0 0 0 / 0.35); color-scheme: light; font-family: var(--sans);
+}
+.mv-dialogue .mv-titre { font-size: 1.6rem; }
+.mv-dialogue .mv-annotations { margin: 0; font-size: 0.85rem; color: var(--ink-soft); }
+.mv-dialogue .mv-rester { align-self: flex-start; }
+.mv-dialogue .mv-etat { margin: 0; min-height: 1.4em; font-size: 0.9rem; color: var(--ink-soft); }
+.mv-dialogue .mv-etat.erreur { color: var(--bad); }
+@media (max-width: 560px) {
+  .mv-dialogue { padding: 18px 16px; }
+  .mv-titre, .mv-dialogue .mv-titre { font-size: 1.3rem; }
+  .mv-espace { display: none; }
+  .mv-actions .mv-bouton { flex: 1 1 100%; }
+}
+
+/* Carte « Matière vue à noter » (Aujourd'hui de Mes classes, tableau de bord). */
+.mv-carte {
+  display: flex; flex-direction: column; gap: 10px; margin: 0 0 18px; padding: 16px 18px; border: 1px solid var(--accent-soft-line);
+  border-left: 4px solid var(--accent); border-radius: 12px; background: var(--surface); color: var(--ink);
+}
+.mv-carte h2 { margin: 0; font: 600 1.15rem var(--serif); }
+.mv-carte-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.mv-carte-liste li { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--line-soft); }
+.mv-carte-liste li:first-child { border-top: 0; padding-top: 0; }
+.mv-carte-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 260px; overflow-wrap: anywhere; }
+.mv-carte-texte span { color: var(--ink-soft); font-size: 0.92rem; }
+.mv-carte-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.mv-carte-pied { margin: 0; }
+.mv-panneau { display: flex; flex-direction: column; gap: 4px; padding: 12px 24px 24px; overflow-y: auto; flex: 1 1 auto; min-height: 0; }
+.mv-panneau-fermer { display: flex; justify-content: flex-end; }
+@media (max-width: 560px) {
+  .mv-panneau { padding: 10px 16px 20px; }
+  .mv-carte-actions { width: 100%; }
+  .mv-carte-actions .mv-bouton { flex: 1 1 0; }
+}

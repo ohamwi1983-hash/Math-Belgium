@@ -5,6 +5,7 @@ import { MenuEspace } from '../components/compte/MenuEspace'
 import { EnTeteCompte, PageCompte, PageReservee } from '../components/compte/PageReservee'
 import { AgendaPeriode } from '../components/carnet/AgendaPeriode'
 import { Aujourdhui } from '../components/carnet/Aujourdhui'
+import { MatiereANoter } from '../components/carnet/MatiereProjetee'
 import { CarteSeance } from '../components/carnet/CarteSeance'
 import { CarnetContexte, avecGrille, textesSeance, type ContexteCarnet } from '../components/carnet/contexteCarnet'
 import { FormulaireSeance, type AnnonceEvaluation } from '../components/carnet/FormulaireSeance'
@@ -737,6 +738,8 @@ function Carnet() {
             <Route
               path="aujourdhui"
               element={avecClasses(
+                <>
+                <MatiereANoter client={client} classes={donnees.classes} onEnregistre={() => void charger()} />
                 <Aujourdhui
                   grilles={grilles}
                   cases={horaire.actif ? horaire.cases : []}
@@ -746,7 +749,8 @@ function Carnet() {
                   maintenant={maintenant}
                   onNoter={noterCreneau}
                   onNoterLibre={noterLibre}
-                />,
+                />
+                </>,
               )}
             />
             <Route

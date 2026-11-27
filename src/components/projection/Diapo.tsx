@@ -301,6 +301,7 @@ function corps(d: DonneesDiapo, chapter: ChapterContent, pas: number, mode: Mode
                 <a
                   className="diapo-entrainement-ouvrir projection-interactif"
                   href={d.lien}
+                  data-generateur={d.generatorId}
                   target="_blank"
                   rel="noopener noreferrer"
                   title="Ouvre le générateur dans un nouvel onglet (la projection reste ouverte)"

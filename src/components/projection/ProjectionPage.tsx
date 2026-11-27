@@ -25,6 +25,9 @@ import { lireAnnotations, aDesAnnotations } from '../../lib/projection/annotatio
 import type { DonneesAnnotations } from '../../lib/projection/annotations'
 import { useConservation, useMagasinAnnotations } from './magasinAnnotations'
 import { DialogueQuitter, PaletteExport, useExportAnnote, useResume } from './ExportAnnote'
+import { DialogueFinProjection, useMatiereProjection } from './MatiereFinProjection'
+import type { PropositionMatiere } from '../../lib/projection/matiereProjetee'
+import '../carnet/matiere-projetee.css'
 import './projection.css'
 
 /**
@@ -475,6 +478,9 @@ function VueDiapos({
   const ann = useAnnotationsProjection(chapter, diapos, choix, projection, gardees)
   const [demandeQuitter, setDemandeQuitter] = useState(false)
   const { etat, suivant, precedent, aller, basculerBlanc } = projection
+  // Matière vue proposée en fin de projection (vue qui pilote seulement, jamais l'écran de la classe).
+  const matiere = useMatiereProjection(chapter, diapos, etat.index, role)
+  const [proposition, setProposition] = useState<PropositionMatiere | null>(null)
   const [message, signaler] = useMessage()
   const { plein, basculer } = usePleinEcran(signaler)
   const [outils, setOutils] = useState<OutilsLocaux>(OUTILS_DEPART)
@@ -495,17 +501,21 @@ function VueDiapos({
 
   const quitterVraiment = useCallback(() => {
     if (document.fullscreenElement) void document.exitFullscreen?.().catch(() => undefined)
+    if (role !== 'diapos') matiere.terminer()
     if (role === 'diapos') {
       window.close()
       return
     }
     navigate(`/${chapter.levelSlug}/${chapter.slug}#projeter`)
-  }, [navigate, chapter, role])
-  // Quitter avec des annotations : proposer de les télécharger (pas sur l'écran de la classe en deux écrans).
+  }, [navigate, chapter, role, matiere])
+  // Quitter avec des annotations : proposer de les télécharger (pas sur l'écran de la classe en deux écrans) ;
+  // pendant une heure de cours de l'horaire : proposer aussi de noter la matière vue.
   const quitter = useCallback(() => {
-    if (role !== 'diapos' && aDesAnnotations({ pages: ann.annotations.instantane(), blanches: projection.etat.blanches })) setDemandeQuitter(true)
+    const p = matiere.proposition()
+    setProposition(p)
+    if (role !== 'diapos' && (p || aDesAnnotations({ pages: ann.annotations.instantane(), blanches: projection.etat.blanches }))) setDemandeQuitter(true)
     else quitterVraiment()
-  }, [role, ann.annotations, projection.etat.blanches, quitterVraiment])
+  }, [role, ann.annotations, projection.etat.blanches, quitterVraiment, matiere])
 
   useClavier({
     suivant: () => !outils.ensemble && !demandeQuitter && suivant(),
@@ -594,7 +604,12 @@ function VueDiapos({
         paletteExport={role === 'diapos' ? undefined : <PaletteExport exp={ann.exp} resume={ann.resume} nouvelleSeance={ann.nouvelleSeance} />}
       />
       {outils.ensemble && <VueEnsemble chapter={chapter} diapos={diapos} projection={projection} fermer={() => setOutils((o) => ({ ...o, ensemble: false }))} />}
-      {demandeQuitter && <DialogueQuitter exp={ann.exp} resume={ann.resume} quitter={quitterVraiment} fermer={() => setDemandeQuitter(false)} />}
+      {demandeQuitter &&
+        (proposition ? (
+          <DialogueFinProjection proposition={proposition} matiere={matiere} exp={ann.exp} resume={ann.resume} annotations={aDesAnnotations({ pages: ann.annotations.instantane(), blanches: etat.blanches })} quitter={quitterVraiment} fermer={() => setDemandeQuitter(false)} />
+        ) : (
+          <DialogueQuitter exp={ann.exp} resume={ann.resume} quitter={quitterVraiment} fermer={() => setDemandeQuitter(false)} />
+        ))}
       {accueil && (
         <div className="projection-accueil" role="dialog" aria-modal="true" aria-labelledby="projection-accueil-titre" onClick={(e) => e.stopPropagation()}>
           <div>
@@ -639,6 +654,8 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
   const ann = useAnnotationsProjection(chapter, diapos, choix, projection, gardees)
   const [demandeQuitter, setDemandeQuitter] = useState(false)
   const { etat, suivant, precedent, aller, basculerBlanc, lancerMinuteur, arreterMinuteur, basculerAtelierPlein } = projection
+  const matiere = useMatiereProjection(chapter, diapos, etat.index, 'prof')
+  const [proposition, setProposition] = useState<PropositionMatiere | null>(null)
   const [message, signaler] = useMessage()
   const { plein, basculer } = usePleinEcran(signaler)
   const [outils, setOutils] = useState<OutilsLocaux>(OUTILS_DEPART)
@@ -674,12 +691,15 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
 
   const quitterVraiment = () => {
     if (document.fullscreenElement) void document.exitFullscreen?.().catch(() => undefined)
+    matiere.terminer()
     const f = fenetreDiapos()
     if (f && !f.closed) f.close()
     navigate(`/${chapter.levelSlug}/${chapter.slug}#projeter`)
   }
   const quitter = () => {
-    if (aDesAnnotations({ pages: ann.annotations.instantane(), blanches: etat.blanches })) setDemandeQuitter(true)
+    const p = matiere.proposition()
+    setProposition(p)
+    if (p || aDesAnnotations({ pages: ann.annotations.instantane(), blanches: etat.blanches })) setDemandeQuitter(true)
     else quitterVraiment()
   }
 
@@ -860,7 +880,12 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
         </aside>
       </div>
       {outils.ensemble && <VueEnsemble chapter={chapter} diapos={diapos} projection={projection} fermer={() => setOutils((o) => ({ ...o, ensemble: false }))} />}
-      {demandeQuitter && <DialogueQuitter exp={ann.exp} resume={ann.resume} quitter={quitterVraiment} fermer={() => setDemandeQuitter(false)} />}
+      {demandeQuitter &&
+        (proposition ? (
+          <DialogueFinProjection proposition={proposition} matiere={matiere} exp={ann.exp} resume={ann.resume} annotations={aDesAnnotations({ pages: ann.annotations.instantane(), blanches: etat.blanches })} quitter={quitterVraiment} fermer={() => setDemandeQuitter(false)} />
+        ) : (
+          <DialogueQuitter exp={ann.exp} resume={ann.resume} quitter={quitterVraiment} fermer={() => setDemandeQuitter(false)} />
+        ))}
       {message && (
         <p className="projection-message" role="status">
           {message}

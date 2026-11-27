@@ -15,6 +15,7 @@ import { estConnecteActif, useCompte } from '../lib/compteContexte'
 import { messageErreur } from '../lib/compteValidation'
 import { aVenir, chapitreDeLInterro, chargerDonneesEspace, coursDuJour, lienProjection, type CoursDuJour, type DonneesEspace } from '../lib/espaceProfesseur'
 import { useOrdreChapitres } from '../lib/ordreChapitres'
+import { MatiereANoter } from '../components/carnet/MatiereProjetee'
 
 /**
  * `/espace` — tableau de bord de l'espace professeur (maquettes « dashboard » et « téléphone » validées le
@@ -95,6 +96,8 @@ function TableauDeBord() {
             </button>
           </div>
         )}
+
+        <MatiereANoter client={client} classes={donnees?.classes ?? []} onEnregistre={() => void charger()} />
 
         <div className="ep-tdb-haut">
           <section className="ep-carte ep-aujourdhui" aria-labelledby={`${id}-auj`}>
