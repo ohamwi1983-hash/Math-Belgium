@@ -1757,7 +1757,7 @@ inchangés ; tout le reste comme avant.
 rien ne dépasse à 680 (impression) / 820 / 1 280 px — et dans chaque Word — image dans `word/media`, première image du
 document dans le tableau d'en-tête, 1,5 cm —, logo invalide ignoré : documents = sans logo ; Word convertis en PDF et relus) ;
 `verif.mjs` (build `NODE_ENV=development vite build --mode test`, faux client `faux-supabase.js` étendu — option `logoAbsent`
-(42703 / PGRST204), contrainte imitée —, 1 280 px et iPhone 13, clair et sombre : 202 vérifications — professeur neuf 0 sur 6,
+(42703 / PGRST204), contrainte imitée —, 1 280 px et iPhone 13, clair et sombre : 200 vérifications — professeur neuf 0 sur 6,
 liens des six boutons, un seul principal, clic → `/profil#ecoles`, données de la maquette 2 sur 6, professeur équipé 4 sur 6,
 « Passer » → 5, clic « Lancer » d'un chapitre → repère posé, 6 sur 6 → plus de carte, ordre enregistré, 0011 / 0002 absents,
 Masquer (note, focus, mémorisé, Réglages → Réafficher), PNG 1 200 × 500 transparent → PNG 600 × 250 ≤ 150 Ko, JPEG bruité
