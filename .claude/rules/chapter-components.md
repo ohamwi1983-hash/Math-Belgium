@@ -148,7 +148,7 @@ projection, fenêtre des diapos et PowerPoint. Rien n'est enregistré côté ser
   navigateur, même session) passent tous par elle.
 
 **Données → diapos** (`lib/projection/diapos.ts`, PUR) : `construireDiapos(chapter, choix)`, aucune
-donnée réécrite. Par étape cochée, dans l'ordre : `titre` (niveau · chapitre, « Étape n · partie »,
+donnée réécrite. Par étape cochée, dans l'ordre : `titre` (niveau · chapitre, « Point n · partie »,
 `title`, `kicker`, intertitres en puces) ; `essentiel` (champ `essentiel`, + première figure de
 l'étape à côté — sauf phrases longues, > 300 caractères : la figure passe sur sa propre diapo, le texte
 resterait sinon sous 28 px) ; puis dans l'ordre écrit : `figure` (chaque `illustration`/`illustrationGroup`, titre = dernier
@@ -230,7 +230,7 @@ H surligneur ; Q équerre ; C compas ; K calculatrice ; Ctrl/Cmd+Z annuler ; F /
 de ces lettres n'était prise). Une touche dans un champ ou un atelier (Shadow DOM compris,
 `composedPath`) lui revient ; sur un bouton, seules les lettres restent des raccourcis. Clic sur la diapo = suivant (sauf boutons, atelier, stylo actif) ;
 glisser au doigt = suivant / précédent.
-- Barre du bas (`BarreOutils`) : fil « chapitre · § n titre court », stylo, équerre, compas,
+- Barre du bas (`BarreOutils`) : fil « chapitre · point n · titre court », stylo, équerre, compas,
   calculatrice, minuteur (1/2/3/5/10 min, affiché en haut à droite, rouge clignotant à 0), écran blanc,
   vue d'ensemble (grille de vignettes `mode="vignette"`, atelier non monté), télécharger (palette
   PowerPoint / PDF annotés, nouvelle séance — « Projection annotée »), plein écran (Fullscreen
@@ -375,7 +375,7 @@ blanches multiples, traceur de fonctions ; dossier de travail `projection-annote
   `~<n° de page>` pour un exemple découpé — elle ne dépend que du contenu, pas des étapes / inclusions
   choisies. Une sélection différente au lancement ne perd rien : les annotations d'une diapo absente
   restent dans le magasin et dans le navigateur, et réapparaissent quand elle revient (l'export ne prend
-  que les diapos choisies ; le lanceur résume « … dans ces étapes » via `resumeDansSelection`, qui couvre
+  que les diapos choisies ; le lanceur résume « … dans ces points » via `resumeDansSelection`, qui couvre
   aussi les pages `~n`).
 - **Conservation** (`useConservation`) : IndexedDB `math-belgium-projection` / `annotations`, clé
   `<niveau>/<slug>` → `DonneesAnnotations` (`pages` non vides, `blanches`, `vues`, `fond`) ; repli
@@ -429,8 +429,8 @@ blanches multiples, traceur de fonctions ; dossier de travail `projection-annote
   en PowerPoint » / « en PDF » + case « Avec mes annotations » (cochée d'office, seulement s'il y en a) —
   l'export « sans annotations » d'avant reste (case décochée ou rien de gardé).
   **Matière vue proposée** (chantier M, 27/11/2026) : pendant une heure de cours de l'horaire d'une classe de l'année du
-  chapitre, Quitter ouvre une boîte « Noter la matière vue de la 5e A ? » (étapes montrées, générateurs ouverts par « Ouvrir
-  le générateur » — `data-generateur` —, « vue en partie ») qui reprend aussi le téléchargement des annotations ; sinon la
+  chapitre, Quitter ouvre une boîte « Noter la matière vue de la 5e A ? » (points montrés, générateurs ouverts par « Ouvrir
+  le générateur » — `data-generateur` —, « vu en partie ») qui reprend aussi le téléchargement des annotations ; sinon la
   boîte ci-dessus, inchangée. Vue du professeur seulement. Détail : `.claude/rules/comptes.md`, « Matière vue proposée en
   fin de projection ».
 - **Export annoté** (`telechargerProjection(chapter, choix, { format, annotations, diapos, progression })`,
@@ -740,10 +740,10 @@ principal n'a pas bougé) ; rien n'est envoyé au serveur.
   (arrêt confirmé), rappel discret en haut à droite quand la barre se masque (gris clignotant en pause), chrono rendu
   seul (`Chrono` : la projection ne se re-rend pas). Durée écrite dans l'en-tête du WebM (`teteAvecDuree` : élément
   `Duration` ajouté dans `Info`, quelques octets, sinon le lecteur affiche 0:00 — vérifié par ffprobe). « Ta vidéo est
-  prête » : aperçu + repères des changements d'étape sur la ligne du temps, durée / poids / format, « Télécharger la
+  prête » : aperçu + repères des changements de point sur la ligne du temps, durée / poids / format, « Télécharger la
   vidéo » (`Titre - AAAA-MM-JJ.webm`, ASCII), Réenregistrer, Supprimer, Fermer (confirmé si pas téléchargée) ; « Pour
-  YouTube » : titre proposé (« Chapitre — étape · étape », modifiable), description (niveau, chapitres horodatés d'après
-  les étapes MONTRÉES — `chapitresYouTube` : 00:00, voisins identiques fusionnés, passages < 10 s fondus, AUCUN chapitre
+  YouTube » : titre proposé (« Chapitre — titre court · titre court » des points montrés, modifiable), description (niveau, chapitres horodatés d'après
+  les points MONTRÉS — `chapitresYouTube` : 00:00, voisins identiques fusionnés, passages < 10 s fondus, AUCUN chapitre
   s'il en reste moins de 3 —, lien du cours complet), Copier ; rappel « la mise en ligne, c'est toi » + RGPD toujours
   affiché.
 - **P6 Points de participation** (`Participation.tsx`, `lib/participation.ts`, `participation.css`,

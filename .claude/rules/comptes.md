@@ -1603,6 +1603,13 @@ et l'agenda gardent « Carnet de matière vue » en surtitre, non-régression oc
 Alias : `/espace/classes` → `/carnet`, `/espace/documents` → `/coffre`, `/espace/reglages` → `/profil` (`Navigate replace`).
 Toutes les anciennes adresses répondent comme avant ; une adresse inconnue sous `/carnet/` → `/carnet`.
 
+**« Point », jamais « étape » / « § n » / « section n »** pour une partie d'un chapitre (28/11/2026, décision du professeur,
+aussi dans l'espace professeur) : tableau de bord, vue d'ensemble, Préparer un cours, « Matière vue à noter », Noter la
+séance, carte de séance, Smartschool / texte pour l'agenda scolaire (« • Point 3 : titre », « — points 2 et 3 »), agenda
+d'une période (« n points »), page des élèves, panneau des évaluations. Liste complète et ce qui reste « étape » :
+`content-authoring.md`, « Vocabulaire ». Le texte des documents imprimés change donc (fiche, agenda, texte copié) : les
+anciennes comparaisons « octet pour octet » ne valent plus pour ces mots ; les séances enregistrées ne changent pas.
+
 **Menu UNIQUE** `components/compte/MenuEspace.tsx` (même API : `children`, `carnet`, `compact`) + `espace.css` (importé par
 lui, donc par TOUTES les pages professeur : tableau de bord, Mes classes, Préparer, conception, Mes documents, partage,
 Réglages, administration). `PORTES` (exporté) = Tableau de bord + quatre portes, chacune avec `sous` (sous-entrées),
@@ -1636,7 +1643,7 @@ tolérée —, séances ; 0002 absent → `carnetAbsent`).
   `/{niveau}/{chapitre}?etape=<id>#projeter`) si un chapitre est en cours et le créneau n'est pas « à noter », sinon **Noter
   la matière vue** (`/carnet/aujourdhui?noter=<classe>` : `CarnetPage` ouvre « Noter la séance » sur le premier créneau
   d'aujourd'hui non noté de la classe, paramètre retiré de l'adresse) ; heure supprimée : « Pas cours — motif ». Téléphone :
-  texte court (« Suites, étape 7 ») et boutons icônes 48 px (`aria-label` complet). « Ma semaine › », « Voir la journée en
+  texte court (« Suites, point 7 ») et boutons icônes 48 px (`aria-label` complet). « Ma semaine › », « Voir la journée en
   détail › » (`/carnet/aujourdhui`). Sans classe : « Pas encore de classe… » + Mes classes ; sans horaire : « … remplis-le »
   + Mon horaire ; week-end / congé / été : une phrase.
 - « À venir » (`aVenir`, 21 jours, 6 au plus) : interrogations (« Évaluation 6e B — Coniques », puce rose), autres
@@ -1781,7 +1788,7 @@ référence sauf « Ma progression » dans la carte de l'accueil. Captures dans 
 
 Décision du professeur : pendant une projection lancée par un professeur connecté, ce qui est MONTRÉ est repéré et, en
 quittant, SI la projection a eu lieu pendant une heure de cours de l'horaire d'une classe de l'année du chapitre, le site
-propose « Noter la matière vue de la 5e A ? » — étapes projetées et générateurs ouverts pré-cochés, « vue en partie »,
+propose « Noter la matière vue de la 5e A ? » — points projetés et générateurs ouverts pré-cochés, « vu en partie »,
 devoir facultatif ; rien n'est écrit sans le clic « Enregistrer dans Mes classes ». Hors des heures de cours (préparation
 chez soi), week-end, congé, heure supprimée par l'agenda : rien (la sortie est celle d'avant). AUCUNE donnée d'élève.
 
@@ -1825,7 +1832,7 @@ la vue du professeur ; jamais l'écran de la classe) — `lib/projection/suiviPr
 « Télécharger tes annotations ? » d'avant GAGNE la proposition — une seule boîte : surtitre « Fin de la projection », titre
 « Noter la matière vue de la 6e B ? », « Vendredi 27/11, 3e heure (10h45) — d'après ton horaire. » + « Changer de classe
 ou de date » (classe — celles de l'année d'abord —, date `type="date"`, heure = créneaux de la classe ce jour-là ou « Sans
-heure précise » ; « — choisi par toi. »), « Étapes projetées », « Exercices ouverts pendant le cours » (« 6gen58 — titre de
+heure précise » ; « — choisi par toi. »), « Points projetés », « Exercices ouverts pendant le cours » (« 6gen58 — titre de
 la carte »), « Devoir pour la prochaine fois » (case + consigne libre, jamais filtrée ; « pour le lun. 30/11 (prochain
 cours) » = `prochainsCours` avec 0007, sinon sans date), « ✓ Enregistrer dans Mes classes » (principal, focus d'office),
 avec des annotations « Télécharger le PowerPoint annoté » + « PDF annoté » dans la même rangée (le téléchargement ne quitte
@@ -1841,7 +1848,7 @@ bas (téléphone : tient à l'écran). Styles : `components/carnet/matiere-proje
 proposition est gardée dans `localStorage` `espace:matiere-a-noter` (même id : remplacée, jamais doublée). Carte « Matière
 vue à noter » (`components/carnet/MatiereProjetee.tsx::MatiereANoter`) en tête de « Aujourd'hui » de Mes classes
 (`/carnet/aujourdhui`) et du tableau de bord (`/espace`, au-dessus d'Aujourd'hui / À venir) : « 6e B · vendredi 27/11,
-3e heure — Projeté : Coniques, étape 1 », « Noter » (même formulaire `FormulaireMatiere` dans `PanneauLateral`, carnet relu à
+3e heure — Projeté : Coniques, point 1 », « Noter » (même formulaire `FormulaireMatiere` dans `PanneauLateral`, carnet relu à
 l'ouverture ; enregistré → message, la page se recharge) et « Oublier » (retirée de ce navigateur ; rien n'était écrit).
 Classe supprimée depuis ou chapitre inconnu : ignorée. Rien s'il n'y a rien. Tableau de bord, « Aujourd'hui » (décision du
 27/11/2026) : le bouton « Noter la matière vue » d'un cours pour lequel une proposition est gardée (même classe, aujourd'hui,
