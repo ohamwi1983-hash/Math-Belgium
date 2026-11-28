@@ -185,30 +185,31 @@ export const aDesObjets = (elements: ElementAnnotation[]) => elements.some(estOb
 // ---------- calque interactif de la page blanche ----------
 
 const TOUCHES: { t: string; latex?: string; action?: 'insere' | 'remplace' | 'efface' | 'precedente' | 'suivante' | 'ok'; signe?: boolean; large?: boolean; nom: string }[] = [
+  // Trois rangées de dix (clavier bas : il tient sous un tableau de signes posé en haut de la page).
   { t: '7', nom: '7' },
   { t: '8', nom: '8' },
   { t: '9', nom: '9' },
   { t: 'x', latex: 'x', nom: 'x' },
   { t: '/', latex: '\\tfrac{a}{b}', nom: 'fraction' },
-  { t: '⌫', action: 'efface', nom: 'effacer le caractère' },
-  { t: '4', nom: '4' },
-  { t: '5', nom: '5' },
-  { t: '6', nom: '6' },
   { t: ',', nom: 'virgule' },
   { t: '−', nom: 'moins' },
   { t: '+', nom: 'plus' },
-  { t: '1', nom: '1' },
-  { t: '2', nom: '2' },
-  { t: '3', nom: '3' },
-  { t: '0', nom: '0' },
   { t: '+∞', latex: '+\\infty', action: 'remplace', nom: 'plus l’infini' },
   { t: '−∞', latex: '-\\infty', action: 'remplace', nom: 'moins l’infini' },
+  { t: '4', nom: '4' },
+  { t: '5', nom: '5' },
+  { t: '6', nom: '6' },
+  { t: '0', nom: '0' },
   { t: '+', latex: '+', action: 'remplace', signe: true, nom: 'signe plus' },
   { t: '−', latex: '-', action: 'remplace', signe: true, nom: 'signe moins' },
   { t: '0', latex: '0', action: 'remplace', signe: true, nom: 'zéro' },
   { t: '‖', latex: '\\|', action: 'remplace', signe: true, nom: 'double barre (valeur interdite)' },
   { t: '↗', latex: '\\nearrow', action: 'remplace', signe: true, nom: 'croissante' },
   { t: '↘', latex: '\\searrow', action: 'remplace', signe: true, nom: 'décroissante' },
+  { t: '1', nom: '1' },
+  { t: '2', nom: '2' },
+  { t: '3', nom: '3' },
+  { t: '⌫', action: 'efface', nom: 'effacer le caractère' },
   { t: '← case', action: 'precedente', large: true, nom: 'case précédente' },
   { t: 'case →', action: 'suivante', large: true, nom: 'case suivante' },
   { t: 'OK ⏎', action: 'ok', large: true, nom: 'valider' },
@@ -689,13 +690,25 @@ export function CalqueObjets({
     const barreH = cible + 8
     const barreY = sy - marge - barreH - 6 >= 4 ? sy - marge - barreH - 6 : sy + h * kz + marge + 6
     const c = g && d && caseActive ? d.cases.find((x) => x.id === caseActive) : null
-    // Clavier : à droite de l'objet s'il y a la place, sinon à gauche, sinon dessous / dessus ; toujours dans la diapo.
-    const wc = 6 * cible + 5 * 5 + 18
-    const hc = 5 * cible + 4 * 5 + 18 + cible + 30
-    let pc: P = [sx + w * kz + 24, sy]
-    if (pc[0] + wc > 1276) pc = [sx - wc - 24, sy]
-    if (pc[0] < 4) pc = [borne(sx, 4, 1276 - wc), sy + h * kz + 24 + hc <= 716 ? sy + h * kz + 24 : sy - hc - 24]
-    pc = [borne(pc[0], 4, 1276 - wc), borne(pc[1], 4, 716 - hc)]
+    // Clavier : sous l'objet s'il y a la place, sinon dessus, à droite, à gauche ; à défaut, le coin qui ne cache pas
+    // la case touchée (et le moins possible de l'objet). Toujours dans la diapo.
+    const wc = 10 * cible + 9 * 5 + 20
+    const hc = 3 * cible + 2 * 5 + 20 + cible * 1.05 + 30
+    const ob: [number, number, number, number] = [sx, sy, w * kz, h * kz]
+    const cc: [number, number, number, number] | null = c ? [sx + c.x * kz, sy + c.y * kz, c.w * kz, c.h * kz] : null
+    const recouvre = (p: P, b: [number, number, number, number]) => Math.max(0, Math.min(p[0] + wc, b[0] + b[2]) - Math.max(p[0], b[0])) * Math.max(0, Math.min(p[1] + hc, b[1] + b[3]) - Math.max(p[1], b[1]))
+    const dedans = (p: P): P => [borne(p[0], 4, 1276 - wc), borne(p[1], 4, 716 - hc)]
+    const essais: P[] = [
+      [sx, sy + h * kz + 20],
+      [sx, sy - hc - 20],
+      [sx + w * kz + 20, sy],
+      [sx - wc - 20, sy],
+      [4, 716 - hc],
+      [1276 - wc, 716 - hc],
+      [1276 - wc, 4],
+      [4, 4],
+    ].map((p) => dedans(p as P))
+    const pc: P = essais.find((p) => recouvre(p, ob) === 0) ?? [...essais].sort((p, q) => (cc ? recouvre(p, cc) - recouvre(q, cc) : 0) * 1e6 + recouvre(p, ob) - recouvre(q, ob))[0]
     const ordre = d ? d.cases.map((x) => x.id) : []
     const aller = (delta: number) => {
       if (!caseActive) return
@@ -724,7 +737,7 @@ export function CalqueObjets({
               aria-valuenow={Math.round(kz * 100)}
               title="Agrandir ou réduire"
               style={{ left: coin[0] ? '100%' : 0, top: coin[1] ? '100%' : 0, cursor: coin[0] === coin[1] ? 'nwse-resize' : 'nesw-resize' }}
-              onPointerDown={(e) => surPoignee(e, o, [coin[0] ? 0 : 1, coin[1] ? 0 : 1] as P, boite, w, h)}
+              onPointerDown={(e) => surPoignee(e, o, coin, boite, w, h)}
               onClick={(e) => e.stopPropagation()}
             />
           ))}

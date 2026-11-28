@@ -270,6 +270,9 @@ export function Annotations({
   // Changement de page (diapo, page blanche) : on montre ce qui y a été écrit (gardé).
   useEffect(() => {
     geste.current = null
+    // Toile remise à neuf (réaffecter la largeur vide son image) : dans Chromium, un dernier trait suivi aussitôt d'un
+    // changement de page (écran blanc → diapo) laissait parfois à l'écran l'image d'avant le dernier point (28/11/2026).
+    for (const c of [canvasFluo.current, canvasStylo.current]) if (c) c.width = c.width
     dessiner()
     setVersion((v) => v + 1)
   }, [page, dessiner])

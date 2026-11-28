@@ -635,7 +635,8 @@ export function nouveauGabarit(type: TypeGabarit, r: ReglagesGabarit, id: string
   const k = Math.min(1, 1180 / d.w, 520 / d.h)
   g.k = Math.round(k * 1000) / 1000
   g.x = Math.round((1280 - d.w * g.k) / 2)
-  g.y = Math.round(Math.max(96, (720 - d.h * g.k) / 2 - 20))
+  // Plutôt en haut (sous la petite barre) : le petit clavier trouve sa place dessous.
+  g.y = Math.round(Math.max(96, Math.min(130, (720 - d.h * g.k) / 2 - 20)))
   return g
 }
 

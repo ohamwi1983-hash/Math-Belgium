@@ -66,8 +66,8 @@
   font: 500 calc(var(--cible) * 0.48) var(--mono); user-select: text;
 }
 .clavier-champ:focus { outline: 3px solid rgb(182 92 31 / 0.35); outline-offset: 0; }
-.clavier-case { font: 500 calc(var(--cible) * 0.27) var(--mono); color: #6b7a86; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(6 * var(--cible) + 5 * var(--g)); }
-.clavier-touches { display: grid; grid-template-columns: repeat(6, var(--cible)); gap: var(--g); }
+.clavier-case { font: 500 calc(var(--cible) * 0.27) var(--mono); color: #6b7a86; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(10 * var(--cible) + 9 * var(--g)); }
+.clavier-touches { display: grid; grid-template-columns: repeat(10, var(--cible)); gap: var(--g); }
 .clavier-touche {
   height: var(--cible); padding: 0; border: 0; border-radius: 7px; background: #eef2f5; color: #182430; font: 600 calc(var(--cible) * 0.4) var(--sans); cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;

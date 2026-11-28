@@ -225,7 +225,7 @@ export function SelectionCopie({
               role="slider"
               aria-label="Ajuster le cadre"
               aria-valuenow={Math.round(cadre.w)}
-              onPointerDown={(e) => surPoignee(e, [coin[0] ? 0 : 1, coin[1] ? 0 : 1] as P)}
+              onPointerDown={(e) => surPoignee(e, coin)}
             />
           ))}
       </div>
