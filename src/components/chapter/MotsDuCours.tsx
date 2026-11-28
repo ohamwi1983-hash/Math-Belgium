@@ -63,11 +63,21 @@ function Bulle({ mot, ancre, chapter, aller }: { mot: MotDuCours; ancre: HTMLEle
   const ici = ancre.closest('.chapter-section')?.id
   const revoir = section && section.id !== ici ? section : undefined
 
-  // Place : sous le mot s'il y a la place, sinon au-dessus ; dans l'écran, à 16 px des bords.
+  // Place : sous le mot s'il y a la place, sinon au-dessus ; dans l'écran, à 16 px des bords. Téléphone
+  // (feuille du bas) : à l'ouverture, la page remonte juste assez pour que le mot reste visible au-dessus
+  // de la feuille (sans passer sous l'en-tête collant de l'étape).
+  const remonte = useRef(false)
   useLayoutEffect(() => {
     const poser = () => {
       const tel = !window.matchMedia('(min-width: 760px)').matches
       setFeuille(tel)
+      if (tel && ref.current && !remonte.current) {
+        remonte.current = true
+        const r = ancre.getBoundingClientRect()
+        const hautFeuille = window.innerHeight - ref.current.offsetHeight - 8
+        const ecart = r.bottom + 12 - hautFeuille
+        if (ecart > 0) window.scrollBy({ top: Math.min(ecart, Math.max(0, r.top - 140)), behavior: 'auto' })
+      }
       if (tel || !ref.current) return
       const r = ancre.getBoundingClientRect()
       const largeur = Math.min(380, window.innerWidth - 32)
@@ -89,9 +99,18 @@ function Bulle({ mot, ancre, chapter, aller }: { mot: MotDuCours; ancre: HTMLEle
     }
   }, [ancre])
 
-  // Focus dans la bulle à l'ouverture ; Échap et clic à côté referment (focus rendu au mot).
+  // Focus dans la bulle dès qu'elle est placée (une bulle encore en `visibility: hidden` ne prend pas le
+  // focus) ; une seule fois.
+  const pret = feuille || pos !== null
+  const focusDonne = useRef(false)
   useEffect(() => {
+    if (!pret || focusDonne.current) return
+    focusDonne.current = true
     ref.current?.focus({ preventScroll: true })
+  }, [pret])
+
+  // Échap et clic à côté referment (focus rendu au mot).
+  useEffect(() => {
     const touche = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
       e.preventDefault()
