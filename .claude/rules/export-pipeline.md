@@ -47,6 +47,10 @@ retirés, voir `.claude/rules/content-history.md`) — via `src/lib/export/` :
   `jspdf` chargés à la demande), qui réutilise `toutesLesReglesCss` / `retirerPreferenceSombre` /
   `inlinerPolices` de `buildHtml.ts` (exportées pour lui) — voir `chapter-components.md`, « Mode
   projection » et « Projection annotée ». L'export du CHAPITRE reste HTML seulement.
+  Écran blanc enrichi (28/11/2026) : gabarits et morceaux collés sont rendus DANS le fond de leur page blanche
+  (`ObjetsExport`, rastérisé avec elle : sous le surligneur et le stylo, sans hachures) ; aires, tangentes, points,
+  vecteurs et courbes à paramètres (valeur du moment) dans le calque du stylo (`peindreCourbes(…, elements)` +
+  `EtiquettesTraceur`) — voir `chapter-components.md`, « Écran blanc enrichi ».
 
 ## Impression des chapitres (bouton « Imprimer », Ctrl+P, fichier « Télécharger ce chapitre »)
 
