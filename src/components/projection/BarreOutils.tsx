@@ -55,6 +55,12 @@ export interface OutilsLocaux {
   nuancier: boolean
   /** Menu « fond ▾ » de l'écran blanc ouvert. */
   menuFond: boolean
+  /** Menu « Gabarit ▾ » de l'écran blanc ouvert (P2). LOCAL. */
+  menuGabarit?: boolean
+  /** Onglet du traceur : Courbes, Points, Tangente, Aire (P3). LOCAL. */
+  ongletTraceur?: 'courbes' | 'points' | 'tangente' | 'aire'
+  /** Outil « Copier » pris (P4, X) : entourer un morceau de la diapo. LOCAL. */
+  copier?: boolean
 }
 
 export function formatDuree(s: number): string {
@@ -73,7 +79,7 @@ export function useResteMinuteur(fin: number | null): number | null {
   return fin === null ? null : Math.max(0, (fin - maintenant) / 1000)
 }
 
-export function Bouton({ label, picto, actif, onClick, raccourci }: { label: string; picto: NomPictogramme; actif?: boolean; onClick: () => void; raccourci?: string }) {
+export function Bouton({ label, picto, actif, onClick, raccourci, pastille }: { label: string; picto: NomPictogramme; actif?: boolean; onClick: () => void; raccourci?: string; pastille?: number }) {
   return (
     <button
       type="button"
@@ -84,6 +90,11 @@ export function Bouton({ label, picto, actif, onClick, raccourci }: { label: str
       onClick={onClick}
     >
       <Pictogramme nom={picto} />
+      {!!pastille && (
+        <span className="projection-outil-pastille" aria-hidden="true">
+          {pastille}
+        </span>
+      )}
     </button>
   )
 }
@@ -91,7 +102,7 @@ export function Bouton({ label, picto, actif, onClick, raccourci }: { label: str
 /** Outil de dessin rangé : pastille, colonne et nuancier disparaissent. */
 const range = (o: OutilsLocaux): OutilsLocaux => ({ ...o, stylo: false, palette: false, nuancier: false })
 /** Outil de dessin pris : seule la pastille apparaît (maquette 1 : « toute la diapo est libre ») ; la toucher ouvre la colonne. */
-const pris = (o: OutilsLocaux, outil: OutilDessin): OutilsLocaux => ({ ...o, stylo: true, outil, menuMinuteur: false, traceur: false, menuFond: false })
+const pris = (o: OutilsLocaux, outil: OutilDessin): OutilsLocaux => ({ ...o, stylo: true, outil, menuMinuteur: false, traceur: false, menuFond: false, menuGabarit: false, copier: false })
 /** Stylo (S) : prend / range le stylo ; depuis le compas, revient au stylo. */
 export const basculerStylo = (o: OutilsLocaux): OutilsLocaux =>
   o.stylo && o.outil !== 'compas' ? { ...range(o), menuMinuteur: false } : pris(o, o.outil === 'compas' ? 'stylo' : o.outil)
@@ -131,7 +142,13 @@ export function BarreOutils({
   magasin,
   paletteExport,
   outilsO,
+  boutonCopier,
+  pagesEcrites,
 }: {
+  /** Outil « Copier » (P4), à gauche du stylo. */
+  boutonCopier?: ReactNode
+  /** Pages blanches écrites de la diapo affichée : pastille « n » sur le bouton Écran blanc (P4). */
+  pagesEcrites?: number
   magasin: MagasinInstruments
   /** Outils du chantier O (enregistrer en vidéo, points de participation), juste après « Plein écran ». */
   outilsO?: ReactNode
@@ -183,6 +200,7 @@ export function BarreOutils({
         </div>
       )}
       </div>
+      {boutonCopier}
       <Bouton label="Stylo d'annotation" picto="crayon" actif={outils.stylo && outils.outil !== 'compas'} onClick={() => setOutils(basculerStylo)} raccourci="S ; surligneur : H" />
       <BoutonsInstruments outils={outils} setOutils={setOutils} magasin={magasin} />
       <span className="projection-separateur" aria-hidden="true" />
@@ -197,7 +215,7 @@ export function BarreOutils({
         <Pictogramme nom="minuteur" />
         {reste !== null && <span className="projection-temps">{formatDuree(reste)}</span>}
       </button>
-      <Bouton label="Écran blanc" picto="ecran-blanc" actif={etat.blanc} onClick={basculerBlanc} raccourci="B" />
+      <Bouton label={pagesEcrites ? `Écran blanc (${pagesEcrites} page${pagesEcrites > 1 ? 's' : ''} blanche${pagesEcrites > 1 ? 's' : ''} pour cette diapo)` : 'Écran blanc'} picto="ecran-blanc" actif={etat.blanc} onClick={basculerBlanc} raccourci="B" pastille={pagesEcrites} />
       <Bouton label="Vue d'ensemble" picto="grille" actif={outils.ensemble} onClick={() => setOutils((o) => ({ ...o, ensemble: !o.ensemble }))} raccourci="G" />
       {paletteExport && (
         <button

@@ -51,6 +51,10 @@ retirés, voir `.claude/rules/content-history.md`) — via `src/lib/export/` :
   d'EXERCICE projetées (« Projeter un exercice » : l'énoncé, puis les pages du corrigé jusqu'à la plus loin montrée
   ou annotée, tirées de nouveau par leur code avec le registre des adaptateurs, chargé à la demande) ; jamais les
   points de participation ni la vidéo — voir `chapter-components.md`, « Outils par-dessus ».
+  Écran blanc enrichi (28/11/2026) : gabarits et morceaux collés sont rendus DANS le fond de leur page blanche
+  (`ObjetsExport`, rastérisé avec elle : sous le surligneur et le stylo, sans hachures) ; aires, tangentes, points,
+  vecteurs et courbes à paramètres (valeur du moment) dans le calque du stylo (`peindreCourbes(…, elements)` +
+  `EtiquettesTraceur`) — voir `chapter-components.md`, « Écran blanc enrichi ».
 
 ## Impression des chapitres (bouton « Imprimer », Ctrl+P, fichier « Télécharger ce chapitre »)
 

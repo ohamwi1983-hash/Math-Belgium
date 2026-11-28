@@ -5,6 +5,7 @@
  */
 import type { Arc, Courbe, ElementAnnotation, PageBlanche, Trait } from './annotations'
 import { traceMemorise } from './traceur'
+import { peindreApresCourbes, peindreAvantCourbes, valeursCourbe } from './traceurEnrichi'
 import { IDENTITE, repereVue } from './vue'
 import type { Transfo } from './vue'
 
@@ -64,7 +65,7 @@ export function peindreTraits(xf: CanvasRenderingContext2D, xs: CanvasRenderingC
     x.stroke()
   }
   for (const el of elements) {
-    if (el.genre === 'epingle' || el.genre === 'courbe') continue
+    if (el.genre !== undefined && el.genre !== 'trait' && el.genre !== 'arc') continue
     if (el.genre !== 'arc' && el.gomme) {
       for (const x of [xf, xs]) {
         x.globalCompositeOperation = 'destination-out'
@@ -92,8 +93,9 @@ export function peindreTraits(xf: CanvasRenderingContext2D, xs: CanvasRenderingC
 }
 
 /** Courbes du traceur (page « repère ») : recalculées pour la vue (nettes à tout zoom), épaisseur du stylo, coupées aux
- * discontinuités, rien hors du cadre. */
-export function peindreCourbes(x: CanvasRenderingContext2D, courbes: Courbe[], page: PageBlanche | null, k: number) {
+ * discontinuités, rien hors du cadre. `elements` (traceur enrichi, 28/11/2026) : aires et famille dessous, tangentes,
+ * vecteurs et points dessus ; paramètres à leur valeur du moment (animation comprise). */
+export function peindreCourbes(x: CanvasRenderingContext2D, courbes: Courbe[], page: PageBlanche | null, k: number, elements: ElementAnnotation[] = []) {
   x.setTransform(1, 0, 0, 1, 0, 0)
   x.clearRect(0, 0, x.canvas.width, x.canvas.height)
   if (!page || page.fond !== 'repere') return
@@ -104,8 +106,10 @@ export function peindreCourbes(x: CanvasRenderingContext2D, courbes: Courbe[], p
   x.clip()
   x.lineJoin = 'round'
   x.lineCap = 'round'
+  const maintenant = Date.now()
+  peindreAvantCourbes(x, elements, courbes, page, maintenant)
   for (const c of courbes) {
-    const { polylignes } = traceMemorise(c.saisie, page.angle, repereVue(page))
+    const { polylignes } = traceMemorise(c.saisie, page.angle, repereVue(page), valeursCourbe(c, maintenant))
     x.strokeStyle = c.couleur
     x.lineWidth = c.epaisseur
     for (const l of polylignes) {
@@ -114,5 +118,6 @@ export function peindreCourbes(x: CanvasRenderingContext2D, courbes: Courbe[], p
       x.stroke()
     }
   }
+  peindreApresCourbes(x, elements, courbes, page, maintenant)
   x.restore()
 }

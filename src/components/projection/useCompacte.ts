@@ -25,7 +25,9 @@ export function useCompacte(ref: RefObject<HTMLElement | null>, disponible: (el:
           etat.current = true
           setCompacte(true)
         }
-      } else if (hauteurNormale.current > 0 && dispo.current(el) >= hauteurNormale.current) {
+      } else if (hauteurNormale.current > 0 && dispo.current(el) >= hauteurNormale.current + 8) {
+        // Marge de 8 px : sans elle, une hauteur offerte presque égale au contenu faisait basculer la palette sans fin
+        // entre les deux dispositions (constaté le 28/11/2026 avec les onglets du traceur).
         etat.current = false
         setCompacte(false)
       }

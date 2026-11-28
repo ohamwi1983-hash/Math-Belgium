@@ -534,6 +534,81 @@ réponses : pastilles à GAUCHE, repli automatique dès qu'on écrit ; dossier d
   vue du professeur, une seule colonne à 1 024 × 768 et 1 920 × 1 080, cibles ≥ 44 px) — 129 + 77
   vérifications, 0 erreur console.
 
+**Écran blanc enrichi : gabarits, traceur enrichi, copier sur une page blanche** (planches P2, P3, P4 validées le
+28/11/2026, chantier « écran blanc » ; le chantier « outils par-dessus » fait P1, P5, P6). Tout est un ÉLÉMENT de la page
+(`ElementEcranBlanc` d'`annotations.ts` : des données, jamais une image) : annuler, deux écrans, conservation, export,
+zoom du repère comme les courbes. Code chargé avec la projection seulement (jamais dans le paquet principal).
+- **Gabarits** (P2, `lib/projection/gabarits.ts` PUR + `components/projection/ObjetsPage.tsx`) : bouton « Gabarit ▾ » de
+  la petite barre de l'écran blanc, après « fond ▾ » (`BoutonsGabaritColler`, menu `MenuGabarit`, `OutilsLocaux.menuGabarit`,
+  fermé au clic ailleurs, replié dès qu'on écrit) : tableau de signes (facteurs, valeurs qui annulent, ligne du produit),
+  de variations (intervalles, ligne de f′), arbre (2 ou 3 niveaux, 2 ou 3 branches — 3 × 3 refusé : 27 feuilles), Venn (2 ou
+  3 ensembles), droite graduée (de, à, pas), tableau statistique (colonnes, lignes, « Total »), tableau de valeurs ; aperçu
+  réel du gabarit, réglages retenus (`localStorage` `projection:gabarit-reglages`, try/catch). `Gabarit` = type, réglages,
+  coin (px de la PAGE), échelle `k`, `cases` (texte tapé ; absent = texte par défaut). `disposer(g)` = traits SVG + cases
+  (px à l'échelle 1). Posé sous la petite barre (le clavier trouve sa place dessous), sélectionné.
+  **Interaction** (`CalqueObjets`, rendu SOUS le canvas des courbes, du fluo et du stylo : le stylo écrit par-dessus, un
+  outil pris rend les objets inertes) : toucher = sélectionner (cadre pointillé bleu, 4 poignées de `--cible` = 44 px
+  réels, proportions gardées), glisser = déplacer, petite barre (Déplacer, + colonne, + ligne, retirer — jamais sous la
+  petite barre de l'écran blanc), toucher ailleurs / Échap = désélectionner ; sélection et clavier LOCAUX à la fenêtre.
+  Toucher une case = petit clavier (`ClavierCase`, trois rangées de dix : chiffres, x, fraction, virgule, ±, ±∞, signes
+  + − 0 ‖ ↗ ↘ qui REMPLACENT le contenu, ⌫, ← case, case →, OK) + champ libre jamais bloqué (seul
+  `normaliserSigneMoins`, Entrée = OK, Tab = case suivante, Échap) ; placé sous / sur / à côté de l'objet, sinon dans le
+  coin qui ne cache pas la case touchée, jamais sous la barre du bas. `saisieVersLatex` : signes, ±∞ (« -inf »), « non A » →
+  Ā, expression lue par le parseur de la calculatrice (fractions, virgule), sinon texte (`\text{}`). Cases vides hachurées
+  (jamais exportées), cases de probabilité en pointillé tant qu'elles sont vides ; rien n'est jamais calculé à la place de
+  la classe. Droite graduée (décision du professeur) : PAS de hachures — gardé = bloc vert bleuté `#009E73` (opacité 0,34),
+  exclu = vermillon `#D55E00` (0,3), sans bords, centrés sur la droite, de la hauteur des graduations, mots « gardé » /
+  « exclu » au-dessus ; crochets comme le cours (« [ » tourné vers l'intérieur = compris) ; éditeur sous la droite
+  sélectionnée (`EditeurDroite` : bornes tapées dont ±∞, crochets à toucher, jusqu'à 3 intervalles, réunion /
+  intersection, « de … à …, pas … ») ; borne illisible : message, saisie gardée.
+  **Annuler** : `MagasinAnnotations.noterModif(page, avant)` (une étape par saisie de case, glisser, agrandissement,
+  « + colonne ») mêlée aux retraits (`n` = ordre des actions) ; × = `retirerEpingle` généralisé (annulable).
+- **Traceur enrichi** (P3, `lib/projection/traceurEnrichi.ts` PUR + `TraceurEnrichi.tsx`) : onglets Courbes / Points /
+  Tangente / Aire du panneau (`OutilsLocaux.ongletTraceur`, panneau remonté à chaque onglet : sa disposition compacte est
+  remesurée) ; jamais imposés, pour toutes les années. **Paramètres** : `analyser(…, { parametres: true })` — toute lettre
+  isolée autre que x devient `{ t: 'param' }` (« e », « π » restent des nombres) ; `Courbe.params` (valeur 1, de −5 à 5, pas
+  0,5 ; bornes et pas en touchant la valeur), curseurs `range`, ▶ / ⏸ : `Courbe.animation = { nom, debut }`, valeur
+  calculée dans CHAQUE fenêtre (`valeurAnimee`, aller-retour en 6 s, départ à la valeur actuelle) — rien n'est diffusé
+  image par image, le tableau et le professeur animent ensemble ; `useBoucleAnimation` repeint les courbes à chaque image et
+  les étiquettes 10 fois par seconde. « Laisser une trace » : famille en gris clair (`traces`, passages de l'animation gardés
+  à l'arrêt). Étiquette « a = 1,5 : f(x) = 1,5(x − 2)² − 1 » (`latexSubstitue` : 1(…) → (…), + −1 → − 1, valeurs arrondies
+  au pas). **Tangente** (`Tangente` : courbe, x, triangle) : case à cocher, « en x = » (calculatrice), toucher une courbe
+  (onglet ouvert : tracé invisible épais) ou glisser le point (pas de 1/10 de graduation) ; dérivée numérique (Richardson),
+  angle / tangente verticale / hors domaine dits en clair ; équation exacte (`reconnaitre` : entier, décimal court,
+  fraction ≤ 60, multiple de π, racine) sinon « ≈ » 0,01 ; triangle « +1 / +m » (pas de 1, 10, 0,1… ≥ 40 px). **Aire**
+  (`Aire` : courbe, a, b, intégrale) : Simpson 4 000 pas, orange translucide `#e0913f` (0,38) SOUS les courbes et le stylo,
+  bornes en pointillé, poignées a / b sur l'axe (accrochées à la demi-graduation à 10 px), valeur exacte + approchée, partie
+  sous l'axe dite en clair (« Intégrale » au lieu d'« Aire »), « Écrire l'intégrale » (décoché) ajoute ∫. **Points**
+  (`PointRepere`, `Liaison` vecteur / segment / droite entre points NOMMÉS) : « D(−1,5 ; 2,5 » (parenthèse fermée d'office,
+  « ; » entre les coordonnées — « (1,5) » ambigu : message), « vecteur AB », « segment BC », « droite AC », « [BC] », « (AC) » ;
+  point déplacé au doigt, accroché aux nœuds de la grille ; vecteur = VRAIE pointe (triangle plein qui s'arrête au bord de
+  B) + composantes en pointillé. Dessin : `peindreCourbes(…, elements)` (aires et famille avant les courbes, tangentes,
+  liaisons, points après) ; étiquettes KaTeX `EtiquettesTraceur` ; poignées `PoigneesTraceur` (SVG transparent au-dessus du
+  déplacement de la vue, sous le stylo).
+- **Copier sur une page blanche** (P4, `lib/projection/morceaux.ts` PUR + `Copier.tsx`) : outil « Copier » (X) à gauche du
+  stylo (barre du bas, vue du professeur ; `OutilsLocaux.copier`, range le stylo, plus de « diapo suivante » au clic ; sur
+  l'écran blanc il revient d'abord à la diapo). Rectangle (d'office, 4 poignées) ou lasso ; reste assombri ; barre
+  « Rectangle · Lasso | Copier · Coller sur une page blanche · × » ; Échap efface puis range. « Coller sur une page
+  blanche » = `ouvrirNouvellePage()` (nouvelle page de cette diapo, au dernier fond, ouverte aussitôt) + `Morceau` sélectionné ;
+  « Copier » seul garde la copie (`localStorage` `projection:presse-papier`, try/catch) : bouton « Coller » de la petite barre.
+  Un `Morceau` garde sa SOURCE (clé de diapo, étape de révélation, cadre, lasso) : redessiné depuis la diapo (`<Diapo
+  mode="vignette">` découpé, `transform: scale`) — net à tout agrandissement, jamais une photo ; diapo absente de la sélection :
+  message. Repères : « n pages blanches › » en haut à droite de la diapo (pages ÉCRITES ; rouvre la dernière vue ; masqué
+  avec la barre, jamais sur l'écran de la classe) + pastille « n » sur le bouton Écran blanc (barre et vue du professeur,
+  `usePagesEcrites`) ; pointillé d'origine du morceau 4 s au retour sur la diapo ; « Page blanche de « L'essentiel · … » » en
+  haut à droite d'une page qui contient un morceau. Annuler retire d'abord le dernier trait, puis l'agrandissement, puis le
+  morceau. Export : juste après la diapo d'origine.
+- **Toile effacée** : un pixel est relu après le repeint d'un changement de page (`Tableau.tsx`) — dans Chromium sans
+  écran, le dernier trait de la page quittée restait sinon affiché sur la suivante (constaté avec le code d'avant aussi).
+- Vérifications (28/11/2026, `scripts/verif-projection/` : `verif-ecran-blanc.mjs`, `verif-deux-ecrans.mjs`,
+  `verif-tailles.mjs`, outils `commun.mjs`) : build de test + faux client connecté (`scripts/verif-espace/`), 6e « Les
+  coniques » et 4e « Fonction du second degré » : copier (rectangle, poignées, collage, agrandissement, annuler, repères,
+  pointillé), 4 gabarits remplis (clavier, stylo, + ligne, droite et ses couleurs mesurées), paramètres animés, tangente,
+  aire, points, rechargement, PowerPoint et PDF relus ; deux écrans (copie, gabarit, animation vue au tableau, repères
+  absents chez la classe) ; 1 280 × 720, 1 920 × 1 080, 1 024 × 768, 870 × 400, thème sombre — 83 + 18 + 95 vérifications,
+  0 erreur console. `useCompacte` revient à la disposition normale avec 8 px de marge (sinon va-et-vient sans fin quand la
+  hauteur offerte égale presque le contenu). Limite : à 870 × 400, le panneau du traceur avec des curseurs défile.
+
 **Vérifications** (24/11/2026, dossier de travail `projection/` : `verif.mjs`, `verif-prod.mjs`,
 `compter_pptx.py`, `comparer_prerendu.py`) : build de test (`NODE_ENV=development vite build --mode test`
 + faux client connecté / `anonyme`) sur 4e ch. 6 (§ 6–11, 24 diapos), 5e ch. 3 (§ 3, 14 diapos) et 6e

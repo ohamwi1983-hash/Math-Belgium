@@ -30,6 +30,7 @@ import type { PropositionMatiere } from '../../lib/projection/matiereProjetee'
 import { BoutonPoints, PanneauPoints, ParticipationProjetee, ReglagesParticipationDialogue, useParticipation } from './Participation'
 import { BoutonEnregistrer, DialogueEnregistrer, DialogueVideoPrete, RappelEnregistrement, useEnregistrement, useEnregistrementDistant } from './Enregistrement'
 import { ChercherAffiche, ContexteExerciceTableau, ErreurExercice, OutilsExercice, PanneauExerciceProf, ScenePageExercice, useExercicesProjection } from './ExerciceTableau'
+import { basculerCopier, BoutonCopier, usePagesEcrites } from './Copier'
 import '../carnet/matiere-projetee.css'
 import './projection.css'
 
@@ -273,7 +274,9 @@ function useClavier(actions: Record<string, (() => void) | undefined>) {
                                 ? a.compas
                                 : touche === 'k'
                                   ? a.calc
-                                  : undefined
+                                  : touche === 'x'
+                                    ? a.copier
+                                    : undefined
       if (!action) return
       e.preventDefault()
       action()
@@ -427,9 +430,9 @@ const OUTILS_DEPART: OutilsLocaux = {
 }
 
 /** Palettes repliées dès qu'on écrit sur la diapo (colonne du dessin, nuancier, traceur, menu du fond). */
-const replierPalettes = (o: OutilsLocaux): OutilsLocaux => (o.palette || o.nuancier || o.traceur || o.menuFond ? { ...o, palette: false, nuancier: false, traceur: false, menuFond: false } : o)
+const replierPalettes = (o: OutilsLocaux): OutilsLocaux => (o.palette || o.nuancier || o.traceur || o.menuFond || o.menuGabarit ? { ...o, palette: false, nuancier: false, traceur: false, menuFond: false, menuGabarit: false } : o)
 /** Échap : d'abord ce qui est déplié (nuancier, puis colonne / menu / traceur) ; null s'il n'y a rien. */
-const echapPalettes = (o: OutilsLocaux): OutilsLocaux | null => (o.nuancier ? { ...o, nuancier: false } : o.palette || o.menuFond ? { ...o, palette: false, menuFond: false } : null)
+const echapPalettes = (o: OutilsLocaux): OutilsLocaux | null => (o.nuancier ? { ...o, nuancier: false } : o.palette || o.menuFond || o.menuGabarit ? { ...o, palette: false, menuFond: false, menuGabarit: false } : null)
 
 /**
  * Annotations de la page de projection : magasin (toutes les pages), conservation dans le navigateur, page
@@ -500,7 +503,8 @@ function VueDiapos({
   const [tiroirPoints, setTiroirPoints] = useState(false)
   const [reglagesPoints, setReglagesPoints] = useState(false)
   // La barre se masque après 3 s même stylo en main (la pastille, elle, reste) ; pas tant qu'une palette est dépliée.
-  const [barreActive] = useInactivite(outils.palette || outils.nuancier || outils.menuFond || outils.menuMinuteur || outils.menuExport || outils.ensemble || demandeQuitter || dialogueRec || tiroirPoints || reglagesPoints)
+  const [barreActive] = useInactivite(outils.palette || outils.nuancier || outils.menuFond || !!outils.menuGabarit || outils.menuMinuteur || outils.menuExport || outils.ensemble || demandeQuitter || dialogueRec || tiroirPoints || reglagesPoints)
+  const pagesEcrites = usePagesEcrites(projection, ann.annotations)
   const surEcrire = useCallback(() => setOutils(replierPalettes), [])
   const atelierPlein = useAtelierPlein(projection)
   const pleinIci = atelierPlein.plein && diapos[etat.index]?.type === 'atelier'
@@ -550,6 +554,10 @@ function VueDiapos({
     compas: () => setOutils(basculerCompas),
     equerre: () => magasin.equerre({ visible: !magasin.lire().equerre.visible }),
     calc: () => magasin.calc({ visible: !magasin.lire().calc.visible }),
+    copier: () => {
+      if (!outils.copier && etat.blanc) basculerBlanc()
+      setOutils(basculerCopier)
+    },
     pleinEcran: basculer,
     echap: () => {
       if (accueil) setAccueil(false)
@@ -595,7 +603,7 @@ function VueDiapos({
             {d && <Diapo key={d.cle} diapo={d} chapter={chapter} pas={etat.pas} mode="direct" debut={etat.debut} atelier={{ plein: atelierPlein.plein, basculerPlein: atelierPlein.basculer }} />}
             <FondPage projection={projection} />
             {exo.page && exo.exercice && <ScenePageExercice ex={exo.exercice} page={exo.page} />}
-            <Annotations projection={projection} magasin={magasin} annotations={ann.annotations} page={ann.page} blanche={ann.blanche} outils={outils} echelle={echelle} role={role} surEcrire={surEcrire} />
+            <Annotations projection={projection} magasin={magasin} annotations={ann.annotations} page={ann.page} blanche={ann.blanche} outils={outils} echelle={echelle} role={role} surEcrire={surEcrire} setOutils={setOutils} />
           </>
         )}
       </Scene>
@@ -640,6 +648,8 @@ function VueDiapos({
             </>
           )
         }
+        boutonCopier={<BoutonCopier projection={projection} outils={outils} setOutils={setOutils} />}
+        pagesEcrites={pagesEcrites}
       />
       <ParticipationProjetee part={part} masquer={rec.enCours && rec.mode === 'region'} />
       {tiroirPoints && role !== 'diapos' && (
@@ -708,6 +718,7 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
   const { plein, basculer } = usePleinEcran(signaler)
   const [outils, setOutils] = useState<OutilsLocaux>(OUTILS_DEPART)
   const surEcrire = useCallback(() => setOutils(replierPalettes), [])
+  const pagesEcrites = usePagesEcrites(projection, ann.annotations)
   const [fenetreOuverte, setFenetreOuverte] = useState(() => !!fenetreDiapos() && !fenetreDiapos()!.closed)
   const [depart] = useState(() => Date.now())
   const [maintenant, setMaintenant] = useState(() => Date.now())
@@ -776,6 +787,10 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
     compas: () => setOutils(basculerCompas),
     equerre: () => magasin.equerre({ visible: !magasin.lire().equerre.visible }),
     calc: () => magasin.calc({ visible: !magasin.lire().calc.visible }),
+    copier: () => {
+      if (!outils.copier && etat.blanc) basculerBlanc()
+      setOutils(basculerCopier)
+    },
     pleinEcran: basculer,
     echap: () => {
       if (rec.phase === 'reglages') rec.fermerReglages()
@@ -815,6 +830,11 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
           <BoutonPoints part={part} actif={colonnePoints} compacte onClick={() => (part.reglages ? setColonnePoints((c) => !c) : setReglagesPoints(true))} />
           <button type="button" className="projection-bouton" aria-pressed={etat.blanc} onClick={basculerBlanc} title="Écran blanc (B)">
             <Pictogramme nom="ecran-blanc" /> {etat.blanc ? 'Rallumer' : 'Écran blanc'}
+            {pagesEcrites > 0 && (
+              <span className="projection-outil-pastille" aria-label={`${pagesEcrites} page${pagesEcrites > 1 ? 's' : ''} blanche${pagesEcrites > 1 ? 's' : ''}`}>
+                {pagesEcrites}
+              </span>
+            )}
           </button>
           <button type="button" className="projection-bouton" aria-pressed={outils.ensemble} onClick={() => setOutils((o) => ({ ...o, ensemble: !o.ensemble }))} title="Vue d'ensemble (G)">
             <Pictogramme nom="grille" /> Vue d'ensemble
@@ -875,6 +895,7 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
                 <Pictogramme nom="crayon" />
               </button>
               <BoutonsInstruments outils={outils} setOutils={setOutils} magasin={magasin} />
+              <BoutonCopier projection={projection} outils={outils} setOutils={setOutils} />
             </span>
           </div>
           {/* Même principe qu'à l'écran de la classe : pastille + colonne à gauche, petite barre de l'écran blanc en haut à
@@ -887,7 +908,7 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
                   {d && (d.type === 'atelier' ? <DiapoAtelierProf diapo={d} chapter={chapter} /> : <Diapo key={d.cle} diapo={d} chapter={chapter} pas={etat.pas} mode="direct" debut={etat.debut} />)}
                   <FondPage projection={projection} />
                   {exo.page && exo.exercice && <ScenePageExercice ex={exo.exercice} page={exo.page} />}
-                  <Annotations projection={projection} magasin={magasin} annotations={ann.annotations} page={ann.page} blanche={ann.blanche} outils={outils} echelle={echelle} role="prof" surEcrire={surEcrire} />
+                  <Annotations projection={projection} magasin={magasin} annotations={ann.annotations} page={ann.page} blanche={ann.blanche} outils={outils} echelle={echelle} role="prof" surEcrire={surEcrire} setOutils={setOutils} />
                 </>
               )}
             </Scene>

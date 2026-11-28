@@ -258,6 +258,16 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
       }),
     [appliquer, diapos],
   )
+  /** « Coller sur une page blanche » (P4) : une NOUVELLE page de la diapo affichée (au fond choisi en dernier), ouverte
+   * aussitôt ; renvoie son id (null sans diapo). */
+  const ouvrirNouvellePage = useCallback((): string | null => {
+    const e = etatRef.current
+    const cle = diapos[e.index]?.cle
+    if (!cle) return null
+    const p = nouvellePageBlanche({ fond: e.fond })
+    appliquer((x) => ({ ...x, blanc: true, blanches: { ...x.blanches, [cle]: [...(x.blanches[cle] ?? []), p] }, vues: { ...x.vues, [cle]: p.id } }))
+    return p.id
+  }, [appliquer, diapos])
   /** Page blanche précédente / suivante de cette diapo ; faux s'il n'y en a pas (rien ne change). */
   const allerPage = useCallback(
     (delta: number): boolean => {
@@ -344,6 +354,10 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
     majVue,
     pageBlancheActuelle,
     nouvellePage,
+    ouvrirNouvellePage,
+    /** Diapos et chapitre (morceaux collés : redessinés depuis leur diapo d'origine). */
+    diapos,
+    chapter,
     allerPage,
     supprimerPage,
     oublierPagesBlanches,

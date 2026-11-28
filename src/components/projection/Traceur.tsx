@@ -13,6 +13,8 @@ import type { MagasinAnnotations } from './magasinAnnotations'
 import { useVersionAnnotations } from './magasinAnnotations'
 import { Pictogramme } from './Pictogrammes'
 import type { Projection } from './useProjection'
+import { PARAMETRE_DEFAUT, parametresDe, valeursCourbe } from '../../lib/projection/traceurEnrichi'
+import { CurseursParametres, OngletAire, OngletPoints, OngletsTraceur, OngletTangente } from './TraceurEnrichi'
 
 const NOMS_POINTS: Record<PointRemarquable['genre'], string> = { zero: 'Zéro', extremum: 'Extremum', intersection: 'Intersection' }
 
@@ -29,15 +31,17 @@ function largeurEtiquette(latex: string): number {
  * remarquables demandés (zéros, extremums, intersections) avec leurs coordonnées en KaTeX. Rendu identique à
  * l'écran et dans l'export annoté (même composant).
  */
-export function EtiquettesCourbes({ courbes, page }: { courbes: Courbe[]; page: PageBlanche }) {
+export function EtiquettesCourbes({ courbes, page, instant = 0 }: { courbes: Courbe[]; page: PageBlanche; instant?: number }) {
   // Repère de la VUE (zoom, déplacement) : noms, points et coordonnées d'écran suivent le graphique.
   const r = useMemo(() => repereVue(page), [page])
   const { noms, points } = useMemo(() => {
     const calculables: (CourbeACalculer & { courbe: Courbe })[] = []
     const noms: { c: Courbe; x: number; y: number }[] = []
     const prises: [number, number][] = []
+    const maintenant = Date.now()
     for (const c of courbes) {
-      const t = traceMemorise(c.saisie, page.angle, r)
+      // Paramètres à leur valeur du moment (animation : `instant` relance le calcul 10 fois par seconde).
+      const t = traceMemorise(c.saisie, page.angle, r, valeursCourbe(c, maintenant))
       if (!t.f) continue
       calculables.push({ id: c.id, f: t.f as Fonction, courbe: c })
       const p = placeEtiquette(t.polylignes, prises)
@@ -49,7 +53,8 @@ export function EtiquettesCourbes({ courbes, page }: { courbes: Courbe[]; page: 
     const m = page.marques
     const points = m.zeros || m.extremums || m.intersections ? pointsRemarquables(calculables, r, m) : []
     return { noms, points }
-  }, [courbes, page, r])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courbes, page, r, instant])
 
   // Étiquettes des points : en haut à droite du point, sinon un autre coin, sans se chevaucher ni sortir du cadre.
   const poses: { p: PointRemarquable; x: number; y: number; l: number; couleur: string }[] = []
@@ -132,6 +137,7 @@ export function PaletteTraceur({
   page,
   outils,
   replier,
+  setOutils,
 }: {
   id?: string
   projection: Projection
@@ -140,6 +146,8 @@ export function PaletteTraceur({
   outils: OutilsLocaux
   /** Replié sur le bouton f(x) dès qu'une courbe est tracée (la liste reste accessible en rouvrant). */
   replier?: () => void
+  /** Onglets Courbes / Points / Tangente / Aire (traceur enrichi, P3). */
+  setOutils?: (f: (o: OutilsLocaux) => OutilsLocaux) => void
 }) {
   useVersionAnnotations(annotations)
   const cle = clePageBlanche(page.id)
@@ -157,6 +165,8 @@ export function PaletteTraceur({
       return
     }
     setErreur(null)
+    // Lettres autres que x : un curseur par lettre (valeur de départ 1), le panneau reste ouvert pour les régler.
+    const lettres = parametresDe(l.saisie)
     const courbe: Courbe = {
       genre: 'courbe',
       id: `${projection.id}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
@@ -164,11 +174,13 @@ export function PaletteTraceur({
       saisie: l.saisie,
       couleur: couleurLibre(courbes),
       epaisseur: Math.max(4, EPAISSEURS[outils.epaisseur]),
+      ...(lettres.length ? { params: Object.fromEntries(lettres.map((n) => [n, { ...PARAMETRE_DEFAUT }])) } : {}),
     }
     annotations.ajouter(cle, courbe)
     setSaisie('')
-    replier?.()
+    if (!lettres.length) replier?.()
   }
+  const onglet = outils.ongletTraceur ?? 'courbes'
   const vue = vueDe(page)
   const ref = useRef<HTMLDivElement>(null)
   const compacte = useCompacte(ref, hauteurTraceur)
@@ -181,8 +193,14 @@ export function PaletteTraceur({
       role="group"
       aria-label="Traceur de fonctions sur le repère"
     >
+      {setOutils && <OngletsTraceur onglet={onglet} setOutils={setOutils} />}
+      {onglet === 'points' && <OngletPoints annotations={annotations} page={page} />}
+      {onglet === 'tangente' && <OngletTangente annotations={annotations} page={page} />}
+      {onglet === 'aire' && <OngletAire annotations={annotations} page={page} />}
       {/* Trois blocs : saisie + liste, réglages (angles, échelles), points à marquer — empilés dans le panneau étroit,
           côte à côte quand la hauteur manque (écran bas en paysage, vue du professeur). */}
+      {onglet === 'courbes' && (
+      <>
       <div className="traceur-bloc traceur-bloc--saisie">
         <form
           className="traceur-ligne traceur-ligne--saisie"
@@ -239,6 +257,7 @@ export function PaletteTraceur({
             })}
           </ul>
         )}
+        {courbes.map((c) => c.params && <CurseursParametres key={c.id} annotations={annotations} cle={cle} courbe={c} page={page} />)}
       </div>
       <div className="traceur-bloc traceur-bloc--reglages">
         <span className="traceur-groupe" role="group" aria-label="Angles des fonctions trigonométriques">
@@ -280,6 +299,8 @@ export function PaletteTraceur({
           </label>
         ))}
       </div>
+      </>
+      )}
     </div>
   )
 }

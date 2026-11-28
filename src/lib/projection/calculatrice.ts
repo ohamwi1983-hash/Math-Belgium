@@ -26,6 +26,8 @@ export type Noeud =
   | { t: 'cst'; nom: 'pi' | 'e' | 'ans' }
   /** Variable x (traceur de fonctions seulement). */
   | { t: 'var' }
+  /** Paramètre (lettre autre que x : a, k, m…) du traceur, réglé par un curseur (`traceurEnrichi.ts`). */
+  | { t: 'param'; nom: string }
   | { t: 'neg'; a: Noeud }
   | { t: 'bin'; op: '+' | '-' | '*' | '/' | 'implicite'; a: Noeud; b: Noeud }
   | { t: 'pow'; a: Noeud; b: Noeud }
@@ -37,6 +39,7 @@ type Jeton =
   | { t: 'op'; v: '+' | '-' | '*' | '/' | '^' | '²' | '(' | ')' | '√' | '|' }
   | { t: 'cst'; v: 'pi' | 'e' | 'ans' }
   | { t: 'var' }
+  | { t: 'param'; v: string }
   | { t: 'fn'; v: NomFonction }
 
 export class ErreurCalcul extends Error {
@@ -76,6 +79,8 @@ const INVERSE: Partial<Record<NomFonction, NomFonction>> = { sin: 'asin', cos: '
 /** Options de lecture : `variable` = la lettre x est la variable (traceur de fonctions), et « |…| » une valeur absolue. */
 export interface OptionsLecture {
   variable?: boolean
+  /** Traceur : toute autre lettre isolée (a, k, m, p…) est un paramètre ; « e » et « π » restent des nombres. */
+  parametres?: boolean
 }
 
 export function decouper(saisie: string, options: OptionsLecture = {}): Jeton[] {
@@ -114,6 +119,11 @@ export function decouper(saisie: string, options: OptionsLecture = {}): Jeton[] 
         i++
         continue
       }
+      if (!trouve && options.parametres) {
+        jetons.push({ t: 'param', v: c })
+        i++
+        continue
+      }
       if (!trouve) throw new ErreurCalcul(`« ${s.slice(i).match(/^[a-zA-Z]+/)?.[0]} » n'est pas reconnu`, 'syntaxe')
       i += trouve[0].length
       let jeton = trouve[1]
@@ -141,7 +151,7 @@ export function analyser(saisie: string, options: OptionsLecture = {}): Noeud {
   // Valeur absolue « |…| » : à l'intérieur (profondeur > 0), une barre FERME ; dehors, elle ouvre.
   let profondeurAbs = 0
   const debutAtome = (j: Jeton | undefined) =>
-    !!j && (j.t === 'nb' || j.t === 'cst' || j.t === 'var' || j.t === 'fn' || estOp(j, '(') || estOp(j, '√') || (estOp(j, '|') && profondeurAbs === 0))
+    !!j && (j.t === 'nb' || j.t === 'cst' || j.t === 'var' || j.t === 'param' || j.t === 'fn' || estOp(j, '(') || estOp(j, '√') || (estOp(j, '|') && profondeurAbs === 0))
 
   const somme = (): Noeud => {
     let a = produit()
@@ -216,6 +226,10 @@ export function analyser(saisie: string, options: OptionsLecture = {}): Noeud {
       k++
       return { t: 'var' }
     }
+    if (j.t === 'param') {
+      k++
+      return { t: 'param', nom: j.v }
+    }
     if (estOp(j, '|') && profondeurAbs === 0) {
       k++
       profondeurAbs++
@@ -273,6 +287,8 @@ export function evaluer(n: Noeud, mode: ModeAngle, ans: number): number {
         return m.v
       case 'var':
         throw new ErreurCalcul('« x » n’a pas de valeur ici', 'syntaxe')
+      case 'param':
+        throw new ErreurCalcul(`« ${m.nom} » n’a pas de valeur ici`, 'syntaxe')
       case 'cst':
         return m.nom === 'pi' ? Math.PI : m.nom === 'e' ? Math.E : ans
       case 'par':
@@ -480,6 +496,7 @@ function nombreLatex(src: string): string {
 /** `fractions` (traceur) : a/b s'écrit en fraction, 2*x comme 2x. */
 export function enLatex(n: Noeud, mode: ModeAngle, options: { fractions?: boolean } = {}): string {
   const sansPar = (m: Noeud) => (m.t === 'par' ? m.a : m)
+  const lettre = (m: Noeud) => m.t === 'var' || m.t === 'param'
   const lx = (m: Noeud): string => {
     switch (m.t) {
       case 'nb':
@@ -488,18 +505,22 @@ export function enLatex(n: Noeud, mode: ModeAngle, options: { fractions?: boolea
         return m.nom === 'pi' ? '\\pi' : m.nom === 'e' ? '\\mathrm{e}' : '\\mathrm{Ans}'
       case 'var':
         return 'x'
+      case 'param':
+        return m.nom
       case 'par':
         return `\\left(${lx(m.a)}\\right)`
       case 'neg':
         return `-${lx(m.a)}`
       case 'bin':
         if (options.fractions && m.op === '/') return `\\dfrac{${lx(sansPar(m.a))}}{${lx(sansPar(m.b))}}`
-        if (options.fractions && m.op === '*' && m.a.t === 'nb' && (m.b.t === 'var' || (m.b.t === 'pow' && m.b.a.t === 'var'))) return `${lx(m.a)}${lx(m.b)}`
+        if (options.fractions && m.op === '*' && m.a.t === 'nb' && (lettre(m.b) || (m.b.t === 'pow' && lettre(m.b.a)))) return `${lx(m.a)}${lx(m.b)}`
+        // Paramètres : 2a, ax, a(x − 2)², kx² sans espace.
+        if (m.op === 'implicite' && (m.a.t === 'param' || ((m.a.t === 'nb' || m.a.t === 'var') && (m.b.t === 'param' || (m.b.t === 'pow' && m.b.a.t === 'param'))))) return `${lx(m.a)}${lx(m.b)}`
         // 2x, 3x², 2√x : sans espace ; 2·sin(30), 3(1 + 2) : petite espace.
         if (m.op === 'implicite' && m.a.t === 'nb' && (m.b.t === 'var' || (m.b.t === 'pow' && m.b.a.t === 'var') || (m.b.t === 'fn' && m.b.nom === 'racine'))) return `${lx(m.a)}${lx(m.b)}`
         return m.op === 'implicite' ? `${lx(m.a)}\\,${lx(m.b)}` : `${lx(m.a)} ${m.op === '*' ? '\\times' : m.op === '/' ? '\\div' : m.op} ${lx(m.b)}`
       case 'pow': {
-        const base = m.a.t === 'nb' || m.a.t === 'cst' || m.a.t === 'var' || m.a.t === 'par' || (m.a.t === 'fn' && m.a.nom === 'abs') ? lx(m.a) : `\\left(${lx(m.a)}\\right)`
+        const base = m.a.t === 'nb' || m.a.t === 'cst' || m.a.t === 'var' || m.a.t === 'param' || m.a.t === 'par' || (m.a.t === 'fn' && m.a.nom === 'abs') ? lx(m.a) : `\\left(${lx(m.a)}\\right)`
         return `{${base}}^{${lx(m.b.t === 'par' ? m.b.a : m.b).replace(/\\dfrac/g, '\\frac')}}`
       }
       case 'fn': {
