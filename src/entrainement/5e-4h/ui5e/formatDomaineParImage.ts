@@ -140,11 +140,11 @@ function aideDomaine1(f: Exterieure): AideEcran {
   switch (f.famille) {
     case "racine":
     case "racineMoins":
-      return { texte: [tx("Une racine carrée n'existe que pour un radicande positif ou nul (cours, § 1) :")], latex: "\\sqrt{A}\\ \\text{existe}\\iff A\\geq 0" };
+      return { texte: [tx("Une racine carrée n'existe que pour un radicande positif ou nul (cours, point 1) :")], latex: "\\sqrt{A}\\ \\text{existe}\\iff A\\geq 0" };
     case "inverse":
-      return { texte: [tx("Un dénominateur ne peut pas être nul (cours, § 1) :")], latex: "\\dfrac{1}{A}\\ \\text{existe}\\iff A\\neq 0" };
+      return { texte: [tx("Un dénominateur ne peut pas être nul (cours, point 1) :")], latex: "\\dfrac{1}{A}\\ \\text{existe}\\iff A\\neq 0" };
     default:
-      return { texte: [tx("Racine au dénominateur : radicande positif ou nul et racine non nulle, donc radicande strictement positif (cours, § 1) :")], latex: "\\dfrac{1}{\\sqrt{A}}\\ \\text{existe}\\iff A>0" };
+      return { texte: [tx("Racine au dénominateur : radicande positif ou nul et racine non nulle, donc radicande strictement positif (cours, point 1) :")], latex: "\\dfrac{1}{\\sqrt{A}}\\ \\text{existe}\\iff A>0" };
   }
 }
 
@@ -169,7 +169,7 @@ export function aide1(e: E, phase: PhaseDomaineParImage): AideEcran {
     case "valeurs":
       return { texte: [tx("f ne peut recevoir que des nombres de son domaine : garde les valeurs de "), lx("\\operatorname{Im} g"), tx(" qui sont aussi dans "), lx("\\operatorname{dom} f"), tx(" — une intersection (dans les deux à la fois), pas une réunion. L'intersection peut être vide.")] };
     case "composee":
-      return { texte: [tx("Cherche les "), lx("x"), tx(" de "), lx("\\operatorname{dom} g"), tx(" pour lesquels "), lx("g(x)"), tx(" appartient à cet ensemble : écris la condition sur "), lx("g(x)"), tx(", puis résous-la en "), lx("x"), tx(" (cours, § 3) :")], latex: `x\\in\\operatorname{dom} g\\quad\\text{et}\\quad g(x)\\in ${ensembleL(e.valeurs)}` };
+      return { texte: [tx("Cherche les "), lx("x"), tx(" de "), lx("\\operatorname{dom} g"), tx(" pour lesquels "), lx("g(x)"), tx(" appartient à cet ensemble : écris la condition sur "), lx("g(x)"), tx(", puis résous-la en "), lx("x"), tx(" (cours, point 3) :")], latex: `x\\in\\operatorname{dom} g\\quad\\text{et}\\quad g(x)\\in ${ensembleL(e.valeurs)}` };
   }
 }
 

@@ -255,7 +255,7 @@ function scenarioL(e: E): CopieDetective {
     ],
     ligneFausse: 1,
     regles: ["dérivée d'une fonction du premier degré", "dérivée de c·aᵘ (règle de la composée)", "on multiplie les constantes", "on remplace x par x₀"],
-    regleCours: { texte: [t("Dérivée d'une exponentielle composée (cours, § 2) :")], latex: "\\left(a^{u}\\right)'=u'\\cdot\\ln a\\cdot a^{u}" },
+    regleCours: { texte: [t("Dérivée d'une exponentielle composée (cours, point 2) :")], latex: "\\left(a^{u}\\right)'=u'\\cdot\\ln a\\cdot a^{u}" },
     aideCorrection: { texte: [t("Ici "), l(`u'(x)=${m}`), t(" et "), l(`\\ln a=${lnA}`), t(" : remplace dans "), l("c\\cdot u'\\cdot\\ln a\\cdot a^{u}"), t(".")] },
     valeurs: [
       { genre: "fonction", label: "f'(x)", labelLatex: "f'(x)=", placeholder: "ex. : 7*ln(5)*5^(2x)", fonction: (x) => cm * Math.log(a) * a ** (m * x + p), latex: `f'(x)=${cm}${lnA}\\cdot ${a}^{${u}}`, exacte: true },
@@ -264,11 +264,11 @@ function scenarioL(e: E): CopieDetective {
     valeursCopie: [NaN, cm],
     piege: [t("Garder "), l(`${cm}`), t(" sans le facteur "), l(lnA), t(" : seule la base e se dérive « sans rien changer ».")],
     corrigeA: {
-      utilise: [t("On contrôle chaque ligne avec les règles de dérivation du cours (§ 2).")],
+      utilise: [t("On contrôle chaque ligne avec les règles de dérivation du cours (point 2).")],
       lignes: [ligne(`u'(x)=${m}`, "ligne 1 : juste"), ligne(`${lnA}\\neq 1`, [t("ligne 2 : le facteur "), l(lnA), t(" manque, et il ne vaut pas 1 car "), l(`${a}\\neq e`)])],
     },
     corrigeB: {
-      utilise: [t("Dérivée d'une exponentielle de base "), l("a"), t(" composée avec "), l("u"), t(" (cours, § 2).")],
+      utilise: [t("Dérivée d'une exponentielle de base "), l("a"), t(" composée avec "), l("u"), t(" (cours, point 2).")],
       lignes: [ligne("\\left(a^{u}\\right)'\\neq u'\\cdot a^{u}", [t("règle de la copie (vraie seulement pour "), l("a=e"), t(")")]), ligne("\\left(a^{u}\\right)'=u'\\cdot\\ln a\\cdot a^{u}", "règle du cours")],
     },
     corrigeC: {
@@ -298,7 +298,7 @@ function scenarioS(e: E): CopieDetective {
     ],
     ligneFausse: 1,
     regles: ["on repère l'exposant", "dérivée d'une fonction du premier degré", "dérivée de c·eᵘ (la constante d disparaît)", "on remplace x par 0"],
-    regleCours: { texte: [t("Dérivée d'une exponentielle composée (cours, § 2) :")], latex: "\\left(e^{u}\\right)'=u'\\cdot e^{u}" },
+    regleCours: { texte: [t("Dérivée d'une exponentielle composée (cours, point 2) :")], latex: "\\left(e^{u}\\right)'=u'\\cdot e^{u}" },
     aideCorrection: { texte: [t("Dérive d'abord "), l(`u(x)=-${k}x`), t(" (attention au signe), puis remplace dans "), l("c\\cdot u'\\cdot e^{u}"), t(".")] },
     valeurs: [
       { genre: "fonction", label: "f'(x)", labelLatex: "f'(x)=", placeholder: "ex. : -7e^(-3x)", fonction: (x) => -ck * Math.exp(-k * x), latex: `f'(x)=-${ck}e^{-${k}x}`, exacte: true },
@@ -307,7 +307,7 @@ function scenarioS(e: E): CopieDetective {
     valeursCopie: [NaN, ck],
     piege: [t("Oublier le signe : la dérivée de "), l(`-${k}x`), t(" est "), l(`-${k}`), t(", donc "), l("f"), t(" est décroissante.")],
     corrigeA: {
-      utilise: [t("On contrôle chaque ligne avec les règles de dérivation du cours (§ 2).")],
+      utilise: [t("On contrôle chaque ligne avec les règles de dérivation du cours (point 2).")],
       lignes: [ligne(`u'(x)=-${k}`, [t("dérivée de "), l(`-${k}x`)]), ligne(`-${k}\\neq ${k}`, "la ligne 2 a perdu le signe")],
     },
     corrigeB: {
@@ -315,7 +315,7 @@ function scenarioS(e: E): CopieDetective {
       lignes: [ligne(`(-${k}x)'\\neq ${k}`, "copie"), ligne(`(-${k}x)'=-${k}`, "le coefficient garde son signe")],
     },
     corrigeC: {
-      utilise: [l("\\left(c\\cdot e^{u}+d\\right)'=c\\cdot u'\\cdot e^{u}"), t(" (cours, § 2), puis "), l("x=0"), t(".")],
+      utilise: [l("\\left(c\\cdot e^{u}+d\\right)'=c\\cdot u'\\cdot e^{u}"), t(" (cours, point 2), puis "), l("x=0"), t(".")],
       lignes: [
         ligne(`f'(x)=${c}\\cdot(-${k})\\cdot e^{-${k}x}`, "ligne 3 reprise avec u' = −" + `${k}`),
         ligne(`=-${ck}e^{-${k}x}`),
@@ -355,7 +355,7 @@ function scenarioI(e: E): CopieDetective {
     ],
     ligneFausse: 1,
     regles: ["on repère la base commune", "on compare les exposants (principe d'équivalence)", "on regroupe les termes en x", "on divise par un nombre positif et on écrit S"],
-    regleCours: { texte: [t("Principe d'équivalence pour une base "), l("0<a<1"), t(" (cours, § 5) :")], latex: "a^{u}<a^{v}\\iff u>v" },
+    regleCours: { texte: [t("Principe d'équivalence pour une base "), l("0<a<1"), t(" (cours, point 5) :")], latex: "a^{u}<a^{v}\\iff u>v" },
     aideCorrection: { texte: [t("Ici "), l(`0<${b.latex}<1`), t(" : écris l'inéquation entre les exposants avec le symbole retourné, puis isole "), l("x"), t(".")] },
     valeurs: [{ genre: "intervalle", label: "S", labelLatex: "S=", placeholder: "", intervalle: iv, latex: `S=${intervalleL(iv)}`, exacte: true }],
     valeursCopie: [],
@@ -368,7 +368,7 @@ function scenarioI(e: E): CopieDetective {
       ],
     },
     corrigeB: {
-      utilise: [t("Principe d'équivalence : pour "), l("a>1"), t(" le sens est conservé, pour "), l("0<a<1"), t(" il change (cours, § 5).")],
+      utilise: [t("Principe d'équivalence : pour "), l("a>1"), t(" le sens est conservé, pour "), l("0<a<1"), t(" il change (cours, point 5).")],
       lignes: [ligne(`${pB(b.latex)}^{u}${sp(S)}${pB(b.latex)}^{v}\\iff u${sp(Sinv)}v`, [l(`0<${b.latex}<1`), t(" : le sens change")])],
     },
     corrigeC: {
@@ -397,7 +397,7 @@ function scenarioR(e: E): CopieDetective {
     ],
     ligneFausse: 3,
     regles: ["substitution t = aˣ", "résolution du trinôme en t", "retour à x", "même base de chaque côté", "ensemble des solutions"],
-    regleCours: { texte: [t("Une exponentielle est toujours strictement positive (cours, § 4) :")], latex: "a^{x}>0\\ \\text{pour tout réel}\\ x" },
+    regleCours: { texte: [t("Une exponentielle est toujours strictement positive (cours, point 4) :")], latex: "a^{x}>0\\ \\text{pour tout réel}\\ x" },
     aideCorrection: { texte: [t("Pour chaque valeur de "), l("t"), t(", résous "), l(`${a}^{x}=t`), t(" ; une valeur négative de "), l("t"), t(" ne donne aucune solution.")] },
     valeurs: [{ genre: "ensemble", label: "S", labelLatex: "S=", placeholder: "ex. : 5 ; -1   (ou ∅)", ensemble: [k], latex: ensembleL([k]), exacte: true }],
     valeursCopie: [],
@@ -407,11 +407,11 @@ function scenarioR(e: E): CopieDetective {
       lignes: [ligne(`${a}^{-${j}}=\\dfrac{1}{${a ** j}}`, "puissance négative : un inverse"), ligne(`\\dfrac{1}{${a ** j}}\\neq ${t2}`, "un nombre positif n'est pas négatif")],
     },
     corrigeB: {
-      utilise: [t("Une exponentielle de base positive est strictement positive : "), l("a^{x}>0"), t(" pour tout "), l("x"), t(" (cours, § 4).")],
+      utilise: [t("Une exponentielle de base positive est strictement positive : "), l("a^{x}>0"), t(" pour tout "), l("x"), t(" (cours, point 4).")],
       lignes: [ligne(`${t2}<0`, [t("donc "), l(`${a}^{x}=${t2}`), t(" n'a aucune solution")])],
     },
     corrigeC: {
-      utilise: [t("On garde seulement la racine positive en "), l("t"), t(", puis « même base » : "), l("a^{x}=a^{k}\\iff x=k"), t(" (cours, § 4).")],
+      utilise: [t("On garde seulement la racine positive en "), l("t"), t(", puis « même base » : "), l("a^{x}=a^{k}\\iff x=k"), t(" (cours, point 4).")],
       lignes: [ligne(`${a}^{x}=${t1}`, [t("racine "), l(`t=${t1}>0`)]), ligne(`=${a}^{${k}}`, k === 0 ? [l(`${a}^{0}=1`)] : undefined), ligne(`x=${k}`, "même base, mêmes exposants")],
       verification: { utilise: [t("On remplace "), l(`x=${k}`), t(" dans l'équation de départ :")], lignes: [ligne(`${a}^{${2 * k}}${termeAx(B, a).replace(`${a}^{x}`, `${a}^{${k}}`)}${termeL(C)}=0`)] },
     },
@@ -435,7 +435,7 @@ function scenarioP1(e: E): CopieDetective {
     ],
     ligneFausse: 1,
     regles: [`${c} écrit comme une puissance de ${a}`, "puissance d'une puissance", "principe d'équivalence (même base)", "équation du premier degré"],
-    regleCours: { texte: [t("Règle (4) des puissances (cours, § 1) :")], latex: "\\left(a^{r}\\right)^{s}=a^{r\\cdot s}" },
+    regleCours: { texte: [t("Règle (4) des puissances (cours, point 1) :")], latex: "\\left(a^{r}\\right)^{s}=a^{r\\cdot s}" },
     aideCorrection: { texte: [t("Écris "), l(`\\left(${a}^{2}\\right)^{${g}}=${a}^{2(${g})}`), t(", développe l'exposant, puis égale les exposants.")] },
     valeurs: [{ genre: "ensemble", label: "S", labelLatex: "S=", placeholder: "ex. : 5/3", ensemble: [rj], latex: ensembleL([rj]), exacte: true }],
     valeursCopie: [rw],
@@ -445,11 +445,11 @@ function scenarioP1(e: E): CopieDetective {
       lignes: [ligne(`\\left(${a}^{2}\\right)^{3}=${a ** 6}`, [l(`${a}^{2}\\cdot ${a}^{2}\\cdot ${a}^{2}`)]), ligne(`${a}^{2+3}=${a ** 5}`), ligne(`${a ** 6}\\neq ${a ** 5}`, "la règle de la ligne 2 est fausse")],
     },
     corrigeB: {
-      utilise: [t("Règle (4) des puissances (cours, § 1).")],
+      utilise: [t("Règle (4) des puissances (cours, point 1).")],
       lignes: [ligne("\\left(a^{r}\\right)^{s}\\neq a^{r+s}", "règle de la copie"), ligne("\\left(a^{r}\\right)^{s}=a^{r\\cdot s}", "règle (4)")],
     },
     corrigeC: {
-      utilise: [t("Règle (4), puis principe d'équivalence : "), l("a^{u}=a^{v}\\iff u=v"), t(" (cours, § 4).")],
+      utilise: [t("Règle (4), puis principe d'équivalence : "), l("a^{u}=a^{v}\\iff u=v"), t(" (cours, point 4).")],
       lignes: [
         ligne(`\\left(${a}^{2}\\right)^{${g}}=${a}^{2(${g})}`, "règle (4)"),
         ligne(`=${a}^{${affineL(2 * m, 2 * p)}}`, "on distribue"),
@@ -477,7 +477,7 @@ function scenarioP2(e: E): CopieDetective {
     ],
     ligneFausse: 0,
     regles: ["produit de deux puissances de même base", "principe d'équivalence (même base)", "on développe", "équation du second degré"],
-    regleCours: { texte: [t("Règle (1) des puissances (cours, § 1) :")], latex: "a^{r}\\cdot a^{s}=a^{r+s}" },
+    regleCours: { texte: [t("Règle (1) des puissances (cours, point 1) :")], latex: "a^{r}\\cdot a^{s}=a^{r+s}" },
     aideCorrection: { texte: [t("Additionne les exposants : "), l(`${A}^{x}\\cdot ${A}^{${affineL(1, p)}}=${A}^{x+(${affineL(1, p)})}`), t(", puis égale les exposants.")] },
     valeurs: [{ genre: "ensemble", label: "S", labelLatex: "S=", placeholder: "ex. : 5/3", ensemble: [x], latex: ensembleL([x]), exacte: true }],
     valeursCopie: [],
@@ -487,11 +487,11 @@ function scenarioP2(e: E): CopieDetective {
       lignes: [ligne(`${A}^{1}\\cdot ${A}^{${1 + p}}=${A}^{${2 + p}}`, "membre de gauche, règle (1)"), ligne(`${A}^{1\\cdot ${1 + p < 0 ? `(${1 + p})` : 1 + p}}=${A}^{${1 + p}}`, "membre de droite de la ligne 1"), ligne(`${A}^{${2 + p}}\\neq ${A}^{${1 + p}}`, "la ligne 1 est fausse")],
     },
     corrigeB: {
-      utilise: [t("Règle (1) des puissances (cours, § 1).")],
+      utilise: [t("Règle (1) des puissances (cours, point 1).")],
       lignes: [ligne("a^{x}\\cdot a^{y}\\neq a^{x\\cdot y}", "règle de la copie"), ligne("a^{x}\\cdot a^{y}=a^{x+y}", "règle (1)")],
     },
     corrigeC: {
-      utilise: [t("Règle (1), puis principe d'équivalence : "), l("a^{u}=a^{v}\\iff u=v"), t(" (cours, § 4).")],
+      utilise: [t("Règle (1), puis principe d'équivalence : "), l("a^{u}=a^{v}\\iff u=v"), t(" (cours, point 4).")],
       lignes: [
         ligne(`${A}^{x}\\cdot ${A}^{${affineL(1, p)}}=${A}^{${affineL(2, p)}}`, "règle (1)"),
         ligne(`${affineL(2, p)}=${qq}`, "mêmes exposants"),
@@ -520,7 +520,7 @@ function scenarioD(e: E): CopieDetective {
     ],
     ligneFausse: 1,
     regles: ["limite de chaque morceau", "comparaison de croissance", "conclusion", "interprétation graphique"],
-    regleCours: { texte: [t("Règle de dominance (cours, § 1) : pour "), l("a>1"), t(" et tout entier "), l("n"), t(" :")], latex: "\\displaystyle\\lim_{x\\to+\\infty}\\dfrac{x^{n}}{a^{x}}=0" },
+    regleCours: { texte: [t("Règle de dominance (cours, point 1) : pour "), l("a>1"), t(" et tout entier "), l("n"), t(" :")], latex: "\\displaystyle\\lim_{x\\to+\\infty}\\dfrac{x^{n}}{a^{x}}=0" },
     aideCorrection: quot ? { texte: [t("C'est exactement la forme de la règle de dominance, avec "), l(`n=${n}`), t(" et "), l(`a=${A}`), t(".")] } : { texte: [t("Mets "), l(`${A}^{x}`), t(" en évidence :")], latex: `${A}^{x}\\left(1-\\dfrac{x^{${n}}}{${A}^{x}}\\right)` },
     valeurs: [{ genre: "limite", label: "La limite", labelLatex: `${lim}${quot ? expr : `\\left(${expr}\\right)`}=`, placeholder: "ex. : 3, +inf, -inf", nombre: quot ? 0 : Infinity, latex: `${lim}${quot ? expr : `\\left(${expr}\\right)`}=${quot ? "0" : "+\\infty"}`, exacte: true }],
     valeursCopie: [quot ? Infinity : -Infinity],
@@ -530,13 +530,13 @@ function scenarioD(e: E): CopieDetective {
       lignes: [ligne(`${quot ? `\\dfrac{${X}^{${n}}}{${A}^{${X}}}` : `${A}^{${X}}-${X}^{${n}}`}\\approx ${sciL(vX)}`, quot ? "le quotient est déjà presque nul" : "la différence est déjà énorme et positive")],
     },
     corrigeB: {
-      utilise: [t("Règle de dominance du cours (§ 1), valable quel que soit l'exposant "), l("n"), t(".")],
+      utilise: [t("Règle de dominance du cours (point 1), valable quel que soit l'exposant "), l("n"), t(".")],
       lignes: [ligne(`${lim}\\dfrac{x^{${n}}}{${A}^{x}}=0`, [l(`${A}>1`)])],
     },
     corrigeC: quot
-      ? { utilise: [t("Règle de dominance (cours, § 1).")], lignes: [ligne(`${lim}${expr}=0`, "règle de dominance")] }
+      ? { utilise: [t("Règle de dominance (cours, point 1).")], lignes: [ligne(`${lim}${expr}=0`, "règle de dominance")] }
       : {
-          utilise: [t("On met "), l(`${A}^{x}`), t(" en évidence, puis règle de dominance (cours, § 1).")],
+          utilise: [t("On met "), l(`${A}^{x}`), t(" en évidence, puis règle de dominance (cours, point 1).")],
           lignes: [
             ligne(`${expr}=${A}^{x}\\left(1-\\dfrac{x^{${n}}}{${A}^{x}}\\right)`, "mise en évidence"),
             ligne(`${lim}\\left(1-\\dfrac{x^{${n}}}{${A}^{x}}\\right)=1-0`, "dominance"),
@@ -567,7 +567,7 @@ function scenarioC(e: E): CopieDetective {
     ],
     ligneFausse: 1,
     regles: ["modèle exponentiel Q₀·rᵗ", "facteur r d'une évolution en pourcentage", "modèle complet", "on remplace t"],
-    regleCours: { texte: [t("Une évolution de "), l("p\\,\\%"), t(" par période multiplie par un facteur constant (cours, § 7) :")], latex: "r=1+\\dfrac{p}{100}\\ \\text{(hausse)},\\qquad r=1-\\dfrac{p}{100}\\ \\text{(baisse)}" },
+    regleCours: { texte: [t("Une évolution de "), l("p\\,\\%"), t(" par période multiplie par un facteur constant (cours, point 7) :")], latex: "r=1+\\dfrac{p}{100}\\ \\text{(hausse)},\\qquad r=1-\\dfrac{p}{100}\\ \\text{(baisse)}" },
     aideCorrection: { texte: [t("Ici c'est une baisse de "), l(`${p}\\,\\%`), t(" : "), l(`r=1-\\dfrac{${p}}{100}`), t(", puis remplace "), l("t"), t(" par "), l(`${n}`), t(".")] },
     valeurs: [
       { genre: "nombre", label: "r", labelLatex: "r=", placeholder: "ex. : 1,07", nombre: r, latex: `r=${decL(r)}`, exacte: true },
@@ -580,7 +580,7 @@ function scenarioC(e: E): CopieDetective {
       lignes: [ligne(`${Q0L}\\cdot ${decL(rFaux)}=${milliers(Q0 * rFaux, 4)}`, "valeur après une période selon la copie"), ligne(`${milliers(Q0 * rFaux, 4)}>${Q0L}`, "la grandeur augmenterait, alors qu'elle baisse")],
     },
     corrigeB: {
-      utilise: [t("Baisser de "), l("p\\,\\%"), t(", c'est multiplier par "), l("1-\\dfrac{p}{100}"), t(" (cours, § 7).")],
+      utilise: [t("Baisser de "), l("p\\,\\%"), t(", c'est multiplier par "), l("1-\\dfrac{p}{100}"), t(" (cours, point 7).")],
       lignes: [ligne(`1-\\dfrac{${p}}{100}=${decL(r)}`, "facteur d'une baisse")],
     },
     corrigeC: {
@@ -609,7 +609,7 @@ function scenarioT(e: E): CopieDetective {
     ],
     ligneFausse: 2,
     regles: ["rapports constants : modèle exponentiel", "b est la valeur en t = 0", "facteur a du modèle", "on remplace t"],
-    regleCours: { texte: [t("Dans un modèle exponentiel, le rapport de deux valeurs consécutives est constant et vaut "), l("a"), t(" (cours, § 7) :")], latex: "a=\\dfrac{f(1)}{f(0)}" },
+    regleCours: { texte: [t("Dans un modèle exponentiel, le rapport de deux valeurs consécutives est constant et vaut "), l("a"), t(" (cours, point 7) :")], latex: "a=\\dfrac{f(1)}{f(0)}" },
     aideCorrection: { texte: [t("Calcule "), l(`\\dfrac{${decL(ys[1], 4)}}{${decL(b)}}`), t(", puis remplace "), l("t"), t(" par "), l(`${T}`), t(" dans "), l("b\\cdot a^{t}"), t(".")] },
     valeurs: [
       { genre: "nombre", label: "a", labelLatex: "a=", placeholder: "ex. : 1,07", nombre: a, latex: `a=${decL(a, 4)}`, exacte: true },
@@ -622,11 +622,11 @@ function scenarioT(e: E): CopieDetective {
       lignes: [ligne(`\\dfrac{${decL(ys[1], 4)}}{${decL(b)}}=${decL(a, 4)}`, "rapport commun"), ligne(`${decL(dif, 4)}\\neq ${decL(a, 4)}`, "la ligne 3 donne une différence")],
     },
     corrigeB: {
-      utilise: [t("Le facteur "), l("a"), t(" est le rapport constant de deux valeurs consécutives (cours, § 7).")],
+      utilise: [t("Le facteur "), l("a"), t(" est le rapport constant de deux valeurs consécutives (cours, point 7).")],
       lignes: [ligne(`${decL(b)}\\cdot ${decL(a, 4)}=${decL(ys[1], 4)}`, "multiplier par a fait passer d'une valeur à la suivante")],
     },
     corrigeC: {
-      utilise: [l("a=\\dfrac{f(1)}{f(0)}"), t(", puis "), l(`f(${T})=b\\cdot a^{${T}}`), t(" (cours, § 7).")],
+      utilise: [l("a=\\dfrac{f(1)}{f(0)}"), t(", puis "), l(`f(${T})=b\\cdot a^{${T}}`), t(" (cours, point 7).")],
       lignes: [ligne(`a=\\dfrac{${decL(ys[1], 4)}}{${decL(b)}}`, "rapport de deux valeurs consécutives"), ligne(`=${decL(a, 4)}`), ligne(`${decL(b)}\\cdot ${decL(a, 4)}^{${T}}=${decL(pred, 6)}`, [t("on remplace "), l("t"), t(" par "), l(`${T}`)])],
       verification: { utilise: [t("Le modèle redonne la dernière mesure :")], lignes: [ligne(`${decL(b)}\\cdot ${decL(a, 4)}^{3}=${decL(ys[3], 4)}`)] },
     },

@@ -214,7 +214,7 @@ export function premiereLigneL(e: E): string {
 }
 
 export function aide1(e: E, p: PhaseCP): AideEcran {
-  if (p === "identite") return { texte: [t("Il faut une relation entre les expressions de "), l("x"), t(" et de "), l("y"), t(" qui ne contienne plus "), l("t"), t(" (cours, § 6).")] };
+  if (p === "identite") return { texte: [t("Il faut une relation entre les expressions de "), l("x"), t(" et de "), l("y"), t(" qui ne contienne plus "), l("t"), t(" (cours, point 6).")] };
   if (p === "equation") {
     const id = identite(e);
     if (id === "isoler") return { texte: [t("Isole le paramètre (ou son carré) dans l'équation de "), l("x"), t(", puis remplace-le dans celle de "), l("y"), t(".")] };

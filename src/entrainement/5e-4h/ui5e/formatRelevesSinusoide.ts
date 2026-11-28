@@ -140,13 +140,13 @@ export function aide1(e: E, phase: PhaseReleves): AideEcran {
         ? { texte: [tx("Le maximum et le minimum sont la plus grande et la plus petite valeur du tableau ; la période est la durée d'un cycle complet, donnée dans l'énoncé.")] }
         : { texte: [tx("Le maximum et le minimum se lisent sur les pleines et basses mers ; la période est la durée entre deux pleines mers (pas entre une pleine et une basse mer).")] };
     case "parametres":
-      return { texte: [tx("Comme pour la grande roue (cours, § 8) :")], latex: "A=\\dfrac{\\max-\\min}{2}\\qquad b=\\dfrac{\\max+\\min}{2}\\qquad \\omega=\\dfrac{2\\pi}{T}" };
+      return { texte: [tx("Comme pour la grande roue (cours, point 8) :")], latex: "A=\\dfrac{\\max-\\min}{2}\\qquad b=\\dfrac{\\max+\\min}{2}\\qquad \\omega=\\dfrac{2\\pi}{T}" };
     case "phase":
       return { texte: [tx("Au maximum, le sinus vaut 1, donc l'argument vaut "), lx("\\dfrac{\\pi}{2}"), tx(" :")], latex: "\\omega\\, t_{\\max}+\\varphi=\\dfrac{\\pi}{2}\\iff\\varphi=\\dfrac{\\pi}{2}-\\omega\\, t_{\\max}" };
     case "prevision":
       return { texte: [tx("Remplace "), lx("t"), tx(" dans le modèle, calculatrice en mode radian.")] };
     case "duree":
-      return { texte: [tx("Résous l'inéquation sur le cercle (cours, § 8) : isole le sinus, lis l'arc du haut ; sa longueur en "), lx("u"), tx(" divisée par "), lx("\\omega"), tx(" donne la durée :")], latex: "\\sin u\\geq m\\iff u\\in[\\arcsin m\\,;\\,\\pi-\\arcsin m]+2k\\pi" };
+      return { texte: [tx("Résous l'inéquation sur le cercle (cours, point 8) : isole le sinus, lis l'arc du haut ; sa longueur en "), lx("u"), tx(" divisée par "), lx("\\omega"), tx(" donne la durée :")], latex: "\\sin u\\geq m\\iff u\\in[\\arcsin m\\,;\\,\\pi-\\arcsin m]+2k\\pi" };
   }
 }
 

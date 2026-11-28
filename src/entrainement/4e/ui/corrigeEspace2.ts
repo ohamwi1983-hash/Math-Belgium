@@ -17,17 +17,17 @@ export type Fragments = FragmentConsigne[];
 
 const P = " ";
 /** Renvois au cours (sections numérotées de `content/chapters/4e/geometrie-dans-espace.ts`). */
-export const COURS_CAVALIERE = `(cours, §${P}1)`;
-export const COURS_PLAN = `(cours, §${P}2)`;
-export const COURS_DEUX_DROITES = `(cours, §${P}3)`;
-export const COURS_DROITE_PLAN = `(cours, §${P}4)`;
-export const COURS_DEUX_PLANS = `(cours, §${P}5)`;
-export const COURS_PARALLELISME = `(cours, §${P}7)`;
-export const COURS_PERCEE = `(cours, §${P}8)`;
-export const COURS_SECTION = `(cours, §${P}9)`;
-export const COURS_DURER = `(cours, §${P}10)`;
-export const COURS_FUITE = `(cours, §${P}11)`;
-export const COURS_OMBRE = `(cours, §${P}12)`;
+export const COURS_CAVALIERE = `(cours, point${P}1)`;
+export const COURS_PLAN = `(cours, point${P}2)`;
+export const COURS_DEUX_DROITES = `(cours, point${P}3)`;
+export const COURS_DROITE_PLAN = `(cours, point${P}4)`;
+export const COURS_DEUX_PLANS = `(cours, point${P}5)`;
+export const COURS_PARALLELISME = `(cours, point${P}7)`;
+export const COURS_PERCEE = `(cours, point${P}8)`;
+export const COURS_SECTION = `(cours, point${P}9)`;
+export const COURS_DURER = `(cours, point${P}10)`;
+export const COURS_FUITE = `(cours, point${P}11)`;
+export const COURS_OMBRE = `(cours, point${P}12)`;
 
 /** Nom de point en LaTeX : « A′ » → `A'`, « L₀ » → `L_0`, « S′ » → `S'`. */
 export function nomL(nom: string): string {

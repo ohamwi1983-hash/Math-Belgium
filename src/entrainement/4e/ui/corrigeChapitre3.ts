@@ -14,9 +14,9 @@ export type Fragments = FragmentConsigne[];
 
 /** Renvois au cours (sections numérotées du chapitre `caracteristiques-fonctions-reference.ts`). */
 export const COURS_FAMILLES = "(cours, « Avant de commencer »)";
-export const COURS_LECTURE = "(cours, § 1)";
-export const COURS_ALGEBRE = "(cours, § 2)";
-export const COURS_TRANSFORMATIONS = "(cours, § 3)";
+export const COURS_LECTURE = "(cours, point 1)";
+export const COURS_ALGEBRE = "(cours, point 2)";
+export const COURS_TRANSFORMATIONS = "(cours, point 3)";
 
 function net(v: number): number {
   return Object.is(v, -0) || Math.abs(v) < 1e-12 ? 0 : v;

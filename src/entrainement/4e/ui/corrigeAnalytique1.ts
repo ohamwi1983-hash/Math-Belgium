@@ -86,12 +86,12 @@ export function moinsH(h: number, x = "x"): string {
   return moinsHRat(h, x);
 }
 
-export const COURS_DROITE = "(cours, § 1)";
-export const COURS_LIRE_TRACER = "(cours, § 2)";
-export const COURS_CARACTERISTIQUES = "(cours, § 3)";
-export const COURS_RELATIONS = "(cours, § 4)";
-export const COURS_INTERSECTION = "(cours, § 5)";
-export const COURS_DISTANCE = "(cours, § 6)";
+export const COURS_DROITE = "(cours, point 1)";
+export const COURS_LIRE_TRACER = "(cours, point 2)";
+export const COURS_CARACTERISTIQUES = "(cours, point 3)";
+export const COURS_RELATIONS = "(cours, point 4)";
+export const COURS_INTERSECTION = "(cours, point 5)";
+export const COURS_DISTANCE = "(cours, point 6)";
 
 function net(v: number): number {
   return Object.is(v, -0) || Math.abs(v) < 1e-12 ? 0 : v;

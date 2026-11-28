@@ -15,7 +15,7 @@ import { capitalSubstL, limiteExacteL, nomFrequence, reponse, rL } from "../../u
 type E = ExerciceInteretsComposes;
 const t = texte;
 const f = latex;
-const COURS = "(cours, § 2)";
+const COURS = "(cours, point 2)";
 
 function etapeCapitaux(e: E): EtapeCorrection[] {
   const sq = "a";

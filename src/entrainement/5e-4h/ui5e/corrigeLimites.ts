@@ -20,11 +20,11 @@ import { finaliserCorrige, jf, sansDoublons } from "./corrigeTrigonometrie1";
  *   substitution suit l'écriture de l'énoncé, jamais une seconde écriture recalculée à part.
  */
 
-export const COURS_LIMITES = "(cours, § 1)";
-export const COURS_OBLIQUE = "(cours, § 2)";
-export const COURS_LECTURE = "(cours, § 3)";
-export const COURS_CONTEXTE = "(cours, § 4)";
-export const COURS_ETUDE = "(cours, § 5)";
+export const COURS_LIMITES = "(cours, point 1)";
+export const COURS_OBLIQUE = "(cours, point 2)";
+export const COURS_LECTURE = "(cours, point 3)";
+export const COURS_CONTEXTE = "(cours, point 4)";
+export const COURS_ETUDE = "(cours, point 5)";
 
 export type Fragments = FragmentConsigne[];
 export const t = texte;

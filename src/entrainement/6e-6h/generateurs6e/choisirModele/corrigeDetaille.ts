@@ -23,15 +23,15 @@ function justification(e: E): FragmentConsigne[] {
   const d = e.d;
   switch (e.variante) {
     case "binomiale":
-      return [f(`${d.n}`), t(" épreuves identiques et indépendantes, deux issues (succès ou non), "), f("X"), t(" compte les succès : loi binomiale (cours, § 2).")];
+      return [f(`${d.n}`), t(" épreuves identiques et indépendantes, deux issues (succès ou non), "), f("X"), t(" compte les succès : loi binomiale (cours, point 2).")];
     case "hypergeometrique":
-      return [t("Tirages sans remise (ou simultanés) dans une population de "), f(`${d.N}`), t(" éléments dont "), f(`${d.K}`), t(" succès : la composition change, loi hypergéométrique (cours, § 1).")];
+      return [t("Tirages sans remise (ou simultanés) dans une population de "), f(`${d.N}`), t(" éléments dont "), f(`${d.K}`), t(" succès : la composition change, loi hypergéométrique (cours, point 1).")];
     case "poisson":
-      return [t("Comptage d'événements rares et indépendants sur une durée (ou des pages), connu par une moyenne, sans nombre d'épreuves fixé : loi de Poisson (cours, § 8).")];
+      return [t("Comptage d'événements rares et indépendants sur une durée (ou des pages), connu par une moyenne, sans nombre d'épreuves fixé : loi de Poisson (cours, point 8).")];
     case "normale":
-      return [t("Mesure continue répartie en cloche, symétrique autour de sa moyenne : loi normale (cours, § 6).")];
+      return [t("Mesure continue répartie en cloche, symétrique autour de sa moyenne : loi normale (cours, point 6).")];
     case "uniforme":
-      return [t("Mesure continue dont toutes les valeurs de l'intervalle sont également possibles : loi uniforme continue (cours, § 5).")];
+      return [t("Mesure continue dont toutes les valeurs de l'intervalle sont également possibles : loi uniforme continue (cours, point 5).")];
     case "aucune":
       return e.ctx === 1 ? [f("X"), t(" est une somme de deux résultats : ni un nombre de succès, ni un comptage, ni une mesure continue ; ses valeurs ne sont pas également probables.")] : [t("On s'arrête au premier succès : le nombre d'épreuves n'est pas fixé à l'avance, ce n'est pas une loi binomiale (ni aucune autre loi du cours).")];
   }
@@ -87,7 +87,7 @@ function lignesProba(e: E): { utilise: FragmentConsigne[]; lignes: LigneCalcul[]
       const z = zNormale(e);
       const x0 = d.mu! + (d.zc! * d.sigma!) / 100;
       return {
-        utilise: [t("Standardisation et table de "), f("\\Phi"), t(" (cours, § 6) ; "), f("\\Phi(-z)=1-\\Phi(z)"), t(".")],
+        utilise: [t("Standardisation et table de "), f("\\Phi"), t(" (cours, point 6) ; "), f("\\Phi(-z)=1-\\Phi(z)"), t(".")],
         lignes: [
           ligne(`z=\\dfrac{${nL(x0)}-${nL(d.mu!)}}{${nL(d.sigma!)}}=${zL(z)}`, "standardisation"),
           ligne(`${phiL(z)}=${p4L(phiTable(z))}`, "table"),

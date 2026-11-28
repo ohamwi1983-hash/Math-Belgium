@@ -174,20 +174,20 @@ export function aide1_125(e: E, p: P): AideEcran {
   if (p === "objet") {
     switch (e.famille) {
       case "droite":
-        return { texte: [t(`Cours, § 1 : médiane = sommet et milieu du côté opposé ; hauteur = sommet et perpendiculaire au côté opposé ; médiatrice = milieu d'un côté et perpendiculaire à ce côté ; bissectrice = partage un angle en deux angles égaux.`)] };
+        return { texte: [t(`Cours, point 1 : médiane = sommet et milieu du côté opposé ; hauteur = sommet et perpendiculaire au côté opposé ; médiatrice = milieu d'un côté et perpendiculaire à ce côté ; bissectrice = partage un angle en deux angles égaux.`)] };
       case "point":
-        return { texte: [t(`Cours, § 1 : les médianes se coupent au centre de gravité, les hauteurs à l'orthocentre, les médiatrices au centre du cercle circonscrit, les bissectrices au centre du cercle inscrit.`)] };
+        return { texte: [t(`Cours, point 1 : les médianes se coupent au centre de gravité, les hauteurs à l'orthocentre, les médiatrices au centre du cercle circonscrit, les bissectrices au centre du cercle inscrit.`)] };
       case "cercle":
-        return { texte: [t(`Cours, § 1 et § 2 : le cercle circonscrit passe par les sommets ; le cercle inscrit touche les trois côtés de l'intérieur ; un cercle exinscrit touche un côté et les prolongements des deux autres ; le cercle des neuf points passe par les milieux des côtés et les pieds des hauteurs.`)] };
+        return { texte: [t(`Cours, points 1 et 2 : le cercle circonscrit passe par les sommets ; le cercle inscrit touche les trois côtés de l'intérieur ; un cercle exinscrit touche un côté et les prolongements des deux autres ; le cercle des neuf points passe par les milieux des côtés et les pieds des hauteurs.`)] };
     }
   }
   switch (e.famille) {
     case "droite":
-      return { texte: [t(`Cours, § 1 : à chaque type de droite remarquable correspond un point de concours (G, H, O ou I).`)] };
+      return { texte: [t(`Cours, point 1 : à chaque type de droite remarquable correspond un point de concours (G, H, O ou I).`)] };
     case "point":
-      return { texte: [t(`Cours, § 1 : un point de la médiatrice d'un segment est équidistant de ses extrémités ; un point de la bissectrice d'un angle est équidistant de ses côtés ; le centre de gravité partage chaque médiane dans le rapport 2 : 1.`)] };
+      return { texte: [t(`Cours, point 1 : un point de la médiatrice d'un segment est équidistant de ses extrémités ; un point de la bissectrice d'un angle est équidistant de ses côtés ; le centre de gravité partage chaque médiane dans le rapport 2 : 1.`)] };
     case "cercle":
-      return { texte: [t(`Cours, § 1 et § 2 : le centre d'un cercle passant par deux points est sur la médiatrice de ces points ; le centre d'un cercle tangent à deux droites est sur une bissectrice de leurs angles.`)] };
+      return { texte: [t(`Cours, points 1 et 2 : le centre d'un cercle passant par deux points est sur la médiatrice de ces points ; le centre d'un cercle tangent à deux droites est sur une bissectrice de leurs angles.`)] };
   }
 }
 

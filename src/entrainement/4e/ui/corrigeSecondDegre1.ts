@@ -22,10 +22,10 @@ import { formatFractionSimplifiee, formatPolynome } from "./formatSimplification
 export type Fragments = FragmentConsigne[];
 
 /** Renvois au cours (sections numérotées de `equations-inequations-second-degre.ts`). */
-export const COURS_RESOUDRE = "(cours, § 1)";
-export const COURS_SIGNE = "(cours, § 2)";
-export const COURS_SIMPLIFIER = "(cours, § 4)";
-export const COURS_DENOMINATEUR = "(cours, § 5)";
+export const COURS_RESOUDRE = "(cours, point 1)";
+export const COURS_SIGNE = "(cours, point 2)";
+export const COURS_SIMPLIFIER = "(cours, point 4)";
+export const COURS_DENOMINATEUR = "(cours, point 5)";
 export const COURS_VOCABULAIRE = "(cours, « Avant de commencer »)";
 
 function net(v: number): number {

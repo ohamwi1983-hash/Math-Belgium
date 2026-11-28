@@ -20,15 +20,15 @@ import { distance3D, EPSILON_3D, normalePlan, normeCarree3D, pointAppartientAuPl
 type Fragments = FragmentConsigne[];
 
 /** Renvois au cours (sections numérotées de `content/chapters/4e/geometrie-dans-espace.ts`). */
-export const COURS_PLAN = "(cours, § 2)";
-export const COURS_DEUX_DROITES = "(cours, § 3)";
-export const COURS_DROITE_PLAN = "(cours, § 4)";
-export const COURS_DEUX_PLANS = "(cours, § 5)";
-export const COURS_TROIS_PLANS = "(cours, § 6)";
-export const COURS_PARALLELISME = "(cours, § 7)";
-export const COURS_PERCEE = "(cours, § 8)";
-export const COURS_SECTION = "(cours, § 9)";
-export const COURS_OMBRE = "(cours, § 12)";
+export const COURS_PLAN = "(cours, point 2)";
+export const COURS_DEUX_DROITES = "(cours, point 3)";
+export const COURS_DROITE_PLAN = "(cours, point 4)";
+export const COURS_DEUX_PLANS = "(cours, point 5)";
+export const COURS_TROIS_PLANS = "(cours, point 6)";
+export const COURS_PARALLELISME = "(cours, point 7)";
+export const COURS_PERCEE = "(cours, point 8)";
+export const COURS_SECTION = "(cours, point 9)";
+export const COURS_OMBRE = "(cours, point 12)";
 
 // --- Notations ---------------------------------------------------------------------------------
 

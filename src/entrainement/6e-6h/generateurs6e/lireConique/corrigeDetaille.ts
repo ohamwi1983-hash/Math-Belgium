@@ -37,8 +37,8 @@ export function correctionDetaillee132(e: E): EtapeCorrection[] {
           utilise(
             sq,
             e.variante === "figure"
-              ? [t("Allure des coniques (cours, § 1) : l'ellipse est fermée, l'hyperbole a deux branches, la parabole une seule branche ouverte.")]
-              : [t("Équations réduites (cours, § 1) : deux carrés additionnés → ellipse ; deux carrés soustraits → hyperbole ; un seul carré → parabole.")],
+              ? [t("Allure des coniques (cours, point 1) : l'ellipse est fermée, l'hyperbole a deux branches, la parabole une seule branche ouverte.")]
+              : [t("Équations réduites (cours, point 1) : deux carrés additionnés → ellipse ; deux carrés soustraits → hyperbole ; un seul carré → parabole.")],
           ),
           res(reponse132(e, ph)),
           piege(sq, [t("Confondre ellipse et cercle : le cercle a deux dénominateurs égaux.")]),
@@ -49,17 +49,17 @@ export function correctionDetaillee132(e: E): EtapeCorrection[] {
           utilise(
             sq,
             C.nature === "parabole"
-              ? [t("Parabole (cours, § 1) : la variable au carré donne l'axe focal, le signe du coefficient 2p le sens d'ouverture.")]
+              ? [t("Parabole (cours, point 1) : la variable au carré donne l'axe focal, le signe du coefficient 2p le sens d'ouverture.")]
               : C.nature === "ellipse"
-                ? [t("Ellipse (cours, § 1) : le plus grand dénominateur porte "), l("a^2"), t(" et désigne l'axe focal.")]
-                : [t("Hyperbole (cours, § 1) : l'axe focal est celui de la variable dont le carré est précédé du signe +.")],
+                ? [t("Ellipse (cours, point 1) : le plus grand dénominateur porte "), l("a^2"), t(" et désigne l'axe focal.")]
+                : [t("Hyperbole (cours, point 1) : l'axe focal est celui de la variable dont le carré est précédé du signe +.")],
           ),
           res(reponse132(e, ph)),
         );
         break;
       case "sommets":
         out.push(
-          utilise(sq, C.nature === "parabole" ? [t("Le sommet de la parabole est l'origine du repère de son équation réduite (cours, § 1).")] : [t("Sommets (cours, § 1) : à la distance a du centre sur l'axe focal"), t(C.nature === "ellipse" ? ", à la distance b sur l'autre axe." : " ; l'hyperbole n'en a que deux.")]),
+          utilise(sq, C.nature === "parabole" ? [t("Le sommet de la parabole est l'origine du repère de son équation réduite (cours, point 1).")] : [t("Sommets (cours, point 1) : à la distance a du centre sur l'axe focal"), t(C.nature === "ellipse" ? ", à la distance b sur l'autre axe." : " ; l'hyperbole n'en a que deux.")]),
           ...(C.nature === "parabole" ? [] : [calcul(sq, lignesAB(C))]),
           res(reponse132(e, ph)),
           ...(C.nature === "hyperbole" ? [piege(sq, [t("Ajouter les points "), l("(0\\,;\\pm b)"), t(" : l'hyperbole ne coupe pas son axe non focal.")])] : []),
@@ -68,7 +68,7 @@ export function correctionDetaillee132(e: E): EtapeCorrection[] {
       case "foyers":
         if (C.nature === "parabole") {
           out.push(
-            utilise(sq, [t("Parabole (cours, § 1) : le foyer est à la distance "), l("\\dfrac{p}{2}"), t(" du sommet, du côté de l'ouverture.")]),
+            utilise(sq, [t("Parabole (cours, point 1) : le foyer est à la distance "), l("\\dfrac{p}{2}"), t(" du sommet, du côté de l'ouverture.")]),
             calcul(sq, [ligne(`2p=${nb(2 * C.p)}\\ \\Rightarrow\\ p=${nb(C.p)}`, "coefficient lu (en valeur absolue)"), ligne(`\\dfrac{p}{2}=${nb(C.p / 2)}`)]),
             res(reponse132(e, ph)),
             piege(sq, [t("Placer le foyer à la distance p (au lieu de p/2) du sommet.")]),
@@ -76,7 +76,7 @@ export function correctionDetaillee132(e: E): EtapeCorrection[] {
         } else {
           const ell = C.nature === "ellipse";
           out.push(
-            utilise(sq, [t("Foyers (cours, § 1) : sur l'axe focal, à la distance c du centre, avec "), l(ell ? "c^2=a^2-b^2" : "c^2=a^2+b^2"), t(".")]),
+            utilise(sq, [t("Foyers (cours, point 1) : sur l'axe focal, à la distance c du centre, avec "), l(ell ? "c^2=a^2-b^2" : "c^2=a^2+b^2"), t(".")]),
             calcul(sq, [ligne(`c^2=${nb(C.a2)}${ell ? "-" : "+"}${nb(C.b2)}=${nb(c2(C))}`), ligne(`c=${exL(cEx(C))}`)]),
             res(reponse132(e, ph)),
             piege(sq, [t(ell ? "Écrire c² = a² + b² (relation de l'hyperbole)." : "Écrire c² = a² − b² (relation de l'ellipse).")]),
@@ -85,7 +85,7 @@ export function correctionDetaillee132(e: E): EtapeCorrection[] {
         break;
       case "excentricite":
         out.push(
-          utilise(sq, [t("Excentricité (cours, § 2) : "), l("e=\\dfrac{c}{a}"), t(".")]),
+          utilise(sq, [t("Excentricité (cours, point 2) : "), l("e=\\dfrac{c}{a}"), t(".")]),
           calcul(sq, [ligne(`e=\\dfrac{${exL(cEx(C))}}{${exL(aEx(C))}}`), ligne(`=${exL(excentricite(C))}`)]),
           res(reponse132(e, ph)),
           verification(sq, [t("Pour une ellipse, "), l("0<e<1"), t(" : c'est bien le cas.")]),
@@ -94,7 +94,7 @@ export function correctionDetaillee132(e: E): EtapeCorrection[] {
       case "asymptotes": {
         const m = C.axe === "x" ? `\\dfrac{b}{a}=\\dfrac{${exL(bEx(C))}}{${exL(aEx(C))}}` : `\\dfrac{a}{b}=\\dfrac{${exL(aEx(C))}}{${exL(bEx(C))}}`;
         out.push(
-          utilise(sq, [t("Asymptotes (cours, § 1) : elles passent par le centre et sont les diagonales du rectangle "), l(C.axe === "x" ? "(\\pm a\\,;\\pm b)" : "(\\pm b\\,;\\pm a)"), t(".")]),
+          utilise(sq, [t("Asymptotes (cours, point 1) : elles passent par le centre et sont les diagonales du rectangle "), l(C.axe === "x" ? "(\\pm a\\,;\\pm b)" : "(\\pm b\\,;\\pm a)"), t(".")]),
           calcul(sq, [ligne(`m=${m}=${nb(C.axe === "x" ? Math.sqrt(C.b2 / C.a2) : Math.sqrt(C.a2 / C.b2))}`, "pente positive")]),
           res(reponse132(e, ph)),
           piege(sq, [t("Prendre l'inverse de la pente quand l'axe focal est vertical.")]),
@@ -103,7 +103,7 @@ export function correctionDetaillee132(e: E): EtapeCorrection[] {
       }
       case "directrice":
         out.push(
-          utilise(sq, [t("Parabole (cours, § 1) : la directrice est perpendiculaire à l'axe focal, à la distance "), l("\\dfrac{p}{2}"), t(" du sommet, du côté opposé au foyer.")]),
+          utilise(sq, [t("Parabole (cours, point 1) : la directrice est perpendiculaire à l'axe focal, à la distance "), l("\\dfrac{p}{2}"), t(" du sommet, du côté opposé au foyer.")]),
           calcul(sq, [ligne(`\\dfrac{p}{2}=${nb(C.p / 2)}`)]),
           res(reponse132(e, ph)),
           verification(sq, [t("Le sommet est le milieu du segment qui joint le foyer à la directrice, perpendiculairement à elle.")]),
@@ -118,7 +118,7 @@ export function correctionDetaillee132(e: E): EtapeCorrection[] {
                 ligne(`b=${exL(bEx(C))}\\ \\Rightarrow\\ b^2=${nb(C.b2)}`, C.nature === "ellipse" ? "demi-petit axe lu" : "rectangle lu"),
               ];
         out.push(
-          utilise(sq, [t("Équations réduites (cours, § 1), écrites avec les longueurs lues sur la figure.")]),
+          utilise(sq, [t("Équations réduites (cours, point 1), écrites avec les longueurs lues sur la figure.")]),
           calcul(sq, lignes),
           res(reponse132(e, ph)),
         );
@@ -126,13 +126,13 @@ export function correctionDetaillee132(e: E): EtapeCorrection[] {
       }
       case "naturePropriete":
         out.push(
-          utilise(sq, [t("Miroirs (cours, § 6) : rayons parallèles ↔ foyer pour la parabole ; foyer ↔ autre foyer pour l'ellipse et l'hyperbole.")]),
+          utilise(sq, [t("Miroirs (cours, point 6) : rayons parallèles ↔ foyer pour la parabole ; foyer ↔ autre foyer pour l'ellipse et l'hyperbole.")]),
           resultat(sq, fr(reponse132(e, ph))),
           piege(sq, [t("Croire qu'un miroir elliptique concentre des rayons parallèles : seul le miroir parabolique le fait.")]),
         );
         break;
       case "propriete":
-        out.push(utilise(sq, [t("Propriétés optiques (cours, § 6).")]), res(reponse132(e, ph)));
+        out.push(utilise(sq, [t("Propriétés optiques (cours, point 6).")]), res(reponse132(e, ph)));
         break;
     }
   });

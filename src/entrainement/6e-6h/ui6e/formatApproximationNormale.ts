@@ -168,15 +168,15 @@ export function aide1(_e: E, p: P): AideEcran {
   switch (p) {
     case "verdict":
     case "condition":
-      return { texte: [t("Conditions du cours (§ 7) pour approcher une loi binomiale par une loi normale, inégalités strictes :")], latex: CONDITIONS };
+      return { texte: [t("Conditions du cours (point 7) pour approcher une loi binomiale par une loi normale, inégalités strictes :")], latex: CONDITIONS };
     case "exacte":
-      return { texte: [t("Loi binomiale (cours, § 2) ; pour une somme de termes, utilise la loi binomiale cumulée de la calculatrice :")], latex: "P(X=i)=C_n^i\\,p^i(1-p)^{n-i}" };
+      return { texte: [t("Loi binomiale (cours, point 2) ; pour une somme de termes, utilise la loi binomiale cumulée de la calculatrice :")], latex: "P(X=i)=C_n^i\\,p^i(1-p)^{n-i}" };
     case "parametres":
       return { texte: [t("La loi normale qui approche "), l("\\mathcal{B}(n\\,;p)"), t(" a les mêmes espérance et écart-type :")], latex: "\\mu=np\\qquad \\sigma=\\sqrt{np(1-p)}" };
     case "bornes":
       return { texte: [t("Correction de continuité : la valeur entière "), l("k"), t(" est représentée par l'intervalle "), l("[k-0{,}5\\,;k+0{,}5]"), t(" ; on garde ou on retire cette demi-unité selon l'événement :")], latex: "P(X\\le k)\\approx P(Y\\le k+0{,}5)\\qquad P(X\\ge k)\\approx P(Y\\ge k-0{,}5)" };
     case "z":
-      return { texte: [t("Standardisation (cours, § 6) :")], latex: "z=\\dfrac{b-\\mu}{\\sigma}" };
+      return { texte: [t("Standardisation (cours, point 6) :")], latex: "z=\\dfrac{b-\\mu}{\\sigma}" };
     default:
       return { texte: [t("Écris la probabilité avec "), l("\\Phi"), t(", puis lis la table (symétrie pour un "), l("z"), t(" négatif) :")], latex: "P(Y\\ge b)=1-\\Phi(z)\\qquad \\Phi(-z)=1-\\Phi(z)" };
   }

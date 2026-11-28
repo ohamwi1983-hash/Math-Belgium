@@ -84,10 +84,10 @@ export function messageIllisible(_e: E, phase: PhaseGrapheReciproque): string {
 }
 
 export function aide1(_e: E, phase: PhaseGrapheReciproque): AideEcran {
-  if (phase === "point") return { texte: [t("Les courbes de "), l("f"), t(" et de "), l("f^{-1}"), t(" sont symétriques par rapport à la droite "), l("y=x"), t(" (cours, § 1) :")], latex: "(a\\,;\\,b)\\in\\mathcal{G}_f\\iff(b\\,;\\,a)\\in\\mathcal{G}_{f^{-1}}" };
-  if (phase === "ensembles") return { texte: [t("La réciproque échange les rôles des deux axes (cours, § 1) :")], latex: "\\mathrm{dom}\\,f^{-1}=\\mathrm{im}\\,f\\qquad\\mathrm{im}\\,f^{-1}=\\mathrm{dom}\\,f" };
+  if (phase === "point") return { texte: [t("Les courbes de "), l("f"), t(" et de "), l("f^{-1}"), t(" sont symétriques par rapport à la droite "), l("y=x"), t(" (cours, point 1) :")], latex: "(a\\,;\\,b)\\in\\mathcal{G}_f\\iff(b\\,;\\,a)\\in\\mathcal{G}_{f^{-1}}" };
+  if (phase === "ensembles") return { texte: [t("La réciproque échange les rôles des deux axes (cours, point 1) :")], latex: "\\mathrm{dom}\\,f^{-1}=\\mathrm{im}\\,f\\qquad\\mathrm{im}\\,f^{-1}=\\mathrm{dom}\\,f" };
   if (phase === "graphe") return { texte: [t("Le graphe de "), l("f^{-1}"), t(" est le symétrique de celui de "), l("f"), t(" par rapport à la droite "), l("y=x"), t(" (la diagonale en pointillé gris).")] };
-  return { texte: [t("Pente d'une droite qui passe par deux nœuds : "), l("m=\\dfrac{\\Delta y}{\\Delta x}"), t(". La symétrie par rapport à "), l("y=x"), t(" échange "), l("\\Delta x"), t(" et "), l("\\Delta y"), t(" (cours, § 1) :")], latex: "(f^{-1})'(b)=\\dfrac{1}{f'(a)}" };
+  return { texte: [t("Pente d'une droite qui passe par deux nœuds : "), l("m=\\dfrac{\\Delta y}{\\Delta x}"), t(". La symétrie par rapport à "), l("y=x"), t(" échange "), l("\\Delta x"), t(" et "), l("\\Delta y"), t(" (cours, point 1) :")], latex: "(f^{-1})'(b)=\\dfrac{1}{f'(a)}" };
 }
 
 export function aide2(e: E, phase: PhaseGrapheReciproque): AideEcran {

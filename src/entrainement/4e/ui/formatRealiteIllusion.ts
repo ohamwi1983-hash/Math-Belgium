@@ -151,8 +151,8 @@ export const CONSIGNES_ETAPES_PAPIER = [
   "Conclus : ce solide peut-il exister ? Justifie par le théorème des trois plans.",
 ];
 
-export const COURS_TROIS_PLANS = "Théorème (cours, § 6) : trois plans distincts, sécants deux à deux, se coupent suivant trois droites concourantes, parallèles ou confondues.";
-export const COURS_CAVALIERE = "La perspective cavalière est une projection parallèle (cours, § 1) : deux droites parallèles restent parallèles sur le dessin, et le point commun de deux droites est dessiné au point commun de leurs dessins.";
+export const COURS_TROIS_PLANS = "Théorème (cours, point 6) : trois plans distincts, sécants deux à deux, se coupent suivant trois droites concourantes, parallèles ou confondues.";
+export const COURS_CAVALIERE = "La perspective cavalière est une projection parallèle (cours, point 1) : deux droites parallèles restent parallèles sur le dessin, et le point commun de deux droites est dessiné au point commun de leurs dessins.";
 
 function aides(e: E): F[][] {
   const [q, r] = e.areteDeplacee === null ? [0, 1] : autres(e);

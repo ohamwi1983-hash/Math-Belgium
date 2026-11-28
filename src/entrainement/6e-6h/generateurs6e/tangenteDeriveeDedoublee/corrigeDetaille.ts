@@ -93,11 +93,11 @@ export function correctionDetailleeTD(e: E): EtapeCorrection[] {
   const formuleCours = c.type === "parabole" ? (Math.abs(e.P.y) === 1 ? "\\dfrac{p}{y_P}" : `\\dfrac{p}{y_P}=\\dfrac{${nL(c.p)}}{${nPL(e.P.y)}}`) : c.type === "ellipse" ? `-\\dfrac{b^2x_P}{a^2y_P}=-\\dfrac{${c.b * c.b}\\cdot ${nPL(e.P.x)}}{${c.a * c.a}\\cdot ${nPL(e.P.y)}}` : `\\dfrac{b^2x_P}{a^2y_P}=\\dfrac{${c.b * c.b}\\cdot ${nPL(e.P.x)}}{${c.a * c.a}\\cdot ${nPL(e.P.y)}}`;
   const verifTan = droiteL(tangenteP(e));
   return [
-    utilise("a", [ft("Une conique est la réunion de deux graphiques de fonctions opposées ; on garde celle qui contient "), L("P"), ft(" (cours, § 5).")]),
+    utilise("a", [ft("Une conique est la réunion de deux graphiques de fonctions opposées ; on garde celle qui contient "), L("P"), ft(" (cours, point 5).")]),
     calcul("a", lignesA(e)),
     resultat("a", [L(optionL(e, branche(e))), ft(".")]),
     piege("a", [ft("Prendre la branche "), L("y=f(x)"), ft(" pour un point d'ordonnée négative : la pente change de signe.")]),
-    utilise("b", [ft("La pente de la tangente en "), L("P"), ft(" est le nombre dérivé "), L("f'(x_P)"), ft(" (cours, § 5).")]),
+    utilise("b", [ft("La pente de la tangente en "), L("P"), ft(" est le nombre dérivé "), L("f'(x_P)"), ft(" (cours, point 5).")]),
     calcul("b", lignesB(e)),
     resultat("b", [ft("La pente vaut "), L(nL(m)), ft(".")]),
     verification("b", [ft("Formule du cours : "), L(`${formuleCours}=${nL(m)}`), ft(".")]),
@@ -105,7 +105,7 @@ export function correctionDetailleeTD(e: E): EtapeCorrection[] {
     calcul("c", lignesC(e)),
     { ...resultat("c", [ft("Tangente en "), L("P"), ft(" : "), L(tangentePL(e)), ft(".")]), figureHtml: figureTD(e, true, false) },
     verification("c", [ft("Forme dédoublée en "), L("P"), ft(" : "), L(dedoubleeSubstL(e, e.P)), ft(", qui se simplifie en "), L(verifTan), ft(" : même droite.")]),
-    utilise("d", [ft("Forme dédoublée (cours, § 5) : dans l'équation de "), L("\\Gamma"), ft(", "), L("x^2\\to x\\,x_Q"), ft(", "), L("y^2\\to y\\,y_Q"), ft(c.type === "parabole" ? ", " : "."), ...(c.type === "parabole" ? [L("x\\to\\dfrac{x+x_Q}{2}"), ft(".")] : [])]),
+    utilise("d", [ft("Forme dédoublée (cours, point 5) : dans l'équation de "), L("\\Gamma"), ft(", "), L("x^2\\to x\\,x_Q"), ft(", "), L("y^2\\to y\\,y_Q"), ft(c.type === "parabole" ? ", " : "."), ...(c.type === "parabole" ? [L("x\\to\\dfrac{x+x_Q}{2}"), ft(".")] : [])]),
     calcul("d", [ligne(dedoubleeSubstL(e), [ft("avec "), L(`Q(${nL(e.Q.x)}\\,;${nL(e.Q.y)})`)]), ligne(tangenteQL(e), "on simplifie")]),
     { ...resultat("d", [ft("Tangente en "), L("Q"), ft(" : "), L(tangenteQL(e)), ft(e.qSommet ? " (droite verticale)." : ".")]), figureHtml: figureTD(e, true, true) },
     piege("d", e.qSommet ? [ft("Dériver en "), L("Q"), ft(" : "), L("y_Q=0"), ft(", la formule de la pente divise par zéro ; la tangente au sommet de l'axe focal est verticale.")] : c.type === "parabole" ? [ft("Remplacer "), L("x"), ft(" par "), L("x\\,x_Q"), ft(" : il devient "), L("\\dfrac{x+x_Q}{2}"), ft(", d'où le coefficient "), L("p"), ft(" et non "), L("2p"), ft(".")] : [ft("Remplacer "), L("x^2"), ft(" par "), L("x_Q^2"), ft(" : on garde une lettre, "), L("x^2\\to x\\,x_Q"), ft(".")]),

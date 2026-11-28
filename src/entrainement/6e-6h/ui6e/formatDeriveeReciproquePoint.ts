@@ -85,10 +85,10 @@ export function messageIllisible(_e: E, phase: PhaseReciproque): string {
 
 export function aide1(e: E, phase: PhaseReciproque): AideEcran {
   const y = y0L(e);
-  if (phase === "x0") return { texte: [l("f^{-1}(y_0)"), t(" est le réel "), l("x_0"), t(" de "), l("I"), t(" tel que "), l("f(x_0)=y_0"), t(" (cours, § 1). On ne sait pas résoudre l'équation par calcul : cherche une valeur évidente ; f étant strictement croissante, c'est la seule solution.")], latex: `f(x_0)=${y}` };
+  if (phase === "x0") return { texte: [l("f^{-1}(y_0)"), t(" est le réel "), l("x_0"), t(" de "), l("I"), t(" tel que "), l("f(x_0)=y_0"), t(" (cours, point 1). On ne sait pas résoudre l'équation par calcul : cherche une valeur évidente ; f étant strictement croissante, c'est la seule solution.")], latex: `f(x_0)=${y}` };
   if (phase === "derivee") return { texte: [t("Dérive "), l("f"), t(" terme à terme avec les dérivées de référence, puis remplace "), l("x"), t(" par "), l("x_0"), t(" — et non par "), l("y_0"), t(".")] };
-  if (phase === "theoreme") return { texte: [t("Théorème (cours, § 1) : si "), l("f"), t(" est continue, strictement monotone sur un intervalle et dérivable en "), l("x_0"), t(" avec "), l("f'(x_0)\\neq 0"), t(", alors :")], latex: "(f^{-1})'(y_0)=\\dfrac{1}{f'(x_0)}" };
-  return { texte: [t("Théorème de la dérivée d'une réciproque (cours, § 1) :")], latex: "(f^{-1})'(y_0)=\\dfrac{1}{f'\\left(f^{-1}(y_0)\\right)}" };
+  if (phase === "theoreme") return { texte: [t("Théorème (cours, point 1) : si "), l("f"), t(" est continue, strictement monotone sur un intervalle et dérivable en "), l("x_0"), t(" avec "), l("f'(x_0)\\neq 0"), t(", alors :")], latex: "(f^{-1})'(y_0)=\\dfrac{1}{f'(x_0)}" };
+  return { texte: [t("Théorème de la dérivée d'une réciproque (cours, point 1) :")], latex: "(f^{-1})'(y_0)=\\dfrac{1}{f'\\left(f^{-1}(y_0)\\right)}" };
 }
 
 export function aide2(e: E, phase: PhaseReciproque): AideEcran {

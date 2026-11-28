@@ -43,10 +43,10 @@ export function correctionDetailleeIdentites(e: ExerciceIdentites): EtapeCorrect
     const phi = phiK12(e);
     const v = trigExact(e.fn, phi)!;
     return [
-      utilise("a", fr([t(`Image de arc${e.fn} (cours, § 2) : `), l(IMAGE_L[e.fn]), t(". On compare "), l(`\\theta=${thetaL(e)}`), t(" à ses bornes.")])),
+      utilise("a", fr([t(`Image de arc${e.fn} (cours, point 2) : `), l(IMAGE_L[e.fn]), t(". On compare "), l(`\\theta=${thetaL(e)}`), t(" à ses bornes.")])),
       calcul("a", lignesComparaison(e)),
       resultat("a", fr(reponse(e, "verdict"))),
-      utilise("b", fr(dedans ? [t(`Pour un angle de l'image, arc${e.fn} défait ${e.fn} : `), l(`\\arc${e.fn}(\\${e.fn}\\theta)=\\theta`), t(" (cours, § 2).")] : [l("A"), t(` est l'angle de l'image qui a le même ${NOM[e.fn]} que `), l("\\theta"), t(" (cours, § 2) : on cherche un angle associé, puis on le ramène dans l'image.")])),
+      utilise("b", fr(dedans ? [t(`Pour un angle de l'image, arc${e.fn} défait ${e.fn} : `), l(`\\arc${e.fn}(\\${e.fn}\\theta)=\\theta`), t(" (cours, point 2).")] : [l("A"), t(` est l'angle de l'image qui a le même ${NOM[e.fn]} que `), l("\\theta"), t(" (cours, point 2) : on cherche un angle associé, puis on le ramène dans l'image.")])),
       calcul("b", lignes),
       resultat("b", fr(reponse(e, "valeur"))),
       verification("b", fr([t("L'angle trouvé est dans l'image et a la même valeur :")]), [ligne(`${trigAngleL(e.fn, phi, 12)}=${radL(v)}`)]),
@@ -65,7 +65,7 @@ export function correctionDetailleeIdentites(e: ExerciceIdentites): EtapeCorrect
           ? null
           : ligne(`\\left(${radL(val)}\\right)^{2}+${qP(e.a)}^{2}=1`);
     return [
-      utilise("a", fr([t(`Image de arc${f} (cours, § 2) : `), l(IMAGE_L[f]), t(` ; le signe ${g === "tan" ? "de la tangente" : `du ${NOM[g]}`} se lit sur cette partie du cercle.`)])),
+      utilise("a", fr([t(`Image de arc${f} (cours, point 2) : `), l(IMAGE_L[f]), t(` ; le signe ${g === "tan" ? "de la tangente" : `du ${NOM[g]}`} se lit sur cette partie du cercle.`)])),
       calcul("a", lignesSigne(e)),
       resultat("a", fr(reponse(e, "verdict"))),
       utilise("b", fr([t("On pose "), l(`\\alpha=\\arc${f}\\left(${qL(e.a)}\\right)`), t(" : "), l(`\\${f}\\alpha=${qL(e.a)}`), t(". "), ...u])),
@@ -77,7 +77,7 @@ export function correctionDetailleeIdentites(e: ExerciceIdentites): EtapeCorrect
   }
   const { utilise: u, lignes } = lignesSimplification(e);
   return [
-    utilise("a", fr([t(`Domaine de arc${arcDe(e.couple)} (cours, § 2)${exterieure(e.couple) === "tan" ? " ; une tangente est un quotient : dénominateur non nul." : "."}`)])),
+    utilise("a", fr([t(`Domaine de arc${arcDe(e.couple)} (cours, point 2)${exterieure(e.couple) === "tan" ? " ; une tangente est un quotient : dénominateur non nul." : "."}`)])),
     calcul("a", lignesDomaine(e)),
     resultat("a", fr(reponse(e, "verdict"))),
     utilise("b", fr(u)),

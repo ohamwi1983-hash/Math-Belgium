@@ -628,7 +628,7 @@ function aidesErreur(type: TypeErreurComplexes): FragmentConsigne[][] {
     case "racineNegatifs":
       return [
         [t("Rappel : la règle "), l("\\sqrt{ab} = \\sqrt{a} \\cdot \\sqrt{b}"), t(" n'est vraie que si :"), l("a \\geq 0 \\text{ et } b \\geq 0")],
-        [t("Revois le piège sur "), l("\\sqrt{-1}"), t(" de la section 1 du cours : à quelle ligne l'élève applique-t-il cette règle à deux nombres négatifs ?")],
+        [t("Revois le piège sur "), l("\\sqrt{-1}"), t(" du point 1 du cours : à quelle ligne l'élève applique-t-il cette règle à deux nombres négatifs ?")],
       ];
   }
 }

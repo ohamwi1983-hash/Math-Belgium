@@ -25,11 +25,11 @@ export function correctionDetaillee137(e: E): EtapeCorrection[] {
     const res = fin ? { ...resultat(sq, fr(reponse137(e, ph))), figureHtml: figureCorrigeLot(figureCorrige137(e)) } : resultat(sq, fr(reponse137(e, ph)));
     switch (ph) {
       case "c":
-        out.push(utilise(sq, [t("Hyperbole (cours, § 1) : "), l("c^2=a^2+b^2"), t(" ; équilatère : b = a.")]), calcul(sq, [ligne(`c^2=${e.a2}+${e.a2}=${2 * e.a2}`), ligne(`c=${exL(c137(e))}`)]), res);
+        out.push(utilise(sq, [t("Hyperbole (cours, point 1) : "), l("c^2=a^2+b^2"), t(" ; équilatère : b = a.")]), calcul(sq, [ligne(`c^2=${e.a2}+${e.a2}=${2 * e.a2}`), ligne(`c=${exL(c137(e))}`)]), res);
         break;
       case "k":
         out.push(
-          utilise(sq, [t("Repère des asymptotes (cours, § 1) : "), l("X=\\dfrac{x-y}{\\sqrt2},\\ Y=\\dfrac{x+y}{\\sqrt2}"), t(".")]),
+          utilise(sq, [t("Repère des asymptotes (cours, point 1) : "), l("X=\\dfrac{x-y}{\\sqrt2},\\ Y=\\dfrac{x+y}{\\sqrt2}"), t(".")]),
           calcul(sq, [ligne(`XY=\\dfrac{(x-y)(x+y)}{2}=\\dfrac{x^2-y^2}{2}`), ligne(`XY=\\dfrac{${e.a2}}{2}=${nb(e.k)}`)]),
           res,
           piege(sq, [t("Écrire k = a² : on oublie le facteur 1/2 venu des deux divisions par √2.")]),
@@ -46,18 +46,18 @@ export function correctionDetaillee137(e: E): EtapeCorrection[] {
         break;
       }
       case "a2":
-        out.push(utilise(sq, [t("Les deux formes de l'hyperbole équilatère (cours, § 1) : "), l("k=\\dfrac{a^2}{2}"), t(".")]), calcul(sq, [ligne(`a^2=2k=2\\times ${e.k}=${e.a2}`)]), res, piege(sq, [t("Prendre a² = k.")]));
+        out.push(utilise(sq, [t("Les deux formes de l'hyperbole équilatère (cours, point 1) : "), l("k=\\dfrac{a^2}{2}"), t(".")]), calcul(sq, [ligne(`a^2=2k=2\\times ${e.k}=${e.a2}`)]), res, piege(sq, [t("Prendre a² = k.")]));
         break;
       case "sommets":
         out.push(
-          utilise(sq, [t("Les sommets de xy = k sont sur l'axe de symétrie y = x (cours, § 1).")]),
+          utilise(sq, [t("Les sommets de xy = k sont sur l'axe de symétrie y = x (cours, point 1).")]),
           calcul(sq, [ligne(`x\\cdot x=${e.k}`, "on remplace y par x"), ligne(`x=\\pm${exL(racineEx(e.k))}`)]),
           res,
         );
         break;
       case "foyers":
         out.push(
-          utilise(sq, [t("Foyers (cours, § 1) : sur l'axe focal y = x, à la distance "), l("c=a\\sqrt2"), t(" de O ; leurs deux coordonnées valent "), l("\\dfrac{c}{\\sqrt2}=a"), t(".")]),
+          utilise(sq, [t("Foyers (cours, point 1) : sur l'axe focal y = x, à la distance "), l("c=a\\sqrt2"), t(" de O ; leurs deux coordonnées valent "), l("\\dfrac{c}{\\sqrt2}=a"), t(".")]),
           calcul(sq, [ligne(`a=\\sqrt{${e.a2}}=${exL(racineEx(e.a2))}`), ligne(`c=a\\sqrt2=${exL(racineEx(2 * e.a2))}`)]),
           res,
           verification(sq, [t("Distance de F à O : "), l(`\\sqrt{2a^2}=\\sqrt{${2 * e.a2}}=c`), t(" ✓")]),

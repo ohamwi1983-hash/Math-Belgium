@@ -50,18 +50,18 @@ function lignesAngle(e: E): LigneCalcul[] {
   const quadrantDe = (d: number) => (d < 90 ? "I" : d < 180 ? "II" : d < 270 ? "III" : "IV");
   const lignes: LigneCalcul[] = [
     ligne(`|\\cos\\theta|=${LATEX_GRANDEUR[cos.grandeur]}`, "valeur lue, sans le signe"),
-    ligne(`\\alpha=${alpha}`, [texte("angle du premier quadrant : l'angle aigu de cosinus "), latex(LATEX_GRANDEUR[cos.grandeur]), texte(" (§ 3)")]),
+    ligne(`\\alpha=${alpha}`, [texte("angle du premier quadrant : l'angle aigu de cosinus "), latex(LATEX_GRANDEUR[cos.grandeur]), texte(" (point 3)")]),
     ligne(`\\cos\\theta=${valeurLatex(cos)}`, [texte("deux candidats de même cosinus : "), latex(angleLatex(e, cands[0]!)), texte(` (quadrant ${quadrantDe(cands[0]!)}) et `), latex(angleLatex(e, cands[1]!)), texte(` (quadrant ${quadrantDe(cands[1]!)})`)]),
     ligne(`\\sin\\theta=${valeurLatex(sin)}`, sin.signe > 0 ? `positif : M au-dessus de l'axe horizontal, quadrant ${p}` : `négatif : M en dessous de l'axe horizontal, quadrant ${p}`),
   ];
   const [tour, demi] = ["360^\\circ", "180^\\circ"];
   if (p === "I") {
-    lignes.push(ligne("\\theta=\\alpha", "formule du quadrant I (§ 1)"), ligne(`=${angleLatex(e)}`));
+    lignes.push(ligne("\\theta=\\alpha", "formule du quadrant I (point 1)"), ligne(`=${angleLatex(e)}`));
     return lignes;
   }
   const formule = p === "II" ? `${demi}-\\alpha` : p === "III" ? `${demi}+\\alpha` : `${tour}-\\alpha`;
   const substituee = p === "II" ? `${demi}-${alpha}` : p === "III" ? `${demi}+${alpha}` : `${tour}-${alpha}`;
-  lignes.push(ligne(`\\theta=${formule}`, `formule du quadrant ${p} (§ 1)`), ligne(`=${substituee}`), ligne(`=${angleLatex(e)}`));
+  lignes.push(ligne(`\\theta=${formule}`, `formule du quadrant ${p} (point 1)`), ligne(`=${substituee}`), ligne(`=${angleLatex(e)}`));
   return lignes;
 }
 
@@ -93,7 +93,7 @@ export function correctionDetailleeLectureCercle(e: E): EtapeCorrection[] {
     utilise("a", [
       texte("Le point M(θ) a pour coordonnées "),
       latex("(\\cos\\theta\\,;\\,\\sin\\theta)"),
-      texte(" (cours, § 1). Les lignes du quadrillage sont les valeurs remarquables (cours, § 3), graduées sur les demi-axes positifs : on lit la graduation de la ligne symétrique, le côté de l'axe donne le signe."),
+      texte(" (cours, point 1). Les lignes du quadrillage sont les valeurs remarquables (cours, point 3), graduées sur les demi-axes positifs : on lit la graduation de la ligne symétrique, le côté de l'axe donne le signe."),
     ]),
     calcul("a", [ligne(`\\cos\\theta=${valeurLatex(cos)}`, lueSur(cos, true)), ligne(`\\sin\\theta=${valeurLatex(sin)}`, lueSur(sin, false))]),
     resultat("a", souderPonctuation(reponseCoordonnees(e))),
@@ -106,7 +106,7 @@ export function correctionDetailleeLectureCercle(e: E): EtapeCorrection[] {
       latex("\\sin\\theta"),
       texte(" (M au-dessus ou en dessous de l'axe horizontal) tranche. Hors des axes, on part de l'angle du premier quadrant "),
       latex("\\alpha"),
-      texte(" et de la formule du quadrant (cours, § 1)."),
+      texte(" et de la formule du quadrant (cours, point 1)."),
     ]),
     calcul("b", lignesAngle(e)),
     resultat("b", reponseAngle(e)),
@@ -136,7 +136,7 @@ export function correctionDetailleeLectureCercle(e: E): EtapeCorrection[] {
       latex("(1\\,;\\,0)"),
       texte(", la droite "),
       latex("x=1"),
-      texte(" (cours, § 1). Si "),
+      texte(" (cours, point 1). Si "),
       latex("(OM)"),
       texte(" est parallèle à cette tangente, "),
       latex("\\tan\\theta"),

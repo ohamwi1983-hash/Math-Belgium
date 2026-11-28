@@ -30,21 +30,21 @@ export function correctionDetaillee102(e: E): EtapeCorrection[] {
     switch (p) {
       case "pascal":
         out.push(
-          utilise(sq, fr([t("Relation de Pascal (cours, § 3) : "), l(PASCAL), t(".")])),
+          utilise(sq, fr([t("Relation de Pascal (cours, point 3) : "), l(PASCAL), t(".")])),
           calcul(sq, [ligne(`${CL(n + 1, k)}=${CL(n, k - 1)}+${CL(n, k)}`, "les deux nombres au-dessus"), ligne(`=${mil(comb(n, k - 1))}+${mil(comb(n, k))}`, `lus sur la ligne ${n}`), ligne(`=${mil(valeur102(e, p))}`)]),
           resultat(sq, fr(reponse102(e, p))),
         );
         break;
       case "symetrique":
         out.push(
-          utilise(sq, fr([t("Symétrie (cours, § 3) : "), l(SYM), t(".")])),
+          utilise(sq, fr([t("Symétrie (cours, point 3) : "), l(SYM), t(".")])),
           calcul(sq, [ligne(`${n + 1}-${n + 1 - k}=${k}`, "indice symétrique"), ligne(`${CL(n + 1, n + 1 - k)}=${CL(n + 1, k)}=${mil(valeur102(e, p))}`, "trouvé à l'étape 1")]),
           { ...resultat(sq, fr(reponse102(e, p))), figureHtml: figurePascal(e, true) ?? undefined },
         );
         break;
       case "somme":
         out.push(
-          utilise(sq, fr([t("Somme d'une ligne (cours, § 3) : "), l(SOMME), t(".")])),
+          utilise(sq, fr([t("Somme d'une ligne (cours, point 3) : "), l(SOMME), t(".")])),
           calcul(sq, [ligne(`S_{${n + 1}}=2^{${n + 1}}`), ligne(`=${mil(valeur102(e, p))}`)]),
           resultat(sq, fr(reponse102(e, p))),
           verification(sq, fr([t(`La somme de la ligne ${n} vaut `), l(`${ligneTriangle(n).length > 6 ? `2^{${n}}` : ligneTriangle(n).join("+")}=${mil(2 ** n)}`), t(" ; chaque ligne double la somme de la précédente : "), l(`2\\times ${mil(2 ** n)}=${mil(2 ** (n + 1))}`), t(".")])),
@@ -53,7 +53,7 @@ export function correctionDetaillee102(e: E): EtapeCorrection[] {
         break;
       case "partenaire":
         out.push(
-          utilise(sq, fr([t("Symétrie (cours, § 3) : "), l(SYM), t(".")])),
+          utilise(sq, fr([t("Symétrie (cours, point 3) : "), l(SYM), t(".")])),
           calcul(sq, [ligne(`${n}-${n - k}=${k}`, "indice symétrique"), ligne(`${CL(n, n - k)}=${CL(n, k)}=${mil(valeur102(e, p))}`, "valeur donnée")]),
           resultat(sq, fr(reponse102(e, p))),
           piege(sq, fr([t("Prendre "), l(CL(n, k + 1)), t(" : le partenaire de symétrie a des indices de somme "), l(`${n}`), t(".")])),
@@ -61,14 +61,14 @@ export function correctionDetaillee102(e: E): EtapeCorrection[] {
         break;
       case "suivant":
         out.push(
-          utilise(sq, fr([t("Relation de Pascal (cours, § 3) : "), l(PASCAL), t(".")])),
+          utilise(sq, fr([t("Relation de Pascal (cours, point 3) : "), l(PASCAL), t(".")])),
           calcul(sq, [ligne(`${CL(n + 1, k + 1)}=${CL(n, k)}+${CL(n, k + 1)}`), ligne(`=${mil(comb(n, k))}+${mil(comb(n, k + 1))}`, "valeurs données"), ligne(`=${mil(valeur102(e, p))}`)]),
           resultat(sq, fr(reponse102(e, p))),
         );
         break;
       case "toutes":
         out.push(
-          utilise(sq, fr([t("Un ensemble à "), l("n"), t(" éléments a "), l("2^n"), t(" parties (somme de la ligne "), l("n"), t(", cours, § 3) : chaque élément est pris ou non.")])),
+          utilise(sq, fr([t("Un ensemble à "), l("n"), t(" éléments a "), l("2^n"), t(" parties (somme de la ligne "), l("n"), t(", cours, point 3) : chaque élément est pris ou non.")])),
           calcul(sq, [ligne(`${CL(n, 0)}+${CL(n, 1)}+\\cdots+${CL(n, n)}=2^{${n}}`), ligne(`=${mil(valeur102(e, p))}`)]),
           resultat(sq, fr(reponse102(e, p))),
         );
@@ -88,7 +88,7 @@ export function correctionDetaillee102(e: E): EtapeCorrection[] {
       }
       case "propriete":
         out.push(
-          utilise(sq, fr([t("Les trois propriétés du triangle (cours, § 3) : Pascal "), l(PASCAL), t(", symétrie "), l(SYM), t(", somme "), l(SOMME), t(".")])),
+          utilise(sq, fr([t("Les trois propriétés du triangle (cours, point 3) : Pascal "), l(PASCAL), t(", symétrie "), l(SYM), t(", somme "), l(SOMME), t(".")])),
           resultat(sq, fr([t(e.propriete === "pascal" ? "Deux coefficients voisins d'une même ligne sont additionnés : relation de Pascal." : e.propriete === "symetrie" ? "Deux coefficients d'une même ligne sont comparés : symétrie." : "Toute une ligne est additionnée : somme d'une ligne.")])),
         );
         break;

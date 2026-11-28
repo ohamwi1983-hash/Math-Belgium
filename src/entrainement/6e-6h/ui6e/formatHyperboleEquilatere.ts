@@ -83,17 +83,17 @@ export const recap137 = reponse137;
 export function aide1_137(_e: E, p: Ph): AideEcran {
   switch (p) {
     case "c":
-      return { texte: [t("Cours, § 1 : pour une hyperbole, "), l("c^2=a^2+b^2"), t(" ; une hyperbole équilatère a b = a.")] };
+      return { texte: [t("Cours, point 1 : pour une hyperbole, "), l("c^2=a^2+b^2"), t(" ; une hyperbole équilatère a b = a.")] };
     case "k":
-      return { texte: [t("Cours, § 1 : dans le repère de ses asymptotes, l'hyperbole équilatère "), l("x^2-y^2=a^2"), t(" a pour équation :")], latex: "XY=\\dfrac{a^2}{2}" };
+      return { texte: [t("Cours, point 1 : dans le repère de ses asymptotes, l'hyperbole équilatère "), l("x^2-y^2=a^2"), t(" a pour équation :")], latex: "XY=\\dfrac{a^2}{2}" };
     case "sommetsXY":
-      return { texte: [t("Cours, § 1 : les sommets sont sur l'axe de symétrie, qui est la bissectrice des asymptotes : leurs deux coordonnées (X ; Y) sont égales, et vérifient "), l("XY=k"), t(".")] };
+      return { texte: [t("Cours, point 1 : les sommets sont sur l'axe de symétrie, qui est la bissectrice des asymptotes : leurs deux coordonnées (X ; Y) sont égales, et vérifient "), l("XY=k"), t(".")] };
     case "a2":
-      return { texte: [t("Cours, § 1 : les deux formes "), l("X^2-Y^2=a^2"), t(" et "), l("xy=k"), t(" décrivent la même hyperbole équilatère, avec :")], latex: "k=\\dfrac{a^2}{2}" };
+      return { texte: [t("Cours, point 1 : les deux formes "), l("X^2-Y^2=a^2"), t(" et "), l("xy=k"), t(" décrivent la même hyperbole équilatère, avec :")], latex: "k=\\dfrac{a^2}{2}" };
     case "sommets":
-      return { texte: [t("Cours, § 1 : les sommets de "), l("xy=k"), t(" sont sur l'axe de symétrie y = x : remplace y par x dans l'équation.")] };
+      return { texte: [t("Cours, point 1 : les sommets de "), l("xy=k"), t(" sont sur l'axe de symétrie y = x : remplace y par x dans l'équation.")] };
     case "foyers":
-      return { texte: [t("Cours, § 1 : les foyers sont sur la droite y = x, à la distance "), l("c=a\\sqrt{2}"), t(" du centre O.")] };
+      return { texte: [t("Cours, point 1 : les foyers sont sur la droite y = x, à la distance "), l("c=a\\sqrt{2}"), t(" du centre O.")] };
   }
 }
 

@@ -197,14 +197,14 @@ function casPossibles(e: E): string {
 export function aide1(e: E, p: P): AideEcran {
   const n = noms(e);
   if (p === "strategie") return { texte: [t("Lis la condition : « au moins », « au plus » ou « exactement ». Pour chaque stratégie, combien de nombres faudrait-il calculer ? Et un même "), t(`${n.groupe} risque-t-il d'être compté plusieurs fois ?`)] };
-  if (p === "termes") return { texte: [t("Combinaisons (cours, § 1) : l'ordre ne compte pas et il n'y a pas de répétition, donc on choisit "), l("p"), t(" éléments parmi "), l("n"), t(" de "), l("C_n^p"), t(" façons (principe de multiplication si l'on choisit en deux temps).")] };
+  if (p === "termes") return { texte: [t("Combinaisons (cours, point 1) : l'ordre ne compte pas et il n'y a pas de répétition, donc on choisit "), l("p"), t(" éléments parmi "), l("n"), t(" de "), l("C_n^p"), t(" façons (principe de multiplication si l'on choisit en deux temps).")] };
   switch (strategieJuste(e)) {
     case "complement":
-      return { texte: [t("Événement contraire (cours, § 2) : « au moins un » est le contraire de « aucun ». Le nombre cherché est donc le nombre total moins le nombre de groupes sans aucun élément de cette sorte.")] };
+      return { texte: [t("Événement contraire (cours, point 2) : « au moins un » est le contraire de « aucun ». Le nombre cherché est donc le nombre total moins le nombre de groupes sans aucun élément de cette sorte.")] };
     case "somme":
-      return { texte: [t("Des cas qui ne se chevauchent pas s'additionnent (principe d'addition, cours, § 2) : « au plus un » = « aucun » ou « exactement un ».")] };
+      return { texte: [t("Des cas qui ne se chevauchent pas s'additionnent (principe d'addition, cours, point 2) : « au plus un » = « aucun » ou « exactement un ».")] };
     default:
-      return { texte: [t("Principe de multiplication (cours, § 1) : un choix en deux temps indépendants se compte par un produit.")] };
+      return { texte: [t("Principe de multiplication (cours, point 1) : un choix en deux temps indépendants se compte par un produit.")] };
   }
 }
 

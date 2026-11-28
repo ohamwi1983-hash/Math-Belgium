@@ -17,8 +17,8 @@ import { POINTS_REMARQUABLES } from "./familleA";
  */
 
 const LETTRES = "abcdefghij";
-const COURS = "(cours, § 4)";
-const COURS_MOIVRE = "(cours, § 5)";
+const COURS = "(cours, point 4)";
+const COURS_MOIVRE = "(cours, point 5)";
 
 function point(angle: AngleRemarquable): { cos: ValeurExacte; sin: ValeurExacte } {
   const p = POINTS_REMARQUABLES.find((pt) => pt.angle.p === angle.p && pt.angle.q === angle.q);

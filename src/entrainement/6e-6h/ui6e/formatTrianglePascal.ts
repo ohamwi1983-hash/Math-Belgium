@@ -18,7 +18,7 @@ const l = lx;
 
 export { phases102 };
 
-const COURS = "(cours, § 3)";
+const COURS = "(cours, point 3)";
 
 /** Figure : ligne n complète, ligne n + 1 avec « ? » en k et en n + 1 − k (énoncé « ligne »). */
 export function figurePascal(e: E, complete = false): string | null {

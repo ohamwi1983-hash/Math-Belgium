@@ -132,7 +132,7 @@ function bornesAuDenominateur(e: ExerciceArcTrig): string {
 
 export function aide1(e: E, phase: PhaseIdentites): AideEcran {
   if (e.variante === "arcTrig") {
-    if (phase === "verdict") return { texte: [t(`${NOM_ARC[e.fn]} ne renvoie que des angles de son image (cours, § 2) :`)], latex: IMAGE_L[e.fn] };
+    if (phase === "verdict") return { texte: [t(`${NOM_ARC[e.fn]} ne renvoie que des angles de son image (cours, point 2) :`)], latex: IMAGE_L[e.fn] };
     return { texte: [l("A"), t(` est l'angle de l'image de ${NOM_ARC[e.fn]} qui a le même ${e.fn === "sin" ? "sinus" : e.fn === "cos" ? "cosinus" : "tangente"} que `), l("\\theta"), t(" :")], latex: `\\arc${e.fn}(\\${e.fn}\\theta)=\\varphi\\iff\\varphi\\in ${IMAGE_L[e.fn]}\\ \\text{et}\\ \\${e.fn}\\varphi=\\${e.fn}\\theta` };
   }
   if (e.variante === "trigArc") {

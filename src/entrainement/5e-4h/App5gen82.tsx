@@ -92,7 +92,7 @@ export function App5gen82() {
                 {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max
                   ? `${ETENDUE_QUESTIONS.max} affirmations`
                   : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max} affirmations`}{" "}
-                vrai/faux chacun, un par section du cours — révision complète du chapitre.
+                vrai/faux chacun, un par point du cours — révision complète du chapitre.
               </p>
               <div className="accueil-choix">
                 {CATALOGUE_VARIANTES.map((variante, index) => (

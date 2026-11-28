@@ -38,7 +38,7 @@ function etapeA(e: E): EtapeCorrection[] {
   if (e.trou) L.push(ligne(`x\\neq ${e.trou.x}`, `point creux ${pt(e.trou.x, e.trou.y)} à l'intérieur de la courbe${e.deplace ? "" : " : cette abscisse est retirée"}`));
   if (e.deplace) L.push(ligne(`f(${e.deplace.x})=${e.deplace.y}`, `point plein isolé ${pt(e.deplace.x, e.deplace.y)} : l'abscisse ${nb(e.deplace.x)} reste dans le domaine`));
   return [
-    utilise("a", [t("Le domaine se lit en projetant la courbe sur l'axe des x (cours, § 1) : un point plein est compris (crochet fermé), un point creux exclu (crochet ouvert), une flèche va jusqu'à l'infini (crochet ouvert).")]),
+    utilise("a", [t("Le domaine se lit en projetant la courbe sur l'axe des x (cours, point 1) : un point plein est compris (crochet fermé), un point creux exclu (crochet ouvert), une flèche va jusqu'à l'infini (crochet ouvert).")]),
     calcul("a", L),
     resultat("a", reponse(e, "domaine")),
     piege("a", e.trou && !e.deplace ? [t("Oublier le point creux à l'intérieur de la courbe : son abscisse n'a pas d'image.")] : e.morceaux.length > 1 ? [t("Relier les deux morceaux : la courbe s'interrompt, le domaine est une réunion.")] : [t("Lire le domaine sur l'axe des y, ou mettre un crochet fermé à un point creux.")]),

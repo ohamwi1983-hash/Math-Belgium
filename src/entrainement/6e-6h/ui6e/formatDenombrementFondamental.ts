@@ -128,7 +128,7 @@ function champsA(e: ExerciceDenombrementA, i: number): ChampCombi[] {
   }
 }
 
-const AIDE_PRINCIPE: AideCombi = { texte: "Principe multiplicatif (cours, § 1) : on multiplie les nombres de choix de chaque case, en commençant par la case la plus contrainte ; un chiffre placé n'est plus disponible pour les cases suivantes." };
+const AIDE_PRINCIPE: AideCombi = { texte: "Principe multiplicatif (cours, point 1) : on multiplie les nombres de choix de chaque case, en commençant par la case la plus contrainte ; un chiffre placé n'est plus disponible pour les cases suivantes." };
 
 function aidesA(e: ExerciceDenombrementA, i: number): AideCombi[] {
   const nb = e.chiffres.length;

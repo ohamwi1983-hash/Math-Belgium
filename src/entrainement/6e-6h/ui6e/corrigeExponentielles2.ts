@@ -23,12 +23,12 @@ export type { Q } from "./corrigeIntegrales1";
 export { q, qAdd, qDiv, qL, qMul, qNeg, qSub, qVal, qPow } from "./corrigeIntegrales1";
 
 /** Renvois aux sections du chapitre « Fonctions exponentielles » (numéros `number` du contenu). */
-export const COURS_LIMITES = "(cours, § 1)";
-export const COURS_DERIVEE = "(cours, § 2)";
-export const COURS_EQUATIONS = "(cours, § 4)";
-export const COURS_INEQUATIONS = "(cours, § 5)";
-export const COURS_ETUDE = "(cours, § 6)";
-export const COURS_PROBLEMES = "(cours, § 7)";
+export const COURS_LIMITES = "(cours, point 1)";
+export const COURS_DERIVEE = "(cours, point 2)";
+export const COURS_EQUATIONS = "(cours, point 4)";
+export const COURS_INEQUATIONS = "(cours, point 5)";
+export const COURS_ETUDE = "(cours, point 6)";
+export const COURS_PROBLEMES = "(cours, point 7)";
 
 /** Finition des corrigés du chapitre : celle du chapitre jumeau (fractions lisibles dans les calculs
  * et résultats, justifications insécables), plus des fractions lisibles dans TOUTES les formules

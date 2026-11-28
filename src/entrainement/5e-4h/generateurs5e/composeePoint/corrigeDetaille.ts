@@ -46,7 +46,7 @@ function etapeA(e: E): EtapeCorrection[] {
   const ex = nomExt(e);
   const it = nomInt(e);
   return [
-    utilise("a", [f(`(${ex}\\circ ${it})(a)=${ex}\\big(${it}(a)\\big)`), t(" : on lit de droite à gauche, "), f(it), t(" s'applique d'abord (cours, § 2).")]),
+    utilise("a", [f(`(${ex}\\circ ${it})(a)=${ex}\\big(${it}(a)\\big)`), t(" : on lit de droite à gauche, "), f(it), t(" s'applique d'abord (cours, point 2).")]),
     calcul("a", lignesInterieure(e)),
     resultat("a", reponse(e, "inter")),
     piege("a", [t("Calculer "), f(`${ex}(${e.a})`), t(" en premier : dans "), f(composeeL(e)), t(", c'est "), f(it), t(" qui reçoit "), f(`${e.a}`), t(".")]),
@@ -78,10 +78,10 @@ function etapeB(e: E): EtapeCorrection[] {
   const r = radicande(ext, e.m);
   const regle =
     ext.genre === "racine"
-      ? [t("Une racine carrée n'existe que si le nombre sous la racine est positif ou nul (cours, § 1).")]
+      ? [t("Une racine carrée n'existe que si le nombre sous la racine est positif ou nul (cours, point 1).")]
       : ext.genre === "inverse"
-        ? [t("Une fraction n'existe que si son dénominateur n'est pas nul (cours, § 1).")]
-        : [t("Racine au dénominateur : le nombre sous la racine doit être positif ou nul et la racine non nulle, donc strictement positif (cours, § 1).")];
+        ? [t("Une fraction n'existe que si son dénominateur n'est pas nul (cours, point 1).")]
+        : [t("Racine au dénominateur : le nombre sous la racine doit être positif ou nul et la racine non nulle, donc strictement positif (cours, point 1).")];
   const brut = radicandeSubstitueL(e);
   // Substitution sans opération (√x, c/x : « 5 ») : pas de « 5 = 5 ».
   const direct = brut === `${r}` || brut === `(${r})`;

@@ -88,7 +88,7 @@ export function optionsBranche(): OptionEcran[] {
 export function aide1(e: E, p: PhaseLO): AideEcran {
   if (p === "difference") return { texte: [t("Pendant le retard, le signal le plus lent parcourt la distance supplémentaire : distance = vitesse × durée. Attention aux unités (1 µs = 10⁻⁶ s).")] };
   if (p === "branche") return { texte: [t("Le signal qui arrive le premier vient de l'émetteur le plus proche du navire.")] };
-  if (p === "equation") return { texte: [t("Hyperbole de foyers "), l("(\\pm c\\,;0)"), t(" (cours, § 1) : "), l("|PF-PF'|=2a"), t(" et :")], latex: "\\dfrac{x^2}{a^2}-\\dfrac{y^2}{b^2}=1,\\quad b^2=c^2-a^2" };
+  if (p === "equation") return { texte: [t("Hyperbole de foyers "), l("(\\pm c\\,;0)"), t(" (cours, point 1) : "), l("|PF-PF'|=2a"), t(" et :")], latex: "\\dfrac{x^2}{a^2}-\\dfrac{y^2}{b^2}=1,\\quad b^2=c^2-a^2" };
   return { texte: [t("Remplace "), l(e.variante === "parallele" ? "y" : "x"), t(" par "), l(nL(e.route)), t(" dans l'équation de l'hyperbole, puis garde les points de la bonne branche.")] };
 }
 

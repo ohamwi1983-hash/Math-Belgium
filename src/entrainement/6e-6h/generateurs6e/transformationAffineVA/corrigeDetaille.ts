@@ -54,7 +54,7 @@ export function correctionDetaillee111(e: E): EtapeCorrection[] {
         break;
       case "esperance":
         out.push(
-          utilise(sq, [t("Linéarité de l'espérance (cours, § 1) : "), l("E(aX+b)=a\\,E(X)+b"), t(".")]),
+          utilise(sq, [t("Linéarité de l'espérance (cours, point 1) : "), l("E(aX+b)=a\\,E(X)+b"), t(".")]),
           calcul(sq, [ligne(`E(Y)=${dlp(e.a)}\\times E(X)${b}`, "linéarité"), ligne(`=${dlp(e.a)}\\times ${dlp(e.eX)}${b}`, "on remplace E(X)"), ...(e.b !== 0 ? [ligne(`=${dl(e.a * e.eX)}${b}`)] : []), ligne(`=${dl(eY(e))}`)]),
           resultat(sq, fr(reponse111(e, ph))),
           piege(sq, [t("Oublier b ou oublier a : l'espérance subit exactement la même transformation que les valeurs.")]),
@@ -72,7 +72,7 @@ export function correctionDetaillee111(e: E): EtapeCorrection[] {
                 ligne(`=${dl(vY(e))}`),
               ];
         out.push(
-          utilise(sq, [t("Variance d'une transformation affine (cours, § 1) : "), l("V(aX+b)=a^2\\,V(X)"), t(" — le décalage b ne change pas la dispersion.")]),
+          utilise(sq, [t("Variance d'une transformation affine (cours, point 1) : "), l("V(aX+b)=a^2\\,V(X)"), t(" — le décalage b ne change pas la dispersion.")]),
           calcul(sq, lignes),
           resultat(sq, fr(reponse111(e, ph))),
           piege(sq, [t("Écrire "), l("V(aX+b)=a\\,V(X)+b"), t(" : la variance ne se transforme pas comme l'espérance.")]),
@@ -81,7 +81,7 @@ export function correctionDetaillee111(e: E): EtapeCorrection[] {
       }
       case "ecartType":
         out.push(
-          utilise(sq, [t("Écart-type (cours, § 1) : racine de la variance, "), l("\\sigma(aX+b)=|a|\\,\\sigma(X)"), t(".")]),
+          utilise(sq, [t("Écart-type (cours, point 1) : racine de la variance, "), l("\\sigma(aX+b)=|a|\\,\\sigma(X)"), t(".")]),
           calcul(sq, [
             ...(e.donnee === "variance" ? [ligne(`\\sigma(X)=\\sqrt{${dl(vX(e))}}=${dl(e.sX)}`, "racine de V(X)")] : []),
             ligne(`\\sigma(Y)=|${dl(e.a)}|\\times\\sigma(X)`),

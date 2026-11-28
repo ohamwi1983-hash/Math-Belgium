@@ -25,16 +25,16 @@ function etapeModele(e: E): EtapeCorrection[] {
   let u: ReturnType<typeof t>[];
   switch (e.variante) {
     case "pointRacine":
-      u = [t("Distance de deux points (Pythagore) ; on minimise "), f("AM^2"), t(" : même point optimal que AM, sans racine à dériver (cours, § 8).")];
+      u = [t("Distance de deux points (Pythagore) ; on minimise "), f("AM^2"), t(" : même point optimal que AM, sans racine à dériver (cours, point 8).")];
       L = [ligne(`AM^2=(x${plusL(-d.a)})^2+\\left(${racineKxL(d.k)}-0\\right)^2`, [t("coordonnées de M et de A")]), ligne(`D(x)=${m.fL}`, [f(`\\left(${racineKxL(d.k)}\\right)^2=${d.k === 1 ? "" : d.k}x`)])];
       break;
     case "pointHyperbole":
-      u = [t("Distance de deux points (Pythagore) ; on minimise "), f("OM^2"), t(" : même point optimal que OM, sans racine à dériver (cours, § 8).")];
+      u = [t("Distance de deux points (Pythagore) ; on minimise "), f("OM^2"), t(" : même point optimal que OM, sans racine à dériver (cours, point 8).")];
       L = [ligne(`OM^2=(x-0)^2+\\left(\\dfrac{${d.k}}{x}-0\\right)^2`, "coordonnées de M et de O"), ligne(`D(x)=${m.fL}`, "on élève la fraction au carré")];
       break;
     case "sauveteur": {
       const V = VITESSES[d.s]!;
-      u = [t("Durée = distance ÷ vitesse ; MN par Pythagore dans le triangle MHN rectangle en H (cours, § 8 : une seule variable, x).")];
+      u = [t("Durée = distance ÷ vitesse ; MN par Pythagore dans le triangle MHN rectangle en H (cours, point 8 : une seule variable, x).")];
       L = [
         ligne(`MH=${d.L}-x`, "M est sur [AH]"),
         ligne(`MN=\\sqrt{(${d.L}-x)^2+${d.h}^2}`, "Pythagore dans MHN"),
@@ -44,7 +44,7 @@ function etapeModele(e: E): EtapeCorrection[] {
       break;
     }
     case "cable":
-      u = [t("Chaque morceau du câble est l'hypoténuse d'un triangle rectangle (Pythagore) ; une seule variable, x (cours, § 8).")];
+      u = [t("Chaque morceau du câble est l'hypoténuse d'un triangle rectangle (Pythagore) ; une seule variable, x (cours, point 8).")];
       L = [ligne(`AM=\\sqrt{x^2+${d.a}^2}`, "Pythagore dans AHM"), ligne(`MB=\\sqrt{(${d.L}-x)^2+${d.b}^2}`, "Pythagore dans MKB, MK = HK − x"), ligne(`\\ell(x)=${m.fL}`, "ℓ(x) = AM + MB")];
       break;
   }
@@ -64,16 +64,16 @@ function etapeDerivee(e: E): EtapeCorrection[] {
   let u: ReturnType<typeof t>[];
   switch (e.variante) {
     case "pointRacine":
-      u = [t("Dérivée terme à terme (cours, § 3).")];
+      u = [t("Dérivée terme à terme (cours, point 3).")];
       L = [ligne(`D'(x)=2(x${plusL(-d.a)})+${d.k}`, [f("\\left((x-a)^2\\right)'=2(x-a)")]), ligne(`=${m.fpL}`, "on développe et on réduit")];
       break;
     case "pointHyperbole":
-      u = [t("Dérivée terme à terme, avec "), f("\\left(\\dfrac{1}{x^2}\\right)'=-\\dfrac{2}{x^3}"), t(" (cours, § 3).")];
+      u = [t("Dérivée terme à terme, avec "), f("\\left(\\dfrac{1}{x^2}\\right)'=-\\dfrac{2}{x^3}"), t(" (cours, point 3).")];
       L = [ligne(`D'(x)=2x+${d.k * d.k}\\cdot\\left(-\\dfrac{2}{x^3}\\right)`, "constante en facteur"), ligne(`=${m.fpL}`, "on réduit")];
       break;
     case "sauveteur": {
       const V = VITESSES[d.s]!;
-      u = [t("Règle de la chaîne pour la racine : "), f("\\left(\\sqrt{v}\\right)'=\\dfrac{v'}{2\\sqrt{v}}"), t(" (cours, § 3).")];
+      u = [t("Règle de la chaîne pour la racine : "), f("\\left(\\sqrt{v}\\right)'=\\dfrac{v'}{2\\sqrt{v}}"), t(" (cours, point 3).")];
       L = [
         ligne(`v=(${d.L}-x)^2+${d.h}^2`, "sous la racine"),
         ligne(`v'=-2(${d.L}-x)`, [t("dérivée de "), f(`(${d.L}-x)^2`), t(" : facteur −1")]),
@@ -83,7 +83,7 @@ function etapeDerivee(e: E): EtapeCorrection[] {
       break;
     }
     case "cable":
-      u = [t("Règle de la chaîne pour chaque racine : "), f("\\left(\\sqrt{u}\\right)'=\\dfrac{u'}{2\\sqrt{u}}"), t(" (cours, § 3).")];
+      u = [t("Règle de la chaîne pour chaque racine : "), f("\\left(\\sqrt{u}\\right)'=\\dfrac{u'}{2\\sqrt{u}}"), t(" (cours, point 3).")];
       L = [
         ligne(`\\left(\\sqrt{x^2+${d.a}^2}\\right)'=\\dfrac{x}{\\sqrt{x^2+${d.a}^2}}`, [f("u'=2x")]),
         ligne(`\\left(\\sqrt{(${d.L}-x)^2+${d.b}^2}\\right)'=-\\dfrac{${d.L}-x}{\\sqrt{(${d.L}-x)^2+${d.b}^2}}`, [f(`u'=-2(${d.L}-x)`)]),
@@ -149,7 +149,7 @@ function etapeCritique(e: E): EtapeCorrection[] {
         : e.variante === "cable"
           ? [t("Échanger a et b : x = HM vérifie "), f("\\dfrac{x}{a}=\\dfrac{L-x}{b}"), t(".")]
           : [t("Se tromper de signe en isolant x.")];
-  return [utilise("c", [t("Un extremum à l'intérieur du domaine annule la dérivée : on résout l'équation, une transformation par ligne (cours, § 5).")]), calcul("c", L), resultat("c", reponse(e, "critique")), piege("c", pg)];
+  return [utilise("c", [t("Un extremum à l'intérieur du domaine annule la dérivée : on résout l'équation, une transformation par ligne (cours, point 5).")]), calcul("c", L), resultat("c", reponse(e, "critique")), piege("c", pg)];
 }
 
 function etapeSigne(e: E): EtapeCorrection[] {
@@ -187,7 +187,7 @@ function etapeSigne(e: E): EtapeCorrection[] {
       break;
   }
   return [
-    utilise("d", [t("On étudie le signe de "), f(`${N}'`), t(" sur le domaine réaliste "), f(m.domaineL), t(" : un zéro hors du domaine ne compte pas (cours, § 8).")]),
+    utilise("d", [t("On étudie le signe de "), f(`${N}'`), t(" sur le domaine réaliste "), f(m.domaineL), t(" : un zéro hors du domaine ne compte pas (cours, point 8).")]),
     calcul("d", L),
     resultat("d", reponse(e, "signe")),
     piege("d", [t("Conclure au minimum en "), f("x_0"), t(" sans vérifier que "), f("x_0"), t(" est dans le domaine ni que la dérivée y change de signe.")]),
@@ -253,7 +253,7 @@ function etapeOptimum(e: E): EtapeCorrection[] {
         ? [t("Oublier de comparer aux bornes : ici ℓ(0) et ℓ(L) sont plus grands.")]
         : [t("Donner la valeur de D (le carré de la distance) pour la distance.")];
   return [
-    utilise("e", [t("Le minimum est atteint là où la dérivée passe de − à + dans le domaine, sinon à une borne ; on calcule la valeur minimale puis on la compare aux bornes (cours, § 8).")]),
+    utilise("e", [t("Le minimum est atteint là où la dérivée passe de − à + dans le domaine, sinon à une borne ; on calcule la valeur minimale puis on la compare aux bornes (cours, point 8).")]),
     calcul("e", L),
     resultat("e", reponse(e, "optimum")),
     verification("e", [t("Comparaison avec les bornes du domaine :")], verif),

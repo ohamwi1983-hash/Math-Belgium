@@ -94,9 +94,9 @@ export function champs(e: E, phase: PhaseArchimede): ChampEcran[] {
 export function aide1(_e: E, phase: PhaseArchimede): AideEcran {
   switch (phase) {
     case "angle":
-      return { texte: [tx("Le polygone découpe le cercle en "), lx("n"), tx(" triangles isocèles de même angle au centre ; la hauteur [CH] partage cet angle en deux (cours, § 1) :")], latex: "\\text{angle au centre}=\\dfrac{360^\\circ}{n}" };
+      return { texte: [tx("Le polygone découpe le cercle en "), lx("n"), tx(" triangles isocèles de même angle au centre ; la hauteur [CH] partage cet angle en deux (cours, point 1) :")], latex: "\\text{angle au centre}=\\dfrac{360^\\circ}{n}" };
     case "cotes":
-      return { texte: [tx("Dans le triangle rectangle CHB, [HB] est le côté opposé à "), lx("\\alpha"), tx(" ; dans le triangle rectangle CFD, [FD] aussi. Chaque côté vaut le double (cours, § 1) :")], latex: "|AB|=2r\\sin\\alpha\\qquad |DE|=2r\\tan\\alpha" };
+      return { texte: [tx("Dans le triangle rectangle CHB, [HB] est le côté opposé à "), lx("\\alpha"), tx(" ; dans le triangle rectangle CFD, [FD] aussi. Chaque côté vaut le double (cours, point 1) :")], latex: "|AB|=2r\\sin\\alpha\\qquad |DE|=2r\\tan\\alpha" };
     case "encadrement":
       return { texte: [tx("Le périmètre du cercle est entre les périmètres des deux polygones ; divise tout par "), lx("2r"), tx(" :")], latex: "n\\cdot 2r\\sin\\alpha\\leq 2\\pi r\\leq n\\cdot 2r\\tan\\alpha" };
     case "doublement":

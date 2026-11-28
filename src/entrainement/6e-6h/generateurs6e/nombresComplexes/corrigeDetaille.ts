@@ -17,7 +17,7 @@ import { type Fraction, cq, cz, lignesCarre, lignesDivisionConjugue, lignesProdu
 
 type Exo<F extends ExerciceNombresComplexes["famille"]> = Extract<ExerciceNombresComplexes, { famille: F }>;
 
-const COURS = "(cours, § 1)";
+const COURS = "(cours, point 1)";
 
 function attendu(e: ExerciceNombresComplexes, i: number): string {
   return formatReponseAttenduePhaseLatex(e, phasesPourExercice(e)[i]).join(",\\ ");

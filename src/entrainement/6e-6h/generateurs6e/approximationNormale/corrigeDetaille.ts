@@ -69,7 +69,7 @@ function clocheAN(e: E): string {
 
 export function correctionDetailleeAN(e: E): EtapeCorrection[] {
   const etapes: EtapeCorrection[] = [
-    utilise("a", [t("Conditions du cours (§ 7, une convention) pour approcher "), f("\\mathcal{B}(n\\,;p)"), t(" par une loi normale : "), f("n>30"), t(" et "), f("0{,}3<p<0{,}7"), t(", inégalités strictes.")]),
+    utilise("a", [t("Conditions du cours (point 7, une convention) pour approcher "), f("\\mathcal{B}(n\\,;p)"), t(" par une loi normale : "), f("n>30"), t(" et "), f("0{,}3<p<0{,}7"), t(", inégalités strictes.")]),
     calcul("a", lignesConditions(e)),
     resultat("a", fr(reponse(e, "verdict"))),
   ];
@@ -78,7 +78,7 @@ export function correctionDetailleeAN(e: E): EtapeCorrection[] {
       utilise("b", [t("Les deux conditions doivent être remplies en même temps.")]),
       { label: "Raisonnement", sousQuestion: "b", fragments: e.echec === "n" ? [t("Une seule condition suffit à empêcher l'approximation : ici "), f(`n=${e.n}`), t(" n'est pas strictement supérieur à 30.")] : [t("Une seule condition suffit à empêcher l'approximation : ici "), f(`p=${pL(e)}`), t(" n'est pas dans "), f("]0{,}3\\,;0{,}7["), t(".")] },
       resultat("b", fr(reponse(e, "condition"))),
-      utilise("c", [t("On calcule alors avec la loi binomiale elle-même (cours, § 2) : "), f("P(X=i)=C_n^i\\,p^i(1-p)^{n-i}"), t(".")]),
+      utilise("c", [t("On calcule alors avec la loi binomiale elle-même (cours, point 2) : "), f("P(X=i)=C_n^i\\,p^i(1-p)^{n-i}"), t(".")]),
       calcul("c", lignesExactes(e)),
       resultat("c", fr(reponse(e, "exacte"))),
       verification("c", [t("C'est bien une probabilité :")], [ligne(`0\\le ${p4L(Math.round(probaExacte(e) * 1e4) / 1e4)}\\le 1`)]),
@@ -103,7 +103,7 @@ export function correctionDetailleeAN(e: E): EtapeCorrection[] {
     utilise("b", [t("La loi normale qui approche "), f("\\mathcal{B}(n\\,;p)"), t(" a la même espérance et le même écart-type : "), f("\\mu=np"), t(", "), f("\\sigma=\\sqrt{np(1-p)}"), t(".")]),
     calcul("b", [ligne(`\\mu=${e.n}\\times ${pL(e)}=${nL(mu(e))}`), ligne(`\\sigma=\\sqrt{${e.n}\\times ${pL(e)}\\times ${nL(1 - pDe(e))}}=\\sqrt{${nL(sigma2(e))}}`), ...(Math.abs(s * 100 - Math.round(s * 100)) < 1e-9 ? [ligne(`=${nL(s)}`)] : [ligne(`\\approx ${nL(sR, 2)}`, "au centième")])]),
     resultat("b", fr(reponse(e, "parametres"))),
-    utilise("c", [t("Correction de continuité (cours, § 7) : la valeur entière "), f("k"), t(" de "), f("X"), t(" est représentée par l'intervalle "), f("[k-0{,}5\\,;k+0{,}5]"), t(" de "), f("Y"), t(".")]),
+    utilise("c", [t("Correction de continuité (cours, point 7) : la valeur entière "), f("k"), t(" de "), f("X"), t(" est représentée par l'intervalle "), f("[k-0{,}5\\,;k+0{,}5]"), t(" de "), f("Y"), t(".")]),
     calcul("c", lignesBornes(e)),
     resultat("c", fr(reponse(e, "bornes"))),
     utilise("d", [f("Z=\\dfrac{Y-\\mu}{\\sigma}"), t(" suit "), f("\\mathcal{N}(0\\,;1)"), t(" ; "), f("z"), t(" au centième pour lire la table.")]),

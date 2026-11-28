@@ -25,7 +25,7 @@ function blocA(e: E): { u: FragmentConsigne[]; lignes: LigneCalcul[] } {
       const L2 = e.L * e.L;
       const [x, y] = coordonneesL(e);
       return {
-        u: [ft("Pythagore dans le triangle "), L("OAB"), ft(", rectangle en "), L("O"), ft(" ; coordonnées du milieu (cours, § 1).")],
+        u: [ft("Pythagore dans le triangle "), L("OAB"), ft(", rectangle en "), L("O"), ft(" ; coordonnées du milieu (cours, point 1).")],
         lignes: [ligne(`OB^2=AB^2-OA^2=${L2}-a^2`, [L("A(a\\,;0)"), ft(", "), L(`AB=${e.L}`)]), ligne(`B\\left(0\\,;\\sqrt{${L2}-a^2}\\right)`, "B sur le mur"), ligne(`x_M=\\dfrac{a+0}{2}=${x}`, "milieu de [AB]"), ligne(`y_M=\\dfrac{0+\\sqrt{${L2}-a^2}}{2}=${y}`)],
       };
     }
@@ -34,7 +34,7 @@ function blocA(e: E): { u: FragmentConsigne[]; lignes: LigneCalcul[] } {
       const cx = affineTL(e.C0.x, e.u.x);
       const cy = affineTL(e.C0.y, e.u.y);
       return {
-        u: [ft("Le centre de gravité est la moyenne des trois sommets : "), L("G=\\dfrac{A+B+C}{3}"), ft(" (cours, § 1).")],
+        u: [ft("Le centre de gravité est la moyenne des trois sommets : "), L("G=\\dfrac{A+B+C}{3}"), ft(" (cours, point 1).")],
         lignes: [ligne(`x_G=\\dfrac{${nL(e.A.x)}${e.B.x < 0 ? "" : "+"}${nL(e.B.x)}+(${cx})}{3}=${x}`), ligne(`y_G=\\dfrac{${nL(e.A.y)}${e.B.y < 0 ? "" : "+"}${nL(e.B.y)}+(${cy})}{3}=${y}`)],
       };
     }
@@ -45,7 +45,7 @@ function blocA(e: E): { u: FragmentConsigne[]; lignes: LigneCalcul[] } {
       };
     case "pied":
       return {
-        u: [ft("La barre a pour vecteur directeur "), L("(1\\,;m)"), ft(" : c'est un vecteur normal de la perpendiculaire passant par "), L("P"), ft(" (cours, § 1).")],
+        u: [ft("La barre a pour vecteur directeur "), L("(1\\,;m)"), ft(" : c'est un vecteur normal de la perpendiculaire passant par "), L("P"), ft(" (cours, point 1).")],
         lignes: [ligne(`1\\cdot ${par("x", e.P.x)}+m\\cdot ${par("y", e.P.y)}=0`, "vecteur normal (1 ; m)"), ligne(generatriceL(e))],
       };
   }
@@ -122,10 +122,10 @@ export function correctionDetailleeLC(e: E): EtapeCorrection[] {
     utilise("a", a.u),
     calcul("a", a.lignes),
     resultat("a", e.variante === "echelle" || e.variante === "gravite" ? [L(`x_{${e.variante === "echelle" ? "M" : "G"}}=${coordonneesL(e)[0]}`), ft(" et "), L(`y_{${e.variante === "echelle" ? "M" : "G"}}=${coordonneesL(e)[1]}`), ft(".")] : [L(generatriceL(e)), ft(".")]),
-    utilise("b", e.variante === "radars" || e.variante === "pied" ? [ft("Méthode des génératrices (cours, § 5) : on tire "), L("m"), ft(" de la première et on le remplace dans la seconde.")] : [ft("On élimine le paramètre entre les deux coordonnées (cours, § 5 et § 6).")]),
+    utilise("b", e.variante === "radars" || e.variante === "pied" ? [ft("Méthode des génératrices (cours, point 5) : on tire "), L("m"), ft(" de la première et on le remplace dans la seconde.")] : [ft("On élimine le paramètre entre les deux coordonnées (cours, points 5 et 6).")]),
     calcul("b", blocB(e)),
     resultat("b", [L(equationLieuL(e)), ft(" : "), ...fr(natureLieu(e)), ft(".")]),
-    utilise("c", [ft("Le contexte impose la restriction : on cherche les positions réellement possibles (cours, § 5).")]),
+    utilise("c", [ft("Le contexte impose la restriction : on cherche les positions réellement possibles (cours, point 5).")]),
     calcul("c", [], blocC(e), "Raisonnement"),
     resultat("c", [ft(NATURES[nature(e)]), ft(".")]),
     { ...resultat("d", [ft(exclu ? "Point exclu : " : ext.length === 2 && nature(e) === "arcOuvert" ? "Extrémités (exclues) : " : "Extrémités : "), L(listeL(ext)), ft(".")]), figureHtml: figureLC(e, true, true) },

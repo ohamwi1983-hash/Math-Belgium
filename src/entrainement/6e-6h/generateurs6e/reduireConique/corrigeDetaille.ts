@@ -72,7 +72,7 @@ export function correctionDetaillee134(e: E): EtapeCorrection[] {
     switch (ph) {
       case "centre":
         out.push(
-          utilise(sq, [t("Réduction par translation (cours, § 2) : on complète les carrés, en ajoutant la même quantité aux deux membres.")]),
+          utilise(sq, [t("Réduction par translation (cours, point 2) : on complète les carrés, en ajoutant la même quantité aux deux membres.")]),
           calcul(sq, lignesCompletion(e)),
           res,
           piege(sq, [t("Oublier de mettre le coefficient du carré en évidence, ou se tromper de signe : "), l("(x+2)^2"), t(" donne h = −2.")]),
@@ -89,16 +89,16 @@ export function correctionDetaillee134(e: E): EtapeCorrection[] {
           lignes.push(ligne(`${C.axe === "x" ? "y'^2" : "x'^2"}=${nb(2 * C.sens * C.p)}${C.axe === "x" ? "x'" : "y'"}`, e.m === 1 ? "x − h = x′, y − k = y′" : `on divise par ${e.m}, puis x − h = x′, y − k = y′`));
         }
         lignes.push(ligne(equationReduiteL(C, true), "forme réduite"));
-        out.push(utilise(sq, [t("Changement de repère (cours, § 2) : origine en Ω, "), l(`x'=${facteurL("x", C.h).replace(/^\(|\)$/g, "")}`), t(" et "), l(`y'=${facteurL("y", C.k).replace(/^\(|\)$/g, "")}`), t(".")]), calcul(sq, lignes), res);
+        out.push(utilise(sq, [t("Changement de repère (cours, point 2) : origine en Ω, "), l(`x'=${facteurL("x", C.h).replace(/^\(|\)$/g, "")}`), t(" et "), l(`y'=${facteurL("y", C.k).replace(/^\(|\)$/g, "")}`), t(".")]), calcul(sq, lignes), res);
         if (C.nature === "hyperbole") out.push(piege(sq, [t("Diviser par un second membre négatif sans inverser les deux signes : l'axe focal serait faux.")]));
         break;
       }
       case "nature":
-        out.push(utilise(sq, [t("Reconnaître une conique sur l'équation réduite (cours, § 1).")]), res);
+        out.push(utilise(sq, [t("Reconnaître une conique sur l'équation réduite (cours, point 1).")]), res);
         break;
       case "sommets":
         out.push(
-          utilise(sq, [t("Sommets (cours, § 1) calculés dans le repère translaté, puis "), l(trans), t(".")]),
+          utilise(sq, [t("Sommets (cours, point 1) calculés dans le repère translaté, puis "), l(trans), t(".")]),
           calcul(sq, [ligne(`a=${exL(aEx(C))}${C.nature === "ellipse" ? `,\\ b=${exL(bEx(C))}` : ""}`), ligne(C.axe === "x" ? `(\\pm a\\,;0)${C.nature === "ellipse" ? "\\ \\text{et}\\ (0\\,;\\pm b)" : ""}` : `(0\\,;\\pm a)${C.nature === "ellipse" ? "\\ \\text{et}\\ (\\pm b\\,;0)" : ""}`, "dans le repère translaté")]),
           res,
         );
@@ -106,7 +106,7 @@ export function correctionDetaillee134(e: E): EtapeCorrection[] {
       case "foyers": {
         const ell = C.nature === "ellipse";
         out.push(
-          utilise(sq, [t("Foyers (cours, § 1) : "), l(ell ? "c^2=a^2-b^2" : "c^2=a^2+b^2"), t(", sur l'axe focal, puis "), l(trans), t(".")]),
+          utilise(sq, [t("Foyers (cours, point 1) : "), l(ell ? "c^2=a^2-b^2" : "c^2=a^2+b^2"), t(", sur l'axe focal, puis "), l(trans), t(".")]),
           calcul(sq, [ligne(`c^2=${nb(C.a2)}${ell ? "-" : "+"}${nb(C.b2)}=${nb(c2(C))}`), ligne(`c=${exL(cEx(C))}`)]),
           res,
         );
@@ -115,7 +115,7 @@ export function correctionDetaillee134(e: E): EtapeCorrection[] {
       case "directrices": {
         const c = cEx(C);
         out.push(
-          utilise(sq, [t("Directrices (cours, § 2) : perpendiculaires à l'axe focal, à la distance "), l("\\dfrac{a^2}{c}"), t(" du centre.")]),
+          utilise(sq, [t("Directrices (cours, point 2) : perpendiculaires à l'axe focal, à la distance "), l("\\dfrac{a^2}{c}"), t(" du centre.")]),
           calcul(sq, [ligne(`\\dfrac{a^2}{c}=\\dfrac{${nb(C.a2)}}{${exL(c)}}=${nb(C.a2 / (c.q + c.r * Math.sqrt(c.n)))}`), ligne(`${C.axe === "x" ? "x'" : "y'"}=\\pm\\dfrac{a^2}{c}`, "dans le repère translaté")]),
           res,
           verification(sq, [t("Les directrices sont au-delà des sommets ("), l("\\dfrac{a^2}{c}>a"), t(" car c < a).")]),
@@ -124,7 +124,7 @@ export function correctionDetaillee134(e: E): EtapeCorrection[] {
       }
       case "asymptotes":
         out.push(
-          utilise(sq, [t("Asymptotes (cours, § 1) : "), l(C.axe === "x" ? "y'=\\pm\\dfrac{b}{a}x'" : "y'=\\pm\\dfrac{a}{b}x'"), t(" dans le repère translaté ; elles passent par Ω.")]),
+          utilise(sq, [t("Asymptotes (cours, point 1) : "), l(C.axe === "x" ? "y'=\\pm\\dfrac{b}{a}x'" : "y'=\\pm\\dfrac{a}{b}x'"), t(" dans le repère translaté ; elles passent par Ω.")]),
           calcul(sq, [ligne(`y'=\\pm\\dfrac{${exL(C.axe === "x" ? bEx(C) : aEx(C))}}{${exL(C.axe === "x" ? aEx(C) : bEx(C))}}\\,x'=\\pm ${coefL(penteAsymptote(C))}x'`), ligne(`${facteurL("y", C.k)}=\\pm ${coefL(penteAsymptote(C))}${facteurL("x", C.h)}`, "on revient au repère initial")]),
           res,
           piege(sq, [t("Garder les asymptotes du repère translaté, qui passent par l'origine au lieu du centre Ω.")]),
@@ -132,7 +132,7 @@ export function correctionDetaillee134(e: E): EtapeCorrection[] {
         break;
       case "parametre":
         out.push(
-          utilise(sq, [t("Parabole (cours, § 1) : dans "), l("y'^2=2p\\,x'"), t(", le coefficient vaut 2p ; p est la distance du foyer à la directrice.")]),
+          utilise(sq, [t("Parabole (cours, point 1) : dans "), l("y'^2=2p\\,x'"), t(", le coefficient vaut 2p ; p est la distance du foyer à la directrice.")]),
           calcul(sq, [ligne(`2p=${nb(2 * C.p)}\\ \\Rightarrow\\ p=${nb(C.p)}`, "coefficient en valeur absolue")]),
           res,
           piege(sq, [t("Répondre 2p (le coefficient) ou p/2 (la distance du sommet au foyer).")]),
@@ -140,13 +140,13 @@ export function correctionDetaillee134(e: E): EtapeCorrection[] {
         break;
       case "foyer":
         out.push(
-          utilise(sq, [t("Foyer (cours, § 1) : à la distance "), l("\\dfrac{p}{2}"), t(" du sommet Ω, du côté de l'ouverture, puis "), l(trans), t(".")]),
+          utilise(sq, [t("Foyer (cours, point 1) : à la distance "), l("\\dfrac{p}{2}"), t(" du sommet Ω, du côté de l'ouverture, puis "), l(trans), t(".")]),
           calcul(sq, [ligne(`\\dfrac{p}{2}=${nb(C.p / 2)}`)]),
           res,
         );
         break;
       case "directrice":
-        out.push(utilise(sq, [t("Directrice (cours, § 1) : perpendiculaire à l'axe focal, à la distance "), l("\\dfrac{p}{2}"), t(" du sommet, du côté opposé au foyer.")]), res, verification(sq, [t("Le sommet Ω est le milieu du segment qui joint le foyer à la directrice.")]));
+        out.push(utilise(sq, [t("Directrice (cours, point 1) : perpendiculaire à l'axe focal, à la distance "), l("\\dfrac{p}{2}"), t(" du sommet, du côté opposé au foyer.")]), res, verification(sq, [t("Le sommet Ω est le milieu du segment qui joint le foyer à la directrice.")]));
         break;
     }
   });

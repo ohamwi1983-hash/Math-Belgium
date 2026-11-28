@@ -200,16 +200,16 @@ export const recap123 = (e: E, p: Ph): Frag[] => reponse123(e, p);
 export function aide1_123(_e: E, p: Ph): AideEcran {
   switch (p) {
     case "repere":
-      return { texte: [t(`Méthode du cours, § 3 : un repère adapté place un sommet à l'origine et un côté sur un axe, puis donne aux autres coordonnées des lettres quelconques (paramètres génériques) — le facteur 2 évite les fractions dans les milieux.`)] };
+      return { texte: [t(`Méthode du cours, point 3 : un repère adapté place un sommet à l'origine et un côté sur un axe, puis donne aux autres coordonnées des lettres quelconques (paramètres génériques) — le facteur 2 évite les fractions dans les milieux.`)] };
     case "coordonnees":
       return {
-        texte: [t(`Cours, § 3 et § 1 : le milieu a pour coordonnées la moyenne de celles des extrémités ; dans un parallélogramme ABCD, `), l("\\vec{AB}=\\vec{DC}"), t(", donc :")],
+        texte: [t(`Cours, points 3 et 1 : le milieu a pour coordonnées la moyenne de celles des extrémités ; dans un parallélogramme ABCD, `), l("\\vec{AB}=\\vec{DC}"), t(", donc :")],
         latex: "x_C=x_B+x_D-x_A\\qquad y_C=y_B+y_D-y_A",
       };
     case "egalite":
-      return { texte: [t(`Cours, § 3 : on traduit la conclusion en égalité — « se coupent en leur milieu » : mêmes coordonnées de milieux ; « parallélogramme » : deux vecteurs égaux ; « perpendiculaires » : `), l("x\\,x'+y\\,y'=0"), t(" ; « longueur moitié » : égalité de carrés de longueurs.")] };
+      return { texte: [t(`Cours, point 3 : on traduit la conclusion en égalité — « se coupent en leur milieu » : mêmes coordonnées de milieux ; « parallélogramme » : deux vecteurs égaux ; « perpendiculaires » : `), l("x\\,x'+y\\,y'=0"), t(" ; « longueur moitié » : égalité de carrés de longueurs.")] };
     case "calcul":
-      return { texte: [t(`Cours, § 3 : on calcule les deux membres avec les coordonnées en lettres, puis on vérifie qu'ils coïncident quelles que soient les lettres :`)], latex: "AB^2=(x_B-x_A)^2+(y_B-y_A)^2" };
+      return { texte: [t(`Cours, point 3 : on calcule les deux membres avec les coordonnées en lettres, puis on vérifie qu'ils coïncident quelles que soient les lettres :`)], latex: "AB^2=(x_B-x_A)^2+(y_B-y_A)^2" };
   }
 }
 

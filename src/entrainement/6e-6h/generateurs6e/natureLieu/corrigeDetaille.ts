@@ -151,7 +151,7 @@ export function correctionDetaillee127(e: E): EtapeCorrection[] {
   const out: EtapeCorrection[] = [];
   const a = lettreEtape(0);
   out.push(
-    utilise(a, [t("Lieux (cours, § 4) : on traduit la condition par une équation en x et y, puis on reconnaît la nature (en comparant au seuil quand il y en a un).")]),
+    utilise(a, [t("Lieux (cours, point 4) : on traduit la condition par une équation en x et y, puis on reconnaît la nature (en comparant au seuil quand il y en a un).")]),
     { ...calcul(a, lignesTraduction(e)), figureHtml: figureCorrigeLot(figureCorrige127(e)) },
     resultat(a, [...fr(reponse127(e, "nature")), t(" "), ...raisonNature(e)]),
     piege(a, [t(PIEGE_FAMILLE[e.famille])]),

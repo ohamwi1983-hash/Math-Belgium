@@ -205,7 +205,7 @@ export function correctionDetailleeNormeDistance(e: ExerciceNormeDistance): Etap
   if (e.variante === "distance") {
     const { labelA: A, labelB: B } = e;
     return finaliserCorrigeVecteurs([
-      utilise("a", [texte("Composantes d'un vecteur : extrémité − origine "), texte(`(cours, § 8).`)]),
+      utilise("a", [texte("Composantes d'un vecteur : extrémité − origine "), texte(`(cours, point 8).`)]),
       calcul("a", lignesComposantes(`${A}${B}`, e.pointA, e.pointB)),
       resultat("a", [latex(`${vec(`${A}${B}`)}=${col(e.vecteurAB)}`)]),
       piege("a", [texte("Soustraire une coordonnée négative revient à ajouter sa valeur absolue : "), latex("2-(-3)=5")]),

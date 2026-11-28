@@ -17,7 +17,7 @@ type Pu = ExercicePuissances;
 export type PhaseHeron = "rect2" | "encadrement" | "etapes" | "valeur" | "carre1" | "carre2" | "fraction" | "ecart";
 export const PHASES_HERON: PhaseHeron[] = ["rect2", "encadrement", "etapes", "valeur"];
 export const PHASES_PUISSANCES: PhaseHeron[] = ["carre1", "carre2", "fraction", "ecart"];
-export const COURS_HERON = "(cours, § 5)";
+export const COURS_HERON = "(cours, point 5)";
 
 export const phasesDe = (e: E): PhaseHeron[] => (e.type === "heron" ? PHASES_HERON : PHASES_PUISSANCES);
 

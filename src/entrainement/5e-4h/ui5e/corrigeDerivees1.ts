@@ -21,12 +21,12 @@ import { fracQ, pgcd, q, qAdd, qMul, qVal, type Q } from "./corrigeTrigonometrie
  *   `docx`) et phrases « f est croissante sur … » tirées du MÊME tableau attendu que l'écran.
  */
 
-export const COURS_DEFINITION = "(cours, § 1)";
-export const COURS_TANGENTES = "(cours, § 2)";
-export const COURS_DERIVEE = "(cours, § 3)";
-export const COURS_SIGNE = "(cours, § 4)";
-export const COURS_ETUDE = "(cours, § 5)";
-export const COURS_LECTURE = "(cours, § 6)";
+export const COURS_DEFINITION = "(cours, point 1)";
+export const COURS_TANGENTES = "(cours, point 2)";
+export const COURS_DERIVEE = "(cours, point 3)";
+export const COURS_SIGNE = "(cours, point 4)";
+export const COURS_ETUDE = "(cours, point 5)";
+export const COURS_LECTURE = "(cours, point 6)";
 
 export type Fragments = FragmentConsigne[];
 export const t = texte;

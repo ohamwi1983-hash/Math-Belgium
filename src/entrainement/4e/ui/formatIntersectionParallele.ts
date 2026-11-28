@@ -293,15 +293,15 @@ function aides(e: E): F[][] {
   if (e.variante === "faces-paralleles") {
     const F1 = face(e.face1);
     return [
-      [[T("L'intersection d'un plan et d'une face passe par les points qui sont à la fois dans le plan ET dans la face (cours, § 5).")], [T(`Parmi P, Q et R, lequel est sur une arête de la face ${F1} ?`)]],
-      [[T("Propriété 1 (cours, § 5) : si un plan coupe deux plans parallèles, les deux droites d'intersection sont parallèles.")], [T(`Les faces ${face(e.face0)} et ${F1} sont parallèles, et (PQR) coupe la première suivant (PQ).`)]],
+      [[T("L'intersection d'un plan et d'une face passe par les points qui sont à la fois dans le plan ET dans la face (cours, point 5).")], [T(`Parmi P, Q et R, lequel est sur une arête de la face ${F1} ?`)]],
+      [[T("Propriété 1 (cours, point 5) : si un plan coupe deux plans parallèles, les deux droites d'intersection sont parallèles.")], [T(`Les faces ${face(e.face0)} et ${F1} sont parallèles, et (PQR) coupe la première suivant (PQ).`)]],
       [[T("Le côté cherché reste dans la face : il s'arrête là où la parallèle rencontre une arête de cette face.")], [T("Un croisement avec une arête d'une autre face, sur le dessin, n'est pas un vrai point d'intersection.")]],
     ];
   }
   const d = e.direction!;
   return [
-    [[T("Un point commun à deux plans : la rencontre de deux droites, une de chaque plan, tracées dans une même face (cours, § 5).")], [T(`Cherche dans la face ${face(e.face0)} une droite de chaque plan.`)]],
-    [[T("Théorème du toit (cours, § 8) : si deux plans sécants contiennent deux droites parallèles, leur droite d'intersection est parallèle à ces droites.")], [T(`Cherche dans chaque plan une droite parallèle à une arête : ${droite(d.cotesAxe[0])} et ${droite(d.cotesAxe[1])}.`)]],
+    [[T("Un point commun à deux plans : la rencontre de deux droites, une de chaque plan, tracées dans une même face (cours, point 5).")], [T(`Cherche dans la face ${face(e.face0)} une droite de chaque plan.`)]],
+    [[T("Théorème du toit (cours, point 8) : si deux plans sécants contiennent deux droites parallèles, leur droite d'intersection est parallèle à ces droites.")], [T(`Cherche dans chaque plan une droite parallèle à une arête : ${droite(d.cotesAxe[0])} et ${droite(d.cotesAxe[1])}.`)]],
     [[T("La droite d'intersection passe par K avec la direction trouvée : elle traverse le solide jusqu'à la face opposée.")], [T(`Dans la face ${face(e.face1)}, les côtés des deux plans se coupent en un second point commun.`)]],
   ];
 }

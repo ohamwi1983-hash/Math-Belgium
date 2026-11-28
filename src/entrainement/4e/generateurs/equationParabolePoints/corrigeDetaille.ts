@@ -15,7 +15,7 @@ import { devant, figureAnnotee, formeJusteLatex, pointLatex, reponseCoefficients
 
 type E = ExerciceEquationParabolePoints;
 const n = nombreLatex;
-const COURS = "(cours, § 2)";
+const COURS = "(cours, point 2)";
 
 function lignesDonnees(e: E): LigneCalcul[] {
   const graphique = e.variante === "graphique";

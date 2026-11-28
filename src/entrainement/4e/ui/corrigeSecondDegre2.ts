@@ -24,13 +24,13 @@ import { facteurCommun } from "../moteur/simplificationEquation";
 export type Fragments = FragmentConsigne[];
 
 /** Renvois au cours (sections numérotées de `equations-inequations-second-degre.ts`). */
-export const COURS_RESOUDRE = "(cours, § 1)";
-export const COURS_SIGNE_TRINOME = "(cours, § 2)";
-export const COURS_PRODUIT = "(cours, § 3)";
-export const COURS_SIMPLIFIER = "(cours, § 4)";
-export const COURS_DENOMINATEUR = "(cours, § 5)";
-export const COURS_RATIONNELLE = "(cours, § 6)";
-export const COURS_CONTEXTE = "(cours, § 7)";
+export const COURS_RESOUDRE = "(cours, point 1)";
+export const COURS_SIGNE_TRINOME = "(cours, point 2)";
+export const COURS_PRODUIT = "(cours, point 3)";
+export const COURS_SIMPLIFIER = "(cours, point 4)";
+export const COURS_DENOMINATEUR = "(cours, point 5)";
+export const COURS_RATIONNELLE = "(cours, point 6)";
+export const COURS_CONTEXTE = "(cours, point 7)";
 
 /** `kx + c` en LaTeX (« 2x-6 », « -x+3 », « x »). */
 export function lineaireLatex(k: number, c: number): string {

@@ -17,7 +17,7 @@ import { decimalLatex, fractionLatex, pgcdEntier, valeurExacteLatex } from "./fo
  *   résultat exact (et sa valeur approchée s'il est irrationnel).
  */
 
-export const cours = (n: number): string => `(cours, § ${n})`;
+export const cours = (n: number): string => `(cours, point ${n})`;
 
 // ============================================================================
 // Rationnels exacts.

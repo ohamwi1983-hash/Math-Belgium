@@ -103,7 +103,7 @@ export function aidesEcran(e: E, ecran: number): Fragments[] {
   const w = omegaLatex(s);
   if (ecran === 0)
     return [
-      [t("Dans "), l("f(x) = A\\sin(\\omega x + \\varphi) + b"), t(" : "), l("A"), t(" est le coefficient devant le sinus, "), l("b"), t(" le terme ajouté, "), l("T = \\dfrac{2\\pi}{\\omega}"), t(" et "), l("\\Phi = -\\dfrac{\\varphi}{\\omega}"), t(" (cours, § 4).")],
+      [t("Dans "), l("f(x) = A\\sin(\\omega x + \\varphi) + b"), t(" : "), l("A"), t(" est le coefficient devant le sinus, "), l("b"), t(" le terme ajouté, "), l("T = \\dfrac{2\\pi}{\\omega}"), t(" et "), l("\\Phi = -\\dfrac{\\varphi}{\\omega}"), t(" (cours, point 4).")],
       souderPonctuation([t("Ici "), l(`\\omega = ${w}`), t(" et "), l(`\\varphi = ${piLatex(e.phi)}`), t(" : remplace-les dans "), l("T = \\dfrac{2\\pi}{\\omega}"), t(" et dans "), l("\\Phi = -\\dfrac{\\varphi}{\\omega}"), t(".")]),
     ];
   if (ecran === 1)

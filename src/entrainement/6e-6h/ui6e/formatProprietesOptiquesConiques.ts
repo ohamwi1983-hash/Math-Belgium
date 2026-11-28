@@ -117,7 +117,7 @@ function aides63(e: E, p: P): AideCombi[] {
       if (e.mode === "parallele") return [{ texte: "Le point d'impact est sur la droite du rayon et sur $\\Gamma$." }, { texte: "Ici :", latex: `y=${lq(e.R.y)}` }];
       return [{ texte: "Écris la droite du rayon (elle passe par $F$, pente donnée), remplace $y$ dans l'équation de $\\Gamma$ et résous : garde le point atteint dans le sens de propagation." }, { texte: "La droite du rayon :", latex: droiteIncidente(e) }];
     case "propriete":
-      return [{ texte: "Propriétés optiques du cours (§ 6) : ellipse, un rayon issu d'un foyer ; hyperbole, un rayon issu d'un foyer ; parabole, un rayon issu du foyer ou parallèle à l'axe." }, { texte: e.famille === "parabole" ? (e.mode === "parallele" ? "Ici, le rayon arrive parallèlement à l'axe d'une parabole." : "Ici, le rayon part du foyer d'une parabole.") : `Ici, le rayon part d'un foyer de ${NOM[e.famille]}.` }];
+      return [{ texte: "Propriétés optiques du cours (point 6) : ellipse, un rayon issu d'un foyer ; hyperbole, un rayon issu d'un foyer ; parabole, un rayon issu du foyer ou parallèle à l'axe." }, { texte: e.famille === "parabole" ? (e.mode === "parallele" ? "Ici, le rayon arrive parallèlement à l'axe d'une parabole." : "Ici, le rayon part du foyer d'une parabole.") : `Ici, le rayon part d'un foyer de ${NOM[e.famille]}.` }];
     case "reflechi":
       return [{ texte: "Le rayon réfléchi est porté par la droite qui passe par $R$ et par le point de la propriété ($F'$ ou $F$), ou bien il est parallèle à l'axe." }, { texte: "Ici :", latex: `R${latexPoint(e.R)}${e.Fp ? `,\\quad F'${latexPoint(e.Fp)}` : `,\\quad F${latexPoint(e.F)}`}` }];
   }

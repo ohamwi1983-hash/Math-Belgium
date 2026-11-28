@@ -158,7 +158,7 @@ export function reponse(e: E, p: P): Frag[] {
 export const recap = reponse;
 
 export function aide1(e: E, p: P): AideEcran {
-  if (p === "modele") return { texte: [t("Relis comment se font les tirages (cours, §§ 5 et 6) : un élément tiré revient-il dans la population avant le tirage suivant ? Si oui, chaque tirage se fait dans les mêmes conditions.")] };
+  if (p === "modele") return { texte: [t("Relis comment se font les tirages (cours, points 5 et 6) : un élément tiré revient-il dans la population avant le tirage suivant ? Si oui, chaque tirage se fait dans les mêmes conditions.")] };
   if (p === "parametres") return e.modele === "binomiale" ? { texte: [t("Loi binomiale : "), l("n"), t(" = nombre de répétitions, "), l("p"), t(" = probabilité d'un succès à chaque tirage (succès : un élément de la sorte comptée par "), l("X"), t(").")] } : { texte: [t("Loi hypergéométrique : "), l("N"), t(" = nombre d'éléments de la population, "), l("K"), t(" = nombre de succès parmi eux, "), l("n"), t(" = nombre d'éléments tirés.")] };
   const formule = e.modele === "binomiale" ? "P(X=k)=C_n^k\\,p^k\\,(1-p)^{n-k}" : "P(X=k)=\\dfrac{C_K^k\\,C_{N-K}^{n-k}}{C_N^n}";
   if (e.evenement === "exactement") return { texte: [t("Formule du cours :")], latex: formule };

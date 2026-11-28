@@ -108,7 +108,7 @@ export function aide1(e: E, phase: PhaseModeleSaturation): AideEcran {
     case "prevision":
       return { texte: [tx("Remplace "), lx("t"), tx(" dans le modèle complet, sans oublier L :")], latex: modeleGeneralL(e) };
     case "seuil":
-      return { texte: [tx("Isole le terme exponentiel, puis utilise la touche ln de la calculatrice (cours, § 7) :")], latex: `L+C\\,q^{t}=S\\iff q^{t}=\\dfrac{S-L}{C}\\iff t=\\dfrac{\\ln\\left(\\frac{S-L}{C}\\right)}{\\ln q}` };
+      return { texte: [tx("Isole le terme exponentiel, puis utilise la touche ln de la calculatrice (cours, point 7) :")], latex: `L+C\\,q^{t}=S\\iff q^{t}=\\dfrac{S-L}{C}\\iff t=\\dfrac{\\ln\\left(\\frac{S-L}{C}\\right)}{\\ln q}` };
   }
 }
 

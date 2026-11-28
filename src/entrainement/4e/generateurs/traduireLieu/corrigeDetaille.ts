@@ -41,7 +41,7 @@ import { colonne, nombreTexte } from "../../ui/outilsAnalytiqueLotG";
 
 type E = ExerciceTraduireLieu;
 
-const COURS_LIEU = "(cours, § 7)";
+const COURS_LIEU = "(cours, point 7)";
 const T = texte;
 const L = latex;
 
@@ -114,7 +114,7 @@ function corrigeDistance(e: LieuDistanceDroite): EtapeCorrection[] {
     const z = v ? "y" : "x";
     const ecart = `${z}-${qp(k)}`;
     sortie.push(
-      utilise("b", [T(`Distance d'un point M à une droite ${v ? "horizontale" : "verticale"} `), L(`${z}=k`), T(" : "), L(`|${z}_M-k|`), T(", un simple écart " + (v ? "d'ordonnées" : "d'abscisses") + " (cours, § 6).")]),
+      utilise("b", [T(`Distance d'un point M à une droite ${v ? "horizontale" : "verticale"} `), L(`${z}=k`), T(" : "), L(`|${z}_M-k|`), T(", un simple écart " + (v ? "d'ordonnées" : "d'abscisses") + " (cours, point 6).")]),
       calcul("b", [
         ligne(`|${ecart}|=${e.r}`, "M est à la distance r de d"),
         ligne(`${ecart}=${e.r}`, `M ${v ? "au-dessus" : "à droite"} de d`),
@@ -132,7 +132,7 @@ function corrigeDistance(e: LieuDistanceDroite): EtapeCorrection[] {
   const [B, Bp] = pointsDistance(e);
   const f = e.r / 5;
   sortie.push(
-    utilise("b", [T("Sur la perpendiculaire à d menée par A, on avance d'une longueur r dans un sens, puis dans l'autre : le vecteur "), L("\\dfrac{r}{\\|\\vec{n}\\|}\\,\\vec{n}"), T(" a la direction du vecteur normal et la norme r (cours, § 6).")]),
+    utilise("b", [T("Sur la perpendiculaire à d menée par A, on avance d'une longueur r dans un sens, puis dans l'autre : le vecteur "), L("\\dfrac{r}{\\|\\vec{n}\\|}\\,\\vec{n}"), T(" a la direction du vecteur normal et la norme r (cours, point 6).")]),
     calcul(
       "b",
       [
@@ -150,7 +150,7 @@ function corrigeDistance(e: LieuDistanceDroite): EtapeCorrection[] {
     ),
     resultat("b", [L(pointL("B", B)), T(" et "), L(pointL("B'", Bp)), T(".")]),
     piege("b", [T(`Ajouter `), L("\\vec{n}"), T(` ne déplace pas de ${e.r} mais de sa norme, 5 : on multiplie d'abord par `), L(`\\dfrac{${e.r}}{5}`), T(".")]),
-    utilise("c", [T("Chaque droite du lieu est parallèle à d : elle a le même vecteur normal "), L(`\\vec{n}${colonne(n.x, n.y)}`), T(" et passe par B, ou par B′ (cours, § 4).")]),
+    utilise("c", [T("Chaque droite du lieu est parallèle à d : elle a le même vecteur normal "), L(`\\vec{n}${colonne(n.x, n.y)}`), T(" et passe par B, ou par B′ (cours, point 4).")]),
     calcul("c", [...lignesDroiteNormale(n, B, "parallèle à d passant par B"), ...lignesDroiteNormale(n, Bp, "parallèle à d passant par B′")]),
     avecFigure(e, resultat("c", [T("Le lieu est la réunion des droites "), L(equationDroite(g1)), T(" et "), L(equationDroite(g2)), T(".")])),
     verification("c", [T("La droite d est à mi-chemin des deux : son terme constant est la moyenne des leurs.")], [ligne(`\\dfrac{${q(g1.c)}+${qp(g2.c)}}{2}=${q(e.d.c)}`, [T("terme constant de "), L(`d\\equiv ${implicite(e.d)}`)])]),
@@ -209,25 +209,25 @@ function corrigeParabole(e: LieuParabole): EtapeCorrection[] {
     ? [
         ligne(`x_S=x_F=${q(e.F.x)}`, "le sommet est sur la perpendiculaire à d menée par F (l'axe)"),
         ligne(`y_S=\\dfrac{y_F+y_H}{2}=\\dfrac{${q(e.F.y)}+${qp(H.y)}}{2}=${q(S.y)}`, [T("milieu de [FH], avec "), L(pointL("H", H))]),
-        ligne(`p=2(y_F-y_S)=2(${q(e.F.y)}-${qp(S.y)})=${q(p)}`, "p signé (cours, § 9)"),
+        ligne(`p=2(y_F-y_S)=2(${q(e.F.y)}-${qp(S.y)})=${q(p)}`, "p signé (cours, point 9)"),
       ]
     : [
         ligne(`y_S=y_F=${q(e.F.y)}`, "le sommet est sur la perpendiculaire à d menée par F (l'axe)"),
         ligne(`x_S=\\dfrac{x_F+x_H}{2}=\\dfrac{${q(e.F.x)}+${qp(H.x)}}{2}=${q(S.x)}`, [T("milieu de [FH], avec "), L(pointL("H", H))]),
-        ligne(`p=2(x_F-x_S)=2(${q(e.F.x)}-${qp(S.x)})=${q(p)}`, "p signé (cours, § 9)"),
+        ligne(`p=2(x_F-x_S)=2(${q(e.F.x)}-${qp(S.x)})=${q(p)}`, "p signé (cours, point 9)"),
       ];
   const sub = vert ? `(x-${qp(S.x)})^2=2\\cdot ${qp(p)}\\,(y-${qp(S.y)})` : `(y-${qp(S.y)})^2=2\\cdot ${qp(p)}\\,(x-${qp(S.x)})`;
   return [
-    utilise("a", [T("Les points équidistants d'un point F et d'une droite d (F hors de d) forment la parabole de foyer F et de directrice d (cours, § 9).")]),
+    utilise("a", [T("Les points équidistants d'un point F et d'une droite d (F hors de d) forment la parabole de foyer F et de directrice d (cours, point 9).")]),
     calcul("a", [ligne(`${zF}_F=${q(vert ? e.F.y : e.F.x)}\\neq ${q(e.k)}`, [T("F n'est pas sur "), L(`d\\equiv ${directriceL(e)}`)])]),
     resultat("a", [T("Le lieu est la parabole de foyer "), L(pointL("F", e.F)), T(" et de directrice "), L(`d\\equiv ${directriceL(e)}`), T(vert ? " ; d est horizontale, l'axe est vertical." : " ; d est verticale, l'axe est horizontal.")]),
     piege("a", [T("Ce n'est pas un cercle : la distance à F n'est pas fixée, elle doit être égale à la distance à d.")]),
-    utilise("b", [T("Le sommet S est le milieu de [FH], où H est le pied de la perpendiculaire à d menée par F ; "), L(vert ? "p=2(y_F-y_S)" : "p=2(x_F-x_S)"), T(", avec son signe (cours, § 9).")]),
+    utilise("b", [T("Le sommet S est le milieu de [FH], où H est le pied de la perpendiculaire à d menée par F ; "), L(vert ? "p=2(y_F-y_S)" : "p=2(x_F-x_S)"), T(", avec son signe (cours, point 9).")]),
     calcul("b", lignesB),
     resultat("b", [L(pointL("S", S)), T(" et "), L(`p=${q(p)}`), T(".")]),
     verification("b", [T("La directrice retrouvée est bien d :")], [ligne(`${zF}=${zF}_S-\\dfrac{p}{2}=${q(vert ? S.y : S.x)}-${qp(p / 2)}=${q(e.k)}`, "directrice du cours")]),
     piege("b", [T(p < 0 ? "Ici, p est négatif : le foyer est " + (vert ? "en dessous" : "à gauche") + " de la directrice, la parabole s'ouvre de ce côté." : "p est la distance du foyer à la directrice, pas celle du foyer au sommet (qui en vaut la moitié).")]),
-    utilise("c", [T(vert ? "Parabole d'axe vertical : " : "Parabole d'axe horizontal : "), L(vert ? "(x-x_S)^2=2p(y-y_S)" : "(y-y_S)^2=2p(x-x_S)"), T(" (cours, § 9).")]),
+    utilise("c", [T(vert ? "Parabole d'axe vertical : " : "Parabole d'axe horizontal : "), L(vert ? "(x-x_S)^2=2p(y-y_S)" : "(y-y_S)^2=2p(x-x_S)"), T(" (cours, point 9).")]),
     calcul("c", dedoublonner([ligne(sub, [T("on remplace "), L("x_S"), T(", "), L("y_S"), T(" et p")]), ligne(equationParabole(e), "on calcule")])),
     avecFigure(e, resultat("c", [T("Le lieu a pour équation "), L(equationParabole(e)), T(".")])),
     verification(
@@ -247,11 +247,11 @@ function corrigeCercle(e: LieuCercle): EtapeCorrection[] {
   const r2 = e.r * e.r;
   const P: Pt = { x: e.C.x + e.r, y: e.C.y };
   return [
-    utilise("a", [T("Les points à une distance r donnée d'un point C forment le cercle de centre C et de rayon r (cours, § 8).")]),
+    utilise("a", [T("Les points à une distance r donnée d'un point C forment le cercle de centre C et de rayon r (cours, point 8).")]),
     calcul("a", [ligne(`MC=${e.r}`, "propriété qui définit le lieu")]),
     resultat("a", [T("Le lieu est le cercle de centre "), L(pointL("C", e.C)), T(` et de rayon ${e.r}.`)]),
     piege("a", [T("Le disque contient aussi les points intérieurs (à une distance plus petite que le rayon) : ce n'est pas le lieu.")]),
-    utilise("b", [L(`MC=${e.r}`), T(" équivaut à "), L(`MC^2=${e.r}^2`), T(" ; par Pythagore, "), L("MC^2=(x-x_C)^2+(y-y_C)^2"), T(" (cours, § 8).")]),
+    utilise("b", [L(`MC=${e.r}`), T(" équivaut à "), L(`MC^2=${e.r}^2`), T(" ; par Pythagore, "), L("MC^2=(x-x_C)^2+(y-y_C)^2"), T(" (cours, point 8).")]),
     calcul("b", dedoublonner([ligne(`${carreDistance(e.C)}=${e.r}^2`, [T("centre "), L(coordL(e.C)), T(`, rayon ${e.r}`)]), ligne(cercleL(e.C, e.r), "on élève le rayon au carré")])),
     avecFigure(e, resultat("b", [T("Le lieu a pour équation "), L(cercleL(e.C, e.r)), T(".")])),
     verification("b", [T("Le point "), L(pointL("P", P)), T(", à la distance r de C sur l'horizontale, vérifie l'équation :")], lignesPointSurCercle(e.C, r2, P, "P")),

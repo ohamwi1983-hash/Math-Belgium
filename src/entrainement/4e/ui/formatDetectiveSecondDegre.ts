@@ -289,7 +289,7 @@ export function regle(e: E): FragmentConsigne[] {
     case "moinsB":
       return [t("Formule des racines quand "), l("\\Delta>0"), t(" :"), l("x=\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}")];
     case "divisionFacteur":
-      return [t("On ne divise jamais les deux membres par une expression qui peut être nulle : on passe tout dans un membre et on met le facteur commun en évidence (cours, § 1).")];
+      return [t("On ne divise jamais les deux membres par une expression qui peut être nulle : on passe tout dans un membre et on met le facteur commun en évidence (cours, point 1).")];
     case "signesRacines":
       return [t("Un produit est nul quand un de ses facteurs est nul ; chaque facteur donne une équation du premier degré :"), l("x-a=0\\iff x=a")];
     case "signe4ac":
@@ -299,15 +299,15 @@ export function regle(e: E): FragmentConsigne[] {
     case "sensNonInverse":
       return [t("Multiplier ou diviser les deux membres d'une inéquation par un nombre négatif change le sens de l'inégalité.")];
     case "signeEntre":
-      return [t("Un trinôme qui a deux racines est du signe de "), l("a"), t(" à l'extérieur des racines et du signe contraire entre elles (cours, § 2).")];
+      return [t("Un trinôme qui a deux racines est du signe de "), l("a"), t(" à l'extérieur des racines et du signe contraire entre elles (cours, point 2).")];
     case "ceFausse":
-      return [t("Condition d'existence : le dénominateur ne peut pas être nul (cours, § 5) :"), l("x-p\\neq 0\\iff x\\neq p")];
+      return [t("Condition d'existence : le dénominateur ne peut pas être nul (cours, point 5) :"), l("x-p\\neq 0\\iff x\\neq p")];
     case "racineEtrangere":
-      return [t("Une valeur trouvée qui annule un dénominateur est rejetée : elle ne respecte pas la condition d'existence (cours, § 5).")];
+      return [t("Une valeur trouvée qui annule un dénominateur est rejetée : elle ne respecte pas la condition d'existence (cours, point 5).")];
     case "produitEnCroix":
-      return [t("Dans une inéquation rationnelle, on ne fait jamais de produit en croix : on passe tout dans un membre, on réduit au même dénominateur et on étudie le signe du quotient (cours, § 6).")];
+      return [t("Dans une inéquation rationnelle, on ne fait jamais de produit en croix : on passe tout dans un membre, on réduit au même dénominateur et on étudie le signe du quotient (cours, point 6).")];
     case "valeurCEIncluse":
-      return [t("Une valeur interdite n'appartient jamais à l'ensemble-solution, même quand le symbole est large (cours, § 6).")];
+      return [t("Une valeur interdite n'appartient jamais à l'ensemble-solution, même quand le symbole est large (cours, point 6).")];
   }
 }
 

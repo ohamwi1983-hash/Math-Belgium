@@ -250,14 +250,14 @@ function produit(e: E): CopieDetectiveDer {
     ],
     ligneFausse: 1,
     regles: ["valeur de f en a", "dérivée d'un produit", "on remplace x par a dans f′", "équation de la tangente"],
-    regleCours: { texte: [t("Dérivée d'un produit (cours, § 3) : "), l("(u\\cdot v)'=u'v+uv'"), t(" — jamais "), l("u'\\cdot v'"), t(".")] },
+    regleCours: { texte: [t("Dérivée d'un produit (cours, point 3) : "), l("(u\\cdot v)'=u'v+uv'"), t(" — jamais "), l("u'\\cdot v'"), t(".")] },
     aideCorrection: { texte: [t("Applique la règle du produit avec "), l(`u=${u}`), t(" et "), l(`v=${v}`), t(", puis recalcule f′(a) et la tangente.")] },
     valeur: { genre: "droite", droite: droiteDe(a, fa, m) },
     copieDroite: droiteDe(a, fa, mc),
     point: { a, fa, m },
     piege: [t("C'est la tangente de la copie : sa pente vient de "), l("u'\\cdot v'"), t(", qui n'est pas la dérivée du produit.")],
     corrigeA: {
-      utilise: [t("On refait la ligne avec la règle du produit "), l("(uv)'=u'v+uv'"), t(" (cours, § 3).")],
+      utilise: [t("On refait la ligne avec la règle du produit "), l("(uv)'=u'v+uv'"), t(" (cours, point 3).")],
       lignes: [
         ligne(`f'(x)=2x(${v})${c > 0 ? "+" : ""}${facteurPar(c, u)}`, [fl(`u'=2x`), ft(", "), fl(`v'=${c}`)]),
         ligne(`=${fPrime}`, [ft("et non "), fl(coefX(2 * c)), ft(" comme dans la copie")]),
@@ -267,7 +267,7 @@ function produit(e: E): CopieDetectiveDer {
       utilise: [t("Sur un exemple simple, le produit des dérivées ne redonne pas la dérivée du produit :")],
       lignes: [ligne("(x\\cdot x)'=(x^2)'=2x", "dérivée du produit"), ligne("x'\\cdot x'=1\\cdot 1=1", [ft("différent de "), fl("2x"), ft(" : la copie se trompe")])],
     },
-    corrigeC: repriseTangente(a, fa, m, fPrime, `${substL(coefsD, a)}=${qL(m)}`, [t("On reprend à partir de la ligne fausse : règle du produit, puis formule de la tangente (cours, § 2).")]),
+    corrigeC: repriseTangente(a, fa, m, fPrime, `${substL(coefsD, a)}=${qL(m)}`, [t("On reprend à partir de la ligne fausse : règle du produit, puis formule de la tangente (cours, point 2).")]),
     preliminaires: PRE_TANGENTE(DOMAINE_POLY),
   };
 }
@@ -290,14 +290,14 @@ function quotient(e: E): CopieDetectiveDer {
     ],
     ligneFausse: 1,
     regles: ["valeur de f en a", "dérivée d'un quotient", "on remplace x par a dans f′", "équation de la tangente"],
-    regleCours: { texte: [t("Dérivée d'un quotient (cours, § 3) : "), l("\\left(\\dfrac{u}{v}\\right)'=\\dfrac{u'v-uv'}{v^2}"), t(" — l'ordre compte, u′ en premier.")] },
+    regleCours: { texte: [t("Dérivée d'un quotient (cours, point 3) : "), l("\\left(\\dfrac{u}{v}\\right)'=\\dfrac{u'v-uv'}{v^2}"), t(" — l'ordre compte, u′ en premier.")] },
     aideCorrection: { texte: [t("Applique la règle du quotient avec "), l(`u=${u}`), t(" et "), l(`v=${v}`), t(" (u′ en premier au numérateur), puis recalcule f′(a) et la tangente.")] },
     valeur: { genre: "droite", droite: droiteDe(a, fa, m) },
     copieDroite: droiteDe(a, fa, mc),
     point: { a, fa, m },
     piege: [t("C'est la tangente de la copie : avec "), l("uv'-u'v"), t(" au numérateur, la pente a le mauvais signe.")],
     corrigeA: {
-      utilise: [t("On refait la ligne avec "), l("\\left(\\dfrac{u}{v}\\right)'=\\dfrac{u'v-uv'}{v^2}"), t(" (cours, § 3).")],
+      utilise: [t("On refait la ligne avec "), l("\\left(\\dfrac{u}{v}\\right)'=\\dfrac{u'v-uv'}{v^2}"), t(" (cours, point 3).")],
       lignes: [
         ligne(`f'(x)=\\dfrac{${parL(c)}\\cdot(${v})-(${u})\\cdot 1}{(${v})^2}`, "u′ en premier"),
         ligne(`=\\dfrac{${num}}{(${v})^2}`, [ft("et non "), fl(`\\dfrac{${-num}}{(${v})^2}`), ft(" comme dans la copie")]),
@@ -307,7 +307,7 @@ function quotient(e: E): CopieDetectiveDer {
       utilise: [t("La règle redonne la dérivée connue de "), l("\\dfrac{1}{x}"), t(" ; l'ordre inversé donne le signe opposé :")],
       lignes: [ligne("\\dfrac{0\\cdot x-1\\cdot 1}{x^2}=-\\dfrac{1}{x^2}", "u′v − uv′ : juste"), ligne("\\dfrac{1\\cdot 1-0\\cdot x}{x^2}=\\dfrac{1}{x^2}", "uv′ − u′v : signe faux")],
     },
-    corrigeC: repriseTangente(a, fa, m, `\\dfrac{${num}}{(${v})^2}`, `\\dfrac{${num}}{${parL(a + ee)}^2}=${qL(m)}`, [t("On reprend à partir de la ligne fausse : règle du quotient, puis formule de la tangente (cours, § 2).")]),
+    corrigeC: repriseTangente(a, fa, m, `\\dfrac{${num}}{(${v})^2}`, `\\dfrac{${num}}{${parL(a + ee)}^2}=${qL(m)}`, [t("On reprend à partir de la ligne fausse : règle du quotient, puis formule de la tangente (cours, point 2).")]),
     preliminaires: PRE_TANGENTE([l(`\\operatorname{dom}f=\\mathbb{R}\\setminus\\{${-ee}\\}`), t(" ; f est dérivable sur son domaine.")]),
   };
 }
@@ -331,14 +331,14 @@ function chaine(e: E): CopieDetectiveDer {
     ],
     ligneFausse: 1,
     regles: ["valeur de f en a", "dérivée d'une puissance de fonction", "on remplace x par a dans f′", "équation de la tangente"],
-    regleCours: { texte: [t("Règle de la chaîne (cours, § 3) : "), l("\\left(u^n\\right)'=n\\,u^{n-1}\\cdot u'"), t(" — on multiplie par la dérivée de l'intérieur.")] },
+    regleCours: { texte: [t("Règle de la chaîne (cours, point 3) : "), l("\\left(u^n\\right)'=n\\,u^{n-1}\\cdot u'"), t(" — on multiplie par la dérivée de l'intérieur.")] },
     aideCorrection: { texte: [t("L'intérieur est "), l(`u=${u}`), t(" : multiplie par "), l("u'"), t(", puis recalcule f′(a) et la tangente.")] },
     valeur: { genre: "droite", droite: droiteDe(a, fa, m) },
     copieDroite: droiteDe(a, fa, mc),
     point: { a, fa, m },
     piege: [t("C'est la tangente de la copie : il manque le facteur "), l(`${c}`), t(", dérivée de l'intérieur.")],
     corrigeA: {
-      utilise: [t("On refait la ligne avec la règle de la chaîne "), l("(u^n)'=n\\,u^{n-1}\\cdot u'"), t(" (cours, § 3).")],
+      utilise: [t("On refait la ligne avec la règle de la chaîne "), l("(u^n)'=n\\,u^{n-1}\\cdot u'"), t(" (cours, point 3).")],
       lignes: [
         ligne(`f'(x)=${n}${puissL(u, n - 1)}\\cdot(${u})'`, "règle de la chaîne"),
         ligne(`=${n}${puissL(u, n - 1)}\\cdot${parL(c)}`, [fl(`u'=${c}`)]),
@@ -353,7 +353,7 @@ function chaine(e: E): CopieDetectiveDer {
         ligne("2\\cdot(2x)=4x", "sans le facteur u′ = 2 : faux"),
       ],
     },
-    corrigeC: repriseTangente(a, fa, m, prim(n * c), `${n * c}\\cdot${puissW}=${qL(m)}`, [t("On reprend à partir de la ligne fausse : règle de la chaîne, puis formule de la tangente (cours, § 2).")]),
+    corrigeC: repriseTangente(a, fa, m, prim(n * c), `${n * c}\\cdot${puissW}=${qL(m)}`, [t("On reprend à partir de la ligne fausse : règle de la chaîne, puis formule de la tangente (cours, point 2).")]),
     preliminaires: PRE_TANGENTE(DOMAINE_POLY),
   };
 }
@@ -379,14 +379,14 @@ function inverse(e: E): CopieDetectiveDer {
     ],
     ligneFausse: 1,
     regles: ["valeur de f en a", "dérivée terme à terme", "on remplace x par a dans f′", "équation de la tangente"],
-    regleCours: { texte: [t("Dérivée de référence (cours, § 3) : "), l("\\left(\\dfrac{1}{x}\\right)'=-\\dfrac{1}{x^2}"), t(", et "), l("(k\\cdot u)'=k\\cdot u'"), t(".")] },
+    regleCours: { texte: [t("Dérivée de référence (cours, point 3) : "), l("\\left(\\dfrac{1}{x}\\right)'=-\\dfrac{1}{x^2}"), t(", et "), l("(k\\cdot u)'=k\\cdot u'"), t(".")] },
     aideCorrection: { texte: [t("Dérive "), l(`\\dfrac{${k}}{x}=${k}\\cdot\\dfrac{1}{x}`), t(" avec la dérivée de référence, puis recalcule f′(a) et la tangente.")] },
     valeur: { genre: "droite", droite: droiteDe(a, fa, m) },
     copieDroite: droiteDe(a, fa, mc),
     point: { a, fa, m },
     piege: [t("C'est la tangente de la copie : la dérivée de "), l("\\dfrac{1}{x}"), t(" est négative.")],
     corrigeA: {
-      utilise: [t("On refait la ligne avec "), l("\\left(\\dfrac{1}{x}\\right)'=-\\dfrac{1}{x^2}"), t(" (cours, § 3).")],
+      utilise: [t("On refait la ligne avec "), l("\\left(\\dfrac{1}{x}\\right)'=-\\dfrac{1}{x^2}"), t(" (cours, point 3).")],
       lignes: [
         ligne(`\\left(\\dfrac{${k}}{x}\\right)'=${k}\\cdot\\left(-\\dfrac{1}{x^2}\\right)`, "constante en facteur"),
         ligne(`f'(x)=${fPrime}`, [ft("et non "), fl(fPrimeCopie), ft(" comme dans la copie")]),
@@ -396,7 +396,7 @@ function inverse(e: E): CopieDetectiveDer {
       utilise: [t("La fonction inverse décroît sur "), l("\\mathopen{]}0\\,;+\\infty\\mathclose{[}"), t(" : sa dérivée y est négative.")],
       lignes: [ligne("\\dfrac{1}{2}<1", "l'inverse de 2 est plus petit que l'inverse de 1 : elle décroît"), ligne("\\left(\\dfrac{1}{x}\\right)'=-\\dfrac{1}{x^2}<0", "dérivée négative, d'où le signe moins")],
     },
-    corrigeC: repriseTangente(a, fa, m, fPrime, `${2 * alpha}\\cdot${parL(a)}${plusFracX(-k, `${parL(a)}^2`)}=${qL(m)}`, [t("On reprend à partir de la ligne fausse : dérivée de référence de "), l("\\dfrac{1}{x}"), t(", puis formule de la tangente (cours, § 2).")]),
+    corrigeC: repriseTangente(a, fa, m, fPrime, `${2 * alpha}\\cdot${parL(a)}${plusFracX(-k, `${parL(a)}^2`)}=${qL(m)}`, [t("On reprend à partir de la ligne fausse : dérivée de référence de "), l("\\dfrac{1}{x}"), t(", puis formule de la tangente (cours, point 2).")]),
     preliminaires: PRE_TANGENTE([l("\\operatorname{dom}f=\\mathbb{R}_0"), t(" ; f est dérivable sur son domaine.")]),
   };
 }
@@ -419,14 +419,14 @@ function formuleTangente(e: E): CopieDetectiveDer {
     ],
     ligneFausse: 3,
     regles: ["valeur de f en a", "dérivée d'un polynôme", "on remplace x par a dans f′", "équation de la tangente", "lecture de l'ordonnée à l'origine"],
-    regleCours: { texte: [t("Équation de la tangente au point d'abscisse a (cours, § 2) : "), l("y=f(a)+f'(a)(x-a)"), t(".")] },
+    regleCours: { texte: [t("Équation de la tangente au point d'abscisse a (cours, point 2) : "), l("y=f(a)+f'(a)(x-a)"), t(".")] },
     aideCorrection: { texte: [t("Remplace dans "), l("y=f(a)+f'(a)(x-a)"), t(" les valeurs de f(a) et de f′(a) de la copie (elles sont justes), puis développe.")] },
     valeur: { genre: "droite", droite: droiteDe(a, fa, m) },
     copieDroite: copieD,
     point: { a, fa, m },
     piege: [t("C'est la droite de la copie : elle a la bonne pente, mais elle ne passe pas par "), l(`\\left(${a}\\,;${qL(fa)}\\right)`), t(".")],
     corrigeA: {
-      utilise: [t("On refait la ligne avec la formule du cours : "), l("y=f(a)+f'(a)(x-a)"), t(" (§ 2).")],
+      utilise: [t("On refait la ligne avec la formule du cours : "), l("y=f(a)+f'(a)(x-a)"), t(" (point 2).")],
       lignes: [
         ligne(`y=${formeTangenteL(a, fa, m)}`, "formule de la tangente"),
         ligne(`y=${droiteL(droiteDe(a, fa, m))}`, [ft("et non "), fl(`y=${droiteL(copieD)}`), ft(" comme dans la copie")]),
@@ -436,7 +436,7 @@ function formuleTangente(e: E): CopieDetectiveDer {
       utilise: [t("La droite de la copie ne passe pas par le point de tangence :")],
       lignes: [ligne(`${parQ(m)}\\cdot${parL(a)}${plusQ(fa)}=${qL(qAdd(qMul(m, q(a)), fa))}`, [ft("en x = a, on devrait trouver f(a) = "), fl(qL(fa))])],
     },
-    corrigeC: repriseTangente(a, fa, m, polyL(coefsD), `${substL(coefsD, a)}=${qL(m)}`, [t("f(a), f′(x) et f′(a) étaient justes ; on reprend la formule de la tangente (cours, § 2).")]),
+    corrigeC: repriseTangente(a, fa, m, polyL(coefsD), `${substL(coefsD, a)}=${qL(m)}`, [t("f(a), f′(x) et f′(a) étaient justes ; on reprend la formule de la tangente (cours, point 2).")]),
     preliminaires: [
       { ligne: DOMAINE_POLY, regle: "domaine et dérivabilité" },
       { ligne: [t("Il faut f(a) et f′(a).")], regle: "organisation du calcul" },
@@ -494,7 +494,7 @@ function signeTrinome(e: E): CopieDetectiveDer {
     ],
     ligneFausse: 2,
     regles: ["dérivée d'un polynôme", "zéros d'un trinôme", "signe d'un trinôme", "lecture des extremums"],
-    regleCours: { texte: [t("Signe d'un trinôme (cours, § 4) : signe de a à l'extérieur des racines, signe contraire entre elles ; maximum là où f′ passe de + à −.")] },
+    regleCours: { texte: [t("Signe d'un trinôme (cours, point 4) : signe de a à l'extérieur des racines, signe contraire entre elles ; maximum là où f′ passe de + à −.")] },
     aideCorrection: { texte: [t("Écris "), l(`f'(x)=${6 * alpha}${facteurX(r1)}${facteurX(r2)}`), t(" et contrôle le signe en une valeur de chaque intervalle.")] },
     valeur: { genre: "extremums", ...vrai },
     copieExtremums: faux,
@@ -512,7 +512,7 @@ function signeTrinome(e: E): CopieDetectiveDer {
       lignes: [ligne("0^2-1=-1<0", "entre les racines −1 et 1 : signe contraire de a"), ligne("2^2-1=3>0", "à l'extérieur : signe de a")],
     },
     corrigeC: {
-      utilise: [t("On reprend à partir de la ligne fausse : signe de f′, puis lecture des extremums (cours, §§ 4 et 5).")],
+      utilise: [t("On reprend à partir de la ligne fausse : signe de f′, puis lecture des extremums (cours, points 4 et 5).")],
       lignes: [
         ligneSigne(sa, -Infinity, r1, "signe de a"),
         ligneSigne(-sa, r1, r2, "signe contraire de a"),
@@ -546,7 +546,7 @@ function racineOubliee(e: E): CopieDetectiveDer {
     ],
     ligneFausse: 1,
     regles: ["dérivée d'un polynôme", "résolution de f′(x) = 0", "signe de f′", "lecture des extremums"],
-    regleCours: { texte: [t("Une équation "), l("x^2=c"), t(" avec "), l("c>0"), t(" a deux solutions, "), l("-\\sqrt{c}"), t(" et "), l("\\sqrt{c}"), t(" ; on étudie ensuite le signe de f′ autour de chacune (cours, §§ 4 et 5).")] },
+    regleCours: { texte: [t("Une équation "), l("x^2=c"), t(" avec "), l("c>0"), t(" a deux solutions, "), l("-\\sqrt{c}"), t(" et "), l("\\sqrt{c}"), t(" ; on étudie ensuite le signe de f′ autour de chacune (cours, points 4 et 5).")] },
     aideCorrection: { texte: [t("Factorise "), l(`f'(x)=${3 * alpha}(x^2-${k * k})`), t(" à l'aide de "), l("a^2-b^2=(a-b)(a+b)"), t(", puis étudie le signe autour des deux racines.")] },
     valeur: { genre: "extremums", ...vrai },
     copieExtremums: faux,
@@ -560,7 +560,7 @@ function racineOubliee(e: E): CopieDetectiveDer {
       lignes: [ligne("3^2=9", "3 convient"), ligne("(-3)^2=9", "−3 convient aussi")],
     },
     corrigeC: {
-      utilise: [t("On reprend à partir de la ligne fausse : f′ factorisée, signe, extremums (cours, §§ 4 et 5).")],
+      utilise: [t("On reprend à partir de la ligne fausse : f′ factorisée, signe, extremums (cours, points 4 et 5).")],
       lignes: [
         ligne(`f'(x)=${3 * alpha}(x+${k})(x-${k})`, "a² − b² = (a − b)(a + b)"),
         ligneSigne(sa, -Infinity, -k, "signe de a, à l'extérieur des racines"),
@@ -607,7 +607,7 @@ function sansChangement(e: E): CopieDetectiveDer {
     ],
     ligneFausse: 2,
     regles: ["dérivée d'un polynôme", "zéros de f′ (mise en évidence)", "signe de f′", "lecture des extremums"],
-    regleCours: { texte: [t("Un zéro de f′ n'est un extremum que si f′ y change de signe (cours, § 5) ; un facteur "), l("x^2"), t(" ne change jamais de signe.")] },
+    regleCours: { texte: [t("Un zéro de f′ n'est un extremum que si f′ y change de signe (cours, point 5) ; un facteur "), l("x^2"), t(" ne change jamais de signe.")] },
     aideCorrection: { texte: [t("Dans "), l(`f'(x)=${c12}x^2(${polyL([1, -m])})`), t(", le facteur "), l("x^2"), t(" est toujours positif ou nul : étudie le signe du reste.")] },
     valeur: { genre: "extremums", ...vrai },
     copieExtremums: faux,
@@ -624,7 +624,7 @@ function sansChangement(e: E): CopieDetectiveDer {
       lignes: [ligne("g'(x)=3x^2\\geq 0", "un carré n'est jamais négatif"), ligne("g'(0)=0", "g croît des deux côtés de 0 : pas d'extremum")],
     },
     corrigeC: {
-      utilise: [t("On reprend à partir de la ligne fausse : signe de f′ (le facteur "), l("x^2"), t(" est positif), puis extremums (cours, §§ 4 et 5).")],
+      utilise: [t("On reprend à partir de la ligne fausse : signe de f′ (le facteur "), l("x^2"), t(" est positif), puis extremums (cours, points 4 et 5).")],
       lignes: [
         ligneSigne(vraiG, -Infinity, r1, [fl("x^2>0"), ft(" et "), fl(`x${plusL(-m)}<0`)]),
         ligneSigne(vraiM, r1, r2, m > 0 ? [fl("x^2>0"), ft(" et "), fl(`x${plusL(-m)}<0`)] : [fl("x^2>0"), ft(" et "), fl(`x${plusL(-m)}>0`)]),

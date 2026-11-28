@@ -132,7 +132,7 @@ export function aide1(_e: E, phase: PhaseLireCourbeExpo): AideEcran {
     case "k":
       return { texte: [tx("En "), lx("x=0"), tx(", "), lx("a^{0}=1"), tx(" :")], latex: "f(0)=k\\cdot a^{0}+c=k+c" };
     case "a":
-      return { texte: [tx("L'écart à l'asymptote, "), lx("f(x)-c=k\\cdot a^{x}"), tx(", est multiplié par "), lx("a"), tx(" quand "), lx("x"), tx(" augmente de 1 (cours, § 7). Rapport de deux écarts consécutifs :")], latex: "a=\\dfrac{f(x+1)-c}{f(x)-c}" };
+      return { texte: [tx("L'écart à l'asymptote, "), lx("f(x)-c=k\\cdot a^{x}"), tx(", est multiplié par "), lx("a"), tx(" quand "), lx("x"), tx(" augmente de 1 (cours, point 7). Rapport de deux écarts consécutifs :")], latex: "a=\\dfrac{f(x+1)-c}{f(x)-c}" };
     case "expression":
       return { texte: [tx("Remplace "), lx("k"), tx(", "), lx("a"), tx(" et "), lx("c"), tx(" par les valeurs trouvées dans :")], latex: "f(x)=k\\cdot a^{x}+c" };
   }

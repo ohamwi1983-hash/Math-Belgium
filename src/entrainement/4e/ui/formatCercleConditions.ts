@@ -112,7 +112,7 @@ function ecranCentreIntersection(e: E, titre: string, consigne: Fragments, aide2
     titre,
     consigne,
     champs: champsPoint("O", e.centre, [], [], "Ton point doit vérifier les deux équations : remplace pour contrôler.").map((c, i) => ({ ...c, libelle: [latex(i === 0 ? `x_{${OMEGA}}=` : `y_{${OMEGA}}=`)] })),
-    aides: [[texte("Le centre est sur les deux droites : ses coordonnées vérifient les deux équations. Résous le système, par substitution ou par combinaison (cours, § 5).")], aide2],
+    aides: [[texte("Le centre est sur les deux droites : ses coordonnées vérifient les deux équations. Résous le système, par substitution ou par combinaison (cours, point 5).")], aide2],
     reponse: [latex(pointLatex(OMEGA, e.centre))],
   };
 }

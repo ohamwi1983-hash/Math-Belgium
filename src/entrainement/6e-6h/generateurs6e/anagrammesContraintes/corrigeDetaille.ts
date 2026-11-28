@@ -32,7 +32,7 @@ function lignesMultinomiale(nom: string, n: number, eff: number[], justif?: stri
   return lignes;
 }
 
-const COURS = "(cours, § 2)";
+const COURS = "(cours, point 2)";
 
 function etape(e: E, p: Phase103): { u: Frag[]; lignes: LigneCalcul[]; verif?: Frag[]; piege?: Frag[] } {
   const m = e.mot;
@@ -71,7 +71,7 @@ function etape(e: E, p: Phase103): { u: Frag[]; lignes: LigneCalcul[]; verif?: F
     }
     case "produit":
       return {
-        u: [t("Principe multiplicatif (cours, § 1) : l'ordre du bloc parmi les consonnes, puis l'ordre des voyelles dans le bloc.")],
+        u: [t("Principe multiplicatif (cours, point 1) : l'ordre du bloc parmi les consonnes, puis l'ordre des voyelles dans le bloc.")],
         lignes: [ligne(`N=N_1\\times N_2=${mil(valeur103(e, "interne"))}\\times ${mil(valeur103(e, "externe"))}`), ligne(`=${mil(valeur103(e, "produit"))}`)],
         verif: [t("Moins que les "), l(mil(valeur103({ ...e, variante: "anagrammes" }, "total"))), t(" mots sans contrainte : normal.")],
         piege: [t("Oublier l'ordre des voyelles à l'intérieur du bloc (ne garder que "), l(`N_2=${mil(valeur103(e, "externe"))}`), t(").")],

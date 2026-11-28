@@ -93,13 +93,13 @@ export function correctionDetailleeCP(e: E): EtapeCorrection[] {
   const lib = LIBELLES_IDENTITE[id];
   const fig = figureCP(e, true);
   const etapes: EtapeCorrection[] = [
-    utilise("a", [ft("Pour éliminer t, il faut une relation entre les expressions de x et de y qui ne contienne plus t (cours, § 6).")]),
+    utilise("a", [ft("Pour éliminer t, il faut une relation entre les expressions de x et de y qui ne contienne plus t (cours, point 6).")]),
     resultat("a", lib.latex ? [ft(lib.texte), L(lib.latex), ft(".")] : [ft(`${lib.texte}.`)]),
-    utilise("b", id === "isoler" ? [ft("On isole le paramètre (ou son carré) dans x, puis on le remplace dans y.")] : [ft("Identité : "), L(lib.latex!), ft(" (cours, § 6).")]),
+    utilise("b", id === "isoler" ? [ft("On isole le paramètre (ou son carré) dans x, puis on le remplace dans y.")] : [ft("Identité : "), L(lib.latex!), ft(" (cours, point 6).")]),
     calcul("b", lignesElimination(e)),
     resultat("b", [L(equationL(e)), ft(" : "), ...fr(natureCourbe(e)), ft(".")]),
     piege("b", e.variante === "astroide" ? [ft("Écrire "), L("x^{2/3}"), ft(" comme une racine cubique de "), L("x^2"), ft(" : elle a un sens aussi pour x < 0 (la courbe est symétrique).")] : e.variante === "parabole" && e.partie === "arc" ? [ft("Confondre "), L("\\cos(2t)"), ft(" avec "), L("\\cos^2 t"), ft(".")] : [ft("Oublier de diviser (ou de multiplier) tous les termes en isolant le paramètre.")]),
-    utilise("c", [ft("La partie décrite dépend des valeurs que prennent les expressions de t sur l'intervalle (cours, § 5 : la restriction).")]),
+    utilise("c", [ft("La partie décrite dépend des valeurs que prennent les expressions de t sur l'intervalle (cours, point 5 : la restriction).")]),
     calcul("c", [], raisonnementPartie(e), "Raisonnement"),
     { ...resultat("c", [ft(LIBELLES_PARTIE[e.variante][e.partie]), ft(".")]), ...(e.partie === "entiere" ? { figureHtml: fig } : {}) },
   ];

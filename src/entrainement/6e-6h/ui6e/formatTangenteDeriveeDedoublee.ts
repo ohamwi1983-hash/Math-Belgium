@@ -99,9 +99,9 @@ export function dedoubleeGeneraleL(e: E): string {
 
 export function aide1(e: E, p: PhaseTD): AideEcran {
   if (p === "branche") return { texte: [t("Isole "), l("y"), t(" dans l'équation de "), l("\\Gamma"), t(" : tu obtiens deux fonctions opposées, "), l("y=f(x)"), t(" et "), l("y=-f(x)"), t(". Celle qui contient "), l("P"), t(" a le signe de "), l("y_P"), t(".")] };
-  if (p === "pente") return { texte: [t("Dérive la fonction choisie (cours, § 5) ; pour une racine :")], latex: "\\left(\\sqrt{u}\\right)'=\\dfrac{u'}{2\\sqrt{u}}" };
+  if (p === "pente") return { texte: [t("Dérive la fonction choisie (cours, point 5) ; pour une racine :")], latex: "\\left(\\sqrt{u}\\right)'=\\dfrac{u'}{2\\sqrt{u}}" };
   if (p === "tangente") return { texte: [t("Droite de pente "), l("m"), t(" passant par "), l("P"), t(" :")], latex: "y-y_P=m\\,(x-x_P)" };
-  return { texte: [t("Forme dédoublée (cours, § 5) : dans l'équation de "), l("\\Gamma"), t(", remplace "), l("x^2"), t(" par "), l("x\\,x_Q"), t(", "), l("y^2"), t(" par "), l("y\\,y_Q"), t(" et "), l("x"), t(" par "), l("\\dfrac{x+x_Q}{2}"), t(" :")], latex: dedoubleeGeneraleL(e) };
+  return { texte: [t("Forme dédoublée (cours, point 5) : dans l'équation de "), l("\\Gamma"), t(", remplace "), l("x^2"), t(" par "), l("x\\,x_Q"), t(", "), l("y^2"), t(" par "), l("y\\,y_Q"), t(" et "), l("x"), t(" par "), l("\\dfrac{x+x_Q}{2}"), t(" :")], latex: dedoubleeGeneraleL(e) };
 }
 
 export function aide2(e: E, p: PhaseTD): AideEcran | null {

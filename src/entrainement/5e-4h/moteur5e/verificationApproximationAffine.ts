@@ -60,7 +60,7 @@ export function piege(e: E, p: PhaseApproximationAffine, valeurs: string[]): Fra
     if (!f) return null;
     const pts = pointsControle(e);
     const g = derivee(e);
-    if (memesFonctions(f, (x) => -g(x), pts)) return [tx("Le signe est faux : revois la dérivée de référence (cours, § 3).")];
+    if (memesFonctions(f, (x) => -g(x), pts)) return [tx("Le signe est faux : revois la dérivée de référence (cours, point 3).")];
     if (e.fn === "racine" && memesFonctions(f, (x) => 2 * g(x), pts)) return [tx("Il manque le facteur 2 au dénominateur : "), lx("(\\sqrt{x})'=\\dfrac{1}{2\\sqrt{x}}"), tx(".")];
     if (e.fn === "puissance" && memesFonctions(f, (x) => e.n * x ** e.n, pts)) return [tx("L'exposant passe devant, puis il diminue de 1.")];
     if (e.fn === "puissance" && memesFonctions(f, (x) => x ** (e.n - 1), pts)) return [tx("N'oublie pas l'ancien exposant, qui passe devant comme facteur.")];

@@ -15,8 +15,8 @@ import { critere, ctx, figureCorrige, reponseE, reponseInstants, reponseK, repon
  */
 
 type E = ExerciceTrajectoires;
-const COURS_INT = "(cours, § 5)";
-const COURS_REL = "(cours, § 4)";
+const COURS_INT = "(cours, point 5)";
+const COURS_REL = "(cours, point 4)";
 
 /** « a·b − c·d = p₁ − p₂ » puis « = valeur » ; la ligne intermédiaire seulement si elle apporte quelque chose. */
 function lignesProduitsCroix(gauche: string, p1: number, p2: number, just: Fr, fin: string): LigneCalcul[] {

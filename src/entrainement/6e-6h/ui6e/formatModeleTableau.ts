@@ -14,7 +14,7 @@ import type { Q } from "./nombresExp";
 type E = ExerciceModeleTableau;
 export type PhaseModeleTableau = "rapports" | "verdict" | "parametres" | "prevision";
 export const PHASES: PhaseModeleTableau[] = ["rapports", "verdict", "parametres", "prevision"];
-export const COURS_MODELE = "(cours, § 7)";
+export const COURS_MODELE = "(cours, point 7)";
 
 export const ctx = (e: E) => CONTEXTES[e.contexte];
 

@@ -192,11 +192,11 @@ function copieS(e: E): CopieDetective {
       lignes: [ligne(`-${k}x\\geq -${c}`, "ligne 2, juste"), ligne(`x\\leq ${qL}`, `on divise par −${k} < 0 : le sens change`), ligne(`${c}-${k}\\times ${parN(x0)}=${c - k * x0}<0`, `x = ${nb(x0)} vérifie la ligne 3 de la copie, mais pas la condition`)],
     },
     corrigeB: {
-      utilise: [t("Diviser les deux membres d'une inégalité par un nombre négatif change son sens (cours, § 1).")],
+      utilise: [t("Diviser les deux membres d'une inégalité par un nombre négatif change son sens (cours, point 1).")],
       lignes: [ligne("2<3", "deux nombres rangés"), ligne(`-${k}\\times 2>-${k}\\times 3`, `on multiplie par −${k} : le sens change`)],
     },
     corrigeC: {
-      utilise: [t("Racine carrée : le nombre sous la racine doit être positif ou nul (cours, § 1). On reprend la résolution à partir de la ligne 3.")],
+      utilise: [t("Racine carrée : le nombre sous la racine doit être positif ou nul (cours, point 1). On reprend la résolution à partir de la ligne 3.")],
       lignes: [ligne(`${rad}\\geq 0`, "condition d'existence"), ligne(`-${k}x\\geq -${c}`, `on retranche ${c}`), ligne(`x\\leq ${qL}`, `on divise par −${k} < 0 : le sens change`)],
       verification: { utilise: [t("Vérification : une valeur du domaine trouvé, puis la borne.")], lignes: [ligne(`${c}-${k}\\times ${parN(x0 - 2)}=${c - k * (x0 - 2)}\\geq 0`, `x = ${nb(x0 - 2)} convient`), ligne(`${c}-${k}\\times ${qL.startsWith("-") ? `(${qL})` : qL}=0`, "la borne convient : √0 = 0")] },
     },
@@ -232,7 +232,7 @@ function copieT(e: E): CopieDetective {
       lignes: [ligne(`${k === 1 ? "" : `${k}\\times `}${b < 0 || !Number.isInteger(b) ? `\\left(${bL}\\right)` : bL}${p > 0 ? "+" : ""}${p}=0`, `x = ${qT(b)} est gardé par la ligne 2`), ligne("\\sqrt{0}=0", "le dénominateur serait nul : la ligne 2 est fausse")],
     },
     corrigeB: {
-      utilise: [t("Racine au dénominateur : nombre sous la racine positif ou nul et racine non nulle, donc strictement positif (cours, § 1).")],
+      utilise: [t("Racine au dénominateur : nombre sous la racine positif ou nul et racine non nulle, donc strictement positif (cours, point 1).")],
       lignes: [ligne("\\sqrt{0}=0", "une racine nulle ne peut pas être au dénominateur")],
     },
     corrigeC: {
@@ -272,7 +272,7 @@ function copieU(e: E): CopieDetective {
       lignes: [ligne(`${b}-${parN(x0)}=${b - x0}<0`, `x = ${nb(x0)} est dans la réunion, mais la seconde racine n'existe pas`)],
     },
     corrigeB: {
-      utilise: [t("Le domaine d'une somme est l'intersection des domaines de ses termes : les deux conditions doivent être vraies en même temps (cours, § 1).")],
+      utilise: [t("Le domaine d'une somme est l'intersection des domaines de ses termes : les deux conditions doivent être vraies en même temps (cours, point 1).")],
       lignes: [ligne(`x\\geq ${a}`, "condition 1"), ligne(`x\\leq ${b}`, "condition 2, en même temps")],
     },
     corrigeC: vide
@@ -309,7 +309,7 @@ function copieC1(e: E): CopieDetective {
       lignes: [ligne(`\\sqrt{${linSub(ex, p)}}-${k}=\\sqrt{${k * k}}-${k}`, `x = ${nb(ex)}`), ligne(`=${k}-${k}`), ligne("=0", "dénominateur nul : la ligne 3 est fausse")],
     },
     corrigeB: {
-      utilise: [t("Domaine d'une composée : "), l("x\\in\\operatorname{dom}g"), t(" et "), l("g(x)\\in\\operatorname{dom}f"), t(" (cours, § 3).")],
+      utilise: [t("Domaine d'une composée : "), l("x\\in\\operatorname{dom}g"), t(" et "), l("g(x)\\in\\operatorname{dom}f"), t(" (cours, point 3).")],
       lignes: [ligne(`\\operatorname{dom}f=\\mathbb{R}\\setminus\\{${k}\\}`, "condition 2 : g(x) ≠ " + k)],
     },
     corrigeC: {
@@ -339,7 +339,7 @@ function copieC2(e: E): CopieDetective {
       lignes: [ligne(s === 1 ? `${linSub(x0, -p)}=-1<0` : `${p}-${parN(x0)}=-1<0`, `pour x = ${nb(x0)}, g(x) n'existe pas`)],
     },
     corrigeB: {
-      utilise: [t("Le domaine d'une composée se lit sur f(g(x)) avant toute simplification : "), l("x\\in\\operatorname{dom}g"), t(" et "), l("g(x)\\in\\operatorname{dom}f"), t(" (cours, § 3).")],
+      utilise: [t("Le domaine d'une composée se lit sur f(g(x)) avant toute simplification : "), l("x\\in\\operatorname{dom}g"), t(" et "), l("g(x)\\in\\operatorname{dom}f"), t(" (cours, point 3).")],
       lignes: [ligne(`\\operatorname{dom}g=${ensembleL(juste)}`, "condition 1")],
     },
     corrigeC: {
@@ -395,7 +395,7 @@ function copieO(e: E): CopieDetective {
           : [ligne(`f(${x0})=${fx0}`), ligne(`g(${fx0})=${m}\\times ${fx0}${q > 0 ? "+" : ""}${q}`, `donc (g∘f)(${nb(x0)}) = g(${nb(fx0)})`), ligne(`=${m * fx0 + q}`), ligne(`${ev(faux)(x0)}\\neq ${m * fx0 + q}`, "la copie trouve une autre valeur")],
     },
     corrigeB: {
-      utilise: [t("Définition de la composée (cours, § 2) : "), l(`(${A}\\circ ${B})(x)=${A}\\big(${B}(x)\\big)`), t(", on applique d'abord "), l(B), t(".")],
+      utilise: [t("Définition de la composée (cours, point 2) : "), l(`(${A}\\circ ${B})(x)=${A}\\big(${B}(x)\\big)`), t(", on applique d'abord "), l(B), t(".")],
       lignes: [ligne(`(${A}\\circ ${B})(${x0})=${A}\\big(${B}(${x0})\\big)`, `${B} reçoit ${nb(x0)} en premier`)],
     },
     corrigeC: { utilise: [t("On reprend dès la ligne 1 avec le bon ordre.")], lignes: lignesC, verification: { utilise: [t("Vérification en "), l(`x=${x0}`), t(" avec l'expression trouvée :")], lignes: [ligne(`(${A}\\circ ${B})(${x0})=${ev(bon)(x0)}`, "même valeur qu'à l'étape a")] } },
@@ -420,7 +420,7 @@ function copieP(e: E): CopieDetective {
       lignes: [ligne(`${fa}\\in\\operatorname{dom}g`, "dom g = ℝ : la ligne 4 est fausse")],
     },
     corrigeB: {
-      utilise: [t("Hors de la portion tracée, la valeur existe mais ne se lit pas ; « n'existe pas » seulement hors du domaine (cours, § 4).")],
+      utilise: [t("Hors de la portion tracée, la valeur existe mais ne se lit pas ; « n'existe pas » seulement hors du domaine (cours, point 4).")],
       lignes: [ligne("\\operatorname{dom}g=\\mathbb{R}", "g(x) = x² − " + c + " se calcule pour tout x")],
     },
     corrigeC: {

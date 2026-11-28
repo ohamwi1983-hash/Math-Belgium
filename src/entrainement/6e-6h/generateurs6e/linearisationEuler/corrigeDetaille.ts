@@ -29,7 +29,7 @@ import {
  * valeurs de l'écran (`ui6e/formatLinearisationEuler.ts`), une transformation par ligne.
  */
 
-const COURS = "(cours, § 5)";
+const COURS = "(cours, point 5)";
 const REGROUPEMENT = "e^{ikx}+e^{-ikx}=2\\cos(kx)\\qquad e^{ikx}-e^{-ikx}=2i\\sin(kx)";
 
 /**

@@ -15,7 +15,7 @@ import { degL, encadrementL, largeurL, milL, reponse, seuilL } from "../../ui5e/
 type E = ExerciceArchimedePi;
 const t = texte;
 const f = latex;
-const COURS = "(cours, § 1)";
+const COURS = "(cours, point 1)";
 const v5 = (x: number) => (exactA(x, 5) ? nbL(x, 5) : nbL(x, 5, true));
 
 function rel(x: number, dec: number): string {

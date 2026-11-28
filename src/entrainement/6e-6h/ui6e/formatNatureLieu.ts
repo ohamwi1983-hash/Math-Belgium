@@ -176,26 +176,26 @@ export function aide1_127(e: E, p: Ph): AideEcran {
   if (p === "elements") {
     switch (typeChamp127(e.nature)) {
       case "cercle":
-        return { texte: [t(`Cours, § 4 : ramène l'équation à la forme `), l("(x-p)^2+(y-q)^2=r^2"), t(" (ou "), l("PM^2=\\ldots"), t(" pour un point M fixe).")] };
+        return { texte: [t(`Cours, point 4 : ramène l'équation à la forme `), l("(x-p)^2+(y-q)^2=r^2"), t(" (ou "), l("PM^2=\\ldots"), t(" pour un point M fixe).")] };
       case "points":
-        return { texte: [t(`Cours, § 4 : `), ...(e.nature === "losange" ? [t("les sommets s'obtiennent en annulant tour à tour une seule valeur absolue.")] : e.nature === "demiDroites" ? [t("les demi-droites partent des points où la plus petite valeur absolue s'annule.")] : [t("les sommets du carré plein sont ceux du carré donné.")])] };
+        return { texte: [t(`Cours, point 4 : `), ...(e.nature === "losange" ? [t("les sommets s'obtiennent en annulant tour à tour une seule valeur absolue.")] : e.nature === "demiDroites" ? [t("les demi-droites partent des points où la plus petite valeur absolue s'annule.")] : [t("les sommets du carré plein sont ceux du carré donné.")])] };
       case "point":
-        return { texte: [t("Cours, § 4 : au seuil exact, le lieu se réduit au seul point où la somme est minimale (le milieu M de [AB], ou le centre Ω du carré).")] };
+        return { texte: [t("Cours, point 4 : au seuil exact, le lieu se réduit au seul point où la somme est minimale (le milieu M de [AB], ou le centre Ω du carré).")] };
       default:
-        if (e.nature === "octogone") return { texte: [t("Cours, § 4 : sur un côté vertical de l'octogone, "), l("|Y|\\leq c"), t(" et la somme des distances vaut "), l("2|X|+2c"), t(" (X, Y : coordonnées depuis le centre).")] };
-        if (e.nature === "droite") return { texte: [t("Cours, § 4 : après développement, il reste une équation du premier degré en x et y : c'est l'équation de la droite.")] };
-        return { texte: [t(`Cours, § 4 : une condition `), l("|A|=k"), t(" se sépare en "), l("A=k"), t(" ou "), l("A=-k"), t(" ; une égalité de distances à deux droites se traduit par une égalité de valeurs absolues.")] };
+        if (e.nature === "octogone") return { texte: [t("Cours, point 4 : sur un côté vertical de l'octogone, "), l("|Y|\\leq c"), t(" et la somme des distances vaut "), l("2|X|+2c"), t(" (X, Y : coordonnées depuis le centre).")] };
+        if (e.nature === "droite") return { texte: [t("Cours, point 4 : après développement, il reste une équation du premier degré en x et y : c'est l'équation de la droite.")] };
+        return { texte: [t(`Cours, point 4 : une condition `), l("|A|=k"), t(" se sépare en "), l("A=k"), t(" ou "), l("A=-k"), t(" ; une égalité de distances à deux droites se traduit par une égalité de valeurs absolues.")] };
     }
   }
   switch (e.famille) {
     case "deuxPoints":
-      return { texte: [t(`Cours, § 4 : `), l("PA^2+PB^2=k"), t(" se compare au seuil "), l("\\dfrac{AB^2}{2}"), t(" (théorème de la médiane) ; "), l("PA^2-PB^2=k"), t(" donne une droite perpendiculaire à (AB) ; "), l("\\dfrac{PA}{PB}=k"), t(" donne la médiatrice si k = 1, un cercle d'Apollonius sinon.")] };
+      return { texte: [t(`Cours, point 4 : `), l("PA^2+PB^2=k"), t(" se compare au seuil "), l("\\dfrac{AB^2}{2}"), t(" (théorème de la médiane) ; "), l("PA^2-PB^2=k"), t(" donne une droite perpendiculaire à (AB) ; "), l("\\dfrac{PA}{PB}=k"), t(" donne la médiatrice si k = 1, un cercle d'Apollonius sinon.")] };
     case "valeursAbsolues":
-      return { texte: [t(`Cours, § 4 : une somme de valeurs absolues égale à k donne un losange (borné) ; une différence donne des demi-droites (non borné) ; `), l("|A|=k"), t(" donne deux droites parallèles, "), l("|A|\\leq k"), t(" une bande.")] };
+      return { texte: [t(`Cours, point 4 : une somme de valeurs absolues égale à k donne un losange (borné) ; une différence donne des demi-droites (non borné) ; `), l("|A|=k"), t(" donne deux droites parallèles, "), l("|A|\\leq k"), t(" une bande.")] };
     case "distancesDroites":
-      return { texte: [t(`Cours, § 4 : à distance k d'une droite → deux parallèles (≤ k : une bande) ; équidistant de deux sécantes → leurs deux bissectrices ; de deux parallèles → la droite du milieu ; somme des distances à deux parallèles écartées de e : vide si k < e, la bande si k = e, deux droites si k > e.`)] };
+      return { texte: [t(`Cours, point 4 : à distance k d'une droite → deux parallèles (≤ k : une bande) ; équidistant de deux sécantes → leurs deux bissectrices ; de deux parallèles → la droite du milieu ; somme des distances à deux parallèles écartées de e : vide si k < e, la bande si k = e, deux droites si k > e.`)] };
     case "carre":
-      return { texte: [t(`Cours, § 4 : pour le carré de demi-côté c, la somme des distances aux côtés a pour seuil 4c (carré plein ; au-delà, un octogone) ; la somme des carrés des distances a pour seuil `), l("4c^2"), t(" (un point ; au-delà, un cercle).")] };
+      return { texte: [t(`Cours, point 4 : pour le carré de demi-côté c, la somme des distances aux côtés a pour seuil 4c (carré plein ; au-delà, un octogone) ; la somme des carrés des distances a pour seuil `), l("4c^2"), t(" (un point ; au-delà, un cercle).")] };
   }
 }
 

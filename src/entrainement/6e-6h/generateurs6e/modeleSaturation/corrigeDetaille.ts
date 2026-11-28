@@ -17,7 +17,7 @@ const t = texte;
 const f = latex;
 const n = (v: number) => (v < 0 ? `-${-v}` : String(v));
 const par = (v: number) => (v < 0 ? `(${v})` : String(v));
-const COURS = "(cours, § 7)";
+const COURS = "(cours, point 7)";
 const puissR = (e: E, exp: string) => `\\left(${rL(e)}\\right)^{${exp}}`;
 
 function etapeRapport(e: E): EtapeCorrection[] {

@@ -84,7 +84,7 @@ export function correctionDetailleeLTP(e: E): EtapeCorrection[] {
   const etapes: EtapeCorrection[] = [];
   if (e.variante === "directe") {
     etapes.push(
-      utilise("a", [t("Table de "), f("\\Phi"), t(" (cours, § 6) : "), f("\\Phi(z)=P(Z\\le z)"), t(" ; la ligne donne l'unité et le dixième de "), f("z"), t(", la colonne son centième.")]),
+      utilise("a", [t("Table de "), f("\\Phi"), t(" (cours, point 6) : "), f("\\Phi(z)=P(Z\\le z)"), t(" ; la ligne donne l'unité et le dixième de "), f("z"), t(", la colonne son centième.")]),
       calcul("a", [lecture(e.a, phiL(e.a))[0]!]),
       resultat("a", fr(reponse(e, "case"))),
       utilise("b", [t("La valeur se lit au croisement de la ligne et de la colonne.")]),
@@ -99,7 +99,7 @@ export function correctionDetailleeLTP(e: E): EtapeCorrection[] {
     const zc = Math.abs(e.z);
     if (e.variante === "inverse") {
       etapes.push(
-        utilise("a", [t("Sens inverse (cours, § 6) : on cherche la probabilité dans le corps de la table et on garde la case la plus proche.")]),
+        utilise("a", [t("Sens inverse (cours, point 6) : on cherche la probabilité dans le corps de la table et on garde la case la plus proche.")]),
         { ...calcul("a", lignesCaseProche(e)), figureHtml: extraitTablePhiHtml(zc) },
         resultat("a", fr(reponse(e, "case"))),
       );
@@ -137,13 +137,13 @@ export function correctionDetailleeLTP(e: E): EtapeCorrection[] {
   let lignesA: LigneCalcul[];
   let utiliseA: FragmentConsigne[];
   if (e.variante === "complement") {
-    utiliseA = [t("Aire totale sous la courbe égale à 1 ; pour une variable continue, "), f("P(Z=a)=0"), t(" : « "), f("\\ge"), t(" » et « "), f(">"), t(" » donnent la même probabilité (cours, § 6).")];
+    utiliseA = [t("Aire totale sous la courbe égale à 1 ; pour une variable continue, "), f("P(Z=a)=0"), t(" : « "), f("\\ge"), t(" » et « "), f(">"), t(" » donnent la même probabilité (cours, point 6).")];
     lignesA = [ligne(`${evenementL(e)}=1-P(Z\\le ${zL(e.a)})`, "événement contraire"), ligne(`=${juste}`)];
   } else if (e.variante === "symetrie") {
-    utiliseA = [t("Symétrie de la courbe par rapport à 0 : "), f("\\Phi(-z)=1-\\Phi(z)"), t(" (cours, § 6).")];
+    utiliseA = [t("Symétrie de la courbe par rapport à 0 : "), f("\\Phi(-z)=1-\\Phi(z)"), t(" (cours, point 6).")];
     lignesA = [ligne(`${evenementL(e)}=P(Z\\ge ${zL(e.a)})`, "symétrie de la courbe"), ligne(`=${juste}`, "contraire")];
   } else {
-    utiliseA = [f("P(a\\le Z\\le b)=\\Phi(b)-\\Phi(a)"), t(" : aire à gauche de "), f("b"), t(" moins aire à gauche de "), f("a"), t(e.aNeg ? " ; pour une borne négative, " : " (cours, § 6)."), ...(e.aNeg ? [f("\\Phi(-t)=1-\\Phi(t)"), t(" (cours, § 6).")] : [])];
+    utiliseA = [f("P(a\\le Z\\le b)=\\Phi(b)-\\Phi(a)"), t(" : aire à gauche de "), f("b"), t(" moins aire à gauche de "), f("a"), t(e.aNeg ? " ; pour une borne négative, " : " (cours, point 6)."), ...(e.aNeg ? [f("\\Phi(-t)=1-\\Phi(t)"), t(" (cours, point 6).")] : [])];
     lignesA = e.aNeg
       ? [ligne(`${evenementL(e)}=${phiL(e.b)}-${phiL(-e.a)}`, "différence"), ligne(`=${phiL(e.b)}-(1-${phiL(e.a)})`, "symétrie"), ligne(`=${juste}`)]
       : [ligne(`${evenementL(e)}=${juste}`, "différence")];

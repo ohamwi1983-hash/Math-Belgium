@@ -34,7 +34,7 @@ import { finaliserCorrige, frac, justif, parN } from "../../ui6e/corrigeLogarith
  * chaque partie avant toute technique de forme indéterminée.
  */
 
-const COURS = "(cours, § 5)";
+const COURS = "(cours, point 5)";
 
 /** Justification de la limite de l'exposant g(x) (étape a). */
 function justificationExposant(e: ExerciceLimiteLogD): FragmentConsigne[] {

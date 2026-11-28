@@ -24,7 +24,7 @@ import {
  * en une transformation par ligne (`lignesDepuisChaine`) et justifiées. Étapes a–d = écrans.
  */
 
-const COURS = "(cours, § 4)";
+const COURS = "(cours, point 4)";
 
 /** « cos θⱼ = …, sin θⱼ = … ⇒ θⱼ = … » de l'écran : deux chaînes (cos, sin) et l'angle. */
 function lignesArgumentFacteur(f: Facteur, indice: string): { lignes: LigneCalcul[]; angle: string } {

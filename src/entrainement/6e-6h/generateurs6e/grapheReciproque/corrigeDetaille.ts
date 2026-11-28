@@ -41,11 +41,11 @@ export function correctionDetailleeGrapheReciproque(e: ExerciceGrapheReciproque)
       : ligne(`${pt(image)}\\neq ${pt(Ap)}`, `graphe ${LETTRES_GRAPHES[i]} : ${NOM_TRANSFO[c]} ; il passe par (${nb(image[0])} ; ${nb(image[1])}) et non par A′`);
   });
   return [
-    utilise("a", fr([t("Si "), l("(a\\,;\\,b)"), t(" est sur la courbe de "), l("f"), t(", alors "), l("(b\\,;\\,a)"), t(" est sur celle de "), l("f^{-1}"), t(" : symétrie par rapport à "), l("y=x"), t(" (cours, § 1).")])),
+    utilise("a", fr([t("Si "), l("(a\\,;\\,b)"), t(" est sur la courbe de "), l("f"), t(", alors "), l("(b\\,;\\,a)"), t(" est sur celle de "), l("f^{-1}"), t(" : symétrie par rapport à "), l("y=x"), t(" (cours, point 1).")])),
     calcul("a", [ligne(`A=${pt(A)}`, "lu sur la grille"), ligne(`f(${A[0]})=${A[1]}`, "A est sur la courbe de f"), ligne(`f^{-1}(${A[1]})=${A[0]}`, "on échange abscisse et ordonnée")]),
     resultat("a", fr(reponse(e, "point"))),
     piege("a", fr([t("Garder les coordonnées de "), l("A"), t(", ou changer leurs signes (symétrie par rapport à "), l("y=-x"), t(").")])),
-    utilise("b", fr([t("Domaine de "), l("f"), t(" : abscisses de la courbe ; image : ordonnées. La réciproque les échange (cours, § 1). Point plein : borne comprise ; rond vide : exclue.")])),
+    utilise("b", fr([t("Domaine de "), l("f"), t(" : abscisses de la courbe ; image : ordonnées. La réciproque les échange (cours, point 1). Point plein : borne comprise ; rond vide : exclue.")])),
     calcul("b", [
       ligne(`\\mathrm{dom}\\,f=${intervalleL(domaineF(e))}`, "de l'extrémité gauche à l'extrémité droite"),
       ligne(`\\mathrm{im}\\,f=${intervalleL(imageF(e))}`, e.variante === "croissante" ? "f croissante : de f(gauche) à f(droite)" : "f décroissante : de f(droite) à f(gauche)"),
@@ -57,7 +57,7 @@ export function correctionDetailleeGrapheReciproque(e: ExerciceGrapheReciproque)
     utilise("c", fr([t("Le graphe de "), l("f^{-1}"), t(" est le symétrique de celui de "), l("f"), t(" par rapport à "), l("y=x"), t(" : il passe par "), l(`A'=${pt(Ap)}`), t(". On teste chaque graphe.")])),
     calcul("c", lignesC),
     { ...resultat("c", fr(reponse(e, "graphe"))), figureHtml: figureCorrige(e) },
-    utilise("d", fr([t("Pente d'une droite par deux nœuds : "), l("m=\\dfrac{\\Delta y}{\\Delta x}"), t(" ; la symétrie par rapport à "), l("y=x"), t(" échange "), l("\\Delta x"), t(" et "), l("\\Delta y"), t(", donc "), l("(f^{-1})'(b)=\\dfrac{1}{f'(a)}"), t(" (cours, § 1).")])),
+    utilise("d", fr([t("Pente d'une droite par deux nœuds : "), l("m=\\dfrac{\\Delta y}{\\Delta x}"), t(" ; la symétrie par rapport à "), l("y=x"), t(" échange "), l("\\Delta x"), t(" et "), l("\\Delta y"), t(", donc "), l("(f^{-1})'(b)=\\dfrac{1}{f'(a)}"), t(" (cours, point 1).")])),
     calcul("d", [
       ligne(`\\Delta x=${N[0]}-${A[0] < 0 ? `(${A[0]})` : A[0]}=${dx}`, `de A au nœud (${nb(N[0])} ; ${nb(N[1])}) de la tangente`),
       ligne(`\\Delta y=${N[1]}-${A[1] < 0 ? `(${A[1]})` : A[1]}=${dy}`),

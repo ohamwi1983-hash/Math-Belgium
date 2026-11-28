@@ -37,7 +37,7 @@ function etapeA(e: E): EtapeCorrection[] {
     infSurInf: piege("a", [t("Écrire "), f("\\dfrac{\\infty}{\\infty}=1"), t(" : c'est une forme indéterminée.")]),
   };
   return [
-    utilise("a", [t("On calcule la limite de chaque morceau ; "), f("\\infty-\\infty"), t(", "), f("\\dfrac{0}{0}"), t(" et "), f("\\dfrac{\\infty}{\\infty}"), t(" sont des formes indéterminées (cours, § 1).")]),
+    utilise("a", [t("On calcule la limite de chaque morceau ; "), f("\\infty-\\infty"), t(", "), f("\\dfrac{0}{0}"), t(" et "), f("\\dfrac{\\infty}{\\infty}"), t(" sont des formes indéterminées (cours, point 1).")]),
     calcul("a", lignes),
     resultat("a", [t("Forme indéterminée "), ...FORMES[fo]]),
     pieges[fo]!,
@@ -50,7 +50,7 @@ function etapeB(e: E): EtapeCorrection[] {
     const R = radicandeL(e);
     const rac = racineE1L(e);
     return [
-      utilise("b", [t("On met "), f("x^2"), t(" en évidence sous la racine ; la racine d'un carré est une valeur absolue : "), f("\\sqrt{x^2}=|x|"), t(" (cours, § 1).")]),
+      utilise("b", [t("On met "), f("x^2"), t(" en évidence sous la racine ; la racine d'un carré est une valeur absolue : "), f("\\sqrt{x^2}=|x|"), t(" (cours, point 1).")]),
       calcul("b", [
         ligne(`\\sqrt{${R}}=\\sqrt{x^2\\left(${rac.slice(6, -1)}\\right)}`, "x² en évidence (x ≠ 0)"),
         ligne(`=\\sqrt{x^2}\\cdot ${rac}`, "racine d'un produit de nombres positifs"),
@@ -111,7 +111,7 @@ function etapeB(e: E): EtapeCorrection[] {
     lignes.push(ligne(`=\\dfrac{${P}}{${conj}}`, "on réduit le numérateur"));
   }
   return [
-    utilise("b", [t("Expression conjuguée : celle de "), f("A-B"), t(" est "), f("A+B"), t(" ; leur produit est le produit remarquable "), f("(A-B)(A+B)=A^2-B^2"), t(", qui fait disparaître la racine (cours, § 1).")]),
+    utilise("b", [t("Expression conjuguée : celle de "), f("A-B"), t(" est "), f("A+B"), t(" ; leur produit est le produit remarquable "), f("(A-B)(A+B)=A^2-B^2"), t(", qui fait disparaître la racine (cours, point 1).")]),
     calcul("b", lignes, deuxRacines ? [t("On multiplie et on divise "), f("f(x)"), t(" par la conjuguée "), f(conj), t(" (non nulle) :")] : []),
     resultat("b", reponse(e, "transformer")),
     piege("b", [t("Multiplier seulement le numérateur par la conjuguée : on multiplie et on divise, sinon la fonction change.")]),
@@ -130,7 +130,7 @@ function etapeC(e: E): EtapeCorrection[] {
   let pg: ReturnType<typeof t>[];
   if (m === "simplifier") {
     const facteur = e.sous === "C" ? "x" : polyL([1, -aD(e)]);
-    usage = [t("Le facteur "), f(facteur), t(" qui s'annule est au numérateur et au dénominateur : on le simplifie (il n'est pas nul tant que "), f(e.sous === "C" ? "x\\neq 0" : `x\\neq ${aD(e)}`), t("), puis on remplace x par la valeur visée (cours, § 1).")];
+    usage = [t("Le facteur "), f(facteur), t(" qui s'annule est au numérateur et au dénominateur : on le simplifie (il n'est pas nul tant que "), f(e.sous === "C" ? "x\\neq 0" : `x\\neq ${aD(e)}`), t("), puis on remplace x par la valeur visée (cours, point 1).")];
     lignes.push(ligne(`f(x)=\\dfrac{${ap.num}}{${ap.den}}`));
     lignes.push(ligne(`=\\dfrac{${as.num}}{${as.den}}`, [t("on simplifie par "), f(facteur)]));
     lignes.push(ligne(`${L}${as.num}=${as.num}`, "constante"));
@@ -141,12 +141,12 @@ function etapeC(e: E): EtapeCorrection[] {
     else lignes.push(ligne(`${L}\\left(${as.den}\\right)=${somme}=${total}`, [t("on remplace x par "), f(e.sous === "C" ? "0" : `${aD(e)}`)]));
     pg = [t("Remplacer x avant de simplifier : on retombe sur "), f("\\dfrac{0}{0}"), t(".")];
   } else if (m === "direct") {
-    usage = [t("Le numérateur est un nombre fixe ; le dénominateur est une somme de deux racines qui tendent vers "), f("+\\infty"), t(" (cours, § 1).")];
+    usage = [t("Le numérateur est un nombre fixe ; le dénominateur est une somme de deux racines qui tendent vers "), f("+\\infty"), t(" (cours, point 1).")];
     lignes.push(ligne(`f(x)=\\dfrac{${ap.num}}{${ap.den}}`));
     lignes.push(ligne(pleineLargeur(`${L}\\left(${as.den}\\right)=+\\infty`), "somme de deux termes qui tendent vers +∞"));
     pg = [t("Conclure trop vite « "), f("\\infty-\\infty=0"), t(" » : ici le résultat est bien 0, mais il faut le démontrer.")];
   } else if (e.sous === "E1") {
-    usage = [t("On divise le numérateur et le dénominateur par x (x < 0) ; "), f("\\dfrac{c}{x}"), t(" et "), f("\\dfrac{c}{x^2}"), t(" tendent vers 0 (cours, § 1).")];
+    usage = [t("On divise le numérateur et le dénominateur par x (x < 0) ; "), f("\\dfrac{c}{x}"), t(" et "), f("\\dfrac{c}{x^2}"), t(" tendent vers 0 (cours, point 1).")];
     lignes.push(ligne(`f(x)=\\dfrac{${ap.num}}{${ap.den}}`));
     lignes.push(ligne(`=\\dfrac{${as.num}}{${as.den}}`, "on divise numérateur et dénominateur par x"));
     lignes.push(ligne(`${L}\\left(${as.num}\\right)=-\\sqrt{${d.m * d.m}}=${-d.m}`, [f("\\dfrac{1}{x}"), t(" et "), f("\\dfrac{1}{x^2}"), t(" tendent vers 0")]));
@@ -154,7 +154,7 @@ function etapeC(e: E): EtapeCorrection[] {
     pg = [t("Oublier le signe « − » apporté par "), f("\\sqrt{x^2}=-x"), t(" : le numérateur tend vers un nombre négatif.")];
   } else {
     const neg = negatif(e);
-    usage = [t(`On divise le numérateur et le dénominateur par x, le terme dominant ; x ${neg ? "< 0" : "> 0"}, donc `), f(neg ? "x=-\\sqrt{x^2}" : "x=\\sqrt{x^2}"), t(" pour entrer x sous la racine (cours, § 1).")];
+    usage = [t(`On divise le numérateur et le dénominateur par x, le terme dominant ; x ${neg ? "< 0" : "> 0"}, donc `), f(neg ? "x=-\\sqrt{x^2}" : "x=\\sqrt{x^2}"), t(" pour entrer x sous la racine (cours, point 1).")];
     lignes.push(ligne(`f(x)=\\dfrac{${ap.num}}{${ap.den}}`));
     if (e.sous === "B2") {
       lignes.push(ligne(`\\dfrac{\\sqrt{${polyL([1, d.a, d.c])}}}{x}=\\sqrt{\\dfrac{${polyL([1, d.a, d.c])}}{x^2}}=${racineDiviseeL(1, d.a, d.c)}`, [f("x>0"), t(" : "), f("x=\\sqrt{x^2}")]));
@@ -205,7 +205,7 @@ function etapeD(e: E): EtapeCorrection[] {
   const v = fonction(e)(pc.x);
   const vL = v.toFixed(4).replace(".", "{,}");
   return [
-    utilise("d", [t("Limite d'un quotient : quotient des limites quand le dénominateur a une limite non nulle ; un nombre fixe divisé par l'infini tend vers 0 (cours, § 1).")]),
+    utilise("d", [t("Limite d'un quotient : quotient des limites quand le dénominateur a une limite non nulle ; un nombre fixe divisé par l'infini tend vers 0 (cours, point 1).")]),
     calcul("d", lignes),
     resultat("d", reponse(e, "limite")),
     verification("d", [t("Contrôle numérique : la valeur de f près de la cible est proche de la limite.")], [ligne(`f\\left(${pc.xL}\\right)\\approx ${vL}`)]),

@@ -65,9 +65,9 @@ export function reponse135(e: E, p: Ph): Frag[] {
 export const recap135 = reponse135;
 
 export function aide1_135(_e: E, p: Ph): AideEcran {
-  if (p === "nature") return { texte: [t("Cours, § 2 : 0 < e < 1 → ellipse ; e = 1 → parabole ; e > 1 → hyperbole.")] };
-  if (p === "equation") return { texte: [t("Cours, § 2 : un point P(x ; y) est sur la conique si et seulement si "), l("|PF|=e\\cdot\\text{dist}(P\\,;d)"), t(" ; élève au carré (deux membres positifs) :")], latex: "|PF|^2=e^2\\cdot\\text{dist}(P\\,;d)^2" };
-  return { texte: [t("Cours, § 2 : le sommet S est sur la perpendiculaire à d issue de F ; comme il est sur la conique, "), l("|SF|=e\\cdot|SH|"), t(", où H est le pied de cette perpendiculaire.")] };
+  if (p === "nature") return { texte: [t("Cours, point 2 : 0 < e < 1 → ellipse ; e = 1 → parabole ; e > 1 → hyperbole.")] };
+  if (p === "equation") return { texte: [t("Cours, point 2 : un point P(x ; y) est sur la conique si et seulement si "), l("|PF|=e\\cdot\\text{dist}(P\\,;d)"), t(" ; élève au carré (deux membres positifs) :")], latex: "|PF|^2=e^2\\cdot\\text{dist}(P\\,;d)^2" };
+  return { texte: [t("Cours, point 2 : le sommet S est sur la perpendiculaire à d issue de F ; comme il est sur la conique, "), l("|SF|=e\\cdot|SH|"), t(", où H est le pied de cette perpendiculaire.")] };
 }
 
 export function aide2_135(e: E, p: Ph): AideEcran | null {

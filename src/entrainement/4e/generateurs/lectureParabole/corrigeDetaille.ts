@@ -15,7 +15,7 @@ import { etiquettePoint } from "../../ui/figureParaboleGrille";
 
 type E = ExerciceLectureParabole;
 const n = nombreLatex;
-const COURS = "(cours, § 1)";
+const COURS = "(cours, point 1)";
 
 function rel(v: number): string {
   return v > 0 ? ">0" : v < 0 ? "<0" : "=0";

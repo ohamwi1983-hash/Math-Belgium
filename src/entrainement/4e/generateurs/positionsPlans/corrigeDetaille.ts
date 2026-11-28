@@ -182,7 +182,7 @@ function etapesTroisPlans(e: ExerciceTroisPlans): EtapeCorrection[] {
     utilise("a", phrase(`On prend deux des plans ${COURS_TROIS_PLANS} : parallèles → aucun point commun ; sinon leur droite d'intersection d, puis la position de d par rapport au troisième plan : sécante → un seul point commun, incluse → une droite commune, parallèle → aucun point commun.`)),
     calcul("a", noyau),
     resultat("a", [texte(LIBELLES_ISSUE[e.issue])]),
-    utilise("b", phrase(`Une droite est commune à deux plans si deux de ses points sont dans chacun d'eux ; sa position par rapport au troisième plan se lit comme au § 4 (incluse, parallèle à une droite du plan, sinon sécante).`)),
+    utilise("b", phrase(`Une droite est commune à deux plans si deux de ses points sont dans chacun d'eux ; sa position par rapport au troisième plan se lit comme au point 4 (incluse, parallèle à une droite du plan, sinon sécante).`)),
     calcul("b", lignes),
     { ...resultat("b", phrase(`${valide(e)} ${conclusionTroisPlans(e)} ${legendeFigureFinale(e)}`)), figureHtml: figurePositionsPlansSvg(e, { mode: "papier", ...elementsFigureFinale(e, null) }) },
     piege("b", [

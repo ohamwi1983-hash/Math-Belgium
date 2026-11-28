@@ -26,12 +26,12 @@ import {
  * intersection, § 6 distance, § 7 lieux et médiatrice, § 8 cercle).
  */
 
-export const COURS_REPERER = "(cours, § 1)";
-export const COURS_RELATIONS = "(cours, § 4)";
-export const COURS_INTERSECTION = "(cours, § 5)";
-export const COURS_DISTANCE = "(cours, § 6)";
-export const COURS_LIEU = "(cours, § 7)";
-export const COURS_CERCLE = "(cours, § 8)";
+export const COURS_REPERER = "(cours, point 1)";
+export const COURS_RELATIONS = "(cours, point 4)";
+export const COURS_INTERSECTION = "(cours, point 5)";
+export const COURS_DISTANCE = "(cours, point 6)";
+export const COURS_LIEU = "(cours, point 7)";
+export const COURS_CERCLE = "(cours, point 8)";
 
 /** Coefficient devant une parenthèse en tête : « » (1), « - » (−1), « 3 ». */
 function coefTete(c: number): string {

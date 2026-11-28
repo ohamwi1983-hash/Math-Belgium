@@ -15,15 +15,15 @@ import { fractionLatex, pgcdEntier } from "./formatMonome";
  * - `justif` : justification en fragments (formules en KaTeX, jamais au clavier).
  */
 
-export const COURS_PROPRIETES = "(cours, § 1)";
-export const COURS_EQUATIONS = "(cours, § 2)";
-export const COURS_INEQUATIONS = "(cours, § 3)";
-export const COURS_DERIVEE = "(cours, § 4)";
-export const COURS_LIMITES = "(cours, § 5)";
-export const COURS_PARAMETRES = "(cours, § 6)";
-export const COURS_HYPERBOLIQUES = "(cours, § 7)";
-export const COURS_GRAPHIQUE_DERIVEE = "(cours, § 8)";
-export const COURS_ETUDE = "(cours, § 9)";
+export const COURS_PROPRIETES = "(cours, point 1)";
+export const COURS_EQUATIONS = "(cours, point 2)";
+export const COURS_INEQUATIONS = "(cours, point 3)";
+export const COURS_DERIVEE = "(cours, point 4)";
+export const COURS_LIMITES = "(cours, point 5)";
+export const COURS_PARAMETRES = "(cours, point 6)";
+export const COURS_HYPERBOLIQUES = "(cours, point 7)";
+export const COURS_GRAPHIQUE_DERIVEE = "(cours, point 8)";
+export const COURS_ETUDE = "(cours, point 9)";
 
 type Fragments = FragmentConsigne[];
 

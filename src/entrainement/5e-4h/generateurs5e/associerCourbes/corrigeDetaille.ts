@@ -55,7 +55,7 @@ function etape(e: E, k: number): EtapeCorrection[] {
     ligne(`\\varphi = -${omegaEnLigne(s.omega).includes("/") ? `\\dfrac{${s.omega.n}}{${s.omega.d}}` : omegaEnLigne(s.omega)} \\times ${parPi(P)} = ${piLatex(s.phi)}`, [f("\\varphi = -\\omega\\,\\Phi")]),
   ];
   return [
-    utilise(sq, [t("Lecture d'une sinusoïde (cours, § 5) : "), f("b = \\dfrac{y_{\\max} + y_{\\min}}{2}"), t(", "), f("|A| = \\dfrac{y_{\\max} - y_{\\min}}{2}"), t(", "), f("T = \\dfrac{2\\pi}{\\omega}"), t(", "), f("\\Phi = -\\dfrac{\\varphi}{\\omega}"), t(" ; le signe de "), f("A"), t(" se lit au sens de la courbe en "), f("x = \\Phi"), t(".")]),
+    utilise(sq, [t("Lecture d'une sinusoïde (cours, point 5) : "), f("b = \\dfrac{y_{\\max} + y_{\\min}}{2}"), t(", "), f("|A| = \\dfrac{y_{\\max} - y_{\\min}}{2}"), t(", "), f("T = \\dfrac{2\\pi}{\\omega}"), t(", "), f("\\Phi = -\\dfrac{\\varphi}{\\omega}"), t(" ; le signe de "), f("A"), t(" se lit au sens de la courbe en "), f("x = \\Phi"), t(".")]),
     calcul(sq, lignes),
     { ...resultat(sq, reponseEcran(e, k)), figureHtml: figureLecture(e, k) },
     piege(

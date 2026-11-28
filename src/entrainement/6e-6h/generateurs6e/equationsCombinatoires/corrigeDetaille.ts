@@ -79,7 +79,7 @@ export function correctionDetaillee101(e: E): EtapeCorrection[] {
     switch (ph) {
       case "polynome":
         out.push(
-          utilise(sq, fr(e.variante === "quotient" ? [t("Factorielle (cours, § 1) : "), l("(m+1)!=(m+1)\\times m!"), t(" ; on descend jusqu'à la factorielle du dénominateur.")] : [t("Définitions (cours, § 1) : "), l(`${AL("n", "k")}=\\dfrac{n!}{(n-k)!}`), t(", "), l(`${CL("n", "k")}=\\dfrac{${AL("n", "k")}}{k!}`), t(".")])),
+          utilise(sq, fr(e.variante === "quotient" ? [t("Factorielle (cours, point 1) : "), l("(m+1)!=(m+1)\\times m!"), t(" ; on descend jusqu'à la factorielle du dénominateur.")] : [t("Définitions (cours, point 1) : "), l(`${AL("n", "k")}=\\dfrac{n!}{(n-k)!}`), t(", "), l(`${CL("n", "k")}=\\dfrac{${AL("n", "k")}}{k!}`), t(".")])),
           calcul(sq, lignesPolynome(e)),
           resultat(sq, fr(reponse101(e, ph))),
         );
@@ -100,7 +100,7 @@ export function correctionDetaillee101(e: E): EtapeCorrection[] {
       }
       case "propriete":
         out.push(
-          utilise(sq, fr([t("Symétrie (cours, § 1) : "), l(`${CL("n", "k")}=${CL("n", "n-k")}`), t(" ; deux indices différents donnent le même coefficient seulement s'ils sont complémentaires.")])),
+          utilise(sq, fr([t("Symétrie (cours, point 1) : "), l(`${CL("n", "k")}=${CL("n", "n-k")}`), t(" ; deux indices différents donnent le même coefficient seulement s'ils sont complémentaires.")])),
           calcul(
             sq,
             e.inconnue === "n"

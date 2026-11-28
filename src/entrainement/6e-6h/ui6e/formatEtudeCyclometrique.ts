@@ -293,8 +293,8 @@ export function aide1(e: E, phase: PhaseEtudeCyclo): AideEcran {
       return { texte: [tx("Cherche morceau par morceau les valeurs interdites : arcsin et arccos demandent un argument dans "), lx("[-1\\,;\\,1]"), tx(", une racine un radicande positif ou nul, une fraction un dénominateur non nul ; arctan est définie sur "), lx("\\mathbb{R}"), tx(".")] };
     case "derivee":
       if (e.variante === "arc-racine")
-        return { texte: [tx("Formules du cours (§ 4), avec la règle de la chaîne :")], latex: `(\\${e.d.arc} x)'=${e.d.arc === "arcsin" ? "" : "-"}\\dfrac{1}{\\sqrt{1-x^{2}}}\\qquad (\\sqrt{u})'=\\dfrac{u'}{2\\sqrt{u}}` };
-      return { texte: [tx("Formule du cours (§ 4), avec la règle de la chaîne"), ...(e.variante === "x-arctan" ? [tx(" et celle du produit "), lx("(uv)'=u'v+uv'")] : []), tx(" :")], latex: "(\\arctan u)'=\\dfrac{u'}{1+u^{2}}" };
+        return { texte: [tx("Formules du cours (point 4), avec la règle de la chaîne :")], latex: `(\\${e.d.arc} x)'=${e.d.arc === "arcsin" ? "" : "-"}\\dfrac{1}{\\sqrt{1-x^{2}}}\\qquad (\\sqrt{u})'=\\dfrac{u'}{2\\sqrt{u}}` };
+      return { texte: [tx("Formule du cours (point 4), avec la règle de la chaîne"), ...(e.variante === "x-arctan" ? [tx(" et celle du produit "), lx("(uv)'=u'v+uv'")] : []), tx(" :")], latex: "(\\arctan u)'=\\dfrac{u'}{1+u^{2}}" };
     case "zeros":
       if (e.variante === "x-arctan") return { texte: [tx("On ne sait pas résoudre "), lx("f'(x)=0"), tx(" par calcul : étudie le signe de chaque terme de "), lx("f'(x)"), tx(" selon que "), lx("x"), tx(" est positif, nul ou négatif.")] };
       return { texte: [tx("Un quotient est nul quand son numérateur est nul (le dénominateur ne s'annule pas sur le domaine de dérivabilité). Garde seulement les valeurs du domaine.")] };
@@ -303,13 +303,13 @@ export function aide1(e: E, phase: PhaseEtudeCyclo): AideEcran {
     case "valeurs":
       switch (e.variante) {
         case "arctan-droite":
-          return { texte: [tx("Valeurs remarquables (cours, § 2) et parité : "), lx("f"), tx(" est impaire.")], latex: "\\arctan\\dfrac{\\sqrt{3}}{3}=\\dfrac{\\pi}{6}\\qquad\\arctan 1=\\dfrac{\\pi}{4}\\qquad\\arctan\\sqrt{3}=\\dfrac{\\pi}{3}" };
+          return { texte: [tx("Valeurs remarquables (cours, point 2) et parité : "), lx("f"), tx(" est impaire.")], latex: "\\arctan\\dfrac{\\sqrt{3}}{3}=\\dfrac{\\pi}{6}\\qquad\\arctan 1=\\dfrac{\\pi}{4}\\qquad\\arctan\\sqrt{3}=\\dfrac{\\pi}{3}" };
         case "x-arctan":
           return { texte: [tx("Le minimum est la valeur de "), lx("f"), tx(" au zéro de "), lx("f'"), tx(". Pour la limite, utilise :")], latex: "\\lim\\limits_{u\\to+\\infty}\\arctan u=\\dfrac{\\pi}{2}" };
         case "arc-racine":
-          return { texte: [tx("Remplace "), lx("x"), tx(" par chaque valeur ; valeurs remarquables (cours, § 2) :")], latex: "\\arcsin\\dfrac{1}{2}=\\dfrac{\\pi}{6}\\qquad\\arccos\\dfrac{1}{2}=\\dfrac{\\pi}{3}\\qquad\\arcsin\\dfrac{\\sqrt{2}}{2}=\\arccos\\dfrac{\\sqrt{2}}{2}=\\dfrac{\\pi}{4}" };
+          return { texte: [tx("Remplace "), lx("x"), tx(" par chaque valeur ; valeurs remarquables (cours, point 2) :")], latex: "\\arcsin\\dfrac{1}{2}=\\dfrac{\\pi}{6}\\qquad\\arccos\\dfrac{1}{2}=\\dfrac{\\pi}{3}\\qquad\\arcsin\\dfrac{\\sqrt{2}}{2}=\\arccos\\dfrac{\\sqrt{2}}{2}=\\dfrac{\\pi}{4}" };
         case "arctan-inverse":
-          return { texte: [tx("Cherche d'abord la limite de "), lx("u=\\dfrac{k}{x}"), tx(" (à gauche et à droite de 0, puis en "), lx("+\\infty"), tx("), puis utilise les asymptotes horizontales de arctan (cours, § 2) et "), lx("\\arctan 0=0"), tx(".")] };
+          return { texte: [tx("Cherche d'abord la limite de "), lx("u=\\dfrac{k}{x}"), tx(" (à gauche et à droite de 0, puis en "), lx("+\\infty"), tx("), puis utilise les asymptotes horizontales de arctan (cours, point 2) et "), lx("\\arctan 0=0"), tx(".")] };
       }
   }
 }

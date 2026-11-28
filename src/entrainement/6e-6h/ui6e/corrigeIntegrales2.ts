@@ -11,12 +11,12 @@ const t = texte;
  */
 
 /** Renvois aux sections du chapitre « Intégrales et primitives » (numéros `number` du contenu). */
-export const COURS_PRIMITIVES = "(cours, § 1)";
-export const COURS_CONDITION_INITIALE = "(cours, § 2)";
-export const COURS_INTEGRALES = "(cours, § 3)";
-export const COURS_AIRES = "(cours, § 4)";
-export const COURS_VOLUMES = "(cours, § 5)";
-export const COURS_PROBLEMES = "(cours, § 7)";
+export const COURS_PRIMITIVES = "(cours, point 1)";
+export const COURS_CONDITION_INITIALE = "(cours, point 2)";
+export const COURS_INTEGRALES = "(cours, point 3)";
+export const COURS_AIRES = "(cours, point 4)";
+export const COURS_VOLUMES = "(cours, point 5)";
+export const COURS_PROBLEMES = "(cours, point 7)";
 
 /** Formules séparées par un texte (« ; » par défaut) : listes de résultats d'une étape. */
 export function listeFormules(formules: string[], separateur = " ; "): FragmentConsigne[] {

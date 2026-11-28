@@ -213,7 +213,7 @@ export function aide1(e: E, p: PhaseApproximationAffine): AideEcran {
     if (estTrigo(e)) return { texte: [tx("Choisis pour a un angle remarquable (0, π/2 ou π) dont le sinus, le cosinus ou la tangente sont connus ; h est le petit écart restant.")] };
     return { texte: [tx("Choisis pour a l'entier le plus proche du nombre ; h est ce qu'il faut lui ajouter :")], latex: `${argumentL(e)}=a+h` };
   }
-  if (p === "derivee") return { texte: [tx("Utilise le tableau des dérivées de référence (cours, § 3).")] };
+  if (p === "derivee") return { texte: [tx("Utilise le tableau des dérivées de référence (cours, point 3).")] };
   if (p === "valeurs") return { texte: [tx("Remplace x par a dans "), lx(`${F}(x)`), tx(" puis dans "), lx(`${F}'(x)`), tx(".")] };
   if (p === "approx") return { texte: [tx("La tangente en a remplace la courbe près de a :")], latex: `${F}(a+h)\\approx ${F}(a)+${F}'(a)\\cdot h` };
   return { texte: [tx("L'erreur est l'écart entre la valeur exacte (ou celle de la calculatrice) et l'approximation, pris positivement :")], latex: "\\text{erreur}=\\left|\\,\\text{valeur exacte}-\\text{approximation}\\,\\right|" };

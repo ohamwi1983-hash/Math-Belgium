@@ -42,7 +42,7 @@ export function correctionDetailleeAMU(e: E): EtapeCorrection[] {
 
   // a) Stratégie.
   etapes.push(
-    utilise("a", [t(`Un ${n.groupe} de `), { type: "latex", valeur: `${e.k}` }, t(` ${n.elements} contient ${cas} ${n.cibles} : on veut `), ...fr(quantificateur(e)), t(` (cas ${demandes.join(", ")} ; ${exclus.length ? `exclus : ${exclus.join(", ")}` : "aucun cas exclu"}) (cours, § 2).`)]),
+    utilise("a", [t(`Un ${n.groupe} de `), { type: "latex", valeur: `${e.k}` }, t(` ${n.elements} contient ${cas} ${n.cibles} : on veut `), ...fr(quantificateur(e)), t(` (cas ${demandes.join(", ")} ; ${exclus.length ? `exclus : ${exclus.join(", ")}` : "aucun cas exclu"}) (cours, point 2).`)]),
   );
   if (s === "complement")
     etapes.push(raisonnement([t(`Cas demandés : ${demandes.length} nombres à calculer ; cas exclus : un seul (« 0 »). On compte donc tous les ${n.groupes} et on retire ceux qui n'en ont aucun.`)]));
@@ -53,7 +53,7 @@ export function correctionDetailleeAMU(e: E): EtapeCorrection[] {
   if (s === "complement") etapes.push(piege("a", [t(`Imposer ${n.cibleFem ? "une" : "un"} ${n.cible} puis compléter librement : un ${n.groupe} qui en contient deux est alors compté deux fois.`)]));
 
   // b) Les deux nombres.
-  etapes.push(utilise("b", [t("Combinaisons (cours, § 1) : dans un groupe, l'ordre ne compte pas et il n'y a pas de répétition ; "), { type: "latex", valeur: "C_n^p=\\dfrac{n!}{p!\\,(n-p)!}" }, t(".")]));
+  etapes.push(utilise("b", [t("Combinaisons (cours, point 1) : dans un groupe, l'ordre ne compte pas et il n'y a pas de répétition ; "), { type: "latex", valeur: "C_n^p=\\dfrac{n!}{p!\\,(n-p)!}" }, t(".")]));
   const lb: LigneCalcul[] = [];
   if (s === "complement") {
     lb.push(...lignesC(N(e), e.k, `tous : ${e.k} parmi ${N(e)}`));

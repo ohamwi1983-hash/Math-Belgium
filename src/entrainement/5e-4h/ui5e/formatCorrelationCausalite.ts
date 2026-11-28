@@ -109,7 +109,7 @@ const fr = (x: unknown) => x as FragmentConsigne[];
 export function correctionDetailleeCorrelationCausalite(e: E): EtapeCorrection[] {
   const s = situationDe(e);
   return [
-    utilise("a", [texte("Corrélation ne signifie pas causalité (cours, § 6) : avant de conclure à une cause, on cherche une cause commune, une coïncidence, une causalité inverse ou un effet décalé ; on ne retient la causalité que si un mécanisme connu (ou une expérience) l'explique.")]),
+    utilise("a", [texte("Corrélation ne signifie pas causalité (cours, point 6) : avant de conclure à une cause, on cherche une cause commune, une coïncidence, une causalité inverse ou un effet décalé ; on ne retient la causalité que si un mécanisme connu (ou une expérience) l'explique.")]),
     resultat("a", fr(LIBELLES_TYPE[e.variante])),
     utilise("b", [texte("On précise l'explication dans la situation.")]),
     resultat("b", fr(frags(s.bonne))),

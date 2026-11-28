@@ -209,10 +209,10 @@ export function reponse(e: E, p: P): Frag[] {
 export const recap = reponse;
 
 export function aide1(_e: E, p: P): AideEcran {
-  if (p === "aire" || p === "figure") return { texte: [l("P(Z\\le t)"), t(" est l'aire à gauche de "), l("t"), t(", "), l("P(Z\\ge t)"), t(" l'aire à droite, "), l("P(a\\le Z\\le b)"), t(" l'aire entre "), l("a"), t(" et "), l("b"), t(" (cours, § 6).")] };
+  if (p === "aire" || p === "figure") return { texte: [l("P(Z\\le t)"), t(" est l'aire à gauche de "), l("t"), t(", "), l("P(Z\\ge t)"), t(" l'aire à droite, "), l("P(a\\le Z\\le b)"), t(" l'aire entre "), l("a"), t(" et "), l("b"), t(" (cours, point 6).")] };
   if (p === "phi") return { texte: [t("La table donne "), l("\\Phi(t)=P(Z\\le t)"), t(" pour "), l("t\\ge 0"), t(" ; l'aire totale vaut 1 et la courbe est symétrique par rapport à 0 :")], latex: "P(Z\\ge t)=1-\\Phi(t)\\qquad \\Phi(-t)=1-\\Phi(t)" };
   if (p === "k") return { texte: [t("Règle empirique : les bornes sont de la forme "), l("\\mu\\pm k\\sigma"), t(". Calcule l'écart entre une borne et la moyenne, puis divise par l'écart-type.")] };
-  return { texte: [t("Règle empirique (cours, § 6) : environ "), l("68{,}3\\,\\%"), t(", "), l("95{,}4\\,\\%"), t(" et "), l("99{,}7\\,\\%"), t(" des valeurs dans "), l("[\\mu-\\sigma\\,;\\mu+\\sigma]"), t(", "), l("[\\mu-2\\sigma\\,;\\mu+2\\sigma]"), t(", "), l("[\\mu-3\\sigma\\,;\\mu+3\\sigma]"), t(". Le reste se partage également entre les deux côtés.")] };
+  return { texte: [t("Règle empirique (cours, point 6) : environ "), l("68{,}3\\,\\%"), t(", "), l("95{,}4\\,\\%"), t(" et "), l("99{,}7\\,\\%"), t(" des valeurs dans "), l("[\\mu-\\sigma\\,;\\mu+\\sigma]"), t(", "), l("[\\mu-2\\sigma\\,;\\mu+2\\sigma]"), t(", "), l("[\\mu-3\\sigma\\,;\\mu+3\\sigma]"), t(". Le reste se partage également entre les deux côtés.")] };
 }
 
 export function aide2(e: E, p: P): AideEcran | null {

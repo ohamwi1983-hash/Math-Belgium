@@ -16,7 +16,7 @@ import { equationL, l, membreDroite, n, nbp, nombreTexte, plusTerme, produitTerm
  */
 
 type E = ExerciceIntersectionCercles;
-const COURS = "(cours, § 10)";
+const COURS = "(cours, point 10)";
 
 /** « -4x-(2x)=-6x » : une colonne de la soustraction. */
 function ligneDifference(c1: number, c2: number, partie: string, nom: string): LigneCalcul | null {

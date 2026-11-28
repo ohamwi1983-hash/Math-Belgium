@@ -134,13 +134,13 @@ export function champs(e: E, phase: PhaseTangenteExpo): ChampEcran[] {
 export function aide1(e: E, phase: PhaseTangenteExpo): AideEcran {
   switch (phase) {
     case "signe":
-      return { texte: [tx("La pente de la tangente en "), lx("(0\\,;1)"), tx(" à la courbe de "), lx("a^{x}"), tx(" est le nombre "), lx("\\ln a"), tx(" (cours, § 2). Il a le signe du sens de variation de "), lx("a^{x}"), tx(" :")], latex: "a>1\\Rightarrow \\ln a>0\\qquad 0<a<1\\Rightarrow \\ln a<0" };
+      return { texte: [tx("La pente de la tangente en "), lx("(0\\,;1)"), tx(" à la courbe de "), lx("a^{x}"), tx(" est le nombre "), lx("\\ln a"), tx(" (cours, point 2). Il a le signe du sens de variation de "), lx("a^{x}"), tx(" :")], latex: "a>1\\Rightarrow \\ln a>0\\qquad 0<a<1\\Rightarrow \\ln a<0" };
     case "image":
       return e.base ? { texte: [tx("Remplace "), lx("x"), tx(" par "), lx("x_0"), tx(" :")], latex: `f(x_0)=k\\cdot a^{x_0}` } : { texte: [tx("Remplace "), lx("x"), tx(" par "), lx("x_0"), tx(" :")], latex: `f(x_0)=k\\cdot e^{m x_0}` };
     case "pente":
-      if (e.variante === "en-zero") return { texte: [tx("Dérivée d'une exponentielle (cours, § 2) :")], latex: "(a^{x})'=\\ln a\\cdot a^{x}" };
-      if (e.base) return { texte: [tx("Dérivée d'une exponentielle (cours, § 2), multipliée par la constante "), lx("k"), tx(" :")], latex: "(a^{x})'=\\ln a\\cdot a^{x}\\qquad (k\\cdot a^{x})'=k\\cdot\\ln a\\cdot a^{x}" };
-      return { texte: [tx("Base "), lx("e"), tx(" : "), lx("\\ln e=1"), tx(", et la règle de la chaîne (cours, § 2) :")], latex: "(e^{u})'=u'\\cdot e^{u}" };
+      if (e.variante === "en-zero") return { texte: [tx("Dérivée d'une exponentielle (cours, point 2) :")], latex: "(a^{x})'=\\ln a\\cdot a^{x}" };
+      if (e.base) return { texte: [tx("Dérivée d'une exponentielle (cours, point 2), multipliée par la constante "), lx("k"), tx(" :")], latex: "(a^{x})'=\\ln a\\cdot a^{x}\\qquad (k\\cdot a^{x})'=k\\cdot\\ln a\\cdot a^{x}" };
+      return { texte: [tx("Base "), lx("e"), tx(" : "), lx("\\ln e=1"), tx(", et la règle de la chaîne (cours, point 2) :")], latex: "(e^{u})'=u'\\cdot e^{u}" };
     case "tangente":
       return { texte: [tx("Équation de la tangente au point d'abscisse "), lx("x_0"), tx(" :")], latex: "y=f'(x_0)\\,(x-x_0)+f(x_0)" };
   }

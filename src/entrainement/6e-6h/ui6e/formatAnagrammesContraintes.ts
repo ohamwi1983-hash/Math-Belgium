@@ -16,7 +16,7 @@ type P = Phase103;
 const t = tx;
 const l = lx;
 
-const COURS = "(cours, § 2)";
+const COURS = "(cours, point 2)";
 export const DEFINITION_ANAGRAMME = "Une anagramme d'un mot est un mot (ayant un sens ou non) écrit avec toutes ses lettres et différent de lui.";
 
 export { phases103 };

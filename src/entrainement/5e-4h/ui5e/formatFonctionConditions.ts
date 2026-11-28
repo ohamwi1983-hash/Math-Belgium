@@ -150,7 +150,7 @@ export function aide1(e: E, p: PhaseFonctionConditions): AideEcran {
   if (p === "resolution") return { texte: [tx("Élimine une inconnue : exprime b dans une équation et remplace-le dans l'autre, ou multiplie les équations pour que les termes en b soient opposés, puis additionne.")] };
   if (p === "derivee") return estInflexion(e) ? { texte: [tx("Dérive deux fois :")], latex: "f'(x)=3ax^2+2bx+c\\qquad f''(x)=6ax+2b" } : { texte: [tx("Dérive terme à terme :")], latex: "f'(x)=3ax^2+2bx+c" };
   if (estInflexion(e)) return { texte: [tx("La courbe est concave là où "), lx("f''<0"), tx(" et convexe là où "), lx("f''>0"), tx(" ; il y a inflexion si "), lx("f''"), tx(" change de signe.")] };
-  return { texte: [tx("En un point où "), lx("f'"), tx(" s'annule, il y a un extremum seulement si "), lx("f'"), tx(" change de signe : de + à − c'est un maximum, de − à + un minimum (cours, § 5).")] };
+  return { texte: [tx("En un point où "), lx("f'"), tx(" s'annule, il y a un extremum seulement si "), lx("f'"), tx(" change de signe : de + à − c'est un maximum, de − à + un minimum (cours, point 5).")] };
 }
 
 export function aide2(e: E, p: PhaseFonctionConditions): AideEcran | null {

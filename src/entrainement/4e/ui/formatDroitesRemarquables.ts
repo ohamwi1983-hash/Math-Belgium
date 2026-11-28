@@ -176,7 +176,7 @@ function ecranPoint(e: E, nom: string, titre: string, consigne: Fragments, d1: s
     consigne,
     champs: champsPoint(nom, p, [], [], "Ton point doit vérifier les deux équations : remplace pour contrôler."),
     aides: [
-      [texte("Le point de concours est sur les deux droites : résous le système de leurs équations, par substitution ou par combinaison (cours, § 5).")],
+      [texte("Le point de concours est sur les deux droites : résous le système de leurs équations, par substitution ou par combinaison (cours, point 5).")],
       [texte("Ici, résous le système formé par "), latex(`${LIB[d1]}\\equiv ${droiteLatex(e.droites[d1]!)}`), texte(" et "), latex(`${LIB[d2]}\\equiv ${droiteLatex(e.droites[d2]!)}`), texte(".")],
     ],
     reponse: [latex(pointLatex(nom, p))],
@@ -226,7 +226,7 @@ function ecransAire(e: E): EcranTSD[] {
       consigne: [texte("Calcule les coordonnées du pied H de la hauteur issue de A (perpendiculaire à (BC) passant par A).")],
       champs: champsPoint("H", h, [], [], "H doit être sur (BC) et $\\vec{AH}$ perpendiculaire à (BC)."),
       aides: [
-        [texte("Méthode du cours (§ 6) : la perpendiculaire à "), latex("ax+by+c=0"), texte(" passant par A a pour vecteur directeur "), latex("\\begin{pmatrix}a\\\\b\\end{pmatrix}"), texte(" ; H est son intersection avec (BC).")],
+        [texte("Méthode du cours (point 6) : la perpendiculaire à "), latex("ax+by+c=0"), texte(" passant par A a pour vecteur directeur "), latex("\\begin{pmatrix}a\\\\b\\end{pmatrix}"), texte(" ; H est son intersection avec (BC).")],
         [texte("Ici, écris la perpendiculaire par "), latex(pointLatex("A", e.a)), texte(" sous forme paramétrique, puis remplace x et y dans "), latex(`(BC)\\equiv ${droiteLatex(d)}`), texte(" pour trouver t.")],
       ],
       reponse: [latex(pointLatex("H", h))],

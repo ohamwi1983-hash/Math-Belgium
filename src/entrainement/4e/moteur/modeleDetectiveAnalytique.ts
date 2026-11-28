@@ -194,7 +194,7 @@ function scenarioDroite(e: E): ScenarioDetective {
     constat: e.type === "normalDirecteur" ? [t("Les coefficients a et b ne sont pas les composantes du vecteur directeur.")] : [t("Le terme constant c a le mauvais signe.")],
     regle:
       e.type === "normalDirecteur"
-        ? [t("Avec un vecteur directeur "), l(colonne("-b", "a")), t(", a est la deuxième composante et b l'opposé de la première ; le vecteur "), l(colonne("a", "b")), t(" est un vecteur normal, perpendiculaire à la droite (cours, § 1).")]
+        ? [t("Avec un vecteur directeur "), l(colonne("-b", "a")), t(", a est la deuxième composante et b l'opposé de la première ; le vecteur "), l(colonne("a", "b")), t(" est un vecteur normal, perpendiculaire à la droite (cours, point 1).")]
         : [t("Pour isoler c, on retire le même nombre aux deux membres : "), l("s+c=0"), t(" donne "), l("c=-s"), t(".")],
     corrigeC: [
       ligne(`d\\equiv ${somme([[be, "x"], [-al, "y"]])}+c=0`, [t("vecteur directeur "), l(colonne(al, be)), t(" : "), l(`a=${n(be)}`), t(", "), l(`b=${n(-al)}`)]),
@@ -249,8 +249,8 @@ function scenarioPerpendiculaire(e: E): ScenarioDetective {
     constat: e.type === "perpNormal" ? [t("Le vecteur directeur de d est faux : "), l(colonne(a, b)), t(" est un vecteur normal de d.")] : [t("Le vecteur de la copie n'est pas perpendiculaire à "), l("\\vec{u}"), t(" : leur produit scalaire n'est pas nul.")],
     regle:
       e.type === "perpNormal"
-        ? [t("Pour "), l("d\\equiv ax+by+c=0"), t(", "), l(colonne("-b", "a")), t(" est un vecteur directeur et "), l(colonne("a", "b")), t(" un vecteur normal (cours, § 4).")]
-        : [t("Un vecteur perpendiculaire à "), l(colonne("\\alpha", "\\beta")), t(" est "), l(colonne("-\\beta", "\\alpha")), t(" : on échange les composantes et on change le signe de l'une d'elles (cours, § 4).")],
+        ? [t("Pour "), l("d\\equiv ax+by+c=0"), t(", "), l(colonne("-b", "a")), t(" est un vecteur directeur et "), l(colonne("a", "b")), t(" un vecteur normal (cours, point 4).")]
+        : [t("Un vecteur perpendiculaire à "), l(colonne("\\alpha", "\\beta")), t(" est "), l(colonne("-\\beta", "\\alpha")), t(" : on échange les composantes et on change le signe de l'une d'elles (cours, point 4).")],
     corrigeC: [
       ligne(`\\vec{u}=${colonne(-b, a)}`, "vecteur directeur de d"),
       ligne(`\\vec{v}=${colonne(a, b)}`, [t("perpendiculaire à "), l("\\vec{u}")]),
@@ -301,7 +301,7 @@ function scenarioPente(e: E): ScenarioDetective {
     constat: e.type === "penteInversee" ? [t("La pente de la copie est l'inverse de la bonne.")] : [t("L'ordonnée à l'origine p a été calculée avec une erreur de signe.")],
     regle:
       e.type === "penteInversee"
-        ? [t("La pente est "), l("m=\\dfrac{y_B-y_A}{x_B-x_A}"), t(" : la variation des ordonnées au numérateur (cours, § 3).")]
+        ? [t("La pente est "), l("m=\\dfrac{y_B-y_A}{x_B-x_A}"), t(" : la variation des ordonnées au numérateur (cours, point 3).")]
         : [t("Pour isoler p dans "), l("y_A=m\\cdot x_A+p"), t(", on retire "), l("m\\cdot x_A"), t(" aux deux membres : "), l("p=y_A-m\\cdot x_A"), t(".")],
     corrigeC: [
       ligne(`m=${fracCorrecte}`, "pente de (AB)"),
@@ -363,8 +363,8 @@ function scenarioCercle(e: E): ScenarioDetective {
     constat: e.type === "signeCentre" ? [t("Les coordonnées du centre ont le mauvais signe.")] : [t("Le rayon de la copie est le carré du rayon.")],
     regle:
       e.type === "signeCentre"
-        ? [l("(x-a)^2+(y-b)^2=r^2"), t(" est l'équation du cercle de centre "), l("(a\\,;b)"), t(" : on change le signe du nombre écrit dans chaque parenthèse (cours, § 8).")]
-        : [t("Dans "), l("(x-a)^2+(y-b)^2=r^2"), t(", le second membre est le carré du rayon : "), l("r=\\sqrt{r^2}"), t(" (cours, § 8).")],
+        ? [l("(x-a)^2+(y-b)^2=r^2"), t(" est l'équation du cercle de centre "), l("(a\\,;b)"), t(" : on change le signe du nombre écrit dans chaque parenthèse (cours, point 8).")]
+        : [t("Dans "), l("(x-a)^2+(y-b)^2=r^2"), t(", le second membre est le carré du rayon : "), l("r=\\sqrt{r^2}"), t(" (cours, point 8).")],
     corrigeC: [
       ligne(`(x^2${plusTerme(D, "x")})+(y^2${plusTerme(Ey, "y")})=${n(-F)}`, "on regroupe"),
       ligne(`${carre("x", a)}-${n(a * a)}+${carre("y", b)}-${n(b * b)}=${n(-F)}`, "on complète les carrés"),
@@ -423,8 +423,8 @@ function scenarioParabole(e: E): ScenarioDetective {
     constat: e.type === "pAuLieuDemi" ? [t("Le foyer de la copie est deux fois trop loin du sommet.")] : [t("La directrice de la copie passe par le foyer : elle est du mauvais côté du sommet.")],
     regle:
       e.type === "pAuLieuDemi"
-        ? [t("Pour "), l("(x-x_S)^2=2p(y-y_S)"), t(", le foyer est "), l("F\\left(x_S\\,;y_S+\\dfrac{p}{2}\\right)"), t(" (cours, § 9).")]
-        : [t("La directrice est "), l("y=y_S-\\dfrac{p}{2}"), t(" : le sommet est au milieu du foyer et de la directrice (cours, § 9).")],
+        ? [t("Pour "), l("(x-x_S)^2=2p(y-y_S)"), t(", le foyer est "), l("F\\left(x_S\\,;y_S+\\dfrac{p}{2}\\right)"), t(" (cours, point 9).")]
+        : [t("La directrice est "), l("y=y_S-\\dfrac{p}{2}"), t(" : le sommet est au milieu du foyer et de la directrice (cours, point 9).")],
     corrigeC: [
       ligne(`2p=${n(k)}`, "on identifie avec la forme du cours"),
       ligne(`p=${q(p)}`),
@@ -544,8 +544,8 @@ function scenarioDistance(e: E): ScenarioDetective {
       : [ligne(`${nbp(neg)}^2=${n(neg * neg)}`, "un carré n'est jamais négatif"), ligne(`CH=\\sqrt{${n(pos * pos)}+${n(neg * neg)}}`), ligne(`=${racineExacteL(N2)}`, [t("et non "), l(racineExacteL(N2Copie)), t(" comme dans la copie")])],
     constat: forme ? [t("La droite utilisée par la copie n'est pas d : les signes de b et de c sont faux.")] : [t("La norme de la copie est fausse : un carré y est compté négatif.")],
     regle: forme
-      ? [t("Un terme qui change de membre change de signe : "), l("\\alpha x=\\beta y+\\gamma"), t(" s'écrit "), l("\\alpha x-\\beta y-\\gamma=0"), t(" (cours, § 1).")]
-      : [t("Le carré d'un nombre négatif est positif : "), l(`${nbp(neg)}^2=${n(neg * neg)}`), t(". La norme de "), l(colonne("x", "y")), t(" est "), l("\\sqrt{x^2+y^2}"), t(" (cours, § 6).")],
+      ? [t("Un terme qui change de membre change de signe : "), l("\\alpha x=\\beta y+\\gamma"), t(" s'écrit "), l("\\alpha x-\\beta y-\\gamma=0"), t(" (cours, point 1).")]
+      : [t("Le carré d'un nombre négatif est positif : "), l(`${nbp(neg)}^2=${n(neg * neg)}`), t(". La norme de "), l(colonne("x", "y")), t(" est "), l("\\sqrt{x^2+y^2}"), t(" (cours, point 6).")],
     corrigeC: blocsDistance.flatMap((x) => x.lignes),
     blocsC: blocsDistance,
     verification: { texte: [t("Le pied H est bien sur d :")], lignes: [ligne(`${termeProduit(a, xH, true)}${termeProduit(b, yH)}${plusTerme(c)}=0`, "H vérifie l'équation de d")] },

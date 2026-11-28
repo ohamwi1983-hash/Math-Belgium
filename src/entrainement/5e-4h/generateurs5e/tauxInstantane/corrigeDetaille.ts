@@ -36,7 +36,7 @@ function etapeA(e: E): EtapeCorrection[] {
     L.push(ligne(`=${decL(tauxMoyen(e))}`));
   }
   return [
-    utilise("a", [t("Le taux de variation moyen entre a et b est "), f(`\\dfrac{${n}(b)-${n}(a)}{b-a}`), t(" : la pente de la sécante (cours, § 3).")]),
+    utilise("a", [t("Le taux de variation moyen entre a et b est "), f(`\\dfrac{${n}(b)-${n}(a)}{b-a}`), t(" : la pente de la sécante (cours, point 3).")]),
     calcul("a", L),
     resultat("a", reponse(e, "moyen")),
     piege("a", [t("Oublier de diviser par "), f(`${e.b}-${e.a}`), t(", ou soustraire dans le mauvais ordre.")]),
@@ -60,7 +60,7 @@ function etapeB(e: E): EtapeCorrection[] {
     })
     .join("");
   return [
-    utilise("b", [t("On dérive terme à terme : "), f(`(k\\,${v}^n)'=k\\,n\\,${v}^{n-1}`), t(", la dérivée d'une constante est nulle (cours, § 3).")]),
+    utilise("b", [t("On dérive terme à terme : "), f(`(k\\,${v}^n)'=k\\,n\\,${v}^{n-1}`), t(", la dérivée d'une constante est nulle (cours, point 3).")]),
     calcul("b", [ligne(modeleL(e)), ligne(`${n}'(${v})=${termes}`, "terme à terme"), ligne(`=${polyDL(deriveeCoefs(e), v)}`)]),
     resultat("b", reponse(e, "derivee")),
   ];
@@ -69,7 +69,7 @@ function etapeB(e: E): EtapeCorrection[] {
 function etapeC(e: E): EtapeCorrection[] {
   const n = F(e);
   return [
-    utilise("c", [t("Le taux de variation instantané en a est le nombre dérivé "), f(`${n}'(a)`), t(" : la pente de la tangente (cours, § 3).")]),
+    utilise("c", [t("Le taux de variation instantané en a est le nombre dérivé "), f(`${n}'(a)`), t(" : la pente de la tangente (cours, point 3).")]),
     calcul("c", [ligne(`${n}'(${e.a})=${substitutionL(deriveeCoefs(e), e.a)}`, "on remplace"), ligne(`=${decL(tauxInstantane(e))}`)]),
     resultat("c", reponse(e, "instantane")),
     piege("c", [t("Remplacer dans "), f(`${n}(${V(e)})`), t(" au lieu de "), f(`${n}'(${V(e)})`), t(" : on obtiendrait la valeur de la grandeur, pas sa vitesse de variation.")]),

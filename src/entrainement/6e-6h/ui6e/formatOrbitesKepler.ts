@@ -96,8 +96,8 @@ export function aide1(e: E, p: PhaseKE): AideEcran {
   const m = mots(e);
   if (p === "axes") return { texte: [t(`Le ${m.proche} et l'${m.loin} sont les deux sommets du grand axe : leur distance vaut `), l("2a"), t(`. Distances au corps central : `), l("a-c"), t(" et "), l("a+c"), t(".")] };
   if (p === "foyer") return { texte: [t("Première loi de Kepler : l'orbite est une ellipse dont le corps central occupe une position remarquable — laquelle ?")] };
-  if (p === "excentricite") return { texte: [t("Excentricité d'une ellipse (cours, § 2) :")], latex: "e=\\dfrac{c}{a}" };
-  return { texte: [t("Relation entre les demi-axes de l'ellipse (cours, § 1) :")], latex: "b^2=a^2-c^2" };
+  if (p === "excentricite") return { texte: [t("Excentricité d'une ellipse (cours, point 2) :")], latex: "e=\\dfrac{c}{a}" };
+  return { texte: [t("Relation entre les demi-axes de l'ellipse (cours, point 1) :")], latex: "b^2=a^2-c^2" };
 }
 
 export function aide2(e: E, p: PhaseKE): AideEcran | null {

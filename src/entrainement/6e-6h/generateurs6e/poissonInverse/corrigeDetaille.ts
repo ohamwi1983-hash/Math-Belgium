@@ -46,7 +46,7 @@ export function correctionDetailleePL(e: E): EtapeCorrection[] {
   if (e.variante === "lambdaZero") {
     const a = next();
     etapes.push(
-      utilise(a, [t("Loi de Poisson (cours, § 8) : "), f("P(X=0)=e^{-\\lambda}"), t(".")]),
+      utilise(a, [t("Loi de Poisson (cours, point 8) : "), f("P(X=0)=e^{-\\lambda}"), t(".")]),
       calcul(a, [ligne(`e^{-\\lambda}=${p4L(p0(e))}`, "donnée"), ligne(`-\\lambda=\\ln ${p4L(p0(e))}`, "logarithme népérien"), ligne(`\\lambda=-\\ln ${p4L(p0(e))}\\approx ${nL(Math.round(-Math.log(p0(e)) * 100) / 100, 2)}`), ligne(`\\lambda=${nL(lb)}`, "au centième")]),
       resultat(a, fr(reponse(e, "lambda"))),
     );
@@ -55,13 +55,13 @@ export function correctionDetailleePL(e: E): EtapeCorrection[] {
     const a = next();
     const c = d.c2! / 2;
     etapes.push(
-      utilise(a, [t("Récurrence du cours (§ 8) : "), f("P(X=k)=P(X=k-1)\\times\\dfrac{\\lambda}{k}"), t(".")]),
+      utilise(a, [t("Récurrence du cours (point 8) : "), f("P(X=k)=P(X=k-1)\\times\\dfrac{\\lambda}{k}"), t(".")]),
       calcul(a, [ligne(`P(X=${d.k! + 1})=P(X=${d.k})\\times\\dfrac{\\lambda}{${d.k! + 1}}`, "récurrence"), ligne(`\\dfrac{\\lambda}{${d.k! + 1}}=${nL(c)}`, "relation observée"), ligne(`\\lambda=${nL(c)}\\times ${d.k! + 1}=${nL(lb)}`)]),
       resultat(a, fr(reponse(e, "lambda"))),
     );
     const b = next();
     etapes.push(
-      utilise(b, [t("Pour une loi de Poisson, "), f("E(X)=V(X)=\\lambda"), t(" (cours, § 8) ; "), f("\\sigma=\\sqrt{V}"), t(".")]),
+      utilise(b, [t("Pour une loi de Poisson, "), f("E(X)=V(X)=\\lambda"), t(" (cours, point 8) ; "), f("\\sigma=\\sqrt{V}"), t(".")]),
       calcul(b, [ligne(`E(X)=\\lambda=${nL(lb)}`), ligne(`\\sigma(X)=\\sqrt{${nL(lb)}}${Math.abs(Math.sqrt(lb) * 100 - Math.round(Math.sqrt(lb) * 100)) < 1e-9 ? "=" : "\\approx "}${nL(Math.round(Math.sqrt(lb) * 100) / 100, 2)}`)]),
       resultat(b, fr(reponse(e, "esperance"))),
     );
@@ -69,7 +69,7 @@ export function correctionDetailleePL(e: E): EtapeCorrection[] {
   if (e.variante === "lambdaZero" || e.variante === "seuil") {
     const b = next();
     etapes.push(
-      utilise(b, [f("\\lambda"), t(" est proportionnel à la durée (ou au nombre de pages) : on ajuste le taux connu à l'échelle de la question (cours, § 8).")]),
+      utilise(b, [f("\\lambda"), t(" est proportionnel à la durée (ou au nombre de pages) : on ajuste le taux connu à l'échelle de la question (cours, point 8).")]),
       calcul(b, [ligne(`\\lambda=${nL(lb)}\\times ${d.m}=${nL(lambdaAjuste(e))}`, `échelle multipliée par ${d.m}`)]),
       resultat(b, fr(reponse(e, "lambdaAjuste"))),
     );

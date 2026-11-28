@@ -100,16 +100,16 @@ export function recap136(e: E, p: Ph): Frag[] {
 export function aide1_136(_e: E, p: Ph): AideEcran {
   switch (p) {
     case "excentricite":
-      return { texte: [t("Cours, § 2 : "), l("e=\\dfrac{c}{a}"), t(", où a est le demi-grand axe et c la demi-distance focale.")] };
+      return { texte: [t("Cours, point 2 : "), l("e=\\dfrac{c}{a}"), t(", où a est le demi-grand axe et c la demi-distance focale.")] };
     case "rayonF":
     case "rayonFp":
-      return { texte: [t("Cours, § 3 : pour un point P d'abscisse x de l'ellipse, les rayons focaux valent :")], latex: "|PF|=a-e\\,x\\qquad |PF'|=a+e\\,x" };
+      return { texte: [t("Cours, point 3 : pour un point P d'abscisse x de l'ellipse, les rayons focaux valent :")], latex: "|PF|=a-e\\,x\\qquad |PF'|=a+e\\,x" };
     case "cosMax":
-      return { texte: [t("Cours, § 3 : B est à la distance a des deux foyers ; applique la loi des cosinus dans le triangle FBF′ :")], latex: "\\cos\\widehat{FBF'}=\\dfrac{a^2+a^2-4c^2}{2a^2}" };
+      return { texte: [t("Cours, point 3 : B est à la distance a des deux foyers ; applique la loi des cosinus dans le triangle FBF′ :")], latex: "\\cos\\widehat{FBF'}=\\dfrac{a^2+a^2-4c^2}{2a^2}" };
     case "existence":
-      return { texte: [t("Cours, § 3 : l'angle FPF′ est le plus grand quand P est en B, sur le petit axe. Un angle plus grand que FBF′ n'est donc atteint par aucun point de l'ellipse.")] };
+      return { texte: [t("Cours, point 3 : l'angle FPF′ est le plus grand quand P est en B, sur le petit axe. Un angle plus grand que FBF′ n'est donc atteint par aucun point de l'ellipse.")] };
     case "aire":
-      return { texte: [t("Cours, § 3 : avec |PF| + |PF′| = 2a et la loi des cosinus, on obtient l'aire du triangle focal d'angle θ en P :")], latex: "\\mathcal{A}=b^2\\tan\\dfrac{\\theta}{2}" };
+      return { texte: [t("Cours, point 3 : avec |PF| + |PF′| = 2a et la loi des cosinus, on obtient l'aire du triangle focal d'angle θ en P :")], latex: "\\mathcal{A}=b^2\\tan\\dfrac{\\theta}{2}" };
   }
 }
 

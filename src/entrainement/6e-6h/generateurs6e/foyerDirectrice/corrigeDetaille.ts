@@ -30,7 +30,7 @@ export function correctionDetaillee135(e: E): EtapeCorrection[] {
   const ev = e.num / e.den;
   // a)
   out.push(
-    utilise("a", [t("Caractérisation focale (cours, § 2) : 0 < e < 1 → ellipse, e = 1 → parabole, e > 1 → hyperbole.")]),
+    utilise("a", [t("Caractérisation focale (cours, point 2) : 0 < e < 1 → ellipse, e = 1 → parabole, e > 1 → hyperbole.")]),
     resultat("a", fr(reponse135(e, "nature"))),
   );
   // b)
@@ -43,7 +43,7 @@ export function correctionDetaillee135(e: E): EtapeCorrection[] {
     ligne(equation135L(e), "coefficients simplifiés"),
   ];
   out.push(
-    utilise("b", [t("Définition par foyer et directrice (cours, § 2) : "), l("|PF|=e\\cdot\\text{dist}(P\\,;d)"), t(", avec "), l(`\\text{dist}(P\\,;d)=|${v}-k|`), t(verticale(e) ? " (directrice verticale)." : " (directrice horizontale).")]),
+    utilise("b", [t("Définition par foyer et directrice (cours, point 2) : "), l("|PF|=e\\cdot\\text{dist}(P\\,;d)"), t(", avec "), l(`\\text{dist}(P\\,;d)=|${v}-k|`), t(verticale(e) ? " (directrice verticale)." : " (directrice horizontale).")]),
     calcul("b", lignes),
     resultat("b", fr(reponse135(e, "equation"))),
     piege("b", [t("Oublier d'élever e au carré, ou mesurer la distance à d avec la mauvaise coordonnée.")]),

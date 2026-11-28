@@ -24,7 +24,7 @@ import { ligne } from "../../export/corrigeTableau";
 export type { D, P };
 export const t = tx;
 export const l = lx;
-export const COURS = (n: number) => `(cours, § ${n})`;
+export const COURS = (n: number) => `(cours, point ${n})`;
 export const fr = (f: Frag[]): FragmentConsigne[] => f as FragmentConsigne[];
 export const nb = nombreLatex;
 

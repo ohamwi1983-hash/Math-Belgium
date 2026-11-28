@@ -18,7 +18,7 @@ const f = latex;
 const n = (v: number) => (v < 0 ? `-${-v}` : String(v));
 const par = (s: string) => (s.startsWith("-") ? `(${s})` : s);
 const approx = (v: number) => nbL(v, 2, true);
-const COURS = "(cours, § 2)";
+const COURS = "(cours, point 2)";
 const eL = (p: number) => (p === 1 ? "e" : `e^{${p}}`);
 
 /** Facteurs k et u' = m devant e^{…} (le facteur 1 omis) : « 2\\cdot (-3)\\cdot  », « -1\\cdot  », «  ». */

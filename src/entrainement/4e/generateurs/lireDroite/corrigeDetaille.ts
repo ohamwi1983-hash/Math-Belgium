@@ -17,7 +17,7 @@ type E = ExerciceLireDroite;
 const LETTRES = "abcdef";
 const T = texte;
 const L = latex;
-const COURS = "(cours, § 1 à § 3)";
+const COURS = "(cours, point 1 à point 3)";
 
 const fig = (svg: string) => `<div style="max-width:6.5cm;margin:6px auto">${svg}</div>`;
 
@@ -92,7 +92,7 @@ function etapeLecture(e: E): EtapeCorrection[] {
   const m = num / den;
   const d: DroiteTracee = { type: "oblique", num, den, p };
   return [
-    utilise("e", [T("Sur "), L("y=mx+p"), T(", p se lit là où la droite coupe l'axe Oy, et m en « escalier » : on avance vers la droite et on compte de combien la droite monte ou descend (cours, § 2).")]),
+    utilise("e", [T("Sur "), L("y=mx+p"), T(", p se lit là où la droite coupe l'axe Oy, et m en « escalier » : on avance vers la droite et on compte de combien la droite monte ou descend (cours, point 2).")]),
     calcul("e", lignesFigure(d)),
     { ...resultat("e", [...reponseLecture(e), T(", donc "), L(expliciteY(d)), T(".")]), figureHtml: fig(figureLecture(e, true)) },
     verification("e", [T("Le nœud "), L(`(${den}\\,;\\,${q(p + num)})`), T(" de la droite vérifie l'équation :")], [ligne(`${q(m)}\\cdot ${den}${plusQ(p)}=${q(p + num)}`, "le point est bien sur la droite")]),
@@ -104,7 +104,7 @@ function etapeImpossible(e: E): EtapeCorrection[] {
   const g = e.impossible;
   const v = g.type === "verticale";
   return [
-    utilise("f", [T("Une droite verticale n'a pas de pente : pas d'écriture "), L("y=mx+p"), T(". Une droite horizontale n'a pas d'écriture "), L("x=ny+q"), T(". L'implicite et la paramétrique existent toujours (cours, § 1).")]),
+    utilise("f", [T("Une droite verticale n'a pas de pente : pas d'écriture "), L("y=mx+p"), T(". Une droite horizontale n'a pas d'écriture "), L("x=ny+q"), T(". L'implicite et la paramétrique existent toujours (cours, point 1).")]),
     calcul("f", [
       ligne(v ? `x=${q(g.k)}` : `y=${q(g.k)}`, v ? `tous les points de g ont l'abscisse ${nombreTexte(g.k)} : g est verticale` : `tous les points de g ont l'ordonnée ${nombreTexte(g.k)} : g est horizontale`),
       ligne(`\\vec{u}=${v ? colonne(0, 1) : colonne(1, 0)}`, v ? "vecteur directeur vertical : pas de pente" : "vecteur directeur horizontal : y ne change pas"),

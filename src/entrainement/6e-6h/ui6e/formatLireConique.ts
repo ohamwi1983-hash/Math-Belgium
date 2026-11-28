@@ -208,34 +208,34 @@ export function aide1_132(e: E, p: Ph): AideEcran {
   switch (p) {
     case "nature":
       return e.variante === "figure"
-        ? { texte: [t("Cours, § 1 : une ellipse est une courbe fermée ; une hyperbole a deux branches ; une parabole n'a qu'une branche, ouverte.")] }
-        : { texte: [t("Cours, § 1 : sur l'équation réduite, deux carrés additionnés égaux à 1 → ellipse (cercle si les dénominateurs sont égaux) ; deux carrés soustraits égaux à 1 → hyperbole ; un seul carré → parabole.")] };
+        ? { texte: [t("Cours, point 1 : une ellipse est une courbe fermée ; une hyperbole a deux branches ; une parabole n'a qu'une branche, ouverte.")] }
+        : { texte: [t("Cours, point 1 : sur l'équation réduite, deux carrés additionnés égaux à 1 → ellipse (cercle si les dénominateurs sont égaux) ; deux carrés soustraits égaux à 1 → hyperbole ; un seul carré → parabole.")] };
     case "axe":
-      if (C.nature === "parabole") return { texte: [t("Cours, § 1 : la variable au carré donne l'axe focal (y² → axe des abscisses), la variable au premier degré et le signe de 2p donnent le sens d'ouverture.")] };
-      if (C.nature === "ellipse") return { texte: [t("Cours, § 1 : c'est toujours le plus grand dénominateur qui porte a² et désigne l'axe focal, jamais la place de x ou de y dans l'écriture.")] };
-      return { texte: [t("Cours, § 1 : l'axe focal d'une hyperbole est celui de la variable dont le carré est précédé du signe +.")] };
+      if (C.nature === "parabole") return { texte: [t("Cours, point 1 : la variable au carré donne l'axe focal (y² → axe des abscisses), la variable au premier degré et le signe de 2p donnent le sens d'ouverture.")] };
+      if (C.nature === "ellipse") return { texte: [t("Cours, point 1 : c'est toujours le plus grand dénominateur qui porte a² et désigne l'axe focal, jamais la place de x ou de y dans l'écriture.")] };
+      return { texte: [t("Cours, point 1 : l'axe focal d'une hyperbole est celui de la variable dont le carré est précédé du signe +.")] };
     case "sommets":
-      if (C.nature === "ellipse") return { texte: [t("Cours, § 1 : l'ellipse "), l("\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1"), t(" a quatre sommets :")], latex: "(\\pm a\\,;0)\\ \\text{et}\\ (0\\,;\\pm b)" };
-      if (C.nature === "hyperbole") return { texte: [t("Cours, § 1 : l'hyperbole "), l("\\dfrac{x^2}{a^2}-\\dfrac{y^2}{b^2}=1"), t(" a deux sommets, tous deux sur l'axe focal :")], latex: "(\\pm a\\,;0)" };
-      return { texte: [t("Cours, § 1 : le sommet d'une parabole est son point le plus proche du foyer, sur l'axe focal ; dans l'équation réduite, c'est l'origine du repère.")] };
+      if (C.nature === "ellipse") return { texte: [t("Cours, point 1 : l'ellipse "), l("\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1"), t(" a quatre sommets :")], latex: "(\\pm a\\,;0)\\ \\text{et}\\ (0\\,;\\pm b)" };
+      if (C.nature === "hyperbole") return { texte: [t("Cours, point 1 : l'hyperbole "), l("\\dfrac{x^2}{a^2}-\\dfrac{y^2}{b^2}=1"), t(" a deux sommets, tous deux sur l'axe focal :")], latex: "(\\pm a\\,;0)" };
+      return { texte: [t("Cours, point 1 : le sommet d'une parabole est son point le plus proche du foyer, sur l'axe focal ; dans l'équation réduite, c'est l'origine du repère.")] };
     case "foyers":
-      if (C.nature === "ellipse") return { texte: [t("Cours, § 1 : les foyers sont sur l'axe focal, à la distance c du centre, avec :")], latex: "c^2=a^2-b^2" };
-      if (C.nature === "hyperbole") return { texte: [t("Cours, § 1 : les foyers sont sur l'axe focal, à la distance c du centre, avec :")], latex: "c^2=a^2+b^2" };
-      return { texte: [t("Cours, § 1 : pour "), l("y^2=2px"), t(", le foyer est "), l("F\\left(\\dfrac{p}{2}\\,;0\\right)"), t(" : il est à la distance "), l("\\dfrac{p}{2}"), t(" du sommet, du côté de l'ouverture.")] };
+      if (C.nature === "ellipse") return { texte: [t("Cours, point 1 : les foyers sont sur l'axe focal, à la distance c du centre, avec :")], latex: "c^2=a^2-b^2" };
+      if (C.nature === "hyperbole") return { texte: [t("Cours, point 1 : les foyers sont sur l'axe focal, à la distance c du centre, avec :")], latex: "c^2=a^2+b^2" };
+      return { texte: [t("Cours, point 1 : pour "), l("y^2=2px"), t(", le foyer est "), l("F\\left(\\dfrac{p}{2}\\,;0\\right)"), t(" : il est à la distance "), l("\\dfrac{p}{2}"), t(" du sommet, du côté de l'ouverture.")] };
     case "excentricite":
-      return { texte: [t("Cours, § 2 : l'excentricité d'une ellipse ou d'une hyperbole est :")], latex: "e=\\dfrac{c}{a}" };
+      return { texte: [t("Cours, point 2 : l'excentricité d'une ellipse ou d'une hyperbole est :")], latex: "e=\\dfrac{c}{a}" };
     case "asymptotes":
       return C.axe === "x"
-        ? { texte: [t("Cours, § 1 : l'hyperbole "), l("\\dfrac{x^2}{a^2}-\\dfrac{y^2}{b^2}=1"), t(" a pour asymptotes :")], latex: "y=\\pm\\dfrac{b}{a}\\,x" }
-        : { texte: [t("Cours, § 1 : on échange les rôles de x et y ; l'hyperbole "), l("\\dfrac{y^2}{a^2}-\\dfrac{x^2}{b^2}=1"), t(" a pour asymptotes :")], latex: "y=\\pm\\dfrac{a}{b}\\,x" };
+        ? { texte: [t("Cours, point 1 : l'hyperbole "), l("\\dfrac{x^2}{a^2}-\\dfrac{y^2}{b^2}=1"), t(" a pour asymptotes :")], latex: "y=\\pm\\dfrac{b}{a}\\,x" }
+        : { texte: [t("Cours, point 1 : on échange les rôles de x et y ; l'hyperbole "), l("\\dfrac{y^2}{a^2}-\\dfrac{x^2}{b^2}=1"), t(" a pour asymptotes :")], latex: "y=\\pm\\dfrac{a}{b}\\,x" };
     case "directrice":
-      return { texte: [t("Cours, § 1 : pour "), l("y^2=2px"), t(", la directrice est "), l("d\\equiv x=-\\dfrac{p}{2}"), t(" : elle est à la distance "), l("\\dfrac{p}{2}"), t(" du sommet, du côté opposé au foyer.")] };
+      return { texte: [t("Cours, point 1 : pour "), l("y^2=2px"), t(", la directrice est "), l("d\\equiv x=-\\dfrac{p}{2}"), t(" : elle est à la distance "), l("\\dfrac{p}{2}"), t(" du sommet, du côté opposé au foyer.")] };
     case "equation":
-      return { texte: [t("Cours, § 1 : équations réduites — "), l("\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1"), t(", "), l("\\dfrac{x^2}{a^2}-\\dfrac{y^2}{b^2}=1"), t(", "), l("y^2=2px"), t(" (et leurs versions où x et y sont échangés ou de signe opposé).")] };
+      return { texte: [t("Cours, point 1 : équations réduites — "), l("\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1"), t(", "), l("\\dfrac{x^2}{a^2}-\\dfrac{y^2}{b^2}=1"), t(", "), l("y^2=2px"), t(" (et leurs versions où x et y sont échangés ou de signe opposé).")] };
     case "naturePropriete":
-      return { texte: [t("Cours, § 6 : le miroir parabolique travaille avec des rayons parallèles et un foyer ; les miroirs elliptique et hyperbolique relient les deux foyers.")] };
+      return { texte: [t("Cours, point 6 : le miroir parabolique travaille avec des rayons parallèles et un foyer ; les miroirs elliptique et hyperbolique relient les deux foyers.")] };
     case "propriete":
-      return { texte: [t("Cours, § 6 : relis la conséquence de la propriété optique propre à chaque miroir (parabolique, elliptique, hyperbolique).")] };
+      return { texte: [t("Cours, point 6 : relis la conséquence de la propriété optique propre à chaque miroir (parabolique, elliptique, hyperbolique).")] };
   }
 }
 

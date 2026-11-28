@@ -9,7 +9,7 @@ import type { Frag } from "../../5e-4h/ui5e/ecransTrigo.types";
  * adaptateurs papier.
  */
 
-export const COURS = (n: number) => `(cours, § ${n})`;
+export const COURS = (n: number) => `(cours, point ${n})`;
 
 export const fr = (f: Frag[]): FragmentConsigne[] => f as FragmentConsigne[];
 

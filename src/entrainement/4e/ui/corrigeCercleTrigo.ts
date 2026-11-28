@@ -21,11 +21,11 @@ export type Fragments = FragmentConsigne[];
 export type FonctionTrigo = "sin" | "cos" | "tan";
 
 /** Renvois au cours (sections numérotées de `cercle-trigonometrique-triangles.ts`). */
-export const COURS_CERCLE = "(cours, § 1)";
-export const COURS_IDENTITE = "(cours, § 2)";
-export const COURS_REMARQUABLES = "(cours, § 3)";
-export const COURS_ASSOCIES = "(cours, § 4)";
-export const COURS_EQUATIONS = "(cours, § 5)";
+export const COURS_CERCLE = "(cours, point 1)";
+export const COURS_IDENTITE = "(cours, point 2)";
+export const COURS_REMARQUABLES = "(cours, point 3)";
+export const COURS_ASSOCIES = "(cours, point 4)";
+export const COURS_EQUATIONS = "(cours, point 5)";
 
 /** Formules des justifications et des résultats rédigés groupées `{…}` (insécables), comme au ch. 2. */
 export const finaliserCorrige = finaliserSecondDegre;

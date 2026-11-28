@@ -22,10 +22,10 @@ import { COULEURS } from "./figureRepereIntegrales";
  *   trois ensembles (valeur de chaque zone en KaTeX).
  */
 
-export const COURS_ENSEMBLES = "(cours, § 1)";
-export const COURS_ARBRES = "(cours, § 2)";
-export const COURS_INDEPENDANCE = "(cours, § 3)";
-export const COURS_PROBLEMES = "(cours, § 4)";
+export const COURS_ENSEMBLES = "(cours, point 1)";
+export const COURS_ARBRES = "(cours, point 2)";
+export const COURS_INDEPENDANCE = "(cours, point 3)";
+export const COURS_PROBLEMES = "(cours, point 4)";
 
 export { calcul, latex, ligne, piege, resultat, texte, utilise, verification };
 

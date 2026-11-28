@@ -14,7 +14,7 @@ import { mValeurL, modeleL, omegaL, omegaTL, phi1L, phi2L, phiL, reponse, TL, tM
 type E = ExercicePhiHorsExtremum;
 const t = texte;
 const f = latex;
-const COURS = "(cours, § 8)";
+const COURS = "(cours, point 8)";
 /** « 8k », mais « k » pour une période 1. */
 const kL = (p: string) => (p === "1" ? "k" : `${p}k`);
 

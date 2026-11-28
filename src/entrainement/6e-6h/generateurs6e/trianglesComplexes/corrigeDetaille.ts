@@ -16,7 +16,7 @@ import type { Coord, PointPlan, SegmentPlan } from "../figuresPlanComplexe40-42"
  */
 
 const LETTRES = "abcdefghij";
-const COURS = "(cours, § 8)";
+const COURS = "(cours, point 8)";
 const f = (valeur: string): FragmentConsigne => latex(valeur);
 const t = (valeur: string): FragmentConsigne => texte(valeur);
 

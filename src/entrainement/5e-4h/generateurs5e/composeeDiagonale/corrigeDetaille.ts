@@ -20,11 +20,11 @@ export function correctionDetailleeComposeeDiagonale(e: E): EtapeCorrection[] {
   const i = nomI(e);
   const o = nomO(e);
   const r: EtapeCorrection[] = [
-    utilise("a", [f(`${composeeL(e)}=${o}\\big(${i}(${e.a})\\big)`), t(" : la fonction écrite à droite, "), f(i), t(", agit en premier (cours, § 2).")]),
+    utilise("a", [f(`${composeeL(e)}=${o}\\big(${i}(${e.a})\\big)`), t(" : la fonction écrite à droite, "), f(i), t(", agit en premier (cours, point 2).")]),
     calcul("a", [ligne(`${i}(${e.a})=${e.v}`, [t("point "), f(`(${e.a}\\,;\\,${e.v})`), t(" de "), f(`C_${i}`), t(", lu sur la grille")])]),
     resultat("a", reponse(e, "premiere")),
     piege("a", o === i ? [t("Lire deux fois la même valeur : la seconde lecture part de "), f(`${e.v}`), t(", pas de "), f(`${e.a}`), t(".")] : [t("Commencer par "), f(`C_${o}`), t(" : on calculerait "), f(`(${i}\\circ ${o})(${e.a})`), t(".")]),
-    utilise("b", [t("La valeur "), f(`${e.v}`), t(" lue sur l'axe vertical devient une entrée de "), f(o), t(" : la droite "), f("y=x"), t(" la reporte sur l'axe horizontal (astuce du cours, § 4). Le graphe de "), f(o), t(" étant complet, "), f(`\\operatorname{dom} ${o}=${domaineL(courbeO(e))}`), t(".")]),
+    utilise("b", [t("La valeur "), f(`${e.v}`), t(" lue sur l'axe vertical devient une entrée de "), f(o), t(" : la droite "), f("y=x"), t(" la reporte sur l'axe horizontal (astuce du cours, point 4). Le graphe de "), f(o), t(" étant complet, "), f(`\\operatorname{dom} ${o}=${domaineL(courbeO(e))}`), t(".")]),
     calcul("b", [
       ligne(`y=${e.v}`, [t("horizontale depuis "), f(`(${e.a}\\,;\\,${e.v})`), t(" jusqu'à la diagonale : point "), f(`(${e.v}\\,;\\,${e.v})`)]),
       ligne(e.existe ? `${e.v}\\in ${domaineL(courbeO(e))}` : `${e.v}\\notin ${domaineL(courbeO(e))}`, e.existe ? [t("la verticale "), f(`x=${e.v}`), t(" rencontre "), f(`C_${o}`)] : [t("la verticale "), f(`x=${e.v}`), t(" ne rencontre pas "), f(`C_${o}`)]),
@@ -41,7 +41,7 @@ export function correctionDetailleeComposeeDiagonale(e: E): EtapeCorrection[] {
     );
   } else {
     r.push(
-      utilise("c", [t("Une composée n'existe que si la valeur intermédiaire appartient au domaine de la fonction qui la reçoit (cours, § 4).")]),
+      utilise("c", [t("Une composée n'existe que si la valeur intermédiaire appartient au domaine de la fonction qui la reçoit (cours, point 4).")]),
       { ...calcul("c", [ligne(`${composeeL(e)}=${o}(${e.v})`, [f(`${e.v}`), t(" hors du domaine de "), f(o), t(" : aucune image")])]), figureHtml: enveloppe(figurePapier(e, { complete: true })) },
       resultat("c", [f(composeeL(e)), t(" n'existe pas")]),
       piege("c", [t("Donner quand même une valeur lue sur la grille, ou lire "), f(`${o}(${e.a})`), t(".")]),

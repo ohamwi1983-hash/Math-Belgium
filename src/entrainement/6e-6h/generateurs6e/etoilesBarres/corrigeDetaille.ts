@@ -48,8 +48,8 @@ export function correctionDetaillee104(e: E): EtapeCorrection[] {
       a,
       fr(
         e.variante === "auMoinsUn"
-          ? [t("« Au moins un par case » (cours, § 1) : on donne d'abord un objet à chaque case, puis on répartit librement ceux qui restent.")]
-          : [t("Combinaison avec répétition (cours, § 1) : les cases (choix possibles) sont distinctes, les objets sont identiques, une case peut en recevoir plusieurs ou aucun.")],
+          ? [t("« Au moins un par case » (cours, point 1) : on donne d'abord un objet à chaque case, puis on répartit librement ceux qui restent.")]
+          : [t("Combinaison avec répétition (cours, point 1) : les cases (choix possibles) sont distinctes, les objets sont identiques, une case peut en recevoir plusieurs ou aucun.")],
       ),
     ),
     calcul(
@@ -72,7 +72,7 @@ export function correctionDetaillee104(e: E): EtapeCorrection[] {
   const N = symboles(e);
   const k = Math.min(barres(e), libre);
   out.push(
-    utilise(c, fr([t("Une répartition = le choix des places des barres parmi les symboles (cours, § 1) : "), l(`${GL("n", "p")}=${CL("n+p-1", "p")}=${CL("n+p-1", "n-1")}`), t(".")])),
+    utilise(c, fr([t("Une répartition = le choix des places des barres parmi les symboles (cours, point 1) : "), l(`${GL("n", "p")}=${CL("n+p-1", "p")}=${CL("n+p-1", "n-1")}`), t(".")])),
     calcul(c, [ligne(`${GL(e.n, libre)}=${CL(N, barres(e))}${k !== barres(e) ? `=${CL(N, k)}` : ""}`, k !== barres(e) ? "symétrie : le plus petit indice" : "places des barres"), ...lignesQuotient(N, k)]),
     resultat(c, fr(reponse104Frag(e, "calcul"))),
     verification(c, fr([t("Par la place des étoiles : "), l(`${CL(N, libre)}=${CL(N, barres(e))}=${mil(reponse104(e))}`), t(" (symétrie, "), l(`${libre}+${barres(e)}=${N}`), t(").")])),

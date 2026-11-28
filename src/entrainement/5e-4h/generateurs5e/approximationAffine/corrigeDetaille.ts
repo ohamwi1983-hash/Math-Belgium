@@ -33,7 +33,7 @@ function etapeA(e: E): EtapeCorrection[] {
     L.push(ligne(`h=${decL(e.h)}`, e.h < 0 ? "écart négatif" : "petit écart"));
   }
   return [
-    utilise("a", [t("On écrit le nombre sous la forme "), f(`${nomF(e)}(a+h)`), t(" : a proche, où "), f(`${nomF(e)}(a)`), t(" et "), f(`${nomF(e)}'(a)`), t(" se calculent sans calculatrice, h petit (cours, § 2).")]),
+    utilise("a", [t("On écrit le nombre sous la forme "), f(`${nomF(e)}(a+h)`), t(" : a proche, où "), f(`${nomF(e)}(a)`), t(" et "), f(`${nomF(e)}'(a)`), t(" se calculent sans calculatrice, h petit (cours, point 2).")]),
     calcul("a", L),
     resultat("a", reponse(e, "ah")),
     piege("a", e.h < 0 ? [t("Oublier le signe de h : ici le nombre est plus petit que a, donc "), f("h<0"), t(".")] : [t("Prendre pour h le nombre lui-même : h est l'écart entre ce nombre et a.")]),
@@ -48,7 +48,7 @@ function etapeB(e: E): EtapeCorrection[] {
   else if (e.fn === "inverse") L.push(ligne(`${F}'(x)=${exprFp(e)}`, "dérivée de référence de 1/x"));
   else L.push(ligne(`${F}'(x)=${exprFp(e)}`, [t("dérivée de référence de "), f(`\\${e.fn} x`), t(" (x en radians)")]));
   return [
-    utilise("b", [t("Le tableau des dérivées de référence (cours, § 3).")]),
+    utilise("b", [t("Le tableau des dérivées de référence (cours, point 3).")]),
     calcul("b", L),
     resultat("b", reponse(e, "derivee")),
     piege("b", e.fn === "racine" ? [t("Oublier le 2 : "), f("(\\sqrt{x})'=\\dfrac{1}{2\\sqrt{x}}"), t(".")] : e.fn === "inverse" ? [t("Oublier le signe moins de "), f("-\\dfrac{1}{x^2}"), t(".")] : e.fn === "puissance" ? [t("Garder l'exposant n au lieu de "), f("n-1"), t(".")] : e.fn === "cos" ? [t("Oublier le signe : "), f("(\\cos x)'=-\\sin x"), t(".")] : [t("Ces dérivées ne sont vraies qu'avec x en radians.")]),
@@ -109,7 +109,7 @@ function etapeD(e: E): EtapeCorrection[] {
   if (!(A === 0 && Math.abs(B) === 1)) L.push(ligne(`=${decL(A)}${prod < 0 ? "-" : "+"}${decL(Math.abs(prod))}`, "produit d'abord"));
   L.push(ligne(`=${decL(approximation(e))}${uniteL(e)}`));
   return [
-    utilise("d", [t("Près de a, la courbe se confond avec sa tangente : "), f(`${F}(a+h)\\approx ${F}(a)+${F}'(a)\\cdot h`), t(" (cours, § 2).")]),
+    utilise("d", [t("Près de a, la courbe se confond avec sa tangente : "), f(`${F}(a+h)\\approx ${F}(a)+${F}'(a)\\cdot h`), t(" (cours, point 2).")]),
     calcul("d", L),
     resultat("d", reponse(e, "approx")),
     piege("d", [t("Remplacer h sans son signe, ou oublier d'ajouter "), f(`${F}(a)`), t(" : "), f(`${F}'(a)\\cdot h`), t(" n'est que la variation.")]),

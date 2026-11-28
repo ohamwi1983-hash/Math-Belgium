@@ -24,7 +24,7 @@ function lignesProbas(e: E): { u: Frag[]; lignes: LigneCalcul[] } {
   const p = probas160(e);
   if (e.variante === "venn")
     return {
-      u: [t("Issues équiprobables (cours, § 1) : "), l("P(A)=\\dfrac{n(A)}{n(\\Omega)}"), t(". Un événement est tout son disque, partie commune comprise.")],
+      u: [t("Issues équiprobables (cours, point 1) : "), l("P(A)=\\dfrac{n(A)}{n(\\Omega)}"), t(". Un événement est tout son disque, partie commune comprise.")],
       lignes: [
         e.nAB === 0 ? ligne(`n(A)=${e.nA}`, "disque A, sans partie commune") : ligne(`n(A)=${e.nA - e.nAB}+${e.nAB}=${e.nA}`, "A seulement, plus la partie commune"),
         ligne(`P(A)=${fractionEtReduite(e.nA, e.N, p.pA)}`),
@@ -34,7 +34,7 @@ function lignesProbas(e: E): { u: Frag[]; lignes: LigneCalcul[] } {
     };
   if (e.variante === "tableau")
     return {
-      u: [t("Issues équiprobables (cours, § 1) : "), l("P(A)=\\dfrac{n(A)}{n(\\Omega)}"), t(", avec les totaux du tableau.")],
+      u: [t("Issues équiprobables (cours, point 1) : "), l("P(A)=\\dfrac{n(A)}{n(\\Omega)}"), t(", avec les totaux du tableau.")],
       lignes: [ligne(`P(A)=${fractionEtReduite(e.nA, e.N, p.pA)}`, "total de la ligne de A"), ligne(`P(B)=${fractionEtReduite(e.nB, e.N, p.pB)}`, "total de la colonne de B")],
     };
   if (e.variante === "contexte") {
@@ -44,7 +44,7 @@ function lignesProbas(e: E): { u: Frag[]; lignes: LigneCalcul[] } {
       return liste && typeof xs[0] === "number" ? `{${liste}}` : pl;
     };
     return {
-      u: [t("Issues équiprobables (cours, § 1) : "), l("P(A)=\\dfrac{n(A)}{n(\\Omega)}"), t(".")],
+      u: [t("Issues équiprobables (cours, point 1) : "), l("P(A)=\\dfrac{n(A)}{n(\\Omega)}"), t(".")],
       lignes: [
         ligne(`n(\\Omega)=${e.N}`),
         ligne(`n(A)=${e.nA}`, just(s.xA, s.A.pluriel)),
@@ -61,14 +61,14 @@ function lignesInter(e: E): { u: Frag[]; lignes: LigneCalcul[] } {
   const p = probas160(e);
   if (e.variante === "valeurs")
     return {
-      u: [t("Formule d'addition (cours, § 1), retournée pour isoler "), l("P(A\\cap B)"), t(".")],
+      u: [t("Formule d'addition (cours, point 1), retournée pour isoler "), l("P(A\\cap B)"), t(".")],
       lignes: [
         ligne("P(A\\cap B)=P(A)+P(B)-P(A\\cup B)"),
         ligne(`=${ecr(e, p.pA)}+${ecr(e, p.pB)}-${ecr(e, pUnion160(e))}`, "on remplace"),
         ligne(`=${ecr(e, p.pAB)}`),
       ],
     };
-  const u: Frag[] = [l("A\\cap B"), t(" : les issues où "), l("A"), t(" et "), l("B"), t(" sont réalisés en même temps (cours, § 1).")];
+  const u: Frag[] = [l("A\\cap B"), t(" : les issues où "), l("A"), t(" et "), l("B"), t(" sont réalisés en même temps (cours, point 1).")];
   const pAB = e.nAB === 0 ? "0" : fractionEtReduite(e.nAB, e.N, p.pAB);
   if (e.variante === "venn") return { u, lignes: [ligne(`P(A\\cap B)=${pAB}`, e.nAB === 0 ? "partie commune aux deux disques vide" : "partie commune aux deux disques")] };
   if (e.variante === "tableau") return { u, lignes: [ligne(`P(A\\cap B)=${pAB}`, e.nAB === 0 ? "case de la ligne A et de la colonne B : 0" : "case de la ligne A et de la colonne B, sur le total général")] };
@@ -124,13 +124,13 @@ export function correctionDetaillee160(e: E): EtapeCorrection[] {
       out.push(utilise(sq, fr(u)), calcul(sq, lignes), resultat(sq, fr(reponse(e, ph))));
     } else if (ph === "produit") {
       out.push(
-        utilise(sq, fr([t("Test d'indépendance (cours, § 1) : on compare "), l("P(A\\cap B)"), t(" au produit "), l("P(A)\\times P(B)"), t(".")])),
+        utilise(sq, fr([t("Test d'indépendance (cours, point 1) : on compare "), l("P(A\\cap B)"), t(" au produit "), l("P(A)\\times P(B)"), t(".")])),
         calcul(sq, lignesProduit(e)),
         resultat(sq, fr(reponse(e, ph))),
       );
     } else {
       out.push(
-        utilise(sq, fr([t("Incompatibles : "), l("P(A\\cap B)=0"), t(". Indépendants : "), l("P(A\\cap B)=P(A)\\times P(B)"), t(" (cours, § 1). Avec "), l("P(A)"), t(" et "), l("P(B)"), t(" non nulles, les deux ne peuvent pas être vrais à la fois.")])),
+        utilise(sq, fr([t("Incompatibles : "), l("P(A\\cap B)=0"), t(". Indépendants : "), l("P(A\\cap B)=P(A)\\times P(B)"), t(" (cours, point 1). Avec "), l("P(A)"), t(" et "), l("P(B)"), t(" non nulles, les deux ne peuvent pas être vrais à la fois.")])),
         calcul(sq, lignesVerdict(e)),
         resultat(sq, fr(reponse(e, ph))),
         piege(sq, fr(piegeVerdict(e))),

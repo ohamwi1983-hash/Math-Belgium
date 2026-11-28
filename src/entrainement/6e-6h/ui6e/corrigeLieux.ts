@@ -19,11 +19,11 @@ import type { FormatCombinatoire } from "./fragmentsCombinatoire";
  *   titres « Étape n — … » du corrigé papier.
  */
 
-export const COURS_DROITES = "cours, § 1";
-export const COURS_CERCLES = "cours, § 2";
-export const COURS_ELIMINATION = "cours, § 4";
-export const COURS_GENERATRICES = "cours, § 5";
-export const COURS_PARAMETRIQUE = "cours, § 6";
+export const COURS_DROITES = "cours, point 1";
+export const COURS_CERCLES = "cours, point 2";
+export const COURS_ELIMINATION = "cours, point 4";
+export const COURS_GENERATRICES = "cours, point 5";
+export const COURS_PARAMETRIQUE = "cours, point 6";
 
 type Fragments = FragmentConsigne[];
 

@@ -90,7 +90,7 @@ export function App6gen70() {
           <div>
             <h2 className="result-title">Choisis un thème</h2>
             <p className="result-subtitle">
-              {CATALOGUE_VARIANTES.length} thèmes, un par section du cours,{" "}
+              {CATALOGUE_VARIANTES.length} thèmes, un par point du cours,{" "}
               {ETENDUE_QUESTIONS.min === ETENDUE_QUESTIONS.max ? ETENDUE_QUESTIONS.min : `${ETENDUE_QUESTIONS.min} à ${ETENDUE_QUESTIONS.max}`} affirmations vrai/faux
               chacun — révision complète du chapitre « Analyse combinatoire ».
             </p>

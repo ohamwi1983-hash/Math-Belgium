@@ -137,7 +137,7 @@ export const recap = reponse;
 export function aide1(e: E, p: P): AideEcran {
   if (p === "case")
     return e.variante === "directe"
-      ? { texte: [t("Dans la table (cours, § 6), la ligne donne l'unité et le dixième de "), l("z"), t(", la colonne son centième.")] }
+      ? { texte: [t("Dans la table (cours, point 6), la ligne donne l'unité et le dixième de "), l("z"), t(", la colonne son centième.")] }
       : { texte: [t("Sens inverse : on cherche la probabilité dans le corps de la table (les valeurs de "), l("\\Phi"), t("), pas dans les marges ; on garde la case dont l'écart avec elle est le plus petit.")] };
   if (p === "ecriture") {
     if (e.variante === "complement") return { texte: [t("L'aire totale sous la courbe vaut 1, et "), l("P(Z=a)=0"), t(" pour une variable continue :")], latex: "P(Z\\ge a)=1-P(Z\\le a)" };

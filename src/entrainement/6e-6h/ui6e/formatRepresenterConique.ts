@@ -95,23 +95,23 @@ const axeTexte = (e: E) => (e.C.axe === "x" ? "horizontal" : "vertical");
 export function aide1_133(e: E, p: Ph): AideEcran {
   switch (p) {
     case "centre":
-      return { texte: [t("Cours, § 2 : dans "), l("\\dfrac{(x-h)^2}{\\ldots}\\pm\\dfrac{(y-k)^2}{\\ldots}=1"), t(", le centre est "), l("\\Omega(h\\,;k)"), t(" : on lit h et k au signe près dans les parenthèses.")] };
+      return { texte: [t("Cours, point 2 : dans "), l("\\dfrac{(x-h)^2}{\\ldots}\\pm\\dfrac{(y-k)^2}{\\ldots}=1"), t(", le centre est "), l("\\Omega(h\\,;k)"), t(" : on lit h et k au signe près dans les parenthèses.")] };
     case "sommet":
-      return { texte: [t("Cours, § 2 : dans "), l("(y-k)^2=2p(x-h)"), t(" (ou "), l("(x-h)^2=2p(y-k)"), t("), le sommet est "), l("S(h\\,;k)"), t(".")] };
+      return { texte: [t("Cours, point 2 : dans "), l("(y-k)^2=2p(x-h)"), t(" (ou "), l("(x-h)^2=2p(y-k)"), t("), le sommet est "), l("S(h\\,;k)"), t(".")] };
     case "sommetsFocaux":
-      return { texte: [t("Cours, § 1 : les sommets de l'axe focal sont à la distance a du centre ; "), l("a^2"), t(" est le dénominateur "), t(e.C.nature === "ellipse" ? "le plus grand." : "du carré précédé du signe +.")] };
+      return { texte: [t("Cours, point 1 : les sommets de l'axe focal sont à la distance a du centre ; "), l("a^2"), t(" est le dénominateur "), t(e.C.nature === "ellipse" ? "le plus grand." : "du carré précédé du signe +.")] };
     case "sommetsNonFocaux":
-      return { texte: [t("Cours, § 1 : les deux autres sommets de l'ellipse sont sur l'axe non focal, à la distance b du centre.")] };
+      return { texte: [t("Cours, point 1 : les deux autres sommets de l'ellipse sont sur l'axe non focal, à la distance b du centre.")] };
     case "foyers":
-      return { texte: [t("Cours, § 1 : les foyers sont sur l'axe focal, à la distance c du centre, avec :")], latex: e.C.nature === "ellipse" ? "c^2=a^2-b^2" : "c^2=a^2+b^2" };
+      return { texte: [t("Cours, point 1 : les foyers sont sur l'axe focal, à la distance c du centre, avec :")], latex: e.C.nature === "ellipse" ? "c^2=a^2-b^2" : "c^2=a^2+b^2" };
     case "foyer":
-      return { texte: [t("Cours, § 1 : le foyer est sur l'axe focal, à la distance "), l("\\dfrac{p}{2}"), t(" du sommet, du côté de l'ouverture.")] };
+      return { texte: [t("Cours, point 1 : le foyer est sur l'axe focal, à la distance "), l("\\dfrac{p}{2}"), t(" du sommet, du côté de l'ouverture.")] };
     case "rectangle":
-      return { texte: [t("Cours, § 1 : le rectangle a pour centre celui de l'hyperbole ; il mesure 2a le long de l'axe focal et 2b le long de l'autre axe.")] };
+      return { texte: [t("Cours, point 1 : le rectangle a pour centre celui de l'hyperbole ; il mesure 2a le long de l'axe focal et 2b le long de l'autre axe.")] };
     case "piedDirectrice":
-      return { texte: [t("Cours, § 1 : la directrice est perpendiculaire à l'axe focal, à la distance "), l("\\dfrac{p}{2}"), t(" du sommet, du côté opposé au foyer.")] };
+      return { texte: [t("Cours, point 1 : la directrice est perpendiculaire à l'axe focal, à la distance "), l("\\dfrac{p}{2}"), t(" du sommet, du côté opposé au foyer.")] };
     case "cordeFocale":
-      return { texte: [t("Cours, § 1 : un point M de la parabole est à la même distance du foyer et de la directrice. Au niveau du foyer, sa distance à la directrice vaut p.")] };
+      return { texte: [t("Cours, point 1 : un point M de la parabole est à la même distance du foyer et de la directrice. Au niveau du foyer, sa distance à la directrice vaut p.")] };
   }
 }
 

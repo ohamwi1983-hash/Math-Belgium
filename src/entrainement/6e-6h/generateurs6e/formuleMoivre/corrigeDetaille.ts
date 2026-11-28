@@ -14,7 +14,7 @@ import { frac, fracLatex } from "../../ui6e/corrigeComplexes";
  */
 
 const LETTRES = "abcdefghij";
-const COURS = "(cours, § 5)";
+const COURS = "(cours, point 5)";
 const nx = (e: ExerciceFormuleMoivre) => `${e.n}x`;
 
 const coefL = (c: number) => (c === 1 ? "" : `${c}`);

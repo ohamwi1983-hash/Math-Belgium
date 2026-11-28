@@ -380,7 +380,7 @@ function optionsNature(e: E): { options: string[]; explications: string[] } {
           "",
           "Un cercle de centre F fixe la distance à F ; ici, la distance à F doit être égale à la distance à d, qui change d'un point à l'autre.",
           "Seul le sommet est à mi-chemin entre F et d sur une parallèle à d : les autres points du lieu s'en écartent.",
-          "Les points équidistants d'un point et d'une droite ne sont pas sur des droites : c'est la définition de la parabole (§ 9).",
+          "Les points équidistants d'un point et d'une droite ne sont pas sur des droites : c'est la définition de la parabole (point 9).",
         ],
       };
     case "cercle":
@@ -407,9 +407,9 @@ function aideNature2(e: E): Fr {
     case "deux-paralleles":
       return [t("Sur une perpendiculaire commune à "), l("d_1"), t(" et "), l("d_2"), t(", combien de points sont à égale distance des deux droites ? Recommence plus loin.")];
     case "parabole":
-      return [t("Le milieu S entre F et d est un point du lieu ; en s'éloignant de S, la distance à d grandit : le point doit aussi s'éloigner de F. Quelle courbe du cours est définie ainsi (§ 9) ?")];
+      return [t("Le milieu S entre F et d est un point du lieu ; en s'éloignant de S, la distance à d grandit : le point doit aussi s'éloigner de F. Quelle courbe du cours est définie ainsi (point 9) ?")];
     case "cercle":
-      return [t(`Tous les points du lieu sont à la distance ${e.r} de C, ni plus près ni plus loin : quelle figure du cours (§ 8) ?`)];
+      return [t(`Tous les points du lieu sont à la distance ${e.r} de C, ni plus près ni plus loin : quelle figure du cours (point 8) ?`)];
   }
 }
 
@@ -522,7 +522,7 @@ function ecransDistance(e: LieuDistanceDroite): EcranTSD[] {
       aides: [
         e.type === "oblique"
           ? [t("Les droites du lieu sont parallèles à d : elles ont le même vecteur normal "), l(`\\vec{n}${colonne(n.x, n.y)}`), t(", donc une équation "), l(`${membre({ a: n.x, b: n.y, c: 0 })}+c=0`), t(". Chacune passe par l'un des points B et B′.")]
-          : [t("La distance d'un point M à une droite "), l(e.type === "horizontale" ? "y=k" : "x=k"), t(" est "), l(e.type === "horizontale" ? "|y_M-k|" : "|x_M-k|"), t(" (cours, § 6) : écris que cette distance vaut "), l(String(e.r)), t(".")],
+          : [t("La distance d'un point M à une droite "), l(e.type === "horizontale" ? "y=k" : "x=k"), t(" est "), l(e.type === "horizontale" ? "|y_M-k|" : "|x_M-k|"), t(" (cours, point 6) : écris que cette distance vaut "), l(String(e.r)), t(".")],
         aide2,
       ],
       reponse: [l(equationDroite(g1)), t(" et "), l(equationDroite(g2))],
@@ -680,7 +680,7 @@ function ecransParabole(e: LieuParabole): EcranTSD[] {
       consigne: [t("Donne les coordonnées du sommet S et le paramètre p (signé) de cette parabole.")],
       champs: champsSP,
       aides: [
-        [t("Le sommet S est à mi-chemin entre le foyer F et la directrice d, sur la perpendiculaire à d menée par F ; "), l(vert ? "p=2(y_F-y_S)" : "p=2(x_F-x_S)"), t(", avec son signe (cours, § 9).")],
+        [t("Le sommet S est à mi-chemin entre le foyer F et la directrice d, sur la perpendiculaire à d menée par F ; "), l(vert ? "p=2(y_F-y_S)" : "p=2(x_F-x_S)"), t(", avec son signe (cours, point 9).")],
         [t("Ici, la perpendiculaire à d par F coupe d en "), l(pointL("H", vert ? { x: e.F.x, y: e.k } : { x: e.k, y: e.F.y })), t(" : S est le milieu de [FH].")],
       ],
       reponse: [l(pointL("S", S)), t(" et "), l(`p=${q(p)}`)],
@@ -691,7 +691,7 @@ function ecransParabole(e: LieuParabole): EcranTSD[] {
       consigne: [t("Écris une équation de la parabole.")],
       champs: [champEq],
       aides: [
-        [t(vert ? "Axe vertical (directrice horizontale) : " : "Axe horizontal (directrice verticale) : "), l(vert ? "(x-x_S)^2=2p(y-y_S)" : "(y-y_S)^2=2p(x-x_S)"), t(" (cours, § 9).")],
+        [t(vert ? "Axe vertical (directrice horizontale) : " : "Axe horizontal (directrice verticale) : "), l(vert ? "(x-x_S)^2=2p(y-y_S)" : "(y-y_S)^2=2p(x-x_S)"), t(" (cours, point 9).")],
         [t("Ici, "), l(pointL("S", S)), t(" et "), l(`p=${q(p)}`), t(" : remplace dans la forme du cours.")],
       ],
       reponse: [l(equationParabole(e))],
@@ -724,7 +724,7 @@ function ecransCercle(e: Extract<E, { variante: "cercle" }>): EcranTSD[] {
         ),
       ],
       aides: [
-        [t("M est sur le lieu exactement quand "), l(`MC=${e.r}`), t(", c'est-à-dire "), l(`MC^2=${e.r}^2`), t(" ; par Pythagore, "), l("MC^2=(x-x_C)^2+(y-y_C)^2"), t(" (cours, § 8).")],
+        [t("M est sur le lieu exactement quand "), l(`MC=${e.r}`), t(", c'est-à-dire "), l(`MC^2=${e.r}^2`), t(" ; par Pythagore, "), l("MC^2=(x-x_C)^2+(y-y_C)^2"), t(" (cours, point 8).")],
         [t("Ici, "), l(pointL("C", e.C)), t(" : remplace "), l("x_C"), t(" et "), l("y_C"), t(", et n'oublie pas d'élever le rayon au carré.")],
       ],
       reponse: [l(cercleL(e.C, e.r))],

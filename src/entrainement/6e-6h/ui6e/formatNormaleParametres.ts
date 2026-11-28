@@ -77,7 +77,7 @@ export function reponse(e: E, p: P): Frag[] {
 export const recap = reponse;
 
 export function aide1(e: E, p: P): AideEcran {
-  if (p === "z") return { texte: [t("Sens inverse (cours, § 6) : avec "), l("Z=\\dfrac{X-\\mu}{\\sigma}"), t(", la proportion donne "), l("\\Phi(z)"), t(" ; cherche-la dans le corps de la table. Une borne sous la moyenne a un "), l("z"), t(" négatif :")], latex: "P(X\\ge x)=1-\\Phi(z)\\qquad \\Phi(-z)=1-\\Phi(z)" };
+  if (p === "z") return { texte: [t("Sens inverse (cours, point 6) : avec "), l("Z=\\dfrac{X-\\mu}{\\sigma}"), t(", la proportion donne "), l("\\Phi(z)"), t(" ; cherche-la dans le corps de la table. Une borne sous la moyenne a un "), l("z"), t(" négatif :")], latex: "P(X\\ge x)=1-\\Phi(z)\\qquad \\Phi(-z)=1-\\Phi(z)" };
   if (p === "sigma") return e.variante === "systeme" ? { texte: [t("Soustrais les deux égalités : "), l("\\mu"), t(" disparaît.")], latex: "x_2-x_1=(z_2-z_1)\\,\\sigma" } : { texte: [t("Relation entre une valeur et son "), l("z"), t(" :")], latex: "x=\\mu+z\\sigma" };
   return { texte: [t("Relation entre une valeur et son "), l("z"), t(" :")], latex: "x=\\mu+z\\sigma" };
 }

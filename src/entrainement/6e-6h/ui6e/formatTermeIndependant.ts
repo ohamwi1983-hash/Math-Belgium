@@ -71,8 +71,8 @@ export const recap = reponse;
 
 export function aide1(_e: E, p: P): AideEcran {
   if (p === "exposant") return { texte: [t("Règles des puissances : "), l("(x^p)^m=x^{pm}"), t(", "), l("\\dfrac{1}{x^q}=x^{-q}"), t(" et "), l("x^r\\cdot x^s=x^{r+s}"), t(".")] };
-  if (p === "k") return { texte: [t("Un terme est indépendant de "), l("x"), t(" quand l'exposant de "), l("x"), t(" vaut "), l("0"), t(" (cours, § 3). Comme "), l("k"), t(" est un rang, il doit être un entier de "), l("0"), t(" à "), l("n"), t(".")] };
-  return { texte: [t("Terme général du binôme (cours, § 3) : "), l("T_{k+1}=C_n^k\\,a^{n-k}\\,b^{k}"), t(" ; on remplace "), l("k"), t(" par la valeur trouvée.")] };
+  if (p === "k") return { texte: [t("Un terme est indépendant de "), l("x"), t(" quand l'exposant de "), l("x"), t(" vaut "), l("0"), t(" (cours, point 3). Comme "), l("k"), t(" est un rang, il doit être un entier de "), l("0"), t(" à "), l("n"), t(".")] };
+  return { texte: [t("Terme général du binôme (cours, point 3) : "), l("T_{k+1}=C_n^k\\,a^{n-k}\\,b^{k}"), t(" ; on remplace "), l("k"), t(" par la valeur trouvée.")] };
 }
 
 export function aide2(e: E, p: P): AideEcran | null {

@@ -27,7 +27,7 @@ export function correctionDetaillee124(e: E): EtapeCorrection[] {
     switch (ph) {
       case "G":
         out.push(
-          utilise(sq, [t("Centre de gravité (cours, § 1) : point de concours des médianes, sa coordonnée est la moyenne des coordonnées des sommets.")]),
+          utilise(sq, [t("Centre de gravité (cours, point 1) : point de concours des médianes, sa coordonnée est la moyenne des coordonnées des sommets.")]),
           calcul(sq, [
             ligne(`x_G=\\dfrac{${sommeTexte(e.A.x, e.B.x, e.C.x)}}{3}=\\dfrac{${nb(3 * G.x)}}{3}=${nb(G.x)}`, "moyenne des abscisses"),
             ligne(`y_G=\\dfrac{${sommeTexte(e.A.y, e.B.y, e.C.y)}}{3}=\\dfrac{${nb(3 * G.y)}}{3}=${nb(G.y)}`, "moyenne des ordonnées"),
@@ -40,7 +40,7 @@ export function correctionDetaillee124(e: E): EtapeCorrection[] {
         const M = milieu(e.A, e.B);
         const { lignes } = lignesDroiteNormale(vec(e.A, e.B), M, "M");
         out.push(
-          utilise(sq, [t("Médiatrice (cours, § 1) : elle passe par le milieu M de [AB] et elle est perpendiculaire à (AB), donc "), l("\\vec{AB}"), t(" en est un vecteur normal.")]),
+          utilise(sq, [t("Médiatrice (cours, point 1) : elle passe par le milieu M de [AB] et elle est perpendiculaire à (AB), donc "), l("\\vec{AB}"), t(" en est un vecteur normal.")]),
           calcul(sq, [...lignesMilieu("M", e.A, e.B, "A", "B"), ligneVecteur("AB", e.A, e.B), ...lignes]),
           resultat(sq, fr(reponse124(e, ph))),
           verification(sq, [t("Le milieu M vérifie l'équation, et A, B sont à égale distance de tout point de cette droite.")]),
@@ -51,7 +51,7 @@ export function correctionDetaillee124(e: E): EtapeCorrection[] {
       case "O": {
         const { lignes } = lignesDroiteNormale(vec(e.B, e.C), milieu(e.B, e.C), "le milieu de [BC]");
         out.push(
-          utilise(sq, [t("Centre du cercle circonscrit (cours, § 1) : point de concours des médiatrices ; on coupe la médiatrice de [AB] avec celle de [BC].")]),
+          utilise(sq, [t("Centre du cercle circonscrit (cours, point 1) : point de concours des médiatrices ; on coupe la médiatrice de [AB] avec celle de [BC].")]),
           calcul(sq, [...lignesMilieu("M'", e.B, e.C, "B", "C"), ligneVecteur("BC", e.B, e.C), ...lignes, ...lignesSysteme(mediatriceAB(e), mediatriceBC(e))]),
           resultat(sq, fr(reponse124(e, ph))),
           verification(sq, [t("O est à égale distance des trois sommets : "), l(`OA^2=OB^2=OC^2=${dist2(e.O, e.A)}`), t(".")]),
@@ -62,7 +62,7 @@ export function correctionDetaillee124(e: E): EtapeCorrection[] {
       case "hauteur": {
         const { lignes } = lignesDroiteNormale(vec(e.A, e.B), e.C, "C");
         out.push(
-          utilise(sq, [t("Hauteur (cours, § 1) : elle passe par le sommet C et elle est perpendiculaire à (AB), donc "), l("\\vec{AB}"), t(" en est un vecteur normal.")]),
+          utilise(sq, [t("Hauteur (cours, point 1) : elle passe par le sommet C et elle est perpendiculaire à (AB), donc "), l("\\vec{AB}"), t(" en est un vecteur normal.")]),
           calcul(sq, [ligneVecteur("AB", e.A, e.B), ...lignes]),
           resultat(sq, fr(reponse124(e, ph))),
           verification(sq, [t("C vérifie l'équation.")]),
@@ -75,7 +75,7 @@ export function correctionDetaillee124(e: E): EtapeCorrection[] {
         const OG = vec(e.O, G);
         const OH = vec(e.O, H);
         out.push(
-          utilise(sq, [t("Orthocentre (cours, § 1) : point de concours des hauteurs ; on coupe la hauteur issue de C avec celle issue de A (vecteur normal "), l("\\vec{BC}"), t(").")]),
+          utilise(sq, [t("Orthocentre (cours, point 1) : point de concours des hauteurs ; on coupe la hauteur issue de C avec celle issue de A (vecteur normal "), l("\\vec{BC}"), t(").")]),
           calcul(sq, [ligneVecteur("BC", e.B, e.C), ...lignes, ...lignesSysteme(hauteurC(e), hauteurA(e))]),
           resultat(sq, fr(reponse124(e, ph))),
           verification(sq, [t("Droite d'Euler : "), l(`\\vec{OG}\\begin{pmatrix}${nb(OG.x)}\\\\${nb(OG.y)}\\end{pmatrix}`), t(" et "), l(`\\vec{OH}\\begin{pmatrix}${nb(OH.x)}\\\\${nb(OH.y)}\\end{pmatrix}`), t(", donc "), l("\\vec{OH}=3\\,\\vec{OG}"), t(" : O, G et H sont alignés.")]),
@@ -85,7 +85,7 @@ export function correctionDetaillee124(e: E): EtapeCorrection[] {
       }
       case "N":
         out.push(
-          utilise(sq, [t("Cercle des neuf points (cours, § 1) : son centre N est le milieu de [OH], sur la droite d'Euler ; son rayon est la moitié de celui du cercle circonscrit.")]),
+          utilise(sq, [t("Cercle des neuf points (cours, point 1) : son centre N est le milieu de [OH], sur la droite d'Euler ; son rayon est la moitié de celui du cercle circonscrit.")]),
           {
             ...calcul(sq, [ligne(`N\\left(\\dfrac{${nb(e.O.x)}+${nbp(H.x)}}{2}\\,;\\dfrac{${nb(e.O.y)}+${nbp(H.y)}}{2}\\right)=\\left(${nb(N.x)}\\,;${nb(N.y)}\\right)`, "milieu de [OH]")]),
             figureHtml: figureCorrigeLot(figure124(e, "fin")),

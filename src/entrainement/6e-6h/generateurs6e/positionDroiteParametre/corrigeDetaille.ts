@@ -77,10 +77,10 @@ export function correctionDetailleePD(e: E): EtapeCorrection[] {
   const c = e.conique;
   const v = e.verdict;
   return [
-    utilise("a", [ft("Points communs d'une droite et d'une conique (cours, § 4) : on remplace "), L("y"), ft(" par "), L(membreDroite(e.m, "k")), ft(" dans l'équation de "), L("\\Gamma"), ft(".")]),
+    utilise("a", [ft("Points communs d'une droite et d'une conique (cours, point 4) : on remplace "), L("y"), ft(" par "), L(membreDroite(e.m, "k")), ft(" dans l'équation de "), L("\\Gamma"), ft(".")]),
     calcul("a", lignesA(e)),
     resultat("a", [L(equationXL(e)), ft(".")]),
-    utilise("b", [ft("Si l'équation est du second degré, "), L("d_k"), ft(" est tangente quand elle a une racine double : "), L("\\Delta=0"), ft(" (cours, § 4–5). Si le coefficient de "), L("x^2"), ft(" est nul, elle est du premier degré et n'a jamais de racine double.")]),
+    utilise("b", [ft("Si l'équation est du second degré, "), L("d_k"), ft(" est tangente quand elle a une racine double : "), L("\\Delta=0"), ft(" (cours, points 4 et 5). Si le coefficient de "), L("x^2"), ft(" est nul, elle est du premier degré et n'a jamais de racine double.")]),
     calcul("b", lignesB(e)),
     resultat("b", [...(valeursTangenceFr(e) as FragmentConsigne[]), ft(".")]),
     verification("b", verifB(e)),

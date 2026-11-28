@@ -26,7 +26,7 @@ export function correctionDetaillee115(e: E): EtapeCorrection[] {
     switch (ph) {
       case "densite":
         out.push(
-          utilise(sq, [t("Loi uniforme (cours, § 5) : densité constante "), l("f(x)=\\dfrac{1}{b-a}"), t(" sur "), l("[a\\,;b]"), t(".")]),
+          utilise(sq, [t("Loi uniforme (cours, point 5) : densité constante "), l("f(x)=\\dfrac{1}{b-a}"), t(" sur "), l("[a\\,;b]"), t(".")]),
           calcul(sq, [ligne(`f(x)=\\dfrac{1}{${b}-${a}}`), ligne(`=${ql(densite115(e))}`)]),
           resultat(sq, fr(reponse115(e, ph))),
           verification(sq, [t("L'aire du rectangle sous la densité vaut "), l(`${L}\\times ${ql(densite115(e))}=1`), t(".")]),
@@ -41,7 +41,7 @@ export function correctionDetaillee115(e: E): EtapeCorrection[] {
         lignes.push(ligne(`${type === "entre" ? evenement115(e) : ""}=\\dfrac{${d2}-${c2}}{${b}-${a}}`, "longueur sur longueur"), ligne(`=\\dfrac{${d2 - c2}}{${L}}`));
         if (ql(proba115(e)) !== `\\dfrac{${d2 - c2}}{${L}}`) lignes.push(ligne(`=${ql(proba115(e))}`, "on simplifie"));
         out.push(
-          utilise(sq, [t("Loi uniforme (cours, § 5) : "), l("P(c\\leq X\\leq d)=\\dfrac{d-c}{b-a}"), t(" pour "), l("[c\\,;d]"), t(" contenu dans "), l("[a\\,;b]"), t(".")]),
+          utilise(sq, [t("Loi uniforme (cours, point 5) : "), l("P(c\\leq X\\leq d)=\\dfrac{d-c}{b-a}"), t(" pour "), l("[c\\,;d]"), t(" contenu dans "), l("[a\\,;b]"), t(".")]),
           calcul(sq, lignes),
           resultat(sq, fr(reponse115(e, ph))),
           piege(sq, type === "deborde" ? [t("Calculer "), l(`\\dfrac{${d}-${c}}{${L}}`), t(" avec l'intervalle tel quel : la partie hors de "), l(`[${a}\\,;${b}]`), t(" a une probabilité nulle.")] : [t("Diviser par b au lieu de "), l("b-a"), t(" : la longueur totale est "), l(`${b}-${a}=${L}`), t(".")]),
@@ -50,7 +50,7 @@ export function correctionDetaillee115(e: E): EtapeCorrection[] {
       }
       case "esperance":
         out.push(
-          utilise(sq, [t("Loi uniforme (cours, § 5) : "), l("E(X)=\\dfrac{a+b}{2}"), t(", le milieu de l'intervalle.")]),
+          utilise(sq, [t("Loi uniforme (cours, point 5) : "), l("E(X)=\\dfrac{a+b}{2}"), t(", le milieu de l'intervalle.")]),
           calcul(sq, [ligne(`E(X)=\\dfrac{${a}+${b}}{2}`), ligne(`=\\dfrac{${a + b}}{2}`), ligne(`=${dl(esperance115(e))}`)]),
           resultat(sq, fr(reponse115(e, ph))),
           piege(sq, [t("Prendre "), l(`\\dfrac{${b}}{2}`), t(" ou "), l(`\\dfrac{b-a}{2}`), t(" : l'intervalle ne commence pas en 0.")]),
@@ -60,7 +60,7 @@ export function correctionDetaillee115(e: E): EtapeCorrection[] {
         const V = variance115(e);
         const Vl = varianceLatex(e);
         out.push(
-          utilise(sq, [t("Loi uniforme (cours, § 5) : "), l("V(X)=\\dfrac{(b-a)^2}{12}"), t(" et "), l("\\sigma(X)=\\sqrt{V(X)}"), t(".")]),
+          utilise(sq, [t("Loi uniforme (cours, point 5) : "), l("V(X)=\\dfrac{(b-a)^2}{12}"), t(" et "), l("\\sigma(X)=\\sqrt{V(X)}"), t(".")]),
           calcul(sq, [
             ligne(`V(X)=\\dfrac{(${b}-${a})^2}{12}`),
             ligne(`=\\dfrac{${L}^2}{12}`),
@@ -77,7 +77,7 @@ export function correctionDetaillee115(e: E): EtapeCorrection[] {
       case "longueur": {
         const V = variance115(e);
         out.push(
-          utilise(sq, [t("Loi uniforme (cours, § 5) : "), l("V(X)=\\dfrac{(b-a)^2}{12}"), t(", et "), l("b-a>0"), t(".")]),
+          utilise(sq, [t("Loi uniforme (cours, point 5) : "), l("V(X)=\\dfrac{(b-a)^2}{12}"), t(", et "), l("b-a>0"), t(".")]),
           calcul(sq, [ligne(`\\dfrac{(b-a)^2}{12}=${varianceLatex(e)}`), ligne(`(b-a)^2=12\\times ${varianceLatex(e)}`, "on multiplie par 12"), ligne(`(b-a)^2=${L * L}`), ligne(`b-a=${L}`, "racine positive")]),
           resultat(sq, fr(reponse115(e, ph))),
           verification(sq, [l(`\\dfrac{${L}^2}{12}=${qdl(V)}`), t(" : on retrouve la variance.")]),
@@ -88,7 +88,7 @@ export function correctionDetaillee115(e: E): EtapeCorrection[] {
       case "bornes": {
         const E2 = 2 * esperance115(e);
         out.push(
-          utilise(sq, [t("Loi uniforme (cours, § 5) : "), l("E(X)=\\dfrac{a+b}{2}"), t(" ; avec "), l(`b-a=${L}`), t(", on obtient un système.")]),
+          utilise(sq, [t("Loi uniforme (cours, point 5) : "), l("E(X)=\\dfrac{a+b}{2}"), t(" ; avec "), l(`b-a=${L}`), t(", on obtient un système.")]),
           calcul(sq, [
             ligne(`\\dfrac{a+b}{2}=${dl(esperance115(e))}`),
             ligne(`a+b=${dl(E2)}`, "on multiplie par 2"),
@@ -105,7 +105,7 @@ export function correctionDetaillee115(e: E): EtapeCorrection[] {
       case "probaInv": {
         const P = probaInv115(e);
         out.push(
-          utilise(sq, [t("Loi uniforme (cours, § 5) : "), l("P(X\\leq c)=P(a\\leq X\\leq c)=\\dfrac{c-a}{b-a}"), t(".")]),
+          utilise(sq, [t("Loi uniforme (cours, point 5) : "), l("P(X\\leq c)=P(a\\leq X\\leq c)=\\dfrac{c-a}{b-a}"), t(".")]),
           calcul(sq, [
             ligne(`${evenementInv115(e)}=\\dfrac{${e.cInv}-${a}}{${L}}`),
             ligne(`=\\dfrac{${e.cInv! - a}}{${L}}`),
