@@ -327,7 +327,7 @@ export const statistiqueDescriptive: ChapterContent = {
           text:
             'Prends un caractère **continu**, ou un caractère discret qui a trop de valeurs différentes. ' +
             'On regroupe alors ses données en **classes** : des intervalles qui se suivent. Une classe va ' +
-            'd\'une borne inférieure (son début) à une borne supérieure (sa fin). Son **amplitude**, c\'est ' +
+            'd\'une **borne inférieure** (son début) à une **borne supérieure** (sa fin). Son **amplitude**, c\'est ' +
             'sa longueur : borne supérieure − borne inférieure. Pour construire un **histogramme**, on ' +
             'choisit ici des classes de **même amplitude**. On dessine des barres collées les unes aux ' +
             'autres. La **hauteur** de chaque barre vaut l\'effectif (ou la fréquence) de sa classe.',
@@ -695,8 +695,8 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'intuition',
           label: 'Pourquoi une médiane, en plus de la moyenne ?',
           text:
-            'Imagine une rue de dix maisons. Neuf valent environ 200 000 € chacune. La dixième est un ' +
-            'immense château à 10 000 000 €. La **moyenne** des dix prix explose à cause du château. Elle ' +
+            'Imagine une rue de dix maisons. Neuf valent environ 200\u00a0000\u00a0€ chacune. La dixième est un ' +
+            'immense château à 10\u00a0000\u00a0000\u00a0€. La **moyenne** des dix prix explose à cause du château. Elle ' +
             'donne un prix qu\'aucune maison de la rue n\'atteint vraiment. La **médiane**, elle, ne regarde ' +
             'que le rang : la place dans la liste rangée. Elle reste sur le prix d\'une maison « normale », ' +
             'sans se soucier du prix du château.',

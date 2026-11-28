@@ -114,7 +114,7 @@ export const lexiqueStatistiqueDescriptive: MotDuCours[] = [
   },
   {
     mot: 'borne',
-    formes: ['bornes', 'borne inférieure', 'borne supérieure', 'bornes inférieures', 'bornes supérieures', 'borne inf', 'borne sup'],
+    formes: ['bornes', 'borne inférieure', 'borne supérieure', 'bornes inférieures', 'bornes supérieures'],
     definition: 'Une des deux extrémités d\'une classe : la borne inférieure est son début, la borne supérieure sa fin.',
     exemple: 'Dans $[4\\,;\\,8[$, la borne inférieure est 4 et la borne supérieure est 8.',
     etape: 'histogramme',
@@ -233,7 +233,7 @@ export const lexiqueStatistiqueDescriptive: MotDuCours[] = [
     mot: 'valeur extrême',
     formes: ['valeurs extrêmes', 'valeur aberrante', 'valeurs aberrantes'],
     definition: 'Une valeur très éloignée des autres, beaucoup plus grande ou beaucoup plus petite.',
-    exemple: 'Un château à 10 000 000 € dans une rue de maisons à 200 000 €.',
+    exemple: 'Un château à 10\u00a0000\u00a0000\u00a0€ dans une rue de maisons à 200\u00a0000\u00a0€.',
     etape: 'position',
     pasDans: ['deux valeurs extrêmes'],
   },
