@@ -477,8 +477,8 @@ function Lien({ href, className, children, ariaLabel }: { href: string; classNam
 function titreEtapes(etapes: EtapePubliee[]): string {
   const n = etapes.map((e) => e.numero).filter((x) => x > 0)
   if (n.length === 0) return ''
-  if (n.length === 1) return `étape ${n[0]}`
-  return `étapes ${n.slice(0, -1).join(', ')} et ${n[n.length - 1]}`
+  if (n.length === 1) return `point ${n[0]}`
+  return `points ${n.slice(0, -1).join(', ')} et ${n[n.length - 1]}`
 }
 
 function decompte(jours: number): { grand: string; petit: string; lu: string } {
@@ -543,7 +543,7 @@ function CarteInterroAncienne({ interro, aujourdhui, principale = false }: { int
         </p>
       </div>
       {interro.etapes.length > 0 && (
-        <ol className="cl-etapes" aria-label="Étapes de l’interro">
+        <ol className="cl-etapes" aria-label="Points de l’interro">
           {interro.etapes.map((e) => {
             const href = lienEtape(interro.niveau, interro.chapitre, e.id)
             return (
@@ -554,7 +554,7 @@ function CarteInterroAncienne({ interro, aujourdhui, principale = false }: { int
                 <span>
                   {href ? (
                     <Lien href={href}>
-                      <span className="cl-sr">Étape {e.numero} : </span>
+                      <span className="cl-sr">Point {e.numero} : </span>
                       <RichText text={e.titre} />
                     </Lien>
                   ) : (
@@ -678,7 +678,7 @@ function Seance({ seance, aujourdhui }: { seance: SeancePubliee; aujourdhui: str
             return (
               <li key={e.id}>
                 <p className="cl-seance-etape">
-                  <span className="cl-seance-num">Étape {e.numero}</span> <RichText text={e.titre} />
+                  <span className="cl-seance-num">{e.numero}.</span> <RichText text={e.titre} />
                   {e.precision && (
                     <span className="cl-precision">
                       <RichText text={e.precision} />
@@ -687,7 +687,7 @@ function Seance({ seance, aujourdhui }: { seance: SeancePubliee; aujourdhui: str
                 </p>
                 {href && (
                   <Lien href={href} className="cl-puce">
-                    <span>Revoir l’étape {e.numero}</span>
+                    <span>Revoir le point {e.numero}</span>
                     <span aria-hidden="true">›</span>
                   </Lien>
                 )}
