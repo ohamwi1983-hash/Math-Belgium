@@ -1,0 +1,10 @@
+{
+  "_doc": "Chapitres réécrits en français simple : leur contrôle (`npm run controle:lisibilite`) BLOQUE le build. `themes` : clés de vocabulaire-cours.json dont les mots doivent être au lexique du chapitre. `exceptions` : phrases de plus de 25 mots admises (énumération, formule longue) — `debut` = premiers mots exacts de la phrase en texte simple (une formule s'écrit « F »), `raison` obligatoire. Les autres chapitres ne bloquent jamais (rapport seulement : `npm run controle:lisibilite -- --rapport`).",
+  "chapitres": [
+    {
+      "chapitre": "4e/statistique-descriptive",
+      "themes": ["statistique"],
+      "exceptions": []
+    }
+  ]
+}

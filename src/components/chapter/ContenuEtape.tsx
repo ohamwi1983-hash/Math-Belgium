@@ -12,6 +12,7 @@ import { estGenerateurMigre, generatorLink } from '../../lib/generatorLink'
 import { useReglagesLecture } from '../../lib/reglagesLecture'
 import { arreter, lire, useLecture, voixDisponible } from '../../lib/voixLecture'
 import { phrasesDe } from '../../lib/phrasesPage'
+import { PorteeMots, SansMotsDuCours } from '../motsDuCoursContexte'
 
 type BlocDe<K extends Block['kind']> = Extract<Block, { kind: K }>
 export type BlocAtelier = BlocDe<'atelier'>
@@ -147,11 +148,13 @@ export function Essentiel({ phrases }: { phrases: string[] }) {
         <Icone nom="cible" taille={16} />
         L’essentiel
       </p>
-      {phrases.map((p, i) => (
-        <p key={i}>
-          <RichText text={p} />
-        </p>
-      ))}
+      <PorteeMots valeur={phrases}>
+        {phrases.map((p, i) => (
+          <p key={i}>
+            <RichText text={p} />
+          </p>
+        ))}
+      </PorteeMots>
     </section>
   )
 }
@@ -193,6 +196,15 @@ function Tiroir({
 }
 
 function TiroirBloc({ bloc }: { bloc: Block }) {
+  // Exemple relu pas à pas, « Dans la vraie vie », « Le sais-tu ? » : un bloc pour les mots du cours.
+  return (
+    <PorteeMots valeur={bloc}>
+      <TiroirBlocContenu bloc={bloc} />
+    </PorteeMots>
+  )
+}
+
+function TiroirBlocContenu({ bloc }: { bloc: Block }) {
   switch (bloc.kind) {
     case 'exemple': {
       const n = bloc.steps.length
@@ -466,7 +478,10 @@ function CarteManipuler({ bloc, ouvrir }: { bloc: BlocAtelier; ouvrir: () => voi
       <p className="carte-titre">{titreAtelier(bloc)}</p>
       {bloc.caption && (
         <p className="carte-legende">
-          <RichText text={bloc.caption} />
+          {/* Consigne d'atelier : pas de mot du cours souligné (carte, comme les widgets). */}
+          <SansMotsDuCours>
+            <RichText text={bloc.caption} />
+          </SansMotsDuCours>
         </p>
       )}
       <button type="button" className="btn-parcours btn-plein" onClick={ouvrir} aria-haspopup="dialog">

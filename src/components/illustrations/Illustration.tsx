@@ -1,5 +1,6 @@
 import type { IllustrationSpec } from '../../content/types'
 import { RichText } from '../Math'
+import { SansMotsDuCours } from '../motsDuCoursContexte'
 import { MachineDiagram } from './MachineDiagram'
 import { DomainNumberLine } from './DomainNumberLine'
 import { CompositionIntroDiagram } from './CompositionIntroDiagram'
@@ -153,7 +154,10 @@ export function Illustration({ spec }: { spec: IllustrationSpec }) {
       <div className={compact ? 'diagram-frame diagram-frame--compact' : 'diagram-frame'}>{renderSvg(spec)}</div>
       {caption && (
         <figcaption>
-          <RichText text={caption} />
+          {/* Légende de figure : jamais de mot du cours souligné. */}
+          <SansMotsDuCours>
+            <RichText text={caption} />
+          </SansMotsDuCours>
         </figcaption>
       )}
     </figure>

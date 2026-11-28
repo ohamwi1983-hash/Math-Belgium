@@ -23,6 +23,8 @@ import { useMediaQuery } from '../../lib/useMediaQuery'
 import { numeroAffiche, useOrdreChapitres } from '../../lib/ordreChapitres'
 import { BoutonLecture } from '../lecture/BoutonLecture'
 import { EcouterEtape } from '../lecture/BoutonEcouter'
+import { FournisseurMotsDuCours, SansMotsDuCours } from '../motsDuCoursContexte'
+import { HoteMotsDuCours } from './MotsDuCours'
 
 /** « Avant de commencer : qu'est-ce qu'un vecteur ? » → « Qu'est-ce qu'un vecteur ? » (le bouton
  * porte déjà « Avant de commencer »). */
@@ -122,6 +124,8 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
   }, [etape, ouvrir])
 
   return (
+    // « Mots du cours » (français simple) : soulignés dans le texte du cours si le chapitre a un lexique.
+    <FournisseurMotsDuCours lexique={chapter.lexique}>
     <div className={`chapter-layout parcours chapter-${chapter.slug}`} data-vue={vue}>
       {etape && <EnteteEtape chapter={chapter} index={indexEtape} aller={aller} />}
 
@@ -152,7 +156,9 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
           </p>
           <h1 className="chapter-title">{chapter.title}</h1>
           <p className="chapter-lede">
-            <RichText text={chapter.lede} />
+            <SansMotsDuCours>
+              <RichText text={chapter.lede} />
+            </SansMotsDuCours>
           </p>
         </header>
 
@@ -164,7 +170,9 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
 
         <BlocReprendre chapter={chapter} etat={etat} aller={aller} durees={durees} />
         <OngletsChapitre vue={vue} aller={aller} prefixe="page" className="onglets-page" />
-        <CeChapitreUtilise chapter={chapter} />
+        <SansMotsDuCours>
+          <CeChapitreUtilise chapter={chapter} />
+        </SansMotsDuCours>
 
         {chapter.intro && (
           <section className={`chapter-section intro-section${introOuverte ? ' intro-ouverte' : ''}`}>
@@ -212,7 +220,9 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
 
         <ReviserVue chapter={chapter} aller={aller} />
         <RecapFinal recap={chapter.recap} />
-        <Formulaire formulaire={chapter.formulaire} chapter={chapter} />
+        <SansMotsDuCours>
+          <Formulaire formulaire={chapter.formulaire} chapter={chapter} />
+        </SansMotsDuCours>
         <ExportSection chapter={chapter} />
         <EntrainerVue chapter={chapter} aller={aller} />
       </div>
@@ -224,7 +234,9 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
       )}
 
       <PanneauModal panneau={panneau} fermer={() => setPanneau(null)} />
+      <HoteMotsDuCours chapter={chapter} aller={aller} />
     </div>
+    </FournisseurMotsDuCours>
   )
 }
 
@@ -288,7 +300,9 @@ function EtapeSection({
       <div className="section-body">
         {section.kicker && <p className="section-kicker">{section.kicker}</p>}
         {section.essentiel && section.essentiel.length > 0 && <Essentiel phrases={section.essentiel} />}
-        <EtapeUtilise section={section} />
+        <SansMotsDuCours>
+          <EtapeUtilise section={section} />
+        </SansMotsDuCours>
         <ContenuEtape blocks={section.blocks} actif={actif} colonneDroite={colonneDroite && actif} ouvrirPanneau={ouvrirPanneau} />
       </div>
       {actif && <FinEtape section={section} suivante={suivante} aller={aller} />}
