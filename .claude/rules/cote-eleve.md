@@ -721,9 +721,10 @@ logique : `tests/purs.test.ts` du dossier de travail `suite-E/` (esbuild + node)
   « Continuer : titre › » (« Commencer » sinon) + « k / N étapes comprises » ; `ListeEtapes` : ✓ (lue), pastille « en
   cours », **« à revoir »** (`aRevoir` = étapes au ton `retravailler` de `suiviChapitres.ts`, relues à
   `suivi:modifie` / `storage`), légende sous la liste. **Fin d'étape** (`FinEtape.tsx`, étape affichée seulement,
-  `no-export`, jamais pré-rendue) : « Tu as fini l'étape n », « M'entraîner sur cette étape » (première carte
-  « S'entraîner » de l'étape ; sans générateur : « Si tout est clair, touche J'ai compris ») et « Étape suivante :
-  titre › » (« Réviser le chapitre » à la fin), « ou revenir à la liste des étapes » ; hors du corps de l'étape (ni
+  `no-export`, jamais pré-rendue) : « Tu as fini le point n » (mot « point », décision du 28/11/2026), UN générateur → « M'entraîner sur ce point » ;
+  PLUSIEURS → « M'entraîner sur ce point : choisis un exercice » + un bouton par générateur (titre, code, compétence, état
+  à revoir / nouveau / réussi lu sur l'appareil) — jamais seulement le premier ; sans générateur : « Si tout est clair,
+  touche J'ai compris » ; « Point suivant : titre › » (« Réviser le chapitre » à la fin), « ou revenir à la liste des points » ; hors du corps de l'étape (ni
   « Écouter l'étape » ni « un bloc à la fois » ne la prennent).
 - **Fin d'exercice** (`entrainement/components/FinExercice.tsx`, montée par `EntrainementPage` sous l'appli — aucun
   générateur touché, `SelecteurVarianteDev` intact) : apparaît quand l'observateur de Ma progression note un essai

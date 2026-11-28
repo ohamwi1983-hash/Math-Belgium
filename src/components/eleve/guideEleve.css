@@ -177,6 +177,19 @@
   .ge-fin-bravo h3 { margin: 0 0 4px; font: 700 19px/1.3 var(--sans); color: var(--ink); }
   .ge-fin-bravo p { margin: 0; font: 400 15.5px/1.5 var(--lecture, var(--sans)); color: var(--ink-soft); }
   .ge-fin-etape .ge-bouton-plein, .ge-fin-etape .ge-bouton-contour { min-height: 56px; font-size: 16.5px; border-radius: 12px; }
+  /* Fin d'un point avec plusieurs générateurs : choisir l'exercice (28/11/2026). */
+  .ge-fin-choix { display: flex; flex-direction: column; gap: 8px; }
+  .ge-fin-choix-titre { margin: 0; font: 700 16.5px/1.35 var(--sans); color: var(--ink); }
+  .ge-fin-choix ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .ge-fin-choix-lien { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 10px 14px; box-sizing: border-box; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; }
+  .ge-fin-choix-lien:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent-soft) 45%, var(--surface)); }
+  .ge-fin-choix-lien:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .ge-fin-choix-texte { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .ge-fin-choix-nom { font: 600 15.5px/1.35 var(--sans); }
+  .ge-fin-choix-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 13px; color: var(--ink-soft); }
+  .ge-fin-choix-meta code { font: 600 13px var(--mono); color: var(--accent-ink); }
+  .ge-fin-choix-meta .ge-etat { min-width: 0; padding: 2px 9px; font-size: 12.5px; }
+  .ge-fin-choix-fleche { flex: none; font-size: 22px; color: var(--accent-ink); }
   .ge-fin-liste { margin: 0; text-align: center; font: 400 15px/1.5 var(--sans); color: var(--ink-soft); }
   .ge-fin-liste a { color: var(--ink); text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 44px; }
 }
