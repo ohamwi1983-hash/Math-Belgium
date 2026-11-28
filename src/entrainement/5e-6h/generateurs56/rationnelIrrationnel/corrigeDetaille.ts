@@ -15,10 +15,10 @@ const f = latex;
 const LETTRES = "abcd";
 
 const UTILISE: Record<FamilleNombre, ReturnType<typeof t>[]> = {
-  racines: [t("Pour un naturel n, √n est un naturel si n est un carré parfait, sinon un irrationnel (de même ∛n et les cubes) ; on simplifie d'abord la racine (cours, étape 1). ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ.")],
-  ecritures: [t("Un rationnel a une écriture décimale limitée ou périodique, un irrationnel une écriture illimitée non périodique (cours, étape 2) ; une fraction peut être un entier. ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ.")],
-  expressions: [t("On développe ou on simplifie ; a + b√r (a, b rationnels, b ≠ 0, r pas un carré parfait) est irrationnel (cours, étape 1). ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ.")],
-  constantes: [t("Valeurs exactes des angles remarquables, Φ² = Φ + 1 ; π et Φ sont irrationnels (cours, étape 1). ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ.")],
+  racines: [t("Pour un naturel n, √n est un naturel si n est un carré parfait, sinon un irrationnel (de même ∛n et les cubes) ; on simplifie d'abord la racine (cours, point 1). ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ.")],
+  ecritures: [t("Un rationnel a une écriture décimale limitée ou périodique, un irrationnel une écriture illimitée non périodique (cours, point 2) ; une fraction peut être un entier. ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ.")],
+  expressions: [t("On développe ou on simplifie ; a + b√r (a, b rationnels, b ≠ 0, r pas un carré parfait) est irrationnel (cours, point 1). ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ.")],
+  constantes: [t("Valeurs exactes des angles remarquables, Φ² = Φ + 1 ; π et Φ sont irrationnels (cours, point 1). ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ.")],
 };
 
 export function correctionDetailleeRationnel(e: ExerciceRationnel): EtapeCorrection[] {

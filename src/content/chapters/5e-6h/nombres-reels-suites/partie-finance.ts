@@ -59,7 +59,7 @@ export const sectionsFinance: ChapterSection[] = [
       { kind: 'video', title: 'Intérêt simple et intérêts composés : valeur acquise, valeur actuelle, taux et durée' },
       {
         kind: 'para',
-        text: R`Placer ses économies sur un compte d'épargne, emprunter pour acheter une voiture ou rénover une maison : dans les deux cas, celui qui prête l'argent est rémunéré. Cette rémunération s'appelle l'**intérêt**. Cette dernière partie du chapitre applique les suites arithmétiques ([[5e-6h/nombres-reels-suites#suites-arithmetiques|étape 7]]) et géométriques ([[5e-6h/nombres-reels-suites#suites-geometriques|étape 8]]) aux calculs d'épargne et d'emprunt.`,
+        text: R`Placer ses économies sur un compte d'épargne, emprunter pour acheter une voiture ou rénover une maison : dans les deux cas, celui qui prête l'argent est rémunéré. Cette rémunération s'appelle l'**intérêt**. Cette dernière partie du chapitre applique les suites arithmétiques ([[5e-6h/nombres-reels-suites#suites-arithmetiques|point 7]]) et géométriques ([[5e-6h/nombres-reels-suites#suites-geometriques|point 8]]) aux calculs d'épargne et d'emprunt.`,
       },
       {
         kind: 'historique',
@@ -343,7 +343,7 @@ export const sectionsFinance: ChapterSection[] = [
         label: 'Démonstration — sur une fraction d’année, l’intérêt simple rapporte plus',
         blocks: [
           { kind: 'para', text: R`Soit un taux annuel $i > 0$ et un entier $k \geq 2$. On montre qu'après $\frac{1}{k}$ d'année (six mois pour $k = 2$, un mois pour $k = 12$), la valeur acquise à intérêt simple, $C_0\left(1 + \frac{i}{k}\right)$, dépasse la valeur acquise à intérêts composés, $C_0(1+i)^{\frac{1}{k}}$.` },
-          { kind: 'para', text: R`**Étape 1 — une inégalité connue.** Pour $h > 0$ et un entier $k \geq 2$, on a $(1+h)^k > 1 + kh$ : en distribuant le produit de $k$ facteurs $(1+h)$, on obtient $1$, puis $k$ fois $h$, puis d'autres termes tous positifs (voir [[5e-6h/nombres-reels-suites#limite-suite|étape 9]]).` },
+          { kind: 'para', text: R`**Étape 1 — une inégalité connue.** Pour $h > 0$ et un entier $k \geq 2$, on a $(1+h)^k > 1 + kh$ : en distribuant le produit de $k$ facteurs $(1+h)$, on obtient $1$, puis $k$ fois $h$, puis d'autres termes tous positifs (voir [[5e-6h/nombres-reels-suites#limite-suite|point 9]]).` },
           { kind: 'para', text: R`**Étape 2 — avec** $\boldsymbol{h = \frac{i}{k}}$**.** $\left(1 + \frac{i}{k}\right)^k > 1 + k\cdot\frac{i}{k} = 1 + i$.` },
           { kind: 'para', text: R`**Étape 3 — conclure.** Les deux membres sont positifs : en prenant la racine $k$-ième, $1 + \frac{i}{k} > \sqrt[k]{1+i} = (1+i)^{\frac{1}{k}}$. On multiplie par $C_0 > 0$ : l'intérêt simple rapporte plus. Pour $k = 2$ et $i = 0{,}03$ : $1{,}015^2 = 1{,}030225 > 1{,}03$.` },
         ],
@@ -578,7 +578,7 @@ export const sectionsFinance: ChapterSection[] = [
       },
       {
         kind: 'para',
-        text: R`Avec quinze ou soixante versements, le tableau deviendrait fastidieux. Mais la somme $1\,200\,(1 + 1{,}03 + 1{,}03^2 + 1{,}03^3 + 1{,}03^4)$ est celle des termes consécutifs d'une suite géométrique de raison $1{,}03$ ([[5e-6h/nombres-reels-suites#suites-geometriques|étape 8]]) : une formule la donne d'un coup.`,
+        text: R`Avec quinze ou soixante versements, le tableau deviendrait fastidieux. Mais la somme $1\,200\,(1 + 1{,}03 + 1{,}03^2 + 1{,}03^3 + 1{,}03^4)$ est celle des termes consécutifs d'une suite géométrique de raison $1{,}03$ ([[5e-6h/nombres-reels-suites#suites-geometriques|point 8]]) : une formule la donne d'un coup.`,
       },
       {
         kind: 'exempleLibre',
@@ -744,7 +744,7 @@ export const sectionsFinance: ChapterSection[] = [
       { kind: 'video', title: 'Crédit à la consommation : TAEG, mensualité et tableau d’amortissement' },
       {
         kind: 'para',
-        text: R`Une voiture, un ordinateur, des travaux : beaucoup d'achats importants sont financés par un crédit. Les annuités de l'étape précédente donnent l'outil de calcul ; il reste à connaître le vocabulaire et les règles propres au crédit.`,
+        text: R`Une voiture, un ordinateur, des travaux : beaucoup d'achats importants sont financés par un crédit. Les annuités du point précédent donnent l'outil de calcul ; il reste à connaître le vocabulaire et les règles propres au crédit.`,
       },
       {
         kind: 'definition',
@@ -778,8 +778,8 @@ export const sectionsFinance: ChapterSection[] = [
         label: 'Démonstration — la formule de la mensualité',
         blocks: [
           { kind: 'para', text: R`Un capital $C$ est emprunté au TAEG donné et remboursé par $n$ mensualités égales $m$, la première un mois après l'emprunt.` },
-          { kind: 'para', text: R`**Étape 1 — le taux mensuel.** Les versements sont mensuels : il faut le taux mensuel équivalent au TAEG ([[5e-6h/nombres-reels-suites#taux-equivalents|étape 12]]) : $(1+i)^{12} = 1 + \text{TAEG}$, donc $i = (1+\text{TAEG})^{\frac{1}{12}} - 1$.` },
-          { kind: 'para', text: R`**Étape 2 — le capital est la valeur actuelle des mensualités.** Le montant emprunté vaut la valeur actuelle des $n$ remboursements ([[5e-6h/nombres-reels-suites#annuites|étape 13]]) : $C = m\cdot\dfrac{1-(1+i)^{-n}}{i}$.` },
+          { kind: 'para', text: R`**Étape 1 — le taux mensuel.** Les versements sont mensuels : il faut le taux mensuel équivalent au TAEG ([[5e-6h/nombres-reels-suites#taux-equivalents|point 12]]) : $(1+i)^{12} = 1 + \text{TAEG}$, donc $i = (1+\text{TAEG})^{\frac{1}{12}} - 1$.` },
+          { kind: 'para', text: R`**Étape 2 — le capital est la valeur actuelle des mensualités.** Le montant emprunté vaut la valeur actuelle des $n$ remboursements ([[5e-6h/nombres-reels-suites#annuites|point 13]]) : $C = m\cdot\dfrac{1-(1+i)^{-n}}{i}$.` },
           { kind: 'para', text: R`**Étape 3 — isoler** $\boldsymbol{m}$**.** On multiplie par $i$ et on divise par $1-(1+i)^{-n}$ (non nul, car $(1+i)^{-n} < 1$) : $m = \dfrac{C\cdot i}{1-(1+i)^{-n}}$.` },
         ],
       },
@@ -913,7 +913,7 @@ export const sectionsFinance: ChapterSection[] = [
       {
         kind: 'application',
         titre: 'Comparer deux offres de crédit',
-        text: R`Une offre annonce un taux d'intérêt bas mais des frais de dossier élevés, une autre l'inverse : laquelle choisir ? C'est pour répondre à cette question que la loi impose d'afficher le **TAEG** dans toute publicité chiffrée pour un crédit. Le prêteur calcule le taux annuel pour lequel la valeur actuelle de **tout** ce que l'emprunteur paie (mensualités, frais, assurances obligatoires) est égale au montant réellement reçu : c'est l'équation de l'étape 13, résolue pour le taux. Deux offres de même durée se comparent alors par un seul nombre : le TAEG le plus bas est l'offre la moins chère.`,
+        text: R`Une offre annonce un taux d'intérêt bas mais des frais de dossier élevés, une autre l'inverse : laquelle choisir ? C'est pour répondre à cette question que la loi impose d'afficher le **TAEG** dans toute publicité chiffrée pour un crédit. Le prêteur calcule le taux annuel pour lequel la valeur actuelle de **tout** ce que l'emprunteur paie (mensualités, frais, assurances obligatoires) est égale au montant réellement reçu : c'est l'équation du point 13, résolue pour le taux. Deux offres de même durée se comparent alors par un seul nombre : le TAEG le plus bas est l'offre la moins chère.`,
         domaines: ['Économie', 'Droit de la consommation'],
       },
       {

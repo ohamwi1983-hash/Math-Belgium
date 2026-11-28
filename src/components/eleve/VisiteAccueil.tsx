@@ -8,7 +8,7 @@ export const EVENEMENT_RELANCER_VISITE = 'visite:relancer'
 
 const ETAPES: { cible: string; titre: string; texte: string }[] = [
   { cible: 'annees', titre: 'Ton année', texte: 'Choisis ici ton année : ton cours, tes exercices et ton interro suivent ce choix. Il reste sur cet appareil.' },
-  { cible: 'portes', titre: 'Trois portes', texte: '« Mon cours » pour lire étape par étape, « M’entraîner » pour les exercices corrigés, « Préparer mon interro » pour un plan jour par jour.' },
+  { cible: 'portes', titre: 'Trois portes', texte: '« Mon cours » pour lire point par point, « M’entraîner » pour les exercices corrigés, « Préparer mon interro » pour un plan jour par jour.' },
   { cible: 'aide', titre: 'Besoin d’aide ?', texte: 'Touche « ? » sur chaque page : deux phrases te disent à quoi elle sert. « Aa » règle la taille et les couleurs du texte.' },
 ]
 

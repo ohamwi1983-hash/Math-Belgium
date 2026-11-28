@@ -16,7 +16,7 @@ import { signe } from "./moteur/verification";
 type E = ExerciceSansAbs;
 const t = texte;
 const f = latex;
-const COURS = "(cours, étape 4)";
+const COURS = "(cours, point 4)";
 const LETTRES = ["b", "c", "d"];
 
 function lignesZero(tm: TermeAbs): LigneCalcul[] {

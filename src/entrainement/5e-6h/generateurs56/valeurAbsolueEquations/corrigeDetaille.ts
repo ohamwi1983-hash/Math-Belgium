@@ -16,7 +16,7 @@ import { absL, affineL, AL, BL, enonceL, estPetit, reponse, sGrand, sPetit } fro
 type E = ExerciceAbsolue;
 const t = texte;
 const f = latex;
-const COURS = "(cours, étape 4)";
+const COURS = "(cours, point 4)";
 const ajoute = (b: number) => (b > 0 ? `on retranche ${b}` : `on ajoute ${-b}`);
 const INVERSE: Record<string, string> = { "<": ">", ">": "<", "\\leq": "\\geq ", "\\geq": "\\leq " };
 const inverse = (s: string): string => INVERSE[s.trim()];

@@ -119,7 +119,7 @@ export const sectionsSuites: ChapterSection[] = [
       {
         kind: 'attention',
         label: 'Attention — quelques termes ne prouvent pas une formule',
-        text: R`Une formule qui marche de $u_1$ à $u_5$ reste une **conjecture** : rien ne garantit, à ce stade, qu'elle marche pour $u_{100}$. Pour en être sûr, il faut un raisonnement valable pour **tous** les rangs. Contrôler la conjecture sur des termes qu'on n'a pas utilisés pour la trouver (ici $u_5$) la rend plus crédible, sans la démontrer. Méfie-toi des régularités tirées trop vite de quelques nombres (voir « Le sais-tu ? » en fin d'étape).`,
+        text: R`Une formule qui marche de $u_1$ à $u_5$ reste une **conjecture** : rien ne garantit, à ce stade, qu'elle marche pour $u_{100}$. Pour en être sûr, il faut un raisonnement valable pour **tous** les rangs. Contrôler la conjecture sur des termes qu'on n'a pas utilisés pour la trouver (ici $u_5$) la rend plus crédible, sans la démontrer. Méfie-toi des régularités tirées trop vite de quelques nombres (voir « Le sais-tu ? » à la fin du point).`,
       },
       { kind: 'subheading', text: 'Représenter une suite' },
       {
@@ -189,7 +189,7 @@ export const sectionsSuites: ChapterSection[] = [
       { kind: 'subheading', text: 'Reconnaître une régularité : ajouter ou multiplier ?' },
       {
         kind: 'para',
-        text: R`Deux familles de suites reviendront sans cesse : les suites **arithmétiques**, où l'on passe d'un terme au suivant en **ajoutant** toujours le même nombre (étape 7), et les suites **géométriques**, où l'on **multiplie** toujours par le même nombre (étape 8). Avant de les étudier, apprends à les reconnaître.`,
+        text: R`Deux familles de suites reviendront sans cesse : les suites **arithmétiques**, où l'on passe d'un terme au suivant en **ajoutant** toujours le même nombre (point 7), et les suites **géométriques**, où l'on **multiplie** toujours par le même nombre (point 8). Avant de les étudier, apprends à les reconnaître.`,
       },
       {
         kind: 'methode',
@@ -232,7 +232,7 @@ export const sectionsSuites: ChapterSection[] = [
           { kind: 'para', text: R`**1.** Pose $v_n = u_n - L$ : l'écart entre le terme $u_n$ et le point fixe $L$.` },
           { kind: 'para', text: R`**2.** Comme $L = aL + b$, on peut écrire $b = L - aL$. Alors $v_{n+1} = u_{n+1} - L = a\,u_n + b - L$.` },
           { kind: 'para', text: R`**3.** En remplaçant $b$ : $v_{n+1} = a\,u_n + L - aL - L = a\,u_n - aL$, soit $v_{n+1} = a(u_n - L) = a\,v_n$.` },
-          { kind: 'para', text: R`**Conclusion.** À chaque pas, l'écart au point fixe est **multiplié par** $a$ : la suite des écarts est géométrique de raison $a$ (étape 8), et $u_n = L + (u_1 - L)\,a^{n-1}$. Si $|a| < 1$, l'écart rétrécit et la suite se rapproche de $L$ (étape 9) ; si $|a| > 1$, il grandit, et la suite s'éloigne de $L$ dès que $u_1 \neq L$.` },
+          { kind: 'para', text: R`**Conclusion.** À chaque pas, l'écart au point fixe est **multiplié par** $a$ : la suite des écarts est géométrique de raison $a$ (point 8), et $u_n = L + (u_1 - L)\,a^{n-1}$. Si $|a| < 1$, l'écart rétrécit et la suite se rapproche de $L$ (point 9) ; si $|a| > 1$, il grandit, et la suite s'éloigne de $L$ dès que $u_1 \neq L$.` },
         ],
       },
       {
@@ -853,7 +853,7 @@ export const sectionsSuites: ChapterSection[] = [
       {
         kind: 'historique',
         titre: 'Le triangle de Kepler et le nombre d’or',
-        text: R`Existe-t-il un triangle rectangle dont les côtés $a$, $aq$, $aq^2$ ($q > 1$) forment une suite géométrique ? L'hypoténuse est le plus grand côté, $aq^2$, et Pythagore donne $a^2 + a^2q^2 = a^2q^4$, soit $q^4 - q^2 - 1 = 0$. C'est une équation du second degré en $q^2$ ; sa solution positive est $q^2 = \dfrac{1+\sqrt{5}}{2} = \Phi$, le nombre d'or (étape 1), donc $q = \sqrt{\Phi} \approx 1{,}272$. Les côtés sont proportionnels à $1$, $\sqrt{\Phi}$ et $\Phi$. On attribue cette remarque à **Johannes Kepler**, dans une lettre de 1597 à son ancien professeur Michael Mästlin : ce triangle porte aujourd'hui le nom de « triangle de Kepler ».`,
+        text: R`Existe-t-il un triangle rectangle dont les côtés $a$, $aq$, $aq^2$ ($q > 1$) forment une suite géométrique ? L'hypoténuse est le plus grand côté, $aq^2$, et Pythagore donne $a^2 + a^2q^2 = a^2q^4$, soit $q^4 - q^2 - 1 = 0$. C'est une équation du second degré en $q^2$ ; sa solution positive est $q^2 = \dfrac{1+\sqrt{5}}{2} = \Phi$, le nombre d'or (point 1), donc $q = \sqrt{\Phi} \approx 1{,}272$. Les côtés sont proportionnels à $1$, $\sqrt{\Phi}$ et $\Phi$. On attribue cette remarque à **Johannes Kepler**, dans une lettre de 1597 à son ancien professeur Michael Mästlin : ce triangle porte aujourd'hui le nom de « triangle de Kepler ».`,
         image: {
           src: '/images/historique/kepler.jpg',
           alt: 'Portrait de Johannes Kepler',
@@ -1054,8 +1054,8 @@ export const sectionsSuites: ChapterSection[] = [
         items: [
           R`« Pour tout $\varepsilon > 0$ » : quelle que soit la précision exigée, aussi petite soit-elle…`,
           R`« il existe un rang $m$ » : … on peut trouver un rang, qui dépend de $\varepsilon$…`,
-          R`« $n > m \Rightarrow |u_n - \ell| < \varepsilon$ » : … au-delà duquel **tous** les termes sont à moins de $\varepsilon$ de $\ell$. Comme $|u_n - \ell| < \varepsilon \iff \ell - \varepsilon < u_n < \ell + \varepsilon$ (étape 4), les points $(n\,;u_n)$ restent alors dans la bande de hauteur $2\varepsilon$ centrée sur $\ell$.`,
-          R`L'ordre des quantificateurs compte (étape 3) : $\varepsilon$ est choisi d'abord, $m$ ensuite, en fonction de $\varepsilon$.`,
+          R`« $n > m \Rightarrow |u_n - \ell| < \varepsilon$ » : … au-delà duquel **tous** les termes sont à moins de $\varepsilon$ de $\ell$. Comme $|u_n - \ell| < \varepsilon \iff \ell - \varepsilon < u_n < \ell + \varepsilon$ (point 4), les points $(n\,;u_n)$ restent alors dans la bande de hauteur $2\varepsilon$ centrée sur $\ell$.`,
+          R`L'ordre des quantificateurs compte (point 3) : $\varepsilon$ est choisi d'abord, $m$ ensuite, en fonction de $\varepsilon$.`,
         ],
       },
       {
@@ -1084,7 +1084,7 @@ export const sectionsSuites: ChapterSection[] = [
         steps: [
           { tag: 'simplifier l’écart', text: R`$u_n - 2 = \dfrac{2n + 3 - 2(n+1)}{n+1}$, donc $u_n - 2 = \dfrac{1}{n+1}$, qui est positif` },
           { tag: 'résoudre l’inéquation', text: R`$\dfrac{1}{n+1} < 10^{-3} \iff n + 1 > 1\,000$, c'est-à-dire $n > 999$ : $m = 999$ convient.` },
-          { tag: 'pour un ε quelconque', text: R`$\dfrac{1}{n+1} < \varepsilon \iff n > \dfrac{1}{\varepsilon} - 1$ : tout naturel $m \geq \dfrac{1}{\varepsilon} - 1$ convient, et il en existe (axiome d'Archimède, étape 3).` },
+          { tag: 'pour un ε quelconque', text: R`$\dfrac{1}{n+1} < \varepsilon \iff n > \dfrac{1}{\varepsilon} - 1$ : tout naturel $m \geq \dfrac{1}{\varepsilon} - 1$ convient, et il en existe (axiome d'Archimède, point 3).` },
         ],
         result: { tag: 'résultat', text: R`Pour $\varepsilon = 10^{-3}$, $m = 999$ ; un tel rang existe pour tout $\varepsilon > 0$, donc $\lim\limits_{n\to+\infty} \dfrac{2n+3}{n+1} = 2$.` },
       },
@@ -1128,7 +1128,7 @@ export const sectionsSuites: ChapterSection[] = [
         blocks: [
           { kind: 'para', text: R`Soit $(u_n)$ une suite arithmétique de raison $r > 0$, et soit un réel $A > 0$ (il joue le rôle du $r$ de la définition ; on le renomme pour ne pas le confondre avec la raison). Il faut trouver un rang $m$ au-delà duquel $u_n > A$.` },
           { kind: 'para', text: R`$u_n > A \iff u_1 + (n-1)r > A$, c'est-à-dire $n > 1 + \dfrac{A - u_1}{r}$ (on divise par $r > 0$ : le sens ne change pas).` },
-          { kind: 'para', text: R`Par l'axiome d'Archimède (étape 3), il existe un naturel $m$ supérieur au réel $1 + \dfrac{A - u_1}{r}$. Alors, pour tout $n > m$, on a $u_n > A$.` },
+          { kind: 'para', text: R`Par l'axiome d'Archimède (point 3), il existe un naturel $m$ supérieur au réel $1 + \dfrac{A - u_1}{r}$. Alors, pour tout $n > m$, on a $u_n > A$.` },
           { kind: 'para', text: R`**Conclusion.** $\lim\limits_{n\to+\infty} u_n = +\infty$. Pour $r < 0$, le même raisonnement, avec un réel $A < 0$ et en changeant le sens de l'inégalité quand on divise par $r$, donne $-\infty$.` },
         ],
       },
@@ -1209,7 +1209,7 @@ export const sectionsSuites: ChapterSection[] = [
         blocks: [
           { kind: 'para', text: R`**La récurrence.** $v_{n+1} = \dfrac{F_{n+2}}{F_{n+1}} = \dfrac{F_{n+1} + F_n}{F_{n+1}} = 1 + \dfrac{F_n}{F_{n+1}}$, c'est-à-dire $v_{n+1} = 1 + \dfrac{1}{v_n}$.` },
           { kind: 'para', text: R`**Si la suite converge** vers un réel $\ell$, alors $v_{n+1}$ tend aussi vers $\ell$ (c'est la même suite, décalée d'un rang), et $1 + \dfrac{1}{v_n}$ tend vers $1 + \dfrac{1}{\ell}$. Donc $\ell = 1 + \dfrac{1}{\ell}$, soit $\ell^2 - \ell - 1 = 0$.` },
-          { kind: 'para', text: R`Cette équation a deux solutions, $\dfrac{1+\sqrt{5}}{2}$ et $\dfrac{1-\sqrt{5}}{2}$. Tous les $v_n$ sont supérieurs ou égaux à $1$, donc $\ell \geq 1$ : $\ell = \dfrac{1+\sqrt{5}}{2} = \Phi \approx 1{,}618$, le nombre d'or (étape 1).` },
+          { kind: 'para', text: R`Cette équation a deux solutions, $\dfrac{1+\sqrt{5}}{2}$ et $\dfrac{1-\sqrt{5}}{2}$. Tous les $v_n$ sont supérieurs ou égaux à $1$, donc $\ell \geq 1$ : $\ell = \dfrac{1+\sqrt{5}}{2} = \Phi \approx 1{,}618$, le nombre d'or (point 1).` },
           { kind: 'para', text: R`**Conclusion.** Les rapports ($1$ ; $2$ ; $1{,}5$ ; $1{,}667$ ; $1{,}6$ ; $1{,}625$ ; $1{,}615$ ; $1{,}619$ ; $1{,}618$…) se rapprochent de $\Phi$, alternativement au-dessus et en dessous. Que la suite converge effectivement, nous l'admettons ici, sur la foi de la table et de la figure.` },
         ],
       },
@@ -1343,7 +1343,7 @@ export const sectionsSuites: ChapterSection[] = [
         blocks: [
           { kind: 'para', text: R`On colorie la moitié d'un carré d'aire $1$, puis la moitié de la surface restante, puis la moitié de ce qui reste, et ainsi de suite indéfiniment. Calcule les aires coloriées et leur somme.` },
           { kind: 'para', text: R`**Les aires coloriées** forment la suite $\dfrac{1}{2}$ ; $\dfrac{1}{4}$ ; $\dfrac{1}{8}$ ; … : géométrique, de premier terme $\dfrac{1}{2}$ et de raison $\dfrac{1}{2}$. Son terme général $u_n = \dfrac{1}{2^n}$ tend vers $0$.` },
-          { kind: 'para', text: R`**Les sommes partielles.** Après $n$ étapes, il reste à colorier une surface d'aire $\dfrac{1}{2^n}$, donc $S_n = 1 - \dfrac{1}{2^n}$. La formule de l'étape 8 donne la même chose : $S_n = \dfrac{1}{2} \times \dfrac{1 - \frac{1}{2^n}}{1 - \frac{1}{2}} = 1 - \dfrac{1}{2^n}$.` },
+          { kind: 'para', text: R`**Les sommes partielles.** Après $n$ étapes, il reste à colorier une surface d'aire $\dfrac{1}{2^n}$, donc $S_n = 1 - \dfrac{1}{2^n}$. La formule du point 8 donne la même chose : $S_n = \dfrac{1}{2} \times \dfrac{1 - \frac{1}{2^n}}{1 - \frac{1}{2}} = 1 - \dfrac{1}{2^n}$.` },
           { kind: 'para', text: R`**Conclusion.** $\dfrac{1}{2^n}$ tend vers $0$, donc $S_n$ tend vers $1$ : $\dfrac{1}{2} + \dfrac{1}{4} + \dfrac{1}{8} + \ldots = 1$. Une infinité d'aires, qui remplissent exactement le carré de départ.` },
           {
             kind: 'illustration',
@@ -1383,8 +1383,8 @@ export const sectionsSuites: ChapterSection[] = [
         kind: 'exempleLibre',
         label: 'Démonstration — la somme de tous les termes d’une suite géométrique',
         blocks: [
-          { kind: 'para', text: R`Pour $q \neq 1$ (étape 8) : $S_n = u_1\,\dfrac{1-q^n}{1-q}$, qu'on écrit $S_n = \dfrac{u_1}{1-q} - \dfrac{u_1}{1-q}\,q^n$.` },
-          { kind: 'para', text: R`**Si** $0 < |q| < 1$, $q^n$ tend vers $0$ (étape 9) : le second terme tend vers $0$, et $S_n$ tend vers $\dfrac{u_1}{1-q}$.` },
+          { kind: 'para', text: R`Pour $q \neq 1$ (point 8) : $S_n = u_1\,\dfrac{1-q^n}{1-q}$, qu'on écrit $S_n = \dfrac{u_1}{1-q} - \dfrac{u_1}{1-q}\,q^n$.` },
+          { kind: 'para', text: R`**Si** $0 < |q| < 1$, $q^n$ tend vers $0$ (point 9) : le second terme tend vers $0$, et $S_n$ tend vers $\dfrac{u_1}{1-q}$.` },
           { kind: 'para', text: R`**Si** $q > 1$, $q^n$ tend vers $+\infty$ et $1 - q < 0$ : le second terme, $-\dfrac{u_1}{1-q}\,q^n$, a le signe de $u_1$ et grandit sans borne. **Si** $q \leq -1$, $q^n$ n'a pas de limite, donc $S_n$ non plus.` },
           { kind: 'para', text: R`**Conclusion.** Pour $u_1 \neq 0$, la somme de tous les termes de la suite géométrique est un réel si et seulement si $0 < |q| < 1$, et alors $\sum\limits_{i=1}^{+\infty} u_1\,q^{i-1} = \dfrac{u_1}{1-q}$.` },
         ],
@@ -1435,7 +1435,7 @@ export const sectionsSuites: ChapterSection[] = [
           { tag: 'appliquer la formule', text: R`$\dfrac{0{,}9}{1 - 0{,}1} = \dfrac{0{,}9}{0{,}9} = 1$` },
           { tag: 'une partie qui ne se répète pas', text: R`$7{,}079\,99\ldots = 7{,}07 + 0{,}009\,99\ldots$, et $0{,}009 + 0{,}000\,9 + \ldots$ est géométrique ($u_1 = 0{,}009$, $q = 0{,}1$), de somme $\dfrac{0{,}009}{1 - 0{,}1} = 0{,}01$` },
         ],
-        result: { tag: 'résultat', text: R`$0{,}999\ldots = 1$ et $7{,}079\,99\ldots = 7{,}08$ : deux écritures décimales d'un même nombre, comme annoncé à l'étape 2.` },
+        result: { tag: 'résultat', text: R`$0{,}999\ldots = 1$ et $7{,}079\,99\ldots = 7{,}08$ : deux écritures décimales d'un même nombre, comme annoncé au point 2.` },
       },
       { kind: 'subheading', text: 'Problèmes classiques de sommes infinies' },
       {
@@ -1542,7 +1542,7 @@ export const sectionsSuites: ChapterSection[] = [
           { kind: 'para', text: R`On part d'un carré de $10$ cm de côté. On trace à l'intérieur un deuxième carré dont chaque sommet est sur un côté du premier, à $1$ cm d'un sommet (en tournant toujours dans le même sens), puis un troisième dans le deuxième, et ainsi de suite indéfiniment. La suite des aires tend-elle vers $0$ ?` },
           { kind: 'para', text: R`**De proche en proche.** Si un carré a pour côté $c_n$, chaque coin forme un triangle rectangle de côtés $1$ et $c_n - 1$, dont l'hypoténuse est le côté du carré suivant : $c_{n+1} = \sqrt{1 + (c_n - 1)^2}$, avec $c_1 = 10$.` },
           { kind: 'para', text: R`**Les valeurs.** $c_2 = \sqrt{82} \approx 9{,}06$, $c_3 \approx 8{,}12$, …, $c_{10} \approx 2{,}06$, $c_{11} \approx 1{,}46$, $c_{12} \approx 1{,}10$, $c_{13} \approx 1{,}005$, $c_{14} \approx 1{,}000\,01$.` },
-          { kind: 'para', text: R`**La limite.** Le côté ne descend jamais sous $1$, car $c_{n+1}^2 = 1 + (c_n - 1)^2 > 1$ ; et il diminue tant que $c_n > 1$, car $c_{n+1}^2 - c_n^2 = 2 - 2c_n < 0$. Une suite qui diminue sans jamais passer sous un même nombre converge (propriété de $\mathbb{R}$ que nous admettons : $\mathbb{R}$ n'a pas de « trou », étape 3). Sa limite $\ell$ vérifie $\ell = \sqrt{1 + (\ell - 1)^2}$, soit $\ell^2 = \ell^2 - 2\ell + 2$, donc $\ell = 1$.` },
+          { kind: 'para', text: R`**La limite.** Le côté ne descend jamais sous $1$, car $c_{n+1}^2 = 1 + (c_n - 1)^2 > 1$ ; et il diminue tant que $c_n > 1$, car $c_{n+1}^2 - c_n^2 = 2 - 2c_n < 0$. Une suite qui diminue sans jamais passer sous un même nombre converge (propriété de $\mathbb{R}$ que nous admettons : $\mathbb{R}$ n'a pas de « trou », point 3). Sa limite $\ell$ vérifie $\ell = \sqrt{1 + (\ell - 1)^2}$, soit $\ell^2 = \ell^2 - 2\ell + 2$, donc $\ell = 1$.` },
           { kind: 'para', text: R`**Conclusion.** Le côté tend vers $1$ cm, donc l'aire tend vers $1$ cm², et non vers $0$ : les carrés tournent en se resserrant autour d'un carré de $1$ cm de côté. Penser « des carrés de plus en plus petits, donc une aire qui tend vers $0$ » est un piège : diminuer ne veut pas dire tendre vers $0$.` },
           {
             kind: 'illustration',

@@ -121,15 +121,15 @@ export function mode(e: E, p: P): ModeEcran {
 export function aide1(e: E, p: P): AideEcran {
   switch (p) {
     case "traduire":
-      if (e.variante === "carre") return { texte: [tx("Traite d'abord l'expression entre les barres comme un tout, avec la méthode du cours (étape 4) : pour c > 0,")], latex: "|A|<c\\iff -c<A<c\\qquad |A|>c\\iff A<-c\\ \\text{ou}\\ A>c" };
-      if (e.variante === "equation") return { texte: [tx("Méthode du cours (étape 4) : si c < 0, |A| = c n'a aucune solution ; si c = 0, |A| = 0 équivaut à A = 0 ; si c > 0, |A| = c équivaut à A = c ou A = −c. Une valeur absolue n'est jamais négative.")] };
-      return { texte: [tx("Méthode du cours (étape 4) : pour c > 0, |A| < c équivaut à −c < A < c et |A| > c à A < −c ou A > c (mêmes règles avec ≤ et ≥). Pour c ≤ 0, raisonne sur le fait qu'une valeur absolue est toujours positive ou nulle.")] };
+      if (e.variante === "carre") return { texte: [tx("Traite d'abord l'expression entre les barres comme un tout, avec la méthode du cours (point 4) : pour c > 0,")], latex: "|A|<c\\iff -c<A<c\\qquad |A|>c\\iff A<-c\\ \\text{ou}\\ A>c" };
+      if (e.variante === "equation") return { texte: [tx("Méthode du cours (point 4) : si c < 0, |A| = c n'a aucune solution ; si c = 0, |A| = 0 équivaut à A = 0 ; si c > 0, |A| = c équivaut à A = c ou A = −c. Une valeur absolue n'est jamais négative.")] };
+      return { texte: [tx("Méthode du cours (point 4) : pour c > 0, |A| < c équivaut à −c < A < c et |A| > c à A < −c ou A > c (mêmes règles avec ≤ et ≥). Pour c ≤ 0, raisonne sur le fait qu'une valeur absolue est toujours positive ou nulle.")] };
     case "egaux":
     case "opposes":
       return { texte: [tx("Résous une équation du premier degré : regroupe les termes en x d'un côté, les nombres de l'autre, puis divise par le coefficient de x.")] };
     case "ensemble":
       return e.variante === "deuxAbsolues"
-        ? { texte: [tx("Les solutions de l'équation sont celles des deux cas réunies (cours, étape 4) :")], latex: "|A|=|B|\\iff A=B\\ \\text{ou}\\ A=-B" }
+        ? { texte: [tx("Les solutions de l'équation sont celles des deux cas réunies (cours, point 4) :")], latex: "|A|=|B|\\iff A=B\\ \\text{ou}\\ A=-B" }
         : { texte: [tx("Résous la traduction trouvée ; attention au sens des inégalités quand tu divises par un nombre négatif. Écris un ensemble de nombres entre accolades, des intervalles avec des crochets (fermé si la borne est comprise), ∅ ou ℝ.")] };
   }
 }

@@ -198,7 +198,7 @@ function etapesTriangleParametre(e: ExerciceOrthogonaliteTriangleParametre): Eta
   const r0 = reductions[s0];
   const autres = (["A", "B", "C"] as Sommet[]).filter((s) => s !== s0);
   const etapesE: EtapeCorrection[] = [
-    utilise("e", [texte("Une équation du second degré "), latex("ax^2+bx+c=0"), texte(" n'a aucune solution réelle quand "), latex("\\Delta=b^2-4ac<0"), texte(" (voir « Équations et inéquations du second degré », étape 1) ; celle du premier degré se résout en isolant x.")]),
+    utilise("e", [texte("Une équation du second degré "), latex("ax^2+bx+c=0"), texte(" n'a aucune solution réelle quand "), latex("\\Delta=b^2-4ac<0"), texte(" (voir « Équations et inéquations du second degré », point 1) ; celle du premier degré se résout en isolant x.")]),
   ];
   for (const s of autres) {
     const r = reductions[s];

@@ -53,7 +53,7 @@ function LienChapitre({ reference, section, texte }: { reference: string; sectio
   const resolu = resoudreLien(reference, section, texte)
   const cible = resolu.cible
   const affiche = insecablesFr(resolu.texte)
-  const titre = cible?.numero ? `Étape ${cible.numero} : ${cible.titreEtape}` : undefined
+  const titre = cible?.numero ? `Point ${cible.numero} : ${cible.titreEtape}` : undefined
   if (!cible || mode === 'texte') return <>{affiche}</>
   if (mode === 'nouvel-onglet') {
     return (

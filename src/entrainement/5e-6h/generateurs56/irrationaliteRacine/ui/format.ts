@@ -111,13 +111,13 @@ export function apercuDecomposition(texte: string): string | null {
 export function aide1(e: E, p: P): AideEcran {
   switch (p) {
     case "hypothese":
-      return { texte: [tx("Pour décider si un nombre est rationnel, on suppose qu'il est égal à une fraction de deux naturels non nuls, puis on regarde si cette hypothèse mène à une contradiction (cours, étape 1).")] };
+      return { texte: [tx("Pour décider si un nombre est rationnel, on suppose qu'il est égal à une fraction de deux naturels non nuls, puis on regarde si cette hypothèse mène à une contradiction (cours, point 1).")] };
     case "elever":
       return { texte: [tx(`Le ${puissanceMot(e)} d'une racine ${e.k === 2 ? "carrée" : "cubique"} redonne le nombre sous la racine, et une fraction s'élève numérateur et dénominateur :`)], latex: `\\left(\\dfrac{m}{n}\\right)^{${e.k}}=\\dfrac{${mkL(e)}}{${nkL(e)}}` };
     case "facteurs":
       return { texte: [tx("Divise par 2 tant que c'est possible, puis par 3, par 5, par 7… ; regroupe les facteurs égaux en puissances. Chaque facteur doit être premier.")] };
     case "exposants":
-      return { texte: [tx(`Un naturel n'a qu'une seule décomposition en facteurs premiers. Dans ${e.N}·n${e.k === 2 ? "²" : "³"}, l'exposant d'un premier p est la somme de son exposant dans ${e.N} et de son exposant dans n${e.k === 2 ? "²" : "³"}, qui est ${pairMot(e)} (cours, étape 1).`)] };
+      return { texte: [tx(`Un naturel n'a qu'une seule décomposition en facteurs premiers. Dans ${e.N}·n${e.k === 2 ? "²" : "³"}, l'exposant d'un premier p est la somme de son exposant dans ${e.N} et de son exposant dans n${e.k === 2 ? "²" : "³"}, qui est ${pairMot(e)} (cours, point 1).`)] };
     case "conclusion":
       return { texte: [tx("Si les deux membres de l'égalité ne peuvent pas avoir la même décomposition, l'hypothèse est fausse. Si au contraire ils le peuvent, cherche une valeur exacte de la racine.")] };
   }

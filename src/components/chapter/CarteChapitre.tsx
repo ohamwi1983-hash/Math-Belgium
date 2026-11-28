@@ -39,10 +39,10 @@ export function LienVue({
   )
 }
 
-/** Onglets sous-titrés (maquette « chapitre » du 27/11/2026) : « Le cours · étape par étape », « Réviser ·
+/** Onglets sous-titrés (maquette « chapitre » du 27/11/2026) : « Le cours · point par point », « Réviser ·
  * teste-toi », « Exercices · corrigés ». Identifiants inchangés (`apprendre` / `reviser` / `entrainer`). */
 const ONGLETS: { id: 'apprendre' | 'reviser' | 'entrainer'; label: string; sous: string; cible: string | null }[] = [
-  { id: 'apprendre', label: 'Le cours', sous: 'étape par étape', cible: null },
+  { id: 'apprendre', label: 'Le cours', sous: 'point par point', cible: null },
   { id: 'reviser', label: 'Réviser', sous: 'teste-toi', cible: 'reviser' },
   { id: 'entrainer', label: 'Exercices', sous: 'corrigés', cible: 'entrainer' },
 ]
@@ -88,24 +88,24 @@ export function OngletsChapitre({ vue, aller, prefixe, className }: { vue: Vue; 
   )
 }
 
-/** Barre « 3 / 18 étapes ». */
+/** Barre « 3 / 18 points ». */
 export function BarreProgression({ lues, total }: { lues: number; total: number }) {
   return (
     <div className="parcours-progression">
-      <div className="barre" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={lues} aria-label="Étapes comprises">
+      <div className="barre" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={lues} aria-label="Points compris">
         <span style={{ width: `${total ? (100 * lues) / total : 0}%` }} />
       </div>
       <span className="parcours-compte">
-        {lues} / {total} étapes
+        {lues} / {total} points
       </span>
     </div>
   )
 }
 
 /**
- * Haut de la carte (maquette « chapitre » du 27/11/2026) : « Tu en es à l'étape n sur N » (dernière étape
+ * Haut de la carte (maquette « chapitre » du 27/11/2026) : « Tu en es au point n sur N » (dernier point
  * ouverte), sa durée, la barre de position et « Continuer : titre › » ; jamais ouvert : « Commencer ». Le
- * nombre d'étapes comprises reste dit en petit (et par les ✓ de la liste).
+ * nombre de points compris reste dit en petit (et par les ✓ de la liste).
  */
 export function BlocReprendre({ chapter, etat, aller, durees }: { chapter: ChapterContent; etat: EtatParcours; aller: Aller; durees: Record<string, number> }) {
   const sections = chapter.sections
@@ -117,12 +117,12 @@ export function BlocReprendre({ chapter, etat, aller, durees }: { chapter: Chapt
   return (
     <div className="parcours-tete ge-reprendre no-export">
       <div className="ge-reprendre-tete">
-        <p className="ge-reprendre-titre">{derniere ? `Tu en es à l’étape ${rang} sur ${total}` : `${total} étapes à lire, une par écran`}</p>
+        <p className="ge-reprendre-titre">{derniere ? `Tu en es au point ${rang} sur ${total}` : `${total} points à lire, un par écran`}</p>
         <p className="ge-reprendre-duree">
-          ≈ {durees[cible.id] ?? 1} min<span className="sr-only"> pour cette étape</span>
+          ≈ {durees[cible.id] ?? 1} min<span className="sr-only"> pour ce point</span>
         </p>
       </div>
-      <div className="barre" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={derniere ? rang : 0} aria-label={derniere ? `Étape ${rang} sur ${total}` : 'Pas encore commencé'}>
+      <div className="barre" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={derniere ? rang : 0} aria-label={derniere ? `Point ${rang} sur ${total}` : 'Pas encore commencé'}>
         <span style={{ width: `${derniere ? (100 * rang) / total : 0}%` }} />
       </div>
       <LienVue cible={cible.id} aller={aller} className="btn-reprendre">
@@ -130,7 +130,7 @@ export function BlocReprendre({ chapter, etat, aller, durees }: { chapter: Chapt
       </LienVue>
       {etat.lues.length > 0 && (
         <p className="ge-reprendre-lues">
-          {etat.lues.length} / {total} étapes comprises
+          {etat.lues.length} / {total} points compris
         </p>
       )}
     </div>
@@ -173,7 +173,7 @@ export function ListeEtapes({
   variante: 'carte' | 'cote'
 }) {
   return (
-    <nav className={`liste-etapes liste-${variante}`} aria-label="Étapes du chapitre">
+    <nav className={`liste-etapes liste-${variante}`} aria-label="Points du chapitre">
       {groupes(chapter.sections).map((g, i) => (
         <div key={i} className="liste-groupe">
           {g.partie && <p className="liste-partie">{g.partie}</p>}
@@ -194,9 +194,9 @@ export function ListeEtapes({
                       {lue ? <Icone nom="coche" taille={15} /> : s.number}
                     </span>
                     <span className="etape-nom">
-                      <span className="sr-only">Étape {s.number} : </span>
+                      <span className="sr-only">Point {s.number} : </span>
                       {titreCourt(s)}
-                      {lue && <span className="sr-only"> (comprise)</span>}
+                      {lue && <span className="sr-only"> (compris)</span>}
                     </span>
                     {revoir ? <span className="ge-pill ge-pill-revoir">à revoir</span> : enCours && variante === 'carte' ? <span className="ge-pill ge-pill-encours">en cours</span> : null}
                     {variante === 'carte' && <span className="etape-duree">{durees[s.id]} min</span>}

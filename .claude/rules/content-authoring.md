@@ -163,6 +163,21 @@ Les `label` de callout, `badge` et `tag` d'exemple, `kicker` de section, `descri
 les dollars littéralement (détecté uniquement au rendu navigateur, jamais par `tsc`). Y mettre des
 caractères Unicode (2ⁿ, x², ×, −), jamais du LaTeX.
 
+## Vocabulaire : « point », jamais « étape », pour une partie du chapitre (28/11/2026)
+
+Décision du professeur : les parties numérotées d'un chapitre (les `sections`) s'appellent des **points** partout où
+l'élève les lit (« le point 3 », « au point 3 », « du point 3 », « ce point », « 7 / 14 points compris », « Tu en es
+au point 8 sur 14 », « Point suivant », « Revoir le point 2 »). Dans le texte du cours : « (point 7) », « comme
+annoncé au point 2 », « la formule de ce point », « à la fin du point », lien nommé `[[…#section|point 7]]`.
+Renvois des générateurs vers le cours : « (cours, point 4) », « Méthode du cours (point 4) ».
+**« étape » reste** pour tout ce qui n'est PAS une section : étapes d'un calcul, d'une méthode, d'une démonstration
+(« **Étape 1 —** »), d'un exemple résolu pas à pas (« Montrer l'étape suivante », « Écouter l'étape n » d'un exemple,
+« Exemple résolu · 4 étapes »), d'un algorithme ou d'une construction répétée (« à chaque étape », « après n
+étapes »), les écrans d'un générateur (« Étape 2 / 3 » de `BarreGenerateur`) et les étapes du corrigé papier
+(« Étape n — consigne »). Les identifiants de code, fichiers, clés `localStorage`, paramètres d'URL (`etapes=`) et
+types (`etape`, `EtapePubliee`…) ne changent pas. Les `label` / `badge` d'exemples ne changent pas non plus (clés
+de `ENONCES_DEMONSTRATION`) : « Exemple résolu — la série des sections 3 et 4 » (4e statistique) est gardé tel quel.
+
 ## Chapitres autonomes : jamais de numéro de chapitre, liens nommés, champ `utilise`
 
 Décision du professeur (25/11/2026, carte des prérequis validée) : les professeurs ne suivent pas tous
@@ -170,7 +185,7 @@ l'ordre des chapitres du site — chaque chapitre doit se lire seul, quel que so
 
 - **Aucun numéro de chapitre dans le texte** (cours, synthèses, quiz, corrigés, énoncés, questions
   « Formule », énoncés de démonstration) : ni « au chapitre 2 », ni « ch. 3 », ni « chapitre précédent /
-  suivant / prochain ». On NOMME ce qu'on cite. Les numéros internes au même chapitre (« § 3 », « étape 3 »,
+  suivant / prochain ». On NOMME ce qu'on cite. Les numéros internes au même chapitre (« point 3 », « § 3 »,
   « section 3 ») restent permis. Les annonces vers la suite (« tu le retrouveras… ») sont gardées, en lien
   nommé. Contrôle au build : `scripts/verifier-liens-chapitres.mjs` (chapitres + questions « Formule ») ;
   générateurs et `evaluationPayload.ts` : recherche `chapitre [0-9]` / `ch\. ?[0-9]` / « chapitre
@@ -179,16 +194,16 @@ l'ordre des chapitres du site — chaque chapitre doit se lire seul, quel que so
 - **Lien nommé** (champs RichText seulement : `text`, `items`, `formula`, `caption`, `forward`, `essentiel`,
   `cartes`, `rappel`…) :
   - `[[4e/equations-inequations-second-degre#resoudre]]` → « « Équations et inéquations du second degré »,
-    étape 1 » (lien interne, info-bulle = titre court de l'étape) ;
+    point 1 » (lien interne, info-bulle = titre court de l'étape) ;
   - `[[4e/geometrie-analytique-plane]]` → « « Géométrie analytique plane » » (carte du chapitre) ;
   - `[[4e/calcul-vectoriel#norme|la norme]]` → « la norme » (texte choisi, en clair : utile en début de
-    phrase, où « « Titre », étape n » se lit mal — préférer « En probabilités ([[…]]), … »).
+    phrase, où « « Titre », point n » se lit mal — préférer « En probabilités ([[…]]), … »).
   Résolution par `chaptersIndex.ts` (`lib/lienChapitre.ts`) ; lien cassé = ÉCHEC du build. Jamais dans
   un `**gras**` (non reparsé : `**binôme de Newton** ([[…]])`, pas `**… [[…]]**`), jamais dans un champ en
   texte BRUT (`label`, `kicker`, `badge`, `tag`, `titreCourt`, `partie`, titres, `description` de carte) :
   là, le nom du chapitre en clair (« Pour la suite — la géométrie analytique ») ou rien. Même règle dans les
   générateurs, quiz, corrigés et énoncés : nom en clair, sans lien (« (voir « Équations et inéquations du
-  second degré », étape 1) », « via la formule des exponentielles »). Rendu : `Math.tsx::LienChapitre`
+  second degré », point 1) », « via la formule des exponentielles »). Rendu : `Math.tsx::LienChapitre`
   (React Router `Link`, même onglet ; nouvel onglet dans « Je bloque », texte seul dans les diapos de
   projection — contexte `ModeLiensChapitre`) ; à l'impression le texte seul (`.lien-chapitre` sans couleur
   ni soulignement), dans l'export HTML le lien est remplacé par son texte (`buildHtml.ts`) ; texte brut
@@ -199,7 +214,7 @@ l'ordre des chapitres du site — chaque chapitre doit se lire seul, quel que so
   du cours cité (absent : « L'essentiel » de l'étape citée) ; `jeBloque: ['gen24']` = générateurs de
   l'étape pour lesquels « Je bloque » montre ce prérequis même s'il n'est qu'utile. Rendu
   (`components/chapter/Prerequis.tsx`) : encadré replié « Ce chapitre utilise… » sur la carte (toutes les
-  entrées, par chapitre), « Cette étape utilise » en tête d'étape (indispensables, rappel dépliable),
+  entrées, par chapitre), « Ce point utilise » en tête d'étape (indispensables, rappel dépliable),
   « Tu as besoin de… » dans « Je bloque ». Jamais imprimé ni exporté. Contrôle au build : cible connue,
   autre chapitre, pas de doublon, générateur `jeBloque` présent dans l'étape. Limité à la MÊME année
   (décision 5 : les acquis des années précédentes ne sont pas listés pour l'instant). Source : carte des
@@ -348,7 +363,7 @@ légendes, `essentiel`, `cartes`, descriptions des cartes « À toi », synthès
   mis au lexique ;
 - tutoiement, ton, exactitude : rien de faux, rien de retiré du contenu exigé, aucun exemple / résultat / formule
   changé ; typographie (« − », virgule décimale, insécables), gras d'insistance en minuscules (jamais « ET »,
-  « EXACTEMENT ») ; dire « étape n » plutôt que « section n » (c'est ce que l'écran affiche) ;
+  « EXACTEMENT ») ; dire « point n » (jamais « étape n » ni « section n » : c'est ce que l'écran affiche, voir « Vocabulaire : « point » ») ;
 - **structure intacte** : mêmes ids de sections, même nombre et même ordre de blocs, mêmes cartes « Teste-toi »
   (clés `idSection:indice`), mêmes générateurs / ateliers / figures ; les `badge` / `label` d'exemples ne changent
   pas (clés de `ENONCES_DEMONSTRATION`, `evaluationPayload.ts`). La progression des élèves, les annotations de
@@ -360,7 +375,7 @@ légendes, `essentiel`, `cartes`, descriptions des cartes « À toi », synthès
 `src/content/lexiques/{niveau}/{slug}.ts`, importées par le fichier du chapitre (`lexique: lexiqueStatistiqueDescriptive`).
 Par mot : `mot` (texte brut), `formes` (pluriel, féminin, variantes, « Q1 »…), `definition` (RichText, 1 ou 2
 phrases courtes), `exemple` (RichText, concret, tiré du chapitre si possible), `etape` (section où il est expliqué :
-bouton « Revoir l'étape n » ; absent pour « Avant de commencer »), `pasDans` (expressions où le mot a son sens courant
+bouton « Revoir le point n » ; absent pour « Avant de commencer »), `pasDans` (expressions où le mot a son sens courant
 et ne doit pas être souligné : « toute la classe », « une classe de 40 élèves », « en moyenne », « mode statistique »).
 Repérage automatique (`src/lib/motsDuCours.ts`, pur) : mots entiers, sans casse ni accents, la forme la plus longue
 gagne (« effectif cumulé » avant « effectif »), jamais dans une formule, un gras (le mot y est souvent DÉFINI), un

@@ -35,7 +35,7 @@ function useApercu(): { source: string; phrases: string[] } {
   const { pathname, hash } = useLocation()
   return useMemo(() => {
     const avecEssentiel = (s: ChapterSection) => !!s.essentiel && s.essentiel.length > 0
-    const depuis = (c: ChapterContent, s: ChapterSection) => ({ source: `${c.title}, étape ${s.number}`, phrases: s.essentiel ?? [] })
+    const depuis = (c: ChapterContent, s: ChapterSection) => ({ source: `${c.title}, point ${s.number}`, phrases: s.essentiel ?? [] })
     const m = /^\/([^/]+)\/([^/]+)\/?$/.exec(pathname)
     const chapitre = m ? findChapter(m[1], m[2]) : undefined
     if (chapitre) {
@@ -50,7 +50,7 @@ function useApercu(): { source: string; phrases: string[] } {
     }
     const suites = findChapter('5e-4h', 'suites')
     const s1 = suites?.sections.find(avecEssentiel)
-    return suites && s1 ? depuis(suites, s1) : { source: 'Suites, étape 1', phrases: ['Une suite est arithmétique si l’on passe d’un terme au suivant en ajoutant toujours la même raison r.'] }
+    return suites && s1 ? depuis(suites, s1) : { source: 'Suites, point 1', phrases: ['Une suite est arithmétique si l’on passe d’un terme au suivant en ajoutant toujours la même raison r.'] }
   }, [pathname, hash])
 }
 
@@ -500,7 +500,7 @@ function LectureVoixHaute({ vitesse, choisirVitesse }: { vitesse: ReglagesLectur
       ) : (
         <>
           <p className="confort-aide">
-            Bouton «&nbsp;Écouter&nbsp;» sur chaque étape du cours, les exemples, la loupe des formules, les énoncés, aides et corrigés des exercices&nbsp;: le texte ET les formules («&nbsp;u indice n plus 1&nbsp;»), la phrase lue surlignée.
+            Bouton «&nbsp;Écouter&nbsp;» sur chaque point du cours, les exemples, la loupe des formules, les énoncés, aides et corrigés des exercices&nbsp;: le texte ET les formules («&nbsp;u indice n plus 1&nbsp;»), la phrase lue surlignée.
           </p>
           <label className="confort-sous" htmlFor={idVoix}>
             Voix

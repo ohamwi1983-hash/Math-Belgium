@@ -47,19 +47,19 @@ export function options(): OptionEcran[] {
 
 const AIDE1: Record<FamilleNombre, AideEcran> = {
   racines: {
-    texte: [tx("Pour un naturel n, "), lx("\\sqrt{n}"), tx(" est un naturel si n est un carré parfait, sinon il est irrationnel ; de même pour "), lx("\\sqrt[3]{n}"), tx(" et les cubes parfaits (cours, étape 1). Simplifie avant de conclure, et souviens-toi que les ensembles sont emboîtés :")],
+    texte: [tx("Pour un naturel n, "), lx("\\sqrt{n}"), tx(" est un naturel si n est un carré parfait, sinon il est irrationnel ; de même pour "), lx("\\sqrt[3]{n}"), tx(" et les cubes parfaits (cours, point 1). Simplifie avant de conclure, et souviens-toi que les ensembles sont emboîtés :")],
     latex: "\\mathbb{N}\\subset\\mathbb{Z}\\subset\\mathbb{Q}\\subset\\mathbb{R}",
   },
   ecritures: {
-    texte: [tx("Un rationnel a une écriture décimale limitée ou périodique ; un irrationnel a une écriture illimitée non périodique (cours, étape 2). Une fraction peut être égale à un entier. Les ensembles sont emboîtés :")],
+    texte: [tx("Un rationnel a une écriture décimale limitée ou périodique ; un irrationnel a une écriture illimitée non périodique (cours, point 2). Une fraction peut être égale à un entier. Les ensembles sont emboîtés :")],
     latex: "\\mathbb{N}\\subset\\mathbb{Z}\\subset\\mathbb{Q}\\subset\\mathbb{R}",
   },
   expressions: {
-    texte: [tx("Développe ou simplifie l'expression. Si le résultat s'écrit "), lx("a+b\\sqrt{r}"), tx(" avec a, b rationnels, "), lx("b\\neq 0"), tx(" et r naturel qui n'est pas un carré parfait, il est irrationnel (cours, étape 1) :")],
+    texte: [tx("Développe ou simplifie l'expression. Si le résultat s'écrit "), lx("a+b\\sqrt{r}"), tx(" avec a, b rationnels, "), lx("b\\neq 0"), tx(" et r naturel qui n'est pas un carré parfait, il est irrationnel (cours, point 1) :")],
     latex: "a+b\\sqrt{r}=q\\ \\Rightarrow\\ \\sqrt{r}=\\dfrac{q-a}{b}",
   },
   constantes: {
-    texte: [tx("Remplace les valeurs remarquables par leurs valeurs exactes ("), lx("\\cos 60^\\circ=\\dfrac{1}{2}"), tx(", "), lx("\\cos 30^\\circ=\\dfrac{\\sqrt{3}}{2}"), tx("…) ; "), lx("\\pi"), tx(" et "), lx("\\Phi"), tx(" sont irrationnels, et "), lx("\\Phi^{2}=\\Phi+1"), tx(" (cours, étape 1).")],
+    texte: [tx("Remplace les valeurs remarquables par leurs valeurs exactes ("), lx("\\cos 60^\\circ=\\dfrac{1}{2}"), tx(", "), lx("\\cos 30^\\circ=\\dfrac{\\sqrt{3}}{2}"), tx("…) ; "), lx("\\pi"), tx(" et "), lx("\\Phi"), tx(" sont irrationnels, et "), lx("\\Phi^{2}=\\Phi+1"), tx(" (cours, point 1).")],
   },
 };
 

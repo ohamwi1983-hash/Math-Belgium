@@ -69,10 +69,10 @@ export default function PanneauJeBloque({
           <ModeLiensChapitre.Provider value="nouvel-onglet">
           <div className="je-bloque-corps">
             <p className="je-bloque-texte">
-              Deux essais sans réussir : revois {bloc ? "l’exemple résolu" : "l’essentiel"} de l’étape du cours. Ton exercice t’attend ici, rien n’est perdu.
+              Deux essais sans réussir : revois {bloc ? "l’exemple résolu" : "l’essentiel"} de ce point du cours. Ton exercice t’attend ici, rien n’est perdu.
             </p>
             <p className="je-bloque-etape">
-              Étape {numero} · <RichText text={section.title} />
+              Point {numero} · <RichText text={section.title} />
             </p>
             {bloc ? (
               <section className="je-bloque-exemple" aria-label={titreExemple ?? "Exemple résolu"}>
@@ -82,7 +82,7 @@ export default function PanneauJeBloque({
             ) : section.essentiel && section.essentiel.length > 0 ? (
               <Essentiel phrases={section.essentiel} />
             ) : (
-              <p className="je-bloque-texte">Cette étape n’a pas d’exemple résolu : relis-la dans le cours.</p>
+              <p className="je-bloque-texte">Ce point n’a pas d’exemple résolu : relis-le dans le cours.</p>
             )}
             {prerequis.length > 0 && (
               <section className="je-bloque-besoin" aria-label="Tu as besoin de…">
@@ -92,7 +92,7 @@ export default function PanneauJeBloque({
                     <li key={p.entree.cible}>
                       <p className="je-bloque-besoin-nom">
                         {p.cible.titreEtape}
-                        <span className="je-bloque-besoin-ou">{`«\u00a0${p.cible.chapitre.title}\u00a0», étape\u00a0${p.cible.numero}`}</span>
+                        <span className="je-bloque-besoin-ou">{`«\u00a0${p.cible.chapitre.title}\u00a0», point\u00a0${p.cible.numero}`}</span>
                       </p>
                       {phrasesRappel(p).map((t, i) => (
                         <p key={i} className="je-bloque-besoin-rappel">
@@ -100,7 +100,7 @@ export default function PanneauJeBloque({
                         </p>
                       ))}
                       <a className="je-bloque-besoin-revoir" href={p.cible.href} target="_blank" rel="noopener">
-                        Revoir l’étape <span className="je-bloque-onglet">(nouvel onglet)</span>
+                        Revoir le point <span className="je-bloque-onglet">(nouvel onglet)</span>
                       </a>
                     </li>
                   ))}
@@ -111,7 +111,7 @@ export default function PanneauJeBloque({
           </ModeLiensChapitre.Provider>
           <div className="je-bloque-actions">
             <a className="btn je-bloque-revoir" href={lien} target="_blank" rel="noopener">
-              Revoir l’étape {numero} <span className="je-bloque-onglet">(nouvel onglet)</span>
+              Revoir le point {numero} <span className="je-bloque-onglet">(nouvel onglet)</span>
             </a>
             <button type="button" className="btn btn-retour-exercice" onClick={() => ref.current?.close()}>
               Retour à l’exercice

@@ -100,11 +100,11 @@ export function delaiEleve(date: string, aujourdhui: string): string | null {
   return `dans ${n} jours`
 }
 
-/** « étape 3 », « étapes 2 et 5 », « étapes 6 à 8 », « étapes 1, 2 et 4 » (numéros triés, suites de 3 et plus regroupées). */
+/** « point 3 », « points 2 et 5 », « points 6 à 8 », « points 1, 2 et 4 » (numéros triés, suites de 3 et plus regroupées). */
 export function texteEtapes(etapes: readonly Pick<EtapePubliee, 'numero'>[]): string {
   const nums = [...new Set(etapes.map((e) => e.numero).filter((n) => n > 0))].sort((a, b) => a - b)
   if (nums.length === 0) return ''
-  if (nums.length === 1) return `étape ${nums[0]}`
+  if (nums.length === 1) return `point ${nums[0]}`
   const morceaux: string[] = []
   for (let i = 0; i < nums.length; ) {
     let j = i
@@ -113,7 +113,7 @@ export function texteEtapes(etapes: readonly Pick<EtapePubliee, 'numero'>[]): st
     else for (let k = i; k <= j; k++) morceaux.push(String(nums[k]))
     i = j + 1
   }
-  return `étapes ${morceaux.length === 1 ? morceaux[0] : `${morceaux.slice(0, -1).join(', ')} et ${morceaux[morceaux.length - 1]}`}`
+  return `points ${morceaux.length === 1 ? morceaux[0] : `${morceaux.slice(0, -1).join(', ')} et ${morceaux[morceaux.length - 1]}`}`
 }
 
 export interface ResumeClasse {
@@ -122,7 +122,7 @@ export interface ResumeClasse {
   interro: {
     /** « Interro mardi 2/12 · dans 5 jours » (« Contrôle-bilan … »). */
     titre: string
-    /** « Suites — étapes 6 à 8 ». */
+    /** « Suites — points 6 à 8 ». */
     detail: string
     /** Lien du plan de révision prérempli (`lienPlanRevision`). */
     plan: string | null
@@ -156,7 +156,7 @@ export function resumeClasse(page: PageEleve, aujourdhui: string): ResumeClasse 
   if (prochaine) {
     const delai = delaiEleve(prochaine.date, aujourdhui)
     const detail = prochaine.chapitres
-      ? prochaine.chapitres.map((c) => [c.titre, texteEtapes(c.points).replace(/^étapes?/, (m) => (m === 'étape' ? 'point' : 'points'))].filter(Boolean).join(' — ')).join(' ; ')
+      ? prochaine.chapitres.map((c) => [c.titre, texteEtapes(c.points)].filter(Boolean).join(' — ')).join(' ; ')
       : [prochaine.titre, texteEtapes(prochaine.etapes)].filter(Boolean).join(' — ')
     interro = {
       titre: `${nomInterro(prochaine)} ${dateCourteEleve(prochaine.date)}${delai ? ` · ${delai}` : ''}`,
@@ -186,14 +186,14 @@ export function aideDePage(chemin: string, fragment: string): AidePage | null {
   if (c === '/') return { titre: 'L’accueil', phrases: ['Ici, tu retrouves ton année : ton cours, tes exercices et la préparation de ton interro.', 'Touche « Mon cours » pour reprendre là où tu t’étais arrêté, ou entre le code de ta classe si ton professeur t’en a donné un.'] }
   if (c === ROUTE_ENTRAINER) return { titre: 'M’entraîner', phrases: ['Cette page sert à t’exercer sur un chapitre : une feuille à imprimer, ou un exercice corrigé tout de suite à l’écran.', 'Choisis ton chapitre, puis commence par les exercices « à revoir » : ce sont ceux qui t’ont posé problème.'] }
   if (c === ROUTE_PLAN) return { titre: 'Préparer mon interro', phrases: ['Ce plan découpe ta révision jour par jour jusqu’à ton interro, en quelques minutes par jour.', 'Fais les tâches du jour et coche-les : si tu rates un jour, le plan se décale tout seul.'] }
-  if (c === '/suivi') return { titre: 'Ma progression', phrases: ['Cette page montre ce que tu as compris et tes derniers exercices, chapitre par chapitre.', 'Commence par « À retravailler » : chaque ligne te dit quelle étape relire et quel exercice refaire.'] }
+  if (c === '/suivi') return { titre: 'Ma progression', phrases: ['Cette page montre ce que tu as compris et tes derniers exercices, chapitre par chapitre.', 'Commence par « À retravailler » : chaque ligne te dit quel point relire et quel exercice refaire.'] }
   if (c === '/classe') return { titre: 'Ma classe', phrases: ['Cette page montre ce que ton professeur a publié pour ta classe : interros, devoirs et matière vue.', 'Entre une seule fois le code donné en classe : il reste sur cet appareil, rien d’autre n’est envoyé.'] }
   const morceaux = c.split('/').filter(Boolean)
   if (morceaux.length === 2 && morceaux[0] !== 'carnet' && morceaux[0] !== 'espace') {
     if (fragment === 'reviser') return { titre: 'Réviser', phrases: ['Cet onglet sert à vérifier ce que tu retiens du chapitre, avec des cartes « Teste-toi » et la fiche du chapitre.', 'Réponds dans ta tête, retourne la carte, puis dis honnêtement si tu savais : les cartes « à revoir » reviennent.'] }
-    if (fragment === 'entrainer') return { titre: 'Exercices', phrases: ['Cet onglet rassemble les exercices corrigés du chapitre, étape par étape, et les feuilles à imprimer.', 'Choisis l’étape que tu viens de lire et fais 2 ou 3 exercices : la correction est immédiate.'] }
-    if (fragment && fragment !== 'projeter') return { titre: 'Une étape du cours', phrases: ['Chaque étape explique une idée, avec « L’essentiel » à retenir et des exemples résolus pas à pas.', 'Lis jusqu’au bout, touche « J’ai compris », puis entraîne-toi sur cette étape avant de passer à la suivante.'] }
-    return { titre: 'Le chapitre', phrases: ['Cette page présente le chapitre étape par étape : tu vois où tu en es et ce qu’il reste à lire.', 'Touche « Continuer » pour reprendre ta lecture ; les onglets « Réviser » et « Exercices » servent après.'] }
+    if (fragment === 'entrainer') return { titre: 'Exercices', phrases: ['Cet onglet rassemble les exercices corrigés du chapitre, point par point, et les feuilles à imprimer.', 'Choisis le point que tu viens de lire et fais 2 ou 3 exercices : la correction est immédiate.'] }
+    if (fragment && fragment !== 'projeter') return { titre: 'Un point du cours', phrases: ['Chaque point explique une idée, avec « L’essentiel » à retenir et des exemples résolus pas à pas.', 'Lis jusqu’au bout, touche « J’ai compris », puis entraîne-toi sur ce point avant de passer au suivant.'] }
+    return { titre: 'Le chapitre', phrases: ['Cette page présente le chapitre point par point : tu vois où tu en es et ce qu’il reste à lire.', 'Touche « Continuer » pour reprendre ta lecture ; les onglets « Réviser » et « Exercices » servent après.'] }
   }
   return null
 }

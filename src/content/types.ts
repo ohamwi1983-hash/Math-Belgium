@@ -1465,7 +1465,7 @@ export interface MotDuCours {
   definition: string
   /** Petit exemple concret (RichText). */
   exemple?: string
-  /** Id de la section où le mot est expliqué : bouton « Revoir l'étape n » de la bulle (absent : pas de
+  /** Id de la section où le mot est expliqué : bouton « Revoir le point n » de la bulle (absent : pas de
    * bouton, par exemple pour un mot expliqué dans « Avant de commencer »). */
   etape?: string
   /** Expressions dans lesquelles une forme ne doit PAS être marquée, parce que le mot y a son sens de tous

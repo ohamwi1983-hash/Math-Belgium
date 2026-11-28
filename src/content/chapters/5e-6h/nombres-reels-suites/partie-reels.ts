@@ -284,7 +284,7 @@ export const sectionsReels: ChapterSection[] = [
           })),
           xAxisLabel: 'n',
           yAxisLabel: 'réduite',
-          caption: R`Les huit premières réduites : en vert sous $\Phi$, en rouge au-dessus. Elles se rapprochent de $\Phi$ en l'encadrant de plus en plus étroitement (voir les intervalles emboîtés de l'étape 3 et la limite de l'étape 9).`,
+          caption: R`Les huit premières réduites : en vert sous $\Phi$, en rouge au-dessus. Elles se rapprochent de $\Phi$ en l'encadrant de plus en plus étroitement (voir les intervalles emboîtés du point 3 et la limite du point 9).`,
         },
       },
       {
@@ -417,7 +417,7 @@ export const sectionsReels: ChapterSection[] = [
       {
         kind: 'attention',
         label: 'Un même nombre, deux écritures',
-        text: R`Un nombre décimal limité non nul a toujours une seconde écriture, qui se termine par des $9$ : $7{,}08 = 7{,}07\overline{9}$ et $1 = 0{,}\overline{9}$. Entre $7{,}07999\ldots$ et $7{,}08$, il n'y a donc **aucun** nombre : ce sont le même point de la droite. L'étape 10 retrouvera $0{,}\overline{9} = 1$ comme une somme infinie $0{,}9 + 0{,}09 + 0{,}009 + \ldots$`,
+        text: R`Un nombre décimal limité non nul a toujours une seconde écriture, qui se termine par des $9$ : $7{,}08 = 7{,}07\overline{9}$ et $1 = 0{,}\overline{9}$. Entre $7{,}07999\ldots$ et $7{,}08$, il n'y a donc **aucun** nombre : ce sont le même point de la droite. Le point 10 retrouvera $0{,}\overline{9} = 1$ comme une somme infinie $0{,}9 + 0{,}09 + 0{,}009 + \ldots$`,
       },
       { kind: 'subheading', text: 'Limitée ou périodique ? Le dénominateur décide' },
       {
@@ -503,7 +503,7 @@ export const sectionsReels: ChapterSection[] = [
       },
       {
         kind: 'para',
-        text: R`Les années précédentes, tu as utilisé beaucoup de règles de calcul en les admettant ou en les vérifiant sur des exemples. Cette étape montre de quels axiomes elles découlent toutes. Tu n'as pas à les mémoriser par cœur : elles servent de référence, pour savoir **quelle règle** justifie un calcul.`,
+        text: R`Les années précédentes, tu as utilisé beaucoup de règles de calcul en les admettant ou en les vérifiant sur des exemples. Ce point montre de quels axiomes elles découlent toutes. Tu n'as pas à les mémoriser par cœur : elles servent de référence, pour savoir **quelle règle** justifie un calcul.`,
       },
       { kind: 'subheading', text: 'Les quantificateurs' },
       {
@@ -615,7 +615,7 @@ export const sectionsReels: ChapterSection[] = [
       {
         kind: 'exemple',
         badge: 'encadrer Φ par des intervalles emboîtés',
-        formula: R`Les réduites $1$ ; $2$ ; $\dfrac{3}{2}$ ; $\dfrac{5}{3}$ ; $\dfrac{8}{5}$ ; $\dfrac{13}{8}$ ; $\dfrac{21}{13}$ ; $\dfrac{34}{21}$ de la fraction continue de $\Phi$ (étape 1) sont tour à tour inférieures et supérieures à $\Phi$. Écris les intervalles qu'elles forment deux à deux et leurs longueurs.`,
+        formula: R`Les réduites $1$ ; $2$ ; $\dfrac{3}{2}$ ; $\dfrac{5}{3}$ ; $\dfrac{8}{5}$ ; $\dfrac{13}{8}$ ; $\dfrac{21}{13}$ ; $\dfrac{34}{21}$ de la fraction continue de $\Phi$ (point 1) sont tour à tour inférieures et supérieures à $\Phi$. Écris les intervalles qu'elles forment deux à deux et leurs longueurs.`,
         steps: [
           { tag: 'intervalles', text: R`$[1\,;2] \supset \left[\dfrac{3}{2}\,;\dfrac{5}{3}\right]$ $\supset \left[\dfrac{8}{5}\,;\dfrac{13}{8}\right]$ $\supset \left[\dfrac{21}{13}\,;\dfrac{34}{21}\right]$` },
           { tag: 'en décimal', text: R`$[1\,;2] \supset [1{,}5\,;1{,}667]$ $\supset [1{,}6\,;1{,}625]$ $\supset [1{,}6154\,;1{,}6190]$` },
@@ -646,7 +646,7 @@ export const sectionsReels: ChapterSection[] = [
       {
         kind: 'historique',
         titre: 'Deux mille ans pour définir les réels',
-        text: R`Les Grecs savaient raisonner sur des grandeurs incommensurables : la théorie des proportions d'**Eudoxe de Cnide** (IVᵉ siècle avant notre ère), exposée au livre V des **Éléments** d'Euclide, compare deux rapports sans jamais écrire de nombre irrationnel. Pendant deux mille ans, les mathématiciens calculent ensuite avec $\sqrt{2}$ ou $\pi$ sans savoir définir précisément ce qu'est un réel. Ce n'est qu'au XIXᵉ siècle, quand l'analyse a besoin de rigueur, que **Méray**, **Cantor** et **Dedekind** (tous vers 1870) en donnent des constructions à partir des rationnels, et qu'on dégage la liste d'axiomes de cette étape.`,
+        text: R`Les Grecs savaient raisonner sur des grandeurs incommensurables : la théorie des proportions d'**Eudoxe de Cnide** (IVᵉ siècle avant notre ère), exposée au livre V des **Éléments** d'Euclide, compare deux rapports sans jamais écrire de nombre irrationnel. Pendant deux mille ans, les mathématiciens calculent ensuite avec $\sqrt{2}$ ou $\pi$ sans savoir définir précisément ce qu'est un réel. Ce n'est qu'au XIXᵉ siècle, quand l'analyse a besoin de rigueur, que **Méray**, **Cantor** et **Dedekind** (tous vers 1870) en donnent des constructions à partir des rationnels, et qu'on dégage la liste d'axiomes de ce point.`,
         image: {
           src: '/images/historique/euclid.jpg',
           alt: "Détail de L'École d'Athènes représentant Euclide",

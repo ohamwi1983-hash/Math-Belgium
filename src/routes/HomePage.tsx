@@ -117,13 +117,13 @@ function ListeChapitres({ level, etats }: { level: LevelEntry; etats: EtatChapit
                     <>
                       <span className="compte-telephone">chapitre terminé</span>
                       <span className="compte-ordi">
-                        {total} / {total} étapes
+                        {total} / {total} points
                       </span>
                     </>
                   ) : commence ? (
-                    `${lues} / ${total} étapes`
+                    `${lues} / ${total} points`
                   ) : (
-                    pluriel(total, 'étape')
+                    pluriel(total, 'point')
                   )}
                 </span>
               </span>

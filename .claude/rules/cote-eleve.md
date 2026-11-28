@@ -278,7 +278,7 @@ automatique) et « Dire chaque case » (`cases`). « Revenir au réglage du site
 
 ### Où sont les boutons « Écouter »
 
-- **Étape du cours** : « Écouter l'étape » (`EcouterEtape`, `ChapterPage`) sous le titre et la méta de l'étape
+- **Étape du cours** : « Écouter le point » (`EcouterEtape`, `ChapterPage`) sous le titre et la méta de l'étape
   active, avant le texte (choix : la maquette montre la barre, pas le bouton ; c'est l'endroit où l'élève commence
   à lire, sans réglage à activer). Lit `phrasesEtape` : « Étape n : titre », sous-titre, « L'essentiel », corps,
   annexes, colonne de droite (≥ 1 200 px). Pendant SA lecture, le bouton devient « Arrêter ».
@@ -366,31 +366,31 @@ l'onglet, `<h1>`, carte de l'accueil, liens du plan, « Effacer ma progression�
 
 - `/suivi` — `routes/SuiviPage.tsx`. `?niveau=` (sinon année de l'accueil `anneeDeDepart`, sinon celle
   du dernier essai), `?chapitre=` (sinon le dernier chapitre travaillé). Onglets des chapitres de
-  l'année ; « À retravailler » en tête (pourquoi + « Revoir : étape n, « … » » + « M'entraîner : id ·
+  l'année ; « À retravailler » en tête (pourquoi + « Revoir : point n, « … » » + « M'entraîner : id ·
   titre ») ; puis chaque étape : comprise (pastille ✓), 5 derniers essais en cases, « 9 réussis sur 11,
   dont 2 avec aide », cartes « n / N « Je savais » ». « Effacer ma progression… » : confirmation DANS la page
-  (jamais `confirm()`), cases « essais » / « plan » cochées, « étapes comprises et cartes de toutes les
+  (jamais `confirm()`), cases « essais » / « plan » cochées, « points compris et cartes de toutes les
   années » décochée. Pas de « bilan à montrer » ni d'« emporter » (planche 14 en suspens).
 - `/suivi/plan` — `routes/PlanRevisionPage.tsx`, refait le 27/11/2026 (maquette `maquette-espace/plan-eleve.png`) :
   - **prérempli depuis une interro annoncée** (bouton « Je prépare mon interro » de la page de classe, de l'accueil,
     aperçu « Ce que verront tes élèves » du professeur ; format d'adresse plus bas) : en-tête « Interro mercredi 2/12 »
-    (« Contrôle-bilan … » si `type=bilan`), « Les coniques · étapes 1 à 3 · annoncée par ton professeur », une seule
+    (« Contrôle-bilan … » si `type=bilan`), « Les coniques · points 1 à 3 · annoncée par ton professeur », une seule
     question « Combien de minutes par jour ? » (10 / 15 / 20 / 30, **15 d'office**), « Faire mon plan », « Changer la
     date ou les étapes ». Un plan déjà fait pour la même date et les mêmes étapes s'ouvre directement ; un autre plan
     en cours est annoncé « sera remplacé ». L'adresse est nettoyée une fois lue ;
   - **sinon trois questions** numérotées : quand (`input type="date"`), quel chapitre (année + chapitre ; étapes
-    « Toutes les étapes » repliées en `<details>`, toutes cochées, « À retravailler » signalé), combien de minutes par
+    « Tous les points » repliés en `<details>`, toutes cochées, « À retravailler » signalé), combien de minutes par
     jour ; « Un jour sans révision ? » replié ;
   - **le plan** : rangée des jours (puces « ven 27 » … jusqu'à l'interro, en rose ; aujourd'hui plein ; à partir
     d'avant-hier ; un jour passé fait porte ✓ ; défile seule sur téléphone), carte « Aujourd'hui · n min » avec « k sur
     N » et **au plus trois tâches concrètes** (`grouperTaches`) — case à cocher (zone 44 px, barrée une fois faite),
-    libellé (« Relire « L'essentiel » de l'étape 1 », « Faire 3 exercices de **6gen58** », « Teste-toi : 5 cartes de
-    l'étape 2 », « Évaluation blanche (20 min) puis corrigé »), sous-titre (« tu y as eu des difficultés mercredi » =
+    libellé (« Relire « L'essentiel » du point 1 », « Faire 3 exercices de **6gen58** », « Teste-toi : 5 cartes du
+    point 2 », « Évaluation blanche (20 min) puis corrigé »), sous-titre (« tu y as eu des difficultés mercredi » =
     dernier essai raté de ce générateur dans les 14 jours, sinon « proposé par ton professeur », sinon le titre de la
     carte) et **« Go »** (le premier « Go » non fait est plein ; nom accessible « Go — faire 3 exercices de 6gen58 ») →
     l'étape (`#section`), le générateur (`generatorLink`, nouvel onglet s'il n'est pas migré), les cartes (`#reviser`),
     l'évaluation blanche (`urlEntrainementEleve` : `/{niveau}/{chapitre}/exercices?notions=…&exos=…`, exercices du
-    professeur) ; puis « Demain · n min » et les jours suivants en UNE ligne (« Étape 3 : relire + 3 exercices de
+    professeur) ; puis « Demain · n min » et les jours suivants en UNE ligne (« Point 3 : relire + 3 exercices de
     6gen59 »), la carte rose du jour de l'interro, « Un jour raté ? Le plan se décale tout seul, rien n'est perdu. ».
     **Plus de « revue n° k » ni de « reporté de »** : l'algorithme ci-dessous ne change pas, seul l'affichage se tait ;
     « le plan garde l'essentiel » devient « Il reste peu de jours : le plan garde l'essentiel… ».
@@ -592,9 +592,9 @@ personnel), grille `44px 1fr auto auto` (écart 8 px sous 400 px) : la barre res
 - **Quoi** : `<dialog>` modal (`showModal` : focus piégé, Échap, clic sur le voile, focus rendu au bouton) —
   feuille du bas (92dvh) sur téléphone, panneau de 560 px à droite dès 900 px. « Tu bloques ? C'est normal. »,
   « Deux essais sans réussir : revois l'exemple résolu… Ton exercice t'attend ici, rien n'est perdu. »,
-  « Étape n · titre », l'exemple révélé pas à pas avec les composants du cours (`ExemplePasAPas` /
+  « Point n · titre », l'exemple révélé pas à pas avec les composants du cours (`ExemplePasAPas` /
   `ExempleLibrePasAPas`, exportés par `ContenuEtape.tsx` — chargés à la première ouverture), à défaut
-  « L'essentiel » de l'étape ; « Revoir l'étape n (nouvel onglet) » (`target="_blank"` : l'exercice en cours
+  « L'essentiel » de l'étape ; « Revoir le point n (nouvel onglet) » (`target="_blank"` : l'exercice en cours
   reste ouvert) et « Retour à l'exercice ». Rien de la réponse de l'écran.
 - **Exemple choisi** (`cibleJeBloque`, pur) : section = celle de la carte « S'entraîner » (la même que le lien
   de retour) ; parmi ses `exemple` / `exempleLibre` (jamais une « Démonstration… »), le plus proche de la
@@ -607,8 +607,8 @@ personnel), grille `44px 1fr auto auto` (écart 8 px sous 400 px) : la barre res
   les entrées `utilise` de l'étape (`lib/prerequisChapitre.ts::prerequisJeBloque`) : les `indispensable`, plus
   les `utile` dont `jeBloque` cite le générateur (décision 4 : gen24, gen25, gen26 — certaines variantes
   demandent une équation du second degré, pas d'option pour les éviter). Bloc sous l'exemple (ou
-  l'essentiel) : par prérequis, titre court de l'étape, « « Chapitre », étape n », le rappel (`rappel`, sinon
-  « L'essentiel » de l'étape citée) et « Revoir l'étape (nouvel onglet) » (≥ 44 px). Les liens nommés du
+  l'essentiel) : par prérequis, titre court de l'étape, « « Chapitre », point n », le rappel (`rappel`, sinon
+  « L'essentiel » de l'étape citée) et « Revoir le point (nouvel onglet) » (≥ 44 px). Les liens nommés du
   panneau s'ouvrent en nouvel onglet (`ModeLiensChapitre` « nouvel-onglet ») : l'exercice reste ouvert.
   Couverture : 68 générateurs (65 par un prérequis indispensable + gen24–26).
 
@@ -680,11 +680,11 @@ logique : `tests/purs.test.ts` du dossier de travail `suite-E/` (esbuild + node)
   carte **« Ma classe »** (`CarteMaClasse`) si un code est gardé (`classe:code`) — version gardée (`classe:derniere`,
   refiltrée par `pageAuJour`) affichée tout de suite, relue en tâche de fond 0,9 s après (import de
   `pageClasseDonnees.ts`, jamais au pré-rendu) ; prochaine interro « Interro mardi 1/12 · dans 4 jours », « Suites —
-  étapes 6 à 8 » (`texteEtapes` : suites de 3 et plus regroupées), devoir le plus proche, bouton **« Je prépare mon
+  points 6 à 8 » (`texteEtapes` : suites de 3 et plus regroupées), devoir le plus proche, bouton **« Je prépare mon
   interro »** = `pageClasse.ts::lienPlanRevision` (`/suivi/plan?date=…&niveau=…&chapitre=…&etapes=…`, format du point
   d'accroche existant, lu par le plan de révision) ; code devenu inconnu → « Ton code de classe ne marche plus » +
   « Entrer le nouveau code » (rien n'est effacé ici, `/classe` s'en charge). **Trois portes** (`PortesAccueil`,
-  `data-visite="portes"`) : Mon cours (« Reprendre : chapitre, étape n » = dernière étape ouverte de l'année, sinon
+  `data-visite="portes"`) : Mon cours (« Reprendre : chapitre, point n » = dernière étape ouverte de l'année, sinon
   `/#chapitres`), M'entraîner (`/entrainer?niveau=&chapitre=`), Préparer mon interro (`/suivi/plan`). Ligne « Pas
   encore de classe ? Entre le code donné par ton professeur » (→ `/classe`) sans code gardé. La liste des chapitres
   de l'année reste dessous (`id="chapitres-<niveau>"`, `/#chapitres` y fait défiler) : le pré-rendu garde les liens
@@ -715,25 +715,25 @@ logique : `tests/purs.test.ts` du dossier de travail `suite-E/` (esbuild + node)
   autres » ; **Interro blanche (20 min)** (`?type=blanche&duree=20`) ; « Voir ma progression ». Préréglages lus par
   `AssistantEleve` (`?type=feuille|blanche`, `?nombre=` 1–30, `?duree=` 20 / 30 / 50 ; valeur inconnue ignorée, rien
   d'autre ne change).
-- **Page de chapitre** (`CarteChapitre.tsx`, `ChapterPage.tsx`) : onglets sous-titrés « Le cours · étape par étape »,
+- **Page de chapitre** (`CarteChapitre.tsx`, `ChapterPage.tsx`) : onglets sous-titrés « Le cours · point par point »,
   « Réviser · teste-toi », « Exercices · corrigés » (mêmes ids `apprendre` / `reviser` / `entrainer`, sous-titre lu
-  après « : ») ; `BlocReprendre` = « Tu en es à l'étape n sur N » (dernière ouverte) + « ≈ m min » + barre de position +
-  « Continuer : titre › » (« Commencer » sinon) + « k / N étapes comprises » ; `ListeEtapes` : ✓ (lue), pastille « en
+  après « : ») ; `BlocReprendre` = « Tu en es au point n sur N » (dernière ouverte) + « ≈ m min » + barre de position +
+  « Continuer : titre › » (« Commencer » sinon) + « k / N points compris » ; `ListeEtapes` : ✓ (lue), pastille « en
   cours », **« à revoir »** (`aRevoir` = étapes au ton `retravailler` de `suiviChapitres.ts`, relues à
   `suivi:modifie` / `storage`), légende sous la liste. **Fin d'étape** (`FinEtape.tsx`, étape affichée seulement,
   `no-export`, jamais pré-rendue) : « Tu as fini le point n » (mot « point », décision du 28/11/2026), UN générateur → « M'entraîner sur ce point » ;
   PLUSIEURS → « M'entraîner sur ce point : choisis un exercice » + un bouton par générateur (titre, code, compétence, état
   à revoir / nouveau / réussi lu sur l'appareil) — jamais seulement le premier ; sans générateur : « Si tout est clair,
   touche J'ai compris » ; « Point suivant : titre › » (« Réviser le chapitre » à la fin), « ou revenir à la liste des points » ; hors du corps de l'étape (ni
-  « Écouter l'étape » ni « un bloc à la fois » ne la prennent).
+  « Écouter le point » ni « un bloc à la fois » ne la prennent).
 - **Fin d'exercice** (`entrainement/components/FinExercice.tsx`, montée par `EntrainementPage` sous l'appli — aucun
   générateur touché, `SelecteurVarianteDev` intact) : apparaît quand l'observateur de Ma progression note un essai
   (`observerProgression`, donc pour les générateurs à puces ; pas pour les quiz vrai / faux : une affirmation = un
   essai), disparaît quand un nouvel exercice commence (puces sans écran clos, ou clic sur un bouton « Nouvel
-  exercice »…). « N questions faites · cours : étape k » (étape du cours de la carte ; jamais « Question n sur N · étape k » : l'en-tête du générateur dit déjà « Étape 3 / 3 » pour ses écrans, le même mot prêtait à confusion), puces colorées (`role="img"` en mots),
+  exercice »…). « N questions faites · cours : point k » (point du cours de la carte ; jamais « Question n sur N · étape k » : l'en-tête du générateur dit déjà « Étape 3 / 3 » pour ses écrans, le même mot prêtait à confusion), puces colorées (`role="img"` en mots),
   « Exercice terminé » + bilan en une phrase (`bilanExercice` : « 3 réponses justes du premier coup, 1 avec une
   aide. »), **Un autre exercice** (clique le bouton « Nouvel exercice » du générateur, sinon remonte l'appli —
-  `key`), **Revoir le cours de l'étape k** (lien de retour de la barre), **Voir ma progression** (`/suivi?niveau=&
+  `key`), **Revoir le cours du point k** (lien de retour de la barre), **Voir ma progression** (`/suivi?niveau=&
   chapitre=`) ; pastilles de compétence (`competencesGenerateur`) en boutons qui s'expliquent en une ligne
   (`EXPLICATION_COMPETENCE`). Pas de défilement automatique (le corrigé reste sous les yeux), aucun `.btn-primary`
   (sinon `CadreActions` le prendrait pour le bouton principal).
@@ -776,3 +776,25 @@ suppression ». Côté élève, rien n'est envoyé ; seule requête : la relectu
   date, points, exercices, nom remplacés, coches gardées) ; interro absente (et ni passée ni au-delà des 3 interros
   publiées) → « Cette interro a été retirée par ton professeur », « Garder mon plan » (le plan n'est plus lié) / « Effacer mon
   plan ». Classes `.plan-avis` (`suivi.css`).
+
+## « Point » au lieu d'« étape » partout côté élève (décision du 28/11/2026)
+
+Les parties numérotées d'un chapitre s'appellent des **points** partout où l'élève les lit (convention complète et ce qui
+reste « étape » : `content-authoring.md`, « Vocabulaire : « point » »). Fait : page de chapitre (onglet « Le cours · point
+par point », `BlocReprendre`, `ListeEtapes`, légende, en-tête collant « titre · point n / N », méta « Point n · ≈ m min »,
+`NavEtape` « Point précédent / suivant : … », « Écouter le point » — `phrasesEtape` lit « Point n : titre » —, carte « Teste-toi »
+« Point n · … », fiche du chapitre et lexique « Revoir le point n », `Prerequis` « n points de k autres chapitres », « Ce point
+utilise », « « Chapitre », point n »), lien nommé `[[…#section]]` → « « Titre », point n » (`lienChapitre.ts`, donc aussi
+les notes de projection et le carnet qui passent par `texteSansLiens`), info-bulle « Point n : titre », `FinEtape` (déjà fait),
+`FinExercice` (« cours : point k », « Revoir le cours du point k »), « Je bloque » (« Point n · titre », « Revoir le point n »,
+« Ce point n'a pas d'exemple résolu »), `/entrainer` (« Point 7 »), `/suivi` (« Point n · titre », « Revoir : point n »,
+« points compris »), `/suivi/plan` (« Relire « L'essentiel » du point 1 », « Teste-toi : 4 cartes du point 1 », « Points 1 et 2 :
+relire + … », « Tous les points », « Garde au moins un point »), accueil (« Reprendre : chapitre, point n », « k / N points »),
+carte « Ma classe » (`guideEleve.ts::texteEtapes` rend « point(s) »), aide « ? », visite, recherche (« titre · point n · niveau »),
+panneau « Aa » (aperçu « Suites, point 1 »), `/classe` (« points lus »), textes du cours qui renvoient à une section (5e (6h)
+« Nombres réels et suites », 4e « Statistique descriptive ») et renvois des générateurs « (cours, point n) » (5e (6h) ch. 1,
+4e ch. 6 « (voir « … », point 1) »). Restent « étape » (hors périmètre, à décider) : la projection (titre de diapo « Étape n »,
+notes « Étape n : titre », lanceur « Étapes à projeter », « Coche au moins une étape ») et l'espace professeur (carnet
+« , étape n », « Étapes projetées », `EspacePage` « — étape n », `PreparerPage` « Choisir les étapes », options de la page de
+classe « Date, étapes du chapitre… »).
+

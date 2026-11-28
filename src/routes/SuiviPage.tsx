@@ -101,10 +101,10 @@ function LigneEtape({ e }: { e: SuiviEtape }) {
       </span>
       <span className="suivi-etape-nom">
         <Link to={e.href}>
-          {e.numero !== null && <span className="sr-only">Étape {e.numero} : </span>}
+          {e.numero !== null && <span className="sr-only">Point {e.numero} : </span>}
           {e.titre}
         </Link>
-        {e.lue && <span className="sr-only"> (étape comprise)</span>}
+        {e.lue && <span className="sr-only"> (point compris)</span>}
       </span>
       <span className={`suivi-ton ${ton.classe}`}>{ton.texte}</span>
       <span className="suivi-etape-detail">
@@ -113,7 +113,7 @@ function LigneEtape({ e }: { e: SuiviEtape }) {
             <span>Exercices</span> <Essais essais={e.essais} /> <span className="suivi-resume">{resumeEssais(e)}</span>
           </span>
         ) : (
-          <span>Pas d'exercice pour cette étape</span>
+          <span>Pas d'exercice pour ce point</span>
         )}
         {e.section && (
           <span>
@@ -157,12 +157,12 @@ function BlocRetravailler({ chapitre }: { chapitre: SuiviChapitre }) {
       <h2 id="titre-retravailler">À retravailler</h2>
       {liste.map((e) => (
         <div key={e.href + e.titre} className="suivi-retravail">
-          <p className="suivi-retravail-titre">{e.numero !== null ? `Étape ${e.numero} · ${e.titre}` : e.titre}</p>
+          <p className="suivi-retravail-titre">{e.numero !== null ? `Point ${e.numero} · ${e.titre}` : e.titre}</p>
           <p className="suivi-retravail-pourquoi">{e.pourquoi}</p>
           <div className="suivi-liens">
             {e.section ? (
               <Link className="suivi-lien" to={e.href}>
-                <IconeLivre /> Revoir&nbsp;: étape {e.numero}, « {e.titre} »
+                <IconeLivre /> Revoir&nbsp;: point {e.numero}, « {e.titre} »
               </Link>
             ) : (
               <Link className="suivi-lien" to={e.href}>
@@ -248,7 +248,7 @@ function Effacer({ onEfface }: { onEfface: () => void }) {
           <label className="suivi-case-a-cocher">
             <input type="checkbox" checked={chapitres} onChange={(e) => setChapitres(e.target.checked)} />
             <span>
-              Les étapes comprises et les cartes « Teste-toi » <span className="suivi-sous">de toutes les années</span>
+              Les points compris et les cartes « Teste-toi » <span className="suivi-sous">de toutes les années</span>
             </span>
           </label>
           <p className="suivi-note">On ne peut pas revenir en arrière.</p>
@@ -341,7 +341,7 @@ export function SuiviPage() {
           <section className="suivi-bloc suivi-vide">
             <h2>Rien encore en {level.label}</h2>
             <p>
-              Ton suivi se remplit tout seul : quand tu marques une étape «&nbsp;J'ai compris&nbsp;», quand tu réponds aux cartes «&nbsp;Teste-toi&nbsp;» et à chaque
+              Ton suivi se remplit tout seul : quand tu marques un point «&nbsp;J'ai compris&nbsp;», quand tu réponds aux cartes «&nbsp;Teste-toi&nbsp;» et à chaque
               exercice terminé d'un générateur.
             </p>
             <Link className="suivi-btn plein" to="/">
@@ -385,7 +385,7 @@ export function SuiviPage() {
                   <Link to={`/${chapitre.chapter.levelSlug}/${chapitre.chapter.slug}`}>{chapitre.chapter.title}</Link>
                 </h2>
                 <span className="suivi-meta">
-                  {chapitre.lues} / {chapitre.total} étapes comprises
+                  {chapitre.lues} / {chapitre.total} points compris
                 </span>
               </div>
               <ol className="suivi-etapes">

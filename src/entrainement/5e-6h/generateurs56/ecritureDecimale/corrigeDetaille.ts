@@ -16,7 +16,7 @@ import { decaleL, difference, fracL, puissanceX, reponse, xL } from "./ui/format
 type E = ExerciceDecimale;
 const t = texte;
 const f = latex;
-const COURS = "(cours, étape 2)";
+const COURS = "(cours, point 2)";
 
 function corrigeDiviser(e: E): EtapeCorrection[] {
   const L: LigneCalcul[] = [ligne(`${e.num}=${e.dev.entier}\\cdot ${e.den}+${Math.abs(e.num) - e.dev.entier * e.den}`, `partie entière ${e.dev.entier}`)];

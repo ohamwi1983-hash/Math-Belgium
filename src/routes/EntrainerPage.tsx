@@ -191,7 +191,7 @@ export function EntrainerPage() {
                     <span className={`ge-etat ge-etat-${g.etat}`}>{LIBELLE_ETAT_GENERATEUR[g.etat]}</span>
                     <span className="ge-ent-gen-titre">
                       {g.titre} <span className="ge-ent-gen-id">· {g.id}</span>
-                      <span className="ge-ent-gen-etape">{g.etape ? `Étape ${g.etape}` : 'Tout le chapitre'}</span>
+                      <span className="ge-ent-gen-etape">{g.etape ? `Point ${g.etape}` : 'Tout le chapitre'}</span>
                     </span>
                     <span className="ge-chevron" aria-hidden="true">
                       ›

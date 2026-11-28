@@ -56,12 +56,13 @@ une règle de masquage sans `@media screen` + `.parcours` ; tout élément propr
 
 Composants :
 - `CarteChapitre.tsx` — `OngletsChapitre` (`tablist`, flèches/Début/Fin ; depuis le 27/11/2026 sous-titrés « Le
-  cours · étape par étape », « Réviser · teste-toi », « Exercices · corrigés »), `BlocReprendre` (« Tu en es à l'étape
-  n sur N » + durée + barre de position + « Continuer : titre › » / « Commencer », « k / N étapes comprises »),
+  cours · point par point », « Réviser · teste-toi », « Exercices · corrigés »), `BlocReprendre` (« Tu en es au point
+  n sur N » + durée + barre de position + « Continuer : titre › » / « Commencer », « k / N points compris »),
   `ListeEtapes` (parties, pastille lue ✓ / en cours / numéro, pastilles « en cours » et « à revoir » — prop `aRevoir`,
   calculée par `ChapterPage` depuis `suiviChapitres.ts` —, `aria-current="step"`, durée ; variante `cote` pour la
   colonne de gauche d'une étape sur ordinateur), `LienVue` (vrai `<a href="#…">` intercepté). `FinEtape.tsx` : fin de
-  l'étape affichée (« Tu as fini l'étape n », M'entraîner sur cette étape, Étape suivante). Détail : `cote-eleve.md`,
+  l'étape affichée (« Tu as fini le point n », M'entraîner sur ce point, Point suivant). Vocabulaire « point » (jamais
+  « étape » pour une section, côté élève) : `content-authoring.md`, « Vocabulaire : « point » ». Détail : `cote-eleve.md`,
   « Côté élève plus clair ».
 - `ContenuEtape.tsx` — contenu d'une étape (et de l'intro « Avant de commencer », repliée sur la
   carte). Blocs dans l'ordre écrit ; les exemples sont rendus à leur place avec `en-tiroir` (imprimés,
@@ -91,14 +92,14 @@ Composants :
 - `Prerequis.tsx` (chapitres autonomes, 25/11/2026 ; données : champ `utilise` des sections, voir
   `content-authoring.md`, « Chapitres autonomes ») — `CeChapitreUtilise` : sur la CARTE, après les onglets
   et avant « Avant de commencer », encadré REPLIÉ (`button` + `aria-expanded`, ≥ 52 px) « Ce chapitre
-  utilise… · n étapes de k autres chapitres » ; déplié : une phrase d'explication, puis par chapitre cité
+  utilise… · n points de k autres chapitres » ; déplié : une phrase d'explication, puis par chapitre cité
   (titre = lien vers sa carte, année entre parenthèses si autre année) une ligne par étape citée (lien
-  « Étape n · titre court » ≥ 44 px, même onglet — on est sur la carte, rien à perdre ; « indispensable » /
-  « utile · pour l'étape 3, 5 »). Classe `.ce-chapitre-utilise` ajoutée aux listes « ce que chaque vue
+  « Point n · titre court » ≥ 44 px, même onglet — on est sur la carte, rien à perdre ; « indispensable » /
+  « utile · pour les points 3, 5 »). Classe `.ce-chapitre-utilise` ajoutée aux listes « ce que chaque vue
   montre » (carte seulement). `EtapeUtilise` : dans le corps de l'étape, juste sous « L'essentiel », pour les
-  entrées `indispensable` seulement : « Cette étape utilise » puis une ligne-bouton par prérequis (titre
-  court + « « Chapitre », étape n », pastille « Rappel » / « Fermer », ≥ 48 px) qui déplie SUR PLACE le
-  rappel (`rappel`, sinon « L'essentiel » de l'étape citée) et « Revoir l'étape (nouvel onglet) » — nouvel
+  entrées `indispensable` seulement : « Ce point utilise » puis une ligne-bouton par prérequis (titre
+  court + « « Chapitre », point n », pastille « Rappel » / « Fermer », ≥ 48 px) qui déplie SUR PLACE le
+  rappel (`rappel`, sinon « L'essentiel » de l'étape citée) et « Revoir le point (nouvel onglet) » — nouvel
   onglet choisi pour ne pas perdre la lecture de l'étape en cours. Résolution : `lib/prerequisChapitre.ts`
   (`resoudreUtilise`, `phrasesRappel`, `prerequisJeBloque`). Les deux sont `no-export` (ni impression ni
   export HTML), jetons du site seulement (clair, sombre, thèmes du panneau « Aa »).
@@ -723,7 +724,7 @@ Maquette `signes.html` + planche 09 et démo validée `lecture-guidee.html` (ong
     `<p class="sr-only" aria-live="polite">` TOUJOURS présent (une région créée en même temps que son
     texte n'est pas toujours lue).
   - **Voix** (lot VX) : bouton « Dire chaque case » du panneau (voir `cote-eleve.md`, « Lecture à voix
-    haute ») ; le résumé est inscrit dans `resumesTableaux` (`lib/phrasesPage.ts`) pour « Écouter l'étape ».
+    haute ») ; le résumé est inscrit dans `resumesTableaux` (`lib/phrasesPage.ts`) pour « Écouter le point ».
   - **Point d'accroche pour la voix** : chaque phrase émet
     `EVENEMENT_PHRASE_TABLEAU` (`'lecture-tableau:phrase'`, `CustomEvent<DetailPhraseTableau>` qui
     bouillonne depuis l'enveloppe : `{ phrase, source: 'case' | 'relire' | 'resume', ligne?, colonne? }`)
@@ -772,13 +773,13 @@ Données et règles d'écriture : `content-authoring.md`, « Français simple et
   bulle à l'ouverture ; Échap, clic à côté, « Fermer » → fermée, focus rendu au mot ; changement d'étape / de vue →
   fermée. Contenu : le mot, la définition, « Exemple : … », « Écouter » (seulement si la synthèse existe, après le
   montage : `lire(phrasesDe(contenu), { sansBarre: true })`, le bouton devient « Arrêter » ; fermer la bulle arrête
-  SA lecture), « Revoir l'étape n » (si le mot est expliqué dans une AUTRE étape que celle affichée), « Tous les
+  SA lecture), « Revoir le point n » (si le mot est expliqué dans une AUTRE étape que celle affichée), « Tous les
   mots » (onglet Réviser, défile jusqu'au lexique), « Fermer » (boutons ≥ 44 px). Ordinateur (≥ 760 px) : sous le
   mot (au-dessus s'il manque de place), 380 px au plus, tenue à 16 px des bords, replacée au défilement ;
   téléphone : feuille du bas pleine largeur (70 dvh au plus, défile), au-dessus de la barre « J'ai compris ».
   `z-index` 420 : au-dessus de la règle / du masque de lecture (400). `LexiqueChapitre` : section « Les mots du
   cours » (`id="mots-du-cours"`) de `ReviserVue`, après « La fiche du chapitre », par ordre alphabétique
-  (`lexiqueAlphabetique`), définition, exemple, « Revoir l'étape n · titre » ; lien « Les mots du cours » dans la
+  (`lexiqueAlphabetique`), définition, exemple, « Revoir le point n · titre » ; lien « Les mots du cours » dans la
   rangée « Dans cet onglet ».
 - **Avec les aides existantes** (rien ne se gêne) : lecture à voix haute — `phrasesPage.ts` n'exclut que les vrais
   `button` : le mot est lu comme le reste de la phrase ; « toucher une phrase pour la lire » ignore `[role="button"]`

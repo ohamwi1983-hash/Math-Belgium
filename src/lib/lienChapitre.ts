@@ -60,7 +60,7 @@ export function resoudreReference(reference: string): CibleResolue | null {
           section,
           numero: index + 1,
           href: `${base}#${section.id}`,
-          libelle: `« ${chapitre.title} », étape ${index + 1}`,
+          libelle: `« ${chapitre.title} », point ${index + 1}`,
           titreEtape: section.titreCourt ?? section.title.replace(/\$([^$]+)\$/g, '$1'),
         }
       }

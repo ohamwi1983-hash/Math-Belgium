@@ -195,7 +195,7 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
         <div id="panneau-apprendre" className="parcours-carte no-export" role="tabpanel" aria-labelledby="page-onglet-apprendre">
           <ListeEtapes chapter={chapter} etat={etat} courante={etat.derniere} durees={durees} aller={aller} variante="carte" aRevoir={aRevoir} />
           <p className="ge-legende">
-            <span aria-hidden="true">✓</span> = étape marquée « J’ai compris ». Les étapes « à revoir » d’après tes exercices ou tes cartes « Teste-toi » sont marquées en orange.
+            <span aria-hidden="true">✓</span> = point marqué « J’ai compris ». Les points « à revoir » d’après tes exercices ou tes cartes « Teste-toi » sont marqués en orange.
           </p>
           <div className="carte-outils">
             <OutilsChapitre chapter={chapter} />
@@ -250,7 +250,7 @@ function EnteteEtape({ chapter, index, aller }: { chapter: ChapterContent; index
       </LienVue>
       <div className="etape-entete-texte">
         <p>
-          {chapter.title} · étape {index + 1} / {total}
+          {chapter.title} · point {index + 1} / {total}
         </p>
         <div className="barre" aria-hidden="true">
           <span style={{ width: `${(100 * (index + 1)) / total}%` }} />
@@ -293,7 +293,7 @@ function EtapeSection({
         </h2>
       </div>
       <p className="etape-meta no-export">
-        <span className="etape-meta-num">Étape {section.number} · </span>≈ {duree} min
+        <span className="etape-meta-num">Point {section.number} · </span>≈ {duree} min
         {precedente && <> · tu as vu : {minusculeInitiale(titreCourt(precedente))}</>}
       </p>
       {actif && <EcouterEtape numero={section.number} />}
@@ -372,9 +372,9 @@ function NavEtape({
   const titrePrec = precedente && `${precedente.number}. ${titreCourt(precedente)}`
   const titreSuiv = suivante && `${suivante.number}. ${titreCourt(suivante)}`
   return (
-    <nav ref={ref} className="etape-nav no-export" aria-label="Étapes">
+    <nav ref={ref} className="etape-nav no-export" aria-label="Points">
       {precedente ? (
-        <LienVue cible={precedente.id} aller={aller} className="btn-parcours nav-prec" aria-label={`Étape précédente : ${titrePrec}`} title={titrePrec}>
+        <LienVue cible={precedente.id} aller={aller} className="btn-parcours nav-prec" aria-label={`Point précédent : ${titrePrec}`} title={titrePrec}>
           <span aria-hidden="true">‹</span>
           <span className="nav-court" aria-hidden="true">
             {precedente.number}
@@ -393,7 +393,7 @@ function NavEtape({
         J’ai compris
       </button>
       {suivante ? (
-        <LienVue cible={suivante.id} aller={aller} className="btn-parcours btn-plein nav-suiv" aria-label={`Étape suivante : ${titreSuiv}`} title={titreSuiv}>
+        <LienVue cible={suivante.id} aller={aller} className="btn-parcours btn-plein nav-suiv" aria-label={`Point suivant : ${titreSuiv}`} title={titreSuiv}>
           <span className="nav-long" aria-hidden="true">
             {titreSuiv}
           </span>
@@ -428,7 +428,7 @@ function EntrainerVue({ chapter, aller }: { chapter: ChapterContent; aller: Alle
       <ExerciseGeneratorSection chapter={chapter} />
       {parEtape.length > 0 && (
         <section className="entrainer-etapes" aria-labelledby="entrainer-titre">
-          <h2 id="entrainer-titre">Les exercices de chaque étape</h2>
+          <h2 id="entrainer-titre">Les exercices de chaque point</h2>
           {parEtape.map(({ s, cartes }) => (
             <div key={s.id} className="entrainer-groupe">
               <p className="entrainer-etape">

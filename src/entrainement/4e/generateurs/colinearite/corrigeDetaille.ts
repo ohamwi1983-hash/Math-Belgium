@@ -117,7 +117,7 @@ function etapesResolutionCarre(l: string, e: ExerciceColinearParametreCarre): Et
     res = [texte("Aucune valeur de x ne rend ces vecteurs colinéaires : l'équation n'a pas de solution réelle.")];
   }
   const etapes: EtapeCorrection[] = [
-    utilise(l, [texte("Équation du second degré : discriminant "), latex("\\Delta=b^2-4ac"), texte(" ; si Δ > 0 deux solutions "), latex("\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}"), texte(", si Δ = 0 une seule, si Δ < 0 aucune (voir « Équations et inéquations du second degré », étape 1).")]),
+    utilise(l, [texte("Équation du second degré : discriminant "), latex("\\Delta=b^2-4ac"), texte(" ; si Δ > 0 deux solutions "), latex("\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}"), texte(", si Δ = 0 une seule, si Δ < 0 aucune (voir « Équations et inéquations du second degré », point 1).")]),
     calcul(l, lignes),
     resultat(l, res),
   ];

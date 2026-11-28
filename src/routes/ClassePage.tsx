@@ -332,7 +332,7 @@ function Saisie({ message, onCode }: { message?: string; onCode: (code: string) 
               ✓
             </span>
             <span>
-              Le code est gardé <strong>sur cet appareil</strong>. Ce que tu fais sur le site (étapes lues, exercices, cartes) n’est jamais envoyé, ni à ton professeur ni à personne.
+              Le code est gardé <strong>sur cet appareil</strong>. Ce que tu fais sur le site (points lus, exercices, cartes) n’est jamais envoyé, ni à ton professeur ni à personne.
             </span>
           </li>
         </ul>

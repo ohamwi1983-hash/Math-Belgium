@@ -46,7 +46,7 @@ export const statistiqueDescriptive: ChapterContent = {
           'Un caractère **discret** prend seulement des valeurs séparées, qu\'on peut compter une par une ' +
             '(un nombre de frères et sœurs, une pointure). Un caractère **continu** peut prendre ' +
             'n\'importe quelle valeur dans un intervalle (une taille, un temps). Pour décrire un caractère ' +
-            'continu, on doit d\'abord **regrouper ses valeurs en classes**. Tu verras ça à l\'étape 2.',
+            'continu, on doit d\'abord **regrouper ses valeurs en classes**. Tu verras ça au point 2.',
         ],
       },
       {
@@ -63,7 +63,7 @@ export const statistiqueDescriptive: ChapterContent = {
       {
         kind: 'para',
         text:
-          'Avec ce vocabulaire, chaque étape construit un outil pour répondre à une question précise. Où ' +
+          'Avec ce vocabulaire, chaque point construit un outil pour répondre à une question précise. Où ' +
           'se trouve le « centre » de la série ? C\'est la moyenne ou la médiane. Les valeurs sont-elles ' +
           'très étalées autour de ce centre ? C\'est l\'étendue, la variance ou l\'écart-type. Et comment ' +
           'comparer deux séries entre elles ?',
@@ -140,7 +140,7 @@ export const statistiqueDescriptive: ChapterContent = {
             'Pour représenter une série **discrète**, on trace un **diagramme en bâtons**. Au-dessus de ' +
             'chaque valeur xᵢ, on dresse un bâton vertical de hauteur nᵢ. Les bâtons restent ' +
             '**séparés**, parce que le caractère ne prend que des valeurs séparées : on ne lit jamais 5,5 ' +
-            'livres. C\'est la grande différence avec l\'**histogramme** de l\'étape 2. Ses barres sont ' +
+            'livres. C\'est la grande différence avec l\'**histogramme** du point 2. Ses barres sont ' +
             '**collées**, parce qu\'elles couvrent des classes : des intervalles qui se suivent sans trou.',
         },
         {
@@ -189,7 +189,7 @@ export const statistiqueDescriptive: ChapterContent = {
             "C'est le tout premier ouvrage qui transforme des données brutes en vraies connaissances. " +
             "Depuis 1592, les paroisses de Londres notaient chaque semaine les décès et leurs causes. Mais " +
             "personne n'utilisait vraiment ces listes. Graunt a l'idée de les ranger dans des tableaux " +
-            "organisés : c'est exactement la démarche de cette étape. Il y découvre des régularités que " +
+            "organisés : c'est exactement la démarche de ce point. Il y découvre des régularités que " +
             "personne n'imaginait. Par exemple, la part de garçons et de filles à la naissance reste presque " +
             "la même d'une année à l'autre. Il en tire aussi la toute première « table de mortalité » de " +
             "l'histoire. Les compagnies d'assurance utilisent encore cet outil aujourd'hui. Aucun portrait " +
@@ -410,10 +410,10 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            'Dans l\'entraînement de cette étape, l\'effectif total vaut toujours $n = 10$, 20 ou 25. ' +
+            'Dans l\'entraînement de ce point, l\'effectif total vaut toujours $n = 10$, 20 ou 25. ' +
             'Chaque fréquence y tombe donc sur un **pourcentage entier** : c\'est un bon moyen de te ' +
             'relire. Mais ce n\'est pas une règle générale ! Avec $n = 16$ (possible dans le tableau de ' +
-            'fréquences de l\'étape 1), une seule donnée vaut $\\dfrac{1}{16} = 6{,}25\\,\\%$. Une fréquence ' +
+            'fréquences du point 1), une seule donnée vaut $\\dfrac{1}{16} = 6{,}25\\,\\%$. Une fréquence ' +
             'à virgule y est donc parfaitement exacte.',
         },
         {
@@ -663,7 +663,7 @@ export const statistiqueDescriptive: ChapterContent = {
           description: [
             'Note à obtenir pour atteindre une moyenne (avec ou sans coefficients), effectif effacé ' +
               'd\'un tableau, moyenne de deux groupes réunis. Et aussi : combien de valeurs ajouter pour ' +
-              'obtenir une médiane (règle du seuil, étape 4). Pose l\'équation, résous-la, conclus.',
+              'obtenir une médiane (règle du seuil, point 4). Pose l\'équation, résous-la, conclus.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 109. Retrouver une valeur manquante »',
@@ -1037,7 +1037,7 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Reprends la série des étapes 3 et 4 : valeurs 2, 6, 9, 12 ; effectifs 5, 8, 4, 3. Tu y as ' +
+            'Reprends la série des points 3 et 4 : valeurs 2, 6, 9, 12 ; effectifs 5, 8, 4, 3. Tu y as ' +
             'déjà trouvé les cinq nombres : min = 2, Q1 = 6, médiane = 6, Q3 = 9, max = 12. Il ne reste ' +
             'qu\'à les placer sur un axe.',
         },
@@ -1048,7 +1048,7 @@ export const statistiqueDescriptive: ChapterContent = {
             series: [{ min: 2, q1: 6, median: 6, q3: 9, max: 12 }],
             xAxisLabel: 'x',
             caption:
-              'La série des étapes 3 et 4 : min=2, Q1=6, médiane=6, Q3=9, max=12. La boîte va de Q1 ' +
+              'La série des points 3 et 4 : min=2, Q1=6, médiane=6, Q3=9, max=12. La boîte va de Q1 ' +
               'à Q3, les moustaches vont jusqu\'aux extrêmes. Ici, la médiane est collée au bord gauche de la boîte.',
           },
         },
@@ -1085,7 +1085,7 @@ export const statistiqueDescriptive: ChapterContent = {
           caption:
             'Déplace les points : la boîte se redessine en direct. Pousse la plus grande valeur vers ' +
             'la droite : seule la moustache droite s\'allonge. La boîte et la médiane ne bougent pas. ' +
-            'Au départ, tu retrouves la boîte de la série suivie depuis l\'étape 3 : Q1 = médiane = 6.',
+            'Au départ, tu retrouves la boîte de la série suivie depuis le point 3 : Q1 = médiane = 6.',
         },
         {
           kind: 'methode',
@@ -1175,7 +1175,7 @@ export const statistiqueDescriptive: ChapterContent = {
             'tout. Dans l\'un, presque tout le monde a entre 10 et 14. Dans l\'autre, la moitié a 20/20 et ' +
             'l\'autre moitié a 4/20. La moyenne seule ne fait **aucune** différence entre ces deux ' +
             'groupes. Il faut un autre nombre, qui mesure à quel point les valeurs s\'écartent du centre. ' +
-            'C\'est tout le sujet de cette étape.',
+            'C\'est tout le sujet de ce point.',
         },
         {
           kind: 'para',
@@ -1231,7 +1231,7 @@ export const statistiqueDescriptive: ChapterContent = {
           text:
             'En mode statistique, ta calculatrice affiche souvent **deux** écarts-types : σx (ou σn) ' +
             'et sx (ou σn−1). Sur cette plateforme, prends toujours **σx** : il divise par n, comme la ' +
-            'formule de cette étape. La touche sx, elle, divise par n − 1 et donne une valeur un peu ' +
+            'formule de ce point. La touche sx, elle, divise par n − 1 et donne une valeur un peu ' +
             'plus grande. Elle sert à d\'autres usages, plus tard. Attention aussi : la calculatrice ' +
             'calcule σx à partir de la variance non arrondie. Pour retomber sur la valeur du ' +
             'générateur, arrondis d\'abord la variance à 2 décimales, puis prends sa racine.',
@@ -1240,7 +1240,7 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'exempleLibre',
           label: 'Exemple résolu — la série des sections 3 et 4',
           blocks: [
-            { kind: 'para', text: 'Moyenne trouvée à l\'étape 3 : $\\bar{x} = 6{,}5$.' },
+            { kind: 'para', text: 'Moyenne trouvée au point 3 : $\\bar{x} = 6{,}5$.' },
             {
               kind: 'featureTable',
               headers: ['xᵢ', 'nᵢ', '(xᵢ−x̄)²·nᵢ'],
@@ -1780,13 +1780,13 @@ export const statistiqueDescriptive: ChapterContent = {
             "Pour tester un nouveau médicament, les chercheurs forment deux groupes de patients " +
             "comparables. L'un reçoit le médicament. L'autre reçoit un placebo : un faux médicament, sans " +
             "principe actif. Ensuite, ils mesurent un indicateur sur chaque groupe : temps de guérison, " +
-            "baisse de tension, etc. Ils comparent les deux séries **exactement** comme dans cette étape. " +
+            "baisse de tension, etc. Ils comparent les deux séries **exactement** comme dans ce point. " +
             "Quelle série a la médiane la plus favorable ? C'est le centrage. Laquelle est la plus " +
             "homogène ? Autrement dit, le médicament a-t-il le même effet sur tous les patients, ou un " +
             "effet très variable ? C'est la dispersion. Quelle part des patients dépasse un seuil donné ? " +
             "C'est la lecture d'un seuil. Une différence de médianes ne suffit jamais, à elle seule, pour " +
             "conclure qu'un médicament marche. Il faut aussi regarder si les deux séries se chevauchent " +
-            "beaucoup ou peu. C'est exactement la question de dispersion de cette étape.",
+            "beaucoup ou peu. C'est exactement la question de dispersion de ce point.",
           domaines: ['Médecine', 'Recherche clinique'],
         },
         {
@@ -1857,7 +1857,7 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'astuce',
           text:
             'Le thème « Médiane et quartiles » du quiz revient sur le piège du seuil. Un cumulé ' +
-            'exactement égal au seuil ne le dépasse pas strictement. Tu l\'as vu à l\'étape 4. C\'est ' +
+            'exactement égal au seuil ne le dépasse pas strictement. Tu l\'as vu au point 4. C\'est ' +
             'utile pour vérifier que tu as le bon réflexe !',
         },
         {

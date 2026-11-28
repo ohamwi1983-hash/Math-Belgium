@@ -192,7 +192,7 @@ function Bulle({ mot, ancre, chapter, aller }: { mot: MotDuCours; ancre: HTMLEle
               aller(revoir.id)
             }}
           >
-            Revoir l’étape {revoir.number}
+            Revoir le point {revoir.number}
             <span className="sr-only"> : {titreCourt(revoir)}</span>
           </button>
         )}
@@ -247,7 +247,7 @@ export function LexiqueChapitre({ chapter, aller }: { chapter: ChapterContent; a
                   )}
                   {s && (
                     <button type="button" className="lexique-revoir" onClick={() => aller(s.id)}>
-                      Revoir l’étape {s.number} · {titreCourt(s)}
+                      Revoir le point {s.number} · {titreCourt(s)}
                     </button>
                   )}
                 </dd>

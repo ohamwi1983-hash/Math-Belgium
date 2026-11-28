@@ -19,7 +19,7 @@ export function correctionDetailleeIrrationalite(e: E): EtapeCorrection[] {
   const r = racineNL(e);
   const k = e.k;
   const pair = k === 2 ? "pair" : "multiple de 3";
-  const cours = "(cours, étape 1)";
+  const cours = "(cours, point 1)";
   const etapes: EtapeCorrection[] = [
     utilise("a", [t(`On suppose que le nombre s'écrit comme une fraction de deux naturels non nuls, et on cherche si cette hypothèse mène à une contradiction ${cours}.`)]),
     calcul("a", [ligne(`${r}=\\dfrac{m}{n}`, "m et n naturels non nuls (hypothèse)")]),

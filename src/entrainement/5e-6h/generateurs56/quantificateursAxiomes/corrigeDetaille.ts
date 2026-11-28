@@ -15,7 +15,7 @@ type E = ExerciceQuantif;
 const t = texte;
 const f = latex;
 const LETTRES = "abc";
-const COURS = "(cours, étape 3)";
+const COURS = "(cours, point 3)";
 const frags = (fr: Frag[]) => fr.map((x) => (x.type === "latex" ? f(x.valeur) : t(x.valeur)));
 
 function corrigeQuantifies(e: E): EtapeCorrection[] {

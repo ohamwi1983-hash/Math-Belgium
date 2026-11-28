@@ -43,7 +43,7 @@ export function CeChapitreUtilise({ chapter }: { chapter: ChapterContent }) {
   }
   if (groupes.size === 0) return null
   const nombre = [...groupes.values()].reduce((n, g) => n + g.lignes.size, 0)
-  const resume = `${nombre} étape${nombre > 1 ? 's' : ''} de ${groupes.size === 1 ? 'un autre chapitre' : `${groupes.size} autres chapitres`}`
+  const resume = `${nombre} point${nombre > 1 ? 's' : ''} de ${groupes.size === 1 ? 'un autre chapitre' : `${groupes.size} autres chapitres`}`
   return (
     <section className={`ce-chapitre-utilise no-export${ouvert ? ' ouvert' : ''}`} aria-label="Ce chapitre utilise">
       <button type="button" className="utilise-bascule" aria-expanded={ouvert} aria-controls={id} onClick={() => setOuvert((o) => !o)}>
@@ -57,7 +57,7 @@ export function CeChapitreUtilise({ chapter }: { chapter: ChapterContent }) {
       </button>
       <div id={id} className="utilise-corps" hidden={!ouvert}>
         <p className="utilise-intro">
-          Ces étapes d’autres chapitres servent ici. Si tu ne les as pas encore vues, lis-les d’abord : pour les indispensables, un rappel s’ouvre aussi au début de l’étape qui s’en sert.
+          Ces points d’autres chapitres servent ici. Si tu ne les as pas encore vus, lis-les d’abord : pour les indispensables, un rappel s’ouvre aussi au début du point qui s’en sert.
         </p>
         {[...groupes.values()].map(({ chapitre, lignes }) => (
           <div key={`${chapitre.levelSlug}/${chapitre.slug}`} className="utilise-groupe">
@@ -69,13 +69,13 @@ export function CeChapitreUtilise({ chapter }: { chapter: ChapterContent }) {
               {[...lignes.values()].sort((a, b) => a.cible.numero - b.cible.numero).map((l) => (
                 <li key={l.cible.href}>
                   <Link to={l.cible.href} className="utilise-lien">
-                    <span className="utilise-num">{`Étape\u00a0${l.cible.numero}`}</span>
+                    <span className="utilise-num">{`Point\u00a0${l.cible.numero}`}</span>
                     <span className="utilise-nom">{l.cible.titreEtape}</span>
                   </Link>
                   <span className="utilise-detail">
                     {l.indispensable ? <strong className="utilise-indispensable">indispensable</strong> : 'utile'}
                     {' · '}
-                    {l.pour.length > 1 ? 'pour les étapes ' : 'pour l’étape '}
+                    {l.pour.length > 1 ? 'pour les points ' : 'pour le point '}
                     {l.pour.map((s) => s.number).join(', ')}
                   </span>
                 </li>
@@ -88,15 +88,15 @@ export function CeChapitreUtilise({ chapter }: { chapter: ChapterContent }) {
   )
 }
 
-/** « Cette étape utilise : … » en tête d'une étape (prérequis indispensables seulement). */
+/** « Ce point utilise : … » en tête d'une étape (prérequis indispensables seulement). */
 export function EtapeUtilise({ section }: { section: ChapterSection }) {
   const prerequis = resoudreUtilise(section.utilise).filter((p) => p.entree.poids === 'indispensable')
   if (prerequis.length === 0) return null
   return (
-    <section className="etape-utilise no-export" aria-label="Cette étape utilise">
+    <section className="etape-utilise no-export" aria-label="Ce point utilise">
       <p className="etiquette">
         <Icone nom="livre" taille={16} />
-        Cette étape utilise
+        Ce point utilise
       </p>
       <ul>
         {prerequis.map((p) => (
@@ -116,7 +116,7 @@ function LigneRappel({ p }: { p: PrerequisResolu }) {
         <span className="utilise-ligne-texte">
           <span className="utilise-nom">{p.cible.titreEtape}</span>
           <span className="utilise-ou">
-            {`«\u00a0${p.cible.chapitre.title}\u00a0», étape\u00a0${p.cible.numero}`}
+            {`«\u00a0${p.cible.chapitre.title}\u00a0», point\u00a0${p.cible.numero}`}
           </span>
         </span>
         <span className="utilise-action" aria-hidden="true">
@@ -130,7 +130,7 @@ function LigneRappel({ p }: { p: PrerequisResolu }) {
           </p>
         ))}
         <a className="utilise-revoir" href={p.cible.href} target="_blank" rel="noopener">
-          Revoir l’étape <span className="utilise-onglet">(nouvel onglet)</span>
+          Revoir le point <span className="utilise-onglet">(nouvel onglet)</span>
         </a>
       </div>
     </li>

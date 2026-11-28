@@ -82,8 +82,8 @@ export function valeurTest(e: E, i: number): Q {
 }
 
 export function aide1(_e: E, p: P): AideEcran {
-  if (p === "zeros") return { texte: [tx("Une valeur absolue change d'écriture là où ce qui est entre les barres s'annule : cherche le zéro de chaque expression, puis range ces zéros sur la droite (cours, étape 4).")] };
-  return { texte: [tx("Sur l'intervalle, remplace chaque valeur absolue : par l'expression elle-même si elle est positive ou nulle, par son opposé si elle est négative ; puis réduis (cours, étape 4) :")], latex: "|A|=A\\ \\text{si}\\ A\\geq 0\\qquad |A|=-A\\ \\text{si}\\ A<0" };
+  if (p === "zeros") return { texte: [tx("Une valeur absolue change d'écriture là où ce qui est entre les barres s'annule : cherche le zéro de chaque expression, puis range ces zéros sur la droite (cours, point 4).")] };
+  return { texte: [tx("Sur l'intervalle, remplace chaque valeur absolue : par l'expression elle-même si elle est positive ou nulle, par son opposé si elle est négative ; puis réduis (cours, point 4) :")], latex: "|A|=A\\ \\text{si}\\ A\\geq 0\\qquad |A|=-A\\ \\text{si}\\ A<0" };
 }
 
 export function aide2(e: E, p: P): AideEcran {

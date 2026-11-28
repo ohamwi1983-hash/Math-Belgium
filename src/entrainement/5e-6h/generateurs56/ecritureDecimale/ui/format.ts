@@ -160,13 +160,13 @@ function apercuFraction(texte: string): string | null {
 export function aide1(e: E, p: P): AideEcran {
   switch (p) {
     case "ecriture":
-      return { texte: [tx("Pose la division : à chaque étape, multiplie le reste par 10 et divise par "), lx(`${e.den}`), tx(" ; tu obtiens un chiffre et un nouveau reste. Dès qu'un reste revient, les chiffres se répètent (cours, étape 2).")] };
+      return { texte: [tx("Pose la division : à chaque étape, multiplie le reste par 10 et divise par "), lx(`${e.den}`), tx(" ; tu obtiens un chiffre et un nouveau reste. Dès qu'un reste revient, les chiffres se répètent (cours, point 2).")] };
     case "longueur":
       return { texte: [tx("La période est le bloc de chiffres qui se répète, le plus court possible.")] };
     case "borne":
-      return { texte: [tx("Dans la division par "), lx(`${e.den}`), tx(", chaque reste est un naturel plus petit que "), lx(`${e.den}`), tx(". Un reste nul arrêterait la division ; un reste qui revient fait recommencer les mêmes chiffres (cours, étape 2).")] };
+      return { texte: [tx("Dans la division par "), lx(`${e.den}`), tx(", chaque reste est un naturel plus petit que "), lx(`${e.den}`), tx(". Un reste nul arrêterait la division ; un reste qui revient fait recommencer les mêmes chiffres (cours, point 2).")] };
     case "puissances":
-      return { texte: [tx("Avec k chiffres avant la période et p chiffres dans la période, les nombres "), lx("10^{k}x"), tx(" et "), lx("10^{k+p}x"), tx(" ont exactement la même partie après la virgule (cours, étape 2) :")], latex: "10^{k+p}x-10^{k}x\\ \\text{est un entier}" };
+      return { texte: [tx("Avec k chiffres avant la période et p chiffres dans la période, les nombres "), lx("10^{k}x"), tx(" et "), lx("10^{k+p}x"), tx(" ont exactement la même partie après la virgule (cours, point 2) :")], latex: "10^{k+p}x-10^{k}x\\ \\text{est un entier}" };
     case "difference":
       return { texte: [tx("Écris les deux multiples de "), lx("x"), tx(" en décalant la virgule, puis soustrais : les parties périodiques s'éliminent.")] };
     case "fraction":
@@ -176,7 +176,7 @@ export function aide1(e: E, p: P): AideEcran {
     case "denominateur":
       return { texte: [tx("Divise par 2, puis par 3, par 5, par 7… tant que c'est possible ; regroupe en puissances.")] };
     case "verdict":
-      return { texte: [tx("Une fraction irréductible a une écriture décimale limitée si et seulement si son dénominateur ne contient que les facteurs premiers 2 et 5 ; sinon, son écriture est illimitée périodique (cours, étape 2) :")], latex: "\\dfrac{m}{n}\\ \\text{limitée}\\iff n=2^{a}\\cdot 5^{b}" };
+      return { texte: [tx("Une fraction irréductible a une écriture décimale limitée si et seulement si son dénominateur ne contient que les facteurs premiers 2 et 5 ; sinon, son écriture est illimitée périodique (cours, point 2) :")], latex: "\\dfrac{m}{n}\\ \\text{limitée}\\iff n=2^{a}\\cdot 5^{b}" };
   }
 }
 

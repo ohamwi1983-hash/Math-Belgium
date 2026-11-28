@@ -3,7 +3,7 @@ import type { MotDuCours } from '../../types'
 /**
  * « Mots du cours » du chapitre 4e « Statistique descriptive à une variable » (pilote du français simple,
  * 28/11/2026). Définitions SIMPLES (1 ou 2 phrases courtes), exemples tirés du chapitre quand c'est
- * possible, `etape` = section où le mot est expliqué (bouton « Revoir l'étape n »). Voir
+ * possible, `etape` = section où le mot est expliqué (bouton « Revoir le point n »). Voir
  * `.claude/rules/content-authoring.md`, « Français simple et mots du cours ».
  */
 export const lexiqueStatistiqueDescriptive: MotDuCours[] = [

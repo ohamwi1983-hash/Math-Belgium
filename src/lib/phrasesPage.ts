@@ -415,7 +415,7 @@ export function phrasesEtape(section: Element): PhraseVoix[] {
   const out: PhraseVoix[] = []
   if (titre) {
     const c: Ctx = { unites: [], courante: null, pile: [titre], exclure: null }
-    unite(c).ajout(num ? `Étape ${num} : ` : '')
+    unite(c).ajout(num ? `Point ${num} : ` : '')
     titre.childNodes.forEach((x) => marcher(x, c))
     finir(c)
     for (const u of c.unites) out.push(...phrasesDeUnite(u))

@@ -196,7 +196,7 @@ export function chercher(requete: string, anneePreferee: string | null): { resul
     const champDetail = absentsDuTitre.length ? e.autres.find((_, i) => absentsDuTitre.some((m) => e.normes[i + 1].includes(m))) : undefined
     return {
       entree: e,
-      contexte: e.type === 'chapitre' ? `Chapitre ${e.chapitreNumero} · ${e.niveau}` : `${e.chapitreTitre} · étape ${e.numero} · ${e.niveau}`,
+      contexte: e.type === 'chapitre' ? `Chapitre ${e.chapitreNumero} · ${e.niveau}` : `${e.chapitreTitre} · point ${e.numero} · ${e.niveau}`,
       titre: surligner(e.titre, mots),
       detail: champDetail ? surligner(champDetail, mots) : null,
     }

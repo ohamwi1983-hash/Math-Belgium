@@ -53,7 +53,7 @@ export function ReviserVue({ chapter, aller }: { chapter: ChapterContent; aller:
           <ol>
             {fiche.map((s) => (
               <li key={s.id}>
-                <LienVue cible={s.id} aller={aller} className="fiche-num" aria-label={`Revoir l'étape ${s.number} : ${titreCourt(s)}`}>
+                <LienVue cible={s.id} aller={aller} className="fiche-num" aria-label={`Revoir le point ${s.number} : ${titreCourt(s)}`}>
                   {s.number}
                 </LienVue>
                 <div>
@@ -133,7 +133,7 @@ function TesteToi({ chapter, cartes }: { chapter: ChapterContent; cartes: Carte[
       {carte ? (
         <PorteeMots valeur={[carte.question, carte.reponse]}>
           <p className="teste-toi-etape">
-            Étape {carte.numero} · {carte.etape}
+            Point {carte.numero} · {carte.etape}
           </p>
           <p className="teste-toi-question" ref={questionRef} tabIndex={-1}>
             <RichText text={carte.question} />

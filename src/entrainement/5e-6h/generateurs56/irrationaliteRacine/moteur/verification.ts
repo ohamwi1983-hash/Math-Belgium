@@ -76,7 +76,7 @@ export function piege(e: E, p: P, valeurs: string[]): Frag[] | null {
         ? [tx("Regarde la décomposition de "), lx(`${e.N}`), tx(e.k === 2 ? " : tous ses exposants sont pairs." : " : tous ses exposants sont des multiples de 3.")]
         : [tx("Regarde l'exposant de "), lx(`${e.premierTemoin}`), tx(" dans la décomposition de "), lx(`${e.N}`), tx(".")];
     case "conclusion":
-      if (v === "C") return [tx("La racine d'un naturel est soit un naturel, soit un irrationnel (cours, étape 1) : jamais un rationnel non entier.")];
+      if (v === "C") return [tx("La racine d'un naturel est soit un naturel, soit un irrationnel (cours, point 1) : jamais un rationnel non entier.")];
       if (v === "D") return [tx("La comparaison des exposants permet toujours de conclure.")];
       return e.verdict === "naturel"
         ? [tx("Il n'y a pas de contradiction : "), lx(`${e.N}`), tx(e.k === 2 ? " est un carré parfait." : " est un cube parfait.")]

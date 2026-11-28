@@ -68,7 +68,7 @@ export function bonneOptionId(e: E, p: P): string {
 }
 
 const AIDE_QUANTIF: AideEcran = {
-  texte: [tx("« ∀ » se lit « pour tout », « ∃ » se lit « il existe (au moins un) ». Un énoncé « pour tout » est faux dès qu'il a un contre-exemple ; un énoncé « il existe » est vrai dès qu'il a un exemple. Dans « ∀x ∃y », y peut dépendre de x ; dans « ∃y ∀x », le même y doit convenir pour tous les x (cours, étape 3).")],
+  texte: [tx("« ∀ » se lit « pour tout », « ∃ » se lit « il existe (au moins un) ». Un énoncé « pour tout » est faux dès qu'il a un contre-exemple ; un énoncé « il existe » est vrai dès qu'il a un exemple. Dans « ∀x ∃y », y peut dépendre de x ; dans « ∃y ∀x », le même y doit convenir pour tous les x (cours, point 3).")],
 };
 
 const AIDE2_AXIOME: Record<IdAxiome, string> = {
@@ -91,7 +91,7 @@ const AIDE2_AXIOME: Record<IdAxiome, string> = {
 export function aide1(_e: E, p: P): AideEcran {
   if (p === "enonce1" || p === "enonce2") return AIDE_QUANTIF;
   if (p === "negation")
-    return { texte: [tx("La négation de « ∀x, P » est « ∃x, non P » ; celle de « ∃x, P » est « ∀x, non P ». Chaque quantificateur change, leur ordre reste le même, et la condition est niée (cours, étape 3).")] };
+    return { texte: [tx("La négation de « ∀x, P » est « ∃x, non P » ; celle de « ∃x, P » est « ∀x, non P ». Chaque quantificateur change, leur ordre reste le même, et la condition est niée (cours, point 3).")] };
   return { texte: [tx("Compare les deux membres : l'ordre des termes a-t-il changé (commutativité) ? Les parenthèses ont-elles bougé (associativité) ? Un facteur a-t-il été distribué ? Un terme a-t-il disparu (neutre) ou une somme est-elle devenue 0 (opposé) ? Pour une inégalité, pense aux axiomes de l'ordre (tableaux de l'étape 3).")] };
 }
 

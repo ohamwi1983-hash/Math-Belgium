@@ -108,7 +108,7 @@ export function HoteLecteurVoix() {
 }
 
 /**
- * « Écouter l'étape » (cours, vue étape) : sous le titre de l'étape, avant le texte. Lit l'étape phrase
+ * « Écouter le point » (cours, vue étape) : sous le titre de l'étape, avant le texte. Lit l'étape phrase
  * par phrase (titre, sous-titre, « L'essentiel », le corps, les annexes ; ateliers, vidéos et cartes
  * « À toi » en une phrase). Rien sans synthèse vocale ni au pré-rendu (pas même le conteneur).
  */
@@ -120,9 +120,9 @@ export function EcouterEtape({ numero }: { numero: number | string }) {
   return (
     <div className="etape-ecouter no-export" ref={ref}>
       <BoutonEcouter
-        libelle={`Écouter l’étape ${numero}`}
-        libelleCourt="Écouter l’étape"
-        titre={`Étape ${numero}`}
+        libelle={`Écouter le point ${numero}`}
+        libelleCourt="Écouter le point"
+        titre={`Point ${numero}`}
         phrases={() => {
           const s = section()
           return s ? phrasesEtape(s) : []

@@ -63,13 +63,19 @@ function dateLongue(j: Jour): string {
 const pluriel = (n: number, un: string, plusieurs = `${un}s`) => `${n} ${n > 1 ? plusieurs : un}`
 const listeEt = (l: string[]) => (l.length <= 1 ? l.join('') : `${l.slice(0, -1).join(', ')} et ${l[l.length - 1]}`)
 
-/** « étape 2 », « étapes 1 à 3 », « étapes 1, 2 et 4 ». */
+/** « point 2 », « points 1 à 3 », « points 1, 2 et 4 ». */
 function texteEtapes(numeros: number[]): string {
   const n = [...new Set(numeros)].sort((a, b) => a - b)
   if (n.length === 0) return ''
-  if (n.length === 1) return `étape ${n[0]}`
+  if (n.length === 1) return `point ${n[0]}`
   const suite = n.every((x, i) => i === 0 || x === n[i - 1] + 1)
-  return suite && n.length >= 3 ? `étapes ${n[0]} à ${n[n.length - 1]}` : `étapes ${listeEt(n.map(String))}`
+  return suite && n.length >= 3 ? `points ${n[0]} à ${n[n.length - 1]}` : `points ${listeEt(n.map(String))}`
+}
+
+/** « du point 2 », « des points 1 à 3 » (« Relire « L'essentiel » du point 1 »). */
+function dePoints(numeros: number[]): string {
+  const t = texteEtapes(numeros)
+  return t ? `${t.startsWith('points') ? 'des' : 'du'} ${t}` : ''
 }
 
 /** « Aujourd'hui », « Demain », « Lundi » (dans la semaine), « Lundi 7/12 » (plus loin). */
@@ -120,7 +126,7 @@ function etapesDuPlan(cles: string[], suivi: SuiviChapitre[], gens: string[] = [
       res.push({
         cle,
         numero: e.section.number,
-        titre: plusieursChapitres ? `Ch. ${c.chapter.chapterNumber}, étape ${e.section.number}` : `Étape ${e.section.number}`,
+        titre: plusieursChapitres ? `Ch. ${c.chapter.chapterNumber}, point ${e.section.number}` : `Point ${e.section.number}`,
         titreCourt: e.titre,
         generateurs: liste,
         cartes: e.cartesTotal,
@@ -181,9 +187,9 @@ function numerosDe(etapes: string[], ctx: Contexte): number[] {
 function texteTache(g: TacheGroupee, ctx: Contexte): { nom: ReactNode; texte: string; sous: ReactNode } {
   switch (g.type) {
     case 'relire': {
-      const e = texteEtapes(numerosDe(g.etapes, ctx))
+      const e = dePoints(numerosDe(g.etapes, ctx))
       const seule = g.etapes.length === 1 ? ctx.infos.get(g.etapes[0]) : undefined
-      const t = `Relire « L'essentiel » de l'${e}`
+      const t = `Relire « L'essentiel » ${e}`
       return { nom: t, texte: t, sous: seule ? <RichText text={seule.titreCourt} /> : '' }
     }
     case 'blanche':
@@ -191,9 +197,9 @@ function texteTache(g: TacheGroupee, ctx: Contexte): { nom: ReactNode; texte: st
     case 'cartes': {
       if (g.aRevoir) {
         const t = `Teste-toi : tes ${pluriel(g.cartes, 'carte')} « À revoir »`
-        return { nom: t, texte: t, sous: 'Toutes les étapes de l’interro.' }
+        return { nom: t, texte: t, sous: 'Tous les points de l’interro.' }
       }
-      const t = `Teste-toi : ${pluriel(g.cartes, 'carte')} de l'${texteEtapes(numerosDe(g.etapes, ctx))}`
+      const t = `Teste-toi : ${pluriel(g.cartes, 'carte')} ${dePoints(numerosDe(g.etapes, ctx))}`
       return { nom: t, texte: t, sous: '' }
     }
     case 'exercices': {
@@ -201,7 +207,7 @@ function texteTache(g: TacheGroupee, ctx: Contexte): { nom: ReactNode; texte: st
         const x = g.exercices[0]
         if (!x.generateur) {
           const info = x.etape ? ctx.infos.get(x.etape) : undefined
-          const t = `Refaire un exemple résolu de l'${info ? `étape ${info.numero}` : 'étape'} sans regarder`
+          const t = `Refaire un exemple résolu du ${info ? `point ${info.numero}` : 'point'} sans regarder`
           return { nom: t, texte: t, sous: 'Puis compare avec le cours.' }
         }
         const gen = x.generateur
@@ -248,7 +254,7 @@ function cibleGo(g: TacheGroupee, ctx: Contexte, garde: PlanGarde): { href: stri
   return { href, externe: !estGenerateurMigre(e.chapter.levelSlug, x.generateur.id) }
 }
 
-/** « Étape 3 : relire + 3 exercices de 6gen59 » — un jour à venir en une ligne. */
+/** « Point 3 : relire + 3 exercices de 6gen59 » — un jour à venir en une ligne. */
 function resumeJour(j: JourPlan, ctx: Contexte): string {
   if (j.role === 'libre') return 'Repos : pas de révision ce jour-là.'
   const groupes = grouperTaches(j.taches)
@@ -435,7 +441,7 @@ function VuePlan({
           <p className="plan-decale">Un jour raté&nbsp;? Le plan se décale tout seul, rien n'est perdu.</p>
           {plan.essentielSeulement && (
             <p className="suivi-note plan-alerte" role="status">
-              Il reste peu de jours&nbsp;: le plan garde l'essentiel (les cartes et un exercice par étape).
+              Il reste peu de jours&nbsp;: le plan garde l'essentiel (les cartes et un exercice par point).
             </p>
           )}
           {!stockageOk && (
@@ -580,7 +586,7 @@ function PlanAnnonce({
         ) : (
           <>
             <p className="suivi-note">
-              Date, étapes et exercices viennent de ton professeur. Il te reste {pluriel(Math.max(1, ecartJours(aujourdhui, brouillon.interro)), 'jour')}&nbsp;: un peu chaque jour plutôt que tout la veille.
+              Date, points et exercices viennent de ton professeur. Il te reste {pluriel(Math.max(1, ecartJours(aujourdhui, brouillon.interro)), 'jour')}&nbsp;: un peu chaque jour plutôt que tout la veille.
             </p>
             <ChoixMinutes legende="Combien de minutes par jour ?" valeur={minutes} onChange={setMinutes} />
             {ancien && ancien.interro !== brouillon.interro && ancien.interro > aujourdhui && (
@@ -591,7 +597,7 @@ function PlanAnnonce({
                 Faire mon plan
               </button>
               <button type="button" className="suivi-btn" onClick={onChanger}>
-                Changer la date ou les étapes
+                Changer la date ou les points
               </button>
             </div>
           </>
@@ -638,7 +644,7 @@ function FormulaireQuestions({
     if (!estJour(b.interro)) err.date = 'Choisis la date de ton interro.'
     else if (b.interro <= aujourdhui) err.date = `L'interro doit être au plus tôt demain, ${dateLongue(demain)}.`
     else if (ecartJours(aujourdhui, b.interro) > 60) err.date = 'Choisis une interro dans les deux mois qui viennent.'
-    if (cochees.length === 0) err.etapes = 'Garde au moins une étape.'
+    if (cochees.length === 0) err.etapes = 'Garde au moins un point.'
     setErreurs(err)
     if (err.date) dateRef.current?.focus()
     else if (err.etapes) {
@@ -707,7 +713,7 @@ function FormulaireQuestions({
         {chapitre && (
           <details ref={etapesRef} className="plan-chapitre" open={cochees.length < cles.length || !!erreurs.etapes || undefined}>
             <summary>
-              <span className="plan-chapitre-titre">{cochees.length === cles.length ? 'Toutes les étapes' : `${pluriel(cochees.length, 'étape')} sur ${cles.length}`}</span>
+              <span className="plan-chapitre-titre">{cochees.length === cles.length ? 'Tous les points' : `${pluriel(cochees.length, 'point')} sur ${cles.length}`}</span>
               <span className="suivi-sous">· choisir</span>
             </summary>
             {erreurs.etapes && <p className="plan-erreur">{erreurs.etapes}</p>}
@@ -723,7 +729,7 @@ function FormulaireQuestions({
                       onChange={(ev) => setB((x) => ({ ...x, etapes: ev.target.checked ? [...x.etapes.filter((k) => k !== cle), cle] : x.etapes.filter((k) => k !== cle) }))}
                     />
                     <span>
-                      Étape {e.numero} · <RichText text={e.titre} />
+                      Point {e.numero} · <RichText text={e.titre} />
                       {e.ton === 'retravailler' && <span className="suivi-ton revoir">À retravailler</span>}
                     </span>
                   </label>

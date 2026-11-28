@@ -54,7 +54,7 @@ export function PortesAccueil({ niveau, reprise }: { niveau: string; reprise: Re
         icone="cours"
         ton="cours"
         titre="Mon cours"
-        texte={reprise ? `Reprendre : ${reprise.chapitre}, étape ${reprise.numero}` : 'Choisis un chapitre et lis-le étape par étape'}
+        texte={reprise ? `Reprendre : ${reprise.chapitre}, point ${reprise.numero}` : 'Choisis un chapitre et lis-le point par point'}
       />
       <Porte to={lienEntrainer(niveau, reprise?.slug)} icone="entrainer" ton="entrainer" titre="M’entraîner" texte="Exercices corrigés, feuille, interro blanche" />
       <Porte to={ROUTE_PLAN} icone="interro" ton="interro" titre="Préparer mon interro" texte="Mon plan jour par jour et ma progression" />

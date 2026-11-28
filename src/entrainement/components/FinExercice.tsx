@@ -93,7 +93,7 @@ export function FinExercice({
       <div className="ge-fin-ex-tete">
         <p className="ge-fin-ex-repere">
           {n > 1 ? `${n} questions faites` : 'Exercice fait'}
-          {etape ? ` · cours : étape ${etape}` : ''}
+          {etape ? ` · cours : point ${etape}` : ''}
         </p>
         {competences.length > 0 && (
           <div className="ge-pastilles">
@@ -132,7 +132,7 @@ export function FinExercice({
         Un autre exercice
       </button>
       <Link className="ge-bouton-contour" to={lienCours}>
-        {etape ? `Revoir le cours de l’étape ${etape}` : 'Revoir le cours du chapitre'}
+        {etape ? `Revoir le cours du point ${etape}` : 'Revoir le cours du chapitre'}
       </Link>
       <Link className="ge-bouton-contour" to={lienProgression}>
         Voir ma progression
