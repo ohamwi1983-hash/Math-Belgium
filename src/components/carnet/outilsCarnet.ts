@@ -148,9 +148,12 @@ export function chapitreParDefaut(classeId: string | undefined, classes: Classe[
   return premier && k?.niveau ? `${k.niveau}/${premier.slug}` : ''
 }
 
-/** Chapitre « en cours » d'une classe (celui de sa dernière séance), ou `''`. */
+/** Chapitre « en cours » d'une classe (celui de sa dernière séance AVEC matière vue — une séance d'annonce d'une
+ * évaluation ou d'un devoir, sans matière, ne compte pas : elle porte le chapitre de l'évaluation), ou `''`. */
 export function chapitreEnCours(classeId: string, seances: Seance[]): string {
-  const derniere = trierRecentes(seances.filter((s) => s.classe_id === classeId))[0]
+  const siennes = seances.filter((s) => s.classe_id === classeId)
+  const avecMatiere = siennes.filter((s) => s.parties.length > 0 || s.generateurs.length > 0)
+  const derniere = trierRecentes(avecMatiere.length > 0 ? avecMatiere : siennes)[0]
   return derniere && findChapter(derniere.niveau, derniere.chapitre) ? `${derniere.niveau}/${derniere.chapitre}` : ''
 }
 

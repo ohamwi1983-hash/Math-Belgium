@@ -45,6 +45,8 @@ export interface SaisieAnnonce {
   /** Évaluation (depuis le 28/11/2026) : chapitres, points, exercices et compétences retenus — `niveau` / `chapitre`
    * ci-dessus = le PREMIER chapitre. */
   contenu?: ContenuEval
+  /** Évaluation nouvelle : identifiant de l'événement choisi d'avance (lien du plan dans le texte copié). */
+  evenementId?: string
 }
 
 /** Séance d'aujourd'hui de la classe que l'annonce peut compléter, sinon `null` (plus récente d'abord). */

@@ -248,6 +248,8 @@ export function AnnoncerEvaluation({
   const retenusD = proposesD.filter((g) => !decoches.has(g.id)).map((g) => g.id)
   const [consigne, setConsigne] = useState(() => modifDevoir?.seance.devoir ?? '')
 
+  // Identifiant de la future évaluation, tiré d'avance : l'aperçu et le texte copié portent déjà le bon lien du plan.
+  const [idPropose] = useState(() => (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : ''))
   const [copier, setCopier] = useState(false)
   const [prevenir, setPrevenir] = useState(true)
   const [tentative, setTentative] = useState(0)
@@ -285,6 +287,7 @@ export function AnnoncerEvaluation({
         consigne: '',
         nom: nomFinal,
         contenu,
+        ...(!modifEval && idPropose ? { evenementId: idPropose } : {}),
       }
     : { quoi, classeId, niveau: chapitreD?.levelSlug ?? '', chapitre: chapitreD?.slug ?? '', date: date ?? '', heureDebut: null, heureFin: null, bilan: false, etapes: structureD.filter((s) => etapesD.has(s.id)).map((s) => s.id), generateurs: retenusD, consigne }
   const erreurs: ReturnType<typeof erreursAnnonce> & { nom?: string; competences?: string } =
@@ -303,7 +306,7 @@ export function AnnoncerEvaluation({
   const apercu = useMemo(() => {
     if (!evaluation || !classe || !dateValide) return null
     return interroPubliee(
-      { id: modifEval?.evenement.id ?? '', du: saisie.date, journee_entiere: saisie.heureDebut === null, heure_debut: saisie.heureDebut, heure_fin: saisie.heureFin, intitule: intituleDeNom(nomFinal), chapitre: premier ? `${premier.niveau}/${premier.slug}` : null },
+      { id: modifEval?.evenement.id ?? idPropose, du: saisie.date, journee_entiere: saisie.heureDebut === null, heure_debut: saisie.heureDebut, heure_fin: saisie.heureFin, intitule: intituleDeNom(nomFinal), chapitre: premier ? `${premier.niveau}/${premier.slug}` : null },
       contenu,
       { classe, seancesClasse: seances.filter((s) => s.classe_id === classe.id), grilles: ctx.grilles, format: ctx.format, avecHeure: true },
     )

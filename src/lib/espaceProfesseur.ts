@@ -82,7 +82,9 @@ export interface ResumeClasse {
 
 export function resumeClasse(classe: Classe, seances: Seance[]): ResumeClasse {
   const siennes = seances.filter((s) => s.classe_id === classe.id)
-  const derniere = triees(siennes).find((s) => findChapter(s.niveau, s.chapitre)) ?? null
+  // Une séance d'annonce (évaluation ou devoir, sans matière vue) ne dit pas le chapitre en cours.
+  const avecMatiere = siennes.filter((s) => s.parties.length > 0 || s.generateurs.length > 0)
+  const derniere = triees(avecMatiere.length > 0 ? avecMatiere : siennes).find((s) => findChapter(s.niveau, s.chapitre)) ?? null
   const chapitre = derniere ? (findChapter(derniere.niveau, derniere.chapitre) ?? null) : null
   if (!chapitre) return { classe, chapitre: null, titreCourt: '', progression: null, etape: null, etapesVues: 0, etapesTotal: 0, derniereSeance: null }
   const progression = progressionClasse(siennes, [chapitre])[0] ?? null

@@ -81,9 +81,11 @@ function ligneEvenement(s: SaisieEvenement) {
   }
 }
 
-export async function ajouterEvenement(c: SupabaseClient, s: SaisieEvenement): Promise<string> {
+/** `id` (facultatif) : identifiant choisi d'avance (annonce d'une évaluation : le texte copié AVANT l'écriture
+ * porte déjà l'identifiant de l'évaluation dans le lien du plan des élèves). */
+export async function ajouterEvenement(c: SupabaseClient, s: SaisieEvenement, id?: string): Promise<string> {
   const n = normaliserSaisie(s)
-  const cree = verifier(await c.from('evenements').insert(ligneEvenement(n)).select('id').single()) as { id: string }
+  const cree = verifier(await c.from('evenements').insert({ ...ligneEvenement(n), ...(id ? { id } : {}) }).select('id').single()) as { id: string }
   if (n.classes.length > 0) {
     const r = await c.from('evenements_classes').insert(n.classes.map((classe_id) => ({ evenement_id: cree.id, classe_id, ecole_id: n.ecole_id })))
     if (r.error) {

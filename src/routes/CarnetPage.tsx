@@ -637,7 +637,7 @@ function Carnet() {
       let cree: string | null = null
       if (saisieEv) {
         if (modifEval) await modifierEvenement(client, modifEval.evenement, saisieEv)
-        else evId = cree = await ajouterEvenement(client, saisieEv)
+        else evId = cree = await ajouterEvenement(client, saisieEv, a.evenementId)
       }
       // Sans 0007, une évaluation n'est que l'événement de l'agenda (date et chapitre).
       if (evaluation && !devoirs) return

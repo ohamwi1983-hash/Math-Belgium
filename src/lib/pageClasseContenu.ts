@@ -55,6 +55,13 @@ export function titreChapitre(niveau: string, slug: string): string {
   return c ? libelleChapitre(c, ordreCourant(), { titre: titreCourtChapitre(c.slug, c.title) }) : ''
 }
 
+/** Titre publié d'un chapitre d'évaluation : titre complet (« Fonctions exponentielles »), numéro du professeur
+ * s'il numérote ses documents — jamais le numéro du site. */
+function titreChapitreLong(niveau: string, slug: string): string {
+  const c = findChapter(niveau, slug)
+  return c ? libelleChapitre(c, ordreCourant(), { titre: texteBrut(c.title) }) : ''
+}
+
 /** Heure d'une interro : « 2e heure » (réglage « numéro ») ou « 09h35 → 10h25 » (réglage « plage »,
  * calculée sur la grille de l'école de la classe ; repli sur le numéro). */
 export function heureInterro(e: Pick<Evenement, 'du' | 'journee_entiere' | 'heure_debut' | 'heure_fin'>, classe: Pick<Classe, 'ecole_id'>, grilles: GrilleHoraire[], format: FormatHoraire): string | null {
@@ -128,7 +135,7 @@ export function interroPubliee(
     return {
       niveau: ch.niveau,
       chapitre: ch.slug,
-      titre: titreChapitre(ch.niveau, ch.slug),
+      titre: titreChapitreLong(ch.niveau, ch.slug),
       points: ch.points.map((p) => ({
         id: p.id,
         numero: p.numero,

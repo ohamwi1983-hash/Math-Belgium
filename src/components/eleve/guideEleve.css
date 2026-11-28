@@ -103,7 +103,7 @@
   border: 1px solid var(--line-soft); border-left: 6px solid var(--plan); border-radius: 14px;
 }
 .ge-classe p { margin: 0; }
-.ge-classe-sur { font: 600 12.5px/1.3 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.ge-classe-sur { font: 600 13px/1.3 var(--sans); letter-spacing: 0.02em; color: var(--ink-soft); }
 .ge-classe-interro { font: 700 19px/1.3 var(--sans); color: var(--ink); }
 .ge-classe-detail { font: 400 15.5px/1.5 var(--lecture, var(--sans)); color: var(--ink-soft); }
 .ge-classe-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin-top: 4px; }

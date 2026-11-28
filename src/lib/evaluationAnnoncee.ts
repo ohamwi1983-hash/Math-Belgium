@@ -16,7 +16,6 @@
  */
 import { findChapter, LEVELS } from '../content/chaptersIndex'
 import type { ChapterContent } from '../content/types'
-import { titreCourtChapitre } from '../entrainement/export/examen'
 import { generateursChapitre, structureChapitre, texteBrut } from './carnet'
 import type { Evenement } from './agendaEvenements'
 import { GENERATEURS_EVALUATION_PILOTE } from './generateursPilote'
@@ -184,8 +183,9 @@ export function quizDuChapitre(chapitre: ChapterContent): string | null {
   return chapitre.recap.entrainement?.generatorId ?? null
 }
 
+/** Titre du chapitre dans l'écran d'annonce et la fiche (« Fonctions exponentielles »), texte brut. */
 export function titreCourt(chapitre: ChapterContent): string {
-  return titreCourtChapitre(chapitre.slug, texteBrut(chapitre.title))
+  return texteBrut(chapitre.title)
 }
 
 /* -------------------------------------------------------------------------- choix de l'écran */
