@@ -250,7 +250,7 @@ export function essentielsDesParties(parties: string[], chapitre: ChapterContent
 /* ------------------------------------------------------------------------------- texte en rubriques */
 
 export interface PartieTexte {
-  /** « § 3 Convergence et divergence des suites ». */
+  /** « Point 3 : Convergence et divergence des suites ». */
   titre: string
   /** Sous-parties vues (vide : section entière). */
   sousParties: string[]
@@ -263,7 +263,7 @@ export interface EvaluationTexte {
   date: string
   /** « H2 », « H1–H2 », `null` sans heure. */
   heure: string | null
-  /** « § 2 », « § 3 ». */
+  /** Numéros des points évalués : « 2 », « 3 ». */
   numeros: string[]
   /** Titres courts des sections évaluées (« suites géométriques »). */
   themes: string[]
@@ -318,7 +318,7 @@ export function donneesTexteAgenda(
   const gens = chapitre ? generateursChapitre(chapitre) : []
   const absolu = (u: string) => (u.startsWith('/') ? `https://math-belgium.vercel.app${u}` : u)
   const lien = (g: { chantier: string; id: string }) => (options.lienGenerateur ? absolu(options.lienGenerateur(g.chantier, g.id)) : '')
-  const parties: PartieTexte[] = lignesPartiesVues(seance.parties, structure).map((l) => ({ titre: `§ ${l.numero} ${l.titreSection}`, sousParties: l.sousParties, url: `${base}#${l.sectionId}` }))
+  const parties: PartieTexte[] = lignesPartiesVues(seance.parties, structure).map((l) => ({ titre: `Point ${l.numero} : ${l.titreSection}`, sousParties: l.sousParties, url: `${base}#${l.sectionId}` }))
   // Processus : exercices faits en classe ET exercices joints au devoir.
   const vus = gens.filter((g) => seance.generateurs.includes(g.id) || (seance.devoir_generateurs ?? []).includes(g.id)).map((g) => ({ id: g.id, titre: texteBrut(g.titre) }))
   const processus = options.processusDe ? processusDeduits(vus, options.processusDe) : []
@@ -330,7 +330,7 @@ export function donneesTexteAgenda(
   if (t) {
     const sections = structure.filter((s) => (seance.evaluation_parties ?? []).includes(s.id))
     const themes = sections.map((s) => minusculeInitiale(texteBrut(chapitre?.sections.find((x) => x.id === s.id)?.titreCourt ?? s.titre)))
-    const numeros = sections.map((s) => `§ ${s.numero}`)
+    const numeros = sections.map((s) => String(s.numero))
     const entrainementEleve = chapitre ? absolu(urlEntrainementEleve(seance.niveau, seance.chapitre, sections.map((s) => s.id), seance.evaluation_generateurs ?? [])) : undefined
     if (t === 'faite') evaluation = { type: t, date: seance.date_seance, heure: null, numeros, themes }
     else if (options.evenement) evaluation = { type: t, date: options.evenement.du, heure: heureEvenementTexte(options.evenement), numeros, themes, ...(entrainementEleve ? { entrainementEleve } : {}) }
@@ -353,7 +353,7 @@ export const PREFIXE_ENTRAINEMENT_ELEVE = 'Pour t’entraîner : '
 
 const EMOJI = { objectif: '🎯', vu: '📘', competences: '🧭', entrainer: '✏️', devoir: '📌', interro: '📅', faite: '📝' }
 
-/** « § 2 et § 3 », « § 1, § 2 et § 4 ». */
+/** « 2 et 3 », « 1, 2 et 4 ». */
 function listeEt(elements: string[]): string {
   if (elements.length <= 1) return elements.join('')
   return `${elements.slice(0, -1).join(', ')} et ${elements[elements.length - 1]}`
@@ -372,10 +372,10 @@ function titreRubrique(emoji: string, titre: string, avecEmoji: boolean): string
   return avecEmoji ? `${emoji} ${titre}` : titre
 }
 
-/** Phrase de l'évaluation : « Interro annoncée : lundi 7/12 (H2) — § 2 et § 3 (suites géométriques,
+/** Phrase de l'évaluation : « Interro annoncée : lundi 7/12 (H2) — points 2 et 3 (suites géométriques,
  * convergence et divergence). » */
 export function phraseEvaluation(e: EvaluationTexte): string {
-  const quoi = e.numeros.length > 0 ? ` — ${listeEt(e.numeros)}${e.themes.length > 0 ? ` (${e.themes.join(', ')})` : ''}` : ''
+  const quoi = e.numeros.length > 0 ? ` — ${e.numeros.length > 1 ? 'points' : 'point'} ${listeEt(e.numeros)}${e.themes.length > 0 ? ` (${e.themes.join(', ')})` : ''}` : ''
   if (e.type === 'faite') return `Interro faite en classe${quoi}.`
   const titre = e.type === 'bilan' ? 'Contrôle-bilan annoncé' : 'Interro annoncée'
   return `${titre} : ${dateJourLong(e.date)}${e.heure ? ` (${e.heure})` : ''}${quoi}.`

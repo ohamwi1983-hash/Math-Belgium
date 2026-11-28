@@ -47,7 +47,7 @@ export async function p5({ browser, contexte, ouvrirProjection, verifier, captur
   await page.waitForFunction(() => /\d:\d\d/.test(document.querySelector('.rec-temps')?.textContent || ''), null, { timeout: 15000 })
   verifier(true, 'enregistrement lancé (après la voix détectée)')
   await capture(page, 'p5-02-pendant-barre')
-  // Trois étapes de 11 s : trois chapitres YouTube.
+  // Trois points de 11 s : trois chapitres YouTube.
   for (let etape = 0; etape < 3; etape++) {
     await page.waitForTimeout(11500)
     if (etape < 2) {
@@ -77,11 +77,11 @@ export async function p5({ browser, contexte, ouvrirProjection, verifier, captur
   await attendre(page, 800)
   const desc = await page.locator('.rec-youtube textarea').inputValue()
   const chapitres = desc.split('\n').filter((l) => /^\d\d:\d\d /.test(l))
-  verifier(chapitres.length >= 3 && chapitres[0].startsWith('00:00'), `chapitres horodatés d’après les étapes (${chapitres.join(' | ')})`)
+  verifier(chapitres.length >= 3 && chapitres[0].startsWith('00:00'), `chapitres horodatés d’après les points (${chapitres.join(' | ')})`)
   verifier(/Le cours complet : math-belgium\.vercel\.app\/6e-6h\/fonctions-exponentielles/.test(desc), 'lien vers le cours complet')
-  verifier((await page.locator('.rec-youtube input').inputValue()).startsWith('Fonctions exponentielles — '), 'titre proposé « chapitre — étapes »')
+  verifier((await page.locator('.rec-youtube input').inputValue()).startsWith('Fonctions exponentielles — '), 'titre proposé « chapitre — points »')
   verifier(/RGPD/.test(await page.locator('.rec-rappel-rgpd').innerText()), 'rappel RGPD toujours affiché')
-  verifier((await page.locator('.rec-repere').count()) >= 3, 'aperçu : un repère par changement d’étape sur la ligne du temps')
+  verifier((await page.locator('.rec-repere').count()) >= 3, 'aperçu : un repère par changement de point sur la ligne du temps')
   await capture(page, 'p5-04-video-prete')
   await debordement(page, 'P5 « Ta vidéo est prête » 1 280 × 720')
   // Une image de la vidéo, pour la relire : la diapo seule (ni barre, ni point rouge)

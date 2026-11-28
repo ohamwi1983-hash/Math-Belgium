@@ -119,7 +119,7 @@ export function diaposEtape(section: ChapterSection, inclure: Inclusion[]): Diap
     section,
     pas: 0,
     intertitres,
-    notes: [`Étape ${section.number} : ${section.title}`, ...(section.kicker ? [section.kicker] : []), ...(section.essentiel ?? [])],
+    notes: [`Point ${section.number} : ${section.title}`, ...(section.kicker ? [section.kicker] : []), ...(section.essentiel ?? [])],
   })
 
   const figures = section.blocks.filter((b): b is FigureBloc => b.kind === 'illustration' || b.kind === 'illustrationGroup')

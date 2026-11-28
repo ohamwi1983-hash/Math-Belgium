@@ -125,8 +125,8 @@ export function BoutonsInstruments({ outils, setOutils, magasin }: { outils: Out
 }
 
 /**
- * Barre d'outils du bas (maquettes Titre / Essentiel / Exemple / Teste, outils D1–D3) : fil « chapitre ·
- * § n titre », stylo / surligneur (palette), équerre, compas, calculatrice, minuteur, écran blanc (fond
+ * Barre d'outils du bas (maquettes Titre / Essentiel / Exemple / Teste, outils D1–D3) : fil « chapitre · point n ·
+ * titre », stylo / surligneur (palette), équerre, compas, calculatrice, minuteur, écran blanc (fond
  * uni / quadrillé / repère), vue d'ensemble, plein écran, ‹ n / N ›, quitter. Masquée après 3 s
  * sans mouvement (`visible`), revient au moindre mouvement de la souris ou toucher.
  */

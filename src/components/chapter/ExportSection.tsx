@@ -49,7 +49,7 @@ export function ExportSection({ chapter }: { chapter: ChapterContent }) {
       <p>
         Une version imprimable du cours (texte, exemples, graphiques) — sans les boutons d'exercices ni le sommaire, et
         sans jamais couper un exemple ou un graphique en changeant de page. La version aménagée garde le même contenu
-        avec une mise en page plus aérée : grande police lisible, texte non justifié, une section par page.
+        avec une mise en page plus aérée : grande police lisible, texte non justifié, un point par page.
       </p>
       <div className="export-buttons">
         <button type="button" className="export-btn" onClick={imprimerChapitre}>

@@ -912,7 +912,7 @@ function Carnet() {
         Mes classes
       </h2>
       <p className="compte-intro">
-        Note ce qui a été vu dans chaque classe : sections et sous-parties du cours, exercices, devoir. Copie le résumé pour Smartschool, imprime une fiche ou l'agenda complet d'une
+        Note ce qui a été vu dans chaque classe : points et sous-parties du cours, exercices, devoir. Copie le résumé pour Smartschool, imprime une fiche ou l'agenda complet d'une
         période, suis la progression et crée une évaluation sur la matière vue. Aucune donnée d'élève n'est enregistrée.
       </p>
       <p className="compte-vide">Aucune classe pour l'instant : ajoute la première (par exemple « 5e B »).</p>

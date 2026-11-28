@@ -60,7 +60,7 @@ export function usePagesEcrites(projection: Projection, annotations: MagasinAnno
 
 function etiquetteDiapo(d: DonneesDiapo): string {
   const nom = {
-    titre: `Étape ${d.section.number}`,
+    titre: `Point ${d.section.number}`,
     essentiel: 'L’essentiel',
     figure: 'Figure',
     exemple: 'Exemple',

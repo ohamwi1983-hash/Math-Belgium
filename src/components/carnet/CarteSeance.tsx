@@ -7,7 +7,7 @@ import { heureEvenementTexte } from '../../lib/carnetDevoirs'
 import { ficheSeanceHtml } from '../../lib/carnetFiche'
 import { couleurClasse, evenementDeSeance, resoudre, textesSeance, useCarnet } from './contexteCarnet'
 import { MenuActions } from './MenuActions'
-import { capitale, copierTexte, dateAbregee, ouvrirFiche, telechargerFiche } from './outilsCarnet'
+import { capitale, copierTexte, dateAbregee, listePoints, ouvrirFiche, telechargerFiche } from './outilsCarnet'
 
 /**
  * Actions d'une séance notée : UNE action principale, « Copier pour Smartschool » (texte en rubriques
@@ -88,12 +88,12 @@ export function CarteSeance({ seance, compacte = false, titreId }: { seance: Sea
   const chapitre = findChapter(seance.niveau, seance.chapitre)
   const exercicesDevoir = chapitre ? generateursChapitre(chapitre).filter((g) => (seance.devoir_generateurs ?? []).includes(g.id)).map((g) => texteBrut(g.titre)) : (seance.devoir_generateurs ?? [])
   const evenement = evenementDeSeance(ctx, seance)
-  const sectionsEval = chapitre ? structureChapitre(chapitre).filter((x) => (seance.evaluation_parties ?? []).includes(x.id)).map((x) => `§ ${x.numero}`) : []
+  const sectionsEval = chapitre ? structureChapitre(chapitre).filter((x) => (seance.evaluation_parties ?? []).includes(x.id)).map((x) => x.numero) : []
   const texteEvaluation = seance.evaluation_type
     ? [
         seance.evaluation_type === 'faite' ? 'interro faite en classe' : seance.evaluation_type === 'bilan' ? 'contrôle-bilan annoncé' : 'interro annoncée',
         seance.evaluation_type !== 'faite' ? (evenement ? `le ${dateJourLong(evenement.du)}${heureEvenementTexte(evenement) ? ` (${heureEvenementTexte(evenement)})` : ''}` : 'retirée de l’agenda') : '',
-        sectionsEval.length > 0 ? `— ${sectionsEval.join(', ')}` : '',
+        sectionsEval.length > 0 ? `— ${listePoints(sectionsEval)}` : '',
       ]
         .filter(Boolean)
         .join(' ')

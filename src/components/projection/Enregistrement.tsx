@@ -380,7 +380,7 @@ export function useEnregistrement({ chapter, diapos, index, role, cible }: { cha
     if (dernier?.titre === titre) return
     passages.current.push({ t, titre })
   }
-  // Chapitres : une entrée à chaque changement d'étape montrée.
+  // Chapitres : une entrée à chaque changement de point montré.
   useEffect(() => {
     if (phaseRef.current === 'enregistre' || phaseRef.current === 'pause') noterPassage(ecoule())
     else if (phaseRef.current === 'attente') noterPassage(0)
@@ -719,7 +719,7 @@ export function DialogueVideoPrete({ rec, chapter }: { rec: Enregistrement; chap
           <div>
             <video ref={video} className="rec-video" src={r.url} controls preload="metadata" aria-label="Aperçu de la vidéo" />
             {r.chapitres.length > 0 && (
-              <div className="rec-ligne-temps" aria-label="Changements d’étape (chapitres YouTube)">
+              <div className="rec-ligne-temps" aria-label="Changements de point (chapitres YouTube)">
                 {r.chapitres.map((c, i) => (
                   <button key={i} type="button" className="rec-repere" style={{ left: `${(100 * c.t) / Math.max(1, r.duree)}%` }} title={`${dureeLisible(c.t)} · ${c.titre}`} aria-label={`Aller à ${dureeLisible(c.t)} : ${c.titre}`} onClick={() => aller(c.t)} />
                 ))}
@@ -785,7 +785,7 @@ export function DialogueVideoPrete({ rec, chapter }: { rec: Enregistrement; chap
               </button>
             </div>
             <label className="rec-lbl" htmlFor={`${id}-desc`}>
-              Description (chapitres d’après les étapes montrées)
+              Description (chapitres d’après les points montrés)
             </label>
             <div className="rec-copie">
               <textarea id={`${id}-desc`} value={description} onChange={(e) => setDescription(e.target.value)} rows={9} />

@@ -495,7 +495,7 @@ function OuEnSontMesClasses({ classes, seances }: { classes: Classe[]; seances: 
                 </span>
                 {ch && (
                   <span className="carnet-avancement-compte">
-                    {vues} / {total} §
+                    {vues} / {total} points
                   </span>
                 )}
               </Link>

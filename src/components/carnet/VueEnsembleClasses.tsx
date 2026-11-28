@@ -55,7 +55,7 @@ export function VueEnsembleClasses({
                 <>
                   <p className="ep-classe-en-cours">
                     En cours : {r.titreCourt}
-                    {r.etape ? `, étape ${r.etape.numero}` : ''}
+                    {r.etape ? `, point ${r.etape.numero}` : ''}
                   </p>
                   {r.etapesTotal > 0 && (
                     <span
@@ -64,14 +64,14 @@ export function VueEnsembleClasses({
                       aria-valuemin={0}
                       aria-valuemax={r.etapesTotal}
                       aria-valuenow={r.etapesVues}
-                      aria-label={`Étapes vues dans ${r.titreCourt}`}
-                      aria-valuetext={`${r.etapesVues} étape${r.etapesVues > 1 ? 's' : ''} sur ${r.etapesTotal}`}
+                      aria-label={`Points vus dans ${r.titreCourt}`}
+                      aria-valuetext={`${r.etapesVues} point${r.etapesVues > 1 ? 's' : ''} sur ${r.etapesTotal}`}
                     >
                       <span style={{ width: `${pourcent}%` }} />
                     </span>
                   )}
                   <p>
-                    {r.etapesVues} étape{r.etapesVues > 1 ? 's' : ''} sur {r.etapesTotal} vue{r.etapesVues > 1 ? 's' : ''}
+                    {r.etapesVues} point{r.etapesVues > 1 ? 's' : ''} sur {r.etapesTotal} vu{r.etapesVues > 1 ? 's' : ''}
                     {reperes.prochainCours ? ` · ${reperes.prochainCours}` : ''}
                   </p>
                 </>

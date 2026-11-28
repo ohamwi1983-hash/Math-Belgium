@@ -32,12 +32,12 @@ export default function LanceurProjection({ chapter, aller }: { chapter: Chapter
 
 const nombre = (n: number, mot: string, accord = '') => `${n} ${mot}${n > 1 ? 's' : ''}${accord ? ` ${accord}${n > 1 ? 's' : ''}` : ''}`
 
-/** « 2 diapos annotées · 1 page blanche dans ces étapes » ; rien ici mais ailleurs : le dire (elles restent gardées). */
+/** « 2 diapos annotées · 1 page blanche dans ces points » ; rien ici mais ailleurs : le dire (elles restent gardées). */
 function texteResumeLanceur(ici: { diapos: number; blanches: number }, total: { diapos: number; blanches: number }): string {
   const morceaux = [ici.diapos ? nombre(ici.diapos, 'diapo', 'annotée') : '', ici.blanches ? nombre(ici.blanches, 'page', 'blanche') : ''].filter(Boolean)
-  if (morceaux.length) return `${morceaux.join(' · ')} dans ces étapes`
+  if (morceaux.length) return `${morceaux.join(' · ')} dans ces points`
   const ailleurs = total.diapos + total.blanches
-  return `Aucune dans ces étapes (${ailleurs} ailleurs dans le chapitre, gardée${ailleurs > 1 ? 's' : ''})`
+  return `Aucune dans ces points (${ailleurs} ailleurs dans le chapitre, gardée${ailleurs > 1 ? 's' : ''})`
 }
 
 function Lanceur({ chapter, aller }: { chapter: ChapterContent; aller: Aller }) {
@@ -120,7 +120,7 @@ function Lanceur({ chapter, aller }: { chapter: ChapterContent; aller: Aller }) 
       setExport({ etat: 'fait', texte: `${nom} téléchargé.` })
     } catch (err) {
       console.warn(`Export ${nom}`, err)
-      setExport({ etat: 'erreur', texte: `Le ${nom} n’a pas pu être préparé. Réessaie ; si cela se reproduit, choisis moins d’étapes.` })
+      setExport({ etat: 'erreur', texte: `Le ${nom} n’a pas pu être préparé. Réessaie ; si cela se reproduit, choisis moins de points.` })
     }
   }
 
@@ -138,9 +138,9 @@ function Lanceur({ chapter, aller }: { chapter: ChapterContent; aller: Aller }) 
 
       <fieldset className="lanceur-groupe">
         <legend className="lanceur-legende">
-          Étapes à projeter
+          Points à projeter
           <button type="button" className="lanceur-lien" onClick={() => setChoix((c) => ({ ...c, etapes: toutes ? [] : chapter.sections.map((s) => s.id) }))}>
-            {toutes ? 'Aucune' : 'Toutes'}
+            {toutes ? 'Aucun' : 'Tous'}
           </button>
         </legend>
         <ul className="lanceur-etapes">
@@ -199,7 +199,7 @@ function Lanceur({ chapter, aller }: { chapter: ChapterContent; aller: Aller }) 
       </fieldset>
 
       <p className="lanceur-total" aria-live="polite">
-        {choix.etapes.length === 0 ? 'Coche au moins une étape.' : `${total} diapos · ${choix.etapes.length} étape${choix.etapes.length > 1 ? 's' : ''}`}
+        {choix.etapes.length === 0 ? 'Coche au moins un point.' : `${total} diapos · ${choix.etapes.length} point${choix.etapes.length > 1 ? 's' : ''}`}
       </p>
       <button type="button" className="lanceur-lancer" onClick={lancer} disabled={choix.etapes.length === 0}>
         <Pictogramme nom="ecran" taille={18} />
