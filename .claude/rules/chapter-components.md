@@ -601,7 +601,12 @@ zoom du repère comme les courbes. Code chargé avec la projection seulement (ja
   écran, le dernier trait de la page quittée restait sinon affiché sur la suivante (constaté avec le code d'avant aussi).
 - Vérifications (28/11/2026, `scripts/verif-projection/` : `verif-ecran-blanc.mjs`, `verif-deux-ecrans.mjs`,
   `verif-tailles.mjs`, outils `commun.mjs`) : build de test + faux client connecté (`scripts/verif-espace/`), 6e « Les
-  coniques » et 4e « Fonction du second degré » — voir le rapport du chantier pour le détail et les captures.
+  coniques » et 4e « Fonction du second degré » : copier (rectangle, poignées, collage, agrandissement, annuler, repères,
+  pointillé), 4 gabarits remplis (clavier, stylo, + ligne, droite et ses couleurs mesurées), paramètres animés, tangente,
+  aire, points, rechargement, PowerPoint et PDF relus ; deux écrans (copie, gabarit, animation vue au tableau, repères
+  absents chez la classe) ; 1 280 × 720, 1 920 × 1 080, 1 024 × 768, 870 × 400, thème sombre — 83 + 18 + 95 vérifications,
+  0 erreur console. `useCompacte` revient à la disposition normale avec 8 px de marge (sinon va-et-vient sans fin quand la
+  hauteur offerte égale presque le contenu). Limite : à 870 × 400, le panneau du traceur avec des curseurs défile.
 
 **Vérifications** (24/11/2026, dossier de travail `projection/` : `verif.mjs`, `verif-prod.mjs`,
 `compter_pptx.py`, `comparer_prerendu.py`) : build de test (`NODE_ENV=development vite build --mode test`
