@@ -348,7 +348,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'suites', sectionId: 'problemes-classiques', generatorId: '5gen47', label: 'Modéliser une situation par une suite (5gen47)', processus: 3 },
   { chapitreSlug: 'suites', sectionId: 'problemes-classiques', generatorId: '5gen49', label: "Détective d'erreurs : suites (5gen49)", processus: 3 },
   { chapitreSlug: 'suites', sectionId: 'comparaison-suites', generatorId: '5gen18', label: '' },
-  { chapitreSlug: 'suites', sectionId: 'recurrente-affine', generatorId: '5gen19', label: '' },
+  { chapitreSlug: 'suites', sectionId: 'recurrente-affine', generatorId: '5gen19', label: '', processus: 3 },
   { chapitreSlug: 'limites-asymptotes', sectionId: 'limites-calcul', generatorId: '5gen20', label: '' },
   { chapitreSlug: 'limites-asymptotes', sectionId: 'limites-calcul', generatorId: '5gen64', label: 'Limites avec racines carrées : expression conjuguée (5gen64)', processus: 2 },
   { chapitreSlug: 'limites-asymptotes', sectionId: 'asymptote-oblique', generatorId: '5gen21', label: '' },
