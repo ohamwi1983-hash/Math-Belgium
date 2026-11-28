@@ -611,6 +611,92 @@ largeur), vidéo sans identifiant, deux écrans (lecture sur l'écran cliqué) ;
 PowerPoint (4e ch. 1 § 1) : 25 diapos comme à l'écran, une image chacune, liens cliquables YouTube et
 générateurs, atelier exporté en disposition `cote`.
 
+**Outils par-dessus — exercice au tableau, vidéo, points de participation** (chantier O, maquettes P1, P5, P6 validées
+le 28/11/2026 ; vérifications : `scripts/verif-projection/` — `outils-o.mjs` + `outils-o-p5.mjs` + `outils-o-p6.mjs`,
+`purs-o.test.ts`, `sonde-exercices.ts`). Tout le code est dans le morceau chargé à la demande de la projection (le paquet
+principal n'a pas bougé) ; rien n'est envoyé au serveur.
+- **P1 « Projeter un exercice »** (`ExerciceTableau.tsx`, `lib/projection/exerciceTableau.ts`, `exercice-tableau.css`) :
+  bouton à côté de « Ouvrir le générateur ↗ » (diapo « S'entraîner », mode direct, `ContexteExerciceTableau` fourni par
+  la page de projection) SEULEMENT pour un générateur de CE site (`estGenerateurMigre`) qui a un adaptateur papier : le
+  registre `lib/evaluationAdapterRegistry.ts` (≈ 2,3 Mo, le même que les feuilles et évaluations) est chargé par
+  `import()` quand une telle diapo est affichée (ou une page d'exercice à montrer) — le bouton apparaît quand il est là.
+  L'exercice s'ouvre PAR-DESSUS la diapo (pas de nouvelle diapo dans la liste), comme une page blanche :
+  `EtatProjection.exercices[cléDiapo]` (`PageExercice` : `gen`, `code` 6 caractères de `codeExercice.ts` = graine +
+  variante, `n`, `pas`, `page`, `reponse`, `chercher`) et `exercice` (id affiché, retombe à null en changeant de diapo ou
+  à l'écran blanc) ; partagé entre fenêtres par l'état, conservé (`DonneesAnnotations.exercices`, lecture tolérante),
+  effacé par « Nouvelle séance ». Chaque fenêtre et l'export RETIRENT la même instance par le code (`genererAvecCode`).
+  Une seule source : énoncé papier (`enoncePapier`, sinon `construireEnonce`), corrigé « comme au tableau »
+  (`correctionDetaillee`, sinon `construireCorrection`), réponse brève. Rendu DANS la scène (filmé, photographié,
+  annotable) : énoncé en très grand (forme « texte + une formule » : titre 40 px et formule à 72 px, sinon paragraphe
+  34 px ajusté jusqu'à × 0,55, figure SVG de l'énoncé, questions a), b)…), pied « Exercice 2 · type ». Corrigé : une
+  ligne = une `EtapeCorrection` (étiquette | texte, chaîne de calcul alignée sur « = » par `decouperLigneCalcul`, figure),
+  la ligne en cours en orange, les suivantes en traits gris SANS changer la mise en page ; les lignes sont réparties sur
+  des PAGES de corrigé mesurées (`decouperCorrige`, page 1 sous l'énoncé rappelé) — la page de la ligne montrée est posée
+  dans l'état (`page`) par la fenêtre qui avance. Annotations par page : `x:<id>` (énoncé), `x:<id>:<k>` (page k du
+  corrigé). Petite barre en haut à gauche (place et style de celle de l'écran blanc, masquée avec la barre du bas ;
+  pictogrammes seuls sous 1 100 px et dans la vue du professeur) : Revenir à la diapo (Échap, après avoir rangé le
+  stylo), Montrer / Cacher la réponse, Corrigé ligne par ligne (« Corrigé 3 / 7 » ; → Espace Entrée clic = ligne
+  suivante, ← précédente), Un autre du même type (page vierge n + 1, l'autre reste), Type ▾ (variantes non retirées du
+  catalogue ; un premier tirage choisit une variante au hasard pour que « du même type » ait un sens), Laisser chercher
+  1 / 2 / 3 / 5 min (petit minuteur en haut à droite, fond à moitié transparent, rouge clignotant à 0:00, sans son),
+  ‹ n / N ›. Un écran : la réponse n'existe nulle part avant « Montrer la réponse ». Vue du professeur : « Pour toi
+  seul » (cadre mauve : réponse + corrigé complet, ✓ / ● au tableau) remplace Suivante / Notes, « Laisser chercher »,
+  gros bouton « Ligne suivante (4 / 7) ». Export annoté : après la diapo et ses pages blanches, l'énoncé puis les pages
+  du corrigé jusqu'à la plus loin montrée ou annotée (`exportPptx.tsx`, genre `exercice`, notes « Exercice 6gen9 n° 1 —
+  corrigé — après « Équations exponentielles » » + réponse) ; elles comptent dans le résumé et la boîte « Quitter ».
+- **P5 « ● Enregistrer »** (`Enregistrement.tsx`, `lib/projection/enregistrement.ts`, `enregistrement.css`) : bouton de
+  la barre (et de l'en-tête de la vue du professeur). Boîte : micros de l'appareil (`enumerateDevices` après la première
+  autorisation ; dernier choisi gardé `localStorage` `projection:micro`, sinon un micro externe d'après son nom),
+  vumètre en direct (`AnalyserNode`), « Tester (5 s) » enregistré puis réécouté avec un verdict (silence / trop faible /
+  bon / sature), qualité 720p ≈ 5 Mo/min · 1080p ≈ 9 Mo/min (`projection:qualite-video`), « Couper le silence du début »
+  (l'enregistrement démarre en pause et reprend à la première voix : rien n'est réencodé — la FIN n'est pas coupée, il
+  faudrait réencoder ou couper un WebM au hasard des grappes : option retirée), ce qui est enregistré / jamais, ce que le
+  navigateur va demander. Capture : un écran = `getDisplayMedia({ preferCurrentTab })` puis **Element Capture**
+  (`RestrictionTarget.fromElement(.projection-scene-cadre)`, classe `rec-cible` = `isolation: isolate`, préparé à
+  l'ouverture de la boîte : le partage doit être demandé DANS le clic) — la vidéo ne contient que la diapo et ce qui est
+  DEDANS (annotations, instruments, pages blanches, traceur, exercice projeté) ; barre, petites barres, pastilles,
+  minuteur, points de participation et point rouge n'y sont jamais. À défaut Region Capture (`CropTarget`) : la région de
+  la diapo, ce qui la recouvre est filmé (la boîte le dit ; les points sont masqués pendant l'enregistrement, le rappel
+  n'est pas affiché). Ni l'un ni l'autre (Firefox, Safari) : « Commencer » désactivé, la boîte explique de passer en vue
+  à deux écrans. Deux écrans : la vue du professeur enregistre la fenêtre des diapos (titre « Diapos — … », choisie dans
+  la fenêtre de partage) ; un message `BroadcastChannel` (`math-belgium-enregistrement:<niveau>/<slug>`) fait cacher à
+  la fenêtre des diapos sa barre, ses petites barres, sa pastille et les points (`.en-enregistrement`). Micro + image
+  dans un `MediaRecorder` WebM (VP9 / VP8 + Opus, MP4 en dernier recours) ; pendant : « ● 12:47 ⏸ ■ » dans la barre
+  (arrêt confirmé), rappel discret en haut à droite quand la barre se masque (gris clignotant en pause), chrono rendu
+  seul (`Chrono` : la projection ne se re-rend pas). Durée écrite dans l'en-tête du WebM (`teteAvecDuree` : élément
+  `Duration` ajouté dans `Info`, quelques octets, sinon le lecteur affiche 0:00 — vérifié par ffprobe). « Ta vidéo est
+  prête » : aperçu + repères des changements d'étape sur la ligne du temps, durée / poids / format, « Télécharger la
+  vidéo » (`Titre - AAAA-MM-JJ.webm`, ASCII), Réenregistrer, Supprimer, Fermer (confirmé si pas téléchargée) ; « Pour
+  YouTube » : titre proposé (« Chapitre — étape · étape », modifiable), description (niveau, chapitres horodatés d'après
+  les étapes MONTRÉES — `chapitresYouTube` : 00:00, voisins identiques fusionnés, passages < 10 s fondus, AUCUN chapitre
+  s'il en reste moins de 3 —, lien du cours complet), Copier ; rappel « la mise en ligne, c'est toi » + RGPD toujours
+  affiché.
+- **P6 Points de participation** (`Participation.tsx`, `lib/participation.ts`, `participation.css`,
+  `components/participation/EditeurEleves.tsx`) : liste des élèves SUR L'APPAREIL du professeur seulement
+  (`localStorage` `participation:eleves|reglages|points|historique:<classe>`, `participation:classe` ; try/catch),
+  jamais sur le serveur, ni dans la vidéo, le PowerPoint / PDF ou la page des élèves ; saisie dans les réglages ET sur
+  la page de la classe (Mes classes, rubrique repliable « Élèves (sur cet appareil) ») : prénoms collés (Smartschool,
+  tableur : lignes, virgules, numéros de tête retirés, doublons numérotés) ou « numéros seulement », « Copier la liste »
+  / « Coller une liste » pour un autre appareil. Classe = celles du carnet (lues à la demande ; d'office la dernière
+  choisie, sinon celle de l'année du chapitre), « Ma classe » sans carnet. Réglages (une fois par classe et par
+  période) : équipes d'office (4 / 5 / 6, au hasard ou à la main, noms de mathématiciennes et mathématiciens, couleurs
+  toujours avec leur nom) sinon podium ; +1 bonne réponse, +1 bonne idée (d'office), −1 pénalité (désactivée d'office,
+  jamais projetée : ni barre, ni podium, ni « +1 »), prénom dans le « +1 » (désactivé d'office) ; période (prochaine
+  interro annoncée de la classe, prochain bulletin, autre date), règle du bonus modifiable ; Projeter la règle,
+  Commencer, Tout effacer. Projeté (HORS du cadre filmé, jamais une annotation) : barres des équipes en haut à droite
+  (repliables en pastille « Équipes ▸ », dépliées 3 s après un point), ou podium (3 marches, ex aequo ensemble, « + n
+  points gagnés aujourd'hui » ; jamais le bas du classement) ; « +1 Les Pythagoriciens » 1,5 s ; tirage montré ; règle ;
+  bilan (« Bravo à toute la 5e A ! », podium des équipes, total), sous la barre (z-index). Donner un point : vue du
+  professeur (deux écrans, bouton « Points » de l'en-tête : la grille remplace Suivante / Notes) — un toucher sur le
+  prénom = +1, 💡 = +1 bonne idée, −1 si activé, équipe entière +1 / −1, premières lettres + Entrée (flèches), Annuler,
+  « Interroger quelqu'un » (×3 pour ceux qui n'ont pas participé aujourd'hui ; reste chez le professeur, « Montrer au
+  tableau »), points de chacun, ronds « pas encore participé », bilan « Pour toi seul · qui reçoit le bonus », Copier la
+  liste, Nouvelle période (bilan gardé dans l'historique). Un écran : la même grille dans un panneau REPLIÉ chez le
+  professeur (bouton « Points » de la barre) — visible de la classe s'il le déplie, donc sans les points de chacun, sans
+  les ronds, sans la liste du bonus (dit dans le panneau). Une tablette ou un téléphone ne peuvent pas piloter la
+  projection d'un autre appareil sans serveur (le canal ne relie que les fenêtres d'un même navigateur). Deux fenêtres :
+  les données par l'événement `storage`, ce qui est projeté par le canal `math-belgium-participation`.
+
 ## Page d'un générateur `/entrainement/:chantier/:generatorId` (refonte du 22/11/2026)
 
 Maquettes A (partout), B (plusieurs étapes), C (choix entre graphiques), D (réponse révélée), E

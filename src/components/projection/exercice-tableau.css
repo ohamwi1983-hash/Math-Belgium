@@ -1,0 +1,127 @@
+/* « Projeter un exercice » (P1) — page d'exercice dans la scène (1 280 × 720 px logiques, fond clair comme les
+   diapos dans les deux thèmes), petite barre en haut à gauche, minuteur « Laisser chercher », vue du professeur. */
+
+.diapo-entrainement-boutons { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 6px; }
+.diapo-entrainement-boutons .diapo-entrainement-ouvrir { margin-top: 0; }
+.diapo-entrainement-projeter {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 22px; border-radius: 999px; cursor: pointer;
+  background: #fff; color: #5b4ea3; border: 2px solid #5b4ea3; font: 600 20px var(--sans);
+}
+.diapo-entrainement-projeter:hover { background: #f1eefa; }
+.diapo-entrainement-projeter:focus-visible { outline: 3px solid #b65c1f; outline-offset: 2px; }
+
+.exo-page {
+  position: absolute; left: 0; top: 0; width: 1280px; height: 720px; overflow: hidden; background: #fbfaf7; color: #182430;
+  font-family: var(--sans); color-scheme: light;
+}
+.exo-page::before { content: ''; position: absolute; left: 0; top: 0; bottom: 56px; width: 10px; background: #5b4ea3; }
+.exo-page .katex { font-size: 1.04em; }
+.exo-formule { white-space: nowrap; }
+.exo-surtitre {
+  position: absolute; left: 72px; right: 72px; top: 72px; margin: 0; font: 600 16px / 1.3 var(--mono); letter-spacing: 0.12em; color: #5b4ea3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.exo-enonce { --k: 1; position: absolute; left: 72px; right: 72px; top: 126px; height: 430px; overflow: hidden; display: flex; flex-direction: column; gap: calc(18px * var(--k)); }
+.exo-enonce-texte, .exo-enonce-titre, .exo-enonce-apres { margin: 0; }
+.exo-enonce-texte { font: 400 calc(34px * var(--k)) / 1.4 var(--sans); }
+.exo-enonce-titre { font: 600 calc(40px * var(--k)) / 1.2 var(--serif); }
+.exo-enonce-formule { padding: calc(14px * var(--k)) 0 0 calc(24px * var(--k)); font-size: calc(72px * var(--k)); line-height: 1.2; white-space: nowrap; }
+.exo-enonce-formule .katex { font-size: 1em; }
+.exo-enonce-apres { font: 400 calc(28px * var(--k)) / 1.4 var(--sans); color: #33434f; }
+.exo-figure { flex: 0 1 auto; min-height: 0; display: flex; justify-content: center; }
+.exo-figure svg { max-width: 100%; max-height: calc(300px * var(--k)); width: auto; height: auto; }
+.exo-questions { margin: 0; padding-left: calc(46px * var(--k)); font: 400 calc(32px * var(--k)) / 1.4 var(--sans); display: flex; flex-direction: column; gap: calc(8px * var(--k)); list-style: lower-alpha; }
+.exo-questions.seule { list-style: none; padding-left: 0; }
+.exo-questions li::marker { font-weight: 600; }
+.exo-pied { position: absolute; left: 72px; bottom: 136px; margin: 0; font: 500 18px var(--mono); color: #8a97a1; }
+
+.exo-corps { position: absolute; left: 72px; right: 72px; bottom: 130px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+.exo-rappel {
+  flex: none; max-height: 150px; overflow: hidden; font: 400 26px / 1.4 var(--sans); color: #182430;
+  padding-bottom: 10px; border-bottom: 1px solid #dfe7ec;
+}
+.exo-rappel-questions > span { display: block; }
+.exo-lignes { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.exo-ligne {
+  position: relative; flex: none; display: grid; grid-template-columns: 200px minmax(0, 1fr); column-gap: 18px; align-items: start;
+  padding: 6px 12px; border-left: 5px solid transparent; border-radius: 4px; font: 400 26px / 1.38 var(--sans); color: #182430;
+}
+.exo-lbl { padding-top: 5px; font: 600 16px / 1.3 var(--mono); color: #2f7a4f; overflow-wrap: anywhere; }
+.exo-ligne--piege .exo-lbl { color: #b23a3a; }
+.exo-ligne--piege .exo-texte { color: #6e2323; }
+.exo-contenu { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.exo-texte { overflow-wrap: break-word; }
+.exo-ligne--resultat .exo-texte { align-self: flex-start; padding: 2px 12px; border: 2px solid #2f7a4f; border-radius: 6px; }
+.exo-ligne--courante { background: #fdf0e3; border-left-color: #b65c1f; }
+.exo-ligne--future .exo-lbl, .exo-ligne--future .exo-contenu { visibility: hidden; }
+.exo-a-venir {
+  position: absolute; left: 230px; right: 18%; top: 50%; height: 16px; margin-top: -8px; border-radius: 3px;
+  background: repeating-linear-gradient(90deg, #dfe5ea 0 22px, transparent 22px 28px);
+}
+.exo-calcul { display: grid; grid-template-columns: max-content max-content minmax(0, 1fr); column-gap: 8px; row-gap: 2px; align-items: baseline; }
+.exo-c-g { text-align: right; white-space: nowrap; }
+.exo-c-d { white-space: nowrap; }
+.exo-c-seule { grid-column: 1 / 3; white-space: nowrap; }
+.exo-c-j { padding-left: 16px; font: italic 400 18px / 1.3 var(--sans); color: #51626f; }
+.exo-figure-ligne { line-height: 0; }
+.exo-figure-ligne svg { max-width: 100%; max-height: 260px; width: auto; height: auto; }
+
+.exo-reponse {
+  position: absolute; left: 72px; right: 72px; bottom: 64px; min-height: 60px; display: flex; align-items: center; gap: 18px; padding: 6px 18px;
+  background: #eef7f1; border: 2px solid #2f7a4f; border-radius: 10px; font: 400 28px / 1.3 var(--sans); color: #182430;
+}
+.exo-reponse-lbl { flex: none; font: 600 16px var(--mono); letter-spacing: 0.06em; color: #2f7a4f; }
+
+.exo-mesure { position: absolute; left: 72px; width: 1136px; top: 0; visibility: hidden; pointer-events: none; }
+.exo-mesure .exo-lignes { display: flex; }
+
+/* Petite barre de l'exercice (place et style de celle de l'écran blanc). */
+.exo-barre { max-width: 100%; }
+.exo-bouton { font: 600 14px var(--sans); white-space: nowrap; }
+.exo-bouton svg { flex: none; }
+.exo-type select {
+  min-height: 44px; max-width: 280px; padding: 0 10px; border: 1px solid #ccd8e0; border-radius: 6px; background: #fff; color: #182430;
+  font: 600 14px var(--sans); cursor: pointer;
+}
+.exo-type select:focus-visible { outline: 3px solid #b65c1f; outline-offset: 2px; }
+.exo-menu-chercher { align-self: flex-start; }
+/* Écran étroit (tablette, téléphone en paysage) et vue réduite du professeur : pictogrammes seuls (nom en infobulle). */
+@media (max-width: 1099px) { .exo-libelle { display: none; } }
+.prof-scene-zone .exo-libelle { display: none; }
+.prof-scene-zone .exo-type select { max-width: 200px; }
+
+/* « Laisser chercher » : plus discret que le minuteur de la barre (fond à moitié transparent), sans son. */
+.exo-chercher {
+  position: absolute; top: 14px; right: 18px; z-index: 4; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 0;
+  border-radius: 999px; background: rgb(24 36 48 / 0.45); color: #fff; font: 600 17px var(--sans); font-variant-numeric: tabular-nums; cursor: default;
+  min-height: 34px;
+}
+.exo-chercher.fini { background: rgb(178 58 58 / 0.85); cursor: pointer; animation: exo-clignote 1.6s ease-in-out infinite; min-height: 44px; }
+@keyframes exo-clignote { 50% { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) { .exo-chercher.fini { animation: none; } }
+
+/* Vue du professeur : « Pour toi seul » (cadre mauve), jamais à l'écran de la classe. */
+.prof-exo-seul { flex: 1; min-height: 140px; overflow: auto; padding: 8px 14px 14px; border: 2px solid #5b4ea3; border-radius: 8px; background: #f6f4fc; color: #182430; }
+.prof-exo-tete { margin: 0 0 6px; display: flex; align-items: center; gap: 10px; min-height: 36px; font: 600 12px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: #5b4ea3; }
+.prof-exo-badge { padding: 2px 8px; border: 1px solid #5b4ea3; border-radius: 999px; font: 500 11px var(--sans); letter-spacing: 0; text-transform: none; }
+.prof-exo-lbl { margin: 8px 0 2px; font: 600 11px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: #51626f; }
+.prof-exo-reponse { font: 400 20px / 1.4 var(--sans); }
+.prof-exo-lignes { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; font: 400 15px / 1.45 var(--sans); }
+.prof-exo-lignes li.vue { color: #51626f; }
+.prof-exo-lignes li.courante { background: #fdf0e3; border-radius: 4px; padding: 2px 4px; }
+.prof-exo-l { font: 600 12px var(--mono); color: #2f7a4f; }
+.prof-exo-calc { display: block; }
+.prof-exo-etat { font-weight: 600; color: #2f7a4f; }
+.prof-exo-etat.courant { color: #b65c1f; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .prof-exo-seul { background: #221f33; color: #eef2f5; border-color: #a99cf0; }
+  :root:not([data-theme="light"]) .prof-exo-tete, :root:not([data-theme="light"]) .prof-exo-badge { color: #c9bff7; border-color: #c9bff7; }
+  :root:not([data-theme="light"]) .prof-exo-lignes li.courante { background: #4a3420; }
+  :root:not([data-theme="light"]) .prof-exo-lbl, :root:not([data-theme="light"]) .prof-exo-lignes li.vue { color: #b7c3cc; }
+  :root:not([data-theme="light"]) .prof-exo-l, :root:not([data-theme="light"]) .prof-exo-etat { color: #7fd1a1; }
+}
+:root[data-theme="dark"] .prof-exo-seul { background: #221f33; color: #eef2f5; border-color: #a99cf0; }
+:root[data-theme="dark"] .prof-exo-tete, :root[data-theme="dark"] .prof-exo-badge { color: #c9bff7; border-color: #c9bff7; }
+:root[data-theme="dark"] .prof-exo-lignes li.courante { background: #4a3420; }
+:root[data-theme="dark"] .prof-exo-lbl, :root[data-theme="dark"] .prof-exo-lignes li.vue { color: #b7c3cc; }
+:root[data-theme="dark"] .prof-exo-l, :root[data-theme="dark"] .prof-exo-etat { color: #7fd1a1; }

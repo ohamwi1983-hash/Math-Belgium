@@ -14,6 +14,7 @@ import { ProgressionClasse } from './ProgressionClasse'
 import { CompteurClasse } from './HeuresEffectives'
 import { ListeARendre } from './DevoirsARendre'
 import { devoirsEntre } from '../../lib/carnetDevoirs'
+import { EditeurEleves } from '../participation/EditeurEleves'
 
 const SEMAINES_PAR_PAGE = 4
 const SEMAINES_COMPLETES = 2
@@ -152,6 +153,15 @@ export function PageClasse({
 
       <CompteurClasse classe={classe} maintenant={maintenant} />
       <ListeARendre seances={devoirsEntre(seances, dateIso(maintenant), ajouterJours(dateIso(maintenant), 28), classe.id)} titre={`À rendre en ${classe.nom}`} avecClasse={false} avecDate idTitre={`${id}-a-rendre`} />
+
+      {/* P6 : liste des élèves gardée SUR CET APPAREIL (points de participation de la projection) — jamais sur le serveur. */}
+      <details className="carnet-bloc carnet-eleves-appareil">
+        <summary className="carnet-titre-bloc">Élèves (sur cet appareil)</summary>
+        <p className="compte-vide">
+          Pour les points de participation en projection. La liste reste sur cet appareil : jamais envoyée au site, jamais sur la page des élèves, ni dans une vidéo ou un PowerPoint.
+        </p>
+        <EditeurEleves classeId={classe.id} titre={false} />
+      </details>
 
       <div className="carnet-classe-corps">
         <section className="carnet-colonne" aria-labelledby={`${id}-fil`}>

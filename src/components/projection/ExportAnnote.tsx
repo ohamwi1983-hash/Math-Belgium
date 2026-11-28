@@ -59,13 +59,14 @@ export type ExportAnnote = ReturnType<typeof useExportAnnote>
 /** Nombre de diapos annotées / pages blanches (pour les intitulés et la boîte « Quitter »). */
 export function useResume(annotations: MagasinAnnotations, etat: EtatProjection) {
   useVersionAnnotations(annotations)
-  return resumeAnnotations({ pages: annotations.instantane(), blanches: etat.blanches })
+  return resumeAnnotations({ pages: annotations.instantane(), blanches: etat.blanches, exercices: etat.exercices })
 }
 
-function texteResume(r: { diapos: number; blanches: number }): string {
+function texteResume(r: { diapos: number; blanches: number; exercices?: number }): string {
   const morceaux: string[] = []
   if (r.diapos) morceaux.push(`${r.diapos} diapo${r.diapos > 1 ? 's' : ''} annotée${r.diapos > 1 ? 's' : ''}`)
   if (r.blanches) morceaux.push(`${r.blanches} page${r.blanches > 1 ? 's' : ''} blanche${r.blanches > 1 ? 's' : ''}`)
+  if (r.exercices) morceaux.push(`${r.exercices} exercice${r.exercices > 1 ? 's' : ''} au tableau`)
   return morceaux.length ? morceaux.join(' · ') : 'Aucune annotation pour l’instant'
 }
 

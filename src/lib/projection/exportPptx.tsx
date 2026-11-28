@@ -16,6 +16,9 @@ import type { Courbe, DonneesAnnotations, ElementAnnotation, Epingle, PageBlanch
 import { peindreCourbes, peindreTraits } from './peinture'
 import { transfoPage, versEcran } from './vue'
 import { lireFonction } from './traceur'
+import { ScenePageExercice, libelleExercice } from '../../components/projection/ExerciceTableau'
+import { chargerRegistre, clePageExercice, exerciceEnCache } from './exerciceTableau'
+import type { ExerciceProjete, PageExercice } from './exerciceTableau'
 
 /**
  * « Télécharger en PowerPoint / PDF » du mode projection (avec ou sans annotations, voir `telechargerProjection`) : les MÊMES diapos (construites et découpées comme
@@ -233,6 +236,8 @@ const pause = (ms: number) => new Promise((r) => setTimeout(r, ms))
 type Element =
   | { genre: 'diapo'; d: DonneesDiapo; page: string; rang: number }
   | { genre: 'blanche'; d: DonneesDiapo; p: PageBlanche; page: string; numero: number }
+  /** Page d'exercice projeté (P1) : l'énoncé (`k` = 0) puis les pages du corrigé atteintes, juste après la diapo « S'entraîner ». */
+  | { genre: 'exercice'; d: DonneesDiapo; p: PageExercice; ex: ExerciceProjete; k: number; page: string }
 
 const L_IMG = LARGEUR * ECHELLE_IMAGE
 const H_IMG = HAUTEUR * ECHELLE_IMAGE
@@ -285,7 +290,13 @@ function Planche({ elements, pages, chapter, pret }: { elements: Element[]; page
         return (
           <div key={`${e.page}-${i}`} data-i={i}>
             <div className="pptx-diapo" style={taille}>
-              {e.genre === 'diapo' ? <Diapo diapo={e.d} chapter={chapter} pas={e.d.pas} mode="export" /> : <FondBlancTableau fond={e.p.fond} ex={e.p.ex} ey={e.p.ey} vue={e.p.vue} />}
+              {e.genre === 'diapo' ? (
+                <Diapo diapo={e.d} chapter={chapter} pas={e.d.pas} mode="export" />
+              ) : e.genre === 'exercice' ? (
+                <ScenePageExercice ex={e.ex} page={{ ...e.p, page: e.k }} />
+              ) : (
+                <FondBlancTableau fond={e.p.fond} ex={e.p.ex} ey={e.p.ey} vue={e.p.vue} />
+              )}
             </div>
             {aDesEtiquettes(liste, blanche) && (
               <div className="pptx-calque" style={taille}>
@@ -411,13 +422,28 @@ export async function telechargerProjection(chapter: ChapterContent, choix: Pick
     const [bibliotheque, css] = await Promise.all([format === 'pptx' ? import('pptxgenjs') : import('jspdf'), cssAutonome()])
     const finales =
       options.diapos ?? (await new Promise<DonneesDiapo[]>((resolve) => racine.render(<Paginateur diapos={construireDiapos(chapter, choix)} chapter={chapter} onFini={resolve} />)))
+    // Exercices projetés (P1) : registre des adaptateurs chargé seulement s'il y en a.
+    const exercices = ann?.exercices ?? {}
+    const registre = Object.keys(exercices).length ? await chargerRegistre().catch(() => null) : null
     const elements: Element[] = []
     finales.forEach((d, rang) => {
       elements.push({ genre: 'diapo', d, page: cleDiapo(d.cle), rang })
       let numero = 0
       for (const p of ann?.blanches[d.cle] ?? []) if (pageBlancheUtile(p, pages)) elements.push({ genre: 'blanche', d, p, page: clePageBlanche(p.id), numero: ++numero })
+      for (const p of registre ? (exercices[d.cle] ?? []) : []) {
+        let ex: ExerciceProjete
+        try {
+          ex = exerciceEnCache(registre!, p.gen, p.code)
+        } catch {
+          continue
+        }
+        // Énoncé, puis les pages du corrigé jusqu'à la plus loin montrée ou annotée.
+        let derniere = p.pas > 0 ? Math.max(1, p.page) : 0
+        for (const cle of pages.keys()) if (cle.startsWith(`x:${p.id}:`) && (pages.get(cle)?.length ?? 0) > 0) derniere = Math.max(derniere, Number(cle.slice(p.id.length + 3)) || 0)
+        for (let k = 0; k <= derniere; k++) elements.push({ genre: 'exercice', d, p, ex, k, page: clePageExercice(p.id, k) })
+      }
     })
-    const annote = elements.some((e) => e.genre === 'blanche' || (pages.get(e.page)?.length ?? 0) > 0)
+    const annote = elements.some((e) => e.genre !== 'diapo' || (pages.get(e.page)?.length ?? 0) > 0)
     const planche = await new Promise<HTMLElement>((resolve) => racine.render(<Planche elements={elements} pages={pages} chapter={chapter} pret={resolve} />))
     await document.fonts?.ready
     // Ateliers (module chargé à la demande, Web Component construit) et ajustement des diapos.
@@ -517,6 +543,10 @@ const PDF_H = 405
 /** Notes du présentateur : titre de la diapo, corrigé / réponse ; page blanche : sa place et ses courbes. */
 function notesElement(e: Element, liste: ElementAnnotation[]): string[] {
   if (e.genre === 'diapo') return [`${e.rang + 1}. ${texteBrut(e.d.section.title)}`, ...e.d.notes.map(texteBrut).filter(Boolean)]
+  if (e.genre === 'exercice') {
+    const titre = `${libelleExercice(e.p)}${e.k > 0 ? ` — corrigé${e.k > 1 ? ` (page ${e.k})` : ''}` : ''} — après « ${e.d.type === 'entrainement' ? e.d.titre : texteBrut(e.d.section.title)} »`
+    return [titre, ...(e.ex.reponse ? [`Réponse : ${e.ex.reponse.map((f) => (f.type === 'latex' ? latexEnTexte(f.valeur) : f.valeur)).join('')}`] : [])]
+  }
   const courbes = liste
     .filter((x): x is Courbe => x.genre === 'courbe')
     .map((c) => {

@@ -11,6 +11,7 @@ import { titreCourt } from '../../lib/parcoursChapitre'
 import { qrCodeSvg } from '../../entrainement/export/qrSvg'
 import { disposerAtelier } from './dispositionAtelier'
 import { Pictogramme } from './Pictogrammes'
+import { BoutonProjeterExercice } from './ExerciceTableau'
 import './projection.css'
 import { surtitreChapitre, useOrdreChapitres } from '../../lib/ordreChapitres'
 
@@ -298,17 +299,21 @@ function corps(d: DonneesDiapo, chapter: ChapterContent, pas: number, mode: Mode
                 Plateforme → {d.where}
               </p>
               {mode === 'direct' && (
-                <a
-                  className="diapo-entrainement-ouvrir projection-interactif"
-                  href={d.lien}
-                  data-generateur={d.generatorId}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Ouvre le générateur dans un nouvel onglet (la projection reste ouverte)"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  Ouvrir le générateur <span aria-hidden="true">↗</span>
-                </a>
+                <div className="diapo-entrainement-boutons">
+                  <a
+                    className="diapo-entrainement-ouvrir projection-interactif"
+                    href={d.lien}
+                    data-generateur={d.generatorId}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Ouvre le générateur dans un nouvel onglet (la projection reste ouverte)"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Ouvrir le générateur <span aria-hidden="true">↗</span>
+                  </a>
+                  {/* P1 : seulement pour un générateur de ce site qui a un adaptateur papier (contexte de la projection). */}
+                  <BoutonProjeterExercice generatorId={d.generatorId} />
+                </div>
               )}
             </div>
             <figure className="diapo-qr">

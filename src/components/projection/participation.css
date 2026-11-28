@@ -1,0 +1,176 @@
+/* Points de participation (P6). Projeté (panneau, « +1 », tirage, règle, bilan) : clair sur la diapo, posé HORS du
+   cadre filmé. Panneau du professeur et réglages : jetons du site (clair / sombre). */
+
+/* ---------- projeté ---------- */
+.part-projete { position: absolute; z-index: 6; color-scheme: light; }
+.part-panneau-projete {
+  right: 16px; top: 64px; width: min(330px, calc(100% - 32px)); max-height: calc(100% - 140px); overflow: auto; padding: 10px 14px 12px;
+  background: rgb(255 255 255 / 0.96); border: 1px solid #dfe7ec; border-radius: 12px; box-shadow: 0 8px 22px rgb(0 0 0 / 0.12); color: #182430;
+}
+.part-projete-tete { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font: 600 13px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: #51626f; }
+.part-projete-tete span { flex: 1; min-width: 0; }
+.part-replier { width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 8px; background: #eef2f5; color: #33434f; cursor: pointer; flex: none; }
+.part-replier:focus-visible, .part-pastille:focus-visible { outline: 3px solid #b65c1f; outline-offset: 2px; }
+.part-barres { margin: 0; padding: 0; list-style: none; }
+.part-barres li { display: grid; grid-template-columns: 1fr 34px; gap: 2px 8px; align-items: center; margin-top: 7px; }
+.part-barre-nom { grid-column: 1 / -1; font: 600 16px var(--sans); }
+.part-barre-fond { height: 14px; border-radius: 7px; background: #eef2f5; overflow: hidden; }
+.part-barre-fond i { display: block; height: 100%; min-width: 4px; border-radius: 7px; background: var(--c); transition: width 0.6s; }
+.part-barres b { font: 700 18px var(--mono); text-align: right; }
+@media (prefers-reduced-motion: reduce) { .part-barre-fond i { transition: none; } }
+.part-regle-courte, .part-total { margin: 10px 0 0; font: 500 13px var(--sans); color: #51626f; }
+.part-total { font: 600 15px var(--sans); color: #2f7a4f; text-align: center; }
+.part-pastille {
+  right: 16px; bottom: 72px; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px; border: 1px solid #dfe7ec;
+  border-radius: 999px; background: rgb(255 255 255 / 0.96); color: #33434f; font: 600 15px var(--sans); box-shadow: 0 4px 12px rgb(0 0 0 / 0.12); cursor: pointer;
+}
+.part-podium { display: flex; align-items: flex-end; justify-content: center; gap: 10px; margin-top: 8px; }
+.part-podium-col { display: flex; flex-direction: column; align-items: center; width: 92px; }
+.part-podium-qui { text-align: center; font: 600 15px / 1.2 var(--sans); margin-bottom: 4px; overflow-wrap: anywhere; }
+.part-podium-qui small { display: block; font: 700 15px var(--mono); color: #51626f; }
+.part-marche { width: 100%; border-radius: 8px 8px 0 0; display: flex; justify-content: center; padding-top: 6px; color: #fff; font: 700 22px var(--serif); }
+.part-vide-projete { margin: 6px 0 0; color: #51626f; font: 500 15px var(--sans); }
+.part-toast {
+  position: absolute; z-index: 13; left: 50%; top: 24px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 14px; padding: 10px 26px;
+  border-radius: 999px; background: #2f7a4f; color: #fff; font: 600 28px var(--sans); box-shadow: 0 12px 30px rgb(47 122 79 / 0.35); white-space: nowrap;
+  max-width: calc(100% - 32px); overflow: hidden; text-overflow: ellipsis; pointer-events: none; animation: part-toast 1.5s ease-out both;
+}
+.part-toast-plus { font: 700 34px var(--serif); }
+@keyframes part-toast { 0% { opacity: 0; transform: translate(-50%, -10px) scale(0.92); } 15% { opacity: 1; transform: translate(-50%, 0) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .part-toast { animation: none; } }
+.part-tire {
+  position: absolute; z-index: 7; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 22px 48px; border-radius: 18px; background: #fff; color: #182430; border: 3px solid #6a4fb3; box-shadow: 0 20px 50px rgb(0 0 0 / 0.25);
+  font: 600 54px var(--serif); pointer-events: none; color-scheme: light;
+}
+.part-tire-lbl { font: 600 15px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: #6a4fb3; }
+.part-carte-regle {
+  position: absolute; z-index: 8; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(820px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto;
+  padding: 26px 32px; border-radius: 16px; background: #fff; color: #182430; box-shadow: 0 20px 50px rgb(0 0 0 / 0.28); cursor: pointer; color-scheme: light;
+}
+.part-carte-sur { margin: 0; font: 600 14px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: #b65c1f; }
+.part-carte-regle-texte { margin: 10px 0; font: 600 34px / 1.25 var(--serif); }
+.part-carte-points { margin: 0; font: 500 20px var(--sans); color: #33434f; }
+.part-carte-equipes { margin: 14px 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px 18px; font: 600 18px var(--sans); }
+.part-carte-equipes i, .part-equipes i, .part-equipe-bouton i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; background: var(--c); vertical-align: -1px; flex: none; }
+.part-bilan {
+  position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px 24px 72px;
+  background: #fbfaf7; color: #182430; color-scheme: light; text-align: center; overflow: auto;
+}
+.part-bilan-sur { margin: 0; font: 600 15px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: #0c828a; }
+.part-bilan-titre { margin: 0; font: 600 clamp(28px, 5vw, 54px) / 1.1 var(--serif); }
+.part-podium--grand { gap: 14px; }
+.part-podium--grand .part-podium-col { width: clamp(96px, 16vw, 180px); }
+.part-podium--grand .part-podium-qui { font-size: clamp(15px, 2vw, 22px); }
+.part-podium--grand .part-marche { font-size: clamp(26px, 4vw, 44px); }
+.part-bilan-texte { margin: 6px 0 0; font: 500 clamp(17px, 2.2vw, 24px) / 1.4 var(--sans); }
+.part-bilan-chiffres { color: #2f7a4f; font-weight: 600; }
+
+/* ---------- panneau du professeur ---------- */
+.part-panneau { display: flex; flex-direction: column; gap: 10px; min-height: 0; color: var(--ink); font: 15px / 1.4 var(--sans); }
+.part-tete { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.part-tete-titre { flex: 1 1 200px; min-width: 0; }
+.part-surtitre { margin: 0; font: 600 12px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.part-titre { margin: 0; font: 600 19px / 1.25 var(--serif); }
+.part-chiffres { display: flex; gap: 16px; }
+.part-chiffres span { display: flex; flex-direction: column; font: 700 22px var(--mono); }
+.part-chiffres small { font: 600 11px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); }
+.part-tete-actions, .part-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.part-bouton, .part-bouton-plein, .part-interroger {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; min-width: 44px; padding: 0 14px; border-radius: 8px; cursor: pointer;
+  font: 600 14px var(--sans); border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.part-bouton[aria-pressed="true"], .part-bouton.on { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.part-bouton:disabled, .part-bouton-plein:disabled { opacity: 0.45; cursor: default; }
+.part-bouton.danger { color: #b23a3a; border-color: #e7b9b9; }
+.part-bouton-plein, .part-interroger { background: #b65c1f; border-color: #b65c1f; color: #fff; }
+.part-avertissement, .part-fin { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--accent-soft); color: var(--ink); font-size: 14px; }
+.part-champ { position: relative; flex: 1 1 200px; min-width: 0; display: flex; align-items: center; }
+.part-champ input { width: 100%; min-height: 44px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: 600 16px var(--sans); }
+.part-propositions { position: absolute; right: 8px; display: flex; gap: 6px; pointer-events: none; font: 500 13px var(--sans); color: var(--ink-soft); }
+.part-propositions .on { color: var(--ink); font-weight: 700; text-decoration: underline; }
+.part-tirage { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 12px; border-radius: 10px; background: var(--plan-soft); border: 1px solid var(--plan); }
+.part-tirage > span { flex: 1 1 200px; }
+.part-equipes-boutons { display: flex; flex-wrap: wrap; gap: 6px; }
+.part-equipe-bouton { display: inline-flex; border: 1px solid var(--line); border-left: 6px solid var(--c); border-radius: 8px; overflow: hidden; }
+.part-equipe-bouton button { min-height: 44px; padding: 0 10px; border: 0; background: var(--surface); color: var(--ink); font: 600 14px var(--sans); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.part-equipe-bouton button.moins { border-left: 1px solid var(--line); color: #b23a3a; min-width: 44px; }
+.part-legende { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 13px; color: var(--ink-soft); }
+.part-legende b { color: var(--good); }
+.part-tri { margin-left: auto; }
+.part-tri button { min-height: 44px; border: 0; background: none; color: var(--ink-soft); font: 500 13px var(--sans); cursor: pointer; padding: 0 2px; }
+.part-tri button[aria-pressed="true"] { color: var(--ink); font-weight: 700; }
+.part-rond { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 3px solid var(--accent); background: var(--surface); vertical-align: -2px; }
+.part-grille { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; overflow: auto; min-height: 0; }
+.part-tuile { position: relative; display: flex; align-items: stretch; min-height: 60px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); border-left: 7px solid var(--c); overflow: hidden; }
+.part-tuile-princ { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 2px; padding: 6px 8px; border: 0; background: none; color: var(--ink); cursor: pointer; text-align: left; }
+.part-tuile-princ b { font: 600 16px var(--sans); overflow-wrap: anywhere; }
+.part-tuile-princ span { font: 600 12.5px var(--mono); color: var(--ink-soft); }
+.part-tuile-princ .part-rond { position: absolute; right: 6px; top: 6px; }
+.part-tuile-idee, .part-tuile-moins { width: 44px; flex: none; display: grid; place-items: center; border: 0; border-left: 1px solid var(--line-soft); background: var(--surface-2); font-size: 19px; cursor: pointer; color: var(--ink); }
+.part-tuile-moins { font: 700 14px var(--sans); color: #b23a3a; }
+.part-tuile.tire { box-shadow: 0 0 0 3px var(--plan); background: var(--plan-soft); }
+.part-tuile.vient { box-shadow: 0 0 0 3px var(--good); }
+.part-panneau button:focus-visible, .part-panneau input:focus-visible, .part-reglages :focus-visible { outline: 3px solid #b65c1f; outline-offset: 2px; }
+.part-vide, .part-note { margin: 0; color: var(--ink-soft); font-size: 14px; }
+.part-bilan-prof { padding: 10px 12px; border: 2px solid var(--plan); border-radius: 10px; background: var(--plan-soft); display: flex; flex-direction: column; gap: 8px; }
+.part-bilan-prof-tete { margin: 0; font: 600 12px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--plan-ink); }
+.part-bilan-prof ul { margin: 0; padding-left: 18px; }
+.part-confirmer { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; }
+
+/* Un écran : panneau replié chez le professeur, déplié à droite (au-dessus de la barre). */
+.part-tiroir {
+  position: absolute; right: 8px; top: 8px; bottom: 64px; z-index: 12; width: min(560px, calc(100% - 16px)); display: flex; flex-direction: column;
+  padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 14px 40px rgb(0 0 0 / 0.25); overflow: auto;
+}
+.part-tiroir .part-panneau { min-height: min-content; }
+/* Vue du professeur : la grille à la place de « Suivante / Notes ». */
+.prof-points { flex: 1; min-height: 0; overflow: auto; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line-soft); border-radius: 6px; }
+
+/* ---------- réglages ---------- */
+.part-voile { position: absolute; inset: 0; z-index: 30; background: rgb(17 23 29 / 0.6); display: flex; align-items: center; justify-content: center; padding: 10px; }
+.part-reglages {
+  width: min(1060px, 100%); max-height: calc(100% - 4px); overflow: auto; background: var(--surface-2); color: var(--ink); border-radius: 12px;
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.35); font: 15px / 1.45 var(--sans);
+}
+.part-reglages-tete { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 12px; padding: 14px 20px; background: var(--surface); border-bottom: 1px solid var(--line-soft); }
+.part-reglages-tete > div { flex: 1; min-width: 0; }
+.part-reglages h2 { margin: 0; font: 600 22px / 1.2 var(--serif); }
+.part-reglages-corps { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 16px 20px; }
+@media (max-width: 860px) { .part-reglages-corps { grid-template-columns: 1fr; } }
+.part-bloc { background: var(--surface); border: 1px solid var(--line-soft); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.part-bloc + .part-bloc { margin-top: 12px; }
+.part-bloc h3 { margin: 0; font: 600 12px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.part-select { min-height: 44px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: 600 15px var(--sans); }
+.part-choix2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.part-carte-mode { text-align: left; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: 14px / 1.4 var(--sans); color: var(--ink-soft); background: var(--surface); cursor: pointer; min-height: 44px; }
+.part-carte-mode b { display: block; color: var(--ink); font-size: 15.5px; margin-bottom: 2px; }
+.part-carte-mode.on { border: 2px solid var(--accent); background: var(--accent-soft); color: var(--ink); }
+.part-reco { margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--good-soft); color: var(--good); font: 600 12px var(--sans); }
+.part-rond-nb { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 600 15px var(--sans); cursor: pointer; }
+.part-rond-nb.on { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.part-equipes { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.part-equipes li { display: flex; align-items: center; gap: 8px; padding: 0 10px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line-soft); }
+.part-equipes input { flex: 1; min-width: 0; min-height: 44px; border: 0; background: transparent; color: var(--ink); font: 600 14px var(--sans); }
+.part-equipes small { color: var(--ink-faint); font-weight: 500; }
+.part-affectation { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; max-height: 260px; overflow: auto; }
+.part-affectation li { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.part-affectation select { min-height: 44px; max-width: 60%; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); }
+.part-ligne-pt { display: flex; align-items: center; gap: 10px; min-height: 44px; border-bottom: 1px solid var(--line-soft); }
+.part-ligne-pt:last-child { border-bottom: 0; }
+.part-ligne-pt small, .part-toujours { color: var(--ink-faint); font-size: 13px; }
+.part-ligne-pt input { margin-left: auto; width: 46px; height: 26px; accent-color: var(--good); cursor: pointer; }
+.part-toujours { margin-left: auto; }
+.pts { width: 34px; font: 700 15px var(--mono); flex: none; }
+.pts.plus { color: var(--good); }
+.pts.moins { color: #b23a3a; }
+.part-autre-date { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; font: 600 14px var(--sans); }
+.part-autre-date input { min-height: 36px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
+.part-lbl { font: 600 12px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.part-regle { width: 100%; min-height: 60px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: 15px / 1.5 var(--sans); resize: vertical; box-sizing: border-box; }
+.part-donnees { margin: 0; padding-left: 20px; font-size: 14px; }
+.part-reglages-pied { position: sticky; bottom: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 10px; padding: 12px 20px; background: var(--surface); border-top: 1px solid var(--line-soft); }
+.part-reglages-pied .part-note { margin-right: auto; }
+.part-bouton.part-bouton span, .part-bouton span { pointer-events: none; }
+/* Vue du professeur : la colonne s’élargit quand la grille des élèves y est (la diapo projetée reste lisible). */
+@media (min-width: 901px) { .prof-corps:has(.prof-points) { grid-template-columns: minmax(0, 1fr) minmax(340px, 46%); } }

@@ -12,6 +12,8 @@
  * gardées et réapparaissent quand elle revient.
  */
 import type { ModeAngle } from './calculatrice'
+import { validerExercices } from './exerciceTableau'
+import type { PageExercice } from './exerciceTableau'
 
 /** Trait d'annotation (stylo, surligneur ou gomme), en coordonnées de la diapo (1 280 × 720). */
 export interface Trait {
@@ -117,6 +119,8 @@ export interface DonneesAnnotations {
   vues: Record<string, string>
   /** Fond proposé pour une nouvelle page. */
   fond: FondBlanc
+  /** Pages d'exercice projetées (P1), par clé de diapo, dans l'ordre (facultatif : données d'avant le 28/11/2026). */
+  exercices?: Record<string, PageExercice[]>
   maj: number
 }
 
@@ -129,13 +133,17 @@ export function pageBlancheUtile(p: PageBlanche, pages: Map<string, ElementAnnot
 }
 
 /** Résumé : nombre de diapos annotées et de pages blanches à exporter. */
-export function resumeAnnotations(d: Pick<DonneesAnnotations, 'pages' | 'blanches'>): { diapos: number; blanches: number } {
+export function resumeAnnotations(d: Pick<DonneesAnnotations, 'pages' | 'blanches'> & Pick<Partial<DonneesAnnotations>, 'exercices'>): { diapos: number; blanches: number; exercices?: number } {
   const pages = new Map(d.pages)
   let diapos = 0
   for (const [cle, l] of d.pages) if (cle.startsWith('d:') && l.length > 0) diapos++
   let blanches = 0
   for (const liste of Object.values(d.blanches)) for (const p of liste) if (pageBlancheUtile(p, pages)) blanches++
-  return { diapos, blanches }
+  // Exercices projetés (P1) : comptés seulement si on les passe (ils partent tous dans l'export, même sans trait).
+  if (!d.exercices) return { diapos, blanches }
+  let exercices = 0
+  for (const liste of Object.values(d.exercices)) exercices += liste.length
+  return { diapos, blanches, exercices }
 }
 
 /** Même résumé, limité aux diapos d'une sélection (clés AVANT découpage : `s:3` couvre aussi `s:3~1`, `s:3~2`). */
@@ -147,9 +155,9 @@ export function resumeDansSelection(d: Pick<DonneesAnnotations, 'pages' | 'blanc
   return resumeAnnotations({ pages, blanches })
 }
 
-export const aDesAnnotations = (d: Pick<DonneesAnnotations, 'pages' | 'blanches'>) => {
+export const aDesAnnotations = (d: Pick<DonneesAnnotations, 'pages' | 'blanches'> & Pick<Partial<DonneesAnnotations>, 'exercices'>) => {
   const r = resumeAnnotations(d)
-  return r.diapos + r.blanches > 0
+  return r.diapos + r.blanches + (r.exercices ?? 0) > 0
 }
 
 // ---------- conservation (IndexedDB, repli localStorage) ----------
@@ -211,7 +219,8 @@ function valider(brut: unknown): DonneesAnnotations | null {
   const vues: Record<string, string> = {}
   for (const [cle, id] of Object.entries(d.vues ?? {})) if (typeof id === 'string') vues[cle] = id
   const fond = d.fond === 'quadrille' || d.fond === 'repere' ? d.fond : 'uni'
-  return { v: 1, pages, blanches, vues, fond, maj: typeof d.maj === 'number' ? d.maj : 0 }
+  const exercices = validerExercices(d.exercices)
+  return { v: 1, pages, blanches, vues, fond, ...(Object.keys(exercices).length ? { exercices } : {}), maj: typeof d.maj === 'number' ? d.maj : 0 }
 }
 
 function nouvellePageBlancheDepuis(p: Partial<PageBlanche>): PageBlanche {
@@ -245,7 +254,7 @@ export async function lireAnnotations(chapitre: { levelSlug: string; slug: strin
 }
 
 export async function enregistrerAnnotations(chapitre: { levelSlug: string; slug: string }, d: DonneesAnnotations): Promise<void> {
-  const vide = d.pages.length === 0 && Object.keys(d.blanches).length === 0
+  const vide = d.pages.length === 0 && Object.keys(d.blanches).length === 0 && Object.keys(d.exercices ?? {}).length === 0
   try {
     if (vide) await requete((s) => s.delete(cleChapitre(chapitre)), 'readwrite')
     else await requete((s) => s.put(d, cleChapitre(chapitre)), 'readwrite')
