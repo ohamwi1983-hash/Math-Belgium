@@ -704,7 +704,9 @@ export function CalqueObjets({
     const haut = 64 / Math.max(echelle, 0.3)
     const dessus = sy - marge - barreH - 6
     const dessous = sy + h * kz + marge + 6
-    const barreY = dessus >= haut ? dessus : dessous + barreH <= 656 ? dessous : Math.max(haut, sy + 4)
+    // Bas utile : au-dessus de la barre du bas (56 px RÉELS, donc plus de px logiques quand la scène est réduite).
+    const bas = 716 - 60 / Math.max(echelle, 0.3)
+    const barreY = dessus >= haut ? dessus : dessous + barreH <= bas ? dessous : Math.max(haut, sy + 4)
     const c = g && d && caseActive ? d.cases.find((x) => x.id === caseActive) : null
     // Clavier : sous l'objet s'il y a la place, sinon dessus, à droite, à gauche ; à défaut, le coin qui ne cache pas
     // la case touchée (et le moins possible de l'objet). Toujours dans la diapo.
@@ -713,8 +715,8 @@ export function CalqueObjets({
     const ob: [number, number, number, number] = [sx, sy, w * kz, h * kz]
     const cc: [number, number, number, number] | null = c ? [sx + c.x * kz, sy + c.y * kz, c.w * kz, c.h * kz] : null
     const recouvre = (p: P, b: [number, number, number, number]) => Math.max(0, Math.min(p[0] + wc, b[0] + b[2]) - Math.max(p[0], b[0])) * Math.max(0, Math.min(p[1] + hc, b[1] + b[3]) - Math.max(p[1], b[1]))
-    // Jamais sous la barre du bas (56 px réels ≈ 60 px logiques en plein écran).
-    const dedans = (p: P): P => [borne(p[0], 4, 1276 - wc), borne(p[1], 4, 656 - hc)]
+    // Jamais sous la barre du bas (si la hauteur le permet).
+    const dedans = (p: P): P => [borne(p[0], 4, 1276 - wc), borne(p[1], 4, Math.max(4, bas - hc))]
     const essais: P[] = [
       [sx, sy + h * kz + 20],
       [sx, sy - hc - 20],
@@ -850,7 +852,7 @@ export function CalqueObjets({
             }}
           />
         )}
-        {g && g.type === 'droite' && <EditeurDroite key={o.id} g={o as Gabarit} modifier={(n) => modifier(n)} cible={cible} pos={[borne(sx, 4, 640), borne(sy + h * kz + marge + 10, 4, 656 - 3 * cible - 40)]} />}
+        {g && g.type === 'droite' && <EditeurDroite key={o.id} g={o as Gabarit} modifier={(n) => modifier(n)} cible={cible} pos={[borne(sx, 4, 640), borne(sy + h * kz + marge + 10, 4, Math.max(4, bas - 3 * cible - 40))]} />}
       </>
     )
   }
