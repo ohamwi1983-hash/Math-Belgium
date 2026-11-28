@@ -201,8 +201,9 @@ export function useVersionAnnotations(magasin: MagasinAnnotations): number {
 }
 
 /** Ce qui est conservé / exporté : annotations + pages de l'écran blanc. */
-export function donneesAnnotations(magasin: MagasinAnnotations, etat: Pick<EtatProjection, 'blanches' | 'vues' | 'fond'>): DonneesAnnotations {
-  return { v: 1, pages: magasin.instantane(), blanches: etat.blanches, vues: etat.vues, fond: etat.fond, maj: Date.now() }
+export function donneesAnnotations(magasin: MagasinAnnotations, etat: Pick<EtatProjection, 'blanches' | 'vues' | 'fond'> & Partial<Pick<EtatProjection, 'exercices'>>): DonneesAnnotations {
+  const exercices = etat.exercices && Object.keys(etat.exercices).length ? { exercices: etat.exercices } : {}
+  return { v: 1, pages: magasin.instantane(), blanches: etat.blanches, vues: etat.vues, fond: etat.fond, ...exercices, maj: Date.now() }
 }
 
 /**
@@ -231,7 +232,7 @@ export function useConservation(chapter: ChapterContent, magasin: MagasinAnnotat
       return
     }
     planifier()
-  }, [etat.blanches, etat.vues, etat.fond])
+  }, [etat.blanches, etat.vues, etat.fond, etat.exercices])
   useEffect(() => magasin.abonner(() => planifier()), [magasin])
   useEffect(() => {
     const vite = () => {

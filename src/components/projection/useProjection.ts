@@ -5,6 +5,8 @@ import type { EtatInstruments } from './instruments'
 import { cleDiapo, clePageBlanche, nouvellePageBlanche } from '../../lib/projection/annotations'
 import type { ElementAnnotation, FondBlanc, PageBlanche, Trait, VueRepere } from '../../lib/projection/annotations'
 import { vueDe } from '../../lib/projection/vue'
+import { clePageExercice } from '../../lib/projection/exerciceTableau'
+import type { PageExercice } from '../../lib/projection/exerciceTableau'
 
 /** État PARTAGÉ entre la fenêtre des diapos et celle du professeur (mode deux écrans). */
 export interface EtatProjection {
@@ -23,6 +25,10 @@ export interface EtatProjection {
   vues: Record<string, string>
   /** Diapo d'atelier en plein écran (l'atelier seul occupe tout l'écran) ; retombe à faux en changeant de diapo. */
   atelierPlein: boolean
+  /** « Projeter un exercice » (P1) : pages d'exercice tirées depuis une diapo « S'entraîner », par clé de diapo, dans l'ordre. */
+  exercices: Record<string, PageExercice[]>
+  /** Page d'exercice affichée par-dessus la diapo courante (id), null = la diapo. Retombe à null en changeant de diapo. */
+  exercice: string | null
 }
 
 export type { Arc, Courbe, ElementAnnotation, Epingle, FondBlanc, PageBlanche, Trait } from '../../lib/projection/annotations'
@@ -52,8 +58,17 @@ export function pageBlancheCourante(e: EtatProjection, diapos: Diapo[]): PageBla
   return liste.find((p) => p.id === e.vues[cle]) ?? liste[liste.length - 1] ?? null
 }
 
+/** Page d'exercice affichée par-dessus la diapo (null : la diapo ou l'écran blanc). */
+export function pageExerciceCourante(e: EtatProjection, diapos: Diapo[]): PageExercice | null {
+  if (!e.exercice) return null
+  const cle = diapos[e.index]?.cle
+  return (cle && e.exercices[cle]?.find((p) => p.id === e.exercice)) || null
+}
+
 /** Clé de la page d'annotations affichée : la page blanche ouverte, sinon la diapo. */
 export function clePageCourante(e: EtatProjection, diapos: Diapo[]): string {
+  const x = pageExerciceCourante(e, diapos)
+  if (x) return clePageExercice(x.id, x.page)
   const p = pageBlancheCourante(e, diapos)
   if (p) return clePageBlanche(p.id)
   return cleDiapo(diapos[e.index]?.cle ?? String(e.index))
@@ -66,7 +81,7 @@ export function clePageCourante(e: EtatProjection, diapos: Diapo[]): string {
  * l'état ; seule une fenêtre « active » (le professeur, ou une fenêtre qui a déjà agi / reçu un état)
  * répond. Rien n'est envoyé hors du navigateur.
  */
-export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Role, initial?: Pick<EtatProjection, 'fond' | 'blanches' | 'vues'>) {
+export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Role, initial?: Pick<EtatProjection, 'fond' | 'blanches' | 'vues'> & { exercices?: Record<string, PageExercice[]> }) {
   const [etat, setEtat] = useState<EtatProjection>(() => ({
     index: 0,
     pas: 0,
@@ -77,6 +92,8 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
     blanches: initial?.blanches ?? {},
     vues: initial?.vues ?? {},
     atelierPlein: false,
+    exercices: initial?.exercices ?? {},
+    exercice: null,
   }))
   const etatRef = useRef(etat)
   etatRef.current = etat
@@ -113,7 +130,7 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
       if (m.type === 'etat') {
         actif.current = true
         const n = Math.max(0, Math.min(diapos.length - 1, m.etat.index))
-        const etatRecu = { ...m.etat, index: n, fond: m.etat.fond ?? 'uni', blanches: m.etat.blanches ?? {}, vues: m.etat.vues ?? {}, atelierPlein: !!m.etat.atelierPlein }
+        const etatRecu = { ...m.etat, index: n, fond: m.etat.fond ?? 'uni', blanches: m.etat.blanches ?? {}, vues: m.etat.vues ?? {}, atelierPlein: !!m.etat.atelierPlein, exercices: m.etat.exercices ?? {}, exercice: m.etat.exercice ?? null }
         etatRef.current = etatRecu
         setEtat(etatRecu)
       } else if (m.type === 'demande') {
@@ -144,6 +161,8 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
       // referme quand on la quitte (→ ← gardent leur rôle : diapo suivante / précédente).
       if (apres.index !== avant.index && apres.atelierPlein) apres = { ...apres, atelierPlein: false }
       if (apres.index !== avant.index && apres.blanc && avant.blanc) apres = { ...apres, blanc: false }
+      // Page d'exercice (P1) : rattachée à sa diapo, refermée en la quittant ; l'écran blanc la remplace.
+      if (apres.exercice && (apres.index !== avant.index || (apres.blanc && !avant.blanc))) apres = { ...apres, exercice: null }
       actif.current = true
       etatRef.current = apres
       setEtat(apres)
@@ -279,6 +298,33 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
   const lancerMinuteur = useCallback((duree: number) => appliquer((e) => ({ ...e, minuteur: { duree, fin: Date.now() + duree * 1000 } })), [appliquer])
   const basculerAtelierPlein = useCallback((plein?: boolean) => appliquer((e) => ((plein ?? !e.atelierPlein) === e.atelierPlein ? e : { ...e, atelierPlein: plein ?? !e.atelierPlein })), [appliquer])
   const arreterMinuteur = useCallback(() => appliquer((e) => ({ ...e, minuteur: { ...e.minuteur, fin: null } })), [appliquer])
+  /** P1 : projette une nouvelle page d'exercice (ajoutée à la fin de la liste de la diapo courante). */
+  const ouvrirExercice = useCallback(
+    (p: PageExercice) =>
+      appliquer((e) => {
+        const cle = diapos[e.index]?.cle
+        if (!cle) return e
+        return { ...e, blanc: false, exercices: { ...e.exercices, [cle]: [...(e.exercices[cle] ?? []), p] }, exercice: p.id }
+      }),
+    [appliquer, diapos],
+  )
+  /** P1 : affiche une page d'exercice déjà tirée de cette diapo (id), ou referme l'exercice (null). */
+  const afficherExercice = useCallback((id: string | null) => appliquer((e) => (e.exercice === id ? e : { ...e, exercice: id, blanc: id ? false : e.blanc })), [appliquer])
+  /** P1 : modifie la page d'exercice affichée (ligne du corrigé, réponse, minuteur « Laisser chercher »). */
+  const majExercice = useCallback(
+    (f: (p: PageExercice) => PageExercice) =>
+      appliquer((e) => {
+        const cle = diapos[e.index]?.cle
+        const courante = pageExerciceCourante(e, diapos)
+        if (!cle || !courante) return e
+        const nouvelle = f(courante)
+        if (nouvelle === courante) return e
+        return { ...e, exercices: { ...e.exercices, [cle]: (e.exercices[cle] ?? []).map((x) => (x.id === courante.id ? nouvelle : x)) } }
+      }),
+    [appliquer, diapos],
+  )
+  /** « Nouvelle séance » : plus aucune page d'exercice. */
+  const oublierExercices = useCallback(() => appliquer((e) => (Object.keys(e.exercices).length || e.exercice ? { ...e, exercices: {}, exercice: null } : e)), [appliquer])
 
   const ecouter = useCallback((f: Ecouteur) => {
     ecouteurs.current.add(f)
@@ -307,6 +353,13 @@ export function useProjection(chapter: ChapterContent, diapos: Diapo[], role: Ro
     lancerMinuteur,
     arreterMinuteur,
     basculerAtelierPlein,
+    ouvrirExercice,
+    afficherExercice,
+    majExercice,
+    oublierExercices,
+    pageExercice: () => pageExerciceCourante(etat, diapos),
+    /** Pages d'exercice de la diapo affichée, dans l'ordre. */
+    pagesExercice: () => etat.exercices[diapos[etat.index]?.cle ?? ''] ?? [],
     envoyer,
     ecouter,
     id,

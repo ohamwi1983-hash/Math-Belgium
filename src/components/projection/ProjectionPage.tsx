@@ -27,6 +27,7 @@ import { useConservation, useMagasinAnnotations } from './magasinAnnotations'
 import { DialogueQuitter, PaletteExport, useExportAnnote, useResume } from './ExportAnnote'
 import { DialogueFinProjection, useMatiereProjection } from './MatiereFinProjection'
 import type { PropositionMatiere } from '../../lib/projection/matiereProjetee'
+import { ChercherAffiche, ContexteExerciceTableau, ErreurExercice, OutilsExercice, PanneauExerciceProf, ScenePageExercice, useExercicesProjection } from './ExerciceTableau'
 import '../carnet/matiere-projetee.css'
 import './projection.css'
 
@@ -440,6 +441,7 @@ function useAnnotationsProjection(chapter: ChapterContent, diapos: DonneesDiapo[
   const nouvelleSeance = useCallback(() => {
     annotations.toutEffacer()
     projection.oublierPagesBlanches()
+    projection.oublierExercices()
     window.setTimeout(sauver, 0)
   }, [annotations, projection, sauver])
   return { annotations, exp, resume, page, blanche, nouvelleSeance }
@@ -494,6 +496,10 @@ function VueDiapos({
   const barreVisible = pleinIci ? presDuBas || outils.stylo || outils.menuMinuteur || outils.menuExport || outils.ensemble : barreActive
   const glisse = useRef<{ x: number; y: number } | null>(null)
   const d = diapos[etat.index]
+  // P1 : exercice projeté par-dessus la diapo — → / Espace / clic = ligne suivante du corrigé.
+  const exo = useExercicesProjection(chapter, diapos, projection)
+  const avancer = exo.page ? exo.actions.suivante : suivant
+  const reculer = exo.page ? exo.actions.precedente : precedent
 
   useEffect(() => {
     if (repli) signaler('La fenêtre des diapos a été bloquée par le navigateur : projection sur un seul écran. Autorise les fenêtres surgissantes de ce site pour utiliser deux écrans.')
@@ -513,13 +519,13 @@ function VueDiapos({
   const quitter = useCallback(() => {
     const p = matiere.proposition()
     setProposition(p)
-    if (role !== 'diapos' && (p || aDesAnnotations({ pages: ann.annotations.instantane(), blanches: projection.etat.blanches }))) setDemandeQuitter(true)
+    if (role !== 'diapos' && (p || aDesAnnotations({ pages: ann.annotations.instantane(), blanches: projection.etat.blanches, exercices: projection.etat.exercices }))) setDemandeQuitter(true)
     else quitterVraiment()
-  }, [role, ann.annotations, projection.etat.blanches, quitterVraiment, matiere])
+  }, [role, ann.annotations, projection.etat.blanches, projection.etat.exercices, quitterVraiment, matiere])
 
   useClavier({
-    suivant: () => !outils.ensemble && !demandeQuitter && suivant(),
-    precedent: () => !outils.ensemble && !demandeQuitter && precedent(),
+    suivant: () => !outils.ensemble && !demandeQuitter && avancer(),
+    precedent: () => !outils.ensemble && !demandeQuitter && reculer(),
     // Écran blanc affiché : Page préc. / Page suiv. passent d'une page blanche à l'autre.
     pageSuivante: etat.blanc ? () => projection.allerPage(1) : undefined,
     pagePrecedente: etat.blanc ? () => projection.allerPage(-1) : undefined,
@@ -539,6 +545,7 @@ function VueDiapos({
       else if (outils.ensemble) setOutils((o) => ({ ...o, ensemble: false }))
       else if (echapPalettes(outils)) setOutils((o) => echapPalettes(o) ?? o)
       else if (outils.stylo || outils.menuMinuteur || outils.menuExport) setOutils((o) => ({ ...o, stylo: false, menuMinuteur: false, menuExport: false }))
+      else if (exo.page) exo.actions.fermer()
       else setOutils((o) => ({ ...o, ensemble: true }))
     },
   })
@@ -553,7 +560,7 @@ function VueDiapos({
         }
         const cible = e.target as HTMLElement
         if (cible.closest(INTERACTIFS)) return
-        suivant()
+        avancer()
       }}
       onPointerDown={(e) => {
         if (e.pointerType !== 'mouse') glisse.current = { x: e.clientX, y: e.clientY }
@@ -563,20 +570,26 @@ function VueDiapos({
         glisse.current = null
         if (!g || outils.stylo || (e.target as HTMLElement).closest('.diapo-atelier, .projection-interactif')) return
         const dx = e.clientX - g.x
-        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(e.clientY - g.y) * 1.5) (dx < 0 ? suivant : precedent)()
+        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(e.clientY - g.y) * 1.5) (dx < 0 ? avancer : reculer)()
       }}
     >
+      <ContexteExerciceTableau.Provider value={exo.contexte}>
       <Scene className="projection-scene--principale">
         {(echelle) => (
           <>
             {d && <Diapo key={d.cle} diapo={d} chapter={chapter} pas={etat.pas} mode="direct" debut={etat.debut} atelier={{ plein: atelierPlein.plein, basculerPlein: atelierPlein.basculer }} />}
             <FondPage projection={projection} />
+            {exo.page && exo.exercice && <ScenePageExercice ex={exo.exercice} page={exo.page} />}
             <Annotations projection={projection} magasin={magasin} annotations={ann.annotations} page={ann.page} blanche={ann.blanche} outils={outils} echelle={echelle} role={role} surEcrire={surEcrire} />
           </>
         )}
       </Scene>
+      </ContexteExerciceTableau.Provider>
       <MinuteurAffiche projection={projection} />
       {etat.blanc && <OutilsBlanc projection={projection} annotations={ann.annotations} outils={outils} setOutils={setOutils} visible={barreVisible} />}
+      <OutilsExercice exo={exo} visible={barreVisible} />
+      <ChercherAffiche page={exo.page} onArreter={() => exo.actions.chercher(null)} />
+      <ErreurExercice exo={exo} />
       <OutilsDessin outils={outils} setOutils={setOutils} />
       {pleinIci && (
         <button
@@ -606,7 +619,7 @@ function VueDiapos({
       {outils.ensemble && <VueEnsemble chapter={chapter} diapos={diapos} projection={projection} fermer={() => setOutils((o) => ({ ...o, ensemble: false }))} />}
       {demandeQuitter &&
         (proposition ? (
-          <DialogueFinProjection proposition={proposition} matiere={matiere} exp={ann.exp} resume={ann.resume} annotations={aDesAnnotations({ pages: ann.annotations.instantane(), blanches: etat.blanches })} quitter={quitterVraiment} fermer={() => setDemandeQuitter(false)} />
+          <DialogueFinProjection proposition={proposition} matiere={matiere} exp={ann.exp} resume={ann.resume} annotations={aDesAnnotations({ pages: ann.annotations.instantane(), blanches: etat.blanches, exercices: etat.exercices })} quitter={quitterVraiment} fermer={() => setDemandeQuitter(false)} />
         ) : (
           <DialogueQuitter exp={ann.exp} resume={ann.resume} quitter={quitterVraiment} fermer={() => setDemandeQuitter(false)} />
         ))}
@@ -665,6 +678,10 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
   const [maintenant, setMaintenant] = useState(() => Date.now())
   const reste = useResteMinuteur(etat.minuteur.fin)
   const d = diapos[etat.index]
+  // P1 : exercice projeté ; « Pour toi seul » remplace la colonne Suivante / Notes.
+  const exo = useExercicesProjection(chapter, diapos, projection)
+  const avancer = exo.page ? exo.actions.suivante : suivant
+  const reculer = exo.page ? exo.actions.precedente : precedent
   const prochaine: { diapo: DonneesDiapo; pas: number; texte: string } | null = d
     ? etat.pas < d.pas
       ? { diapo: d, pas: etat.pas + 1, texte: 'Prochain clic : étape suivante de cette diapo' }
@@ -699,13 +716,13 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
   const quitter = () => {
     const p = matiere.proposition()
     setProposition(p)
-    if (p || aDesAnnotations({ pages: ann.annotations.instantane(), blanches: etat.blanches })) setDemandeQuitter(true)
+    if (p || aDesAnnotations({ pages: ann.annotations.instantane(), blanches: etat.blanches, exercices: etat.exercices })) setDemandeQuitter(true)
     else quitterVraiment()
   }
 
   useClavier({
-    suivant: () => !outils.ensemble && !demandeQuitter && suivant(),
-    precedent: () => !outils.ensemble && !demandeQuitter && precedent(),
+    suivant: () => !outils.ensemble && !demandeQuitter && avancer(),
+    precedent: () => !outils.ensemble && !demandeQuitter && reculer(),
     pageSuivante: etat.blanc ? () => projection.allerPage(1) : undefined,
     pagePrecedente: etat.blanc ? () => projection.allerPage(-1) : undefined,
     debut: () => aller(0),
@@ -722,6 +739,7 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
       if (etat.atelierPlein) basculerAtelierPlein(false)
       else if (outils.menuExport) setOutils((o) => ({ ...o, menuExport: false }))
       else if (!outils.ensemble && echapPalettes(outils)) setOutils((o) => echapPalettes(o) ?? o)
+      else if (exo.page && !outils.ensemble && !outils.stylo) exo.actions.fermer()
       else setOutils((o) => (o.ensemble ? { ...o, ensemble: false } : o.stylo ? { ...o, stylo: false, palette: false, nuancier: false } : { ...o, ensemble: true }))
     },
   })
@@ -816,18 +834,33 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
           {/* Même principe qu'à l'écran de la classe : pastille + colonne à gauche, petite barre de l'écran blanc en haut à
               gauche, posées sur la diapo projetée (rien au-dessus ni en dessous : elle garde toute la place). */}
           <div className="prof-scene-zone">
+            <ContexteExerciceTableau.Provider value={exo.contexte}>
             <Scene className="prof-scene">
               {(echelle) => (
                 <>
                   {d && (d.type === 'atelier' ? <DiapoAtelierProf diapo={d} chapter={chapter} /> : <Diapo key={d.cle} diapo={d} chapter={chapter} pas={etat.pas} mode="direct" debut={etat.debut} />)}
                   <FondPage projection={projection} />
+                  {exo.page && exo.exercice && <ScenePageExercice ex={exo.exercice} page={exo.page} />}
                   <Annotations projection={projection} magasin={magasin} annotations={ann.annotations} page={ann.page} blanche={ann.blanche} outils={outils} echelle={echelle} role="prof" surEcrire={surEcrire} />
                 </>
               )}
             </Scene>
+            </ContexteExerciceTableau.Provider>
             {etat.blanc && <OutilsBlanc projection={projection} annotations={ann.annotations} outils={outils} setOutils={setOutils} />}
+            <OutilsExercice exo={exo} visible />
+            <ChercherAffiche page={exo.page} onArreter={() => exo.actions.chercher(null)} />
             <OutilsDessin outils={outils} setOutils={setOutils} />
           </div>
+          {exo.page ? (
+            <div className="prof-navigation">
+              <button type="button" className="projection-bouton prof-nav" onClick={reculer} disabled={exo.page.pas === 0}>
+                <Pictogramme nom="precedent" /> Ligne précédente
+              </button>
+              <button type="button" className="projection-bouton-plein prof-nav" onClick={avancer} disabled={!exo.exercice || exo.page.pas >= exo.total}>
+                {exo.page.pas >= exo.total ? 'Corrigé terminé' : `Ligne suivante (${exo.page.pas + 1} / ${exo.total})`} <Pictogramme nom="suivant" />
+              </button>
+            </div>
+          ) : (
           <div className="prof-navigation">
             <button type="button" className="projection-bouton prof-nav" onClick={precedent} disabled={etat.index === 0 && etat.pas === 0}>
               <Pictogramme nom="precedent" /> Précédent
@@ -836,9 +869,14 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
               Suivant <Pictogramme nom="suivant" />
             </button>
           </div>
+          )}
         </section>
 
         <aside className="prof-cote">
+          {exo.page ? (
+            <PanneauExerciceProf exo={exo} />
+          ) : (
+          <>
           <section className="prof-suivante" aria-label="Suivante">
             <p className="prof-etiquette">{prochaine ? prochaine.texte : 'Fin de la projection'}</p>
             {prochaine && (
@@ -876,13 +914,15 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
               )}
             </div>
           </section>
+          </>
+          )}
           {!projection.synchro && <p className="projection-avertissement">Ce navigateur ne synchronise pas deux fenêtres : pilote les diapos depuis la fenêtre projetée.</p>}
         </aside>
       </div>
       {outils.ensemble && <VueEnsemble chapter={chapter} diapos={diapos} projection={projection} fermer={() => setOutils((o) => ({ ...o, ensemble: false }))} />}
       {demandeQuitter &&
         (proposition ? (
-          <DialogueFinProjection proposition={proposition} matiere={matiere} exp={ann.exp} resume={ann.resume} annotations={aDesAnnotations({ pages: ann.annotations.instantane(), blanches: etat.blanches })} quitter={quitterVraiment} fermer={() => setDemandeQuitter(false)} />
+          <DialogueFinProjection proposition={proposition} matiere={matiere} exp={ann.exp} resume={ann.resume} annotations={aDesAnnotations({ pages: ann.annotations.instantane(), blanches: etat.blanches, exercices: etat.exercices })} quitter={quitterVraiment} fermer={() => setDemandeQuitter(false)} />
         ) : (
           <DialogueQuitter exp={ann.exp} resume={ann.resume} quitter={quitterVraiment} fermer={() => setDemandeQuitter(false)} />
         ))}
