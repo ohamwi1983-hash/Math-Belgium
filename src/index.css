@@ -2977,3 +2977,6 @@ body:has(.accueil) { background: var(--paper); }
 .pastille-competence-3 { color: var(--proc3-ink); }
 .pastille-competence-3 .pastille-competence-num { background: var(--proc3); color: var(--on-proc3); }
 .carte-atoi .pastilles-competences { margin-top: -2px; }
+
+/* Nom propre (classe…) dans un surtitre en capitales CSS : garder sa casse (« 6e B »). */
+.sans-capitales { text-transform: none; }

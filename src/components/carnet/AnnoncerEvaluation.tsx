@@ -379,7 +379,7 @@ export function AnnoncerEvaluation({
     <div className="annonce" ref={racine}>
       <BandeauEspace
         titreId={`${id}-titre`}
-        surtitre={classe ? `Mes classes › ${classe.nom}` : 'Mes classes'}
+        surtitre={classe ? <>Mes classes › <span className="sans-capitales">{classe.nom}</span></> : 'Mes classes'}
         titre={titre}
         icone={null}
         apresTitre={
@@ -838,7 +838,7 @@ export function AnnoncerEvaluation({
 
           <section className="ep-carte annonce-apercu" aria-labelledby={`${id}-apercu`}>
             <p className="annonce-surtitre" id={`${id}-apercu`}>
-              {enModif ? 'Ce que verront tes élèves' : 'Ce que verront tes élèves'}
+              Ce que verront tes élèves
             </p>
             {evaluation ? (
               apercu ? (

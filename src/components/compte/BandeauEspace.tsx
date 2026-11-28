@@ -29,7 +29,8 @@ export function BandeauEspace({
   icone: ReactNode
   classe?: string
   classeIcone?: string
-  surtitre?: string
+  /** Texte en capitales (CSS) ; un nom de classe s'y met dans `<span className="sans-capitales">` (« 6e B », jamais « 6E B »). */
+  surtitre?: ReactNode
   apresTitre?: ReactNode
   pastilles?: ReactNode
   etiquettePastilles?: string
