@@ -484,7 +484,7 @@ export function OutilsBlanc({
       )}
       {outils.menuGabarit && <MenuGabarit id={idGabarit} projection={projection} annotations={annotations} page={page} setOutils={setOutils} />}
       {repere && outils.traceur && (
-        <PaletteTraceur id={idTraceur} projection={projection} annotations={annotations} page={page} outils={outils} replier={() => setOutils((o) => ({ ...o, traceur: false }))} setOutils={setOutils} />
+        <PaletteTraceur key={outils.ongletTraceur ?? 'courbes'} id={idTraceur} projection={projection} annotations={annotations} page={page} outils={outils} replier={() => setOutils((o) => ({ ...o, traceur: false }))} setOutils={setOutils} />
       )}
     </div>
   )

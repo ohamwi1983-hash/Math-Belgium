@@ -110,6 +110,12 @@ try {
   // Retour à la diapo : repères « 1 page blanche » et pastille.
   await page.keyboard.press('b')
   await page.waitForTimeout(500)
+  // Chromium sans écran (SwiftShader) garde parfois à l'écran l'image d'avant le dernier point quand on quitte la page
+  // blanche juste après un trait (constaté aussi avec le code d'avant ce chantier) : un aller-retour de diapo la rafraîchit.
+  await page.keyboard.press('ArrowRight')
+  await page.waitForTimeout(200)
+  await page.keyboard.press('ArrowLeft')
+  await page.waitForTimeout(400)
   verifier((await page.locator('.repere-blanches').first().textContent())?.includes('1 page blanche'), 'P4 : « 1 page blanche › » en haut à droite de la diapo')
   verifier((await page.locator('.projection-barre .projection-outil-pastille').textContent()) === '1', 'P4 : pastille « 1 » sur le bouton Écran blanc')
   verifier((await page.locator('.morceau-origine-cadre').count()) === 1, 'P4 : léger pointillé d’où vient le morceau')
@@ -326,18 +332,18 @@ try {
   await page.locator('.traceur-onglet', { hasText: 'Tangente' }).click()
   await page.getByText(/Tangente à/).first().click()
   await page.waitForTimeout(300)
-  const eq1 = await page.locator('.tangente-resultat .katex-mathml annotation').first().textContent()
+  const eq1 = await page.locator('.onglet-tangente .tangente-resultat').first().getAttribute('data-tex')
   verifier(eq1?.replace(/\s/g, '') === 'y=2x-1', `P3 : tangente en x = 1 : « ${eq1} »`)
   await page.getByText('Montrer le triangle de la pente').click()
   // Glisser le point jusqu'à x = 2 (repère : 1 carreau = 1 → x = 2 à 640 + 80).
   await glisser(page, [680, 320], [720, 200])
   await page.waitForTimeout(300)
-  const eq2 = await page.locator('.tangente-resultat .katex-mathml annotation').first().textContent()
+  const eq2 = await page.locator('.onglet-tangente .tangente-resultat').first().getAttribute('data-tex')
   verifier(eq2?.replace(/\s/g, '') === 'y=4x-4', `P3 : le point glisse le long de la courbe (x = 2 : « ${eq2} »)`)
   // Toucher la courbe ailleurs (x = −1).
   await cliquer(page, [600, 320])
   await page.waitForTimeout(300)
-  const eq3 = await page.locator('.tangente-resultat .katex-mathml annotation').first().textContent()
+  const eq3 = await page.locator('.onglet-tangente .tangente-resultat').first().getAttribute('data-tex')
   verifier(eq3?.replace(/\s/g, '') === 'y=-2x-1', `P3 : toucher la courbe pose la tangente (x = −1 : « ${eq3} »)`)
   await capture(page, CAPTURES, 'P3-2-tangente')
 
@@ -345,7 +351,7 @@ try {
   await page.locator('.traceur-onglet', { hasText: 'Aire' }).click()
   await page.getByText(/Aire sous/).first().click()
   await page.waitForTimeout(300)
-  const aire = await page.locator('.onglet-aire .tangente-resultat .katex-mathml annotation').first().textContent()
+  const aire = await page.locator('.onglet-aire .tangente-resultat').first().getAttribute('data-tex')
   verifier(aire?.includes('\\frac{8}{3}') && aire.includes('2{,}67'), `P3 : aire de 0 à 2 = 8/3 ≈ 2,67 (« ${aire} »)`)
   await page.getByText(/Écrire l’intégrale/).click()
   await page.waitForTimeout(200)
@@ -356,7 +362,7 @@ try {
   await page.locator('.aire-bornes input').nth(0).fill('-2')
   await page.locator('.aire-bornes input').nth(0).press('Enter')
   await page.waitForTimeout(200)
-  const aire2 = await page.locator('.onglet-aire .tangente-resultat .katex-mathml annotation').first().textContent()
+  const aire2 = await page.locator('.onglet-aire .tangente-resultat').first().getAttribute('data-tex')
   verifier(aire2?.includes('\\frac{16}{3}'), `P3 : bornes tapées (−2 à 2 : « ${aire2} »)`)
 
   // Points, vecteurs, segments.
@@ -385,7 +391,7 @@ try {
   // Déplacer A (1 ; 2) → accroché à (2 ; 2).
   await glisser(page, [680, 280], [722, 284])
   await page.waitForTimeout(250)
-  const listeA = await page.locator('.onglet-points .traceur-courbe').first().locator('annotation').textContent()
+  const listeA = await page.locator('.onglet-points .traceur-courbe').first().getAttribute('data-tex')
   verifier(listeA?.replace(/\s/g, '').includes('A\\left(2\\,;\\,2\\right)'), `P3 : point déplacé au doigt, accroché à la grille (${listeA})`)
   await capture(page, CAPTURES, 'P3-4-points-vecteurs')
   verifier((await pluspetiteCible(page, '.projection-palette--traceur button')) >= 44, 'P3 : cibles du traceur ≥ 44 px')

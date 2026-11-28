@@ -358,9 +358,9 @@ export function OngletTangente({ annotations, page }: { annotations: MagasinAnno
           <ChampValeur etiquette={<MathInline tex="\text{en } x =" />} valeur={t.x} appliquer={(v) => maj({ ...t, x: v })} />
           {res &&
             (res.ok ? (
-              <div className="tangente-resultat" aria-live="polite">
+              <div className="tangente-resultat" aria-live="polite" data-tex={res.latexEquation}>
                 <MathInline tex={res.latexEquation} />
-                <span>
+                <span className="tangente-detail">
                   pente <MathInline tex={res.latexPente} /> · point <MathInline tex={res.latexPoint} />
                 </span>
               </div>
@@ -418,7 +418,7 @@ export function OngletAire({ annotations, page }: { annotations: MagasinAnnotati
           {res &&
             (res.ok ? (
               <>
-                <div className="tangente-resultat" aria-live="polite">
+                <div className="tangente-resultat" aria-live="polite" data-tex={res.latexValeur}>
                   <MathInline tex={`${res.signe === 'positive' ? '\\text{Aire}' : '\\text{Intégrale}'} ${res.latexValeur}`} />
                 </div>
                 {res.signe !== 'positive' && (
@@ -522,7 +522,7 @@ export function OngletPoints({ annotations, page }: { annotations: MagasinAnnota
       {(points.length > 0 || liaisons.length > 0) && (
         <ul className="traceur-liste" aria-label="Points et vecteurs placés">
           {points.map((p) => (
-            <li key={p.id} className="traceur-courbe" style={{ ['--c' as string]: p.couleur }}>
+            <li key={p.id} className="traceur-courbe" style={{ ['--c' as string]: p.couleur }} data-tex={`${p.nom}\\left(${latexNombre(p.x)}\\,;\\,${latexNombre(p.y)}\\right)`}>
               <span className="traceur-pastille" aria-hidden="true" />
               <MathInline tex={`${p.nom}\\left(${latexNombre(p.x)}\\,;\\,${latexNombre(p.y)}\\right)`} />
               <button
@@ -597,8 +597,9 @@ export function EtiquettesTraceur({ elements, page, instant = 0 }: { elements: E
     if (!res.ok) continue
     const [px, py] = [versPxX(res.x0, r), versPxY(res.y0, r)]
     if (px < -20 || px > 1300 || py < -20 || py > 740) continue
-    boite(`t${t.id}`, px + 34, py - 96, `${res.latexEquation}\\quad\\text{\\small pente } ${res.latexPente}`, t.couleur)
-    libre(`tp${t.id}`, px + 16, py + 12, res.latexPoint, t.couleur, 20)
+    boite(`t${t.id}`, px + 34, py - 96, `${res.latexEquation}\\quad{\\small \\text{pente}\\ {${res.latexPente}}}`, t.couleur)
+    // Coordonnées du point de contact : sous le point, du côté opposé à l'équation.
+    libre(`tp${t.id}`, px - 24 - largeur(res.latexPoint, 20), py + 14, res.latexPoint, t.couleur, 20)
     if (t.triangle) {
       const d = pasTriangle(r)
       const p1x = versPxX(res.x0 + d, r)
@@ -661,10 +662,12 @@ export function EtiquettesTraceur({ elements, page, instant = 0 }: { elements: E
   for (const c of courbes) {
     const v = valeursCourbe(c, maintenant)
     if (!v || !c.params) continue
-    const sub = latexSubstitue(c.saisie, page.angle, v)
+    // Valeurs arrondies comme le curseur (pas du paramètre, une décimale de plus pendant l'animation).
+    const affichees = Object.fromEntries(Object.entries(v).map(([k, x]) => [k, Number(texteParametre(x, c.params![k].pas, estAnimee(c) && c.animation?.nom === k ? 1 : 0).replace(',', '.').replace('−', '-'))]))
+    const sub = latexSubstitue(c.saisie, page.angle, affichees)
     if (!sub) continue
-    const vals = Object.entries(v)
-      .map(([k, x]) => `${k} = ${texteParametre(x, c.params![k].pas, estAnimee(c) && c.animation?.nom === k ? 1 : 0).replace(',', '{,}').replace('−', '-')}`)
+    const vals = Object.entries(affichees)
+      .map(([k, x]) => `${k} = ${String(x).replace('.', '{,}')}`)
       .join(',\\ ')
     const tex = `${vals} :\\ ${c.nom}(x) = ${sub}`
     const l = largeur(tex, 24)

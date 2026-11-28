@@ -158,7 +158,7 @@ export function ObjetsExport({ elements, page, diapos, chapter }: { elements: El
         const [sx, sy] = versEcran(t, [o.x, o.y])
         const kz = o.k * z
         if (o.genre === 'gabarit') {
-          const g = { ...o, r: reglagesComplets(o.r) }
+          const g = { ...o, r: reglagesComplets(o.r), cases: o.cases ?? {} }
           const d = disposer(g)
           return (
             <div key={o.id} className="objet-pose" style={{ left: sx, top: sy, width: d.w * kz, height: d.h * kz }}>
@@ -653,7 +653,7 @@ export function CalqueObjets({
       {objets.map((o) => {
         const [sx, sy] = versEcran(t, [o.x, o.y])
         const kz = o.k * z
-        const g = o.genre === 'gabarit' ? { ...o, r: reglagesComplets(o.r) } : null
+        const g = o.genre === 'gabarit' ? { ...o, r: reglagesComplets(o.r), cases: o.cases ?? {} } : null
         const d = g ? disposer(g) : null
         const w = d ? d.w : (o as Morceau).cadre.w
         const h = d ? d.h : (o as Morceau).cadre.h
@@ -681,14 +681,19 @@ export function CalqueObjets({
   function chromeObjet(o: Gabarit | Morceau) {
     const [sx, sy] = versEcran(t, [o.x, o.y])
     const kz = o.k * z
-    const g = o.genre === 'gabarit' ? { ...o, r: reglagesComplets(o.r) } : null
+    const g = o.genre === 'gabarit' ? { ...o, r: reglagesComplets(o.r), cases: o.cases ?? {} } : null
     const d = g ? disposer(g) : null
     const w = d ? d.w : (o as Morceau).cadre.w
     const h = d ? d.h : (o as Morceau).cadre.h
     const boite: [number, number, number, number] = [sx, sy, w * kz, h * kz]
     const marge = 12
     const barreH = cible + 8
-    const barreY = sy - marge - barreH - 6 >= 4 ? sy - marge - barreH - 6 : sy + h * kz + marge + 6
+    // Petite barre au-dessus de l'objet, mais jamais sous la petite barre de l'écran blanc (≈ 64 px réels en haut) :
+    // sinon dessous, sinon dans le haut de l'objet.
+    const haut = 64 / Math.max(echelle, 0.3)
+    const dessus = sy - marge - barreH - 6
+    const dessous = sy + h * kz + marge + 6
+    const barreY = dessus >= haut ? dessus : dessous + barreH <= 656 ? dessous : Math.max(haut, sy + 4)
     const c = g && d && caseActive ? d.cases.find((x) => x.id === caseActive) : null
     // Clavier : sous l'objet s'il y a la place, sinon dessus, à droite, à gauche ; à défaut, le coin qui ne cache pas
     // la case touchée (et le moins possible de l'objet). Toujours dans la diapo.
@@ -697,7 +702,8 @@ export function CalqueObjets({
     const ob: [number, number, number, number] = [sx, sy, w * kz, h * kz]
     const cc: [number, number, number, number] | null = c ? [sx + c.x * kz, sy + c.y * kz, c.w * kz, c.h * kz] : null
     const recouvre = (p: P, b: [number, number, number, number]) => Math.max(0, Math.min(p[0] + wc, b[0] + b[2]) - Math.max(p[0], b[0])) * Math.max(0, Math.min(p[1] + hc, b[1] + b[3]) - Math.max(p[1], b[1]))
-    const dedans = (p: P): P => [borne(p[0], 4, 1276 - wc), borne(p[1], 4, 716 - hc)]
+    // Jamais sous la barre du bas (56 px réels ≈ 60 px logiques en plein écran).
+    const dedans = (p: P): P => [borne(p[0], 4, 1276 - wc), borne(p[1], 4, 656 - hc)]
     const essais: P[] = [
       [sx, sy + h * kz + 20],
       [sx, sy - hc - 20],
@@ -816,7 +822,7 @@ export function CalqueObjets({
             pos={pc}
           />
         )}
-        {g && g.type === 'droite' && <EditeurDroite key={o.id} g={o as Gabarit} modifier={(n) => modifier(n)} cible={cible} pos={[borne(sx, 4, 640), borne(sy + h * kz + marge + 10, 4, 716 - 2 * cible - 30)]} />}
+        {g && g.type === 'droite' && <EditeurDroite key={o.id} g={o as Gabarit} modifier={(n) => modifier(n)} cible={cible} pos={[borne(sx, 4, 640), borne(sy + h * kz + marge + 10, 4, 656 - 3 * cible - 40)]} />}
       </>
     )
   }

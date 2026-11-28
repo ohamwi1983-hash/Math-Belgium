@@ -192,7 +192,7 @@
 .gabarit-aide { margin: 0; font: 400 13px/1.4 var(--sans); color: #5b6b77; }
 .gabarit-apercu { display: flex; justify-content: center; padding: 6px; background: #fbfcfd; border: 1px solid #e4eaee; border-radius: 6px; overflow: hidden; }
 .gabarit-apercu .gabarit-case { cursor: default; }
-.gabarit-poser { min-height: 44px; border: 0; border-radius: 999px; background: #b65c1f; color: #fff; font: 600 15px var(--sans); cursor: pointer; }
+.gabarit-poser { position: sticky; bottom: 0; min-height: 44px; border: 0; border-radius: 999px; background: #b65c1f; color: #fff; font: 600 15px var(--sans); cursor: pointer; box-shadow: 0 0 0 6px #fff; }
 .gabarit-poser:hover { background: #9a4c18; }
 .gabarit-poser:focus-visible { outline: 3px solid #182430; outline-offset: 2px; }
 /* Écran bas (téléphone en paysage, vue du professeur) : liste sur deux colonnes, sans aperçu des mini-dessins. */
@@ -225,7 +225,7 @@
 .aire-bornes { display: flex; gap: 8px; }
 .aire-bornes .traceur-champ { flex: 1 1 0; min-width: 0; }
 .tangente-resultat { display: flex; flex-direction: column; gap: 2px; font-size: 21px; color: #182430; }
-.tangente-resultat > span { font: 400 16px var(--sans); color: #5b6b77; }
+.tangente-detail { font: 400 16px var(--sans); color: #5b6b77; }
 .tangente-resultat .math-inline { overflow: visible; white-space: nowrap; }
 .aire-negative { color: #7a3c11; }
 .choix-courbe { flex-wrap: wrap; }

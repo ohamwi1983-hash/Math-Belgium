@@ -246,7 +246,6 @@ function tableauSignes(g: Gabarit): Disposition {
   const cases: CaseGabarit[] = []
   // Abscisse du centre de la colonne de la valeur j (0 = −∞, m + 1 = +∞) et de la colonne du signe j (0…m).
   const xV = (j: number) => LAB + j * (V + S) + V / 2
-  const xS = (j: number) => LAB + j * (V + S) + V + S / 2
   formes.push({ f: 'rect', x: 0, y: 0, w, h, bord: TRAIT, ep: 2.5, fond: '#fff' })
   formes.push({ f: 'ligne', x1: LAB, y1: 0, x2: LAB, y2: h, ep: 2.5 })
   for (let i = 1; i < lignes; i++) formes.push({ f: 'ligne', x1: 0, y1: i * H, x2: w, y2: i * H, ep: i === 1 ? 3.5 : 2 })
@@ -259,8 +258,13 @@ function tableauSignes(g: Gabarit): Disposition {
     const estProduit = produit && i === lignes - 1
     const nomLigne = nomLisible(g, `l${i}`, estProduit ? 'ligne du produit' : `facteur ${i}`)
     cases.push({ id: `l${i}`, x: 0, y, w: LAB, h: H, nom: `nom de la ligne ${i}`, taille: 27 })
-    for (let j = 0; j <= m; j++) cases.push({ id: `s${i}-${j}`, x: xS(j) - S / 2, y, w: S, h: H, nom: `${nomLigne}, entre ${valeur(j)} et ${valeur(j + 1)}`, hachuree: true })
-    for (let j = 1; j <= m; j++) cases.push({ id: `z${i}-${j}`, x: xV(j) - 26, y: y + 12, w: 52, h: H - 24, nom: `${nomLigne}, sous ${valeur(j)}`, fond: true, hachuree: estProduit })
+    // Case du signe : tout l'intervalle entre deux barres, sauf la place des « 0 » / « ‖ » posés sur les barres.
+    for (let j = 0; j <= m; j++) {
+      const x1 = j === 0 ? LAB + 6 : xV(j) + 30
+      const x2 = j === m ? w - 6 : xV(j + 1) - 30
+      cases.push({ id: `s${i}-${j}`, x: x1, y: y + 4, w: x2 - x1, h: H - 8, nom: `${nomLigne}, entre ${valeur(j)} et ${valeur(j + 1)}`, hachuree: true })
+    }
+    for (let j = 1; j <= m; j++) cases.push({ id: `z${i}-${j}`, x: xV(j) - 26, y: y + 12, w: 52, h: H - 24, nom: `${nomLigne}, sous ${valeur(j)}`, fond: true })
   }
   return { w, h, formes, cases }
 }

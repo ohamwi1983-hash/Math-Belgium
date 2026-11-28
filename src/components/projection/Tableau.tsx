@@ -270,10 +270,15 @@ export function Annotations({
   // Changement de page (diapo, page blanche) : on montre ce qui y a été écrit (gardé).
   useEffect(() => {
     geste.current = null
-    // Toile remise à neuf (réaffecter la largeur vide son image) : dans Chromium, un dernier trait suivi aussitôt d'un
-    // changement de page (écran blanc → diapo) laissait parfois à l'écran l'image d'avant le dernier point (28/11/2026).
-    for (const c of [canvasFluo.current, canvasStylo.current]) if (c) c.width = c.width
     dessiner()
+    // Lecture d'un pixel : force Chromium à prendre l'effacement en compte. Sans elle, le dernier trait de la page
+    // quittée restait parfois affiché sur la suivante (constaté le 28/11/2026, Chromium sans écran, code d'avant compris).
+    try {
+      canvasStylo.current?.getContext('2d')?.getImageData(0, 0, 1, 1)
+      canvasFluo.current?.getContext('2d')?.getImageData(0, 0, 1, 1)
+    } catch {
+      // rien
+    }
     setVersion((v) => v + 1)
   }, [page, dessiner])
   // Changement de page ou de repère (échelle, vue, angles, fond) : les courbes sont recalculées depuis leur expression,
