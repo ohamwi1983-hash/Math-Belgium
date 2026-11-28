@@ -145,6 +145,8 @@ try {
   verifier((await page.locator('.gabarit--signes').count()) === 1, 'P2 : tableau de signes posé')
   verifier((await page.locator('.menu-gabarit').count()) === 0, 'P2 : menu refermé')
   const remplir = async (id, texte) => {
+    // Le clavier ouvert peut couvrir la case suivante : on le referme (OK) avant de toucher une autre case.
+    if ((await page.locator('.gabarit-clavier').count()) > 0) await page.getByRole('button', { name: 'valider' }).click()
     await page.locator(`.gabarit-case[data-case="${id}"]`).first().click()
     await page.waitForTimeout(150)
     const champ = page.locator('.clavier-champ')
@@ -215,6 +217,14 @@ try {
   const casesArbre = await page.evaluate(() => [...document.querySelectorAll('.gabarit--arbre .gabarit-case')].map((c) => c.dataset.case))
   verifier(casesArbre.includes('p1-0') && casesArbre.includes('f2-3'), 'P2 : arbre 2 niveaux : branches et produits')
   await remplir('p1-0', '0,4')
+  const k0 = await page.locator('.gabarit-clavier').boundingBox()
+  const pg = await page.locator('.clavier-poignee').boundingBox()
+  await page.mouse.move(pg.x + pg.width / 2, pg.y + pg.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(pg.x + pg.width / 2 + 150, pg.y + pg.height / 2 - 40, { steps: 5 })
+  await page.mouse.up()
+  const k1 = await page.locator('.gabarit-clavier').boundingBox()
+  verifier(Math.abs(k1.x - k0.x - 150) < 3 || k1.x > k0.x + 100, 'P2 : le petit clavier se déplace par sa poignée')
   await remplir('p1-1', '0,6')
   await remplir('p2-0', '0,5')
   await remplir('p2-1', '0,5')

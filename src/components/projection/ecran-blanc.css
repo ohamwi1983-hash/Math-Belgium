@@ -61,8 +61,15 @@
   pointer-events: auto; user-select: none; --g: 5px;
 }
 .clavier-apercu { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
+.clavier-ligne { display: flex; gap: 6px; align-items: center; }
+.clavier-poignee {
+  flex: none; width: var(--cible); height: calc(var(--cible) * 1.05); border: 1px solid #ccd8e0; border-radius: 8px; background: #fff; color: #51626f; display: grid; place-items: center;
+  cursor: grab; touch-action: none;
+}
+.clavier-poignee:active { cursor: grabbing; }
+.clavier-poignee:focus-visible { outline: 3px solid #b65c1f; outline-offset: 1px; }
 .clavier-champ {
-  width: 100%; box-sizing: border-box; height: calc(var(--cible) * 1.05); padding: 0 12px; border: 2px solid #b65c1f; border-radius: 8px; background: #fbfcfd; color: #182430;
+  flex: 1; min-width: 0; width: 100%; box-sizing: border-box; height: calc(var(--cible) * 1.05); padding: 0 12px; border: 2px solid #b65c1f; border-radius: 8px; background: #fbfcfd; color: #182430;
   font: 500 calc(var(--cible) * 0.48) var(--mono); user-select: text;
 }
 .clavier-champ:focus { outline: 3px solid rgb(182 92 31 / 0.35); outline-offset: 0; }
@@ -209,7 +216,7 @@
 /* ---------- traceur enrichi ---------- */
 .traceur-onglets { display: flex; gap: 4px; }
 .traceur-onglet {
-  flex: 1 1 0; min-width: 0; min-height: 44px; padding: 0 6px; border: 1px solid #ccd8e0; border-radius: 999px; background: #fff; color: #182430; font: 600 13.5px var(--sans);
+  flex: 1 1 0; min-width: 0; min-height: 44px; padding: 0 3px; border: 1px solid #ccd8e0; border-radius: 999px; background: #fff; color: #182430; font: 600 13px var(--sans);
   white-space: nowrap; cursor: pointer;
 }
 .traceur-onglet:hover { background: #eef2f5; }

@@ -225,7 +225,10 @@ function ClavierCase({
   focus,
   cible,
   pos,
+  deplacer,
 }: {
+  /** Poignée : glisser le clavier ailleurs (il couvre une case qu'on veut voir). */
+  deplacer: (e: React.PointerEvent) => void
   c: CaseGabarit
   valeur: string
   saisir: (t: string) => void
@@ -288,6 +291,7 @@ function ClavierCase({
       onClick={(e) => e.stopPropagation()}
     >
       <div className="clavier-apercu">
+        <div className="clavier-ligne">
         <label className="sr-only" htmlFor={idChamp}>
           {c.nom}
         </label>
@@ -316,6 +320,10 @@ function ClavierCase({
             }
           }}
         />
+        <button type="button" className="clavier-poignee" aria-label="Déplacer le petit clavier (glisser)" title="Glisser pour déplacer le clavier" onPointerDown={deplacer}>
+          <PictoBlanc nom="deplacer" taille={Math.round(cible * 0.45)} />
+        </button>
+        </div>
         <span className="clavier-case" aria-hidden="true">
           {c.nom}
         </span>
@@ -499,6 +507,8 @@ export function CalqueObjets({
   const [sel, setSel] = useState<string | null>(null)
   const [caseActive, setCaseActive] = useState<string | null>(null)
   const [focusClavier, setFocusClavier] = useState(true)
+  // Clavier déplacé à la main (poignée) : décalage gardé tant que l'objet reste sélectionné.
+  const [decalage, setDecalage] = useState<P>([0, 0])
   const t = transfoPage(blanche)
   const z = zoomDe(t)
   const cible = Math.max(44, echelle > 0 ? 44 / echelle : 44)
@@ -522,6 +532,7 @@ export function CalqueObjets({
       engager()
       setSel(id)
       setCaseActive(null)
+      setDecalage([0, 0])
       const el = lire(id)
       avant.current = el ? (JSON.parse(JSON.stringify(el)) as ElementAnnotation) : null
     },
@@ -714,7 +725,10 @@ export function CalqueObjets({
       [1276 - wc, 4],
       [4, 4],
     ].map((p) => dedans(p as P))
-    const pc: P = essais.find((p) => recouvre(p, ob) === 0) ?? [...essais].sort((p, q) => (cc ? recouvre(p, cc) - recouvre(q, cc) : 0) * 1e6 + recouvre(p, ob) - recouvre(q, ob))[0]
+    // À défaut d'une place libre : ne pas cacher la case touchée, puis le moins possible des AUTRES cases, puis de l'objet.
+    const boitesCases: [number, number, number, number][] = d ? d.cases.map((x) => [sx + x.x * kz, sy + x.y * kz, x.w * kz, x.h * kz]) : []
+    const cout = (p: P) => (cc ? recouvre(p, cc) : 0) * 1e6 + boitesCases.reduce((n, b) => n + recouvre(p, b), 0) * 100 + recouvre(p, ob)
+    const pc: P = essais.find((p) => recouvre(p, ob) === 0) ?? [...essais].sort((p, q) => cout(p) - cout(q))[0]
     const ordre = d ? d.cases.map((x) => x.id) : []
     const aller = (delta: number) => {
       if (!caseActive) return
@@ -819,7 +833,21 @@ export function CalqueObjets({
             }}
             focus={focusClavier}
             cible={cible}
-            pos={pc}
+            pos={[borne(pc[0] + decalage[0], 4, 1276 - wc), borne(pc[1] + decalage[1], 4, 716 - hc)]}
+            deplacer={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              const depart = versDiapo(e.clientX, e.clientY)
+              const d0 = decalage
+              suivrePointeur(
+                e,
+                (ev) => {
+                  const p = versDiapo(ev.clientX, ev.clientY)
+                  setDecalage([d0[0] + p[0] - depart[0], d0[1] + p[1] - depart[1]])
+                },
+                () => undefined,
+              )
+            }}
           />
         )}
         {g && g.type === 'droite' && <EditeurDroite key={o.id} g={o as Gabarit} modifier={(n) => modifier(n)} cible={cible} pos={[borne(sx, 4, 640), borne(sy + h * kz + marge + 10, 4, 656 - 3 * cible - 40)]} />}
