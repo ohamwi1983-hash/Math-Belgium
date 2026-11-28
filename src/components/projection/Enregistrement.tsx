@@ -504,7 +504,7 @@ export function BoutonEnregistrer({ rec, compacte = false }: { rec: Enregistreme
     return (
       <button
         type="button"
-        className={`projection-outil rec-bouton${rec.phase === 'reglages' ? ' actif' : ''}`}
+        className={`${compacte ? 'projection-bouton' : 'projection-outil'} rec-bouton${rec.phase === 'reglages' ? ' actif' : ''}`}
         aria-label="Enregistrer la projection en vidéo"
         title="Enregistrer la diapo, tes annotations et ta voix en vidéo (pour YouTube) — rien n'est envoyé au site"
         onClick={rec.ouvrir}

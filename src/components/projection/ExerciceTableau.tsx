@@ -371,7 +371,7 @@ function PageEnonce({ ex, page }: { ex: ExerciceProjete; page: PageExercice }) {
         )}
       </div>
       <p className="exo-pied">
-        Exercice {page.n} · {libelleType(ex.variante).toLowerCase().replace(/^tirage libre$/, 'tirage libre')}
+        Exercice {page.n} · {ex.variante ? `type ${libelleType(ex.variante)}` : 'tirage libre'}
       </p>
     </>
   )

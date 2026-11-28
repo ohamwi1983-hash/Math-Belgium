@@ -172,3 +172,5 @@
 .part-reglages-pied { position: sticky; bottom: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 10px; padding: 12px 20px; background: var(--surface); border-top: 1px solid var(--line-soft); }
 .part-reglages-pied .part-note { margin-right: auto; }
 .part-bouton.part-bouton span, .part-bouton span { pointer-events: none; }
+/* Vue du professeur : la colonne s’élargit quand la grille des élèves y est (la diapo projetée reste lisible). */
+@media (min-width: 901px) { .prof-corps:has(.prof-points) { grid-template-columns: minmax(0, 1fr) minmax(340px, 46%); } }

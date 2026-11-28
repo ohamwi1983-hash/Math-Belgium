@@ -69,6 +69,8 @@ interface Affiche {
   /** Prénom tiré au sort, montré au tableau (« Montrer au tableau ») ; `n` change à chaque demande. */
   tire: { nom: string; n: number } | null
   classe: string | null
+  /** Nom de la classe (« 5e A »), pour la fenêtre des diapos qui ne lit pas le carnet. */
+  nom?: string
 }
 const AFFICHE_DEPART: Affiche = { actif: false, visible: true, replie: false, regle: false, bilan: false, tire: null, classe: null }
 
@@ -137,6 +139,20 @@ export function useParticipation(chapter: ChapterContent, role: Role) {
   }, [classes, affiche.classe, chapter.levelSlug, role])
 
   const relire = useCallback(() => setDonnees(lireDonnees(afficheRef.current.classe)), [])
+  // Nom de la classe partagé avec la fenêtre des diapos (elle ne lit pas le carnet).
+  const nomConnu = classes.find((c) => c.id === affiche.classe)?.nom
+  useEffect(() => {
+    if (nomConnu && afficheRef.current.nom !== nomConnu) {
+      const a = { ...afficheRef.current, nom: nomConnu }
+      afficheRef.current = a
+      setAffiche(a)
+      try {
+        canal.current?.postMessage({ type: 'affiche', de: id, affiche: a })
+      } catch {
+        // rien
+      }
+    }
+  }, [nomConnu, id])
   useEffect(() => relire(), [classe, relire])
   // Autre fenêtre (ou autre onglet) : la liste, les réglages ou les points ont changé.
   useEffect(() => {
@@ -256,7 +272,7 @@ export function useParticipation(chapter: ChapterContent, role: Role) {
     classes,
     agenda,
     classe,
-    nomClasse: classes.find((c) => c.id === classe)?.nom ?? (classe === CLASSE_LOCALE ? 'Ma classe' : classe ? 'la classe' : ''),
+    nomClasse: classes.find((c) => c.id === classe)?.nom ?? (classe === CLASSE_LOCALE ? 'Ma classe' : (affiche.nom ?? '')),
     liste,
     eleves,
     reglages,
@@ -435,9 +451,11 @@ function BilanProjete({ part }: { part: Participation }) {
   const r = part.reglages!
   const sc = part.scores!
   const equipes = r.affichage === 'equipes'
-  const ordre = classementEquipes(r, sc.equipes).slice(0, 3)
+  // Équipes : trois rangs au plus, ex aequo sur la même marche, jamais une équipe à 0 point.
+  const marchesEquipes = podium(new Map(r.equipes.map((e, i) => [e.nom, sc.equipes[i]])))
+  const couleur = (noms: string[]) => (noms.length === 1 ? (r.equipes.find((e) => e.nom === noms[0])?.couleur ?? '#8a97a1') : '#8a97a1')
   const marches = podium(pointsPositifs(part.points))
-  const ontParticipe = part.eleves.filter((e) => part.points.some((p) => p.e === e && p.v > 0)).length
+  const ontParticipe = part.eleves.filter((e) => part.points.some((p) => p.e === e && p.v > 0 && p.genre !== 'penalite')).length
   return (
     <div className="part-bilan projection-interactif" role="dialog" aria-label="Bilan de la période" onClick={(e) => e.stopPropagation()}>
       <p className="part-bilan-sur">
@@ -446,31 +464,30 @@ function BilanProjete({ part }: { part: Participation }) {
       <h2 className="part-bilan-titre">Bravo à toute la {part.nomClasse || 'classe'} !</h2>
       {equipes ? (
         <div className="part-podium part-podium--grand">
-          {[ordre[1], ordre[0], ordre[2]]
-            .filter((i): i is number => i !== undefined)
-            .map((i) => {
-              const rang = ordre.indexOf(i) + 1
-              return (
-                <div key={i} className="part-podium-col">
-                  <span className="part-podium-qui">
-                    {r.equipes[i].nom}
-                    <small>{sc.equipes[i]}</small>
-                  </span>
-                  <span className="part-marche" style={{ height: rang === 1 ? 150 : rang === 2 ? 108 : 80, background: r.equipes[i].couleur }}>
-                    {rang}
-                  </span>
-                </div>
-              )
-            })}
+          {[2, 1, 3]
+            .map((rang) => marchesEquipes.find((m) => m.rang === rang))
+            .filter((m): m is Marche => !!m)
+            .map((m) => (
+              <div key={m.rang} className="part-podium-col">
+                <span className="part-podium-qui">
+                  {m.noms.join(', ')}
+                  <small>{m.points}</small>
+                </span>
+                <span className="part-marche" style={{ height: m.rang === 1 ? 150 : m.rang === 2 ? 108 : 80, background: couleur(m.noms) }}>
+                  {m.rang}
+                </span>
+              </div>
+            ))}
+          {marchesEquipes.length === 0 && <p className="part-vide-projete">Pas encore de point pendant cette période.</p>}
         </div>
       ) : (
         <Podium marches={marches} />
       )}
       <p className="part-bilan-texte">
-        {equipes ? 'Ces trois équipes' : 'Les trois premiers'} gagnent <b>+1 point à {r.periode.libelle}</b>.
+        {equipes ? (marchesEquipes.flatMap((m) => m.noms).length > 1 ? 'Ces équipes' : 'Cette équipe') : 'Les premiers du podium'} {equipes && marchesEquipes.flatMap((m) => m.noms).length === 1 ? 'gagne' : 'gagnent'} <b>+1 point à {r.periode.libelle}</b>.
         <br />
         <span className="part-bilan-chiffres">
-          {sc.totalPeriode} points gagnés ensemble · {ontParticipe} élève{ontParticipe > 1 ? 's' : ''} sur {part.eleves.length} ont participé.
+          {sc.totalPeriode} points gagnés ensemble · {ontParticipe} élève{ontParticipe > 1 ? 's' : ''} sur {part.eleves.length} {ontParticipe > 1 ? 'ont' : 'a'} participé.
         </span>
       </p>
     </div>
