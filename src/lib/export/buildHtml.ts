@@ -183,6 +183,8 @@ export async function buildHtmlBlob(chapter: ChapterContent, amenage = false): P
   clone.querySelectorAll('.impression-seule').forEach((el) => el.classList.remove('impression-seule'))
   // Lien nommé vers un autre chapitre (`[[…]]`) : son texte seul (l'adresse interne ne mènerait nulle part hors du site).
   clone.querySelectorAll('a.lien-chapitre').forEach((el) => el.replaceWith(...Array.from(el.childNodes)))
+  // Mot du cours souligné (français simple, `motsDuCoursContexte.tsx`) : son texte seul, comme à l'impression.
+  clone.querySelectorAll('.mot-cours').forEach((el) => el.replaceWith(...Array.from(el.childNodes)))
 
   const css = await inlinerPolices(retirerPreferenceSombre(toutesLesReglesCss()))
   const titre = echapperHtml(chapter.title)

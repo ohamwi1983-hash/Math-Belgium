@@ -1,0 +1,104 @@
+/* « Mots du cours » (français simple) : mot souligné, bulle, lexique de l'onglet Réviser.
+   Jetons du site seulement (clair, sombre, thèmes « Aa » : crème, contraste élevé). Écran seulement :
+   à l'impression le mot souligné est du texte ordinaire (et `buildHtml.ts` le remplace par son texte). */
+
+@media screen {
+  /* Pointillé discret mais net : `--sky` (≥ 4,5:1 sur le fond du texte dans les 5 thèmes), décalé sous
+     les jambages ; la couleur du texte ne change pas. Cible tactile agrandie par un pseudo-élément
+     (40 px de haut), sans toucher à la hauteur de ligne. */
+  .mot-cours {
+    position: relative;
+    cursor: pointer;
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-decoration-color: var(--sky);
+    text-decoration-thickness: max(2px, 0.12em);
+    text-underline-offset: 0.22em;
+    text-decoration-skip-ink: none;
+    border-radius: 3px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mot-cours::after {
+    content: "";
+    position: absolute;
+    left: -2px;
+    right: -2px;
+    top: 50%;
+    height: 40px;
+    transform: translateY(-50%);
+  }
+  .mot-cours:hover,
+  .mot-cours[aria-expanded="true"] {
+    background: var(--sky-soft);
+    text-decoration-style: solid;
+  }
+  .mot-cours:focus { outline: none; }
+  .mot-cours:focus-visible {
+    outline: 2px solid var(--sky);
+    outline-offset: 2px;
+    background: var(--sky-soft);
+  }
+  :root[data-theme="contraste"]:not(:has(.projection)) .mot-cours { text-decoration-color: var(--ink); }
+}
+
+/* ---------- bulle ---------- */
+.mot-bulle {
+  position: fixed;
+  z-index: 420; /* au-dessus de la règle / du masque de lecture (400) et des barres fixes */
+  box-sizing: border-box;
+  max-width: calc(100vw - 32px);
+  padding: 14px 16px 10px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--sky);
+  border-radius: 12px;
+  box-shadow: 0 14px 36px rgb(0 0 0 / 0.22);
+  font: 400 16px/1.5 var(--l-police, var(--lecture, var(--sans)));
+  text-align: left;
+}
+.mot-bulle:focus { outline: none; }
+.mot-bulle:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+.mot-bulle p { margin: 0 0 8px; }
+.mot-bulle-titre { font: 700 17px/1.3 var(--sans); color: var(--sky-ink); }
+.mot-bulle-titre::first-letter { text-transform: uppercase; }
+.mot-bulle-exemple { color: var(--ink); }
+.mot-bulle-etiquette { font-weight: 700; }
+.mot-bulle-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 4px; }
+.mot-bulle-bouton {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px;
+  font: 600 14.5px/1.2 var(--sans); color: var(--ink); background: var(--paper);
+  border: 1px solid var(--line); border-radius: 22px; cursor: pointer;
+}
+.mot-bulle-bouton:hover { border-color: var(--sky); }
+.mot-bulle-bouton:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+.mot-bulle-fermer { margin-left: auto; }
+/* Téléphone : feuille du bas, pleine largeur, au-dessus de la barre « J'ai compris ». */
+.mot-bulle--feuille {
+  left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); top: auto;
+  max-width: none; max-height: 70dvh; overflow-y: auto;
+  border-radius: 14px;
+  box-shadow: 0 -6px 28px rgb(0 0 0 / 0.25);
+}
+:root[data-theme="contraste"]:not(:has(.projection)) .mot-bulle { border: 2px solid var(--ink); border-top: 5px solid var(--sky); }
+@media print { .mot-bulle { display: none !important; } }
+
+/* ---------- lexique (onglet Réviser) ---------- */
+.lexique-chapitre { margin: 32px 0 8px; }
+.lexique-chapitre h2 { font-family: var(--serif); font-size: 24px; margin: 0 0 6px; }
+.lexique-chapitre h2:focus { outline: none; }
+.lexique-intro { color: var(--ink-soft); margin: 0 0 14px; font-family: var(--l-police, var(--lecture, var(--sans))); }
+.lexique-chapitre dl { margin: 0; display: grid; gap: 10px; }
+.lexique-mot {
+  padding: 12px 14px; background: var(--surface); border: 1px solid var(--line-soft);
+  border-left: 4px solid var(--sky); border-radius: 8px;
+}
+.lexique-mot dt { font: 700 17px/1.3 var(--sans); color: var(--sky-ink); margin-bottom: 4px; }
+.lexique-mot dt::first-letter { text-transform: uppercase; }
+.lexique-mot dd { margin: 0; font-family: var(--l-police, var(--lecture, var(--sans))); }
+.lexique-mot dd p { margin: 0 0 6px; }
+.lexique-revoir {
+  min-height: 40px; padding: 0; background: none; border: 0; cursor: pointer;
+  font: 600 14.5px/1.3 var(--sans); color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; text-align: left;
+}
+:root[data-theme="contraste"]:not(:has(.projection)) .lexique-mot { border: 2px solid var(--ink); border-left-width: 5px; }

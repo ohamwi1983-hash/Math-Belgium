@@ -1,5 +1,10 @@
 import type { ChapterContent } from '../../types'
+import { lexiqueStatistiqueDescriptive } from '../../lexiques/4e/statistique-descriptive'
 
+// Chapitre en FRANÇAIS SIMPLE (pilote du 28/11/2026) : une idée par phrase, 25 mots au plus, mots du
+// cours expliqués sur place et dans le lexique (`lexique`). Contrôlé au build par
+// `scripts/controle-lisibilite.mjs` — voir `.claude/rules/content-authoring.md`, « Français simple et
+// mots du cours ». Structure (ids, blocs, cartes, générateurs) identique à la version d'avant.
 export const statistiqueDescriptive: ChapterContent = {
   level: '4e',
   levelSlug: '4e',
@@ -7,10 +12,10 @@ export const statistiqueDescriptive: ChapterContent = {
   title: 'Statistique descriptive à une variable',
   slug: 'statistique-descriptive',
   lede:
-    "Une série de mesures en vrac, ça ne dit rien à personne. Dans ce chapitre, tu vas construire " +
-    "toute une boîte à outils pour la rendre lisible : tableau de fréquences, histogramme, " +
-    "moyenne, médiane et quartiles, boîte à moustaches, variance et écart-type. À la fin, tu " +
-    "sauras aussi comparer deux séries entre elles.",
+    "Une série de mesures en désordre ne dit rien à personne. Dans ce chapitre, tu construis une boîte à " +
+    "outils pour la rendre lisible. Tu verras le tableau de fréquences, l'histogramme, la moyenne, la " +
+    "médiane et les quartiles. Tu verras aussi la boîte à moustaches, la variance et l'écart-type. À la " +
+    "fin, tu sauras comparer deux séries entre elles.",
 
   intro: {
     title: 'Avant de commencer : le vocabulaire de base',
@@ -19,32 +24,29 @@ export const statistiqueDescriptive: ChapterContent = {
       {
         kind: 'para',
         text:
-          'La **statistique descriptive**, c\'est l\'étude d\'une **population** — l\'ensemble des ' +
-          'individus observés. On l\'étudie à travers un **caractère** : la grandeur qu\'on ' +
-          'mesure sur chaque individu. Dans ce chapitre, ce caractère est toujours ' +
-          '**quantitatif** (un nombre). Et on n\'étudie jamais deux caractères en même temps — ' +
-          'toujours un seul.',
+          'La **statistique descriptive** étudie une **population** : l\'ensemble des individus qu\'on ' +
+          'observe. Un individu peut être une personne, un objet, un jour… Sur chaque individu, on ' +
+          'observe un **caractère** : la grandeur qu\'on mesure. Dans ce chapitre, ce caractère est ' +
+          'toujours **quantitatif** : c\'est un nombre. Et on étudie un seul caractère à la fois, jamais deux.',
       },
       {
         kind: 'rappel',
         label: 'Rappel — population ou échantillon ?',
         items: [
-          'Tu as rarement les données de toute la population. Le plus souvent, tu travailles ' +
-            'sur un **échantillon** — un sous-ensemble de la population, sur lequel tu observes ' +
-            'le caractère. Bonne nouvelle : toutes les formules de ce chapitre (moyenne, ' +
-            'médiane, variance…) marchent pareil, que la série vienne de la population entière ' +
-            'ou d\'un échantillon.',
+          'Tu as rarement les données de toute la population. Le plus souvent, tu travailles sur un ' +
+            '**échantillon** : une partie de la population, sur laquelle tu observes le caractère. Bonne ' +
+            'nouvelle : toutes les formules de ce chapitre (moyenne, médiane, variance…) marchent de la ' +
+            'même façon. Peu importe que la série vienne de toute la population ou d\'un échantillon.',
         ],
       },
       {
         kind: 'rappel',
         label: 'Rappel — discret ou continu ?',
         items: [
-          'Un caractère **discret** ne prend que des valeurs isolées, qu\'on peut compter une ' +
-            'par une (un nombre de frères et sœurs, une pointure). Un caractère **continu** peut ' +
-            'prendre n\'importe quelle valeur dans un intervalle (une taille, un temps). Pour un ' +
-            'caractère continu, on ne peut le décrire qu\'après l\'avoir **regroupé en classes** ' +
-            '— tu verras ça à la section 2.',
+          'Un caractère **discret** prend seulement des valeurs séparées, qu\'on peut compter une par une ' +
+            '(un nombre de frères et sœurs, une pointure). Un caractère **continu** peut prendre ' +
+            'n\'importe quelle valeur dans un intervalle (une taille, un temps). Pour décrire un caractère ' +
+            'continu, on doit d\'abord **regrouper ses valeurs en classes**. Tu verras ça à l\'étape 2.',
         ],
       },
       {
@@ -61,10 +63,10 @@ export const statistiqueDescriptive: ChapterContent = {
       {
         kind: 'para',
         text:
-          'Avec ce vocabulaire, chaque section construit un outil pour répondre à une question ' +
-          'précise. Où se trouve le « centre » de la série ? (moyenne, médiane) À quel point les ' +
-          'valeurs sont-elles dispersées autour de ce centre ? (étendue, variance, écart-type) ' +
-          'Et comment comparer deux séries entre elles ?',
+          'Avec ce vocabulaire, chaque étape construit un outil pour répondre à une question précise. Où ' +
+          'se trouve le « centre » de la série ? C\'est la moyenne ou la médiane. Les valeurs sont-elles ' +
+          'très étalées autour de ce centre ? C\'est l\'étendue, la variance ou l\'écart-type. Et comment ' +
+          'comparer deux séries entre elles ?',
       },
     ],
   },
@@ -78,38 +80,38 @@ export const statistiqueDescriptive: ChapterContent = {
       titreCourt: 'Tableau de fréquences',
       partie: 'Organiser et représenter les données',
       essentiel: [
-        'Tableau de fréquences : les valeurs distinctes rangées par ordre croissant, leur effectif $n_i$, leur fréquence $f_i = \\dfrac{n_i}{n}$, puis les effectifs et fréquences **cumulés** ; la dernière ligne cumulée vaut n et 100 %.',
+        'Tableau de fréquences : les valeurs distinctes, rangées par ordre croissant, avec leur effectif $n_i$ et leur fréquence $f_i = \\dfrac{n_i}{n}$. On ajoute les effectifs et les fréquences **cumulés** : la dernière ligne cumulée vaut n et 100 %.',
         'Une série discrète se représente par un diagramme en bâtons, aux bâtons séparés. Dans un diagramme circulaire, l\'angle d\'un secteur vaut $\\alpha_i = f_i \\times 360^{\\circ}$.',
-        'Avant de croire un graphique, lis ses axes et ses nombres : axe tronqué, graduations irrégulières, pictogrammes agrandis dans les deux sens, parts qui ne totalisent pas 100 %.',
+        'Avant de croire un graphique, lis ses axes et ses nombres. Méfie-toi d\'un axe tronqué, qui ne part pas de 0, et de graduations irrégulières. Méfie-toi aussi des pictogrammes agrandis dans les deux sens et des parts qui ne font pas 100 %.',
       ],
       cartes: [
         { question: 'Comment calcule-t-on la fréquence d\'une valeur ?', reponse: '$f_i = \\dfrac{n_i}{n}$ : son effectif divisé par l\'effectif total, souvent en %.' },
         { question: 'Que doit valoir la dernière ligne des effectifs cumulés ?', reponse: 'L\'effectif total n (et 100 % pour la fréquence cumulée).' },
         { question: 'Une fréquence de 30 % : quel angle dans un diagramme circulaire ?', reponse: '$0{,}30 \\times 360^{\\circ} = 108^{\\circ}$.' },
-        { question: 'Un pictogramme 2 fois plus haut et 2 fois plus large : quel est le piège ?', reponse: 'Son aire est 4 fois plus grande : l\'œil voit « ×4 » pour une valeur seulement doublée.' },
+        { question: 'Un pictogramme 2 fois plus haut et 2 fois plus large : quel est le piège ?', reponse: 'Son aire est 4 fois plus grande. L\'œil voit « ×4 » alors que la valeur est seulement doublée.' },
       ],
       blocks: [
         { kind: 'video', title: 'Organiser des données brutes : le tableau de fréquences', youtubeId: 'LnLwqGZ1POU' },
         {
           kind: 'para',
           text:
-            'Une série statistique brute, c\'est une liste de valeurs **dans l\'ordre où elles ' +
-            'ont été relevées**. Jamais triée, jamais organisée. La première étape, c\'est ' +
-            'toujours de la transformer en **tableau de fréquences** : une ligne par valeur ' +
-            'distincte, avec son effectif, sa fréquence, et les versions **cumulées** de ces ' +
-            'deux colonnes.',
+            'Une série statistique brute, c\'est une liste de valeurs **dans l\'ordre où on les a ' +
+            'relevées**. Elle n\'est ni triée, ni organisée. La première étape est toujours de la ' +
+            'transformer en **tableau de fréquences**. Ce tableau a une ligne par valeur distincte : ' +
+            'chaque valeur différente n\'y apparaît qu\'une fois. Sur sa ligne, on écrit son effectif, sa ' +
+            'fréquence, et les versions **cumulées** de ces deux colonnes.',
         },
         {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Repère les valeurs **distinctes** de la série. Range-les par ordre croissant.',
-            'Compte, pour chacune, son **effectif** nᵢ : le nombre de fois qu\'elle apparaît.',
-            'Calcule sa **fréquence** fᵢ = nᵢ/n (souvent en %).',
-            'Cumule colonne par colonne. L\'**effectif cumulé** à la ligne i, c\'est la somme ' +
-              'des effectifs de cette ligne et de toutes celles d\'avant. La **fréquence ' +
-              'cumulée** se déduit directement de l\'effectif cumulé — ne la recalcule jamais ' +
-              'séparément.',
+            'Repère les valeurs **distinctes** de la série : les valeurs différentes. Range-les par ordre croissant.',
+            'Pour chaque valeur, compte son **effectif** nᵢ : le nombre de fois qu\'elle apparaît.',
+            'Calcule sa **fréquence** fᵢ = nᵢ/n : la part de la série qu\'elle représente, souvent en %. ' +
+              'Ici, n est l\'effectif total : le nombre de toutes les données.',
+            'Cumule, colonne par colonne. L\'**effectif cumulé** d\'une ligne, c\'est son effectif plus ' +
+              'ceux de toutes les lignes d\'avant. La **fréquence cumulée** se calcule directement à partir ' +
+              'de l\'effectif cumulé. Ne la recalcule jamais à part.',
           ],
         },
         {
@@ -135,12 +137,11 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Pour représenter une série **discrète**, on trace un **diagramme en bâtons** : un ' +
-            'bâton vertical au-dessus de chaque valeur xᵢ, de hauteur nᵢ. Les bâtons restent ' +
-            '**séparés**, parce que le caractère ne prend que des valeurs isolées (on ne lit jamais ' +
-            '5,5 livres). C\'est la grande différence avec l\'**histogramme** de la section 2 : ses ' +
-            'barres sont **accolées**, parce qu\'elles couvrent des classes, des intervalles qui se ' +
-            'suivent sans trou.',
+            'Pour représenter une série **discrète**, on trace un **diagramme en bâtons**. Au-dessus de ' +
+            'chaque valeur xᵢ, on dresse un bâton vertical de hauteur nᵢ. Les bâtons restent ' +
+            '**séparés**, parce que le caractère ne prend que des valeurs séparées : on ne lit jamais 5,5 ' +
+            'livres. C\'est la grande différence avec l\'**histogramme** de l\'étape 2. Ses barres sont ' +
+            '**collées**, parce qu\'elles couvrent des classes : des intervalles qui se suivent sans trou.',
         },
         {
           kind: 'illustration',
@@ -167,34 +168,33 @@ export const statistiqueDescriptive: ChapterContent = {
             xAxisLabel: 'livres lus',
             yAxisLabel: 'effectif',
             caption:
-              'Diagramme en bâtons de la série des livres : un bâton par valeur (3, 5, 7, 12), de ' +
-              'hauteur 6, 7, 4, 3 — les bâtons ne se touchent pas.',
+              'Diagramme en bâtons de la série des livres. Il y a un bâton par valeur (3, 5, 7, 12), de ' +
+              'hauteur 6, 7, 4 et 3. Les bâtons ne se touchent pas.',
           },
         },
         {
           kind: 'astuce',
           label: 'Vérifier son tableau en un coup d\'œil',
           text:
-            'La dernière ligne de la colonne effectif cumulé doit toujours valoir n, l\'effectif ' +
-            'total. Et la dernière ligne de la fréquence cumulée doit toujours valoir 100 %. ' +
-            'Sinon, tu as oublié une valeur — ou compté une valeur en trop !',
+            'La dernière ligne de la colonne « effectif cumulé » doit toujours valoir n, l\'effectif ' +
+            'total. La dernière ligne de la fréquence cumulée doit toujours valoir 100 %. Sinon, tu as ' +
+            'oublié une valeur, ou tu as compté une valeur en trop !',
         },
         {
           kind: 'historique',
           titre: 'Compter les morts pour inventer la statistique',
           text:
-            "En 1662, le marchand londonien **John Graunt** publie ses « Observations " +
-            'naturelles et politiques... faites sur les registres de mortalité » — le tout ' +
-            "premier ouvrage à transformer des données brutes en véritable connaissance. " +
-            "Chaque semaine depuis 1592, les paroisses de Londres enregistraient les décès et " +
-            'leurs causes, sans que personne ne les exploite vraiment. Graunt a l\'idée de les ' +
-            'rassembler dans des tableaux organisés — exactement la démarche de cette section ' +
-            '— et y découvre des régularités insoupçonnées : la proportion de garçons et de ' +
-            "filles à la naissance reste étonnamment stable d'une année à l'autre, et il en " +
-            "tire la toute première « table de mortalité » de l'histoire, un outil encore " +
-            "utilisé aujourd'hui par les compagnies d'assurance. Aucun portrait authentifié de " +
-            "Graunt n'a survécu — l'image parfois présentée comme la sienne est aujourd'hui " +
-            'considérée comme un faux tardif.',
+            "En 1662, un marchand de Londres, **John Graunt**, publie un livre sur les registres des décès. " +
+            "Son titre : « Observations naturelles et politiques... faites sur les registres de mortalité ». " +
+            "C'est le tout premier ouvrage qui transforme des données brutes en vraies connaissances. " +
+            "Depuis 1592, les paroisses de Londres notaient chaque semaine les décès et leurs causes. Mais " +
+            "personne n'utilisait vraiment ces listes. Graunt a l'idée de les ranger dans des tableaux " +
+            "organisés : c'est exactement la démarche de cette étape. Il y découvre des régularités que " +
+            "personne n'imaginait. Par exemple, la part de garçons et de filles à la naissance reste presque " +
+            "la même d'une année à l'autre. Il en tire aussi la toute première « table de mortalité » de " +
+            "l'histoire. Les compagnies d'assurance utilisent encore cet outil aujourd'hui. Aucun portrait " +
+            "sûr de Graunt n'a survécu. L'image qu'on présente parfois comme la sienne est sans doute un " +
+            'faux, fait bien plus tard.',
         },
         {
           kind: 'entrainement',
@@ -211,10 +211,10 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Pour montrer comment un tout se **partage**, on utilise un **diagramme circulaire** : le ' +
-            'disque entier représente 100 % des individus, et chaque catégorie reçoit un **secteur** ' +
-            'proportionnel à sa fréquence. Comme le disque fait 360°, l\'angle du secteur vaut ' +
-            '$\\alpha_i = f_i \\times 360^{\\circ}$ (avec $f_i$ écrite en décimal : 30 % = 0,30). Dans ' +
+            'Pour montrer comment un tout se **partage**, on utilise un **diagramme circulaire**. Le ' +
+            'disque entier représente 100 % des individus. Chaque catégorie reçoit un **secteur** : une ' +
+            'part du disque proportionnelle à sa fréquence. Le disque fait 360°, donc l\'angle du secteur ' +
+            'vaut $\\alpha_i = f_i \\times 360^{\\circ}$. Écris $f_i$ en nombre décimal : 30 % = 0,30. Dans ' +
             'l\'autre sens, un angle lu donne la fréquence : $f_i = \\dfrac{\\alpha_i}{360^{\\circ}}$.',
         },
         {
@@ -233,16 +233,17 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'attention',
           label: 'Un graphique peut mentir sans écrire un seul chiffre faux',
           text:
-            'Avant de croire ce qu\'un graphique « montre », lis ses axes et ses nombres. Quatre ' +
-            'manipulations reviennent souvent :',
+            'Avant de croire ce qu\'un graphique « montre », lis ses axes et ses nombres. Voici quatre ' +
+            'pièges fréquents :',
           items: [
-            '**Axe vertical tronqué** : il ne commence pas à 0, et une petite hausse paraît énorme.',
-            '**Graduations irrégulières** : des écarts égaux sur l\'axe ne représentent pas des écarts ' +
+            '**Axe vertical tronqué** : l\'axe ne commence pas à 0. Une petite hausse paraît alors énorme.',
+            '**Graduations irrégulières** : sur l\'axe, des écarts égaux ne représentent pas des écarts ' +
               'égaux de valeurs.',
-            '**Pictogrammes agrandis dans les deux sens** : un dessin 2 fois plus haut ET 2 fois plus ' +
-              'large a une aire 4 fois plus grande — l\'œil voit « ×4 » pour une valeur seulement doublée.',
-            '**Diagramme circulaire dont les parts ne totalisent pas 100 %** : les parts ne découpent ' +
-              'plus un tout (souvent parce que chacun pouvait donner plusieurs réponses).',
+            '**Pictogrammes agrandis dans les deux sens** : un dessin devient 2 fois plus haut **et** 2 fois ' +
+              'plus large. Son aire est alors 4 fois plus grande. L\'œil voit « ×4 » alors que la valeur est ' +
+              'seulement doublée.',
+            '**Diagramme circulaire dont les parts ne font pas 100 %** : les parts ne découpent plus un ' +
+              'tout. Souvent, c\'est parce que chacun pouvait donner plusieurs réponses.',
           ],
         },
         {
@@ -283,8 +284,8 @@ export const statistiqueDescriptive: ChapterContent = {
               yAxisLabel: 'ventes',
               compact: true,
               caption:
-                'Mêmes données, axe partant de 0 : de 1000 à 1080, la hausse réelle est de ' +
-                '$\\dfrac{1080 - 1000}{1000} \\times 100 = 8$ %.',
+                'Mêmes données, axe partant de 0. De 1000 à 1080, la hausse réelle est de ' +
+                '$\\dfrac{1080 - 1000}{1000} \\times 100 = 8$ %.',
             },
           ],
         },
@@ -293,8 +294,8 @@ export const statistiqueDescriptive: ChapterContent = {
           title: 'Diagrammes et graphiques trompeurs',
           generatorId: 'gen111',
           description: [
-            'Passe des fréquences aux angles d\'un diagramme circulaire (et inversement), lis un ' +
-              'diagramme en bâtons, puis démasque un graphique trompeur et corrige sa conclusion chiffrée.',
+            'Passe des fréquences aux angles d\'un diagramme circulaire, et dans l\'autre sens. Lis un ' +
+              'diagramme en bâtons. Puis démasque un graphique trompeur et corrige sa conclusion chiffrée.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 111. Diagrammes et graphiques trompeurs »',
@@ -309,54 +310,54 @@ export const statistiqueDescriptive: ChapterContent = {
       titreCourt: 'Classes et histogramme',
       partie: 'Organiser et représenter les données',
       essentiel: [
-        'Un caractère continu se regroupe en **classes** ; l\'amplitude d\'une classe vaut borne supérieure − borne inférieure. L\'histogramme a des barres **accolées**, de hauteur égale à l\'effectif quand les classes ont la même amplitude.',
-        'Une classe $[a\\,;\\,b[$ contient a mais **pas** b : une donnée sur une frontière va dans la classe suivante — sauf dans la dernière classe, qui inclut sa borne supérieure.',
-        'Amplitude : l\'étendue divisée par le nombre de classes (en pratique 5 à 8), arrondie vers le haut à une valeur ronde.',
+        'Un caractère continu se regroupe en **classes**. L\'amplitude d\'une classe vaut : borne supérieure − borne inférieure. L\'histogramme a des barres **collées**. Quand les classes ont la même amplitude, la hauteur d\'une barre est l\'effectif de sa classe.',
+        'Une classe $[a\\,;\\,b[$ contient a, mais **pas** b. Une donnée sur une frontière va donc dans la classe suivante. Seule exception : la dernière classe, qui contient aussi sa borne supérieure.',
+        'Amplitude : divise l\'étendue par le nombre de classes (en pratique, 5 à 8). Puis arrondis vers le haut, à une valeur ronde.',
       ],
       cartes: [
         { question: 'Avec les classes $[2\\,;\\,4[$ et $[4\\,;\\,6[$, où va la donnée 4 ?', reponse: 'Dans $[4\\,;\\,6[$ : une donnée sur une frontière va dans la classe suivante.' },
-        { question: 'Quelle classe fait exception à la règle des frontières ?', reponse: 'La toute dernière : elle inclut aussi sa borne supérieure.' },
+        { question: 'Quelle classe fait exception à la règle des frontières ?', reponse: 'La toute dernière : elle contient aussi sa borne supérieure.' },
         { question: 'Étendue 7,5 et 4 classes : quelle amplitude choisir ?', reponse: '$\\dfrac{7{,}5}{4} = 1{,}875$, arrondi vers le haut à 2.' },
-        { question: 'Bâtons séparés ou barres accolées : quand utilise-t-on chacun ?', reponse: 'Des bâtons séparés pour une série discrète ; des barres accolées (histogramme) pour des classes qui se suivent.' },
+        { question: 'Bâtons séparés ou barres collées : quand utilise-t-on chacun ?', reponse: 'Des bâtons séparés pour une série discrète. Des barres collées (histogramme) pour des classes qui se suivent.' },
       ],
       blocks: [
         { kind: 'video', title: 'Regrouper en classes : l\'histogramme', youtubeId: 'oftzQYXj6tA' },
         {
           kind: 'para',
           text:
-            'Un caractère **continu** (ou discret avec trop de valeurs distinctes) : on regroupe ' +
-            'ses données en **classes**, des intervalles consécutifs. L\'**amplitude** d\'une ' +
-            'classe, c\'est sa longueur : borne supérieure − borne inférieure. Pour construire un ' +
-            '**histogramme**, on choisit ici des classes de **même amplitude** : des barres ' +
-            'accolées, dont la **hauteur** vaut l\'effectif (ou la fréquence) de chaque classe.',
+            'Prends un caractère **continu**, ou un caractère discret qui a trop de valeurs différentes. ' +
+            'On regroupe alors ses données en **classes** : des intervalles qui se suivent. Une classe va ' +
+            'd\'une borne inférieure (son début) à une borne supérieure (sa fin). Son **amplitude**, c\'est ' +
+            'sa longueur : borne supérieure − borne inférieure. Pour construire un **histogramme**, on ' +
+            'choisit ici des classes de **même amplitude**. On dessine des barres collées les unes aux ' +
+            'autres. La **hauteur** de chaque barre vaut l\'effectif (ou la fréquence) de sa classe.',
         },
         {
           kind: 'piege',
           label: 'Quelle borne appartient à quelle classe ?',
           text:
-            'Règle utilisée dans tout ce chapitre : une classe [borne inf ; borne sup[ contient ' +
-            'sa borne inférieure, mais **pas** sa borne supérieure ! Une donnée **exactement** ' +
-            'sur une frontière appartient toujours à la classe **suivante**. Seule exception : ' +
-            'la **toute dernière classe** du tableau inclut aussi sa borne supérieure, pour ne ' +
-            'perdre aucune donnée.',
+            'Dans tout ce chapitre, une classe [borne inf ; borne sup[ contient sa borne inférieure. Mais ' +
+            'elle ne contient **pas** sa borne supérieure ! Une donnée qui tombe **exactement** sur une ' +
+            'frontière va donc toujours dans la classe **suivante**. Seule exception : la **toute dernière ' +
+            'classe** du tableau contient aussi sa borne supérieure. Ainsi, on ne perd aucune donnée.',
         },
         {
           kind: 'methode',
           label: 'Choisir ses classes',
           items: [
-            'Calcule l\'**étendue** de la série : max − min.',
-            'Choisis le **nombre de classes** : en pratique entre 5 et 8. Moins quand il y a peu ' +
-              'de données.',
-            'Divise l\'étendue par ce nombre, puis arrondis **vers le haut** à une valeur « ronde » : ' +
+            'Calcule l\'**étendue** de la série : max − min, la plus grande valeur moins la plus petite.',
+            'Choisis le **nombre de classes** : en pratique, entre 5 et 8. Prends-en moins quand il y a ' +
+              'peu de données.',
+            'Divise l\'étendue par ce nombre. Puis arrondis **vers le haut**, à une valeur « ronde » : ' +
               'c\'est l\'**amplitude**.',
-            'Fais commencer la première classe à une valeur ronde, inférieure ou égale au minimum.',
+            'Fais commencer la première classe à une valeur ronde, plus petite que le minimum ou égale à lui.',
           ],
         },
         {
           kind: 'para',
           text:
-            'Sur l\'exemple ci-dessous : min = 0,5 et max = 8, donc étendue = 7,5. Avec seulement ' +
-            '20 données, 4 classes suffisent : $\\dfrac{7{,}5}{4} = 1{,}875$, arrondi à **2**. On démarre à 0 : ' +
+            'Sur l\'exemple ci-dessous : min = 0,5 et max = 8, donc étendue = 7,5. Il n\'y a que 20 ' +
+            'données : 4 classes suffisent. $\\dfrac{7{,}5}{4} = 1{,}875$, arrondi à **2**. On démarre à 0 : ' +
             '[0 ; 2[, [2 ; 4[, [4 ; 6[, [6 ; 8].',
         },
         {
@@ -364,18 +365,18 @@ export const statistiqueDescriptive: ChapterContent = {
           badge: '4 classes, amplitude 2',
           formula:
             'Temps d\'écran quotidien (en h) de 20 élèves : 1 ; 2 ; 3,5 ; 0,5 ; 6 ; 4 ; 1,5 ; ' +
-            '2,5 ; 5 ; 8 ; 0,5 ; 3 ; 1,8 ; 2,2 ; 4,5 ; 7 ; 1,2 ; 3,8 ; 5,5 ; 2,7 — classes ' +
-            'imposées d\'amplitude 2 :',
+            '2,5 ; 5 ; 8 ; 0,5 ; 3 ; 1,8 ; 2,2 ; 4,5 ; 7 ; 1,2 ; 3,8 ; 5,5 ; 2,7. Les classes ' +
+            'imposées ont une amplitude de 2 :',
           steps: [
             {
               tag: 'données sur une frontière',
               text:
-                '2 va dans [2 ; 4[, 4 dans [4 ; 6[ et 6 dans [6 ; 8] — jamais dans la classe qui se ' +
-                'termine par cette valeur.',
+                '2 va dans [2 ; 4[, 4 dans [4 ; 6[ et 6 dans [6 ; 8]. Une donnée ne va jamais dans la ' +
+                'classe qui se termine par cette valeur.',
             },
             {
               tag: '8, la toute dernière borne',
-              text: '8 est la borne supérieure de la dernière classe : exception, [6 ; 8] l\'inclut.',
+              text: '8 est la borne supérieure de la dernière classe : c\'est l\'exception, [6 ; 8] la contient.',
             },
             { tag: 'compter', text: '6 + 7 + 4 + 3 = 20 données ✓' },
           ],
@@ -403,47 +404,44 @@ export const statistiqueDescriptive: ChapterContent = {
             ],
             xAxisLabel: 'classe',
             yAxisLabel: 'effectif',
-            caption: '4 classes d\'amplitude 2 — la hauteur des barres, c\'est l\'effectif de chaque classe',
+            caption: '4 classes d\'amplitude 2. La hauteur d\'une barre est l\'effectif de sa classe.',
           },
         },
         {
           kind: 'astuce',
           text:
-            'Dans l\'entraînement de cette section, l\'effectif total vaut toujours $n = 10$, 20 ou ' +
-            '25 : chaque fréquence y tombe sur un **pourcentage entier**, un bon moyen de te ' +
-            'relire. Ce n\'est pas une règle générale ! Avec $n = 16$ (possible dans le tableau de ' +
-            'fréquences de la section 1), une seule donnée vaut $\\dfrac{1}{16} = 6{,}25\\,\\%$ : une fréquence à ' +
-            'virgule y est parfaitement exacte.',
+            'Dans l\'entraînement de cette étape, l\'effectif total vaut toujours $n = 10$, 20 ou 25. ' +
+            'Chaque fréquence y tombe donc sur un **pourcentage entier** : c\'est un bon moyen de te ' +
+            'relire. Mais ce n\'est pas une règle générale ! Avec $n = 16$ (possible dans le tableau de ' +
+            'fréquences de l\'étape 1), une seule donnée vaut $\\dfrac{1}{16} = 6{,}25\\,\\%$. Une fréquence ' +
+            'à virgule y est donc parfaitement exacte.',
         },
         {
           kind: 'rappel',
           label: 'Classes de même amplitude… seulement pour l\'histogramme',
           items: [
-            'Pour **construire un histogramme**, les classes sont ici toujours de même ' +
-              'amplitude : la hauteur de chaque barre se lit alors directement comme ' +
-              'l\'effectif de la classe.',
-            'Dans les autres exercices du chapitre (moyenne pondérée, médiane, synthèse), les ' +
-              'classes peuvent avoir des amplitudes **différentes**. Ça ne change rien aux ' +
-              'calculs : la moyenne utilise le **centre** de chaque classe, la médiane ' +
-              's\'obtient par **interpolation** dans la classe du seuil, et le mode reste la ' +
-              'classe de **plus grand effectif**.',
+            'Pour **construire un histogramme**, les classes ont ici toujours la même amplitude. La ' +
+              'hauteur de chaque barre se lit alors directement comme l\'effectif de la classe.',
+            'Dans les autres exercices du chapitre (moyenne pondérée, médiane, synthèse), les classes ' +
+              'peuvent avoir des amplitudes **différentes**. Ça ne change rien aux calculs. La moyenne ' +
+              'utilise le **centre** de chaque classe. La médiane s\'obtient par **interpolation** dans ' +
+              'la classe du seuil. Et le mode reste la classe de **plus grand effectif**.',
           ],
         },
         {
           kind: 'historique',
           titre: 'Un diagramme qui a sauvé des vies',
           text:
-            "En 1858, l'infirmière britannique **Florence Nightingale** publie un rapport sur " +
-            "les pertes de l'armée britannique pendant la guerre de Crimée, accompagné d'un " +
-            "graphique de son invention : le « diagramme en rose » (coxcomb), une forme " +
-            "d'histogramme circulaire où chaque secteur, groupé par mois, montre les décès " +
-            "dus aux blessures de combat, aux maladies évitables et à d'autres causes. Le " +
-            "résultat est saisissant : la quasi-totalité des morts viennent de maladies " +
-            "évitables (typhus, choléra, mauvaise hygiène) et non des combats eux-mêmes. " +
-            "Nightingale sait que des tableaux de chiffres n'auraient jamais convaincu le " +
-            "Parlement britannique aussi vite — son graphique, lui, le fait : les hôpitaux " +
-            "militaires sont réformés dans la foulée. C'est l'un des tout premiers exemples " +
-            "où un graphique statistique change concrètement une décision politique.",
+            "En 1858, l'infirmière britannique **Florence Nightingale** publie un rapport sur la guerre de " +
+            "Crimée. Il parle des soldats britanniques morts pendant cette guerre. Elle y ajoute un " +
+            "graphique de son invention : le « diagramme en rose » (coxcomb). C'est une sorte " +
+            "d'histogramme en cercle, avec un secteur par mois. Chaque secteur montre les morts dus aux " +
+            "blessures de combat, aux maladies évitables et aux autres causes. Le résultat frappe tout le " +
+            "monde. Presque tous les morts viennent de maladies évitables (typhus, choléra, mauvaise " +
+            "hygiène), pas des combats. Nightingale sait qu'un tableau de chiffres n'aurait pas convaincu " +
+            "le Parlement britannique aussi vite. Son graphique, lui, y arrive : les hôpitaux militaires " +
+            "sont réformés juste après. C'est l'un des tout premiers cas où un graphique statistique " +
+            "change vraiment une décision politique.",
           image: {
             src: '/images/historique/nightingale.jpg',
             alt: 'Portrait de Florence Nightingale',
@@ -456,19 +454,19 @@ export const statistiqueDescriptive: ChapterContent = {
           label: 'Manipule toi-même — combien de classes choisir ?',
           caption:
             'Les 40 mêmes temps de trajet, découpés en 2 à 12 classes de même amplitude ' +
-            '(amplitude = étendue / nombre de classes). Trop peu de classes mélangent les ' +
-            'élèves qui viennent à pied et ceux qui prennent le bus ; trop de classes ' +
-            'donnent un histogramme haché, plein de classes presque vides. Cherche le ' +
-            'découpage qui montre le mieux les deux groupes.',
+            '(amplitude = étendue / nombre de classes). Avec trop peu de classes, on mélange les ' +
+            'élèves qui viennent à pied et ceux qui prennent le bus. Avec trop de classes, ' +
+            'l\'histogramme est haché, plein de classes presque vides. Cherche le découpage qui ' +
+            'montre le mieux les deux groupes.',
         },
         {
           kind: 'atelier',
           tag: 'frontiere-classe-widget',
           label: 'Manipule toi-même — sur quelle classe tombe x ?',
           caption:
-            'Fais glisser x le long des 4 classes de l\'exemple : dès qu\'il tombe pile sur une ' +
-            'frontière, le point devient rouge et le texte précise explicitement la classe ' +
-            'SUIVANTE — sauf tout à la fin, où la dernière classe fait exception.',
+            'Fais glisser x le long des 4 classes de l\'exemple. Quand x tombe pile sur une ' +
+            'frontière, le point devient rouge. Le texte te dit alors clairement que x va dans la ' +
+            'classe suivante. Seule exception, tout à la fin : la dernière classe.',
         },
         {
           kind: 'entrainement',
@@ -491,9 +489,9 @@ export const statistiqueDescriptive: ChapterContent = {
       titreCourt: 'Moyenne pondérée',
       partie: 'Moyenne, médiane, quartiles',
       essentiel: [
-        'Moyenne pondérée : $\\bar{x} = \\dfrac{\\Sigma(x_i \\cdot n_i)}{\\Sigma n_i}$ — chaque valeur multipliée par son effectif, la somme divisée par l\'effectif total. Jamais la moyenne des valeurs distinctes seules.',
-        'En classes, chaque classe $[a\\,;\\,b[$ est représentée par son **centre** $\\dfrac{a+b}{2}$ : la moyenne obtenue est une approximation.',
-        'Une donnée manque ? Écris la formule avec toutes les données, l\'inconnue comprise, égale-la à la moyenne connue et résous l\'équation.',
+        'Moyenne pondérée : $\\bar{x} = \\dfrac{\\Sigma(x_i \\cdot n_i)}{\\Sigma n_i}$. On multiplie chaque valeur par son effectif, puis on divise la somme par l\'effectif total. Ne fais jamais la moyenne des valeurs distinctes seules.',
+        'En classes, chaque classe $[a\\,;\\,b[$ est représentée par son **centre** $\\dfrac{a+b}{2}$. La moyenne obtenue est alors une valeur approchée.',
+        'Une donnée manque ? Écris la formule avec toutes les données, l\'inconnue comprise. Égale-la à la moyenne connue, puis résous l\'équation.',
       ],
       cartes: [
         { question: 'Quel est le centre de la classe $[4\\,;\\,8[$ ?', reponse: '$\\dfrac{4+8}{2} = 6$.' },
@@ -506,9 +504,9 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'para',
           text:
-            'La **moyenne pondérée** tient compte du poids de chaque valeur. Chaque valeur n\'a ' +
-            'pas le même « poids » : une valeur qui revient 7 fois compte 7 fois plus qu\'une ' +
-            'valeur isolée.',
+            'La **moyenne pondérée** tient compte du poids de chaque valeur. Toutes les valeurs n\'ont pas ' +
+            'le même « poids ». Une valeur qui revient 7 fois compte 7 fois plus qu\'une valeur qui ' +
+            'n\'apparaît qu\'une fois.',
         },
         {
           kind: 'definition',
@@ -541,17 +539,17 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'piege',
           text:
             'Ne fais **jamais** la moyenne des valeurs distinctes seules ! Ici, ça donnerait ' +
-            '$(2+6+9+12)/4 = 7{,}25$. Cette erreur ignore complètement les effectifs. Elle ' +
+            '$(2+6+9+12)/4 = 7{,}25$. Cette erreur oublie complètement les effectifs. Elle ' +
             'donne un résultat faux dès que les effectifs ne sont pas tous égaux.',
         },
         {
           kind: 'methode',
           label: 'Données regroupées en classes',
           items: [
-            'On ne connaît plus chaque valeur : on utilise le **centre** de chaque classe, la ' +
+            'On ne connaît plus chaque valeur. On utilise donc le **centre** de chaque classe : la ' +
               'moyenne de ses deux bornes. Pour la classe $[a\\,;\\,b[$, c\'est $\\dfrac{a+b}{2}$. Il ' +
               'représente toute la classe dans le calcul.',
-            'C\'est une **approximation** : on fait comme si toutes les valeurs de la classe ' +
+            'On obtient une **valeur approchée** : on fait comme si toutes les valeurs de la classe ' +
               'étaient au centre. La vraie moyenne des données brutes peut être un peu différente.',
           ],
         },
@@ -570,34 +568,32 @@ export const statistiqueDescriptive: ChapterContent = {
               ],
             },
             { kind: 'para', text: 'Somme des produits : $10+48+40+42=140$. Effectif total : $n=20$.' },
-            { kind: 'para', text: 'Moyenne : $\\bar{x} = 140/20 = 7$ — une valeur approchée.' },
+            { kind: 'para', text: 'Moyenne : $\\bar{x} = 140/20 = 7$. C\'est une valeur approchée.' },
           ],
         },
         {
           kind: 'astuce',
           label: 'Avec les fréquences',
           text:
-            'Si le tableau donne les **fréquences** fᵢ (en nombre décimal) au lieu des effectifs, la ' +
-            'formule devient $\\bar{x} = \\Sigma(x_i \\cdot f_i)$. Plus besoin de diviser : la somme ' +
-            'des fréquences vaut déjà 1. Sur l\'exemple discret : $2 \\cdot 0{,}25 + 6 \\cdot 0{,}4 + ' +
-            '9 \\cdot 0{,}2 + 12 \\cdot 0{,}15 = 6{,}5$ — la même moyenne.',
+            'Le tableau donne parfois les **fréquences** fᵢ (en nombre décimal) au lieu des effectifs. La ' +
+            'formule devient alors $\\bar{x} = \\Sigma(x_i \\cdot f_i)$. Plus besoin de diviser : la somme ' +
+            'des fréquences vaut déjà 1. Sur l\'exemple discret : ' +
+            '$2 \\cdot 0{,}25 + 6 \\cdot 0{,}4 + 9 \\cdot 0{,}2 + 12 \\cdot 0{,}15 = 6{,}5$. C\'est la même moyenne.',
         },
         {
           kind: 'historique',
           titre: 'L\'astronome belge qui a inventé « l\'homme moyen »',
           text:
-            "Dans les années 1830, l'astronome et statisticien belge **Adolphe Quetelet** a " +
-            "une idée audacieuse : appliquer la moyenne pondérée — jusque-là réservée aux " +
-            "mesures physiques en astronomie — aux mesures humaines. En compilant des " +
-            "milliers de mesures de taille, de poids et même de comportements, il construit " +
-            'le concept de « l\'homme moyen », un individu théorique qui ' +
-            "résumerait toute une population par ses valeurs moyennes. L'idée fait scandale " +
-            "autant qu'elle fascine : peut-on vraiment réduire une société entière à quelques " +
-            'nombres ? Quetelet invente au passage l\'**indice de masse corporelle** (encore ' +
-            'appelé « indice de Quetelet »), le poids divisé par le carré de la taille, ' +
-            "toujours utilisé en médecine aujourd'hui. Fondateur de l'Observatoire royal de " +
-            "Belgique, il reste l'un des scientifiques belges les plus influents du 19e " +
-            "siècle.",
+            "Dans les années 1830, l'astronome et statisticien belge **Adolphe Quetelet** a une idée " +
+            "nouvelle. Jusque-là, on utilisait la moyenne pondérée pour des mesures en astronomie. Lui " +
+            "l'applique aux mesures humaines. Il rassemble des milliers de mesures : tailles, poids et " +
+            "même comportements. Il construit ainsi l'idée de « l'homme moyen ». C'est un individu " +
+            "imaginaire qui résumerait toute une population par ses valeurs moyennes. L'idée choque " +
+            "autant qu'elle fascine : peut-on vraiment réduire une société entière à quelques nombres ? " +
+            "Au passage, Quetelet invente l'**indice de masse corporelle**, aussi appelé « indice de " +
+            "Quetelet ». C'est le poids divisé par le carré de la taille. Les médecins l'utilisent " +
+            "toujours aujourd'hui. Il a fondé l'Observatoire royal de Belgique. C'est l'un des " +
+            "scientifiques belges les plus importants du 19e siècle.",
           image: {
             src: '/images/historique/quetelet.jpg',
             alt: 'Portrait d\'Adolphe Quetelet',
@@ -620,14 +616,14 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'methode',
           label: 'Quand la moyenne est connue mais qu\'une donnée manque',
           items: [
-            'Appelle l\'inconnue par une lettre ($x$ pour une note, $k$ pour un effectif…), puis écris la ' +
-              'formule de la moyenne **avec toutes les données**, l\'inconnue comprise : elle apparaît au ' +
-              'numérateur (multipliée par son coefficient ou sa valeur) ET, si c\'est un effectif ou un ' +
-              'coefficient, au dénominateur.',
+            'Appelle l\'inconnue par une lettre ($x$ pour une note, $k$ pour un effectif…). Écris la ' +
+              'formule de la moyenne **avec toutes les données**, l\'inconnue comprise. L\'inconnue ' +
+              'apparaît en haut de la fraction, multipliée par son coefficient ou par sa valeur. Si c\'est ' +
+              'un effectif ou un coefficient, elle apparaît aussi en bas de la fraction.',
             'Égale cette expression à la moyenne connue : c\'est une équation du premier degré. Multiplie ' +
-              'les deux membres par le dénominateur, puis isole l\'inconnue.',
-            'Conclus dans le contexte : une note ne dépasse pas 20 (le résultat peut montrer que c\'est ' +
-              'impossible), un effectif est un nombre entier, et l\'effectif total change quand on ajoute ' +
+              'les deux côtés de l\'égalité par le dénominateur, puis isole l\'inconnue.',
+            'Conclus dans le contexte. Une note ne dépasse pas 20 : le résultat peut montrer que c\'est ' +
+              'impossible. Un effectif est un nombre entier. Et l\'effectif total change quand on ajoute ' +
               'des données.',
           ],
         },
@@ -646,8 +642,8 @@ export const statistiqueDescriptive: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Conclusion : Léa doit obtenir **au moins** 13/20 — avec exactement 13, sa moyenne vaut 12 ; ' +
-                'avec plus, elle dépasse 12.',
+                'Conclusion : Léa doit obtenir **au moins** 13/20. Avec exactement 13, sa moyenne vaut 12. ' +
+                'Avec plus, elle dépasse 12.',
             },
           ],
         },
@@ -656,9 +652,9 @@ export const statistiqueDescriptive: ChapterContent = {
           label: 'La moyenne des moyennes',
           text:
             'Pour réunir deux groupes de tailles différentes, on ne fait **jamais** la moyenne des deux ' +
-            'moyennes. La 4e A (24 élèves, moyenne 14) et la 4e B (16 élèves, moyenne 9) ont ensemble une ' +
-            'moyenne de $\\dfrac{24 \\times 14 + 16 \\times 9}{24 + 16} = \\dfrac{480}{40} = 12$, et non ' +
-            '$\\dfrac{14 + 9}{2} = 11{,}5$ : le groupe le plus nombreux pèse davantage.',
+            'moyennes. La 4e A a 24 élèves, avec une moyenne de 14. La 4e B a 16 élèves, avec une moyenne ' +
+            'de 9. Ensemble, leur moyenne vaut $\\dfrac{24 \\times 14 + 16 \\times 9}{24 + 16} = \\dfrac{480}{40} = 12$, ' +
+            'et non $\\dfrac{14 + 9}{2} = 11{,}5$. Le groupe le plus nombreux pèse davantage.',
         },
         {
           kind: 'entrainement',
@@ -666,8 +662,8 @@ export const statistiqueDescriptive: ChapterContent = {
           generatorId: 'gen109',
           description: [
             'Note à obtenir pour atteindre une moyenne (avec ou sans coefficients), effectif effacé ' +
-              'd\'un tableau, moyenne de deux groupes réunis, et combien de valeurs ajouter pour ' +
-              'obtenir une médiane (règle du seuil, section 4) : pose l\'équation, résous-la, conclus.',
+              'd\'un tableau, moyenne de deux groupes réunis. Et aussi : combien de valeurs ajouter pour ' +
+              'obtenir une médiane (règle du seuil, étape 4). Pose l\'équation, résous-la, conclus.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 109. Retrouver une valeur manquante »',
@@ -682,15 +678,15 @@ export const statistiqueDescriptive: ChapterContent = {
       titreCourt: 'Médiane, quartiles, mode',
       partie: 'Moyenne, médiane, quartiles',
       essentiel: [
-        'Règle du seuil : sur les effectifs cumulés, le seuil vaut $\\dfrac{n}{2}$ pour la médiane, $\\dfrac{n}{4}$ pour Q1 et $\\dfrac{3n}{4}$ pour Q3 ; le paramètre est la **première valeur** dont l\'effectif cumulé dépasse **strictement** ce seuil.',
+        'Règle du seuil : sur les effectifs cumulés, le seuil vaut $\\dfrac{n}{2}$ pour la médiane, $\\dfrac{n}{4}$ pour Q1 et $\\dfrac{3n}{4}$ pour Q3. Le paramètre est la **première valeur** dont l\'effectif cumulé dépasse **strictement** ce seuil.',
         'En classes, on interpole dans la classe du seuil : $\\text{valeur} = L + \\dfrac{\\text{seuil} - CF_{avant}}{n_{classe}} \\cdot \\text{amplitude}$.',
-        'Le **mode** est la valeur (ou la classe) de plus grand effectif. La médiane est insensible aux valeurs extrêmes, la moyenne très sensible.',
+        'Le **mode** est la valeur (ou la classe) de plus grand effectif. Une valeur extrême ne fait presque pas bouger la médiane. Elle fait beaucoup bouger la moyenne.',
       ],
       cartes: [
-        { question: 'n = 20 : quel est le seuil de Q1 ?', reponse: '$\\dfrac{n}{4} = 5$ : Q1 est la première valeur dont l\'effectif cumulé dépasse strictement 5.' },
+        { question: 'n = 20 : quel est le seuil de Q1 ?', reponse: '$\\dfrac{n}{4} = 5$. Q1 est la première valeur dont l\'effectif cumulé dépasse strictement 5.' },
         { question: 'L\'effectif cumulé d\'une valeur vaut exactement le seuil : est-ce le paramètre cherché ?', reponse: 'Non, pas encore : on prend la valeur suivante.' },
         { question: 'Le seuil 10 tombe dans $[4\\,;\\,8[$ (cumulés de 5 à 13) : que vaut la médiane ?', reponse: '$4 + \\dfrac{10-5}{8} \\cdot 4 = 6{,}5$.' },
-        { question: 'Une valeur énorme s\'ajoute à la série : quel indicateur bouge à peine ?', reponse: 'La médiane : elle est insensible aux valeurs extrêmes, contrairement à la moyenne.' },
+        { question: 'Une valeur énorme s\'ajoute à la série : quel indicateur bouge à peine ?', reponse: 'La médiane. Une valeur extrême ne la fait presque pas bouger, contrairement à la moyenne.' },
       ],
       blocks: [
         { kind: 'video', title: 'Médiane, quartiles et mode (1/2) : la règle du seuil', youtubeId: 'OTT30Ux-Z8k' },
@@ -699,39 +695,42 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'intuition',
           label: 'Pourquoi une médiane, en plus de la moyenne ?',
           text:
-            'Imagine une rue de dix maisons. Neuf valent environ 200 000 € chacune, la dixième ' +
-            'est un immense château à 10 000 000 €. La **moyenne** des dix prix explose à cause ' +
-            'du château — elle donne un prix qu\'aucune maison de la rue n\'atteint vraiment. La ' +
-            '**médiane**, elle, ne regarde que le rang : elle reste sur le prix d\'une maison ' +
-            '« normale », sans se soucier de savoir à quel point le château est cher.',
+            'Imagine une rue de dix maisons. Neuf valent environ 200 000 € chacune. La dixième est un ' +
+            'immense château à 10 000 000 €. La **moyenne** des dix prix explose à cause du château. Elle ' +
+            'donne un prix qu\'aucune maison de la rue n\'atteint vraiment. La **médiane**, elle, ne regarde ' +
+            'que le rang : la place dans la liste rangée. Elle reste sur le prix d\'une maison « normale », ' +
+            'sans se soucier du prix du château.',
         },
         {
           kind: 'para',
           text:
-            'Ces paramètres localisent une série par le **rang** des individus — pas par un ' +
-            'calcul sur les valeurs elles-mêmes. La **médiane** partage la série en deux ' +
-            'moitiés égales. Les **quartiles** Q1 et Q3 la partagent en quatre. Le **mode**, ' +
-            'lui, est simplement la valeur (ou la classe) de plus grand effectif.',
+            'Ces paramètres décrivent une série par le **rang** des individus : leur place quand on range ' +
+            'les valeurs dans l\'ordre. Ce n\'est pas un calcul sur les valeurs elles-mêmes. La ' +
+            '**médiane** coupe la série en deux moitiés égales. Les **quartiles** Q1 et Q3 la coupent en ' +
+            'quatre parts égales. Le **mode**, lui, est simplement la valeur (ou la classe) de plus grand ' +
+            'effectif.',
         },
         {
           kind: 'methode',
           label: 'La règle du seuil',
           items: [
             'Sur le tableau des effectifs cumulés, chaque paramètre correspond à un **seuil** : ' +
-              '$\\dfrac{n}{2}$ pour la médiane, $\\dfrac{n}{4}$ pour $Q_1$, $\\dfrac{3n}{4}$ pour $Q_3$. Le paramètre cherché, c\'est la ' +
-              '**première valeur** dont l\'effectif cumulé dépasse **strictement** ce seuil.',
+              '$\\dfrac{n}{2}$ pour la médiane, $\\dfrac{n}{4}$ pour $Q_1$, $\\dfrac{3n}{4}$ pour $Q_3$. Le ' +
+              'paramètre cherché, c\'est la **première valeur** dont l\'effectif cumulé dépasse ' +
+              '**strictement** ce seuil. Dépasser strictement le seuil veut dire : être plus grand que lui, ' +
+              'et pas seulement égal.',
           ],
         },
         {
           kind: 'piege',
           label: '« Strictement supérieur », jamais « supérieur ou égal »',
           text:
-            'C\'est l\'erreur la plus fréquente ! Si l\'effectif cumulé est **exactement** égal ' +
-            'au seuil, ce n\'est **pas encore** la bonne valeur. Il faut prendre la ' +
-            '**suivante**. Preuve sur l\'exemple ci-dessous, avec $Q_1$ : le seuil vaut $\\dfrac{n}{4} = 5$, ' +
-            'et l\'effectif cumulé de x=2 vaut **exactement** 5 — égal au seuil, donc pas encore. ' +
-            'Le premier cumulé strictement supérieur à 5 est 13, à x=6 : Q1 = 6. Jamais x=2, ' +
-            'même si tu es tenté de t\'arrêter dès que le cumulé « atteint » le seuil.',
+            'C\'est l\'erreur la plus fréquente ! Si l\'effectif cumulé est **exactement** égal au seuil, ' +
+            'ce n\'est **pas encore** la bonne valeur. Il faut prendre la **suivante**. Vérifie-le sur ' +
+            'l\'exemple ci-dessous, avec $Q_1$. Le seuil vaut $\\dfrac{n}{4} = 5$, et l\'effectif cumulé ' +
+            'de x=2 vaut **exactement** 5. Il est égal au seuil : ce n\'est donc pas encore Q1. Le premier ' +
+            'cumulé strictement supérieur à 5 est 13, à x=6 : Q1 = 6. Ce n\'est jamais x=2, même si tu as ' +
+            'envie de t\'arrêter dès que le cumulé « atteint » le seuil.',
         },
         {
           kind: 'exempleLibre',
@@ -758,10 +757,10 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'para',
           text:
             'Avec des classes, on ne connaît plus chaque valeur. On trace alors le **polygone des ' +
-            'effectifs cumulés**. Chaque point a pour abscisse la **borne supérieure** d\'une ' +
-            'classe, et pour ordonnée l\'effectif cumulé de cette classe : à la fin de la classe ' +
-            '[4 ; 8[, on a déjà compté 13 données. On part de 0, sur la borne inférieure de la ' +
-            'toute première classe. Puis on relie les points par des segments.',
+            'effectifs cumulés**. Chaque point a pour abscisse la **borne supérieure** d\'une classe. Il ' +
+            'a pour ordonnée l\'effectif cumulé de cette classe. Par exemple, à la fin de la classe ' +
+            '[4 ; 8[, on a déjà compté 13 données. On part de 0, sur la borne inférieure de la toute ' +
+            'première classe. Puis on relie les points par des segments.',
         },
         {
           kind: 'featureTable',
@@ -781,8 +780,8 @@ export const statistiqueDescriptive: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Seuil de la médiane : $n/2 = 10$. On part de 10 sur l\'axe des effectifs, on va ' +
-                'jusqu\'au polygone, puis on descend sur l\'axe des valeurs.',
+                'Seuil de la médiane : $n/2 = 10$. On part de 10 sur l\'axe des effectifs et on va ' +
+                'jusqu\'au polygone. Puis on descend sur l\'axe des valeurs.',
             },
             {
               kind: 'illustration',
@@ -817,16 +816,16 @@ export const statistiqueDescriptive: ChapterContent = {
                 xAxisLabel: 'valeur',
                 yAxisLabel: 'effectif cumulé',
                 caption:
-                  'Polygone des effectifs cumulés : le seuil 10 coupe le segment de (4 ; 5) à (8 ; 13), ' +
-                  'donc dans la classe [4 ; 8[. On lit médiane ≈ 6,5. Le triangle vert montre la ' +
-                  'proportionnalité utilisée par le calcul juste en dessous.',
+                  'Polygone des effectifs cumulés. Le seuil 10 coupe le segment qui va de (4 ; 5) à ' +
+                  '(8 ; 13) : on est donc dans la classe [4 ; 8[. On lit médiane ≈ 6,5. Le triangle vert ' +
+                  'montre la proportionnalité utilisée par le calcul juste en dessous.',
               },
             },
             {
               kind: 'para',
               text:
-                'Le seuil 10 tombe sur le segment qui relie $(4\\,;\\,5)$ et $(8\\,;\\,13)$ : la médiane ' +
-                'est dans la classe [4 ; 8[. On lit environ **6,5**.',
+                'Le seuil 10 tombe sur le segment qui relie $(4\\,;\\,5)$ et $(8\\,;\\,13)$. La médiane ' +
+                'est donc dans la classe [4 ; 8[. On lit environ **6,5**.',
             },
           ],
         },
@@ -834,18 +833,18 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'methode',
           label: 'Données regroupées en classes : interpolation',
           items: [
-            'La lecture sur le polygone se calcule exactement. Sur le segment de la classe, ' +
-              'l\'effectif cumulé monte de $n_{classe}$ pendant que la valeur avance d\'une ' +
-              'amplitude : c\'est une situation de **proportionnalité** (le triangle vert). Pour ' +
-              'monter de $\\text{seuil} - CF_{avant}$, il faut donc avancer de ' +
+            'La lecture sur le polygone se calcule exactement. Sur le segment de la classe, l\'effectif ' +
+              'cumulé monte de $n_{classe}$. Pendant ce temps, la valeur avance d\'une amplitude. C\'est ' +
+              'une situation de **proportionnalité** (le triangle vert). Pour monter de ' +
+              '$\\text{seuil} - CF_{avant}$, il faut donc avancer de ' +
               '$\\dfrac{\\text{seuil} - CF_{avant}}{n_{classe}} \\cdot \\text{amplitude}$.',
-            'D\'abord, repère la **classe** où le seuil tombe, comme ci-dessus. Ensuite, ' +
-              'trouve la valeur exacte par interpolation linéaire le long de cette classe : ' +
+            'D\'abord, repère la **classe** où tombe le seuil, comme ci-dessus. Ensuite, trouve la valeur ' +
+              'exacte par interpolation linéaire, le long de cette classe : ' +
               '$\\text{valeur} = L + \\dfrac{\\text{seuil} - CF_{avant}}{n_{classe}} \\cdot \\text{amplitude}$. ' +
-              'L est la borne inférieure de la classe, et $CF_{avant}$ l\'effectif cumulé ' +
+              'Ici, L est la borne inférieure de la classe. Et $CF_{avant}$ est l\'effectif cumulé ' +
               '**juste avant** cette classe.',
-            'Sur les mêmes effectifs regroupés en classes [0;4[/[4;8[/[8;12[/[12;16[ : le ' +
-              'seuil médiane = 10 tombe dans [4;8[ (cumulés 5→13). Donc médiane = ' +
+            'Reprends les mêmes effectifs, regroupés en classes [0;4[/[4;8[/[8;12[/[12;16[. Le seuil de ' +
+              'la médiane, 10, tombe dans [4;8[ (cumulés 5→13). Donc médiane = ' +
               '$4 + \\dfrac{10-5}{8}\\times 4 = 6{,}5$.',
           ],
         },
@@ -854,20 +853,21 @@ export const statistiqueDescriptive: ChapterContent = {
           tag: 'seuil-cumule-widget',
           label: 'Manipule toi-même — le seuil, en valeurs isolées puis en classes',
           caption:
-            'Deux modes. En valeurs isolées : règle les effectifs ; la ligne du tableau qui ' +
-            'atteint exactement le seuil se surligne en rouge (« pas encore ! »), celle qui ' +
-            'le dépasse la PREMIÈRE en vert — avec Q1 et les réglages par défaut, tu es ' +
-            'dans le cas-piège du texte. En classes : le polygone des effectifs cumulés ' +
-            'apparaît ; suis la ligne du seuil jusqu\'au polygone, puis descends sur l\'axe — ' +
-            'le petit triangle violet est exactement la règle de trois de la formule ' +
-            'd\'interpolation (médiane = 6,5 par défaut).',
+            'Deux façons de jouer. En valeurs isolées : règle les effectifs. La ligne du tableau qui ' +
+            'atteint exactement le seuil devient rouge (« pas encore ! »). Celle qui le dépasse la ' +
+            'première devient verte. Avec Q1 et les réglages de départ, tu es dans le cas-piège du ' +
+            'texte. En classes : le polygone des effectifs cumulés apparaît. Suis la ligne du seuil ' +
+            'jusqu\'au polygone, puis descends sur l\'axe. Le petit triangle violet est exactement la ' +
+            'règle de trois de la formule d\'interpolation (médiane = 6,5 au départ).',
         },
         { kind: 'subheading', text: 'Le mode, sans aucun calcul' },
         {
           kind: 'para',
           text:
-            'Le **mode**, c\'est simplement la valeur (ou la classe) de plus grand effectif. Tu ' +
-            'le lis directement sur un tableau déjà ordonné, sans aucun seuil ni cumul.',
+            'Le **mode**, c\'est simplement la valeur (ou la classe) de plus grand effectif : celle qui ' +
+            'revient le plus souvent. Tu le lis directement sur un tableau déjà rangé, sans seuil ni cumul. ' +
+            'Avec des classes, le mode est une classe : la **classe modale**. Une série qui a deux modes ' +
+            'est dite **bimodale**.',
         },
         {
           kind: 'exemple',
@@ -881,27 +881,26 @@ export const statistiqueDescriptive: ChapterContent = {
           badge: 'classe modale',
           formula: 'Classes [0 ; 4[, [4 ; 8[, [8 ; 12[, [12 ; 16[ — effectifs 5, 8, 4, 3',
           steps: [{ tag: 'plus grand effectif', text: '8, pour la classe [4 ; 8[' }],
-          result: { tag: 'classe modale', text: '[4 ; 8[ — pour des données en classes, le mode est une classe, pas un nombre' },
+          result: { tag: 'classe modale', text: '[4 ; 8[. Pour des données en classes, le mode est une classe, pas un nombre.' },
         },
         {
           kind: 'exemple',
           badge: 'deux modes',
           formula: '2 — 3 — 3 — 3 — 5 — 6 — 7 — 7 — 7 — 9',
-          steps: [{ tag: 'compter', text: '3 et 7 apparaissent chacun 3 fois — aucune autre valeur n\'apparaît autant' }],
-          result: { tag: 'série bimodale', text: 'deux modes : 3 et 7 — une série peut avoir plusieurs modes' },
+          steps: [{ tag: 'compter', text: '3 et 7 apparaissent chacun 3 fois. Aucune autre valeur n\'apparaît autant.' }],
+          result: { tag: 'série bimodale', text: 'deux modes : 3 et 7. Une série peut avoir plusieurs modes.' },
         },
         {
           kind: 'methode',
           label: 'Quelle valeur centrale choisir ?',
           items: [
-            'Les trois paramètres se valent mathématiquement. Mais pas dans toutes les situations !',
-            '**Moyenne** — elle utilise toutes les données. Mais elle est très sensible aux ' +
-              'valeurs extrêmes : un seul salaire énorme fait grimper toute une moyenne.',
-            '**Médiane** — elle est insensible aux valeurs extrêmes. Mais elle ne regarde ' +
-              'qu\'une seule position, et ignore la forme du reste de la série.',
-            '**Mode** — c\'est toujours une vraie valeur de la série, facile à lire. Mais il ' +
-              'est peu représentatif si les effectifs sont trop dispersés, ou s\'il y a ' +
-              'plusieurs modes.',
+            'Mathématiquement, les trois paramètres se valent. Mais pas dans toutes les situations !',
+            '**Moyenne** : elle utilise toutes les données. Mais une valeur extrême la fait beaucoup ' +
+              'bouger : un seul salaire énorme fait grimper toute une moyenne.',
+            '**Médiane** : une valeur extrême ne la fait presque pas bouger. Mais elle ne regarde ' +
+              'qu\'une seule position, et pas la forme du reste de la série.',
+            '**Mode** : c\'est toujours une vraie valeur de la série, facile à lire. Mais il résume mal ' +
+              'la série si les effectifs sont très étalés, ou s\'il y a plusieurs modes.',
           ],
         },
         {
@@ -909,9 +908,9 @@ export const statistiqueDescriptive: ChapterContent = {
           tag: 'valeur-aberrante-widget',
           label: 'Manipule toi-même — la valeur aberrante',
           caption:
-            'Pousse le match exceptionnel vers la droite : la moyenne s\'envole, la médiane ' +
-            '(la 5e valeur dans l\'ordre croissant) ne bouge pas. Le bouton « Match ' +
-            'exceptionnel » retrouve exactement l\'application du basketteur ci-dessous ' +
+            'Pousse le match exceptionnel vers la droite : la moyenne s\'envole, mais la médiane ne ' +
+            'bouge pas. Ici, la médiane est la 5e valeur dans l\'ordre croissant. Le bouton « Match ' +
+            'exceptionnel » retrouve exactement l\'application du basketteur, plus bas ' +
             '(moyenne 22,75, médiane 20).',
         },
         {
@@ -943,24 +942,23 @@ export const statistiqueDescriptive: ChapterContent = {
               xAxisLabel: 'match',
               yAxisLabel: 'points marqués',
               caption:
-                '8 matchs d\'un basketteur, dont un exceptionnel à 50 points. La moyenne ' +
-                '(22,75) est tirée vers le haut par ce seul match ; la médiane (20 — règle du ' +
-                'seuil : $\\dfrac{n}{2} = 4$, et la 5e valeur dans l\'ordre croissant est 20) reste proche du ' +
-                'niveau typique des 7 autres matchs.',
+                '8 matchs d\'un basketteur, dont un exceptionnel à 50 points. Ce seul match tire la ' +
+                'moyenne (22,75) vers le haut. La médiane vaut 20 : avec la règle du seuil, ' +
+                '$\\dfrac{n}{2} = 4$, et la 5e valeur dans l\'ordre croissant est 20. Elle reste proche ' +
+                'du niveau habituel des 7 autres matchs.',
             },
           ],
           text:
-            "En sport, le choix entre moyenne, médiane et mode change complètement l'histoire " +
-            "qu'on raconte. La moyenne de points par match d'un basketteur peut être tirée " +
-            "vers le haut par une seule performance exceptionnelle à 50 points — la médiane, " +
-            "elle, reste insensible à ce match exceptionnel et reflète mieux son niveau « " +
-            "typique ». Un entraîneur qui compare deux joueurs de même moyenne regarde " +
-            "ensuite leur dispersion : celui dont les scores varient peu (constant match " +
-            "après match) est souvent préféré à celui qui alterne les matchs exceptionnels et " +
-            "les matchs catastrophiques, même à moyenne égale. Le mode, lui, sert à repérer " +
-            "le score le plus fréquent d'un joueur — utile pour prédire ce qu'il est le plus " +
-            "probable de réaliser lors du prochain match, plutôt que ce qu'il réalise « en " +
-            "moyenne ».",
+            "En sport, choisir entre moyenne, médiane et mode change complètement l'histoire qu'on " +
+            "raconte. Prends la moyenne de points par match d'un basketteur. Une seule performance " +
+            "exceptionnelle à 50 points peut la tirer vers le haut. La médiane, elle, ne bouge presque " +
+            "pas à cause de ce match. Elle montre mieux son niveau « habituel ». Un entraîneur compare " +
+            "parfois deux joueurs de même moyenne. Il regarde alors leur dispersion : à quel point leurs " +
+            "scores changent d'un match à l'autre. Souvent, il préfère le joueur régulier, dont les " +
+            "scores varient peu. L'autre alterne les matchs exceptionnels et les matchs catastrophiques, " +
+            "même à moyenne égale. Le mode, lui, montre le score le plus fréquent d'un joueur. Il aide à " +
+            "prévoir ce que le joueur va le plus probablement marquer au prochain match. Ce n'est pas la " +
+            "même chose que ce qu'il marque « en moyenne ».",
           domaines: ['Sport', 'Analyse de données'],
         },
         {
@@ -980,20 +978,20 @@ export const statistiqueDescriptive: ChapterContent = {
           label: 'Moyenne ou médiane\u00a0? Le test du retrait',
           text:
             'Pour décider, retire la valeur la plus éloignée des autres et recalcule les deux ' +
-            'indicateurs. Si la moyenne bouge beaucoup alors que la médiane ne bouge presque pas, ' +
-            'une valeur extrême tire la moyenne : la **médiane** est plus représentative. Si les ' +
-            'deux bougent à peine et restent proches, aucune valeur n\'est isolée : les deux ' +
-            'indicateurs **se valent**. La moyenne n\'est donc pas « toujours la meilleure » parce ' +
-            'qu\'elle utilise toutes les valeurs — et la médiane non plus.',
+            'indicateurs. Si la moyenne bouge beaucoup alors que la médiane ne bouge presque pas, une ' +
+            'valeur extrême tire la moyenne. La **médiane** est alors plus représentative : elle résume ' +
+            'mieux la série. Si les deux bougent à peine et restent proches, aucune valeur n\'est à ' +
+            'part. Les deux indicateurs **se valent**. La moyenne n\'est donc pas « toujours la ' +
+            'meilleure » parce qu\'elle utilise toutes les valeurs. Et la médiane non plus.',
         },
         {
           kind: 'entrainement',
           title: 'Moyenne ou médiane\u00a0? La valeur aberrante',
           generatorId: 'gen110',
           description: [
-            'Calcule moyenne et médiane d\'une série brute (salaires, trajets, prix, notes…), puis ' +
-              'sans la valeur la plus éloignée, et décide quel indicateur est le plus représentatif — ' +
-              'parfois la médiane, parfois les deux se valent.',
+            'Calcule la moyenne et la médiane d\'une série brute (salaires, trajets, prix, notes…). ' +
+              'Recommence sans la valeur la plus éloignée. Puis décide quel indicateur est le plus ' +
+              'représentatif : parfois la médiane, parfois les deux se valent.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 110. Moyenne ou médiane ? La valeur aberrante »',
@@ -1008,14 +1006,14 @@ export const statistiqueDescriptive: ChapterContent = {
       titreCourt: 'Boîte à moustaches',
       partie: 'Moyenne, médiane, quartiles',
       essentiel: [
-        'La boîte à moustaches résume une série en cinq nombres : minimum, Q1, médiane, Q3, maximum. La boîte couvre $[Q_1\\,;\\,Q_3]$, la moitié centrale de la série.',
+        'La boîte à moustaches résume une série en cinq nombres : minimum, Q1, médiane, Q3, maximum. La boîte couvre $[Q_1\\,;\\,Q_3]$ : la moitié centrale de la série.',
         'Ses quatre parties contiennent chacune environ 25 % des valeurs, quelle que soit leur longueur. L\'**écart interquartile** $Q_3 - Q_1$ est la largeur de la boîte.',
-        'Pour comparer deux boîtes : la médiane la plus grande est le trait le plus à droite ; la série la plus dispersée a la boîte la plus large.',
+        'Pour comparer deux boîtes, regarde d\'abord la médiane : la plus grande est le trait le plus à droite. Ensuite, la série la plus dispersée a la boîte la plus large.',
       ],
       cartes: [
         { question: 'Quels sont les cinq nombres d\'une boîte à moustaches ?', reponse: 'Le minimum, Q1, la médiane, Q3 et le maximum.' },
         { question: 'Q1 = 6 et Q3 = 9 : que vaut l\'écart interquartile ?', reponse: '$Q_3 - Q_1 = 9 - 6 = 3$.' },
-        { question: 'Quelle part des valeurs contient une moustache très longue ?', reponse: 'Environ 25 %, comme chaque partie : longue veut dire que ses valeurs sont étalées.' },
+        { question: 'Quelle part des valeurs contient une moustache très longue ?', reponse: 'Environ 25 %, comme chaque partie. Une moustache longue veut dire que ses valeurs sont étalées.' },
       ],
       blocks: [
         { kind: 'video', title: 'La boîte à moustaches', youtubeId: 'CMzCmWA9YTg' },
@@ -1023,26 +1021,25 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'intuition',
           label: 'Pour visualiser les quartiles',
           text:
-            'Imagine toute la classe alignée du plus petit au plus grand, puis découpée en ' +
-            'quatre groupes de même taille. Q1 est la frontière après le premier quart de la ' +
-            'file, Q3 la frontière après les trois quarts. La **boîte** de la boîte à ' +
-            'moustaches, c\'est exactement ce groupe du milieu : la moitié des individus qui ne ' +
-            'sont ni parmi les plus petits, ni parmi les plus grands.',
+            'Imagine toute la classe alignée, du plus petit au plus grand. On la coupe en quatre groupes ' +
+            'de même taille. Q1 est la frontière après le premier quart de la file. Q3 est la frontière ' +
+            'après les trois quarts. La **boîte** de la boîte à moustaches, c\'est exactement le groupe du ' +
+            'milieu. C\'est la moitié des élèves qui ne sont ni parmi les plus petits, ni parmi les plus grands.',
         },
         {
           kind: 'para',
           text:
-            'La **boîte à moustaches** (ou **box-plot**) résume une série en cinq nombres ' +
-            'seulement : minimum, Q1, médiane, Q3, maximum. La **boîte** couvre l\'intervalle ' +
-            '[Q1 ; Q3] — elle contient donc la moitié « centrale » de la série. Les ' +
-            '**moustaches**, elles, s\'étendent jusqu\'au minimum et au maximum.',
+            'La **boîte à moustaches** (en anglais **box-plot**) résume une série en cinq nombres ' +
+            'seulement : minimum, Q1, médiane, Q3, maximum. La **boîte** va de Q1 à Q3, sur l\'intervalle ' +
+            '[Q1 ; Q3]. Elle contient donc la moitié « centrale » de la série. Les **moustaches**, elles, ' +
+            'vont jusqu\'au minimum et jusqu\'au maximum.',
         },
         {
           kind: 'para',
           text:
-            'Reprends la série des sections 3 et 4 (valeurs 2, 6, 9, 12 ; effectifs 5, 8, 4, 3). Tu y ' +
-            'as déjà trouvé les cinq nombres : min = 2, Q1 = 6, médiane = 6, Q3 = 9, max = 12. Il ' +
-            'ne reste qu\'à les placer sur un axe.',
+            'Reprends la série des étapes 3 et 4 : valeurs 2, 6, 9, 12 ; effectifs 5, 8, 4, 3. Tu y as ' +
+            'déjà trouvé les cinq nombres : min = 2, Q1 = 6, médiane = 6, Q3 = 9, max = 12. Il ne reste ' +
+            'qu\'à les placer sur un axe.',
         },
         {
           kind: 'illustration',
@@ -1051,8 +1048,8 @@ export const statistiqueDescriptive: ChapterContent = {
             series: [{ min: 2, q1: 6, median: 6, q3: 9, max: 12 }],
             xAxisLabel: 'x',
             caption:
-              'La série des sections 3 et 4 : min=2, Q1=6, médiane=6, Q3=9, max=12 — boîte = ' +
-              '[Q1;Q3], moustaches jusqu\'aux extrêmes. Ici, la médiane est collée au bord gauche de la boîte.',
+              'La série des étapes 3 et 4 : min=2, Q1=6, médiane=6, Q3=9, max=12. La boîte va de Q1 ' +
+              'à Q3, les moustaches vont jusqu\'aux extrêmes. Ici, la médiane est collée au bord gauche de la boîte.',
           },
         },
         {
@@ -1067,38 +1064,36 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'para',
           text:
-            'La boîte et les moustaches découpent la série en **quatre parties** : moustache ' +
-            'gauche, moitié gauche de la boîte, moitié droite, moustache droite. Chacune contient ' +
-            'environ **25 %** des valeurs — même si leurs longueurs sont très différentes ! Une ' +
-            'partie courte veut dire que ses valeurs sont **serrées**, une partie longue qu\'elles ' +
-            'sont **étalées**.',
+            'La boîte et les moustaches découpent la série en **quatre parties** : moustache gauche, ' +
+            'moitié gauche de la boîte, moitié droite, moustache droite. Chacune contient environ ' +
+            '**25 %** des valeurs, même si leurs longueurs sont très différentes ! Une partie courte veut ' +
+            'dire que ses valeurs sont **serrées**. Une partie longue veut dire qu\'elles sont **étalées**.',
         },
         {
           kind: 'astuce',
           label: 'Lire l\'asymétrie',
           text:
-            'Si la médiane est au milieu de la boîte et que les moustaches ont la même longueur, la ' +
-            'série est à peu près **symétrique**. Ici, la médiane est collée au bord gauche (Q1 = ' +
-            'médiane = 6) : beaucoup de valeurs sont regroupées à 6, et la partie droite est plus ' +
-            'étalée. La série est **asymétrique**, étirée vers les grandes valeurs.',
+            'Parfois, la médiane est au milieu de la boîte et les deux moustaches ont la même longueur. ' +
+            'La série est alors à peu près **symétrique**. Ici, la médiane est collée au bord gauche ' +
+            '(Q1 = médiane = 6). Beaucoup de valeurs sont regroupées à 6, et la partie droite est plus ' +
+            'étalée. La série est **asymétrique** : elle s\'étire vers les grandes valeurs.',
         },
         {
           kind: 'atelier',
           tag: 'boite-moustaches-vivante-widget',
           label: 'Manipule toi-même — une boîte à moustaches vivante',
           caption:
-            'Déplace les points : la boîte se redessine en direct. Pousse la plus grande ' +
-            'valeur vers la droite : seule la moustache droite s\'allonge, la boîte et la ' +
-            'médiane ne bougent pas. Au départ, tu retrouves la boîte du fil rouge : Q1 = ' +
-            'médiane = 6.',
+            'Déplace les points : la boîte se redessine en direct. Pousse la plus grande valeur vers ' +
+            'la droite : seule la moustache droite s\'allonge. La boîte et la médiane ne bougent pas. ' +
+            'Au départ, tu retrouves la boîte de la série suivie depuis l\'étape 3 : Q1 = médiane = 6.',
         },
         {
           kind: 'methode',
           label: 'Comparer deux boîtes à moustaches',
           items: [
-            'Deux questions reviennent tout le temps. Quelle série a la **médiane** la plus ' +
-              'grande ? C\'est le trait vertical dans la boîte le plus à droite. Et quelle ' +
-              'série est la **plus dispersée** ? C\'est la boîte la plus large, mesurée par ' +
+            'Deux questions reviennent tout le temps. Quelle série a la **médiane** la plus grande ? ' +
+              'C\'est celle dont le trait vertical, dans la boîte, est le plus à droite. Et quelle série ' +
+              'est la **plus dispersée** ? C\'est celle qui a la boîte la plus large, mesurée par ' +
               'l\'**écart interquartile** Q3 − Q1.',
           ],
         },
@@ -1113,31 +1108,30 @@ export const statistiqueDescriptive: ChapterContent = {
             xAxisLabel: 'x',
             ticks: [0, 2, 4, 6, 8, 10, 12, 14, 16],
             caption:
-              'Série A : min 2 / Q1 5 / méd. 8 / Q3 12 / max 15 (IQR = 7) — Série B : min 1 / Q1 4 / ' +
-              'méd. 6 / Q3 9 / max 11 (IQR = 5) — A a la médiane la plus grande ET la boîte la plus large',
+              'IQR : l\'écart interquartile, en anglais. Série A : min 2 / Q1 5 / méd. 8 / Q3 12 / max 15 ' +
+              '(IQR = 7). Série B : min 1 / Q1 4 / méd. 6 / Q3 9 / max 11 (IQR = 5). A a la médiane la ' +
+              'plus grande **et** la boîte la plus large.',
           },
         },
         {
           kind: 'astuce',
           label: 'La largeur de la boîte, un indice de confiance',
           text:
-            'Plus la boîte est **étroite**, plus les valeurs centrales sont resserrées autour ' +
-            'de la médiane. Elle résume alors bien toute la série. Une boîte **large** signale ' +
-            'l\'inverse : la médiane reste un centre valide, mais elle devient moins ' +
-            'représentative, parce que les valeurs sont beaucoup plus dispersées autour ' +
-            'd\'elle. Sur l\'exemple ci-dessus, la médiane de B (la boîte la plus étroite) est ' +
-            'donc la plus représentative des deux.',
+            'Plus la boîte est **étroite**, plus les valeurs centrales sont serrées autour de la ' +
+            'médiane. La médiane résume alors bien toute la série. Une boîte **large** signale ' +
+            'l\'inverse. La médiane reste un bon centre, mais elle est moins représentative. Les ' +
+            'valeurs sont en effet beaucoup plus étalées autour d\'elle. Sur l\'exemple ci-dessus, la ' +
+            'médiane de B (la boîte la plus étroite) est donc la plus représentative des deux.',
         },
         {
           kind: 'historique',
           titre: 'Le statisticien qui dessinait des boîtes',
           text:
-            'La boîte à moustaches a été inventée par le statisticien américain **John Tukey**, ' +
-            'vers 1970. Il l\'a rendue célèbre en 1977 dans son livre « Exploratory Data Analysis » ' +
-            '(l\'analyse exploratoire des données). Son idée : avant de se lancer dans de longs ' +
-            'calculs, il faut **regarder** les données, avec des dessins simples qu\'on trace à la ' +
-            'main en quelques minutes. On doit aussi à Tukey le mot « bit », l\'unité ' +
-            'd\'information de l\'informatique.',
+            'La boîte à moustaches a été inventée par le statisticien américain **John Tukey**, vers ' +
+            '1970. Il l\'a rendue célèbre en 1977 dans son livre « Exploratory Data Analysis » ' +
+            '(l\'analyse exploratoire des données). Son idée : avant de faire de longs calculs, il faut ' +
+            '**regarder** les données. Pour cela, on trace à la main, en quelques minutes, des dessins ' +
+            'simples. On doit aussi à Tukey le mot « bit », l\'unité d\'information de l\'informatique.',
         },
         {
           kind: 'entrainement',
@@ -1161,12 +1155,12 @@ export const statistiqueDescriptive: ChapterContent = {
       titreCourt: 'Variance et écart-type',
       partie: 'Mesurer la dispersion',
       essentiel: [
-        'Étendue : max − min. Variance : $V = \\dfrac{\\Sigma(x_i-\\bar{x})^2 \\cdot n_i}{n}$, la moyenne des carrés des écarts à $\\bar{x}$ ; écart-type : $\\sqrt{V}$, dans la même unité que les données.',
-        'Sur cette plateforme, on divise toujours par n (σx sur la calculatrice), et l\'écart-type se calcule à partir de la variance arrondie à 2 décimales.',
-        'Si $y = ax + b$ : $\\bar{y} = a\\,\\bar{x} + b$, $V_y = a^2\\,V_x$ et $\\sigma_y = |a|\\,\\sigma_x$ ; le nombre b ajouté ne change aucune dispersion.',
+        'Étendue : max − min. Variance : $V = \\dfrac{\\Sigma(x_i-\\bar{x})^2 \\cdot n_i}{n}$, la moyenne des carrés des écarts à $\\bar{x}$. Écart-type : $\\sqrt{V}$, dans la même unité que les données.',
+        'Sur cette plateforme, on divise toujours par n (σx sur la calculatrice). L\'écart-type se calcule à partir de la variance arrondie à 2 décimales.',
+        'Si $y = ax + b$ : $\\bar{y} = a\\,\\bar{x} + b$, $V_y = a^2\\,V_x$ et $\\sigma_y = |a|\\,\\sigma_x$. Le nombre b ajouté ne change aucune dispersion.',
       ],
       cartes: [
-        { question: 'Pourquoi interpréter l\'écart-type plutôt que la variance ?', reponse: 'L\'écart-type est dans la même unité que les données ; la variance est en unité au carré.' },
+        { question: 'Pourquoi interpréter l\'écart-type plutôt que la variance ?', reponse: 'L\'écart-type est dans la même unité que les données. La variance, elle, est en unité au carré.' },
         { question: 'La variance vaut 10,95 : que vaut l\'écart-type ?', reponse: '$\\sqrt{10{,}95} \\approx 3{,}31$.' },
         { question: 'Une prime de 50 € pour chaque employé : que devient l\'écart-type des salaires ?', reponse: 'Il ne change pas : un nombre ajouté à toutes les valeurs ne change jamais la dispersion.' },
         { question: '$y = 1{,}8\\,x + 32$ et $V_x = 16$ : que vaut $V_y$ ?', reponse: '$1{,}8^2 \\times 16 = 51{,}84$ ; le $+32$ n\'intervient pas.' },
@@ -1177,58 +1171,58 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'intuition',
           label: 'Pourquoi un nombre pour la dispersion ?',
           text:
-            'Deux classes peuvent avoir exactement la même moyenne, 12/20, sans se ressembler ' +
-            'en rien : dans l\'une, presque tout le monde est entre 10 et 14 ; dans l\'autre, la ' +
-            'moitié a 20/20 et l\'autre moitié a 4/20. La moyenne seule ne fait **aucune** ' +
-            'différence entre ces deux classes. Il faut un autre nombre, qui mesure à quel point ' +
-            'les valeurs s\'écartent du centre — c\'est tout l\'objet de cette section.',
+            'Deux groupes d\'élèves peuvent avoir exactement la même moyenne, 12/20, sans se ressembler du ' +
+            'tout. Dans l\'un, presque tout le monde a entre 10 et 14. Dans l\'autre, la moitié a 20/20 et ' +
+            'l\'autre moitié a 4/20. La moyenne seule ne fait **aucune** différence entre ces deux ' +
+            'groupes. Il faut un autre nombre, qui mesure à quel point les valeurs s\'écartent du centre. ' +
+            'C\'est tout le sujet de cette étape.',
         },
         {
           kind: 'para',
           text:
-            'La **moyenne** résume le centre d\'une série. Mais deux séries de même moyenne ' +
-            'peuvent être très différentes : l\'une resserrée autour de x̄, l\'autre très ' +
-            'étalée. Ces trois paramètres mesurent justement cet étalement.',
+            'La **moyenne** résume le centre d\'une série. Mais deux séries de même moyenne peuvent être ' +
+            'très différentes. L\'une est serrée autour de x̄, l\'autre très étalée. Ces trois paramètres ' +
+            'mesurent justement cet étalement : on l\'appelle la **dispersion**.',
         },
         { kind: 'subheading', text: 'L\'étendue' },
         {
           kind: 'para',
           text:
-            'Le plus simple des trois : $\\text{étendue} = \\max - \\min$. Rapide à calculer. Mais ' +
-            'il ne tient compte que des deux valeurs extrêmes — insensible à tout ce qui se ' +
-            'passe entre les deux.',
+            'C\'est le plus simple des trois : $\\text{étendue} = \\max - \\min$. Il est rapide à ' +
+            'calculer. Mais il ne tient compte que des deux valeurs extrêmes. Il ne voit rien de ce qui ' +
+            'se passe entre les deux.',
         },
         { kind: 'subheading', text: 'La variance et l\'écart-type' },
         {
           kind: 'definition',
           label: 'Formules',
           items: [
-            'Variance — c\'est la moyenne des carrés des écarts à x̄ : $V = \\dfrac{\\Sigma(x_i-\\bar{x})^2 ' +
-              '\\cdot n_i}{n} = \\dfrac{(x_1-\\bar{x})^2 n_1 + (x_2-\\bar{x})^2 n_2 + \\ldots}{n_1+n_2+\\ldots}$.',
-            'Écart-type — c\'est sa racine carrée. Il est dans la même unité que les données — ' +
-              'contrairement à la variance, qui est en unité au carré : ' +
-              '$\\text{écart-type} = \\sqrt{V}$.',
+            'Variance : c\'est la moyenne des carrés des écarts à x̄. L\'écart d\'une valeur, c\'est cette ' +
+              'valeur moins la moyenne. On a : $V = \\dfrac{\\Sigma(x_i-\\bar{x})^2 \\cdot n_i}{n} = ' +
+              '\\dfrac{(x_1-\\bar{x})^2 n_1 + (x_2-\\bar{x})^2 n_2 + \\ldots}{n_1+n_2+\\ldots}$.',
+            'Écart-type : c\'est sa racine carrée, $\\text{écart-type} = \\sqrt{V}$. Il est dans la même ' +
+              'unité que les données. La variance, elle, est en unité au carré.',
           ],
         },
         {
           kind: 'intuition',
           label: 'Ce que représente concrètement l\'écart-type',
           text:
-            'Tu as déjà mesuré une distance entre deux nombres sur une droite graduée, $|a-b|$. ' +
-            'L\'écart-type, c\'est un peu la même idée, résumée pour toute la série en un seul ' +
-            'nombre : à peu près la distance **typique** entre une valeur de la série et la ' +
-            'moyenne. Un écart-type petit veut dire que les valeurs sont proches de x̄ ; un ' +
-            'écart-type grand veut dire qu\'elles s\'en éloignent beaucoup, en moyenne.',
+            'Tu as déjà mesuré la distance entre deux nombres sur une droite graduée : $|a-b|$. ' +
+            'L\'écart-type, c\'est un peu la même idée, résumée en un seul nombre pour toute la série. ' +
+            'C\'est à peu près la distance **habituelle** entre une valeur de la série et la moyenne. Un ' +
+            'petit écart-type veut dire que les valeurs sont proches de x̄. Un grand écart-type veut dire ' +
+            'qu\'elles s\'en éloignent beaucoup, en moyenne.',
         },
         {
           kind: 'rappel',
           label: 'Convention de calcul sur cette plateforme',
           items: [
-            'Sur cette plateforme, la variance se calcule **toujours** en divisant par ' +
-              'l\'effectif total n — jamais par n−1. L\'écart-type se calcule ensuite comme la ' +
-              'racine carrée de la variance **déjà arrondie à 2 décimales** — jamais depuis le ' +
-              'rapport non arrondi. Respecte bien cet ordre : c\'est nécessaire pour retomber ' +
-              'exactement sur la valeur vérifiée par le générateur !',
+            'Sur cette plateforme, la variance se calcule **toujours** en divisant par l\'effectif total ' +
+              'n, jamais par n−1. On calcule ensuite l\'écart-type : c\'est la racine carrée de la ' +
+              'variance **déjà arrondie à 2 décimales**. Ne le calcule jamais avec la variance non ' +
+              'arrondie. Respecte bien cet ordre : c\'est nécessaire pour retomber exactement sur la ' +
+              'valeur vérifiée par le générateur !',
           ],
         },
         {
@@ -1236,9 +1230,9 @@ export const statistiqueDescriptive: ChapterContent = {
           label: 'Avec la calculatrice',
           text:
             'En mode statistique, ta calculatrice affiche souvent **deux** écarts-types : σx (ou σn) ' +
-            'et sx (ou σn−1). Sur cette plateforme, prends toujours **σx** : il divise par n, comme ' +
-            'la formule de cette section. sx divise par n − 1 et donne une valeur un peu plus ' +
-            'grande — il sert à d\'autres usages, plus tard. Attention aussi : la calculatrice ' +
+            'et sx (ou σn−1). Sur cette plateforme, prends toujours **σx** : il divise par n, comme la ' +
+            'formule de cette étape. La touche sx, elle, divise par n − 1 et donne une valeur un peu ' +
+            'plus grande. Elle sert à d\'autres usages, plus tard. Attention aussi : la calculatrice ' +
             'calcule σx à partir de la variance non arrondie. Pour retomber sur la valeur du ' +
             'générateur, arrondis d\'abord la variance à 2 décimales, puis prends sa racine.',
         },
@@ -1246,7 +1240,7 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'exempleLibre',
           label: 'Exemple résolu — la série des sections 3 et 4',
           blocks: [
-            { kind: 'para', text: 'Moyenne trouvée à la section 3 : $\\bar{x} = 6{,}5$.' },
+            { kind: 'para', text: 'Moyenne trouvée à l\'étape 3 : $\\bar{x} = 6{,}5$.' },
             {
               kind: 'featureTable',
               headers: ['xᵢ', 'nᵢ', '(xᵢ−x̄)²·nᵢ'],
@@ -1277,7 +1271,7 @@ export const statistiqueDescriptive: ChapterContent = {
               ],
             },
             { kind: 'para', text: 'Somme : $80+32+16+112=240$, $n=24$. Variance : $240/24=10$ (exacte, pas d\'arrondi ici).' },
-            { kind: 'para', text: 'Écart-type : $\\sqrt{10} \\approx 3{,}16$ (ici un vrai arrondi — on écrit « ≈ », pas « = »).' },
+            { kind: 'para', text: 'Écart-type : $\\sqrt{10} \\approx 3{,}16$. Ici, c\'est un vrai arrondi : on écrit « ≈ », pas « = ».' },
           ],
         },
         {
@@ -1285,10 +1279,9 @@ export const statistiqueDescriptive: ChapterContent = {
           tag: 'dispersion-comparee-widget',
           label: 'Manipule toi-même — même moyenne, dispersion différente',
           caption:
-            'Déplace les points : x̄, la variance et l\'écart-type se recalculent en direct, ' +
-            'avec la bande x̄ ± σ. Compare les deux réglages : même moyenne 12, mais un ' +
-            'écart-type de 1,1 (série resserrée) contre 8 (moitié à 4, moitié à 20, ' +
-            'l\'exemple du texte).',
+            'Déplace les points : x̄, la variance et l\'écart-type se recalculent en direct, avec la ' +
+            'bande x̄ ± σ. Compare les deux réglages. Ils ont la même moyenne, 12. Mais l\'écart-type ' +
+            'vaut 1,1 pour la série serrée, et 8 pour l\'exemple du texte (moitié à 4, moitié à 20).',
         },
         {
           kind: 'application',
@@ -1318,9 +1311,9 @@ export const statistiqueDescriptive: ChapterContent = {
               xAxisLabel: 'mesure (mm)',
               yAxisLabel: 'lot',
               caption:
-                'Deux lots de 5 pièces, EXACTEMENT la même moyenne (x̄ = 50 mm, la cible) : le ' +
-                'lot A (vert) est bien centré ET resserré — machine réglée ; le lot B (rouge) a ' +
-                'la même moyenne mais une dispersion bien plus large — signal d\'alerte, même ' +
+                'Deux lots de 5 pièces, avec **exactement** la même moyenne : x̄ = 50 mm, la cible. Le ' +
+                'lot A (vert) est bien centré **et** serré : la machine est bien réglée. Le lot B (rouge) ' +
+                'a la même moyenne, mais une dispersion bien plus large. C\'est un signal d\'alerte, même ' +
                 'si la cible est atteinte en moyenne.',
             },
           ],
@@ -1330,27 +1323,26 @@ export const statistiqueDescriptive: ChapterContent = {
             caption: 'Contrôle qualité dans une usine sidérurgique, Tarente, 1963. Touring Club Italiano, CC BY-SA 4.0, via Wikimedia Commons.',
           },
           text:
-            "Dans une usine, une machine qui fabrique des pièces vise toujours une valeur " +
-            "cible (un diamètre, une masse, une épaisseur) — mais aucune pièce n'est jamais " +
-            "parfaitement identique à une autre. Le contrôle qualité mesure régulièrement un " +
-            "échantillon de pièces et calcule leur **moyenne** (reste-t-on bien sur la cible ?) " +
-            "et leur **écart-type** (les pièces sont-elles toutes proches les unes des autres, " +
-            "ou très dispersées ?). Un écart-type qui grimpe, même si la moyenne reste bonne, " +
-            "est un signal d'alerte : la machine se dérègle, et de plus en plus de pièces " +
-            "risquent de sortir des tolérances acceptables. C'est exactement l'idée de " +
-            "l'atelier ci-dessus : deux séries de même moyenne peuvent raconter une histoire " +
-            "complètement différente selon leur dispersion.",
+            "Dans une usine, une machine fabrique des pièces. Elle vise toujours une valeur cible : un " +
+            "diamètre, une masse, une épaisseur. Mais deux pièces ne sont jamais parfaitement identiques. " +
+            "Le contrôle qualité mesure régulièrement un échantillon de pièces. Il calcule leur " +
+            "**moyenne** : reste-t-on bien sur la cible ? Il calcule aussi leur **écart-type** : les " +
+            "pièces sont-elles toutes proches les unes des autres, ou très étalées ? Un écart-type qui " +
+            "grimpe est un signal d'alerte, même si la moyenne reste bonne. Cela veut dire que la machine " +
+            "se dérègle. De plus en plus de pièces risquent alors de sortir des tolérances, les écarts " +
+            "permis. C'est exactement l'idée de l'atelier ci-dessus : deux séries de même moyenne peuvent " +
+            "raconter une histoire très différente, selon leur dispersion.",
           domaines: ['Industrie', 'Contrôle qualité'],
         },
         {
           kind: 'rappel',
           label: 'Variance de données groupées en classes',
           items: [
-            'Comme pour la moyenne, chaque classe est représentée par son **centre** $x_i$, la ' +
-              'moyenne de ses deux bornes — jamais par une borne.',
-            'On calcule d\'abord $\\bar{x}$ avec ces centres, pondérés par les effectifs, puis la ' +
-              'variance avec la même formule : $V = \\dfrac{\\Sigma(x_i-\\bar{x})^2 \\cdot n_i}{n}$, et ' +
-              '$\\sigma = \\sqrt{V}$. Comme pour la moyenne, c\'est une **approximation**.',
+            'Comme pour la moyenne, chaque classe est représentée par son **centre** $x_i$, la moyenne ' +
+              'de ses deux bornes. On ne prend jamais une borne.',
+            'On calcule d\'abord $\\bar{x}$ avec ces centres, chacun multiplié par son effectif. Puis on ' +
+              'calcule la variance avec la même formule : $V = \\dfrac{\\Sigma(x_i-\\bar{x})^2 \\cdot n_i}{n}$, ' +
+              'et $\\sigma = \\sqrt{V}$. Comme pour la moyenne, on obtient une **valeur approchée**.',
           ],
         },
         {
@@ -1358,9 +1350,9 @@ export const statistiqueDescriptive: ChapterContent = {
           title: 'Paramètres de dispersion',
           generatorId: 'gen34',
           description: [
-            'Calcule la variance puis l\'écart-type d\'une série : soit une série discrète dont x̄ ' +
-              'est donné, soit des données groupées en classes, où tu calcules d\'abord les centres ' +
-              'et x̄ toi-même.',
+            'Calcule la variance puis l\'écart-type d\'une série. Soit une série discrète dont x̄ est ' +
+              'donné. Soit des données groupées en classes : tu calcules alors d\'abord les centres et ' +
+              'x̄ toi-même.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 34. Paramètres de dispersion »',
@@ -1369,11 +1361,11 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Il arrive qu\'on transforme **toutes** les valeurs d\'une série de la même façon : une ' +
-            'prime de 50 € pour chaque employé, une hausse de 3 %, un changement d\'unité… Inutile ' +
-            'de tout recalculer : on écrit la transformation sous la forme $y = a\\,x + b$ ($a$ : le ' +
-            'nombre qui multiplie chaque valeur, $b$ : le nombre ajouté ensuite), puis on applique ' +
-            'les règles du tableau.',
+            'Parfois, on transforme **toutes** les valeurs d\'une série de la même façon. Par exemple : une ' +
+            'prime de 50 € pour chaque employé, une hausse de 3 %, un changement d\'unité… Inutile de tout ' +
+            'recalculer. On écrit la transformation sous la forme $y = a\\,x + b$. Ici, $a$ est le nombre ' +
+            'qui multiplie chaque valeur, et $b$ le nombre ajouté ensuite. Puis on applique les règles du ' +
+            'tableau.',
         },
         {
           kind: 'featureTable',
@@ -1390,11 +1382,11 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'intuition',
           label: 'Pourquoi b ne change pas la dispersion ?',
           text:
-            'Ajouter $b$ à toutes les valeurs déplace la série d\'un bloc, comme si on faisait glisser ' +
-            'tous les points sur la droite graduée : le centre bouge, mais les écarts entre les ' +
-            'valeurs restent les mêmes. Multiplier par $a$, au contraire, étire (ou resserre) la ' +
-            'série : les écarts sont multipliés par $|a|$ — et la variance, qui est une moyenne de ' +
-            '**carrés** d\'écarts, par $a^2$.',
+            'Ajouter $b$ à toutes les valeurs déplace la série d\'un bloc. C\'est comme si on faisait ' +
+            'glisser tous les points sur la droite graduée. Le centre bouge, mais les écarts entre les ' +
+            'valeurs restent les mêmes. Multiplier par $a$, au contraire, étire (ou resserre) la série. ' +
+            'Les écarts sont multipliés par $|a|$. Et la variance est une moyenne de **carrés** d\'écarts : ' +
+            'elle est donc multipliée par $a^2$.',
         },
         {
           kind: 'exempleLibre',
@@ -1420,8 +1412,8 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Un nombre ajouté à toutes les valeurs ne change **jamais** la dispersion : avec une prime ' +
-            'de 50 € pour tous, l\'écart-type des salaires reste le même — surtout pas « $\\sigma + 50$ ». ' +
+            'Un nombre ajouté à toutes les valeurs ne change **jamais** la dispersion. Avec une prime de ' +
+            '50 € pour tous, l\'écart-type des salaires reste le même : surtout pas « $\\sigma + 50$ » ! ' +
             'La variance est multipliée par $a^2$, pas par $a$. Et un écart-type n\'est jamais négatif : ' +
             'si $a < 0$, on multiplie par $|a|$.',
         },
@@ -1430,8 +1422,8 @@ export const statistiqueDescriptive: ChapterContent = {
           title: 'Effet d\'une transformation des données',
           generatorId: 'gen108',
           description: [
-            'Prime pour tous, hausse en %, changement d\'unité, °C → °F : écris la transformation ' +
-              'y = ax + b, puis déduis les nouveaux indicateurs (moyenne, médiane, étendue, ' +
+            'Prime pour tous, hausse en %, changement d\'unité, °C → °F. Écris la transformation ' +
+              'y = ax + b. Puis déduis les nouveaux indicateurs (moyenne, médiane, étendue, ' +
               'variance, écart-type) sans recalculer la série.',
           ],
           chantier: '4e',
@@ -1447,11 +1439,11 @@ export const statistiqueDescriptive: ChapterContent = {
       titreCourt: 'Inégalité de Bienaymé-Tchebychev',
       partie: 'Mesurer la dispersion',
       essentiel: [
-        'Pour **n\'importe quelle série** et tout $k > 1$, au moins $\\left(1 - \\dfrac{1}{k^2}\\right) \\times 100\\,\\%$ des valeurs se trouvent dans $[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$.',
-        'C\'est une garantie minimale, souvent dépassée : on arrondit dans le sens qui la conserve — un pourcentage vers le bas, un nombre d\'individus vers le haut.',
+        'Pour **n\'importe quelle série** et pour tout $k > 1$, au moins $\\left(1 - \\dfrac{1}{k^2}\\right) \\times 100\\,\\%$ des valeurs se trouvent dans $[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$.',
+        'C\'est une garantie minimale, souvent dépassée. On arrondit dans le sens qui la garde vraie : un pourcentage vers le bas, un nombre d\'individus vers le haut.',
       ],
       cartes: [
-        { question: 'k = 2 : quelle proportion minimale des valeurs dans $[\\bar{x}-2\\sigma\\,;\\,\\bar{x}+2\\sigma]$ ?', reponse: '$1 - \\dfrac{1}{4} = \\dfrac{3}{4}$ : au moins 75 % des valeurs.' },
+        { question: 'k = 2 : quel pourcentage minimal des valeurs dans $[\\bar{x}-2\\sigma\\,;\\,\\bar{x}+2\\sigma]$ ?', reponse: '$1 - \\dfrac{1}{4} = \\dfrac{3}{4}$ : au moins 75 % des valeurs.' },
         { question: '$\\bar{x} = 12$ et $\\sigma = 2$ : quel k correspond à l\'intervalle $[8\\,;\\,16]$ ?', reponse: '$k = 2$, car $8 = 12 - 2 \\cdot 2$ et $16 = 12 + 2 \\cdot 2$.' },
         { question: 'Quel k garantit au moins 95 % des valeurs ?', reponse: '$1 - \\dfrac{1}{k^2} = 0{,}95$, donc $k^2 = 20$ et $k = \\sqrt{20}$.' },
         { question: 'On trouve « au moins 18,75 élèves » : comment arrondir ?', reponse: 'Vers le haut : au moins 19 élèves.' },
@@ -1461,13 +1453,13 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Cette inégalité garantit, **pour n\'importe quelle série** — peu importe sa forme ' +
-            '—, qu\'une proportion minimale des valeurs se trouve à moins de k écarts-types de ' +
-            'la moyenne. Ça marche dès que k > 1 :',
+            'Cette inégalité donne une garantie **pour n\'importe quelle série**, quelle que soit sa ' +
+            'forme. Une part minimale des valeurs se trouve à moins de k écarts-types de la moyenne. Ça ' +
+            'marche dès que k > 1 :',
         },
         {
           kind: 'definition',
-          items: ['au moins une proportion $1 - \\dfrac{1}{k^2}$ des valeurs — soit $\\left(1 - \\dfrac{1}{k^2}\\right) \\times 100\\,\\%$ — se trouve dans $[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$'],
+          items: ['au moins une part $1 - \\dfrac{1}{k^2}$ des valeurs, soit $\\left(1 - \\dfrac{1}{k^2}\\right) \\times 100\\,\\%$, se trouve dans $[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$'],
         },
         {
           kind: 'illustration',
@@ -1484,7 +1476,7 @@ export const statistiqueDescriptive: ChapterContent = {
             rangeAnnotations: [{ from: 0.5, to: 3.5, label: 'au moins 75 % des valeurs (k=2)' }],
             axisLabel: 'x',
             axisLabelAtEnd: true,
-            caption: 'zone centrale $[\\bar{x}-k\\sigma\\,;\\bar{x}+k\\sigma]$ — pour $k=2$, elle contient au moins $1-\\dfrac{1}{4} = 75\\,\\%$ des valeurs',
+            caption: 'zone centrale $[\\bar{x}-k\\sigma\\,;\\bar{x}+k\\sigma]$. Pour $k=2$, elle contient au moins $1-\\dfrac{1}{4} = 75\\,\\%$ des valeurs.',
           },
         },
         {
@@ -1498,16 +1490,16 @@ export const statistiqueDescriptive: ChapterContent = {
           tag: 'tchebychev-garantie-widget',
           label: 'Manipule toi-même — une garantie minimale',
           caption:
-            'Choisis la forme de la série et fais varier k : le pourcentage réel de valeurs ' +
-            'dans $[\\bar{x} - k\\sigma\\,;\\bar{x} + k\\sigma]$ ne descend jamais sous le minimum garanti ' +
-            '$\\left(1 - \\dfrac{1}{k^2}\\right) \\times 100\\,\\%$, quelle que soit la forme — et il le dépasse souvent largement.',
+            'Choisis la forme de la série et fais varier k. Le pourcentage réel de valeurs dans ' +
+            '$[\\bar{x} - k\\sigma\\,;\\bar{x} + k\\sigma]$ ne descend jamais sous le minimum garanti, ' +
+            '$\\left(1 - \\dfrac{1}{k^2}\\right) \\times 100\\,\\%$. C\'est vrai quelle que soit la forme. Et il le dépasse souvent largement.',
         },
         {
           kind: 'astuce',
           label: 'Dans l\'autre sens',
           text:
-            'Si l\'énoncé donne directement le pourcentage minimal garanti, plutôt que k, tu ' +
-            'peux retrouver k par la formule réciproque $k = \\sqrt{100/(100-\\text{pourcentage})}$. ' +
+            'L\'énoncé donne parfois directement le pourcentage minimal garanti, au lieu de k. Tu peux ' +
+            'alors retrouver k avec la formule dans l\'autre sens : $k = \\sqrt{100/(100-\\text{pourcentage})}$. ' +
             'Ensuite, tu calcules l\'intervalle $[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$ ' +
             'comme d\'habitude.',
         },
@@ -1535,7 +1527,7 @@ export const statistiqueDescriptive: ChapterContent = {
               kind: 'para',
               text:
                 '**Étape 1 — retrouver k.** L\'intervalle [8 ; 16] s\'écrit ' +
-                '$[12-2 \\cdot 2\\,;\\,12+2 \\cdot 2]$ : on est à 2 écarts-types de la moyenne, donc ' +
+                '$[12-2 \\cdot 2\\,;\\,12+2 \\cdot 2]$. On est à 2 écarts-types de la moyenne, donc ' +
                 '$k=2$.',
             },
             {
@@ -1554,14 +1546,14 @@ export const statistiqueDescriptive: ChapterContent = {
               kind: 'para',
               text:
                 'On vérifie : $\\bar{x} = 480/40 = 12$ et $V = (36+44+0+44+36)/40 = 4$, donc ' +
-                '$\\sigma=2$ ✓. Entre 8 et 16, on trouve $11+16+11 = 38$ élèves, soit 95 % — bien plus ' +
-                'que les 30 garantis.',
+                '$\\sigma=2$ ✓. Entre 8 et 16, on trouve $11+16+11 = 38$ élèves, soit 95 %. C\'est bien ' +
+                'plus que les 30 garantis.',
             },
             {
               kind: 'para',
               text:
-                'Bienaymé-Tchebychev ne connaît pas la forme de la série : sa garantie doit marcher ' +
-                'pour **toutes** les séries. C\'est pour ça qu\'elle est souvent pessimiste.',
+                'Bienaymé-Tchebychev ne connaît pas la forme de la série. Sa garantie doit donc marcher ' +
+                'pour **toutes** les séries. C\'est pour ça qu\'elle est souvent plus faible que la réalité.',
             },
           ],
         },
@@ -1570,32 +1562,30 @@ export const statistiqueDescriptive: ChapterContent = {
           label: 'Retrouver la moyenne',
           text:
             'L\'intervalle $[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$ est **symétrique** autour de ' +
-            '$\\bar{x}$ : si l\'énoncé te le donne sous la forme $[a\\,;\\,b]$, la moyenne est son ' +
-            'centre, $\\bar{x} = \\dfrac{a+b}{2}$ — inutile de calculer k.',
+            '$\\bar{x}$ : la moyenne est pile au milieu. Si l\'énoncé te le donne sous la forme ' +
+            '$[a\\,;\\,b]$, la moyenne est son centre : $\\bar{x} = \\dfrac{a+b}{2}$. Inutile de calculer k.',
         },
         {
           kind: 'piege',
           label: 'Arrondir sans perdre la garantie',
           text:
-            'Bienaymé-Tchebychev donne une **garantie** (« au moins… ») : quand tu arrondis, fais-' +
-            'le toujours dans le sens qui la conserve. Un pourcentage minimal s\'arrondit **vers le ' +
-            'bas**. Un nombre minimal d\'individus, lui, s\'arrondit **vers le haut** : c\'est un ' +
-            'entier, donc « au moins 18,75 élèves » veut dire « au moins 19 élèves ». Les bornes ' +
-            'd\'un intervalle s\'arrondissent ' +
-            '**vers l\'extérieur** : la borne inférieure vers le bas, la borne supérieure vers le ' +
-            'haut. Et k s\'arrondit lui aussi dans le sens qui garde la garantie vraie : vers le ' +
-            'bas si tu en déduis un pourcentage, vers le haut si tu en déduis un intervalle.',
+            'Bienaymé-Tchebychev donne une **garantie** (« au moins… »). Quand tu arrondis, fais-le ' +
+            'toujours dans le sens qui garde cette garantie vraie. Un pourcentage minimal s\'arrondit ' +
+            '**vers le bas**. Un nombre minimal d\'individus, lui, s\'arrondit **vers le haut**. C\'est ' +
+            'un entier : « au moins 18,75 élèves » veut dire « au moins 19 élèves ». Les bornes d\'un ' +
+            'intervalle s\'arrondissent **vers l\'extérieur** : la borne inférieure vers le bas, la ' +
+            'borne supérieure vers le haut. Et k s\'arrondit lui aussi dans le sens qui garde la garantie ' +
+            'vraie. Vers le bas si tu en déduis un pourcentage, vers le haut si tu en déduis un intervalle.',
         },
         {
           kind: 'historique',
           titre: 'Deux mathématiciens, une même inégalité',
           text:
-            'Cette inégalité porte deux noms parce qu\'elle a été trouvée **deux fois**, de façon ' +
-            'indépendante. Le Français **Irénée-Jules Bienaymé** la publie en 1853. Le Russe ' +
-            '**Pafnouti Tchebychev** la redécouvre et la démontre à sa manière en 1867. ' +
-            'Tchebychev a ensuite reconnu que Bienaymé l\'avait trouvée avant lui. Son point fort ' +
-            'n\'a pas changé depuis : elle marche pour n\'importe quelle série, sans rien savoir de ' +
-            'sa forme.',
+            'Cette inégalité porte deux noms parce qu\'elle a été trouvée **deux fois**, par deux ' +
+            'mathématiciens, chacun de son côté. Le Français **Irénée-Jules Bienaymé** la publie en ' +
+            '1853. Le Russe **Pafnouti Tchebychev** la retrouve en 1867, et la démontre à sa façon. Plus ' +
+            'tard, Tchebychev a reconnu que Bienaymé l\'avait trouvée avant lui. Son point fort n\'a pas ' +
+            'changé depuis : elle marche pour n\'importe quelle série, sans rien savoir de sa forme.',
         },
         {
           kind: 'entrainement',
@@ -1603,8 +1593,8 @@ export const statistiqueDescriptive: ChapterContent = {
           generatorId: 'gen37',
           description: [
             'Applique l\'inégalité sous 8 variantes. À partir de k, retrouve l\'intervalle, le ' +
-              'pourcentage minimal ou le nombre minimal d\'individus concernés — et ' +
-              'réciproquement.',
+              'pourcentage minimal ou le nombre minimal d\'individus concernés. Ou fais le chemin dans ' +
+              'l\'autre sens.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 37. Inégalité de Bienaymé-Tchebychev »',
@@ -1619,7 +1609,7 @@ export const statistiqueDescriptive: ChapterContent = {
       titreCourt: 'Comparer deux séries',
       partie: 'Comparer, puis réviser',
       essentiel: [
-        'Comparer deux séries : le **centrage** (les médianes), la **dispersion** (les écarts-types : la plus petite valeur, la série la plus homogène), un **seuil** lu sur la courbe cumulée, puis une phrase d\'interprétation.',
+        'Pour comparer deux séries, regarde le **centrage** : les médianes. Regarde la **dispersion** : le plus petit écart-type donne la série la plus homogène. Lis un **seuil** sur la courbe cumulée. Termine par une phrase d\'interprétation.',
         'Le pourcentage de valeurs entre a et b se lit en deux fois : cumulé(b) − cumulé(a).',
       ],
       cartes: [
@@ -1632,12 +1622,12 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Comparer deux séries, c\'est réutiliser tous les outils précédents sur les deux à ' +
-            'la fois. Quelle série a la **médiane** la plus grande ? C\'est une question de ' +
-            'centrage. Laquelle a l\'**écart-type** le plus petit, donc la plus homogène ? ' +
-            'C\'est une question de dispersion. Les données peuvent être données sous forme de ' +
-            'tableaux bruts, de récapitulatifs déjà calculés, ou de **courbes cumulées** à ' +
-            'lire directement sur un graphique.',
+            'Comparer deux séries, c\'est utiliser tous les outils précédents sur les deux séries à la ' +
+            'fois. Quelle série a la **médiane** la plus grande ? C\'est une question de centrage. ' +
+            'Laquelle a l\'**écart-type** le plus petit, et donc des valeurs plus proches les unes des ' +
+            'autres ? C\'est une question de dispersion. On dit que cette série est la plus homogène. ' +
+            'Les données peuvent venir de tableaux bruts, de résumés déjà calculés, ou de **courbes ' +
+            'cumulées** à lire sur un graphique.',
         },
         {
           kind: 'illustration',
@@ -1691,18 +1681,18 @@ export const statistiqueDescriptive: ChapterContent = {
             xAxisLabel: 'note',
             yAxisLabel: 'effectif cumulé',
             caption:
-              'Notes sur 20 de deux groupes de 20 élèves (effectifs pour les notes 6, 8, 10, 12, 14, 16 : ' +
-              'A = 1, 3, 6, 5, 3, 2 ; B = 3, 6, 4, 2, 4, 1). À la note 10, on lit 10 élèves pour A, ' +
-              'mais 13 pour B : le groupe B compte plus d\'élèves à 10 ou moins.',
+              'Notes sur 20 de deux groupes de 20 élèves. Effectifs pour les notes 6, 8, 10, 12, 14, 16 : ' +
+              'A = 1, 3, 6, 5, 3, 2 ; B = 3, 6, 4, 2, 4, 1. À la note 10, on lit 10 élèves pour A, ' +
+              'mais 13 pour B. Le groupe B compte donc plus d\'élèves à 10 ou moins.',
           },
         },
         {
           kind: 'para',
           text:
-            'Les mêmes séries, résumées par leurs boîtes à moustaches (règle du seuil). Groupe A : ' +
+            'Voici les mêmes séries, résumées par leurs boîtes à moustaches (règle du seuil). Groupe A : ' +
             'min 6, Q1 = 10, médiane 12, Q3 = 14, max 16. Groupe B : min 6, Q1 = 8, médiane 10, ' +
             'Q3 = 14, max 16. Le groupe A a la médiane la plus grande **et** la boîte la plus ' +
-            'étroite : il réussit mieux, et de façon plus homogène.',
+            'étroite. Il réussit mieux, et de façon plus homogène.',
         },
         {
           kind: 'illustration',
@@ -1715,7 +1705,7 @@ export const statistiqueDescriptive: ChapterContent = {
             xAxisLabel: 'note',
             ticks: [4, 6, 8, 10, 12, 14, 16, 18],
             caption:
-              'Groupe A : médiane 12, écart interquartile 4 — groupe B : médiane 10, écart ' +
+              'Groupe A : médiane 12, écart interquartile 4. Groupe B : médiane 10, écart ' +
               'interquartile 6. Même minimum et même maximum, mais pas du tout la même répartition.',
           },
         },
@@ -1723,12 +1713,11 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'methode',
           label: 'Les 4 types de questions',
           items: [
-            '**Centrage** — comparer les deux médianes.',
-            '**Dispersion** — comparer les deux écarts-types. La plus petite valeur = la ' +
-              'série la plus homogène.',
-            '**Seuil** — lire un effectif (ou une fréquence) cumulé à une valeur donnée. Tu ' +
-              'projettes sur la courbe, puis sur l\'axe des effectifs.',
-            '**Interprétation** — traduire ces lectures en une phrase de conclusion correcte.',
+            '**Centrage** : comparer les deux médianes.',
+            '**Dispersion** : comparer les deux écarts-types. Le plus petit donne la série la plus homogène.',
+            '**Seuil** : lire un effectif (ou une fréquence) cumulé à une valeur donnée. Tu vas jusqu\'à ' +
+              'la courbe, puis tu lis sur l\'axe des effectifs.',
+            '**Interprétation** : traduire ces lectures en une phrase de conclusion correcte.',
           ],
         },
         {
@@ -1736,19 +1725,18 @@ export const statistiqueDescriptive: ChapterContent = {
           label: 'Lire un intervalle, pas seulement un seuil',
           text:
             'Pour répondre à « quel pourcentage se situe entre a et b ? », ne lis jamais ' +
-            'l\'intervalle directement sur la courbe ! Lis séparément le cumulé en b et le ' +
-            'cumulé en a. Puis **soustrais** les deux : cumulé(b) − cumulé(a).',
+            'l\'intervalle directement sur la courbe ! Lis le cumulé en b, puis le cumulé en a. Ensuite, ' +
+            '**soustrais** les deux : cumulé(b) − cumulé(a).',
         },
         {
           kind: 'atelier',
           tag: 'deux-courbes-cumulees-widget',
           label: 'Manipule toi-même — deux séries, deux courbes cumulées',
           caption:
-            'Les fréquences cumulées de deux séries sur le même graphique. Déplace a : tu ' +
-            'lis, sur chaque courbe, le pourcentage des valeurs inférieures ou égales à a. ' +
-            'Coche « Lire entre a et b » : chaque pourcentage s\'obtient par cumulé(b) − ' +
-            'cumulé(a), jamais d\'un seul coup. Les deux médianes se lisent au seuil de 50 ' +
-            '%.',
+            'Les fréquences cumulées de deux séries, sur le même graphique. Déplace a : sur chaque ' +
+            'courbe, tu lis le pourcentage des valeurs plus petites que a ou égales à a. Coche « Lire ' +
+            'entre a et b ». Chaque pourcentage s\'obtient par cumulé(b) − cumulé(a), jamais d\'un seul ' +
+            'coup. Les deux médianes se lisent au seuil de 50 %.',
         },
         {
           kind: 'application',
@@ -1777,11 +1765,10 @@ export const statistiqueDescriptive: ChapterContent = {
               xAxisLabel: 'temps de guérison (jours)',
               yAxisLabel: 'groupe',
               caption:
-                'Le groupe Traitement (vert) guérit en général plus vite ET de façon plus ' +
-                'homogène (points resserrés entre 5 et 12 jours ; deux patients guéris en 6 jours, ' +
-                'leurs points sont empilés) que le groupe Placebo (rouge, ' +
-                'étalé de 8 à 18 jours) — mais les deux séries se chevauchent encore entre 8 et ' +
-                '12 jours : la différence est nette, sans être totale.',
+                'Le groupe Traitement (vert) guérit en général plus vite **et** de façon plus homogène. ' +
+                'Ses points sont serrés entre 5 et 12 jours. Deux patients ont guéri en 6 jours : leurs ' +
+                'points sont empilés. Le groupe Placebo (rouge) est étalé de 8 à 18 jours. Mais les deux ' +
+                'séries se chevauchent encore entre 8 et 12 jours. La différence est nette, sans être totale.',
             },
           ],
           image: {
@@ -1790,17 +1777,16 @@ export const statistiqueDescriptive: ChapterContent = {
             caption: 'Analyse de données dans le cadre d\'un essai clinique.',
           },
           text:
-            "Pour tester un nouveau médicament, les chercheurs forment deux groupes de " +
-            "patients comparables : l'un reçoit le médicament, l'autre un placebo (sans " +
-            "principe actif). Ils mesurent ensuite un indicateur (temps de guérison, baisse " +
-            "de tension, etc.) sur chaque groupe et comparent les deux séries EXACTEMENT comme " +
-            "dans cette section : quelle série a la médiane la plus favorable (centrage) ? " +
-            "Laquelle est la plus homogène, c'est-à-dire a le médicament un effet constant ou " +
-            "très variable d'un patient à l'autre (dispersion) ? Quelle proportion de patients " +
-            "dépasse un seuil donné (lecture de seuil) ? Une différence de médianes, à elle " +
-            "seule, ne suffit jamais à conclure qu'un médicament fonctionne — il faut aussi " +
-            "regarder si les deux séries se chevauchent beaucoup ou peu, exactement la question " +
-            "de dispersion que pose cette section.",
+            "Pour tester un nouveau médicament, les chercheurs forment deux groupes de patients " +
+            "comparables. L'un reçoit le médicament. L'autre reçoit un placebo : un faux médicament, sans " +
+            "principe actif. Ensuite, ils mesurent un indicateur sur chaque groupe : temps de guérison, " +
+            "baisse de tension, etc. Ils comparent les deux séries **exactement** comme dans cette étape. " +
+            "Quelle série a la médiane la plus favorable ? C'est le centrage. Laquelle est la plus " +
+            "homogène ? Autrement dit, le médicament a-t-il le même effet sur tous les patients, ou un " +
+            "effet très variable ? C'est la dispersion. Quelle part des patients dépasse un seuil donné ? " +
+            "C'est la lecture d'un seuil. Une différence de médianes ne suffit jamais, à elle seule, pour " +
+            "conclure qu'un médicament marche. Il faut aussi regarder si les deux séries se chevauchent " +
+            "beaucoup ou peu. C'est exactement la question de dispersion de cette étape.",
           domaines: ['Médecine', 'Recherche clinique'],
         },
         {
@@ -1808,8 +1794,8 @@ export const statistiqueDescriptive: ChapterContent = {
           title: 'Comparaison de deux séries statistiques',
           generatorId: 'gen38',
           description: [
-            'Compare deux séries sous 3 présentations (tableaux bruts, récapitulatif, courbes ' +
-              'cumulées). Sur le centrage, la dispersion, la lecture d\'un seuil et ' +
+            'Compare deux séries sous 3 présentations : tableaux bruts, résumé déjà calculé, courbes ' +
+              'cumulées. Travaille le centrage, la dispersion, la lecture d\'un seuil et ' +
               'l\'interprétation.',
           ],
           chantier: '4e',
@@ -1825,10 +1811,10 @@ export const statistiqueDescriptive: ChapterContent = {
       titreCourt: 'Révision et synthèse',
       partie: 'Comparer, puis réviser',
       essentiel: [
-        'Trois façons de réviser : un exercice de synthèse sur un seul jeu de données, un détective d\'erreurs dans la copie d\'un élève, et le quiz vrai/faux en 10 thèmes.',
+        'Trois façons de réviser. Un exercice de synthèse sur un seul jeu de données. Un détective d\'erreurs dans la copie d\'un élève. Et le quiz vrai/faux en 10 thèmes.',
       ],
       cartes: [
-        { question: 'Une copie cherche la médiane sur la série brute, sans la ranger. Quelle est l\'erreur ?', reponse: 'La médiane se cherche par le rang : il faut d\'abord ranger les valeurs par ordre croissant.' },
+        { question: 'Une copie cherche la médiane sur la série brute, sans la ranger. Quelle est l\'erreur ?', reponse: 'La médiane se cherche par le rang. Il faut d\'abord ranger les valeurs par ordre croissant.' },
         { question: 'Une copie donne un écart-type de 10,95 pour une variance de 10,95. Quelle est l\'erreur ?', reponse: 'La racine est oubliée : $\\sigma = \\sqrt{10{,}95} \\approx 3{,}31$.' },
       ],
       blocks: [
@@ -1836,19 +1822,19 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Trois façons de réviser ce chapitre. Un **exercice de synthèse**, qui enchaîne sur ' +
-            'un seul jeu de données cohérent : la moyenne pondérée, les paramètres de ' +
-            'position, la boîte à moustaches, la dispersion et Bienaymé-Tchebychev. Un ' +
-            '**détective d\'erreurs**, où tu traques l\'erreur dans la copie d\'un élève. Ou un ' +
-            '**quiz vrai/faux**, qui couvre transversalement les 9 générateurs de ce chapitre.',
+            'Il y a trois façons de réviser ce chapitre. D\'abord, un **exercice de synthèse** sur un ' +
+            'seul jeu de données. Il enchaîne la moyenne pondérée, la médiane et les quartiles, la ' +
+            'boîte à moustaches, la dispersion et Bienaymé-Tchebychev. Ensuite, un **détective ' +
+            'd\'erreurs** : tu cherches l\'erreur dans la copie d\'un élève. Enfin, un **quiz ' +
+            'vrai/faux** qui couvre les 9 générateurs de ce chapitre.',
         },
         {
           kind: 'entrainement',
           title: 'Synthèse — Statistique descriptive complète',
           generatorId: 'gen35',
           description: [
-            'Un seul contexte narratif, enchaîné du début à la fin : moyenne, médiane/Q1/Q3, ' +
-              'boîte à moustaches, variance/écart-type, puis Bienaymé-Tchebychev (k=2).',
+            'Une seule histoire, du début à la fin : moyenne, médiane/Q1/Q3, boîte à moustaches, ' +
+              'variance/écart-type, puis Bienaymé-Tchebychev (k=2).',
           ],
           chantier: '4e',
           whereLabel: '4e → « 35. Synthèse — Statistique descriptive complète »',
@@ -1858,10 +1844,11 @@ export const statistiqueDescriptive: ChapterContent = {
           title: 'Détective d\'erreurs : statistique',
           generatorId: 'gen112',
           description: [
-            'La copie d\'un élève contient UNE ligne fausse (moyenne sans les effectifs, médiane sur ' +
-              'la série non rangée, seuil de Q1 atteint mais pas dépassé, mauvais effectif cumulé, ' +
-              'variance non divisée par n, racine oubliée, moyenne des moyennes) : trouve-la, nomme ' +
-              'l\'erreur, puis donne le résultat corrigé.',
+            'La copie d\'un élève contient une seule ligne fausse. Ce peut être une moyenne sans les ' +
+              'effectifs, une médiane sur la série non rangée ou un seuil de Q1 atteint mais pas ' +
+              'dépassé. Ce peut être aussi un mauvais effectif cumulé, une variance non divisée par n, ' +
+              'une racine oubliée ou une moyenne des moyennes. Trouve-la, nomme l\'erreur, puis donne ' +
+              'le résultat corrigé.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 112. Détective d\'erreurs : statistique »',
@@ -1869,17 +1856,17 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            'Le thème « Médiane et quartiles » du quiz revient explicitement sur le piège du ' +
-            'seuil strict (cumulé exactement égal au seuil), vu à la section 4. Utile pour ' +
-            'vérifier que le réflexe est bien acquis !',
+            'Le thème « Médiane et quartiles » du quiz revient sur le piège du seuil. Un cumulé ' +
+            'exactement égal au seuil ne le dépasse pas strictement. Tu l\'as vu à l\'étape 4. C\'est ' +
+            'utile pour vérifier que tu as le bon réflexe !',
         },
         {
           kind: 'entrainement',
           title: 'Statistique descriptive à une variable — quiz vrai/faux',
           generatorId: 'gen59',
           description: [
-            '350 affirmations pré-écrites, réparties en 10 thèmes qui reprennent tout ce ' +
-              'chapitre. Un seul essai par question. La justification est toujours révélée.',
+            '350 affirmations déjà écrites, réparties en 10 thèmes qui reprennent tout ce ' +
+              'chapitre. Un seul essai par question. La justification est toujours montrée.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 59. Statistique descriptive à une variable — quiz vrai/faux »',
@@ -1966,17 +1953,16 @@ export const statistiqueDescriptive: ChapterContent = {
     items: [
       '**Vocabulaire** — population, individu, caractère (discret ou continu), effectif $n_i$, ' +
         'effectif total $n$, fréquence $f_i = \\dfrac{n_i}{n}$.',
-      '**Regroupement** — tableau de fréquences pour une liste discrète. Convention ' +
-        '$[\\text{inf}\\,;\\text{sup}[$ pour un caractère continu (sauf la dernière classe, fermée des ' +
-        'deux côtés). Classes de même amplitude pour construire un histogramme ; ailleurs, les ' +
-        'amplitudes peuvent différer.',
+      '**Regroupement** — tableau de fréquences pour une liste discrète. Pour un caractère continu, ' +
+        'classes $[\\text{inf}\\,;\\text{sup}[$ (sauf la dernière classe, fermée des deux côtés). Classes ' +
+        'de même amplitude pour construire un histogramme. Ailleurs, les amplitudes peuvent être différentes.',
       '**Moyenne** — $\\bar{x} = \\dfrac{\\sum x_i \\cdot n_i}{\\sum n_i}$, jamais la moyenne des ' +
         'valeurs distinctes seules.',
       '**Position** — médiane / $Q_1$ / $Q_3$ = première valeur dont l\'effectif cumulé dépasse ' +
         '**strictement** le seuil ($\\dfrac{n}{2}$, $\\dfrac{n}{4}$, $\\dfrac{3n}{4}$). Interpolation ' +
         'linéaire pour des classes.',
-      '**Boîte à moustaches** — 5 nombres : min, $Q_1$, médiane, $Q_3$, max. Écart interquartile $= ' +
-        'Q_3 - Q_1$, la largeur de la boîte. Chaque partie contient environ 25 % des valeurs ; une ' +
+      '**Boîte à moustaches** — 5 nombres : min, $Q_1$, médiane, $Q_3$, max. Écart interquartile ' +
+        '$= Q_3 - Q_1$, la largeur de la boîte. Chaque partie contient environ 25 % des valeurs. Une ' +
         'médiane décentrée signale une série asymétrique.',
       '**Dispersion** — étendue $= \\max - \\min$. Variance $= \\dfrac{\\sum (x_i-\\bar{x})^2 \\cdot ' +
         'n_i}{n}$, division par $n$. Écart-type $= \\sqrt{\\text{variance}}$, calculé depuis la ' +
@@ -1991,8 +1977,8 @@ export const statistiqueDescriptive: ChapterContent = {
       items: [
         'Ma colonne d\'effectifs cumulés se termine-t-elle bien par $n$ ? Et ma fréquence cumulée ' +
           'par 100 % ?',
-        'Ai-je bien pris la première valeur dont le cumulé dépasse strictement le seuil, ' +
-          'jamais celle qui l\'atteint tout juste ?',
+        'Ai-je bien pris la première valeur dont le cumulé dépasse strictement le seuil ? Jamais ' +
+          'celle qui l\'atteint tout juste.',
         'Ai-je divisé la somme des carrés d\'écarts par $n$, pas par $n-1$ ?',
         'Ai-je calculé l\'écart-type à partir de la variance déjà arrondie ?',
         'Sur ma calculatrice, ai-je lu $\\sigma_x$ (division par $n$), et pas $s_x$ ?',
@@ -2003,4 +1989,6 @@ export const statistiqueDescriptive: ChapterContent = {
       'statistiques à deux variables et la corrélation (en 5e, [[5e-4h/statistique-deux-variables]]). Ce sont les briques de base : tout le ' +
       'reste s\'appuie dessus.',
   },
+
+  lexique: lexiqueStatistiqueDescriptive,
 }

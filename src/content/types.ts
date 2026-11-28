@@ -1449,6 +1449,30 @@ export interface UtiliseEntree {
   jeBloque?: string[]
 }
 
+/**
+ * Un « mot du cours » (vocabulaire du programme expliqué en français simple) : repéré dans le texte du
+ * chapitre (souligné en pointillé, bulle au toucher) et listé dans le lexique de l'onglet Réviser. Voir
+ * `.claude/rules/content-authoring.md`, « Français simple et mots du cours ».
+ */
+export interface MotDuCours {
+  /** Le mot tel qu'il s'affiche en titre de bulle et dans le lexique — texte BRUT (« écart interquartile »). */
+  mot: string
+  /** Autres formes repérées dans le texte (pluriel, féminin, variantes : « quartiles », « premier quartile »,
+   * « Q1 »). Le mot lui-même est toujours repéré. Repérage en mots entiers, sans tenir compte de la casse ni
+   * des accents, jamais dans une formule, un titre, un lien ou un tableau. */
+  formes?: string[]
+  /** Définition simple : 1 ou 2 phrases courtes (RichText : `$…$` permis). */
+  definition: string
+  /** Petit exemple concret (RichText). */
+  exemple?: string
+  /** Id de la section où le mot est expliqué : bouton « Revoir l'étape n » de la bulle (absent : pas de
+   * bouton, par exemple pour un mot expliqué dans « Avant de commencer »). */
+  etape?: string
+  /** Expressions dans lesquelles une forme ne doit PAS être marquée, parce que le mot y a son sens de tous
+   * les jours (« toute la classe », « en moyenne », « en mode statistique »). */
+  pasDans?: string[]
+}
+
 export interface ChapterContent {
   /** Human-readable level label, e.g. "5e (4h)". */
   level: string
@@ -1484,4 +1508,7 @@ export interface ChapterContent {
      * à tout le chapitre) — distincte des cartes de fin de section, positionnée après `forward`. */
     entrainement?: Extract<Block, { kind: 'entrainement' }>
   }
+  /** « Mots du cours » du chapitre (voir `MotDuCours`) : données dans `src/content/lexiques/{niveau}/{slug}.ts`.
+   * Absent : aucun mot souligné, pas de lexique dans Réviser. Jamais imprimé ni exporté. */
+  lexique?: MotDuCours[]
 }

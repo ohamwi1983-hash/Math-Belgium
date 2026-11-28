@@ -10,6 +10,10 @@ import { FeatureTable } from './FeatureTable'
 import { OperationChain } from './OperationChain'
 import { InteractiveWidget } from './InteractiveWidget'
 import { TablePhi } from '../TablePhi'
+import { PorteeMots, SansMotsDuCours } from '../motsDuCoursContexte'
+
+/** Blocs où aucun mot du cours n'est souligné (titres, tableaux, figures, cartes, widgets). */
+const SANS_MOTS = new Set<Block['kind']>(['subheading', 'featureTable', 'signTable', 'illustration', 'illustrationGroup', 'operationChain', 'tablePhi', 'atelier', 'entrainement', 'video'])
 
 /** Renders one content block. Sections/intros are just ordered arrays of these.
  *
@@ -17,6 +21,23 @@ import { TablePhi } from '../TablePhi'
  * le pré-rendu, mais masqué à l'écran du parcours, où il est relu pas à pas dans un tiroir en fin
  * d'étape (voir `ContenuEtape`). */
 export function BlockRenderer({ block, enTiroir }: { block: Block; enTiroir?: boolean }) {
+  // « Mots du cours » : un mot n'est souligné qu'une fois par bloc (`PorteeMots`), jamais dans un titre,
+  // un tableau, une figure, une carte ou un widget (`SansMotsDuCours`). Sans lexique : aucun effet.
+  if (SANS_MOTS.has(block.kind)) {
+    return (
+      <SansMotsDuCours>
+        <BlocContenu block={block} enTiroir={enTiroir} />
+      </SansMotsDuCours>
+    )
+  }
+  return (
+    <PorteeMots valeur={block}>
+      <BlocContenu block={block} enTiroir={enTiroir} />
+    </PorteeMots>
+  )
+}
+
+function BlocContenu({ block, enTiroir }: { block: Block; enTiroir?: boolean }) {
   switch (block.kind) {
     case 'para':
       return (

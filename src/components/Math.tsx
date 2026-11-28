@@ -5,6 +5,7 @@ import katex from 'katex'
 import { normaliserLogDecimal } from '../lib/notationLog'
 import { lireFormule } from '../lib/lectureFormules'
 import { resoudreLien } from '../lib/lienChapitre'
+import { marquerMots, useMotsDuCours } from './motsDuCoursContexte'
 
 /** Correspondances (option « Couleurs et soulignés qui se correspondent », planche 09) : SEULE commande
  * de confiance admise, `\htmlClass{m1}{…}` / `m2` / `m3` (une simple classe sur un `<span>` ; KaTeX
@@ -90,6 +91,10 @@ type Morceau = { texte: string } | { tex: string; avant: string; apres: string }
 
 /** Renders a data string containing `$latex$` math and `**bold**` emphasis. */
 export const RichText = memo(function RichText({ text }: { text: string }) {
+  // « Mots du cours » (français simple) : soulignés seulement sous `FournisseurMotsDuCours` (page de
+  // chapitre), jamais dans une formule, un gras ou un lien ; ailleurs, rendu strictement identique.
+  const mots = useMotsDuCours()
+  const dejaMarques = new Set<number>()
   const morceaux: Morceau[] = []
   let lastIndex = 0
   let match: RegExpExecArray | null
@@ -129,7 +134,7 @@ export const RichText = memo(function RichText({ text }: { text: string }) {
     if ('gras' in m) parts.push(<strong key={key}>{m.gras}</strong>)
     else if ('lien' in m) parts.push(<LienChapitre key={key} reference={m.lien} section={m.section} texte={m.choisi} />)
     else if ('texte' in m) {
-      if (m.texte) parts.push(<Fragment key={key}>{m.texte}</Fragment>)
+      if (m.texte) parts.push(<Fragment key={key}>{marquerMots(mots, m.texte, text, dejaMarques, String(key)) ?? m.texte}</Fragment>)
     } else if (m.avant || m.apres) {
       parts.push(
         <span className="colle" key={key}>

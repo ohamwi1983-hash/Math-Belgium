@@ -10,6 +10,10 @@ paths:
   - "src/lib/lienChapitre.ts"
   - "src/lib/prerequisChapitre.ts"
   - "scripts/verifier-liens-chapitres.mjs"
+  - "src/lib/motsDuCours.ts"
+  - "src/components/motsDuCoursContexte.tsx"
+  - "scripts/controle-lisibilite.mjs"
+  - "scripts/lisibilite/**"
 ---
 
 # Conventions de rédaction du contenu (`ChapterContent`)
@@ -319,3 +323,64 @@ kinds de `Block` :
   "S'entraîner ↗" restant affiché en dessous. **Aucune carte ne s'en sert** : le portage de
   `gen7-widget` / `gen8-widget` n'a jamais été fusionné, et l'utilisateur a décidé de ne pas les
   porter (audit du 4e ch. 1) — ne pas poser de `widgetTag` sur les cartes gen7 / gen8.
+
+## Français simple et mots du cours (pilote : 4e « Statistique descriptive », 28/11/2026)
+
+Constat du professeur : des élèves de 4e (lecteurs moyens à faibles, certains « dys ») ne comprennent pas le cours
+en le lisant (« mots compliqués ») et demandent à une IA de leur expliquer le texte. Démarche validée sur UN
+chapitre pilote ; si le résultat convient, elle sera étendue à toute la 4e, la 5e et la 6e. Un chapitre est « en
+français simple » quand il est déclaré dans `scripts/lisibilite/chapitres-francais-simple.json` : son contrôle
+bloque alors le build.
+
+**Règles d'écriture** (tout texte que l'élève lit : `para`, encadrés, items, étapes et résultats d'exemples,
+légendes, `essentiel`, `cartes`, descriptions des cartes « À toi », synthèse) :
+- une idée par phrase ; viser 20 mots au plus, **jamais plus de 25** (hors exception écrite dans le fichier des
+  chapitres déclarés : énumération, formule longue) ; casser les incises « — … — » et les chaînes « donc …, puisque
+  … » en phrases courtes ; « — » ne sert plus que d'étiquette (« **Moyenne** : … », « Médiane — seuil … » dans un
+  exemple, synthèse) ;
+- mots de tous les jours à la place des mots de manuel (liste noire réutilisable
+  `scripts/lisibilite/mots-de-manuel.json`, avec ce qu'on écrit à la place : « les deux côtés de l'égalité » pour
+  « les deux membres », « n'importe quel » pour « quelconque », « dans l'autre sens » pour « réciproquement »,
+  « valeur approchée » pour « approximation », « qui se suivent » pour « consécutifs »…). Un mot de la liste
+  nécessaire au cours (« strictement », « représentatif ») est GARDÉ s'il est au lexique ET expliqué sur place ;
+- les vrais mots du cours (programme FWB) sont GARDÉS, expliqués en une phrase à leur première apparition dans
+  l'étape où ils servent (« Une classe va d'une borne inférieure (son début) à une borne supérieure (sa fin). ») et
+  mis au lexique ;
+- tutoiement, ton, exactitude : rien de faux, rien de retiré du contenu exigé, aucun exemple / résultat / formule
+  changé ; typographie (« − », virgule décimale, insécables), gras d'insistance en minuscules (jamais « ET »,
+  « EXACTEMENT ») ; dire « étape n » plutôt que « section n » (c'est ce que l'écran affiche) ;
+- **structure intacte** : mêmes ids de sections, même nombre et même ordre de blocs, mêmes cartes « Teste-toi »
+  (clés `idSection:indice`), mêmes générateurs / ateliers / figures ; les `badge` / `label` d'exemples ne changent
+  pas (clés de `ENONCES_DEMONSTRATION`, `evaluationPayload.ts`). La progression des élèves, les annotations de
+  projection (étape + rang du bloc) et les exports en dépendent. Contrôle de la réécriture : comparer avant / après
+  (mêmes champs non textuels, mêmes formules `$…$` bloc par bloc) — script `structure.mjs` du dossier de travail
+  `francais-simple/`, à reprendre pour chaque chapitre.
+
+**Lexique** (« mots du cours ») : champ `ChapterContent.lexique?: MotDuCours[]` (`types.ts`), données dans
+`src/content/lexiques/{niveau}/{slug}.ts`, importées par le fichier du chapitre (`lexique: lexiqueStatistiqueDescriptive`).
+Par mot : `mot` (texte brut), `formes` (pluriel, féminin, variantes, « Q1 »…), `definition` (RichText, 1 ou 2
+phrases courtes), `exemple` (RichText, concret, tiré du chapitre si possible), `etape` (section où il est expliqué :
+bouton « Revoir l'étape n » ; absent pour « Avant de commencer »), `pasDans` (expressions où le mot a son sens courant
+et ne doit pas être souligné : « toute la classe », « une classe de 40 élèves », « en moyenne », « mode statistique »).
+Repérage automatique (`src/lib/motsDuCours.ts`, pur) : mots entiers, sans casse ni accents, la forme la plus longue
+gagne (« effectif cumulé » avant « effectif »), jamais dans une formule, un gras (le mot y est souvent DÉFINI), un
+lien, un titre, un tableau, une légende de figure ou une consigne d'atelier. Un mot est souligné **une fois par
+bloc** (première chaîne du bloc qui le contient, calcul pur sur les données) et partout où il revient dans le
+chapitre. Rendu : `components/chapter/MotsDuCours.tsx` (voir `chapter-components.md`, « Mots du cours »).
+
+**Contrôle** : `npm run controle:lisibilite` (`scripts/controle-lisibilite.mjs`, logique pure dans
+`scripts/lisibilite/mesure.mjs`), branché dans `npm run build` après `verifier-liens-chapitres.mjs`. Pour un chapitre
+déclaré : phrase de plus de 25 mots sans exception écrite, mot de la liste noire hors lexique, mot du cours d'un
+thème du chapitre (`scripts/lisibilite/vocabulaire-cours.json`, par thème : `statistique`…) absent du lexique, mot du
+lexique jamais repéré (forme mal écrite), étape inconnue, définition de plus de 2 phrases → ÉCHEC. Les autres
+chapitres ne bloquent jamais : `-- --rapport` (tableau de tous les chapitres), `-- --json f.json` (rapport complet),
+`-- --plus 20 4e/slug` (phrases de plus de 20 mots d'un chapitre, pour la réécriture). Mesure : un jeton avec une
+lettre = un mot, une formule = un mot, une suite de nombres (« 3, 5, 3, 7 ») = un mot ; phrases coupées après
+« . ! ? … » suivis d'une majuscule, d'un chiffre ou d'une formule ; texte mesuré = tout ce que l'élève lit (pas les
+titres, étiquettes, tableaux de données ni légendes de photos).
+
+**Étendre à un chapitre** : (1) `-- --plus 20 niveau/slug` et la liste noire pour repérer ; (2) réécrire les textes
+seulement ; (3) écrire `src/content/lexiques/{niveau}/{slug}.ts` et l'importer ; (4) ajouter le thème de
+vocabulaire s'il manque ; (5) déclarer le chapitre ; (6) `npm run controle:lisibilite`, `npm run controle:lecture`,
+comparaison de structure avant / après, `npm run build`.
+

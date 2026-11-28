@@ -745,3 +745,44 @@ Maquette `signes.html` + planche 09 et démo validée `lecture-guidee.html` (ong
   case par case ») et `impression.mjs` (média print : hauteurs et écarts des tableaux identiques, rien
   du panneau ni du bouton).
 
+
+## Mots du cours (français simple, pilote 4e « Statistique descriptive », 28/11/2026)
+
+Données et règles d'écriture : `content-authoring.md`, « Français simple et mots du cours ». Code :
+- `components/motsDuCoursContexte.tsx` — `FournisseurMotsDuCours` (posé par `ChapterPage` autour de tout
+  `.chapter-layout` quand `chapter.lexique` existe ; sinon rien ne change, nulle part) ; `SansMotsDuCours` (coupe le
+  repérage : lede, `CeChapitreUtilise`, `EtapeUtilise`, `Formulaire`, `FeatureTable`, légendes de `Illustration`,
+  consigne de `CarteManipuler`, blocs `subheading` / tableaux / figures / `atelier` / `entrainement` / `video` dans
+  `BlockRenderer`, la bulle et le lexique) ; `PorteeMots` (un bloc : chaque mot n'est souligné que dans la PREMIÈRE
+  chaîne du bloc qui le contient — `BlockRenderer` pour chaque bloc, `TiroirBloc` pour les exemples relus pas à pas,
+  « Dans la vraie vie » et « Le sais-tu ? », `Essentiel`, chaque ligne de « La fiche du chapitre », chaque carte
+  « Teste-toi » ; un bloc imbriqué garde la portée de son parent) ; `marquerMots`, appelé par `RichText`
+  (`Math.tsx`) sur les seuls morceaux de texte simple (jamais formule, gras, lien). Hors fournisseur (générateurs,
+  « Je bloque », projection, carnet, panneau « Aa », évaluations) : rendu strictement identique.
+- Mot souligné : `<span class="mot-cours" role="button" tabindex="0" aria-haspopup="dialog" aria-expanded
+  aria-label="quartiles : voir la définition">` — pas un `<button>` (un bouton ne se coupe pas en fin de ligne :
+  « polygone des effectifs cumulés » doit passer à la ligne comme le texte). Clic, toucher, Entrée ou Espace. Pointillé
+  `--sky` (2 px, décalé sous les jambages ; `--ink` en contraste élevé), fond `--sky-soft` au survol / ouvert /
+  focus ; cible tactile agrandie par un `::after` de 40 px de haut sans changer la ligne. `aria-expanded` posé
+  directement sur l'élément à l'ouverture (magasin hors React : ouvrir une bulle ne redessine aucun texte). Écran
+  seulement (`@media screen`) : imprimé comme du texte ; `buildHtml.ts` remplace le `span` par son texte. Présent dans
+  le HTML pré-rendu (contenu identique hors ces balises) ; la bulle, elle, n'existe qu'ouverte.
+- `components/chapter/MotsDuCours.tsx` (+ `motsDuCours.css`) — `HoteMotsDuCours` (dans `ChapterPage`) : bulle non
+  modale (`role="dialog"`, `aria-modal="false"`, titre = le mot) rendue dans `body` par un portail ; focus dans la
+  bulle à l'ouverture ; Échap, clic à côté, « Fermer » → fermée, focus rendu au mot ; changement d'étape / de vue →
+  fermée. Contenu : le mot, la définition, « Exemple : … », « Écouter » (seulement si la synthèse existe, après le
+  montage : `lire(phrasesDe(contenu), { sansBarre: true })`, le bouton devient « Arrêter » ; fermer la bulle arrête
+  SA lecture), « Revoir l'étape n » (si le mot est expliqué dans une AUTRE étape que celle affichée), « Tous les
+  mots » (onglet Réviser, défile jusqu'au lexique), « Fermer » (boutons ≥ 44 px). Ordinateur (≥ 760 px) : sous le
+  mot (au-dessus s'il manque de place), 380 px au plus, tenue à 16 px des bords, replacée au défilement ;
+  téléphone : feuille du bas pleine largeur (70 dvh au plus, défile), au-dessus de la barre « J'ai compris ».
+  `z-index` 420 : au-dessus de la règle / du masque de lecture (400). `LexiqueChapitre` : section « Les mots du
+  cours » (`id="mots-du-cours"`) de `ReviserVue`, après « La fiche du chapitre », par ordre alphabétique
+  (`lexiqueAlphabetique`), définition, exemple, « Revoir l'étape n · titre » ; lien « Les mots du cours » dans la
+  rangée « Dans cet onglet ».
+- **Avec les aides existantes** (rien ne se gêne) : lecture à voix haute — `phrasesPage.ts` n'exclut que les vrais
+  `button` : le mot est lu comme le reste de la phrase ; « toucher une phrase pour la lire » ignore `[role="button"]`
+  (toucher un mot ouvre sa bulle, toucher ailleurs lit) ; règle / masque — calque `pointer-events: none`, la bulle
+  passe au-dessus (420 > 400) ; « un bloc à la fois » — la bulle est hors du corps de l'étape (portail) : jamais un
+  bloc ; toucher un mot d'un bloc effacé le rend net ET ouvre la bulle ; loupe — elle ne réagit qu'aux formules, qui
+  ne sont jamais soulignées ; exemples guidés et tableaux lus case par case — inchangés (pas de mot dans un tableau).

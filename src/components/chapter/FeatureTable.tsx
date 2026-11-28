@@ -1,5 +1,6 @@
 import type { Block } from '../../content/types'
 import { RichText } from '../Math'
+import { SansMotsDuCours } from '../motsDuCoursContexte'
 
 /** Tableau à en-tête fixe (ex. "Fonction | Domaine | Image | Dérivée") — colonnes nommées, lignes
  * de données, à ne pas confondre avec `SignTable` (bornes/intervalles alignés).
@@ -15,7 +16,9 @@ export function FeatureTable({
   block: Extract<Block, { kind: 'featureTable' }>
   synthese?: boolean
 }) {
+  // Tableau : jamais de mot du cours souligné (cellules courtes, données).
   return (
+    <SansMotsDuCours>
     <div className="table-scroll">
       <table className={synthese ? 'tableau feature-table feature-table--synthese' : 'tableau feature-table'}>
         {block.caption && <caption>{block.caption}</caption>}
@@ -44,5 +47,6 @@ export function FeatureTable({
         </tbody>
       </table>
     </div>
+    </SansMotsDuCours>
   )
 }

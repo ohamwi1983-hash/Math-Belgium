@@ -6,6 +6,8 @@ import type { EtatCarte } from '../../lib/parcoursChapitre'
 import { animationsReduites } from '../../lib/reglagesLecture'
 import type { Aller } from './CarteChapitre'
 import { LienVue } from './CarteChapitre'
+import { PorteeMots } from '../motsDuCoursContexte'
+import { LexiqueChapitre } from './MotsDuCours'
 
 interface Carte {
   cle: string
@@ -36,6 +38,7 @@ export function ReviserVue({ chapter, aller }: { chapter: ChapterContent; aller:
   }
   const liens = [
     { label: 'Ce qu’il faut retenir', sel: '.synthese' },
+    ...(chapter.lexique?.length ? [{ label: 'Les mots du cours', sel: '#mots-du-cours' }] : []),
     ...(chapter.formulaire ? [{ label: 'Formulaire', sel: '.formulaire' }] : []),
     ...(chapter.recap.entrainement ? [{ label: 'Quiz vrai ou faux', sel: '.synthese .generator-card' }] : []),
     { label: 'Imprimer ou télécharger', sel: '.page > .export-section' },
@@ -55,17 +58,20 @@ export function ReviserVue({ chapter, aller }: { chapter: ChapterContent; aller:
                 </LienVue>
                 <div>
                   <p className="fiche-titre">{titreCourt(s)}</p>
-                  {s.essentiel!.map((p, i) => (
-                    <p key={i} className="fiche-texte">
-                      <RichText text={p} />
-                    </p>
-                  ))}
+                  <PorteeMots valeur={s.essentiel}>
+                    {s.essentiel!.map((p, i) => (
+                      <p key={i} className="fiche-texte">
+                        <RichText text={p} />
+                      </p>
+                    ))}
+                  </PorteeMots>
                 </div>
               </li>
             ))}
           </ol>
         </section>
       )}
+      <LexiqueChapitre chapter={chapter} aller={aller} />
       <nav className="reviser-liens" aria-label="Dans cet onglet">
         {liens.map((l) => (
           <button key={l.sel} type="button" onClick={() => defiler(l.sel)}>
@@ -125,7 +131,7 @@ function TesteToi({ chapter, cartes }: { chapter: ChapterContent; cartes: Carte[
         )}
       </p>
       {carte ? (
-        <>
+        <PorteeMots valeur={[carte.question, carte.reponse]}>
           <p className="teste-toi-etape">
             Étape {carte.numero} · {carte.etape}
           </p>
@@ -153,7 +159,7 @@ function TesteToi({ chapter, cartes }: { chapter: ChapterContent; cartes: Carte[
               Voir la réponse
             </button>
           )}
-        </>
+        </PorteeMots>
       ) : (
         <div className="teste-toi-fin">
           <p className="teste-toi-question">Paquet terminé.</p>

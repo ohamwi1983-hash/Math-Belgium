@@ -6724,3 +6724,28 @@ et paquets, aires et périmètres des deux fractales (n ≤ 6), simple / compos�
 trois premières lignes ; 15 000 € 5 % 48 mois : 344,69, 1 545,12 / 1 544,90). Épinglage dans le panneau
 (`chapitre-retouches/ateliers.cjs`) : 9 / 9 épinglés, 0 KO à 390 × 664 et 375 × 667. Captures et scripts :
 `scratchpad/56-G/` (`final/`, `cap/`, `tout.sh`, `ouvrir.cjs`, `act-*.cjs`).
+
+## 4e, Chapitre 4 — Statistique descriptive : pilote du français simple et des « mots du cours » (28/11/2026)
+
+Demande du professeur (des élèves de 4e « ne comprennent pas le cours en le lisant ») ; démarche validée sur ce seul
+chapitre, à étendre ensuite. Règles, lexique et contrôle : `content-authoring.md`, « Français simple et mots du
+cours » ; composant : `chapter-components.md`, « Mots du cours ». Dossier de travail `francais-simple/` (audit,
+`structure.mjs`, `audit.mjs`, captures).
+- **Réécriture** de TOUS les textes lus (lede, « Avant de commencer », paragraphes, encadrés, étapes et résultats
+  d'exemples, légendes, « Le sais-tu ? », « Dans la vraie vie », consignes d'ateliers, cartes « À toi »,
+  `essentiel`, `cartes`, synthèse) : 170 passages. Mesure `controle-lisibilite` (tout le texte lu) : 7 470 → 8 012
+  mots, 14,2 → 10,2 mots par phrase, phrases de plus de 20 mots 19,5 % → 1,1 %, de plus de 25 mots 12,3 % → 0 %, de
+  plus de 35 mots 3,2 % → 0 %, 35 → 0 mots de manuel hors lexique. Structure identique (contrôle `structure.mjs` :
+  ids, 186 unités, champs non textuels, formules bloc par bloc ; badges et labels d'exemples inchangés).
+- Choix : « section n » → « étape n » ; « accolées » → « collées » (bâtons / histogramme) ; « valeurs isolées » →
+  « valeurs séparées » (le libellé « En valeurs isolées » de l'atelier `seuil-cumule-widget` est gardé dans sa
+  consigne, c'est le nom de son mode) ; « approximation » → « valeur approchée » ; « proportion » → « part » ;
+  « membres » → « côtés de l'égalité » ; « Deux classes » (de 4e) → « Deux groupes d'élèves » (étape 6) ;
+  majuscules d'insistance (ET, EXACTEMENT, SUIVANTE, UNE) → gras ou mot simple ; « strictement » et
+  « représentatif » gardés (vocabulaire des générateurs gen33, gen110), expliqués sur place et au lexique ; ajouts
+  d'explication courts : borne inférieure / supérieure (étape 2), « dépasser strictement » (étape 4), dispersion
+  (étape 6), placebo, IQR, classe modale et série bimodale (étape 4, une phrase). Le bug `*exactement*` signalé plus
+  haut n'existait plus dans le fichier.
+- **Lexique** : `src/content/lexiques/4e/statistique-descriptive.ts`, 42 mots (population… inégalité de
+  Bienaymé-Tchebychev), `pasDans` pour « classe » (toute la classe, une classe de 40 élèves, notes de la classe),
+  « moyenne » (en moyenne), « mode » (mode statistique), « valeur extrême » (deux valeurs extrêmes = min et max).
