@@ -16,6 +16,10 @@ import type { Courbe, DonneesAnnotations, ElementAnnotation, Epingle, PageBlanch
 import { peindreCourbes, peindreTraits } from './peinture'
 import { transfoPage, versEcran } from './vue'
 import { lireFonction } from './traceur'
+import { aDesElementsEnrichis } from './traceurEnrichi'
+import { NOMS_GABARITS } from './gabarits'
+import { aDesObjets, ObjetsExport } from '../../components/projection/ObjetsPage'
+import { EtiquettesTraceur } from '../../components/projection/TraceurEnrichi'
 
 /**
  * « Télécharger en PowerPoint / PDF » du mode projection (avec ou sans annotations, voir `telechargerProjection`) : les MÊMES diapos (construites et découpées comme
@@ -252,6 +256,7 @@ function CalqueEtiquettes({ elements, page }: { elements: ElementAnnotation[]; p
   return (
     <>
       {page?.fond === 'repere' && courbes.length > 0 && <EtiquettesCourbes courbes={courbes} page={page} />}
+      {page?.fond === 'repere' && <EtiquettesTraceur elements={elements} page={page} />}
       {elements
         .filter((e): e is Epingle => e.genre === 'epingle')
         .map((e) => {
@@ -267,10 +272,10 @@ function CalqueEtiquettes({ elements, page }: { elements: ElementAnnotation[]; p
 }
 
 const aDesEtiquettes = (elements: ElementAnnotation[], page: PageBlanche | null) =>
-  elements.some((e) => e.genre === 'epingle') || (page?.fond === 'repere' && elements.some((e) => e.genre === 'courbe'))
+  elements.some((e) => e.genre === 'epingle') || (page?.fond === 'repere' && (elements.some((e) => e.genre === 'courbe') || aDesElementsEnrichis(elements)))
 
 /** Planche hors écran : chaque diapo dans son état final, chaque page blanche (fond), et les calques d'étiquettes. */
-function Planche({ elements, pages, chapter, pret }: { elements: Element[]; pages: Map<string, ElementAnnotation[]>; chapter: ChapterContent; pret: (el: HTMLElement) => void }) {
+function Planche({ elements, pages, chapter, diapos, pret }: { elements: Element[]; pages: Map<string, ElementAnnotation[]>; chapter: ChapterContent; diapos: DonneesDiapo[]; pret: (el: HTMLElement) => void }) {
   const ref = useRef<HTMLDivElement>(null)
   const signal = useRef(pret)
   useEffect(() => {
@@ -286,6 +291,8 @@ function Planche({ elements, pages, chapter, pret }: { elements: Element[]; page
           <div key={`${e.page}-${i}`} data-i={i}>
             <div className="pptx-diapo" style={taille}>
               {e.genre === 'diapo' ? <Diapo diapo={e.d} chapter={chapter} pas={e.d.pas} mode="export" /> : <FondBlancTableau fond={e.p.fond} ex={e.p.ex} ey={e.p.ey} vue={e.p.vue} />}
+              {/* Gabarits et morceaux collés (P2, P4) : dans le fond de la page blanche, sous le surligneur et le stylo. */}
+              {e.genre === 'blanche' && aDesObjets(liste) && <ObjetsExport elements={liste} page={e.p} diapos={diapos} chapter={chapter} />}
             </div>
             {aDesEtiquettes(liste, blanche) && (
               <div className="pptx-calque" style={taille}>
@@ -312,7 +319,7 @@ async function calques(elements: ElementAnnotation[], page: PageBlanche | null, 
   const [cs, xs] = toile()
   peindreTraits(xf, xs, elements, ECHELLE_IMAGE, transfoPage(page))
   const avecFluo = elements.some((e) => (e.genre === undefined || e.genre === 'trait') && e.fluo && !e.gomme)
-  const avecStylo = elements.some((e) => e.genre === 'arc' || e.genre === 'epingle' || e.genre === 'courbe' || ((e.genre === undefined || e.genre === 'trait') && !e.fluo && !e.gomme))
+  const avecStylo = elements.some((e) => e.genre === 'arc' || e.genre === 'epingle' || e.genre === 'courbe' || e.genre === 'point' || e.genre === 'liaison' || e.genre === 'tangente' || e.genre === 'aire' || ((e.genre === undefined || e.genre === 'trait') && !e.fluo && !e.gomme))
   let fluo: HTMLCanvasElement | null = null
   if (avecFluo) {
     const [c, x] = toile()
@@ -328,9 +335,9 @@ async function calques(elements: ElementAnnotation[], page: PageBlanche | null, 
   if (avecStylo) {
     const [c, x] = toile()
     const courbes = elements.filter((e): e is Courbe => e.genre === 'courbe')
-    if (page && courbes.length) {
+    if (page && (courbes.length || aDesElementsEnrichis(elements))) {
       const [cc, xc] = toile()
-      peindreCourbes(xc, courbes, page, ECHELLE_IMAGE)
+      peindreCourbes(xc, courbes, page, ECHELLE_IMAGE, elements)
       x.drawImage(cc, 0, 0)
     }
     x.drawImage(cs, 0, 0)
@@ -418,7 +425,7 @@ export async function telechargerProjection(chapter: ChapterContent, choix: Pick
       for (const p of ann?.blanches[d.cle] ?? []) if (pageBlancheUtile(p, pages)) elements.push({ genre: 'blanche', d, p, page: clePageBlanche(p.id), numero: ++numero })
     })
     const annote = elements.some((e) => e.genre === 'blanche' || (pages.get(e.page)?.length ?? 0) > 0)
-    const planche = await new Promise<HTMLElement>((resolve) => racine.render(<Planche elements={elements} pages={pages} chapter={chapter} pret={resolve} />))
+    const planche = await new Promise<HTMLElement>((resolve) => racine.render(<Planche elements={elements} pages={pages} chapter={chapter} diapos={finales} pret={resolve} />))
     await document.fonts?.ready
     // Ateliers (module chargé à la demande, Web Component construit) et ajustement des diapos.
     await pause(finales.some((d) => d.type === 'atelier') ? 1500 : 500)
@@ -524,5 +531,8 @@ function notesElement(e: Element, liste: ElementAnnotation[]): string[] {
       return `${c.nom}(x) = ${l.ok ? latexEnTexte(l.latex) : c.saisie}`
     })
   const fond = e.p.fond === 'repere' ? 'repère' : e.p.fond === 'quadrille' ? 'quadrillé' : 'uni'
-  return [`Page blanche ${e.numero} (${fond}) — après « ${texteBrut(e.d.section.title)} »`, ...courbes]
+  const autres = liste.flatMap((x) =>
+    x.genre === 'gabarit' ? [NOMS_GABARITS[x.type]] : x.genre === 'morceau' ? ['Morceau collé de la diapo d’origine'] : x.genre === 'point' ? [`${x.nom}(${String(x.x).replace('.', ',')} ; ${String(x.y).replace('.', ',')})`] : x.genre === 'liaison' ? [`${x.sorte} ${x.a}${x.b}`] : [],
+  )
+  return [`Page blanche ${e.numero} (${fond}) — après « ${texteBrut(e.d.section.title)} »`, ...courbes, ...autres]
 }

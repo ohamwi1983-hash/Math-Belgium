@@ -45,7 +45,7 @@ export function sansPrefixe(saisie: string): string {
 }
 
 /** Évaluation SANS exception : NaN hors du domaine (division par 0, √ d'un négatif, ln d'un négatif…). */
-function compiler(n: Noeud, mode: ModeAngle): Fonction {
+function compiler(n: Noeud, mode: ModeAngle, valeurs: Record<string, number> = {}): Fonction {
   const c = (m: Noeud): Fonction => {
     switch (m.t) {
       case 'nb': {
@@ -58,6 +58,11 @@ function compiler(n: Noeud, mode: ModeAngle): Fonction {
       }
       case 'var':
         return (x) => x
+      case 'param': {
+        // Paramètre réglé par un curseur (valeur de départ 1).
+        const v = valeurs[m.nom] ?? 1
+        return () => v
+      }
       case 'par':
         return c(m.a)
       case 'neg': {
@@ -141,13 +146,14 @@ function compiler(n: Noeud, mode: ModeAngle): Fonction {
 }
 
 /** Lit « f(x) = … » : fonction numérique + LaTeX de l'expression ; message en clair sinon (rien n'est effacé). */
-export function lireFonction(saisie: string, mode: ModeAngle): LectureFonction {
+export function lireFonction(saisie: string, mode: ModeAngle, valeurs?: Record<string, number>): LectureFonction {
   const s = sansPrefixe(saisie)
   if (!s.trim()) return { ok: false, erreur: 'Écris une expression en x, par exemple x² − 2x.' }
   try {
-    const arbre = analyser(s, { variable: true })
+    // Toute lettre autre que x (a, k, m, p…) est un paramètre animable (planche P3) ; « e » et « π » restent des nombres.
+    const arbre = analyser(s, { variable: true, parametres: true })
     if (/\bans\b/i.test(s)) return { ok: false, erreur: '« Ans » n’a pas de sens dans une fonction' }
-    return { ok: true, f: compiler(arbre, mode), latex: enLatex(arbre, mode, { fractions: true }), saisie: s }
+    return { ok: true, f: compiler(arbre, mode, valeurs), latex: enLatex(arbre, mode, { fractions: true }), saisie: s }
   } catch (e) {
     return { ok: false, erreur: e instanceof ErreurCalcul ? e.message : 'Expression illisible' }
   }
@@ -277,7 +283,7 @@ export interface PointRemarquable {
 }
 
 /** Coordonnée affichée : décimal exact tel quel, sinon forme exacte reconnue, sinon null (arrondie). */
-function exacte(v: number): string | null {
+export function exacte(v: number): string | null {
   const w = nettoyer(v)
   const d = formaterDecimal(w)
   // Décimal exact court (au plus 3 décimales : 2,5 ; −1,25) tel quel ; plus long : forme exacte ou arrondi.
@@ -285,7 +291,7 @@ function exacte(v: number): string | null {
   return formeExacte(w)
 }
 
-function arrondie(v: number): string {
+export function arrondie(v: number): string {
   const w = Math.round(v * 100) / 100
   return formaterDecimal(w === 0 ? 0 : w).latex
 }
@@ -466,11 +472,12 @@ export const NOMS_COURBES = ['f', 'g', 'h', 'k', 'm', 'p', 'q', 'r', 's', 'u', '
 /** Mémoire des tracés (une page redessinée à chaque trait de stylo ne recalcule pas ses courbes). */
 const memoire = new Map<string, { f: Fonction | null; polylignes: Polyligne[] }>()
 
-export function traceMemorise(saisie: string, mode: ModeAngle, r: Repere): { f: Fonction | null; polylignes: Polyligne[] } {
-  const cle = `${mode}|${r.ex}|${r.ey}|${r.cx ?? 0}|${r.cy ?? 0}|${saisie}`
+export function traceMemorise(saisie: string, mode: ModeAngle, r: Repere, valeurs?: Record<string, number>): { f: Fonction | null; polylignes: Polyligne[] } {
+  const params = valeurs ? Object.entries(valeurs).map(([k, v]) => `${k}=${v}`).join(',') : ''
+  const cle = `${mode}|${r.ex}|${r.ey}|${r.cx ?? 0}|${r.cy ?? 0}|${params}|${saisie}`
   let m = memoire.get(cle)
   if (!m) {
-    const l = lireFonction(saisie, mode)
+    const l = lireFonction(saisie, mode, valeurs)
     m = l.ok ? { f: l.f, polylignes: echantillonner(l.f, r) } : { f: null, polylignes: [] }
     if (memoire.size > 60) memoire.delete(memoire.keys().next().value as string)
     memoire.set(cle, m)

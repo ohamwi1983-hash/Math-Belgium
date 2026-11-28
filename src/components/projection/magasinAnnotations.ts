@@ -7,6 +7,8 @@ import type { EtatProjection, MessageProjection, Projection } from './useProject
 type Abonne = (page: string | null, structure: boolean) => void
 
 const copier = (el: ElementAnnotation): ElementAnnotation => (el.genre === undefined || el.genre === 'trait' ? { ...el, points: [...el.points] } : { ...el })
+/** Élément rendu en React (étiquette, gabarit, morceau, point…) : son remplacement demande un re-rendu, pas seulement le canvas. */
+const enStructure = (el: ElementAnnotation) => el.genre !== undefined && el.genre !== 'trait' && el.genre !== 'arc'
 
 /**
  * Annotations de TOUTES les pages (diapos et pages de l'écran blanc), par clé stable de page, pour la page
@@ -22,7 +24,11 @@ export class MagasinAnnotations {
   /** Résultats épinglés retirés au × (par page) : « Annuler » les remet, dans l'ordre inverse. `longueur` =
    * nombre d'éléments de la page juste après le retrait (si on a ajouté autre chose depuis, « Annuler »
    * retire d'abord ces ajouts). */
-  retraits = new Map<string, { el: Epingle; longueur: number }[]>()
+  retraits = new Map<string, { el: ElementAnnotation; longueur: number; n?: number }[]>()
+  /** Modifications annulables d'un élément posé (gabarit rempli / déplacé / agrandi, morceau collé…) : « Annuler » remet
+   * l'état d'avant (`noterModif`), dans l'ordre inverse, mêlées aux retraits (`n` : ordre des actions). */
+  modifs = new Map<string, { avant: ElementAnnotation; longueur: number; n: number }[]>()
+  private compteur = 0
   private abonnes = new Set<Abonne>()
   private version = 0
   private envoyer: ((m: MessageProjection) => void) | null = null
@@ -81,7 +87,7 @@ export class MagasinAnnotations {
     if (i >= 0) l[i] = el
     else l.push(el)
     this.envoyer?.({ type: 'element', de: this.id, page, element: el })
-    this.avis(page, el.genre === 'epingle' || i < 0)
+    this.avis(page, enStructure(el) || i < 0)
   }
   retirer(page: string, id: string) {
     const l = this.liste(page)
@@ -104,6 +110,7 @@ export class MagasinAnnotations {
   }
   effacer(page: string) {
     this.retraits.delete(page)
+    this.modifs.delete(page)
     this.liste(page).length = 0
     this.envoyer?.({ type: 'effacer', de: this.id, page })
     this.avis(page, true)
@@ -114,16 +121,32 @@ export class MagasinAnnotations {
     this.pages.delete(page)
   }
   /** × d'une étiquette épinglée : retrait annulable (Ctrl/Cmd+Z, bouton « Annuler »). */
-  retirerEpingle(page: string, el: Epingle) {
+  retirerEpingle(page: string, el: Epingle | ElementAnnotation) {
     this.retirer(page, el.id)
     const pile = this.retraits.get(page) ?? []
-    pile.push({ el, longueur: this.liste(page).length })
+    pile.push({ el, longueur: this.liste(page).length, n: ++this.compteur })
     this.retraits.set(page, pile)
+  }
+  /** Un élément posé vient d'être modifié (remplacé) : « Annuler » le remettra comme `avant`. */
+  noterModif(page: string, avant: ElementAnnotation) {
+    const pile = this.modifs.get(page) ?? []
+    pile.push({ avant: copier(avant), longueur: this.liste(page).length, n: ++this.compteur })
+    this.modifs.set(page, pile)
   }
   annuler(page: string) {
     const l = this.liste(page)
     const pile = this.retraits.get(page)
     const dernier = pile?.[pile.length - 1]
+    // Modification d'un élément posé plus récente que le dernier retrait, rien d'ajouté depuis : on la défait.
+    const modifs = this.modifs.get(page)
+    const modif = modifs?.[modifs.length - 1]
+    if (modif && l.length <= modif.longueur && (!dernier || (dernier.n ?? 0) < modif.n)) {
+      modifs!.pop()
+      if (l.some((x) => x.id === modif.avant.id)) {
+        this.remplacer(page, modif.avant)
+        return
+      }
+    }
     if (dernier && l.length <= dernier.longueur) {
       pile!.pop()
       this.ajouter(page, dernier.el)
@@ -135,6 +158,7 @@ export class MagasinAnnotations {
   toutEffacer() {
     this.pages = new Map()
     this.retraits = new Map()
+    this.modifs = new Map()
     this.envoyer?.({ type: 'annotations', de: this.id, toutes: [] })
     this.avis(null, true)
   }
@@ -150,6 +174,7 @@ export class MagasinAnnotations {
       case 'annotations':
         this.pages = new Map(m.toutes.map(([k, l]) => [k, l.map(copier)]))
         this.retraits = new Map()
+        this.modifs = new Map()
         this.avis(null, true)
         return
       case 'trait':
@@ -165,6 +190,7 @@ export class MagasinAnnotations {
       case 'effacer':
         this.liste(m.page).length = 0
         this.retraits.delete(m.page)
+        this.modifs.delete(m.page)
         this.avis(m.page, true)
         return
       case 'element': {
@@ -172,7 +198,7 @@ export class MagasinAnnotations {
         const i = l.findIndex((x) => x.id === m.element.id)
         if (i >= 0) l[i] = m.element
         else l.push(m.element)
-        this.avis(m.page, m.element.genre === 'epingle' || i < 0)
+        this.avis(m.page, enStructure(m.element) || i < 0)
         return
       }
       case 'retirer': {

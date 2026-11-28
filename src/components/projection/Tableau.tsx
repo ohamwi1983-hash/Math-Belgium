@@ -14,6 +14,10 @@ import { peindreCourbes, peindreTraits } from '../../lib/projection/peinture'
 import { decimalesPas, deplacer, graduations, texteGraduationPas, transfoPage, versEcran, versPage, vueDe, zoomer } from '../../lib/projection/vue'
 import type { Transfo, VueRepere } from '../../lib/projection/vue'
 import { EtiquettesCourbes } from './Traceur'
+import { CalqueObjets } from './ObjetsPage'
+import { EtiquettesTraceur, PoigneesTraceur, useBoucleAnimation } from './TraceurEnrichi'
+import { ReperesPagesBlanches, SelectionCopie } from './Copier'
+import { estAnimee } from '../../lib/projection/traceurEnrichi'
 
 /** Unité commune du quadrillage, des graduations de l'équerre et du rayon du compas : 1 carreau = 40 px logiques
  * (32 carreaux sur la largeur de la diapo, 18 sur la hauteur). */
@@ -187,7 +191,10 @@ export function Annotations({
   echelle,
   role,
   surEcrire,
+  setOutils,
 }: {
+  /** Outils locaux (outil « Copier » rangé après la copie, P4). */
+  setOutils?: (f: (o: OutilsLocaux) => OutilsLocaux) => void
   projection: Projection
   magasin: MagasinInstruments
   /** Annotations de toutes les pages (magasin de la page de projection : conservées, exportées). */
@@ -244,7 +251,7 @@ export function Annotations({
   const dessinerCourbes = useCallback(() => {
     const xc = canvasCourbes.current?.getContext('2d')
     if (!xc) return
-    peindreCourbes(xc, annotations.courbes(pageRef.current), blancheRef.current, xc.canvas.width / LARGEUR)
+    peindreCourbes(xc, annotations.courbes(pageRef.current), blancheRef.current, xc.canvas.width / LARGEUR, annotations.liste(pageRef.current))
   }, [annotations])
 
   // Résolution des canvas = taille réelle à l'écran (net à toute échelle).
@@ -642,14 +649,20 @@ export function Annotations({
   const epingles = elementsPage.filter((el): el is Epingle => el.genre === 'epingle')
   const courbes = annotations.courbes(page)
   const gomme = actif && outils.outil === 'gomme'
+  // Paramètre animé (traceur enrichi) : courbes repeintes à chaque image, étiquettes 10 fois par seconde.
+  const instant = useBoucleAnimation(repere && courbes.some(estAnimee), dessinerCourbes)
 
   return (
     <div ref={racine} className="projection-tableau" style={{ '--cible': `${Math.round(Math.max(44, echelle > 0 ? 44 / echelle : 44))}px` } as React.CSSProperties}>
       {/* Courbes du traceur SOUS le surligneur et le stylo (on écrit par-dessus), puis leurs étiquettes. */}
       {/* Repère, sans outil : glisser = déplacer la vue (un clic ne passe pas à la diapo suivante). */}
       {repere && !actif && <div className="projection-vue projection-interactif" aria-hidden="true" onPointerDown={surVue} onClick={(e) => e.stopPropagation()} />}
+      {/* Gabarits et morceaux collés (P2, P4) : sous les courbes, le surligneur et le stylo. */}
+      {blanche && <CalqueObjets projection={projection} annotations={annotations} page={page} blanche={blanche} outils={outils} echelle={echelle} versDiapo={versDiapo} />}
       <canvas ref={canvasCourbes} className="projection-annotations projection-annotations--courbes" aria-hidden="true" />
-      {blanche?.fond === 'repere' && courbes.length > 0 && <EtiquettesCourbes courbes={courbes} page={blanche} />}
+      {blanche?.fond === 'repere' && courbes.length > 0 && <EtiquettesCourbes courbes={courbes} page={blanche} instant={instant} />}
+      {blanche?.fond === 'repere' && <EtiquettesTraceur elements={elementsPage} page={blanche} instant={instant} />}
+      {blanche?.fond === 'repere' && <PoigneesTraceur annotations={annotations} page={page} blanche={blanche} outils={outils} echelle={echelle} versDiapo={versDiapo} />}
       <canvas ref={canvasFluo} className="projection-annotations projection-annotations--fluo" aria-hidden="true" />
       <canvas
         ref={canvasStylo}
@@ -694,6 +707,8 @@ export function Annotations({
         </div>
         )
       })}
+      <ReperesPagesBlanches projection={projection} annotations={annotations} page={page} role={role} echelle={echelle} blanche={!!blanche} />
+      {!blanche && outils.copier && <SelectionCopie projection={projection} annotations={annotations} page={page} echelle={echelle} versDiapo={versDiapo} finir={() => setOutils?.((o) => ({ ...o, copier: false }))} />}
       {compas && <DessinCompas compas={compas} texte={texteRayonGrille(compas.r, grille)} />}
       {equerre.visible && (
         <DessinEquerre

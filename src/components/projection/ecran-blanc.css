@@ -1,0 +1,263 @@
+/* ---------- Écran blanc enrichi (28/11/2026) : gabarits (P2), traceur enrichi (P3), copier sur une page blanche (P4) ----------
+   Tout est en px LOGIQUES de la scène (1 280 × 720) sauf la petite barre et ses menus (posés hors de la scène).
+   `--cible` = 44 px RÉELS (vue réduite du professeur comprise). Interface toujours claire (thème sombre compris) :
+   la diapo et ses outils restent clairs, comme le reste du mode projection. */
+
+.calque-objets, .traceur-poignees, .copie-calque, .morceau-origine { color-scheme: light; }
+
+/* Pastille « n » sur le bouton Écran blanc (pages blanches écrites de la diapo) */
+.projection-outil-pastille {
+  position: absolute; right: 2px; top: 2px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: #b65c1f; color: #fff;
+  font: 700 11px/18px var(--sans); text-align: center; box-shadow: 0 0 0 2px #fff; pointer-events: none;
+}
+.projection-bouton .projection-outil-pastille { position: static; margin-left: 4px; box-shadow: none; }
+
+/* ---------- objets posés (gabarits, morceaux) ---------- */
+.calque-objets { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; pointer-events: none; }
+.calque-objets[data-stylo] .objet-pose { pointer-events: none; }
+.objet-pose { position: absolute; pointer-events: auto; touch-action: none; cursor: pointer; }
+.objet-pose.choisi { cursor: move; }
+.objet-contenu { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.objet-cadre { position: absolute; border: 2px dashed #2f6fb0; border-radius: 6px; pointer-events: none; }
+.objet-poignee {
+  position: absolute; width: var(--cible); height: var(--cible); margin: calc(var(--cible) / -2) 0 0 calc(var(--cible) / -2); pointer-events: auto;
+  touch-action: none; display: grid; place-items: center;
+}
+.objet-poignee::after { content: ''; width: 16px; height: 16px; border-radius: 3px; background: #fff; border: 2.5px solid #2f6fb0; box-shadow: 0 1px 4px rgb(0 0 0 / 0.2); }
+.objet-barre {
+  position: absolute; display: flex; gap: 4px; padding: 4px; background: #fff; border: 1px solid #dfe7ec; border-radius: 10px; box-shadow: 0 4px 12px rgb(0 0 0 / 0.14);
+  pointer-events: auto; color: #33434f; white-space: nowrap;
+}
+.objet-bouton {
+  min-width: var(--cible); height: var(--cible); padding: 0 calc(var(--cible) * 0.22); border: 0; border-radius: 7px; background: transparent; color: inherit;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; font: 600 calc(var(--cible) * 0.32) var(--sans); cursor: pointer;
+}
+.objet-bouton:hover { background: #eef2f5; }
+.objet-bouton:disabled { opacity: 0.4; cursor: default; background: transparent; }
+.objet-deplacer { cursor: grab; touch-action: none; }
+.objet-retirer:hover { background: #f6dede; color: #b23a3a; }
+.objet-bouton:focus-visible { outline: 3px solid #b65c1f; outline-offset: 1px; }
+
+/* Gabarit : traits en SVG, cases en KaTeX (centrées) */
+.gabarit { position: relative; color: #182430; }
+.gabarit-svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.gabarit-serif { font-family: var(--serif); }
+.gabarit-sans { font-family: var(--sans); }
+.gabarit-mono { font-family: var(--mono); }
+.gabarit-case { position: absolute; display: flex; align-items: center; justify-content: center; border-radius: 4px; line-height: 1.1; }
+.gabarit-case .math-inline { overflow: visible; white-space: nowrap; }
+.gabarit-case .katex { font-size: 1em; }
+.gabarit-case.fond { background: #fff; }
+.gabarit-case.hachuree { background: repeating-linear-gradient(135deg, transparent 0 10px, #eef2f5 10px 12px); }
+.gabarit-case.pointillee { border: 1.5px dashed #b5c3cd; background: rgb(255 255 255 / 0.85); }
+.gabarit-case.active { background: #fff6ec; box-shadow: inset 0 0 0 4px #b65c1f; }
+.objet-pose:not(.choisi) .gabarit-case { cursor: pointer; }
+.objet-pose.choisi .gabarit-case { cursor: text; }
+.gabarit--droite .gabarit-case { display: none; }
+
+/* Petit clavier d'une case */
+.gabarit-clavier {
+  position: absolute; z-index: 3; padding: 9px; background: #fff; border: 1px solid #dfe7ec; border-radius: 12px; box-shadow: 0 12px 30px rgb(0 0 0 / 0.2);
+  pointer-events: auto; user-select: none; --g: 5px;
+}
+.clavier-apercu { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
+.clavier-champ {
+  width: 100%; box-sizing: border-box; height: calc(var(--cible) * 1.05); padding: 0 12px; border: 2px solid #b65c1f; border-radius: 8px; background: #fbfcfd; color: #182430;
+  font: 500 calc(var(--cible) * 0.48) var(--mono); user-select: text;
+}
+.clavier-champ:focus { outline: 3px solid rgb(182 92 31 / 0.35); outline-offset: 0; }
+.clavier-case { font: 500 calc(var(--cible) * 0.27) var(--mono); color: #6b7a86; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(6 * var(--cible) + 5 * var(--g)); }
+.clavier-touches { display: grid; grid-template-columns: repeat(6, var(--cible)); gap: var(--g); }
+.clavier-touche {
+  height: var(--cible); padding: 0; border: 0; border-radius: 7px; background: #eef2f5; color: #182430; font: 600 calc(var(--cible) * 0.4) var(--sans); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.clavier-touche .math-inline { overflow: visible; }
+.clavier-touche:hover { background: #dfe7ec; }
+.clavier-touche.signe { background: #fff6ec; color: #7a3c11; }
+.clavier-touche.large { grid-column: span 2; font-size: calc(var(--cible) * 0.32); }
+.clavier-touche.ok { background: #b65c1f; color: #fff; }
+.clavier-touche:focus-visible { outline: 3px solid #b65c1f; outline-offset: 1px; }
+
+/* Droite graduée : éditeur des intervalles (sous la droite sélectionnée) */
+.droite-editeur {
+  position: absolute; z-index: 3; display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; background: #fff; border: 1px solid #dfe7ec; border-radius: 12px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.16); pointer-events: auto; color: #182430; font: 600 calc(var(--cible) * 0.34) var(--sans); max-width: 1180px;
+}
+.droite-rangee { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.droite-titre { font: 500 calc(var(--cible) * 0.27) var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: #6b7a86; }
+.droite-intervalle { display: inline-flex; align-items: center; gap: 4px; }
+.droite-operateur { padding: 0 4px; font: 600 calc(var(--cible) * 0.5) var(--serif); color: #33434f; }
+.droite-crochet {
+  min-width: var(--cible); height: var(--cible); border: 0; border-radius: 8px; background: #182430; color: #fff; font: 700 calc(var(--cible) * 0.5) var(--mono); cursor: pointer;
+}
+.droite-crochet:disabled { background: #8a97a1; cursor: default; }
+.droite-champ {
+  width: calc(var(--cible) * 1.9); height: var(--cible); box-sizing: border-box; padding: 0 8px; border: 1px solid #ccd8e0; border-radius: 8px; background: #fbfcfd; color: #182430;
+  font: 500 calc(var(--cible) * 0.4) var(--mono); text-align: center; user-select: text;
+}
+.droite-champ:focus { outline: 2px solid #b65c1f; border-color: #b65c1f; }
+.droite-pv { font: 600 calc(var(--cible) * 0.4) var(--sans); }
+.droite-bouton {
+  min-height: var(--cible); padding: 0 calc(var(--cible) * 0.3); border: 1px solid #ccd8e0; border-radius: 999px; background: #fff; color: #182430; font: 600 calc(var(--cible) * 0.31) var(--sans);
+  cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+}
+.droite-bouton:hover { background: #eef2f5; }
+.droite-bouton[aria-pressed='true'] { background: #182430; border-color: #182430; color: #fff; }
+.droite-retirer { padding: 0; width: var(--cible); justify-content: center; }
+.droite-choix { display: inline-flex; gap: 4px; }
+.droite-erreur { margin: 0; color: #b23a3a; font: 500 calc(var(--cible) * 0.31) / 1.35 var(--sans); }
+.droite-crochet:focus-visible, .droite-bouton:focus-visible { outline: 3px solid #b65c1f; outline-offset: 2px; }
+
+/* Morceau collé : la diapo d'origine redessinée, découpée au cadre (ou au lasso) */
+.morceau { position: relative; overflow: hidden; background: #fbfaf7; border-radius: 3px; box-shadow: 0 0 0 1px rgb(24 36 48 / 0.08); }
+.morceau-diapo { position: absolute; width: 1280px; height: 720px; pointer-events: none; }
+.morceau-absent { margin: 0; padding: 12px; font: 500 18px var(--sans); color: #6b7a86; }
+.morceau-origine { position: absolute; left: 0; top: 0; pointer-events: none; }
+.morceau-origine path, .morceau-origine-cadre { fill: none; stroke: #8fb2d6; stroke-width: 2.5; stroke-dasharray: 3 4; }
+.morceau-origine-cadre { position: absolute; border: 2.5px dotted #8fb2d6; border-radius: 3px; pointer-events: none; }
+
+/* Repères : « n pages blanches › » sur la diapo, « Page blanche de « … » » sur la page */
+.repere-blanches {
+  position: absolute; right: 18px; z-index: 2; display: inline-flex; align-items: center; gap: 8px; min-height: var(--cible); padding: 0 calc(var(--cible) * 0.3);
+  border-radius: 999px; background: #fff; border: 1px solid #dfe7ec; box-shadow: 0 4px 12px rgb(0 0 0 / 0.1); font: 600 calc(var(--cible) * 0.34) var(--sans);
+  color: #33434f; pointer-events: auto; cursor: pointer; transition: opacity 0.25s; max-width: 640px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.repere-blanches:hover { background: #f4f7f9; }
+.repere-blanches:focus-visible { outline: 3px solid #b65c1f; outline-offset: 2px; }
+.repere-rattache { cursor: default; pointer-events: none; }
+.projection--diapos.inactive .repere-blanches { opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .repere-blanches { transition: none; } }
+
+/* ---------- outil « Copier » ---------- */
+.copie-calque { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; pointer-events: auto; touch-action: none; cursor: crosshair; }
+.copie-calque svg { position: absolute; left: 0; top: 0; pointer-events: none; }
+.copie-voile { fill: rgb(24 36 48 / 0.18); }
+.copie-contour { fill: none; stroke: #2f6fb0; stroke-width: 2.5; stroke-dasharray: 7 5; }
+.copie-poignee {
+  position: absolute; width: var(--cible); height: var(--cible); margin: calc(var(--cible) / -2) 0 0 calc(var(--cible) / -2); display: grid; place-items: center; touch-action: none;
+  cursor: nwse-resize;
+}
+.copie-poignee::after { content: ''; width: 16px; height: 16px; border-radius: 3px; background: #fff; border: 2.5px solid #2f6fb0; box-shadow: 0 1px 4px rgb(0 0 0 / 0.2); }
+.copie-barre {
+  position: absolute; z-index: 3; display: flex; align-items: center; gap: 6px; padding: 6px; background: #fff; border: 1px solid #dfe7ec; border-radius: 999px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18); pointer-events: auto; white-space: nowrap; color: #182430;
+}
+.copie-bouton {
+  min-height: var(--cible); min-width: var(--cible); padding: 0 calc(var(--cible) * 0.32); border: 1px solid #ccd8e0; border-radius: 999px; background: #fff; color: #182430;
+  font: 600 calc(var(--cible) * 0.32) var(--sans); display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;
+}
+.copie-bouton:hover { background: #eef2f5; }
+.copie-bouton[aria-pressed='true'] { background: #182430; border-color: #182430; color: #fff; }
+.copie-bouton.accent { background: #b65c1f; border-color: #b65c1f; color: #fff; }
+.copie-bouton.accent:hover { background: #9a4c18; }
+.copie-bouton:focus-visible { outline: 3px solid #b65c1f; outline-offset: 2px; }
+.copie-sep { width: 1px; height: calc(var(--cible) * 0.6); background: #dfe7ec; }
+.copie-aide { padding: 0 8px; font: 500 calc(var(--cible) * 0.31) var(--sans); color: #51626f; }
+
+/* ---------- menu « Gabarit ▾ » (petite barre de l'écran blanc, hors de la scène : px réels) ---------- */
+.blanc-gabarit, .blanc-coller { gap: 6px; }
+.menu-gabarit {
+  display: flex; gap: 10px; padding: 8px; background: #fff; border: 1px solid #dfe7ec; border-radius: 12px; box-shadow: 0 10px 28px rgb(0 0 0 / 0.18); color: #182430;
+  min-height: 0; max-height: 100%; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; flex: 0 1 auto; color-scheme: light; max-width: 100%; box-sizing: border-box;
+}
+.gabarit-liste { display: flex; flex-direction: column; gap: 2px; width: 270px; flex: none; }
+.gabarit-item {
+  display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 2px 10px; border: 0; border-radius: 8px; background: transparent; color: #182430;
+  font: 600 15px var(--sans); text-align: left; cursor: pointer;
+}
+.gabarit-item:hover { background: #f4f7f9; }
+.gabarit-item[aria-checked='true'] { background: #eef2f5; box-shadow: inset 0 0 0 2px #182430; }
+.gabarit-item:focus-visible { outline: 3px solid #b65c1f; outline-offset: 1px; }
+.gabarit-mini { flex: none; width: 60px; height: 38px; background: #fff; border: 1px solid #dfe7ec; border-radius: 4px; }
+.gabarit-mini line, .gabarit-mini rect, .gabarit-mini path, .gabarit-mini circle { stroke: #51626f; stroke-width: 1.4; fill: none; }
+.gabarit-reglages { display: flex; flex-direction: column; gap: 10px; width: 300px; flex: none; padding: 4px 4px 4px 12px; border-left: 1px solid #e4eaee; }
+.gabarit-titre { margin: 0; font: 500 12px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: #6b7a86; }
+.gabarit-pas { display: flex; align-items: center; justify-content: space-between; gap: 8px; font: 600 15px var(--sans); }
+.gabarit-pas-ctl { display: inline-flex; align-items: center; gap: 2px; border: 1px solid #ccd8e0; border-radius: 999px; }
+.gabarit-pas-ctl button { width: 44px; height: 44px; border: 0; border-radius: 999px; background: transparent; color: #182430; font: 600 20px var(--mono); cursor: pointer; }
+.gabarit-pas-ctl button:hover { background: #eef2f5; }
+.gabarit-pas-ctl button:disabled { opacity: 0.35; cursor: default; background: transparent; }
+.gabarit-pas-ctl button:focus-visible { outline: 3px solid #b65c1f; outline-offset: 1px; }
+.gabarit-pas-ctl b { min-width: 30px; text-align: center; font: 700 16px var(--mono); }
+.gabarit-interrupteur { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; font: 600 15px var(--sans); cursor: pointer; }
+.gabarit-interrupteur input { appearance: none; -webkit-appearance: none; position: relative; width: 48px; height: 28px; margin: 0; border-radius: 14px; background: #ccd8e0; cursor: pointer; transition: background 0.15s; }
+.gabarit-interrupteur input::after { content: ''; position: absolute; left: 3px; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / 0.25); transition: left 0.15s; }
+.gabarit-interrupteur input:checked { background: #2f7a4f; }
+.gabarit-interrupteur input:checked::after { left: 23px; }
+.gabarit-interrupteur input:focus-visible { outline: 3px solid #b65c1f; outline-offset: 2px; }
+.gabarit-lignes { display: flex; flex-direction: column; gap: 2px; }
+.gabarit-coche { display: flex; align-items: center; gap: 10px; min-height: 40px; font: 600 14px var(--sans); cursor: pointer; }
+.gabarit-coche input { width: 20px; height: 20px; margin: 0; accent-color: #182430; }
+.gabarit-aide { margin: 0; font: 400 13px/1.4 var(--sans); color: #5b6b77; }
+.gabarit-apercu { display: flex; justify-content: center; padding: 6px; background: #fbfcfd; border: 1px solid #e4eaee; border-radius: 6px; overflow: hidden; }
+.gabarit-apercu .gabarit-case { cursor: default; }
+.gabarit-poser { min-height: 44px; border: 0; border-radius: 999px; background: #b65c1f; color: #fff; font: 600 15px var(--sans); cursor: pointer; }
+.gabarit-poser:hover { background: #9a4c18; }
+.gabarit-poser:focus-visible { outline: 3px solid #182430; outline-offset: 2px; }
+/* Écran bas (téléphone en paysage, vue du professeur) : liste sur deux colonnes, sans aperçu des mini-dessins. */
+@media (max-height: 560px) {
+  .menu-gabarit { gap: 8px; padding: 6px; }
+  .gabarit-liste { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 330px; align-content: start; }
+  .gabarit-item { min-height: 44px; padding: 2px 8px; font-size: 13px; }
+  .gabarit-mini { display: none; }
+  .gabarit-reglages { gap: 6px; width: 280px; }
+  .gabarit-apercu { display: none; }
+}
+.prof-scene-zone .gabarit-apercu { display: none; }
+
+/* ---------- traceur enrichi ---------- */
+.traceur-onglets { display: flex; gap: 4px; }
+.traceur-onglet {
+  flex: 1 1 0; min-width: 0; min-height: 44px; padding: 0 6px; border: 1px solid #ccd8e0; border-radius: 999px; background: #fff; color: #182430; font: 600 13.5px var(--sans);
+  white-space: nowrap; cursor: pointer;
+}
+.traceur-onglet:hover { background: #eef2f5; }
+.traceur-onglet[aria-selected='true'] { background: #182430; border-color: #182430; color: #fff; }
+.traceur-onglet:focus-visible { outline: 3px solid #b65c1f; outline-offset: 2px; }
+.projection-palette--traceur.compacte .traceur-onglets { flex-direction: column; width: 108px; flex: none; }
+.projection-palette--traceur.compacte .onglet-points, .projection-palette--traceur.compacte .onglet-tangente, .projection-palette--traceur.compacte .onglet-aire { width: 330px; }
+.traceur-aide { margin: 0; font: 400 13px/1.4 var(--sans); color: #5b6b77; }
+.traceur-etiquette-douce { margin-left: auto; padding: 2px 8px; border-radius: 999px; background: #eef2f5; font: 500 12px var(--sans); color: #51626f; }
+.traceur-champ { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font: 600 15px var(--sans); }
+.traceur-champ .traceur-saisie { flex: 1 1 80px; width: auto; min-width: 0; }
+.traceur-champ .traceur-erreur { flex: 1 0 100%; text-align: left; }
+.aire-bornes { display: flex; gap: 8px; }
+.aire-bornes .traceur-champ { flex: 1 1 0; min-width: 0; }
+.tangente-resultat { display: flex; flex-direction: column; gap: 2px; font-size: 21px; color: #182430; }
+.tangente-resultat > span { font: 400 16px var(--sans); color: #5b6b77; }
+.tangente-resultat .math-inline { overflow: visible; white-space: nowrap; }
+.aire-negative { color: #7a3c11; }
+.choix-courbe { flex-wrap: wrap; }
+.choix-courbe .traceur-choix[aria-checked='true'] { background: #182430; color: #fff; }
+.params { display: flex; flex-direction: column; gap: 6px; padding-top: 6px; border-top: 1px solid #e4eaee; }
+.params-titre { margin: 0; font: 500 12px var(--mono); letter-spacing: 0.06em; color: #6b7a86; }
+.param-ligne { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+.param-lire { width: 44px; height: 44px; border: 0; border-radius: 50%; background: #eef2f5; color: #33434f; display: grid; place-items: center; cursor: pointer; }
+.param-lire.actif { background: #182430; color: #fff; }
+.param-lire:focus-visible, .param-valeur:focus-visible, .param-curseur:focus-visible { outline: 3px solid #b65c1f; outline-offset: 2px; }
+.param-curseur { width: 100%; height: 44px; margin: 0; accent-color: #182430; cursor: pointer; }
+.param-valeur { min-height: 44px; min-width: 76px; padding: 0 8px; border: 1px solid #ccd8e0; border-radius: 8px; background: #fff; color: #182430; font: 600 15px var(--mono); cursor: pointer; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.param-bornes { display: flex; flex-wrap: wrap; gap: 6px; padding-left: 52px; }
+.param-borne { display: inline-flex; align-items: center; gap: 4px; font: 600 13px var(--sans); }
+.param-borne input { width: 58px; height: 40px; box-sizing: border-box; padding: 0 6px; border: 1px solid #ccd8e0; border-radius: 6px; font: 500 15px var(--mono); text-align: center; user-select: text; }
+.param-trace { align-self: flex-start; }
+
+/* Étiquettes du traceur enrichi (sur le repère, sous le stylo) */
+.traceur-calque--enrichi { color: #182430; }
+.traceur-boite { position: absolute; padding: 5px 12px; border: 2px solid; border-radius: 6px; background: #fff; box-shadow: 0 4px 12px rgb(0 0 0 / 0.08); white-space: nowrap; line-height: 1.25; }
+.traceur-boite .katex { font-size: 1em; }
+.traceur-libre { position: absolute; white-space: nowrap; text-shadow: 0 0 3px #fff, 0 0 6px #fff, 0 0 8px #fff; line-height: 1.2; }
+.traceur-libre .katex { font-size: 1em; }
+.traceur-nom-point { font-weight: 600; }
+.aire-borne {
+  position: absolute; width: 30px; height: 30px; box-sizing: border-box; border-radius: 50%; border: 4px solid #b65c1f; background: #fff; color: #7a3c11; font: 700 15px/22px var(--sans);
+  text-align: center;
+}
+
+/* Poignées (glisser) : invisibles, au-dessus du déplacement de la vue, sous le stylo */
+.traceur-poignees { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+.traceur-poignees .poignee { fill: transparent; pointer-events: all; cursor: grab; touch-action: none; }
+.traceur-poignees .poignee:active { cursor: grabbing; }
+.traceur-poignees .poignee-borne { cursor: ew-resize; }
+.traceur-poignees .poignee-courbe { fill: none; stroke: transparent; pointer-events: stroke; stroke-linecap: round; stroke-linejoin: round; cursor: pointer; touch-action: none; }

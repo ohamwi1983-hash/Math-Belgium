@@ -11,6 +11,7 @@ import type { MagasinAnnotations } from './magasinAnnotations'
 import { Pictogramme } from './Pictogrammes'
 import type { NomPictogramme } from './Pictogrammes'
 import { PaletteTraceur } from './Traceur'
+import { BoutonsGabaritColler, MenuGabarit } from './ObjetsPage'
 import type { FondBlanc, Projection } from './useProjection'
 
 /**
@@ -344,6 +345,7 @@ export function OutilsBlanc({
   const [confirmer, setConfirmer] = useState(false)
   const idMenu = useId()
   const idTraceur = useId()
+  const idGabarit = useId()
   const menuRef = useRef<HTMLDivElement>(null)
   const boutonFond = useRef<HTMLButtonElement>(null)
   useEffect(() => setConfirmer(false), [page?.id, outils.menuFond])
@@ -362,7 +364,7 @@ export function OutilsBlanc({
   const rang = liste.findIndex((p) => p.id === page.id) + 1
   const repere = page.fond === 'repere'
   const zoom = (f: number) => projection.majPage({ vue: zoomer(vueDe(page), f) })
-  const ouvert = outils.menuFond || (repere && outils.traceur)
+  const ouvert = outils.menuFond || (repere && outils.traceur) || !!outils.menuGabarit
   return (
     <div className={`projection-blanc-outils${visible || ouvert ? '' : ' masquee'}`} onClick={(e) => e.stopPropagation()}>
       <div className="projection-blanc-barre projection-interactif" role="toolbar" aria-label="Écran blanc : pages, fond, zoom">
@@ -389,11 +391,12 @@ export function OutilsBlanc({
           aria-controls={idMenu}
           aria-label={`Fond de la page : ${FONDS.find((f) => f.valeur === page.fond)?.nom.toLowerCase()}`}
           title="Fond de la page (uni, quadrillé, repère) · supprimer la page"
-          onClick={() => setOutils((o) => ({ ...o, menuFond: !o.menuFond, traceur: false, palette: false, nuancier: false }))}
+          onClick={() => setOutils((o) => ({ ...o, menuFond: !o.menuFond, traceur: false, palette: false, nuancier: false, menuGabarit: false }))}
         >
           <Pictogramme nom={PICTO_FOND[page.fond]} />
           <Pictogramme nom="chevron-bas" taille={16} />
         </button>
+        <BoutonsGabaritColler projection={projection} annotations={annotations} page={page} outils={outils} setOutils={setOutils} idMenu={idGabarit} />
         {repere && (
           <>
             <button
@@ -403,7 +406,7 @@ export function OutilsBlanc({
               aria-controls={idTraceur}
               aria-label="Traceur de fonctions"
               title={outils.traceur ? 'Replier le traceur de fonctions' : 'Tracer une fonction sur le repère (et la liste des courbes)'}
-              onClick={() => setOutils((o) => ({ ...o, traceur: !o.traceur, menuFond: false, palette: false, nuancier: false }))}
+              onClick={() => setOutils((o) => ({ ...o, traceur: !o.traceur, menuFond: false, palette: false, nuancier: false, menuGabarit: false }))}
             >
               <MathInline tex="f(x)" />
             </button>
@@ -479,8 +482,9 @@ export function OutilsBlanc({
           )}
         </div>
       )}
+      {outils.menuGabarit && <MenuGabarit id={idGabarit} projection={projection} annotations={annotations} page={page} setOutils={setOutils} />}
       {repere && outils.traceur && (
-        <PaletteTraceur id={idTraceur} projection={projection} annotations={annotations} page={page} outils={outils} replier={() => setOutils((o) => ({ ...o, traceur: false }))} />
+        <PaletteTraceur id={idTraceur} projection={projection} annotations={annotations} page={page} outils={outils} replier={() => setOutils((o) => ({ ...o, traceur: false }))} setOutils={setOutils} />
       )}
     </div>
   )

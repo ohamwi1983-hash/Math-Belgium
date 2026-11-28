@@ -12,6 +12,9 @@
  * gardées et réapparaissent quand elle revient.
  */
 import type { ModeAngle } from './calculatrice'
+import type { Gabarit } from './gabarits'
+import type { Morceau } from './morceaux'
+import type { Aire, Liaison, Parametre, PointRepere, Tangente } from './traceurEnrichi'
 
 /** Trait d'annotation (stylo, surligneur ou gomme), en coordonnées de la diapo (1 280 × 720). */
 export interface Trait {
@@ -63,9 +66,19 @@ export interface Courbe {
   saisie: string
   couleur: string
   epaisseur: number
+  /** Paramètres (lettres autres que x) réglés par des curseurs, animables (planche P3, `traceurEnrichi.ts`). */
+  params?: Record<string, Parametre>
+  /** Animation en cours d'un paramètre : valeur calculée dans chaque fenêtre d'après `debut` (deux écrans en même temps). */
+  animation?: { nom: string; debut: number } | null
+  /** « Laisser une trace » : courbes déjà passées gardées en gris clair (valeurs des paramètres). */
+  trace?: boolean
+  traces?: Record<string, number>[]
 }
 
-export type ElementAnnotation = Trait | Arc | Epingle | Courbe
+/** Éléments ajoutés le 28/11/2026 (écran blanc : gabarits P2, traceur enrichi P3, morceau collé P4). */
+export type ElementEcranBlanc = Gabarit | Morceau | PointRepere | Liaison | Tangente | Aire
+
+export type ElementAnnotation = Trait | Arc | Epingle | Courbe | ElementEcranBlanc
 
 export type FondBlanc = 'uni' | 'quadrille' | 'repere'
 
