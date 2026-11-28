@@ -35,7 +35,9 @@ export default defineConfig({
         // statiquement) : il a dépassé la limite par défaut de 2 Mio en novembre 2026, ce qui fait
         // échouer le build (le fichier ne serait plus précaché, donc plus disponible hors ligne).
         // Si la limite devait encore être atteinte, charger le contenu des chapitres à la demande.
-        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+        // 28/11/2026 : 4 Mio → 6 Mio avant la réécriture « français simple » + lexiques de tous les
+        // chapitres (paquet principal à 4,0 Mo, ≈ 190 ko de marge seulement).
+        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
       },
     }),
   ],
