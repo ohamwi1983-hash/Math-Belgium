@@ -120,7 +120,7 @@ export function avecRenvoiCours<T extends { type?: string; sousQuestion?: string
     const n = typeof section === "number" ? section : section(et.sousQuestion ?? "a");
     const fr = [...et.fragments];
     const d = fr[fr.length - 1];
-    const renvoi = ` (cours, § ${n})`;
+    const renvoi = ` (cours, point ${n})`;
     if (d && d.type === "texte" && /\.\s*$/.test(d.valeur)) fr[fr.length - 1] = tx(d.valeur.replace(/\.\s*$/, `${renvoi}.`));
     else fr.push(tx(`${renvoi}.`));
     return { ...et, fragments: fr };

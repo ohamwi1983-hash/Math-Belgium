@@ -178,6 +178,38 @@ Renvois des générateurs vers le cours : « (cours, point 4) », « Méthode du
 types (`etape`, `EtapePubliee`…) ne changent pas. Les `label` / `badge` d'exemples ne changent pas non plus (clés
 de `ENONCES_DEMONSTRATION`) : « Exemple résolu — la série des sections 3 et 4 » (4e statistique) est gardé tel quel.
 
+**Aussi côté professeur et dans les générateurs** (même jour, le professeur a dit oui) : jamais « étape n », « § n »
+ni « section n » pour une partie du chapitre, nulle part où on LIT le texte (écran, `aria-label`, `title`, texte lu,
+copié, imprimé, exporté).
+- Projection : diapo de titre « Point n · partie », notes « Point n : titre », fil de la barre « chapitre · point n ·
+  titre court » (choix : « point n » plutôt que « n. titre », qui se confondait avec le numéro de chapitre), vignettes
+  et étiquette de copie « Point n », lanceur « Points à projeter » (lien « Tous » / « Aucun »), « Coche au moins un
+  point. », « n diapos · k points », « … dans ces points », « choisis moins de points », « choisis au moins un
+  point », vidéo « Changements de point (chapitres YouTube) », « chapitres d'après les points montrés ».
+- Espace professeur : tableau de bord « — point n » / « , point n », « Choisir les points », vue d'ensemble « , point n »,
+  « n points sur N vus », « Points vus dans … » ; « Matière vue à noter » « Points projetés », « Point n — titre »,
+  « vu en partie », « Suites, points 7 et 8 » ; « Noter la séance » « Coche un point entier… », parties de l'évaluation
+  « n. titre » (plus « § n »), « coche les points évalués » ; carte de séance et texte pour l'agenda scolaire
+  « — points 2 et 3 », « • Point 3 : titre » (rubrique « Vu en classe ») ; semaine « · points 6 et 7 » ; « dernière
+  fois : Suites, point 3 « titre » » ; « 4 / 9 points », « points commencés », « + 3 points » ; agenda d'une période
+  « (n points) » ; page des élèves « points du chapitre » ; panneau des évaluations « n points, … ces points »,
+  « Question de démonstration (point 3) », « Afficher les titres des points du cours ». Aide :
+  `components/carnet/outilsCarnet.ts::listePoints` (« point 3 », « points 2 et 3 », « points 1, 2 et 4 »).
+- Générateurs : « (cours, point 4) », « Cours, point 1 : … », « (cours, points 1 et 4) » (ancien « § 1 et § 4 »,
+  « §§ 4 et 5 », « § 4–5 »), « du point 1 du cours », « un par point du cours », « Je fais le point » : colonne
+  « Point n — titre ». Remplacés HORS commentaires seulement (lexer qui ignore `//` et `/* */`) ; les commentaires
+  gardent leurs « § n » (historique).
+- **Restent** (ce ne sont pas des sections) : « Trois étapes » de l'annonce (Quand / Sur quoi / Publier), les étapes de
+  « Premiers pas », les étapes de RÉVÉLATION d'une diapo (« étape 2 / 4 » de la vue du professeur, « Prochain clic :
+  étape suivante de cette diapo », « Exemples résolus (une étape par clic) », « · étape 2 sur 4 » d'un exemple),
+  « Corrigé : n étapes » du panneau, « Une section par classe » de l'agenda (section du document imprimé), « Émojis de
+  section » (rubriques du texte), la « section » GÉOMÉTRIQUE (section plane d'un solide, points de section, aire de
+  la section d'une gouttière…), et le « § » SENTINELLE du code (`lectureValeurTrigo.ts` « $1§ »,
+  `SAISIE_NON_DEFINIE = "§non-definie"`, `join("§")` de `grilleCorrection.ts`). Les clés (`cle: 'Retour au § 1'`
+  d'`evaluationPayload.ts`) ne changent pas. Les anciennes séances gardent leur texte enregistré.
+- Contrôle d'un reste : chercher `§` et `[Ss]ections? +[0-9]` hors commentaires dans `src/entrainement`, `src/lib`,
+  `src/components`, `src/routes` (seuls les sentinelles ci-dessus doivent rester).
+
 ## Chapitres autonomes : jamais de numéro de chapitre, liens nommés, champ `utilise`
 
 Décision du professeur (25/11/2026, carte des prérequis validée) : les professeurs ne suivent pas tous

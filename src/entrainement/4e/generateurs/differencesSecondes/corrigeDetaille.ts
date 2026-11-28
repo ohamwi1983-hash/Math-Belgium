@@ -28,7 +28,7 @@ import {
 
 type E = ExerciceDifferences;
 const n = nombreLatex;
-const COURS = "(cours, § 1)";
+const COURS = "(cours, point 1)";
 
 function moins(a: number, b: number): string {
   return `${n(a)}-${b < 0 ? `(${n(b)})` : n(b)}`;

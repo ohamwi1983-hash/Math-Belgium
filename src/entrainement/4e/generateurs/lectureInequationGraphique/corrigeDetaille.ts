@@ -55,13 +55,13 @@ export function correctionDetailleeLectureInequation(e: E): EtapeCorrection[] {
   const large = estLarge(e.symbole);
   const sansPoint = e.issue === 0;
   return [
-    utilise("a", [texte(`Un point commun à 𝒫 et à ${nomDroite(e)} vérifie `), lat(`f(x)=${droite(e)}`), texte(" ; on lit son abscisse sur la grille, en descendant jusqu'à l'axe des x (cours, § 2).")]),
+    utilise("a", [texte(`Un point commun à 𝒫 et à ${nomDroite(e)} vérifie `), lat(`f(x)=${droite(e)}`), texte(" ; on lit son abscisse sur la grille, en descendant jusqu'à l'axe des x (cours, point 2).")]),
     calcul("a", lignesLecture(e)),
     resultat("a", abscissesFragments(e)),
-    utilise("b", [lat(`f(x)>${droite(e)}`), texte(` : 𝒫 au-dessus de ${nomDroite(e)} ; `), lat(`f(x)<${droite(e)}`), texte(` : 𝒫 en dessous (cours, § 2 et § 7).`)]),
+    utilise("b", [lat(`f(x)>${droite(e)}`), texte(` : 𝒫 au-dessus de ${nomDroite(e)} ; `), lat(`f(x)<${droite(e)}`), texte(` : 𝒫 en dessous (cours, points 2 et 7).`)]),
     calcul("b", lignesPosition(e)),
     resultat("b", lectureFragments(lectureJuste(e), e)),
-    utilise("c", [texte("Crochets inversés (cours, § 2) : un symbole large inclut les abscisses des points communs, un symbole strict les exclut ; ±∞ a toujours un crochet ouvert.")]),
+    utilise("c", [texte("Crochets inversés (cours, point 2) : un symbole large inclut les abscisses des points communs, un symbole strict les exclut ; ±∞ a toujours un crochet ouvert.")]),
     calcul("c", [ligne(solutionLatex(e), sansPoint ? "aucune borne à décider" : large ? "symbole large : points communs inclus" : "symbole strict : points communs exclus")]),
     { ...resultat("c", reponseSolutionFragments(e)), figureHtml: figureSvg(e, true) },
     piege("c", e.issue === 1 ? [texte("Au point de contact, f(x) = g(x) : il appartient à S seulement si le symbole est large.")] : sansPoint ? [texte("Pas de point commun ne veut pas dire « pas de solution » : regarde de quel côté est la parabole.")] : [texte("On lit des abscisses (sur l'axe des x), jamais les ordonnées des points communs.")]),

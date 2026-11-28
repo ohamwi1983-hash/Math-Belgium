@@ -252,9 +252,9 @@ export const TABLEAU_R_LATEX = "\\begin{array}{ll}|r|\\geq 0{,}98 & \\text{très
 export function aide1(_e: E, p: PhaseModeliser): AideEcran {
   switch (p) {
     case "equation":
-      return { texte: [tx("Touche « data » : tape les x dans la liste L1 et les y dans L2 ; puis « 2nd » et « data », « 2-Var Stats » avec L1 pour les x et L2 pour les y (cours, § 4). La calculatrice affiche a et b de la droite des moindres carrés "), lx("y=ax+b"), tx(".")] };
+      return { texte: [tx("Touche « data » : tape les x dans la liste L1 et les y dans L2 ; puis « 2nd » et « data », « 2-Var Stats » avec L1 pour les x et L2 pour les y (cours, point 4). La calculatrice affiche a et b de la droite des moindres carrés "), lx("y=ax+b"), tx(".")] };
     case "correlation":
-      return { texte: [tx("« 2-Var Stats » affiche r avec a et b (cours, § 5). Il est compris entre −1 et 1 et il a le même signe que a.")] };
+      return { texte: [tx("« 2-Var Stats » affiche r avec a et b (cours, point 5). Il est compris entre −1 et 1 et il a le même signe que a.")] };
     case "fiabilite":
       return { texte: [tx("La droite est un bon modèle quand la corrélation est forte ou très forte. Tableau d'interprétation du cours :")], latex: TABLEAU_R_LATEX };
     case "prevision":

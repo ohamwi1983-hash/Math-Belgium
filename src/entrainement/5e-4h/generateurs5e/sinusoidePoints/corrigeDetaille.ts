@@ -74,16 +74,16 @@ export function correctionDetailleeSinusoidePoints(e: E): EtapeCorrection[] {
     return ligne(`x = ${xLatex(e, source.x)} ${op} = ${xLatex(e, p.x)}`, [t("même ordonnée que "), f(`x_${source.j}`), t(` : y = ${p.y < 0 ? "−" + -p.y : p.y}`)]);
   });
   return [
-    utilise("a", [t("Dans "), f("f(x) = A\\sin(\\omega x + \\varphi) + b"), t(" (cours, § 4) : "), f("T = \\dfrac{2\\pi}{\\omega}"), t(" et "), f("\\Phi = -\\dfrac{\\varphi}{\\omega}"), t(".")]),
+    utilise("a", [t("Dans "), f("f(x) = A\\sin(\\omega x + \\varphi) + b"), t(" (cours, point 4) : "), f("T = \\dfrac{2\\pi}{\\omega}"), t(" et "), f("\\Phi = -\\dfrac{\\varphi}{\\omega}"), t(".")]),
     calcul("a", a),
     resultat("a", souderPonctuation(reponseParametres(e))),
     verification("a", [f(`${omegaLatex(s)} \\times ${Tl} = 2\\pi`), t(" : un tour complet de l'argument.")]),
     piege("a", [t("La période n'est ni "), f("\\omega"), t(" ni "), f("2\\pi\\omega"), t(", et le décalage horizontal n'est pas "), f("\\varphi"), t(".")]),
-    utilise("b", [t("Méthode de construction (cours, § 4) : à partir de "), f("\\Phi"), t(", une période partagée en 4 ; ordonnées "), f("b"), t(", "), f("b + A"), t(", "), f("b"), t(", "), f("b - A"), t(", "), f("b"), t(".")]),
+    utilise("b", [t("Méthode de construction (cours, point 4) : à partir de "), f("\\Phi"), t(", une période partagée en 4 ; ordonnées "), f("b"), t(", "), f("b + A"), t(", "), f("b"), t(", "), f("b - A"), t(", "), f("b"), t(".")]),
     calcul("b", b),
     { ...resultat("b", souderPonctuation(listePoints(e, per))), figureHtml: figureCorrige(e, "periode") },
     piege("b", e.A < 0 ? [t("Avec "), f("A < 0"), t(", la courbe descend d'abord : le minimum vient avant le maximum.")] : [t("La période commence en "), f("x = \\Phi"), t(", pas en 0.")]),
-    utilise("c", [t("La courbe se répète tous les "), f(`T = ${Tl}`), t(" (cours, § 4) : on ajoute ou on retire "), f("T"), t(" aux abscisses, les ordonnées ne changent pas.")]),
+    utilise("c", [t("La courbe se répète tous les "), f(`T = ${Tl}`), t(" (cours, point 4) : on ajoute ou on retire "), f("T"), t(" aux abscisses, les ordonnées ne changent pas.")]),
     calcul("c", c),
     { ...resultat("c", souderPonctuation(listePoints(e, rep))), figureHtml: figureCorrige(e, "complete") },
     piege("c", [t("On décale d'une période entière "), f("T"), t(", pas d'une demi-période.")]),

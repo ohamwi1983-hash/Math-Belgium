@@ -75,7 +75,7 @@ export function ecransAlignes(e: E): EcranChoixParallelisme[] {
             `Chacun des points ${noms} est sur un côté prolongé du triangle MNP et sur un côté prolongé du triangle ABC : à quels plans appartient-il ?`,
           ]
         : [
-            "Relis le théorème du toit (cours, § 8) : que dit-il de la droite d'intersection de deux plans qui contiennent deux droites parallèles ?",
+            "Relis le théorème du toit (cours, point 8) : que dit-il de la droite d'intersection de deux plans qui contiennent deux droites parallèles ?",
             `${dA(haut!)} est une droite du plan (MNP) et ${dA(base!)} une droite du plan (ABC) : quelle est la droite commune à ces deux plans ?`,
           ],
     },
@@ -96,7 +96,7 @@ export function ecransAlignes(e: E): EcranChoixParallelisme[] {
       ...optionsDe(e.conclusions),
       aides: general
         ? [
-            "Deux plans distincts qui ont un point commun sont sécants : leur intersection est une droite entière (cours, § 5).",
+            "Deux plans distincts qui ont un point commun sont sécants : leur intersection est une droite entière (cours, point 5).",
             "Le point M est-il dans le plan (ABC) ? Et sur quelle droite se trouve un point commun aux deux plans ?",
           ]
         : [

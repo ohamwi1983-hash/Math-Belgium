@@ -24,12 +24,12 @@ function etapesFaces(e: E): EtapeCorrection[] {
   const R = e.points[2]!;
   const L = f.pointLeurre;
   return [
-    utilise("a", [T("Un point de l'intersection d'un plan et d'une face appartient à la fois au plan et à la face (cours, § 5).")]),
+    utilise("a", [T("Un point de l'intersection d'un plan et d'une face appartient à la fois au plan et à la face (cours, point 5).")]),
     calcul("a", [ligne("R\\in(PQR)", "R est un des points qui nomment le plan"), ligne(`R\\in[${R.arete.join("")}]`, `R est sur une arête de la face ${F1}`)]),
     resultat("a", [T(`L'intersection du plan (PQR) et de la face ${F1} passe par R.`)]),
     piege("a", [T(`P et Q sont dans le plan (PQR), mais pas dans la face ${F1} : ils sont sur la face ${F0}.`)]),
 
-    utilise("b", [T("Propriété 1 (cours, § 5) : si un plan coupe deux plans parallèles, les deux droites d'intersection sont parallèles.")]),
+    utilise("b", [T("Propriété 1 (cours, point 5) : si un plan coupe deux plans parallèles, les deux droites d'intersection sont parallèles.")]),
     calcul("b", [
       ligne(`(${F0})\\parallel(${F1})`, `faces opposées ${e.genre === "cube" ? "du cube" : "du pavé"}`),
       ligne(`(PQR)\\cap(${F0})=(PQ)`, `P et Q sont dans le plan (PQR) et dans la face ${F0}`),
@@ -38,7 +38,7 @@ function etapesFaces(e: E): EtapeCorrection[] {
     resultat("b", [T(`Dans la face ${F1}, on trace la parallèle à (PQ) menée par R.`)]),
     piege("b", [T(`La droite (R${L}) est dans le plan (PQR), mais elle traverse le solide : ce n'est pas un côté de la section.`)]),
 
-    utilise("c", [T(`La section ne sort pas de la face ${F1} : la parallèle s'arrête sur une arête de cette face (cours, § 5).`)]),
+    utilise("c", [T(`La section ne sort pas de la face ${F1} : la parallèle s'arrête sur une arête de cette face (cours, point 5).`)]),
     calcul("c", [ligne(`S\\in[${f.areteS.join("")}]`, `la parallèle à (PQ) menée par R rencontre l'arête ${seg(f.areteS)} de la face ${F1}`)]),
     { ...resultat("c", [T(`Le plan (PQR) coupe la face ${F1} suivant le segment [RS], parallèle à [PQ].`)]), figureHtml: figureCorrige(figureIP(e, "papier", 3)) },
     verification("c", [T("Sur le dessin, [RS] est parallèle à [PQ] : la perspective cavalière conserve le parallélisme.")]),
@@ -75,7 +75,7 @@ function etapesDirection(e: E): EtapeCorrection[] {
       ? `${droite(c1)} est parallèle à l'arête ${droite(c2)}`
       : `toutes deux parallèles à l'arête ${droite(d.direction)}`;
   return [
-    utilise("a", [T("Un point commun à deux plans : la rencontre de deux droites, une de chaque plan, tracées dans une même face (cours, § 5).")]),
+    utilise("a", [T("Un point commun à deux plans : la rencontre de deux droites, une de chaque plan, tracées dans une même face (cours, point 5).")]),
     calcul(
       "a",
       [
@@ -88,7 +88,7 @@ function etapesDirection(e: E): EtapeCorrection[] {
     resultat("a", [T(`K, rencontre de ${droite(t1)} et ${droite(t2)} dans la face ${F0}, est un point commun aux deux plans.`)]),
     piege("a", [T("Deux droites qui se croisent sur le dessin sans être dans une même face sont souvent gauches : leur croisement n'est pas un point commun.")]),
 
-    utilise("b", [T("Théorème du toit (cours, § 8) : si deux plans sécants contiennent deux droites parallèles, leur droite d'intersection est parallèle à ces droites.")]),
+    utilise("b", [T("Théorème du toit (cours, point 8) : si deux plans sécants contiennent deux droites parallèles, leur droite d'intersection est parallèle à ces droites.")]),
     calcul("b", [
       ligne(`${dL(c1)}\\subset${pL(p1)}`, memeDirection(c1, p1)),
       ligne(`${dL(c2)}\\subset${pL(p2)}`, memeDirection(c2, p2)),

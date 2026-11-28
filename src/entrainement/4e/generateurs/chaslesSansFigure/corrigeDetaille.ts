@@ -13,9 +13,9 @@ import { l, t } from "../../ui/outilsAnalytiqueLotG";
  */
 
 type E = ExerciceChaslesSansFigure;
-const C2 = "(cours, § 2)";
-const C5 = "(cours, § 5)";
-const C6 = "(cours, § 6)";
+const C2 = "(cours, point 2)";
+const C5 = "(cours, point 5)";
+const C6 = "(cours, point 6)";
 
 /** Chaîne de Chasles de proche en proche : V0 + V1 + … → un seul vecteur (ou le vecteur nul). */
 function lignesTelescopage(chaine: string[], ferme: boolean): LigneCalcul[] {
@@ -76,11 +76,11 @@ function corrigeCoefficients(e: ExerciceCoefficients): EtapeCorrection[] {
   else if (r < 0) lignesB.push(ligne(`=${TL([vec(r, X, Z)])}`), ligne(`=${TL(resultatCoefficients(e))}`, "on retourne le vecteur"));
   else lignesB.push(ligne(`=${TL(resultatCoefficients(e))}`));
   return [
-    utilise("a", [t("Un coefficient commun se met en évidence (cours, § 3), puis la relation de Chasles réduit la parenthèse "), t(C6), t(".")]),
+    utilise("a", [t("Un coefficient commun se met en évidence (cours, point 3), puis la relation de Chasles réduit la parenthèse "), t(C6), t(".")]),
     calcul("a", lignesA),
     resultat("a", [l(`${TL(g)}=${TL([vec(k, X, Z)])}`)]),
     piege("a", negatif ? [t("Retourner un vecteur change le signe de son coefficient : "), l(`${TL([negatif])}=${TL([positif(negatif)])}`), t(".")] : [t("Le coefficient reste devant le vecteur réduit : "), l(`${parenthese}=${TL([vec(k, X, Z)])}`), t(", pas "), l(V(X, Z)), t(".")]),
-    utilise("b", [t("On remplace le groupe par le vecteur trouvé, on écrit le dernier terme avec le même vecteur, puis on additionne les coefficients d'un même vecteur (cours, § 3).")]),
+    utilise("b", [t("On remplace le groupe par le vecteur trouvé, on écrit le dernier terme avec le même vecteur, puis on additionne les coefficients d'un même vecteur (cours, point 3).")]),
     calcul("b", lignesB),
     resultat("b", [l(`${TL(e.termes)}=${TL(resultatCoefficients(e))}`)]),
     piege("b", [t("Le signe écrit devant le dernier terme fait partie de son coefficient : "), l(`${TL([e.troisieme])}=${TL([vec(c, X, Z)])}`), t(".")]),

@@ -96,7 +96,7 @@ function etapeA(e: E): EtapeCorrection[] {
   if (e.variante === "deuxTangentes") L.push(ligne("c=0", "tangente horizontale en 0 : pente nulle"), ligne(`d=${e.d}`, [t("le point "), f(`(0\\,;${e.d})`), t(" est sur la courbe")]));
   else L.push(ligne(`d=${e.d}`, [t("la tangente "), f(tangenteL(e)), t(" passe par "), f("(0\\,;f(0))")]), ligne(`c=${e.c}`, [t("pente de la tangente : "), f("f'(0)")]));
   return [
-    utilise("a", [t("La tangente au point d'abscisse a a pour pente "), f("f'(a)"), t(" et passe par "), f("(a\\,;f(a))"), t(" ; en a = 0, tout se lit sur c et d (cours, § 2).")]),
+    utilise("a", [t("La tangente au point d'abscisse a a pour pente "), f("f'(a)"), t(" et passe par "), f("(a\\,;f(a))"), t(" ; en a = 0, tout se lit sur c et d (cours, point 2).")]),
     calcul("a", L),
     resultat("a", reponse(e, "directes")),
     piege("a", [t("Échanger c et d : "), f("d=f(0)"), t(" est l'ordonnée à l'origine de la tangente, "), f("c=f'(0)"), t(" sa pente.")]),
@@ -118,8 +118,8 @@ function etapeB(e: E): EtapeCorrection[] {
     utilise(
       "b",
       e.variante === "inflexion"
-        ? [t("Point d'inflexion d'abscisse "), f("x_1"), t(" : "), f("f''(x_1)=0"), t(" (cours, § 4) ; point de la courbe : "), f("f(x)=y"), t(".")]
-        : [t("Tangente horizontale en "), f("x_0"), t(" : "), f("f'(x_0)=0"), t(" (cours, § 2) ; point de la courbe : "), f("f(x_0)=y_0"), t(".")],
+        ? [t("Point d'inflexion d'abscisse "), f("x_1"), t(" : "), f("f''(x_1)=0"), t(" (cours, point 4) ; point de la courbe : "), f("f(x)=y"), t(".")]
+        : [t("Tangente horizontale en "), f("x_0"), t(" : "), f("f'(x_0)=0"), t(" (cours, point 2) ; point de la courbe : "), f("f(x_0)=y_0"), t(".")],
     ),
     calcul("b", L),
     resultat("b", reponse(e, "systeme")),
@@ -145,7 +145,7 @@ function etapeD(e: E): EtapeCorrection[] {
       ? [ligne("f''(x)=6ax+2b"), ligne(`=6\\cdot ${parL(e.a)}\\,x+2\\cdot ${parL(e.b)}`, "on remplace a et b"), ligne(`=${fppxL(e)}`)]
       : [ligne("f'(x)=3ax^2+2bx+c"), ligne(`=3\\cdot ${parL(e.a)}\\,x^2+2\\cdot ${parL(e.b)}\\,x${plusL(e.c)}`, "on remplace a, b et c"), ligne(`=${fpxL(e)}`)];
   return [
-    utilise("d", [t("On dérive "), f(`f(x)=${fxL(e)}`), t(e.variante === "inflexion" ? " deux fois (cours, § 3 et § 4)." : " terme à terme (cours, § 3).")]),
+    utilise("d", [t("On dérive "), f(`f(x)=${fxL(e)}`), t(e.variante === "inflexion" ? " deux fois (cours, points 3 et 4)." : " terme à terme (cours, point 3).")]),
     calcul("d", L),
     resultat("d", reponse(e, "derivee")),
   ];
@@ -176,8 +176,8 @@ function etapeE(e: E): EtapeCorrection[] {
     utilise(
       "e",
       inf
-        ? [t("Concave où "), f("f''<0"), t(", convexe où "), f("f''>0"), t(" ; un point d'inflexion exige un changement de signe de "), f("f''"), t(" (cours, § 4).")]
-        : [t("Un zéro de "), f("f'"), t(" est un extremum seulement si "), f("f'"), t(" y change de signe : de + à −, maximum ; de − à +, minimum (cours, § 5).")],
+        ? [t("Concave où "), f("f''<0"), t(", convexe où "), f("f''>0"), t(" ; un point d'inflexion exige un changement de signe de "), f("f''"), t(" (cours, point 4).")]
+        : [t("Un zéro de "), f("f'"), t(" est un extremum seulement si "), f("f'"), t(" y change de signe : de + à −, maximum ; de − à +, minimum (cours, point 5).")],
     ),
     calcul("e", L),
     resultat("e", conclusion),

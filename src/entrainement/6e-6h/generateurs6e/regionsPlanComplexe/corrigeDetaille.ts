@@ -12,7 +12,7 @@ import { figureCorrigeSvg } from "../../ui6e/figureRegionsPlanComplexe";
  * transformation par ligne, le résultat, le test d'un point pour la région (vérification), le piège.
  */
 
-const COURS = "(cours, § 9)";
+const COURS = "(cours, point 9)";
 const LETTRES = ["a", "b", "c", "d"];
 
 export function correctionDetailleeRegions(e: ExerciceRegions): EtapeCorrection[] {

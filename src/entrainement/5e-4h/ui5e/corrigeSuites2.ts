@@ -14,12 +14,12 @@ import { latex, ligne, texte } from "../../export/corrigeTableau";
 export type Fragments = FragmentConsigne[];
 
 /** Renvois aux sections numérotées du chapitre `content/chapters/5e-4h/suites.ts`. */
-export const COURS_SUITES = "(cours, § 1)";
-export const COURS_ARITHMETIQUES = "(cours, § 1)";
-export const COURS_GEOMETRIQUES = "(cours, § 2)";
-export const COURS_NATURE = "(cours, § 1 et § 2)";
-export const COURS_CONVERGENCE = "(cours, § 3)";
-export const COURS_PROBLEMES = "(cours, § 4)";
+export const COURS_SUITES = "(cours, point 1)";
+export const COURS_ARITHMETIQUES = "(cours, point 1)";
+export const COURS_GEOMETRIQUES = "(cours, point 2)";
+export const COURS_NATURE = "(cours, points 1 et 2)";
+export const COURS_CONVERGENCE = "(cours, point 3)";
+export const COURS_PROBLEMES = "(cours, point 4)";
 
 /** Rationnel `{ num, den }` (même forme que `Q`, `Frac`, `FractionQ`, `Fraction` du chapitre). */
 export interface Rationnel {

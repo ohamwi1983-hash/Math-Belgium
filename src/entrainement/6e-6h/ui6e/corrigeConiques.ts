@@ -16,12 +16,12 @@ import { avecFigure, parQ } from "./corrigeLieux";
  * « loi des cosinus », forme dédoublée, condition de tangence k² = a²m² ± b².
  */
 
-export const COURS_IDENTIFIER = "cours, § 1";
-export const COURS_EXCENTRICITE = "cours, § 2";
-export const COURS_AIRE = "cours, § 3";
-export const COURS_INTERSECTION = "cours, § 4";
-export const COURS_TANGENTES = "cours, § 5";
-export const COURS_OPTIQUE = "cours, § 6";
+export const COURS_IDENTIFIER = "cours, point 1";
+export const COURS_EXCENTRICITE = "cours, point 2";
+export const COURS_AIRE = "cours, point 3";
+export const COURS_INTERSECTION = "cours, point 4";
+export const COURS_TANGENTES = "cours, point 5";
+export const COURS_OPTIQUE = "cours, point 6";
 
 type Fragments = FragmentConsigne[];
 

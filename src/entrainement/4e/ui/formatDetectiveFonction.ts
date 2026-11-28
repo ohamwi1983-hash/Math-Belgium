@@ -120,17 +120,17 @@ export function regle(e: E): Fr {
   switch (e.type) {
     case "bSansSigne":
     case "signeXS":
-      return [t("L'abscisse du sommet vaut "), l("x_S=-\\dfrac{b}{2a}"), t(", avec les coefficients lus sur f(x) avec leur signe (cours, § 1).")];
+      return [t("L'abscisse du sommet vaut "), l("x_S=-\\dfrac{b}{2a}"), t(", avec les coefficients lus sur f(x) avec leur signe (cours, point 1).")];
     case "nonMultiplieParA":
-      return [t("On redistribue a sur les deux termes du crochet : "), l("a\\left[(x-p)^2-p^2\\right]=a(x-p)^2-ap^2"), t(" (cours, § 2).")];
+      return [t("On redistribue a sur les deux termes du crochet : "), l("a\\left[(x-p)^2-p^2\\right]=a(x-p)^2-ap^2"), t(" (cours, point 2).")];
     case "signeSommet":
-      return [t("La forme canonique "), l("a(x-x_S)^2+y_S"), t(" donne le sommet "), l("S(x_S\\,;y_S)"), t(" : dans la parenthèse, on soustrait "), l("x_S"), t(" (cours, § 2).")];
+      return [t("La forme canonique "), l("a(x-x_S)^2+y_S"), t(" donne le sommet "), l("S(x_S\\,;y_S)"), t(" : dans la parenthèse, on soustrait "), l("x_S"), t(" (cours, point 2).")];
     case "allureInversee":
     case "imageAvecXS":
-      return [t("Si "), l("a>0"), t(", le sommet est un minimum et "), l("\\operatorname{im} f=[y_S\\,;+\\infty["), t(" ; si "), l("a<0"), t(", c'est un maximum et "), l("\\operatorname{im} f=\\mathopen{]}-\\infty\\,;y_S]"), t(" (cours, § 1).")];
+      return [t("Si "), l("a>0"), t(", le sommet est un minimum et "), l("\\operatorname{im} f=[y_S\\,;+\\infty["), t(" ; si "), l("a<0"), t(", c'est un maximum et "), l("\\operatorname{im} f=\\mathopen{]}-\\infty\\,;y_S]"), t(" (cours, point 1).")];
     case "sommetHorsDomaine":
     case "variationInversee":
-      return [t("Sur un intervalle, l'extremum est au sommet seulement si le sommet est dans l'intervalle ; sinon, f est monotone sur l'intervalle et l'extremum est à la borne la plus proche du sommet (cours, § 3).")];
+      return [t("Sur un intervalle, l'extremum est au sommet seulement si le sommet est dans l'intervalle ; sinon, f est monotone sur l'intervalle et l'extremum est à la borne la plus proche du sommet (cours, point 3).")];
   }
 }
 

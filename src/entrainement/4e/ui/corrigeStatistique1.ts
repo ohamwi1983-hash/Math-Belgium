@@ -16,13 +16,13 @@ import { nombreFr, nombreFrLatex } from "./nombreFr";
 export type Fragments = FragmentConsigne[];
 
 /** Renvois au cours (sections numérotées de `content/chapters/4e/statistique-descriptive.ts`). */
-export const COURS_FREQUENCES = "(cours, § 1)";
-export const COURS_HISTOGRAMME = "(cours, § 2)";
-export const COURS_MOYENNE = "(cours, § 3)";
-export const COURS_POSITION = "(cours, § 4)";
-export const COURS_BOITE = "(cours, § 5)";
-export const COURS_DISPERSION = "(cours, § 6)";
-export const COURS_BT = "(cours, § 7)";
+export const COURS_FREQUENCES = "(cours, point 1)";
+export const COURS_HISTOGRAMME = "(cours, point 2)";
+export const COURS_MOYENNE = "(cours, point 3)";
+export const COURS_POSITION = "(cours, point 4)";
+export const COURS_BOITE = "(cours, point 5)";
+export const COURS_DISPERSION = "(cours, point 6)";
+export const COURS_BT = "(cours, point 7)";
 
 /** Nombre sans bruit flottant (somme de décimaux : 0,1 + 0,2). */
 export function net(v: number): number {

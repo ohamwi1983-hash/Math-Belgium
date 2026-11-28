@@ -18,7 +18,7 @@ const l = lx;
 
 export { phases101 };
 
-const COURS = "(cours, § 1)";
+const COURS = "(cours, point 1)";
 
 /** n + s écrit proprement (« n », « n+1 », « n-1 »). */
 export const nPlus = (s: number) => (s === 0 ? "n" : s > 0 ? `n+${s}` : `n-${-s}`);

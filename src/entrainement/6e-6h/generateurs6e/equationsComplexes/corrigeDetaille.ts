@@ -20,7 +20,7 @@ import { type V, addV, coefV, cv, estNul, lignesCarre, lignesDivisionConjugue, l
  * l'adaptateur papier et l'écran (étape échouée).
  */
 
-const COURS = "(cours, § 3)";
+const COURS = "(cours, point 3)";
 
 const ensemble = (vs: V[]) => `S=\\left\\{${vs.map(cv).join(";\\ ")}\\right\\}`;
 const egal = (a: V, b: V) => Math.abs(a.re - b.re) < 1e-9 && Math.abs(a.im - b.im) < 1e-9;

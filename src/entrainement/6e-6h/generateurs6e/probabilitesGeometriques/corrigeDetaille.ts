@@ -17,7 +17,7 @@ type E = ExerciceProbaGeo;
 const t = texte;
 const f = latex;
 const fr = (x: Frag[]) => x as unknown as FragmentConsigne[];
-const COURS = "(cours, § 1, probabilités géométriques)";
+const COURS = "(cours, point 1, probabilités géométriques)";
 const LETTRES = "abc";
 
 /** « = n/d » (justification éventuelle), puis la forme réduite si elle diffère. */

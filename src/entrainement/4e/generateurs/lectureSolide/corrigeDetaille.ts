@@ -39,7 +39,7 @@ function etapesDessin(e: E): EtapeCorrection[] {
     ...deformees.map((f) => ligne(`\\text{${nomFaceLue(f.sommets)}}`, `${f.role} : elle contient une fuyante, ${tetra ? "triangle déformé" : "parallélogramme"}`)),
   ];
   return [
-    utilise("a", [T("Perspective cavalière (cours, § 1) : les faces parallèles à la feuille sont en vraie grandeur ; une face qui contient une fuyante est déformée (un rectangle devient un parallélogramme).")]),
+    utilise("a", [T("Perspective cavalière (cours, point 1) : les faces parallèles à la feuille sont en vraie grandeur ; une face qui contient une fuyante est déformée (un rectangle devient un parallélogramme).")]),
     calcul("a", lignesFaces, [], "Lecture"),
     {
       ...resultat("a", [T(`Vraie grandeur : ${vraies.map((f) => nomFaceLue(f.sommets)).join(", ")}. ${majuscule(etiquetteDeformee(e))}${deformees.length > 1 ? "s" : ""} : ${deformees.map((f) => nomFaceLue(f.sommets)).join(", ")}.`)]),
@@ -47,7 +47,7 @@ function etapesDessin(e: E): EtapeCorrection[] {
     },
     piege("a", [T(tetra ? "La face avant est la seule sans fuyante : les trois autres faces passent toutes par la fuyante [AD]." : "La face arrière aussi est en vraie grandeur : elle est superposable à la face avant.")]),
 
-    utilise("b", [T("Les fuyantes partent vers la droite et vers le haut : on voit le solide de face, d'en haut et par la droite (cours, § 1). Une arête est cachée quand aucune face vue ne la borde.")]),
+    utilise("b", [T("Les fuyantes partent vers la droite et vers le haut : on voit le solide de face, d'en haut et par la droite (cours, point 1). Une arête est cachée quand aucune face vue ne la borde.")]),
     calcul(
       "b",
       cachees.map((x) => ligne(`[${x.sommets.join("")}]`, `ses faces (${facesDe(e, x.sommets).join(", ")}) sont cachées : pointillés`)),
@@ -57,7 +57,7 @@ function etapesDessin(e: E): EtapeCorrection[] {
     { ...resultat("b", [T(`Arêtes cachées : ${cachees.map((x) => nomArete(x.sommets)).join(", ")}.`)]), figureHtml: figureCorrige(figureCachees(e, "papier")) },
     piege("b", [T("Une arête de l'arrière n'est pas forcément cachée : si une face vue (le dessus ou la droite) la borde, elle reste en trait plein.")]),
 
-    utilise("c", [T("Perspective cavalière (cours, § 1) : une fuyante est dessinée à la moitié de sa vraie longueur ; les horizontales et les verticales des faces parallèles à la feuille sont en vraie grandeur.")]),
+    utilise("c", [T("Perspective cavalière (cours, point 1) : une fuyante est dessinée à la moitié de sa vraie longueur ; les horizontales et les verticales des faces parallèles à la feuille sont en vraie grandeur.")]),
     calcul(
       "c",
       L.fuyante
@@ -86,7 +86,7 @@ function etapePlan(e: E, p: PlanLu, sq: string): EtapeCorrection[] {
   const lignes: LigneCalcul[] = p.dans.map((n) => ligne(`${n}\\in${plan}`, p.raisons[n]!));
   const exclus = p.candidats.filter((n) => !p.dans.includes(n));
   return [
-    utilise(sq, [T("Un point appartient à un plan s'il est sur une droite de ce plan : la droite qui joint deux points du plan, ou la parallèle à une droite du plan menée par un de ses points (cours, § 2).")]),
+    utilise(sq, [T("Un point appartient à un plan s'il est sur une droite de ce plan : la droite qui joint deux points du plan, ou la parallèle à une droite du plan menée par un de ses points (cours, point 2).")]),
     calcul(sq, lignes, p.face ? [T(`Le plan ${plan} est celui de la face ${p.face}.`)] : [], "Lecture"),
     { ...resultat(sq, [T(`Points du plan ${plan}, autres que ${p.noms.join(", ")} : ${p.dans.join(", ")}.`)]), figureHtml: figureCorrige(figurePlan(e, "papier", p, true)) },
     verification(sq, [T(`Les autres points (${exclus.join(", ")}) ne sont sur aucune droite du plan : le plan les laisse d'un côté ou de l'autre.`)]),
@@ -100,7 +100,7 @@ function etapesPositions(e: E): EtapeCorrection[] {
     const nom: FragmentConsigne[] = [T(`${nomDroite(p.d1)} et ${nomDroite(p.d2)}`)];
     const rel = p.position === "paralleles" ? `${nomDroite(p.d1)}\\parallel ${nomDroite(p.d2)}` : `${nomDroite(p.d1)},\\ ${nomDroite(p.d2)}`;
     return [
-      utilise(sq, [T("Deux droites distinctes sont coplanaires (parallèles ou sécantes) ou gauches : cherche un plan qui contient leurs quatre points (cours, § 3).")]),
+      utilise(sq, [T("Deux droites distinctes sont coplanaires (parallèles ou sécantes) ou gauches : cherche un plan qui contient leurs quatre points (cours, point 3).")]),
       calcul(sq, [ligne(rel, p.raison)], [], "Lecture"),
       { ...resultat(sq, [...nom, T(` : ${LIBELLES_POSITIONS[p.position]}.`)]), ...(p.croisementDessin ? { figureHtml: figureCorrige(figurePaire(e, "papier", i)) } : {}) },
       piege(

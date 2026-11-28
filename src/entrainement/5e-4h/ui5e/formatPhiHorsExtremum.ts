@@ -248,11 +248,11 @@ function maxMinL(e: E): { max: string; min: string } {
 export function aide1(e: E, phase: PhasePhi): AideEcran {
   switch (phase) {
     case "parametres":
-      return { texte: [tx("L'amplitude et le décalage vertical viennent des valeurs extrêmes, la pulsation de la période (cours, § 8) :")], latex: "A=\\dfrac{\\max-\\min}{2}\\qquad b=\\dfrac{\\max+\\min}{2}\\qquad \\omega=\\dfrac{2\\pi}{T}" };
+      return { texte: [tx("L'amplitude et le décalage vertical viennent des valeurs extrêmes, la pulsation de la période (cours, point 8) :")], latex: "A=\\dfrac{\\max-\\min}{2}\\qquad b=\\dfrac{\\max+\\min}{2}\\qquad \\omega=\\dfrac{2\\pi}{T}" };
     case "sinus":
       return { texte: [tx("Remplace "), lx("t"), tx(" par 0 dans le modèle, puis isole le sinus (retranche "), lx("b"), tx(", divise par "), lx("A"), tx(") :")], latex: `${e.contexte.nomFonction}(0)=A\\sin\\varphi+b` };
     case "candidats":
-      return { texte: [tx("Hors d'un extremum, deux angles de "), lx("]-\\pi\\,;\\pi]"), tx(" ont le même sinus, symétriques par rapport à l'axe vertical du cercle (cours, § 8) :")], latex: "\\varphi_1=\\arcsin m\\qquad \\varphi_2=\\pi-\\arcsin m" };
+      return { texte: [tx("Hors d'un extremum, deux angles de "), lx("]-\\pi\\,;\\pi]"), tx(" ont le même sinus, symétriques par rapport à l'axe vertical du cercle (cours, point 8) :")], latex: "\\varphi_1=\\arcsin m\\qquad \\varphi_2=\\pi-\\arcsin m" };
     case "choix":
       return { texte: [tx("Au départ, l'argument vaut "), lx("u=\\varphi"), tx(". Sur le cercle, le point monte quand il est à droite de l'axe vertical, c'est-à-dire quand son cosinus est positif :")], latex: "\\text{la grandeur monte}\\iff\\cos\\varphi>0" };
     case "maximum":

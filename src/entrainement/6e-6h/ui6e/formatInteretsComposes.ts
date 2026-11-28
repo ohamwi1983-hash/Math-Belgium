@@ -70,7 +70,7 @@ export function aide1(_e: E, phase: PhaseInteretsComposes): AideEcran {
     case "capitaux":
       return { texte: [tx("À chaque versement, le taux appliqué est "), lx("\\dfrac{r}{n}"), tx(" ; en "), lx("t"), tx(" ans, il y a "), lx("n\\cdot t"), tx(" versements (le taux en décimal : 5 % = 0,05) :")], latex: "K_n=K_0\\left(1+\\dfrac{r}{n}\\right)^{n\\,t}" };
     case "limite":
-      return { texte: [tx("Définition de e (cours, § 2) : "), lx("{\\lim\\limits_{m\\to+\\infty}\\left(1+\\frac{1}{m}\\right)^{m}=e}"), tx(". Pose "), lx("m=\\dfrac{n}{r}"), tx(", qui tend vers l'infini avec "), lx("n"), tx(" :")], latex: "\\left(1+\\dfrac{r}{n}\\right)^{n\\,t}=\\left[\\left(1+\\dfrac{1}{m}\\right)^{m}\\right]^{r\\,t}" };
+      return { texte: [tx("Définition de e (cours, point 2) : "), lx("{\\lim\\limits_{m\\to+\\infty}\\left(1+\\frac{1}{m}\\right)^{m}=e}"), tx(". Pose "), lx("m=\\dfrac{n}{r}"), tx(", qui tend vers l'infini avec "), lx("n"), tx(" :")], latex: "\\left(1+\\dfrac{r}{n}\\right)^{n\\,t}=\\left[\\left(1+\\dfrac{1}{m}\\right)^{m}\\right]^{r\\,t}" };
     case "taux":
       return { texte: [tx("En capitalisation continue, le capital est multiplié par "), lx("e^{r}"), tx(" en un an ; un taux annuel simple "), lx("i"), tx(" le multiplie par "), lx("1+i"), tx(" :")], latex: "1+i=e^{r}" };
   }

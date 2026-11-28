@@ -13,7 +13,7 @@ import { COUL, planComplexeSvg } from "./figurePlanAffixes";
 
 type Exo<F extends ExerciceAffixesRacines["famille"]> = Extract<ExerciceAffixesRacines, { famille: F }>;
 
-const COURS = "(cours, § 2)";
+const COURS = "(cours, point 2)";
 
 function correctionA(e: Exo<"A">): EtapeCorrection[] {
   const z = cz(e.a, e.b);

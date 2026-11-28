@@ -12,8 +12,8 @@ import { COURS_CERCLE, COURS_LIEU } from "./corrigeLotG";
  */
 
 export { COURS_CERCLE, COURS_LIEU };
-export const COURS_PARABOLE = "(cours, § 9)";
-export const COURS_LIEUX = "(cours, § 10)";
+export const COURS_PARABOLE = "(cours, point 9)";
+export const COURS_LIEUX = "(cours, point 10)";
 
 type Fragments = FragmentConsigne[];
 

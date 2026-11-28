@@ -174,17 +174,17 @@ export function aide1_126(_e: E, p: Ph): AideEcran {
   switch (p) {
     case "centreRayon":
     case "centre":
-      return { texte: [t(`Cours, § 2 : on complète les carrés pour passer à la forme centre-rayon :`)], latex: "x^2-2px=(x-p)^2-p^2" };
+      return { texte: [t(`Cours, point 2 : on complète les carrés pour passer à la forme centre-rayon :`)], latex: "x^2-2px=(x-p)^2-p^2" };
     case "distance":
-      return { texte: [t(`Cours, § 2 : distance d'un point à une droite ax + by + c = 0 :`)], latex: "d(\\Omega\\,;d)=\\dfrac{|a\\,x_\\Omega+b\\,y_\\Omega+c|}{\\sqrt{a^2+b^2}}" };
+      return { texte: [t(`Cours, point 2 : distance d'un point à une droite ax + by + c = 0 :`)], latex: "d(\\Omega\\,;d)=\\dfrac{|a\\,x_\\Omega+b\\,y_\\Omega+c|}{\\sqrt{a^2+b^2}}" };
     case "position":
-      return { texte: [t(`Cours, § 2 : on compare la distance du centre à la droite avec le rayon : plus petite → sécante, égale → tangente, plus grande → extérieure.`)] };
+      return { texte: [t(`Cours, point 2 : on compare la distance du centre à la droite avec le rayon : plus petite → sécante, égale → tangente, plus grande → extérieure.`)] };
     case "tangente":
-      return { texte: [t(`Cours, § 2 : la tangente en T est perpendiculaire au rayon [ΩT] ; le vecteur `), l("\\vec{\\Omega T}"), t(" en est un vecteur normal.")] };
+      return { texte: [t(`Cours, point 2 : la tangente en T est perpendiculaire au rayon [ΩT] ; le vecteur `), l("\\vec{\\Omega T}"), t(" en est un vecteur normal.")] };
     case "longueur":
-      return { texte: [t(`Cours, § 2 : le triangle ΩTP est rectangle en T (la tangente est perpendiculaire au rayon) ; par Pythagore :`)], latex: "PT^2=\\Omega P^2-r^2" };
+      return { texte: [t(`Cours, point 2 : le triangle ΩTP est rectangle en T (la tangente est perpendiculaire au rayon) ; par Pythagore :`)], latex: "PT^2=\\Omega P^2-r^2" };
     case "tangentes":
-      return { texte: [t(`Cours, § 2 : une droite passant par P est tangente au cercle si et seulement si la distance du centre à cette droite vaut r. Écris une droite non verticale par P avec une pente m, sans oublier la droite verticale par P.`)] };
+      return { texte: [t(`Cours, point 2 : une droite passant par P est tangente au cercle si et seulement si la distance du centre à cette droite vaut r. Écris une droite non verticale par P avec une pente m, sans oublier la droite verticale par P.`)] };
   }
 }
 

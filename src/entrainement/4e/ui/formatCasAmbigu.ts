@@ -243,7 +243,7 @@ export function aidesEcran(e: ExerciceCasAmbigu, ecran: number): FragmentConsign
     case 1:
       return [
         [texte("Le sinus d'un angle ne dépasse jamais 1 : "), latex("-1 \\le \\sin x \\le 1")],
-        [texte("Entre 0° et 180°, deux angles supplémentaires ont le même sinus (section 4, angles associés) : "), latex("\\sin(180^\\circ - x) = \\sin x")],
+        [texte("Entre 0° et 180°, deux angles supplémentaires ont le même sinus (point 4, angles associés) : "), latex("\\sin(180^\\circ - x) = \\sin x")],
       ];
     case 2:
       if (r.candidats.length === 0) {

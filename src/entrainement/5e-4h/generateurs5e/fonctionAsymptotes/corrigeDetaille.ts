@@ -30,7 +30,7 @@ function etapeA(e: E): EtapeCorrection[] {
     L.push(ligne(`d=${-d.p}`, d.p > 0 ? `on retranche ${d.p}` : `on ajoute ${-d.p}`));
   }
   return [
-    utilise("a", [t("Une fonction rationnelle a une asymptote verticale "), f("x=p"), t(" là où son dénominateur s'annule et pas son numérateur (cours, § 2 et § 5).")]),
+    utilise("a", [t("Une fonction rationnelle a une asymptote verticale "), f("x=p"), t(" là où son dénominateur s'annule et pas son numérateur (cours, points 2 et 5).")]),
     calcul("a", L),
     resultat("a", reponse(e, "av")),
     piege("a", ob ? [t("Se tromper de signe : "), f("x-p"), t(" s'annule en "), f("x=p"), t(", pas en "), f("x=-p"), t(".")] : [t("Prendre "), f(`d=${d.p}`), t(" : "), f("x+d"), t(" s'annule en "), f("x=-d"), t(".")]),
@@ -52,7 +52,7 @@ function etapeB(e: E): EtapeCorrection[] {
     L.push(ligne(`a=${d.k}`, [t("l'asymptote horizontale est "), f(horizL(e))]));
   }
   return [
-    utilise("b", ob ? [t("La droite "), f("y=ax+b"), t(" est asymptote oblique quand "), f("f(x)-(ax+b)"), t(" tend vers 0 en l'infini (cours, § 2).")] : [t("En l'infini, un quotient de polynômes de même degré tend vers le quotient de leurs coefficients de plus haut degré : c'est l'ordonnée de l'asymptote horizontale (cours, § 2).")]),
+    utilise("b", ob ? [t("La droite "), f("y=ax+b"), t(" est asymptote oblique quand "), f("f(x)-(ax+b)"), t(" tend vers 0 en l'infini (cours, point 2).")] : [t("En l'infini, un quotient de polynômes de même degré tend vers le quotient de leurs coefficients de plus haut degré : c'est l'ordonnée de l'asymptote horizontale (cours, point 2).")]),
     calcul("b", L),
     resultat("b", reponse(e, "horiz")),
     piege("b", ob ? [t("Échanger pente et ordonnée à l'origine : a multiplie x.")] : [t("Prendre "), f("a=\\dfrac{1}{k}"), t(" : la limite vaut "), f("\\dfrac{a}{1}"), t(", donc a est l'ordonnée de l'asymptote elle-même.")]),
@@ -131,7 +131,7 @@ function etapeE(e: E): EtapeCorrection[] {
     L.push(ligne(`${Lp}f(x)=${limiteL(limiteDroite(e))}`, `${numerateurEnP(e) > 0 ? "positif" : "négatif"} divisé par 0⁺`));
   }
   return [
-    utilise("e", [t("Asymptote verticale : la limite en p est infinie ; nombre non nul divisé par "), f("0^{+}"), t(" donne un infini du signe de ce nombre (cours, § 1).")]),
+    utilise("e", [t("Asymptote verticale : la limite en p est infinie ; nombre non nul divisé par "), f("0^{+}"), t(" donne un infini du signe de ce nombre (cours, point 1).")]),
     calcul("e", L),
     resultat("e", reponse(e, "verifier")),
     piege("e", [t("Conclure sans tester le numérateur : s'il s'annulait aussi en p, ce serait un point vide, pas une asymptote.")]),

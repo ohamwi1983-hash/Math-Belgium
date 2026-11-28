@@ -73,12 +73,12 @@ export function correctionDetailleeCG(e: E): EtapeCorrection[] {
     const a: EtapeCorrection[] =
       e.variante === "aire"
         ? [
-            utilise("a", [f("P(Z\\le t)"), t(" est l'aire à gauche de "), f("t"), t(", "), f("P(Z\\ge t)"), t(" l'aire à droite, "), f("P(a\\le Z\\le b)"), t(" l'aire entre "), f("a"), t(" et "), f("b"), t(" (cours, § 6).")]),
+            utilise("a", [f("P(Z\\le t)"), t(" est l'aire à gauche de "), f("t"), t(", "), f("P(Z\\ge t)"), t(" l'aire à droite, "), f("P(a\\le Z\\le b)"), t(" l'aire entre "), f("a"), t(" et "), f("b"), t(" (cours, point 6).")]),
             { label: "Lecture", sousQuestion: "a", fragments: [t("Sur la figure, l'aire colorée est "), ...fr(aireMots(x)), t(".")] },
             resultat("a", fr(reponse(e, "aire"))),
           ]
         : [
-            utilise("a", [f(aireL(x)), t(" est l'aire sous la courbe "), ...fr(aireMots(x)), t(" (cours, § 6).")]),
+            utilise("a", [f(aireL(x)), t(" est l'aire sous la courbe "), ...fr(aireMots(x)), t(" (cours, point 6).")]),
             { label: "Lecture", sousQuestion: "a", fragments: [t(`Seule la figure ${lettreJuste(e)} colore l'aire `), ...fr(aireMots(x)), t(" :")], figureHtml: figureAire(x, 300) },
             resultat("a", fr(reponse(e, "figure"))),
           ];
@@ -106,7 +106,7 @@ export function correctionDetailleeCG(e: E): EtapeCorrection[] {
   };
   const unCote = e.question !== "entre" && e.question !== "hors";
   return [
-    utilise("a", [t("Règle empirique (cours, § 6) : les bornes s'écrivent "), f("\\mu\\pm k\\sigma"), t(".")]),
+    utilise("a", [t("Règle empirique (cours, point 6) : les bornes s'écrivent "), f("\\mu\\pm k\\sigma"), t(".")]),
     calcul("a", [ligne(`k=\\dfrac{|${nL(borne)}-${nL(e.mu)}|}{${nL(e.sigma)}}`, `écart en ${c.unite} divisé par σ`), ligne(`=\\dfrac{${nL(e.k * e.sigma)}}{${nL(e.sigma)}}`), ligne(`=${e.k}`)]),
     resultat("a", fr(reponse(e, "k"))),
     utilise("b", [t("Environ "), f(pctL(p0)), t(" des valeurs sont dans "), f(`[\\mu-${e.k === 1 ? "" : e.k}\\sigma\\,;\\mu+${e.k === 1 ? "" : e.k}\\sigma]`), t(" ; la courbe est symétrique par rapport à "), f("\\mu"), t(" : le reste se partage également entre les deux côtés.")]),

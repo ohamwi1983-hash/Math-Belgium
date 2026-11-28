@@ -19,7 +19,7 @@ import './matiere-projetee.css'
 
 /**
  * « Noter la matière vue de la 5e A ? » (maquette « fin-projection », chantier M du 27/11/2026) : étapes
- * projetées et générateurs ouverts pré-cochés, « vue en partie » (sous-parties montrées), devoir facultatif,
+ * projetées et générateurs ouverts pré-cochés, « vu en partie » (sous-parties montrées), devoir facultatif,
  * « Changer de classe ou de date ». « Enregistrer dans Mes classes » crée la séance du carnet ou COMPLÈTE celle
  * déjà notée pour ce créneau (mêmes tables et mêmes fonctions que « Noter la séance » : `ajouterSeance` /
  * `modifierSeance`, `normaliserParties`, `erreursSeance`). Rien n'est écrit sans ce clic.
@@ -115,7 +115,7 @@ export function FormulaireMatiere({
     if (!chapitre) return
     setErreur(null)
     if (choix.unites.length === 0 && choix.generateurs.length === 0 && !choix.devoir.trim()) {
-      setErreur('Coche au moins une étape ou un exercice (ou « Plus tard » si tu préfères noter la séance autrement).')
+      setErreur('Coche au moins un point ou un exercice (ou « Plus tard » si tu préfères noter la séance autrement).')
       return
     }
     setEnvoi(true)
@@ -188,7 +188,7 @@ export function FormulaireMatiere({
       <div className="mv-boite">
         {proposition.etapes.length > 0 && (
           <fieldset className="mv-groupe">
-            <legend>Étapes projetées</legend>
+            <legend>Points projetés</legend>
             {proposition.etapes.map((e) => {
               const partie = structure.find((s) => s.id === e.id)
               const toutes = partie ? (partie.sousParties.length > 0 ? partie.sousParties.map((p) => p.id) : [partie.id]) : [e.id]
@@ -217,13 +217,13 @@ export function FormulaireMatiere({
                     />
                     <span className="mv-case-texte">
                       <span>
-                        Étape {e.numero} — <RichText text={partie?.titre ?? e.titre} />
+                        Point {e.numero} — <RichText text={partie?.titre ?? e.titre} />
                       </span>
-                      <small>{partiel ? `${e.vues} diapo${e.vues > 1 ? 's' : ''} sur ${e.total} : vue en partie` : `${e.total} diapo${e.total > 1 ? 's' : ''} sur ${e.total} montrée${e.total > 1 ? 's' : ''}`}</small>
+                      <small>{partiel ? `${e.vues} diapo${e.vues > 1 ? 's' : ''} sur ${e.total} : vu en partie` : `${e.total} diapo${e.total > 1 ? 's' : ''} sur ${e.total} montrée${e.total > 1 ? 's' : ''}`}</small>
                     </span>
                   </label>
                   {montrerSous && (
-                    <ul className="mv-sous" aria-label={`Parties de l’étape ${e.numero}`}>
+                    <ul className="mv-sous" aria-label={`Parties du point ${e.numero}`}>
                       {partie!.sousParties.map((p) => (
                         <li key={p.id}>
                           <label className="mv-case mv-case--sous">
@@ -335,12 +335,12 @@ function capitale(t: string): string {
   return t.charAt(0).toUpperCase() + t.slice(1)
 }
 
-/** Résumé d'une proposition gardée : « Suites, étapes 7 et 8 · 2 exercices ». */
+/** Résumé d'une proposition gardée : « Suites, points 7 et 8 · 2 exercices ». */
 export function resumeProposition(p: PropositionMatiere): string {
   const c = findChapter(p.niveau, p.chapitre)
   const titre = c ? titreCourtChapitre(c.slug, texteBrut(c.title)) : p.chapitre
   const nums = p.etapes.map((e) => e.numero)
-  const etapes = nums.length === 0 ? '' : nums.length === 1 ? `, étape ${nums[0]}` : `, étapes ${nums.slice(0, -1).join(', ')} et ${nums[nums.length - 1]}`
+  const etapes = nums.length === 0 ? '' : nums.length === 1 ? `, point ${nums[0]}` : `, points ${nums.slice(0, -1).join(', ')} et ${nums[nums.length - 1]}`
   const ex = p.generateurs.length ? ` · ${p.generateurs.length} exercice${p.generateurs.length > 1 ? 's' : ''}` : ''
   return `${titre}${etapes}${ex}`
 }

@@ -153,7 +153,7 @@ export const FORMAT_6GEN44: FormatCombinatoire<E, P> = {
       case "C":
         if (e.sousType === "repetition")
           return p === "cEcran1"
-            ? [{ texte: "Choisir $p$ éléments parmi $n$, sans ordre, avec répétition possible (cours, § 1) :", latex: "\\Gamma_n^p=C_{n+p-1}^{p}" }, { texte: `Ici $n=${e.n}$ (nombre de sortes) et $p=${e.p}$ (nombre d'éléments choisis). Au clavier, une combinaison s'écrit avec la lettre C suivie des deux nombres entre parenthèses.` }]
+            ? [{ texte: "Choisir $p$ éléments parmi $n$, sans ordre, avec répétition possible (cours, point 1) :", latex: "\\Gamma_n^p=C_{n+p-1}^{p}" }, { texte: `Ici $n=${e.n}$ (nombre de sortes) et $p=${e.p}$ (nombre d'éléments choisis). Au clavier, une combinaison s'écrit avec la lettre C suivie des deux nombres entre parenthèses.` }]
             : [{ texte: "Calcule la combinaison avec la touche nCr, ou $\\dfrac{m!}{p!\\,(m-p)!}$." }, { texte: `Il s'agit de $C_{${e.n + e.p - 1}}^{${e.p}}$.` }];
         if (p === "cEcran1") return [{ texte: "Si l'on peut distinguer les objets, un résultat est une liste ordonnée (avec répétition) ; sinon, c'est un choix sans ordre, avec répétition." }, { texte: "Deux résultats qui ne diffèrent que par le dé qui donne chaque face sont-ils différents ici ?" }];
         return [{ texte: "$B_n^p=n^p$ ; $\\Gamma_n^p=C_{n+p-1}^{p}$." }, { texte: `Ici $n=${e.n}$ faces et $p=${e.p}$ dés.` }];

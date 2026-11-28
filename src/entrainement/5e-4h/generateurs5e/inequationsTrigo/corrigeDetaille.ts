@@ -16,7 +16,7 @@ import { angleRefPi, argL, ensembleL, familleL, FENETRE_L, gaucheL, intervalleL,
 type E = ExerciceInequationTrigo;
 const t = texte;
 const f = latex;
-const COURS = "(cours, § 8)";
+const COURS = "(cours, point 8)";
 /** « a + b », mais « b » seul quand a vaut 0. */
 const plus = (a: string, b: string) => (a === "0" ? b : `${a}+${b}`);
 /** Figure du corrigé papier : largeur limitée (6,5 cm), centrée. */

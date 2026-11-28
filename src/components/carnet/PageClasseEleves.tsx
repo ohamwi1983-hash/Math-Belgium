@@ -197,7 +197,7 @@ export function PageClasseEleves({
             <h3>Ce que les élèves voient</h3>
             <Interrupteur
               nom="Prochaines interros"
-              desc="Date, étapes du chapitre et générateurs « Pour t’entraîner » (repris de l’interro annoncée dans Mes classes)."
+              desc="Date, points du chapitre et générateurs « Pour t’entraîner » (repris de l’interro annoncée dans Mes classes)."
               actif={reglages.publier_interros}
               desactive={occupe || !page}
               onChange={(v) => onReglages({ ...reglages, publier_interros: v })}
@@ -211,7 +211,7 @@ export function PageClasseEleves({
             />
             <Interrupteur
               nom="Matière vue"
-              desc="Les 3 dernières séances : date et étapes du chapitre, avec un lien vers chaque étape."
+              desc="Les 3 dernières séances : date et points du chapitre, avec un lien vers chaque point."
               actif={reglages.publier_matiere}
               desactive={occupe || !page}
               onChange={(v) => onReglages({ ...reglages, publier_matiere: v })}

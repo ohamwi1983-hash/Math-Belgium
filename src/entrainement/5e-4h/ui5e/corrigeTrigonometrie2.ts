@@ -22,11 +22,11 @@ import { reduireRationnelPi } from "../generateurs5e/parametresSinusoide/rationn
 
 export type Fragments = FragmentConsigne[];
 
-export const COURS_PARAMETRES = "(cours, § 4)";
-export const COURS_LECTURE = "(cours, § 5)";
-export const COURS_EXTREMUMS = "(cours, § 6)";
-export const COURS_EQUATIONS = "(cours, § 7)";
-export const COURS_MODELISER = "(cours, § 8)";
+export const COURS_PARAMETRES = "(cours, point 4)";
+export const COURS_LECTURE = "(cours, point 5)";
+export const COURS_EXTREMUMS = "(cours, point 6)";
+export const COURS_EQUATIONS = "(cours, point 7)";
+export const COURS_MODELISER = "(cours, point 8)";
 
 /** Formules des justifications et des résultats rédigés groupées `{…}` (insécables). */
 export const finaliserCorrige = finaliserSecondDegre;

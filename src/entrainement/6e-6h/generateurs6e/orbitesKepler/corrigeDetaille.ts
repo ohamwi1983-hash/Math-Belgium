@@ -36,17 +36,17 @@ export function correctionDetailleeKE(e: E): EtapeCorrection[] {
   const q = perihelie(e);
   const Q = aphelie(e);
   return [
-    utilise("a", [ft(`Le ${m.proche} et l'${m.loin} sont les sommets du grand axe ; le corps central étant à un foyer, leurs distances à lui valent `), L("a-c"), ft(" et "), L("a+c"), ft(" (cours, § 1 et § 3).")]),
+    utilise("a", [ft(`Le ${m.proche} et l'${m.loin} sont les sommets du grand axe ; le corps central étant à un foyer, leurs distances à lui valent `), L("a-c"), ft(" et "), L("a+c"), ft(" (cours, points 1 et 3).")]),
     calcul("a", lignesA(e)),
     resultat("a", [L(`a=${milliersL(e.a)}`), ft(` ${unite(e)}`), ft(" et "), L(`c=${milliersL(e.c)}`), ft(` ${unite(e)}`), ft(".")]),
     utilise("b", [ft(`Première loi de Kepler : l'orbite est une ellipse dont le centre ${m.centralDe} occupe un foyer — pas le centre de l'ellipse.`)]),
     calcul("b", [ligne(`F(c\\,;0)\\quad\\text{et}\\quad F'(-c\\,;0)`, "foyers de l'ellipse"), ligne(`${m.nom}=F`, `foyer du côté du ${m.proche}`)]),
     resultat("b", [L(coordCentralL(e)), ft(".")]),
     verification("b", [ft(`Distance de ${m.nom} au ${m.proche} `), L(`(${milliersL(e.a)}\\,;0)`), ft(" : "), L(`${milliersL(e.a)}-${milliersL(e.c)}=${milliersL(q)}`), ft(", la donnée.")]),
-    utilise("c", [ft("Excentricité d'une ellipse : "), L("e=\\dfrac{c}{a}"), ft(" (cours, § 2).")]),
+    utilise("c", [ft("Excentricité d'une ellipse : "), L("e=\\dfrac{c}{a}"), ft(" (cours, point 2).")]),
     calcul("c", [ligne(`e=\\dfrac{${milliersL(e.c)}}{${milliersL(e.a)}}=${nL(excentricite(e))}`, g > 1 ? `on simplifie par ${g}` : "fraction irréductible")]),
     resultat("c", [L(`e=${nL(excentricite(e))}`), ft(e.variante === "comete" ? " : proche de 1, orbite très allongée." : e.variante === "satellite" ? "." : " : orbite peu aplatie.")]),
-    utilise("d", [ft("Relation de l'ellipse : "), L("b^2=a^2-c^2"), ft(" (cours, § 1).")]),
+    utilise("d", [ft("Relation de l'ellipse : "), L("b^2=a^2-c^2"), ft(" (cours, point 1).")]),
     calcul("d", [ligne(`b^2=${milliersL(e.a)}^2-${milliersL(e.c)}^2=${milliersL(e.a * e.a)}-${milliersL(e.c * e.c)}=${milliersL(e.b * e.b)}`), ligne(`b=${milliersL(e.b)}`)]),
     { ...resultat("d", [L(`b=${milliersL(e.b)}`), ft(` ${unite(e)}`), ft(".")]), figureHtml: figureKE(e, true, true) },
     verification("d", [L(`q\\cdot Q=${milliersL(q)}\\cdot ${milliersL(Q)}=${milliersL(q * Q)}=b^2`), ft(" : en effet "), L("(a-c)(a+c)=a^2-c^2"), ft(".")]),

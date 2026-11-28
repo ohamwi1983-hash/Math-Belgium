@@ -1187,7 +1187,7 @@ function pageJeVerifieHtml(entete: EnteteEvaluation, numerotes: { item: ItemEval
   const lignes = [...sections.values()]
     .sort((a, b) => a.numero - b.numero)
     .map((s) => {
-      const relire = s.numero > 0 ? `Section ${s.numero} — ${s.titre}` : s.titre;
+      const relire = s.numero > 0 ? `Point ${s.numero} — ${s.titre}` : s.titre;
       const ex = s.exercices.length > 1 ? `exercices ${s.exercices.join(", ")}` : `exercice ${s.exercices[0]}`;
       return `<tr><td>${echapperHtml(s.titre)} <span class="pts">(${ex})</span></td><td class="case-col"><span class="case"></span></td><td class="case-col"><span class="case"></span></td><td class="case-col"><span class="case"></span></td><td class="relire">${echapperHtml(relire)}</td></tr>`;
     })

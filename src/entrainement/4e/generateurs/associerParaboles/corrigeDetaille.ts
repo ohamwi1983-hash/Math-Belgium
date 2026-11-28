@@ -37,7 +37,7 @@ function etape(e: E, n: number): EtapeCorrection[] {
   lignes.push(ligne(`${nom}(${q(p.h)})=${q(p.k)}`, `contrôle dans l'équation de ${nom} : le sommet lu est bien sur sa courbe`));
   return [
     utilise(sq, [
-      texte("Lecture d'une parabole (cours, § 2) : la forme canonique "),
+      texte("Lecture d'une parabole (cours, point 2) : la forme canonique "),
       latex("a(x-x_S)^2+y_S"),
       texte(" donne le sommet, la forme factorisée "),
       latex("a(x-x_1)(x-x_2)"),

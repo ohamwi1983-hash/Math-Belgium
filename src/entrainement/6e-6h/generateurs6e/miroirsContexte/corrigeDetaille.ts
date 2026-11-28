@@ -82,16 +82,16 @@ function correctionContexte(e: E): EtapeCorrection[] {
           ? [ft("Prendre la distance entre les foyers "), L("2c"), ft(" pour la longueur du trajet : par la paroi, il mesure "), L("2a"), ft(", le même pour toutes les ondes, qui arrivent donc en même temps.")]
           : [ft("Prendre "), L("a"), ft(" égal à la moitié de "), L("FF'"), ft(" : c'est "), L("c"), ft(" ; "), L("a"), ft(" est la distance du centre au sommet "), L("S"), ft(".")];
   return [
-    utilise("a", [ft("Propriétés optiques des coniques (cours, § 6).")]),
+    utilise("a", [ft("Propriétés optiques des coniques (cours, point 6).")]),
     calcul("a", [], raison, "Raisonnement"),
     resultat("a", [ft(NATURES[n]), ft(".")]),
-    utilise("b", [ft(n === "parabole" ? "Équation réduite d'une parabole de sommet O et d'axe Ox, foyer en " : n === "ellipse" ? "Équation réduite de l'ellipse, " : "Équation réduite de l'hyperbole, "), L(n === "parabole" ? "\\left(\\dfrac p2\\,;0\\right)" : n === "ellipse" ? "b^2=a^2-c^2" : "b^2=c^2-a^2"), ft(" (cours, § 1).")]),
+    utilise("b", [ft(n === "parabole" ? "Équation réduite d'une parabole de sommet O et d'axe Ox, foyer en " : n === "ellipse" ? "Équation réduite de l'ellipse, " : "Équation réduite de l'hyperbole, "), L(n === "parabole" ? "\\left(\\dfrac p2\\,;0\\right)" : n === "ellipse" ? "b^2=a^2-c^2" : "b^2=c^2-a^2"), ft(" (cours, point 1).")]),
     calcul("b", lignesEquation(e)),
     resultat("b", [L(equationL(e)), ft(".")]),
     utilise("c", [ft(e.variante === "antenne" ? "Le récepteur est au foyer, à " : e.variante === "phare" ? "Le bord du réflecteur est un point de la parabole ; sa distance à l'axe est le rayon de l'ouverture." : e.variante === "lithotriteur" ? "Points de l'ellipse situés dans le plan de coupe." : "Position des points sur l'axe."), ...(e.variante === "antenne" ? [L("\\dfrac p2"), ft(" du sommet.")] : [])]),
     calcul("c", lignesGrandeur(e)),
     resultat("c", [L(cm(grandeur(e))), ft(".")]),
-    utilise("d", n === "parabole" ? [ft("Définition de la parabole : distance au foyer = distance à la directrice (cours, § 1).")] : n === "ellipse" ? [ft("Définition de l'ellipse : "), L("PF+PF'=2a"), ft(" (cours, § 1).")] : [ft("Définition de l'hyperbole : "), L("|PF'-PF|=2a"), ft(" (cours, § 1).")]),
+    utilise("d", n === "parabole" ? [ft("Définition de la parabole : distance au foyer = distance à la directrice (cours, point 1).")] : n === "ellipse" ? [ft("Définition de l'ellipse : "), L("PF+PF'=2a"), ft(" (cours, point 1).")] : [ft("Définition de l'hyperbole : "), L("|PF'-PF|=2a"), ft(" (cours, point 1).")]),
     calcul("d", lignesDistance(e)),
     { ...resultat("d", [L(e.variante === "cassegrain" ? `PF'-PF=${cm(distance(e))}` : cm(distance(e))), ft(".")]), figureHtml: figureMC(e, true) },
     piege("d", piegeD),
@@ -104,7 +104,7 @@ function correctionFtfp(e: E): EtapeCorrection[] {
   const P = e.P;
   const d = grandeur(e);
   return [
-    utilise("a", [ft("Forme dédoublée de la tangente à "), L("y^2=2px"), ft(" : "), L("y\\,y_P=p\\,(x+x_P)"), ft(" (cours, § 5).")]),
+    utilise("a", [ft("Forme dédoublée de la tangente à "), L("y^2=2px"), ft(" : "), L("y\\,y_P=p\\,(x+x_P)"), ft(" (cours, point 5).")]),
     calcul("a", [ligne(`y\\cdot ${nPL(P.y)}=${nL(e.p)}\\,(x${sgL(P.x)})`, [L(`p=${nL(e.p)}`), ft(", "), L(`P${coordL(P)}`)]), ligne(tangenteL(e), "forme implicite")]),
     resultat("a", [L(tangenteL(e)), ft(".")]),
     utilise("b", [L("T"), ft(" est sur l'axe des abscisses : "), L("y=0"), ft(".")]),
@@ -113,7 +113,7 @@ function correctionFtfp(e: E): EtapeCorrection[] {
     utilise("c", [ft("Foyer "), L(`F${coordL(F)}`), ft(" ; définition de la parabole pour "), L("FP"), ft(" (distance à la directrice "), L(`x=${nL(-e.p / 2)}`), ft(").")]),
     calcul("c", [ligne(`FT=${nL(F.x)}-${nPL(T.x)}=${nL(d)}`), ligne(`FP=x_P+\\dfrac p2=${nL(P.x)}+${nL(e.p / 2)}=${nL(d)}`), ligne(`FP=\\sqrt{${pL(P.x - F.x)}^2+${pL(P.y)}^2}=\\sqrt{${milliersL((P.x - F.x) ** 2 + P.y * P.y)}}=${nL(d)}`, "contrôle")]),
     resultat("c", [L(`FT=FP=${nL(d)}\\text{ cm}`), ft(" : le triangle "), L("FPT"), ft(" est isocèle en "), L("F"), ft(".")]),
-    utilise("d", [ft("Loi de la réflexion : angles égaux avec la tangente (cours, § 6). Les angles à la base du triangle isocèle "), L("FPT"), ft(" sont égaux, et le rayon incident, parallèle à l'axe, fait avec la tangente le même angle que l'axe (angles correspondants).")]),
+    utilise("d", [ft("Loi de la réflexion : angles égaux avec la tangente (cours, point 6). Les angles à la base du triangle isocèle "), L("FPT"), ft(" sont égaux, et le rayon incident, parallèle à l'axe, fait avec la tangente le même angle que l'axe (angles correspondants).")]),
     calcul("d", [ligne(`\\widehat{PTF}=\\widehat{TPF}`, "triangle isocèle en F"), ligne(`\\text{rayon réfléchi}=(PF)`, "angle égal de l'autre côté de la tangente"), ligne(reflechiL(e), [ft("droite par "), L("P"), ft(" et "), L("F")])]),
     { ...resultat("d", [ft("Le rayon réfléchi passe par le foyer : "), L(reflechiL(e)), ft(".")]), figureHtml: figureMC(e, true) },
     piege("d", [ft("Placer "), L("T"), ft(" en "), L(`(${nL(P.x)}\\,;0)`), ft(" : la tangente coupe l'axe de l'autre côté du sommet, en "), L("-x_P"), ft(".")]),

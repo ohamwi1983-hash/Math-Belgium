@@ -9,11 +9,11 @@ import { arrondiLatex, decimalLatex } from "./fragmentsCombinatoire";
  * Notation du cours : 𝓑(n ; p) calligraphique, 𝒩(μ ; σ), Cₙᵏ, P(S∣Cⱼ).
  */
 
-export const COURS_DISCRETES = "cours, § 1";
-export const COURS_BINOMIALE_8 = "cours, § 2";
-export const COURS_NORMALE = "cours, § 6";
-export const COURS_EXTENSIONS = "cours, § 7";
-export const COURS_POISSON = "cours, § 8";
+export const COURS_DISCRETES = "cours, point 1";
+export const COURS_BINOMIALE_8 = "cours, point 2";
+export const COURS_NORMALE = "cours, point 6";
+export const COURS_EXTENSIONS = "cours, point 7";
+export const COURS_POISSON = "cours, point 8";
 
 export const BIN = (n: string | number, p: string) => `\\mathcal{B}(${n}\\,;${p})`;
 export const NOR = (mu: string | number, sigma: string | number) => `\\mathcal{N}(${mu}\\,;${sigma})`;

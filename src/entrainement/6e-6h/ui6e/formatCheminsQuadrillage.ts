@@ -118,11 +118,11 @@ export function aide1(e: E, p: P): AideEcran {
     case "avantP":
     case "apresP":
     case "total":
-      return { texte: [t("Chemins dans un quadrillage (cours, § 4) : un chemin le plus court qui fait "), l("a"), t(" pas vers la droite et "), l("b"), t(" vers le haut est un mot de "), l("a+b"), t(" lettres ; il suffit de choisir les places des "), l("b"), t(" flèches vers le haut, soit "), l("C_{a+b}^{b}"), t(" chemins.")] };
+      return { texte: [t("Chemins dans un quadrillage (cours, point 4) : un chemin le plus court qui fait "), l("a"), t(" pas vers la droite et "), l("b"), t(" vers le haut est un mot de "), l("a+b"), t(" lettres ; il suffit de choisir les places des "), l("b"), t(" flèches vers le haut, soit "), l("C_{a+b}^{b}"), t(" chemins.")] };
     case "parP":
-      return { texte: [t("Principe de multiplication (cours, § 1) : un chemin par "), l("P"), t(" est un chemin de "), l("A"), t(" à "), l("P"), t(" suivi d'un chemin de "), l("P"), t(" à "), l("B"), t(".")] };
+      return { texte: [t("Principe de multiplication (cours, point 1) : un chemin par "), l("P"), t(" est un chemin de "), l("A"), t(" à "), l("P"), t(" suivi d'un chemin de "), l("P"), t(" à "), l("B"), t(".")] };
     case "chemins":
-      if (e.variante === "eviter") return { texte: [t("Complément (cours, § 2) : les chemins qui évitent "), l("P"), t(" sont tous les chemins, moins ceux qui passent par "), l("P"), t(".")] };
+      if (e.variante === "eviter") return { texte: [t("Complément (cours, point 2) : les chemins qui évitent "), l("P"), t(" sont tous les chemins, moins ceux qui passent par "), l("P"), t(".")] };
       if (e.variante === "passage") return { texte: [t("Principe de multiplication : chaque chemin de "), l("A"), t(" à "), l("P"), t(" se prolonge par chacun des chemins de "), l("P"), t(" à "), l("B"), t(".")] };
       return { texte: [t("Un chemin est un mot formé de flèches "), l("\\rightarrow"), t(" et "), l("\\uparrow"), t(" : choisir les places des flèches vers le haut parmi tous les déplacements (combinaison, l'ordre des places choisies ne compte pas).")] };
   }

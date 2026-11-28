@@ -17,12 +17,12 @@ import { arrondiLatex, decimalesAffichage, fractionLatex, milliers } from "./fra
  *   annoncé (au millième, davantage pour une très petite probabilité) — une transformation par ligne.
  */
 
-export const COURS_FONDAMENTAL = "cours, § 1";
-export const COURS_COMBINE = "cours, § 2";
-export const COURS_BINOME = "cours, § 3";
-export const COURS_PROBLEMES = "cours, § 4";
-export const COURS_HYPERGEO = "cours, § 5";
-export const COURS_BINOMIALE = "cours, § 6";
+export const COURS_FONDAMENTAL = "cours, point 1";
+export const COURS_COMBINE = "cours, point 2";
+export const COURS_BINOME = "cours, point 3";
+export const COURS_PROBLEMES = "cours, point 4";
+export const COURS_HYPERGEO = "cours, point 5";
+export const COURS_BINOMIALE = "cours, point 6";
 
 export { calcul, latex, ligne, piege, resultat, texte, utilise, verification };
 

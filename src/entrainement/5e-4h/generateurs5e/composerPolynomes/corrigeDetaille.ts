@@ -15,7 +15,7 @@ import type { PhaseComposerPolynomes } from "../../ui5e/formatComposerPolynomes"
 type E = ExerciceComposerPolynomes;
 const t = texte;
 const f = latex;
-const COURS = "(cours, § 3)";
+const COURS = "(cours, point 3)";
 
 /** Bloc « Carré » (identité remarquable) quand l'extérieure est du second degré. */
 function blocCarre(sq: string, ext: number[], int: number[]): EtapeCorrection[] {
@@ -62,7 +62,7 @@ function etape(e: E, phase: PhaseComposerPolynomes, sq: string): EtapeCorrection
       ];
     case "point":
       return [
-        utilise(sq, [t("Étage par étage : d'abord le nombre "), f(`g(${e.a})`), t(", puis f de ce nombre. La forme développée, évaluée au même point, doit donner la même valeur (astuce du cours, § 3).")]),
+        utilise(sq, [t("Étage par étage : d'abord le nombre "), f(`g(${e.a})`), t(", puis f de ce nombre. La forme développée, évaluée au même point, doit donner la même valeur (astuce du cours, point 3).")]),
         calcul(sq, [
           ligne(`g(${e.a})=${substNombreL(e.g, e.a)}`, "premier étage : g"),
           ligne(`=${e.ga}`),

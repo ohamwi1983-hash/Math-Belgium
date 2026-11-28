@@ -16,8 +16,8 @@ import { svgTableauVariationsCyclo } from "../../ui6e/tableauVariationsCyclo";
 type E = ExerciceEtudeCyclo;
 const t = texte;
 const f = latex;
-const COURS2 = "(cours, § 2)";
-const COURS4 = "(cours, § 4)";
+const COURS2 = "(cours, point 2)";
+const COURS4 = "(cours, point 4)";
 const etape = (sq: string, u: Parameters<typeof utilise>[1], lignes: LigneCalcul[], e: E, phase: Parameters<typeof reponse>[1], extra: EtapeCorrection[] = []): EtapeCorrection[] => [
   utilise(sq, u),
   calcul(sq, lignes),

@@ -793,8 +793,6 @@ relire + … », « Tous les points », « Garde au moins un point »), accueil 
 carte « Ma classe » (`guideEleve.ts::texteEtapes` rend « point(s) »), aide « ? », visite, recherche (« titre · point n · niveau »),
 panneau « Aa » (aperçu « Suites, point 1 »), `/classe` (« points lus »), textes du cours qui renvoient à une section (5e (6h)
 « Nombres réels et suites », 4e « Statistique descriptive ») et renvois des générateurs « (cours, point n) » (5e (6h) ch. 1,
-4e ch. 6 « (voir « … », point 1) »). Restent « étape » (hors périmètre, à décider) : la projection (titre de diapo « Étape n »,
-notes « Étape n : titre », lanceur « Étapes à projeter », « Coche au moins une étape ») et l'espace professeur (carnet
-« , étape n », « Étapes projetées », `EspacePage` « — étape n », `PreparerPage` « Choisir les étapes », options de la page de
-classe « Date, étapes du chapitre… »).
+4e ch. 6 « (voir « … », point 1) »). Projection, espace professeur et renvois « § n » / « section n » des générateurs :
+passés à « point » le même jour (voir `content-authoring.md`, « Vocabulaire »).
 

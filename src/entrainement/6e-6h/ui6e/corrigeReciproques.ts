@@ -20,11 +20,11 @@ import { formatEnsembleReelLatex } from "./formatEnsembleReel";
 export { affine, finaliserCorrige, frac, justif, listeEt, nb, parE, parN, rationnel, sommeTermes, terme } from "./corrigeLogarithmes1";
 export { dec, sansRepetition, vaut } from "./corrigeLogarithmes2";
 
-export const COURS_RECIPROQUE = "(cours, § 1)";
-export const COURS_CYCLO = "(cours, § 2)";
-export const COURS_EQUATIONS = "(cours, § 3)";
-export const COURS_DERIVEES = "(cours, § 4)";
-export const COURS_GRAPHES = "(cours, § 5)";
+export const COURS_RECIPROQUE = "(cours, point 1)";
+export const COURS_CYCLO = "(cours, point 2)";
+export const COURS_EQUATIONS = "(cours, point 3)";
+export const COURS_DERIVEES = "(cours, point 4)";
+export const COURS_GRAPHES = "(cours, point 5)";
 
 type Fragments = FragmentConsigne[];
 

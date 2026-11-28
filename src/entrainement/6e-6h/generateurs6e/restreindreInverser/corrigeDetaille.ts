@@ -15,8 +15,8 @@ type E = ExerciceRestreindre;
 const t = texte;
 const f_ = latex;
 const ent = (x: number) => (x < 0 ? `-${-x}` : String(x));
-const COURS1 = "(cours, § 1)";
-const COURS2 = "(cours, § 2)";
+const COURS1 = "(cours, point 1)";
+const COURS2 = "(cours, point 2)";
 const NOM = { sinus: "\\sin", cosinus: "\\cos", tangente: "\\tan" } as const;
 const ARC = { sinus: "arcsin", cosinus: "arccos", tangente: "arctan" } as const;
 

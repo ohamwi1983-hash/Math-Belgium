@@ -23,7 +23,7 @@ export function aideAnglesAssociesNiveau1(e: ExerciceAnglesAssocies): FragmentCo
       : f === "sin"
         ? "\\sin(90^\\circ - x) = \\cos x,\\quad \\sin(90^\\circ + x) = \\cos x,\\quad \\sin(180^\\circ - x) = \\sin x,\\quad \\sin(180^\\circ + x) = -\\sin x,\\quad \\sin(-x) = -\\sin x"
         : "\\cos(90^\\circ - x) = \\sin x,\\quad \\cos(90^\\circ + x) = -\\sin x,\\quad \\cos(180^\\circ - x) = -\\cos x,\\quad \\cos(180^\\circ + x) = -\\cos x,\\quad \\cos(-x) = \\cos x";
-  return [texte("Écris l'angle demandé à l'aide d'un angle aigu x, puis applique la règle de sa famille (cours, § 4) : "), latex(regles), texte(". La figure montre l'angle et la valeur cherchée.")];
+  return [texte("Écris l'angle demandé à l'aide d'un angle aigu x, puis applique la règle de sa famille (cours, point 4) : "), latex(regles), texte(". La figure montre l'angle et la valeur cherchée.")];
 }
 
 /** Niveau 2 : l'écriture de θ (la figure ajoute l'angle associé en orange). */

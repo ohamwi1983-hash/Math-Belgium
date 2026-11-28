@@ -179,7 +179,7 @@ export function aide1(e: E, phase: PhaseInequation): AideEcran {
     case "arc":
       if (e.fonction === "sin")
         return {
-          texte: [tx("Le sinus est l'ordonnée du point du cercle : trace la droite horizontale "), lx("\\sin u=m"), tx(". L'arc solution est au-dessus (pour ≥) ou au-dessous (pour ≤), parcouru dans le sens trigonométrique (cours, § 8) :")],
+          texte: [tx("Le sinus est l'ordonnée du point du cercle : trace la droite horizontale "), lx("\\sin u=m"), tx(". L'arc solution est au-dessus (pour ≥) ou au-dessous (pour ≤), parcouru dans le sens trigonométrique (cours, point 8) :")],
           latex: "\\sin u\\geq m\\iff u\\in[\\arcsin m\\,;\\,\\pi-\\arcsin m]+2k\\pi",
         };
       return {

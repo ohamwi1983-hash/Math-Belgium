@@ -13,7 +13,7 @@ import { q, qp, sansDoublons } from "../../ui/corrigeChapitre3";
 
 type E = ExerciceSigneRacines;
 const lat = (valeur: string): FragmentConsigne => ({ type: "latex", valeur });
-const COURS = "(cours, § 1)";
+const COURS = "(cours, point 1)";
 
 function lignesPhase(e: E, phase: PhaseSigneRacines): LigneCalcul[] {
   const { a, b, c } = e;

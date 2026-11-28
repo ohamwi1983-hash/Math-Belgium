@@ -45,7 +45,7 @@ export function correctionDetaillee126(e: E): EtapeCorrection[] {
       case "centreRayon":
       case "centre":
         out.push(
-          utilise(sq, [t("Équation d'un cercle (cours, § 2) : on complète les carrés pour obtenir "), l("(x-p)^2+(y-q)^2=r^2"), t(", de centre "), l("\\Omega(p\\,;q)"), t(" et de rayon r.")]),
+          utilise(sq, [t("Équation d'un cercle (cours, point 2) : on complète les carrés pour obtenir "), l("(x-p)^2+(y-q)^2=r^2"), t(", de centre "), l("\\Omega(p\\,;q)"), t(" et de rayon r.")]),
           calcul(sq, [...lignesCarres(e), ...(ph === "centreRayon" ? [ligne(`r=\\sqrt{${nb(e.r2)}}=${nb(r)}`, "racine du second membre")] : [])]),
           resultat(sq, fr(reponse126(e, ph))),
           piege(sq, [t("Se tromper de signe : "), l("x^2-2px"), t(" donne un centre d'abscisse p, positive ; et "), l("r^2"), t(" n'est pas le rayon.")]),
@@ -57,7 +57,7 @@ export function correctionDetaillee126(e: E): EtapeCorrection[] {
         const termes = [d.a !== 0 ? `${nb(d.a)}\\times ${nbp(e.O.x)}` : "", d.b !== 0 ? `${d.b < 0 ? `(${nb(d.b)})` : nb(d.b)}\\times ${nbp(e.O.y)}` : "", d.c !== 0 ? nb(d.c) : ""].filter((s) => s !== "");
         const valeur = d.a * e.O.x + d.b * e.O.y + d.c;
         out.push(
-          utilise(sq, [t("Distance d'un point à une droite (cours, § 1) : "), l("d(\\Omega\\,;d)=\\dfrac{|a\\,x_\\Omega+b\\,y_\\Omega+c|}{\\sqrt{a^2+b^2}}"), t(".")]),
+          utilise(sq, [t("Distance d'un point à une droite (cours, point 1) : "), l("d(\\Omega\\,;d)=\\dfrac{|a\\,x_\\Omega+b\\,y_\\Omega+c|}{\\sqrt{a^2+b^2}}"), t(".")]),
           calcul(sq, [
             ligne(`d(\\Omega\\,;d)=\\dfrac{\\left|${termes.join("+").replace(/\+-/g, "-")}\\right|}{${norme === 1 ? "1" : `\\sqrt{${nb(d.a)}^2+${nbp(d.b)}^2}`}}`, "on remplace"),
             ligne(`=\\dfrac{|${nb(valeur)}|}{${nb(norme)}}`),
@@ -70,7 +70,7 @@ export function correctionDetaillee126(e: E): EtapeCorrection[] {
       }
       case "position":
         out.push(
-          utilise(sq, [t("Position d'une droite et d'un cercle (cours, § 2) : si "), l("d(\\Omega\\,;d)<r"), t(", la droite est sécante (deux points communs) ; si "), l("d(\\Omega\\,;d)=r"), t(", tangente ; si "), l("d(\\Omega\\,;d)>r"), t(", extérieure.")]),
+          utilise(sq, [t("Position d'une droite et d'un cercle (cours, point 2) : si "), l("d(\\Omega\\,;d)<r"), t(", la droite est sécante (deux points communs) ; si "), l("d(\\Omega\\,;d)=r"), t(", tangente ; si "), l("d(\\Omega\\,;d)>r"), t(", extérieure.")]),
           { ...resultat(sq, fr(reponse126(e, ph))), figureHtml: figureCorrigeLot(figureCorrige126(e)) },
           piege(sq, [t("Comparer la distance à "), l("r^2"), t(" au lieu de r.")]),
         );
@@ -80,7 +80,7 @@ export function correctionDetaillee126(e: E): EtapeCorrection[] {
         const n = { x: T.x - e.O.x, y: T.y - e.O.y };
         const { lignes } = lignesDroiteNormale(n, T, "T");
         out.push(
-          utilise(sq, [t("Tangente en un point (cours, § 2) : elle est perpendiculaire au rayon [ΩT], donc "), l("\\vec{\\Omega T}"), t(" en est un vecteur normal.")]),
+          utilise(sq, [t("Tangente en un point (cours, point 2) : elle est perpendiculaire au rayon [ΩT], donc "), l("\\vec{\\Omega T}"), t(" en est un vecteur normal.")]),
           { ...calcul(sq, [ligne(`\\vec{\\Omega T}\\begin{pmatrix}${nb(T.x)}-${nbp(e.O.x)}\\\\${nb(T.y)}-${nbp(e.O.y)}\\end{pmatrix}=\\begin{pmatrix}${nb(n.x)}\\\\${nb(n.y)}\\end{pmatrix}`), ...lignes]), figureHtml: figureCorrigeLot(figureCorrige126(e)) },
           resultat(sq, fr(reponse126(e, ph))),
           verification(sq, [t("T est bien sur le cercle : "), l(`${nbp(n.x)}^2+${nbp(n.y)}^2=${nb(e.r2)}=r^2`), t(" ; et T vérifie l'équation de la tangente.")]),
@@ -97,7 +97,7 @@ export function correctionDetaillee126(e: E): EtapeCorrection[] {
         const { u, v } = equationPente(e);
         const OP2 = u * u + v * v;
         out.push(
-          utilise(sq, [t("Longueur d'une tangente (cours, § 2) : la tangente est perpendiculaire au rayon, le triangle ΩTP est rectangle en T ; par Pythagore, "), l("PT^2=\\Omega P^2-r^2"), t(".")]),
+          utilise(sq, [t("Longueur d'une tangente (cours, point 2) : la tangente est perpendiculaire au rayon, le triangle ΩTP est rectangle en T ; par Pythagore, "), l("PT^2=\\Omega P^2-r^2"), t(".")]),
           calcul(sq, [ligne(`\\Omega P^2=${nbp(u)}^2+${nbp(v)}^2=${nb(OP2)}`), ligne(`PT^2=${nb(OP2)}-${nb(e.r2)}=${nb(e.pt! ** 2)}`, "Pythagore dans ΩTP"), ligne(`PT=${nb(e.pt!)}`)]),
           resultat(sq, fr(reponse126(e, ph))),
           piege(sq, [t("Additionner au lieu de soustraire : l'hypoténuse du triangle rectangle est [ΩP], pas [PT].")]),
@@ -125,7 +125,7 @@ export function correctionDetaillee126(e: E): EtapeCorrection[] {
           lignes.push(ligne(`m_1=${nb((-B + rac) / (2 * A))},\\ m_2=${nb((-B - rac) / (2 * A))}`));
         }
         out.push(
-          utilise(sq, [t("Tangentes issues d'un point (cours, § 2) : une droite par P est tangente si et seulement si la distance du centre à cette droite vaut r ; on traite à part la droite verticale "), l(`x=${nb(P.x)}`), t(", qui n'a pas de pente.")]),
+          utilise(sq, [t("Tangentes issues d'un point (cours, point 2) : une droite par P est tangente si et seulement si la distance du centre à cette droite vaut r ; on traite à part la droite verticale "), l(`x=${nb(P.x)}`), t(", qui n'a pas de pente.")]),
           { ...calcul(sq, lignes), figureHtml: figureCorrigeLot(figureCorrige126(e)) },
           resultat(sq, [l(equationCours(d1!)), t(" et "), l(equationCours(d2!))]),
           piege(sq, [t("Ne chercher que des droites y = mx + p : quand l'équation en m n'a qu'une solution, la seconde tangente est verticale.")]),

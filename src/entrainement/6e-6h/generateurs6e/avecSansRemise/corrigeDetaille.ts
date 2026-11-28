@@ -45,7 +45,7 @@ export function correctionDetailleeASR(e: E): EtapeCorrection[] {
   const bin = e.modele === "binomiale";
   const P = probaJuste(e);
   const etapes: EtapeCorrection[] = [
-    utilise("a", [t("Tirages avec remise (ou répétés dans les mêmes conditions) : identiques et indépendants, loi binomiale (cours, § 6). Tirages sans remise ou simultanés : la composition change, loi hypergéométrique (cours, § 5).")]),
+    utilise("a", [t("Tirages avec remise (ou répétés dans les mêmes conditions) : identiques et indépendants, loi binomiale (cours, point 6). Tirages sans remise ou simultanés : la composition change, loi hypergéométrique (cours, point 5).")]),
     {
       label: "Raisonnement",
       sousQuestion: "a",

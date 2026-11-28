@@ -19,21 +19,21 @@ export interface Vec {
 }
 
 /** Renvois au cours (sections numérotées de `content/chapters/4e/calcul-vectoriel.ts`). */
-export const COURS_VECTEUR = "(cours, § 1)";
-export const COURS_OPPOSES = "(cours, § 2)";
-export const COURS_MULTIPLE = "(cours, § 3)";
-export const COURS_SOMME = "(cours, § 4)";
-export const COURS_DIFFERENCE = "(cours, § 5)";
-export const COURS_CHASLES = "(cours, § 6)";
-export const COURS_DECOMPOSER = "(cours, § 7)";
-export const COURS_COMPOSANTES = "(cours, § 8)";
-export const COURS_SOMME_REPERE = "(cours, § 9)";
-export const COURS_MULTIPLE_REPERE = "(cours, § 10)";
-export const COURS_NORME = "(cours, § 11)";
-export const COURS_MILIEU = "(cours, § 12)";
-export const COURS_COLINEARITE = "(cours, § 13)";
-export const COURS_ORTHOGONALITE = "(cours, § 14)";
-export const COURS_PHYSIQUE = "(cours, § 17)";
+export const COURS_VECTEUR = "(cours, point 1)";
+export const COURS_OPPOSES = "(cours, point 2)";
+export const COURS_MULTIPLE = "(cours, point 3)";
+export const COURS_SOMME = "(cours, point 4)";
+export const COURS_DIFFERENCE = "(cours, point 5)";
+export const COURS_CHASLES = "(cours, point 6)";
+export const COURS_DECOMPOSER = "(cours, point 7)";
+export const COURS_COMPOSANTES = "(cours, point 8)";
+export const COURS_SOMME_REPERE = "(cours, point 9)";
+export const COURS_MULTIPLE_REPERE = "(cours, point 10)";
+export const COURS_NORME = "(cours, point 11)";
+export const COURS_MILIEU = "(cours, point 12)";
+export const COURS_COLINEARITE = "(cours, point 13)";
+export const COURS_ORTHOGONALITE = "(cours, point 14)";
+export const COURS_PHYSIQUE = "(cours, point 17)";
 
 export const J_COMPOSANTES = "composantes : extrémité − origine";
 export const J_COLINEARITE = "critère de colinéarité";

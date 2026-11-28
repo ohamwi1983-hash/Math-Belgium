@@ -103,7 +103,7 @@ function ecransDessin(e: E): EcranEspace[] {
       etiquettes: ["vraie grandeur", etiquetteDeformee(e)],
       bonnes: e.faces.map((f) => (f.vraieGrandeur ? 0 : 1)),
       aides: [
-        [T("Perspective cavalière (cours, § 1) : seules les faces parallèles à la feuille gardent leur vraie forme ; une face qui contient une fuyante est déformée.")],
+        [T("Perspective cavalière (cours, point 1) : seules les faces parallèles à la feuille gardent leur vraie forme ; une face qui contient une fuyante est déformée.")],
         [T(tetra ? "Repère les fuyantes, les arêtes tracées à 45° : une face qui en contient une est déformée." : "Repère les fuyantes, les arêtes tracées à 45° : une face qui en contient une est déformée. Pense à la face arrière, superposable à la face avant.")],
       ],
       messageFaux: [
@@ -122,7 +122,7 @@ function ecransDessin(e: E): EcranEspace[] {
       bonnes: e.aretes.flatMap((a, i) => (a.cachee ? [i] : [])),
       colonnes: 4,
       aides: [
-        [T("Les fuyantes partent vers la droite et vers le haut : on voit le solide de face, d'en haut et par la droite (cours, § 1).")],
+        [T("Les fuyantes partent vers la droite et vers le haut : on voit le solide de face, d'en haut et par la droite (cours, point 1).")],
         [T("Une arête est cachée quand les faces qui la bordent sont toutes cachées : les faces du dessous, de gauche et de l'arrière ne se voient pas.")],
       ],
       messageFaux: [T("Une arête est cachée quand aucune face vue ne la borde : les faces du dessous, de gauche et de l'arrière sont cachées.")],
@@ -135,7 +135,7 @@ function ecransDessin(e: E): EcranEspace[] {
       bonne: L.bonne,
       explications: L.options.map((v) => explicationLongueur(e, v)),
       aides: [
-        [T("Perspective cavalière (cours, § 1) : les fuyantes sont dessinées à la moitié de leur vraie longueur ; les horizontales et les verticales des faces parallèles à la feuille sont en vraie grandeur.")],
+        [T("Perspective cavalière (cours, point 1) : les fuyantes sont dessinées à la moitié de leur vraie longueur ; les horizontales et les verticales des faces parallèles à la feuille sont en vraie grandeur.")],
         [T(`Regarde la direction de ${nomArete(L.arete)} sur le dessin : est-elle tracée à 45° ?`)],
       ],
     },
@@ -156,7 +156,7 @@ function ecransAppartenance(e: E): EcranEspace[] {
     options: p.candidats.map((n) => [T(n)]),
     bonnes: p.candidats.flatMap((n, i) => (p.dans.includes(n) ? [i] : [])),
     colonnes: 4,
-    aides: [[T("Un point appartient au plan s'il est sur une droite du plan : la droite qui joint deux points du plan, ou la parallèle à une droite du plan menée par un de ses points (cours, § 2).")], aide2Plan(p)],
+    aides: [[T("Un point appartient au plan s'il est sur une droite du plan : la droite qui joint deux points du plan, ou la parallèle à une droite du plan menée par un de ses points (cours, point 2).")], aide2Plan(p)],
     messageFaux: [T("Un point du plan est sur une droite du plan. Sur le dessin, un point qui semble dans le triangle peut être devant ou derrière le plan.")],
   }));
 }
@@ -171,7 +171,7 @@ function ecransPositions(e: E): EcranEspace[] {
       etiquettes: ORDRE_POSITIONS.map((p) => LIBELLES_POSITIONS[p]),
       bonnes: e.paires.map((p) => ORDRE_POSITIONS.indexOf(p.position)),
       aides: [
-        [T("Cherche un plan qui contient les quatre points des deux droites : s'il n'y en a aucun, elles sont gauches ; sinon elles sont parallèles (même direction) ou sécantes (cours, § 3).")],
+        [T("Cherche un plan qui contient les quatre points des deux droites : s'il n'y en a aucun, elles sont gauches ; sinon elles sont parallèles (même direction) ou sécantes (cours, point 3).")],
         [T("Deux droites qui se croisent sur le dessin ne sont pas forcément sécantes ; deux droites parallèles peuvent être dans deux faces différentes.")],
       ],
       messageFaux: [T("Gauches : aucun plan ne contient les quatre points. Parallèles : dans un même plan et de même direction. Sécantes : dans un même plan, de directions différentes.")],

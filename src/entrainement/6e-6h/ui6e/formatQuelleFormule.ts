@@ -18,8 +18,8 @@ type P = Phase100;
 const t = tx;
 const l = lx;
 
-const COURS = "(cours, § 1)";
-const COURS_MULTI = "(cours, § 2)";
+const COURS = "(cours, point 1)";
+const COURS_MULTI = "(cours, point 2)";
 
 const MATIERES = ["natation", "tennis", "escalade"];
 const COULEURS = ["rouges", "bleues", "vertes"];

@@ -16,7 +16,7 @@ import { q, qDiv, qVal } from "../../ui5e/nombresTrigo";
 type E = ExerciceDomaineParImage;
 const t = texte;
 const f = latex;
-const COURS3 = "(cours, § 3)";
+const COURS3 = "(cours, point 3)";
 const plusK = (k: number) => (k === 0 ? "" : k > 0 ? `+${k}` : `${k}`);
 const ajout = (k: number) => (k > 0 ? `on retranche ${k}` : `on ajoute ${-k}`);
 const inverser = (s: string) => ({ "\\geq": "\\leq", "\\leq": "\\geq", ">": "<", "<": ">", "\\neq": "\\neq" } as Record<string, string>)[s];
@@ -87,7 +87,7 @@ function etapeDomaine(e: E): EtapeCorrection[] {
     L.push(ligne(`x${s}${c}`, "on multiplie par −1 : le sens change"));
   } else if (c !== 0) L.push(ligne(`x${s}${c}`, c > 0 ? `on ajoute ${c}` : `on retranche ${-c}`));
   return [
-    utilise(sq, [t(fe.famille === "inverse" ? "Un dénominateur ne peut pas être nul (cours, § 1)." : fe.famille.startsWith("inverseRacine") ? "Racine au dénominateur : radicande positif ou nul et racine non nulle, donc radicande strictement positif (cours, § 1)." : "Une racine carrée n'existe que pour un radicande positif ou nul (cours, § 1).")]),
+    utilise(sq, [t(fe.famille === "inverse" ? "Un dénominateur ne peut pas être nul (cours, point 1)." : fe.famille.startsWith("inverseRacine") ? "Racine au dénominateur : radicande positif ou nul et racine non nulle, donc radicande strictement positif (cours, point 1)." : "Une racine carrée n'existe que pour un radicande positif ou nul (cours, point 1).")]),
     calcul(sq, L),
     resultat(sq, reponse(e, "domaine")),
     piege(sq, fe.famille.startsWith("inverseRacine") ? [t("Garder la borne "), f(`${c}`), t(" : la racine y vaut 0, au dénominateur.")] : fe.famille === "inverse" ? [t("Exclure un intervalle : seule la valeur qui annule le dénominateur est retirée.")] : [t("Ouvrir le crochet en "), f(`${c}`), t(" : "), f("\\sqrt{0}=0"), t(" existe.")]),

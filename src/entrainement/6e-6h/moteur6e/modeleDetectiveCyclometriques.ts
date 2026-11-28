@@ -212,7 +212,7 @@ function scenarioInverse(e: E): CopieDetectiveCyclo {
     ],
     ligneFausse: 1,
     regles: ["affine non constante : bijective", "expression de la réciproque", "on remplace x", "calcul"],
-    regleCours: { texte: [t("La réciproque défait "), l("f"), t(" : on résout "), l("y=f(x)"), t(" en "), l("x"), t(", puis on échange les noms (cours, § 1) :")], latex: "f\\left(f^{-1}(x)\\right)=x" },
+    regleCours: { texte: [t("La réciproque défait "), l("f"), t(" : on résout "), l("y=f(x)"), t(" en "), l("x"), t(", puis on échange les noms (cours, point 1) :")], latex: "f\\left(f^{-1}(x)\\right)=x" },
     aideCorrection: { texte: [t("Isole "), l("x"), t(" dans "), l(`y=${f}`), t(" (retire "), l(`${b}`), t(", divise par "), l(`${a}`), t("), puis remplace "), l("x"), t(" par "), l(`${c}`), t(".")] },
     valeurs: [
       { genre: "fonction", label: "f⁻¹(x)", labelLatex: "f^{-1}(x)=", placeholder: "ex. : (x+7)/6", fonction: fx, points: [-2.3, -0.6, 0.7, 1.9, 3.1], latex: `f^{-1}(x)=${quot("x")}` },
@@ -226,11 +226,11 @@ function scenarioInverse(e: E): CopieDetectiveCyclo {
       lignes: [ligne(`f\\left(${qL(q(1, D))}\\right)=${a}\\cdot ${qL(q(1, D)).startsWith("-") ? `\\left(${qL(q(1, D))}\\right)` : qL(q(1, D))}${termeL(b)}`, "on applique f"), ligne(`=${qL(verifQ)}`), ligne(`${qL(verifQ)}\\neq ${c}`, "on ne retrouve pas le nombre de départ")],
     },
     corrigeB: {
-      utilise: [t("Réciproque : "), l("f^{-1}"), t(" défait "), l("f"), t(" ; inverse : "), l("\\dfrac{1}{f(x)}"), t(" (cours, § 1). Ce sont deux fonctions différentes :")],
+      utilise: [t("Réciproque : "), l("f^{-1}"), t(" défait "), l("f"), t(" ; inverse : "), l("\\dfrac{1}{f(x)}"), t(" (cours, point 1). Ce sont deux fonctions différentes :")],
       lignes: [ligne(`f\\left(\\dfrac{1}{f(x)}\\right)\\neq x`, "1/f ne défait pas f")],
     },
     corrigeC: {
-      utilise: [t("On résout "), l("y=f(x)"), t(" en "), l("x"), t(" (cours, § 1), puis on remplace.")],
+      utilise: [t("On résout "), l("y=f(x)"), t(" en "), l("x"), t(" (cours, point 1), puis on remplace.")],
       lignes: [
         ligne(`y=${f}`, "on pose y = f(x)"),
         ligne(`${a}x=y${termeL(-b)}`, retirer(b)),
@@ -271,14 +271,14 @@ function scenarioArcsinSin(e: E): CopieDetectiveCyclo {
     ],
     ligneFausse: 1,
     regles: [`arc${autre} défait ${autre} sur son image`, `arc${fn} défait ${fn}`, "somme des deux termes", "on réduit au même dénominateur"],
-    regleCours: { texte: [t(`arc${fn} ne renvoie que des angles de son image (cours, § 2) :`)], latex: `\\arc${fn}(\\${fn}\\theta)=\\theta\\iff\\theta\\in ${IMAGE_L[fn]}` },
+    regleCours: { texte: [t(`arc${fn} ne renvoie que des angles de son image (cours, point 2) :`)], latex: `\\arc${fn}(\\${fn}\\theta)=\\theta\\iff\\theta\\in ${IMAGE_L[fn]}` },
     aideCorrection: { texte: [t(`Cherche l'angle de `), l(IMAGE_L[fn]), t(` qui a le même ${fn === "sin" ? "sinus" : "cosinus"} que `), l(thL), t(", puis refais la somme.")] },
     valeurs: [{ genre: "nombre", label: "A", labelLatex: "A=", placeholder: "ex. : 7π/12", nombre: (somme * Math.PI) / 12, latex: `A=${piL(somme, 12)}` }],
     valeursCopie: [(sommeCopie * Math.PI) / 12],
     piege: [t("Simplifier "), l(`\\arc${fn}\\circ\\${fn}`), t(" sans vérifier que l'angle est dans l'image.")],
-    corrigeA: { utilise: [t(`Image de arc${fn} (cours, § 2) : `), l(IMAGE_L[fn]), t(". On compare "), l(thL), t(" à ses bornes.")], lignes: lignesComparaison(ex) },
+    corrigeA: { utilise: [t(`Image de arc${fn} (cours, point 2) : `), l(IMAGE_L[fn]), t(". On compare "), l(thL), t(" à ses bornes.")], lignes: lignesComparaison(ex) },
     corrigeB: {
-      utilise: [t(`arc${fn}(${fn} θ) est l'angle de l'image qui a le même ${fn === "sin" ? "sinus" : "cosinus"} que θ ; il ne vaut θ que si θ est dans l'image (cours, § 2).`)],
+      utilise: [t(`arc${fn}(${fn} θ) est l'angle de l'image qui a le même ${fn === "sin" ? "sinus" : "cosinus"} que θ ; il ne vaut θ que si θ est dans l'image (cours, point 2).`)],
       lignes: [ligne(`${thL}\\notin ${IMAGE_L[fn]}`, "θ hors de l'image"), ligne(`${expr(fn, k12)}\\neq ${thL}`, "la simplification est fausse")],
     },
     corrigeC: {
@@ -327,7 +327,7 @@ function scenarioDerivee(e: E): CopieDetectiveCyclo {
     valCopieV = denom.d / denom.n;
     valCopieL = `\\dfrac{1}{1+${qLi(u0Carre)}}=${qL(q(denom.d, denom.n))}`;
     ligneRegle = "(\\arctan u)'=\\dfrac{1}{1+u^{2}}";
-    regleCours = { texte: [t("Dérivée de arctan d'une fonction (cours, § 4) :")], latex: "(\\arctan u)'=\\dfrac{u'}{1+u^{2}}" };
+    regleCours = { texte: [t("Dérivée de arctan d'une fonction (cours, point 4) :")], latex: "(\\arctan u)'=\\dfrac{u'}{1+u^{2}}" };
     lignesC.push(
       ligne(`f'(x)=\\dfrac{${k}}{1+(${k}x)^{2}}`, [l("u'=" + k), t(", "), l(`u=${k}x`)]),
       ligne(`=${fpLatex}`),
@@ -344,8 +344,8 @@ function scenarioDerivee(e: E): CopieDetectiveCyclo {
     fpLatex = `${sgn < 0 ? "-" : ""}\\dfrac{${k}}{\\sqrt{1-${k2}x^{2}}}`;
     regleCours =
       v === "signeArccos"
-        ? { texte: [t("Dérivée de arccos d'une fonction (cours, § 4) :")], latex: "(\\arccos u)'=-\\dfrac{u'}{\\sqrt{1-u^{2}}}" }
-        : { texte: [t("Dérivée de arcsin d'une fonction (cours, § 4), avec "), l("u^{2}"), t(" le carré de tout "), l("u"), t(" :")], latex: "(\\arcsin u)'=\\dfrac{u'}{\\sqrt{1-u^{2}}}" };
+        ? { texte: [t("Dérivée de arccos d'une fonction (cours, point 4) :")], latex: "(\\arccos u)'=-\\dfrac{u'}{\\sqrt{1-u^{2}}}" }
+        : { texte: [t("Dérivée de arcsin d'une fonction (cours, point 4), avec "), l("u^{2}"), t(" le carré de tout "), l("u"), t(" :")], latex: "(\\arcsin u)'=\\dfrac{u'}{\\sqrt{1-u^{2}}}" };
     if (v === "signeArccos") {
       fCopie = (x) => k / Math.sqrt(1 - k2 * x * x);
       fpCopieL = `\\dfrac{${k}}{\\sqrt{1-${k2}x^{2}}}`;
@@ -459,7 +459,7 @@ function scenarioCe(e: E): CopieDetectiveCyclo {
     ],
     ligneFausse: 3,
     regles: [`arc${fn} injective : arguments égaux`, "on réduit à un trinôme", "racines du trinôme", "ensemble des solutions", "conclusion"],
-    regleCours: { texte: [t(`arc${fn} A = arc${fn} B ⟺ A = B, à condition que A et B soient dans [−1 ; 1] (cours, § 3) :`)], latex: `\\text{CE : }-1\\leq ${vL}\\leq 1` },
+    regleCours: { texte: [t(`arc${fn} A = arc${fn} B ⟺ A = B, à condition que A et B soient dans [−1 ; 1] (cours, point 3) :`)], latex: `\\text{CE : }-1\\leq ${vL}\\leq 1` },
     aideCorrection: { texte: [t("Remplace chaque candidat dans "), l(vL), t(" : l'argument doit être entre "), l("-1"), t(" et "), l("1"), t(".")] },
     valeurs: [{ genre: "ensemble", label: "S", labelLatex: "S=", placeholder: "ex. : 5 ; −1   (ou ∅)", ensemble: [x1], latex: `S=\\{${x1}\\}` }],
     valeursCopie: [],
@@ -469,7 +469,7 @@ function scenarioCe(e: E): CopieDetectiveCyclo {
       utilise: [t("On remplace chaque candidat dans l'argument "), l(vL), t(" (il doit être dans [−1 ; 1]).")],
       lignes: [ligne(`${m}\\cdot ${parN(x1)}${termeL(n)}=${v1}`, [l(`x=${x1}`)]), ligne(`${m}\\cdot ${parN(x2)}${termeL(n)}=${v2}`, [l(`x=${x2}`)]), ligne(`${v2}\\notin[-1\\,;\\,1]`, "hors du domaine de l'arcfonction")],
     },
-    corrigeB: { utilise: [t(`Domaine de arc${fn} : [−1 ; 1] (cours, § 2) ; les candidats obtenus par l'égalité des arguments doivent être contrôlés (cours, § 3).`)], lignes: [ligne(`-1\\leq ${vL}\\leq 1`, "condition d'existence")] },
+    corrigeB: { utilise: [t(`Domaine de arc${fn} : [−1 ; 1] (cours, point 2) ; les candidats obtenus par l'égalité des arguments doivent être contrôlés (cours, point 3).`)], lignes: [ligne(`-1\\leq ${vL}\\leq 1`, "condition d'existence")] },
     corrigeC: {
       utilise: [t("On garde les seuls candidats qui vérifient la condition d'existence.")],
       lignes: [ligne(`-1\\leq ${v1}\\leq 1`, [l(`x=${x1}`), t(" : accepté")]), ligne(`${v2}${v2 > 1 ? ">1" : "<-1"}`, [l(`x=${x2}`), t(" : rejeté")])],
@@ -529,7 +529,7 @@ function scenarioArctan(e: E): CopieDetectiveCyclo {
     ],
     ligneFausse: 1,
     regles: ["sens de variation de arctan", "image de arctan", `on multiplie par ${k}`, ajouter(c)],
-    regleCours: { texte: [t("arctan a deux asymptotes horizontales, jamais atteintes (cours, § 2) :")], latex: "\\lim\\limits_{x\\to\\pm\\infty}\\arctan x=\\pm\\dfrac{\\pi}{2}\\qquad\\mathrm{im}\\,\\arctan=\\mathopen{]}-\\dfrac{\\pi}{2}\\,;\\,\\dfrac{\\pi}{2}\\mathclose{[}" },
+    regleCours: { texte: [t("arctan a deux asymptotes horizontales, jamais atteintes (cours, point 2) :")], latex: "\\lim\\limits_{x\\to\\pm\\infty}\\arctan x=\\pm\\dfrac{\\pi}{2}\\qquad\\mathrm{im}\\,\\arctan=\\mathopen{]}-\\dfrac{\\pi}{2}\\,;\\,\\dfrac{\\pi}{2}\\mathclose{[}" },
     aideCorrection: { texte: [t("Reprends avec l'intervalle ouvert : multiplie les bornes par "), l(`${k}`), t(", ajoute "), l(`${c}`), t(", et garde les crochets ouverts.")] },
     valeurs: [{ genre: "intervalle", label: "im f", labelLatex: "\\mathrm{im}\\,f=", placeholder: "", intervalle: { gauche: c - (k * Math.PI) / 2, droite: c + (k * Math.PI) / 2, gaucheFermee: false, droiteFermee: false }, latex: `\\mathrm{im}\\,f=\\mathopen{]}${bg}\\,;\\,${bd}\\mathclose{[}` }],
     valeursCopie: [],
@@ -538,7 +538,7 @@ function scenarioArctan(e: E): CopieDetectiveCyclo {
       utilise: [t("Pour que "), l("\\dfrac{\\pi}{2}"), t(" soit atteint, il faudrait un réel "), l("x"), t(" avec "), l("\\arctan x=\\dfrac{\\pi}{2}"), t(", donc "), l("x=\\tan\\dfrac{\\pi}{2}"), t(".")],
       lignes: [ligne("\\cos\\dfrac{\\pi}{2}=0", "la tangente de π/2 n'existe pas"), ligne("\\dfrac{\\pi}{2}\\notin\\mathrm{im}\\,\\arctan", "la borne n'est pas atteinte")],
     },
-    corrigeB: { utilise: [t("Image de arctan : intervalle ouvert (cours, § 2).")], lignes: [ligne(`\\mathrm{im}\\,\\arctan=${IMAGE_L.tan}`, "asymptotes y = ±π/2")] },
+    corrigeB: { utilise: [t("Image de arctan : intervalle ouvert (cours, point 2).")], lignes: [ligne(`\\mathrm{im}\\,\\arctan=${IMAGE_L.tan}`, "asymptotes y = ±π/2")] },
     corrigeC: {
       utilise: [t(`On reprend à partir de la ligne ${numeroFausse(e, 1)} avec l'intervalle ouvert.`)],
       lignes: [ligne(`-\\dfrac{\\pi}{2}<\\arctan x<\\dfrac{\\pi}{2}`, "image de arctan"), ligne(`-${kpi}<${kL}\\arctan x<${kpi}`, `on multiplie par ${k} > 0`), ligne(`${bg}<f(x)<${bd}`, ajouter(c))],
@@ -567,7 +567,7 @@ function scenarioInjectivite(e: E): CopieDetectiveCyclo {
     ],
     ligneFausse: 3,
     regles: ["domaine", "dérivée", "signe de la dérivée", "conclusion sur les variations", "conséquence"],
-    regleCours: { texte: [t("Une dérivée négative sur chaque intervalle donne une fonction décroissante sur chaque intervalle, pas sur leur réunion ; pour l'injectivité, on compare les images des deux morceaux (cours, § 1).")] },
+    regleCours: { texte: [t("Une dérivée négative sur chaque intervalle donne une fonction décroissante sur chaque intervalle, pas sur leur réunion ; pour l'injectivité, on compare les images des deux morceaux (cours, point 1).")] },
     aideCorrection: { texte: [t("Résous vraiment "), l(`f(x)=${c}`), t(" : retire "), l(`${c}`), t(", multiplie par "), l("x\\neq 0"), t(", isole "), l("x^{2}"), t(".")] },
     valeurs: [{ genre: "ensemble", label: "S", labelLatex: "S=", placeholder: "ex. : 5 ; −1   (ou ∅)", ensemble: [-tt, tt], latex: `S=\\{-${tt}\\,;\\,${tt}\\}` }],
     valeursCopie: [],
@@ -584,7 +584,7 @@ function scenarioInjectivite(e: E): CopieDetectiveCyclo {
       ],
     },
     corrigeB: {
-      utilise: [t("Monotone sur chaque intervalle ne veut pas dire monotone sur la réunion (cours, § 1).")],
+      utilise: [t("Monotone sur chaque intervalle ne veut pas dire monotone sur la réunion (cours, point 1).")],
       lignes: [ligne(`-${tt}<${tt}`, "deux réels pris dans les deux morceaux"), ligne(`f(-${tt})=f(${tt})`, "une fonction décroissante sur la réunion donnerait f(−t) > f(t)")],
     },
     corrigeC: {

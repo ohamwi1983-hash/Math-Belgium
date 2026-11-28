@@ -14,7 +14,7 @@ import { modeleL, nomF, omegaExactL, pL, reponse, TL, vL } from "../../ui5e/form
 type E = ExerciceRelevesSinusoide;
 const t = texte;
 const f = latex;
-const COURS = "(cours, § 8)";
+const COURS = "(cours, point 8)";
 const egal = (x: number, d: number) => (exactA(x, d) ? `=${nbL(x, d)}` : `\\approx ${nbL(x, d, true)}`);
 const par = (s: string) => (s.startsWith("-") ? `(${s})` : s);
 

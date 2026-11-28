@@ -94,7 +94,7 @@ function corrigeImpact(e: E, b: string): EtapeCorrection[] {
     ligne(`y_R=${lq(e.m)}\\cdot ${parQ(e.R.x)}${k.n === 0n ? "" : `${k.n < 0n ? "-" : "+"}${lq(k.n < 0n ? qNeg(k) : k)}`}=${lq(e.R.y)}`, "ordonnée du point retenu"),
   ];
   return [
-    utiliseCours(b, fx(`Le rayon suit la droite de pente $m=${lq(e.m)}$ issue de $F$ ; ses points communs avec le miroir s'obtiennent en remplaçant $y$ dans l'équation de $\\Gamma$ (cours, § 4) ; le rayon va vers ${sensTexte} : il atteint le point commun situé de ce côté de $F$`), COURS_OPTIQUE),
+    utiliseCours(b, fx(`Le rayon suit la droite de pente $m=${lq(e.m)}$ issue de $F$ ; ses points communs avec le miroir s'obtiennent en remplaçant $y$ dans l'équation de $\\Gamma$ (cours, point 4) ; le rayon va vers ${sensTexte} : il atteint le point commun situé de ce côté de $F$`), COURS_OPTIQUE),
     calcul(b, lignes),
     resultat(b, fx(`${devant.length === 1 ? `Seule l'abscisse $${lq(e.R.x)}$ est du côté où va le rayon` : `Le rayon atteint d'abord le point d'abscisse $${lq(e.R.x)}$`} : le rayon atteint le miroir en $R${latexPoint(e.R)}$${e.autre ? ` (l'autre point commun, $${latexPoint(e.autre)}$, n'est pas sur son trajet)` : ""}.`)),
   ];

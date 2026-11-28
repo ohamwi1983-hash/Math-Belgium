@@ -82,17 +82,17 @@ export const recap124 = reponse124;
 export function aide1_124(_e: E, p: Ph): AideEcran {
   switch (p) {
     case "G":
-      return { texte: [t(`Cours, § 1 : le centre de gravité a pour coordonnées la moyenne des coordonnées des trois sommets :`)], latex: "G\\left(\\dfrac{x_A+x_B+x_C}{3}\\,;\\dfrac{y_A+y_B+y_C}{3}\\right)" };
+      return { texte: [t(`Cours, point 1 : le centre de gravité a pour coordonnées la moyenne des coordonnées des trois sommets :`)], latex: "G\\left(\\dfrac{x_A+x_B+x_C}{3}\\,;\\dfrac{y_A+y_B+y_C}{3}\\right)" };
     case "mediatrice":
-      return { texte: [t(`Cours, § 1 : la médiatrice de [AB] passe par le milieu M de [AB] et elle est perpendiculaire à (AB) ; le vecteur `), l("\\vec{AB}"), t(" en est donc un vecteur normal :")], latex: "x_{\\vec{AB}}\\,(x-x_M)+y_{\\vec{AB}}\\,(y-y_M)=0" };
+      return { texte: [t(`Cours, point 1 : la médiatrice de [AB] passe par le milieu M de [AB] et elle est perpendiculaire à (AB) ; le vecteur `), l("\\vec{AB}"), t(" en est donc un vecteur normal :")], latex: "x_{\\vec{AB}}\\,(x-x_M)+y_{\\vec{AB}}\\,(y-y_M)=0" };
     case "O":
-      return { texte: [t(`Cours, § 1 : le centre du cercle circonscrit est le point de concours des médiatrices ; il suffit d'en couper deux.`)] };
+      return { texte: [t(`Cours, point 1 : le centre du cercle circonscrit est le point de concours des médiatrices ; il suffit d'en couper deux.`)] };
     case "hauteur":
-      return { texte: [t(`Cours, § 1 : la hauteur issue de C passe par C et elle est perpendiculaire à (AB) ; le vecteur `), l("\\vec{AB}"), t(" en est un vecteur normal :")], latex: "x_{\\vec{AB}}\\,(x-x_C)+y_{\\vec{AB}}\\,(y-y_C)=0" };
+      return { texte: [t(`Cours, point 1 : la hauteur issue de C passe par C et elle est perpendiculaire à (AB) ; le vecteur `), l("\\vec{AB}"), t(" en est un vecteur normal :")], latex: "x_{\\vec{AB}}\\,(x-x_C)+y_{\\vec{AB}}\\,(y-y_C)=0" };
     case "H":
-      return { texte: [t(`Cours, § 1 : l'orthocentre est le point de concours des hauteurs ; il suffit d'en couper deux.`)] };
+      return { texte: [t(`Cours, point 1 : l'orthocentre est le point de concours des hauteurs ; il suffit d'en couper deux.`)] };
     case "N":
-      return { texte: [t(`Cours, § 1 : le centre du cercle des neuf points est le milieu du segment [OH] ; il est sur la droite d'Euler.`)] };
+      return { texte: [t(`Cours, point 1 : le centre du cercle des neuf points est le milieu du segment [OH] ; il est sur la droite d'Euler.`)] };
   }
 }
 

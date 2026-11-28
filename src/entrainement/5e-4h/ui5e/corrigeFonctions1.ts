@@ -20,11 +20,11 @@ import { q, qVal, sansDoublons, type Q } from "./corrigeTrigonometrie1";
  *   l'extérieur des racines ».
  */
 
-export const COURS_DOMAINE = "(cours, § 1)";
-export const COURS_DECOMPOSER = "(cours, § 2)";
-export const COURS_COMPOSER = "(cours, § 3)";
-export const COURS_GRAPHIQUE = "(cours, § 4)";
-export const COURS_CONTEXTE = "(cours, § 5)";
+export const COURS_DOMAINE = "(cours, point 1)";
+export const COURS_DECOMPOSER = "(cours, point 2)";
+export const COURS_COMPOSER = "(cours, point 3)";
+export const COURS_GRAPHIQUE = "(cours, point 4)";
+export const COURS_CONTEXTE = "(cours, point 5)";
 
 export type Fragments = FragmentConsigne[];
 export const t = texte;

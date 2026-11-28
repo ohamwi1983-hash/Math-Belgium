@@ -186,7 +186,7 @@ function infSurInf(e: E): CopieDetectiveLim {
     ],
     ligneFausse: 2,
     regles: ["limite d'un polynôme : celle de son terme dominant", "limite d'un polynôme : celle de son terme dominant", "quotient de deux limites infinies", "limite finie en +∞ : asymptote horizontale"],
-    regleCours: { texte: [l("\\dfrac{\\infty}{\\infty}"), t(" est une forme indéterminée : on met en évidence le terme de plus haut degré au numérateur et au dénominateur (cours, § 1).")] },
+    regleCours: { texte: [l("\\dfrac{\\infty}{\\infty}"), t(" est une forme indéterminée : on met en évidence le terme de plus haut degré au numérateur et au dénominateur (cours, point 1).")] },
     aideCorrection: { texte: [t("Mets "), l("x^2"), t(" en évidence en haut et en bas, simplifie, puis passe à la limite.")] },
     valeur: { genre: "limite", labels: [`${L}f(x)=`], nombres: [a / k], latex: `${L}f(x)=${fracL(a, k)}` },
     copieNombres: [sa],
@@ -197,7 +197,7 @@ function infSurInf(e: E): CopieDetectiveLim {
     },
     corrigeB: { utilise: [l("\\dfrac{\\infty}{\\infty}"), t(" est une forme indéterminée : deux quotients de cette forme peuvent avoir des limites différentes.")], lignes: [ligne("\\dfrac{2x^2}{x^2}=2", "un quotient ∞/∞ qui tend vers 2"), ligne("\\dfrac{x^2}{x}=x", "un autre qui tend vers +∞")] },
     corrigeC: {
-      utilise: [t("On met "), l("x^2"), t(" en évidence (cours, § 1) ; "), l("\\dfrac{c}{x}"), t(" et "), l("\\dfrac{c}{x^2}"), t(" tendent vers 0.")],
+      utilise: [t("On met "), l("x^2"), t(" en évidence (cours, point 1) ; "), l("\\dfrac{c}{x}"), t(" et "), l("\\dfrac{c}{x^2}"), t(" tendent vers 0.")],
       lignes: [
         ligne(`f(x)=\\dfrac{x^2\\left(${sommeDiv(a, b, c)}\\right)}{x^2\\left(${sommeDiv(k, 0, e.d.e)}\\right)}`, "mise en évidence de x²"),
         ligne(`=\\dfrac{${sommeDiv(a, b, c)}}{${sommeDiv(k, 0, e.d.e)}}`, "on simplifie par x² (x ≠ 0)"),
@@ -227,7 +227,7 @@ function infMoinsInf(e: E): CopieDetectiveLim {
     lignes: [[l(`${L}${t1}=${infS(s)}`)], [l(`${L}(${t2})=${infS(-s)}`)], [t("Forme "), l("\\infty-\\infty"), t(" : les deux infinis s'annulent, donc "), l(`${L}f(x)=0`), t(".")], [t("La droite "), l("y=0"), t(" est asymptote horizontale en "), l("+\\infty"), t(".")]],
     ligneFausse: 2,
     regles: ["limite d'un monôme", "limite d'un monôme", "somme de deux limites infinies de signes contraires", "limite finie en +∞ : asymptote horizontale"],
-    regleCours: { texte: [l("\\infty-\\infty"), t(" est une forme indéterminée : pour un polynôme, on met en évidence le terme de plus haut degré (cours, § 1).")] },
+    regleCours: { texte: [l("\\infty-\\infty"), t(" est une forme indéterminée : pour un polynôme, on met en évidence le terme de plus haut degré (cours, point 1).")] },
     aideCorrection: { texte: [t("Mets "), l(t1), t(" en évidence, puis regarde la limite de la parenthèse.")] },
     valeur: { genre: "limite", labels: [`${L}f(x)=`], nombres: [s * Infinity], latex: `${L}f(x)=${infS(s)}` },
     copieNombres: [0],
@@ -235,7 +235,7 @@ function infMoinsInf(e: E): CopieDetectiveLim {
     corrigeA: { utilise: [t("On refait la ligne : la limite d'un polynôme en l'infini est celle de son terme dominant.")], lignes: [ligne(`${L}f(x)=${L}${t1}`, "terme dominant"), ligne(`=${infS(s)}`, [ft("et non 0 comme dans la copie")])] },
     corrigeB: { utilise: [l("\\infty-\\infty"), t(" est une forme indéterminée : la différence peut tendre vers n'importe quoi.")], lignes: [ligne("(x+3)-x=3", "une forme ∞ − ∞ qui tend vers 3"), ligne("2x-x=x", "une autre qui tend vers +∞")] },
     corrigeC: {
-      utilise: [t("Mise en évidence du terme dominant (cours, § 1).")],
+      utilise: [t("Mise en évidence du terme dominant (cours, point 1).")],
       lignes: [
         ligne(`f(x)=${t1}\\left(1-\\dfrac{${b}}{${ax}}\\right)`, "mise en évidence"),
         ligne(`${L}\\left(1-\\dfrac{${b}}{${ax}}\\right)=1`, [fl(`\\dfrac{${b}}{${ax}}`), ft(" tend vers 0")]),
@@ -268,7 +268,7 @@ function signeZero(e: E): CopieDetectiveLim {
     lignes: [[l(`${L}(${num})=${N}`)], [l(`${L}(${den})=${zeroFaux}`)], [l(`${L}f(x)=${infS(-bon)}`), t(` (nombre ${N > 0 ? "positif" : "négatif"} divisé par `), l(zeroFaux), t(")")]],
     ligneFausse: 1,
     regles: ["limite d'un polynôme : on remplace x par p", "signe du dénominateur près de p", "nombre non nul divisé par 0⁺ ou 0⁻"],
-    regleCours: { texte: [t("Le signe de 0 se lit sur le dénominateur, du côté où l'on s'approche : "), l(polyL([1, -p])), t(side < 0 ? " est négatif pour x < " : " est positif pour x > "), l(`${p}`), t(" (cours, § 1).")] },
+    regleCours: { texte: [t("Le signe de 0 se lit sur le dénominateur, du côté où l'on s'approche : "), l(polyL([1, -p])), t(side < 0 ? " est négatif pour x < " : " est positif pour x > "), l(`${p}`), t(" (cours, point 1).")] },
     aideCorrection: { texte: [t("Garde le numérateur, corrige le signe du 0 au dénominateur, puis applique la règle des signes.")] },
     valeur: { genre: "limite", labels: [`${L}f(x)=`], nombres: [bon * Infinity], latex: `${L}f(x)=${infS(bon)}` },
     copieNombres: [-bon * Infinity],
@@ -276,7 +276,7 @@ function signeZero(e: E): CopieDetectiveLim {
     corrigeA: { utilise: [t("On refait la ligne : on regarde le signe de "), l(den), t(" quand x est proche de "), l(`${p}`), t(side < 0 ? " par la gauche." : " par la droite.")], lignes: [ligne(`${L}(${den})=${zeroBon}`, [ft(side < 0 ? "pour x < " : "pour x > "), fl(`${p}`), ft(side < 0 ? ", le dénominateur est négatif (copie : " : ", le dénominateur est positif (copie : "), fl(zeroFaux), ft(")")])] },
     corrigeB: { utilise: [t("Un nombre proche de p du bon côté donne le signe du dénominateur :")], lignes: [ligne(`${dec(xT)}-${parL(p)}=${dec(side * 0.1)}`, [ft("par exemple x = "), fl(dec(xT))])] },
     corrigeC: {
-      utilise: [t("Nombre non nul divisé par "), l("0^{+}"), t(" ou "), l("0^{-}"), t(" : un infini, signe par la règle des signes (cours, § 1).")],
+      utilise: [t("Nombre non nul divisé par "), l("0^{+}"), t(" ou "), l("0^{-}"), t(" : un infini, signe par la règle des signes (cours, point 1).")],
       lignes: [ligne(`${L}(${num})=${a}\\cdot ${parL(p)}${plusL(b)}=${N}`, "on remplace x par p"), ligne(`${L}(${den})=${zeroBon}`), ligne(`${L}f(x)=${infS(bon)}`, `${N > 0 ? "positif" : "négatif"} divisé par ${side < 0 ? "0⁻" : "0⁺"}`)],
     },
     preliminaires: [
@@ -301,7 +301,7 @@ function simplification(e: E): CopieDetectiveLim {
     lignes: [[t("On simplifie par "), l("x^2"), t(" : "), l(`f(x)=${faux}`), t(".")], [l(`${L}${faux}=${infS(b)}`)], [t("f n'a donc pas d'asymptote horizontale en "), l("+\\infty"), t(".")]],
     ligneFausse: 0,
     regles: ["simplification par x²", "limite d'une fonction du premier degré", "pas de limite finie : pas d'asymptote horizontale"],
-    regleCours: { texte: [t("On ne simplifie une fraction que par un facteur commun ; ici on met "), l("x^2"), t(" en évidence pour faire apparaître ce facteur (cours, § 1).")] },
+    regleCours: { texte: [t("On ne simplifie une fraction que par un facteur commun ; ici on met "), l("x^2"), t(" en évidence pour faire apparaître ce facteur (cours, point 1).")] },
     aideCorrection: { texte: [t("Mets "), l("x^2"), t(" en évidence au numérateur et au dénominateur, simplifie, puis passe à la limite.")] },
     valeur: { genre: "limite", labels: [`${L}f(x)=`], nombres: [a / k], latex: `${L}f(x)=${fracL(a, k)}` },
     copieNombres: [Math.sign(b) * Infinity],
@@ -312,7 +312,7 @@ function simplification(e: E): CopieDetectiveLim {
     },
     corrigeB: { utilise: [t("On ne simplifie que par un facteur commun à tout le numérateur et à tout le dénominateur.")], lignes: [ligne(`${N}=x(${polyL([a, b])})`, "x est un facteur du numérateur, x² n'en est pas un")] },
     corrigeC: {
-      utilise: [t("On met "), l("x^2"), t(" en évidence (cours, § 1) ; "), l("\\dfrac{c}{x}"), t(" et "), l("\\dfrac{c}{x^2}"), t(" tendent vers 0.")],
+      utilise: [t("On met "), l("x^2"), t(" en évidence (cours, point 1) ; "), l("\\dfrac{c}{x}"), t(" et "), l("\\dfrac{c}{x^2}"), t(" tendent vers 0.")],
       lignes: [
         ligne(`f(x)=\\dfrac{x^2\\left(${sommeDiv(a, b, 0)}\\right)}{x^2\\left(${sommeDiv(k, 0, c)}\\right)}`, "mise en évidence de x²"),
         ligne(`=\\dfrac{${sommeDiv(a, b, 0)}}{${sommeDiv(k, 0, c)}}`, "on simplifie par x² (x ≠ 0)"),
@@ -349,7 +349,7 @@ function racineMoinsInfini(e: E): CopieDetectiveLim {
     ],
     ligneFausse: 1,
     regles: ["x² mis en évidence sous la racine", "racine d'un carré", "simplification par x", "limites de référence"],
-    regleCours: { texte: [t("La racine d'un carré est une valeur absolue : "), l("\\sqrt{x^2}=|x|"), t(", qui vaut "), l("-x"), t(" quand x < 0 (cours, § 1).")] },
+    regleCours: { texte: [t("La racine d'un carré est une valeur absolue : "), l("\\sqrt{x^2}=|x|"), t(", qui vaut "), l("-x"), t(" quand x < 0 (cours, point 1).")] },
     aideCorrection: { texte: [t("Reprends à la ligne fausse avec "), l("\\sqrt{x^2}=-x"), t(", divise par x, puis passe à la limite.")] },
     valeur: { genre: "limite", labels: [`${L}f(x)=`], nombres: [-m / p], latex: `${L}f(x)=${fracL(-m, p)}` },
     copieNombres: [m / p],
@@ -357,7 +357,7 @@ function racineMoinsInfini(e: E): CopieDetectiveLim {
     corrigeA: { utilise: [t("On refait la ligne : en "), l("-\\infty"), t(", x est négatif.")], lignes: [ligne("\\sqrt{x^2}=|x|", "racine d'un carré"), ligne("=-x", [ft("car x < 0 en "), fl("-\\infty"), ft(" (la copie écrit x)")])] },
     corrigeB: { utilise: [t("Une racine carrée n'est jamais négative :")], lignes: [ligne("\\sqrt{(-3)^2}=\\sqrt{9}=3", "par exemple x = −3"), ligne("3=-(-3)", "c'est −x, pas x")] },
     corrigeC: {
-      utilise: [t("On reprend avec "), l("\\sqrt{x^2}=-x"), t(" puis on divise par x (cours, § 1).")],
+      utilise: [t("On reprend avec "), l("\\sqrt{x^2}=-x"), t(" puis on divise par x (cours, point 1).")],
       lignes: [
         ligne(`f(x)=\\dfrac{-x${rac}}{${D}}`, [latex("x<0")]),
         ligne(`=\\dfrac{-${rac}}{${denDiv}}`, "on divise numérateur et dénominateur par x"),
@@ -387,7 +387,7 @@ function degres(e: E): CopieDetectiveLim {
     lignes: [[t("Termes dominants : "), l(mono2(a)), t(" et "), l(`${k === 1 ? "" : k}x^3`), t(".")], [l(`\\dfrac{${mono2(a)}}{${k === 1 ? "" : k}x^3}=${fausse}`)], [l(`${L}f(x)=${infS(a)}`)]],
     ligneFausse: 1,
     regles: ["terme dominant d'un polynôme", "quotient de puissances de x", "limite d'un monôme"],
-    regleCours: { texte: [t("Pour diviser deux puissances de x, on soustrait les exposants : "), l("\\dfrac{x^2}{x^3}=x^{2-3}=\\dfrac{1}{x}"), t(" (cours, § 1).")] },
+    regleCours: { texte: [t("Pour diviser deux puissances de x, on soustrait les exposants : "), l("\\dfrac{x^2}{x^3}=x^{2-3}=\\dfrac{1}{x}"), t(" (cours, point 1).")] },
     aideCorrection: { texte: [t("Refais le quotient des termes dominants, puis passe à la limite.")] },
     valeur: { genre: "limite", labels: [`${L}f(x)=`], nombres: [0], latex: `${L}f(x)=0` },
     copieNombres: [Math.sign(a) * Infinity],
@@ -395,7 +395,7 @@ function degres(e: E): CopieDetectiveLim {
     corrigeA: { utilise: [t("On refait la ligne : on soustrait les exposants.")], lignes: [ligne(`\\dfrac{${mono2(a)}}{${k === 1 ? "" : k}x^3}=\\dfrac{${a}}{${k === 1 ? "" : k}x}`, [ft("et non "), fl(fausse), ft(" comme dans la copie")])] },
     corrigeB: { utilise: [t("Quotient de deux puissances de x :")], lignes: [ligne("\\dfrac{x^2}{x^3}=\\dfrac{1}{x}", "on soustrait les exposants : 2 − 3 = −1")] },
     corrigeC: {
-      utilise: [t("Le dénominateur a le plus haut degré : le quotient des termes dominants tend vers 0 (cours, § 1).")],
+      utilise: [t("Le dénominateur a le plus haut degré : le quotient des termes dominants tend vers 0 (cours, point 1).")],
       lignes: [ligne(`${L}f(x)=${L}\\dfrac{${a}}{${k === 1 ? "" : k}x}`, "quotient des termes dominants"), ligne("=0", "un nombre divisé par une quantité qui tend vers l'infini")],
       verification: { utilise: [t("Contrôle numérique :")], lignes: [approx(f, 1e4, "10^{4}")] },
     },
@@ -421,13 +421,13 @@ function aoAh(e: E): CopieDetectiveLim {
     lignes: [[t("Le numérateur est de degré 2, le dénominateur de degré 1.")], [l(`\\dfrac{${mono2(a)}}{x}=${a}`), t(" (termes dominants).")], [t("Donc "), l(`y=${a}`), t(" est asymptote horizontale en "), l("-\\infty"), t(" et en "), l("+\\infty"), t(".")]],
     ligneFausse: 1,
     regles: ["degrés du numérateur et du dénominateur", "quotient des termes dominants", "limite finie en l'infini : asymptote horizontale"],
-    regleCours: { texte: [t("Quand le numérateur a un degré de plus que le dénominateur, la fonction a une asymptote oblique "), l("y=ax+b"), t(", obtenue par division (cours, § 2).")] },
+    regleCours: { texte: [t("Quand le numérateur a un degré de plus que le dénominateur, la fonction a une asymptote oblique "), l("y=ax+b"), t(", obtenue par division (cours, point 2).")] },
     aideCorrection: { texte: [t("Divise le numérateur par "), l(den), t(" : le quotient du premier degré donne l'asymptote oblique.")] },
     valeur: { genre: "droite", labels: ["y="], droite: { m: a, q }, latex: `y=${droite}` },
     copieDroite: { m: 0, q: a },
     piege: [t("C'est le résultat de la copie : "), l(`\\dfrac{${mono2(a)}}{x}=${coefX(a)}`), t(", pas "), l(`${a}`), t(".")],
     corrigeA: { utilise: [t("On refait la ligne : on divise les termes dominants.")], lignes: [ligne(`\\dfrac{${mono2(a)}}{x}=${coefX(a)}`, [ft("et non "), fl(`${a}`), ft(" comme dans la copie")])] },
-    corrigeB: { utilise: [t("Degré du numérateur = degré du dénominateur + 1 : asymptote oblique, obtenue par division (cours, § 2).")], lignes: [ligne(`${N}=(${den})(${droite})${plusL(r)}`, [ft("division par "), fl(den)])] },
+    corrigeB: { utilise: [t("Degré du numérateur = degré du dénominateur + 1 : asymptote oblique, obtenue par division (cours, point 2).")], lignes: [ligne(`${N}=(${den})(${droite})${plusL(r)}`, [ft("division par "), fl(den)])] },
     corrigeC: {
       utilise: [t("On écrit f comme un premier degré plus une fraction qui tend vers 0 en l'infini.")],
       lignes: [ligne(`f(x)=${droite}${r < 0 ? "-" : "+"}\\dfrac{${Math.abs(r)}}{${den}}`, "on divise chaque terme par le dénominateur"), ligne(`${limL(PLUS)}\\dfrac{${r}}{${den}}=0`, "de même en −∞"), ligne(`y=${droite}`, "asymptote oblique en −∞ et en +∞")],
@@ -456,7 +456,7 @@ function lateral(e: E): CopieDetectiveLim {
     lignes: [[l(`${Lp}(${num})=${N}`)], [l(`${Lp}(${den})=0`)], [t("Donc "), l(`${Lp}f(x)=${infS(sN)}`), t(" (nombre non nul divisé par 0).")], [t("La courbe part vers "), l(infS(sN)), t(" des deux côtés de la droite "), l(`x=${p}`), t(".")]],
     ligneFausse: 2,
     regles: ["limite d'un polynôme : on remplace x par p", "limite d'un polynôme : on remplace x par p", "nombre non nul divisé par 0", "lecture du résultat"],
-    regleCours: { texte: [t("Quand le dénominateur tend vers 0, on calcule la limite à gauche ("), l("0^-"), t(") ET la limite à droite ("), l("0^+"), t(") ; si elles diffèrent, la limite en p n'existe pas (cours, § 1).")] },
+    regleCours: { texte: [t("Quand le dénominateur tend vers 0, on calcule la limite à gauche ("), l("0^-"), t(") ET la limite à droite ("), l("0^+"), t(") ; si elles diffèrent, la limite en p n'existe pas (cours, point 1).")] },
     aideCorrection: { texte: [t("Calcule séparément la limite à gauche et la limite à droite de "), l(`${p}`), t(".")] },
     valeur: { genre: "deux", labels: [`${Lg}f(x)=`, `${Ld}f(x)=`], nombres: [-sN * Infinity, sN * Infinity], latex: `${Lg}f(x)=${infS(-sN)},\\quad ${Ld}f(x)=${infS(sN)}` },
     copieNombres: [sN * Infinity, sN * Infinity],
@@ -464,7 +464,7 @@ function lateral(e: E): CopieDetectiveLim {
     corrigeA: { utilise: [t("On refait la ligne en séparant les deux côtés de "), l(`${p}`), t(".")], lignes: [ligne(`${Lg}(${den})=0^{-}`, [ft("pour x < "), fl(`${p}`)]), ligne(`${Lg}f(x)=${infS(-sN)}`, [ft("à gauche : "), fl(infS(-sN)), ft(", pas "), fl(infS(sN))])] },
     corrigeB: { utilise: [t("Des valeurs de part et d'autre de p montrent deux comportements opposés :")], lignes: [ligne(`f(${dec(p - 0.1)})=${-10 * N + a}`, "à gauche de p"), ligne(`f(${dec(p + 0.1)})=${10 * N + a}`, "à droite de p")] },
     corrigeC: {
-      utilise: [t("Nombre non nul divisé par "), l("0^{-}"), t(" ou "), l("0^{+}"), t(" (cours, § 1) ; les deux limites latérales diffèrent.")],
+      utilise: [t("Nombre non nul divisé par "), l("0^{-}"), t(" ou "), l("0^{+}"), t(" (cours, point 1) ; les deux limites latérales diffèrent.")],
       lignes: [ligne(`${Lg}f(x)=${infS(-sN)}`, `${N > 0 ? "positif" : "négatif"} divisé par 0⁻`), ligne(`${Ld}f(x)=${infS(sN)}`, `${N > 0 ? "positif" : "négatif"} divisé par 0⁺`)],
     },
     preliminaires: [

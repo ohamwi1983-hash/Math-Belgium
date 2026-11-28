@@ -205,7 +205,7 @@ export function aide1(e: E, p: PhaseLC): AideEcran {
   }
   if (p === "equation") {
     if (ecranCoordonnees(e)) return { texte: [t("Exprime le paramètre à partir d'une coordonnée, ou cherche une relation entre "), l("x"), t(" et "), l("y"), t(" qui ne le contienne plus.")] };
-    return { texte: [t("Méthode des génératrices (cours, § 5) : tire "), l("m"), t(" de la première génératrice et remplace-le dans la seconde.")] };
+    return { texte: [t("Méthode des génératrices (cours, point 5) : tire "), l("m"), t(" de la première génératrice et remplace-le dans la seconde.")] };
   }
   if (p === "nature") return { texte: [t("Le contexte limite les positions possibles : longueurs positives, demi-plan balayé, quart de tour, triangle qui doit exister…")] };
   return { texte: [t("Cherche les positions extrêmes de la situation (ou celle qui est interdite).")] };

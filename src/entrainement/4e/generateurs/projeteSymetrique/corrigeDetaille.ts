@@ -48,9 +48,9 @@ import {
  */
 
 type E = ExerciceProjeteSymetrique;
-const COURS_REL = "(cours, § 4)";
-const COURS_INT = "(cours, § 5)";
-const COURS_DIST = "(cours, § 6)";
+const COURS_REL = "(cours, point 4)";
+const COURS_INT = "(cours, point 5)";
+const COURS_DIST = "(cours, point 6)";
 
 /** Lignes « équation cartésienne d'une droite par un point et un vecteur directeur » :
  * a = y_v, b = −x_v, puis le terme constant par le point. */
@@ -193,7 +193,7 @@ function correctionReflexion(e: E): EtapeCorrection[] {
     resultat("a", reponseAp(e)),
     verificationMilieu(e, "a"),
     piege("a", [l("x_{A'}=2x_H-x_A"), t(", pas "), l("2x_A-x_H"), t(" : c'est H, le milieu de [AA′].")]),
-    utilise("b", [t("Une droite passant par deux points a pour vecteur directeur le vecteur qui les relie "), t("(cours, § 1)"), t(".")]),
+    utilise("b", [t("Une droite passant par deux points a pour vecteur directeur le vecteur qui les relie "), t("(cours, point 1)"), t(".")]),
     calcul("b", lignesDroite, [], "Vecteur directeur"),
     // La forme « (A′B) ≡ ax + by + c = 0 » en introduction, puis deux grilles (c, équation) : sur un
     // téléphone, le long membre de gauche de la substitution et la longue équation ne s'additionnent plus.

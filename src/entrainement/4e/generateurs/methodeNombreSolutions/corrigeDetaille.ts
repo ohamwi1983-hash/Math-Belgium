@@ -14,7 +14,7 @@ import { lineaire, moinsH, nombreTexte, q, qp, racineCarreeLatex, sansDoublons }
 
 type E = ExerciceMethodeNombreSolutions;
 const lat = (valeur: string): FragmentConsigne => ({ type: "latex", valeur });
-const COURS = "(cours, § 1)";
+const COURS = "(cours, point 1)";
 
 function ligneReduction(e: E): LigneCalcul[] {
   if (e.presentation === "reduite") return [];

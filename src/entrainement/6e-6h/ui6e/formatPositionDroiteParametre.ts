@@ -166,8 +166,8 @@ export function optionsPosition(): OptionEcran[] {
 // ---------------------------------------------------------------------------------------------
 
 export function aide1(e: E, p: PhasePD): AideEcran {
-  if (p === "equation") return { texte: [t("Intersection d'une droite et d'une conique (cours, § 4) : remplace "), l("y"), t(" par "), l(membreDroite(e.m, "k")), t(" dans l'équation de "), l("\\Gamma"), t(", puis ordonne selon les puissances de "), l("x"), t(".")] };
-  if (p === "condition") return { texte: [t("Si l'équation est du second degré, la droite est tangente quand elle a une racine double (cours, § 4–5) :")], latex: "\\Delta=0" };
+  if (p === "equation") return { texte: [t("Intersection d'une droite et d'une conique (cours, point 4) : remplace "), l("y"), t(" par "), l(membreDroite(e.m, "k")), t(" dans l'équation de "), l("\\Gamma"), t(", puis ordonne selon les puissances de "), l("x"), t(".")] };
+  if (p === "condition") return { texte: [t("Si l'équation est du second degré, la droite est tangente quand elle a une racine double (cours, points 4 et 5) :")], latex: "\\Delta=0" };
   if (p === "position") return { texte: [t("Remplace "), l("k"), t(" par "), l(nL(e.k0)), t(" : le signe de "), l("\\Delta"), t(" donne le nombre de points ; mais si le coefficient de "), l("x^2"), t(" est nul, l'équation est du premier degré.")] };
   return { texte: [t("Résous l'équation en "), l("x"), t(" pour "), l(`k=${nL(e.k0)}`), t(", puis calcule "), l(`y=${membreDroite(e.m, nL(e.k0)).replace(/\+0$/, "")}`), t(".")] };
 }

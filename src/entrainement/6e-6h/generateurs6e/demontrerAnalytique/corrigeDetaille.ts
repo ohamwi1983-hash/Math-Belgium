@@ -85,16 +85,16 @@ export function correctionDetaillee123(e: E): EtapeCorrection[] {
   const [a, b, c, d] = [0, 1, 2, 3].map(lettreEtape) as [string, string, string, string];
   const conclusion = CONCLUSION[e.support].replace("AM", `${e.noms[0]}M`).replace("BC", `${e.noms[1]}${e.noms[2]}`);
   return [
-    utilise(a, [t("Méthode du cours (§ 3), étapes 1 et 2 : un sommet à l'origine, un côté sur un axe, et des lettres quelconques pour le reste — sinon la preuve ne vaudrait que pour une figure particulière.")]),
+    utilise(a, [t("Méthode du cours (point 3), étapes 1 et 2 : un sommet à l'origine, un côté sur un axe, et des lettres quelconques pour le reste — sinon la preuve ne vaudrait que pour une figure particulière.")]),
     resultat(a, reperes123(e)[0]!),
     piege(a, [t("Prouver sur un exemple numérique, ou choisir un repère qui ajoute une propriété (angle droit, côtés égaux) : la conclusion ne vaudrait que dans ce cas.")]),
-    utilise(b, [t("Coordonnées (cours, § 1) : le milieu est la moyenne des extrémités ; dans un parallélogramme, "), l("\\vec{AB}=\\vec{DC}"), t(".")]),
+    utilise(b, [t("Coordonnées (cours, point 1) : le milieu est la moyenne des extrémités ; dans un parallélogramme, "), l("\\vec{AB}=\\vec{DC}"), t(".")]),
     calcul(b, lignesCoordonnees(e)),
     resultat(b, fr(reponse123(e, "coordonnees"))),
-    utilise(c, [t("Méthode du cours (§ 3), étape 3 : on traduit la conclusion en une égalité entre deux expressions calculables.")]),
+    utilise(c, [t("Méthode du cours (point 3), étape 3 : on traduit la conclusion en une égalité entre deux expressions calculables.")]),
     resultat(c, egalites123(e)[0]!.fr),
     piege(c, [t("Établir une égalité vraie mais qui ne prouve pas la propriété demandée, ou partir de l'hypothèse au lieu de la conclusion.")]),
-    utilise(d, [t("Méthode du cours (§ 3), étape 4 : on calcule les deux membres et on constate qu'ils coïncident quelles que soient les lettres.")]),
+    utilise(d, [t("Méthode du cours (point 3), étape 4 : on calcule les deux membres et on constate qu'ils coïncident quelles que soient les lettres.")]),
     { ...calcul(d, lignesCalcul(e)), figureHtml: figureCorrigeLot(figure123(e)) },
     resultat(d, [t(conclusion)]),
     verification(d, [t("Aucune valeur particulière n'a été donnée aux lettres : le calcul vaut pour toutes les figures du type demandé.")]),

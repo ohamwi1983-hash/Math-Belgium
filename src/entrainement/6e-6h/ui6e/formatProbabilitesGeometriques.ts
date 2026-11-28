@@ -162,7 +162,7 @@ export function messageIllisible(e: E, p: P): string {
 
 export const MESSAGE_APPROCHEE = "C'est une valeur approchée : la consigne demande la valeur exacte (garde π et les fractions). Cette saisie ne compte pas comme une tentative.";
 
-const COURS = "(cours, § 1)";
+const COURS = "(cours, point 1)";
 
 export function aide1(e: E, p: P): AideEcran {
   switch (p) {

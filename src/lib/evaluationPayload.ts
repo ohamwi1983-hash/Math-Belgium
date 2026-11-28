@@ -3682,7 +3682,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
       },
       {
         enonce:
-          "Si la tangente en un point a une pente nulle, cela veut-il dire que f est constante autour de ce point ? Justifie à l'aide de l'exemple de la section.",
+          "Si la tangente en un point a une pente nulle, cela veut-il dire que f est constante autour de ce point ? Justifie à l'aide de l'exemple du point.",
         corrige:
           "Non — une tangente horizontale en un seul point n'affirme rien sur le comportement de f ailleurs. $f(x) = x^2-2x+1$ a une tangente horizontale uniquement en $x = 1$, mais elle est strictement décroissante avant ce point et strictement croissante après : elle n'est constante nulle part. Une pente nulle ne décrit que l'instant précis en ce point, jamais un voisinage entier.",
       },
@@ -4786,7 +4786,7 @@ const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrut
         enonce:
           "Pourquoi les propriétés optiques des trois coniques dépendent-elles directement de leur définition par distance (foyer/directrice ou foyers) ?",
         corrige:
-          "La loi de la réflexion compare l'angle d'incidence et l'angle de réflexion par rapport à la tangente. Les démonstrations de ces propriétés optiques (section 6 : triangle isocèle $FPT$ pour la parabole, symétrique d'un foyer par rapport à la tangente pour l'ellipse) s'appuient précisément sur l'égalité de distances qui définit chaque conique (égale distance à un foyer et une directrice pour la parabole, somme ou différence de distances à deux foyers pour l'ellipse et l'hyperbole) — c'est cette structure métrique qui produit, via la tangente, l'égalité d'angles caractéristique de chaque miroir.",
+          "La loi de la réflexion compare l'angle d'incidence et l'angle de réflexion par rapport à la tangente. Les démonstrations de ces propriétés optiques (point 6 : triangle isocèle $FPT$ pour la parabole, symétrique d'un foyer par rapport à la tangente pour l'ellipse) s'appuient précisément sur l'égalité de distances qui définit chaque conique (égale distance à un foyer et une directrice pour la parabole, somme ou différence de distances à deux foyers pour l'ellipse et l'hyperbole) — c'est cette structure métrique qui produit, via la tangente, l'égalité d'angles caractéristique de chaque miroir.",
       },
     ],
   },

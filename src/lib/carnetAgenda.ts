@@ -374,11 +374,11 @@ const pluriel = (n: number, mot: string, motPluriel = `${mot}s`) => `${n} ${n > 
 
 /** « 12 séances · 15 heures de cours · 2 chapitres · 7 sections ». */
 export function texteSynthese(s: SyntheseAgenda): string {
-  return [pluriel(s.seances, 'séance'), `${pluriel(s.heures, 'heure')} de cours`, pluriel(s.chapitres.length, 'chapitre'), pluriel(s.sections, 'section')].join(' · ')
+  return [pluriel(s.seances, 'séance'), `${pluriel(s.heures, 'heure')} de cours`, pluriel(s.chapitres.length, 'chapitre'), pluriel(s.sections, 'point')].join(' · ')
 }
 
 export function texteChapitreSynthese(c: SyntheseAgenda['chapitres'][number]): string {
-  return `${c.niveau} — ${c.numero !== null ? `Ch. ${c.numero} — ` : ''}${c.titre} (${pluriel(c.sections, 'section')})`
+  return `${c.niveau} — ${c.numero !== null ? `Ch. ${c.numero} — ` : ''}${c.titre} (${pluriel(c.sections, 'point')})`
 }
 
 export const MESSAGE_SEMAINE_VIDE = 'Aucune séance notée cette semaine.'

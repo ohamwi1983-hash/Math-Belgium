@@ -633,7 +633,7 @@ export function FormulaireSeance({
               <legend className="carnet-etiquette">
                 Ce qui a été vu <span className="compte-compte">({nbCochees} cochée{nbCochees > 1 ? 's' : ''})</span>
               </legend>
-              <p className="compte-aide">Coche une section entière, ou seulement les sous-parties vues.</p>
+              <p className="compte-aide">Coche un point entier, ou seulement les sous-parties vues.</p>
               {structure.map((section) => {
                 const unites = unitesSection(section)
                 const n = unites.filter((u) => coches.has(u)).length
@@ -812,7 +812,7 @@ export function FormulaireSeance({
               {typeEval && chapitre && (
                 <fieldset className="agenda-groupe">
                   <legend className="carnet-etiquette-bloc">Matière (parties vues)</legend>
-                  {sectionsEval.length === 0 && <p className="compte-aide">Aucune partie de ce chapitre n’est encore cochée pour cette classe : coche les sections évaluées.</p>}
+                  {sectionsEval.length === 0 && <p className="compte-aide">Aucune partie de ce chapitre n’est encore cochée pour cette classe : coche les points évalués.</p>}
                   <div className="carnet-sous-parties carnet-eval-parties">
                     {(sectionsEval.length > 0 ? sectionsEval : structure).map((s) => {
                       const coche = partiesEval.has(s.id)
@@ -831,11 +831,11 @@ export function FormulaireSeance({
                               }}
                             />
                             <span className="carnet-case-texte">
-                              § {s.numero} <RichText text={s.titre} />
+                              {s.numero}. <RichText text={s.titre} />
                             </span>
                           </label>
                           {gensSection.length > 0 && (
-                            <div className="carnet-eval-gens" role="group" aria-label={`Exercices de la partie ${s.numero}`}>
+                            <div className="carnet-eval-gens" role="group" aria-label={`Exercices du point ${s.numero}`}>
                               {gensSection.map((g) => (
                                 <label className="carnet-case" key={g.generatorId}>
                                   <input type="checkbox" checked={!decochesEval.has(g.generatorId)} onChange={(e) => setDecochesEval((avant) => basculerDans(avant, g.generatorId, !e.target.checked))} />

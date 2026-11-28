@@ -17,9 +17,9 @@ export type Fragments = FragmentConsigne[];
 
 /** Renvois au cours (sections numérotées de `fonction-second-degre.ts`). */
 export const COURS_DEBUT = "(cours, « Avant de commencer »)";
-export const COURS_ETUDIER = "(cours, § 1)";
-export const COURS_TRANSFORMER = "(cours, § 2)";
-export const COURS_UTILISER = "(cours, § 3)";
+export const COURS_ETUDIER = "(cours, point 1)";
+export const COURS_TRANSFORMER = "(cours, point 2)";
+export const COURS_UTILISER = "(cours, point 3)";
 
 function net(v: number): number {
   return Object.is(v, -0) || Math.abs(v) < 1e-12 ? 0 : v;

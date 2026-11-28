@@ -397,7 +397,7 @@ export function libelleChoixFormeD(id: string): string {
   return CHOIX_FORME_LATEX.find((c) => c.id === id)?.latex ?? "\\text{pas indéterminée}";
 }
 
-const TEXTE_REFERENCE_D = "Le produit est une forme « l'infini fois 0 » : fais apparaître la limite de référence du cours (§ 5), où u tend vers 0 :";
+const TEXTE_REFERENCE_D = "Le produit est une forme « l'infini fois 0 » : fais apparaître la limite de référence du cours (point 5), où u tend vers 0 :";
 
 function consigneD(phase: "dForme" | "dExposant" | "dConclure"): FragmentConsigne[] {
   if (phase === "dForme") return [texte("Détermine la limite de la base et celle de l'exposant, puis le type de forme obtenu.")];
@@ -423,7 +423,7 @@ function aideD1(phase: "dForme" | "dExposant" | "dConclure", exercice: ExerciceL
     case "d6":
       return exercice.exposant === "surLn"
         ? { texte: "Écris le logarithme de la base : il se simplifie avec le dénominateur de l'exposant. Rappel :", latex: "\\ln x\\neq 0 \\text{ pour } x\\neq 1" }
-        : { texte: "Le produit est une forme « 0 fois l'infini » : utilise une croissance comparée du cours (§ 5) :", latex: exercice.sousType === "d4" ? "\\lim_{x\\to 0^+} x\\ln x=0" : "\\lim_{x\\to +\\infty}\\dfrac{\\ln x}{x^{k}}=0\\ (k>0)" };
+        : { texte: "Le produit est une forme « 0 fois l'infini » : utilise une croissance comparée du cours (point 5) :", latex: exercice.sousType === "d4" ? "\\lim_{x\\to 0^+} x\\ln x=0" : "\\lim_{x\\to +\\infty}\\dfrac{\\ln x}{x^{k}}=0\\ (k>0)" };
     case "d5":
     case "d7":
       return { texte: "Le logarithme défait l'exponentielle de la base :", latex: "\\ln\\left(e^{u}\\right)=u" };

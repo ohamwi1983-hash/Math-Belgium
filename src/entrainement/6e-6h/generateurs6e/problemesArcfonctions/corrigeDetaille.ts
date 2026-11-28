@@ -37,7 +37,7 @@ function etapesRefraction(e: Extract<E, { variante: "refraction" }>): EtapeCorre
   const c = "c";
   const sinT1 = (m2.n * Math.sin((e.theta2Voulu * Math.PI) / 180)) / m1.n;
   return [
-    utilise(a, [t("Loi de Snell-Descartes (cours, § 2, application « réfraction ») : on isole "), f("\\sin\\theta_2"), t(", puis on applique arcsin, qui renvoie un angle de "), f("[-90^{\\circ}\\,;\\,90^{\\circ}]"), t(".")]),
+    utilise(a, [t("Loi de Snell-Descartes (cours, point 2, application « réfraction ») : on isole "), f("\\sin\\theta_2"), t(", puis on applique arcsin, qui renvoie un angle de "), f("[-90^{\\circ}\\,;\\,90^{\\circ}]"), t(".")]),
     calcul(a, snell(m1.n, m2.n, e.theta1, "\\theta_2", degL(e.theta1, 0))),
     resultat(a, reponse(e, "q1")),
     verification(a, [t(`En entrant ${m2.dans}, plus réfringent, le rayon se rapproche de la normale : `), f(`\\theta_2<\\theta_1=${degL(e.theta1, 0)}`), t(".")]),
@@ -71,7 +71,7 @@ function etapesReflexion(e: Extract<E, { variante: "reflexion-totale" }>): Etape
   const s = sinusRefracte(m1.n, m2.n, e.theta1Verdict);
   const oui = verdictRayon(e);
   return [
-    utilise("a", [t("À l'angle limite, le rayon réfracté rase la surface : "), f("\\theta_2=90^{\\circ}"), t(" dans la loi de Snell-Descartes (cours, § 2).")]),
+    utilise("a", [t("À l'angle limite, le rayon réfracté rase la surface : "), f("\\theta_2=90^{\\circ}"), t(" dans la loi de Snell-Descartes (cours, point 2).")]),
     calcul("a", [
       ligne(`${nL(m1.n)}\\cdot\\sin\\theta_L=${nL(m2.n)}\\cdot\\sin 90^{\\circ}`, "loi de Snell-Descartes"),
       ligne(`\\sin\\theta_L=\\dfrac{${nL(m2.n)}}{${nL(m1.n)}}`, [f("\\sin 90^{\\circ}=1")]),
@@ -103,7 +103,7 @@ function etapesVue(e: Extract<E, { variante: "angle-de-vue" }>): EtapeCorrection
   const b2 = nbL(b * b, 4);
   const xOpt = valeurAttendue(e, "q2");
   return [
-    utilise("a", [t("Dans le triangle rectangle yeux – mur, l'angle vers un point situé "), f("h"), t(" m plus haut que les yeux a pour tangente "), f("\\dfrac{h}{x}"), t(". L'angle de vue est la différence des angles vers le bord supérieur et vers le bord inférieur (cours, § 4, application).")]),
+    utilise("a", [t("Dans le triangle rectangle yeux – mur, l'angle vers un point situé "), f("h"), t(" m plus haut que les yeux a pour tangente "), f("\\dfrac{h}{x}"), t(". L'angle de vue est la différence des angles vers le bord supérieur et vers le bord inférieur (cours, point 4, application).")]),
     calcul("a", [
       ligne(`\\theta(x)=\\arctan\\dfrac{b}{x}-\\arctan\\dfrac{a}{x}`, "différence de deux angles"),
       ligne(`\\theta(${mL(e.x0)})=${vueSubstL(e, mL(e.x0))}`),
@@ -111,7 +111,7 @@ function etapesVue(e: Extract<E, { variante: "angle-de-vue" }>): EtapeCorrection
     ]),
     resultat("a", reponse(e, "q1")),
     piege("a", [t("Écrire "), f("\\arctan\\dfrac{b-a}{x}"), t(" : les deux angles se mesurent depuis l'horizontale des yeux.")]),
-    utilise("b", [t("Dérivée de "), f("\\arctan u"), t(" (cours, § 4) : "), f("\\dfrac{u'}{1+u^{2}}"), t(" ; avec "), f("u=\\dfrac{k}{x}"), t(", "), f("\\left(\\arctan\\dfrac{k}{x}\\right)'=\\dfrac{-k}{x^{2}+k^{2}}"), t(". L'angle est maximal où "), f("\\theta'"), t(" passe du signe + au signe −.")]),
+    utilise("b", [t("Dérivée de "), f("\\arctan u"), t(" (cours, point 4) : "), f("\\dfrac{u'}{1+u^{2}}"), t(" ; avec "), f("u=\\dfrac{k}{x}"), t(", "), f("\\left(\\arctan\\dfrac{k}{x}\\right)'=\\dfrac{-k}{x^{2}+k^{2}}"), t(". L'angle est maximal où "), f("\\theta'"), t(" passe du signe + au signe −.")]),
     calcul("b", [
       ligne(`\\theta'(x)=\\dfrac{-${mL(b)}}{x^{2}+${b2}}+\\dfrac{${mL(a)}}{x^{2}+${a2}}`, "règle de la chaîne"),
       ligne(`=\\dfrac{${nbL(b - a, 2)}\\,(${abL(e)}-x^{2})}{(x^{2}+${a2})(x^{2}+${b2})}`, "même dénominateur"),
@@ -132,7 +132,7 @@ function etapesVue(e: Extract<E, { variante: "angle-de-vue" }>): EtapeCorrection
 
 function etapesEchelle(e: Extract<E, { variante: "echelle" }>): EtapeCorrection[] {
   return [
-    utilise("a", [t("Triangle rectangle mur – sol – échelle : l'échelle est l'hypoténuse, la distance au mur est le côté adjacent à l'angle au sol. arccos renvoie un angle de "), f("[0^{\\circ}\\,;\\,180^{\\circ}]"), t(" (cours, § 2).")]),
+    utilise("a", [t("Triangle rectangle mur – sol – échelle : l'échelle est l'hypoténuse, la distance au mur est le côté adjacent à l'angle au sol. arccos renvoie un angle de "), f("[0^{\\circ}\\,;\\,180^{\\circ}]"), t(" (cours, point 2).")]),
     calcul("a", [
       ligne(`\\cos\\alpha=\\dfrac{d}{L}`, "côté adjacent sur hypoténuse"),
       ligne(`=\\dfrac{${mL(e.d)}}{${mL(e.L)}}`),

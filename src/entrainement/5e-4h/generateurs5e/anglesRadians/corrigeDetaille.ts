@@ -34,7 +34,7 @@ function etapeReduction(e: E): EtapeCorrection[] {
     ligne(`0 \\leq ${piLatex(e.reduit)} < 2\\pi`, [t("l'angle est dans "), f("[0\\,;\\,2\\pi[")]),
   ];
   return [
-    utilise("a", [t("Un tour complet mesure "), f("2\\pi"), t(" (cours, § 4) : "), f("\\theta"), t(" et "), f("\\theta + 2k\\pi"), t(" ont le même point image.")]),
+    utilise("a", [t("Un tour complet mesure "), f("2\\pi"), t(" (cours, point 4) : "), f("\\theta"), t(" et "), f("\\theta + 2k\\pi"), t(" ont le même point image.")]),
     calcul("a", lignes),
     resultat("a", souderPonctuation(reponseReduction(e))),
     piege("a", [t("Retirer "), f("\\pi"), t(" (un demi-tour) au lieu de "), f("2\\pi"), t(" donne le point diamétralement opposé.")]),
@@ -56,7 +56,7 @@ function etapeQuadrant(e: E): EtapeCorrection[] {
     ];
   }
   return [
-    utilise("b", [t("Les repères "), f("\\dfrac{\\pi}{2}"), t(", "), f("\\pi"), t(", "), f("\\dfrac{3\\pi}{2}"), t(" séparent les quatre quadrants (cours, § 4).")]),
+    utilise("b", [t("Les repères "), f("\\dfrac{\\pi}{2}"), t(", "), f("\\pi"), t(", "), f("\\dfrac{3\\pi}{2}"), t(" séparent les quatre quadrants (cours, point 4).")]),
     calcul("b", lignes),
     resultat("b", souderPonctuation(reponseQuadrant(e))),
   ];
@@ -86,7 +86,7 @@ function etapeCosSin(e: E): EtapeCorrection[] {
   const c2 = carre(c.valeur);
   const s2 = carre(s.valeur);
   return [
-    utilise("c", [f("\\cos\\theta"), t(" est l'abscisse de M, "), f("\\sin\\theta"), t(" son ordonnée (cours, § 4) ; les valeurs sans signe sont celles de l'angle de référence, le signe vient du quadrant.")]),
+    utilise("c", [f("\\cos\\theta"), t(" est l'abscisse de M, "), f("\\sin\\theta"), t(" son ordonnée (cours, point 4) ; les valeurs sans signe sont celles de l'angle de référence, le signe vient du quadrant.")]),
     calcul("c", lignes),
     resultat("c", souderPonctuation(reponseCosSin(e))),
     verification("c", [f(`\\left(${c.latex}\\right)^2 + \\left(${s.latex}\\right)^2 = ${ratLatex(c2)} + ${ratLatex(s2)} = 1`)]),
@@ -102,7 +102,7 @@ function etapeTangente(e: E): EtapeCorrection[] {
     ? [ligne(`\\tan\\theta = \\dfrac{\\sin\\theta}{\\cos\\theta}`, "définition"), ligne(`= \\dfrac{${interieur(s.latex)}}{${interieur(c.latex)}}`, "on remplace"), ligne(`= ${tg.latex}`, "on simplifie")]
     : [ligne(`\\cos\\left(${piLatex(e.reduit)}\\right) = 0`, "on ne peut pas diviser par 0")];
   return [
-    utilise("d", [f("\\tan\\theta = \\dfrac{\\sin\\theta}{\\cos\\theta}"), t(", qui n'existe que si "), f("\\cos\\theta \\neq 0"), t(" (cours, § 4).")]),
+    utilise("d", [f("\\tan\\theta = \\dfrac{\\sin\\theta}{\\cos\\theta}"), t(", qui n'existe que si "), f("\\cos\\theta \\neq 0"), t(" (cours, point 4).")]),
     calcul("d", lignes),
     resultat("d", souderPonctuation(reponseTangente(e))),
     piege("d", [t("Le quotient se fait dans l'ordre sinus sur cosinus ; quand "), f("\\cos\\theta = 0"), t(" (M sur l'axe vertical), la tangente n'existe pas.")]),

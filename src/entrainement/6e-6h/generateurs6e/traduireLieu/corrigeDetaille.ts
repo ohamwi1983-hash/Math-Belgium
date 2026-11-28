@@ -80,8 +80,8 @@ function calculEquation(e: E): { utilise: FragmentConsigne[]; lignes: LigneCalcu
       const gauche = moins(s, { "1": ab2 });
       const u: FragmentConsigne[] =
         e.situation === "thales"
-          ? [ft("Pythagore et sa réciproque : le triangle "), { type: "latex", valeur: "APB" }, ft(" est rectangle en "), { type: "latex", valeur: "P" }, ft(" si et seulement si "), { type: "latex", valeur: "PA^2+PB^2=AB^2" }, ft(" ; distance dans un repère orthonormé (cours, § 4).")]
-          : [ft("Distance dans un repère orthonormé : "), { type: "latex", valeur: "PA^2=(x-x_A)^2+(y-y_A)^2" }, ft(" (cours, § 1 et § 4).")];
+          ? [ft("Pythagore et sa réciproque : le triangle "), { type: "latex", valeur: "APB" }, ft(" est rectangle en "), { type: "latex", valeur: "P" }, ft(" si et seulement si "), { type: "latex", valeur: "PA^2+PB^2=AB^2" }, ft(" ; distance dans un repère orthonormé (cours, point 4).")]
+          : [ft("Distance dans un repère orthonormé : "), { type: "latex", valeur: "PA^2=(x-x_A)^2+(y-y_A)^2" }, ft(" (cours, points 1 et 4).")];
       return {
         utilise: u,
         lignes: [
@@ -100,7 +100,7 @@ function calculEquation(e: E): { utilise: FragmentConsigne[]; lignes: LigneCalcu
       const d = sommeCarres([B]);
       const diff = moins(g, d);
       return {
-        utilise: [ft(e.situation === "mediatrice" ? "Le centre d'un cercle passant par A et B est à la même distance de A et de B ; distance dans un repère orthonormé (cours, § 1)." : "Isocèle en P : PA = PB, donc PA² = PB² ; distance dans un repère orthonormé (cours, § 1).")],
+        utilise: [ft(e.situation === "mediatrice" ? "Le centre d'un cercle passant par A et B est à la même distance de A et de B ; distance dans un repère orthonormé (cours, point 1)." : "Isocèle en P : PA = PB, donc PA² = PB² ; distance dans un repère orthonormé (cours, point 1).")],
         lignes: [
           ligne(`${m}A^2=${m}B^2`),
           ligne(`${carre("x", A.x)}+${carre("y", A.y)}=${carre("x", B.x)}+${carre("y", B.y)}`, `${m === "P" ? "P" : "Ω"}(x ; y)`),
@@ -115,7 +115,7 @@ function calculEquation(e: E): { utilise: FragmentConsigne[]; lignes: LigneCalcu
       const pa: Poly = { x: u.x, y: u.y, "1": -u.x * A.x - u.y * A.y };
       const pb: Poly = { x: -u.x, y: -u.y, "1": u.x * B.x + u.y * B.y };
       return {
-        utilise: [ft("Rectangle en "), { type: "latex", valeur: "A" }, ft(" : "), { type: "latex", valeur: "(AB)\\perp(AP)" }, ft(", donc "), { type: "latex", valeur: "\\vec{AB}\\cdot\\vec{AP}=0" }, ft(" ; de même en "), { type: "latex", valeur: "B" }, ft(" (produit scalaire, cours, § 1).")],
+        utilise: [ft("Rectangle en "), { type: "latex", valeur: "A" }, ft(" : "), { type: "latex", valeur: "(AB)\\perp(AP)" }, ft(", donc "), { type: "latex", valeur: "\\vec{AB}\\cdot\\vec{AP}=0" }, ft(" ; de même en "), { type: "latex", valeur: "B" }, ft(" (produit scalaire, cours, point 1).")],
         lignes: [
           ligne(`\\vec{AB}\\cdot\\vec{AP}=${produitScalaireL(u, A)}=0`, `vecteur AB (${nT(u.x)} ; ${nT(u.y)})`),
           ligne(egal0(pa), "on développe"),
@@ -132,7 +132,7 @@ function calculEquation(e: E): { utilise: FragmentConsigne[]; lignes: LigneCalcu
       const b = e.M.y + e.O.y;
       const p4: Poly = { x2: 4, y2: 4, x: -4 * a, y: -4 * b, "1": a * a + b * b - e.r * e.r };
       return {
-        utilise: [ft("I milieu de "), { type: "latex", valeur: "[MQ]" }, ft(" : "), { type: "latex", valeur: "Q=2I-M" }, ft(" ; Q est sur "), { type: "latex", valeur: "\\Gamma" }, ft(" (équation du cercle, cours, § 2).")],
+        utilise: [ft("I milieu de "), { type: "latex", valeur: "[MQ]" }, ft(" : "), { type: "latex", valeur: "Q=2I-M" }, ft(" ; Q est sur "), { type: "latex", valeur: "\\Gamma" }, ft(" (équation du cercle, cours, point 2).")],
         lignes: [
           ligne(`x_Q=2x${sg(-e.M.x)}`, "I(x ; y)"),
           ligne(`y_Q=2y${sg(-e.M.y)}`),
@@ -148,7 +148,7 @@ function calculEquation(e: E): { utilise: FragmentConsigne[]; lignes: LigneCalcu
       const Ld = polyL(polyDroite(e.d));
       const [d1, d2] = droitesLieu(e);
       return {
-        utilise: [ft("Distance d'un point à une droite (cours, § 1) : "), { type: "latex", valeur: "\\text{dist}(P\\,;d)=\\dfrac{|ax_P+by_P+c|}{\\sqrt{a^2+b^2}}" }, ft(".")],
+        utilise: [ft("Distance d'un point à une droite (cours, point 1) : "), { type: "latex", valeur: "\\text{dist}(P\\,;d)=\\dfrac{|ax_P+by_P+c|}{\\sqrt{a^2+b^2}}" }, ft(".")],
         lignes: [
           ligne(`\\dfrac{|${Ld}|}{\\sqrt{${nP(e.d.a)}^2+${nP(e.d.b)}^2}}=${nL(e.h)}`, "P(x ; y)"),
           ligne(`|${Ld}|=${nL(n * e.h)}`, `√(a² + b²) = ${n}`),
@@ -163,7 +163,7 @@ function calculEquation(e: E): { utilise: FragmentConsigne[]; lignes: LigneCalcu
       const n2 = e.d1.a ** 2 + e.d1.b ** 2;
       const [b1, b2] = droitesLieu(e);
       return {
-        utilise: [ft("Un cercle de centre Ω est tangent à une droite quand la distance de Ω à cette droite vaut le rayon ; distance d'un point à une droite (cours, § 1 et § 2).")],
+        utilise: [ft("Un cercle de centre Ω est tangent à une droite quand la distance de Ω à cette droite vaut le rayon ; distance d'un point à une droite (cours, points 1 et 2).")],
         lignes: [
           ligne(`\\dfrac{|${L1}|}{\\sqrt{${n2}}}=\\dfrac{|${L2}|}{\\sqrt{${n2}}}`, "Ω(x ; y)"),
           ligne(`|${L1}|=|${L2}|`, "même dénominateur"),
@@ -177,7 +177,7 @@ function calculEquation(e: E): { utilise: FragmentConsigne[]; lignes: LigneCalcu
 
 function reciproque(e: E): { utilise: FragmentConsigne[]; lignes: LigneCalcul[]; conclusion: FragmentConsigne[] } {
   const L = (s: string) => ({ type: "latex" as const, valeur: s });
-  const u = [ft("Réciproque : un point de l'ensemble trouvé appartient au lieu seulement si la condition de l'énoncé a un sens pour lui (cours, § 4).")];
+  const u = [ft("Réciproque : un point de l'ensemble trouvé appartient au lieu seulement si la condition de l'énoncé a un sens pour lui (cours, point 4).")];
   switch (e.situation) {
     case "pythagore":
       return { utilise: u, lignes: [ligne(`AA^2+AB^2=0+AB^2=AB^2`, "P = A convient"), ligne(`BA^2+BB^2=AB^2+0=AB^2`, "P = B convient")], conclusion: [ft("Tout point du cercle vérifie l'égalité, A et B compris : aucun point à exclure.")] };

@@ -12,7 +12,7 @@ import { figureCorrigeLirePlacerSvg } from "../../ui6e/figureLirePlacerPlanCompl
  * de l'écran (`calculPlacement`, `calculModuleArgument`) une transformation par ligne.
  */
 
-const COURS = "(cours, § 7)";
+const COURS = "(cours, point 7)";
 const LETTRES: Record<PhaseLirePlacer, string> = { lire: "a", placer1: "b", placer2: "c", associer: "d", moduleArgument: "e" };
 
 function methode(e: ExerciceLirePlacer, phase: PhaseLirePlacer): FragmentConsigne[] {

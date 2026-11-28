@@ -10,10 +10,10 @@ import { nombreTexte, q, qp } from "./corrigeChapitre3";
  * puis racines par la formule. Sans `docx`.
  */
 
-export const COURS_RESOUDRE = "(cours, §\u00a01)";
-export const COURS_SIGNE_TRINOME = "(cours, §\u00a02)";
-export const COURS_DENOMINATEUR = "(cours, §\u00a05)";
-export const COURS_CONTEXTE = "(cours, §\u00a07)";
+export const COURS_RESOUDRE = "(cours, point\u00a01)";
+export const COURS_SIGNE_TRINOME = "(cours, point\u00a02)";
+export const COURS_DENOMINATEUR = "(cours, point\u00a05)";
+export const COURS_CONTEXTE = "(cours, point\u00a07)";
 
 /** Δ = b² − 4ac, substitution, calcul. */
 export function lignesDelta([a, b, c]: Poly2, nom = "\\Delta"): LigneCalcul[] {

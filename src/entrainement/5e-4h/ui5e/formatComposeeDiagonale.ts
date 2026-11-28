@@ -76,7 +76,7 @@ export function aide1(e: E, phase: PhaseComposeeDiagonale): AideEcran {
   const o = nomO(e);
   switch (phase) {
     case "premiere":
-      return { texte: [tx("Une composée se lit de droite à gauche : "), lx(`${composeeL(e)}=${o}\\big(${i}(${e.a})\\big)`), tx(". La fonction écrite à droite agit en premier (cours, § 2).")] };
+      return { texte: [tx("Une composée se lit de droite à gauche : "), lx(`${composeeL(e)}=${o}\\big(${i}(${e.a})\\big)`), tx(". La fonction écrite à droite agit en premier (cours, point 2).")] };
     case "existence":
       return {
         texte: [
@@ -96,7 +96,7 @@ export function aide1(e: E, phase: PhaseComposeeDiagonale): AideEcran {
           lx(`C_${o}`),
           tx(", c'est-à-dire si "),
           lx(`v\\in\\operatorname{dom} ${o}`),
-          tx(" (astuce du cours, § 4)."),
+          tx(" (astuce du cours, point 4)."),
         ],
       };
     case "valeur":

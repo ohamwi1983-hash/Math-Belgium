@@ -16,7 +16,7 @@ import { piL, q, qL } from "../../ui6e/nombresCycloLotG";
 type E = ExerciceLireTransformee;
 const t = texte;
 const f = latex;
-const COURS = "(cours, § 2 et § 5)";
+const COURS = "(cours, points 2 et 5)";
 const ent = (x: number) => (x < 0 ? `-${-x}` : String(x));
 
 function etapeDomaine(e: E, sq: string): EtapeCorrection[] {

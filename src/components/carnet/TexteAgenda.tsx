@@ -135,7 +135,7 @@ export function TexteAgenda({
                 )}
                 {essentiels.length > 0 && (
                   <details className="carnet-details-discret">
-                    <summary>L’essentiel de l’étape, pour t’aider à reformuler</summary>
+                    <summary>L’essentiel du point, pour t’aider à reformuler</summary>
                     <ul className="carnet-texte-essentiel">
                       {essentiels.map((e) => (
                         <li key={e}>{e}</li>

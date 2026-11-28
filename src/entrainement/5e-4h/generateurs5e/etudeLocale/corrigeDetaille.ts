@@ -279,7 +279,7 @@ function resultatsNature(e: ExerciceEtudeLocale, mode: "fprime" | "fseconde"): F
   return liste(lignes);
 }
 
-const COURS_DERIVEE_ETUDE = "(cours, § 3)";
+const COURS_DERIVEE_ETUDE = "(cours, point 3)";
 
 export function correctionDetailleeEtudeLocale(e: ExerciceEtudeLocale): EtapeCorrection[] {
   const etapes: EtapeCorrection[] = [];

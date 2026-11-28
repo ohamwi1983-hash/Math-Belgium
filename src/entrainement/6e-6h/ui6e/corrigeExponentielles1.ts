@@ -18,10 +18,10 @@ import { sansRepetition } from "./corrigeLogarithmes2";
 export { affine, finaliserCorrige, frac, justif, listeEt, nb, parE, parN, rationnel, sommeTermes, terme } from "./corrigeLogarithmes1";
 export { dec, fragmentsAide, sansRepetition, vaut } from "./corrigeLogarithmes2";
 
-export const COURS_LIMITES = "(cours, § 1)";
-export const COURS_DERIVEE = "(cours, § 2)";
-export const COURS_GRAPHIQUE = "(cours, § 3)";
-export const COURS_EQUATIONS = "(cours, § 4)";
+export const COURS_LIMITES = "(cours, point 1)";
+export const COURS_DERIVEE = "(cours, point 2)";
+export const COURS_GRAPHIQUE = "(cours, point 3)";
+export const COURS_EQUATIONS = "(cours, point 4)";
 
 type Fragments = FragmentConsigne[];
 

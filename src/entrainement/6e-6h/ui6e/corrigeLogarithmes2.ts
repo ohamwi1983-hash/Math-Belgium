@@ -10,14 +10,14 @@ import { latex, ligne, texte } from "../../export/corrigeTableau";
  */
 
 /** Renvois aux sections du chapitre « Fonctions logarithmes » (numéros `number` du contenu). */
-export const COURS_PROPRIETES = "(cours, § 1)";
-export const COURS_EQUATIONS = "(cours, § 2)";
-export const COURS_INEQUATIONS = "(cours, § 3)";
-export const COURS_DERIVEE = "(cours, § 4)";
-export const COURS_LIMITES = "(cours, § 5)";
-export const COURS_PARAMETRES = "(cours, § 6)";
-export const COURS_ETUDE = "(cours, § 9)";
-export const COURS_PROBLEMES = "(cours, § 10)";
+export const COURS_PROPRIETES = "(cours, point 1)";
+export const COURS_EQUATIONS = "(cours, point 2)";
+export const COURS_INEQUATIONS = "(cours, point 3)";
+export const COURS_DERIVEE = "(cours, point 4)";
+export const COURS_LIMITES = "(cours, point 5)";
+export const COURS_PARAMETRES = "(cours, point 6)";
+export const COURS_ETUDE = "(cours, point 9)";
+export const COURS_PROBLEMES = "(cours, point 10)";
 
 /** Arrondi à `d` décimales (sans artefact flottant). */
 export function arrondi(v: number, d: number): number {

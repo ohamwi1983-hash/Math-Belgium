@@ -101,7 +101,7 @@ function Projection({ chapter }: { chapter: ChapterContent }) {
     return (
       <div className="projection-garde" role="status">
         <h1>Projeter en classe</h1>
-        <p>Aucune diapo avec ces réglages : choisis au moins une étape.</p>
+        <p>Aucune diapo avec ces réglages : choisis au moins un point.</p>
       </div>
     )
   }
@@ -320,7 +320,7 @@ function useInactivite(gele: boolean): [boolean, () => void] {
 }
 
 function fil(chapter: ChapterContent, d: DonneesDiapo | undefined) {
-  return d ? `${chapter.title} · § ${d.section.number} ${titreCourt(d.section)}` : chapter.title
+  return d ? `${chapter.title} · point ${d.section.number} · ${titreCourt(d.section)}` : chapter.title
 }
 
 /** Minuteur de la barre, affiché en haut à droite de l'écran projeté (visible de la classe). */
@@ -392,7 +392,7 @@ function VueEnsemble({ chapter, diapos, projection, fermer }: { chapter: Chapter
 function etiquette(d: DonneesDiapo): string {
   switch (d.type) {
     case 'titre':
-      return `Étape ${d.section.number}`
+      return `Point ${d.section.number}`
     case 'essentiel':
       return 'L’essentiel'
     case 'figure':

@@ -130,11 +130,11 @@ export function aide1(e: E, p: Phase161): AideEcran {
   if (p === "choix") return { texte: [t("Pour comparer deux fractions, écris-les au même dénominateur (ou compare les produits en croix).")] };
   const j = jeuDe(e, p);
   const G = p === "pA" ? "G_A" : "G_B";
-  if (parContraire(j)) return { texte: [t("« Au moins un » : passe par l'événement contraire (cours, § 4) :")], latex: `P(${G})=1-P(\\overline{${G}})` };
-  if (j.type === "pieces") return { texte: [t("Épreuves répétées (cours, § 4) : tous les chemins de l'arbre ont la même probabilité ; compte les chemins gagnants.")] };
+  if (parContraire(j)) return { texte: [t("« Au moins un » : passe par l'événement contraire (cours, point 4) :")], latex: `P(${G})=1-P(\\overline{${G}})` };
+  if (j.type === "pieces") return { texte: [t("Épreuves répétées (cours, point 4) : tous les chemins de l'arbre ont la même probabilité ; compte les chemins gagnants.")] };
   if (j.type === "urne" || j.type === "roue")
-    return { texte: [t(`Arbre pondéré (cours, § 2) : on multiplie les probabilités le long d'un chemin, puis on additionne les chemins gagnants.${j.type === "urne" && !j.remise ? " Sans remise, le second tirage se fait avec une boule de moins." : ""}`)] };
-  return { texte: [t("Deux dés : 36 couples équiprobables (diagramme cartésien, cours, § 2) :")], latex: `P(${G})=\\dfrac{n(${G})}{36}` };
+    return { texte: [t(`Arbre pondéré (cours, point 2) : on multiplie les probabilités le long d'un chemin, puis on additionne les chemins gagnants.${j.type === "urne" && !j.remise ? " Sans remise, le second tirage se fait avec une boule de moins." : ""}`)] };
+  return { texte: [t("Deux dés : 36 couples équiprobables (diagramme cartésien, cours, point 2) :")], latex: `P(${G})=\\dfrac{n(${G})}{36}` };
 }
 
 export function aide2(e: E, p: Phase161): AideEcran | null {

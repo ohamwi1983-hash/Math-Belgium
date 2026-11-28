@@ -14,12 +14,12 @@ import { ligne } from "../../export/corrigeTableau";
 export type Fragments = FragmentConsigne[];
 
 /** Renvois au cours (sections numérotées de `content/chapters/4e/statistique-descriptive.ts`). */
-export const COURS_FREQUENCES = "(cours, § 1)";
-export const COURS_MOYENNE = "(cours, § 3)";
-export const COURS_POSITION = "(cours, § 4)";
-export const COURS_DISPERSION = "(cours, § 6)";
-export const COURS_BT = "(cours, § 7)";
-export const COURS_COMPARER = "(cours, § 8)";
+export const COURS_FREQUENCES = "(cours, point 1)";
+export const COURS_MOYENNE = "(cours, point 3)";
+export const COURS_POSITION = "(cours, point 4)";
+export const COURS_DISPERSION = "(cours, point 6)";
+export const COURS_BT = "(cours, point 7)";
+export const COURS_COMPARER = "(cours, point 8)";
 
 function net(v: number): number {
   const r = Math.round(v * 1e9) / 1e9;

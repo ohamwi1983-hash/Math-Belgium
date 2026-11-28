@@ -684,7 +684,7 @@ export const BANQUE_QUIZ_FONCTIONS_LOGARITHMES: Record<VarianteQuizFonctionsLoga
     {
       enonce: [texte("Le signe de "), latex("(\\log_a x)'=\\dfrac{1}{x\\ln(a)}"), texte(" est celui de "), latex("\\ln(a)"), texte(" : "), latex("\\log_a"), texte(" est croissante si "), latex("a>1"), texte(", décroissante si "), latex("0<a<1"), texte(".")],
       reponse: true,
-      justification: [texte("Comme "), latex("x>0"), texte(" sur tout le domaine, seul le signe de "), latex("\\ln(a)"), texte(" pilote celui de la dérivée — la formule redonne ainsi, sans aucun graphique, le sens de variation lu à la section 1.")],
+      justification: [texte("Comme "), latex("x>0"), texte(" sur tout le domaine, seul le signe de "), latex("\\ln(a)"), texte(" pilote celui de la dérivée — la formule redonne ainsi, sans aucun graphique, le sens de variation lu au point 1.")],
     },
     {
       enonce: [latex("(\\log_a x)'"), texte(" est strictement positive quelle que soit la base valide "), latex("a"), texte(".")],

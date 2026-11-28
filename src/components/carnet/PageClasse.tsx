@@ -201,7 +201,7 @@ export function PageClasse({
           <h3 id={`${id}-evaluation`} className="carnet-titre-bloc carnet-ancre" tabIndex={-1} ref={titreEvaluation}>
             <span id="evaluation">Évaluation sur la matière vue</span>
           </h3>
-          {n > 0 ? <EvaluationMatiere key={classe.id} classe={classe} seances={seancesClasse} sansTitre /> : <p className="compte-vide">Note d'abord une séance : l'évaluation reprend les sections vues depuis une date.</p>}
+          {n > 0 ? <EvaluationMatiere key={classe.id} classe={classe} seances={seancesClasse} sansTitre /> : <p className="compte-vide">Note d'abord une séance : l'évaluation reprend les points vus depuis une date.</p>}
         </section>
       </div>
     </div>
@@ -275,7 +275,7 @@ function ProgressionResume({ classe, seances, toutes }: { classe: Classe; seance
             {courant.numero}. {courant.titre}
           </Link>
           <span className="carnet-avancement-compte">
-            {commencees} / {courant.sections.length} §
+            {commencees} / {courant.sections.length} points
           </span>
         </p>
         <span className={`carnet-barre-classe carnet-c${couleurClasse(ctx.classes, classe.id)}`} aria-hidden="true">
@@ -283,7 +283,7 @@ function ProgressionResume({ classe, seances, toutes }: { classe: Classe; seance
         </span>
         {autre && autreCourant && (
           <p className="carnet-comparaison">
-            {autre.nom} : {autreCourant.sections.filter((s) => s.vues > 0).length} / {autreCourant.sections.length} § commencées
+            {autre.nom} : {autreCourant.sections.filter((s) => s.vues > 0).length} / {autreCourant.sections.length} points commencés
           </p>
         )}
       </div>
@@ -315,7 +315,7 @@ function ProgressionResume({ classe, seances, toutes }: { classe: Classe; seance
       </ol>
       {(cachees > 0 || toutesSections) && courant.sections.length > limite && (
         <button type="button" className="compte-bouton-lien" aria-expanded={toutesSections} onClick={() => setToutesSections(!toutesSections)}>
-          {toutesSections ? 'Afficher moins' : `+ ${cachees} section${cachees > 1 ? 's' : ''}`}
+          {toutesSections ? 'Afficher moins' : `+ ${cachees} point${cachees > 1 ? 's' : ''}`}
         </button>
       )}
       {autresChapitres.length > 0 && (
@@ -326,7 +326,7 @@ function ProgressionResume({ classe, seances, toutes }: { classe: Classe; seance
             return (
               <li key={p.levelSlug + p.slug} className={fini ? 'vue' : commence > 0 ? 'commencee' : 'a-venir'}>
                 <span aria-hidden="true">{fini ? '✓' : commence > 0 ? '▸' : '○'}</span> {p.numero}. {findChapter(p.levelSlug, p.slug) ? p.titre : p.slug}
-                {fini && p.derniereSeance ? ` (terminé le ${jourMois(p.derniereSeance)})` : commence > 0 ? ` (${commence} / ${p.sections.length} §)` : ''}
+                {fini && p.derniereSeance ? ` (terminé le ${jourMois(p.derniereSeance)})` : commence > 0 ? ` (${commence} / ${p.sections.length} points)` : ''}
               </li>
             )
           })}

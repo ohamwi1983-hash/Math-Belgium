@@ -26,8 +26,8 @@ export type PhaseSigma =
   | "nouvelleBorne"
   | "nouveauTerme";
 
-export const COURS_SIGMA = "(cours, § 7)";
-export const COURS_GEO = "(cours, § 8)";
+export const COURS_SIGMA = "(cours, point 7)";
+export const COURS_GEO = "(cours, point 8)";
 
 export function phasesSigma(e: E): PhaseSigma[] {
   switch (e.variante) {

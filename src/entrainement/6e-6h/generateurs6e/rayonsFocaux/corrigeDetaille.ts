@@ -26,18 +26,18 @@ export function correctionDetaillee136(e: E): EtapeCorrection[] {
     const res = fin ? { ...resultat(sq, fr(reponse136(e, ph))), figureHtml: figureCorrigeLot(figureCorrige136(e)) } : resultat(sq, fr(reponse136(e, ph)));
     switch (ph) {
       case "excentricite":
-        out.push(utilise(sq, [t("Excentricité (cours, § 2) : "), l("e=\\dfrac{c}{a}"), t(".")]), calcul(sq, [ligne(`a=${e.a},\\ c=${e.c}`, "équation et foyers lus"), ligne(`e=\\dfrac{${e.c}}{${e.a}}=${nb(ev)}`)]), res);
+        out.push(utilise(sq, [t("Excentricité (cours, point 2) : "), l("e=\\dfrac{c}{a}"), t(".")]), calcul(sq, [ligne(`a=${e.a},\\ c=${e.c}`, "équation et foyers lus"), ligne(`e=\\dfrac{${e.c}}{${e.a}}=${nb(ev)}`)]), res);
         break;
       case "rayonF":
         out.push(
-          utilise(sq, [t("Rayons focaux (cours, § 3) : "), l("|PF|=a-e\\,x_P"), t(" pour le foyer F(c ; 0).")]),
+          utilise(sq, [t("Rayons focaux (cours, point 3) : "), l("|PF|=a-e\\,x_P"), t(" pour le foyer F(c ; 0).")]),
           calcul(sq, [ligne(`|PF|=${e.a}-${nb(ev)}\\times${e.xP! < 0 ? `(${nb(e.xP!)})` : nb(e.xP!)}`), ligne(`=${nb(rayonF136(e))}`)]),
           res,
         );
         break;
       case "rayonFp":
         out.push(
-          utilise(sq, [t("Rayons focaux (cours, § 3) : "), l("|PF'|=a+e\\,x_P"), t(".")]),
+          utilise(sq, [t("Rayons focaux (cours, point 3) : "), l("|PF'|=a+e\\,x_P"), t(".")]),
           calcul(sq, [ligne(`|PF'|=${e.a}+${nb(ev)}\\times${e.xP! < 0 ? `(${nb(e.xP!)})` : nb(e.xP!)}`), ligne(`=${nb(rayonFp136(e))}`)]),
           res,
           verification(sq, [l(`|PF|+|PF'|=${nb(rayonF136(e))}+${nb(rayonFp136(e))}=${nb(2 * e.a)}=2a`), t(" ✓")]),
@@ -45,14 +45,14 @@ export function correctionDetaillee136(e: E): EtapeCorrection[] {
         break;
       case "cosMax":
         out.push(
-          utilise(sq, [t("B est sur l'axe non focal : "), l("|BF|=|BF'|=a"), t(" ; loi des cosinus dans le triangle FBF′ (cours, § 3), avec "), l("|FF'|=2c"), t(".")]),
+          utilise(sq, [t("B est sur l'axe non focal : "), l("|BF|=|BF'|=a"), t(" ; loi des cosinus dans le triangle FBF′ (cours, point 3), avec "), l("|FF'|=2c"), t(".")]),
           calcul(sq, [ligne(`\\cos\\widehat{FBF'}=\\dfrac{a^2+a^2-4c^2}{2a^2}`), ligne(`=\\dfrac{${e.a * e.a}+${e.a * e.a}-${4 * e.c * e.c}}{${2 * e.a * e.a}}`), ligne(`=${nb(cosMax136(e))}`)]),
           res,
         );
         break;
       case "existence":
         out.push(
-          utilise(sq, [t("Quand P parcourt l'ellipse, l'angle FPF′ est maximal en B (cours, § 3) ; un angle plus grand a un cosinus plus petit.")]),
+          utilise(sq, [t("Quand P parcourt l'ellipse, l'angle FPF′ est maximal en B (cours, point 3) ; un angle plus grand a un cosinus plus petit.")]),
           calcul(sq, [ligne(`\\cos ${e.theta}^\\circ=${nb(cosTheta(e.theta!))}`), ligne(`${nb(cosTheta(e.theta!))}${e.existe ? "\\geq" : "<"}${nb(cosMax136(e))}`, e.existe ? "l'angle demandé ne dépasse pas l'angle maximal" : "l'angle demandé dépasse l'angle maximal")]),
           res,
           piege(sq, [t("Comparer les cosinus dans le mauvais sens : un plus grand angle a un plus petit cosinus.")]),
@@ -61,7 +61,7 @@ export function correctionDetaillee136(e: E): EtapeCorrection[] {
       case "aire": {
         const th = e.theta!;
         out.push(
-          utilise(sq, [t("Triangle focal (cours, § 3) : "), l("|PF|+|PF'|=2a"), t(", loi des cosinus, puis "), l("\\mathcal{A}=\\tfrac12|PF|\\,|PF'|\\sin\\theta"), t(".")]),
+          utilise(sq, [t("Triangle focal (cours, point 3) : "), l("|PF|+|PF'|=2a"), t(", loi des cosinus, puis "), l("\\mathcal{A}=\\tfrac12|PF|\\,|PF'|\\sin\\theta"), t(".")]),
           calcul(sq, [
             ligne(`4c^2=|PF|^2+|PF'|^2-2|PF|\\,|PF'|\\cos\\theta`, "loi des cosinus"),
             ligne(`4c^2=4a^2-2|PF|\\,|PF'|(1+\\cos\\theta)`, "car (|PF| + |PF′|)² = 4a²"),

@@ -23,7 +23,7 @@ const avecFigure = (et: EtapeCorrection, svg: string): EtapeCorrection => ({ ...
 function etapeEquation(e: E): EtapeCorrection[] {
   const s = e.stats;
   return [
-    utilise("a", [t("La calculatrice (mode « 2-Var Stats », x dans L1 et y dans L2) donne la droite des moindres carrés "), f("y=ax+b"), t(", avec "), f("a=\\dfrac{\\operatorname{Cov}(x,y)}{V(x)}"), t(" et "), f("b=\\bar{y}-a\\,\\bar{x}"), t(" (cours, § 4).")]),
+    utilise("a", [t("La calculatrice (mode « 2-Var Stats », x dans L1 et y dans L2) donne la droite des moindres carrés "), f("y=ax+b"), t(", avec "), f("a=\\dfrac{\\operatorname{Cov}(x,y)}{V(x)}"), t(" et "), f("b=\\bar{y}-a\\,\\bar{x}"), t(" (cours, point 4).")]),
     calcul("a", [
       ligne(`\\bar{x}${egalOuEnviron(s.mx, 4)}`, "moyenne des x"),
       ligne(`\\bar{y}${egalOuEnviron(s.my, 4)}`, "moyenne des y"),
@@ -39,7 +39,7 @@ function etapeEquation(e: E): EtapeCorrection[] {
 function etapeCorrelation(e: E): EtapeCorrection[] {
   const s = e.stats;
   return [
-    utilise("b", [t("La calculatrice affiche r avec a et b ; par définition (cours, § 5) "), f("r=\\dfrac{\\operatorname{Cov}(x,y)}{\\sigma_x\\,\\sigma_y}"), t(", de même signe que a.")]),
+    utilise("b", [t("La calculatrice affiche r avec a et b ; par définition (cours, point 5) "), f("r=\\dfrac{\\operatorname{Cov}(x,y)}{\\sigma_x\\,\\sigma_y}"), t(", de même signe que a.")]),
     calcul("b", [
       ligne(`\\operatorname{Cov}(x,y)${egalOuEnviron(s.cov, 4)}`, "moyenne des produits des écarts"),
       ligne(`\\sigma_x${egalOuEnviron(s.sx, 4)}\\qquad\\sigma_y${egalOuEnviron(s.sy, 4)}`, "écarts-types (division par n)"),
@@ -53,7 +53,7 @@ function etapeCorrelation(e: E): EtapeCorrection[] {
 function etapeFiabilite(e: E): EtapeCorrection[] {
   const v = Math.abs(e.stats.r);
   return [
-    utilise("c", [t("La droite est un bon modèle quand la corrélation est forte ou très forte (tableau d'interprétation du cours, § 5) : "), f(TABLEAU_R_LATEX)]),
+    utilise("c", [t("La droite est un bon modèle quand la corrélation est forte ou très forte (tableau d'interprétation du cours, point 5) : "), f(TABLEAU_R_LATEX)]),
     calcul("c", [
       ligne(`|r|\\approx ${nL(v, 3, true)}${v >= 0.8 ? "\\geq" : "<"}0{,}80`, `corrélation ${categorieR(e.stats.r)}`),
     ]),
@@ -81,7 +81,7 @@ function etapeNature(e: E): EtapeCorrection[] {
   const x0 = xL(e, e.x0);
   const lien = e.interpolation ? `${mn}<${x0}<${mx}` : e.x0 > xMax(e) ? `${x0}>${mx}` : `${x0}<${mn}`;
   return [
-    utilise("e", [t("Interpolation : x est dans l'intervalle des données ; extrapolation : en dehors, où rien ne garantit que la tendance continue (cours, § 2 et § 6).")]),
+    utilise("e", [t("Interpolation : x est dans l'intervalle des données ; extrapolation : en dehors, où rien ne garantit que la tendance continue (cours, points 2 et 6).")]),
     calcul("e", [ligne(lien, `les x du tableau vont de ${nT(xMin(e), 2)} à ${nT(xMax(e), 2)}`)]),
     resultat("e", fr(reponse(e, "nature"))),
     ...(e.fiable ? [] : [verification("e", [t("De toute façon, le modèle est peu fiable (corrélation trop faible) : la prévision n'est qu'un ordre de grandeur.")])]),

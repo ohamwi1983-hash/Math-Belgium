@@ -13,7 +13,7 @@ import type { Q } from "./nombresExp";
 type E = ExerciceLimitesRef;
 export type PhaseLimitesRef = "forme" | "reference" | "valeur";
 export const PHASES: PhaseLimitesRef[] = ["forme", "reference", "valeur"];
-export const COURS_LIMITES = "(cours, § 1)";
+export const COURS_LIMITES = "(cours, point 1)";
 
 // ============================================================================
 // Écritures.

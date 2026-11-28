@@ -40,8 +40,8 @@ export function correctionDetaillee125(e: E): EtapeCorrection[] {
           ...utilise(sq, [
             t(
               e.famille === "cercle"
-                ? "Cercles remarquables (cours, § 1 et § 2) : circonscrit (par les sommets), inscrit (tangent aux côtés, à l'intérieur), exinscrit (tangent à un côté et aux prolongements des deux autres), cercle des neuf points (milieux des côtés, pieds des hauteurs)."
-                : "Droites remarquables (cours, § 1) : médiane (sommet, milieu du côté opposé), hauteur (sommet, perpendiculaire au côté opposé), médiatrice (milieu d'un côté, perpendiculaire), bissectrice (partage un angle en deux angles égaux).",
+                ? "Cercles remarquables (cours, points 1 et 2) : circonscrit (par les sommets), inscrit (tangent aux côtés, à l'intérieur), exinscrit (tangent à un côté et aux prolongements des deux autres), cercle des neuf points (milieux des côtés, pieds des hauteurs)."
+                : "Droites remarquables (cours, point 1) : médiane (sommet, milieu du côté opposé), hauteur (sommet, perpendiculaire au côté opposé), médiatrice (milieu d'un côté, perpendiculaire), bissectrice (partage un angle en deux angles égaux).",
             ),
           ]),
           figureHtml: figureCorrigeLot(figure125(e, NOM_OBJET[e.objet].replace(/^./, (c) => c.toUpperCase()))),
@@ -54,10 +54,10 @@ export function correctionDetaillee125(e: E): EtapeCorrection[] {
         utilise(sq, [
           t(
             e.famille === "droite"
-              ? "Points de concours (cours, § 1) : médianes → G, hauteurs → H, médiatrices → O, bissectrices → I."
+              ? "Points de concours (cours, point 1) : médianes → G, hauteurs → H, médiatrices → O, bissectrices → I."
               : e.famille === "point"
-                ? "Propriétés (cours, § 1) : G aux deux tiers de chaque médiane depuis le sommet ; H, les droites vers les sommets sont perpendiculaires aux côtés opposés ; O équidistant des sommets ; I équidistant des côtés."
-                : "Centre d'un cercle (cours, § 1 et § 2) : équidistant de deux points → sur leur médiatrice ; équidistant de deux droites → sur une bissectrice de leurs angles.",
+                ? "Propriétés (cours, point 1) : G aux deux tiers de chaque médiane depuis le sommet ; H, les droites vers les sommets sont perpendiculaires aux côtés opposés ; O équidistant des sommets ; I équidistant des côtés."
+                : "Centre d'un cercle (cours, points 1 et 2) : équidistant de deux points → sur leur médiatrice ; équidistant de deux droites → sur une bissectrice de leurs angles.",
           ),
         ]),
         resultat(sq, fr(reponse125(e, ph))),

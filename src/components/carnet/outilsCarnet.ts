@@ -201,8 +201,16 @@ export function texteReperes(iso: string): string {
   return r.semaine === null ? `Période ${r.periode}` : `Période ${r.periode} · semaine ${r.semaine}`
 }
 
+/** « point 3 », « points 2 et 3 », « points 1, 2 et 4 » (les parties numérotées d'un chapitre s'appellent des
+ * « points », décision du professeur du 28/11/2026). */
+export function listePoints(numeros: (number | string)[]): string {
+  if (numeros.length === 0) return ''
+  if (numeros.length === 1) return `point ${numeros[0]}`
+  return `points ${numeros.slice(0, -1).join(', ')} et ${numeros[numeros.length - 1]}`
+}
+
 /** Résumé court d'une séance : titre du chapitre, sections vues (« 6. Relation de Chasles »), et
- * numéros (« § 6, 7 »). */
+ * numéros (« points 6 et 7 »). */
 export function resumeSeance(s: Pick<Seance, 'niveau' | 'chapitre' | 'parties'>): { chapitre: string; sections: string[]; numeros: string } {
   const ch = findChapter(s.niveau, s.chapitre)
   if (!ch) return { chapitre: `Chapitre retiré du site (${s.chapitre})`, sections: [], numeros: '' }
@@ -210,11 +218,11 @@ export function resumeSeance(s: Pick<Seance, 'niveau' | 'chapitre' | 'parties'>)
   return {
     chapitre: texteBrut(ch.title),
     sections: lignes.map((l) => `${l.numero}. ${l.titreSection}`),
-    numeros: lignes.length > 0 ? `§ ${lignes.map((l) => l.numero).join(', ')}` : '',
+    numeros: lignes.length > 0 ? listePoints(lignes.map((l) => l.numero)) : '',
   }
 }
 
-/** « Limites et asymptotes, § 3 Asymptotes » : la dernière séance de la classe AVANT ce créneau
+/** « Limites et asymptotes, point 3 « Asymptotes » » : la dernière séance de la classe AVANT ce créneau
  * (dernière section vue), pour « dernière fois : … ». */
 export function derniereFois(seances: Seance[], classeId: string, date: string, numeroHeure: number | null = null): string | null {
   const avant = seances.filter(
@@ -226,7 +234,7 @@ export function derniereFois(seances: Seance[], classeId: string, date: string, 
   if (!ch) return null
   const lignes = lignesPartiesVues(s.parties, structureChapitre(ch))
   const derniere = lignes[lignes.length - 1]
-  return derniere ? `${texteBrut(ch.title)}, § ${derniere.numero} ${derniere.titreSection}` : texteBrut(ch.title)
+  return derniere ? `${texteBrut(ch.title)}, point ${derniere.numero} « ${derniere.titreSection} »` : texteBrut(ch.title)
 }
 
 /** « Semaine du 16 au 20 novembre » / « … du 30 novembre au 4 décembre ». */

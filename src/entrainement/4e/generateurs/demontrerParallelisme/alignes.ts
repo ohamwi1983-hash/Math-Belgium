@@ -274,7 +274,7 @@ function optionsConclusion(cas: CasTroisPointsAlignes, construits: PointIntersec
       {
         texte: `Ils sont sécants en un seul point : ${noms} sont donc confondus.`,
         valide: false,
-        defaut: "Deux plans sécants ont toute une droite en commun, jamais un seul point (cours, § 5).",
+        defaut: "Deux plans sécants ont toute une droite en commun, jamais un seul point (cours, point 5).",
       },
     ];
     return melanger([valable, ...melanger(leurres).slice(0, 3)]);

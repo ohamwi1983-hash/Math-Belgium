@@ -22,14 +22,14 @@ import { approche, dec, decimalExact, pgcd, q, qAdd, qMul, qVal, sansDoublons, t
  *   intervalle délimité par les racines et les valeurs exclues.
  */
 
-export const COURS_REGLES = "(cours, § 3)";
-export const COURS_SIGNE = "(cours, § 4)";
-export const COURS_LOCALE = "(cours, § 5)";
-export const COURS_ETUDIER = "(cours, § 7)";
-export const COURS_OPTIMISATION = "(cours, § 8)";
-export const COURS_ECONOMIQUE = "(cours, § 9)";
-export const COURS_BORNE = "(cours, § 10)";
-export const COURS_VITESSE = "(cours, § 11)";
+export const COURS_REGLES = "(cours, point 3)";
+export const COURS_SIGNE = "(cours, point 4)";
+export const COURS_LOCALE = "(cours, point 5)";
+export const COURS_ETUDIER = "(cours, point 7)";
+export const COURS_OPTIMISATION = "(cours, point 8)";
+export const COURS_ECONOMIQUE = "(cours, point 9)";
+export const COURS_BORNE = "(cours, point 10)";
+export const COURS_VITESSE = "(cours, point 11)";
 
 export type Fragments = FragmentConsigne[];
 export const t = texte;

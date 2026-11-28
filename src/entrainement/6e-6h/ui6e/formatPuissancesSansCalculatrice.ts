@@ -17,7 +17,7 @@ export function phases(e: E): PhasePuissances[] {
   return e.variante === "comparer" ? ["exposants", "sens", "conclusion"] : ["exposant", "valeur"];
 }
 
-export const COURS_PUISSANCES = "(cours, § 1)";
+export const COURS_PUISSANCES = "(cours, point 1)";
 
 // ============================================================================
 // Écritures.

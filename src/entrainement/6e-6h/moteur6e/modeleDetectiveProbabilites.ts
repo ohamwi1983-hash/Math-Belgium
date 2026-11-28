@@ -162,7 +162,7 @@ function complementaire(e: E): CopieDetectiveProba {
     lignes: [[l("\\bar{A}"), t(` : ${tous}.`)], [l(`P(\\bar{A})=${puissL(p, n, decimal)}=${nb(pN)}`)], [l(`P(A)=1-${nb(pN)}=${nb(qSub(q(1), pN))}`)]],
     ligneFausse: 0,
     regles: ["événement contraire", `probabilité du contraire (${essais} indépendants : produit)`, "probabilité cherchée par le contraire"],
-    regleCours: { texte: [t("Événement contraire (cours, § 1 et § 4) : le contraire de « au moins un succès » est « aucun succès » ; ensuite "), l("P(A)=1-P(\\bar{A})"), t(".")] },
+    regleCours: { texte: [t("Événement contraire (cours, points 1 et 4) : le contraire de « au moins un succès » est « aucun succès » ; ensuite "), l("P(A)=1-P(\\bar{A})"), t(".")] },
     aideCorrection: { texte: [t("Écris le bon contraire, puis calcule "), l("P(\\bar{A})"), t(" : les "), l(`${n}`), t(` ${essais} sont des échecs, de probabilité `), l(nb(qe)), t(" chacun.")] },
     valeur: qSub(q(1), qN),
     valeurCopie: qSub(q(1), pN),
@@ -174,7 +174,7 @@ function complementaire(e: E): CopieDetectiveProba {
       { valeur: qMul(p, q(n)), message: [t("On n'additionne pas les probabilités des essais : passe par l'événement contraire.")] },
     ],
     corrigeA: {
-      utilise: [t("Le contraire de « au moins un succès » est « aucun succès » (cours, § 4, « au moins un » par le complément) : "), l("\\bar{A}"), t(` : ${aucun}.`)],
+      utilise: [t("Le contraire de « au moins un succès » est « aucun succès » (cours, point 4, « au moins un » par le complément) : "), l("\\bar{A}"), t(` : ${aucun}.`)],
       lignes: [ligne(`P(\\bar{A})=${puissL(qe, n, decimal)}`, [ft(`${n} échecs, ${essais} indépendants : on multiplie`)]), ligne(`=${nb(qN)}`, [ft("et non "), fl(nb(pN)), ft(" comme dans la copie")])],
     },
     corrigeB: {
@@ -202,7 +202,7 @@ function reunion(e: E): CopieDetectiveProba {
     lignes: [[l(`P(A\\cup V)=${fracB(a, N)}+${fracB(b, N)}=${fracB(a + b, N)}`)], [l(`P(\\overline{A\\cup V})=1-${fracB(a + b, N)}=${fracB(N - a - b, N)}`)]],
     ligneFausse: 0,
     regles: ["probabilité de la réunion", "probabilité du contraire"],
-    regleCours: { texte: [t("Probabilité d'une réunion (cours, § 1) :")], latex: "P(A\\cup V)=P(A)+P(V)-P(A\\cap V)" },
+    regleCours: { texte: [t("Probabilité d'une réunion (cours, point 1) :")], latex: "P(A\\cup V)=P(A)+P(V)-P(A\\cap V)" },
     aideCorrection: { texte: [t("Recalcule "), l("P(A\\cup V)"), t(" en retirant "), l(`P(A\\cap V)=${fracB(c, N)}`), t(", puis passe au contraire.")] },
     valeur: juste,
     valeurCopie: q(N - a - b, N),
@@ -213,7 +213,7 @@ function reunion(e: E): CopieDetectiveProba {
       { valeur: q(c, N), message: [t("C'est "), l("P(A\\cap V)"), t(", la probabilité de pratiquer les deux.")] },
     ],
     corrigeA: {
-      utilise: [t("Probabilité d'une réunion (cours, § 1) : "), l("P(A\\cup V)=P(A)+P(V)-P(A\\cap V)"), t(".")],
+      utilise: [t("Probabilité d'une réunion (cours, point 1) : "), l("P(A\\cup V)=P(A)+P(V)-P(A\\cap V)"), t(".")],
       lignes: [ligne(`P(A\\cup V)=${fracB(a, N)}+${fracB(b, N)}-${fracB(c, N)}`, "on retire l'intersection, comptée deux fois"), ligne(`=${fracB(a + b - c, N)}`, [ft("et non "), fl(fracB(a + b, N)), ft(" comme dans la copie")])],
     },
     corrigeB: {
@@ -240,7 +240,7 @@ function conditionnelleInversee(e: E): CopieDetectiveProba {
     lignes: [[l("P(T|B)=\\dfrac{P(T\\cap B)}{P(T)}")], [l(`P(T|B)=${fracB(c, N)}\\div${fracB(a, N)}=${fracB(c, a)}`)]],
     ligneFausse: 0,
     regles: ["définition de la probabilité conditionnelle", "calcul de la conditionnelle"],
-    regleCours: { texte: [t("Probabilité conditionnelle (cours, § 1) — on divise par la probabilité de ce qu'on sait déjà :")], latex: "P(T|B)=\\dfrac{P(T\\cap B)}{P(B)}" },
+    regleCours: { texte: [t("Probabilité conditionnelle (cours, point 1) — on divise par la probabilité de ce qu'on sait déjà :")], latex: "P(T|B)=\\dfrac{P(T\\cap B)}{P(B)}" },
     aideCorrection: { texte: [t("Recommence avec "), l(`P(B)=${fracB(b, N)}`), t(" au dénominateur.")] },
     valeur: q(c, b),
     valeurCopie: q(c, a),
@@ -251,7 +251,7 @@ function conditionnelleInversee(e: E): CopieDetectiveProba {
       { valeur: q(a, N), message: [t("C'est "), l("P(T)"), t(" : savoir que le membre joue au badminton change la probabilité.")] },
     ],
     corrigeA: {
-      utilise: [t("Probabilité conditionnelle (cours, § 1) : on divise par la probabilité de l'événement connu, ici "), l("B"), t(".")],
+      utilise: [t("Probabilité conditionnelle (cours, point 1) : on divise par la probabilité de l'événement connu, ici "), l("B"), t(".")],
       lignes: [ligne("P(T|B)=\\dfrac{P(T\\cap B)}{P(B)}", [ft("et non "), fl("\\dfrac{P(T\\cap B)}{P(T)}"), ft(" comme dans la copie")])],
     },
     corrigeB: {
@@ -280,7 +280,7 @@ function produitSansRemise(e: E): CopieDetectiveProba {
     lignes: [[l(`P(R_1)=${fracB(r, n)}`)], [l(`P(R_2|R_1)=${fracB(r, n)}`)], [l(`P(R_1\\cap R_2)=${fracB(r, n)}\\times${fracB(r, n)}=${fracB(r * r, n * n)}`)]],
     ligneFausse: 1,
     regles: ["proportion de boules rouges", "composition de l'urne au 2e tirage", "produit le long du chemin"],
-    regleCours: { texte: [t("Tirage sans remise (cours, § 2) : au second tirage, l'urne a perdu une boule ; "), l("P(R_2|R_1)"), t(" se lit sur l'urne modifiée.")] },
+    regleCours: { texte: [t("Tirage sans remise (cours, point 2) : au second tirage, l'urne a perdu une boule ; "), l("P(R_2|R_1)"), t(" se lit sur l'urne modifiée.")] },
     aideCorrection: { texte: [t("Après une boule rouge tirée, combien reste-t-il de boules, et combien de rouges ? Recalcule "), l("P(R_2|R_1)"), t(", puis le produit.")] },
     valeur: q(r * (r - 1), D),
     valeurCopie: q(r * r, n * n),
@@ -291,7 +291,7 @@ function produitSansRemise(e: E): CopieDetectiveProba {
       { valeur: q(r * (r - 1), n * n), message: [t("Après le premier tirage, il ne reste que "), l(`${n - 1}`), t(" boules dans l'urne.")] },
     ],
     corrigeA: {
-      utilise: [t("Tirage sans remise (cours, § 2) : après une rouge, il reste "), l(`${n - 1}`), t(" boules dont "), l(`${r - 1}`), t(" rouges.")],
+      utilise: [t("Tirage sans remise (cours, point 2) : après une rouge, il reste "), l(`${n - 1}`), t(" boules dont "), l(`${r - 1}`), t(" rouges.")],
       lignes: [ligne(`P(R_2|R_1)=${fracB(r - 1, n - 1)}`, [ft("et non "), fl(fracB(r, n)), ft(" comme dans la copie")])],
     },
     corrigeB: {
@@ -337,7 +337,7 @@ function arbreMalPondere(e: E): CopieDetectiveProba {
     lignes: [[l(`P(B)=1-${dec(pA)}=${dec(pB)}`)], [l(`P(A\\cap D)=${dec(pA)}\\times ${dec(qA)}=${dec(cA)}`)], [l(`P(B\\cap D)=${dec(qB)}`)], [l(`P(D)=${dec(cA)}+${dec(qB)}=${dec(copie)}`)]],
     ligneFausse: 2,
     regles: ["probabilité du contraire", "chemin A puis D", "chemin B puis D", "probabilités totales"],
-    regleCours: { texte: [t("Probabilité d'un chemin (cours, § 2) : produit des probabilités de ses branches —")], latex: "P(B\\cap D)=P(B)\\times P(D|B)" },
+    regleCours: { texte: [t("Probabilité d'un chemin (cours, point 2) : produit des probabilités de ses branches —")], latex: "P(B\\cap D)=P(B)\\times P(D|B)" },
     aideCorrection: { texte: [t("Multiplie la branche "), l(`P(B)=${dec(pB)}`), t(" par "), l(`P(D|B)=${dec(qB)}`), t(", puis additionne les deux chemins qui mènent à D.")] },
     valeur: juste,
     valeurCopie: copie,
@@ -348,7 +348,7 @@ function arbreMalPondere(e: E): CopieDetectiveProba {
       { valeur: qAdd(qA, qB), message: [t("On n'additionne pas les branches du second niveau : chaque chemin est un produit.")] },
     ],
     corrigeA: {
-      utilise: [t("Probabilité d'un chemin (cours, § 2 et § 3) : produit des probabilités de ses branches.")],
+      utilise: [t("Probabilité d'un chemin (cours, points 2 et 3) : produit des probabilités de ses branches.")],
       lignes: [ligne("P(B\\cap D)=P(B)\\times P(D|B)", "chemin « B puis D »"), ligne(`=${dec(pB)}\\times ${dec(qB)}`), ligne(`=${dec(cB)}`, [ft("et non "), fl(dec(qB)), ft(" comme dans la copie")])],
     },
     corrigeB: {
@@ -356,7 +356,7 @@ function arbreMalPondere(e: E): CopieDetectiveProba {
       lignes: [ligne("P(A\\cap D)=0{,}5\\times 0{,}2=0{,}1", "et non 0,2 : une branche seule ne suffit pas")],
     },
     corrigeC: {
-      utilise: [t("On reprend à partir de la ligne fausse : chemin « B puis D », puis probabilités totales (cours, § 3).")],
+      utilise: [t("On reprend à partir de la ligne fausse : chemin « B puis D », puis probabilités totales (cours, point 3).")],
       lignes: [ligne(`P(B\\cap D)=${dec(pB)}\\times ${dec(qB)}=${dec(cB)}`), ligne(`P(D)=${dec(cA)}+${dec(cB)}`, "probabilités totales"), ligne(`=${dec(juste)}`)],
       verification: { utilise: [l("P(D)"), t(" est une moyenne pondérée des taux des deux machines, donc comprise entre eux :")], lignes: [ligne(`${dec(mi)}\\le ${dec(juste)}\\le ${dec(ma)}`)] },
     },
@@ -377,7 +377,7 @@ function ordreOublie(e: E): CopieDetectiveProba {
       lignes: [[t("Cas favorable : "), l(`(${a}\\,;${b})`), t(", un seul couple.")], [l("P=\\dfrac{1}{36}")]],
       ligneFausse: 0,
       regles: ["cas favorables", "favorables / possibles"],
-      regleCours: { texte: [t("Les issues sont des couples ordonnés (diagramme cartésien, cours, § 2) : "), l(`(${a}\\,;${b})`), t(" et "), l(`(${b}\\,;${a})`), t(" sont deux issues différentes.")] },
+      regleCours: { texte: [t("Les issues sont des couples ordonnés (diagramme cartésien, cours, point 2) : "), l(`(${a}\\,;${b})`), t(" et "), l(`(${b}\\,;${a})`), t(" sont deux issues différentes.")] },
       aideCorrection: { texte: [t("Compte toutes les cases du diagramme cartésien qui contiennent un "), l(`${a}`), t(" et un "), l(`${b}`), t(".")] },
       valeur: q(2, 36),
       valeurCopie: q(1, 36),
@@ -385,7 +385,7 @@ function ordreOublie(e: E): CopieDetectiveProba {
       piege: [t("C'est le résultat de la copie : un seul des deux ordres y est compté.")],
       autres: [{ valeur: q(1, 21), message: [t("Les "), l("36"), t(" couples sont équiprobables, pas les 21 paires non ordonnées.")] }],
       corrigeA: {
-        utilise: [t("Les couples sont ordonnés (cours, § 2) : obtenir un "), l(`${a}`), t(" et un "), l(`${b}`), t(", c'est "), l(`(${a}\\,;${b})`), t(" ou "), l(`(${b}\\,;${a})`), t(".")],
+        utilise: [t("Les couples sont ordonnés (cours, point 2) : obtenir un "), l(`${a}`), t(" et un "), l(`${b}`), t(", c'est "), l(`(${a}\\,;${b})`), t(" ou "), l(`(${b}\\,;${a})`), t(".")],
         lignes: [ligne("n(\\text{favorables})=2", [ft("et non 1 comme dans la copie")])],
       },
       corrigeB: {
@@ -412,7 +412,7 @@ function ordreOublie(e: E): CopieDetectiveProba {
     lignes: [[t("« Une boule de chaque couleur » : le chemin "), l("R_1\\cap B_2"), t(".")], [l(`P(R_1\\cap B_2)=${fracB(r, n)}\\times${fracB(b, n - 1)}=${fracB(r * b, D)}`)]],
     ligneFausse: 0,
     regles: ["chemins qui réalisent l'événement", "produit le long du chemin"],
-    regleCours: { texte: [t("Probabilité d'un événement (cours, § 2) : somme des probabilités de tous les chemins qui le réalisent ; ici l'ordre des couleurs compte.")] },
+    regleCours: { texte: [t("Probabilité d'un événement (cours, point 2) : somme des probabilités de tous les chemins qui le réalisent ; ici l'ordre des couleurs compte.")] },
     aideCorrection: { texte: [t("Ajoute le chemin "), l("B_1\\cap R_2"), t(" : calcule sa probabilité, puis additionne les deux chemins.")] },
     valeur: q(2 * r * b, D),
     valeurCopie: q(r * b, D),
@@ -420,7 +420,7 @@ function ordreOublie(e: E): CopieDetectiveProba {
     piege: [t("C'est le résultat de la copie : le chemin « bleue puis rouge » y manque.")],
     autres: [{ valeur: q(2 * r * b, n * n), message: [t("Le tirage est sans remise : au second tirage, il ne reste que "), l(`${n - 1}`), t(" boules.")] }],
     corrigeA: {
-      utilise: [t("Une boule de chaque couleur se réalise par deux chemins de l'arbre (cours, § 2) : rouge puis bleue, ou bleue puis rouge.")],
+      utilise: [t("Une boule de chaque couleur se réalise par deux chemins de l'arbre (cours, point 2) : rouge puis bleue, ou bleue puis rouge.")],
       lignes: [ligne("P(\\text{une de chaque})=P(R_1\\cap B_2)+P(B_1\\cap R_2)", [ft("et non le seul chemin "), fl("R_1\\cap B_2"), ft(" comme dans la copie")])],
     },
     corrigeB: {

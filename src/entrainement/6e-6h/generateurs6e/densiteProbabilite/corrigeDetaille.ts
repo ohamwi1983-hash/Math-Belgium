@@ -56,7 +56,7 @@ function etapesTrace(e: E): EtapeCorrection[] {
     if (ph === "k") {
       const { lignes, total } = lignesAires(e, u, v, "\\mathcal{A}");
       out.push(
-        utilise(sq, [t("Densité (cours, § 3) : l'aire totale sous la courbe vaut 1. On découpe l'aire en figures simples ; les hauteurs se lisent sur le quadrillage, en multiples de k.")]),
+        utilise(sq, [t("Densité (cours, point 3) : l'aire totale sous la courbe vaut 1. On découpe l'aire en figures simples ; les hauteurs se lisent sur le quadrillage, en multiples de k.")]),
         calcul(sq, [...lignes, ligne(`${enK(total)}=1`, "l'aire totale vaut 1"), ligne(`k=${kl}`)]),
         resultat(sq, fr(reponse113(e, ph))),
         piege(sq, [t("Prendre pour k l'aire totale elle-même : c'est son inverse qui fait valoir 1 à l'aire.")]),
@@ -68,7 +68,7 @@ function etapesTrace(e: E): EtapeCorrection[] {
     const { lignes, total } = lignesAires(e, x0, x1, "\\mathcal{A}");
     const P = ph === "intervalle" ? probaIntervalle113(e) : probaQueue113(e);
     out.push(
-      utilise(sq, [t("Probabilité d'un intervalle (cours, § 3) : c'est l'aire sous la courbe de f entre ses bornes ; au milieu d'une pente, la hauteur est la fraction de k correspondante.")]),
+      utilise(sq, [t("Probabilité d'un intervalle (cours, point 3) : c'est l'aire sous la courbe de f entre ses bornes ; au milieu d'une pente, la hauteur est la fraction de k correspondante.")]),
       { ...calcul(sq, [...lignes, ligne(`${ev}=${enK(total)}`, "aire entre les bornes"), ligne(`=${ql(total)}\\times ${kl}`, "on remplace k"), ligne(`=${ql(P)}`)]), figureHtml: densiteSvg(e.segments!, { zone: [x0, x1] }) },
       resultat(sq, fr(reponse113(e, ph))),
       ...(ph === "queue" ? [verification(sq, [t("Avec l'aire restante : "), l(`1-${ql(fois(k, aireUnites(e.segments!, x1 === v ? u : x1, x1 === v ? x0 : v)))}=${ql(P)}`), t(".")])] : []),
@@ -90,7 +90,7 @@ function etapesFormule(e: E): EtapeCorrection[] {
     const sq = lettreEtape(i);
     if (ph === "k") {
       out.push(
-        utilise(sq, [t("Densité (cours, § 3) : "), l(`\\int_0^{${L}}f(x)\\,dx=1`), t(" ; k sort de l'intégrale.")]),
+        utilise(sq, [t("Densité (cours, point 3) : "), l(`\\int_0^{${L}}f(x)\\,dx=1`), t(" ; k sort de l'intégrale.")]),
         calcul(sq, [
           ligne(`\\int_0^{${L}}k${gl}\\,dx=1`, "l'aire totale vaut 1"),
           ligne(`k\\Big[${primitiveLatex(g, L)}\\Big]_0^{${L}}=1`, "primitive"),
@@ -107,7 +107,7 @@ function etapesFormule(e: E): EtapeCorrection[] {
       const diff = moins(Gb, Ga);
       const paren = (x: Q) => (x.n < 0 ? `\\left(${ql(x)}\\right)` : ql(x));
       out.push(
-        utilise(sq, [t("Probabilité d'un intervalle (cours, § 3) : "), l("P(a\\leq X\\leq b)=\\int_a^b f(x)\\,dx"), t(".")]),
+        utilise(sq, [t("Probabilité d'un intervalle (cours, point 3) : "), l("P(a\\leq X\\leq b)=\\int_a^b f(x)\\,dx"), t(".")]),
         calcul(sq, [
           ligne(`${evenementIntervalle113(e)}=\\int_{${e.a}}^{${e.b}}${kl}${gl}\\,dx`),
           ligne(`=${kl}\\Big[${primitiveLatex(g, L)}\\Big]_{${e.a}}^{${e.b}}`, "primitive"),
@@ -123,7 +123,7 @@ function etapesFormule(e: E): EtapeCorrection[] {
       const xg = xgLatex(g, L);
       const I = integraleXG(g, L);
       out.push(
-        utilise(sq, [t("Espérance d'une variable continue (cours, § 3) : "), l(`E(X)=\\int_0^{${L}}x\\,f(x)\\,dx`), t(".")]),
+        utilise(sq, [t("Espérance d'une variable continue (cours, point 3) : "), l(`E(X)=\\int_0^{${L}}x\\,f(x)\\,dx`), t(".")]),
         calcul(sq, [
           ligne(`E(X)=\\int_0^{${L}}x\\times ${kl}${gl}\\,dx`),
           ligne(`=${kl}\\int_0^{${L}}${xg.integrande.includes("-") ? `\\left(${xg.integrande}\\right)` : xg.integrande}\\,dx`, "on développe"),

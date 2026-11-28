@@ -18,19 +18,19 @@ export interface V {
 }
 
 /** Renvois aux sections numérotées du chapitre `calcul-vectoriel.ts`. */
-export const COURS_VECTEUR = "(cours, § 1)";
-export const COURS_OPPOSES = "(cours, § 2)";
-export const COURS_MULTIPLIER = "(cours, § 3)";
-export const COURS_CHASLES = "(cours, § 6)";
-export const COURS_COMPOSANTES = "(cours, § 8)";
-export const COURS_ADDITION_REPERE = "(cours, § 9)";
-export const COURS_MULTIPLICATION_REPERE = "(cours, § 10)";
-export const COURS_NORME = "(cours, § 11)";
-export const COURS_TRANSLATION_MILIEU = "(cours, § 12)";
-export const COURS_COLINEARITE = "(cours, § 13)";
-export const COURS_ORTHOGONALITE = "(cours, § 14)";
-export const COURS_COMPARER = "(cours, § 16)";
-export const COURS_RESULTANTE = "(cours, § 17)";
+export const COURS_VECTEUR = "(cours, point 1)";
+export const COURS_OPPOSES = "(cours, point 2)";
+export const COURS_MULTIPLIER = "(cours, point 3)";
+export const COURS_CHASLES = "(cours, point 6)";
+export const COURS_COMPOSANTES = "(cours, point 8)";
+export const COURS_ADDITION_REPERE = "(cours, point 9)";
+export const COURS_MULTIPLICATION_REPERE = "(cours, point 10)";
+export const COURS_NORME = "(cours, point 11)";
+export const COURS_TRANSLATION_MILIEU = "(cours, point 12)";
+export const COURS_COLINEARITE = "(cours, point 13)";
+export const COURS_ORTHOGONALITE = "(cours, point 14)";
+export const COURS_COMPARER = "(cours, point 16)";
+export const COURS_RESULTANTE = "(cours, point 17)";
 
 export const J_COMPOSANTES = "composantes : extrémité − origine";
 

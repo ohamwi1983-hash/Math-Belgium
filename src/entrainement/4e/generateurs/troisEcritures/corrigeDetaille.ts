@@ -17,8 +17,8 @@ import { mono, moinsH, nombreTexte, plusQ, polynome, q, qp, sansDoublons, somme 
 
 type E = ExerciceTroisEcritures;
 
-const COURS_ETUDIER = "(cours, § 1)";
-const COURS_TRANSFORMER = "(cours, § 2)";
+const COURS_ETUDIER = "(cours, point 1)";
+const COURS_TRANSFORMER = "(cours, point 2)";
 
 /** « (x−3)² = x² − 2·3·x + 3² » : le carré développé, avec le double produit visible. */
 function carreDeveloppe(h: number): string {

@@ -1200,14 +1200,14 @@ export function EvaluationGeneratorPanel({
     setGenereLocalementCompte(null)
     const sections = m.chapitres.reduce((t, c) => t + c.sections.length, 0)
     setBandeauCarnet(
-      `Matière vue${classe ? ` en ${classe}` : ''}${depuis ? ` depuis le ${depuis}` : ''} : ${sections} section${sections > 1 ? 's' : ''}, ` +
+      `Matière vue${classe ? ` en ${classe}` : ''}${depuis ? ` depuis le ${depuis}` : ''} : ${sections} point${sections > 1 ? 's' : ''}, ` +
         (chapitresLimites.size > 0
           ? generateurs > 0
-            ? `${generateurs} générateur${generateurs > 1 ? 's' : ''} choisi${generateurs > 1 ? 's' : ''} dans Mes classes (un exercice chacun ; les autres générateurs de ces sections ne sont pas pris). Ajuste les nombres, ou compose selon la durée avec ces seuls générateurs.`
+            ? `${generateurs} générateur${generateurs > 1 ? 's' : ''} choisi${generateurs > 1 ? 's' : ''} dans Mes classes (un exercice chacun ; les autres générateurs de ces points ne sont pas pris). Ajuste les nombres, ou compose selon la durée avec ces seuls générateurs.`
             : `aucun des ${choisis.size} générateur${choisis.size > 1 ? 's' : ''} choisis dans Mes classes n'est disponible avec ces réglages : choisis les questions à la main.`
           : generateurs > 0
             ? `${generateurs} générateur${generateurs > 1 ? 's' : ''} pré-sélectionné${generateurs > 1 ? 's' : ''} (un exercice chacun). Ajuste les nombres et ajoute d'autres questions si besoin.`
-            : 'aucun générateur dans ces sections : choisis les questions à la main.'),
+            : 'aucun générateur dans ces points : choisis les questions à la main.'),
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps -- une seule fois par matière demandée (garde `matiereTraitee`).
   }, [matiereDemandee])
@@ -1488,7 +1488,7 @@ export function EvaluationGeneratorPanel({
     const section = sectionDe(l)
     const detail = e.lettres > 1 ? `a)–${lettre(e.lettres)})` : e.lettres === 1 ? 'a)' : e.repetitions > 1 ? `×${e.repetitions}` : null
     if (e.nature === 'vraiFaux') return { titre: 'Vrai ou faux', detail }
-    if (e.nature === 'ouverte') return { titre: `${LABEL_TYPE[l.type].replace('Questions ouvertes — ', 'Question de ')}${section ? ` (§ ${section.number})` : ''}`, detail }
+    if (e.nature === 'ouverte') return { titre: `${LABEL_TYPE[l.type].replace('Questions ouvertes — ', 'Question de ')}${section ? ` (point ${section.number})` : ''}`, detail }
     const nom = (section ? libelleGenerateurPanneau(section, l.cle ?? '') : (l.cle ?? '')).replace(/\s*\((?:\d+)?gen\d+\)$/, '')
     const catalogue = catalogueVariantesExercice(l.cle as IdGenerateurPilote, estExercice ? 'exercice' : 'evaluation', (e.retraits[0].cles ?? []).map(varianteDeCle))
     const variantes = [...new Set((e.retraits[0].cles ?? []).map((c) => catalogue.find((v) => v.id === varianteDeCle(c))?.label).filter((x): x is string => !!x && x !== 'Tirage aléatoire'))]
@@ -1637,7 +1637,7 @@ export function EvaluationGeneratorPanel({
     ...(versionAmenagee ? ['version aménagée'] : []),
     ...(deuxColonnes ? ['deux colonnes'] : []),
     ...(joindreFormulaire ? ['formulaire en annexe'] : []),
-    ...(afficherTitresSection ? ['titres de section'] : []),
+    ...(afficherTitresSection ? ['titres des points du cours'] : []),
     ...(!estExercice && afficherDuree ? ['durée affichée'] : []),
   ]
   const lignesConsignes = consignesSupplementaires.split('\n').filter((t) => t.trim()).length
@@ -2022,7 +2022,7 @@ export function EvaluationGeneratorPanel({
         <legend>Mise en page</legend>
         <label className="admin-eval-checkbox-field" htmlFor="eval-titres-section">
           <input id="eval-titres-section" type="checkbox" checked={afficherTitresSection} onChange={(e) => setAfficherTitresSection(e.target.checked)} />
-          Afficher les titres de section
+          Afficher les titres des points du cours
         </label>
         <label className="admin-eval-checkbox-field" htmlFor="eval-amenagee" title="Même énoncé, police très lisible, grand interligne, une question par page — même barème.">
           <input id="eval-amenagee" type="checkbox" checked={versionAmenagee} onChange={(e) => setVersionAmenagee(e.target.checked)} />
@@ -2577,7 +2577,7 @@ export function EvaluationGeneratorPanel({
                   </div>
                 )
               })}
-              <p className="conc-masque">Les pastilles disent ce qu’on trouve dans chaque section : 1 Connaître, 2 Appliquer, 3 Transférer.</p>
+              <p className="conc-masque">Les pastilles disent ce qu’on trouve dans chaque point : 1 Connaître, 2 Appliquer, 3 Transférer.</p>
             </section>
 
             {/* ---------- Ma feuille / Mon évaluation / Mon examen ---------- */}

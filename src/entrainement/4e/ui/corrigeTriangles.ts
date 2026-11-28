@@ -22,11 +22,11 @@ import { latex, ligne, texte } from "../../export/corrigeTableau";
 export type Fragments = FragmentConsigne[];
 
 /** Renvois au cours (sections numérotées de `content/chapters/4e/cercle-trigonometrique-triangles.ts`). */
-export const COURS_VALEURS_REMARQUABLES = "(cours, § 3)";
-export const COURS_ANGLES_ASSOCIES = "(cours, § 4)";
-export const COURS_EQUATIONS = "(cours, § 5)";
-export const COURS_TRIANGLE = "(cours, § 6)";
-export const COURS_TRIANGULATION = "(cours, § 7)";
+export const COURS_VALEURS_REMARQUABLES = "(cours, point 3)";
+export const COURS_ANGLES_ASSOCIES = "(cours, point 4)";
+export const COURS_EQUATIONS = "(cours, point 5)";
+export const COURS_TRIANGLE = "(cours, point 6)";
+export const COURS_TRIANGULATION = "(cours, point 7)";
 
 // ---------------------------------------------------------------------------------------------
 // Nombres

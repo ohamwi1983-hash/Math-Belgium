@@ -157,23 +157,23 @@ export function aide1_134(e: E, p: Ph): AideEcran {
   const C = e.C;
   switch (p) {
     case "centre":
-      return { texte: [t("Cours, § 2 : regroupe les termes en x et en y, mets le coefficient du carré en évidence, puis complète chaque groupe en un carré parfait :")], latex: "x^2-2hx=(x-h)^2-h^2" };
+      return { texte: [t("Cours, point 2 : regroupe les termes en x et en y, mets le coefficient du carré en évidence, puis complète chaque groupe en un carré parfait :")], latex: "x^2-2hx=(x-h)^2-h^2" };
     case "reduite":
-      return { texte: [t("Cours, § 2 : après la complétion, divise par le second membre pour obtenir 1 (pour une parabole, isole le carré), puis remplace x − h par x′ et y − k par y′.")] };
+      return { texte: [t("Cours, point 2 : après la complétion, divise par le second membre pour obtenir 1 (pour une parabole, isole le carré), puis remplace x − h par x′ et y − k par y′.")] };
     case "nature":
-      return { texte: [t("Cours, § 1 : deux carrés additionnés égaux à 1 → ellipse (axe focal = plus grand dénominateur) ; soustraits → hyperbole (axe focal = carré précédé de +) ; un seul carré → parabole.")] };
+      return { texte: [t("Cours, point 1 : deux carrés additionnés égaux à 1 → ellipse (axe focal = plus grand dénominateur) ; soustraits → hyperbole (axe focal = carré précédé de +) ; un seul carré → parabole.")] };
     case "sommets":
     case "foyers":
     case "foyer":
-      return { texte: [t("Cours, § 2 : calcule l'élément dans le repère translaté (centre en O′), puis reviens au repère initial :")], latex: "x=x'+h\\qquad y=y'+k" };
+      return { texte: [t("Cours, point 2 : calcule l'élément dans le repère translaté (centre en O′), puis reviens au repère initial :")], latex: "x=x'+h\\qquad y=y'+k" };
     case "directrices":
-      return { texte: [t("Cours, § 2 : les directrices sont perpendiculaires à l'axe focal, à la distance "), l("\\dfrac{a^2}{c}"), t(" du centre.")] };
+      return { texte: [t("Cours, point 2 : les directrices sont perpendiculaires à l'axe focal, à la distance "), l("\\dfrac{a^2}{c}"), t(" du centre.")] };
     case "asymptotes":
-      return { texte: [t("Cours, § 1 : dans le repère translaté, les asymptotes sont "), l(C.axe === "x" ? "y'=\\pm\\dfrac{b}{a}x'" : "y'=\\pm\\dfrac{a}{b}x'"), t(" ; elles passent par le centre Ω.")] };
+      return { texte: [t("Cours, point 1 : dans le repère translaté, les asymptotes sont "), l(C.axe === "x" ? "y'=\\pm\\dfrac{b}{a}x'" : "y'=\\pm\\dfrac{a}{b}x'"), t(" ; elles passent par le centre Ω.")] };
     case "parametre":
-      return { texte: [t("Cours, § 1 : dans "), l("y'^2=2p\\,x'"), t(", le coefficient est 2p (le double du paramètre) ; p est la distance du foyer à la directrice.")] };
+      return { texte: [t("Cours, point 1 : dans "), l("y'^2=2p\\,x'"), t(", le coefficient est 2p (le double du paramètre) ; p est la distance du foyer à la directrice.")] };
     case "directrice":
-      return { texte: [t("Cours, § 1 : la directrice est perpendiculaire à l'axe focal, à la distance "), l("\\dfrac{p}{2}"), t(" du sommet, du côté opposé au foyer.")] };
+      return { texte: [t("Cours, point 1 : la directrice est perpendiculaire à l'axe focal, à la distance "), l("\\dfrac{p}{2}"), t(" du sommet, du côté opposé au foyer.")] };
   }
 }
 

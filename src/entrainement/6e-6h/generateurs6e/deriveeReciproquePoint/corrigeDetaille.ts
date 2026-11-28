@@ -29,7 +29,7 @@ export function correctionDetailleeReciproque(e: ExerciceDeriveeReciproque): Eta
   const y = y0L(e);
   const oui = applicable(e);
   const etapes: EtapeCorrection[] = [
-    utilise("a", fr([l("f^{-1}(y_0)"), t(" est le réel "), l("x_0"), t(" de "), l("I"), t(" tel que "), l("f(x_0)=y_0"), t(" (cours, § 1) ; on teste une valeur évidente.")])),
+    utilise("a", fr([l("f^{-1}(y_0)"), t(" est le réel "), l("x_0"), t(" de "), l("I"), t(" tel que "), l("f(x_0)=y_0"), t(" (cours, point 1) ; on teste une valeur évidente.")])),
     calcul("a", [ligne(`${m.fL}=${y}`, "équation à résoudre dans I"), ...chaine(`f(${p.x0L})`, p.chaineF, [t("on teste "), l(`x=${p.x0L}`)]), ligne(`x_0=${p.x0L}`, "f strictement croissante : c'est la seule solution")]),
     resultat("a", fr(reponse(e, "x0"))),
     piege("a", fr([t("Calculer "), l("f(y_0)"), t(" au lieu de résoudre "), l("f(x)=y_0"), t(".")])),
@@ -37,7 +37,7 @@ export function correctionDetailleeReciproque(e: ExerciceDeriveeReciproque): Eta
     calcul("b", [ligne(`f'(x)=${m.fpxL}`, "dérivée terme à terme"), ...chaine(`f'(${p.x0L})`, p.chaineFp, [t("on remplace "), l("x"), t(" par "), l(p.x0L)])]),
     resultat("b", fr(reponse(e, "derivee"))),
     piege("b", fr([t("Remplacer "), l("x"), t(" par "), l("y_0"), t(" dans "), l("f'"), t(".")])),
-    utilise("c", fr([t("Hypothèses du théorème (cours, § 1) : "), l("f"), t(" continue et strictement monotone sur l'intervalle "), l("I"), t(", dérivable en "), l("x_0"), t(", avec "), l("f'(x_0)\\neq 0"), t(".")])),
+    utilise("c", fr([t("Hypothèses du théorème (cours, point 1) : "), l("f"), t(" continue et strictement monotone sur l'intervalle "), l("I"), t(", dérivable en "), l("x_0"), t(", avec "), l("f'(x_0)\\neq 0"), t(".")])),
     calcul("c", [ligne(oui ? `f'(${p.x0L})=${p.fpL}\\neq 0` : `f'(${p.x0L})=0`, oui ? "hypothèse remplie" : "l'hypothèse f′(x₀) ≠ 0 n'est pas remplie")]),
     resultat("c", fr(reponse(e, "theoreme"))),
     piege("c", fr([t("Conclure que "), l("f"), t(" n'est pas injective parce que "), l("f'"), t(" s'annule : une fonction strictement croissante peut avoir une dérivée nulle en un point isolé.")])),
@@ -47,7 +47,7 @@ export function correctionDetailleeReciproque(e: ExerciceDeriveeReciproque): Eta
     const suite = [`\\dfrac{1}{${fpFrac}}`, ...p.chaineInv].filter((x, i, tab) => i === 0 || x !== tab[i - 1]);
     if (suite[suite.length - 1] !== p.invL) suite.push(p.invL);
     etapes.push(
-      utilise("d", fr([t("Théorème de la dérivée d'une réciproque (cours, § 1), avec "), l(`f^{-1}(${y})=${p.x0L}`), t(" (étape 1).")])),
+      utilise("d", fr([t("Théorème de la dérivée d'une réciproque (cours, point 1), avec "), l(`f^{-1}(${y})=${p.x0L}`), t(" (étape 1).")])),
       calcul("d", [
         ligne(`(f^{-1})'(${y})=\\dfrac{1}{f'\\left(f^{-1}(${y})\\right)}`, "théorème"),
         ligne(`=\\dfrac{1}{f'(${p.x0L})}`, [l(`f^{-1}(${y})=${p.x0L}`)]),

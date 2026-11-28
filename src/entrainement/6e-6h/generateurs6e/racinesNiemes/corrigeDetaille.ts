@@ -15,7 +15,7 @@ import { anglePiLatex, indice, planComplexeSvg } from "../../ui6e/papierComplexe
  */
 
 const LETTRES = "abcdefghij";
-const COURS = "(cours, § 6)";
+const COURS = "(cours, point 6)";
 const f = (valeur: string): FragmentConsigne => latex(valeur);
 const t = (valeur: string): FragmentConsigne => texte(valeur);
 

@@ -111,7 +111,7 @@ function Preparer() {
                   </select>
                 </label>
                 <button type="submit" className="ep-bouton principal" disabled={!choisi}>
-                  Choisir les étapes <span aria-hidden="true">›</span>
+                  Choisir les points <span aria-hidden="true">›</span>
                 </button>
               </form>
               <p className="ep-outil-note">Le bouton « Projeter » reste aussi sur chaque page de chapitre.</p>

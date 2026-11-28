@@ -183,15 +183,15 @@ function utiliseCorrection(e: DonneesDetectiveTrig): Fragments {
   const s = sectionCours(e);
   switch (e.variante) {
     case "secteur":
-      return [t(`Aire d'un secteur (cours, § ${s}) : `), f("A = \\dfrac{1}{2}\\,r^2\\,\\theta"), t(", avec "), f("\\theta = d \\times \\dfrac{\\pi}{180}"), t(" en radians.")];
+      return [t(`Aire d'un secteur (cours, point ${s}) : `), f("A = \\dfrac{1}{2}\\,r^2\\,\\theta"), t(", avec "), f("\\theta = d \\times \\dfrac{\\pi}{180}"), t(" en radians.")];
     case "parametres":
-      return [t(`Construction (cours, § ${s}) : `), f("T = \\dfrac{2\\pi}{\\omega}"), t(", "), f("\\Phi = -\\dfrac{\\varphi}{\\omega}"), t(", puis les points tous les quarts de période à partir de "), f("\\Phi"), t(".")];
+      return [t(`Construction (cours, point ${s}) : `), f("T = \\dfrac{2\\pi}{\\omega}"), t(", "), f("\\Phi = -\\dfrac{\\varphi}{\\omega}"), t(", puis les points tous les quarts de période à partir de "), f("\\Phi"), t(".")];
     case "equation":
       return e.fonction === "sin"
-        ? [t(`Équation en sinus (cours, § ${s}) : `), f("u = \\alpha + 2k\\pi"), t(" ou "), f("u = \\pi - \\alpha + 2k\\pi"), t(", puis on divise tout par 2.")]
-        : [t(`Équation en cosinus (cours, § ${s}) : `), f("u = \\alpha + 2k\\pi"), t(" ou "), f("u = -\\alpha + 2k\\pi"), t(", puis on divise tout par 2.")];
+        ? [t(`Équation en sinus (cours, point ${s}) : `), f("u = \\alpha + 2k\\pi"), t(" ou "), f("u = \\pi - \\alpha + 2k\\pi"), t(", puis on divise tout par 2.")]
+        : [t(`Équation en cosinus (cours, point ${s}) : `), f("u = \\alpha + 2k\\pi"), t(" ou "), f("u = -\\alpha + 2k\\pi"), t(", puis on divise tout par 2.")];
     case "produit":
-      return [t(`Produit nul (cours, § ${s}) : un des facteurs est nul ; `), f("\\tan x = c \\iff x = \\alpha + k\\pi"), t(" ; "), f("\\tan x"), t(" n'existe pas là où "), f("\\cos x = 0"), t(".")];
+      return [t(`Produit nul (cours, point ${s}) : un des facteurs est nul ; `), f("\\tan x = c \\iff x = \\alpha + k\\pi"), t(" ; "), f("\\tan x"), t(" n'existe pas là où "), f("\\cos x = 0"), t(".")];
   }
 }
 
@@ -212,7 +212,7 @@ export function correctionDetailleeDetectiveTrig(e: E): EtapeCorrection[] {
   const n = indiceLigneFausse(e) + 1;
   const s = sectionCours(e);
   return [
-    utilise("a", [t(`Chaque ligne doit suivre d'une règle du cours (cours, § ${s}) ; la première qui la contredit est la ligne fausse, les suivantes n'en sont que des conséquences.`)]),
+    utilise("a", [t(`Chaque ligne doit suivre d'une règle du cours (cours, point ${s}) ; la première qui la contredit est la ligne fausse, les suivantes n'en sont que des conséquences.`)]),
     calcul("a", controleLigne(e)),
     resultat("a", [t(`La ligne ${n} est fausse.`)]),
     piege("a", [t("Ne signale pas la première valeur qui paraît étrange : c'est souvent une conséquence. Cherche la ligne qui cause l'écart.")]),

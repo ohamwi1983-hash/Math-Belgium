@@ -20,7 +20,7 @@ type E = ExerciceMeilleurAjustement;
 const t = texte;
 const f = latex;
 const fr = (x: unknown) => x as FragmentConsigne[];
-const COURS = "(cours, § 4)";
+const COURS = "(cours, point 4)";
 
 const valD = (d: Droite, x: number) => `${nL(d.a, 2)}\\cdot ${nP(x, 2)}${nPlus(d.b, 2)}`;
 
@@ -80,7 +80,7 @@ function deuxDroites(e: E): EtapeCorrection[] {
 function mayerMoindres(e: E): EtapeCorrection[] {
   const s = resume(e.points);
   return [
-    utilise("a", [t("Le point moyen a pour coordonnées les moyennes des x et des y (cours, § 1).")]),
+    utilise("a", [t("Le point moyen a pour coordonnées les moyennes des x et des y (cours, point 1).")]),
     calcul("a", [
       ligne(`\\bar{x}=\\dfrac{${e.points.map((q) => nL(q.x, 2)).join("+")}}{6}=\\dfrac{${nL(somme(e.points.map((q) => q.x)), 2)}}{6}=${nL(s.mx, 2)}`),
       ligne(`\\bar{y}=\\dfrac{${e.points.map((q) => nL(q.y, 2)).join("+")}}{6}=\\dfrac{${nL(somme(e.points.map((q) => q.y)), 2)}}{6}=${nL(s.my, 2)}`),
@@ -100,7 +100,7 @@ function aberrant(e: E): EtapeCorrection[] {
   const sans = resumeSans(e);
   const yAttendu = d.a * q.x + d.b;
   return [
-    utilise("a", [t("Un point aberrant s'écarte nettement de la tendance des autres ; ici, le contexte annonce un événement exceptionnel (cours, § 6).")]),
+    utilise("a", [t("Un point aberrant s'écarte nettement de la tendance des autres ; ici, le contexte annonce un événement exceptionnel (cours, point 6).")]),
     calcul("a", [ligne(`y_{\\text{droite des autres}}\\approx ${nL(yAttendu, ca.dp)}\\quad\\text{contre}\\quad y=${nL(q.y, 2)}`, `pour x = ${nL(q.x, 2).replace("{,}", ",")}`)]),
     { ...resultat("a", fr(reponse(e, "repere"))), figureHtml: figure(e, "correlations") },
     utilise("b", [t("La calculatrice affiche r avec « 2-Var Stats » : une fois avec les huit points, une fois sans le point aberrant.")]),

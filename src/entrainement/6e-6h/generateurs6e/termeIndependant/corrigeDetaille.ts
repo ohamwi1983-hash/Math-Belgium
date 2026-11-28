@@ -41,7 +41,7 @@ export function correctionDetailleeTI(e: E): EtapeCorrection[] {
   const a = e.a;
   const coefA = a === 1 ? "" : `${a}^{${n}-k}\\,`;
   const etapes: EtapeCorrection[] = [
-    utilise("a", [t("Terme général du binôme de Newton (cours, § 3) : "), f("T_{k+1}=C_n^k\\,a^{n-k}\\,b^{k}"), t(", avec ici "), f(`a=${premierL(e)}`), t(" et "), f(`b=${secondL(e)}`), t(" ; puis "), f("\\dfrac{1}{x^q}=x^{-q}"), t(" et "), f("x^r\\cdot x^s=x^{r+s}"), t(".")]),
+    utilise("a", [t("Terme général du binôme de Newton (cours, point 3) : "), f("T_{k+1}=C_n^k\\,a^{n-k}\\,b^{k}"), t(", avec ici "), f(`a=${premierL(e)}`), t(" et "), f(`b=${secondL(e)}`), t(" ; puis "), f("\\dfrac{1}{x^q}=x^{-q}"), t(" et "), f("x^r\\cdot x^s=x^{r+s}"), t(".")]),
     calcul("a", [
       ligne(termeGeneralL(e)),
       ligne(`=C_{${n}}^{k}\\,${coefA}${p === 1 ? `x^{${n}-k}` : `x^{${p}(${n}-k)}`}\\cdot ${par(e.b)}^{k}\\,x^{-${q === 1 ? "" : q}k}`, "on sépare nombres et puissances de x"),

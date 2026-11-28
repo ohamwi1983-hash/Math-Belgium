@@ -17,7 +17,7 @@ const l = lx;
 
 export const phases104 = (): P[] => ["np", "codage", "calcul"];
 
-const COURS = "(cours, § 1)";
+const COURS = "(cours, point 1)";
 
 /** Somme x₁ + x₂ + … + xₙ écrite en entier (n ≤ 5). */
 export const sommeX = (n: number) => Array.from({ length: n }, (_, i) => `x_{${i + 1}}`).join("+");

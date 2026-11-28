@@ -18,7 +18,7 @@ type E = ExerciceChemins;
 const t = texte;
 const f = latex;
 const fr = (x: Frag[]) => x as unknown as FragmentConsigne[];
-const COURS = "(cours, § 4, chemins dans un quadrillage)";
+const COURS = "(cours, point 4, chemins dans un quadrillage)";
 
 function lignesC(n: number, k: number, justif?: string): LigneCalcul[] {
   const kk = Math.min(k, n - k);
@@ -57,7 +57,7 @@ export function correctionDetailleeChemins(e: E): EtapeCorrection[] {
     etapes.push(...comptage("a", "A", "P", e.px, e.py, "avantP", e));
     etapes.push(...comptage("b", "P", "B", e.m - e.px, e.n - e.py, "apresP", e));
     etapes.push(
-      utilise("c", [t("Principe de multiplication (cours, § 1) : un chemin par "), f("P"), t(" = un chemin de "), f("A"), t(" à "), f("P"), t(", puis un chemin de "), f("P"), t(" à "), f("B"), t(".")]),
+      utilise("c", [t("Principe de multiplication (cours, point 1) : un chemin par "), f("P"), t(" = un chemin de "), f("A"), t(" à "), f("P"), t(", puis un chemin de "), f("P"), t(" à "), f("B"), t(".")]),
       calcul("c", [ligne(`N=${entL(avantP(e))}\\times ${entL(apresP(e))}`), ligne(`=${entL(parP(e))}`)]),
       { ...resultat("c", fr(reponse(e, "chemins"))), figureHtml: figureCheminExemple(e, mot) },
       verification("c", [t("Le résultat est inférieur au nombre de tous les chemins de "), f("A"), t(" à "), f("B"), t(" :")], [ligne(`${entL(parP(e))}<${cL(e.m + e.n, e.n)}=${entL(totalAB(e))}`)]),
@@ -72,7 +72,7 @@ export function correctionDetailleeChemins(e: E): EtapeCorrection[] {
     utilise("b", [t("Un chemin par "), f("P"), t(" = un chemin de "), f("A"), t(" à "), f("P"), t(" ("), f(`${e.px}`), t(" à droite, "), f(`${e.py}`), t(" en haut), puis un chemin de "), f("P"), t(" à "), f("B"), t(" ("), f(`${e.m - e.px}`), t(" à droite, "), f(`${e.n - e.py}`), t(" en haut) : principe de multiplication.")]),
     calcul("b", [...lignesC(e.px + e.py, e.py, "de A à P"), ...lignesC(e.m - e.px + e.n - e.py, e.n - e.py, "de P à B"), ligne(`${entL(avantP(e))}\\times ${entL(apresP(e))}=${entL(parP(e))}`, "par P")]),
     resultat("b", fr(reponse(e, "parP"))),
-    utilise("c", [t("Complément (cours, § 2) : les chemins qui évitent "), f("P"), t(" sont tous les chemins, moins ceux qui passent par "), f("P"), t(".")]),
+    utilise("c", [t("Complément (cours, point 2) : les chemins qui évitent "), f("P"), t(" sont tous les chemins, moins ceux qui passent par "), f("P"), t(".")]),
     calcul("c", [ligne(`N=${entL(totalAB(e))}-${entL(parP(e))}`), ligne(`=${entL(reponseFinale(e))}`)]),
     { ...resultat("c", fr(reponse(e, "chemins"))), figureHtml: figureCheminExemple(e, mot) },
     verification("c", [t("Les chemins par "), f("P"), t(" et ceux qui l'évitent se partagent tous les chemins :")], [ligne(`${entL(parP(e))}+${entL(reponseFinale(e))}=${entL(totalAB(e))}`)]),

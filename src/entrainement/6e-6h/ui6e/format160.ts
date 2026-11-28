@@ -140,12 +140,12 @@ export function ensemblesContexte(e: Extract<E, { variante: "contexte" }>) {
 }
 
 export function aide1(e: E, phase: Phase160): AideEcran {
-  if (phase === "probas") return { texte: [t("Issues équiprobables (cours, § 1) : on divise le nombre de cas favorables par le nombre de cas possibles :")], latex: "P(A)=\\dfrac{n(A)}{n(\\Omega)}" };
+  if (phase === "probas") return { texte: [t("Issues équiprobables (cours, point 1) : on divise le nombre de cas favorables par le nombre de cas possibles :")], latex: "P(A)=\\dfrac{n(A)}{n(\\Omega)}" };
   if (phase === "inter") {
-    if (e.variante === "valeurs") return { texte: [t("Formule d'addition (cours, § 1), à retourner pour isoler "), l("P(A\\cap B)"), t(" :")], latex: "P(A\\cup B)=P(A)+P(B)-P(A\\cap B)" };
-    return { texte: [l("A\\cap B"), t(" est réalisé quand "), l("A"), t(" et "), l("B"), t(" le sont en même temps (cours, § 1) :")], latex: "P(A\\cap B)=\\dfrac{n(A\\cap B)}{n(\\Omega)}" };
+    if (e.variante === "valeurs") return { texte: [t("Formule d'addition (cours, point 1), à retourner pour isoler "), l("P(A\\cap B)"), t(" :")], latex: "P(A\\cup B)=P(A)+P(B)-P(A\\cap B)" };
+    return { texte: [l("A\\cap B"), t(" est réalisé quand "), l("A"), t(" et "), l("B"), t(" le sont en même temps (cours, point 1) :")], latex: "P(A\\cap B)=\\dfrac{n(A\\cap B)}{n(\\Omega)}" };
   }
-  if (phase === "produit") return { texte: [t("Pour tester l'indépendance (cours, § 1), on compare "), l("P(A\\cap B)"), t(" au produit :")], latex: "P(A)\\times P(B)" };
+  if (phase === "produit") return { texte: [t("Pour tester l'indépendance (cours, point 1), on compare "), l("P(A\\cap B)"), t(" au produit :")], latex: "P(A)\\times P(B)" };
   return {
     texte: [
       t("Incompatibles : "),
@@ -154,7 +154,7 @@ export function aide1(e: E, phase: Phase160): AideEcran {
       l("P(A\\cap B)=0"),
       t(". Indépendants : "),
       l("P(A\\cap B)=P(A)\\times P(B)"),
-      t(" (cours, § 1). Si aucune des deux égalités n'est vraie : ni l'un ni l'autre."),
+      t(" (cours, point 1). Si aucune des deux égalités n'est vraie : ni l'un ni l'autre."),
     ],
   };
 }

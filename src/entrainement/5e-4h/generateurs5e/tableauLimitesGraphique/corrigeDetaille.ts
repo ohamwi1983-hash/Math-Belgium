@@ -79,7 +79,7 @@ function etapeA(e: E): EtapeCorrection[] {
     else L.push(ligneIntrus(e, k, l));
   });
   return [
-    utilise("a", [t("Chaque limite du tableau se lit sur le graphique : limite infinie en "), f("p^-"), t(" (ou "), f("p^+"), t(") → la courbe longe la droite "), f("x=p"), t(" à gauche (ou à droite) en montant ou en descendant ; limite L en l'infini → la courbe s'approche de la droite "), f("y=L"), t(" (cours, § 3). On note "), f("f_A"), t(", "), f("f_B"), t("… la fonction de chaque graphique.")]),
+    utilise("a", [t("Chaque limite du tableau se lit sur le graphique : limite infinie en "), f("p^-"), t(" (ou "), f("p^+"), t(") → la courbe longe la droite "), f("x=p"), t(" à gauche (ou à droite) en montant ou en descendant ; limite L en l'infini → la courbe s'approche de la droite "), f("y=L"), t(" (cours, point 3). On note "), f("f_A"), t(", "), f("f_B"), t("… la fonction de chaque graphique.")]),
     calcul("a", L),
     resultat("a", reponse(e, "graphique")),
     piege("a", [t("Confondre une asymptote horizontale avec une valeur atteinte : la courbe peut passer par la hauteur L ; c'est son comportement en l'infini qui compte.")]),
@@ -93,7 +93,7 @@ function etapeB(e: E): EtapeCorrection[] {
     L.push(ligne(`${limL(pointC(p, "-"))}f(x)=${infL(s.cotes[i]![0])}`, "lu dans le tableau"));
     L.push(ligne(`x=${p}`, "limite infinie en cette valeur : asymptote verticale"));
   });
-  return [utilise("b", [t("Une limite infinie quand x tend vers p (à gauche ou à droite) donne l'asymptote verticale "), f("x=p"), t(" (cours, § 2).")]), calcul("b", L), resultat("b", reponse(e, "av"))];
+  return [utilise("b", [t("Une limite infinie quand x tend vers p (à gauche ou à droite) donne l'asymptote verticale "), f("x=p"), t(" (cours, point 2).")]), calcul("b", L), resultat("b", reponse(e, "av"))];
 }
 
 function etapeC(e: E): EtapeCorrection[] {
@@ -114,7 +114,7 @@ function etapeC(e: E): EtapeCorrection[] {
     }
   }
   return [
-    utilise("c", estOblique(s) ? [t("Si "), f("f(x)-(mx+q)"), t(" tend vers 0 en l'infini, la droite "), f("y=mx+q"), t(" est asymptote oblique (cours, § 2).")] : [t("Une limite finie L en "), f("-\\infty"), t(" ou en "), f("+\\infty"), t(" donne l'asymptote horizontale "), f("y=L"), t(" de ce côté (cours, § 2).")]),
+    utilise("c", estOblique(s) ? [t("Si "), f("f(x)-(mx+q)"), t(" tend vers 0 en l'infini, la droite "), f("y=mx+q"), t(" est asymptote oblique (cours, point 2).")] : [t("Une limite finie L en "), f("-\\infty"), t(" ou en "), f("+\\infty"), t(" donne l'asymptote horizontale "), f("y=L"), t(" de ce côté (cours, point 2).")]),
     { ...calcul("c", L), figureHtml: enveloppe(figureCorrige(e)) },
     resultat("c", reponse(e, "horiz")),
   ];

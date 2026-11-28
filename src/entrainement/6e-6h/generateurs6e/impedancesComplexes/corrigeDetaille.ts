@@ -21,7 +21,7 @@ import {
  * ligne ; étapes a–e = écrans (composants, impédance totale, module et déphasage, intensité, nature).
  */
 
-const COURS = "(cours, § 9)";
+const COURS = "(cours, point 9)";
 const f = (valeur: string): FragmentConsigne => latex(valeur);
 const t = (valeur: string): FragmentConsigne => texte(valeur);
 

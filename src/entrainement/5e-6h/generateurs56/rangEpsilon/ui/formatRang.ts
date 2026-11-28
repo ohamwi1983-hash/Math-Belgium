@@ -13,7 +13,7 @@ import { affineVarL, exactAvec, exposantT, fractionL, nbL, nbT, scientifiqueL } 
 
 type E = ExerciceRang;
 export type PhaseRang = "limite" | "ecart" | "inequation" | "premier" | "rang" | "terme";
-export const COURS_LIMITE = "(cours, § 9)";
+export const COURS_LIMITE = "(cours, point 9)";
 
 export function phasesRang(e: E): PhaseRang[] {
   if (e.variante === "rationnelle") return ["limite", "ecart", "inequation", "rang"];

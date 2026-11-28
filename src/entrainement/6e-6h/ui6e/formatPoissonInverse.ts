@@ -166,11 +166,11 @@ export const recap = reponse;
 export function aide1(e: E, p: P): AideEcran {
   switch (p) {
     case "lambda":
-      return e.variante === "lambdaZero" ? { texte: [t("Formule du cours pour "), l("k=0"), t(" :")], latex: "P(X=0)=e^{-\\lambda}" } : { texte: [t("Récurrence du cours (§ 8) :")], latex: "P(X=k)=P(X=k-1)\\times\\dfrac{\\lambda}{k}" };
+      return e.variante === "lambdaZero" ? { texte: [t("Formule du cours pour "), l("k=0"), t(" :")], latex: "P(X=0)=e^{-\\lambda}" } : { texte: [t("Récurrence du cours (point 8) :")], latex: "P(X=k)=P(X=k-1)\\times\\dfrac{\\lambda}{k}" };
     case "lambdaAjuste":
       return { texte: [l("\\lambda"), t(" est le nombre moyen d'événements sur l'échelle de la question : il est proportionnel à la durée (ou au nombre de pages).")] };
     case "esperance":
-      return { texte: [t("Propriété de la loi de Poisson (cours, § 8) :")], latex: "E(X)=V(X)=\\lambda\\qquad \\sigma(X)=\\sqrt{V(X)}" };
+      return { texte: [t("Propriété de la loi de Poisson (cours, point 8) :")], latex: "E(X)=V(X)=\\lambda\\qquad \\sigma(X)=\\sqrt{V(X)}" };
     case "mode":
       return { texte: [t("Avec la récurrence, "), l("P(X=k)>P(X=k-1)"), t(" tant que "), l("\\dfrac{\\lambda}{k}>1"), t(", c'est-à-dire "), l("k<\\lambda"), t(" ; égalité si "), l("k=\\lambda"), t(".")] };
     case "seuil":

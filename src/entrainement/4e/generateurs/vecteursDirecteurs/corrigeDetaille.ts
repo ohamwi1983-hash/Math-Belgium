@@ -14,7 +14,7 @@ import { colonne, l, n, nbp, pointL, t, type Fr } from "../../ui/outilsAnalytiqu
  */
 
 type E = ExerciceVecteursDirecteurs;
-const COURS = "(cours, § 15)";
+const COURS = "(cours, point 15)";
 
 /** « 3\cdot 2-1\cdot 6 » : critère de colinéarité de u (lu) et v. */
 function critereL(u: { x: number; y: number }, v: { x: number; y: number }): string {
@@ -72,7 +72,7 @@ function etapeB(e: E): EtapeCorrection[] {
   const nature = (i: number) => (e.options[i]!.nature === "echangees" ? "composantes échangées" : e.options[i]!.nature === "normal" ? "perpendiculaire à d" : e.options[i]!.nature === "signe" && e.u.x !== 0 && e.u.y !== 0 ? "une composante de signe changé" : "pas colinéaire");
   const piegeFr: Fr = [t("Ni "), l(`\\vec{u_{${echangees + 1}}}`), t(` (${nature(echangees)}) ni `), l(`\\vec{u_{${autre + 1}}}`), t(` (${nature(autre)}) ne sont des vecteurs directeurs. L'opposé `), l(`\\vec{u_{${oppose + 1}}}`), t(" en est un : un vecteur directeur peut changer de sens.")];
   return [
-    utilise("b", [t("Un vecteur non nul est un vecteur directeur de d s'il est colinéaire à "), l(`\\vec{${nom}}`), t(" : critère de colinéarité "), l("x_u\\cdot y_v-y_u\\cdot x_v=0"), t(" (cours, § 13 et § 15).")]),
+    utilise("b", [t("Un vecteur non nul est un vecteur directeur de d s'il est colinéaire à "), l(`\\vec{${nom}}`), t(" : critère de colinéarité "), l("x_u\\cdot y_v-y_u\\cdot x_v=0"), t(" (cours, points 13 et 15).")]),
     calcul("b", e.options.map((o, i) => ligneOption(e, o, i)), [t("Avec "), l(`\\vec{${nom}}${colonne(e.u.x, e.u.y)}`), t(", pour chaque vecteur proposé :")]),
     resultat("b", [t("Vecteurs directeurs de d : "), ...reponseB(e), t(".")]),
     piege("b", piegeFr),

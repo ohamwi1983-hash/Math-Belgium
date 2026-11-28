@@ -23,7 +23,7 @@ function etapeAsymptote(e: E): EtapeCorrection[] {
   const sq = "a";
   const cote = estCroissanteBase(e.base) ? "-\\infty" : "+\\infty";
   return [
-    utilise(sq, [t("Du côté où "), f("a^{x}"), t(" tend vers 0, "), f("k\\cdot a^{x}+c"), t(" tend vers "), f("c"), t(" : la droite "), f("y=c"), t(" est une asymptote horizontale (cours, § 6).")]),
+    utilise(sq, [t("Du côté où "), f("a^{x}"), t(" tend vers 0, "), f("k\\cdot a^{x}+c"), t(" tend vers "), f("c"), t(" : la droite "), f("y=c"), t(" est une asymptote horizontale (cours, point 6).")]),
     calcul(sq, [
       ligne(`\\lim\\limits_{x\\to ${cote}} ${puissanceL(e.base)}=0`, estCroissanteBase(e.base) ? "la base est supérieure à 1" : "la base est comprise entre 0 et 1"),
       ligne(`y=${n(e.c)}`, "droite en pointillés, lue sur l'axe vertical : la courbe s'en approche sans l'atteindre"),
@@ -44,7 +44,7 @@ function etapeK(e: E): EtapeCorrection[] {
     ligne(`=${n(e.k)}`),
   ]);
   return [
-    utilise(sq, [t("En "), f("x=0"), t(", "), f("a^{0}=1"), t(" : l'ordonnée à l'origine vaut "), f("k+c"), t(" (cours, § 1).")]),
+    utilise(sq, [t("En "), f("x=0"), t(", "), f("a^{0}=1"), t(" : l'ordonnée à l'origine vaut "), f("k+c"), t(" (cours, point 1).")]),
     { ...appel, figureHtml: `<div style="max-width:7cm;margin:0 auto">${figure(e, "corrige")}</div>` },
     resultat(sq, rep(e, "k")),
     verification(sq, [t(`La courbe est ${e.k > 0 ? "au-dessus" : "en dessous"} de son asymptote : `), f(e.k > 0 ? "k>0" : "k<0"), t(".")]),
@@ -66,7 +66,7 @@ function etapeA(e: E): EtapeCorrection[] {
   const reduite = ratL(e.base);
   if (r.bas !== 1 || r.haut < 0) lignes.push(ligne(`=${reduite}`));
   return [
-    utilise(sq, [t("L'écart à l'asymptote "), f("f(x)-c=k\\cdot a^{x}"), t(" est multiplié par "), f("a"), t(" quand "), f("x"), t(" augmente de 1 : le rapport ne dépend que de l'écart (cours, § 7).")]),
+    utilise(sq, [t("L'écart à l'asymptote "), f("f(x)-c=k\\cdot a^{x}"), t(" est multiplié par "), f("a"), t(" quand "), f("x"), t(" augmente de 1 : le rapport ne dépend que de l'écart (cours, point 7).")]),
     calcul(sq, lignes),
     resultat(sq, rep(e, "a")),
     verification(sq, [

@@ -39,7 +39,7 @@ export function correctionDetaillee114(e: E): EtapeCorrection[] {
     const sq = lettreEtape(i);
     if (ph === "nature")
       out.push(
-        utilise(sq, [t("Discrète ou continue (cours, § 4) : une variable discrète prend des valeurs qu'on peut énumérer une à une (en nombre fini ou non) ; une variable continue prend toutes les valeurs réelles d'un intervalle.")]),
+        utilise(sq, [t("Discrète ou continue (cours, point 4) : une variable discrète prend des valeurs qu'on peut énumérer une à une (en nombre fini ou non) ; une variable continue prend toutes les valeurs réelles d'un intervalle.")]),
         resultat(sq, fr(reponse114(e, ph))),
         piege(sq, piegeNature(e)),
       );
@@ -51,7 +51,7 @@ export function correctionDetaillee114(e: E): EtapeCorrection[] {
       );
     else
       out.push(
-        utilise(sq, [t("Tableau du cours (§ 4) : en discret, la loi de probabilité donne "), l("P(X=k)"), t(" et on additionne ; en continu, la densité donne la probabilité d'un intervalle par une intégrale, et "), l("P(X=c)=0"), t(".")]),
+        utilise(sq, [t("Tableau du cours (point 4) : en discret, la loi de probabilité donne "), l("P(X=k)"), t(" et on additionne ; en continu, la densité donne la probabilité d'un intervalle par une intégrale, et "), l("P(X=c)=0"), t(".")]),
         resultat(sq, [t(`X est ${nomNature(e.nature)} : `), ...fr(reponse114(e, ph)).map((f, k) => (k === 0 && f.type === "texte" ? { ...f, valeur: f.valeur.charAt(0).toLowerCase() + f.valeur.slice(1) } : f))]),
         piege(sq, e.nature === "discrete" ? [t("Écrire "), l("P(X=c)=0"), t(" : c'est vrai en continu seulement ; ici, chaque valeur a sa probabilité.")] : [t("Additionner des "), l("P(X=k)"), t(" : chacune vaut 0 en continu, il faut une aire sous la densité.")]),
       );

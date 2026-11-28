@@ -213,22 +213,22 @@ export function optionsConique(): OptionEcran[] {
 export function aide1(e: E, p: PhaseMC): AideEcran {
   switch (p) {
     case "conique":
-      return { texte: [t("Propriétés optiques (cours, § 6) : la parabole renvoie vers son foyer les rayons parallèles à son axe ; l'ellipse renvoie vers un foyer ce qui part de l'autre ; l'hyperbole renvoie un rayon dirigé vers un foyer comme s'il venait de l'autre.")] };
+      return { texte: [t("Propriétés optiques (cours, point 6) : la parabole renvoie vers son foyer les rayons parallèles à son axe ; l'ellipse renvoie vers un foyer ce qui part de l'autre ; l'hyperbole renvoie un rayon dirigé vers un foyer comme s'il venait de l'autre.")] };
     case "equation":
-      if (e.variante === "lithotriteur") return { texte: [t("Ellipse de foyers sur l'axe des abscisses (cours, § 1) : "), l("c"), t(" est la moitié de la distance entre les foyers, "), l("a"), t(" la distance du centre au sommet, et :")], latex: "b^2=a^2-c^2" };
-      if (e.variante === "cassegrain") return { texte: [t("Hyperbole de foyers sur l'axe des abscisses (cours, § 1) : "), l("c"), t(" est la moitié de "), l("FF'"), t(", "), l("a"), t(" la distance du centre au sommet, et :")], latex: "b^2=c^2-a^2" };
-      return { texte: [t("Parabole de sommet l'origine et d'axe l'axe des abscisses (cours, § 1) :")], latex: "y^2=2px,\\quad F\\left(\\dfrac p2\\,;0\\right)" };
+      if (e.variante === "lithotriteur") return { texte: [t("Ellipse de foyers sur l'axe des abscisses (cours, point 1) : "), l("c"), t(" est la moitié de la distance entre les foyers, "), l("a"), t(" la distance du centre au sommet, et :")], latex: "b^2=a^2-c^2" };
+      if (e.variante === "cassegrain") return { texte: [t("Hyperbole de foyers sur l'axe des abscisses (cours, point 1) : "), l("c"), t(" est la moitié de "), l("FF'"), t(", "), l("a"), t(" la distance du centre au sommet, et :")], latex: "b^2=c^2-a^2" };
+      return { texte: [t("Parabole de sommet l'origine et d'axe l'axe des abscisses (cours, point 1) :")], latex: "y^2=2px,\\quad F\\left(\\dfrac p2\\,;0\\right)" };
     case "grandeur":
       if (e.variante === "antenne") return { texte: [t("Le récepteur est au foyer "), l("F"), t(", à "), l("\\dfrac p2"), t(" du sommet.")] };
       if (e.variante === "phare") return { texte: [t("Le bord du réflecteur est un point de la parabole : son ordonnée est le rayon de l'ouverture, son abscisse la profondeur.")] };
       if (e.variante === "lithotriteur") return { texte: [t("Le plan coupe l'axe au centre de l'ellipse : cherche les points de l'ellipse d'abscisse "), l("0"), t(".")] };
       return { texte: [t("Place "), l("S"), t(", "), l("F"), t(" et "), l("F'"), t(" sur l'axe : "), l("S"), t(" est un sommet de l'hyperbole.")] };
     case "distance":
-      if (e.variante === "lithotriteur") return { texte: [t("Définition de l'ellipse (cours, § 1) : pour tout point "), l("P"), t(" de l'ellipse :")], latex: "PF+PF'=2a" };
-      if (e.variante === "cassegrain") return { texte: [t("Définition de l'hyperbole (cours, § 1) : pour tout point "), l("P"), t(" de la branche la plus proche de "), l("F"), t(" :")], latex: "PF'-PF=2a" };
+      if (e.variante === "lithotriteur") return { texte: [t("Définition de l'ellipse (cours, point 1) : pour tout point "), l("P"), t(" de l'ellipse :")], latex: "PF+PF'=2a" };
+      if (e.variante === "cassegrain") return { texte: [t("Définition de l'hyperbole (cours, point 1) : pour tout point "), l("P"), t(" de la branche la plus proche de "), l("F"), t(" :")], latex: "PF'-PF=2a" };
       return { texte: [t("Définition de la parabole : la distance d'un point au foyer égale sa distance à la directrice "), l("d\\equiv x=-\\dfrac p2"), t(".")] };
     case "tangente":
-      return { texte: [t("Forme dédoublée (cours, § 5) :")], latex: "y\\,y_P=p\\,(x+x_P)" };
+      return { texte: [t("Forme dédoublée (cours, point 5) :")], latex: "y\\,y_P=p\\,(x+x_P)" };
     case "pointT":
       return { texte: [t("T est sur l'axe des abscisses : remplace "), l("y"), t(" par "), l("0"), t(" dans l'équation de la tangente.")] };
     case "distances":

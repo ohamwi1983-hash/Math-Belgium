@@ -85,7 +85,7 @@ function corps(d: DonneesDiapo, chapter: ChapterContent, pas: number, mode: Mode
             {surtitreChapitre(chapter.level, chapter)}
           </p>
           <p className="diapo-etape" data-pptx="">
-            Étape {d.section.number}
+            Point {d.section.number}
             {d.section.partie ? ` · ${d.section.partie}` : ''}
           </p>
           <h1 className="diapo-grand-titre" data-pptx="">

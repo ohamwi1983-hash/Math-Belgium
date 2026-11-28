@@ -277,7 +277,7 @@ export function lignesValeur(e: ExerciceTrigArc): { utilise: Frag[]; lignes: Lig
       L.push(ligne(`\\tan\\alpha=\\dfrac{\\sin\\alpha}{\\cos\\alpha}${p}`, "quotient"));
       for (const x2 of s) L.push(ligne(x2));
     }
-    return { utilise: [t("Identité "), l("\\cos^{2}\\alpha+\\sin^{2}\\alpha=1"), t(` et signe de la racine fixé par l'image (cours, § 2)${g === "tan" ? ", puis " : "."}`), ...(g === "tan" ? [l("\\tan\\alpha=\\dfrac{\\sin\\alpha}{\\cos\\alpha}"), t(".")] : [])], lignes: L };
+    return { utilise: [t("Identité "), l("\\cos^{2}\\alpha+\\sin^{2}\\alpha=1"), t(` et signe de la racine fixé par l'image (cours, point 2)${g === "tan" ? ", puis " : "."}`), ...(g === "tan" ? [l("\\tan\\alpha=\\dfrac{\\sin\\alpha}{\\cos\\alpha}"), t(".")] : [])], lignes: L };
   }
   // arctan
   const x = q(a.d * a.d, a.d * a.d + a.n * a.n);
@@ -295,7 +295,7 @@ export function lignesValeur(e: ExerciceTrigArc): { utilise: Frag[]; lignes: Lig
     L.push(ligne(`=${radL(radMul(radQ(a), cosR))}`));
   }
   return {
-    utilise: [t("Identité "), l("1+\\tan^{2}\\alpha=\\dfrac{1}{\\cos^{2}\\alpha}"), t(" et signe de la racine fixé par l'image (cours, § 2)"), ...(g === "sin" ? [t(", puis "), l("\\sin\\alpha=\\tan\\alpha\\cdot\\cos\\alpha"), t(".")] : [t(".")])],
+    utilise: [t("Identité "), l("1+\\tan^{2}\\alpha=\\dfrac{1}{\\cos^{2}\\alpha}"), t(" et signe de la racine fixé par l'image (cours, point 2)"), ...(g === "sin" ? [t(", puis "), l("\\sin\\alpha=\\tan\\alpha\\cdot\\cos\\alpha"), t(".")] : [t(".")])],
     lignes: L.filter((x2, i) => i === 0 || x2.latex !== L[i - 1].latex),
   };
 }
@@ -413,7 +413,7 @@ export function lignesSimplification(e: ExerciceLitteral): { utilise: Frag[]; li
       L.push(ligne(`\\tan\\alpha=\\dfrac{\\sin\\alpha}{\\cos\\alpha}`, "quotient"));
       L.push(ligne(`=${formeSimplifieeL(e)}`));
     }
-    return { utilise: [t("On pose "), l(`\\alpha=\\arc${f}(${k}x)`), t(", donc "), l(`\\${f}\\alpha=${k}x`), t(" ; identité "), l("\\cos^{2}\\alpha+\\sin^{2}\\alpha=1"), t(" et signe sur l'image (cours, § 2).")], lignes: L };
+    return { utilise: [t("On pose "), l(`\\alpha=\\arc${f}(${k}x)`), t(", donc "), l(`\\${f}\\alpha=${k}x`), t(" ; identité "), l("\\cos^{2}\\alpha+\\sin^{2}\\alpha=1"), t(" et signe sur l'image (cours, point 2).")], lignes: L };
   }
   L.push(ligne("\\cos^{2}\\alpha=\\dfrac{1}{1+\\tan^{2}\\alpha}", [l("1+\\tan^{2}\\alpha=\\dfrac{1}{\\cos^{2}\\alpha}")]));
   L.push(ligne(`=\\dfrac{1}{1+(${k}x)^{2}}`, [l(`\\tan\\alpha=${k}x`)]));
@@ -425,5 +425,5 @@ export function lignesSimplification(e: ExerciceLitteral): { utilise: Frag[]; li
     L.push(ligne(`=${k}x\\cdot\\dfrac{1}{\\sqrt{1+${k2}x^{2}}}`));
     L.push(ligne(`=${formeSimplifieeL(e)}`));
   }
-  return { utilise: [t("On pose "), l(`\\alpha=\\arctan(${k}x)`), t(", donc "), l(`\\tan\\alpha=${k}x`), t(" ; identité "), l("1+\\tan^{2}\\alpha=\\dfrac{1}{\\cos^{2}\\alpha}"), t(" (cours, § 2).")], lignes: L };
+  return { utilise: [t("On pose "), l(`\\alpha=\\arctan(${k}x)`), t(", donc "), l(`\\tan\\alpha=${k}x`), t(" ; identité "), l("1+\\tan^{2}\\alpha=\\dfrac{1}{\\cos^{2}\\alpha}"), t(" (cours, point 2).")], lignes: L };
 }

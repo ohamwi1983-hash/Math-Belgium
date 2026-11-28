@@ -184,7 +184,7 @@ export function AgendaPeriode({
         <legend>Contenu</legend>
         <label className="carnet-case">
           <input type="checkbox" checked={liens} onChange={(e) => setLiens(e.target.checked)} />
-          <span>Inclure les liens vers les sections du cours et les exercices</span>
+          <span>Inclure les liens vers les points du cours et les exercices</span>
         </label>
         <label className="carnet-case">
           <input type="checkbox" checked={remarques} onChange={(e) => setRemarques(e.target.checked)} />

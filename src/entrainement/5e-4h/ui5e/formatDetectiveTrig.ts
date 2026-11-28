@@ -350,14 +350,14 @@ function aidesCorrection(e: DonneesDetectiveTrig): Fragments[] {
     case "secteur": {
       const th = piLatex(angleRadians(e));
       return [
-        [t("Aire d'un secteur, avec l'angle en radians (cours, § 1) : "), l("A = \\dfrac{1}{2}\\,r^2\\,\\theta"), t(", où "), l("\\theta = d \\times \\dfrac{\\pi}{180}"), t(".")],
+        [t("Aire d'un secteur, avec l'angle en radians (cours, point 1) : "), l("A = \\dfrac{1}{2}\\,r^2\\,\\theta"), t(", où "), l("\\theta = d \\times \\dfrac{\\pi}{180}"), t(".")],
         [t("Ici "), l(`\\theta = ${e.d} \\times \\dfrac{\\pi}{180} = ${th}`), t(", donc "), l(`A = \\dfrac{1}{2} \\times ${e.r}^2 \\times ${th}`), t(" : il reste à calculer.")],
       ];
     }
     case "parametres": {
       const c = calculParametres(e, false);
       return [
-        [t("Construction (cours, § 4) : "), l("T = \\dfrac{2\\pi}{\\omega}"), t(", "), l("\\Phi = -\\dfrac{\\varphi}{\\omega}"), t(" ; à partir de "), l("\\Phi"), t(", le maximum vient un quart de période plus loin si "), l("A > 0"), t(", trois quarts de période plus loin si "), l("A < 0"), t(".")],
+        [t("Construction (cours, point 4) : "), l("T = \\dfrac{2\\pi}{\\omega}"), t(", "), l("\\Phi = -\\dfrac{\\varphi}{\\omega}"), t(" ; à partir de "), l("\\Phi"), t(", le maximum vient un quart de période plus loin si "), l("A > 0"), t(", trois quarts de période plus loin si "), l("A < 0"), t(".")],
         [t("Ici "), l(`T = ${piLatex(c.T)}`), t(", "), l(`\\Phi = ${piLatex(c.Phi)}`), t(" et "), l(`A ${e.A > 0 ? ">" : "<"} 0`), t(" : calcule "), l(e.A > 0 ? "\\Phi + \\dfrac{T}{4}" : "\\Phi + \\dfrac{3T}{4}"), t(".")],
       ];
     }
@@ -366,7 +366,7 @@ function aidesCorrection(e: DonneesDetectiveTrig): Fragments[] {
       const sinus = e.fonction === "sin";
       return [
         [
-          t(`Pour ${sinus ? "le sinus" : "le cosinus"} (cours, § 7) : `),
+          t(`Pour ${sinus ? "le sinus" : "le cosinus"} (cours, point 7) : `),
           l(sinus ? "u = \\alpha + 2k\\pi" : "u = \\alpha + 2k\\pi"),
           t(" ou "),
           l(sinus ? "u = \\pi - \\alpha + 2k\\pi" : "u = -\\alpha + 2k\\pi"),
@@ -380,7 +380,7 @@ function aidesCorrection(e: DonneesDetectiveTrig): Fragments[] {
     case "produit": {
       const c = calculProduit(e, false);
       return [
-        [t("Produit nul (cours, § 7) : un des facteurs est nul. "), l("\\tan x = c \\iff x = \\alpha + k\\pi"), t(", et "), l("\\tan x"), t(" n'existe pas là où "), l("\\cos x = 0"), t(".")],
+        [t("Produit nul (cours, point 7) : un des facteurs est nul. "), l("\\tan x = c \\iff x = \\alpha + k\\pi"), t(", et "), l("\\tan x"), t(" n'existe pas là où "), l("\\cos x = 0"), t(".")],
         [t("Ici "), l(`\\tan x = ${secondTangente(e).latex} \\iff x = ${piLatex(c.beta)} + k\\pi`), t(" ; "), l("\\cos x = 0"), t(" donne "), l("x = \\dfrac{\\pi}{2} + k\\pi"), t(", où "), l("\\tan x"), t(" n'existe pas.")],
       ];
     }

@@ -17,12 +17,12 @@ import { additionnerFractionQ, diviserFractionQ, entierVersFractionQ, fractionQ,
  * - Décimaux à la virgule (`dec`), nombre écrit dans un texte (`nt`, « − » typographique).
  */
 
-export const COURS_ARITHMETIQUE = "(cours, § 1)";
-export const COURS_GEOMETRIQUE = "(cours, § 2)";
-export const COURS_CONVERGENCE = "(cours, § 3)";
-export const COURS_PROBLEMES = "(cours, § 4)";
-export const COURS_COMPARAISON = "(cours, § 5)";
-export const COURS_RECURRENTE = "(cours, § 6)";
+export const COURS_ARITHMETIQUE = "(cours, point 1)";
+export const COURS_GEOMETRIQUE = "(cours, point 2)";
+export const COURS_CONVERGENCE = "(cours, point 3)";
+export const COURS_PROBLEMES = "(cours, point 4)";
+export const COURS_COMPARAISON = "(cours, point 5)";
+export const COURS_RECURRENTE = "(cours, point 6)";
 
 export type Q = FractionQ;
 

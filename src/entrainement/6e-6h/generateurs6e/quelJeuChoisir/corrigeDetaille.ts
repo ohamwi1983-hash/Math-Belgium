@@ -55,7 +55,7 @@ export function lignesJeu(j: Jeu, G: string): { u: Frag[]; lignes: LigneCalcul[]
   const nonG = `\\overline{${G}}`;
   switch (j.type) {
     case "somme": {
-      const u: Frag[] = [t("Deux dés : "), l("6\\times 6=36"), t(" couples équiprobables (diagramme cartésien, cours, § 2).")];
+      const u: Frag[] = [t("Deux dés : "), l("6\\times 6=36"), t(" couples équiprobables (diagramme cartésien, cours, point 2).")];
       if (j.mode === "egal") {
         const c = couplesSomme(j.s);
         return { u, lignes: [ligne("n(\\Omega)=6\\times 6=36"), ligne(`n(${G})=${c}`, couplesSommeListe(j.s)), ligne(`P(${G})=${f(c, 36)}`), ...finFraction(c, 36).slice(1)] };
@@ -67,9 +67,9 @@ export function lignesJeu(j: Jeu, G: string): { u: Frag[]; lignes: LigneCalcul[]
       return { u, lignes: [ligne("n(\\Omega)=36"), ligne(`n(${G})=${parts.join("+")}=${c}`, just), ligne(`P(${G})=${f(c, 36)}`), ...finFraction(c, 36).slice(1)] };
     }
     case "double":
-      return { u: [t("Deux dés : 36 couples équiprobables (cours, § 2).")], lignes: [ligne("n(\\Omega)=36"), ligne(`n(${G})=6`, "(1 ; 1), (2 ; 2), …, (6 ; 6)"), ligne(`P(${G})=${f(6, 36)}`), ligne(`=${qL(q(1, 6))}`, "on simplifie")] };
+      return { u: [t("Deux dés : 36 couples équiprobables (cours, point 2).")], lignes: [ligne("n(\\Omega)=36"), ligne(`n(${G})=6`, "(1 ; 1), (2 ; 2), …, (6 ; 6)"), ligne(`P(${G})=${f(6, 36)}`), ligne(`=${qL(q(1, 6))}`, "on simplifie")] };
     case "ecart": {
-      const u: Frag[] = [t("Deux dés : 36 couples équiprobables (cours, § 2) ; chaque écart non nul s'obtient dans les deux ordres.")];
+      const u: Frag[] = [t("Deux dés : 36 couples équiprobables (cours, point 2) ; chaque écart non nul s'obtient dans les deux ordres.")];
       if (j.mode === "egal") {
         const c = couplesEcart(j.d);
         return { u, lignes: [ligne("n(\\Omega)=36"), ligne(`n(${G})=2\\times ${6 - j.d}=${c}`, `(1 ; ${1 + j.d}), …, (${6 - j.d} ; 6) et leurs inverses`), ligne(`P(${G})=${f(c, 36)}`), ...finFraction(c, 36).slice(1)] };
@@ -82,13 +82,13 @@ export function lignesJeu(j: Jeu, G: string): { u: Frag[]; lignes: LigneCalcul[]
     }
     case "produitPair":
       return {
-        u: [t("Événement contraire (cours, § 4) : le produit est impair seulement si les deux dés sont impairs (dés indépendants, cours, § 2).")],
+        u: [t("Événement contraire (cours, point 4) : le produit est impair seulement si les deux dés sont impairs (dés indépendants, cours, point 2).")],
         lignes: [ligne(`P(${nonG})=${f(3, 6)}\\times ${f(3, 6)}`, "deux résultats impairs"), ligne(`=${f(9, 36)}`), ligne(`P(${G})=1-P(${nonG})`), ligne(`=1-${f(9, 36)}`), ...finFraction(27, 36)],
       };
     case "auMoinsUnDe": {
       const a = j.k - 1;
       return {
-        u: [t("« Au moins un » : événement contraire (cours, § 4). "), l(nonG), t(` : aucun des deux dés ne montre ${j.k === 6 ? "un 6" : `${j.k} ou plus`} (dés indépendants).`)],
+        u: [t("« Au moins un » : événement contraire (cours, point 4). "), l(nonG), t(` : aucun des deux dés ne montre ${j.k === 6 ? "un 6" : `${j.k} ou plus`} (dés indépendants).`)],
         lignes: [ligne(`P(${nonG})=${f(a, 6)}\\times ${f(a, 6)}`), ligne(`=${f(a * a, 36)}`), ligne(`P(${G})=1-P(${nonG})`), ligne(`=1-${f(a * a, 36)}`), ...finFraction(36 - a * a, 36)],
       };
     }
@@ -96,7 +96,7 @@ export function lignesJeu(j: Jeu, G: string): { u: Frag[]; lignes: LigneCalcul[]
       const den = 6 ** j.n;
       const num = 5 ** j.n;
       return {
-        u: [t("« Au moins un 6 » : événement contraire (cours, § 4). "), l(nonG), t(` : aucun 6 en ${NOMS[j.n]} lancers indépendants.`)],
+        u: [t("« Au moins un 6 » : événement contraire (cours, point 4). "), l(nonG), t(` : aucun 6 en ${NOMS[j.n]} lancers indépendants.`)],
         lignes: [ligne(`P(${nonG})=\\left(\\dfrac{5}{6}\\right)^{${j.n}}`), ligne(`=${f(num, den)}`), ligne(`P(${G})=1-P(${nonG})`), ligne(`=1-${f(num, den)}`), ...finFraction(den - num, den)],
       };
     }
@@ -104,10 +104,10 @@ export function lignesJeu(j: Jeu, G: string): { u: Frag[]; lignes: LigneCalcul[]
       const N = 2 ** j.n;
       if (j.mode === "auMoins" && j.k === 1)
         return {
-          u: [t("« Au moins une fois pile » : événement contraire (cours, § 4). "), l(nonG), t(" : face à chaque lancer.")],
+          u: [t("« Au moins une fois pile » : événement contraire (cours, point 4). "), l(nonG), t(" : face à chaque lancer.")],
           lignes: [ligne(`P(${nonG})=\\left(\\dfrac{1}{2}\\right)^{${j.n}}`), ligne(`=${f(1, N)}`), ligne(`P(${G})=1-${f(1, N)}`), ...finFraction(N - 1, N)],
         };
-      const u: Frag[] = [t("Épreuves répétées (cours, § 4) : l'arbre a "), l(`2^{${j.n}}=${N}`), t(" chemins de même probabilité (P : pile, F : face) ; on compte les chemins gagnants.")];
+      const u: Frag[] = [t("Épreuves répétées (cours, point 4) : l'arbre a "), l(`2^{${j.n}}=${N}`), t(" chemins de même probabilité (P : pile, F : face) ; on compte les chemins gagnants.")];
       if (j.mode === "exactement") {
         const ch = chemins(j.n, j.k);
         return { u, lignes: [ligne(`n(\\Omega)=2^{${j.n}}=${N}`), ligne(`n(${G})=${ch.length}`, ch.join(", ")), ligne(`P(${G})=${f(ch.length, N)}`), ...finFraction(ch.length, N).slice(1)] };
@@ -127,7 +127,7 @@ export function lignesJeu(j: Jeu, G: string): { u: Frag[]; lignes: LigneCalcul[]
       const RV = `${f(j.r, n)}\\times ${f(ar.v, ar.n)}`;
       const VR = `${f(j.v, n)}\\times ${f(av.r, av.n)}`;
       const D = n * ar.n;
-      const u: Frag[] = [t(`Arbre pondéré (cours, § 2) : on multiplie le long d'un chemin, on additionne les chemins. ${j.remise ? "Avec remise, le second tirage se fait dans la même urne." : "Sans remise, le second tirage se fait avec une boule de moins."}`)];
+      const u: Frag[] = [t(`Arbre pondéré (cours, point 2) : on multiplie le long d'un chemin, on additionne les chemins. ${j.remise ? "Avec remise, le second tirage se fait dans la même urne." : "Sans remise, le second tirage se fait avec une boule de moins."}`)];
       if (j.evt === "deuxR") return { u, lignes: [ligne(`P(${G})=${RR}`, "chemin rouge puis rouge"), ...finFraction(j.r * ar.r, D)] };
       if (j.evt === "meme") {
         const a = j.r * ar.r;
@@ -141,7 +141,7 @@ export function lignesJeu(j: Jeu, G: string): { u: Frag[]; lignes: LigneCalcul[]
       }
       const b = j.v * av.v;
       return {
-        u: [...u, t(" « Au moins une rouge » : événement contraire (cours, § 4), "), l(nonG), t(" : aucune rouge.")],
+        u: [...u, t(" « Au moins une rouge » : événement contraire (cours, point 4), "), l(nonG), t(" : aucune rouge.")],
         lignes: [ligne(`P(${nonG})=${VV}`, "chemin vert puis vert"), ligne(`=${f(b, D)}`), ligne(`P(${G})=1-${f(b, D)}`), ...finFraction(D - b, D)],
       };
     }
@@ -149,7 +149,7 @@ export function lignesJeu(j: Jeu, G: string): { u: Frag[]; lignes: LigneCalcul[]
       const g = f(j.k, j.n);
       const p = f(j.n - j.k, j.n);
       const D = j.n * j.n;
-      const u: Frag[] = [t("Arbre pondéré (cours, § 2) : deux lancers indépendants, on multiplie le long d'un chemin, on additionne les chemins.")];
+      const u: Frag[] = [t("Arbre pondéré (cours, point 2) : deux lancers indépendants, on multiplie le long d'un chemin, on additionne les chemins.")];
       if (j.evt === "deuxFois") return { u, lignes: [ligne(`P(${G})=${g}\\times ${g}`, "gagnant puis gagnant"), ...finFraction(j.k * j.k, D)] };
       if (j.evt === "exactementUne") {
         const a = j.k * (j.n - j.k);
@@ -157,7 +157,7 @@ export function lignesJeu(j: Jeu, G: string): { u: Frag[]; lignes: LigneCalcul[]
       }
       const b = (j.n - j.k) ** 2;
       return {
-        u: [...u, t(" « Au moins une fois » : événement contraire (cours, § 4), "), l(nonG), t(" : perdant les deux fois.")],
+        u: [...u, t(" « Au moins une fois » : événement contraire (cours, point 4), "), l(nonG), t(" : perdant les deux fois.")],
         lignes: [ligne(`P(${nonG})=${p}\\times ${p}`, "perdant puis perdant"), ligne(`=${f(b, D)}`), ligne(`P(${G})=1-${f(b, D)}`), ...finFraction(D - b, D)],
       };
     }

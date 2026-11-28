@@ -105,13 +105,13 @@ export function correctionDetaillee100(e: E): EtapeCorrection[] {
   const rep = REPONSES_100[e.type];
   phases100(e).forEach((ph, i) => {
     const sq = lettreEtape(i);
-    if (ph === "ordre") out.push(utilise(sq, fr([t("Question 1 du cours (§ 1) : si on échange deux éléments choisis, le résultat change-t-il ?")])), resultat(sq, fr([t(r.ordre)])));
-    else if (ph === "repetition") out.push(utilise(sq, fr([t("Question 2 du cours (§ 1) : un même élément peut-il être choisi, ou apparaître, plusieurs fois ?")])), resultat(sq, fr([t(r.repetition)])));
-    else if (ph === "tous") out.push(utilise(sq, fr([t("Question 3 du cours (§ 1), posée car l'ordre compte : place-t-on tous les éléments disponibles ?")])), resultat(sq, fr([t(r.tous)])));
+    if (ph === "ordre") out.push(utilise(sq, fr([t("Question 1 du cours (point 1) : si on échange deux éléments choisis, le résultat change-t-il ?")])), resultat(sq, fr([t(r.ordre)])));
+    else if (ph === "repetition") out.push(utilise(sq, fr([t("Question 2 du cours (point 1) : un même élément peut-il être choisi, ou apparaître, plusieurs fois ?")])), resultat(sq, fr([t(r.repetition)])));
+    else if (ph === "tous") out.push(utilise(sq, fr([t("Question 3 du cours (point 1), posée car l'ordre compte : place-t-on tous les éléments disponibles ?")])), resultat(sq, fr([t(r.tous)])));
     else if (ph === "type") {
       const oui = (b: boolean | null) => (b ? "oui" : "non");
       out.push(
-        utilise(sq, fr([t("Tableau des groupements (cours, § 1) : ordre, répétition, tous utilisés donnent la ligne ; en cercle, seules les positions relatives comptent.")])),
+        utilise(sq, fr([t("Tableau des groupements (cours, point 1) : ordre, répétition, tous utilisés donnent la ligne ; en cercle, seules les positions relatives comptent.")])),
         resultat(
           sq,
           fr([
@@ -123,7 +123,7 @@ export function correctionDetaillee100(e: E): EtapeCorrection[] {
       );
     } else {
       out.push(
-        utilise(sq, fr([t(`${nomType(e.type)} (cours, § ${e.type === "permRep" ? 2 : 1}) : `), l(formuleType(e.type)), t(estCollier(e) ? ", divisé par 2 pour un collier." : ".")])),
+        utilise(sq, fr([t(`${nomType(e.type)} (cours, point ${e.type === "permRep" ? 2 : 1}) : `), l(formuleType(e.type)), t(estCollier(e) ? ", divisé par 2 pour un collier." : ".")])),
         calcul(sq, lignesCalcul(e)),
         resultat(sq, fr(reponse100(e, "calcul"))),
         verification(sq, fr(verificationCalcul(e))),

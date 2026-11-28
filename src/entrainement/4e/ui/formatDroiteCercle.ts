@@ -191,7 +191,7 @@ function ecranPied(e: ExercicePositionRelative | ExerciceCercleTangent, titre: s
           [texte("Ici, d est "), texte(d.b === 0 ? "verticale" : "horizontale"), texte(" : H a la même "), texte(d.b === 0 ? "abscisse que d et la même ordonnée que C." : "ordonnée que d et la même abscisse que C.")],
         ]
       : [
-          [texte("Méthode du cours (§ 6) : la perpendiculaire à "), latex("d\\equiv ax+by+c=0"), texte(" a pour vecteur directeur le vecteur normal "), latex("\\begin{pmatrix}a\\\\b\\end{pmatrix}"), texte(" de d ; H est l'intersection de cette perpendiculaire et de d.")],
+          [texte("Méthode du cours (point 6) : la perpendiculaire à "), latex("d\\equiv ax+by+c=0"), texte(" a pour vecteur directeur le vecteur normal "), latex("\\begin{pmatrix}a\\\\b\\end{pmatrix}"), texte(" de d ; H est l'intersection de cette perpendiculaire et de d.")],
           [texte("Ici, la perpendiculaire par C a pour équations paramétriques "), latex(`\\begin{cases}x=${somme([[centre.x, ""], [d.a, "t"]])}\\\\y=${somme([[centre.y, ""], [d.b, "t"]])}\\end{cases}`), texte(" : remplace x et y dans l'équation de d pour trouver t.")],
         ],
     reponse: [latex(pointLatex("H", h))],

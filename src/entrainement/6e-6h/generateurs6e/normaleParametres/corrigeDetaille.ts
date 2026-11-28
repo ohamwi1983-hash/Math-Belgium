@@ -32,7 +32,7 @@ function lignesZ(e: E, d: DonneeNP, nom: string): LigneCalcul[] {
 export function correctionDetailleeNP(e: E): EtapeCorrection[] {
   const d = e.donnees;
   const etapes: EtapeCorrection[] = [
-    utilise("a", [t("Sens inverse (cours, § 6) : "), f("Z=\\dfrac{X-\\mu}{\\sigma}"), t(" suit "), f("\\mathcal{N}(0\\,;1)"), t(" ; une valeur "), f("x"), t(" s'écrit "), f("x=\\mu+z\\sigma"), t(", et "), f("P(X\\le x)=\\Phi(z)"), t(".")]),
+    utilise("a", [t("Sens inverse (cours, point 6) : "), f("Z=\\dfrac{X-\\mu}{\\sigma}"), t(" suit "), f("\\mathcal{N}(0\\,;1)"), t(" ; une valeur "), f("x"), t(" s'écrit "), f("x=\\mu+z\\sigma"), t(", et "), f("P(X\\le x)=\\Phi(z)"), t(".")]),
     calcul("a", d.length === 2 ? [...lignesZ(e, d[0]!, "z_1"), ...lignesZ(e, d[1]!, "z_2")] : lignesZ(e, d[0]!, "z")),
     resultat("a", fr(reponse(e, "z"))),
   ];

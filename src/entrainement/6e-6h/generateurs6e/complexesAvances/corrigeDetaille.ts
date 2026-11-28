@@ -22,7 +22,7 @@ import type { Coord, PointPlan } from "../figuresPlanComplexe40-42";
  */
 
 const LETTRES = "abcdefghij";
-const cours = (n: number | string): string => `(cours, § ${n})`;
+const cours = (n: number | string): string => `(cours, point ${n})`;
 const f = (valeur: string): FragmentConsigne => latex(valeur);
 const t = (valeur: string): FragmentConsigne => texte(valeur);
 /** Signe moins typographique dans un texte (jamais « - » visible). */

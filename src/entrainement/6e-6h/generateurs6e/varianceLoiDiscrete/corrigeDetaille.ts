@@ -58,7 +58,7 @@ export function correctionDetaillee110(e: E): EtapeCorrection[] {
     switch (ph) {
       case "esperance":
         out.push(
-          utilise(sq, [t("Espérance (cours, § 1) : somme des valeurs pondérées par leurs probabilités, "), l("E(X)=\\sum x_i\\times P(X=x_i)"), t(".")]),
+          utilise(sq, [t("Espérance (cours, point 1) : somme des valeurs pondérées par leurs probabilités, "), l("E(X)=\\sum x_i\\times P(X=x_i)"), t(".")]),
           calcul(sq, lignesEsperance(L, "X")),
           resultat(sq, fr(reponse110(e, ph))),
           verification(sq, [t("La loi est valide : "), l(sommeProbas(L)), t(" ; l'espérance est bien comprise entre la plus petite et la plus grande valeur de X.")]),
@@ -67,7 +67,7 @@ export function correctionDetaillee110(e: E): EtapeCorrection[] {
         break;
       case "carres":
         out.push(
-          utilise(sq, [t("Même somme pondérée (cours, § 1), avec les carrés des valeurs : "), l("E(X^2)=\\sum x_i^2\\times P(X=x_i)"), t(".")]),
+          utilise(sq, [t("Même somme pondérée (cours, point 1), avec les carrés des valeurs : "), l("E(X^2)=\\sum x_i^2\\times P(X=x_i)"), t(".")]),
           calcul(sq, lignesCarres(L, "X")),
           resultat(sq, fr(reponse110(e, ph))),
           piege(sq, L.valeurs[0]! < 0 ? [t("Compter négatif le carré d'une valeur négative : "), l(`${dlp(L.valeurs[0]!)}^2=${dl(L.valeurs[0]! ** 2)}`), t(".")] : [t("Calculer "), l("[E(X)]^2"), t(" à la place de "), l("E(X^2)"), t(" : on élève chaque valeur au carré avant de pondérer.")]),
@@ -75,7 +75,7 @@ export function correctionDetaillee110(e: E): EtapeCorrection[] {
         break;
       case "variance":
         out.push(
-          utilise(sq, [t("Formule de König (cours, § 1) : "), l("V(X)=E(X^2)-[E(X)]^2"), t(".")]),
+          utilise(sq, [t("Formule de König (cours, point 1) : "), l("V(X)=E(X^2)-[E(X)]^2"), t(".")]),
           calcul(sq, lignesVariance(L, "X")),
           resultat(sq, fr(reponse110(e, ph))),
           piege(sq, [t("Oublier le carré de l'espérance ("), l("E(X^2)-E(X)"), t(") : une variance se mesure dans l'unité au carré.")]),
@@ -84,7 +84,7 @@ export function correctionDetaillee110(e: E): EtapeCorrection[] {
       case "ecartType": {
         const s = ecartType(L);
         out.push(
-          utilise(sq, [t("Écart-type (cours, § 1) : "), l("\\sigma(X)=\\sqrt{V(X)}"), t(", dans la même unité que X.")]),
+          utilise(sq, [t("Écart-type (cours, point 1) : "), l("\\sigma(X)=\\sqrt{V(X)}"), t(", dans la même unité que X.")]),
           calcul(sq, [ligne(`\\sigma(X)=\\sqrt{${dl(variance(L))}}`, "racine carrée de la variance"), ligne(`=${dl(s)}`)]),
           resultat(sq, fr(reponse110(e, ph))),
           verification(sq, [l(`${dl(s)}^2=${dl(s * s)}`), t(" : on retrouve la variance.")]),
@@ -94,7 +94,7 @@ export function correctionDetaillee110(e: E): EtapeCorrection[] {
       }
       case "esperances":
         out.push(
-          utilise(sq, [t("Espérance (cours, § 1) : "), l("E(X)=\\sum x_i\\times P(X=x_i)"), t(".")]),
+          utilise(sq, [t("Espérance (cours, point 1) : "), l("E(X)=\\sum x_i\\times P(X=x_i)"), t(".")]),
           calcul(sq, lignesEsperance(L, "X"), [t("Jeu A :")]),
           calcul(sq, lignesEsperance(e.loiB!, "Y"), [t("Jeu B :")]),
           resultat(sq, fr(reponse110(e, ph))),
@@ -103,7 +103,7 @@ export function correctionDetaillee110(e: E): EtapeCorrection[] {
         break;
       case "variances":
         out.push(
-          utilise(sq, [t("Formule de König (cours, § 1) : "), l("V(X)=E(X^2)-[E(X)]^2"), t(", après "), l("E(X^2)=\\sum x_i^2\\times P(X=x_i)"), t(".")]),
+          utilise(sq, [t("Formule de König (cours, point 1) : "), l("V(X)=E(X^2)-[E(X)]^2"), t(", après "), l("E(X^2)=\\sum x_i^2\\times P(X=x_i)"), t(".")]),
           calcul(sq, [...lignesCarres(L, "X"), ...lignesVariance(L, "X")], [t("Jeu A :")]),
           calcul(sq, [...lignesCarres(e.loiB!, "Y"), ...lignesVariance(e.loiB!, "Y")], [t("Jeu B :")]),
           resultat(sq, fr(reponse110(e, ph))),
@@ -112,7 +112,7 @@ export function correctionDetaillee110(e: E): EtapeCorrection[] {
         break;
       case "verdict":
         out.push(
-          utilise(sq, [t("La variance (cours, § 1) mesure la dispersion des gains autour de l'espérance : à espérance égale, le jeu le plus risqué a la plus grande variance (et le plus grand écart-type).")]),
+          utilise(sq, [t("La variance (cours, point 1) mesure la dispersion des gains autour de l'espérance : à espérance égale, le jeu le plus risqué a la plus grande variance (et le plus grand écart-type).")]),
           resultat(sq, fr(reponse110(e, ph))),
           verification(sq, [t("Écarts-types : "), l(`\\sigma(X)\\approx ${dl(Math.round(ecartType(L) * 100) / 100)}`), t(" et "), l(`\\sigma(Y)\\approx ${dl(Math.round(ecartType(e.loiB!) * 100) / 100)}`), t(" : même classement.")]),
           piege(sq, [t("Choisir le jeu qui a le plus grand gain possible : le risque se lit sur la variance, qui tient compte de toutes les valeurs et de leurs probabilités.")]),

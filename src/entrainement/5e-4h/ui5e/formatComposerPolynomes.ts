@@ -235,7 +235,7 @@ function aideDeveloppement2(ext: number[], int: number[]): AideEcran {
 export function aide1(e: E, phase: PhaseComposerPolynomes): AideEcran {
   switch (phase) {
     case "substitution":
-      return { texte: [tx("Dans "), lx("f\\circ g"), tx(", g agit d'abord : sa sortie devient l'entrée de f. On remplace donc chaque "), lx("x"), tx(" de f par toute l'expression de "), lx("g(x)"), tx(", entre parenthèses (cours, § 3) :")], latex: "(f\\circ g)(x)=f\\big(g(x)\\big)" };
+      return { texte: [tx("Dans "), lx("f\\circ g"), tx(", g agit d'abord : sa sortie devient l'entrée de f. On remplace donc chaque "), lx("x"), tx(" de f par toute l'expression de "), lx("g(x)"), tx(", entre parenthèses (cours, point 3) :")], latex: "(f\\circ g)(x)=f\\big(g(x)\\big)" };
     case "fog": {
       const carre = extFog(e).length === 3;
       return {

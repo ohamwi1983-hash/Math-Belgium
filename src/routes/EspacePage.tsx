@@ -279,8 +279,8 @@ function LigneCours({ c, aujourdhui }: { c: CoursDuJour; aujourdhui: string }) {
               {r.titreCourt}
               {etape && (
                 <>
-                  <span className="ep-cours-detail">{` — étape ${etape.numero}`}</span>
-                  <span className="ep-cours-court">{`, étape ${etape.numero}`}</span>
+                  <span className="ep-cours-detail">{` — point ${etape.numero}`}</span>
+                  <span className="ep-cours-court">{`, point ${etape.numero}`}</span>
                   <span className="ep-cours-detail"> « {etape.titre} »</span>
                 </>
               )}
@@ -309,7 +309,7 @@ function LigneCours({ c, aujourdhui }: { c: CoursDuJour; aujourdhui: string }) {
         )}
       </span>
       {projeter ? (
-        <Link className="ep-bouton principal ep-cours-action" to={projeter} aria-label={`Projeter ${r?.titreCourt ?? ''}${etape ? `, étape ${etape.numero}` : ''} (${nom})`}>
+        <Link className="ep-bouton principal ep-cours-action" to={projeter} aria-label={`Projeter ${r?.titreCourt ?? ''}${etape ? `, point ${etape.numero}` : ''} (${nom})`}>
           <IconeProjeter />
           <span className="ep-cours-action-texte">Projeter</span>
         </Link>
