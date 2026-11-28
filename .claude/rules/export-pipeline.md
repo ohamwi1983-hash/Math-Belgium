@@ -47,6 +47,10 @@ retirés, voir `.claude/rules/content-history.md`) — via `src/lib/export/` :
   `jspdf` chargés à la demande), qui réutilise `toutesLesReglesCss` / `retirerPreferenceSombre` /
   `inlinerPolices` de `buildHtml.ts` (exportées pour lui) — voir `chapter-components.md`, « Mode
   projection » et « Projection annotée ». L'export du CHAPITRE reste HTML seulement.
+  Depuis le 28/11/2026 (chantier O), ce même export ajoute, juste après une diapo « S'entraîner », les pages
+  d'EXERCICE projetées (« Projeter un exercice » : l'énoncé, puis les pages du corrigé jusqu'à la plus loin montrée
+  ou annotée, tirées de nouveau par leur code avec le registre des adaptateurs, chargé à la demande) ; jamais les
+  points de participation ni la vidéo — voir `chapter-components.md`, « Outils par-dessus ».
 
 ## Impression des chapitres (bouton « Imprimer », Ctrl+P, fichier « Télécharger ce chapitre »)
 

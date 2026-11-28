@@ -16,7 +16,7 @@ const ICI = dirname(fileURLToPath(import.meta.url))
 const BUILD = process.argv[2]
 const CAPTURES = process.argv[3] || join(ICI, 'captures')
 const QUOI = (process.argv[4] || 'p1,p5,p6').split(',')
-const PORT = 5431
+const PORT = Number(process.env.PORT_VERIF) || 5437
 const BASE = `http://localhost:${PORT}`
 if (!BUILD) {
   console.error('Usage : node scripts/verif-projection/outils-o.mjs <build> [captures] [p1,p5,p6]')
@@ -81,6 +81,16 @@ async function debordement(page, quoi) {
       if (!r.width || !r.height) continue
       const st = getComputedStyle(el)
       if (st.visibility === 'hidden' || st.opacity === '0') continue
+      // Dans un conteneur qui défile ou rogne (boîte, panneau) : c'est le conteneur qui doit tenir dans la fenêtre.
+      let rogne = false
+      for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+        const o = getComputedStyle(p)
+        if (/(auto|scroll|hidden)/.test(o.overflow + o.overflowX + o.overflowY) && !p.matches('.projection, .projection-scene, .projection-scene-cadre')) {
+          rogne = true
+          break
+        }
+      }
+      if (rogne) continue
       if (r.right > w + 1 || r.bottom > h + 1 || r.left < -1 || r.top < -1) hors.push(`${el.className || el.tagName} ${Math.round(r.left)},${Math.round(r.top)},${Math.round(r.right)},${Math.round(r.bottom)}`)
     }
     return { hors: hors.slice(0, 5), sw: document.documentElement.scrollWidth, w }
@@ -235,6 +245,32 @@ async function p1(browser) {
   await capture(diapos, 'p1-07-fenetre-diapos')
   verifier(d.erreurs.length === 0, `P1 deux écrans : 0 erreur console (${d.erreurs.slice(0, 3).join(' | ')})`)
   await d.ctx.close()
+  // Tailles d'écran : tablette, téléphone en paysage, grand écran ; thème sombre (interface)
+  for (const [l, h, sombre] of [[1024, 768, false], [870, 400, false], [1920, 1080, true]]) {
+    const t = await contexte(browser, { largeur: l, hauteur: h, sombre })
+    await ouvrirProjection(t.page, URL_P1)
+    await t.page.keyboard.press('End')
+    await t.page.waitForSelector('.diapo-entrainement-projeter', { timeout: 30000 })
+    await t.page.locator('.diapo-entrainement-projeter').click()
+    await t.page.waitForSelector('.exo-page .exo-surtitre', { timeout: 20000 })
+    await t.page.keyboard.press('ArrowRight')
+    await attendre(t.page, 600)
+    await t.page.mouse.move(l / 2, h / 2)
+    await debordement(t.page, `P1 ${l} × ${h}`)
+    await cibles(t.page, '.exo-barre button, .exo-barre select', `petite barre ${l} × ${h}`)
+    await capture(t.page, `p1-08-${l}x${h}${sombre ? '-sombre' : ''}`)
+    if (l === 1920) {
+      await t.page.goto(`${BASE}${URL_P1}&role=prof`, { waitUntil: 'domcontentloaded' })
+      await t.page.waitForSelector('.prof-scene .diapo', { timeout: 30000 })
+      await t.page.keyboard.press('End')
+      await t.page.waitForSelector('.prof-scene .diapo-entrainement-projeter', { timeout: 30000 })
+      await t.page.locator('.prof-scene .diapo-entrainement-projeter').click()
+      await t.page.waitForSelector('.prof-exo-seul .prof-exo-lignes li', { timeout: 20000 })
+      await capture(t.page, 'p1-09-vue-professeur-sombre')
+    }
+    verifier(t.erreurs.length === 0, `P1 ${l} × ${h} : 0 erreur console (${t.erreurs.slice(0, 3).join(' | ')})`)
+    await t.ctx.close()
+  }
 }
 
 // ------------------------------------------------------------------------------------------ main

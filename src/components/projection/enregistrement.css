@@ -1,0 +1,98 @@
+/* « ● Enregistrer » (P5) : bouton et chrono de la barre, rappel, boîtes (claires dans les deux thèmes, comme les palettes). */
+
+/* Element Capture : la cible doit former un contexte d'empilement (le fluo reste fondu avec la diapo : ils sont dedans). */
+.projection-scene-cadre.rec-cible { isolation: isolate; }
+
+.rec-point { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: #d42c2c; box-shadow: 0 0 0 4px rgb(212 44 44 / 0.2); flex: none; }
+.rec-point.pause { background: #8a97a1; box-shadow: 0 0 0 4px rgb(138 151 161 / 0.25); animation: rec-clignote 1.6s ease-in-out infinite; }
+.rec-point.blanc { background: #fff; box-shadow: none; width: 10px; height: 10px; }
+@keyframes rec-clignote { 50% { opacity: 0.4; } }
+@media (prefers-reduced-motion: reduce) { .rec-point.pause { animation: none; } }
+
+.rec-barre { position: relative; display: inline-flex; align-items: center; gap: 2px; padding: 0 2px 0 12px; height: 44px; border-radius: 22px; background: #fbe7e7; color: #8e2424; flex: none; }
+.rec-barre.pause { background: #eef2f5; color: #33434f; }
+.rec-temps { min-width: 52px; margin-left: 6px; font: 600 14px var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rec-mini { color: inherit; border-radius: 22px; }
+.rec-mini:disabled { opacity: 0.4; cursor: default; }
+.rec-confirmer { position: absolute; bottom: 52px; right: 0; white-space: nowrap; color: #182430; font: 500 14px var(--sans); z-index: 3; }
+.rec-bouton span { margin-left: 6px; }
+
+.rec-rappel {
+  position: absolute; top: 70px; right: 20px; z-index: 4; display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px;
+  background: rgb(255 255 255 / 0.9); color: #8e2424; font: 600 14px var(--mono); box-shadow: 0 2px 8px rgb(0 0 0 / 0.12); pointer-events: none;
+}
+.rec-rappel.pause { color: #51626f; }
+
+/* Fenêtre des diapos filmée (deux écrans) : rien de posé par-dessus la diapo dans la vidéo. */
+.projection--diapos.en-enregistrement .projection-barre,
+.projection--diapos.en-enregistrement .projection-blanc-outils,
+.projection--diapos.en-enregistrement .projection-pastille,
+.projection--diapos.en-enregistrement .projection-colonne,
+.projection--diapos.en-enregistrement .part-projete,
+.projection--diapos.en-enregistrement .part-toast,
+.projection--diapos.en-enregistrement .part-tire { display: none !important; }
+
+.rec-voile { position: absolute; inset: 0; z-index: 20; background: rgb(17 23 29 / 0.62); display: flex; align-items: center; justify-content: center; padding: 12px; }
+.rec-dialogue {
+  color-scheme: light; width: min(940px, 100%); max-height: calc(100% - 8px); overflow: auto; background: #fff; color: #182430; border-radius: 10px;
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.35); padding: 20px 24px; font: 15px / 1.45 var(--sans);
+}
+.rec-dialogue h2 { margin: 0 0 2px; font: 600 25px / 1.2 var(--serif); }
+.rec-dialogue h3 { margin: 0 0 6px; display: flex; align-items: center; gap: 8px; font: 600 19px var(--serif); }
+.rec-sous { margin: 0 0 10px; color: #51626f; }
+.rec-colonnes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; }
+@media (max-width: 760px) { .rec-colonnes { grid-template-columns: 1fr; gap: 6px; } }
+.rec-lbl { display: block; margin: 12px 0 6px; font: 600 12px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: #51626f; }
+.rec-micros { display: flex; flex-direction: column; gap: 4px; }
+.rec-micro { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border: 1px solid #dfe7ec; border-radius: 8px; cursor: pointer; }
+.rec-micro.on { border: 2px solid #b65c1f; background: #fff6ec; }
+.rec-micro input { width: 18px; height: 18px; accent-color: #b65c1f; flex: none; }
+.rec-niveau { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.rec-vu { display: inline-flex; gap: 3px; align-items: flex-end; height: 26px; }
+.rec-vu i { display: block; width: 9px; height: 26px; border-radius: 2px; background: #dfe7ec; }
+.rec-vu i.g { background: #2f7a4f; }
+.rec-vu i.j { background: #b98900; }
+.rec-vu i.r { background: #b23a3a; }
+.rec-jugement { font-weight: 600; flex: 1 1 140px; }
+.rec-jugement.bon { color: #2f7a4f; }
+.rec-jugement.faible, .rec-jugement.silence { color: #8a5a00; }
+.rec-jugement.sature { color: #b23a3a; }
+.rec-tester { min-height: 44px; }
+.rec-test { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 8px; }
+.rec-test audio { height: 44px; max-width: 100%; }
+.rec-qualites { display: flex; flex-wrap: wrap; gap: 6px; }
+.rec-qualites .projection-duree { min-height: 44px; }
+.rec-qualites .projection-duree.on { background: #182430; color: #fff; border-color: #182430; }
+.rec-case { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; cursor: pointer; min-height: 44px; }
+.rec-case input { width: 20px; height: 20px; margin-top: 2px; accent-color: #2f7a4f; flex: none; }
+.rec-liste { margin: 0; padding: 10px 12px; list-style: none; display: grid; gap: 4px; border: 1px solid #dfe7ec; border-radius: 8px; background: #f7f9fb; }
+.rec-liste li { display: flex; gap: 8px; align-items: baseline; }
+.rec-liste li::before { font-weight: 700; flex: none; }
+.rec-liste li.o::before { content: '✓'; color: #2f7a4f; }
+.rec-liste li.n::before { content: '✗'; color: #b23a3a; }
+.rec-note { margin: 0; color: #33434f; }
+.rec-alerte { margin: 10px 0 0; padding: 8px 12px; border-radius: 8px; background: #fff3e0; color: #6b3d00; }
+.rec-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 10px; margin-top: 16px; }
+.rec-actions.gauche { justify-content: flex-start; margin-top: 10px; }
+.rec-commencer { background: #c62828; border-color: #c62828; color: #fff; }
+.rec-commencer:disabled { opacity: 0.45; cursor: not-allowed; }
+.rec-dialogue .projection-bouton { background: #fff; color: #182430; border-color: #ccd8e0; }
+.rec-video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #11171d; border-radius: 8px; }
+.rec-ligne-temps { position: relative; height: 22px; margin: 4px 6px 0; border-bottom: 3px solid #dfe7ec; }
+.rec-repere { position: absolute; bottom: -12px; width: 44px; height: 44px; margin-left: -22px; border: 0; background: transparent; cursor: pointer; }
+.rec-repere::after { content: ''; position: absolute; left: 21px; top: 12px; width: 3px; height: 16px; border-radius: 2px; background: #b65c1f; }
+.rec-repere:focus-visible { outline: 3px solid #b65c1f; outline-offset: -6px; border-radius: 6px; }
+.rec-infos { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 14px 0 8px; font: 500 13px var(--mono); color: #33434f; }
+.rec-telecharger { width: 100%; background: #b65c1f; border-color: #b65c1f; color: #fff; margin-bottom: 8px; }
+.rec-supprimer { color: #b23a3a !important; border-color: #e7b9b9 !important; }
+.rec-confirmer-fermer { display: inline-flex; align-items: center; gap: 8px; color: #6b3d00; font-weight: 500; }
+.rec-copie { display: flex; gap: 8px; align-items: flex-start; }
+.rec-copie input, .rec-copie textarea {
+  flex: 1; min-width: 0; min-height: 44px; padding: 8px 10px; border: 1px solid #ccd8e0; border-radius: 8px; background: #f7f9fb; color: #182430; font: 14px / 1.5 var(--mono);
+}
+.rec-copie textarea { resize: vertical; }
+.rec-copie .projection-bouton { flex: none; }
+.rec-rappel-rgpd { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: #fff8d6; border: 1px solid #ecd98c; font-size: 13.5px; }
+.rec-rappel-rgpd p { margin: 0; }
+.rec-rappel-rgpd p + p { margin-top: 6px; }
+.rec-dialogue :focus-visible { outline: 3px solid #b65c1f; outline-offset: 2px; }

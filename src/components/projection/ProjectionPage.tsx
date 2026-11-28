@@ -27,6 +27,8 @@ import { useConservation, useMagasinAnnotations } from './magasinAnnotations'
 import { DialogueQuitter, PaletteExport, useExportAnnote, useResume } from './ExportAnnote'
 import { DialogueFinProjection, useMatiereProjection } from './MatiereFinProjection'
 import type { PropositionMatiere } from '../../lib/projection/matiereProjetee'
+import { BoutonPoints, PanneauPoints, ParticipationProjetee, ReglagesParticipationDialogue, useParticipation } from './Participation'
+import { BoutonEnregistrer, DialogueEnregistrer, DialogueVideoPrete, RappelEnregistrement, useEnregistrement, useEnregistrementDistant } from './Enregistrement'
 import { ChercherAffiche, ContexteExerciceTableau, ErreurExercice, OutilsExercice, PanneauExerciceProf, ScenePageExercice, useExercicesProjection } from './ExerciceTableau'
 import '../carnet/matiere-projetee.css'
 import './projection.css'
@@ -41,7 +43,9 @@ export function ProjectionPage() {
   const { levelSlug, chapterSlug } = useParams<{ levelSlug: string; chapterSlug: string }>()
   const chapter = levelSlug && chapterSlug ? findChapter(levelSlug, chapterSlug) : undefined
   const location = useLocation()
-  usePageNonIndexee(chapter ? `Projection — ${chapter.title}` : 'Projection')
+  // Fenêtre des diapos : titre distinct, à choisir dans la fenêtre de partage du navigateur (« ● Enregistrer » en deux écrans).
+  const fenetreDesDiapos = new URLSearchParams(location.search).get('role') === 'diapos'
+  usePageNonIndexee(chapter ? `${fenetreDesDiapos ? 'Diapos' : 'Projection'} — ${chapter.title}` : 'Projection')
   if (!chapter) return <Navigate to="/" replace />
   return (
     <GardeOuPage chapter={chapter} retour={location.pathname + location.search}>
@@ -487,8 +491,16 @@ function VueDiapos({
   const { plein, basculer } = usePleinEcran(signaler)
   const [outils, setOutils] = useState<OutilsLocaux>(OUTILS_DEPART)
   const [accueil, setAccueil] = useState(role === 'diapos')
+  // P5 : enregistrer la projection en vidéo (un écran : la diapo de cet onglet) ; la fenêtre des diapos suit l'enregistrement de la vue du professeur.
+  const rec = useEnregistrement({ chapter, diapos, index: etat.index, role, cible: () => document.querySelector<HTMLElement>('.projection-scene--principale .projection-scene-cadre') })
+  const enregistreAilleurs = useEnregistrementDistant(chapter, role !== 'diapos')
+  const dialogueRec = rec.phase === 'reglages' || rec.phase === 'fini'
+  // P6 : points de participation (projeté hors du cadre filmé ; un écran : panneau replié chez le professeur).
+  const part = useParticipation(chapter, role)
+  const [tiroirPoints, setTiroirPoints] = useState(false)
+  const [reglagesPoints, setReglagesPoints] = useState(false)
   // La barre se masque après 3 s même stylo en main (la pastille, elle, reste) ; pas tant qu'une palette est dépliée.
-  const [barreActive] = useInactivite(outils.palette || outils.nuancier || outils.menuFond || outils.menuMinuteur || outils.menuExport || outils.ensemble || demandeQuitter)
+  const [barreActive] = useInactivite(outils.palette || outils.nuancier || outils.menuFond || outils.menuMinuteur || outils.menuExport || outils.ensemble || demandeQuitter || dialogueRec || tiroirPoints || reglagesPoints)
   const surEcrire = useCallback(() => setOutils(replierPalettes), [])
   const atelierPlein = useAtelierPlein(projection)
   const pleinIci = atelierPlein.plein && diapos[etat.index]?.type === 'atelier'
@@ -524,8 +536,8 @@ function VueDiapos({
   }, [role, ann.annotations, projection.etat.blanches, projection.etat.exercices, quitterVraiment, matiere])
 
   useClavier({
-    suivant: () => !outils.ensemble && !demandeQuitter && avancer(),
-    precedent: () => !outils.ensemble && !demandeQuitter && reculer(),
+    suivant: () => !outils.ensemble && !demandeQuitter && !dialogueRec && !reglagesPoints && avancer(),
+    precedent: () => !outils.ensemble && !demandeQuitter && !dialogueRec && !reglagesPoints && reculer(),
     // Écran blanc affiché : Page préc. / Page suiv. passent d'une page blanche à l'autre.
     pageSuivante: etat.blanc ? () => projection.allerPage(1) : undefined,
     pagePrecedente: etat.blanc ? () => projection.allerPage(-1) : undefined,
@@ -541,6 +553,9 @@ function VueDiapos({
     pleinEcran: basculer,
     echap: () => {
       if (accueil) setAccueil(false)
+      else if (rec.phase === 'reglages') rec.fermerReglages()
+      else if (reglagesPoints) setReglagesPoints(false)
+      else if (tiroirPoints) setTiroirPoints(false)
       else if (pleinIci) atelierPlein.sortir()
       else if (outils.ensemble) setOutils((o) => ({ ...o, ensemble: false }))
       else if (echapPalettes(outils)) setOutils((o) => echapPalettes(o) ?? o)
@@ -552,7 +567,7 @@ function VueDiapos({
 
   return (
     <div
-      className={`projection projection--diapos${barreActive ? '' : ' inactive'}${pleinIci ? ' atelier-plein' : ''}`}
+      className={`projection projection--diapos${barreActive ? '' : ' inactive'}${pleinIci ? ' atelier-plein' : ''}${role === 'diapos' && enregistreAilleurs ? ' en-enregistrement' : ''}`}
       onClick={(e) => {
         if (outils.stylo || outils.menuMinuteur || outils.menuExport) {
           if (outils.menuMinuteur || outils.menuExport) setOutils((o) => ({ ...o, menuMinuteur: false, menuExport: false }))
@@ -615,7 +630,27 @@ function VueDiapos({
         quitter={quitter}
         magasin={magasin}
         paletteExport={role === 'diapos' ? undefined : <PaletteExport exp={ann.exp} resume={ann.resume} nouvelleSeance={ann.nouvelleSeance} />}
+        outilsO={
+          role === 'diapos' ? (
+            part.affiche.actif ? <BoutonPoints part={part} actif={part.affiche.visible} onClick={() => part.majAffiche((a) => ({ ...a, visible: !a.visible }))} /> : undefined
+          ) : (
+            <>
+              <BoutonEnregistrer rec={rec} />
+              <BoutonPoints part={part} actif={tiroirPoints} onClick={() => (part.reglages ? setTiroirPoints((t) => !t) : setReglagesPoints(true))} />
+            </>
+          )
+        }
       />
+      <ParticipationProjetee part={part} masquer={rec.enCours && rec.mode === 'region'} />
+      {tiroirPoints && role !== 'diapos' && (
+        <div className="part-tiroir" onClick={(e) => e.stopPropagation()}>
+          <PanneauPoints part={part} prive={false} onReglages={() => setReglagesPoints(true)} onFermer={() => setTiroirPoints(false)} />
+        </div>
+      )}
+      {reglagesPoints && <ReglagesParticipationDialogue part={part} fermer={() => setReglagesPoints(false)} />}
+      <RappelEnregistrement rec={rec} visible={!barreVisible} />
+      <DialogueEnregistrer rec={rec} chapter={chapter} />
+      <DialogueVideoPrete rec={rec} chapter={chapter} />
       {outils.ensemble && <VueEnsemble chapter={chapter} diapos={diapos} projection={projection} fermer={() => setOutils((o) => ({ ...o, ensemble: false }))} />}
       {demandeQuitter &&
         (proposition ? (
@@ -682,6 +717,13 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
   const exo = useExercicesProjection(chapter, diapos, projection)
   const avancer = exo.page ? exo.actions.suivante : suivant
   const reculer = exo.page ? exo.actions.precedente : precedent
+  // P5 : en deux écrans, on filme la fenêtre des diapos (choisie dans la fenêtre de partage du navigateur).
+  const rec = useEnregistrement({ chapter, diapos, index: etat.index, role: 'prof', cible: () => null })
+  const dialogueRec = rec.phase === 'reglages' || rec.phase === 'fini'
+  // P6 : la grille des élèves remplace la colonne « Suivante / Notes » (bouton « Points » ; « ✕ » pour revenir).
+  const part = useParticipation(chapter, 'prof')
+  const [colonnePoints, setColonnePoints] = useState(false)
+  const [reglagesPoints, setReglagesPoints] = useState(false)
   const prochaine: { diapo: DonneesDiapo; pas: number; texte: string } | null = d
     ? etat.pas < d.pas
       ? { diapo: d, pas: etat.pas + 1, texte: 'Prochain clic : étape suivante de cette diapo' }
@@ -721,8 +763,8 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
   }
 
   useClavier({
-    suivant: () => !outils.ensemble && !demandeQuitter && avancer(),
-    precedent: () => !outils.ensemble && !demandeQuitter && reculer(),
+    suivant: () => !outils.ensemble && !demandeQuitter && !dialogueRec && avancer(),
+    precedent: () => !outils.ensemble && !demandeQuitter && !dialogueRec && reculer(),
     pageSuivante: etat.blanc ? () => projection.allerPage(1) : undefined,
     pagePrecedente: etat.blanc ? () => projection.allerPage(-1) : undefined,
     debut: () => aller(0),
@@ -736,7 +778,9 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
     calc: () => magasin.calc({ visible: !magasin.lire().calc.visible }),
     pleinEcran: basculer,
     echap: () => {
-      if (etat.atelierPlein) basculerAtelierPlein(false)
+      if (rec.phase === 'reglages') rec.fermerReglages()
+      else if (reglagesPoints) setReglagesPoints(false)
+      else if (etat.atelierPlein) basculerAtelierPlein(false)
       else if (outils.menuExport) setOutils((o) => ({ ...o, menuExport: false }))
       else if (!outils.ensemble && echapPalettes(outils)) setOutils((o) => echapPalettes(o) ?? o)
       else if (exo.page && !outils.ensemble && !outils.stylo) exo.actions.fermer()
@@ -767,6 +811,8 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
               <Pictogramme nom="deux-ecrans" /> Ouvrir la fenêtre des diapos
             </button>
           )}
+          <BoutonEnregistrer rec={rec} compacte />
+          <BoutonPoints part={part} actif={colonnePoints} compacte onClick={() => (part.reglages ? setColonnePoints((c) => !c) : setReglagesPoints(true))} />
           <button type="button" className="projection-bouton" aria-pressed={etat.blanc} onClick={basculerBlanc} title="Écran blanc (B)">
             <Pictogramme nom="ecran-blanc" /> {etat.blanc ? 'Rallumer' : 'Écran blanc'}
           </button>
@@ -873,7 +919,11 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
         </section>
 
         <aside className="prof-cote">
-          {exo.page ? (
+          {colonnePoints ? (
+            <section className="prof-points" aria-label="Points de participation">
+              <PanneauPoints part={part} prive onReglages={() => setReglagesPoints(true)} onFermer={() => setColonnePoints(false)} />
+            </section>
+          ) : exo.page ? (
             <PanneauExerciceProf exo={exo} />
           ) : (
           <>
@@ -926,6 +976,18 @@ function VuePresentateur({ chapter, diapos, choix, gardees }: { chapter: Chapter
         ) : (
           <DialogueQuitter exp={ann.exp} resume={ann.resume} quitter={quitterVraiment} fermer={() => setDemandeQuitter(false)} />
         ))}
+      <DialogueEnregistrer rec={rec} chapter={chapter} />
+      <DialogueVideoPrete rec={rec} chapter={chapter} />
+      {reglagesPoints && (
+        <ReglagesParticipationDialogue
+          part={part}
+          fermer={() => {
+            setReglagesPoints(false)
+            // Vue du professeur : après les réglages, la grille des élèves (à la place de Suivante / Notes).
+            setColonnePoints(true)
+          }}
+        />
+      )}
       {message && (
         <p className="projection-message" role="status">
           {message}

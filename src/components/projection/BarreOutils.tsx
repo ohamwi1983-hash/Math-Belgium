@@ -130,8 +130,11 @@ export function BarreOutils({
   quitter,
   magasin,
   paletteExport,
+  outilsO,
 }: {
   magasin: MagasinInstruments
+  /** Outils du chantier O (enregistrer en vidéo, points de participation), juste après « Plein écran ». */
+  outilsO?: ReactNode
   /** Palette « Télécharger » (absente sur l'écran de la classe en deux écrans). */
   paletteExport?: ReactNode
   projection: Projection
@@ -209,6 +212,7 @@ export function BarreOutils({
         </button>
       )}
       <Bouton label={outils.pleinEcran ? 'Quitter le plein écran' : 'Plein écran'} picto={outils.pleinEcran ? 'quitter-plein-ecran' : 'plein-ecran'} onClick={basculerPleinEcran} raccourci="F" />
+      {outilsO}
       <span className="projection-separateur" aria-hidden="true" />
       <Bouton label="Précédent" picto="precedent" onClick={precedent} raccourci="←" />
       <span className="projection-compteur" aria-live="polite">
