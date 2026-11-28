@@ -30,6 +30,9 @@ paths:
   - "src/lib/guideEleve.ts"
   - "src/components/eleve/{BarreEleve,AidePage,VisiteAccueil,AccueilEleve,IconesEleve}.tsx"
   - "src/components/eleve/guideEleve.css"
+  - "src/components/eleve/BlocEvaluation.tsx"
+  - "src/components/eleve/blocEvaluation.css"
+  - "src/lib/pageClasse.ts"
   - "src/routes/{HomePage,EntrainerPage}.tsx"
   - "src/entrainement/components/FinExercice.tsx"
   - "src/components/chapter/{FinEtape,CarteChapitre}.tsx"
@@ -739,3 +742,36 @@ logique : `tests/purs.test.ts` du dossier de travail `suite-E/` (esbuild + node)
 - **Vérifications** (dossier de travail `suite-E/` : `cap.mjs`, `cap2.mjs`, `tests/purs.test.ts`, captures dans
   `captures/`) : build de production servi en local, iPhone 13 et 1 280 px, clair et sombre, `lire_page_classe` simulé
   (`page.route`).
+
+## Évaluation annoncée : contenu, changement, retrait (28/11/2026, maquettes 1a / 1b / 2 / 3 / 4 du professeur)
+
+Côté professeur : `.claude/rules/comptes.md`, « Évaluations et devoirs annoncés : contenu précisé, fiche, modification,
+suppression ». Côté élève, rien n'est envoyé ; seule requête : la relecture de la page de classe PAR SON CODE.
+
+- **Même bloc partout** : `components/eleve/BlocEvaluation.tsx` (+ `blocEvaluation.css`, classes `be-*`) rend l'interro
+  publiée (`InterroPubliee` étendue : `nom`, `competences`, `chapitres[].points[].exercices`, `connaitre`) sur `/classe`
+  (`CarteEvaluation` ; ancien format sans `chapitres` → `CarteInterroAncienne`, rendu d'avant), dans la carte « Ma classe »
+  de l'accueil et dans l'aperçu / la fiche du professeur. Titre « Interro vendredi 4/12 · 3e heure (dans 7 jours) » (nom
+  libre du professeur : « Contrôle… », « Bilan… »), pastilles de compétences (`PastilleCompetence`, couleurs `--procN`, nom
+  lu), par chapitre (titre seul, jamais le numéro du site) les points « numéro + titre » (jamais le mot « étape ») avec la
+  précision « seulement : … » / « sans : … », les codes des exercices = LIENS vers les générateurs (`generatorLink`),
+  ligne « Connaître : questions « formule » et quiz vrai/faux » + codes des quiz, « Je prépare mon interro › ». Conteneur
+  < 520 px (téléphone) : codes en ligne et bouton « Voir les noms des exercices » (`aria-pressed`) ; plus large : une
+  rangée par exercice (pastille, code, nom).
+- **Carte « Ma classe »** (`AccueilEleve.tsx::CarteMaClasse`) : repliée — « Interro vendredi 4/12 · dans 7 jours »,
+  « Fonctions exponentielles — point 7 ; Fonctions logarithmes — points 1 et 2 » (`guideEleve.ts::resumeClasse`, nom
+  `nomInterro`), « date changée » si besoin — puis `<details>` « Voir le contenu » / « Cacher le contenu » avec le bloc.
+- **Plan prérempli multi-chapitres** : `pageClasse.ts::lienPlanRevision(i)` →
+  `/suivi/plan?date=&niveau=&chapitre=<premier>&etapes=slug%23section,…&gen=…&type=bilan&nom=<nom>&id=<événement>` (une
+  étape d'un autre chapitre s'écrit `slug#section` ; l'ancien format `etapes=id,id` reste lu). `PlanRevisionPage`
+  (`listeEtapesLien`) garde `nom`, `annonceId` (`id`) et `signature` (`signatureInterro` : date | points | exercices triés
+  | nom) dans le plan (`planRevisionStockage.ts`, champs facultatifs, anciens plans intacts).
+- **Dernière version sur l'appareil** (`classe:derniere`) : `garderPage(code, page, date)` renvoie la page ANNOTÉE — une
+  interro (même `id`) dont la date a changé depuis la dernière version vue porte `avant` (« date changée — avant : ven. 4/12 »,
+  gardé tant que la date reste nouvelle), sur `/classe` et dans la carte.
+- **Avis dans le plan** (`PlanRevisionPage.tsx::AvisAnnonce`, plan fait depuis une interro annoncée) : relit la version
+  gardée puis, 600 ms après, la page par son code ; interro trouvée mais signature différente → « Ton interro a changé » (+
+  « Ton professeur l'a déplacée au … » si la date a bougé) et « Mettre mon plan à jour » (rien ne change sans le bouton :
+  date, points, exercices, nom remplacés, coches gardées) ; interro absente (et ni passée ni au-delà des 3 interros
+  publiées) → « Cette interro a été retirée par ton professeur », « Garder mon plan » (le plan n'est plus lié) / « Effacer mon
+  plan ». Classes `.plan-avis` (`suivi.css`).

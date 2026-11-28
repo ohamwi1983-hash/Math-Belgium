@@ -22,6 +22,10 @@ paths:
   - "src/lib/logoImage.ts"
   - "src/lib/premiersPas.ts"
   - "src/components/eleve/classe.css"
+  - "src/lib/evaluationAnnoncee.ts"
+  - "src/components/eleve/BlocEvaluation.tsx"
+  - "src/components/eleve/blocEvaluation.css"
+  - "scripts/verif-espace/**"
   - "supabase/**"
   - ".env*"
 ---
@@ -49,6 +53,8 @@ Page de classe à code pour les élèves SANS compte (`/classe`), publiée depui
 « Page de classe » en fin de fichier). « Mon ordre des chapitres » du professeur (et plus jamais le numéro du site sur ce que
 voient les élèves) : `0011_ordre_chapitres.sql` (section « Mon ordre des chapitres (0011) » en fin de fichier). Logo FACULTATIF de
 chaque école sur les documents : `0012_logo_ecole.sql` (section « Premiers pas et logo de l'école » en fin de fichier).
+Compétences évaluées d'une évaluation annoncée (facultatif) : `0013_evaluation_competences.sql` (section « Évaluations et
+devoirs annoncés : contenu précisé, fiche, modification, suppression » en fin de fichier).
 
 ## Décisions de l'utilisateur
 
@@ -1686,6 +1692,11 @@ ouvert), menu du compte (prof / admin), connexion → `/espace`, `?retour=/coffr
 
 ## Annoncer une évaluation / Donner un devoir (27/11/2026 : maquette « annonce » validée, AUCUNE migration)
 
+> **28/11/2026** : l'étape « Sur quoi ? » (nom libre, compétences, plusieurs chapitres, points et exercices), l'aperçu = bloc
+> publié, la fiche, la modification et la suppression sont décrits dans « Évaluations et devoirs annoncés : contenu précisé,
+> fiche, modification, suppression » (fin de fichier) ; ce qui suit reste vrai pour le reste (adresse, Quand ?, Publier,
+> séance d'annonce, rappels).
+
 Décision du professeur : UN composant « Annoncer une évaluation » (et « Donner un devoir », même modèle), en trois étapes,
 présent sur le tableau de bord, la carte de chaque classe, la page de la classe (et la fin de projection, chantier M : il
 suffit d'un lien).
@@ -1934,3 +1945,116 @@ cibles ≥ 44 px, `scrollWidth` = largeur, 0 erreur console). Captures dans `sui
 **Mise en service** : SQL Editor → New query → coller TOUT `0012_logo_ecole.sql` → Run → « Success. No rows returned » ;
 recharger `/profil` → « En-tête des copies » → « Ajouter le logo de l'école ». À vérifier contre le vrai projet :
 enregistrement (taille réelle acceptée par PostgREST), relecture, impression d'une copie et d'un Word avec le logo.
+
+## Évaluations et devoirs annoncés : contenu précisé, fiche, modification, suppression (28/11/2026 : maquettes 1a, 1b, 2, 3, 4 validées, `supabase/migrations/0013_evaluation_competences.sql` facultative)
+
+Demande du professeur : dire précisément ce qui est évalué (nom libre, compétences, plusieurs chapitres, points et
+exercices), pouvoir rouvrir une évaluation annoncée (fiche), la modifier ou la supprimer, et que les élèves voient
+exactement le même contenu. Même logique pour les devoirs. AUCUNE donnée d'élève côté serveur, aucune clé secrète.
+
+**Logique PURE** : `lib/evaluationAnnoncee.ts` (sans React ni Supabase) — noms, dates, contenu, encodage, messages.
+
+**Nom de l'évaluation** (« Sur quoi ? ») : puces Interro (d'office) / Contrôle / Bilan / « autre nom… » (champ texte libre,
+jamais filtré, `NOM_MAX` = 60, `erreurNom`). Stocké dans `evenements.intitule` (0006) : `''` = Interro, sinon le nom tel quel
+(`intituleDeNom`) ; lu par `nomEvaluation(intitule, typeSeance)` — l'ancien « Contrôle-bilan » (et une séance `bilan` à
+intitulé vide) se lit « Contrôle-bilan ». `designation(nom)` donne l'article et l'accord (« le contrôle », « la remédiation »,
+« l'évaluation « … » ») de tous les messages. `evaluation_type` de la séance : `bilan` pour Bilan / Contrôle-bilan,
+sinon `annonce` (`typeDeNom`). Le nom remplace « Interro » PARTOUT où l'évaluation est citée (Ma semaine, Aujourd'hui,
+heures effectives, agenda d'une période, tableau de bord, vue d'ensemble, page des élèves, carte « Ma classe », plan).
+
+**Compétences** 1 Connaître · 2 Appliquer · 3 Transférer (couleurs `--proc1/2/3`, cochées d'office) : décocher retire ses
+exercices, et les points qui n'en ont plus (`pointVisible`). Gardées par `seances.evaluation_competences` (0013) ;
+**sans 0013** : `{1}` ∪ compétences des exercices retenus (`contenuEnregistre`) et note discrète au professeur
+(`.annonce-note-0013`, « Pour garder le choix des compétences, applique la migration 0013… »). Ligne « Connaître :
+questions « formule » et quiz vrai/faux des points cochés » par chapitre, avec le code du quiz (`recap.entrainement`,
+`quizDuChapitre`) ; case à cocher (absente si le chapitre n'a pas de quiz).
+
+**Plusieurs chapitres** : le chapitre en cours s'ouvre d'office ; **règle du chapitre précédent** (`chapitrePrecedent`,
+dite sous la liste) : autre chapitre de la même année dont la dernière séance AVEC matière vue date de ≤ 14 jours
+(`JOURS_CHAPITRE_PRECEDENT`) ; ses points vus ces 7 derniers jours (`JOURS_POINTS_PRECEDENT`) sont cochés. « + Ajouter un
+chapitre » (liste dans l'ordre du professeur, `chapitresDeLAnnee`), « Retirer ce chapitre × ». `chapitreEnCours`
+(`outilsCarnet.ts`) et `resumeClasse` (`espaceProfesseur.ts`) ignorent depuis ce chantier les séances SANS matière vue
+(séance d'annonce d'une évaluation ou d'un devoir) — sinon une annonce sur l'ancien chapitre le redevenait « en cours ».
+**Points** : numéro + titre, JAMAIS le mot « étape » (professeur ET élèves) ; état « vue lundi 23/11 (il y a 4 jours) »,
+« vue hier », « vue aujourd'hui », « commencée jeudi 26/11 (hier) », « pas encore vue » (`texteVu`) ; vus / commencés cochés.
+Exercices sous leur point (`exercicesDuPoint` : table du panneau `GENERATEURS_EVALUATION_PILOTE`, libellé sans « (id) »,
+sinon carte « S'entraîner ») avec pastille de compétence et code ; toucher = retirer (barré, `aria-pressed`).
+
+**Encodage** (tables existantes ; `stockageDepuisContenu` / `choixDepuisStockage`, aller-retour testé) :
+- `evenements.chapitre` = PREMIER chapitre (`niveau/slug`, contrainte 0006 inchangée) ;
+- `seances.evaluation_parties` : id seul = point du chapitre de la séance (format d'avant, lu tel quel), `slug#section` = point
+  d'un AUTRE chapitre de la même année (≤ 67 caractères < limite 80 de 0007) ; chapitre retenu sans point = aucune entrée ;
+- `seances.evaluation_generateurs` : exercices retenus + codes de quiz retenus ; **vide = tous** (règle de 0008, anciennes
+  annonces) ; tout retenu → vide ;
+- `seances.evaluation_competences` (0013) : `[1,2,3]` sous-ensemble ; vide = déduites.
+L'identifiant de l'événement est tiré par le site (`crypto.randomUUID`, `ajouterEvenement(c, s, id)`) AVANT l'écriture :
+le texte copié contient déjà le lien du plan avec `id=` (même texte depuis l'annonce et depuis la fiche).
+
+**Aperçu = bloc publié** : `pageClasseContenu.ts::interroPubliee(e, contenu, …)` construit l'`InterroPubliee` de la page des
+élèves ; l'aperçu « Ce que verront tes élèves », la fiche, `/classe` et la carte « Ma classe » rendent CE bloc avec le même
+composant `components/eleve/BlocEvaluation.tsx` (+ `blocEvaluation.css`, classes `be-*`) ; « Copier le texte »
+(`textesBloc` : texte ET HTML, mêmes lignes, codes compris, lien du plan) dit la même chose. `InterroPubliee` gagne
+(facultatifs, lecture tolérante `lireChapitres`) `id`, `nom`, `competences`, `chapitres[{ niveau, chapitre, titre,
+points[{ id, numero, titre, precision, exercices[{ id, titre, competence }] }], connaitre }]` ; les anciens champs
+(chapitre, étapes, générateurs du premier chapitre) restent remplis pour une page déjà gardée sur un téléphone.
+Téléphone (conteneur < 520 px) : codes en ligne, « Voir les noms des exercices » ; plus large : une rangée par exercice.
+
+**Fiche** (`components/carnet/FicheEvaluation.tsx` — `FicheEvaluation`, `FicheDevoir` — + `fiche.css`, classes `fi-*`) dans
+`PanneauLateral` (prop `feuille` : feuille du bas avec poignée sous 760 px) : étiquette mauve `--plan` « Interro · 6e B »,
+titre, date + heure + « dans n jours » + rappel J−7 / J−2, nom, compétences, contenu par chapitre, publiée (page des élèves,
+agenda), annoncée le, « Ce que voient tes élèves » (repli), **Modifier**, **Préparer l'évaluation ›**, **Copier le texte**,
+et à part, en rouge, **Supprimer l'évaluation…**. Ouverte depuis : l'étiquette de Ma semaine (bouton SÉPARÉ de la case,
+`.agenda-etiquette-eval`, ≥ 44 px sur téléphone), « À venir » du tableau de bord, la carte de la classe (vue d'ensemble),
+la page de la classe, l'agenda d'une période, Aujourd'hui (interros du jour), « Événements de la semaine » — tout
+événement « Interrogation » ouvert par `ouvrirEvenement` ouvre la fiche (plus le formulaire d'événement), et les puces
+« À rendre » ouvrent `FicheDevoir`. Adresses : `/carnet/classe/:id?fiche=<événement>` et `?devoir=<séance>` (lues puis
+retirées). Contexte : `ouvrirFiche`, `ouvrirFicheDevoir` (`contexteCarnet.ts`).
+
+**Modifier** : `/carnet/annoncer?classe=<id>&modifier=<événement>` (devoir : `&quoi=devoir&modifier=<séance>`) — même écran,
+prérempli (`choixDepuisStockage`), bandeau « Tu modifies l'interro du vendredi 4/12 (6e B)… », ancienne date barrée en
+tirets + « date changée — avant : … », marques « ajouté » / « retiré », carte « Ce qui va changer » (`changementsEvaluation`),
+case « Copier un message pour prévenir les élèves » cochée avec le texte (`messageModification`), « Enregistrer les
+modifications » / « Annuler » ; met à jour la MÊME évaluation (`modifierEvenement` + la même séance d'annonce), puis rouvre la
+fiche. **Supprimer** : confirmation DANS la fiche (`role="alertdialog"`, Échap = « Garder l'interro », jamais `confirm()`),
+« Ce qui sera retiré » / « Ce qui reste », case du message (`messageSuppression`), « Supprimer l'interro » / « Garder
+l'interro », pas d'annulation : l'événement ET le contenu partent (champs d'évaluation de la séance d'annonce remis à vide, ou
+la séance supprimée si elle n'avait rien d'autre — `seanceSansRienDAutre`) ; la page des élèves se republie seule. Devoirs :
+même logique (`changementsDevoir`, `messageModificationDevoir`, `messageSuppressionDevoir`, consigne / date / exercices
+retirés).
+
+**Schéma 0013** (idempotent, à coller APRÈS 0012 ; « Success. No rows returned ») : `seances.evaluation_competences jsonb not
+null default '[]'`, contrainte `seances_evaluation_competences_valides` = `public.competences_evaluation_valides(j)`
+(tableau d'au plus 3 entiers distincts parmi 1, 2, 3 ; `immutable`, `search_path = ''`, `anon` sans droit d'exécution) ;
+PAS de contrainte de cohérence avec `evaluation_type` (le carnet d'avant, qui n'écrit pas la colonne, doit pouvoir retirer
+une évaluation) ; RLS / droits de 0002 rappelés. Vérifié sur Postgres 16 local (table `seances` minimale + rôles imités, 0013
+×3) : anciennes lignes `[]`, une seule contrainte, 4 valeurs valides acceptées, 11 invalides refusées (4, 0, doublon, 4
+éléments, texte, 1,5, objet, nombre, null JSON, `[null]`, NULL SQL), fonction refusée à `anon`. **0013 pas appliquée** :
+`carnetDonnees.ts::lireCompetencesEvaluation` → `{ actif: false }` (42703 / PGRST204 mentionnant la colonne,
+`colonne0013Absente`), rien n'est écrit, tout marche avec les compétences déduites. **Mise en service** : SQL Editor → New
+query → coller TOUT `0013_evaluation_competences.sql` → Run → recharger `/carnet` → Annoncer une évaluation → décocher
+Transférer → Annoncer → rouvrir la fiche (Transférer reste décochée).
+
+**Côté élève** (voir `.claude/rules/cote-eleve.md`, « Évaluation annoncée : contenu, changement, retrait ») : `/classe` et la
+carte « Ma classe » montrent le même bloc (codes = liens vers les générateurs) ; « Je prépare mon interro » préremplit le plan
+avec tous les chapitres, points et exercices ; l'appareil garde la dernière version (`classe:derniere`) et signale « date
+changée », « Ton interro a changé », « Cette interro a été retirée par ton professeur ».
+
+**Outils de vérification DANS le dépôt** (`scripts/verif-espace/`, jamais importés par l'application) :
+- `faux-supabase.js` — faux client injecté par `window.__MB_FAUX_SUPABASE__` (lu seulement si `import.meta.env.DEV`) : base
+  en `sessionStorage` (survit aux navigations), requêtes `select / insert / update / delete / upsert` avec filtres
+  (`eq`, `neq`, `in`, `is`, `not`, `gte`, `lte`, `order`, `limit`, `single`, `maybeSingle`), RPC `lire_page_classe`, `nouveau_code_classe`,
+  `couper_code_classe`, `definir_ecole_par_defaut`, session, journal des écritures `window.__MB_JOURNAL__`, base lisible
+  `window.__MB_FAUX_DB__`, option `sans0013` (42703 sur la colonne) ;
+- `donnees.mjs` — données d'exemple (professeur, école, 6e B / 5e A / 4e C, horaire, séances sur deux chapitres consécutifs,
+  interro au FORMAT D'AVANT, devoir, pages des élèves) et heure de référence `MAINTENANT` (vendredi 27/11/2026 10 h) ;
+- `serveur.mjs` — serveur statique avec repli SPA (`demarrerServeur(dossier, port)`) ;
+- `verif.mjs` — parcours Playwright (iPhone 13 et 1 280 px, clair et sombre, + sans 0013) : annonce (puces, nom, compétences,
+  chapitre précédent, points, exercices, aperçu = bloc publié, texte copié relu), fiche (depuis Ma semaine, le tableau de
+  bord, la classe), page des élèves et carte « Ma classe », plan prérempli multi-chapitres, modification (rôles des chapitres,
+  date changée, marques, récapitulatif, message, même événement), avis « a changé » / « retirée » côté élève, suppression
+  (confirmation, Échap, événement et contenu retirés, page republiée), devoir (fiche, modifier, supprimer), cibles ≥ 44 px,
+  aucun champ numérique, `scrollWidth` = largeur, 0 erreur console ; captures dans le dossier donné ;
+- `sonde.mjs` — ouvre une adresse et affiche le texte d'un sélecteur (débogage).
+Usage : `NODE_ENV=development npx vite build --mode test --outDir <build>` (aucune variable Supabase : en développement, le
+faux client injecté suffit) puis `node scripts/verif-espace/verif.mjs <build> <dossier-captures>`. Résultat du chantier :
+378 vérifications, 0 échec.

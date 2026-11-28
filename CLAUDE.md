@@ -79,6 +79,11 @@ cherchant le chapitre correspondant dans `chaptersIndex.ts`.
   `pageClasse.ts::lienPlanRevision`) — publics, non indexés, non pré-rendus, tout reste dans le navigateur.
 - « Annoncer une évaluation » / « Donner un devoir » (professeur) : `/carnet/annoncer?classe=&quoi=devoir&chapitre=`, sans
   migration (événement 0006 + séance d'annonce 0007/0008) — voir `.claude/rules/comptes.md`, section du même nom.
+  Depuis le 28/11/2026 (section « Évaluations et devoirs annoncés : contenu précisé, fiche, modification, suppression ») :
+  nom libre, compétences (0013 facultative), plusieurs chapitres, points et exercices ; fiche d'une évaluation / d'un devoir
+  (`/carnet/classe/:id?fiche=<événement>` / `?devoir=<séance>`, panneau latéral, feuille du bas sur téléphone) ; modifier
+  (`/carnet/annoncer?classe=&modifier=<événement>`, devoir `&quoi=devoir&modifier=<séance>`) ; supprimer (confirmation dans
+  la fiche). Outils de vérification Playwright + faux Supabase gardés dans `scripts/verif-espace/`.
 - Côté élève plus clair (27/11/2026, `.claude/rules/cote-eleve.md`, « Côté élève plus clair ») : accueil à trois portes
   (Mon cours / M'entraîner / Préparer mon interro) + carte « Ma classe » (code gardé) ; `/entrainer` (« M'entraîner »,
   publique, non indexée, non pré-rendue) ; barre du bas sur téléphone (`HoteBarreEleve`), aide « ? » dans l'en-tête,
