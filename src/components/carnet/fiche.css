@@ -1,0 +1,44 @@
+/* Fiche d'une évaluation / d'un devoir (`FicheEvaluation.tsx`, maquettes « fiche-eval » 2, 4 et 5 du 28/11/2026).
+   Préfixe `fi-`, jetons du site ; mauve `--plan` pour l'étiquette (jamais une couleur de compétence). */
+.fi-tete { position: relative; }
+.fi-poignee { display: none; }
+.fi-etiquette { display: inline-block; margin: 0 0 6px; padding: 2px 10px; border-radius: 6px; background: var(--plan-soft); color: var(--plan-ink); font: 600 0.8rem/1.5 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; overflow-wrap: anywhere; }
+.fi-tete h2 { overflow-wrap: anywhere; }
+.fi-sous { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.fi-rappel { margin-left: 2px; }
+.fi-corps { gap: 14px; }
+.fi-lignes { margin: 0; display: flex; flex-direction: column; }
+.fi-ligne { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line-soft); }
+.fi-ligne dt { color: var(--ink-soft); }
+.fi-ligne dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.fi-ligne ul { margin: 4px 0 0; padding-left: 18px; }
+.fi-comps { display: flex; flex-wrap: wrap; gap: 6px; }
+.fi-chap + .fi-chap { margin-top: 8px; }
+.fi-codes { display: flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 2px; }
+.fi-code { display: inline-flex; align-items: center; gap: 4px; font: 600 0.88rem var(--mono); color: var(--accent-ink); }
+.fi-aide { margin: 4px 0 0; font-size: 0.9rem; color: var(--ink-soft); }
+.fi-consigne { white-space: pre-line; }
+.fi-publie .ok, .fi-ligne .ok { color: color-mix(in srgb, var(--good) 80%, var(--ink)); }
+.fi-publie .non, .fi-ligne .non { color: var(--ink-soft); }
+.fi-eleves { border: 1px solid var(--line-soft); border-radius: 10px; padding: 0 14px; background: var(--paper); }
+.fi-eleves > summary { display: flex; align-items: center; min-height: 48px; cursor: pointer; font: 600 0.82rem var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.fi-eleves[open] { padding-bottom: 14px; }
+.fi-boutons { display: flex; flex-wrap: wrap; gap: 10px; }
+.fi-boutons .ep-bouton { min-height: 48px; }
+.fi-zone-rouge { padding-top: 4px; }
+.fi-rouge { border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); color: color-mix(in srgb, var(--bad) 85%, var(--ink)); background: var(--surface); }
+.fi-rouge-plein { background: var(--bad); border-color: var(--bad); color: var(--surface); }
+.fi-confirmer { display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 2px solid var(--bad); border-radius: 12px; background: var(--bad-soft); color: var(--ink); }
+.fi-confirmer h3 { margin: 0; font: 600 1.25rem/1.25 var(--serif); }
+.fi-confirmer-sous { margin: 4px 0 0; font-weight: 700; }
+.fi-confirmer ul { margin: 0; padding-left: 20px; }
+.fi-confirmer .annonce-message { background: var(--surface); }
+
+/* Téléphone : la fiche monte depuis le bas (feuille du bas), refermée par ×. */
+@media (max-width: 759px) {
+  .carnet-panneau.feuille { align-self: flex-end; height: auto; max-height: 92dvh; border-radius: 16px 16px 0 0; box-shadow: 0 -12px 32px rgba(16, 22, 29, 0.24); }
+  .carnet-panneau-fond:has(.carnet-panneau.feuille) { align-items: flex-end; }
+  .carnet-panneau.feuille .fi-poignee { display: block; position: absolute; top: 6px; left: 50%; width: 44px; height: 5px; margin-left: -22px; border-radius: 3px; background: var(--line); }
+  .fi-ligne { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .fi-boutons .ep-bouton { flex: 1 1 100%; justify-content: center; text-align: center; white-space: normal; }
+}

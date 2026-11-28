@@ -13,8 +13,9 @@ function focusables(racine: HTMLElement): HTMLElement[] {
  * `[data-autofocus]`, sinon le panneau lui-même) et PIÉGÉ (Tab / Maj+Tab bouclent), Échap ferme, le
  * focus revient à l'élément qui l'a ouvert ; défilement de la page bloqué pendant l'ouverture. Un
  * clic sur le voile ne ferme PAS (une saisie en cours ne doit pas se perdre sur un geste de travers).
+ * `feuille` : sur téléphone, monte depuis le bas (fiche d'une évaluation ou d'un devoir), refermée par ×.
  */
-export function PanneauLateral({ titreId, onFermer, children, large = false }: { titreId: string; onFermer: () => void; children: ReactNode; large?: boolean }) {
+export function PanneauLateral({ titreId, onFermer, children, large = false, feuille = false }: { titreId: string; onFermer: () => void; children: ReactNode; large?: boolean; feuille?: boolean }) {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const precedent = document.activeElement instanceof HTMLElement ? document.activeElement : null
@@ -56,7 +57,7 @@ export function PanneauLateral({ titreId, onFermer, children, large = false }: {
   return createPortal(
     <div className="carnet-panneau-fond" onKeyDown={clavier}>
       <div className="carnet-panneau-voile" aria-hidden="true" />
-      <div className={`carnet-panneau${large ? ' large' : ''}`} role="dialog" aria-modal="true" aria-labelledby={titreId} ref={ref} tabIndex={-1}>
+      <div className={`carnet-panneau${large ? ' large' : ''}${feuille ? ' feuille' : ''}`} role="dialog" aria-modal="true" aria-labelledby={titreId} ref={ref} tabIndex={-1}>
         {children}
       </div>
     </div>,

@@ -29,6 +29,12 @@ export interface PlanGarde {
   bilan?: boolean
   /** Générateurs retenus par le professeur pour cette interro (ils passent en premier dans le plan). */
   gens?: string[]
+  /** Nom de l'évaluation choisi par le professeur (« Contrôle », « Examen blanc »…), depuis le 28/11/2026. */
+  nom?: string
+  /** Identifiant de l'évaluation annoncée (page de classe) : son appareil la retrouve dans `classe:derniere`. */
+  annonceId?: string
+  /** Empreinte de l'annonce au moment du plan (`pageClasse.ts::signatureAnnonce`) : « Ton interro a changé ». */
+  signature?: string
 }
 
 export const CLE_PLAN = 'suivi:plan:v1'
@@ -64,6 +70,9 @@ export function lirePlan(): PlanGarde | null {
     ...(p.annonce === true ? { annonce: true } : {}),
     ...(p.bilan === true ? { bilan: true } : {}),
     ...(gens.length > 0 ? { gens } : {}),
+    ...(typeof p.nom === 'string' && p.nom.trim() ? { nom: p.nom.trim().slice(0, 80) } : {}),
+    ...(typeof p.annonceId === 'string' && /^[A-Za-z0-9_-]{1,80}$/.test(p.annonceId) ? { annonceId: p.annonceId } : {}),
+    ...(typeof p.signature === 'string' ? { signature: p.signature.slice(0, 4000) } : {}),
   }
 }
 

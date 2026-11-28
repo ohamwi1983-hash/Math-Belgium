@@ -199,6 +199,33 @@ export async function modifierSeance(c: SupabaseClient, id: string, s: SaisieSea
   verifier(await c.from('seances').update(ligneSeance(s, horaire, devoirs, generateursEval)).eq('id', id))
 }
 
+/* ------------------------------------------------------- compétences évaluées (0013, facultative) */
+
+/** Colonne de 0013 inconnue : migration pas appliquée. */
+export function colonne0013Absente(erreur: unknown): boolean {
+  const e = (erreur ?? {}) as { code?: string; message?: string }
+  return /evaluation_competences/i.test(String(e.message ?? '')) && (e.code === '42703' || e.code === 'PGRST204' || /does not exist|schema cache|could not find/i.test(String(e.message ?? '')))
+}
+
+/** Compétences évaluées des séances qui annoncent une évaluation (`seances.evaluation_competences`, 0013), lues
+ * À PART des séances : sans 0013, `{ actif: false }` et le carnet marche comme avant (compétences déduites). */
+export async function lireCompetencesEvaluation(c: SupabaseClient): Promise<{ actif: false } | { actif: true; parSeance: Map<string, number[]> }> {
+  const r = await c.from('seances').select('id, evaluation_competences').not('evaluation_type', 'is', null)
+  if (r.error && (colonne0013Absente(r.error) || colonne0007Absente(r.error))) return { actif: false }
+  const lignes = (verifier(r) ?? []) as unknown as { id: string; evaluation_competences: unknown }[]
+  const parSeance = new Map<string, number[]>()
+  for (const l of lignes) {
+    const v = Array.isArray(l.evaluation_competences) ? l.evaluation_competences.filter((x): x is number => x === 1 || x === 2 || x === 3) : []
+    if (v.length > 0) parSeance.set(l.id, v)
+  }
+  return { actif: true, parSeance }
+}
+
+/** Enregistre les compétences évaluées d'une séance d'annonce (0013) ; `[]` les retire. */
+export async function enregistrerCompetencesEvaluation(c: SupabaseClient, seanceId: string, competences: number[]): Promise<void> {
+  verifier(await c.from('seances').update({ evaluation_competences: competences }).eq('id', seanceId))
+}
+
 /** Objectif et compétences transversales d'une séance (panneau « Texte pour l'agenda scolaire », 0007). */
 export async function enregistrerTexteSeance(c: SupabaseClient, id: string, valeurs: { objectif: string; competences: string[] }): Promise<void> {
   verifier(await c.from('seances').update({ objectif: valeurs.objectif.replace(/\s+/g, ' ').trim(), competences: valeurs.competences }).eq('id', id))

@@ -83,7 +83,15 @@ export function VueEnsembleClasses({
               )}
               {reperes.evaluation && (
                 <p className="ep-classe-alerte">
-                  {reperes.evaluation}
+                  {reperes.evaluationId ? (
+                    <Link className="ep-lien-fiche" to={`/carnet/classe/${c.id}?fiche=${reperes.evaluationId}`}>
+                      Prochaine évaluation : {reperes.evaluation}
+                      <span aria-hidden="true"> ›</span>
+                      <span className="carnet-sr"> (ouvrir la fiche)</span>
+                    </Link>
+                  ) : (
+                    reperes.evaluation
+                  )}
                   {reperes.rappel && (
                     <>
                       {' '}

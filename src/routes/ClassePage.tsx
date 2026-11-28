@@ -33,6 +33,7 @@ import {
   type SeancePubliee,
 } from '../lib/pageClasse'
 import { lirePageClasse } from '../lib/pageClasseDonnees'
+import { BlocEvaluation } from '../components/eleve/BlocEvaluation'
 
 /**
  * `/classe` — page de classe à code (élèves SANS compte, planche 12 des maquettes « côté élève »).
@@ -109,11 +110,13 @@ export function ClassePage() {
       const instant = new Date()
       setMaintenant(instant)
       if (r.statut === 'ok') {
+        // Version gardée sur l'appareil, annotée « date changée » quand le professeur a déplacé une interro déjà vue.
+        let page = r.page
         if (!apercu) {
           garderCode(code)
-          garderPage(code, r.page, instant)
+          page = garderPage(code, r.page, instant)
         }
-        setEtat({ vue: 'page', code, page: r.page, recueLe: instant.toISOString() })
+        setEtat({ vue: 'page', code, page, recueLe: instant.toISOString() })
         return
       }
       if (r.statut === 'inconnu') {
@@ -489,6 +492,22 @@ function lienGenerateur(niveau: string, g: GenerateurPublie): string | null {
 }
 
 function CarteInterro({ interro, aujourdhui, principale = false }: { interro: InterroPubliee; aujourdhui: string; principale?: boolean }) {
+  if (interro.chapitres) return <CarteEvaluation interro={interro} aujourdhui={aujourdhui} principale={principale} />
+  return <CarteInterroAncienne interro={interro} aujourdhui={aujourdhui} principale={principale} />
+}
+
+/** Évaluation publiée depuis le 28/11/2026 (chapitres, points, exercices, compétences) : le bloc que le professeur a
+ * vu dans « Ce que verront tes élèves » (maquette 1b), codes = liens vers les générateurs. */
+function CarteEvaluation({ interro, aujourdhui, principale }: { interro: InterroPubliee; aujourdhui: string; principale: boolean }) {
+  const plan = lienPlanRevision(interro)
+  return (
+    <section className={`cl-interro cl-evaluation${principale ? ' cl-evaluation-principale' : ''}`}>
+      <BlocEvaluation interro={interro} aujourdhui={aujourdhui} plan={plan} surtitre={principale ? 'Prochaine évaluation' : 'Ensuite'} titreNiveau={2} />
+    </section>
+  )
+}
+
+function CarteInterroAncienne({ interro, aujourdhui, principale = false }: { interro: InterroPubliee; aujourdhui: string; principale?: boolean }) {
   const id = useId()
   const d = decompte(joursAvant(interro.date, aujourdhui))
   const nature = interro.type === 'bilan' ? 'Contrôle-bilan' : 'Interro'

@@ -15,7 +15,7 @@ function IconeDevoir({ taille = 13 }: { taille?: number }) {
 
 /**
  * Devoir à rendre (0007), marqué « À rendre » dans l'agenda (Aujourd'hui, Ma semaine, page de la
- * classe, agenda d'une période) : bouton qui ouvre la séance où il a été donné. `avecClasse` : nom de
+ * classe, agenda d'une période) : bouton qui ouvre la FICHE du devoir (consigne, exercices, Modifier, Supprimer). `avecClasse` : nom de
  * la classe en tête ; `avecDate` : date de remise (listes sur plusieurs jours).
  */
 export function PuceARendre({ seance, avecClasse = true, avecDate = false, compacte = false, avecResume = true }: { seance: Seance; avecClasse?: boolean; avecDate?: boolean; compacte?: boolean; avecResume?: boolean }) {
@@ -23,7 +23,7 @@ export function PuceARendre({ seance, avecClasse = true, avecDate = false, compa
   const classe = ctx.classes.find((c) => c.id === seance.classe_id)
   const resume = resumeDevoir(seance, compacte ? 40 : 90)
   return (
-    <button type="button" className={`carnet-a-rendre${compacte ? ' compacte' : ''}`} onClick={() => ctx.voir(seance)} title={avecResume ? undefined : resumeDevoir(seance, 200)}>
+    <button type="button" className={`carnet-a-rendre${compacte ? ' compacte' : ''}`} onClick={() => ctx.ouvrirFicheDevoir(seance)} title={avecResume ? undefined : resumeDevoir(seance, 200)}>
       <IconeDevoir />
       <span>
         <strong>À rendre</strong>
@@ -32,7 +32,7 @@ export function PuceARendre({ seance, avecClasse = true, avecDate = false, compa
         {resume && avecResume ? ` : ${resume}` : ''}
       </span>
       {!avecResume && resume && <span className="carnet-sr"> : {resume}</span>}
-      <span className="carnet-sr"> — donné le {dateCourteJour(seance.date_seance)}, ouvrir la séance</span>
+      <span className="carnet-sr"> — donné le {dateCourteJour(seance.date_seance)}, ouvrir la fiche du devoir</span>
     </button>
   )
 }

@@ -6,6 +6,7 @@
  * celui de la dernière séance de la classe (`chapitreEnCours`), progression par `progressionClasse`,
  * créneaux du jour et heures supprimées par `lignesDuJour` (horaire 0003 + agenda 0006).
  */
+import { nomEvaluation } from './evaluationAnnoncee'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { ChapterContent } from '../content/types'
 import { findChapter } from '../content/chaptersIndex'
@@ -104,7 +105,7 @@ export function lienProjection(chapitre: Pick<ChapterContent, 'levelSlug' | 'slu
 
 /** « Interro » / « Contrôle-bilan » : intitulé d'une interrogation de l'agenda. */
 function nomInterro(e: Evenement): string {
-  return e.intitule.trim() || 'Évaluation'
+  return nomEvaluation(e.intitule)
 }
 
 /** Titre court du chapitre d'une interrogation (« niveau/slug »), ou `''`. */
@@ -235,7 +236,7 @@ export function aVenir(
       if (e.type === 'interrogation') {
         const chap = chapitreDeLInterro(e)
         const rappel = rappelEvaluation(e.du, aujourdhui)
-        items.push({ cle: `e-${e.id}`, date, dateTexte: dateCourteJour(date), sorte: 'evaluation', texte: `${nomInterro(e)} ${nomClasse(e.classe_id)}${chap ? ` — ${chap}` : ''}`.replace(/\s+/g, ' ').trim(), lien: e.classe_id ? `/carnet/classe/${e.classe_id}` : '/carnet/agenda', ...(rappel ? { rappel } : {}) })
+        items.push({ cle: `e-${e.id}`, date, dateTexte: dateCourteJour(date), sorte: 'evaluation', texte: `${nomInterro(e)} ${nomClasse(e.classe_id)}${chap ? ` — ${chap}` : ''}`.replace(/\s+/g, ' ').trim(), lien: e.classe_id ? `/carnet/classe/${e.classe_id}?fiche=${e.id}` : '/carnet/agenda', ...(rappel ? { rappel } : {}) })
       } else {
         items.push({ cle: `e-${e.id}`, date, dateTexte: dateCourteJour(date), sorte: 'evenement', texte: `${titreEvenement(e)} — ${quiTexte(e, d.classes)}`, lien: '/carnet/semaine' })
       }
@@ -251,7 +252,7 @@ export function aVenir(
     if (!s.devoir_pour) continue
     const c = findChapter(s.niveau, s.chapitre)
     const quoi = c ? titreCourtChapitre(c.slug, texteBrut(c.title)) : resumeDevoir(s, 50)
-    items.push({ cle: `d-${s.id}`, date: s.devoir_pour, dateTexte: dateCourteJour(s.devoir_pour), sorte: 'devoir', texte: `Devoir ${nomClasse(s.classe_id)}${quoi ? ` — ${quoi}` : ''}`, lien: `/carnet/classe/${s.classe_id}` })
+    items.push({ cle: `d-${s.id}`, date: s.devoir_pour, dateTexte: dateCourteJour(s.devoir_pour), sorte: 'devoir', texte: `Devoir ${nomClasse(s.classe_id)}${quoi ? ` — ${quoi}` : ''}`, lien: `/carnet/classe/${s.classe_id}?devoir=${s.id}` })
   }
   items.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
   return items.slice(0, options.max ?? 6)
@@ -284,6 +285,8 @@ export interface RepereClasse {
   aNoter: string | null
   /** Rappel J−7 / J−2 de la prochaine évaluation (`rappelEvaluation`), sinon `null`. */
   rappel?: string | null
+  /** Identifiant de la prochaine évaluation (pour ouvrir sa fiche). */
+  evaluationId?: string | null
 }
 
 /** Repères de la carte d'une classe (vue d'ensemble de « Mes classes ») : mêmes calculs que le carnet
@@ -291,9 +294,10 @@ export interface RepereClasse {
 export function reperesClasse(classeId: string, d: Pick<DonneesEspace, 'horaire' | 'agenda' | 'classes' | 'seances'>, aujourdhui: string, minutes: number): RepereClasse {
   const interro = d.agenda.actif ? prochaineInterro(classeId, d.agenda.evenements, aujourdhui) : null
   const chap = interro ? chapitreDeLInterro(interro) : ''
-  const evaluation = interro ? `${(interro.intitule.trim() || 'évaluation').toLowerCase()} ${interro.du === aujourdhui ? "aujourd'hui" : dateJourLong(interro.du)}${chap ? ` · ${chap}` : ''}` : null
+  const evaluation = interro ? `${nomEvaluation(interro.intitule)} ${interro.du === aujourdhui ? "aujourd'hui" : dateJourLong(interro.du)}${chap ? ` · ${chap}` : ''}` : null
   const rappel = interro ? rappelEvaluation(interro.du, aujourdhui) : null
-  if (!d.horaire.actif) return { prochainCours: null, evaluation, aNoter: null, rappel }
+  const evaluationId = interro?.id ?? null
+  if (!d.horaire.actif) return { prochainCours: null, evaluation, evaluationId, aNoter: null, rappel }
   const cases = d.horaire.cases.filter((c) => c.classe_id === classeId)
   const supprimee = d.agenda.actif && d.agenda.evenements.length > 0 ? predicatSuppression({ evenements: d.agenda.evenements, classes: d.classes, grilles: d.horaire.grilles }) : undefined
   const plusTard = creneauxDuJour(aujourdhui, d.horaire.grilles, cases, { supprimee })
@@ -315,5 +319,5 @@ export function reperesClasse(classeId: string, d: Pick<DonneesEspace, 'horaire'
       : oublies.length === 1
         ? `matière vue ${oublies[0].date === aujourdhui ? "d'aujourd'hui" : `de ${jourLong(oublies[0].date)} ${jourMois(oublies[0].date)}`} à noter`
         : `${oublies.length} séances à noter`
-  return { prochainCours: prochain, evaluation, aNoter, rappel }
+  return { prochainCours: prochain, evaluation, evaluationId, aNoter, rappel }
 }

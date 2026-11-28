@@ -32,8 +32,13 @@ export interface ContexteCarnet {
   ctxAgenda: ContexteAgenda | null
   /** Ouvre le formulaire « Nouvel événement » (valeurs pré-remplies facultatives). */
   nouvelEvenement: (prerempli?: Partial<SaisieEvenement>) => void
-  /** Ouvre le formulaire sur un événement existant (le toucher dans l'agenda). */
+  /** Ouvre le formulaire sur un événement existant (le toucher dans l'agenda) ; une évaluation (« Interrogation »)
+   * ouvre sa FICHE à la place (28/11/2026). */
   ouvrirEvenement: (e: Evenement) => void
+  /** Fiche d'une évaluation annoncée (contenu, Modifier, Préparer, Copier, Supprimer). */
+  ouvrirFiche: (e: Evenement) => void
+  /** Fiche d'un devoir donné (la séance qui le porte). */
+  ouvrirFicheDevoir: (s: Seance) => void
   /** 0007 appliqué : devoirs (date de remise, exercices joints), évaluations, texte mémorisé. */
   devoirs: boolean
   /** 0008 appliqué : les générateurs retenus pour une évaluation sont gardés avec la séance. */

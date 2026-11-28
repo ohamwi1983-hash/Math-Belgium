@@ -80,6 +80,9 @@ export interface Seance {
   /** Générateurs retenus pour l'évaluation, parmi ceux des sections évaluées (`0008_evaluation_generateurs.sql`,
    * absent tant que 0008 n'est pas appliqué) ; vide = tous ceux des sections évaluées. */
   evaluation_generateurs?: string[]
+  /** Compétences évaluées `[1, 2, 3]` (`0013_evaluation_competences.sql`, lue À PART : `lireCompetencesEvaluation`) ;
+   * absente ou vide : déduites des exercices retenus (`evaluationAnnoncee.ts`). */
+  evaluation_competences?: number[]
 }
 
 /** Évaluation notée avec une séance (0007). « faite » : l'interro a eu lieu pendant la séance (aucun

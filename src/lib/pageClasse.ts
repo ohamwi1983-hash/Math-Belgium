@@ -54,6 +54,24 @@ export interface EtapePubliee {
 export interface GenerateurPublie {
   id: string
   titre: string
+  /** Compétence de l'exercice (1 Connaître, 2 Appliquer, 3 Transférer), depuis le 28/11/2026. */
+  competence?: 1 | 2 | 3
+}
+
+/** Un point (section) d'un chapitre de l'évaluation, avec SES exercices (depuis le 28/11/2026). */
+export interface PointPublie extends EtapePubliee {
+  exercices: GenerateurPublie[]
+}
+
+/** Un chapitre de l'évaluation (plusieurs possibles depuis le 28/11/2026). */
+export interface ChapitrePublie {
+  niveau: string
+  chapitre: string
+  /** « Chapitre 3 — Suites » (numéro du professeur) ou « Suites » : jamais le numéro du site. */
+  titre: string
+  points: PointPublie[]
+  /** Ligne « Connaître » : `null` = pas de ligne ; sinon les codes des quiz (vide : questions « formule » seules). */
+  connaitre: string[] | null
 }
 
 export interface InterroPubliee {
@@ -69,6 +87,16 @@ export interface InterroPubliee {
   chapitre: string
   etapes: EtapePubliee[]
   generateurs: GenerateurPublie[]
+  /* Depuis le 28/11/2026 (facultatifs : une ancienne copie publiée reste lue avec les champs ci-dessus) : */
+  /** Identifiant de l'évaluation (événement de l'agenda) : « date changée », « Ton interro a changé ». */
+  id?: string
+  /** Nom choisi par le professeur (« Interro », « Contrôle », « Bilan », « Examen blanc »…). */
+  nom?: string
+  competences?: (1 | 2 | 3)[]
+  /** Chapitre par chapitre, les points et leurs exercices. */
+  chapitres?: ChapitrePublie[]
+  /** SUR L'APPAREIL SEULEMENT (jamais publié) : date vue auparavant, quand le professeur l'a changée. */
+  avant?: string
 }
 
 export interface DevoirPublie {
@@ -158,10 +186,31 @@ function lireEtapes(v: unknown): EtapePubliee[] {
   })
 }
 
-function lireGenerateurs(v: unknown): GenerateurPublie[] {
-  return tableau(v, 12).flatMap((x) => {
+function lireCompetence(v: unknown): 1 | 2 | 3 | undefined {
+  return v === 1 || v === 2 || v === 3 ? v : undefined
+}
+
+function lireGenerateurs(v: unknown, max = 12): GenerateurPublie[] {
+  return tableau(v, max).flatMap((x) => {
     const o = objet(x)
-    return o && typeof o.id === 'string' && ID.test(o.id) ? [{ id: o.id, titre: texte(o.titre, 200) || o.id }] : []
+    if (!o || typeof o.id !== 'string' || !ID.test(o.id)) return []
+    const c = lireCompetence(o.competence)
+    return [{ id: o.id, titre: texte(o.titre, 200) || o.id, ...(c ? { competence: c } : {}) }]
+  })
+}
+
+function lireChapitres(v: unknown): ChapitrePublie[] | undefined {
+  if (!Array.isArray(v)) return undefined
+  return tableau(v, 8).flatMap((x) => {
+    const o = objet(x)
+    if (!o) return []
+    const points: PointPublie[] = tableau(o.points, 30).flatMap((y) => {
+      const p = objet(y)
+      const e = p ? lireEtapes([p])[0] : undefined
+      return p && e ? [{ ...e, exercices: lireGenerateurs(p.exercices, 20) }] : []
+    })
+    const connaitre = Array.isArray(o.connaitre) ? o.connaitre.filter((c): c is string => typeof c === 'string' && ID.test(c)).slice(0, 4) : null
+    return [{ niveau: slugOuVide(o.niveau), chapitre: slugOuVide(o.chapitre), titre: texte(o.titre, 200), points, connaitre }]
   })
 }
 
@@ -175,8 +224,60 @@ function lireInterros(v: unknown): InterroPubliee[] {
     const date = o ? dateOuNull(o.date) : null
     if (!o || !date) return []
     const heure = texte(o.heure, 60)
-    return [{ date, ...(heure ? { heure } : {}), type: o.type === 'bilan' ? 'bilan' : 'interro', titre: texte(o.titre, 200), niveau: slugOuVide(o.niveau), chapitre: slugOuVide(o.chapitre), etapes: lireEtapes(o.etapes), generateurs: lireGenerateurs(o.generateurs) }]
+    const id = typeof o.id === 'string' && ID.test(o.id) ? o.id : ''
+    const nom = texte(o.nom, 80).trim()
+    const competences = Array.isArray(o.competences) ? [...new Set(o.competences.map(lireCompetence).filter((c): c is 1 | 2 | 3 => c !== undefined))].sort() : undefined
+    const chapitres = lireChapitres(o.chapitres)
+    const avant = dateOuNull(o.avant)
+    return [
+      {
+        date,
+        ...(heure ? { heure } : {}),
+        type: o.type === 'bilan' ? 'bilan' : 'interro',
+        titre: texte(o.titre, 200),
+        niveau: slugOuVide(o.niveau),
+        chapitre: slugOuVide(o.chapitre),
+        etapes: lireEtapes(o.etapes),
+        generateurs: lireGenerateurs(o.generateurs, 40),
+        ...(id ? { id } : {}),
+        ...(nom ? { nom } : {}),
+        ...(competences ? { competences } : {}),
+        ...(chapitres ? { chapitres } : {}),
+        ...(avant && avant !== date ? { avant } : {}),
+      },
+    ]
   })
+}
+
+/** Nom affiché d'une interro publiée (« Interro », « Contrôle-bilan » d'une ancienne copie, nom choisi). */
+export function nomInterro(i: Pick<InterroPubliee, 'nom' | 'type'>): string {
+  return i.nom?.trim() || (i.type === 'bilan' ? 'Contrôle-bilan' : 'Interro')
+}
+
+/** Chapitres d'une interro publiée ; une ancienne copie (un chapitre, étapes et générateurs à part) est relue en un
+ * chapitre dont les points n'ont pas d'exercices (ses générateurs restent dans `generateurs`). */
+export function chapitresInterro(i: InterroPubliee): ChapitrePublie[] {
+  if (i.chapitres) return i.chapitres
+  return [{ niveau: i.niveau, chapitre: i.chapitre, titre: i.titre, points: i.etapes.map((e) => ({ ...e, exercices: [] })), connaitre: null }]
+}
+
+/** Points (`slug#section`) et exercices d'une interro publiée, dans l'ordre : mêmes clés que le plan de révision. */
+export function clesInterro(i: InterroPubliee): { niveau: string; etapes: string[]; gens: string[] } {
+  const chs = chapitresInterro(i)
+  const etapes = chs.flatMap((c) => (c.chapitre ? c.points.map((p) => `${c.chapitre}#${p.id}`) : []))
+  const gens = i.chapitres ? chs.flatMap((c) => [...c.points.flatMap((p) => p.exercices.map((x) => x.id)), ...(c.connaitre ?? [])]) : i.generateurs.map((g) => g.id)
+  return { niveau: chs.find((c) => c.niveau)?.niveau ?? i.niveau, etapes, gens: [...new Set(gens)] }
+}
+
+/** Empreinte d'une interro (date, points, exercices, nom) : un plan de révision fait depuis cette annonce sait
+ * qu'elle a changé (« Ton interro a changé : mettre mon plan à jour »). */
+export function signatureAnnonce(o: { date: string; etapes: string[]; gens: string[]; nom: string }): string {
+  return `${o.date}|${o.etapes.join(',')}|${[...o.gens].sort().join(',')}|${o.nom.trim().toLowerCase()}`
+}
+
+export function signatureInterro(i: InterroPubliee): string {
+  const k = clesInterro(i)
+  return signatureAnnonce({ date: i.date, etapes: k.etapes, gens: k.gens, nom: nomInterro(i) })
 }
 
 function lireDevoirs(v: unknown): DevoirPublie[] {
@@ -252,18 +353,27 @@ export function lienEtape(niveau: string, chapitre: string, sectionId: string): 
 export const ROUTE_PLAN_REVISION: string | null = '/suivi/plan'
 
 export function lienPlanRevision(
-  i: Pick<InterroPubliee, 'date' | 'niveau' | 'chapitre' | 'etapes'> & Partial<Pick<InterroPubliee, 'generateurs' | 'type'>>,
+  i: Pick<InterroPubliee, 'date' | 'niveau' | 'chapitre' | 'etapes'> & Partial<Pick<InterroPubliee, 'generateurs' | 'type' | 'chapitres' | 'nom' | 'id' | 'titre'>>,
   route: string | null = ROUTE_PLAN_REVISION,
 ): string | null {
   if (!route) return null
   const p = new URLSearchParams({ date: i.date })
-  if (i.niveau && i.chapitre) {
-    p.set('niveau', i.niveau)
-    p.set('chapitre', i.chapitre)
+  const complete: InterroPubliee = { titre: '', generateurs: [], type: 'interro', ...i } as InterroPubliee
+  const k = clesInterro(complete)
+  const chs = chapitresInterro(complete).filter((c) => c.chapitre)
+  const premier = chs[0]?.chapitre || i.chapitre
+  if (k.niveau && premier) {
+    p.set('niveau', k.niveau)
+    p.set('chapitre', premier)
   }
-  if (i.etapes.length > 0) p.set('etapes', i.etapes.map((e) => e.id).join(','))
-  if (i.generateurs && i.generateurs.length > 0) p.set('gen', i.generateurs.map((g) => g.id).join(','))
+  // Un seul chapitre : ids seuls (format d'avant) ; plusieurs : « slug#section ».
+  const unSeul = chs.length <= 1
+  const etapes = unSeul ? k.etapes.map((e) => e.split('#')[1] ?? e) : k.etapes
+  if (etapes.length > 0) p.set('etapes', etapes.join(','))
+  if (k.gens.length > 0) p.set('gen', k.gens.join(','))
   if (i.type === 'bilan') p.set('type', 'bilan')
+  if (i.nom && i.nom.trim().toLowerCase() !== 'interro') p.set('nom', i.nom.trim())
+  if (i.id) p.set('id', i.id)
   return `${route}?${p.toString().replace(/%2F/g, '/').replace(/%2C/g, ',')}`
 }
 
@@ -365,7 +475,21 @@ export function lirePageGardee(code: string): PageGardee | null {
   }
 }
 
-export function garderPage(code: string, page: PageEleve, recueLe: Date): void {
+/** Garde la version reçue ; renvoie la page annotée : une interro dont le professeur a changé la date depuis la
+ * dernière version vue sur CET appareil porte `avant` (« date changée »), gardé tant que la date reste nouvelle. */
+export function garderPage(code: string, recue: PageEleve, recueLe: Date): PageEleve {
+  const precedente = lirePageGardee(code)?.page.interros ?? []
+  const page: PageEleve = {
+    ...recue,
+    interros: recue.interros
+      ? recue.interros.map((i) => {
+          const avant = i.id ? precedente.find((x) => x.id === i.id) : undefined
+          if (!avant) return i
+          const date = avant.date !== i.date ? (avant.avant ?? avant.date) : avant.avant
+          return date && date !== i.date ? { ...i, avant: date } : i
+        })
+      : null,
+  }
   const brute = {
     classe: page.classe,
     mis_a_jour: page.misAJour,
@@ -379,6 +503,7 @@ export function garderPage(code: string, page: PageEleve, recueLe: Date): void {
   } catch {
     /* sans stockage : pas de version hors ligne */
   }
+  return page
 }
 
 /** « Quitter cette classe sur cet appareil » (ou code qui ne marche plus) : tout est oublié. */

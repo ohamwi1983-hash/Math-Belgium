@@ -163,3 +163,8 @@ body:has(.cl-page) { background: var(--paper); }
 @media (prefers-reduced-motion: reduce) {
   .cl-page * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
+
+/* Évaluation au nouveau format (28/11/2026) : carte claire, le bloc publié (`BlocEvaluation`). */
+.cl-evaluation { background: var(--surface); color: var(--ink); }
+.cl-evaluation-principale { border: 2px solid var(--ink); }
+.cl-evaluation .be-titre { font-size: 1.4rem; }

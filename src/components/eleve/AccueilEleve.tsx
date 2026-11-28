@@ -4,6 +4,7 @@ import { dateLocale, garderPage, lirePageGardee, pageAuJour, type PageEleve } fr
 import { ROUTE_PLAN, lienEntrainer, resumeClasse } from '../../lib/guideEleve'
 import { chargerSupabase, supabaseConfigure } from '../../lib/supabase'
 import { IconeEleve, type NomIconeEleve } from './IconesEleve'
+import { BlocEvaluation } from './BlocEvaluation'
 import './guideEleve.css'
 
 /**
@@ -79,6 +80,7 @@ type EtatClasse = { page: PageEleve | null; codePerime: boolean }
  */
 export function CarteMaClasse({ code }: { code: string }) {
   const [etat, setEtat] = useState<EtatClasse>(() => ({ page: lirePageGardee(code)?.page ?? null, codePerime: false }))
+  const [ouvert, setOuvert] = useState(false)
 
   useEffect(() => {
     if (!supabaseConfigure() || (window as Window & { __prerendu?: boolean }).__prerendu) return
@@ -91,8 +93,7 @@ export function CarteMaClasse({ code }: { code: string }) {
         const r = await lirePageClasse(client, code)
         if (!actif) return
         if (r.statut === 'ok') {
-          garderPage(code, r.page, new Date())
-          setEtat({ page: r.page, codePerime: false })
+          setEtat({ page: garderPage(code, r.page, new Date()), codePerime: false })
         } else if (r.statut === 'inconnu') setEtat((e) => ({ ...e, codePerime: true }))
       } catch {
         /* hors ligne : la version gardée reste affichée */
@@ -121,8 +122,22 @@ export function CarteMaClasse({ code }: { code: string }) {
         </>
       ) : resume?.interro ? (
         <>
-          <p className="ge-classe-interro">{resume.interro.titre}</p>
+          <p className="ge-classe-interro">
+            {resume.interro.titre}
+            {resume.interro.avant && (
+              <>
+                {' '}
+                <span className="ge-classe-change">date changée</span>
+              </>
+            )}
+          </p>
           <p className="ge-classe-detail">{[resume.interro.detail, resume.devoir].filter(Boolean).join(' · ')}</p>
+          {resume.interro.complete && (
+            <details className="ge-classe-contenu" onToggle={(e) => setOuvert((e.currentTarget as HTMLDetailsElement).open)}>
+              <summary>{ouvert ? 'Cacher le contenu' : 'Voir le contenu'}</summary>
+              <BlocEvaluation interro={resume.interro.complete} aujourdhui={aujourdhui} plan={null} sansTitre />
+            </details>
+          )}
           <div className="ge-classe-actions">
             <Link className="ge-bouton-plein ge-classe-bouton" to={resume.interro.plan ?? ROUTE_PLAN}>
               Je prépare mon interro ›

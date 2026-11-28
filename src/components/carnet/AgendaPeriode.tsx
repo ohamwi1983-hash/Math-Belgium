@@ -1,4 +1,5 @@
 import { useId, useMemo, useState } from 'react'
+import { nomEvaluation } from '../../lib/evaluationAnnoncee'
 import { generatorLink } from '../../lib/generatorLink'
 import { dateIso, type Classe, type FormatHoraire, type Seance } from '../../lib/carnet'
 import {
@@ -264,7 +265,7 @@ export function AgendaPeriode({
               <ul className="agenda-liste-periode">
                 {liste.map((e) => {
                   const r = ctx.ctxAgenda ? resumeSuppressions(e, ctx.ctxAgenda) : null
-                  const quoi = e.type === 'interrogation' ? [classes.find((c) => c.id === e.classe_id)?.nom, e.chapitre ? titreChapitre(e.chapitre) : null].filter(Boolean).join(' · ') : titreEvenement(e)
+                  const quoi = e.type === 'interrogation' ? [nomEvaluation(e.intitule), classes.find((c) => c.id === e.classe_id)?.nom, e.chapitre ? titreChapitre(e.chapitre) : null].filter(Boolean).join(' · ') : titreEvenement(e)
                   return (
                     <li key={e.id}>
                       <button type="button" className="agenda-a-venir-ligne colonne" onClick={() => ctx.ouvrirEvenement(e)}>

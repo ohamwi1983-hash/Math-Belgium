@@ -256,3 +256,10 @@ body:has(.ge-ent) { background: var(--paper); }
 .entrainement .ge-fin-ex .ge-bouton-plein { color: var(--on-accent); }
 .entrainement .ge-fin-ex .ge-bouton-plein:hover { color: var(--surface); }
 .entrainement .ge-fin-ex .ge-bouton-contour { color: var(--ink); }
+
+/* Carte « Ma classe » : « date changée » et contenu replié de l’évaluation (28/11/2026). */
+.ge-classe-change { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink); font: 600 0.8rem/1.5 var(--sans); vertical-align: 2px; }
+.ge-classe-contenu { margin: 4px 0 8px; }
+.ge-classe-contenu > summary { display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; color: var(--accent-ink); font-weight: 600; }
+.ge-classe-contenu[open] > summary { margin-bottom: 6px; }
+@media (min-width: 760px) { .ge-classe-contenu { flex: 1 1 100%; } }

@@ -1,6 +1,6 @@
 import { PuceARendre } from './DevoirsARendre'
 import { devoirsARendre } from '../../lib/carnetDevoirs'
-import { useId, useMemo, useState } from 'react'
+import { useId, useMemo, useState, type ReactElement } from 'react'
 import { Link } from 'react-router-dom'
 import { ajouterJours } from '../../lib/calendrierFwb'
 import { dateCourte, dateIso, type Seance } from '../../lib/carnet'
@@ -18,6 +18,7 @@ import { Planification } from './Planification'
 import { avertissementsInterro, dateCourteJour, evenementsEntre, interrosDuCreneau, motifCourt, predicatSuppression, quiTexte, texteAvertissement, titreEvenement, type Evenement } from '../../lib/agendaEvenements'
 import { CarteRemise, IconeType, PuceType } from './AgendaUi'
 import { TableauHeuresRestantes, titreChapitre } from './HeuresEffectives'
+import { nomEvaluation } from '../../lib/evaluationAnnoncee'
 
 const JOURS = ['Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.']
 const JOURS_LONGS = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi']
@@ -136,7 +137,7 @@ export function MaSemaine({
         {evs.map((e) => (
           <button key={e.id} type="button" className={`agenda-puce-jour agenda-t-${e.type}`} onClick={() => ctx.ouvrirEvenement(e)}>
             <IconeType type={e.type} taille={13} />
-            <span>{e.type === 'interrogation' ? `Interro · ${ctx.classes.find((c) => c.id === e.classe_id)?.nom ?? ''}` : titreEvenement(e)}</span>
+            <span>{e.type === 'interrogation' ? `${nomEvaluation(e.intitule)} · ${ctx.classes.find((c) => c.id === e.classe_id)?.nom ?? ''}` : titreEvenement(e)}</span>
           </button>
         ))}
         {remises.map((p) => (
@@ -155,21 +156,40 @@ export function MaSemaine({
     )
   }
 
-  function lignesInterro(c: Creneau) {
+  /** Étiquettes des évaluations posées sur ce créneau : chacune est un BOUTON À PART (hors du bouton de la case,
+   * jamais un bouton dans un bouton) qui ouvre la fiche de l'évaluation. */
+  function lignesInterro(c: Creneau, nomJour: string) {
     const interros = ctx.agenda.actif ? interrosDuCreneau(c, ctx.agenda.evenements) : []
     return interros.map((e) => {
       const av = avertissementsInterro({ date: e.du, ecoleId: c.ecole_id, periodes: ctx.agenda.periodes, evenements: ctx.agenda.evenements, seuil: ctx.agenda.seuil, aujourdhui })
+      const nom = nomEvaluation(e.intitule)
+      const chap = e.chapitre ? titreChapitre(e.chapitre) : ''
       return (
-        <span key={e.id} className="agenda-case-interro">
-          <span className="agenda-case-interro-titre">Interro{e.chapitre ? ` · ${titreChapitre(e.chapitre)}` : ''}</span>
+        <button key={e.id} type="button" className="agenda-etiquette-eval" onClick={() => ctx.ouvrirFiche(e)} aria-label={`${nom}${chap ? ` · ${chap}` : ''}, ${nomJour} : ouvrir la fiche`}>
+          <span>
+            {nom}
+            {chap ? ` · ${chap}` : ''} <span aria-hidden="true">›</span>
+          </span>
           {av.map((a) => (
             <span key={a.type} className={`agenda-mini-alerte ${a.type === 'apres' ? 'apres' : 'presse'}`}>
               <IconeType type="attention" taille={12} /> {texteAvertissement(a, e.du).court}
             </span>
           ))}
-        </span>
+        </button>
       )
     })
+  }
+
+  /** La case et, à côté, les étiquettes de ses évaluations. */
+  function avecEtiquettes(c: Creneau, nomJour: string, bouton: ReactElement) {
+    const etiquettes = lignesInterro(c, nomJour)
+    if (etiquettes.length === 0) return bouton
+    return (
+      <div className="carnet-case-groupe">
+        {bouton}
+        {etiquettes}
+      </div>
+    )
   }
 
   function contenuCellule(j: JourSemaine, k: number, cel: CelluleSemaine, compact: boolean) {
@@ -200,7 +220,9 @@ export function MaSemaine({
       const quand = `${numerosCreneau(c)} ${plage(c.debut, c.fin)}`
       if (s) {
         const r = resumeSeance(s)
-        return (
+        return avecEtiquettes(
+          c,
+          nomJour,
           <button type="button" className={`carnet-case-semaine note carnet-c${couleur}`} onClick={() => ctx.voir(s)} aria-label={`${classe?.nom}, ${nomJour}, ${quand} : séance notée, ${r.chapitre} ${r.numeros}. Ouvrir`}>
             <strong>{classe?.nom}</strong>
             {compact && <span className="carnet-case-quand">{quand}</span>}
@@ -208,17 +230,17 @@ export function MaSemaine({
               {r.chapitre}
               {r.numeros && ` · ${r.numeros}`}
             </span>
-            {lignesInterro(c)}
-          </button>
+          </button>,
         )
       }
-      return (
+      return avecEtiquettes(
+        c,
+        nomJour,
         <button type="button" className={`carnet-case-semaine ${st} carnet-c${couleur}`} onClick={() => onNoter(c)} aria-label={`${classe?.nom}, ${nomJour}, ${quand} : ${st === 'a-venir' ? 'à venir' : st === 'en-cours' ? 'en cours' : 'à noter'}. Noter la séance`}>
           <strong>{classe?.nom}</strong>
           {compact && <span className="carnet-case-quand">{quand}</span>}
           <span className="carnet-case-resume">{st === 'a-venir' ? 'à venir · noter' : st === 'en-cours' ? 'en cours · Noter' : 'Noter'}</span>
-          {lignesInterro(c)}
-        </button>
+        </button>,
       )
     }
     if (cel.type === 'libre') {
@@ -469,7 +491,7 @@ export function MaSemaine({
 function LigneEvenementSemaine({ e }: { e: Evenement }) {
   const ctx = useCarnet()
   const noms = quiTexte(e, ctx.classes)
-  const quoi = e.type === 'interrogation' ? (e.chapitre ? titreChapitre(e.chapitre) : '') : e.intitule.trim()
+  const quoi = e.type === 'interrogation' ? [nomEvaluation(e.intitule), e.chapitre ? titreChapitre(e.chapitre) : ''].filter(Boolean).join(' · ') : e.intitule.trim()
   return (
     <li>
       <button type="button" className="agenda-a-venir-ligne colonne" onClick={() => ctx.ouvrirEvenement(e)}>

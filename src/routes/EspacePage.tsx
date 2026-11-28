@@ -15,6 +15,7 @@ import { resumeDevoir } from '../lib/carnetDevoirs'
 import { estConnecteActif, useCompte } from '../lib/compteContexte'
 import { messageErreur } from '../lib/compteValidation'
 import { aVenir, chapitreDeLInterro, chargerDonneesEspace, coursDuJour, lienProjection, type CoursDuJour, type DonneesEspace } from '../lib/espaceProfesseur'
+import { nomEvaluation } from '../lib/evaluationAnnoncee'
 import { useOrdreChapitres } from '../lib/ordreChapitres'
 import { MatiereANoter, ouvrirProposition, usePropositionsGardees } from '../components/carnet/MatiereProjetee'
 
@@ -298,10 +299,11 @@ function LigneCours({ c, aujourdhui }: { c: CoursDuJour; aujourdhui: string }) {
               </span>
             ))}
             {c.interros.map((e) => (
-              <span key={e.id} className="ep-chip evaluation">
-                {(e.intitule.trim() || 'évaluation').toLowerCase()} {dateJourLong(e.du)}
+              <Link key={e.id} className="ep-chip evaluation" to={`/carnet/classe/${e.classe_id}?fiche=${e.id}`}>
+                {nomEvaluation(e.intitule).toLowerCase()} {dateJourLong(e.du)}
                 {chapitreDeLInterro(e) ? ` · ${chapitreDeLInterro(e)}` : ''}
-              </span>
+                <span className="carnet-sr"> (ouvrir la fiche)</span>
+              </Link>
             ))}
           </span>
         )}

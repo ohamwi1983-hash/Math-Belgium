@@ -14,6 +14,7 @@ import { ResumeHeuresEffectives, titreChapitre } from './HeuresEffectives'
 import { ListeARendre, PuceARendre } from './DevoirsARendre'
 import { devoirsARendre } from '../../lib/carnetDevoirs'
 import { capitale, chapitreEnCours, dateAbregee, derniereFois, heureCourte, lireDepuisOubliees, memoriserDepuisOubliees, resumeSeance, texteReperes, trierRecentes } from './outilsCarnet'
+import { nomEvaluation } from '../../lib/evaluationAnnoncee'
 
 const OUBLIEES_VISIBLES = 12
 
@@ -518,7 +519,7 @@ function LigneInterro({ e, ecoleId, aujourdhui }: { e: Evenement; ecoleId: strin
   return (
     <span className="agenda-interro-ligne">
       <button type="button" className="agenda-interro" onClick={() => ctx.ouvrirEvenement(e)}>
-        <IconeType type="interrogation" taille={13} /> Interro{e.chapitre ? ` · ${titreChapitre(e.chapitre)}` : ''}
+        <IconeType type="interrogation" taille={13} /> {nomEvaluation(e.intitule)}{e.chapitre ? ` · ${titreChapitre(e.chapitre)}` : ''}
         <span className="carnet-sr"> — modifier</span>
       </button>
       {av.map((a) => (

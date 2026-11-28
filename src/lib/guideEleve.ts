@@ -1,6 +1,6 @@
 import type { Essai } from './suiviEssais'
 import type { DevoirPublie, EtapePubliee, InterroPubliee, PageEleve } from './pageClasse'
-import { joursAvant, lienPlanRevision } from './pageClasse'
+import { joursAvant, lienPlanRevision, nomInterro } from './pageClasse'
 
 /**
  * Côté élève plus clair (chantier E, maquettes `maquette-eleve/` du 27/11/2026) — logique PURE, sans DOM
@@ -126,6 +126,10 @@ export interface ResumeClasse {
     detail: string
     /** Lien du plan de révision prérempli (`lienPlanRevision`). */
     plan: string | null
+    /** Date vue auparavant sur cet appareil (« date changée »). */
+    avant?: string
+    /** L'interro publiée (nouveau format : chapitres, points, exercices), pour « Voir le contenu ». */
+    complete?: InterroPubliee
   } | null
   /** « Devoir pour jeudi 3/12 : … » (le plus proche), `null` sans devoir. */
   devoir: string | null
@@ -151,11 +155,15 @@ export function resumeClasse(page: PageEleve, aujourdhui: string): ResumeClasse 
   let interro: ResumeClasse['interro'] = null
   if (prochaine) {
     const delai = delaiEleve(prochaine.date, aujourdhui)
-    const etapes = texteEtapes(prochaine.etapes)
+    const detail = prochaine.chapitres
+      ? prochaine.chapitres.map((c) => [c.titre, texteEtapes(c.points).replace(/^étapes?/, (m) => (m === 'étape' ? 'point' : 'points'))].filter(Boolean).join(' — ')).join(' ; ')
+      : [prochaine.titre, texteEtapes(prochaine.etapes)].filter(Boolean).join(' — ')
     interro = {
-      titre: `${prochaine.type === 'bilan' ? 'Contrôle-bilan' : 'Interro'} ${dateCourteEleve(prochaine.date)}${delai ? ` · ${delai}` : ''}`,
-      detail: [prochaine.titre, etapes].filter(Boolean).join(' — '),
+      titre: `${nomInterro(prochaine)} ${dateCourteEleve(prochaine.date)}${delai ? ` · ${delai}` : ''}`,
+      detail,
       plan: lienPlanRevision(prochaine),
+      ...(prochaine.avant ? { avant: prochaine.avant } : {}),
+      ...(prochaine.chapitres ? { complete: prochaine } : {}),
     }
   }
   return { classe: page.classe, interro, devoir: devoirs[0] ? texteDevoir(devoirs[0]) : null, vide: !interro && devoirs.length === 0 }

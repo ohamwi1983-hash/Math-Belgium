@@ -180,3 +180,9 @@
 .ep-projection-texte .ep-chip { margin-left: 4px; }
 .ep-partages .profil-lien-bouton { min-height: 44px; text-align: left; }
 .ep-lien-fleche { color: var(--accent-ink); font-weight: 600; }
+
+/* Évaluation du jour / carte de la classe : liens vers la FICHE de l’évaluation (28/11/2026). */
+a.ep-chip.evaluation { display: inline-flex; align-items: center; min-height: 32px; text-decoration: none; }
+a.ep-chip.evaluation:hover { text-decoration: underline; }
+.ep-lien-fiche { display: inline-flex; align-items: center; min-height: 44px; color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 759px) { a.ep-chip.evaluation { min-height: 44px; } }

@@ -16,10 +16,11 @@
 import { findChapter } from '../content/chaptersIndex'
 import { titreCourtChapitre } from '../entrainement/export/examen'
 import { generateursChapitre, jourSemaine, numeroHeureTexte, plageTexte, structureChapitre, texteBrut, unitesCouvertes, unitesSection, type Classe, type FormatHoraire, type PartieSection, type Seance } from './carnet'
-import { aUnDevoir, INTITULE_BILAN } from './carnetDevoirs'
+import { aUnDevoir } from './carnetDevoirs'
 import type { Evenement } from './agendaEvenements'
 import { heureDe, journee, plage, type GrilleHoraire } from './horaire'
-import type { ContenuPageClasse, DevoirPublie, EtapePubliee, GenerateurPublie, InterroPubliee, SeancePubliee } from './pageClasse'
+import type { ChapitrePublie, ContenuPageClasse, DevoirPublie, EtapePubliee, GenerateurPublie, InterroPubliee, SeancePubliee } from './pageClasse'
+import { contenuEnregistre, typeDeNom, type ContenuEval } from './evaluationAnnoncee'
 import { libelleChapitre, ordreCourant } from './ordreChapitres'
 
 export const MAX_INTERROS = 3
@@ -49,7 +50,7 @@ function ajouterJours(iso: string, n: number): string {
 
 /** Titre publié : « Chapitre 3 — Suites » (numéro du professeur s'il a rangé ses chapitres et numérote
  * ses documents) ou « Suites » — jamais le numéro du site (« Mon ordre des chapitres »). */
-function titreChapitre(niveau: string, slug: string): string {
+export function titreChapitre(niveau: string, slug: string): string {
   const c = findChapter(niveau, slug)
   return c ? libelleChapitre(c, ordreCourant(), { titre: titreCourtChapitre(c.slug, c.title) }) : ''
 }
@@ -109,6 +110,53 @@ function generateursPublies(niveau: string, chapitre: string, ids: string[]): Ge
   return ids.slice(0, 12).map((id) => ({ id, titre: texteBrut(tous.find((g) => g.id === id)?.titre ?? id) }))
 }
 
+/** Interro publiée d'après l'événement et sa séance d'annonce (chapitres, points, exercices, compétences, nom) —
+ * aussi l'APERÇU « Ce que verront tes élèves » de l'écran d'annonce et de la fiche (même fonction : même bloc). */
+export function interroPubliee(
+  e: Pick<Evenement, 'id' | 'du' | 'journee_entiere' | 'heure_debut' | 'heure_fin' | 'intitule' | 'chapitre'>,
+  contenu: ContenuEval,
+  o: { classe: Pick<Classe, 'ecole_id'>; seancesClasse: Pick<Seance, 'niveau' | 'chapitre' | 'parties' | 'date_seance'>[]; grilles: GrilleHoraire[]; format: FormatHoraire; avecHeure: boolean },
+): InterroPubliee {
+  const chapitres: ChapitrePublie[] = contenu.chapitres.map((ch) => {
+    const c = findChapter(ch.niveau, ch.slug)
+    const structure = c ? structureChapitre(c) : []
+    const vues = unitesCouvertes(
+      o.seancesClasse.filter((s) => s.niveau === ch.niveau && s.chapitre === ch.slug && s.date_seance <= e.du).flatMap((s) => s.parties),
+      structure,
+    )
+    const precisions = etapesEvaluees(structure.filter((s) => ch.points.some((p) => p.id === s.id)), vues)
+    return {
+      niveau: ch.niveau,
+      chapitre: ch.slug,
+      titre: titreChapitre(ch.niveau, ch.slug),
+      points: ch.points.map((p) => ({
+        id: p.id,
+        numero: p.numero,
+        titre: p.titre,
+        precision: precisions.find((x) => x.id === p.id)?.precision ?? '',
+        exercices: p.exercices.slice(0, 20).map((x) => ({ id: x.id, titre: x.titre, competence: x.competence })),
+      })),
+      connaitre: ch.connaitre ? (ch.quiz ? [ch.quiz] : []) : null,
+    }
+  })
+  const premier = chapitres[0]
+  const heure = o.avecHeure ? heureInterro(e, o.classe, o.grilles, o.format) : null
+  return {
+    date: e.du,
+    ...(heure ? { heure } : {}),
+    type: typeDeNom(contenu.nom) === 'bilan' ? 'bilan' : 'interro',
+    titre: premier?.titre ?? '',
+    niveau: premier?.niveau ?? '',
+    chapitre: premier?.chapitre ?? '',
+    etapes: premier ? premier.points.map(({ id, numero, titre, precision }) => ({ id, numero, titre, precision })) : [],
+    generateurs: chapitres.flatMap((c) => c.points.flatMap((p) => p.exercices)).slice(0, 40),
+    ...(e.id ? { id: e.id } : {}),
+    nom: contenu.nom,
+    competences: contenu.competences,
+    chapitres,
+  }
+}
+
 function interrosPubliees(d: DonneesPublication, seancesClasse: Seance[]): InterroPubliee[] {
   return d.evenements
     .filter((e) => e.type === 'interrogation' && e.classe_id === d.classe.id && e.du >= d.aujourdhui)
@@ -116,29 +164,7 @@ function interrosPubliees(d: DonneesPublication, seancesClasse: Seance[]): Inter
     .slice(0, MAX_INTERROS)
     .map((e) => {
       const annonce = seancesClasse.find((s) => s.evaluation_evenement === e.id)
-      const [niveauEv, slugEv] = (e.chapitre ?? '').split('/')
-      const niveau = annonce?.niveau ?? niveauEv ?? ''
-      const chapitre = annonce?.chapitre ?? slugEv ?? ''
-      const contenu = findChapter(niveau, chapitre)
-      const structure = contenu ? structureChapitre(contenu) : []
-      const sections = structure.filter((s) => (annonce?.evaluation_parties ?? []).includes(s.id))
-      const vues = unitesCouvertes(
-        seancesClasse.filter((s) => s.niveau === niveau && s.chapitre === chapitre && s.date_seance <= e.du).flatMap((s) => s.parties),
-        structure,
-      )
-      const retenus = annonce?.evaluation_generateurs ?? []
-      const ids = retenus.length > 0 ? retenus : sections.flatMap((s) => s.generateurs.map((g) => g.id))
-      const heure = d.avecHeure ? heureInterro(e, d.classe, d.grilles, d.format) : null
-      return {
-        date: e.du,
-        ...(heure ? { heure } : {}),
-        type: e.intitule === INTITULE_BILAN || annonce?.evaluation_type === 'bilan' ? 'bilan' : 'interro',
-        titre: contenu ? titreChapitre(niveau, chapitre) : '',
-        niveau: contenu ? niveau : '',
-        chapitre: contenu ? chapitre : '',
-        etapes: etapesEvaluees(sections, vues),
-        generateurs: contenu ? generateursPublies(niveau, chapitre, [...new Set(ids)]) : [],
-      } satisfies InterroPubliee
+      return interroPubliee(e, contenuEnregistre(e, annonce), { classe: d.classe, seancesClasse, grilles: d.grilles, format: d.format, avecHeure: d.avecHeure })
     })
 }
 

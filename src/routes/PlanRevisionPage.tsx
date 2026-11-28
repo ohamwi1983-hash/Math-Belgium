@@ -28,6 +28,8 @@ import { ecrirePlan, effacerPlan, lirePlan, MINUTES_DEFAUT, MINUTES_POSSIBLES, t
 import { estGenerateurMigre, generatorLink } from '../lib/generatorLink'
 import { urlEntrainementEleve } from '../lib/carnetMatiere'
 import { BoucleConfiance } from '../components/suivi/communs'
+import { chargerSupabase, supabaseConfigure } from '../lib/supabase'
+import { clesInterro, garderPage, lireCodeGarde, lirePageGardee, nomInterro, signatureAnnonce, signatureInterro, type InterroPubliee } from '../lib/pageClasse'
 import '../components/suivi/suivi.css'
 
 /**
@@ -338,6 +340,7 @@ function VuePlan({
   onCocher,
   onModifier,
   onSupprimer,
+  onRemplacer,
   stockageOk,
 }: {
   garde: PlanGarde
@@ -347,6 +350,7 @@ function VuePlan({
   onCocher: (ids: string[], oui: boolean) => void
   onModifier: () => void
   onSupprimer: () => void
+  onRemplacer: (p: PlanGarde) => void
   stockageOk: boolean
 }) {
   const [confirmer, setConfirmer] = useState(false)
@@ -357,11 +361,12 @@ function VuePlan({
   const faites = groupes.filter((g) => g.faite).length
   const indexPrincipal = groupes.findIndex((g) => !g.faite)
   const suivants = plan.jours.filter((j) => j.jour > aujourdhui && j.role !== 'interro')
-  const nature = garde.bilan ? 'Contrôle-bilan' : 'Interro'
+  const nature = garde.nom ?? (garde.bilan ? 'Contrôle-bilan' : 'Interro')
 
   return (
     <>
       <EnTetePlan garde={garde} infos={listeInfos} />
+      <AvisAnnonce garde={garde} aujourdhui={aujourdhui} onRemplacer={onRemplacer} onEffacer={onSupprimer} />
       {plan.termine ? (
         <section className="suivi-bloc">
           <h2>{garde.interro === aujourdhui ? "C'est aujourd'hui : bonne chance !" : `L'interro du ${dateLongue(garde.interro)} est passée.`}</h2>
@@ -475,7 +480,7 @@ function VuePlan({
 }
 
 /** « MON PLAN DE RÉVISION » / « Interro mardi 2/12 » / « Les coniques · étapes 1 à 3 · annoncée par ton professeur ». */
-function EnTetePlan({ garde, infos }: { garde: Pick<PlanGarde, 'interro' | 'bilan' | 'annonce'>; infos: Pick<InfoEtape, 'chapter' | 'numero'>[] }) {
+function EnTetePlan({ garde, infos }: { garde: Pick<PlanGarde, 'interro' | 'bilan' | 'annonce' | 'nom'>; infos: Pick<InfoEtape, 'chapter' | 'numero'>[] }) {
   const parChapitre = new Map<string, { titre: string; numeros: number[] }>()
   for (const i of infos) {
     const x = parChapitre.get(i.chapter.slug) ?? { titre: i.chapter.title, numeros: [] }
@@ -487,7 +492,7 @@ function EnTetePlan({ garde, infos }: { garde: Pick<PlanGarde, 'interro' | 'bila
     <div className="plan-entete">
       <p className="plan-surtitre">Mon plan de révision</p>
       <h1 tabIndex={-1}>
-        {garde.bilan ? 'Contrôle-bilan' : 'Interro'} {dateCourte(garde.interro)}
+        {garde.nom ?? (garde.bilan ? 'Contrôle-bilan' : 'Interro')} {dateCourte(garde.interro)}
       </h1>
       {(sujets.length > 0 || garde.annonce) && (
         <p className="plan-sujet">
@@ -547,6 +552,7 @@ function ChoixMinutes({ valeur, onChange, legende, numero }: { valeur: number; o
 function PlanAnnonce({
   brouillon,
   bilan,
+  nom,
   infos,
   ancien,
   aujourdhui,
@@ -555,6 +561,7 @@ function PlanAnnonce({
 }: {
   brouillon: Brouillon
   bilan: boolean
+  nom?: string
   infos: InfoEtape[]
   ancien: PlanGarde | null
   aujourdhui: Jour
@@ -565,7 +572,7 @@ function PlanAnnonce({
   const passee = brouillon.interro <= aujourdhui
   return (
     <>
-      <EnTetePlan garde={{ interro: brouillon.interro, bilan, annonce: true }} infos={infos} />
+      <EnTetePlan garde={{ interro: brouillon.interro, bilan, annonce: true, ...(nom ? { nom } : {}) }} infos={infos} />
       <section className="suivi-bloc plan-formulaire" aria-labelledby="plan-annonce-titre">
         <h2 id="plan-annonce-titre">{passee ? 'Cette interro est déjà là' : 'Ton plan est presque prêt'}</h2>
         {passee ? (
@@ -769,8 +776,82 @@ function FormulaireQuestions({
 
 const ID_LIEN = /^[A-Za-z0-9_-]{1,80}$/
 const listeLien = (v: string | null) => (v ?? '').split(',').map((s) => s.trim()).filter((s) => ID_LIEN.test(s))
+/** Étapes du lien : `section` (chapitre de `chapitre=`) ou `slug#section` (plusieurs chapitres, depuis le 28/11/2026). */
+const listeEtapesLien = (v: string | null) => (v ?? '').split(',').map((s) => s.trim()).filter((s) => /^(?:[a-z0-9-]{1,80}#)?[A-Za-z0-9_-]{1,80}$/.test(s))
 
 type Mode = 'plan' | 'annonce' | 'questions'
+
+/**
+ * Plan fait depuis une interro annoncée (`annonceId`) : son appareil relit la dernière version de la page de classe
+ * (`classe:derniere`, relue aussi en tâche de fond par son code — seule requête, rien n'est envoyé). Interro modifiée
+ * → « Ton interro a changé : mettre mon plan à jour » (rien ne change sans le bouton) ; retirée → « Cette interro a été
+ * retirée par ton professeur » + garder / effacer le plan.
+ */
+function AvisAnnonce({ garde, aujourdhui, onRemplacer, onEffacer }: { garde: PlanGarde; aujourdhui: string; onRemplacer: (p: PlanGarde) => void; onEffacer: () => void }) {
+  const code = garde.annonceId ? lireCodeGarde() : null
+  const [interros, setInterros] = useState<InterroPubliee[] | null>(() => (code ? (lirePageGardee(code)?.page.interros ?? null) : null))
+  useEffect(() => {
+    if (!code || !supabaseConfigure() || (window as Window & { __prerendu?: boolean }).__prerendu) return
+    let actif = true
+    const t = window.setTimeout(async () => {
+      try {
+        const { lirePageClasse } = await import('../lib/pageClasseDonnees')
+        const client = await chargerSupabase()
+        if (!client || !actif) return
+        const r = await lirePageClasse(client, code)
+        if (actif && r.statut === 'ok') setInterros(garderPage(code, r.page, new Date()).interros)
+      } catch {
+        /* hors ligne : la version gardée suffit */
+      }
+    }, 600)
+    return () => {
+      actif = false
+      window.clearTimeout(t)
+    }
+  }, [code])
+  if (!garde.annonceId || !interros) return null
+  const i = interros.find((x) => x.id === garde.annonceId)
+  if (i) {
+    if (!garde.signature || signatureInterro(i) === garde.signature) return null
+    const k = clesInterro(i)
+    return (
+      <section className="suivi-bloc plan-avis" role="status">
+        <h2>Ton {nomInterro(i).toLowerCase()} a changé</h2>
+        <p className="suivi-note">
+          {i.date !== garde.interro ? `Ton professeur l’a déplacée au ${dateLongue(i.date)}. ` : ''}Rien ne change dans ton plan tant que tu ne le mets pas à jour.
+        </p>
+        <div className="suivi-boutons">
+          <button
+            type="button"
+            className="suivi-btn plein"
+            onClick={() =>
+              onRemplacer({ ...garde, interro: i.date, etapes: k.etapes.length > 0 ? k.etapes : garde.etapes, gens: k.gens, nom: nomInterro(i), ...(i.type === 'bilan' ? { bilan: true } : { bilan: undefined }), signature: signatureInterro(i) })
+            }
+          >
+            Mettre mon plan à jour
+          </button>
+        </div>
+      </section>
+    )
+  }
+  // Absente : retirée, sauf si elle est passée, ou plus loin que les 3 interros publiées.
+  const derniere = interros.length >= 3 ? interros[interros.length - 1].date : null
+  if (garde.interro < aujourdhui || (derniere && garde.interro > derniere)) return null
+  return (
+    <section className="suivi-bloc plan-avis" role="status">
+      <h2>Cette interro a été retirée par ton professeur</h2>
+      <p className="suivi-note">Ton plan reste sur cet appareil : tu peux le garder pour réviser quand même, ou l’effacer.</p>
+      <div className="suivi-boutons">
+        <button type="button" className="suivi-btn plein" onClick={() => onRemplacer({ ...garde, annonceId: undefined, signature: undefined })}>
+          Garder mon plan
+        </button>
+        <button type="button" className="suivi-btn" onClick={onEffacer}>
+          Effacer mon plan
+        </button>
+      </div>
+    </section>
+  )
+}
 
 export function PlanRevisionPage() {
   usePageNonIndexee('Mon plan de révision')
@@ -786,14 +867,29 @@ export function PlanRevisionPage() {
     const chapitre = params.get('chapitre')
     const level = LEVELS.find((l) => l.slug === niveau)
     const chap = level?.chapters.find((c) => c.slug === chapitre)
-    const ids = listeLien(params.get('etapes'))
+    const brutes = listeEtapesLien(params.get('etapes'))
+    const multi = brutes.some((b) => b.includes('#'))
+    const etapes: string[] = []
+    if (level && chap) {
+      if (!multi) etapes.push(...chap.sections.filter((s) => brutes.includes(s.id)).map((s) => `${chap.slug}#${s.id}`))
+      else
+        for (const b of brutes) {
+          const [slug, sec] = b.includes('#') ? b.split('#') : [chap.slug, b]
+          const c = level.chapters.find((x) => x.slug === slug)
+          if (c && c.sections.some((s) => s.id === sec) && !etapes.includes(`${c.slug}#${sec}`)) etapes.push(`${c.slug}#${sec}`)
+        }
+    }
+    const nomLu = (params.get('nom') ?? '').replace(/\s+/g, ' ').trim().slice(0, 80)
+    const idLu = params.get('id') ?? ''
     return {
       date: estJour(date) ? date : null,
       level,
       chap,
-      etapes: chap ? chap.sections.filter((s) => ids.includes(s.id)).map((s) => `${chap.slug}#${s.id}`) : [],
+      etapes,
       gens: listeLien(params.get('gen')),
       bilan: params.get('type') === 'bilan',
+      nom: nomLu || null,
+      id: /^[A-Za-z0-9_-]{1,80}$/.test(idLu) ? idLu : null,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- adresse d'arrivée seulement
   }, [])
@@ -837,8 +933,9 @@ export function PlanRevisionPage() {
     setStockageOk(ecrirePlan(p))
   }, [])
 
-  function creer(b: Brouillon, annonce: { gens: string[]; bilan: boolean } | null) {
+  function creer(b: Brouillon, annonce: { gens: string[]; bilan: boolean; nom?: string | null; id?: string | null } | null) {
     const memeInterro = garde && garde.interro === b.interro
+    const nomAnnonce = annonce?.nom ?? (annonce?.bilan ? 'Contrôle-bilan' : 'Interro')
     enregistrer({
       debut: aujourdhui,
       interro: b.interro,
@@ -847,7 +944,8 @@ export function PlanRevisionPage() {
       niveau: b.niveau,
       etapes: b.etapes,
       faites: memeInterro ? garde.faites : [],
-      ...(annonce ? { annonce: true, ...(annonce.bilan ? { bilan: true } : {}), ...(annonce.gens.length > 0 ? { gens: annonce.gens } : {}) } : {}),
+      ...(annonce ? { annonce: true, ...(annonce.bilan ? { bilan: true } : {}), ...(annonce.gens.length > 0 ? { gens: annonce.gens } : {}), ...(annonce.nom ? { nom: annonce.nom } : {}) } : {}),
+      ...(annonce?.id ? { annonceId: annonce.id, signature: signatureAnnonce({ date: b.interro, etapes: b.etapes, gens: annonce.gens, nom: nomAnnonce }) } : {}),
     })
     setMode('plan')
     if ([...params.keys()].length > 0) setParams(new URLSearchParams(), { replace: true })
@@ -894,10 +992,11 @@ export function PlanRevisionPage() {
           <PlanAnnonce
             brouillon={brouillonInitial}
             bilan={lien.bilan}
+            nom={lien.nom ?? undefined}
             infos={infosAnnonce}
             ancien={garde}
             aujourdhui={aujourdhui}
-            onValider={(minutes) => creer({ ...brouillonInitial, minutes, etapes: infosAnnonce.map((i) => i.cle) }, { gens: lien.gens, bilan: lien.bilan })}
+            onValider={(minutes) => creer({ ...brouillonInitial, minutes, etapes: infosAnnonce.map((i) => i.cle) }, { gens: lien.gens, bilan: lien.bilan, nom: lien.nom, id: lien.id })}
             onChanger={() => setMode('questions')}
           />
         ) : mode === 'questions' || !garde || !plan ? (
@@ -912,7 +1011,7 @@ export function PlanRevisionPage() {
               initial={brouillonInitial}
               aujourdhui={aujourdhui}
               existe={!!garde}
-              onValider={(b) => creer(b, annonceComplete && b.interro === lien.date && b.chapitre === lien.chap?.slug ? { gens: lien.gens, bilan: lien.bilan } : garde?.annonce && b.interro === garde.interro ? { gens: garde.gens ?? [], bilan: !!garde.bilan } : null)}
+              onValider={(b) => creer(b, annonceComplete && b.interro === lien.date && b.chapitre === lien.chap?.slug ? { gens: lien.gens, bilan: lien.bilan, nom: lien.nom } : garde?.annonce && b.interro === garde.interro ? { gens: garde.gens ?? [], bilan: !!garde.bilan, nom: garde.nom ?? null } : null)}
               onAnnuler={garde ? () => setMode('plan') : undefined}
             />
             <BoucleConfiance>
@@ -937,6 +1036,7 @@ export function PlanRevisionPage() {
               setGarde(null)
               setMode('questions')
             }}
+            onRemplacer={enregistrer}
             stockageOk={stockageOk}
           />
         )}

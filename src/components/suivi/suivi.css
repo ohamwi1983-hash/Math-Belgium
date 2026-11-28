@@ -286,3 +286,7 @@ body:has(.suivi-page) { background: var(--paper); }
   .suivi-onglet { max-width: none; }
   .suivi-bloc { padding: 20px 22px; }
 }
+
+/* Interro annoncée modifiée ou retirée par le professeur (28/11/2026). */
+.plan-avis { border-left: 6px solid var(--accent); }
+.plan-avis h2 { margin-top: 0; }

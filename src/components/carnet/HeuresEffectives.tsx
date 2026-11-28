@@ -1,4 +1,5 @@
 import { useId, useMemo } from 'react'
+import { nomEvaluation } from '../../lib/evaluationAnnoncee'
 import { Link } from 'react-router-dom'
 import { findChapter } from '../../content/chaptersIndex'
 import { dateIso, texteBrut, type Classe } from '../../lib/carnet'
@@ -167,9 +168,7 @@ function LigneAVenir({ e, classe, aujourdhui }: { e: Evenement; classe: Classe; 
   const av = e.type === 'interrogation' ? avertissementsInterro({ date: e.du, ecoleId: classe.ecole_id, periodes: ctx.agenda.periodes, evenements: ctx.agenda.evenements, seuil: ctx.agenda.seuil, aujourdhui }) : []
   const suite =
     e.type === 'interrogation'
-      ? e.chapitre
-        ? ` — ${titreChapitre(e.chapitre)}`
-        : ''
+      ? ` — ${nomEvaluation(e.intitule)}${e.chapitre ? ` · ${titreChapitre(e.chapitre)}` : ''}`
       : e.intitule.trim()
         ? ` — ${e.intitule.trim()}`
         : ''

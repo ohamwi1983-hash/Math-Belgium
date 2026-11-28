@@ -17,7 +17,8 @@ import { MessageHoraireInactif, MonHoraire } from '../components/carnet/MonHorai
 import { PageClasse } from '../components/carnet/PageClasse'
 import { PageClasseEleves } from '../components/carnet/PageClasseEleves'
 import { VueEnsembleClasses } from '../components/carnet/VueEnsembleClasses'
-import { AnnoncerEvaluation, type EtatPageEleves, type TextesAnnonce } from '../components/carnet/AnnoncerEvaluation'
+import { AnnoncerEvaluation, type EtatPageEleves, type ModificationAnnonce, type TextesAnnonce } from '../components/carnet/AnnoncerEvaluation'
+import { FicheDevoir, FicheEvaluation } from '../components/carnet/FicheEvaluation'
 import { PanneauLateral } from '../components/carnet/PanneauLateral'
 import { FormulaireEvenement } from '../components/carnet/FormulaireEvenement'
 import { ReglagesAgenda } from '../components/carnet/ReglagesAgenda'
@@ -35,6 +36,8 @@ import {
   ajouterSeance,
   chargerHoraire,
   chargerSeances,
+  enregistrerCompetencesEvaluation,
+  lireCompetencesEvaluation,
   enregistrerReglagesTexte,
   enregistrerTexteSeance,
   lireReglagesTexte,
@@ -63,6 +66,7 @@ import type { ReglagesPageClasse } from '../lib/pageClasse'
 import { chargerPagesClasse, couperCode, enregistrerReglagesPage, nouveauCode, publierContenu, type PagesClasse } from '../lib/pageClasseDonnees'
 import { nouvelleSeanceSupport, saisieDepuisSeance, seanceAvecAnnonce, seanceSupport, type QuoiAnnonce, type SaisieAnnonce } from '../lib/annonceClasse'
 import { urlEvaluationMatiere } from '../lib/carnetMatiere'
+import { designation, heureOrdinale, intituleDeNom, jourLong, seanceSansRienDAutre } from '../lib/evaluationAnnoncee'
 
 const DUREES = [40, 45, 50, 55, 60, 90, 100, 110]
 const TEXTE_DEFAUT = { rubriques: lireRubriques(null), competences: lireCompetences(null) }
@@ -112,6 +116,8 @@ interface Donnees {
   pages: PagesClasse
   /** Panne de lecture des pages de classe (le carnet reste utilisable). */
   erreurPages: string | null
+  /** 0013 appliquée : compétences évaluées gardées avec l'annonce (`seances.evaluation_competences`). */
+  competences: boolean
 }
 
 type Panneau =
@@ -120,6 +126,8 @@ type Panneau =
   | { type: 'voir'; seanceId: string }
   | { type: 'evenement'; evenement: Evenement | null; prerempli: Partial<SaisieEvenement> }
   | { type: 'texte'; seanceId: string }
+  | { type: 'fiche'; evenementId: string }
+  | { type: 'ficheDevoir'; seanceId: string }
 
 function MessageCarnetInactif() {
   return (
@@ -178,9 +186,13 @@ function Carnet() {
           (ex: unknown) => ({ pages: { actif: true, pages: [] } as PagesClasse, erreur: messageErreur(ex) }),
         ),
       ])
+      // Compétences évaluées (0013, facultative) : lues à part, une panne ou la migration absente ne bloque rien.
+      const comps = devoirs ? await lireCompetencesEvaluation(client).catch(() => ({ actif: false as const })) : { actif: false as const }
+      const seancesCompletes = comps.actif ? seances.map((x) => (comps.parSeance.has(x.id) ? { ...x, evaluation_competences: comps.parSeance.get(x.id) } : x)) : seances
       setDonnees({
         classes,
-        seances,
+        seances: seancesCompletes,
+        competences: comps.actif,
         reglages: r.reglages,
         reglagesExiste: r.existe,
         horaire,
@@ -254,6 +266,21 @@ function Carnet() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- une fois, dès que les données sont là
   }, [donnees !== null, noterDemande])
 
+  // Fiche d'une évaluation (`?fiche=<événement>`) ou d'un devoir (`?devoir=<séance>`) : tableau de bord (« À venir »),
+  // après une modification. Paramètre retiré de l'adresse une fois lu.
+  const ficheDemandee = params.get('fiche')
+  const devoirDemande = params.get('devoir')
+  useEffect(() => {
+    if (!donnees || (!ficheDemandee && !devoirDemande)) return
+    const suivant = new URLSearchParams(params)
+    suivant.delete('fiche')
+    suivant.delete('devoir')
+    setParams(suivant, { replace: true })
+    if (ficheDemandee && donnees.agenda.actif && donnees.agenda.evenements.some((e) => e.id === ficheDemandee)) setPanneau({ type: 'fiche', evenementId: ficheDemandee })
+    else if (devoirDemande && donnees.seances.some((x) => x.id === devoirDemande)) setPanneau({ type: 'ficheDevoir', seanceId: devoirDemande })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- dès que les données sont là
+  }, [donnees !== null, ficheDemandee, devoirDemande])
+
   const ecoles = compte.ecoles
   const profil = compte.profil
   const seances = donnees?.seances
@@ -279,7 +306,9 @@ function Carnet() {
       agenda: donnees.agenda,
       ctxAgenda,
       nouvelEvenement: (prerempli = {}) => setPanneau({ type: 'evenement', evenement: null, prerempli }),
-      ouvrirEvenement: (e) => setPanneau({ type: 'evenement', evenement: e, prerempli: {} }),
+      ouvrirEvenement: (e) => setPanneau(e.type === 'interrogation' ? { type: 'fiche', evenementId: e.id } : { type: 'evenement', evenement: e, prerempli: {} }),
+      ouvrirFiche: (e) => setPanneau({ type: 'fiche', evenementId: e.id }),
+      ouvrirFicheDevoir: (x) => setPanneau({ type: 'ficheDevoir', seanceId: x.id }),
       devoirs: donnees.devoirs,
       generateursEval: donnees.generateursEval,
       texte: donnees.texte,
@@ -548,10 +577,12 @@ function Carnet() {
     } else if (interro) setMessage(`${base}.${interro}`)
   }
 
-  /** « Annoncer une évaluation » / « Donner un devoir » : l'événement « Interrogation » (0006) et / ou la séance
-   * d'annonce (séance du jour complétée, sinon nouvelle séance sans matière vue — `lib/annonceClasse.ts`). Aucune
-   * migration. La page des élèves se republie seule (`synchroniserPages`, au rechargement des données). */
-  async function annoncer(a: SaisieAnnonce, o: { textes: TextesAnnonce | null; preparer: boolean }) {
+  /** « Annoncer une évaluation » / « Donner un devoir » — et leur MODIFICATION (`modification`) : l'événement
+   * « Interrogation » (0006 ; nom dans `intitule`, premier chapitre dans `chapitre`) et / ou la séance d'annonce (séance
+   * du jour complétée, sinon nouvelle séance sans matière vue — `lib/annonceClasse.ts`), compétences (0013 si appliquée).
+   * Une modification met à jour LA MÊME évaluation (événement + séance), jamais une seconde. La page des élèves se
+   * republie seule (`synchroniserPages`, au rechargement des données). */
+  async function annoncer(a: SaisieAnnonce, o: { textes: TextesAnnonce | null; preparer: boolean; message: string | null }, modification: ModificationAnnonce | null = null) {
     if (!client || !donnees) return
     const classe = donnees.classes.find((c) => c.id === a.classeId)
     if (!classe) return
@@ -560,21 +591,25 @@ function Carnet() {
     const evaluation = a.quoi === 'evaluation'
     if (evaluation && !agenda.actif) return
     // Copie AVANT l'enregistrement (le geste de l'utilisateur vaut encore pour le presse-papiers).
-    const copie = o.textes ? copierTexte(o.textes.texte, o.textes.html) : null
+    const aCopier = o.message !== null ? { texte: o.message, html: `<p>${o.message.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</p>` } : o.textes
+    const copie = aCopier ? copierTexte(aCopier.texte, aCopier.html) : null
     const maintenantCourant = new Date()
     const aujourdhui = dateIso(maintenantCourant)
     const minutes = maintenantCourant.getHours() * 60 + maintenantCourant.getMinutes()
-    const support = devoirs ? seanceSupport(donnees.seances, a, aujourdhui) : null
-    // Nouvelle séance d'annonce : à l'heure du cours en cours de la classe s'il y en a un.
+    const modifEval = modification?.quoi === 'evaluation' ? modification : null
+    const modifDevoir = modification?.quoi === 'devoir' ? modification : null
+    // Séance qui porte l'annonce : en modification, la même ; sinon la séance du jour libre, ou une nouvelle.
+    const support = modifEval ? modifEval.seance : modifDevoir ? modifDevoir.seance : devoirs ? seanceSupport(donnees.seances, a, aujourdhui) : null
     const enCours = actif ? (creneauxDuJour(aujourdhui, donnees.horaire.grilles, donnees.horaire.cases.filter((c) => c.classe_id === classe.id)).creneaux.find((c) => c.debut <= minutes && minutes < c.fin) ?? null) : null
     const base = support ? saisieDepuisSeance(support) : nouvelleSeanceSupport(a, aujourdhui, minutes, enCours)
     // Sans 0007 : la date de remise ne peut pas être gardée, elle va dans la consigne.
     const annonceFinale: SaisieAnnonce = !evaluation && !devoirs && a.date ? { ...a, consigne: `Pour le ${dateJourLong(a.date)} : ${a.consigne.trim()}` } : a
+    const nom = a.nom ?? (a.bilan ? INTITULE_BILAN : 'Interro')
     const saisieEv: SaisieEvenement | null = evaluation
       ? {
           ecole_id: classe.ecole_id,
           type: 'interrogation',
-          intitule: a.bilan ? INTITULE_BILAN : '',
+          intitule: a.contenu ? intituleDeNom(nom) : a.bilan ? INTITULE_BILAN : '',
           du: a.date,
           au: a.date,
           journee_entiere: a.heureDebut === null,
@@ -587,37 +622,125 @@ function Carnet() {
           classes: [],
         }
       : null
-    const nature = a.bilan ? 'Contrôle-bilan' : 'Interro'
-    const fait = evaluation ? `${nature} du ${dateJourLong(a.date)} annoncé${a.bilan ? '' : 'e'} à la ${classe.nom}` : `Devoir donné à la ${classe.nom}${a.date ? ` pour le ${dateJourLong(a.date)}` : ''}`
+    const d = designation(nom)
+    const leNom = d.Le.replace(/^L’évaluation « (.*) »$/, '« $1 »')
+    const quand = `${dateJourLong(a.date)}${a.heureDebut !== null ? `, ${heureOrdinale(a.heureDebut, a.heureFin)}` : ''}`
+    const fait = modification
+      ? evaluation
+        ? `${leNom} de la ${classe.nom} modifié${d.feminin ? 'e' : ''} : ${quand}. La page des élèves est à jour`
+        : `Devoir de la ${classe.nom} modifié${a.date ? ` : pour le ${dateJourLong(a.date)}` : ''}. La page des élèves est à jour`
+      : evaluation
+        ? `${nom} du ${dateJourLong(a.date)} annoncé${d.feminin ? 'e' : ''} à la ${classe.nom}. La page des élèves est à jour`
+        : `Devoir donné à la ${classe.nom}${a.date ? ` pour le ${dateJourLong(a.date)}` : ''}`
+    let evId: string | null = modifEval ? modifEval.evenement.id : null
     const ok = await agir(async () => {
-      let evId: string | null = null
-      if (saisieEv) evId = await ajouterEvenement(client, saisieEv)
+      let cree: string | null = null
+      if (saisieEv) {
+        if (modifEval) await modifierEvenement(client, modifEval.evenement, saisieEv)
+        else evId = cree = await ajouterEvenement(client, saisieEv)
+      }
       // Sans 0007, une évaluation n'est que l'événement de l'agenda (date et chapitre).
       if (evaluation && !devoirs) return
       const finale = seanceAvecAnnonce(base, annonceFinale, evId)
+      let seanceId: string
       try {
-        if (support) await modifierSeance(client, support.id, finale, actif, devoirs, generateursEval)
-        else await ajouterSeance(client, finale, actif, devoirs, generateursEval)
+        if (support) {
+          await modifierSeance(client, support.id, finale, actif, devoirs, generateursEval)
+          seanceId = support.id
+        } else seanceId = (await ajouterSeance(client, finale, actif, devoirs, generateursEval)).id
       } catch (ex) {
         // Pas d'interro orpheline : celle qu'on vient de créer est retirée.
-        if (evId) await supprimerEvenement(client, evId).catch(() => undefined)
+        if (cree) await supprimerEvenement(client, cree).catch(() => undefined)
         throw ex
       }
+      if (evaluation && donnees.competences && a.contenu) await enregistrerCompetencesEvaluation(client, seanceId, a.contenu.competences)
     }, `${fait}.`)
     if (!ok) return
     choisirClasse(classe.id)
-    if (copie && o.textes) {
-      if (await copie) setMessage(`${fait}, et texte copié : colle-le dans le journal de classe ou Smartschool.`)
+    if (copie && aCopier) {
+      if (await copie) setMessage(`${fait}. ${o.message !== null ? 'Message pour les élèves copié' : 'Texte copié : colle-le dans le journal de classe ou Smartschool'}.`)
       else {
         setMessage(`${fait}. Copie automatique impossible sur cet appareil : sélectionne le texte ci-dessous et copie-le.`)
-        setTexteACopier(o.textes.texte)
+        setTexteACopier(aCopier.texte)
       }
     }
-    if (o.preparer && evaluation) {
-      naviguer(urlEvaluationMatiere({ levelSlug: a.niveau, chapitres: [{ slug: a.chapitre, sections: a.etapes, ...(a.generateurs.length > 0 ? { generateurs: a.generateurs } : {}) }] }, '', classe.nom, classe.id))
+    if (o.preparer && evaluation && a.contenu) {
+      const chs = a.contenu.chapitres.filter((c) => c.niveau === a.niveau)
+      naviguer(urlEvaluationMatiere({ levelSlug: a.niveau, chapitres: chs.map((c) => ({ slug: c.slug, sections: c.points.map((p) => p.id), generateurs: c.points.flatMap((p) => p.exercices.map((x) => x.id)) })) }, '', classe.nom, classe.id))
+      return
+    }
+    if (modification) {
+      // La fiche se rouvre avec le nouveau contenu.
+      naviguer(`/carnet/classe/${classe.id}?${evaluation && evId ? `fiche=${evId}` : modifDevoir ? `devoir=${modifDevoir.seance.id}` : ''}`)
       return
     }
     naviguer(`/carnet/classe/${classe.id}`)
+  }
+
+  /** Supprimer une évaluation : l'événement ET son contenu partent ensemble (champs d'évaluation de la séance
+   * d'annonce remis à vide ; la séance d'annonce supprimée si elle n'avait rien d'autre). Pas d'annulation après. */
+  async function supprimerEvaluation(e: Evenement, message: string | null) {
+    if (!client || !donnees) return
+    const copie = message ? copierTexte(message, `<p>${message}</p>`) : null
+    const s = donnees.seances.find((x) => x.evaluation_evenement === e.id)
+    const classe = donnees.classes.find((c) => c.id === e.classe_id)
+    const nom = (e.intitule ?? '').trim() || (s?.evaluation_type === 'bilan' ? INTITULE_BILAN : 'Interro')
+    const d = designation(nom)
+    const fait = `${d.Le.replace(/^L’évaluation « (.*) »$/, '« $1 »')} du ${jourLong(e.du)}${classe ? ` (${classe.nom})` : ''} supprimé${d.feminin ? 'e' : ''}. La page des élèves est à jour`
+    const ok = await agir(async () => {
+      if (s) {
+        if (seanceSansRienDAutre(s, 'evaluation')) await supprimerSeance(client, s.id)
+        else {
+          await modifierSeance(client, s.id, { ...saisieDepuisSeance(s), evaluation_type: null, evaluation_parties: [], evaluation_evenement: null, evaluation_generateurs: [] }, donnees.horaire.actif, donnees.devoirs, donnees.generateursEval)
+          if (donnees.competences) await enregistrerCompetencesEvaluation(client, s.id, [])
+        }
+      }
+      await supprimerEvenement(client, e.id)
+    }, `${fait}.`)
+    if (!ok) return
+    setPanneau(null)
+    if (copie) {
+      if (await copie) setMessage(`${fait}. Message copié.`)
+      else if (message) {
+        setMessage(`${fait}. Copie automatique impossible : sélectionne le message ci-dessous.`)
+        setTexteACopier(message)
+      }
+    }
+  }
+
+  /** Supprimer un devoir : consigne, date de remise et exercices joints retirés (la séance supprimée si elle n'avait
+   * rien d'autre). Pas d'annulation après. */
+  async function supprimerDevoir(s: Seance, message: string | null) {
+    if (!client || !donnees) return
+    const copie = message ? copierTexte(message, `<p>${message}</p>`) : null
+    const classe = donnees.classes.find((c) => c.id === s.classe_id)
+    const fait = `Devoir${s.devoir_pour ? ` pour le ${jourLong(s.devoir_pour)}` : ''}${classe ? ` (${classe.nom})` : ''} supprimé. La page des élèves est à jour`
+    const ok = await agir(async () => {
+      if (seanceSansRienDAutre(s, 'devoir')) await supprimerSeance(client, s.id)
+      else await modifierSeance(client, s.id, { ...saisieDepuisSeance(s), devoir: '', devoir_pour: null, devoir_generateurs: [] }, donnees.horaire.actif, donnees.devoirs, donnees.generateursEval)
+    }, `${fait}.`)
+    if (!ok) return
+    setPanneau(null)
+    if (copie) {
+      if (await copie) setMessage(`${fait}. Message copié.`)
+      else if (message) {
+        setMessage(`${fait}. Copie automatique impossible : sélectionne le message ci-dessous.`)
+        setTexteACopier(message)
+      }
+    }
+  }
+
+  /** « Copier le texte » d'une fiche (journal de classe / Smartschool). */
+  async function copierFiche(t: TextesAnnonce) {
+    const reussi = await copierTexte(t.texte, t.html)
+    setErreur(null)
+    if (reussi) {
+      setTexteACopier(null)
+      setMessage('Texte copié : colle-le dans le journal de classe ou Smartschool.')
+    } else {
+      setMessage('Copie automatique impossible sur cet appareil : sélectionne le texte ci-dessous et copie-le.')
+      setTexteACopier(t.texte)
+    }
   }
 
   /** État de la page des élèves d'une classe (0010) pour « Publier ». */
@@ -801,6 +924,10 @@ function Carnet() {
   const seanceVue = panneau?.type === 'voir' ? donnees.seances.find((s) => s.id === panneau.seanceId) : undefined
   const seanceTexte = panneau?.type === 'texte' ? donnees.seances.find((s) => s.id === panneau.seanceId) : undefined
   const classeTexte = seanceTexte ? donnees.classes.find((c) => c.id === seanceTexte.classe_id) : undefined
+  const evenementFiche = panneau?.type === 'fiche' && donnees.agenda.actif ? donnees.agenda.evenements.find((e) => e.id === panneau.evenementId) : undefined
+  const classeFiche = evenementFiche ? donnees.classes.find((c) => c.id === evenementFiche.classe_id) : undefined
+  const seanceDevoir = panneau?.type === 'ficheDevoir' ? donnees.seances.find((x) => x.id === panneau.seanceId) : undefined
+  const classeDevoir = seanceDevoir ? donnees.classes.find((c) => c.id === seanceDevoir.classe_id) : undefined
 
   return (
     <CarnetContexte.Provider value={contexte}>
@@ -995,9 +1122,28 @@ function Carnet() {
               path="annoncer"
               element={avecClasses(
                 <RouteAnnonce>
-                  {(classeParam, quoi, chapitreParam) => (
+                  {(classeParam, quoi, chapitreParam, modifierParam) => {
+                    const evModif = quoi === 'evaluation' && modifierParam && donnees.agenda.actif ? donnees.agenda.evenements.find((e) => e.id === modifierParam && e.type === 'interrogation') : undefined
+                    const seanceModif = quoi === 'devoir' && modifierParam ? donnees.seances.find((x) => x.id === modifierParam) : undefined
+                    const modification: ModificationAnnonce | null = evModif
+                      ? { quoi: 'evaluation', evenement: evModif, seance: donnees.seances.find((x) => x.evaluation_evenement === evModif.id) }
+                      : seanceModif
+                        ? { quoi: 'devoir', seance: seanceModif }
+                        : null
+                    if (modifierParam && !modification)
+                      return (
+                        <div className="compte-encadre" role="status">
+                          <p>
+                            {quoi === 'devoir' ? 'Ce devoir' : 'Cette évaluation'} n’existe plus (supprimé{quoi === 'devoir' ? '' : 'e'} entre-temps ?). <Link to="/carnet">Retour à Mes classes</Link>
+                          </p>
+                        </div>
+                      )
+                    return (
                     <AnnoncerEvaluation
-                      key={`${quoi}-${classeParam ?? ''}`}
+                      key={`${quoi}-${classeParam ?? ''}-${modifierParam ?? ''}`}
+                      modification={modification}
+                      competencesActif={donnees.competences}
+                      onAnnuler={() => naviguer(-1)}
                       classes={donnees.classes}
                       seances={donnees.seances}
                       horaire={horaireFormulaire}
@@ -1007,9 +1153,10 @@ function Carnet() {
                       pageEleves={etatPageEleves}
                       occupe={occupe}
                       maintenant={maintenant}
-                      onAnnoncer={(a, o) => void annoncer(a, o)}
+                      onAnnoncer={(a, o) => void annoncer(a, o, modification)}
                     />
-                  )}
+                    )
+                  }}
                 </RouteAnnonce>,
               )}
             />
@@ -1081,6 +1228,48 @@ function Carnet() {
           />
         </PanneauLateral>
       )}
+      {evenementFiche && classeFiche && (
+        <PanneauLateral titreId={titrePanneau} onFermer={() => setPanneau(null)} feuille>
+          <FicheEvaluation
+            key={evenementFiche.id}
+            evenement={evenementFiche}
+            seance={donnees.seances.find((x) => x.evaluation_evenement === evenementFiche.id)}
+            classe={classeFiche}
+            seances={donnees.seances}
+            pageEleves={etatPageEleves(classeFiche.id)}
+            maintenant={maintenant}
+            titreId={titrePanneau}
+            occupe={occupe}
+            onModifier={() => {
+              setPanneau(null)
+              naviguer(`/carnet/annoncer?classe=${encodeURIComponent(classeFiche.id)}&modifier=${encodeURIComponent(evenementFiche.id)}`)
+            }}
+            onCopier={(t) => void copierFiche(t)}
+            onSupprimer={(m) => void supprimerEvaluation(evenementFiche, m)}
+            onFermer={() => setPanneau(null)}
+          />
+        </PanneauLateral>
+      )}
+      {seanceDevoir && classeDevoir && (
+        <PanneauLateral titreId={titrePanneau} onFermer={() => setPanneau(null)} feuille>
+          <FicheDevoir
+            key={seanceDevoir.id}
+            seance={seanceDevoir}
+            classe={classeDevoir}
+            pageEleves={etatPageEleves(classeDevoir.id)}
+            maintenant={maintenant}
+            titreId={titrePanneau}
+            occupe={occupe}
+            onModifier={() => {
+              setPanneau(null)
+              naviguer(`/carnet/annoncer?classe=${encodeURIComponent(classeDevoir.id)}&quoi=devoir&modifier=${encodeURIComponent(seanceDevoir.id)}`)
+            }}
+            onCopier={(t) => void copierFiche(t)}
+            onSupprimer={(m) => void supprimerDevoir(seanceDevoir, m)}
+            onFermer={() => setPanneau(null)}
+          />
+        </PanneauLateral>
+      )}
       {seanceVue && (
         <PanneauLateral titreId={titrePanneau} onFermer={() => setPanneau(null)}>
           <div className="carnet-panneau-tete">
@@ -1129,9 +1318,9 @@ function RouteClasse({ classes, rendu, onVue }: { classes: Classe[]; rendu: (c: 
 /** `/carnet/annoncer?classe=<id>&quoi=devoir&chapitre=<niveau>/<slug>` : « Annoncer une évaluation » (défaut) ou
  * « Donner un devoir », classe et chapitre choisis d'avance (tableau de bord, carte et page de la classe, fin de
  * projection). */
-function RouteAnnonce({ children }: { children: (classe: string | null, quoi: QuoiAnnonce, chapitre: string | null) => ReactNode }) {
+function RouteAnnonce({ children }: { children: (classe: string | null, quoi: QuoiAnnonce, chapitre: string | null, modifier: string | null) => ReactNode }) {
   const [params] = useSearchParams()
-  return <>{children(params.get('classe'), params.get('quoi') === 'devoir' ? 'devoir' : 'evaluation', params.get('chapitre'))}</>
+  return <>{children(params.get('classe'), params.get('quoi') === 'devoir' ? 'devoir' : 'evaluation', params.get('chapitre'), params.get('modifier'))}</>
 }
 
 /** `/carnet/agenda?classe=<id>` (bouton « Agenda de la classe ») : classe choisie d'avance. */

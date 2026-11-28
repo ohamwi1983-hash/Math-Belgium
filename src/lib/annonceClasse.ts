@@ -17,6 +17,7 @@
 import { structureChapitre, unitesCouvertes, unitesSection, type SaisieSeance, type Seance } from './carnet'
 import type { ChapterContent } from '../content/types'
 import type { Creneau } from './horaire'
+import { stockageDepuisContenu, typeDeNom, type ContenuEval } from './evaluationAnnoncee'
 
 export type QuoiAnnonce = 'evaluation' | 'devoir'
 
@@ -39,6 +40,11 @@ export interface SaisieAnnonce {
   generateurs: string[]
   /** Devoir : consigne (texte libre). */
   consigne: string
+  /** Évaluation (depuis le 28/11/2026) : nom choisi (« Interro », « Contrôle », « Bilan », libre). */
+  nom?: string
+  /** Évaluation (depuis le 28/11/2026) : chapitres, points, exercices et compétences retenus — `niveau` / `chapitre`
+   * ci-dessus = le PREMIER chapitre. */
+  contenu?: ContenuEval
 }
 
 /** Séance d'aujourd'hui de la classe que l'annonce peut compléter, sinon `null` (plus récente d'abord). */
@@ -112,8 +118,13 @@ export function nouvelleSeanceSupport(a: Pick<SaisieAnnonce, 'classeId' | 'nivea
 /** Séance finale : l'annonce posée sur la séance de départ (évaluation : type, étapes, lien, générateurs ;
  * devoir : consigne, date de remise, exercices joints). */
 export function seanceAvecAnnonce(base: SaisieSeance, a: SaisieAnnonce, evenementId: string | null): SaisieSeance {
-  if (a.quoi === 'evaluation')
+  if (a.quoi === 'evaluation') {
+    if (a.contenu) {
+      const st = stockageDepuisContenu(a.contenu, base.chapitre)
+      return { ...base, evaluation_type: typeDeNom(a.contenu.nom), evaluation_parties: st.parties, evaluation_evenement: evenementId, evaluation_generateurs: st.generateurs }
+    }
     return { ...base, evaluation_type: a.bilan ? 'bilan' : 'annonce', evaluation_parties: a.etapes, evaluation_evenement: evenementId, evaluation_generateurs: a.generateurs }
+  }
   return { ...base, devoir: a.consigne.trim(), devoir_pour: a.date || null, devoir_generateurs: a.generateurs }
 }
 
@@ -157,7 +168,7 @@ export function erreursAnnonce(a: SaisieAnnonce, aujourdhui: string): { date?: s
   if (a.quoi === 'evaluation') {
     if (!dateOk) e.date = 'Choisis le jour de l’évaluation.'
     else if (a.date <= aujourdhui) e.date = 'Une évaluation annoncée a lieu après aujourd’hui : choisis un jour qui suit.'
-    if (a.etapes.length === 0) e.etapes = 'Coche au moins une étape évaluée.'
+    if (a.contenu ? a.contenu.chapitres.length === 0 : a.etapes.length === 0) e.etapes = 'Coche au moins un point évalué.'
   } else {
     if (a.date && !dateOk) e.date = 'Date de remise illisible.'
     else if (a.date && a.date < aujourdhui) e.date = 'Le devoir est à rendre après aujourd’hui : choisis une date qui suit.'
